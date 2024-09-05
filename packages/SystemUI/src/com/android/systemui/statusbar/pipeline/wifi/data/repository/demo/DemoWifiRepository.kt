@@ -101,29 +101,20 @@ constructor(
 
     private fun FakeWifiEventModel.Wifi.toWifiNetworkModel(): WifiNetworkModel =
         WifiNetworkModel.Active(
-            networkId = DEMO_NET_ID,
             isValidated = validated ?: true,
             level = level ?: 0,
             ssid = ssid ?: DEMO_NET_SSID,
             hotspotDeviceType = hotspotDeviceType,
-
-            // These fields below aren't supported in demo mode, since they aren't needed to satisfy
-            // the interface.
-            isPasspointAccessPoint = false,
-            isOnlineSignUpForPasspointAccessPoint = false,
-            passpointProviderFriendlyName = null,
         )
 
     private fun FakeWifiEventModel.CarrierMerged.toCarrierMergedModel(): WifiNetworkModel =
         WifiNetworkModel.CarrierMerged(
-            networkId = DEMO_NET_ID,
             subscriptionId = subscriptionId,
             level = level,
             numberOfLevels = numberOfLevels,
         )
 
     companion object {
-        private const val DEMO_NET_ID = 1234
         private const val DEMO_NET_SSID = "Demo SSID"
     }
 }

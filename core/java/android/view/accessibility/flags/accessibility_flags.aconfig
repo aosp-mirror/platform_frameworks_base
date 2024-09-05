@@ -19,6 +19,13 @@ flag {
 }
 
 flag {
+    name: "a11y_selection_api"
+    namespace: "accessibility"
+    description: "Enables new APIs for an AccessibilityService to control selection across nodes."
+    bug: "362782866"
+}
+
+flag {
     namespace: "accessibility"
     name: "allow_shortcut_chooser_on_lockscreen"
     description: "Allows the a11y shortcut disambig dialog to appear on the lockscreen"

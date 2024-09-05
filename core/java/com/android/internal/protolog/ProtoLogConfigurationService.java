@@ -75,11 +75,7 @@ import java.util.TreeMap;
 public final class ProtoLogConfigurationService extends IProtoLogConfigurationService.Stub {
     private static final String LOG_TAG = "ProtoLogConfigurationService";
 
-    private final ProtoLogDataSource mDataSource = new ProtoLogDataSource(
-            this::onTracingInstanceStart,
-            this::onTracingInstanceFlush,
-            this::onTracingInstanceStop
-    );
+    private final ProtoLogDataSource mDataSource;
 
     /**
      * Keeps track of how many of each viewer config file is currently registered.
@@ -116,11 +112,28 @@ public final class ProtoLogConfigurationService extends IProtoLogConfigurationSe
     private final ViewerConfigFileTracer mViewerConfigFileTracer;
 
     public ProtoLogConfigurationService() {
-        this(ProtoLogConfigurationService::dumpTransitionTraceConfig);
+        this(ProtoLogDataSource::new, ProtoLogConfigurationService::dumpTransitionTraceConfig);
+    }
+
+    @VisibleForTesting
+    public ProtoLogConfigurationService(@NonNull ProtoLogDataSourceBuilder dataSourceBuilder) {
+        this(dataSourceBuilder, ProtoLogConfigurationService::dumpTransitionTraceConfig);
     }
 
     @VisibleForTesting
     public ProtoLogConfigurationService(@NonNull ViewerConfigFileTracer tracer) {
+        this(ProtoLogDataSource::new, tracer);
+    }
+
+    private ProtoLogConfigurationService(
+            @NonNull ProtoLogDataSourceBuilder dataSourceBuilder,
+            @NonNull ViewerConfigFileTracer tracer) {
+        mDataSource = dataSourceBuilder.build(
+            this::onTracingInstanceStart,
+            this::onTracingInstanceFlush,
+            this::onTracingInstanceStop
+        );
+
         // Initialize the Perfetto producer and register the Perfetto ProtoLog datasource to be
         // receive the lifecycle callbacks of the datasource and write the viewer configs if and
         // when required to the datasource.

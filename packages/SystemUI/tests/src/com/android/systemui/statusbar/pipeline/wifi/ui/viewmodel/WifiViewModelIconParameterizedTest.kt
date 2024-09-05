@@ -206,8 +206,7 @@ internal class WifiViewModelIconParameterizedTest(private val testCase: TestCase
                 // Enabled = false => no networks shown
                 TestCase(
                     enabled = false,
-                    network =
-                        WifiNetworkModel.CarrierMerged(NETWORK_ID, subscriptionId = 1, level = 1),
+                    network = WifiNetworkModel.CarrierMerged(subscriptionId = 1, level = 1),
                     expected = null,
                 ),
                 TestCase(
@@ -217,20 +216,19 @@ internal class WifiViewModelIconParameterizedTest(private val testCase: TestCase
                 ),
                 TestCase(
                     enabled = false,
-                    network = WifiNetworkModel.Active(NETWORK_ID, isValidated = false, level = 1),
+                    network = WifiNetworkModel.Active(isValidated = false, level = 1),
                     expected = null,
                 ),
                 TestCase(
                     enabled = false,
-                    network = WifiNetworkModel.Active(NETWORK_ID, isValidated = true, level = 3),
+                    network = WifiNetworkModel.Active(isValidated = true, level = 3),
                     expected = null,
                 ),
 
                 // forceHidden = true => no networks shown
                 TestCase(
                     forceHidden = true,
-                    network =
-                        WifiNetworkModel.CarrierMerged(NETWORK_ID, subscriptionId = 1, level = 1),
+                    network = WifiNetworkModel.CarrierMerged(subscriptionId = 1, level = 1),
                     expected = null,
                 ),
                 TestCase(
@@ -240,12 +238,12 @@ internal class WifiViewModelIconParameterizedTest(private val testCase: TestCase
                 ),
                 TestCase(
                     enabled = false,
-                    network = WifiNetworkModel.Active(NETWORK_ID, isValidated = false, level = 2),
+                    network = WifiNetworkModel.Active(isValidated = false, level = 2),
                     expected = null,
                 ),
                 TestCase(
                     forceHidden = true,
-                    network = WifiNetworkModel.Active(NETWORK_ID, isValidated = true, level = 1),
+                    network = WifiNetworkModel.Active(isValidated = true, level = 1),
                     expected = null,
                 ),
 
@@ -265,7 +263,7 @@ internal class WifiViewModelIconParameterizedTest(private val testCase: TestCase
                 ),
                 TestCase(
                     alwaysShowIconWhenEnabled = true,
-                    network = WifiNetworkModel.Active(NETWORK_ID, isValidated = false, level = 4),
+                    network = WifiNetworkModel.Active(isValidated = false, level = 4),
                     expected =
                         Expected(
                             iconResource = WIFI_NO_INTERNET_ICONS[4],
@@ -278,7 +276,7 @@ internal class WifiViewModelIconParameterizedTest(private val testCase: TestCase
                 ),
                 TestCase(
                     alwaysShowIconWhenEnabled = true,
-                    network = WifiNetworkModel.Active(NETWORK_ID, isValidated = true, level = 2),
+                    network = WifiNetworkModel.Active(isValidated = true, level = 2),
                     expected =
                         Expected(
                             iconResource = WIFI_FULL_ICONS[2],
@@ -305,7 +303,7 @@ internal class WifiViewModelIconParameterizedTest(private val testCase: TestCase
                 ),
                 TestCase(
                     hasDataCapabilities = false,
-                    network = WifiNetworkModel.Active(NETWORK_ID, isValidated = false, level = 2),
+                    network = WifiNetworkModel.Active(isValidated = false, level = 2),
                     expected =
                         Expected(
                             iconResource = WIFI_NO_INTERNET_ICONS[2],
@@ -318,7 +316,7 @@ internal class WifiViewModelIconParameterizedTest(private val testCase: TestCase
                 ),
                 TestCase(
                     hasDataCapabilities = false,
-                    network = WifiNetworkModel.Active(NETWORK_ID, isValidated = true, level = 0),
+                    network = WifiNetworkModel.Active(isValidated = true, level = 0),
                     expected =
                         Expected(
                             iconResource = WIFI_FULL_ICONS[0],
@@ -345,7 +343,7 @@ internal class WifiViewModelIconParameterizedTest(private val testCase: TestCase
                 ),
                 TestCase(
                     isDefault = true,
-                    network = WifiNetworkModel.Active(NETWORK_ID, isValidated = false, level = 3),
+                    network = WifiNetworkModel.Active(isValidated = false, level = 3),
                     expected =
                         Expected(
                             iconResource = WIFI_NO_INTERNET_ICONS[3],
@@ -358,7 +356,7 @@ internal class WifiViewModelIconParameterizedTest(private val testCase: TestCase
                 ),
                 TestCase(
                     isDefault = true,
-                    network = WifiNetworkModel.Active(NETWORK_ID, isValidated = true, level = 1),
+                    network = WifiNetworkModel.Active(isValidated = true, level = 1),
                     expected =
                         Expected(
                             iconResource = WIFI_FULL_ICONS[1],
@@ -374,8 +372,7 @@ internal class WifiViewModelIconParameterizedTest(private val testCase: TestCase
                     enabled = true,
                     isDefault = true,
                     forceHidden = false,
-                    network =
-                        WifiNetworkModel.CarrierMerged(NETWORK_ID, subscriptionId = 1, level = 1),
+                    network = WifiNetworkModel.CarrierMerged(subscriptionId = 1, level = 1),
                     expected = null,
                 ),
 
@@ -392,7 +389,7 @@ internal class WifiViewModelIconParameterizedTest(private val testCase: TestCase
                 ),
                 TestCase(
                     isDefault = false,
-                    network = WifiNetworkModel.Active(NETWORK_ID, isValidated = false, level = 3),
+                    network = WifiNetworkModel.Active(isValidated = false, level = 3),
                     expected = null,
                 ),
 
@@ -400,7 +397,7 @@ internal class WifiViewModelIconParameterizedTest(private val testCase: TestCase
                 // because wifi isn't the default connection (b/272509965).
                 TestCase(
                     isDefault = false,
-                    network = WifiNetworkModel.Active(NETWORK_ID, isValidated = true, level = 4),
+                    network = WifiNetworkModel.Active(isValidated = true, level = 4),
                     expected = null,
                 ),
             )
@@ -408,4 +405,3 @@ internal class WifiViewModelIconParameterizedTest(private val testCase: TestCase
 }
 
 private val IMMEDIATE = Dispatchers.Main.immediate
-private const val NETWORK_ID = 789

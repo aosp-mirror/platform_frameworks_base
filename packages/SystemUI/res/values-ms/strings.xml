@@ -104,6 +104,7 @@
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> dan apl lain yang dibuka telah mengesan tangkapan skrin ini."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Tambahkan pada nota"</string>
     <string name="backlinks_include_link" msgid="4562093591148248158">"Sertakan pautan"</string>
+    <string name="backlinks_duplicate_label_format" msgid="558445128952827926">"<xliff:g id="APPNAME">%1$s</xliff:g> <xliff:g id="FREQUENCYCOUNT">(%2$d)</xliff:g>"</string>
     <string name="screenrecord_title" msgid="4257171601439507792">"Perakam Skrin"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Memproses rakaman skrin"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Pemberitahuan breterusan untuk sesi rakaman skrin"</string>
@@ -291,7 +292,7 @@
     <string name="start_dreams" msgid="9131802557946276718">"Penyelamat skrin"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Jangan Ganggu"</string>
-    <string name="quick_settings_modes_label" msgid="5407025818652750501">"Mod keutamaan"</string>
+    <string name="quick_settings_modes_label" msgid="879156359479504244">"Mod"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Tiada peranti berpasangan tersedia"</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"Ketik untuk menyambungkan atau memutuskan sambungan peranti"</string>
@@ -300,8 +301,7 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Gunakan Bluetooth"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Disambungkan"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"Perkongsian Audio"</string>
-    <!-- no translation found for quick_settings_bluetooth_device_audio_sharing_or_switch_active (3227408556754456024) -->
-    <skip />
+    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="3227408556754456024">"Ketik untuk menukar atau berkongsi audio"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Disimpan"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"putuskan sambungan"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"aktifkan"</string>
@@ -433,7 +433,7 @@
     <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"Buka Tetapan"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Peranti lain"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Togol Ikhtisar"</string>
-    <string name="zen_modes_dialog_title" msgid="4159138230418567383">"Mod keutamaan"</string>
+    <string name="zen_modes_dialog_title" msgid="8854640808100096934">"Mod"</string>
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"Selesai"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"Tetapan"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"Hidup"</string>
@@ -534,8 +534,12 @@
     <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"Perkhidmatan yang menyediakan fungsi ini boleh mengakses semua maklumat yang boleh dilihat pada skrin anda atau dimainkan daripada peranti anda semasa membuat rakaman atau penghantaran. Maklumat ini termasuk kata laluan, butiran pembayaran, foto, mesej dan audio yang anda mainkan."</string>
     <string name="screen_share_generic_app_selector_title" msgid="8331515850599218288">"Kongsi atau rakam apl"</string>
     <string name="media_projection_entry_app_permission_dialog_title" msgid="4613857256721708062">"Kongsi skrin anda dengan <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
-    <string name="media_projection_entry_app_permission_dialog_option_text_single_app" msgid="6314402084788062644">"Kongsi satu apl"</string>
-    <string name="media_projection_entry_app_permission_dialog_option_text_entire_screen" msgid="7381488112332599632">"Kongsi seluruh skrin"</string>
+    <string name="screen_share_permission_dialog_option_single_app" msgid="2974054871681567314">"Kongsi satu apl"</string>
+    <!-- no translation found for media_projection_entry_app_permission_dialog_option_text_single_app (2308901434964846084) -->
+    <skip />
+    <string name="screen_share_permission_dialog_option_entire_screen" msgid="4493174362775038997">"Kongsi seluruh skrin"</string>
+    <!-- no translation found for media_projection_entry_app_permission_dialog_option_text_entire_screen (5100078808078139706) -->
+    <skip />
     <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="5504288438067851086">"Apabila anda berkongsi seluruh skrin anda, apa-apa sahaja kandungan pada skrin anda boleh dilihat oleh <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>. Oleh hal yang demikian, berhati-hati dengan perkara seperti kata laluan, butiran pembayaran, mesej, foto dan audio serta video."</string>
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="7094417930857938876">"Apabila anda berkongsi apl, apa-apa sahaja kandungan yang dipaparkan atau dimainkan pada apl boleh dilihat oleh <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>. Oleh hal yang demikian, berhati-hati dengan perkara seperti kata laluan, butiran pembayaran, mesej, foto dan audio serta video."</string>
     <string name="media_projection_entry_app_permission_dialog_continue_entire_screen" msgid="1850848182344377579">"Kongsi skrin"</string>
@@ -1387,6 +1391,18 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Kuncupkan ikon"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Kembangkan ikon"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"atau"</string>
+    <!-- no translation found for launch_keyboard_tutorial_notification_title (8849933155160522519) -->
+    <skip />
+    <!-- no translation found for launch_keyboard_tutorial_notification_content (2880339951512757918) -->
+    <skip />
+    <!-- no translation found for launch_touchpad_tutorial_notification_title (2243780062772196901) -->
+    <skip />
+    <!-- no translation found for launch_touchpad_tutorial_notification_content (7931085031240753226) -->
+    <skip />
+    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_title (1940023776496198762) -->
+    <skip />
+    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_content (1780725168171929365) -->
+    <skip />
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Gerak isyarat kembali"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Gerak isyarat pergi ke laman utama"</string>
     <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"Kekunci tindakan"</string>

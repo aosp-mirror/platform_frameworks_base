@@ -50,4 +50,5 @@ interface INfcCardEmulation
 
     void overrideRoutingTable(int userHandle, String protocol, String technology, in String pkg);
     void recoverRoutingTable(int userHandle);
+    boolean isEuiccSupported();
 }

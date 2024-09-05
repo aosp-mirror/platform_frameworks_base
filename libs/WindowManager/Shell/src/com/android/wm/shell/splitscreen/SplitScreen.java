@@ -50,7 +50,7 @@ public interface SplitScreen {
 
     /**
      * The side stage type.
-     * @see SideStage
+     * @see StageTaskListener
      */
     int STAGE_TYPE_SIDE = 1;
 

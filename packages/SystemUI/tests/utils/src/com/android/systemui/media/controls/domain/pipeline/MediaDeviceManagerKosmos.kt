@@ -41,6 +41,5 @@ val Kosmos.mediaDeviceManager by
             },
             fgExecutor = fakeExecutor,
             bgExecutor = fakeExecutor,
-            logger = mediaDeviceLogger,
         )
     }

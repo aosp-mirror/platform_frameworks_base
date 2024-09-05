@@ -151,13 +151,13 @@ constructor(
         }
 
     /**
-     * A flow modeling the chip that should be shown in the status bar after accounting for possibly
-     * multiple ongoing activities and animation requirements.
+     * A flow modeling the primary chip that should be shown in the status bar after accounting for
+     * possibly multiple ongoing activities and animation requirements.
      *
      * [com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment] is responsible for
      * actually displaying the chip.
      */
-    val chip: StateFlow<OngoingActivityChipModel> =
+    val primaryChip: StateFlow<OngoingActivityChipModel> =
         internalChip
             .pairwise(initialValue = DEFAULT_INTERNAL_HIDDEN_MODEL)
             .map { (old, new) ->

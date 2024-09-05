@@ -117,7 +117,7 @@ public class SplitTransitionTests extends ShellTestCase {
     private final TestShellExecutor mTestShellExecutor = new TestShellExecutor();
     private SplitLayout mSplitLayout;
     private MainStage mMainStage;
-    private SideStage mSideStage;
+    private StageTaskListener mSideStage;
     private StageCoordinator mStageCoordinator;
     private SplitScreenTransitions mSplitScreenTransitions;
 
@@ -137,7 +137,7 @@ public class SplitTransitionTests extends ShellTestCase {
                 StageTaskListener.StageListenerCallbacks.class), mSyncQueue, mSurfaceSession,
                 mIconProvider, Optional.of(mWindowDecorViewModel)));
         mMainStage.onTaskAppeared(new TestRunningTaskInfoBuilder().build(), createMockSurface());
-        mSideStage = spy(new SideStage(mContext, mTaskOrganizer, DEFAULT_DISPLAY, mock(
+        mSideStage = spy(new StageTaskListener(mContext, mTaskOrganizer, DEFAULT_DISPLAY, mock(
                 StageTaskListener.StageListenerCallbacks.class), mSyncQueue, mSurfaceSession,
                 mIconProvider, Optional.of(mWindowDecorViewModel)));
         mSideStage.onTaskAppeared(new TestRunningTaskInfoBuilder().build(), createMockSurface());

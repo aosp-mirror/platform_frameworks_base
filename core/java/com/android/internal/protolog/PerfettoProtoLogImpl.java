@@ -99,11 +99,8 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
     public static final String NULL_STRING = "null";
     private final AtomicInteger mTracingInstances = new AtomicInteger();
 
-    private final ProtoLogDataSource mDataSource = new ProtoLogDataSource(
-            this::onTracingInstanceStart,
-            this::onTracingFlush,
-            this::onTracingInstanceStop
-    );
+    @NonNull
+    private final ProtoLogDataSource mDataSource;
     @Nullable
     private final ProtoLogViewerConfigReader mViewerConfigReader;
     @Nullable
@@ -156,8 +153,11 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
             @Nullable ViewerConfigInputStreamProvider viewerConfigInputStreamProvider,
             @Nullable ProtoLogViewerConfigReader viewerConfigReader,
             @NonNull Runnable cacheUpdater,
-            @NonNull IProtoLogGroup[] groups) {
-        this(null, viewerConfigInputStreamProvider, viewerConfigReader, cacheUpdater, groups);
+            @NonNull IProtoLogGroup[] groups,
+            @NonNull ProtoLogDataSourceBuilder dataSourceBuilder,
+            @NonNull ProtoLogConfigurationService configurationService) {
+        this(null, viewerConfigInputStreamProvider, viewerConfigReader, cacheUpdater,
+                groups, dataSourceBuilder, configurationService);
     }
 
     private PerfettoProtoLogImpl(
@@ -166,11 +166,31 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
             @Nullable ProtoLogViewerConfigReader viewerConfigReader,
             @NonNull Runnable cacheUpdater,
             @NonNull IProtoLogGroup[] groups) {
+        this(viewerConfigFilePath, viewerConfigInputStreamProvider, viewerConfigReader,
+                cacheUpdater, groups,
+                ProtoLogDataSource::new,
+                IProtoLogConfigurationService.Stub
+                        .asInterface(ServiceManager.getService(PROTOLOG_CONFIGURATION_SERVICE))
+        );
+    }
+
+    private PerfettoProtoLogImpl(
+            @Nullable String viewerConfigFilePath,
+            @Nullable ViewerConfigInputStreamProvider viewerConfigInputStreamProvider,
+            @Nullable ProtoLogViewerConfigReader viewerConfigReader,
+            @NonNull Runnable cacheUpdater,
+            @NonNull IProtoLogGroup[] groups,
+            @NonNull ProtoLogDataSourceBuilder dataSourceBuilder,
+            @Nullable IProtoLogConfigurationService configurationService) {
         if (viewerConfigFilePath != null && viewerConfigInputStreamProvider != null) {
             throw new RuntimeException("Only one of viewerConfigFilePath and "
                     + "viewerConfigInputStreamProvider can be set");
         }
 
+        mDataSource = dataSourceBuilder.build(
+                this::onTracingInstanceStart,
+                this::onTracingFlush,
+                this::onTracingInstanceStop);
         Producer.init(InitArguments.DEFAULTS);
         DataSourceParams params =
                 new DataSourceParams.Builder()
@@ -186,9 +206,7 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
         registerGroupsLocally(groups);
 
         if (android.tracing.Flags.clientSideProtoLogging()) {
-            mProtoLogConfigurationService =
-                    IProtoLogConfigurationService.Stub.asInterface(ServiceManager.getService(
-                            PROTOLOG_CONFIGURATION_SERVICE));
+            mProtoLogConfigurationService = configurationService;
             Objects.requireNonNull(mProtoLogConfigurationService,
                     "ServiceManager returned a null ProtoLog Configuration Service");
 
@@ -733,6 +751,10 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
             incrementalState.protologMessageInterningSet.add(messageHash);
 
             final ProtoOutputStream os = ctx.newTracePacket();
+
+            // Dependent on the ProtoLog viewer config packet that contains the group information.
+            os.write(SEQUENCE_FLAGS, SEQ_NEEDS_INCREMENTAL_STATE);
+
             final long protologViewerConfigToken = os.start(PROTOLOG_VIEWER_CONFIG);
             final long messageConfigToken = os.start(MESSAGES);
 

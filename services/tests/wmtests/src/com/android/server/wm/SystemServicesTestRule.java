@@ -571,7 +571,7 @@ public class SystemServicesTestRule implements TestRule {
         // This makes sure all previous messages in the handler are fully processed vs. just popping
         // them from the message queue.
         final AtomicBoolean currentMessagesProcessed = new AtomicBoolean(false);
-        wm.mAnimator.getChoreographer().postFrameCallback(time -> {
+        wm.mAnimator.addAfterPrepareSurfacesRunnable(() -> {
             synchronized (currentMessagesProcessed) {
                 currentMessagesProcessed.set(true);
                 currentMessagesProcessed.notifyAll();
