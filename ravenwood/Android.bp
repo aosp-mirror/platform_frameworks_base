@@ -94,6 +94,9 @@ java_library {
     libs: [
         "ravenwood-runtime-common-ravenwood",
     ],
+    static_libs: [
+        "framework-annotations-lib", // should it be "libs" instead?
+    ],
     visibility: ["//visibility:private"],
 }
 

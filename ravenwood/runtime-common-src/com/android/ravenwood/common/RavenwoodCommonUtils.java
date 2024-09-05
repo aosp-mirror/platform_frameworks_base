@@ -15,12 +15,17 @@
  */
 package com.android.ravenwood.common;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
 import com.android.ravenwood.common.divergence.RavenwoodDivergence;
 
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
@@ -32,6 +37,14 @@ public class RavenwoodCommonUtils {
     }
 
     private static final Object sLock = new Object();
+
+    /**
+     * If set to "1", we enable the verbose logging.
+     *
+     * (See also InitLogging() in http://ac/system/libbase/logging.cpp)
+     */
+    public static final boolean RAVENWOOD_VERBOSE_LOGGING = "1".equals(System.getenv(
+            "RAVENWOOD_VERBOSE"));
 
     /** Name of `libravenwood_runtime` */
     private static final String RAVENWOOD_NATIVE_RUNTIME_NAME = "ravenwood_runtime";
@@ -264,5 +277,13 @@ public class RavenwoodCommonUtils {
                 "Method %s.%s() expected to be public %svoid",
                 method.getDeclaringClass().getName(), method.getName(),
                 (isStatic ? "static " : "")));
+    }
+
+    @NonNull
+    public static String getStackTraceString(@Nullable Throwable th) {
+        StringWriter stringWriter = new StringWriter();
+        PrintWriter writer = new PrintWriter(stringWriter);
+        th.printStackTrace(writer);
+        return stringWriter.toString();
     }
 }

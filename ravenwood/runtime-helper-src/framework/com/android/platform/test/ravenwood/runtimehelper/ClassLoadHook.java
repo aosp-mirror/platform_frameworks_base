@@ -15,6 +15,8 @@
  */
 package com.android.platform.test.ravenwood.runtimehelper;
 
+import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_VERBOSE_LOGGING;
+
 import android.system.ErrnoException;
 import android.system.Os;
 
@@ -39,14 +41,6 @@ public class ClassLoadHook {
      */
     private static final boolean SKIP_LOADING_LIBANDROID = "1".equals(System.getenv(
             "RAVENWOOD_SKIP_LOADING_LIBANDROID"));
-
-    /**
-     * If set to 1, and if $ANDROID_LOG_TAGS isn't set, we enable the verbose logging.
-     *
-     * (See also InitLogging() in http://ac/system/libbase/logging.cpp)
-     */
-    private static final boolean RAVENWOOD_VERBOSE_LOGGING = "1".equals(System.getenv(
-            "RAVENWOOD_VERBOSE"));
 
     public static final String CORE_NATIVE_CLASSES = "core_native_classes";
     public static final String ICU_DATA_PATH = "icu.data.path";
