@@ -3225,7 +3225,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
 
         Slog.i(TAG_WM, "Using new display size: " + width + "x" + height);
-        updateBaseDisplayMetrics(width, height, mBaseDisplayDensity,
+        updateBaseDisplayMetrics(width, height,
+                mIsDensityForced ? mBaseDisplayDensity : mInitialDisplayDensity,
                 xDPI != INVALID_DPI ? xDPI : mBaseDisplayPhysicalXDpi,
                 yDPI != INVALID_DPI ? yDPI : mBaseDisplayPhysicalYDpi);
         reconfigureDisplayLocked();
