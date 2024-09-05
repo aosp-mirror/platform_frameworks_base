@@ -38,6 +38,8 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapConcat
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -73,22 +75,34 @@ constructor(
             sceneInteractorProvider
                 .get()
                 .transitionState
-                .map { state ->
+                .flatMapConcat { state ->
                     when (state) {
                         is ObservableTransitionState.Idle ->
-                            state.currentScene == Scenes.Shade ||
-                                state.currentScene == Scenes.NotificationsShade ||
-                                state.currentScene == Scenes.QuickSettingsShade ||
-                                state.currentScene == Scenes.Lockscreen
+                            flowOf(
+                                state.currentScene == Scenes.Shade ||
+                                    state.currentScene == Scenes.NotificationsShade ||
+                                    state.currentScene == Scenes.QuickSettingsShade ||
+                                    state.currentScene == Scenes.Lockscreen
+                            )
                         is ObservableTransitionState.Transition ->
-                            state.toContent == Scenes.Shade ||
-                                state.toContent == Scenes.NotificationsShade ||
-                                state.toContent == Scenes.QuickSettingsShade ||
-                                state.toContent == Scenes.Lockscreen ||
-                                state.fromContent == Scenes.Shade ||
-                                state.fromContent == Scenes.NotificationsShade ||
-                                state.fromContent == Scenes.QuickSettingsShade ||
-                                state.fromContent == Scenes.Lockscreen
+                            if (
+                                state.fromContent == Scenes.Bouncer &&
+                                    state.toContent == Scenes.Lockscreen
+                            ) {
+                                // Lockscreen is not visible during preview stage of predictive back
+                                state.isInPreviewStage.map { !it }
+                            } else {
+                                flowOf(
+                                    state.toContent == Scenes.Shade ||
+                                        state.toContent == Scenes.NotificationsShade ||
+                                        state.toContent == Scenes.QuickSettingsShade ||
+                                        state.toContent == Scenes.Lockscreen ||
+                                        state.fromContent == Scenes.Shade ||
+                                        state.fromContent == Scenes.NotificationsShade ||
+                                        state.fromContent == Scenes.QuickSettingsShade ||
+                                        state.fromContent == Scenes.Lockscreen
+                                )
+                            }
                     }
                 }
                 .distinctUntilChanged()
