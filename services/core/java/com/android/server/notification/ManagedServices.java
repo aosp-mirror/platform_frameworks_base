@@ -950,7 +950,7 @@ abstract public class ManagedServices {
                 || isPackageOrComponentAllowed(component.getPackageName(), userId))) {
             return false;
         }
-        return isValidService(component, userId);
+        return componentHasBindPermission(component, userId);
     }
 
     private boolean componentHasBindPermission(ComponentName component, int userId) {
@@ -1302,12 +1302,11 @@ abstract public class ManagedServices {
                     if (TextUtils.equals(getPackageName(approvedPackageOrComponent), packageName)) {
                         final ComponentName component = ComponentName.unflattenFromString(
                                 approvedPackageOrComponent);
-                        if (component != null && !isValidService(component, userId)) {
+                        if (component != null && !componentHasBindPermission(component, userId)) {
                             approved.removeAt(j);
                             if (DEBUG) {
                                 Slog.v(TAG, "Removing " + approvedPackageOrComponent
-                                        + " from approved list; no bind permission or "
-                                        + "service interface filter found "
+                                        + " from approved list; no bind permission found "
                                         + mConfig.bindPermission);
                             }
                         }
@@ -1324,11 +1323,6 @@ abstract public class ManagedServices {
         } else {
             return packageOrComponent;
         }
-    }
-
-    protected boolean isValidService(ComponentName component, int userId) {
-        return componentHasBindPermission(component, userId) && queryPackageForServices(
-                component.getPackageName(), userId).contains(component);
     }
 
     protected boolean isValidEntry(String packageOrComponent, int userId) {
