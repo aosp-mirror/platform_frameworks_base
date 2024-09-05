@@ -51,13 +51,6 @@ flag {
 }
 
 flag {
-  name: "phrase_strict_fallback"
-  namespace: "text"
-  description: "Feature flag for automatic fallback from phrase based line break to strict line break."
-  bug: "281970875"
-}
-
-flag {
   name: "use_bounds_for_width"
   is_exported: true
   namespace: "text"
