@@ -1923,7 +1923,6 @@ public class OomAdjuster {
         int procState;
         int capability = cycleReEval ? getInitialCapability(app) : 0;
 
-        boolean foregroundActivities = false;
         boolean hasVisibleActivities = false;
         if (app == topApp && PROCESS_STATE_CUR_TOP == PROCESS_STATE_TOP) {
             // The last app on the list is the foreground app.
@@ -1937,7 +1936,6 @@ public class OomAdjuster {
                 schedGroup = SCHED_GROUP_DEFAULT;
                 state.setAdjType("intermediate-top-activity");
             }
-            foregroundActivities = true;
             hasVisibleActivities = true;
             procState = PROCESS_STATE_TOP;
             if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
@@ -1988,7 +1986,6 @@ public class OomAdjuster {
             adj = FOREGROUND_APP_ADJ;
             schedGroup = SCHED_GROUP_BACKGROUND;
             state.setAdjType("top-sleeping");
-            foregroundActivities = true;
             procState = PROCESS_STATE_CUR_TOP;
             if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
                 reportOomAdjMessageLocked(TAG_OOM_ADJ, "Making top (sleeping): " + app);
@@ -2008,7 +2005,8 @@ public class OomAdjuster {
             }
         }
 
-        // Examine all activities if not already foreground.
+        // Examine all non-top activities.
+        boolean foregroundActivities = app == topApp;
         if (!foregroundActivities && state.getCachedHasActivities()) {
             state.computeOomAdjFromActivitiesIfNecessary(mTmpComputeOomAdjWindowCallback,
                     adj, foregroundActivities, hasVisibleActivities, procState, schedGroup,

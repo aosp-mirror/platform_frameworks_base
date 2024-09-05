@@ -438,6 +438,28 @@ public class MockingOomAdjusterTests {
 
     @SuppressWarnings("GuardedBy")
     @Test
+    public void testUpdateOomAdj_DoOne_TopSleepingReceivingBroadcast() {
+        ProcessRecord app = spy(makeDefaultProcessRecord(MOCKAPP_PID, MOCKAPP_UID,
+                MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, true));
+        doReturn(PROCESS_STATE_TOP_SLEEPING).when(mService.mAtmInternal).getTopProcessState();
+        doReturn(app).when(mService).getTopApp();
+        updateOomAdj(app);
+
+        assertProcStates(app, PROCESS_STATE_TOP_SLEEPING, FOREGROUND_APP_ADJ,
+                SCHED_GROUP_BACKGROUND);
+        assertTrue(app.mState.hasForegroundActivities());
+
+        doReturn(true).when(mService).isReceivingBroadcastLocked(any(ProcessRecord.class),
+                any(int[].class));
+        updateOomAdj(app);
+
+        assertProcStates(app, PROCESS_STATE_RECEIVER, FOREGROUND_APP_ADJ, SCHED_GROUP_BACKGROUND);
+        assertTrue(app.mState.hasForegroundActivities());
+
+    }
+
+    @SuppressWarnings("GuardedBy")
+    @Test
     public void testUpdateOomAdj_DoOne_ExecutingService() {
         ProcessRecord app = spy(makeDefaultProcessRecord(MOCKAPP_PID, MOCKAPP_UID,
                 MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, true));
