@@ -20,7 +20,6 @@ import static android.app.appfunctions.flags.Flags.FLAG_ENABLE_APP_FUNCTION_MANA
 
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
-import android.annotation.WorkerThread;
 import android.app.appsearch.AppSearchManager;
 import android.app.appsearch.AppSearchManager.SearchContext;
 import android.app.appsearch.AppSearchResult;
