@@ -258,3 +258,10 @@ flag {
     description: "Creates a shell transition when display focus switches."
     bug: "356109871"
 }
+
+flag {
+    name: "enter_desktop_by_default_on_freeform_displays"
+    namespace: "lse_desktop_experience"
+    description: "Allow entering desktop mode by default on freeform displays"
+    bug: "361419732"
+}
