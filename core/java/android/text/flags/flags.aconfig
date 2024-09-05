@@ -113,13 +113,6 @@ flag {
 }
 
 flag {
-  name: "icu_bidi_migration"
-  namespace: "text"
-  description: "A flag for replacing AndroidBidi with android.icu.text.Bidi."
-  bug: "317144801"
-}
-
-flag {
   name: "lazy_variation_instance"
   namespace: "text"
   description: "A flag for enabling lazy variation instance creation."
