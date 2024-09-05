@@ -1340,15 +1340,6 @@ flag {
 }
 
 flag {
-   name: "lockscreen_preview_renderer_create_on_main_thread"
-   namespace: "systemui"
-   description: "Force preview renderer to be created on the main thread"
-   bug: "343732179"
-   metadata {
-        purpose: PURPOSE_BUGFIX
-   }
-}
-flag {
    name: "classic_flags_multi_user"
    namespace: "systemui"
    description: "Make the classic feature flag loading multi user aware."
