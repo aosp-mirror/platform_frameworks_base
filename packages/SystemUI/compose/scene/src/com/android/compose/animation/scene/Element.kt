@@ -154,11 +154,11 @@ internal fun Modifier.element(
  * An element associated to [ElementNode]. Note that this element does not support updates as its
  * arguments should always be the same.
  */
-private data class ElementModifier(
-    private val layoutImpl: SceneTransitionLayoutImpl,
+internal data class ElementModifier(
+    internal val layoutImpl: SceneTransitionLayoutImpl,
     private val currentTransitionStates: List<TransitionState>,
-    private val content: Content,
-    private val key: ElementKey,
+    internal val content: Content,
+    internal val key: ElementKey,
 ) : ModifierNodeElement<ElementNode>() {
     override fun create(): ElementNode =
         ElementNode(layoutImpl, currentTransitionStates, content, key)
