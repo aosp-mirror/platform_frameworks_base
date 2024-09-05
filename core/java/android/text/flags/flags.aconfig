@@ -113,15 +113,6 @@ flag {
 }
 
 flag {
-  name: "lazy_variation_instance"
-  namespace: "text"
-  description: "A flag for enabling lazy variation instance creation."
-  # Make read only, as it could be used before the Settings provider is initialized.
-  is_fixed_read_only: true
-  bug: "324676775"
-}
-
-flag {
   name: "handwriting_end_of_line_tap"
   namespace: "text"
   description: "Initiate handwriting when stylus taps at the end of a line in a focused non-empty TextView with the cursor at the end of that line"
