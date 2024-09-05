@@ -57,9 +57,6 @@ sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
             row.logChange(COL_NUM_LEVELS, NUM_LEVELS_DEFAULT)
             row.logChange(COL_SSID, null)
             row.logChange(COL_HOTSPOT, null)
-            row.logChange(COL_PASSPOINT_ACCESS_POINT, false)
-            row.logChange(COL_ONLINE_SIGN_UP, false)
-            row.logChange(COL_PASSPOINT_NAME, null)
         }
     }
 
@@ -90,9 +87,6 @@ sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
             row.logChange(COL_NUM_LEVELS, NUM_LEVELS_DEFAULT)
             row.logChange(COL_SSID, null)
             row.logChange(COL_HOTSPOT, null)
-            row.logChange(COL_PASSPOINT_ACCESS_POINT, false)
-            row.logChange(COL_ONLINE_SIGN_UP, false)
-            row.logChange(COL_PASSPOINT_NAME, null)
         }
     }
 
@@ -118,9 +112,6 @@ sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
             row.logChange(COL_NUM_LEVELS, NUM_LEVELS_DEFAULT)
             row.logChange(COL_SSID, null)
             row.logChange(COL_HOTSPOT, null)
-            row.logChange(COL_PASSPOINT_ACCESS_POINT, false)
-            row.logChange(COL_ONLINE_SIGN_UP, false)
-            row.logChange(COL_PASSPOINT_NAME, null)
         }
     }
 
@@ -194,9 +185,6 @@ sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
             row.logChange(COL_NUM_LEVELS, numberOfLevels)
             row.logChange(COL_SSID, null)
             row.logChange(COL_HOTSPOT, null)
-            row.logChange(COL_PASSPOINT_ACCESS_POINT, false)
-            row.logChange(COL_ONLINE_SIGN_UP, false)
-            row.logChange(COL_PASSPOINT_NAME, null)
         }
     }
 
@@ -224,15 +212,6 @@ sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
          * isn't a hotspot connection.
          */
         val hotspotDeviceType: HotspotDeviceType = WifiNetworkModel.HotspotDeviceType.NONE,
-
-        /** See [android.net.wifi.WifiInfo.isPasspointAp]. */
-        val isPasspointAccessPoint: Boolean = false,
-
-        /** See [android.net.wifi.WifiInfo.isOsuAp]. */
-        val isOnlineSignUpForPasspointAccessPoint: Boolean = false,
-
-        /** See [android.net.wifi.WifiInfo.passpointProviderFriendlyName]. */
-        val passpointProviderFriendlyName: String? = null,
     ) : WifiNetworkModel() {
         init {
             require(level in MIN_VALID_LEVEL..MAX_VALID_LEVEL) {
@@ -267,21 +246,6 @@ sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
             if (prevVal.hotspotDeviceType != hotspotDeviceType) {
                 row.logChange(COL_HOTSPOT, hotspotDeviceType.name)
             }
-
-            // TODO(b/238425913): The passpoint-related values are frequently never used, so it
-            //   would be great to not log them when they're not used.
-            if (prevVal.isPasspointAccessPoint != isPasspointAccessPoint) {
-                row.logChange(COL_PASSPOINT_ACCESS_POINT, isPasspointAccessPoint)
-            }
-            if (
-                prevVal.isOnlineSignUpForPasspointAccessPoint !=
-                    isOnlineSignUpForPasspointAccessPoint
-            ) {
-                row.logChange(COL_ONLINE_SIGN_UP, isOnlineSignUpForPasspointAccessPoint)
-            }
-            if (prevVal.passpointProviderFriendlyName != passpointProviderFriendlyName) {
-                row.logChange(COL_PASSPOINT_NAME, passpointProviderFriendlyName)
-            }
         }
 
         override fun logFull(row: TableRowLogger) {
@@ -293,29 +257,6 @@ sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
             row.logChange(COL_NUM_LEVELS, null)
             row.logChange(COL_SSID, ssid)
             row.logChange(COL_HOTSPOT, hotspotDeviceType.name)
-            row.logChange(COL_PASSPOINT_ACCESS_POINT, isPasspointAccessPoint)
-            row.logChange(COL_ONLINE_SIGN_UP, isOnlineSignUpForPasspointAccessPoint)
-            row.logChange(COL_PASSPOINT_NAME, passpointProviderFriendlyName)
-        }
-
-        override fun toString(): String {
-            // Only include the passpoint-related values in the string if we have them. (Most
-            // networks won't have them so they'll be mostly clutter.)
-            val passpointString =
-                if (
-                    isPasspointAccessPoint ||
-                        isOnlineSignUpForPasspointAccessPoint ||
-                        passpointProviderFriendlyName != null
-                ) {
-                    ", isPasspointAp=$isPasspointAccessPoint, " +
-                        "isOnlineSignUpForPasspointAp=$isOnlineSignUpForPasspointAccessPoint, " +
-                        "passpointName=$passpointProviderFriendlyName"
-                } else {
-                    ""
-                }
-
-            return "WifiNetworkModel.Active(networkId=$networkId, isValidated=$isValidated, " +
-                "level=$level, ssid=$ssid$passpointString)"
         }
 
         companion object {
@@ -375,9 +316,6 @@ const val COL_LEVEL = "level"
 const val COL_NUM_LEVELS = "maxLevel"
 const val COL_SSID = "ssid"
 const val COL_HOTSPOT = "hotspot"
-const val COL_PASSPOINT_ACCESS_POINT = "isPasspointAccessPoint"
-const val COL_ONLINE_SIGN_UP = "isOnlineSignUpForPasspointAccessPoint"
-const val COL_PASSPOINT_NAME = "passpointProviderFriendlyName"
 
 val LEVEL_DEFAULT: String? = null
 val NUM_LEVELS_DEFAULT: String? = null

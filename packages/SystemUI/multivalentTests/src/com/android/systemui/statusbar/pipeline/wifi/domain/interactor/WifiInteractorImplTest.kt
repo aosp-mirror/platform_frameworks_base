@@ -106,48 +106,6 @@ class WifiInteractorImplTest : SysuiTestCase() {
         }
 
     @Test
-    fun ssid_isPasspointAccessPoint_outputsPasspointName() =
-        testScope.runTest {
-            wifiRepository.setWifiNetwork(
-                WifiNetworkModel.Active(
-                    networkId = 1,
-                    level = 1,
-                    isPasspointAccessPoint = true,
-                    passpointProviderFriendlyName = "friendly",
-                )
-            )
-
-            var latest: String? = null
-            val job = underTest.ssid.onEach { latest = it }.launchIn(this)
-            runCurrent()
-
-            assertThat(latest).isEqualTo("friendly")
-
-            job.cancel()
-        }
-
-    @Test
-    fun ssid_isOnlineSignUpForPasspoint_outputsPasspointName() =
-        testScope.runTest {
-            wifiRepository.setWifiNetwork(
-                WifiNetworkModel.Active(
-                    networkId = 1,
-                    level = 1,
-                    isOnlineSignUpForPasspointAccessPoint = true,
-                    passpointProviderFriendlyName = "friendly",
-                )
-            )
-
-            var latest: String? = null
-            val job = underTest.ssid.onEach { latest = it }.launchIn(this)
-            runCurrent()
-
-            assertThat(latest).isEqualTo("friendly")
-
-            job.cancel()
-        }
-
-    @Test
     fun ssid_unknownSsid_outputsNull() =
         testScope.runTest {
             wifiRepository.setWifiNetwork(
@@ -238,7 +196,6 @@ class WifiInteractorImplTest : SysuiTestCase() {
                     isValidated = true,
                     level = 3,
                     ssid = "AB",
-                    passpointProviderFriendlyName = "friendly"
                 )
             wifiRepository.setWifiNetwork(wifiNetwork)
 

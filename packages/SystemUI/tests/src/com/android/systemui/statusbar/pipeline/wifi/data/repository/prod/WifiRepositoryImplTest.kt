@@ -289,27 +289,6 @@ class WifiRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
-    fun accessPointInfo_alwaysFalse() =
-        testScope.runTest {
-            val latest by collectLastValue(underTest.wifiNetwork)
-
-            val wifiEntry =
-                mock<WifiEntry>().apply {
-                    whenever(this.isPrimaryNetwork).thenReturn(true)
-                    whenever(this.level).thenReturn(3)
-                    whenever(this.title).thenReturn(TITLE)
-                }
-            whenever(wifiPickerTracker.connectedWifiEntry).thenReturn(wifiEntry)
-            getCallback().onWifiEntriesChanged()
-
-            assertThat(latest is WifiNetworkModel.Active).isTrue()
-            val latestActive = latest as WifiNetworkModel.Active
-            assertThat(latestActive.isPasspointAccessPoint).isFalse()
-            assertThat(latestActive.isOnlineSignUpForPasspointAccessPoint).isFalse()
-            assertThat(latestActive.passpointProviderFriendlyName).isNull()
-        }
-
-    @Test
     fun wifiNetwork_unreachableLevel_inactiveNetwork() =
         testScope.runTest {
             val latest by collectLastValue(underTest.wifiNetwork)
