@@ -1805,16 +1805,7 @@ public class Paint {
      * @return true if elegant metrics are enabled for text drawing.
      */
     public boolean isElegantTextHeight() {
-        int rawValue = nGetElegantTextHeight(mNativePaint);
-        switch (rawValue) {
-            case ELEGANT_TEXT_HEIGHT_DISABLED:
-                return false;
-            case ELEGANT_TEXT_HEIGHT_ENABLED:
-                return true;
-            case ELEGANT_TEXT_HEIGHT_UNSET:
-            default:
-                return com.android.text.flags.Flags.deprecateUiFonts();
-        }
+        return nGetElegantTextHeight(mNativePaint) != ELEGANT_TEXT_HEIGHT_DISABLED;
     }
 
     // Note: the following three values must be equal to the ones in the JNI file: Paint.cpp

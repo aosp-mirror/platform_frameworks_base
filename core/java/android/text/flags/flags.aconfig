@@ -59,13 +59,6 @@ flag {
 }
 
 flag {
-  name: "deprecate_ui_fonts"
-  namespace: "text"
-  description: "Feature flag for deprecating UI fonts. By setting true for this feature flag, the elegant text height of will be turned on by default unless explicitly setting it to false by attribute or Java API call."
-  bug: "279646685"
-}
-
-flag {
   name: "word_style_auto"
   is_exported: true
   namespace: "text"
