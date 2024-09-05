@@ -104,7 +104,7 @@ fun SceneContainer(
     // TODO(b/359173565): Add overlay user actions when the API is final.
     LaunchedEffect(currentSceneKey) {
         try {
-            sceneByKey[currentSceneKey]?.destinationScenes?.collectLatest { userActions ->
+            sceneByKey[currentSceneKey]?.userActions?.collectLatest { userActions ->
                 userActionsByContentKey[currentSceneKey] =
                     viewModel.resolveSceneFamilies(userActions)
             }

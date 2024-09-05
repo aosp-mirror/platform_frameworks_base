@@ -210,16 +210,6 @@ flag {
 }
 
 flag {
-  name: "dmrh_set_app_restrictions"
-  namespace: "enterprise"
-  description: "Allow DMRH to set application restrictions (both on the profile and the parent)"
-  bug: "328758346"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
   name: "always_persist_do"
   namespace: "enterprise"
   description: "Always write device_owners2.xml so that migration flags aren't lost"
@@ -261,16 +251,6 @@ flag {
     namespace: "enterprise"
     description: "Migrate APIs for unmanaged mode"
     bug: "335624297"
-    metadata {
-      purpose: PURPOSE_BUGFIX
-    }
-}
-
-flag {
-    name: "headless_single_user_fixes"
-    namespace: "enterprise"
-    description: "Various fixes for headless single user mode"
-    bug: "289515470"
     metadata {
       purpose: PURPOSE_BUGFIX
     }

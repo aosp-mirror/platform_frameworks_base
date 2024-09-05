@@ -26,8 +26,6 @@ import java.lang.annotation.Target;
 
 /**
  * Annotation injected to all methods that are processed as "substitute".
- *
- * (This annotation is only added in the impl jar, but not the stub jar)
  */
 @Target({TYPE, METHOD, CONSTRUCTOR, FIELD})
 @Retention(RetentionPolicy.RUNTIME)

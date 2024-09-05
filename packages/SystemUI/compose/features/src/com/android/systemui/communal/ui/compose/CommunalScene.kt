@@ -49,10 +49,10 @@ constructor(
 ) : ExclusiveActivatable(), Scene {
     override val key = Scenes.Communal
 
-    override val destinationScenes: Flow<Map<UserAction, UserActionResult>> =
-        MutableStateFlow<Map<UserAction, UserActionResult>>(
+    override val userActions: Flow<Map<UserAction, UserActionResult>> =
+        MutableStateFlow(
                 mapOf(
-                    Swipe(SwipeDirection.End) to UserActionResult(Scenes.Lockscreen),
+                    Swipe(SwipeDirection.End) to Scenes.Lockscreen,
                 )
             )
             .asStateFlow()

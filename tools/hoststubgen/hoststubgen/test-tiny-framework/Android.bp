@@ -21,7 +21,7 @@ java_library {
 
 // Create stub/impl jars from "hoststubgen-test-tiny-framework", using the following 3 rules.
 java_genrule_host {
-    name: "hoststubgen-test-tiny-framework-host",
+    name: "hoststubgen-test-tiny-framework-host-base",
     defaults: ["hoststubgen-command-defaults"],
     cmd: hoststubgen_common_options +
         "--in-jar $(location :hoststubgen-test-tiny-framework) " +
@@ -35,25 +35,13 @@ java_genrule_host {
 }
 
 java_genrule_host {
-    name: "hoststubgen-test-tiny-framework-host-stub",
+    name: "hoststubgen-test-tiny-framework-host",
     cmd: "cp $(in) $(out)",
     srcs: [
-        ":hoststubgen-test-tiny-framework-host{host_stub.jar}",
+        ":hoststubgen-test-tiny-framework-host-base{host.jar}",
     ],
     out: [
-        "host_stub.jar",
-    ],
-    visibility: ["//visibility:private"],
-}
-
-java_genrule_host {
-    name: "hoststubgen-test-tiny-framework-host-impl",
-    cmd: "cp $(in) $(out)",
-    srcs: [
-        ":hoststubgen-test-tiny-framework-host{host_impl.jar}",
-    ],
-    out: [
-        "host_impl.jar",
+        "host.jar",
     ],
     visibility: ["//visibility:private"],
 }
@@ -61,7 +49,7 @@ java_genrule_host {
 // Same as "hoststubgen-test-tiny-framework-host", but with more options, to test more hoststubgen
 // features.
 java_genrule_host {
-    name: "hoststubgen-test-tiny-framework-host-ext",
+    name: "hoststubgen-test-tiny-framework-host-ext-base",
     defaults: ["hoststubgen-command-defaults"],
     cmd: hoststubgen_common_options +
         "--in-jar $(location :hoststubgen-test-tiny-framework) " +
@@ -79,37 +67,25 @@ java_genrule_host {
 }
 
 java_genrule_host {
-    name: "hoststubgen-test-tiny-framework-host-ext-stub",
+    name: "hoststubgen-test-tiny-framework-host-ext",
     cmd: "cp $(in) $(out)",
     srcs: [
-        ":hoststubgen-test-tiny-framework-host-ext{host_stub.jar}",
+        ":hoststubgen-test-tiny-framework-host-ext-base{host.jar}",
     ],
     out: [
-        "host_stub.jar",
-    ],
-    visibility: ["//visibility:private"],
-}
-
-java_genrule_host {
-    name: "hoststubgen-test-tiny-framework-host-ext-impl",
-    cmd: "cp $(in) $(out)",
-    srcs: [
-        ":hoststubgen-test-tiny-framework-host-ext{host_impl.jar}",
-    ],
-    out: [
-        "host_impl.jar",
+        "host.jar",
     ],
     visibility: ["//visibility:private"],
 }
 
 // Compile the test jar, using 2 rules.
-// 1. Build the test against the stub.
+// 1. Build the test against the original framework.
 java_library_host {
     name: "hoststubgen-test-tiny-test-lib",
     srcs: ["tiny-test/src/**/*.java"],
 
     libs: [
-        "hoststubgen-test-tiny-framework-host-stub",
+        "hoststubgen-test-tiny-framework",
     ],
     static_libs: [
         "junit",
@@ -129,7 +105,7 @@ java_test_host {
     static_libs: [
         "hoststubgen-test-tiny-test-lib",
         "hoststubgen-helper-runtime",
-        "hoststubgen-test-tiny-framework-host-impl",
+        "hoststubgen-test-tiny-framework-host",
     ],
     test_suites: ["general-tests"],
 }
@@ -149,49 +125,25 @@ java_genrule_host {
 }
 
 java_genrule_host {
-    name: "hoststubgen-test-tiny-framework-host-stub-dump",
+    name: "hoststubgen-test-tiny-framework-host-dump",
     defaults: ["hoststubgen-jar-dump-defaults"],
     srcs: [
-        ":hoststubgen-test-tiny-framework-host-stub",
+        ":hoststubgen-test-tiny-framework-host",
     ],
     out: [
-        "02-hoststubgen-test-tiny-framework-host-stub-dump.txt",
+        "03-hoststubgen-test-tiny-framework-host-dump.txt",
     ],
     visibility: ["//visibility:private"],
 }
 
 java_genrule_host {
-    name: "hoststubgen-test-tiny-framework-host-impl-dump",
+    name: "hoststubgen-test-tiny-framework-host-ext-dump",
     defaults: ["hoststubgen-jar-dump-defaults"],
     srcs: [
-        ":hoststubgen-test-tiny-framework-host-impl",
+        ":hoststubgen-test-tiny-framework-host-ext",
     ],
     out: [
-        "03-hoststubgen-test-tiny-framework-host-impl-dump.txt",
-    ],
-    visibility: ["//visibility:private"],
-}
-
-java_genrule_host {
-    name: "hoststubgen-test-tiny-framework-host-ext-stub-dump",
-    defaults: ["hoststubgen-jar-dump-defaults"],
-    srcs: [
-        ":hoststubgen-test-tiny-framework-host-ext-stub",
-    ],
-    out: [
-        "12-hoststubgen-test-tiny-framework-host-ext-stub-dump.txt",
-    ],
-    visibility: ["//visibility:private"],
-}
-
-java_genrule_host {
-    name: "hoststubgen-test-tiny-framework-host-ext-impl-dump",
-    defaults: ["hoststubgen-jar-dump-defaults"],
-    srcs: [
-        ":hoststubgen-test-tiny-framework-host-ext-impl",
-    ],
-    out: [
-        "13-hoststubgen-test-tiny-framework-host-ext-impl-dump.txt",
+        "13-hoststubgen-test-tiny-framework-host-ext-dump.txt",
     ],
     visibility: ["//visibility:private"],
 }
@@ -206,11 +158,9 @@ python_test_host {
         "golden-output/*.txt",
     ],
     java_data: [
-        "hoststubgen-test-tiny-framework-host-stub-dump",
-        "hoststubgen-test-tiny-framework-host-impl-dump",
         "hoststubgen-test-tiny-framework-orig-dump",
-        "hoststubgen-test-tiny-framework-host-ext-stub-dump",
-        "hoststubgen-test-tiny-framework-host-ext-impl-dump",
+        "hoststubgen-test-tiny-framework-host-dump",
+        "hoststubgen-test-tiny-framework-host-ext-dump",
     ],
     test_suites: ["general-tests"],
 }

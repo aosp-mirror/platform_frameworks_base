@@ -43,8 +43,7 @@ run m $HOSTSTUBGEN hoststubgen-annotations hoststubgen-helper-runtime truth juni
 
 tiny_framework_classes=$out/tiny-framework/classes/
 tiny_framework_jar=$out/tiny-framework.jar
-tiny_framework_host_stub_jar=$out/tiny-framework_host_stub.jar
-tiny_framework_host_impl_jar=$out/tiny-framework_host_impl.jar
+tiny_framework_host_jar=$out/tiny-framework_host.jar
 
 tiny_test_classes=$out/tiny-test/classes/
 tiny_test_jar=$out/tiny-test.jar
@@ -87,8 +86,7 @@ echo "# Generating the stub and impl jars..."
 run $HOSTSTUBGEN \
     @../hoststubgen-standard-options.txt \
     --in-jar $tiny_framework_jar \
-    --out-stub-jar $tiny_framework_host_stub_jar \
-    --out-impl-jar $tiny_framework_host_impl_jar \
+    --out-jar $tiny_framework_host_jar \
     --policy-override-file policy-override-tiny-framework.txt \
     --gen-keep-all-file out/tiny-framework_keep_all.txt \
     --gen-input-dump-file out/tiny-framework_dump.txt \
@@ -97,14 +95,14 @@ run $HOSTSTUBGEN \
     $HOSTSTUBGEN_OPTS
 
 # Extract the jar files, so we can look into them.
-extract $tiny_framework_host_stub_jar $tiny_framework_host_impl_jar
+extract $tiny_framework_host_jar
 
 # Build the test
 echo "# Building tiny-test..."
 run $JAVAC \
     -cp $( \
         join : \
-        $tiny_framework_host_stub_jar \
+        $tiny_framework_jar \
         "${test_compile_classpaths[@]}" \
         ) \
     -d $tiny_test_classes \
@@ -124,7 +122,7 @@ run $JAVA \
     -cp $( \
         join : \
         $tiny_test_jar \
-        $tiny_framework_host_impl_jar \
+        $tiny_framework_host_jar \
         "${test_compile_classpaths[@]}" \
         "${test_runtime_classpaths[@]}" \
         ) \

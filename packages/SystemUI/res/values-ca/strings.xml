@@ -110,7 +110,7 @@
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"Vols gravar la pantalla?"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Grava una aplicació"</string>
     <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"Grava tota la pantalla"</string>
-    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Quan graves tota la pantalla, es grava tot el que es mostra en pantalla. Per aquest motiu, ves amb compte amb les contrasenyes, les dades de pagament, els missatges, les fotos, i l\'àudio i el vídeo."</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Quan graves tota la pantalla, es grava tot el que es mostra en pantalla. Per aquest motiu, ves amb compte amb elements com les contrasenyes, les dades de pagament, els missatges, les fotos, i l\'àudio i el vídeo."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Quan graves una aplicació, es grava tot el que es mostra o es reprodueix en aquesta aplicació. Per aquest motiu, ves amb compte amb les contrasenyes, les dades de pagament, els missatges, les fotos, i l\'àudio i el vídeo."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Grava la pantalla"</string>
     <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"Tria una aplicació per gravar"</string>
@@ -300,6 +300,8 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Utilitza el Bluetooth"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Connectat"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"Compartició d\'àudio"</string>
+    <!-- no translation found for quick_settings_bluetooth_device_audio_sharing_or_switch_active (3227408556754456024) -->
+    <skip />
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Desat"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"desconnecta"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"activa"</string>
@@ -718,8 +720,7 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Satèl·lit, bona connexió"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Satèl·lit, connexió disponible"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"SOS per satèl·lit"</string>
-    <!-- no translation found for satellite_emergency_only_carrier_text (828510231597991206) -->
-    <skip />
+    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"Trucades d\'emergència o SOS"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Perfil de treball"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Diversió per a uns quants, però no per a tothom"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"El Personalitzador d\'interfície d\'usuari presenta opcions addicionals per canviar i personalitzar la interfície d\'usuari d\'Android. És possible que aquestes funcions experimentals canviïn, deixin de funcionar o desapareguin en versions futures. Continua amb precaució."</string>

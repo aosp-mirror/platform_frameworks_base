@@ -24,8 +24,6 @@ import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLoggin
 import com.android.systemui.contextualeducation.GestureType
 import com.android.systemui.contextualeducation.GestureType.ALL_APPS
 import com.android.systemui.contextualeducation.GestureType.BACK
-import com.android.systemui.contextualeducation.GestureType.HOME
-import com.android.systemui.contextualeducation.GestureType.OVERVIEW
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.education.dagger.ContextualEducationModule.EduClock
@@ -68,11 +66,9 @@ constructor(
 
     private val keyboardShortcutTriggered: Flow<GestureType> = conflatedCallbackFlow {
         val listener = KeyGestureEventListener { event ->
+            // Only store keyboard shortcut time for gestures providing keyboard education
             val shortcutType =
                 when (event.keyGestureType) {
-                    KeyGestureEvent.KEY_GESTURE_TYPE_BACK -> BACK
-                    KeyGestureEvent.KEY_GESTURE_TYPE_HOME -> HOME
-                    KeyGestureEvent.KEY_GESTURE_TYPE_RECENT_APPS -> OVERVIEW
                     KeyGestureEvent.KEY_GESTURE_TYPE_ALL_APPS -> ALL_APPS
                     else -> null
                 }
@@ -87,6 +83,7 @@ constructor(
     }
 
     override fun start() {
+        // Listen to back gesture model changes and trigger education if needed
         backgroundScope.launch {
             contextualEducationInteractor.backGestureModelFlow.collect {
                 if (isUsageSessionExpired(it)) {
@@ -98,6 +95,7 @@ constructor(
             }
         }
 
+        // Listen to touchpad connection changes and update the first connection time
         backgroundScope.launch {
             userInputDeviceRepository.isAnyTouchpadConnectedForUser.collect {
                 if (
@@ -111,6 +109,7 @@ constructor(
             }
         }
 
+        // Listen to keyboard connection changes and update the first connection time
         backgroundScope.launch {
             userInputDeviceRepository.isAnyKeyboardConnectedForUser.collect {
                 if (
@@ -124,6 +123,7 @@ constructor(
             }
         }
 
+        // Listen to keyboard shortcut triggered and update the last trigger time
         backgroundScope.launch {
             keyboardShortcutTriggered.collect {
                 contextualEducationInteractor.updateShortcutTriggerTime(it)

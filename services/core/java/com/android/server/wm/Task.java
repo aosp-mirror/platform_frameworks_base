@@ -3507,7 +3507,7 @@ class Task extends TaskFragment {
      * {@link android.window.TaskFragmentOrganizer}
      */
     TaskFragmentParentInfo getTaskFragmentParentInfo() {
-        return new TaskFragmentParentInfo(getConfiguration(), getDisplayId(),
+        return new TaskFragmentParentInfo(getConfiguration(), getDisplayId(), mTaskId,
                 shouldBeVisible(null /* starting */), hasNonFinishingDirectActivity(),
                 getDecorSurface());
     }

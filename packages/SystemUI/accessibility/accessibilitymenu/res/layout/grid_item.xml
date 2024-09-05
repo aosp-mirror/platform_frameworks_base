@@ -3,8 +3,7 @@
     android:id="@+id/shortcutItem"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingTop="@dimen/grid_item_padding"
-    android:paddingBottom="@dimen/grid_item_padding"
+    android:padding="@dimen/grid_item_padding"
     android:gravity="center">
 
   <ImageButton

@@ -300,6 +300,8 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"ब्‍लूटूथ वापरा"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"कनेक्ट केले"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"ऑडिओ शेअरिंग"</string>
+    <!-- no translation found for quick_settings_bluetooth_device_audio_sharing_or_switch_active (3227408556754456024) -->
+    <skip />
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"सेव्ह केले"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"डिस्कनेक्ट करा"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"ॲक्टिव्हेट करा"</string>
@@ -718,8 +720,7 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"सॅटेलाइट, चांगले कनेक्शन"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"सॅटेलाइट, कनेक्शन उपलब्ध"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"सॅटेलाइट SOS"</string>
-    <!-- no translation found for satellite_emergency_only_carrier_text (828510231597991206) -->
-    <skip />
+    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"आणीबाणी कॉल किंवा SOS"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"कार्य प्रोफाईल"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"सर्वांसाठी नाही तर काहींसाठी मजेदार असू शकते"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"सिस्टम UI ट्युनर आपल्‍याला Android यूझर इंटरफेस ट्विक आणि कस्टमाइझ करण्‍याचे अनेक प्रकार देते. ही प्रयोगात्मक वैशिष्‍ट्ये बदलू शकतात, खंडित होऊ शकतात किंवा भविष्‍यातील रिलीज मध्‍ये कदाचित दिसणार नाहीत. सावधगिरी बाळगून पुढे सुरू ठेवा."</string>
