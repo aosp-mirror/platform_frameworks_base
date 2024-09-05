@@ -24,6 +24,7 @@ import com.android.systemui.log.table.Diffable
 import com.android.systemui.log.table.TableRowLogger
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
 import com.android.wifitrackerlib.HotspotNetworkEntry.DeviceType
+import com.android.wifitrackerlib.WifiEntry
 
 /** Provides information about the current wifi network. */
 sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
@@ -38,6 +39,7 @@ sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
      */
     object Unavailable : WifiNetworkModel() {
         override fun toString() = "WifiNetwork.Unavailable"
+
         override fun logDiffs(prevVal: WifiNetworkModel, row: TableRowLogger) {
             if (prevVal is Unavailable) {
                 return
@@ -67,6 +69,7 @@ sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
         val invalidReason: String,
     ) : WifiNetworkModel() {
         override fun toString() = "WifiNetwork.Invalid[$invalidReason]"
+
         override fun logDiffs(prevVal: WifiNetworkModel, row: TableRowLogger) {
             if (prevVal !is Invalid) {
                 logFull(row)
@@ -154,7 +157,8 @@ sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
     ) : WifiNetworkModel() {
         init {
             require(level in MIN_VALID_LEVEL..numberOfLevels) {
-                "0 <= wifi level <= $numberOfLevels required; level was $level"
+                "CarrierMerged: $MIN_VALID_LEVEL <= wifi level <= $numberOfLevels required; " +
+                    "level was $level"
             }
             require(subscriptionId != SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
                 "subscription ID cannot be invalid"
@@ -232,7 +236,8 @@ sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
     ) : WifiNetworkModel() {
         init {
             require(level in MIN_VALID_LEVEL..MAX_VALID_LEVEL) {
-                "0 <= wifi level <= 4 required; level was $level"
+                "Active: $MIN_VALID_LEVEL <= wifi level <= $MAX_VALID_LEVEL required; " +
+                    "level was $level"
             }
         }
 
@@ -314,16 +319,12 @@ sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
         }
 
         companion object {
-            // TODO(b/292534484): Use [com.android.wifitrackerlib.WifiEntry.WIFI_LEVEL_MAX] instead
-            // once the migration to WifiTrackerLib is complete.
-            @VisibleForTesting internal const val MAX_VALID_LEVEL = 4
+            @VisibleForTesting internal const val MAX_VALID_LEVEL = WifiEntry.WIFI_LEVEL_MAX
         }
     }
 
     companion object {
-        // TODO(b/292534484): Use [com.android.wifitrackerlib.WifiEntry.WIFI_LEVEL_MIN] instead
-        // once the migration to WifiTrackerLib is complete.
-        @VisibleForTesting internal const val MIN_VALID_LEVEL = 0
+        @VisibleForTesting internal const val MIN_VALID_LEVEL = WifiEntry.WIFI_LEVEL_MIN
     }
 
     /**

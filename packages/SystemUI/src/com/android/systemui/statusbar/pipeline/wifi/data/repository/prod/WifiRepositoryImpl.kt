@@ -130,7 +130,8 @@ constructor(
                             // into our internal model immediately. [toWifiNetworkModel] always
                             // returns a new instance, so the flow is guaranteed to emit.
                             send(
-                                newPrimaryNetwork = connectedEntry?.toPrimaryWifiNetworkModel()
+                                newPrimaryNetwork =
+                                    connectedEntry?.toPrimaryWifiNetworkModel()
                                         ?: WIFI_NETWORK_DEFAULT,
                                 newSecondaryNetworks = secondaryNetworks,
                                 newIsDefault = connectedEntry?.isDefaultNetwork ?: false,
@@ -270,7 +271,17 @@ constructor(
     }
 
     private fun WifiEntry.convertNormalToModel(): WifiNetworkModel {
-        if (this.level == WIFI_LEVEL_UNREACHABLE || this.level !in WIFI_LEVEL_MIN..WIFI_LEVEL_MAX) {
+        // WifiEntry instance values aren't guaranteed to be stable between method calls because
+        // WifiPickerTracker is continuously updating the same object. Save the level in a local
+        // variable so that checking the level validity here guarantees that the level will still be
+        // valid when we create the `WifiNetworkModel.Active` instance later. Otherwise, the level
+        // could be valid here but become invalid later, and `WifiNetworkModel.Active` will throw
+        // an exception. See b/362384551.
+        val currentLevel = this.level
+        if (
+            currentLevel == WIFI_LEVEL_UNREACHABLE ||
+                currentLevel !in WIFI_LEVEL_MIN..WIFI_LEVEL_MAX
+        ) {
             // If our level means the network is unreachable or the level is otherwise invalid, we
             // don't have an active network.
             return WifiNetworkModel.Inactive
@@ -286,7 +297,7 @@ constructor(
         return WifiNetworkModel.Active(
             networkId = NETWORK_ID,
             isValidated = this.hasInternetAccess(),
-            level = this.level,
+            level = currentLevel,
             ssid = this.title,
             hotspotDeviceType = hotspotDeviceType,
             // With WifiTrackerLib, [WifiEntry.title] will appropriately fetch the  SSID for
