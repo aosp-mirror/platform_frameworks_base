@@ -3515,6 +3515,48 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         return true;
     }
 
+    @GuardedBy("getLockObject()")
+    private boolean maybeMigrateResetPasswordTokenLocked(String backupId) {
+        if (!Flags.resetPasswordWithTokenCoexistence()) {
+            Slog.i(LOG_TAG, "ResetPasswordWithToken not migrated because coexistence "
+                    + "support is not enabled.");
+            return false;
+        }
+        if (mOwners.isResetPasswordWithTokenMigrated()) {
+            // TODO(b/359187209): Remove log after Flags.resetPasswordWithTokenCoexistence full
+            //  rollout.
+            Slog.v(LOG_TAG, "ResetPasswordWithToken was previously migrated to "
+                    + "policy engine.");
+            return false;
+        }
+
+        Slog.i(LOG_TAG, "Migrating ResetPasswordWithToken to policy engine");
+
+        // Create backup if none exists
+        mDevicePolicyEngine.createBackup(backupId);
+        try {
+            iterateThroughDpcAdminsLocked((admin, enforcingAdmin) -> {
+                int userId = enforcingAdmin.getUserId();
+                DevicePolicyData policy = getUserData(userId);
+                if (policy.mPasswordTokenHandle != 0) {
+                    Slog.i(LOG_TAG, "Setting RESET_PASSWORD_TOKEN policy");
+                    mDevicePolicyEngine.setLocalPolicy(
+                            PolicyDefinition.RESET_PASSWORD_TOKEN,
+                            enforcingAdmin,
+                            new LongPolicyValue(policy.mPasswordTokenHandle),
+                            userId);
+                }
+            });
+        } catch (Exception e) {
+            Slog.wtf(LOG_TAG,
+                    "Failed to migrate ResetPasswordWithToken to policy engine", e);
+        }
+
+        Slog.i(LOG_TAG, "Marking ResetPasswordWithToken migration complete");
+        mOwners.markResetPasswordWithTokenMigrated();
+        return true;
+    }
+
     /** Register callbacks for statsd pulled atoms. */
     private void registerStatsCallbacks() {
         final StatsManager statsManager = mContext.getSystemService(StatsManager.class);
@@ -19342,6 +19384,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     PolicyDefinition.RESET_PASSWORD_TOKEN,
                     enforcingAdmin,
                     userId);
+            // TODO(b/369152176): Address difference in behavior regarding addEscrowToken when
+            //  compared with the else branch.
             long tokenHandle = addEscrowToken(
                     token, currentTokenHandle == null ? 0 : currentTokenHandle, userId);
             if (tokenHandle == 0) {
@@ -24280,12 +24324,21 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         maybeMigrateSecurityLoggingPolicyLocked();
         // ID format: <sdk-int>.<auto_increment_id>.<descriptions>'
         String unmanagedBackupId = "35.1.unmanaged-mode";
-        boolean migrated = false;
-        migrated = migrated | maybeMigrateRequiredPasswordComplexityLocked(unmanagedBackupId);
-        migrated = migrated | maybeMigrateSuspendedPackagesLocked(unmanagedBackupId);
-        if (migrated) {
+        boolean unmanagedMigrated = false;
+        unmanagedMigrated =
+                unmanagedMigrated | maybeMigrateRequiredPasswordComplexityLocked(unmanagedBackupId);
+        unmanagedMigrated =
+                unmanagedMigrated | maybeMigrateSuspendedPackagesLocked(unmanagedBackupId);
+        if (unmanagedMigrated) {
             Slogf.i(LOG_TAG, "Backup made: " + unmanagedBackupId);
         }
+
+        String supervisionBackupId = "36.2.supervision-support";
+        boolean supervisionMigrated = maybeMigrateResetPasswordTokenLocked(supervisionBackupId);
+        if (supervisionMigrated) {
+            Slogf.i(LOG_TAG, "Backup made: " + supervisionBackupId);
+        }
+
         // Additional migration steps should repeat the pattern above with a new backupId.
     }
 
