@@ -16,6 +16,8 @@
 
 package com.android.server.power;
 
+import static android.os.PowerManager.SCREEN_TIMEOUT_KEEP_DISPLAY_ON;
+import static android.os.PowerManager.SCREEN_TIMEOUT_ACTIVE;
 import static android.os.PowerManagerInternal.WAKEFULNESS_ASLEEP;
 import static android.os.PowerManagerInternal.WAKEFULNESS_AWAKE;
 import static android.os.PowerManagerInternal.WAKEFULNESS_DOZING;
@@ -34,6 +36,7 @@ import static com.android.server.power.PowerManagerService.WAKE_LOCK_STAY_AWAKE;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.display.DisplayManagerInternal.DisplayPowerRequest;
 import android.os.PowerManager;
+import android.os.PowerManager.ScreenTimeoutPolicy;
 import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
 import android.os.Trace;
@@ -413,6 +416,12 @@ public class PowerGroup {
         final int screenOnWakeLockMask =
                 WAKE_LOCK_SCREEN_BRIGHT | WAKE_LOCK_SCREEN_DIM | WAKE_LOCK_STAY_AWAKE;
         return (mWakeLockSummary & (screenOnWakeLockMask)) != 0;
+    }
+
+    @ScreenTimeoutPolicy
+    public int getScreenTimeoutPolicy() {
+        return hasWakeLockKeepingScreenOnLocked() ? SCREEN_TIMEOUT_KEEP_DISPLAY_ON
+                : SCREEN_TIMEOUT_ACTIVE;
     }
 
     public void setWakeLockSummaryLocked(int summary) {

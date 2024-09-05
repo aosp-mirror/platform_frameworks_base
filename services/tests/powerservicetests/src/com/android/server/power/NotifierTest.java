@@ -16,6 +16,8 @@
 
 package com.android.server.power;
 
+import static android.os.PowerManager.SCREEN_TIMEOUT_KEEP_DISPLAY_ON;
+import static android.os.PowerManager.SCREEN_TIMEOUT_ACTIVE;
 import static android.os.PowerManagerInternal.WAKEFULNESS_ASLEEP;
 import static android.os.PowerManagerInternal.WAKEFULNESS_AWAKE;
 
@@ -30,6 +32,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -49,7 +52,9 @@ import android.hardware.display.DisplayManagerInternal;
 import android.os.BatteryStats;
 import android.os.BatteryStatsInternal;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.IWakeLockCallback;
+import android.os.IScreenTimeoutPolicyListener;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.os.RemoteException;
@@ -84,6 +89,7 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.concurrent.Executor;
@@ -914,6 +920,201 @@ public class NotifierTest {
         createNotifier();
         assertEquals(mNotifier.getWakelockMonitorTypeForLogging(
                         PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK), -1);
+    }
+
+    @Test
+    public void testScreenTimeoutListener_reportsScreenTimeoutPolicyChange() throws Exception {
+        createNotifier();
+        final IScreenTimeoutPolicyListener listener = Mockito.mock(
+                IScreenTimeoutPolicyListener.class);
+        final IBinder listenerBinder = Mockito.mock(IBinder.class);
+        when(listener.asBinder()).thenReturn(listenerBinder);
+        mNotifier.addScreenTimeoutPolicyListener(Display.DEFAULT_DISPLAY,
+                SCREEN_TIMEOUT_ACTIVE, listener);
+        mTestLooper.dispatchAll();
+        clearInvocations(listener);
+
+        mNotifier.notifyScreenTimeoutPolicyChanges(Display.DEFAULT_DISPLAY_GROUP,
+                /* hasScreenWakeLock= */ SCREEN_TIMEOUT_KEEP_DISPLAY_ON);
+
+        // Verify that the event is sent asynchronously on a handler
+        verify(listener, never()).onScreenTimeoutPolicyChanged(anyInt());
+        mTestLooper.dispatchAll();
+        verify(listener).onScreenTimeoutPolicyChanged(SCREEN_TIMEOUT_KEEP_DISPLAY_ON);
+    }
+
+    @Test
+    public void testScreenTimeoutListener_addAndRemoveListener_doesNotInvokeListener()
+            throws Exception {
+        createNotifier();
+        final IScreenTimeoutPolicyListener listener = Mockito.mock(
+                IScreenTimeoutPolicyListener.class);
+        final IBinder listenerBinder = Mockito.mock(IBinder.class);
+        when(listener.asBinder()).thenReturn(listenerBinder);
+        mNotifier.addScreenTimeoutPolicyListener(Display.DEFAULT_DISPLAY,
+                SCREEN_TIMEOUT_ACTIVE, listener);
+        mTestLooper.dispatchAll();
+        clearInvocations(listener);
+        mNotifier.removeScreenTimeoutPolicyListener(Display.DEFAULT_DISPLAY, listener);
+
+        mNotifier.notifyScreenTimeoutPolicyChanges(Display.DEFAULT_DISPLAY_GROUP,
+                SCREEN_TIMEOUT_KEEP_DISPLAY_ON);
+        mTestLooper.dispatchAll();
+
+        // Callback should not be fired as listener is removed
+        verify(listener, never()).onScreenTimeoutPolicyChanged(anyInt());
+    }
+
+    @Test
+    public void testScreenTimeoutListener_addAndClearListeners_doesNotInvokeListener()
+            throws Exception {
+        createNotifier();
+        final IScreenTimeoutPolicyListener listener = Mockito.mock(
+                IScreenTimeoutPolicyListener.class);
+        final IBinder listenerBinder = Mockito.mock(IBinder.class);
+        when(listener.asBinder()).thenReturn(listenerBinder);
+        mNotifier.addScreenTimeoutPolicyListener(Display.DEFAULT_DISPLAY,
+                SCREEN_TIMEOUT_ACTIVE, listener);
+        mTestLooper.dispatchAll();
+        clearInvocations(listener);
+        mNotifier.clearScreenTimeoutPolicyListeners(Display.DEFAULT_DISPLAY);
+
+        mNotifier.notifyScreenTimeoutPolicyChanges(Display.DEFAULT_DISPLAY_GROUP,
+                SCREEN_TIMEOUT_KEEP_DISPLAY_ON);
+        mTestLooper.dispatchAll();
+
+        // Callback should not be fired as listener is removed
+        verify(listener, never()).onScreenTimeoutPolicyChanged(anyInt());
+    }
+
+    @Test
+    public void testScreenTimeoutListener_subscribedToAnotherDisplay_listenerNotFired()
+            throws Exception {
+        createNotifier();
+
+        final IScreenTimeoutPolicyListener listener = Mockito.mock(
+                IScreenTimeoutPolicyListener.class);
+        final IBinder listenerBinder = Mockito.mock(IBinder.class);
+        when(listener.asBinder()).thenReturn(listenerBinder);
+        mNotifier.addScreenTimeoutPolicyListener(Display.DEFAULT_DISPLAY,
+                SCREEN_TIMEOUT_ACTIVE, listener);
+        mTestLooper.dispatchAll();
+        clearInvocations(listener);
+
+        mNotifier.notifyScreenTimeoutPolicyChanges(/* displayGroupId= */ 123,
+                SCREEN_TIMEOUT_KEEP_DISPLAY_ON);
+        mTestLooper.dispatchAll();
+
+        // Callback should not be fired as we subscribed only to the DEFAULT_DISPLAY
+        verify(listener, never()).onScreenTimeoutPolicyChanged(anyInt());
+    }
+
+    @Test
+    public void testScreenTimeoutListener_listenerDied_listenerNotFired()
+            throws Exception {
+        createNotifier();
+
+        final IScreenTimeoutPolicyListener listener = Mockito.mock(
+                IScreenTimeoutPolicyListener.class);
+        final IBinder listenerBinder = Mockito.mock(IBinder.class);
+        when(listener.asBinder()).thenReturn(listenerBinder);
+
+        mNotifier.addScreenTimeoutPolicyListener(Display.DEFAULT_DISPLAY,
+                SCREEN_TIMEOUT_ACTIVE, listener);
+        mTestLooper.dispatchAll();
+
+        ArgumentCaptor<IBinder.DeathRecipient> captor =
+                ArgumentCaptor.forClass(IBinder.DeathRecipient.class);
+        verify(listenerBinder).linkToDeath(captor.capture(), anyInt());
+        mTestLooper.dispatchAll();
+        captor.getValue().binderDied();
+        clearInvocations(listener);
+
+        mNotifier.notifyScreenTimeoutPolicyChanges(Display.DEFAULT_DISPLAY,
+                SCREEN_TIMEOUT_KEEP_DISPLAY_ON);
+        mTestLooper.dispatchAll();
+
+        // Callback should not be fired as binder died
+        verify(listener, never()).onScreenTimeoutPolicyChanged(anyInt());
+    }
+
+    @Test
+    public void testScreenTimeoutListener_listenerThrowsException_listenerNotFiredSecondTime()
+            throws Exception {
+        createNotifier();
+
+        final IScreenTimeoutPolicyListener listener = Mockito.mock(
+                IScreenTimeoutPolicyListener.class);
+        final IBinder listenerBinder = Mockito.mock(IBinder.class);
+        when(listener.asBinder()).thenReturn(listenerBinder);
+        doThrow(RuntimeException.class).when(listener).onScreenTimeoutPolicyChanged(anyInt());
+        mNotifier.addScreenTimeoutPolicyListener(Display.DEFAULT_DISPLAY_GROUP,
+                SCREEN_TIMEOUT_ACTIVE, listener);
+        mTestLooper.dispatchAll();
+        clearInvocations(listener);
+
+        mNotifier.notifyScreenTimeoutPolicyChanges(Display.DEFAULT_DISPLAY,
+                SCREEN_TIMEOUT_KEEP_DISPLAY_ON);
+        mTestLooper.dispatchAll();
+
+        // Callback should not be fired as it has thrown an exception once
+        verify(listener, never()).onScreenTimeoutPolicyChanged(anyInt());
+    }
+
+    @Test
+    public void testScreenTimeoutListener_nonDefaultDisplay_stillReportsPolicyCorrectly()
+            throws Exception {
+        createNotifier();
+        final int otherDisplayId = 123;
+        final int otherDisplayGroupId = 123_00;
+        when(mDisplayManagerInternal.getGroupIdForDisplay(otherDisplayId)).thenReturn(
+                otherDisplayGroupId);
+        final IScreenTimeoutPolicyListener listener = Mockito.mock(
+                IScreenTimeoutPolicyListener.class);
+        final IBinder listenerBinder = Mockito.mock(IBinder.class);
+        when(listener.asBinder()).thenReturn(listenerBinder);
+        mNotifier.addScreenTimeoutPolicyListener(otherDisplayId,
+                SCREEN_TIMEOUT_ACTIVE, listener);
+        mTestLooper.dispatchAll();
+        clearInvocations(listener);
+
+        mNotifier.notifyScreenTimeoutPolicyChanges(otherDisplayGroupId,
+                SCREEN_TIMEOUT_KEEP_DISPLAY_ON);
+        mTestLooper.dispatchAll();
+
+        verify(listener).onScreenTimeoutPolicyChanged(SCREEN_TIMEOUT_KEEP_DISPLAY_ON);
+    }
+
+    @Test
+    public void testScreenTimeoutListener_timeoutPolicyTimeout_reportsTimeoutOnSubscription()
+            throws Exception {
+        createNotifier();
+        final IScreenTimeoutPolicyListener listener = Mockito.mock(
+                IScreenTimeoutPolicyListener.class);
+        final IBinder listenerBinder = Mockito.mock(IBinder.class);
+        when(listener.asBinder()).thenReturn(listenerBinder);
+
+        mNotifier.addScreenTimeoutPolicyListener(Display.DEFAULT_DISPLAY,
+                SCREEN_TIMEOUT_ACTIVE, listener);
+        mTestLooper.dispatchAll();
+
+        verify(listener).onScreenTimeoutPolicyChanged(SCREEN_TIMEOUT_ACTIVE);
+    }
+
+    @Test
+    public void testScreenTimeoutListener_policyHeld_reportsHeldOnSubscription()
+            throws Exception {
+        createNotifier();
+        final IScreenTimeoutPolicyListener listener = Mockito.mock(
+                IScreenTimeoutPolicyListener.class);
+        final IBinder listenerBinder = Mockito.mock(IBinder.class);
+        when(listener.asBinder()).thenReturn(listenerBinder);
+
+        mNotifier.addScreenTimeoutPolicyListener(Display.DEFAULT_DISPLAY,
+                SCREEN_TIMEOUT_KEEP_DISPLAY_ON, listener);
+        mTestLooper.dispatchAll();
+
+        verify(listener).onScreenTimeoutPolicyChanged(SCREEN_TIMEOUT_KEEP_DISPLAY_ON);
     }
 
     private final PowerManagerService.Injector mInjector = new PowerManagerService.Injector() {

@@ -63,6 +63,7 @@ import android.hardware.SystemSensorManager;
 import android.hardware.devicestate.DeviceState;
 import android.hardware.devicestate.DeviceStateManager;
 import android.hardware.display.AmbientDisplayConfiguration;
+import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.power.Boost;
 import android.hardware.power.Mode;
@@ -76,6 +77,7 @@ import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.IBinder;
 import android.os.IPowerManager;
+import android.os.IScreenTimeoutPolicyListener;
 import android.os.IWakeLockCallback;
 import android.os.Looper;
 import android.os.Message;
@@ -341,6 +343,7 @@ public final class PowerManagerService extends SystemService
     private LightsManager mLightsManager;
     private BatteryManagerInternal mBatteryManagerInternal;
     private DisplayManagerInternal mDisplayManagerInternal;
+    private DisplayManager mDisplayManager;
     private IBatteryStats mBatteryStats;
     private WindowManagerPolicy mPolicy;
     private Notifier mNotifier;
@@ -755,6 +758,24 @@ public final class PowerManagerService extends SystemService
             mNotifier.onGroupWakefulnessChangeStarted(groupId, wakefulness, reason, eventTime);
             updateGlobalWakefulnessLocked(eventTime, reason, uid, opUid, opPackageName, details);
             updatePowerStateLocked();
+        }
+    }
+
+    private final class DisplayListener implements DisplayManager.DisplayListener {
+
+        @Override
+        public void onDisplayAdded(int displayId) {
+
+        }
+
+        @Override
+        public void onDisplayRemoved(int displayId) {
+            mNotifier.clearScreenTimeoutPolicyListeners(displayId);
+        }
+
+        @Override
+        public void onDisplayChanged(int displayId) {
+
         }
     }
 
@@ -1354,6 +1375,7 @@ public final class PowerManagerService extends SystemService
             mDisplayManagerInternal = getLocalService(DisplayManagerInternal.class);
             mPolicy = getLocalService(WindowManagerPolicy.class);
             mBatteryManagerInternal = getLocalService(BatteryManagerInternal.class);
+            mDisplayManager = mContext.getSystemService(DisplayManager.class);
             mAttentionDetector.systemReady(mContext);
 
             SensorManager sensorManager = new SystemSensorManager(mContext, mHandler.getLooper());
@@ -1373,6 +1395,7 @@ public final class PowerManagerService extends SystemService
             DisplayGroupPowerChangeListener displayGroupPowerChangeListener =
                     new DisplayGroupPowerChangeListener();
             mDisplayManagerInternal.registerDisplayGroupListener(displayGroupPowerChangeListener);
+            mDisplayManager.registerDisplayListener(new DisplayListener(), mHandler);
 
             if(mDreamManager != null){
                 // This DreamManager method does not acquire a lock, so it should be safe to call.
@@ -2571,7 +2594,10 @@ public final class PowerManagerService extends SystemService
             // Phase 5: Send notifications, if needed.
             finishWakefulnessChangeIfNeededLocked();
 
-            // Phase 6: Update suspend blocker.
+            // Phase 6: Notify screen timeout policy changes if needed
+            notifyScreenTimeoutPolicyChangesLocked();
+
+            // Phase 7: Update suspend blocker.
             // Because we might release the last suspend blocker here, we need to make sure
             // we finished everything else first!
             updateSuspendBlockerLocked();
@@ -3822,6 +3848,16 @@ public final class PowerManagerService extends SystemService
         // Use default display group for proximity sensor.
         return (mPowerGroups.get(Display.DEFAULT_DISPLAY_GROUP).getWakeLockSummaryLocked()
                         & WAKE_LOCK_PROXIMITY_SCREEN_OFF) != 0;
+    }
+
+    @GuardedBy("mLock")
+    private void notifyScreenTimeoutPolicyChangesLocked() {
+        for (int idx = 0; idx < mPowerGroups.size(); idx++) {
+            final int powerGroupId = mPowerGroups.keyAt(idx);
+            final PowerGroup powerGroup = mPowerGroups.valueAt(idx);
+            final int screenTimeoutPolicy = powerGroup.getScreenTimeoutPolicy();
+            mNotifier.notifyScreenTimeoutPolicyChanges(powerGroupId, screenTimeoutPolicy);
+        }
     }
 
     /**
@@ -5967,6 +6003,55 @@ public final class PowerManagerService extends SystemService
             final long ident = Binder.clearCallingIdentity();
             try {
                 return isWakeLockLevelSupportedInternal(level, displayId);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override // Binder call
+        public void addScreenTimeoutPolicyListener(int displayId,
+                IScreenTimeoutPolicyListener listener) {
+            mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER,
+                    null);
+
+            if (displayId == Display.INVALID_DISPLAY) {
+                throw new IllegalArgumentException("Valid display id is expected");
+            }
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                int initialTimeoutPolicy;
+                final int displayGroupId = mDisplayManagerInternal.getGroupIdForDisplay(displayId);
+                synchronized (mLock) {
+                    final PowerGroup powerGroup = mPowerGroups.get(displayGroupId);
+                    if (powerGroup != null) {
+                        initialTimeoutPolicy = powerGroup.getScreenTimeoutPolicy();
+                    } else {
+                        throw new IllegalArgumentException("No display found for the specified "
+                                + "display id " + displayId);
+                    }
+                }
+
+                mNotifier.addScreenTimeoutPolicyListener(displayId, initialTimeoutPolicy,
+                        listener);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override // Binder call
+        public void removeScreenTimeoutPolicyListener(int displayId,
+                IScreenTimeoutPolicyListener listener) {
+            mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER,
+                    null);
+
+            if (displayId == Display.INVALID_DISPLAY) {
+                throw new IllegalArgumentException("Valid display id is expected");
+            }
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                mNotifier.removeScreenTimeoutPolicyListener(displayId, listener);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
