@@ -14,20 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.systemui.volume.panel.component.captioning.ui.viewmodel
+package com.android.systemui.accessibility.data.repository
 
-import android.content.applicationContext
-import com.android.internal.logging.uiEventLogger
-import com.android.systemui.accessibility.domain.interactor.captioningInteractor
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.testScope
 
-val Kosmos.captioningViewModel by
-    Kosmos.Fixture {
-        CaptioningViewModel(
-            applicationContext,
-            captioningInteractor,
-            testScope.backgroundScope,
-            uiEventLogger,
-        )
-    }
+var Kosmos.fakeCaptioningRepository by Kosmos.Fixture { FakeCaptioningRepository() }
+val Kosmos.captioningRepository by Kosmos.Fixture { fakeCaptioningRepository }
