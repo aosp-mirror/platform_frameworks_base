@@ -30,6 +30,7 @@ import android.testing.TestableContext;
 
 import androidx.test.InstrumentationRegistry;
 
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.uri.UriGrantsManagerInternal;
 
 import org.junit.After;
@@ -41,6 +42,7 @@ import org.mockito.MockitoAnnotations;
 
 public class UiServiceTestCase {
     @Mock protected PackageManagerInternal mPmi;
+    @Mock protected UserManagerInternal mUmi;
     @Mock protected UriGrantsManagerInternal mUgmInternal;
 
     protected static final String PKG_N_MR1 = "com.example.n_mr1";
@@ -92,6 +94,8 @@ public class UiServiceTestCase {
                     }
                 });
 
+        LocalServices.removeServiceForTest(UserManagerInternal.class);
+        LocalServices.addService(UserManagerInternal.class, mUmi);
         LocalServices.removeServiceForTest(UriGrantsManagerInternal.class);
         LocalServices.addService(UriGrantsManagerInternal.class, mUgmInternal);
         when(mUgmInternal.checkGrantUriPermission(

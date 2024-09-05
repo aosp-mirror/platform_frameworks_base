@@ -20,7 +20,6 @@ import android.view.ViewGroup
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
@@ -34,6 +33,7 @@ import com.android.systemui.keyguard.ui.viewmodel.AodBurnInViewModel
 import com.android.systemui.keyguard.ui.viewmodel.BurnInParameters
 import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.notifications.ui.composable.ConstrainedNotificationStack
+import com.android.systemui.notifications.ui.composable.SnoozeableHeadsUpNotificationSpace
 import com.android.systemui.shade.LargeScreenHeaderHelper
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
 import com.android.systemui.statusbar.notification.stack.ui.view.NotificationScrollView
@@ -79,6 +79,14 @@ constructor(
         )
     }
 
+    @Composable
+    fun SceneScope.HeadsUpNotifications() {
+        SnoozeableHeadsUpNotificationSpace(
+            stackScrollView = stackScrollView.get(),
+            viewModel = rememberViewModel("HeadsUpNotifications") { viewModelFactory.create() },
+        )
+    }
+
     /**
      * @param burnInParams params to make this view adaptive to burn-in, `null` to disable burn-in
      *   adjustment
@@ -99,7 +107,7 @@ constructor(
 
         ConstrainedNotificationStack(
             stackScrollView = stackScrollView.get(),
-            viewModel = rememberViewModel { viewModelFactory.create() },
+            viewModel = rememberViewModel("Notifications") { viewModelFactory.create() },
             modifier =
                 modifier
                     .fillMaxWidth()

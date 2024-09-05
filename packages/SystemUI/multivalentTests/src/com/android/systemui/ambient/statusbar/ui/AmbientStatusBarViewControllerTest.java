@@ -148,6 +148,7 @@ public class AmbientStatusBarViewControllerTest extends SysuiTestCase {
                 mKosmos.getWifiInteractor(),
                 mKosmos.getCommunalSceneInteractor(),
                 mLogBuffer);
+        mController.onInit();
     }
 
     @Test
@@ -515,6 +516,15 @@ public class AmbientStatusBarViewControllerTest extends SysuiTestCase {
         mController.onViewAttached();
         mController.onViewDetached();
         verify(mDreamOverlayStateController).setDreamOverlayStatusBarVisible(false);
+    }
+
+    @Test
+    public void testStatusBarWindowStateControllerListenerLifecycle() {
+        ArgumentCaptor<StatusBarWindowStateListener> listenerCaptor =
+                ArgumentCaptor.forClass(StatusBarWindowStateListener.class);
+        verify(mStatusBarWindowStateController).addListener(listenerCaptor.capture());
+        mController.destroy();
+        verify(mStatusBarWindowStateController).removeListener(eq(listenerCaptor.getValue()));
     }
 
     private StatusBarWindowStateListener updateStatusBarWindowState(boolean show) {

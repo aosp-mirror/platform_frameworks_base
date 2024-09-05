@@ -78,18 +78,12 @@ public class TunerResourceManagerService extends SystemService implements IBinde
 
     private static final int INVALID_FE_COUNT = -1;
 
-    private static final int RESOURCE_ID_SHIFT = 24;
-    private static final int RESOURCE_TYPE_SHIFT = 56;
-    private static final long RESOURCE_COUNT_MASK = 0xffffff;
-    private static final long RESOURCE_ID_MASK = 0xffffffff;
-    private static final long RESOURCE_TYPE_MASK = 0xff;
-
     // Map of the registered client profiles
     private Map<Integer, ClientProfile> mClientProfiles = new HashMap<>();
     private int mNextUnusedClientId = 0;
 
     // Map of the current available frontend resources
-    private Map<Long, FrontendResource> mFrontendResources = new HashMap<>();
+    private Map<Integer, FrontendResource> mFrontendResources = new HashMap<>();
     // SparseIntArray of the max usable number for each frontend resource type
     private SparseIntArray mFrontendMaxUsableNums = new SparseIntArray();
     // SparseIntArray of the currently used number for each frontend resource type
@@ -99,15 +93,15 @@ public class TunerResourceManagerService extends SystemService implements IBinde
 
     // Backups for the frontend resource maps for enabling testing with custom resource maps
     // such as TunerTest.testHasUnusedFrontend1()
-    private Map<Long, FrontendResource> mFrontendResourcesBackup = new HashMap<>();
+    private Map<Integer, FrontendResource> mFrontendResourcesBackup = new HashMap<>();
     private SparseIntArray mFrontendMaxUsableNumsBackup = new SparseIntArray();
     private SparseIntArray mFrontendUsedNumsBackup = new SparseIntArray();
     private SparseIntArray mFrontendExistingNumsBackup = new SparseIntArray();
 
     // Map of the current available demux resources
-    private Map<Long, DemuxResource> mDemuxResources = new HashMap<>();
+    private Map<Integer, DemuxResource> mDemuxResources = new HashMap<>();
     // Map of the current available lnb resources
-    private Map<Long, LnbResource> mLnbResources = new HashMap<>();
+    private Map<Integer, LnbResource> mLnbResources = new HashMap<>();
     // Map of the current available Cas resources
     private Map<Integer, CasResource> mCasResources = new HashMap<>();
     // Map of the current available CiCam resources
@@ -209,13 +203,7 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         @Override
         public void unregisterClientProfile(int clientId) throws RemoteException {
             enforceTrmAccessPermission("unregisterClientProfile");
-            synchronized (mLock) {
-                if (!checkClientExists(clientId)) {
-                    Slog.e(TAG, "Unregistering non exists client:" + clientId);
-                    return;
-                }
-                unregisterClientProfileInternal(clientId);
-            }
+            unregisterClientProfileInternal(clientId);
         }
 
         @Override
@@ -278,7 +266,7 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         }
 
         @Override
-        public void setLnbInfoList(long[] lnbHandles) throws RemoteException {
+        public void setLnbInfoList(int[] lnbHandles) throws RemoteException {
             enforceTrmAccessPermission("setLnbInfoList");
             if (lnbHandles == null) {
                 throw new RemoteException("Lnb handle list can't be null");
@@ -289,28 +277,15 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         }
 
         @Override
-        public boolean requestFrontend(
-                @NonNull TunerFrontendRequest request, @NonNull long[] frontendHandle) {
+        public boolean requestFrontend(@NonNull TunerFrontendRequest request,
+                @NonNull int[] frontendHandle) {
             enforceTunerAccessPermission("requestFrontend");
             enforceTrmAccessPermission("requestFrontend");
             if (frontendHandle == null) {
                 Slog.e(TAG, "frontendHandle can't be null");
                 return false;
             }
-            synchronized (mLock) {
-                if (!checkClientExists(request.clientId)) {
-                    Slog.e(TAG, "Request frontend from unregistered client: "
-                            + request.clientId);
-                    return false;
-                }
-                // If the request client is holding or sharing a frontend, throw an exception.
-                if (!getClientProfile(request.clientId).getInUseFrontendHandles().isEmpty()) {
-                    Slog.e(TAG, "Release frontend before requesting another one. Client id: "
-                            + request.clientId);
-                    return false;
-                }
-                return requestFrontendInternal(request, frontendHandle);
-            }
+            return requestFrontendInternal(request, frontendHandle);
         }
 
         @Override
@@ -375,25 +350,19 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         }
 
         @Override
-        public boolean requestDemux(@NonNull TunerDemuxRequest request, @NonNull long[] demuxHandle)
-                throws RemoteException {
+        public boolean requestDemux(@NonNull TunerDemuxRequest request,
+                    @NonNull int[] demuxHandle) throws RemoteException {
             enforceTunerAccessPermission("requestDemux");
             enforceTrmAccessPermission("requestDemux");
             if (demuxHandle == null) {
                 throw new RemoteException("demuxHandle can't be null");
             }
-            synchronized (mLock) {
-                if (!checkClientExists(request.clientId)) {
-                    throw new RemoteException("Request demux from unregistered client:"
-                            + request.clientId);
-                }
-                return requestDemuxInternal(request, demuxHandle);
-            }
+            return requestDemuxInternal(request, demuxHandle);
         }
 
         @Override
         public boolean requestDescrambler(@NonNull TunerDescramblerRequest request,
-                @NonNull long[] descramblerHandle) throws RemoteException {
+                    @NonNull int[] descramblerHandle) throws RemoteException {
             enforceDescramblerAccessPermission("requestDescrambler");
             enforceTrmAccessPermission("requestDescrambler");
             if (descramblerHandle == null) {
@@ -410,84 +379,44 @@ public class TunerResourceManagerService extends SystemService implements IBinde
 
         @Override
         public boolean requestCasSession(@NonNull CasSessionRequest request,
-                @NonNull long[] casSessionHandle) throws RemoteException {
+                @NonNull int[] casSessionHandle) throws RemoteException {
             enforceTrmAccessPermission("requestCasSession");
             if (casSessionHandle == null) {
                 throw new RemoteException("casSessionHandle can't be null");
             }
-            synchronized (mLock) {
-                if (!checkClientExists(request.clientId)) {
-                    throw new RemoteException("Request cas from unregistered client:"
-                            + request.clientId);
-                }
-                return requestCasSessionInternal(request, casSessionHandle);
-            }
+            return requestCasSessionInternal(request, casSessionHandle);
         }
 
         @Override
-        public boolean requestCiCam(@NonNull TunerCiCamRequest request, @NonNull long[] ciCamHandle)
-                throws RemoteException {
+        public boolean requestCiCam(@NonNull TunerCiCamRequest request,
+                @NonNull int[] ciCamHandle) throws RemoteException {
             enforceTrmAccessPermission("requestCiCam");
             if (ciCamHandle == null) {
                 throw new RemoteException("ciCamHandle can't be null");
             }
-            synchronized (mLock) {
-                if (!checkClientExists(request.clientId)) {
-                    throw new RemoteException("Request ciCam from unregistered client:"
-                            + request.clientId);
-                }
-                return requestCiCamInternal(request, ciCamHandle);
-            }
+            return requestCiCamInternal(request, ciCamHandle);
         }
 
         @Override
-        public boolean requestLnb(@NonNull TunerLnbRequest request, @NonNull long[] lnbHandle)
+        public boolean requestLnb(@NonNull TunerLnbRequest request, @NonNull int[] lnbHandle)
                 throws RemoteException {
             enforceTunerAccessPermission("requestLnb");
             enforceTrmAccessPermission("requestLnb");
             if (lnbHandle == null) {
                 throw new RemoteException("lnbHandle can't be null");
             }
-            synchronized (mLock) {
-                if (!checkClientExists(request.clientId)) {
-                    throw new RemoteException("Request lnb from unregistered client:"
-                            + request.clientId);
-                }
-                return requestLnbInternal(request, lnbHandle);
-            }
+            return requestLnbInternal(request, lnbHandle);
         }
 
         @Override
-        public void releaseFrontend(long frontendHandle, int clientId) throws RemoteException {
+        public void releaseFrontend(int frontendHandle, int clientId) throws RemoteException {
             enforceTunerAccessPermission("releaseFrontend");
             enforceTrmAccessPermission("releaseFrontend");
-            if (!validateResourceHandle(TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND,
-                    frontendHandle)) {
-                throw new RemoteException("frontendHandle can't be invalid");
-            }
-            synchronized (mLock) {
-                if (!checkClientExists(clientId)) {
-                    throw new RemoteException("Release frontend from unregistered client:"
-                            + clientId);
-                }
-                FrontendResource fe = getFrontendResource(frontendHandle);
-                if (fe == null) {
-                    throw new RemoteException("Releasing frontend does not exist.");
-                }
-                int ownerClientId = fe.getOwnerClientId();
-                ClientProfile ownerProfile = getClientProfile(ownerClientId);
-                if (ownerClientId != clientId
-                        && (ownerProfile != null
-                              && !ownerProfile.getShareFeClientIds().contains(clientId))) {
-                    throw new RemoteException(
-                            "Client is not the current owner of the releasing fe.");
-                }
-                releaseFrontendInternal(fe, clientId);
-            }
+            releaseFrontendInternal(frontendHandle, clientId);
         }
 
         @Override
-        public void releaseDemux(long demuxHandle, int clientId) throws RemoteException {
+        public void releaseDemux(int demuxHandle, int clientId) throws RemoteException {
             enforceTunerAccessPermission("releaseDemux");
             enforceTrmAccessPermission("releaseDemux");
             if (DEBUG) {
@@ -518,7 +447,7 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         }
 
         @Override
-        public void releaseDescrambler(long descramblerHandle, int clientId) {
+        public void releaseDescrambler(int descramblerHandle, int clientId) {
             enforceTunerAccessPermission("releaseDescrambler");
             enforceTrmAccessPermission("releaseDescrambler");
             if (DEBUG) {
@@ -527,7 +456,7 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         }
 
         @Override
-        public void releaseCasSession(long casSessionHandle, int clientId) throws RemoteException {
+        public void releaseCasSession(int casSessionHandle, int clientId) throws RemoteException {
             enforceTrmAccessPermission("releaseCasSession");
             if (!validateResourceHandle(
                     TunerResourceManager.TUNER_RESOURCE_TYPE_CAS_SESSION, casSessionHandle)) {
@@ -551,7 +480,7 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         }
 
         @Override
-        public void releaseCiCam(long ciCamHandle, int clientId) throws RemoteException {
+        public void releaseCiCam(int ciCamHandle, int clientId) throws RemoteException {
             enforceTrmAccessPermission("releaseCiCam");
             if (!validateResourceHandle(
                     TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND_CICAM, ciCamHandle)) {
@@ -579,7 +508,7 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         }
 
         @Override
-        public void releaseLnb(long lnbHandle, int clientId) throws RemoteException {
+        public void releaseLnb(int lnbHandle, int clientId) throws RemoteException {
             enforceTunerAccessPermission("releaseLnb");
             enforceTrmAccessPermission("releaseLnb");
             if (!validateResourceHandle(TunerResourceManager.TUNER_RESOURCE_TYPE_LNB, lnbHandle)) {
@@ -752,17 +681,23 @@ public class TunerResourceManagerService extends SystemService implements IBinde
 
     @VisibleForTesting
     protected void unregisterClientProfileInternal(int clientId) {
-        if (DEBUG) {
-            Slog.d(TAG, "unregisterClientProfile(clientId=" + clientId + ")");
-        }
-        removeClientProfile(clientId);
-        // Remove the Media Resource Manager callingPid to tvAppId mapping
-        if (mMediaResourceManager != null) {
-            try {
-                mMediaResourceManager.overridePid(Binder.getCallingPid(), -1);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Could not overridePid in resourceManagerSercice when unregister,"
-                        + " remote exception: " + e);
+        synchronized (mLock) {
+            if (!checkClientExists(clientId)) {
+                Slog.e(TAG, "Unregistering non exists client:" + clientId);
+                return;
+            }
+            if (DEBUG) {
+                Slog.d(TAG, "unregisterClientProfile(clientId=" + clientId + ")");
+            }
+            removeClientProfile(clientId);
+            // Remove the Media Resource Manager callingPid to tvAppId mapping
+            if (mMediaResourceManager != null) {
+                try {
+                    mMediaResourceManager.overridePid(Binder.getCallingPid(), -1);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Could not overridePid in resourceManagerSercice when unregister,"
+                            + " remote exception: " + e);
+                }
             }
         }
     }
@@ -877,7 +812,7 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         // A set to record the frontends pending on updating. Ids will be removed
         // from this set once its updating finished. Any frontend left in this set when all
         // the updates are done will be removed from mFrontendResources.
-        Set<Long> updatingFrontendHandles = new HashSet<>(getFrontendResources().keySet());
+        Set<Integer> updatingFrontendHandles = new HashSet<>(getFrontendResources().keySet());
 
         // Update frontendResources map and other mappings accordingly
         for (int i = 0; i < infos.length; i++) {
@@ -896,7 +831,7 @@ public class TunerResourceManagerService extends SystemService implements IBinde
             }
         }
 
-        for (long removingHandle : updatingFrontendHandles) {
+        for (int removingHandle : updatingFrontendHandles) {
             // update the exclusive group id member list
             removeFrontendResource(removingHandle);
         }
@@ -914,7 +849,7 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         // A set to record the demuxes pending on updating. Ids will be removed
         // from this set once its updating finished. Any demux left in this set when all
         // the updates are done will be removed from mDemuxResources.
-        Set<Long> updatingDemuxHandles = new HashSet<>(getDemuxResources().keySet());
+        Set<Integer> updatingDemuxHandles = new HashSet<>(getDemuxResources().keySet());
 
         // Update demuxResources map and other mappings accordingly
         for (int i = 0; i < infos.length; i++) {
@@ -932,13 +867,13 @@ public class TunerResourceManagerService extends SystemService implements IBinde
             }
         }
 
-        for (long removingHandle : updatingDemuxHandles) {
+        for (int removingHandle : updatingDemuxHandles) {
             // update the exclusive group id member list
             removeDemuxResource(removingHandle);
         }
     }
     @VisibleForTesting
-    protected void setLnbInfoListInternal(long[] lnbHandles) {
+    protected void setLnbInfoListInternal(int[] lnbHandles) {
         if (DEBUG) {
             for (int i = 0; i < lnbHandles.length; i++) {
                 Slog.d(TAG, "updateLnbInfo(lnbHanle=" + lnbHandles[i] + ")");
@@ -948,7 +883,7 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         // A set to record the Lnbs pending on updating. Handles will be removed
         // from this set once its updating finished. Any lnb left in this set when all
         // the updates are done will be removed from mLnbResources.
-        Set<Long> updatingLnbHandles = new HashSet<>(getLnbResources().keySet());
+        Set<Integer> updatingLnbHandles = new HashSet<>(getLnbResources().keySet());
 
         // Update lnbResources map and other mappings accordingly
         for (int i = 0; i < lnbHandles.length; i++) {
@@ -964,7 +899,7 @@ public class TunerResourceManagerService extends SystemService implements IBinde
             }
         }
 
-        for (long removingHandle : updatingLnbHandles) {
+        for (int removingHandle : updatingLnbHandles) {
             removeLnbResource(removingHandle);
         }
     }
@@ -998,10 +933,14 @@ public class TunerResourceManagerService extends SystemService implements IBinde
             return;
         }
         // Add the new Cas Resource.
-        cas = new CasResource.Builder(casSystemId)
+        int casSessionHandle = generateResourceHandle(
+                TunerResourceManager.TUNER_RESOURCE_TYPE_CAS_SESSION, casSystemId);
+        cas = new CasResource.Builder(casSessionHandle, casSystemId)
                              .maxSessionNum(maxSessionNum)
                              .build();
-        ciCam = new CiCamResource.Builder(casSystemId)
+        int ciCamHandle = generateResourceHandle(
+                TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND_CICAM, casSystemId);
+        ciCam = new CiCamResource.Builder(ciCamHandle, casSystemId)
                              .maxSessionNum(maxSessionNum)
                              .build();
         addCasResource(cas);
@@ -1009,90 +948,124 @@ public class TunerResourceManagerService extends SystemService implements IBinde
     }
 
     @VisibleForTesting
-    protected boolean requestFrontendInternal(TunerFrontendRequest request, long[] frontendHandle) {
+    protected boolean requestFrontendInternal(TunerFrontendRequest request, int[] frontendHandle) {
         if (DEBUG) {
             Slog.d(TAG, "requestFrontend(request=" + request + ")");
         }
-
-        frontendHandle[0] = TunerResourceManager.INVALID_RESOURCE_HANDLE;
-        ClientProfile requestClient = getClientProfile(request.clientId);
-        // TODO: check if this is really needed
-        if (requestClient == null) {
+        int[] reclaimOwnerId = new int[1];
+        if (!claimFrontend(request, frontendHandle, reclaimOwnerId)) {
             return false;
         }
-        clientPriorityUpdateOnRequest(requestClient);
-        long grantingFrontendHandle = TunerResourceManager.INVALID_RESOURCE_HANDLE;
-        long inUseLowestPriorityFrHandle = TunerResourceManager.INVALID_RESOURCE_HANDLE;
-        // Priority max value is 1000
-        int currentLowestPriority = MAX_CLIENT_PRIORITY + 1;
-        boolean isRequestFromSameProcess = false;
-        // If the desired frontend id was specified, we only need to check the frontend.
-        boolean hasDesiredFrontend = request.desiredId != TunerFrontendRequest.DEFAULT_DESIRED_ID;
-        for (FrontendResource fr : getFrontendResources().values()) {
-            int frontendId = getResourceIdFromHandle(fr.getHandle());
-            if (fr.getType() == request.frontendType
-                    && (!hasDesiredFrontend || frontendId == request.desiredId)) {
-                if (!fr.isInUse()) {
-                    // Unused resource cannot be acquired if the max is already reached, but
-                    // TRM still has to look for the reclaim candidate
-                    if (isFrontendMaxNumUseReached(request.frontendType)) {
-                        continue;
-                    }
-                    // Grant unused frontend with no exclusive group members first.
-                    if (fr.getExclusiveGroupMemberFeHandles().isEmpty()) {
-                        grantingFrontendHandle = fr.getHandle();
-                        break;
-                    } else if (grantingFrontendHandle
-                            == TunerResourceManager.INVALID_RESOURCE_HANDLE) {
-                        // Grant the unused frontend with lower id first if all the unused
-                        // frontends have exclusive group members.
-                        grantingFrontendHandle = fr.getHandle();
-                    }
-                } else if (grantingFrontendHandle == TunerResourceManager.INVALID_RESOURCE_HANDLE) {
-                    // Record the frontend id with the lowest client priority among all the
-                    // in use frontends when no available frontend has been found.
-                    int priority = getFrontendHighestClientPriority(fr.getOwnerClientId());
-                    if (currentLowestPriority > priority) {
-                        // we need to check the max used num if the target frontend type is not
-                        // currently in primary use (and simply blocked due to exclusive group)
-                        ClientProfile targetOwnerProfile = getClientProfile(fr.getOwnerClientId());
-                        long primaryFeId = targetOwnerProfile.getPrimaryFrontend();
-                        FrontendResource primaryFe = getFrontendResource(primaryFeId);
-                        if (fr.getType() != primaryFe.getType()
-                                && isFrontendMaxNumUseReached(fr.getType())) {
+        if (frontendHandle[0] == TunerResourceManager.INVALID_RESOURCE_HANDLE) {
+            return false;
+        }
+        if (reclaimOwnerId[0] != INVALID_CLIENT_ID) {
+            if (!reclaimResource(reclaimOwnerId[0], TunerResourceManager
+                    .TUNER_RESOURCE_TYPE_FRONTEND)) {
+                return false;
+            }
+            synchronized (mLock) {
+                if (getFrontendResource(frontendHandle[0]).isInUse()) {
+                    Slog.e(TAG, "Reclaimed frontend still in use");
+                    return false;
+                }
+                updateFrontendClientMappingOnNewGrant(frontendHandle[0], request.clientId);
+            }
+        }
+        return true;
+    }
+
+    protected boolean claimFrontend(
+            TunerFrontendRequest request,
+            int[] frontendHandle,
+            int[] reclaimOwnerId
+    ) {
+        frontendHandle[0] = TunerResourceManager.INVALID_RESOURCE_HANDLE;
+        reclaimOwnerId[0] = INVALID_CLIENT_ID;
+        synchronized (mLock) {
+            if (!checkClientExists(request.clientId)) {
+                Slog.e(TAG, "Request frontend from unregistered client: "
+                        + request.clientId);
+                return false;
+            }
+            // If the request client is holding or sharing a frontend, throw an exception.
+            if (!getClientProfile(request.clientId).getInUseFrontendHandles().isEmpty()) {
+                Slog.e(TAG, "Release frontend before requesting another one. Client id: "
+                        + request.clientId);
+                return false;
+            }
+            ClientProfile requestClient = getClientProfile(request.clientId);
+            clientPriorityUpdateOnRequest(requestClient);
+            FrontendResource grantingFrontend = null;
+            FrontendResource inUseLowestPriorityFrontend = null;
+            // Priority max value is 1000
+            int currentLowestPriority = MAX_CLIENT_PRIORITY + 1;
+            boolean isRequestFromSameProcess = false;
+            // If the desired frontend id was specified, we only need to check the frontend.
+            boolean hasDesiredFrontend = request.desiredId != TunerFrontendRequest
+                    .DEFAULT_DESIRED_ID;
+            for (FrontendResource fr : getFrontendResources().values()) {
+                int frontendId = getResourceIdFromHandle(fr.getHandle());
+                if (fr.getType() == request.frontendType
+                        && (!hasDesiredFrontend || frontendId == request.desiredId)) {
+                    if (!fr.isInUse()) {
+                        // Unused resource cannot be acquired if the max is already reached, but
+                        // TRM still has to look for the reclaim candidate
+                        if (isFrontendMaxNumUseReached(request.frontendType)) {
                             continue;
                         }
-                        // update the target frontend
-                        inUseLowestPriorityFrHandle = fr.getHandle();
-                        currentLowestPriority = priority;
-                        isRequestFromSameProcess = (requestClient.getProcessId()
-                            == (getClientProfile(fr.getOwnerClientId())).getProcessId());
+                        // Grant unused frontend with no exclusive group members first.
+                        if (fr.getExclusiveGroupMemberFeHandles().isEmpty()) {
+                            grantingFrontend = fr;
+                            break;
+                        } else if (grantingFrontend == null) {
+                            // Grant the unused frontend with lower id first if all the unused
+                            // frontends have exclusive group members.
+                            grantingFrontend = fr;
+                        }
+                    } else if (grantingFrontend == null) {
+                        // Record the frontend id with the lowest client priority among all the
+                        // in use frontends when no available frontend has been found.
+                        int priority = getFrontendHighestClientPriority(fr.getOwnerClientId());
+                        if (currentLowestPriority > priority) {
+                            // we need to check the max used num if the target frontend type is not
+                            // currently in primary use (and simply blocked due to exclusive group)
+                            ClientProfile targetOwnerProfile =
+                                    getClientProfile(fr.getOwnerClientId());
+                            int primaryFeId = targetOwnerProfile.getPrimaryFrontend();
+                            FrontendResource primaryFe = getFrontendResource(primaryFeId);
+                            if (fr.getType() != primaryFe.getType()
+                                    && isFrontendMaxNumUseReached(fr.getType())) {
+                                continue;
+                            }
+                            // update the target frontend
+                            inUseLowestPriorityFrontend = fr;
+                            currentLowestPriority = priority;
+                            isRequestFromSameProcess = (requestClient.getProcessId()
+                                == (getClientProfile(fr.getOwnerClientId())).getProcessId());
+                        }
                     }
                 }
             }
-        }
 
-        // Grant frontend when there is unused resource.
-        if (grantingFrontendHandle != TunerResourceManager.INVALID_RESOURCE_HANDLE) {
-            frontendHandle[0] = grantingFrontendHandle;
-            updateFrontendClientMappingOnNewGrant(grantingFrontendHandle, request.clientId);
-            return true;
-        }
-
-        // When all the resources are occupied, grant the lowest priority resource if the
-        // request client has higher priority.
-        if (inUseLowestPriorityFrHandle != TunerResourceManager.INVALID_RESOURCE_HANDLE
-            && ((requestClient.getPriority() > currentLowestPriority) || (
-            (requestClient.getPriority() == currentLowestPriority) && isRequestFromSameProcess))) {
-            if (!reclaimResource(
-                    getFrontendResource(inUseLowestPriorityFrHandle).getOwnerClientId(),
-                    TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND)) {
-                return false;
+            // Grant frontend when there is unused resource.
+            if (grantingFrontend != null) {
+                updateFrontendClientMappingOnNewGrant(grantingFrontend.getHandle(),
+                        request.clientId);
+                frontendHandle[0] = grantingFrontend.getHandle();
+                return true;
             }
-            frontendHandle[0] = inUseLowestPriorityFrHandle;
-            updateFrontendClientMappingOnNewGrant(
-                    inUseLowestPriorityFrHandle, request.clientId);
-            return true;
+
+            // When all the resources are occupied, grant the lowest priority resource if the
+            // request client has higher priority.
+            if (inUseLowestPriorityFrontend != null
+                    && ((requestClient.getPriority() > currentLowestPriority)
+                    || ((requestClient.getPriority() == currentLowestPriority)
+                    && isRequestFromSameProcess))) {
+                frontendHandle[0] = inUseLowestPriorityFrontend.getHandle();
+                reclaimOwnerId[0] = inUseLowestPriorityFrontend.getOwnerClientId();
+                return true;
+            }
         }
 
         return false;
@@ -1108,7 +1081,7 @@ public class TunerResourceManagerService extends SystemService implements IBinde
             getClientProfile(shareeFeClientId).stopSharingFrontend(selfClientId);
             getClientProfile(selfClientId).releaseFrontend();
         }
-        for (long feId : getClientProfile(targetClientId).getInUseFrontendHandles()) {
+        for (int feId : getClientProfile(targetClientId).getInUseFrontendHandles()) {
             getClientProfile(selfClientId).useFrontend(feId);
         }
         getClientProfile(selfClientId).setShareeFeClientId(targetClientId);
@@ -1123,14 +1096,14 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         currentOwnerProfile.stopSharingFrontend(newOwnerId);
         newOwnerProfile.setShareeFeClientId(ClientProfile.INVALID_RESOURCE_ID);
         currentOwnerProfile.setShareeFeClientId(newOwnerId);
-        for (long inUseHandle : newOwnerProfile.getInUseFrontendHandles()) {
+        for (int inUseHandle : newOwnerProfile.getInUseFrontendHandles()) {
             getFrontendResource(inUseHandle).setOwner(newOwnerId);
         }
         // change the primary frontend
         newOwnerProfile.setPrimaryFrontend(currentOwnerProfile.getPrimaryFrontend());
         currentOwnerProfile.setPrimaryFrontend(TunerResourceManager.INVALID_RESOURCE_HANDLE);
         // double check there is no other resources tied to the previous owner
-        for (long inUseHandle : currentOwnerProfile.getInUseFrontendHandles()) {
+        for (int inUseHandle : currentOwnerProfile.getInUseFrontendHandles()) {
             int ownerId = getFrontendResource(inUseHandle).getOwnerClientId();
             if (ownerId != newOwnerId) {
                 Slog.e(TAG, "something is wrong in transferFeOwner:" + inUseHandle
@@ -1162,8 +1135,8 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         ClientProfile currentOwnerProfile = getClientProfile(currentOwnerId);
         ClientProfile newOwnerProfile = getClientProfile(newOwnerId);
 
-        Set<Long> inUseLnbHandles = new HashSet<>();
-        for (Long lnbHandle : currentOwnerProfile.getInUseLnbHandles()) {
+        Set<Integer> inUseLnbHandles = new HashSet<>();
+        for (Integer lnbHandle : currentOwnerProfile.getInUseLnbHandles()) {
             // link lnb handle to the new profile
             newOwnerProfile.useLnb(lnbHandle);
 
@@ -1175,7 +1148,7 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         }
 
         // unlink lnb handles from the original owner
-        for (Long lnbHandle : inUseLnbHandles) {
+        for (Integer lnbHandle : inUseLnbHandles) {
             currentOwnerProfile.releaseLnb(lnbHandle);
         }
 
@@ -1198,168 +1171,257 @@ public class TunerResourceManagerService extends SystemService implements IBinde
     }
 
     @VisibleForTesting
-    protected boolean requestLnbInternal(TunerLnbRequest request, long[] lnbHandle) {
+    protected boolean requestLnbInternal(TunerLnbRequest request, int[] lnbHandle)
+            throws RemoteException {
         if (DEBUG) {
             Slog.d(TAG, "requestLnb(request=" + request + ")");
         }
-
-        lnbHandle[0] = TunerResourceManager.INVALID_RESOURCE_HANDLE;
-        ClientProfile requestClient = getClientProfile(request.clientId);
-        clientPriorityUpdateOnRequest(requestClient);
-        long grantingLnbHandle = TunerResourceManager.INVALID_RESOURCE_HANDLE;
-        long inUseLowestPriorityLnbHandle = TunerResourceManager.INVALID_RESOURCE_HANDLE;
-        // Priority max value is 1000
-        int currentLowestPriority = MAX_CLIENT_PRIORITY + 1;
-        boolean isRequestFromSameProcess = false;
-        for (LnbResource lnb : getLnbResources().values()) {
-            if (!lnb.isInUse()) {
-                // Grant the unused lnb with lower handle first
-                grantingLnbHandle = lnb.getHandle();
-                break;
-            } else {
-                // Record the lnb id with the lowest client priority among all the
-                // in use lnb when no available lnb has been found.
-                int priority = updateAndGetOwnerClientPriority(lnb.getOwnerClientId());
-                if (currentLowestPriority > priority) {
-                    inUseLowestPriorityLnbHandle = lnb.getHandle();
-                    currentLowestPriority = priority;
-                    isRequestFromSameProcess = (requestClient.getProcessId()
-                        == (getClientProfile(lnb.getOwnerClientId())).getProcessId());
-                }
-            }
+        int[] reclaimOwnerId = new int[1];
+        if (!claimLnb(request, lnbHandle, reclaimOwnerId)) {
+            return false;
         }
-
-        // Grant Lnb when there is unused resource.
-        if (grantingLnbHandle > -1) {
-            lnbHandle[0] = grantingLnbHandle;
-            updateLnbClientMappingOnNewGrant(grantingLnbHandle, request.clientId);
-            return true;
+        if (lnbHandle[0] == TunerResourceManager.INVALID_RESOURCE_HANDLE) {
+            return false;
         }
-
-        // When all the resources are occupied, grant the lowest priority resource if the
-        // request client has higher priority.
-        if (inUseLowestPriorityLnbHandle > TunerResourceManager.INVALID_RESOURCE_HANDLE
-            && ((requestClient.getPriority() > currentLowestPriority) || (
-            (requestClient.getPriority() == currentLowestPriority) && isRequestFromSameProcess))) {
-            if (!reclaimResource(getLnbResource(inUseLowestPriorityLnbHandle).getOwnerClientId(),
+        if (reclaimOwnerId[0] != INVALID_CLIENT_ID) {
+            if (!reclaimResource(reclaimOwnerId[0],
                     TunerResourceManager.TUNER_RESOURCE_TYPE_LNB)) {
                 return false;
             }
-            lnbHandle[0] = inUseLowestPriorityLnbHandle;
-            updateLnbClientMappingOnNewGrant(inUseLowestPriorityLnbHandle, request.clientId);
-            return true;
+            synchronized (mLock) {
+                if (getLnbResource(lnbHandle[0]).isInUse()) {
+                    Slog.e(TAG, "Reclaimed lnb still in use");
+                    return false;
+                }
+                updateLnbClientMappingOnNewGrant(lnbHandle[0], request.clientId);
+            }
+        }
+        return true;
+    }
+
+    protected boolean claimLnb(TunerLnbRequest request, int[] lnbHandle, int[] reclaimOwnerId)
+            throws RemoteException {
+        lnbHandle[0] = TunerResourceManager.INVALID_RESOURCE_HANDLE;
+        reclaimOwnerId[0] = INVALID_CLIENT_ID;
+        synchronized (mLock) {
+            if (!checkClientExists(request.clientId)) {
+                throw new RemoteException("Request lnb from unregistered client:"
+                        + request.clientId);
+            }
+            ClientProfile requestClient = getClientProfile(request.clientId);
+            clientPriorityUpdateOnRequest(requestClient);
+            LnbResource grantingLnb = null;
+            LnbResource inUseLowestPriorityLnb = null;
+            // Priority max value is 1000
+            int currentLowestPriority = MAX_CLIENT_PRIORITY + 1;
+            boolean isRequestFromSameProcess = false;
+            for (LnbResource lnb : getLnbResources().values()) {
+                if (!lnb.isInUse()) {
+                    // Grant the unused lnb with lower handle first
+                    grantingLnb = lnb;
+                    break;
+                } else {
+                    // Record the lnb id with the lowest client priority among all the
+                    // in use lnb when no available lnb has been found.
+                    int priority = updateAndGetOwnerClientPriority(lnb.getOwnerClientId());
+                    if (currentLowestPriority > priority) {
+                        inUseLowestPriorityLnb = lnb;
+                        currentLowestPriority = priority;
+                        isRequestFromSameProcess = (requestClient.getProcessId()
+                            == (getClientProfile(lnb.getOwnerClientId())).getProcessId());
+                    }
+                }
+            }
+
+            // Grant Lnb when there is unused resource.
+            if (grantingLnb != null) {
+                updateLnbClientMappingOnNewGrant(grantingLnb.getHandle(), request.clientId);
+                lnbHandle[0] = grantingLnb.getHandle();
+                return true;
+            }
+
+            // When all the resources are occupied, grant the lowest priority resource if the
+            // request client has higher priority.
+            if (inUseLowestPriorityLnb != null
+                    && ((requestClient.getPriority() > currentLowestPriority) || (
+                    (requestClient.getPriority() == currentLowestPriority)
+                        && isRequestFromSameProcess))) {
+                lnbHandle[0] = inUseLowestPriorityLnb.getHandle();
+                reclaimOwnerId[0] = inUseLowestPriorityLnb.getOwnerClientId();
+                return true;
+            }
         }
 
         return false;
     }
 
     @VisibleForTesting
-    protected boolean requestCasSessionInternal(
-            CasSessionRequest request, long[] casSessionHandle) {
+    protected boolean requestCasSessionInternal(CasSessionRequest request, int[] casSessionHandle)
+            throws RemoteException {
         if (DEBUG) {
             Slog.d(TAG, "requestCasSession(request=" + request + ")");
         }
-        CasResource cas = getCasResource(request.casSystemId);
-        // Unregistered Cas System is treated as having unlimited sessions.
-        if (cas == null) {
-            cas = new CasResource.Builder(request.casSystemId)
-                                 .maxSessionNum(Integer.MAX_VALUE)
-                                 .build();
-            addCasResource(cas);
+        int[] reclaimOwnerId = new int[1];
+        if (!claimCasSession(request, casSessionHandle, reclaimOwnerId)) {
+            return false;
         }
-        casSessionHandle[0] = TunerResourceManager.INVALID_RESOURCE_HANDLE;
-        ClientProfile requestClient = getClientProfile(request.clientId);
-        clientPriorityUpdateOnRequest(requestClient);
-        int lowestPriorityOwnerId = -1;
-        // Priority max value is 1000
-        int currentLowestPriority = MAX_CLIENT_PRIORITY + 1;
-        boolean isRequestFromSameProcess = false;
-        if (!cas.isFullyUsed()) {
-            casSessionHandle[0] = generateResourceHandle(
-                    TunerResourceManager.TUNER_RESOURCE_TYPE_CAS_SESSION, cas.getSystemId());
-            updateCasClientMappingOnNewGrant(request.casSystemId, request.clientId);
-            return true;
+        if (casSessionHandle[0] == TunerResourceManager.INVALID_RESOURCE_HANDLE) {
+            return false;
         }
-        for (int ownerId : cas.getOwnerClientIds()) {
-            // Record the client id with lowest priority that is using the current Cas system.
-            int priority = updateAndGetOwnerClientPriority(ownerId);
-            if (currentLowestPriority > priority) {
-                lowestPriorityOwnerId = ownerId;
-                currentLowestPriority = priority;
-                isRequestFromSameProcess = (requestClient.getProcessId()
-                    == (getClientProfile(ownerId)).getProcessId());
-            }
-        }
-
-        // When all the Cas sessions are occupied, reclaim the lowest priority client if the
-        // request client has higher priority.
-        if (lowestPriorityOwnerId > -1 && ((requestClient.getPriority() > currentLowestPriority)
-        || ((requestClient.getPriority() == currentLowestPriority) && isRequestFromSameProcess))) {
-            if (!reclaimResource(lowestPriorityOwnerId,
+        if (reclaimOwnerId[0] != INVALID_CLIENT_ID) {
+            if (!reclaimResource(reclaimOwnerId[0],
                     TunerResourceManager.TUNER_RESOURCE_TYPE_CAS_SESSION)) {
                 return false;
             }
-            casSessionHandle[0] = generateResourceHandle(
-                    TunerResourceManager.TUNER_RESOURCE_TYPE_CAS_SESSION, cas.getSystemId());
-            updateCasClientMappingOnNewGrant(request.casSystemId, request.clientId);
-            return true;
+            synchronized (mLock) {
+                if (getCasResource(request.casSystemId).isFullyUsed()) {
+                    Slog.e(TAG, "Reclaimed cas still fully used");
+                    return false;
+                }
+                updateCasClientMappingOnNewGrant(request.casSystemId, request.clientId);
+            }
         }
+        return true;
+    }
+
+    protected boolean claimCasSession(CasSessionRequest request, int[] casSessionHandle,
+            int[] reclaimOwnerId) throws RemoteException {
+        casSessionHandle[0] = TunerResourceManager.INVALID_RESOURCE_HANDLE;
+        reclaimOwnerId[0] = INVALID_CLIENT_ID;
+        synchronized (mLock) {
+            if (!checkClientExists(request.clientId)) {
+                throw new RemoteException("Request cas from unregistered client:"
+                        + request.clientId);
+            }
+            CasResource cas = getCasResource(request.casSystemId);
+            // Unregistered Cas System is treated as having unlimited sessions.
+            if (cas == null) {
+                int resourceHandle = generateResourceHandle(
+                        TunerResourceManager.TUNER_RESOURCE_TYPE_CAS_SESSION, request.clientId);
+                cas = new CasResource.Builder(resourceHandle, request.casSystemId)
+                                    .maxSessionNum(Integer.MAX_VALUE)
+                                    .build();
+                addCasResource(cas);
+            }
+            ClientProfile requestClient = getClientProfile(request.clientId);
+            clientPriorityUpdateOnRequest(requestClient);
+            int lowestPriorityOwnerId = INVALID_CLIENT_ID;
+            // Priority max value is 1000
+            int currentLowestPriority = MAX_CLIENT_PRIORITY + 1;
+            boolean isRequestFromSameProcess = false;
+            if (!cas.isFullyUsed()) {
+                updateCasClientMappingOnNewGrant(request.casSystemId, request.clientId);
+                casSessionHandle[0] = cas.getHandle();
+                return true;
+            }
+            for (int ownerId : cas.getOwnerClientIds()) {
+                // Record the client id with lowest priority that is using the current Cas system.
+                int priority = updateAndGetOwnerClientPriority(ownerId);
+                if (currentLowestPriority > priority) {
+                    lowestPriorityOwnerId = ownerId;
+                    currentLowestPriority = priority;
+                    isRequestFromSameProcess = (requestClient.getProcessId()
+                        == (getClientProfile(ownerId)).getProcessId());
+                }
+            }
+
+            // When all the Cas sessions are occupied, reclaim the lowest priority client if the
+            // request client has higher priority.
+            if (lowestPriorityOwnerId != INVALID_CLIENT_ID
+                    && ((requestClient.getPriority() > currentLowestPriority)
+                    || ((requestClient.getPriority() == currentLowestPriority)
+                    && isRequestFromSameProcess))) {
+                casSessionHandle[0] = cas.getHandle();
+                reclaimOwnerId[0] = lowestPriorityOwnerId;
+                return true;
+            }
+        }
+
         return false;
     }
 
     @VisibleForTesting
-    protected boolean requestCiCamInternal(TunerCiCamRequest request, long[] ciCamHandle) {
+    protected boolean requestCiCamInternal(TunerCiCamRequest request, int[] ciCamHandle)
+            throws RemoteException {
         if (DEBUG) {
             Slog.d(TAG, "requestCiCamInternal(TunerCiCamRequest=" + request + ")");
         }
-        CiCamResource ciCam = getCiCamResource(request.ciCamId);
-        // Unregistered Cas System is treated as having unlimited sessions.
-        if (ciCam == null) {
-            ciCam = new CiCamResource.Builder(request.ciCamId)
-                                     .maxSessionNum(Integer.MAX_VALUE)
-                                     .build();
-            addCiCamResource(ciCam);
+        int[] reclaimOwnerId = new int[1];
+        if (!claimCiCam(request, ciCamHandle, reclaimOwnerId)) {
+            return false;
         }
-        ciCamHandle[0] = TunerResourceManager.INVALID_RESOURCE_HANDLE;
-        ClientProfile requestClient = getClientProfile(request.clientId);
-        clientPriorityUpdateOnRequest(requestClient);
-        int lowestPriorityOwnerId = -1;
-        // Priority max value is 1000
-        int currentLowestPriority = MAX_CLIENT_PRIORITY + 1;
-        boolean isRequestFromSameProcess = false;
-        if (!ciCam.isFullyUsed()) {
-            ciCamHandle[0] = generateResourceHandle(
-                    TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND_CICAM, ciCam.getCiCamId());
-            updateCiCamClientMappingOnNewGrant(request.ciCamId, request.clientId);
-            Slog.e(TAG, "requestCiCamInternal(ciCamHandle=" + ciCamHandle[0] + ")");
-            return true;
+        if (ciCamHandle[0] == TunerResourceManager.INVALID_RESOURCE_HANDLE) {
+            return false;
         }
-        for (int ownerId : ciCam.getOwnerClientIds()) {
-            // Record the client id with lowest priority that is using the current Cas system.
-            int priority = updateAndGetOwnerClientPriority(ownerId);
-            if (currentLowestPriority > priority) {
-                lowestPriorityOwnerId = ownerId;
-                currentLowestPriority = priority;
-                isRequestFromSameProcess = (requestClient.getProcessId()
-                    == (getClientProfile(ownerId)).getProcessId());
-            }
-        }
-
-        // When all the CiCam sessions are occupied, reclaim the lowest priority client if the
-        // request client has higher priority.
-        if (lowestPriorityOwnerId > -1 && ((requestClient.getPriority() > currentLowestPriority)
-            || ((requestClient.getPriority() == currentLowestPriority)
-                && isRequestFromSameProcess))) {
-            if (!reclaimResource(lowestPriorityOwnerId,
+        if (reclaimOwnerId[0] != INVALID_CLIENT_ID) {
+            if (!reclaimResource(reclaimOwnerId[0],
                     TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND_CICAM)) {
                 return false;
             }
-            ciCamHandle[0] = generateResourceHandle(
-                    TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND_CICAM, ciCam.getCiCamId());
-            updateCiCamClientMappingOnNewGrant(request.ciCamId, request.clientId);
-            Slog.e(TAG, "requestCiCamInternal(ciCamHandle=" + ciCamHandle[0] + ")");
-            return true;
+            synchronized (mLock) {
+                if (getCiCamResource(request.ciCamId).isFullyUsed()) {
+                    Slog.e(TAG, "Reclaimed ciCam still fully used");
+                    return false;
+                }
+                updateCiCamClientMappingOnNewGrant(request.ciCamId, request.clientId);
+            }
         }
+        return true;
+    }
+
+    protected boolean claimCiCam(TunerCiCamRequest request, int[] ciCamHandle,
+            int[] reclaimOwnerId) throws RemoteException {
+        ciCamHandle[0] = TunerResourceManager.INVALID_RESOURCE_HANDLE;
+        reclaimOwnerId[0] = INVALID_CLIENT_ID;
+        synchronized (mLock) {
+            if (!checkClientExists(request.clientId)) {
+                throw new RemoteException("Request ciCam from unregistered client:"
+                        + request.clientId);
+            }
+            CiCamResource ciCam = getCiCamResource(request.ciCamId);
+            // Unregistered CiCam is treated as having unlimited sessions.
+            if (ciCam == null) {
+                int resourceHandle = generateResourceHandle(
+                        TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND_CICAM, request.ciCamId);
+                ciCam = new CiCamResource.Builder(resourceHandle, request.ciCamId)
+                                    .maxSessionNum(Integer.MAX_VALUE)
+                                    .build();
+                addCiCamResource(ciCam);
+            }
+            ClientProfile requestClient = getClientProfile(request.clientId);
+            clientPriorityUpdateOnRequest(requestClient);
+            int lowestPriorityOwnerId = INVALID_CLIENT_ID;
+            // Priority max value is 1000
+            int currentLowestPriority = MAX_CLIENT_PRIORITY + 1;
+            boolean isRequestFromSameProcess = false;
+            if (!ciCam.isFullyUsed()) {
+                updateCiCamClientMappingOnNewGrant(request.ciCamId, request.clientId);
+                ciCamHandle[0] = ciCam.getHandle();
+                return true;
+            }
+            for (int ownerId : ciCam.getOwnerClientIds()) {
+                // Record the client id with lowest priority that is using the current CiCam.
+                int priority = updateAndGetOwnerClientPriority(ownerId);
+                if (currentLowestPriority > priority) {
+                    lowestPriorityOwnerId = ownerId;
+                    currentLowestPriority = priority;
+                    isRequestFromSameProcess = (requestClient.getProcessId()
+                        == (getClientProfile(ownerId)).getProcessId());
+                }
+            }
+
+            // When all the CiCam sessions are occupied, reclaim the lowest priority client if the
+            // request client has higher priority.
+            if (lowestPriorityOwnerId != INVALID_CLIENT_ID
+                    && ((requestClient.getPriority() > currentLowestPriority)
+                    || ((requestClient.getPriority() == currentLowestPriority)
+                    && isRequestFromSameProcess))) {
+                ciCamHandle[0] = ciCam.getHandle();
+                reclaimOwnerId[0] = lowestPriorityOwnerId;
+                return true;
+            }
+        }
+
         return false;
     }
 
@@ -1392,20 +1454,49 @@ public class TunerResourceManagerService extends SystemService implements IBinde
     }
 
     @VisibleForTesting
-    protected void releaseFrontendInternal(FrontendResource fe, int clientId) {
+    protected void releaseFrontendInternal(int frontendHandle, int clientId)
+            throws RemoteException {
         if (DEBUG) {
-            Slog.d(TAG, "releaseFrontend(id=" + fe.getHandle() + ", clientId=" + clientId + " )");
+            Slog.d(TAG, "releaseFrontend(id=" + frontendHandle + ", clientId=" + clientId + " )");
         }
-        if (clientId == fe.getOwnerClientId()) {
-            ClientProfile ownerClient = getClientProfile(fe.getOwnerClientId());
-            if (ownerClient != null) {
-                for (int shareOwnerId : ownerClient.getShareFeClientIds()) {
-                    reclaimResource(shareOwnerId,
-                            TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND);
+        if (!validateResourceHandle(TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND,
+                frontendHandle)) {
+            throw new RemoteException("frontendHandle can't be invalid");
+        }
+        Set<Integer> reclaimedResourceOwnerIds = unclaimFrontend(frontendHandle, clientId);
+        if (reclaimedResourceOwnerIds != null) {
+            for (int shareOwnerId : reclaimedResourceOwnerIds) {
+                reclaimResource(shareOwnerId,
+                        TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND);
+            }
+        }
+        synchronized (mLock) {
+            clearFrontendAndClientMapping(getClientProfile(clientId));
+        }
+    }
+
+    private Set<Integer> unclaimFrontend(int frontendHandle, int clientId) throws RemoteException {
+        Set<Integer> reclaimedResourceOwnerIds = null;
+        synchronized (mLock) {
+            if (!checkClientExists(clientId)) {
+                throw new RemoteException("Release frontend from unregistered client:"
+                        + clientId);
+            }
+            FrontendResource fe = getFrontendResource(frontendHandle);
+            if (fe == null) {
+                throw new RemoteException("Releasing frontend does not exist.");
+            }
+            int ownerClientId = fe.getOwnerClientId();
+            ClientProfile ownerProfile = getClientProfile(ownerClientId);
+            if (ownerClientId == clientId) {
+                reclaimedResourceOwnerIds = ownerProfile.getShareFeClientIds();
+            } else {
+                if (!ownerProfile.getShareFeClientIds().contains(clientId)) {
+                    throw new RemoteException("Client is not a sharee of the releasing fe.");
                 }
             }
         }
-        clearFrontendAndClientMapping(getClientProfile(clientId));
+        return reclaimedResourceOwnerIds;
     }
 
     @VisibleForTesting
@@ -1441,103 +1532,129 @@ public class TunerResourceManagerService extends SystemService implements IBinde
     }
 
     @VisibleForTesting
-    protected boolean requestDemuxInternal(TunerDemuxRequest request, long[] demuxHandle) {
+    public boolean requestDemuxInternal(@NonNull TunerDemuxRequest request,
+                @NonNull int[] demuxHandle) throws RemoteException {
         if (DEBUG) {
             Slog.d(TAG, "requestDemux(request=" + request + ")");
         }
-
-        // For Tuner 2.0 and below or any HW constraint devices that are unable to support
-        // ITuner.openDemuxById(), demux resources are not really managed under TRM and
-        // mDemuxResources.size() will be zero
-        if (mDemuxResources.size() == 0) {
-            // There are enough Demux resources, so we don't manage Demux in R.
-            demuxHandle[0] =
-                    generateResourceHandle(TunerResourceManager.TUNER_RESOURCE_TYPE_DEMUX, 0);
-            return true;
-        }
-
-        demuxHandle[0] = TunerResourceManager.INVALID_RESOURCE_HANDLE;
-        ClientProfile requestClient = getClientProfile(request.clientId);
-
-        if (requestClient == null) {
+        int[] reclaimOwnerId = new int[1];
+        if (!claimDemux(request, demuxHandle, reclaimOwnerId)) {
             return false;
         }
+        if (demuxHandle[0] == TunerResourceManager.INVALID_RESOURCE_HANDLE) {
+            return false;
+        }
+        if (reclaimOwnerId[0] != INVALID_CLIENT_ID) {
+            if (!reclaimResource(reclaimOwnerId[0],
+                    TunerResourceManager.TUNER_RESOURCE_TYPE_DEMUX)) {
+                return false;
+            }
+            synchronized (mLock) {
+                if (getDemuxResource(demuxHandle[0]).isInUse()) {
+                    Slog.e(TAG, "Reclaimed demux still in use");
+                    return false;
+                }
+                updateDemuxClientMappingOnNewGrant(demuxHandle[0], request.clientId);
+            }
+        }
+        return true;
+    }
 
-        clientPriorityUpdateOnRequest(requestClient);
-        long grantingDemuxHandle = TunerResourceManager.INVALID_RESOURCE_HANDLE;
-        long inUseLowestPriorityDrHandle = TunerResourceManager.INVALID_RESOURCE_HANDLE;
-        // Priority max value is 1000
-        int currentLowestPriority = MAX_CLIENT_PRIORITY + 1;
-        boolean isRequestFromSameProcess = false;
-        // If the desired demux id was specified, we only need to check the demux.
-        boolean hasDesiredDemuxCap = request.desiredFilterTypes
-                != DemuxFilterMainType.UNDEFINED;
-        int smallestNumOfSupportedCaps = Integer.SIZE + 1;
-        int smallestNumOfSupportedCapsInUse = Integer.SIZE + 1;
-        for (DemuxResource dr : getDemuxResources().values()) {
-            if (!hasDesiredDemuxCap || dr.hasSufficientCaps(request.desiredFilterTypes)) {
-                if (!dr.isInUse()) {
-                    int numOfSupportedCaps = dr.getNumOfCaps();
+    protected boolean claimDemux(TunerDemuxRequest request, int[] demuxHandle, int[] reclaimOwnerId)
+            throws RemoteException {
+        demuxHandle[0] = TunerResourceManager.INVALID_RESOURCE_HANDLE;
+        reclaimOwnerId[0] = INVALID_CLIENT_ID;
+        synchronized (mLock) {
+            if (!checkClientExists(request.clientId)) {
+                throw new RemoteException("Request demux from unregistered client:"
+                        + request.clientId);
+            }
 
-                    // look for the demux with minimum caps supporting the desired caps
-                    if (smallestNumOfSupportedCaps > numOfSupportedCaps) {
-                        smallestNumOfSupportedCaps = numOfSupportedCaps;
-                        grantingDemuxHandle = dr.getHandle();
-                    }
-                } else if (grantingDemuxHandle == TunerResourceManager.INVALID_RESOURCE_HANDLE) {
-                    // Record the demux id with the lowest client priority among all the
-                    // in use demuxes when no availabledemux has been found.
-                    int priority = updateAndGetOwnerClientPriority(dr.getOwnerClientId());
-                    if (currentLowestPriority >= priority) {
+            // For Tuner 2.0 and below or any HW constraint devices that are unable to support
+            // ITuner.openDemuxById(), demux resources are not really managed under TRM and
+            // mDemuxResources.size() will be zero
+            if (mDemuxResources.size() == 0) {
+                // There are enough Demux resources, so we don't manage Demux in R.
+                demuxHandle[0] =
+                        generateResourceHandle(TunerResourceManager.TUNER_RESOURCE_TYPE_DEMUX, 0);
+                return true;
+            }
+
+            ClientProfile requestClient = getClientProfile(request.clientId);
+            if (requestClient == null) {
+                return false;
+            }
+            clientPriorityUpdateOnRequest(requestClient);
+            DemuxResource grantingDemux = null;
+            DemuxResource inUseLowestPriorityDemux = null;
+            // Priority max value is 1000
+            int currentLowestPriority = MAX_CLIENT_PRIORITY + 1;
+            boolean isRequestFromSameProcess = false;
+            // If the desired demux id was specified, we only need to check the demux.
+            boolean hasDesiredDemuxCap = request.desiredFilterTypes
+                    != DemuxFilterMainType.UNDEFINED;
+            int smallestNumOfSupportedCaps = Integer.SIZE + 1;
+            int smallestNumOfSupportedCapsInUse = Integer.SIZE + 1;
+            for (DemuxResource dr : getDemuxResources().values()) {
+                if (!hasDesiredDemuxCap || dr.hasSufficientCaps(request.desiredFilterTypes)) {
+                    if (!dr.isInUse()) {
                         int numOfSupportedCaps = dr.getNumOfCaps();
-                        boolean shouldUpdate = false;
-                        // update lowest priority
-                        if (currentLowestPriority > priority) {
-                            currentLowestPriority = priority;
-                            isRequestFromSameProcess = (requestClient.getProcessId()
-                                == (getClientProfile(dr.getOwnerClientId())).getProcessId());
 
-                            // reset the smallest caps when lower priority resource is found
-                            smallestNumOfSupportedCapsInUse = numOfSupportedCaps;
-
-                            shouldUpdate = true;
-                        } else {
-                            // This is the case when the priority is the same as previously found
-                            // one. Update smallest caps when priority.
-                            if (smallestNumOfSupportedCapsInUse > numOfSupportedCaps) {
-                                smallestNumOfSupportedCapsInUse = numOfSupportedCaps;
-                                shouldUpdate = true;
-                            }
+                        // look for the demux with minimum caps supporting the desired caps
+                        if (smallestNumOfSupportedCaps > numOfSupportedCaps) {
+                            smallestNumOfSupportedCaps = numOfSupportedCaps;
+                            grantingDemux = dr;
                         }
-                        if (shouldUpdate) {
-                            inUseLowestPriorityDrHandle = dr.getHandle();
+                    } else if (grantingDemux == null) {
+                        // Record the demux id with the lowest client priority among all the
+                        // in use demuxes when no availabledemux has been found.
+                        int priority = updateAndGetOwnerClientPriority(dr.getOwnerClientId());
+                        if (currentLowestPriority >= priority) {
+                            int numOfSupportedCaps = dr.getNumOfCaps();
+                            boolean shouldUpdate = false;
+                            // update lowest priority
+                            if (currentLowestPriority > priority) {
+                                currentLowestPriority = priority;
+                                isRequestFromSameProcess = (requestClient.getProcessId()
+                                    == (getClientProfile(dr.getOwnerClientId())).getProcessId());
+
+                                // reset the smallest caps when lower priority resource is found
+                                smallestNumOfSupportedCapsInUse = numOfSupportedCaps;
+
+                                shouldUpdate = true;
+                            } else {
+                                // This is the case when the priority is the same as previously
+                                // found one. Update smallest caps when priority.
+                                if (smallestNumOfSupportedCapsInUse > numOfSupportedCaps) {
+                                    smallestNumOfSupportedCapsInUse = numOfSupportedCaps;
+                                    shouldUpdate = true;
+                                }
+                            }
+                            if (shouldUpdate) {
+                                inUseLowestPriorityDemux = dr;
+                            }
                         }
                     }
                 }
             }
-        }
 
-        // Grant demux when there is unused resource.
-        if (grantingDemuxHandle != TunerResourceManager.INVALID_RESOURCE_HANDLE) {
-            demuxHandle[0] = grantingDemuxHandle;
-            updateDemuxClientMappingOnNewGrant(grantingDemuxHandle, request.clientId);
-            return true;
-        }
-
-        // When all the resources are occupied, grant the lowest priority resource if the
-        // request client has higher priority.
-        if (inUseLowestPriorityDrHandle != TunerResourceManager.INVALID_RESOURCE_HANDLE
-            && ((requestClient.getPriority() > currentLowestPriority) || (
-            (requestClient.getPriority() == currentLowestPriority) && isRequestFromSameProcess))) {
-            if (!reclaimResource(
-                    getDemuxResource(inUseLowestPriorityDrHandle).getOwnerClientId(),
-                    TunerResourceManager.TUNER_RESOURCE_TYPE_DEMUX)) {
-                return false;
+            // Grant demux when there is unused resource.
+            if (grantingDemux != null) {
+                updateDemuxClientMappingOnNewGrant(grantingDemux.getHandle(), request.clientId);
+                demuxHandle[0] = grantingDemux.getHandle();
+                return true;
             }
-            demuxHandle[0] = inUseLowestPriorityDrHandle;
-            updateDemuxClientMappingOnNewGrant(
-                    inUseLowestPriorityDrHandle, request.clientId);
-            return true;
+
+            // When all the resources are occupied, grant the lowest priority resource if the
+            // request client has higher priority.
+            if (inUseLowestPriorityDemux != null
+                    && ((requestClient.getPriority() > currentLowestPriority) || (
+                    (requestClient.getPriority() == currentLowestPriority)
+                        && isRequestFromSameProcess))) {
+                demuxHandle[0] = inUseLowestPriorityDemux.getHandle();
+                reclaimOwnerId[0] = inUseLowestPriorityDemux.getOwnerClientId();
+                return true;
+            }
         }
 
         return false;
@@ -1559,7 +1676,7 @@ public class TunerResourceManagerService extends SystemService implements IBinde
 
     @VisibleForTesting
     protected boolean requestDescramblerInternal(
-            TunerDescramblerRequest request, long[] descramblerHandle) {
+            TunerDescramblerRequest request, int[] descramblerHandle) {
         if (DEBUG) {
             Slog.d(TAG, "requestDescrambler(request=" + request + ")");
         }
@@ -1801,7 +1918,9 @@ public class TunerResourceManagerService extends SystemService implements IBinde
             return;
         }
 
-        mListeners.put(clientId, record);
+        synchronized (mLock) {
+            mListeners.put(clientId, record);
+        }
     }
 
     @VisibleForTesting
@@ -1817,33 +1936,44 @@ public class TunerResourceManagerService extends SystemService implements IBinde
 
         // Reclaim all the resources of the share owners of the frontend that is used by the current
         // resource reclaimed client.
-        ClientProfile profile = getClientProfile(reclaimingClientId);
-        // TODO: check if this check is really needed.
-        if (profile == null) {
-            return true;
-        }
-        Set<Integer> shareFeClientIds = profile.getShareFeClientIds();
-        for (int clientId : shareFeClientIds) {
-            try {
-                mListeners.get(clientId).getListener().onReclaimResources();
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to reclaim resources on client " + clientId, e);
-                return false;
+        Set<Integer> shareFeClientIds;
+        synchronized (mLock) {
+            ClientProfile profile = getClientProfile(reclaimingClientId);
+            if (profile == null) {
+                return true;
             }
-            clearAllResourcesAndClientMapping(getClientProfile(clientId));
+            shareFeClientIds = profile.getShareFeClientIds();
+        }
+        ResourcesReclaimListenerRecord listenerRecord = null;
+        for (int clientId : shareFeClientIds) {
+            synchronized (mLock) {
+                listenerRecord = mListeners.get(clientId);
+            }
+            if (listenerRecord != null) {
+                try {
+                    listenerRecord.getListener().onReclaimResources();
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Failed to reclaim resources on client " + clientId, e);
+                }
+            }
         }
 
         if (DEBUG) {
             Slog.d(TAG, "Reclaiming resources because higher priority client request resource type "
                     + resourceType + ", clientId:" + reclaimingClientId);
         }
-        try {
-            mListeners.get(reclaimingClientId).getListener().onReclaimResources();
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Failed to reclaim resources on client " + reclaimingClientId, e);
-            return false;
+
+        synchronized (mLock) {
+            listenerRecord = mListeners.get(reclaimingClientId);
         }
-        clearAllResourcesAndClientMapping(profile);
+        if (listenerRecord != null) {
+            try {
+                listenerRecord.getListener().onReclaimResources();
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to reclaim resources on client " + reclaimingClientId, e);
+            }
+        }
+
         return true;
     }
 
@@ -1878,20 +2008,20 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         return false;
     }
 
-    private void updateFrontendClientMappingOnNewGrant(long grantingHandle, int ownerClientId) {
+    private void updateFrontendClientMappingOnNewGrant(int grantingHandle, int ownerClientId) {
         FrontendResource grantingFrontend = getFrontendResource(grantingHandle);
         ClientProfile ownerProfile = getClientProfile(ownerClientId);
         grantingFrontend.setOwner(ownerClientId);
         increFrontendNum(mFrontendUsedNums, grantingFrontend.getType());
         ownerProfile.useFrontend(grantingHandle);
-        for (long exclusiveGroupMember : grantingFrontend.getExclusiveGroupMemberFeHandles()) {
+        for (int exclusiveGroupMember : grantingFrontend.getExclusiveGroupMemberFeHandles()) {
             getFrontendResource(exclusiveGroupMember).setOwner(ownerClientId);
             ownerProfile.useFrontend(exclusiveGroupMember);
         }
         ownerProfile.setPrimaryFrontend(grantingHandle);
     }
 
-    private void updateDemuxClientMappingOnNewGrant(long grantingHandle, int ownerClientId) {
+    private void updateDemuxClientMappingOnNewGrant(int grantingHandle, int ownerClientId) {
         DemuxResource grantingDemux = getDemuxResource(grantingHandle);
         if (grantingDemux != null) {
             ClientProfile ownerProfile = getClientProfile(ownerClientId);
@@ -1906,7 +2036,7 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         ownerProfile.releaseDemux(releasingDemux.getHandle());
     }
 
-    private void updateLnbClientMappingOnNewGrant(long grantingHandle, int ownerClientId) {
+    private void updateLnbClientMappingOnNewGrant(int grantingHandle, int ownerClientId) {
         LnbResource grantingLnb = getLnbResource(grantingHandle);
         ClientProfile ownerProfile = getClientProfile(ownerClientId);
         grantingLnb.setOwner(ownerClientId);
@@ -1990,23 +2120,23 @@ public class TunerResourceManagerService extends SystemService implements IBinde
 
     @VisibleForTesting
     @Nullable
-    protected FrontendResource getFrontendResource(long frontendHandle) {
+    protected FrontendResource getFrontendResource(int frontendHandle) {
         return mFrontendResources.get(frontendHandle);
     }
 
     @VisibleForTesting
-    protected Map<Long, FrontendResource> getFrontendResources() {
+    protected Map<Integer, FrontendResource> getFrontendResources() {
         return mFrontendResources;
     }
 
     @VisibleForTesting
     @Nullable
-    protected DemuxResource getDemuxResource(long demuxHandle) {
+    protected DemuxResource getDemuxResource(int demuxHandle) {
         return mDemuxResources.get(demuxHandle);
     }
 
     @VisibleForTesting
-    protected Map<Long, DemuxResource> getDemuxResources() {
+    protected Map<Integer, DemuxResource> getDemuxResources() {
         return mDemuxResources;
     }
 
@@ -2065,8 +2195,8 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         }
     }
 
-    private void replaceFeResourceMap(
-            Map<Long, FrontendResource> srcMap, Map<Long, FrontendResource> dstMap) {
+    private void replaceFeResourceMap(Map<Integer, FrontendResource> srcMap, Map<Integer,
+            FrontendResource> dstMap) {
         if (dstMap != null) {
             dstMap.clear();
             if (srcMap != null && srcMap.size() > 0) {
@@ -2119,7 +2249,7 @@ public class TunerResourceManagerService extends SystemService implements IBinde
             if (fe.getExclusiveGroupId() == newFe.getExclusiveGroupId()) {
                 newFe.addExclusiveGroupMemberFeHandle(fe.getHandle());
                 newFe.addExclusiveGroupMemberFeHandles(fe.getExclusiveGroupMemberFeHandles());
-                for (long excGroupmemberFeHandle : fe.getExclusiveGroupMemberFeHandles()) {
+                for (int excGroupmemberFeHandle : fe.getExclusiveGroupMemberFeHandles()) {
                     getFrontendResource(excGroupmemberFeHandle)
                             .addExclusiveGroupMemberFeHandle(newFe.getHandle());
                 }
@@ -2137,7 +2267,7 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         mDemuxResources.put(newDemux.getHandle(), newDemux);
     }
 
-    private void removeFrontendResource(long removingHandle) {
+    private void removeFrontendResource(int removingHandle) {
         FrontendResource fe = getFrontendResource(removingHandle);
         if (fe == null) {
             return;
@@ -2149,7 +2279,7 @@ public class TunerResourceManagerService extends SystemService implements IBinde
             }
             clearFrontendAndClientMapping(ownerClient);
         }
-        for (long excGroupmemberFeHandle : fe.getExclusiveGroupMemberFeHandles()) {
+        for (int excGroupmemberFeHandle : fe.getExclusiveGroupMemberFeHandles()) {
             getFrontendResource(excGroupmemberFeHandle)
                     .removeExclusiveGroupMemberFeId(fe.getHandle());
         }
@@ -2157,7 +2287,7 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         mFrontendResources.remove(removingHandle);
     }
 
-    private void removeDemuxResource(long removingHandle) {
+    private void removeDemuxResource(int removingHandle) {
         DemuxResource demux = getDemuxResource(removingHandle);
         if (demux == null) {
             return;
@@ -2170,12 +2300,12 @@ public class TunerResourceManagerService extends SystemService implements IBinde
 
     @VisibleForTesting
     @Nullable
-    protected LnbResource getLnbResource(long lnbHandle) {
+    protected LnbResource getLnbResource(int lnbHandle) {
         return mLnbResources.get(lnbHandle);
     }
 
     @VisibleForTesting
-    protected Map<Long, LnbResource> getLnbResources() {
+    protected Map<Integer, LnbResource> getLnbResources() {
         return mLnbResources;
     }
 
@@ -2184,7 +2314,7 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         mLnbResources.put(newLnb.getHandle(), newLnb);
     }
 
-    private void removeLnbResource(long removingHandle) {
+    private void removeLnbResource(int removingHandle) {
         LnbResource lnb = getLnbResource(removingHandle);
         if (lnb == null) {
             return;
@@ -2267,6 +2397,7 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         addResourcesReclaimListener(clientId, listener);
     }
 
+    @SuppressWarnings("GuardedBy") // Lock is held on mListeners
     private void removeClientProfile(int clientId) {
         for (int shareOwnerId : getClientProfile(clientId).getShareFeClientIds()) {
             clearFrontendAndClientMapping(getClientProfile(shareOwnerId));
@@ -2274,12 +2405,9 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         clearAllResourcesAndClientMapping(getClientProfile(clientId));
         mClientProfiles.remove(clientId);
 
-        // it may be called by unregisterClientProfileInternal under test
-        synchronized (mLock) {
-            ResourcesReclaimListenerRecord record = mListeners.remove(clientId);
-            if (record != null) {
-                record.getListener().asBinder().unlinkToDeath(record, 0);
-            }            
+        ResourcesReclaimListenerRecord record = mListeners.remove(clientId);
+        if (record != null) {
+            record.getListener().asBinder().unlinkToDeath(record, 0);
         }
     }
 
@@ -2288,7 +2416,7 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         if (profile == null) {
             return;
         }
-        for (Long feId : profile.getInUseFrontendHandles()) {
+        for (Integer feId : profile.getInUseFrontendHandles()) {
             FrontendResource fe = getFrontendResource(feId);
             int ownerClientId = fe.getOwnerClientId();
             if (ownerClientId == profile.getId()) {
@@ -2299,9 +2427,10 @@ public class TunerResourceManagerService extends SystemService implements IBinde
             if (ownerClientProfile != null) {
                 ownerClientProfile.stopSharingFrontend(profile.getId());
             }
+
         }
 
-        long primaryFeId = profile.getPrimaryFrontend();
+        int primaryFeId = profile.getPrimaryFrontend();
         if (primaryFeId != TunerResourceManager.INVALID_RESOURCE_HANDLE) {
             FrontendResource primaryFe = getFrontendResource(primaryFeId);
             if (primaryFe != null) {
@@ -2312,13 +2441,14 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         profile.releaseFrontend();
     }
 
-    private void clearAllResourcesAndClientMapping(ClientProfile profile) {
+    @VisibleForTesting
+    protected void clearAllResourcesAndClientMapping(ClientProfile profile) {
         // TODO: check if this check is really needed. Maybe needed for reclaimResource path.
         if (profile == null) {
             return;
         }
         // Clear Lnb
-        for (Long lnbHandle : profile.getInUseLnbHandles()) {
+        for (Integer lnbHandle : profile.getInUseLnbHandles()) {
             getLnbResource(lnbHandle).removeOwner();
         }
         // Clear Cas
@@ -2330,7 +2460,7 @@ public class TunerResourceManagerService extends SystemService implements IBinde
             getCiCamResource(profile.getInUseCiCamId()).removeOwner(profile.getId());
         }
         // Clear Demux
-        for (Long demuxHandle : profile.getInUseDemuxHandles()) {
+        for (Integer demuxHandle : profile.getInUseDemuxHandles()) {
             getDemuxResource(demuxHandle).removeOwner();
         }
         // Clear Frontend
@@ -2343,31 +2473,24 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         return mClientProfiles.keySet().contains(clientId);
     }
 
-    /**
-     *   Generate resource handle for resourceType and resourceId
-     *   Resource Handle Allotment : 64 bits (long)
-     *   8 bits - resourceType
-     *   32 bits - resourceId
-     *   24 bits - resourceRequestCount
-     */
-    private long generateResourceHandle(
+    private int generateResourceHandle(
             @TunerResourceManager.TunerResourceType int resourceType, int resourceId) {
-        return (resourceType & RESOURCE_TYPE_MASK) << RESOURCE_TYPE_SHIFT
-                | (resourceId & RESOURCE_ID_MASK) << RESOURCE_ID_SHIFT
-                | (mResourceRequestCount++ & RESOURCE_COUNT_MASK);
+        return (resourceType & 0x000000ff) << 24
+                | (resourceId << 16)
+                | (mResourceRequestCount++ & 0xffff);
     }
 
     @VisibleForTesting
-    protected int getResourceIdFromHandle(long resourceHandle) {
+    protected int getResourceIdFromHandle(int resourceHandle) {
         if (resourceHandle == TunerResourceManager.INVALID_RESOURCE_HANDLE) {
-            return (int) resourceHandle;
+            return resourceHandle;
         }
-        return (int) ((resourceHandle >> RESOURCE_ID_SHIFT) & RESOURCE_ID_MASK);
+        return (resourceHandle & 0x00ff0000) >> 16;
     }
 
-    private boolean validateResourceHandle(int resourceType, long resourceHandle) {
+    private boolean validateResourceHandle(int resourceType, int resourceHandle) {
         if (resourceHandle == TunerResourceManager.INVALID_RESOURCE_HANDLE
-                || ((resourceHandle >> RESOURCE_TYPE_SHIFT) & RESOURCE_TYPE_MASK) != resourceType) {
+                || ((resourceHandle & 0xff000000) >> 24) != resourceType) {
             return false;
         }
         return true;

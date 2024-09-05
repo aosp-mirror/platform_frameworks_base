@@ -830,7 +830,6 @@
     <protected-broadcast android:name="android.intent.action.PROFILE_REMOVED" />
     <protected-broadcast android:name="com.android.internal.telephony.cat.SMS_SENT_ACTION" />
     <protected-broadcast android:name="com.android.internal.telephony.cat.SMS_DELIVERY_ACTION" />
-    <protected-broadcast android:name="com.android.internal.telephony.data.ACTION_RETRY" />
     <protected-broadcast android:name="android.companion.virtual.action.VIRTUAL_DEVICE_REMOVED" />
     <protected-broadcast android:name="com.android.internal.intent.action.FLASH_NOTIFICATION_START_PREVIEW" />
     <protected-broadcast android:name="com.android.internal.intent.action.FLASH_NOTIFICATION_STOP_PREVIEW" />
@@ -844,6 +843,7 @@
     <protected-broadcast android:name="android.app.action.CONSOLIDATED_NOTIFICATION_POLICY_CHANGED" />
     <protected-broadcast android:name="android.intent.action.MAIN_USER_LOCKSCREEN_KNOWLEDGE_FACTOR_CHANGED" />
     <protected-broadcast android:name="com.android.uwb.uwbcountrycode.GEOCODE_RETRY" />
+    <protected-broadcast android:name="android.telephony.action.ACTION_SATELLITE_SUBSCRIBER_ID_LIST_CHANGED" />
 
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->
@@ -2617,7 +2617,8 @@
          @hide
     -->
     <permission android:name="android.permission.VIBRATE_VENDOR_EFFECTS"
-        android:protectionLevel="signature|privileged" />
+        android:protectionLevel="signature|privileged"
+        android:featureFlag="android.os.vibrator.vendor_vibration_effects" />
 
     <!-- @SystemApi Allows access to the vibrator state.
          <p>Protection level: signature
@@ -3765,7 +3766,6 @@
         privileged app such as the Assistant app.
         <p>Protection level: internal|role
         <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
-        @FlaggedApi("android.app.admin.flags.assist_content_user_restriction_enabled")
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_ASSIST_CONTENT"
         android:protectionLevel="internal|role" />
@@ -3836,7 +3836,6 @@
     <!-- Allows an application to use audit logging API.
         @hide
         @SystemApi
-        @FlaggedApi("android.app.admin.flags.security_log_v2_enabled")
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_AUDIT_LOGGING"
         android:protectionLevel="internal|role" />
@@ -4027,7 +4026,6 @@
         APIs protected by this permission on users different to the calling user.
         <p>Protection level: internal|role
         <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
-        @FlaggedApi("android.app.admin.flags.esim_management_enabled")
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_MANAGED_SUBSCRIPTIONS"
         android:protectionLevel="internal|role" />
@@ -5605,12 +5603,13 @@
     <!-- This permission is required among systems services to always keep the
          binding with TvInputManagerService.
          <p>This should only be used by the OEM TvInputService.
+         @FlaggedApi("android.media.tv.flags.tif_unbind_inactive_tis")
          <p>Protection level: signature|privileged|vendorPrivileged
          @hide
     -->
     <permission android:name="android.permission.ALWAYS_BOUND_TV_INPUT"
         android:protectionLevel="signature|privileged|vendorPrivileged"
-        android:featureFlag="android.media.tv.flags.tis_always_bound_permission"/>
+        android:featureFlag="android.media.tv.flags.tif_unbind_inactive_tis"/>
 
     <!-- Must be required by a {@link android.media.tv.interactive.TvInteractiveAppService}
          to ensure that only the system can bind to it.
@@ -7649,7 +7648,8 @@
     <permission android:name="android.permission.BIND_CARRIER_MESSAGING_CLIENT_SERVICE"
         android:protectionLevel="signature" />
 
-    <!-- Must be required by an {@link android.service.watchdog.ExplicitHealthCheckService} to
+    <!-- @FlaggedApi(android.crashrecovery.flags.Flags.FLAG_ENABLE_CRASHRECOVERY) @SystemApi
+         Must be required by an {@link android.service.watchdog.ExplicitHealthCheckService} to
          ensure that only the system can bind to it.
          @hide This is not a third-party API (intended for OEMs and system apps).
     -->
@@ -8010,6 +8010,41 @@
     <permission android:name="android.permission.EXECUTE_APP_ACTION"
                 android:protectionLevel="internal|role" />
 
+    <!-- Must be required by an {@link android.app.appfunctions.AppFunctionService},
+         to ensure that only the system can bind to it.
+         <p>Protection level: signature
+         @FlaggedApi("android.app.appfunctions.flags.enable_app_function_manager")  -->
+    <permission android:name="android.permission.BIND_APP_FUNCTION_SERVICE"
+        android:featureFlag="android.app.appfunctions.flags.enable_app_function_manager"
+        android:protectionLevel="signature" />
+
+    <!-- @SystemApi Allows a trusted application to perform actions on behalf of users inside of
+         applications with privacy guarantees from the system.
+         <p>This permission is currently only granted to system packages in the
+         {@link android.app.role.SYSTEM_UI_INTELLIGENCE} role which complies with privacy
+         requirements outlined in the Android CDD section "9.8.6 Content Capture".
+         <p>Apps are not able to opt-out from caller having this permission.
+         <p>Protection level: internal|role
+         @hide
+         @FlaggedApi("android.app.appfunctions.flags.enable_app_function_manager")  -->
+    <permission android:name="android.permission.EXECUTE_APP_FUNCTIONS_TRUSTED"
+        android:featureFlag="android.app.appfunctions.flags.enable_app_function_manager"
+        android:protectionLevel="internal|role" />
+
+    <!-- @SystemApi Allows an application to perform actions on behalf of users inside of
+         applications.
+         <p>This permission is currently only granted to preinstalled / system apps having the
+         {@link android.app.role.ASSISTANT} role.
+         <p>Apps contributing app functions can opt to disallow callers with this permission,
+         limiting to only callers with {@link android.permission.EXECUTE_APP_FUNCTIONS_TRUSTED}
+         instead.
+         <p>Protection level: internal|role
+         @hide
+         @FlaggedApi("android.app.appfunctions.flags.enable_app_function_manager")  -->
+    <permission android:name="android.permission.EXECUTE_APP_FUNCTIONS"
+        android:featureFlag="android.app.appfunctions.flags.enable_app_function_manager"
+        android:protectionLevel="internal|role" />
+
     <!-- Allows an application to display its suggestions using the autofill framework.
          <p>For now, this permission is only granted to the Browser application.
          <p>Protection level: internal|role
@@ -8136,7 +8171,8 @@
          <p>Not for use by third-party applications.
          @hide -->
     <permission android:name="android.permission.MANAGE_KEY_GESTURES"
-                android:protectionLevel="signature" />
+                android:protectionLevel="signature"
+                android:featureFlag="com.android.hardware.input.manage_key_gestures" />
 
     <uses-permission android:name="android.permission.HANDLE_QUERY_PACKAGE_RESTART" />
 

@@ -1,0 +1,8 @@
+{
+  "postsubmit": [
+    {
+       "name": "FrameworksCoreTests_android_tracing",
+        "file_patterns": [".*\\.java"]
+    }
+  ]
+}

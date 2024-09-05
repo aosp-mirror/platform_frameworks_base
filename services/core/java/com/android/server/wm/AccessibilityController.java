@@ -1764,15 +1764,7 @@ final class AccessibilityController {
             IBinder topFocusedWindowToken = null;
 
             synchronized (mService.mGlobalLock) {
-                // If there is a recents animation running, then use the animation target as the
-                // top window state. Otherwise,do not send the windows if there is no top focus as
-                // the window manager is still looking for where to put it. We will do the work when
-                // we get a focus change callback.
-                final RecentsAnimationController controller =
-                        mService.getRecentsAnimationController();
-                final WindowState topFocusedWindowState = controller != null
-                        ? controller.getTargetAppMainWindow()
-                        : getTopFocusWindow();
+                final WindowState topFocusedWindowState = getTopFocusWindow();
                 if (topFocusedWindowState == null) {
                     if (DEBUG) {
                         Slog.d(LOG_TAG, "top focused window is null, compute it again later");
@@ -1907,10 +1899,6 @@ final class AccessibilityController {
 
         private boolean windowMattersToAccessibility(AccessibilityWindow a11yWindow,
                 Region regionInScreen, Region unaccountedSpace) {
-            if (a11yWindow.ignoreRecentsAnimationForAccessibility()) {
-                return false;
-            }
-
             if (a11yWindow.isFocused()) {
                 return true;
             }
@@ -2450,7 +2438,7 @@ final class AccessibilityController {
 
                             long tokenInner = os.start(WINDOW_MANAGER_SERVICE);
                             synchronized (mService.mGlobalLock) {
-                                mService.dumpDebugLocked(os, WindowTraceLogLevel.ALL);
+                                mService.dumpDebugLocked(os, WindowTracingLogLevel.ALL);
                             }
                             os.end(tokenInner);
                             os.write(CPU_STATS, printCpuStats(reportedTimeStampNanos));

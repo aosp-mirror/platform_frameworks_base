@@ -19,6 +19,7 @@ package com.android.systemui.keyguard.domain.interactor
 
 import android.app.StatusBarManager
 import android.graphics.Point
+import android.util.Log
 import android.util.MathUtils
 import com.android.app.animation.Interpolators
 import com.android.systemui.bouncer.data.repository.KeyguardBouncerRepository
@@ -35,9 +36,12 @@ import com.android.systemui.keyguard.shared.model.DozeStateModel
 import com.android.systemui.keyguard.shared.model.DozeStateModel.Companion.isDozeOff
 import com.android.systemui.keyguard.shared.model.DozeTransitionModel
 import com.android.systemui.keyguard.shared.model.Edge
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
+import com.android.systemui.keyguard.shared.model.KeyguardState.DOZING
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
+import com.android.systemui.keyguard.shared.model.KeyguardState.OCCLUDED
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.res.R
@@ -87,6 +91,7 @@ constructor(
     sceneInteractorProvider: Provider<SceneInteractor>,
     private val fromGoneTransitionInteractor: Provider<FromGoneTransitionInteractor>,
     private val fromLockscreenTransitionInteractor: Provider<FromLockscreenTransitionInteractor>,
+    private val fromOccludedTransitionInteractor: Provider<FromOccludedTransitionInteractor>,
     sharedNotificationContainerInteractor: Provider<SharedNotificationContainerInteractor>,
     @Application applicationScope: CoroutineScope,
 ) {
@@ -406,6 +411,12 @@ constructor(
         }
     }
 
+    /** Which keyguard state to use when the device goes to sleep. */
+    val asleepKeyguardState: StateFlow<KeyguardState> =
+        repository.isAodAvailable
+            .map { aodAvailable -> if (aodAvailable) AOD else DOZING }
+            .stateIn(applicationScope, SharingStarted.Eagerly, DOZING)
+
     /**
      * Whether the primary authentication is required for the given user due to lockdown or
      * encryption after reboot.
@@ -484,7 +495,11 @@ constructor(
 
     /** Temporary shim, until [KeyguardWmStateRefactor] is enabled */
     fun dismissKeyguard() {
-        fromLockscreenTransitionInteractor.get().dismissKeyguard()
+        when (keyguardTransitionInteractor.transitionState.value.to) {
+            LOCKSCREEN -> fromLockscreenTransitionInteractor.get().dismissKeyguard()
+            OCCLUDED -> fromOccludedTransitionInteractor.get().dismissFromOccluded()
+            else -> Log.v(TAG, "Keyguard was dismissed, no direct transition call needed")
+        }
     }
 
     fun onCameraLaunchDetected(source: Int) {

@@ -22,6 +22,7 @@ import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.communal.data.repository.communalSceneRepository
+import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor.OnSceneAboutToChangeListener
 import com.android.systemui.communal.domain.model.CommunalTransitionProgressModel
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.shared.model.EditModeState
@@ -36,6 +37,11 @@ import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.verify
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
@@ -55,6 +61,36 @@ class CommunalSceneInteractorTest : SysuiTestCase() {
 
             underTest.changeScene(CommunalScenes.Communal, "test")
             assertThat(currentScene).isEqualTo(CommunalScenes.Communal)
+        }
+
+    @Test
+    fun changeScene_callsSceneStateProcessor() =
+        testScope.runTest {
+            val callback: OnSceneAboutToChangeListener = mock()
+            underTest.registerSceneStateProcessor(callback)
+
+            val currentScene by collectLastValue(underTest.currentScene)
+            assertThat(currentScene).isEqualTo(CommunalScenes.Blank)
+            verify(callback, never()).onSceneAboutToChange(any(), anyOrNull())
+
+            underTest.changeScene(CommunalScenes.Communal, "test")
+            assertThat(currentScene).isEqualTo(CommunalScenes.Communal)
+            verify(callback).onSceneAboutToChange(CommunalScenes.Communal, null)
+        }
+
+    @Test
+    fun changeScene_doesNotCallSceneStateProcessorForDuplicateState() =
+        testScope.runTest {
+            val callback: OnSceneAboutToChangeListener = mock()
+            underTest.registerSceneStateProcessor(callback)
+
+            val currentScene by collectLastValue(underTest.currentScene)
+            assertThat(currentScene).isEqualTo(CommunalScenes.Blank)
+
+            underTest.changeScene(CommunalScenes.Blank, "test")
+            assertThat(currentScene).isEqualTo(CommunalScenes.Blank)
+
+            verify(callback, never()).onSceneAboutToChange(any(), anyOrNull())
         }
 
     @Test

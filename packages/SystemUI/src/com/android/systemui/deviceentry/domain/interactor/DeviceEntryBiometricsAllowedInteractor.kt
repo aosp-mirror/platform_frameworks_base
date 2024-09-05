@@ -22,6 +22,7 @@ import com.android.systemui.dagger.SysUISingleton
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
@@ -44,16 +45,28 @@ constructor(
     biometricSettingsInteractor: DeviceEntryBiometricSettingsInteractor,
     facePropertyRepository: FacePropertyRepository,
 ) {
+    /**
+     * Whether face is locked out due to too many failed face attempts. This currently includes
+     * whether face is not allowed based on other biometric lockouts; however does not include if
+     * face isn't allowed due to other strong or primary authentication requirements.
+     */
+    val isFaceLockedOut: StateFlow<Boolean> = deviceEntryFaceAuthInteractor.isLockedOut
 
     private val isStrongFaceAuth: Flow<Boolean> =
         facePropertyRepository.sensorInfo.map { it?.strength == SensorStrength.STRONG }
 
     private val isStrongFaceAuthLockedOut: Flow<Boolean> =
-        combine(isStrongFaceAuth, deviceEntryFaceAuthInteractor.isLockedOut) {
-            isStrongFaceAuth,
-            isFaceAuthLockedOut ->
+        combine(isStrongFaceAuth, isFaceLockedOut) { isStrongFaceAuth, isFaceAuthLockedOut ->
             isStrongFaceAuth && isFaceAuthLockedOut
         }
+
+    /**
+     * Whether fingerprint is locked out due to too many failed fingerprint attempts. This does NOT
+     * include whether fingerprint is not allowed based on other biometric lockouts nor if
+     * fingerprint isn't allowed due to other strong or primary authentication requirements.
+     */
+    val isFingerprintLockedOut: StateFlow<Boolean> =
+        deviceEntryFingerprintAuthInteractor.isLockedOut
 
     /**
      * Whether fingerprint authentication is currently allowed for the user. This is true if the
@@ -64,7 +77,7 @@ constructor(
      */
     val isFingerprintAuthCurrentlyAllowed: Flow<Boolean> =
         combine(
-            deviceEntryFingerprintAuthInteractor.isLockedOut,
+            isFingerprintLockedOut,
             biometricSettingsInteractor.fingerprintAuthCurrentlyAllowed,
             isStrongFaceAuthLockedOut,
         ) { fpLockedOut, fpAllowedBySettings, strongAuthFaceAuthLockedOut ->

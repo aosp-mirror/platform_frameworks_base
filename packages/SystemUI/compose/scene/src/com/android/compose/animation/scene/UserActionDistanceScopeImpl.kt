@@ -35,7 +35,7 @@ internal class ElementStateScopeImpl(
     }
 
     override fun SceneKey.targetSize(): IntSize? {
-        return layoutImpl.scenes[this]?.targetSize.takeIf { it != IntSize.Zero }
+        return layoutImpl.sceneOrNull(this)?.targetSize.takeIf { it != IntSize.Zero }
     }
 }
 

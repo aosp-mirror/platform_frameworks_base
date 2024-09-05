@@ -17,11 +17,13 @@
 
 package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
-import com.android.compose.animation.scene.ObservableTransitionState
+import com.android.compose.animation.scene.ObservableTransitionState.Idle
+import com.android.compose.animation.scene.ObservableTransitionState.Transition
+import com.android.compose.animation.scene.ObservableTransitionState.Transition.ChangeScene
 import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
-import com.android.systemui.lifecycle.SysUiViewModel
+import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.SceneFamilies
@@ -39,10 +41,13 @@ import dagger.Lazy
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 
 /** ViewModel which represents the state of the NSSL/Controller in the world of flexiglass */
 class NotificationScrollViewModel
@@ -57,10 +62,45 @@ constructor(
     keyguardInteractor: Lazy<KeyguardInteractor>,
 ) :
     ActivatableFlowDumper by ActivatableFlowDumperImpl(dumpManager, "NotificationScrollViewModel"),
-    SysUiViewModel() {
+    ExclusiveActivatable() {
 
-    override suspend fun onActivated() {
+    override suspend fun onActivated(): Nothing {
         activateFlowDumper()
+    }
+
+    private fun expandedInScene(scene: SceneKey): Boolean {
+        return when (scene) {
+            Scenes.Lockscreen,
+            Scenes.Shade,
+            Scenes.QuickSettings -> true
+            else -> false
+        }
+    }
+
+    private fun fullyExpandedDuringSceneChange(change: ChangeScene): Boolean {
+        // The lockscreen stack is visible during all transitions away from the lockscreen, so keep
+        // the stack expanded until those transitions finish.
+        return (expandedInScene(change.fromScene) && expandedInScene(change.toScene)) ||
+            change.isBetween({ it == Scenes.Lockscreen }, { true })
+    }
+
+    private fun expandFractionDuringSceneChange(
+        change: ChangeScene,
+        shadeExpansion: Float,
+        qsExpansion: Float,
+    ): Float {
+        return if (fullyExpandedDuringSceneChange(change)) {
+            1f
+        } else if (change.isBetween({ it == Scenes.Gone }, { it in SceneFamilies.NotifShade })) {
+            shadeExpansion
+        } else if (change.isBetween({ it == Scenes.Gone }, { it == Scenes.QuickSettings })) {
+            // during QS expansion, increase fraction at same rate as scrim alpha,
+            // but start when scrim alpha is at EXPANSION_FOR_DELAYED_STACK_FADE_IN.
+            (qsExpansion / EXPANSION_FOR_MAX_SCRIM_ALPHA - EXPANSION_FOR_DELAYED_STACK_FADE_IN)
+                .coerceIn(0f, 1f)
+        } else {
+            0f
+        }
     }
 
     /**
@@ -75,47 +115,33 @@ constructor(
                 shadeInteractor.qsExpansion,
                 sceneInteractor.transitionState,
                 sceneInteractor.resolveSceneFamily(SceneFamilies.QuickSettings),
-            ) { shadeExpansion, shadeMode, qsExpansion, transitionState, quickSettingsScene ->
+            ) { shadeExpansion, _, qsExpansion, transitionState, _ ->
                 when (transitionState) {
-                    is ObservableTransitionState.Idle -> {
-                        when (transitionState.currentScene) {
-                            Scenes.Lockscreen,
-                            Scenes.QuickSettings -> 1f
-                            else -> shadeExpansion
-                        }
-                    }
-                    is ObservableTransitionState.Transition -> {
-                        if (
-                            (transitionState.fromScene in SceneFamilies.NotifShade &&
-                                transitionState.toScene == quickSettingsScene) ||
-                                (transitionState.fromScene in quickSettingsScene &&
-                                    transitionState.toScene in SceneFamilies.NotifShade) ||
-                                (transitionState.fromScene == Scenes.Lockscreen &&
-                                    transitionState.toScene in SceneFamilies.NotifShade) ||
-                                (transitionState.fromScene in SceneFamilies.NotifShade &&
-                                    transitionState.toScene == Scenes.Lockscreen)
-                        ) {
-                            1f
-                        } else if (
-                            shadeMode != ShadeMode.Split &&
-                                (transitionState.fromScene in SceneFamilies.Home &&
-                                    transitionState.toScene == quickSettingsScene) ||
-                                (transitionState.fromScene == quickSettingsScene &&
-                                    transitionState.toScene in SceneFamilies.Home)
-                        ) {
-                            // during QS expansion, increase fraction at same rate as scrim alpha,
-                            // but start when scrim alpha is at EXPANSION_FOR_DELAYED_STACK_FADE_IN.
-                            (qsExpansion / EXPANSION_FOR_MAX_SCRIM_ALPHA -
-                                    EXPANSION_FOR_DELAYED_STACK_FADE_IN)
-                                .coerceIn(0f, 1f)
-                        } else {
-                            shadeExpansion
-                        }
-                    }
+                    is Idle -> if (expandedInScene(transitionState.currentScene)) 1f else 0f
+                    is ChangeScene ->
+                        expandFractionDuringSceneChange(
+                            transitionState,
+                            shadeExpansion,
+                            qsExpansion,
+                        )
+                    is Transition.ShowOrHideOverlay,
+                    is Transition.ReplaceOverlay -> TODO("b/359173565: Handle overlay transitions")
                 }
             }
             .distinctUntilChanged()
             .dumpWhileCollecting("expandFraction")
+
+    val qsExpandFraction: Flow<Float> =
+        shadeInteractor.qsExpansion.dumpWhileCollecting("qsExpandFraction")
+
+    /** Whether we should close any open notification guts. */
+    val shouldCloseGuts: Flow<Boolean> = stackAppearanceInteractor.shouldCloseGuts
+
+    val shouldResetStackTop: Flow<Boolean> =
+        sceneInteractor.transitionState
+            .mapNotNull { state -> state is Idle && state.currentScene == Scenes.Gone }
+            .distinctUntilChanged()
+            .dumpWhileCollecting("shouldResetStackTop")
 
     private operator fun SceneKey.contains(scene: SceneKey) =
         sceneInteractor.isSceneInFamily(scene, this)
@@ -177,6 +203,10 @@ constructor(
     val currentGestureOverscrollConsumer: (Boolean) -> Unit =
         stackAppearanceInteractor::setCurrentGestureOverscroll
 
+    /** Receives whether the current touch gesture is inside any open guts. */
+    val currentGestureInGutsConsumer: (Boolean) -> Unit =
+        stackAppearanceInteractor::setCurrentGestureInGuts
+
     /** Whether the notification stack is scrollable or not. */
     val isScrollable: Flow<Boolean> =
         sceneInteractor.currentScene
@@ -195,8 +225,30 @@ constructor(
         }
     }
 
+    /** Whether the notification stack is displayed in pulsing mode. */
+    val isPulsing: Flow<Boolean> by lazy {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) {
+            flowOf(false)
+        } else {
+            keyguardInteractor.get().isPulsing.dumpWhileCollecting("isPulsing")
+        }
+    }
+
+    val shouldAnimatePulse: StateFlow<Boolean> by lazy {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) {
+            MutableStateFlow(false)
+        } else {
+            keyguardInteractor.get().isAodAvailable
+        }
+    }
+
     @AssistedFactory
     interface Factory {
         fun create(): NotificationScrollViewModel
     }
 }
+
+private fun ChangeScene.isBetween(
+    a: (SceneKey) -> Boolean,
+    b: (SceneKey) -> Boolean,
+): Boolean = (a(fromScene) && b(toScene)) || (b(fromScene) && a(toScene))

@@ -26,7 +26,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.util.fastLastOrNull
 import com.android.compose.animation.scene.content.Content
 import com.android.compose.animation.scene.content.state.TransitionState
 
@@ -58,6 +57,13 @@ internal fun MovableElement(
     modifier: Modifier,
     content: @Composable ElementScope<MovableElementContentScope>.() -> Unit,
 ) {
+    check(key.contentPicker.contents.contains(sceneOrOverlay.key)) {
+        val elementName = key.debugName
+        val contentName = sceneOrOverlay.key.debugName
+        "MovableElement $elementName was composed in content $contentName but the " +
+            "MovableElementKey($elementName).contentPicker.contents does not contain $contentName"
+    }
+
     Box(modifier.element(layoutImpl, sceneOrOverlay, key)) {
         val contentScope = sceneOrOverlay.scope
         val boxScope = this
@@ -153,13 +159,20 @@ private class MovableElementScopeImpl(
             // size* as its movable content, i.e. the same *size when idle*. During transitions,
             // this size will be used to interpolate the transition size, during the intermediate
             // layout pass.
+            //
+            // Important: Like in Modifier.element(), we read the transition states during
+            // composition then pass them to Layout to make sure that composition sees new states
+            // before layout and drawing.
+            val transitionStates = layoutImpl.state.transitionStates
             Layout { _, _ ->
                 // No need to measure or place anything.
                 val size =
                     placeholderContentSize(
-                        layoutImpl,
-                        contentKey,
-                        layoutImpl.elements.getValue(element),
+                        layoutImpl = layoutImpl,
+                        content = contentKey,
+                        element = layoutImpl.elements.getValue(element),
+                        elementKey = element,
+                        transitionStates = transitionStates,
                     )
                 layout(size.width, size.height) {}
             }
@@ -172,28 +185,45 @@ private fun shouldComposeMovableElement(
     content: ContentKey,
     element: MovableElementKey,
 ): Boolean {
-    val transitions = layoutImpl.state.currentTransitions
-    if (transitions.isEmpty()) {
-        // If we are idle, there is only one [scene] that is composed so we can compose our
-        // movable content here. We still check that [scene] is equal to the current idle scene, to
-        // make sure we only compose it there.
-        return layoutImpl.state.transitionState.currentScene == content
+    return when (
+        val elementState = movableElementState(element, layoutImpl.state.transitionStates)
+    ) {
+        null -> false
+        is TransitionState.Idle ->
+            movableElementContentWhenIdle(layoutImpl, element, elementState) == content
+        is TransitionState.Transition -> {
+            // During transitions, always compose movable elements in the scene picked by their
+            // content picker.
+            val contents = element.contentPicker.contents
+            shouldPlaceOrComposeSharedElement(
+                layoutImpl,
+                content,
+                element,
+                elementState,
+                isInContent = { contents.contains(it) }
+            )
+        }
     }
+}
 
-    // The current transition for this element is the last transition in which either fromScene or
-    // toScene contains the element.
+private fun movableElementState(
+    element: MovableElementKey,
+    transitionStates: List<TransitionState>,
+): TransitionState? {
     val contents = element.contentPicker.contents
-    val transition =
-        transitions.fastLastOrNull { transition ->
-            transition.fromScene in contents || transition.toScene in contents
-        } ?: return false
+    return elementState(transitionStates, isInContent = { contents.contains(it) })
+}
 
-    // Always compose movable elements in the scene picked by their scene picker.
-    return shouldPlaceOrComposeSharedElement(
+private fun movableElementContentWhenIdle(
+    layoutImpl: SceneTransitionLayoutImpl,
+    element: MovableElementKey,
+    elementState: TransitionState.Idle,
+): ContentKey {
+    val contents = element.contentPicker.contents
+    return elementContentWhenIdle(
         layoutImpl,
-        content,
-        element,
-        transition,
+        elementState,
+        isInContent = { contents.contains(it) },
     )
 }
 
@@ -205,6 +235,8 @@ private fun placeholderContentSize(
     layoutImpl: SceneTransitionLayoutImpl,
     content: ContentKey,
     element: Element,
+    elementKey: MovableElementKey,
+    transitionStates: List<TransitionState>,
 ): IntSize {
     // If the content of the movable element was already composed in this scene before, use that
     // target size.
@@ -213,19 +245,21 @@ private fun placeholderContentSize(
         return targetValueInScene
     }
 
-    // This code is only run during transitions (otherwise the content would be composed and the
-    // placeholder would not), so it's ok to cast the state into a Transition directly.
-    val transition = layoutImpl.state.transitionState as TransitionState.Transition
+    // If the element content was already composed in the other overlay/scene, we use that
+    // target size assuming it doesn't change between scenes.
+    // TODO(b/317026105): Provide a way to give a hint size/content for cases where this is
+    // not true.
+    val otherContent =
+        when (val state = movableElementState(elementKey, transitionStates)) {
+            null -> return IntSize.Zero
+            is TransitionState.Idle -> movableElementContentWhenIdle(layoutImpl, elementKey, state)
+            is TransitionState.Transition ->
+                if (state.fromContent == content) state.toContent else state.fromContent
+        }
 
-    // If the content was already composed in the other scene, we use that target size assuming it
-    // doesn't change between scenes.
-    // TODO(b/317026105): Provide a way to give a hint size/content for cases where this is not
-    // true.
-    val otherScene =
-        if (transition.fromScene == content) transition.toScene else transition.fromScene
-    val targetValueInOtherScene = element.stateByContent[otherScene]?.targetSize
-    if (targetValueInOtherScene != null && targetValueInOtherScene != Element.SizeUnspecified) {
-        return targetValueInOtherScene
+    val targetValueInOtherContent = element.stateByContent[otherContent]?.targetSize
+    if (targetValueInOtherContent != null && targetValueInOtherContent != Element.SizeUnspecified) {
+        return targetValueInOtherContent
     }
 
     return IntSize.Zero

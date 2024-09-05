@@ -17,6 +17,7 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import com.android.systemui.biometrics.authController
+import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardBlueprintInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardClockInteractor
 import com.android.systemui.kosmos.Kosmos
@@ -34,5 +35,6 @@ val Kosmos.lockscreenContentViewModel by
             shadeInteractor = shadeInteractor,
             unfoldTransitionInteractor = unfoldTransitionInteractor,
             occlusionInteractor = sceneContainerOcclusionInteractor,
+            deviceEntryInteractor = deviceEntryInteractor,
         )
     }

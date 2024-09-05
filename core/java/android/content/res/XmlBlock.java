@@ -24,6 +24,8 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
+import android.ravenwood.annotation.RavenwoodClassLoadHook;
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
 import android.util.TypedValue;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -44,6 +46,8 @@ import java.io.Reader;
  * {@hide}
  */
 @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+@RavenwoodKeepWholeClass
+@RavenwoodClassLoadHook(RavenwoodClassLoadHook.LIBANDROID_LOADING_HOOK)
 public final class XmlBlock implements AutoCloseable {
     private static final boolean DEBUG=false;
 

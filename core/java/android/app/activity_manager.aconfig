@@ -81,3 +81,36 @@ flag {
          purpose: PURPOSE_BUGFIX
      }
 }
+
+flag {
+     namespace: "backstage_power"
+     name: "rate_limit_get_running_app_processes"
+     description: "Rate limit calls to getRunningAppProcesses using a cache"
+     is_fixed_read_only: true
+     bug: "360374604"
+     metadata {
+         purpose: PURPOSE_BUGFIX
+     }
+}
+
+flag {
+     namespace: "backstage_power"
+     name: "rate_limit_get_processes_in_error_state"
+     description: "Rate limit calls to getProcessesInErrorState using a cache"
+     is_fixed_read_only: true
+     bug: "361146083"
+     metadata {
+         purpose: PURPOSE_BUGFIX
+     }
+}
+
+flag {
+     namespace: "backstage_power"
+     name: "cache_get_current_user_id"
+     description: "Add caching for getCurrentUserId"
+     is_fixed_read_only: true
+     bug: "361853873"
+     metadata {
+         purpose: PURPOSE_BUGFIX
+     }
+}

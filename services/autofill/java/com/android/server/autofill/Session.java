@@ -4664,6 +4664,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 // event as concluded.
                 if (!wasPreviouslyFillDialog
                         && (!isSameViewEntered || maybeNewRequestId.isPresent())) {
+                    mPresentationStatsEventLogger.logAndEndEvent("new view entered");
                     startNewEventForPresentationStatsEventLogger();
                     if (maybeNewRequestId.isPresent()) {
                         mPresentationStatsEventLogger.maybeSetRequestId(maybeNewRequestId.get());

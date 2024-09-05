@@ -65,14 +65,10 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"Pomjerite gore desno"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"Pomjeri dolje lijevo"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"Pomjerite dolje desno"</string>
-    <!-- no translation found for bubble_accessibility_action_expand_menu (8637233525952938845) -->
-    <skip />
-    <!-- no translation found for bubble_accessibility_action_collapse_menu (2975310870146231463) -->
-    <skip />
-    <!-- no translation found for bubble_accessibility_action_move_bar_left (4803535120353716759) -->
-    <skip />
-    <!-- no translation found for bubble_accessibility_action_move_bar_right (7686542531917510421) -->
-    <skip />
+    <string name="bubble_accessibility_action_expand_menu" msgid="8637233525952938845">"proširivanje menija"</string>
+    <string name="bubble_accessibility_action_collapse_menu" msgid="2975310870146231463">"sužavanje menija"</string>
+    <string name="bubble_accessibility_action_move_bar_left" msgid="4803535120353716759">"Pomicanje ulijevo"</string>
+    <string name="bubble_accessibility_action_move_bar_right" msgid="7686542531917510421">"Pomicanje udesno"</string>
     <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"proširivanje oblačića <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"sužavanje oblačića <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"Postavke aplikacije <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
@@ -131,4 +127,5 @@
     <string name="expand_menu_text" msgid="3847736164494181168">"Otvaranje menija"</string>
     <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"Maksimiziraj ekran"</string>
     <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"Snimi ekran"</string>
+    <string name="desktop_mode_non_resizable_snap_text" msgid="1049800446363800707">"Nije moguće promijeniti veličinu aplikacije"</string>
 </resources>

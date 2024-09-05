@@ -31,10 +31,10 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
-import android.app.WindowConfiguration;
+import android.app.WindowConfiguration.WindowingMode;
 import android.content.ComponentName;
 import android.content.pm.ActivityInfo;
-import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.UserMinAspectRatio;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.view.Surface;
@@ -134,11 +134,6 @@ class AppCompatActivityRobot {
                 isUnresizable);
     }
 
-    void configureTopActivityIgnoreOrientationRequest(boolean ignoreOrientationRequest) {
-        mActivityStack.top().mDisplayContent
-                .setIgnoreOrientationRequest(ignoreOrientationRequest);
-    }
-
     void configureUnresizableTopActivity(@ActivityInfo.ScreenOrientation int screenOrientation) {
         configureTopActivity(/* minAspect */ -1, /* maxAspect */ -1, screenOrientation,
                 /* isUnresizable */ true);
@@ -176,8 +171,12 @@ class AppCompatActivityRobot {
         return mActivityStack.getFromTop(fromTop);
     }
 
-    void setTaskWindowingMode(@WindowConfiguration.WindowingMode int windowingMode) {
+    void setTaskWindowingMode(@WindowingMode int windowingMode) {
         mTaskStack.top().setWindowingMode(windowingMode);
+    }
+
+    void setTaskDisplayAreaWindowingMode(@WindowingMode int windowingMode) {
+        mTaskStack.top().getDisplayArea().setWindowingMode(windowingMode);
     }
 
     void setLetterboxedForFixedOrientationAndAspectRatio(boolean enabled) {
@@ -210,7 +209,7 @@ class AppCompatActivityRobot {
     }
 
     void setShouldCreateCompatDisplayInsets(boolean enabled) {
-        doReturn(enabled).when(mActivityStack.top()).shouldCreateCompatDisplayInsets();
+        doReturn(enabled).when(mActivityStack.top()).shouldCreateAppCompatDisplayInsets();
     }
 
     void setTopActivityInSizeCompatMode(boolean inScm) {
@@ -222,10 +221,14 @@ class AppCompatActivityRobot {
                 .getAppCompatAspectRatioOverrides()).shouldApplyUserFullscreenOverride();
     }
 
-    void setGetUserMinAspectRatioOverrideCode(@PackageManager.UserMinAspectRatio int orientation) {
-        doReturn(orientation).when(mActivityStack.top()
-                .mAppCompatController.getAppCompatAspectRatioOverrides())
-                .getUserMinAspectRatioOverrideCode();
+    void setGetUserMinAspectRatioOverrideCode(@UserMinAspectRatio int overrideCode) {
+        doReturn(overrideCode).when(mActivityStack.top().mAppCompatController
+                .getAppCompatAspectRatioOverrides()).getUserMinAspectRatioOverrideCode();
+    }
+
+    void setGetUserMinAspectRatioOverrideValue(float overrideValue) {
+        doReturn(overrideValue).when(mActivityStack.top().mAppCompatController
+                .getAppCompatAspectRatioOverrides()).getUserMinAspectRatio();
     }
 
     void setIgnoreOrientationRequest(boolean enabled) {
@@ -233,12 +236,23 @@ class AppCompatActivityRobot {
     }
 
     void setTopTaskInMultiWindowMode(boolean inMultiWindowMode) {
-        doReturn(inMultiWindowMode).when(mTaskStack.top())
-                .inMultiWindowMode();
+        doReturn(inMultiWindowMode).when(mTaskStack.top()).inMultiWindowMode();
     }
 
     void setTopActivityAsEmbedded(boolean embedded) {
         doReturn(embedded).when(mActivityStack.top()).isEmbedded();
+    }
+
+    void setTopActivityVisible(boolean isVisible) {
+        doReturn(isVisible).when(mActivityStack.top()).isVisible();
+    }
+
+    void setTopActivityVisibleRequested(boolean isVisibleRequested) {
+        doReturn(isVisibleRequested).when(mActivityStack.top()).isVisibleRequested();
+    }
+
+    void setTopActivityFillsParent(boolean fillsParent) {
+        doReturn(fillsParent).when(mActivityStack.top()).fillsParent();
     }
 
     void setTopActivityInMultiWindowMode(boolean multiWindowMode) {
@@ -485,7 +499,7 @@ class AppCompatActivityRobot {
             activity.setRequestedOrientation(screenOrientation);
         }
         // Make sure to use the provided configuration to construct the size compat fields.
-        activity.clearSizeCompatMode();
+        activity.mAppCompatController.getAppCompatSizeCompatModePolicy().clearSizeCompatMode();
         activity.ensureActivityConfiguration();
         // Make sure the display configuration reflects the change of activity.
         if (activity.mDisplayContent.updateOrientation()) {

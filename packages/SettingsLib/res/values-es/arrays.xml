@@ -243,7 +243,7 @@
     <item msgid="8612549335720461635">"4K (seguro)"</item>
     <item msgid="7322156123728520872">"4K (mejorado)"</item>
     <item msgid="7735692090314849188">"4K (mejorado, seguro)"</item>
-    <item msgid="7346816300608639624">"720p, 1080p (pantalla doble)"</item>
+    <item msgid="7346816300608639624">"720p, 1080p (pantalla dual)"</item>
   </string-array>
   <string-array name="enable_opengl_traces_entries">
     <item msgid="4433736508877934305">"Desactivado"</item>

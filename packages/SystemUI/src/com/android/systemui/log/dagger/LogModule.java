@@ -574,7 +574,7 @@ public class LogModule {
     @SysUISingleton
     @KeyguardQuickAffordancesLog
     public static LogBuffer provideKeyguardQuickAffordancesLogBuffer(LogBufferFactory factory) {
-        return factory.create("KeyguardQuickAffordancesLog", 25);
+        return factory.create("KeyguardQuickAffordancesLog", 100);
     }
 
     /**
@@ -618,6 +618,16 @@ public class LogModule {
     }
 
     /**
+     * Provides a {@link LogBuffer} for communal touch-handling logs.
+     */
+    @Provides
+    @SysUISingleton
+    @CommunalTouchLog
+    public static LogBuffer provideCommunalTouchLogBuffer(LogBufferFactory factory) {
+        return factory.create("CommunalTouchLog", 250);
+    }
+
+    /**
      * Provides a {@link TableLogBuffer} for communal-related logs.
      */
     @Provides
@@ -658,6 +668,14 @@ public class LogModule {
     @KeyboardLog
     public static LogBuffer provideKeyboardLogBuffer(LogBufferFactory factory) {
         return factory.create("KeyboardLog", 50);
+    }
+
+    /** Provides a {@link LogBuffer} for the input devices tutorial. */
+    @Provides
+    @SysUISingleton
+    @InputDeviceTutorialLog
+    public static LogBuffer provideInputDeviceTutorialLogBuffer(LogBufferFactory factory) {
+        return factory.create("InputDeviceTutorialLog", 50);
     }
 
     /** Provides a {@link LogBuffer} for {@link PackageChangeRepository} */

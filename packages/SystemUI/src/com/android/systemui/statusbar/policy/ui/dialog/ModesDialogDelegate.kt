@@ -21,7 +21,11 @@ import android.provider.Settings
 import android.util.Log
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.android.compose.PlatformButton
@@ -88,7 +92,15 @@ constructor(
     @Composable
     private fun ModesDialogContent(dialog: SystemUIDialog) {
         AlertDialogContent(
-            title = { Text(stringResource(R.string.zen_modes_dialog_title)) },
+            modifier = Modifier.semantics {
+                testTagsAsResourceId = true
+            },
+            title = {
+                Text(
+                    modifier = Modifier.testTag("modes_title"),
+                    text = stringResource(R.string.zen_modes_dialog_title)
+                )
+            },
             content = { ModeTileGrid(viewModel.get()) },
             neutralButton = {
                 PlatformOutlinedButton(onClick = { openSettings(dialog) }) {

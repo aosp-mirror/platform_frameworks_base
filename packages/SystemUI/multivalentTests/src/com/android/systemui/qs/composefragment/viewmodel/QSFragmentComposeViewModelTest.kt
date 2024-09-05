@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.composefragment.viewmodel
 
+import android.app.StatusBarManager
 import android.content.testableContext
 import android.testing.TestableLooper.RunWithLooper
 import androidx.lifecycle.Lifecycle
@@ -31,6 +32,10 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.qs.fgsManagerController
 import com.android.systemui.res.R
 import com.android.systemui.shade.largeScreenHeaderHelper
+import com.android.systemui.statusbar.StatusBarState
+import com.android.systemui.statusbar.disableflags.data.model.DisableFlagsModel
+import com.android.systemui.statusbar.disableflags.data.repository.fakeDisableFlagsRepository
+import com.android.systemui.statusbar.sysuiStatusBarStateController
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.Dispatchers
@@ -140,6 +145,59 @@ class QSFragmentComposeViewModelTest : SysuiTestCase() {
             }
         }
 
+    @Test
+    fun statusBarState_followsController() =
+        with(kosmos) {
+            testScope.testWithinLifecycle {
+                val statusBarState by collectLastValue(underTest.statusBarState)
+                runCurrent()
+
+                sysuiStatusBarStateController.setState(StatusBarState.SHADE)
+                assertThat(statusBarState).isEqualTo(StatusBarState.SHADE)
+
+                sysuiStatusBarStateController.setState(StatusBarState.KEYGUARD)
+                assertThat(statusBarState).isEqualTo(StatusBarState.KEYGUARD)
+
+                sysuiStatusBarStateController.setState(StatusBarState.SHADE_LOCKED)
+                assertThat(statusBarState).isEqualTo(StatusBarState.SHADE_LOCKED)
+            }
+        }
+
+    @Test
+    fun statusBarState_changesEarlyIfUpcomingStateIsKeyguard() =
+        with(kosmos) {
+            testScope.testWithinLifecycle {
+                val statusBarState by collectLastValue(underTest.statusBarState)
+
+                sysuiStatusBarStateController.setState(StatusBarState.SHADE)
+                sysuiStatusBarStateController.setUpcomingState(StatusBarState.SHADE_LOCKED)
+                assertThat(statusBarState).isEqualTo(StatusBarState.SHADE)
+
+                sysuiStatusBarStateController.setUpcomingState(StatusBarState.KEYGUARD)
+                assertThat(statusBarState).isEqualTo(StatusBarState.KEYGUARD)
+
+                sysuiStatusBarStateController.setUpcomingState(StatusBarState.SHADE)
+                assertThat(statusBarState).isEqualTo(StatusBarState.KEYGUARD)
+            }
+        }
+
+    @Test
+    fun qsEnabled_followsRepository() =
+        with(kosmos) {
+            testScope.testWithinLifecycle {
+                val qsEnabled by collectLastValue(underTest.qsEnabled)
+
+                fakeDisableFlagsRepository.disableFlags.value =
+                    DisableFlagsModel(disable2 = QS_DISABLE_FLAG)
+
+                assertThat(qsEnabled).isFalse()
+
+                fakeDisableFlagsRepository.disableFlags.value = DisableFlagsModel()
+
+                assertThat(qsEnabled).isTrue()
+            }
+        }
+
     private inline fun TestScope.testWithinLifecycle(
         crossinline block: suspend TestScope.() -> TestResult
     ): TestResult {
@@ -147,5 +205,9 @@ class QSFragmentComposeViewModelTest : SysuiTestCase() {
             lifecycleOwner.setCurrentState(Lifecycle.State.RESUMED)
             block().also { lifecycleOwner.setCurrentState(Lifecycle.State.DESTROYED) }
         }
+    }
+
+    companion object {
+        private const val QS_DISABLE_FLAG = StatusBarManager.DISABLE2_QUICK_SETTINGS
     }
 }

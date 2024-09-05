@@ -20,103 +20,40 @@ import android.content.ClipData
 import androidx.compose.foundation.draganddrop.dragAndDropSource
 import androidx.compose.foundation.draganddrop.dragAndDropTarget
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.lazy.grid.LazyGridItemInfo
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draganddrop.DragAndDropEvent
 import androidx.compose.ui.draganddrop.DragAndDropTarget
 import androidx.compose.ui.draganddrop.DragAndDropTransferData
 import androidx.compose.ui.draganddrop.mimeTypes
+import androidx.compose.ui.draganddrop.toAndroidDragEvent
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.unit.IntRect
+import androidx.compose.ui.unit.center
+import androidx.compose.ui.unit.toRect
 import com.android.systemui.qs.panels.shared.model.SizedTile
 import com.android.systemui.qs.panels.ui.viewmodel.EditTileViewModel
 import com.android.systemui.qs.pipeline.shared.TileSpec
 
-@Composable
-fun rememberDragAndDropState(listState: EditTileListState): DragAndDropState {
-    val draggedCell: MutableState<SizedTile<EditTileViewModel>?> = remember { mutableStateOf(null) }
-    return remember(listState) { DragAndDropState(draggedCell, listState) }
-}
-
-/**
- * Holds the [TileSpec] of the tile being moved and modify the [EditTileListState] based on drag and
- * drop events.
- */
-class DragAndDropState(
-    val draggedCell: MutableState<SizedTile<EditTileViewModel>?>,
-    private val listState: EditTileListState,
-) {
+/** Holds the [TileSpec] of the tile being moved and receives drag and drop events. */
+interface DragAndDropState {
+    val draggedCell: SizedTile<EditTileViewModel>?
     val dragInProgress: Boolean
-        get() = draggedCell.value != null
 
-    /** Returns index of the dragged tile if it's present in the list. Returns -1 if not. */
-    fun currentPosition(): Int {
-        return draggedCell.value?.let { listState.indexOf(it.tile.tileSpec) } ?: -1
-    }
+    fun isMoving(tileSpec: TileSpec): Boolean
 
-    fun isMoving(tileSpec: TileSpec): Boolean {
-        return draggedCell.value?.let { it.tile.tileSpec == tileSpec } ?: false
-    }
+    fun onStarted(cell: SizedTile<EditTileViewModel>)
 
-    fun onStarted(cell: SizedTile<EditTileViewModel>) {
-        draggedCell.value = cell
-    }
+    fun onMoved(target: Int, insertAfter: Boolean)
 
-    fun onMoved(targetSpec: TileSpec) {
-        draggedCell.value?.let { listState.move(it, targetSpec) }
-    }
+    fun movedOutOfBounds()
 
-    fun movedOutOfBounds() {
-        // Removing the tiles from the current tile grid if it moves out of bounds. This clears
-        // the spacer and makes it apparent that dropping the tile at that point would remove it.
-        draggedCell.value?.let { listState.remove(it.tile.tileSpec) }
-    }
-
-    fun onDrop() {
-        draggedCell.value = null
-    }
-}
-
-/**
- * Registers a tile as a [DragAndDropTarget] to receive drag events and update the
- * [DragAndDropState] with the tile's position, which can be used to insert a temporary placeholder.
- *
- * @param dragAndDropState The [DragAndDropState] using the tiles list
- * @param tileSpec The [TileSpec] of the tile
- * @param acceptDrops Whether the tile should accept a drop based on a given [TileSpec]
- * @param onDrop Action to be executed when a [TileSpec] is dropped on the tile
- */
-@Composable
-fun Modifier.dragAndDropTile(
-    dragAndDropState: DragAndDropState,
-    tileSpec: TileSpec,
-    acceptDrops: (TileSpec) -> Boolean,
-    onDrop: (TileSpec, Int) -> Unit,
-): Modifier {
-    val target =
-        remember(dragAndDropState) {
-            object : DragAndDropTarget {
-                override fun onDrop(event: DragAndDropEvent): Boolean {
-                    return dragAndDropState.draggedCell.value?.let {
-                        onDrop(it.tile.tileSpec, dragAndDropState.currentPosition())
-                        dragAndDropState.onDrop()
-                        true
-                    } ?: false
-                }
-
-                override fun onEntered(event: DragAndDropEvent) {
-                    dragAndDropState.onMoved(tileSpec)
-                }
-            }
-        }
-    return dragAndDropTarget(
-        shouldStartDragAndDrop = { event ->
-            event.mimeTypes().contains(QsDragAndDrop.TILESPEC_MIME_TYPE) &&
-                dragAndDropState.draggedCell.value?.let { acceptDrops(it.tile.tileSpec) } ?: false
-        },
-        target = target,
-    )
+    fun onDrop()
 }
 
 /**
@@ -135,7 +72,7 @@ fun Modifier.dragAndDropRemoveZone(
         remember(dragAndDropState) {
             object : DragAndDropTarget {
                 override fun onDrop(event: DragAndDropEvent): Boolean {
-                    return dragAndDropState.draggedCell.value?.let {
+                    return dragAndDropState.draggedCell?.let {
                         onDrop(it.tile.tileSpec)
                         dragAndDropState.onDrop()
                         true
@@ -156,19 +93,22 @@ fun Modifier.dragAndDropRemoveZone(
 }
 
 /**
- * Registers a tile list as a [DragAndDropTarget] to receive drop events. Use this on list
- * containers to catch drops outside of tiles.
+ * Registers a tile list as a [DragAndDropTarget] to receive drop events. Use this on the lazy tile
+ * grid to receive drag and drops events.
  *
+ * @param gridState The [LazyGridState] of the tile list
+ * @param contentOffset The [Offset] of the tile list
  * @param dragAndDropState The [DragAndDropState] using the tiles list
- * @param acceptDrops Whether the tile should accept a drop based on a given [TileSpec]
- * @param onDrop Action to be executed when a [TileSpec] is dropped on the tile
+ * @param onDrop Callback when a tile is dropped
  */
 @Composable
 fun Modifier.dragAndDropTileList(
+    gridState: LazyGridState,
+    contentOffset: Offset,
     dragAndDropState: DragAndDropState,
-    acceptDrops: (TileSpec) -> Boolean,
-    onDrop: (TileSpec, Int) -> Unit,
+    onDrop: () -> Unit,
 ): Modifier {
+    val currentContentOffset by rememberUpdatedState(contentOffset)
     val target =
         remember(dragAndDropState) {
             object : DragAndDropTarget {
@@ -176,9 +116,23 @@ fun Modifier.dragAndDropTileList(
                     dragAndDropState.onDrop()
                 }
 
+                override fun onMoved(event: DragAndDropEvent) {
+                    // Drag offset relative to the list's top left corner
+                    val relativeDragOffset = event.dragOffsetRelativeTo(currentContentOffset)
+                    val targetItem =
+                        gridState.layoutInfo.visibleItemsInfo.firstOrNull { item ->
+                            // Check if the drag is on this item
+                            IntRect(item.offset, item.size).toRect().contains(relativeDragOffset)
+                        }
+
+                    targetItem?.let {
+                        dragAndDropState.onMoved(it.index, insertAfter(it, relativeDragOffset))
+                    }
+                }
+
                 override fun onDrop(event: DragAndDropEvent): Boolean {
-                    return dragAndDropState.draggedCell.value?.let {
-                        onDrop(it.tile.tileSpec, dragAndDropState.currentPosition())
+                    return dragAndDropState.draggedCell?.let {
+                        onDrop()
                         dragAndDropState.onDrop()
                         true
                     } ?: false
@@ -188,24 +142,36 @@ fun Modifier.dragAndDropTileList(
     return dragAndDropTarget(
         target = target,
         shouldStartDragAndDrop = { event ->
-            event.mimeTypes().contains(QsDragAndDrop.TILESPEC_MIME_TYPE) &&
-                dragAndDropState.draggedCell.value?.let { acceptDrops(it.tile.tileSpec) } ?: false
+            event.mimeTypes().contains(QsDragAndDrop.TILESPEC_MIME_TYPE)
         },
     )
 }
 
+private fun DragAndDropEvent.dragOffsetRelativeTo(offset: Offset): Offset {
+    return toAndroidDragEvent().run { Offset(x, y) } - offset
+}
+
+private fun insertAfter(item: LazyGridItemInfo, offset: Offset): Boolean {
+    // We want to insert the tile after the target if we're aiming at the right side of a large tile
+    // TODO(ostonge): Verify this behavior in RTL
+    val itemCenter = item.offset + item.size.center
+    return item.span != 1 && offset.x > itemCenter.x
+}
+
+@Composable
 fun Modifier.dragAndDropTileSource(
     sizedTile: SizedTile<EditTileViewModel>,
     onTap: (TileSpec) -> Unit,
     onDoubleTap: (TileSpec) -> Unit,
     dragAndDropState: DragAndDropState
 ): Modifier {
+    val state by rememberUpdatedState(dragAndDropState)
     return dragAndDropSource {
         detectTapGestures(
             onTap = { onTap(sizedTile.tile.tileSpec) },
             onDoubleTap = { onDoubleTap(sizedTile.tile.tileSpec) },
             onLongPress = {
-                dragAndDropState.onStarted(sizedTile)
+                state.onStarted(sizedTile)
 
                 // The tilespec from the ClipData transferred isn't actually needed as we're moving
                 // a tile within the same application. We're using a custom MIME type to limit the

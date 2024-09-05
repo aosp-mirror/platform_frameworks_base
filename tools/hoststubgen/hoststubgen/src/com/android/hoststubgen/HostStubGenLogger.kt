@@ -89,6 +89,8 @@ class HostStubGenLogger {
         addPrinter(StreamPrinter(level, PrintWriter(BufferedOutputStream(
             FileOutputStream(logFilename)))))
 
+        log.i("Log file set: $logFilename for $level")
+
         return this
     }
 
@@ -122,6 +124,9 @@ class HostStubGenLogger {
     }
 
     fun println(level: LogLevel, message: String) {
+        if (message.isEmpty()) {
+            return // Don't print an empty message.
+        }
         printers.forEach {
             if (it.logLevel.ordinal >= level.ordinal) {
                 it.println(level, indent, message)
@@ -185,29 +190,43 @@ class HostStubGenLogger {
         println(LogLevel.Debug, format, *args)
     }
 
-    inline fun <T> logTime(level: LogLevel, message: String, block: () -> T): T {
+    inline fun <T> logTime(level: LogLevel, message: String, block: () -> T): Double {
+        var ret: Double = -1.0
         val start = System.currentTimeMillis()
         try {
-            return block()
+            block()
         } finally {
             val end = System.currentTimeMillis()
+            ret = (end - start) / 1000.0
             if (isEnabled(level)) {
                 println(level,
                     String.format("%s: took %.1f second(s).", message, (end - start) / 1000.0))
             }
         }
+        return ret
     }
 
-    inline fun <T> iTime(message: String, block: () -> T): T {
+    /** Do an "i" log with how long it took. */
+    inline fun <T> iTime(message: String, block: () -> T): Double {
         return logTime(LogLevel.Info, message, block)
     }
 
-    inline fun <T> vTime(message: String, block: () -> T): T {
+    /** Do a "v" log with how long it took. */
+    inline fun <T> vTime(message: String, block: () -> T): Double {
         return logTime(LogLevel.Verbose, message, block)
     }
 
-    inline fun <T> dTime(message: String, block: () -> T): T {
+    /** Do a "d" log with how long it took. */
+    inline fun <T> dTime(message: String, block: () -> T): Double {
         return logTime(LogLevel.Debug, message, block)
+    }
+
+    /**
+     * Similar to the other "xTime" methods, but the message is not supposed to be printed.
+     * It's only used to measure the duration with the same interface as other log methods.
+     */
+    inline fun <T> nTime(block: () -> T): Double {
+        return logTime(LogLevel.Debug, "", block)
     }
 
     inline fun forVerbose(block: () -> Unit) {
@@ -252,6 +271,21 @@ class HostStubGenLogger {
                 it.write(cbuf, off, len)
             }
         }
+    }
+
+    /**
+     * Handle log-related command line arguments.
+     */
+    fun maybeHandleCommandLineArg(currentArg: String, nextArgProvider: () -> String): Boolean {
+        when (currentArg) {
+            "-v", "--verbose" -> setConsoleLogLevel(LogLevel.Verbose)
+            "-d", "--debug" -> setConsoleLogLevel(LogLevel.Debug)
+            "-q", "--quiet" -> setConsoleLogLevel(LogLevel.None)
+            "--verbose-log" -> addFilePrinter(LogLevel.Verbose, nextArgProvider())
+            "--debug-log" -> addFilePrinter(LogLevel.Debug, nextArgProvider())
+            else -> return false
+        }
+        return true
     }
 }
 

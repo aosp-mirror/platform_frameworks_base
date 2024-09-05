@@ -25,6 +25,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeFalse;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -52,6 +53,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 
 import java.util.Optional;
 
@@ -76,6 +78,8 @@ public final class StageTaskListenerTests extends ShellTestCase {
     private IconProvider mIconProvider;
     @Mock
     private WindowDecorViewModel mWindowDecorViewModel;
+    @Spy
+    private WindowContainerTransaction mWct;
     @Captor
     private ArgumentCaptor<SyncTransactionQueue.TransactionRunnable> mRunnableCaptor;
     private SurfaceSession mSurfaceSession = new SurfaceSession();
@@ -176,5 +180,23 @@ public final class StageTaskListenerTests extends ShellTestCase {
 
         mStageTaskListener.evictAllChildren(wct);
         assertFalse(wct.isEmpty());
+    }
+
+    @Test
+    public void testAddTask() {
+        final ActivityManager.RunningTaskInfo task = new TestRunningTaskInfoBuilder().build();
+        mStageTaskListener.addTask(task, mWct);
+
+        verify(mWct).reparent(eq(task.token), eq(mRootTask.token), eq(true));
+    }
+
+    @Test
+    public void testRemoveTask() {
+        final ActivityManager.RunningTaskInfo task = new TestRunningTaskInfoBuilder().build();
+        assertThat(mStageTaskListener.removeTask(task.taskId, null, mWct)).isFalse();
+
+        mStageTaskListener.mChildrenTaskInfo.put(task.taskId, task);
+        assertThat(mStageTaskListener.removeTask(task.taskId, null, mWct)).isTrue();
+        verify(mWct).reparent(eq(task.token), isNull(), eq(false));
     }
 }

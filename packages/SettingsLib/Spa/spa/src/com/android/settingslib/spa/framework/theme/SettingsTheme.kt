@@ -40,3 +40,5 @@ fun SettingsTheme(content: @Composable () -> Unit) {
         }
     }
 }
+
+const val isSpaExpressiveEnabled = false

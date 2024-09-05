@@ -75,7 +75,7 @@ constructor(
             }
             .map { it ?: AudioOutputDevice.Unknown }
             .flowOn(backgroundCoroutineContext)
-            .stateIn(scope, SharingStarted.Eagerly, AudioOutputDevice.Unknown)
+            .stateIn(scope, SharingStarted.Eagerly, AudioOutputDevice.Unavailable)
 
     private fun AudioDeviceInfo.toAudioOutputDevice(): AudioOutputDevice {
         if (
@@ -117,6 +117,11 @@ constructor(
             deviceType == MediaDeviceType.TYPE_3POINT5_MM_AUDIO_DEVICE ||
                 deviceType == MediaDeviceType.TYPE_USB_C_AUDIO_DEVICE ->
                 AudioOutputDevice.Wired(
+                    name = name,
+                    icon = icon,
+                )
+            deviceType == MediaDeviceType.TYPE_CAST_DEVICE ->
+                AudioOutputDevice.Remote(
                     name = name,
                     icon = icon,
                 )

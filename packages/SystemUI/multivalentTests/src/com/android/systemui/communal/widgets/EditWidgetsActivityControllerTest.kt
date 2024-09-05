@@ -30,28 +30,63 @@ import org.mockito.kotlin.clearInvocations
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 
 @ExperimentalCoroutinesApi
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class EditWidgetsActivityControllerTest : SysuiTestCase() {
     @Test
-    fun activityLifecycle_stoppedWhenNotWaitingForResult() {
+    fun activityLifecycle_finishedWhenNotWaitingForResult() {
         val activity = mock<Activity>()
-        val controller = EditWidgetsActivity.ActivityController(activity)
+        val controller = EditWidgetsActivity.ActivityControllerImpl(activity)
 
         val callbackCapture = argumentCaptor<ActivityLifecycleCallbacks>()
         verify(activity).registerActivityLifecycleCallbacks(callbackCapture.capture())
 
+        controller.setActivityFullyVisible(true)
         callbackCapture.lastValue.onActivityStopped(activity)
 
         verify(activity).finish()
     }
 
     @Test
-    fun activityLifecycle_notStoppedWhenNotWaitingForResult() {
+    fun activityLifecycle_notFinishedWhenOnStartCalledAfterOnStop() {
         val activity = mock<Activity>()
-        val controller = EditWidgetsActivity.ActivityController(activity)
+
+        val controller = EditWidgetsActivity.ActivityControllerImpl(activity)
+
+        val callbackCapture = argumentCaptor<ActivityLifecycleCallbacks>()
+        verify(activity).registerActivityLifecycleCallbacks(callbackCapture.capture())
+
+        controller.setActivityFullyVisible(false)
+        callbackCapture.lastValue.onActivityStopped(activity)
+        callbackCapture.lastValue.onActivityStarted(activity)
+
+        verify(activity, never()).finish()
+    }
+
+    @Test
+    fun activityLifecycle_notFinishedDuringConfigurationChange() {
+        val activity = mock<Activity>()
+
+        val controller = EditWidgetsActivity.ActivityControllerImpl(activity)
+
+        val callbackCapture = argumentCaptor<ActivityLifecycleCallbacks>()
+        verify(activity).registerActivityLifecycleCallbacks(callbackCapture.capture())
+
+        controller.setActivityFullyVisible(true)
+        whenever(activity.isChangingConfigurations).thenReturn(true)
+        callbackCapture.lastValue.onActivityStopped(activity)
+        callbackCapture.lastValue.onActivityStarted(activity)
+
+        verify(activity, never()).finish()
+    }
+
+    @Test
+    fun activityLifecycle_notFinishedWhenWaitingForResult() {
+        val activity = mock<Activity>()
+        val controller = EditWidgetsActivity.ActivityControllerImpl(activity)
 
         val callbackCapture = argumentCaptor<ActivityLifecycleCallbacks>()
         verify(activity).registerActivityLifecycleCallbacks(callbackCapture.capture())
@@ -63,15 +98,16 @@ class EditWidgetsActivityControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun activityLifecycle_stoppedAfterResultReturned() {
+    fun activityLifecycle_finishedAfterResultReturned() {
         val activity = mock<Activity>()
-        val controller = EditWidgetsActivity.ActivityController(activity)
+        val controller = EditWidgetsActivity.ActivityControllerImpl(activity)
 
         val callbackCapture = argumentCaptor<ActivityLifecycleCallbacks>()
         verify(activity).registerActivityLifecycleCallbacks(callbackCapture.capture())
 
         controller.onWaitingForResult(true)
         controller.onWaitingForResult(false)
+        controller.setActivityFullyVisible(true)
         callbackCapture.lastValue.onActivityStopped(activity)
 
         verify(activity).finish()
@@ -83,7 +119,7 @@ class EditWidgetsActivityControllerTest : SysuiTestCase() {
         val bundle = Bundle(1)
 
         run {
-            val controller = EditWidgetsActivity.ActivityController(activity)
+            val controller = EditWidgetsActivity.ActivityControllerImpl(activity)
             val callbackCapture = argumentCaptor<ActivityLifecycleCallbacks>()
             verify(activity).registerActivityLifecycleCallbacks(callbackCapture.capture())
 
@@ -94,7 +130,7 @@ class EditWidgetsActivityControllerTest : SysuiTestCase() {
         clearInvocations(activity)
 
         run {
-            val controller = EditWidgetsActivity.ActivityController(activity)
+            val controller = EditWidgetsActivity.ActivityControllerImpl(activity)
             val callbackCapture = argumentCaptor<ActivityLifecycleCallbacks>()
             verify(activity).registerActivityLifecycleCallbacks(callbackCapture.capture())
 

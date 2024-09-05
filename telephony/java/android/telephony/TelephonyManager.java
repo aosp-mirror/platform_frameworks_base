@@ -23,6 +23,7 @@ import static android.provider.Telephony.Carriers.INVALID_APN_ID;
 import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.Manifest;
+import android.annotation.BoolRes;
 import android.annotation.BytesLong;
 import android.annotation.CallbackExecutor;
 import android.annotation.CurrentTimeMillisLong;
@@ -132,6 +133,7 @@ import com.android.internal.telephony.OperatorInfo;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.RILConstants;
 import com.android.internal.telephony.flags.Flags;
+import com.android.internal.telephony.util.TelephonyUtils;
 import com.android.telephony.Rlog;
 
 import java.io.IOException;
@@ -1777,8 +1779,8 @@ public class TelephonyManager {
 
     /**
      * Used as an int value for {@link #EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE}
-     * to indicate user to decide whether current SIM should be preferred for all
-     * data / voice / sms. {@link #EXTRA_SUBSCRIPTION_ID} will specified to indicate
+     * to indicate the current SIM should be preferred for all data / voice / sms.
+     * {@link #EXTRA_SUBSCRIPTION_ID} will specified to indicate
      * which subscription should be the default subscription.
      * @hide
      */
@@ -6885,6 +6887,26 @@ public class TelephonyManager {
         }
     }
 
+    // Suppressing AndroidFrameworkCompatChange because we're querying vendor
+    // partition SDK level, not application's target SDK version.
+    @SuppressWarnings("AndroidFrameworkCompatChange")
+    private boolean hasCapability(@NonNull String feature, @BoolRes int legacySetting) {
+        if (mContext == null) return true;
+
+        if (mContext.getPackageManager().hasSystemFeature(feature)) return true;
+
+        // Check SDK version of the vendor partition.
+        final int vendorApiLevel = SystemProperties.getInt(
+                "ro.vendor.api_level", Build.VERSION.DEVICE_INITIAL_SDK_INT);
+        // Devices shipped with 2024Q2 or later are required to declare FEATURE_TELEPHONY_*
+        // for individual sub-features (calling, messaging, data), so there's no need to check
+        // the legacy setting.
+        if (vendorApiLevel < Build.VENDOR_API_2024_Q2) {
+            return mContext.getResources().getBoolean(legacySetting);
+        }
+        return false;
+    }
+
     // TODO(b/316183370): replace all @code with @link in javadoc after feature is released
     /**
      * @return true if the current device is "voice capable".
@@ -6904,11 +6926,9 @@ public class TelephonyManager {
      * device (when {@code #isDeviceVoiceCapable} return {@code true}), caller should check for
      * subscription-level voice capability as well. See {@code #isDeviceVoiceCapable} for details.
      */
-    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_CALLING)
     @Deprecated
     public boolean isVoiceCapable() {
-        if (mContext == null) return true;
-        return mContext.getResources().getBoolean(
+        return hasCapability(PackageManager.FEATURE_TELEPHONY_CALLING,
                 com.android.internal.R.bool.config_voice_capable);
     }
 
@@ -6931,7 +6951,6 @@ public class TelephonyManager {
      *
      * @see SubscriptionInfo#getServiceCapabilities()
      */
-    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_CALLING)
     @FlaggedApi(Flags.FLAG_DATA_ONLY_CELLULAR_SERVICE)
     public boolean isDeviceVoiceCapable() {
         return isVoiceCapable();
@@ -6950,10 +6969,9 @@ public class TelephonyManager {
      * device (when {@code #isDeviceSmsCapable} return {@code true}), caller should check for
      * subscription-level SMS capability as well. See {@code #isDeviceSmsCapable} for details.
      */
-    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_MESSAGING)
+    @Deprecated
     public boolean isSmsCapable() {
-        if (mContext == null) return true;
-        return mContext.getResources().getBoolean(
+        return hasCapability(PackageManager.FEATURE_TELEPHONY_MESSAGING,
                 com.android.internal.R.bool.config_sms_capable);
     }
 
@@ -6973,7 +6991,6 @@ public class TelephonyManager {
      *
      * @see SubscriptionInfo#getServiceCapabilities()
      */
-    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_MESSAGING)
     @FlaggedApi(Flags.FLAG_DATA_ONLY_CELLULAR_SERVICE)
     public boolean isDeviceSmsCapable() {
         return isSmsCapable();
@@ -9975,6 +9992,7 @@ public class TelephonyManager {
             ALLOWED_NETWORK_TYPES_REASON_POWER,
             ALLOWED_NETWORK_TYPES_REASON_CARRIER,
             ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G,
+            ALLOWED_NETWORK_TYPES_REASON_TEST,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface AllowedNetworkTypesReason {
@@ -10011,6 +10029,14 @@ public class TelephonyManager {
      */
     @SystemApi
     public static final int ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G = 3;
+
+    /**
+     * To indicate allowed network type change is requested by Testing purpose, should be default to
+     * {@link #getAllNetworkTypesBitmask} when done testing.
+     *
+     * @hide
+     */
+    public static final int ALLOWED_NETWORK_TYPES_REASON_TEST = 4;
 
     /**
      * Set the allowed network types of the device and provide the reason triggering the allowed
@@ -10118,6 +10144,8 @@ public class TelephonyManager {
             case TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_CARRIER:
             case TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G:
                 return true;
+            case TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_TEST:
+                return TelephonyUtils.IS_DEBUGGABLE;
         }
         return false;
     }
@@ -13928,7 +13956,10 @@ public class TelephonyManager {
      *          {@link PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION}.
      */
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
-    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.READ_BASIC_PHONE_STATE,
+            android.Manifest.permission.READ_PHONE_STATE
+    })
     public void getCarrierRestrictionStatus(@NonNull Executor executor,
             @NonNull @CarrierRestrictionStatus
                     Consumer<Integer> resultListener) {
@@ -14527,10 +14558,8 @@ public class TelephonyManager {
      * data connections over the telephony network.
      * <p>
      */
-    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_DATA)
     public boolean isDataCapable() {
-        if (mContext == null) return true;
-        return mContext.getResources().getBoolean(
+        return hasCapability(PackageManager.FEATURE_TELEPHONY_DATA,
                 com.android.internal.R.bool.config_mobile_data_capable);
     }
 

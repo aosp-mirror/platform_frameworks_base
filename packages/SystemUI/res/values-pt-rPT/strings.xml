@@ -107,20 +107,13 @@
     <string name="screenrecord_title" msgid="4257171601439507792">"Gravador de ecrã"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"A processar a gravação de ecrã"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notificação persistente de uma sessão de gravação de ecrã"</string>
-    <!-- no translation found for screenrecord_permission_dialog_title (7415261783188749730) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_option_text_single_app (1996450687814647583) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen (2794896384693120020) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_entire_screen (1321758636709366068) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_single_app (3738199712880063924) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_continue_entire_screen (5557974446773486600) -->
-    <skip />
-    <!-- no translation found for screenrecord_app_selector_title (3854492366333954736) -->
-    <skip />
+    <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"Gravar o ecrã?"</string>
+    <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Gravar uma app"</string>
+    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"Gravar o ecrã inteiro"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Quando está a gravar o ecrã inteiro, tudo o que é apresentado no ecrã é gravado. Por isso, tenha cuidado com, por exemplo, palavras-passe, detalhes de pagamento, mensagens, fotos, áudio e vídeo."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Quando está a gravar uma app, tudo o que é apresentado ou reproduzido nessa app é gravado. Por isso, tenha cuidado com, por exemplo, palavras-passe, detalhes de pagamento, mensagens, fotos, áudio e vídeo."</string>
+    <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Gravar ecrã"</string>
+    <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"Escolha uma app para gravar"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Gravar áudio"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Áudio do dispositivo"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"O som do dispositivo, como música, chamadas e toques."</string>
@@ -307,6 +300,8 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Usar Bluetooth"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Ligado"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"Partilha de áudio"</string>
+    <!-- no translation found for quick_settings_bluetooth_device_audio_sharing_or_switch_active (3227408556754456024) -->
+    <skip />
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Guardado"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"desassociar"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"ativar"</string>
@@ -315,6 +310,7 @@
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"O Bluetooth vai ser ativado amanhã de manhã"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Partilhar áudio"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"A partilhar áudio"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"aceder às definições de partilha de áudio"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> de bateria"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Áudio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Ausc. c/ mic. integ."</string>
@@ -390,7 +386,7 @@
     <string name="qs_record_issue_start" msgid="2979831312582567056">"Iniciar"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"Parar"</string>
     <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"Relatório de erro"</string>
-    <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"Que parte do dispositivo foi afetada?"</string>
+    <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"Que experiência com o dispositivo foi afetada?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"Selecione o tipo de problema"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Gravação de ecrã"</string>
     <string name="performance" msgid="6552785217174378320">"Desempenho"</string>
@@ -441,6 +437,7 @@
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"Concluir"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"Definições"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"Ativado"</string>
+    <string name="zen_mode_on_with_details" msgid="7416143430557895497">"Ativado • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"Desativado"</string>
     <string name="zen_mode_set_up" msgid="7457957033034460064">"Configurar"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"Gerir nas definições"</string>
@@ -464,7 +461,7 @@
     <string name="keyguard_retry" msgid="886802522584053523">"Deslize rapidamente para cima para tentar novamente."</string>
     <string name="accesssibility_keyguard_retry" msgid="8880238862712870676">"Deslize para cima para tentar o Desbloqueio facial novamente"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Desbloquear para utilizar o NFC"</string>
-    <string name="do_disclosure_generic" msgid="4896482821974707167">"Este dispositivo pertence à sua entidade."</string>
+    <string name="do_disclosure_generic" msgid="4896482821974707167">"Este dispositivo pertence à sua organização."</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"Este dispositivo pertence à entidade <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>."</string>
     <string name="do_financed_disclosure_with_name" msgid="6723004643314467864">"Este dispositivo foi fornecido por <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>."</string>
     <string name="phone_hint" msgid="6682125338461375925">"Deslize rapid. a partir do ícone para aceder ao telemóvel"</string>
@@ -535,8 +532,7 @@
     <string name="media_projection_dialog_warning" msgid="1303664408388363598">"A app <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> vai ter acesso a todas as informações que estiverem visíveis no ecrã ou que forem reproduzidas a partir do dispositivo durante a gravação ou a transmissão. Isto inclui informações como palavras-passe, detalhes de pagamentos, fotos, mensagens e áudio reproduzido."</string>
     <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"Começar a gravar ou a transmitir?"</string>
     <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"O serviço que fornece esta função vai ter acesso a todas as informações que estiverem visíveis no ecrã ou que forem reproduzidas a partir do dispositivo durante a gravação ou a transmissão. Isto inclui informações como palavras-passe, detalhes de pagamentos, fotos, mensagens e áudio reproduzido."</string>
-    <!-- no translation found for screen_share_generic_app_selector_title (8331515850599218288) -->
-    <skip />
+    <string name="screen_share_generic_app_selector_title" msgid="8331515850599218288">"Partilhe ou grave uma app"</string>
     <string name="media_projection_entry_app_permission_dialog_title" msgid="4613857256721708062">"Partilhar o seu ecrã com a app <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_entry_app_permission_dialog_option_text_single_app" msgid="6314402084788062644">"Partilhar uma app"</string>
     <string name="media_projection_entry_app_permission_dialog_option_text_entire_screen" msgid="7381488112332599632">"Partilhar ecrã inteiro"</string>
@@ -544,16 +540,14 @@
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="7094417930857938876">"Quando está a partilhar uma app, tudo o que é mostrado ou reproduzido nessa app é visível para a app <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>. Por isso, tenha cuidado com, por exemplo, palavras-passe, detalhes de pagamento, mensagens, fotos, áudio e vídeo."</string>
     <string name="media_projection_entry_app_permission_dialog_continue_entire_screen" msgid="1850848182344377579">"Partilhar ecrã"</string>
     <string name="media_projection_entry_app_permission_dialog_single_app_disabled" msgid="8999903044874669995">"A app <xliff:g id="APP_NAME">%1$s</xliff:g> desativou esta opção"</string>
-    <!-- no translation found for media_projection_entry_share_app_selector_title (1419515119767501822) -->
-    <skip />
+    <string name="media_projection_entry_share_app_selector_title" msgid="1419515119767501822">"Escolha uma app para partilhar"</string>
     <string name="media_projection_entry_cast_permission_dialog_title" msgid="752756942658159416">"Transmitir o ecrã?"</string>
     <string name="media_projection_entry_cast_permission_dialog_option_text_single_app" msgid="6073353940838561981">"Transmitir uma app"</string>
     <string name="media_projection_entry_cast_permission_dialog_option_text_entire_screen" msgid="8389508187954155307">"Transmitir ecrã inteiro"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="4040447861037324017">"Quando está a transmitir todo o ecrã, tudo o que estiver no seu ecrã é visível. Por isso, tenha cuidado com, por exemplo, palavras-passe, detalhes de pagamento, mensagens, fotos, áudio e vídeo."</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="7487834861348460736">"Quando está a transmitir uma app, tudo o que é mostrado ou reproduzido nessa app fica visível. Por isso, tenha cuidado com, por exemplo, palavras-passe, detalhes de pagamento, mensagens, fotos, áudio e vídeo."</string>
     <string name="media_projection_entry_cast_permission_dialog_continue_entire_screen" msgid="3261124185304676483">"Transmitir ecrã"</string>
-    <!-- no translation found for media_projection_entry_cast_app_selector_title (6323062146661922387) -->
-    <skip />
+    <string name="media_projection_entry_cast_app_selector_title" msgid="6323062146661922387">"Escolha uma app para transmitir"</string>
     <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"Começar a partilhar?"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Quando está a partilhar, gravar ou transmitir conteúdo, o Android tem acesso a tudo o que está visível no seu ecrã ou é reproduzido no seu dispositivo. Por isso, tenha cuidado com, por exemplo, palavras-passe, detalhes de pagamento, mensagens, fotos, áudio e vídeo."</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Quando está a partilhar, gravar ou transmitir uma app, o Android tem acesso a tudo o que é apresentado ou reproduzido nessa app. Por isso, tenha cuidado com, por exemplo, palavras-passe, detalhes de pagamento, mensagens, fotos, áudio e vídeo."</string>
@@ -587,7 +581,7 @@
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Este dispositivo foi fornecido pela <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>."</string>
     <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"Este dispositivo pertence à sua organização e está ligado à Internet através da app <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"Este dispositivo pertence à organização <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> e está ligado à Internet através da app <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Este dispositivo pertence à sua entidade."</string>
+    <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Este dispositivo pertence à sua organização."</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Este dispositivo pertence à entidade <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>."</string>
     <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"Este dispositivo pertence à sua organização e está ligado à Internet através de VPNs"</string>
     <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"Este dispositivo pertence à organização <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> e está ligado à Internet através de VPNs"</string>
@@ -600,15 +594,15 @@
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"As suas apps pessoais estão ligadas à Internet através da app <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"Este dispositivo está ligado à Internet através da app <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"Este dispositivo foi fornecido pela <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>."</string>
-    <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Gestão de dispositivos"</string>
+    <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Gestão do dispositivo"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
     <string name="monitoring_subtitle_network_logging" msgid="2444199331891219596">"Registos de rede"</string>
     <string name="monitoring_subtitle_ca_certificate" msgid="8588092029755175800">"Certificados da AC"</string>
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Ver Políticas"</string>
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"Ver controlos"</string>
-    <string name="monitoring_description_named_management" msgid="505833016545056036">"Este dispositivo pertence à entidade <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nO administrador de TI pode monitorizar e gerir as definições, o acesso empresarial, as apps, os dados associados ao dispositivo e as informações de localização do mesmo.\n\nContacte o administrador de TI para obter mais informações."</string>
+    <string name="monitoring_description_named_management" msgid="505833016545056036">"Este dispositivo pertence à entidade <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nO administrador de TI pode monitorizar e gerir as definições, o acesso empresarial, as apps, os dados associados ao dispositivo e as informações de localização do mesmo.\n\nContacte o administrador de TI para mais informações."</string>
     <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"A <xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g> pode conseguir aceder aos dados associados a este dispositivo, gerir apps e alterar as definições do mesmo.\n\nSe tiver perguntas, contacte a <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g>."</string>
-    <string name="monitoring_description_management" msgid="4308879039175729014">"Este dispositivo pertence à sua entidade.\n\nO administrador de TI pode monitorizar e gerir as definições, o acesso empresarial, as apps, os dados associados ao dispositivo e as informações de localização do mesmo.\n\nContacte o administrador de TI para obter mais informações."</string>
+    <string name="monitoring_description_management" msgid="4308879039175729014">"Este dispositivo pertence à sua organização.\n\nO administrador de TI pode monitorizar e gerir as definições, o acesso empresarial, as apps, os dados associados ao dispositivo e as informações de localização do mesmo.\n\nContacte o administrador de TI para mais informações."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"A sua entidade instalou uma autoridade de certificação neste dispositivo. O tráfego da sua rede segura pode ser monitorizado ou alterado."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"A sua entidade instalou uma autoridade de certificação no seu perfil de trabalho. O tráfego da sua rede segura pode ser monitorizado ou alterado."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Está instalada uma autoridade de certificação neste dispositivo. O tráfego da sua rede segura pode ser monitorizado ou alterado."</string>
@@ -726,6 +720,7 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Satélite, boa ligação"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Satélite, ligação disponível"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"Satélite SOS"</string>
+    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"Chamadas de emergência ou SOS"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Perfil de trabalho"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Diversão para alguns, mas não para todos"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"O Sintonizador da interface do sistema disponibiliza-lhe formas adicionais ajustar e personalizar a interface do utilizador do Android. Estas funcionalidades experimentais podem ser alteradas, deixar de funcionar ou desaparecer em versões futuras. Prossiga com cuidado."</string>

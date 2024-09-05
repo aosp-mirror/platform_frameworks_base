@@ -120,7 +120,9 @@ class PreAuthInfo {
                         userId), trustManager)) {
             isMandatoryBiometricsAuthentication = true;
             promptInfo.setAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG);
-            promptInfo.setNegativeButtonText(context.getString(R.string.cancel));
+            if (promptInfo.getNegativeButtonText() == null) {
+                promptInfo.setNegativeButtonText(context.getString(R.string.cancel));
+            }
         }
 
         final boolean biometricRequested = Utils.isBiometricRequested(promptInfo);
@@ -446,6 +448,12 @@ class PreAuthInfo {
                 Utils.authenticatorStatusToBiometricConstant(
                         getInternalStatus().second));
     }
+
+    /** Returns if mandatory biometrics authentication is in effect */
+    boolean getIsMandatoryBiometricsAuthentication() {
+        return mIsMandatoryBiometricsAuthentication;
+    }
+
 
     /**
      * For the given request, generate the appropriate reason why authentication cannot be started.

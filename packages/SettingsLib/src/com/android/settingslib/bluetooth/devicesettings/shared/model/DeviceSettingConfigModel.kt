@@ -24,8 +24,11 @@ data class DeviceSettingConfigModel(
     val mainItems: List<DeviceSettingConfigItemModel>,
     /** Items need to be shown in device details more settings page. */
     val moreSettingsItems: List<DeviceSettingConfigItemModel>,
-    /** Footer text in more settings page. */
-    val moreSettingsPageFooter: String
+    /**
+     * Help button which need to be shown on the top right corner of device details more settings
+     * page.
+     */
+    val moreSettingsHelpItem: DeviceSettingConfigItemModel?,
 )
 
 /** Models a device setting item in config. */

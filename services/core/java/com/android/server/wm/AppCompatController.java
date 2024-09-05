@@ -39,11 +39,15 @@ class AppCompatController {
     @NonNull
     private final AppCompatReachabilityPolicy mAppCompatReachabilityPolicy;
     @NonNull
+    private final DesktopAppCompatAspectRatioPolicy mDesktopAppCompatAspectRatioPolicy;
+    @NonNull
     private final AppCompatOverrides mAppCompatOverrides;
     @NonNull
     private final AppCompatDeviceStateQuery mAppCompatDeviceStateQuery;
     @NonNull
     private final AppCompatLetterboxPolicy mAppCompatLetterboxPolicy;
+    @NonNull
+    private final AppCompatSizeCompatModePolicy mAppCompatSizeCompatModePolicy;
 
     AppCompatController(@NonNull WindowManagerService wmService,
                         @NonNull ActivityRecord activityRecord) {
@@ -63,6 +67,10 @@ class AppCompatController {
                 wmService.mAppCompatConfiguration);
         mAppCompatLetterboxPolicy = new AppCompatLetterboxPolicy(mActivityRecord,
                 wmService.mAppCompatConfiguration);
+        mDesktopAppCompatAspectRatioPolicy = new DesktopAppCompatAspectRatioPolicy(activityRecord,
+                mAppCompatOverrides, mTransparentPolicy, wmService.mAppCompatConfiguration);
+        mAppCompatSizeCompatModePolicy = new AppCompatSizeCompatModePolicy(mActivityRecord,
+                mAppCompatOverrides);
     }
 
     @NonNull
@@ -78,6 +86,11 @@ class AppCompatController {
     @NonNull
     AppCompatAspectRatioPolicy getAppCompatAspectRatioPolicy() {
         return mAppCompatAspectRatioPolicy;
+    }
+
+    @NonNull
+    DesktopAppCompatAspectRatioPolicy getDesktopAppCompatAspectRatioPolicy() {
+        return mDesktopAppCompatAspectRatioPolicy;
     }
 
     @NonNull
@@ -143,9 +156,15 @@ class AppCompatController {
         return mAppCompatOverrides.getAppCompatLetterboxOverrides();
     }
 
+    @NonNull
+    AppCompatSizeCompatModePolicy getAppCompatSizeCompatModePolicy() {
+        return mAppCompatSizeCompatModePolicy;
+    }
+
     void dump(@NonNull PrintWriter pw, @NonNull String prefix) {
         getTransparentPolicy().dump(pw, prefix);
         getAppCompatLetterboxPolicy().dump(pw, prefix);
+        getAppCompatSizeCompatModePolicy().dump(pw, prefix);
     }
 
 }

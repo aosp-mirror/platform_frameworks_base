@@ -107,20 +107,13 @@
     <string name="screenrecord_title" msgid="4257171601439507792">"Screen recorder"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Processing screen recording"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Ongoing notification for a screen record session"</string>
-    <!-- no translation found for screenrecord_permission_dialog_title (7415261783188749730) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_option_text_single_app (1996450687814647583) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen (2794896384693120020) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_entire_screen (1321758636709366068) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_single_app (3738199712880063924) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_continue_entire_screen (5557974446773486600) -->
-    <skip />
-    <!-- no translation found for screenrecord_app_selector_title (3854492366333954736) -->
-    <skip />
+    <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"Record your screen?"</string>
+    <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Record one app"</string>
+    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"Record entire screen"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"When you\'re recording your entire screen, anything displayed on your screen is recorded. So, be careful with things like passwords, payment details, messages, photos, audio and video."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"When you\'re recording an app, anything displayed or played in that app is recorded. So, be careful with things like passwords, payment details, messages, photos, audio and video."</string>
+    <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Record screen"</string>
+    <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"Choose app to record"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Record audio"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Device audio"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Sound from your device, like music, calls and ringtones"</string>
@@ -307,6 +300,8 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Use Bluetooth"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Connected"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"Audio sharing"</string>
+    <!-- no translation found for quick_settings_bluetooth_device_audio_sharing_or_switch_active (3227408556754456024) -->
+    <skip />
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Saved"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"disconnect"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"activate"</string>
@@ -315,6 +310,7 @@
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bluetooth will turn on tomorrow morning"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Share audio"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Sharing audio"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"enter audio sharing settings"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> battery"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Headset"</string>
@@ -441,6 +437,7 @@
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"Done"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"Settings"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"On"</string>
+    <string name="zen_mode_on_with_details" msgid="7416143430557895497">"On • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"Off"</string>
     <string name="zen_mode_set_up" msgid="7457957033034460064">"Set up"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"Manage in settings"</string>
@@ -535,8 +532,7 @@
     <string name="media_projection_dialog_warning" msgid="1303664408388363598">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> will have access to all of the information that is visible on your screen or played from your device while recording or casting. This includes information such as passwords, payment details, photos, messages and audio that you play."</string>
     <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"Start recording or casting?"</string>
     <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"The service providing this function will have access to all of the information that is visible on your screen or played from your device while recording or casting. This includes information such as passwords, payment details, photos, messages and audio that you play."</string>
-    <!-- no translation found for screen_share_generic_app_selector_title (8331515850599218288) -->
-    <skip />
+    <string name="screen_share_generic_app_selector_title" msgid="8331515850599218288">"Share or record an app"</string>
     <string name="media_projection_entry_app_permission_dialog_title" msgid="4613857256721708062">"Share your screen with <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_entry_app_permission_dialog_option_text_single_app" msgid="6314402084788062644">"Share one app"</string>
     <string name="media_projection_entry_app_permission_dialog_option_text_entire_screen" msgid="7381488112332599632">"Share entire screen"</string>
@@ -544,16 +540,14 @@
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="7094417930857938876">"When you\'re sharing an app, anything shown or played in that app is visible to <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>. So be careful with things like passwords, payment details, messages, photos, audio and video."</string>
     <string name="media_projection_entry_app_permission_dialog_continue_entire_screen" msgid="1850848182344377579">"Share screen"</string>
     <string name="media_projection_entry_app_permission_dialog_single_app_disabled" msgid="8999903044874669995">"<xliff:g id="APP_NAME">%1$s</xliff:g> has disabled this option"</string>
-    <!-- no translation found for media_projection_entry_share_app_selector_title (1419515119767501822) -->
-    <skip />
+    <string name="media_projection_entry_share_app_selector_title" msgid="1419515119767501822">"Choose app to share"</string>
     <string name="media_projection_entry_cast_permission_dialog_title" msgid="752756942658159416">"Cast your screen?"</string>
     <string name="media_projection_entry_cast_permission_dialog_option_text_single_app" msgid="6073353940838561981">"Cast one app"</string>
     <string name="media_projection_entry_cast_permission_dialog_option_text_entire_screen" msgid="8389508187954155307">"Cast entire screen"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="4040447861037324017">"When you\'re casting your entire screen, anything on your screen is visible. So be careful with things like passwords, payment details, messages, photos, audio and video."</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="7487834861348460736">"When you\'re casting an app, anything shown or played in that app is visible. So be careful with things like passwords, payment details, messages, photos, audio and video."</string>
     <string name="media_projection_entry_cast_permission_dialog_continue_entire_screen" msgid="3261124185304676483">"Cast screen"</string>
-    <!-- no translation found for media_projection_entry_cast_app_selector_title (6323062146661922387) -->
-    <skip />
+    <string name="media_projection_entry_cast_app_selector_title" msgid="6323062146661922387">"Choose app to cast"</string>
     <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"Start sharing?"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"When you’re sharing, recording or casting, Android has access to anything visible on your screen or played on your device. So be careful with things like passwords, payment details, messages, photos, audio and video."</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"When you’re sharing, recording or casting an app, Android has access to anything shown or played on that app. So be careful with things like passwords, payment details, messages, photos, audio and video."</string>
@@ -726,6 +720,7 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Satellite, good connection"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Satellite, connection available"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"Satellite SOS"</string>
+    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"Emergency calls or SOS"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Work profile"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Fun for some but not for all"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"System UI Tuner gives you extra ways to tweak and customise the Android user interface. These experimental features may change, break or disappear in future releases. Proceed with caution."</string>
@@ -1398,24 +1393,16 @@
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Done"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Go back"</string>
     <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"To go back, swipe left or right using three fingers anywhere on the touchpad.\n\nYou can also use the keyboard shortcut Action + Esc for this."</string>
-    <!-- no translation found for touchpad_back_gesture_success_title (7240576648330612171) -->
-    <skip />
-    <!-- no translation found for touchpad_back_gesture_success_body (2324724953720741719) -->
-    <skip />
+    <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"Great work!"</string>
+    <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"You completed the go back gesture."</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Go home"</string>
     <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"To go to your home screen at any time, swipe up with three fingers from the bottom of your screen."</string>
-    <!-- no translation found for touchpad_home_gesture_success_title (3778407003948209795) -->
-    <skip />
-    <!-- no translation found for touchpad_home_gesture_success_body (2404031094918807067) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_title (2659466586996495447) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_guidance (5718948664616999196) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_success_title (466467860120112933) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_success_body (7201991081652850430) -->
-    <skip />
+    <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"Nice!"</string>
+    <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"You completed the go home gesture."</string>
+    <string name="tutorial_action_key_title" msgid="2659466586996495447">"Action key"</string>
+    <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"To access your apps, press the action key on your keyboard."</string>
+    <string name="tutorial_action_key_success_title" msgid="466467860120112933">"Congratulations!"</string>
+    <string name="tutorial_action_key_success_body" msgid="7201991081652850430">"You completed the action key gesture.\n\nAction + / shows all the shortcuts that you have available."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Keyboard backlight"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Level %1$d of %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Home controls"</string>

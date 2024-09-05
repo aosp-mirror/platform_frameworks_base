@@ -18,21 +18,27 @@ package com.android.systemui.qs.composefragment.viewmodel
 
 import android.content.res.Resources
 import android.graphics.Rect
+import androidx.annotation.FloatRange
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LifecycleCoroutineScope
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.FooterActionsController
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
 import com.android.systemui.qs.ui.viewmodel.QuickSettingsContainerViewModel
 import com.android.systemui.shade.LargeScreenHeaderHelper
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator
+import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.disableflags.data.repository.DisableFlagsRepository
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.util.LargeScreenUtils
+import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -79,11 +85,17 @@ constructor(
             _qsVisible.value = value
         }
 
-    private val _qsExpansion = MutableStateFlow(0f)
+    // This can only be negative if undefined (in which case it will be -1f), else it will be
+    // in [0, 1]. In some cases, it could be set back to -1f internally to indicate that it's
+    // different to every value in [0, 1].
+    @FloatRange(from = -1.0, to = 1.0) private val _qsExpansion = MutableStateFlow(-1f)
     var qsExpansionValue: Float
         get() = _qsExpansion.value
         set(value) {
-            _qsExpansion.value = value
+            if (value < 0f) {
+                _qsExpansion.value = -1f
+            }
+            _qsExpansion.value = value.coerceIn(0f, 1f)
         }
 
     private val _panelFraction = MutableStateFlow(0f)
@@ -120,20 +132,51 @@ constructor(
             _stackScrollerOverscrolling.value = value
         }
 
-    private val qsDisabled =
+    /**
+     * Whether QS is enabled by policy. This is normally true, except when it's disabled by some
+     * policy. See [DisableFlagsRepository].
+     */
+    val qsEnabled =
         disableFlagsRepository.disableFlags
-            .map { !it.isQuickSettingsEnabled() }
+            .map { it.isQuickSettingsEnabled() }
             .stateIn(
                 lifecycleScope,
                 SharingStarted.WhileSubscribed(),
-                !disableFlagsRepository.disableFlags.value.isQuickSettingsEnabled()
+                disableFlagsRepository.disableFlags.value.isQuickSettingsEnabled()
             )
 
     private val _showCollapsedOnKeyguard = MutableStateFlow(false)
 
     private val _keyguardAndExpanded = MutableStateFlow(false)
 
-    private val _statusBarState = MutableStateFlow(-1)
+    /**
+     * Tracks the current [StatusBarState]. It will switch early if the upcoming state is
+     * [StatusBarState.KEYGUARD]
+     */
+    @get:VisibleForTesting
+    val statusBarState =
+        conflatedCallbackFlow {
+                val callback =
+                    object : StatusBarStateController.StateListener {
+                        override fun onStateChanged(newState: Int) {
+                            trySend(newState)
+                        }
+
+                        override fun onUpcomingStateChanged(upcomingState: Int) {
+                            if (upcomingState == StatusBarState.KEYGUARD) {
+                                trySend(upcomingState)
+                            }
+                        }
+                    }
+                sysuiStatusBarStateController.addCallback(callback)
+
+                awaitClose { sysuiStatusBarStateController.removeCallback(callback) }
+            }
+            .stateIn(
+                lifecycleScope,
+                SharingStarted.WhileSubscribed(),
+                sysuiStatusBarStateController.state,
+            )
 
     private val _viewHeight = MutableStateFlow(0)
 
@@ -178,6 +221,12 @@ constructor(
                 }
             }
             .stateIn(lifecycleScope, SharingStarted.WhileSubscribed(), QSExpansionState.QQS)
+
+    /**
+     * Accessibility action for collapsing/expanding QS. The provided runnable is responsible for
+     * determining the correct action based on the expansion state.
+     */
+    var collapseExpandAccessibilityAction: Runnable? = null
 
     @AssistedFactory
     interface Factory {

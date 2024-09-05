@@ -27,6 +27,7 @@ import android.view.SurfaceControl;
 
 import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.common.LaunchAdjacentController;
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
@@ -49,6 +50,7 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
     private final ShellTaskOrganizer mShellTaskOrganizer;
     private final Optional<DesktopModeTaskRepository> mDesktopModeTaskRepository;
     private final WindowDecorViewModel mWindowDecorationViewModel;
+    private final LaunchAdjacentController mLaunchAdjacentController;
 
     private final SparseArray<State> mTasks = new SparseArray<>();
 
@@ -62,11 +64,13 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
             ShellInit shellInit,
             ShellTaskOrganizer shellTaskOrganizer,
             Optional<DesktopModeTaskRepository> desktopModeTaskRepository,
+            LaunchAdjacentController launchAdjacentController,
             WindowDecorViewModel windowDecorationViewModel) {
         mContext = context;
         mShellTaskOrganizer = shellTaskOrganizer;
         mWindowDecorationViewModel = windowDecorationViewModel;
         mDesktopModeTaskRepository = desktopModeTaskRepository;
+        mLaunchAdjacentController = launchAdjacentController;
         if (shellInit != null) {
             shellInit.addInitCallback(this::onInit, this);
         }
@@ -106,6 +110,7 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
                 }
             });
         }
+        updateLaunchAdjacentController();
     }
 
     @Override
@@ -123,6 +128,7 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
         if (!Transitions.ENABLE_SHELL_TRANSITIONS) {
             mWindowDecorationViewModel.destroyWindowDecoration(taskInfo);
         }
+        updateLaunchAdjacentController();
     }
 
     @Override
@@ -144,6 +150,17 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
                         taskInfo.isVisible);
             });
         }
+        updateLaunchAdjacentController();
+    }
+
+    private void updateLaunchAdjacentController() {
+        for (int i = 0; i < mTasks.size(); i++) {
+            if (mTasks.valueAt(i).mTaskInfo.isVisible) {
+                mLaunchAdjacentController.setLaunchAdjacentEnabled(false);
+                return;
+            }
+        }
+        mLaunchAdjacentController.setLaunchAdjacentEnabled(true);
     }
 
     @Override

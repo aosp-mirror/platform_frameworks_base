@@ -170,7 +170,6 @@ import com.android.systemui.communal.ui.viewmodel.BaseCommunalViewModel
 import com.android.systemui.communal.ui.viewmodel.CommunalEditModeViewModel
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.communal.util.DensityUtils.Companion.adjustedDp
-import com.android.systemui.communal.util.DensityUtils.Companion.scalingAdjustment
 import com.android.systemui.communal.widgets.SmartspaceAppWidgetHostView
 import com.android.systemui.communal.widgets.WidgetConfigurator
 import com.android.systemui.res.R
@@ -197,7 +196,12 @@ fun CommunalHub(
 
     val gridState =
         rememberLazyGridState(viewModel.savedFirstScrollIndex, viewModel.savedFirstScrollOffset)
-    viewModel.clearPersistedScrollPosition()
+
+    LaunchedEffect(Unit) {
+        if (!viewModel.isEditMode) {
+            viewModel.clearPersistedScrollPosition()
+        }
+    }
 
     val contentListState = rememberContentListState(widgetConfigurator, communalContent, viewModel)
     val reorderingWidgets by viewModel.reorderingWidgets.collectAsStateWithLifecycle()
@@ -220,7 +224,6 @@ fun CommunalHub(
     val windowMetrics = WindowMetricsCalculator.getOrCreate().computeCurrentWindowMetrics(context)
     val screenWidth = windowMetrics.bounds.width()
     val layoutDirection = LocalLayoutDirection.current
-
     if (viewModel.isEditMode) {
         ObserveNewWidgetAddedEffect(communalContent, gridState, viewModel)
     } else {
@@ -478,8 +481,7 @@ fun CommunalHub(
 }
 
 val hubDimensions: Dimensions
-    @Composable
-    get() = Dimensions(LocalContext.current, LocalConfiguration.current, LocalDensity.current)
+    @Composable get() = Dimensions(LocalContext.current, LocalConfiguration.current)
 
 @Composable
 private fun DisclaimerBottomSheetContent(onButtonClicked: () -> Unit) {
@@ -545,23 +547,31 @@ private fun ScrollOnUpdatedLiveContentEffect(
     communalContent: List<CommunalContentModel>,
     gridState: LazyGridState,
 ) {
-    val coroutineScope = rememberCoroutineScope()
     val liveContentKeys = remember { mutableListOf<String>() }
+    var communalContentPending by remember { mutableStateOf(true) }
 
     LaunchedEffect(communalContent) {
+        // Do nothing until any communal content comes in
+        if (communalContentPending && communalContent.isEmpty()) {
+            return@LaunchedEffect
+        }
+
         val prevLiveContentKeys = liveContentKeys.toList()
+        val newLiveContentKeys = communalContent.filter { it.isLiveContent() }.map { it.key }
         liveContentKeys.clear()
-        liveContentKeys.addAll(communalContent.filter { it.isLiveContent() }.map { it.key })
+        liveContentKeys.addAll(newLiveContentKeys)
 
-        // Find the first updated content
+        // Do nothing on first communal content since we don't have a delta
+        if (communalContentPending) {
+            communalContentPending = false
+            return@LaunchedEffect
+        }
+
+        // Do nothing if there is no new live content
         val indexOfFirstUpdatedContent =
-            liveContentKeys.indexOfFirst { !prevLiveContentKeys.contains(it) }
-
-        // Scroll if current position is behind the first updated content
+            newLiveContentKeys.indexOfFirst { !prevLiveContentKeys.contains(it) }
         if (indexOfFirstUpdatedContent in 0 until gridState.firstVisibleItemIndex) {
-            // Launching with a scope to prevent the job from being canceled in the case of a
-            // recomposition during scrolling
-            coroutineScope.launch { gridState.animateScrollToItem(indexOfFirstUpdatedContent) }
+            gridState.scrollToItem(indexOfFirstUpdatedContent)
         }
     }
 }
@@ -1156,7 +1166,7 @@ private fun WidgetContent(
                 .then(selectableModifier)
                 .thenIf(!viewModel.isEditMode && !model.inQuietMode) {
                     Modifier.pointerInput(Unit) {
-                        observeTaps { viewModel.onTapWidget(model.componentName, model.priority) }
+                        observeTaps { viewModel.onTapWidget(model.componentName, model.rank) }
                     }
                 }
                 .thenIf(!viewModel.isEditMode && model.inQuietMode) {
@@ -1288,8 +1298,9 @@ fun DisabledWidgetPlaceholder(
         modifier =
             modifier
                 .background(
-                    MaterialTheme.colorScheme.surfaceVariant,
-                    RoundedCornerShape(dimensionResource(system_app_widget_background_radius))
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    shape =
+                        RoundedCornerShape(dimensionResource(system_app_widget_background_radius))
                 )
                 .clickable(
                     enabled = !viewModel.isEditMode,
@@ -1325,10 +1336,8 @@ fun PendingWidgetPlaceholder(
     Column(
         modifier =
             modifier.background(
-                MaterialTheme.colorScheme.surfaceVariant,
-                RoundedCornerShape(
-                    dimensionResource(system_app_widget_background_radius) * scalingAdjustment
-                )
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                shape = RoundedCornerShape(dimensionResource(system_app_widget_background_radius))
             ),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -1514,21 +1523,24 @@ data class ContentPaddingInPx(val start: Float, val top: Float) {
     fun toOffset(): Offset = Offset(start, top)
 }
 
-class Dimensions(val context: Context, val config: Configuration, val density: Density) {
+class Dimensions(val context: Context, val config: Configuration) {
     val GridTopSpacing: Dp
         get() {
-            if (config.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                return 114.adjustedDp
-            } else {
-                val windowMetrics =
-                    WindowMetricsCalculator.getOrCreate().computeCurrentWindowMetrics(context)
-                val screenHeight = with(density) { windowMetrics.bounds.height().adjustedDp }
-
-                return (screenHeight - CardHeightFull) / 2
-            }
+            val result =
+                if (config.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                    114.dp
+                } else {
+                    val windowMetrics =
+                        WindowMetricsCalculator.getOrCreate().computeCurrentWindowMetrics(context)
+                    val density = context.resources.displayMetrics.density
+                    val screenHeight = (windowMetrics.bounds.height() / density).dp
+                    ((screenHeight - CardHeightFull) / 2)
+                }
+            return result
         }
 
-    val GridHeight = CardHeightFull + GridTopSpacing
+    val GridHeight: Dp
+        get() = CardHeightFull + GridTopSpacing
 
     companion object {
         val CardHeightFull

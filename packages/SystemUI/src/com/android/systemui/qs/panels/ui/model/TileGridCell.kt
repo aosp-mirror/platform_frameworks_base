@@ -22,6 +22,12 @@ import com.android.systemui.qs.panels.shared.model.SizedTile
 import com.android.systemui.qs.panels.shared.model.splitInRowsSequence
 import com.android.systemui.qs.panels.ui.viewmodel.EditTileViewModel
 
+/** Represents an item from a grid associated with a row and a span */
+interface GridCell {
+    val row: Int
+    val span: GridItemSpan
+}
+
 /**
  * Represents a [EditTileViewModel] from a grid associated with a tile format and the row it's
  * positioned at
@@ -29,10 +35,12 @@ import com.android.systemui.qs.panels.ui.viewmodel.EditTileViewModel
 @Immutable
 data class TileGridCell(
     override val tile: EditTileViewModel,
-    val row: Int,
-    val key: String = "${tile.tileSpec.spec}-$row",
+    override val row: Int,
     override val width: Int,
-) : SizedTile<EditTileViewModel> {
+    override val span: GridItemSpan = GridItemSpan(width)
+) : GridCell, SizedTile<EditTileViewModel> {
+    val key: String = "${tile.tileSpec.spec}-$row"
+
     constructor(
         sizedTile: SizedTile<EditTileViewModel>,
         row: Int
@@ -41,12 +49,30 @@ data class TileGridCell(
         row = row,
         width = sizedTile.width,
     )
-
-    val span = GridItemSpan(width)
 }
 
-fun List<SizedTile<EditTileViewModel>>.toTileGridCells(columns: Int): List<TileGridCell> {
+/** Represents an empty space used to fill incomplete rows. Will always display as a 1x1 tile */
+@Immutable
+data class SpacerGridCell(
+    override val row: Int,
+    override val span: GridItemSpan = GridItemSpan(1)
+) : GridCell
+
+fun List<SizedTile<EditTileViewModel>>.toGridCells(
+    columns: Int,
+    includeSpacers: Boolean = false
+): List<GridCell> {
     return splitInRowsSequence(this, columns)
-        .flatMapIndexed { index, sizedTiles -> sizedTiles.map { TileGridCell(it, index) } }
+        .flatMapIndexed { rowIndex, sizedTiles ->
+            val row: List<GridCell> = sizedTiles.map { TileGridCell(it, rowIndex) }
+
+            if (includeSpacers) {
+                // Fill the incomplete rows with spacers
+                val numSpacers = columns - sizedTiles.sumOf { it.width }
+                row.toMutableList().apply { repeat(numSpacers) { add(SpacerGridCell(rowIndex)) } }
+            } else {
+                row
+            }
+        }
         .toList()
 }

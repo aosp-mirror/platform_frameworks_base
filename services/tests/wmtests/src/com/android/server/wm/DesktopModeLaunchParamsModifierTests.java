@@ -21,11 +21,19 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.content.pm.ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_LARGE_VALUE;
+import static android.content.pm.ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_MEDIUM_VALUE;
+import static android.content.pm.ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_SMALL_VALUE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+import static android.content.pm.PackageManager.USER_MIN_ASPECT_RATIO_16_9;
+import static android.content.pm.PackageManager.USER_MIN_ASPECT_RATIO_3_2;
+import static android.content.pm.PackageManager.USER_MIN_ASPECT_RATIO_4_3;
+import static android.content.pm.PackageManager.USER_MIN_ASPECT_RATIO_DISPLAY_SIZE;
+import static android.content.pm.PackageManager.USER_MIN_ASPECT_RATIO_SPLIT_SCREEN;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.util.DisplayMetrics.DENSITY_DEFAULT;
@@ -34,7 +42,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.wm.DesktopModeBoundsCalculator.DESKTOP_MODE_INITIAL_BOUNDS_SCALE;
 import static com.android.server.wm.DesktopModeBoundsCalculator.DESKTOP_MODE_LANDSCAPE_APP_PADDING;
-import static com.android.server.wm.DesktopModeBoundsCalculator.calculateAspectRatio;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.PHASE_DISPLAY;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.RESULT_CONTINUE;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.RESULT_SKIP;
@@ -44,6 +51,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 
 import android.app.ActivityOptions;
+import android.compat.testing.PlatformCompatChangeRule;
+import android.content.ComponentName;
 import android.content.pm.ActivityInfo;
 import android.graphics.Rect;
 import android.platform.test.annotations.DisableFlags;
@@ -55,8 +64,12 @@ import androidx.test.filters.SmallTest;
 
 import com.android.window.flags.Flags;
 
+import libcore.junit.util.compat.CoreCompatChangeRule.EnableCompatChanges;
+
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 
 /**
@@ -73,6 +86,9 @@ public class DesktopModeLaunchParamsModifierTests extends
     private static final Rect LANDSCAPE_DISPLAY_BOUNDS = new Rect(0, 0, 2560, 1600);
     private static final Rect PORTRAIT_DISPLAY_BOUNDS = new Rect(0, 0, 1600, 2560);
     private static final float LETTERBOX_ASPECT_RATIO = 1.3f;
+
+    @Rule
+    public TestRule compatChangeRule = new PlatformCompatChangeRule();
 
     @Before
     public void setUp() throws Exception {
@@ -199,14 +215,17 @@ public class DesktopModeLaunchParamsModifierTests extends
 
         final TestDisplayContent display = createDisplayContent(ORIENTATION_LANDSCAPE,
                 LANDSCAPE_DISPLAY_BOUNDS);
-        final Task task = createTask(display, SCREEN_ORIENTATION_UNSPECIFIED, true);
+        final Task task = createTask(display, /* isResizeable */ true);
+        final ActivityRecord activity = createActivity(display, SCREEN_ORIENTATION_UNSPECIFIED,
+                task, /* ignoreOrientationRequest */ true);
 
         final int desiredWidth =
                 (int) (LANDSCAPE_DISPLAY_BOUNDS.width() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
         final int desiredHeight =
                 (int) (LANDSCAPE_DISPLAY_BOUNDS.height() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
 
-        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(task).calculate());
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(task)
+                .setActivity(activity).calculate());
         assertEquals(desiredWidth, mResult.mBounds.width());
         assertEquals(desiredHeight, mResult.mBounds.height());
     }
@@ -219,14 +238,17 @@ public class DesktopModeLaunchParamsModifierTests extends
 
         final TestDisplayContent display = createDisplayContent(ORIENTATION_LANDSCAPE,
                 LANDSCAPE_DISPLAY_BOUNDS);
-        final Task task = createTask(display, SCREEN_ORIENTATION_LANDSCAPE, true);
+        final Task task = createTask(display, /* isResizeable */ true);
+        final ActivityRecord activity = createActivity(display, SCREEN_ORIENTATION_LANDSCAPE,
+                task, /* ignoreOrientationRequest */ true);
 
         final int desiredWidth =
                 (int) (LANDSCAPE_DISPLAY_BOUNDS.width() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
         final int desiredHeight =
                 (int) (LANDSCAPE_DISPLAY_BOUNDS.height() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
 
-        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(task).calculate());
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(task)
+                .setActivity(activity).calculate());
         assertEquals(desiredWidth, mResult.mBounds.width());
         assertEquals(desiredHeight, mResult.mBounds.height());
     }
@@ -239,7 +261,9 @@ public class DesktopModeLaunchParamsModifierTests extends
 
         final TestDisplayContent display = createDisplayContent(ORIENTATION_LANDSCAPE,
                 LANDSCAPE_DISPLAY_BOUNDS);
-        final Task task = createTask(display, SCREEN_ORIENTATION_LANDSCAPE, true);
+        final Task task = createTask(display, /* isResizeable */ true);
+        final ActivityRecord activity = createActivity(display, SCREEN_ORIENTATION_LANDSCAPE,
+                task, /* ignoreOrientationRequest */ true);
 
         spyOn(mActivity.mAppCompatController.getAppCompatAspectRatioOverrides());
         doReturn(true).when(
@@ -251,7 +275,8 @@ public class DesktopModeLaunchParamsModifierTests extends
         final int desiredHeight =
                 (int) (LANDSCAPE_DISPLAY_BOUNDS.height() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
 
-        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(task).calculate());
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(task)
+                .setActivity(activity).calculate());
         assertEquals(desiredWidth, mResult.mBounds.width());
         assertEquals(desiredHeight, mResult.mBounds.height());
     }
@@ -264,7 +289,9 @@ public class DesktopModeLaunchParamsModifierTests extends
 
         final TestDisplayContent display = createDisplayContent(ORIENTATION_LANDSCAPE,
                 LANDSCAPE_DISPLAY_BOUNDS);
-        final Task task = createTask(display, SCREEN_ORIENTATION_LANDSCAPE, true);
+        final Task task = createTask(display, /* isResizeable */ true);
+        final ActivityRecord activity = createActivity(display, SCREEN_ORIENTATION_LANDSCAPE,
+                task, /* ignoreOrientationRequest */ true);
 
         spyOn(mActivity.mAppCompatController.getAppCompatAspectRatioOverrides());
         doReturn(true).when(
@@ -276,7 +303,8 @@ public class DesktopModeLaunchParamsModifierTests extends
         final int desiredHeight =
                 (int) (LANDSCAPE_DISPLAY_BOUNDS.height() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
 
-        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(task).calculate());
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(task)
+                .setActivity(activity).calculate());
         assertEquals(desiredWidth, mResult.mBounds.width());
         assertEquals(desiredHeight, mResult.mBounds.height());
     }
@@ -285,19 +313,466 @@ public class DesktopModeLaunchParamsModifierTests extends
     @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
     public void testResizablePortraitBounds_landscapeDevice_resizable_portraitOrientation() {
         setupDesktopModeLaunchParamsModifier();
-        doReturn(LETTERBOX_ASPECT_RATIO).when(()
-                -> calculateAspectRatio(any(), any()));
 
         final TestDisplayContent display = createDisplayContent(ORIENTATION_LANDSCAPE,
                 LANDSCAPE_DISPLAY_BOUNDS);
-        final Task task = createTask(display, SCREEN_ORIENTATION_PORTRAIT, true);
+        final Task task = createTask(display, /* isResizeable */ true);
+        final ActivityRecord activity = createActivity(display, SCREEN_ORIENTATION_PORTRAIT,
+                task, /* ignoreOrientationRequest */ true);
+
+        spyOn(activity.mAppCompatController.getDesktopAppCompatAspectRatioPolicy());
+        doReturn(LETTERBOX_ASPECT_RATIO).when(activity.mAppCompatController
+                .getDesktopAppCompatAspectRatioPolicy()).calculateAspectRatio(any());
 
         final int desiredWidth =
                 (int) ((LANDSCAPE_DISPLAY_BOUNDS.height() / LETTERBOX_ASPECT_RATIO) + 0.5f);
         final int desiredHeight =
                 (int) (LANDSCAPE_DISPLAY_BOUNDS.height() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
 
-        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(task).calculate());
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(task)
+                .setActivity(activity).calculate());
+        assertEquals(desiredWidth, mResult.mBounds.width());
+        assertEquals(desiredHeight, mResult.mBounds.height());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
+    @EnableCompatChanges({ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO,
+            ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_SMALL})
+    public void testSmallAspectRatioOverride_landscapeDevice() {
+        setupDesktopModeLaunchParamsModifier();
+
+        final TestDisplayContent display = createDisplayContent(ORIENTATION_LANDSCAPE,
+                LANDSCAPE_DISPLAY_BOUNDS);
+        final Task task = createTask(display, /* isResizeable */ true);
+        final ActivityRecord activity = createActivity(display, SCREEN_ORIENTATION_PORTRAIT,
+                task, /* ignoreOrientationRequest */ false);
+
+        final int desiredHeight =
+                (int) (LANDSCAPE_DISPLAY_BOUNDS.height() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
+        final int desiredWidth =
+                (int) (desiredHeight / OVERRIDE_MIN_ASPECT_RATIO_SMALL_VALUE);
+
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(task)
+                .setActivity(activity).calculate());
+        assertEquals(desiredWidth, mResult.mBounds.width());
+        assertEquals(desiredHeight, mResult.mBounds.height());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
+    @EnableCompatChanges({ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO,
+            ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_MEDIUM})
+    public void testMediumAspectRatioOverride_landscapeDevice() {
+        setupDesktopModeLaunchParamsModifier();
+
+        final TestDisplayContent display = createDisplayContent(ORIENTATION_LANDSCAPE,
+                LANDSCAPE_DISPLAY_BOUNDS);
+        final Task task = createTask(display, /* isResizeable */ true);
+        final ActivityRecord activity = createActivity(display, SCREEN_ORIENTATION_PORTRAIT,
+                task, /* ignoreOrientationRequest */ false);
+
+        final int desiredHeight =
+                (int) (LANDSCAPE_DISPLAY_BOUNDS.height() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
+        final int desiredWidth =
+                (int) (desiredHeight / OVERRIDE_MIN_ASPECT_RATIO_MEDIUM_VALUE);
+
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(task)
+                .setActivity(activity).calculate());
+        assertEquals(desiredWidth, mResult.mBounds.width());
+        assertEquals(desiredHeight, mResult.mBounds.height());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
+    @EnableCompatChanges({ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO,
+            ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_LARGE})
+    public void testLargeAspectRatioOverride_landscapeDevice() {
+        setupDesktopModeLaunchParamsModifier();
+
+        final TestDisplayContent display = createDisplayContent(ORIENTATION_LANDSCAPE,
+                LANDSCAPE_DISPLAY_BOUNDS);
+        final Task task = createTask(display, /* isResizeable */ true);
+        final ActivityRecord activity = createActivity(display, SCREEN_ORIENTATION_PORTRAIT,
+                task, /* ignoreOrientationRequest */ false);
+
+        final int desiredHeight =
+                (int) (LANDSCAPE_DISPLAY_BOUNDS.height() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
+        final int desiredWidth =
+                (int) (desiredHeight / OVERRIDE_MIN_ASPECT_RATIO_LARGE_VALUE);
+
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(task)
+                .setActivity(activity).calculate());
+        assertEquals(desiredWidth, mResult.mBounds.width());
+        assertEquals(desiredHeight, mResult.mBounds.height());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
+    @EnableCompatChanges({ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO,
+            ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_TO_ALIGN_WITH_SPLIT_SCREEN})
+    public void testSplitScreenAspectRatioOverride_landscapeDevice() {
+        setupDesktopModeLaunchParamsModifier();
+
+        final TestDisplayContent display = createDisplayContent(ORIENTATION_LANDSCAPE,
+                LANDSCAPE_DISPLAY_BOUNDS);
+        final Task task = createTask(display, /* isResizeable */ true);
+        final ActivityRecord activity = createActivity(display, SCREEN_ORIENTATION_PORTRAIT,
+                task, /* ignoreOrientationRequest */ false);
+
+        final int desiredHeight =
+                (int) (LANDSCAPE_DISPLAY_BOUNDS.height() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
+        final int desiredWidth =
+                (int) (desiredHeight / activity.mAppCompatController
+                        .getAppCompatAspectRatioOverrides().getSplitScreenAspectRatio());
+
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(task)
+                .setActivity(activity).calculate());
+        assertEquals(desiredWidth, mResult.mBounds.width());
+        assertEquals(desiredHeight, mResult.mBounds.height());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
+    @EnableCompatChanges({ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO,
+            ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_SMALL})
+    public void testSmallAspectRatioOverride_portraitDevice() {
+        setupDesktopModeLaunchParamsModifier();
+
+        final TestDisplayContent display = createDisplayContent(ORIENTATION_PORTRAIT,
+                PORTRAIT_DISPLAY_BOUNDS);
+        final Task task = createTask(display, /* isResizeable */ true);
+        final ActivityRecord activity = createActivity(display, SCREEN_ORIENTATION_PORTRAIT,
+                task, /* ignoreOrientationRequest */ false);
+        // Mock desired aspect ratio so min override can take effect.
+        setDesiredAspectRatio(activity, /* aspectRatio */ 1f);
+
+        final int desiredWidth =
+                (int) (PORTRAIT_DISPLAY_BOUNDS.width() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
+        final int desiredHeight = (int) (desiredWidth * OVERRIDE_MIN_ASPECT_RATIO_SMALL_VALUE);
+
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(task)
+                .setActivity(activity).calculate());
+        assertEquals(desiredWidth, mResult.mBounds.width());
+        assertEquals(desiredHeight, mResult.mBounds.height());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
+    @EnableCompatChanges({ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO,
+            ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_MEDIUM})
+    public void testMediumAspectRatioOverride_portraitDevice() {
+        setupDesktopModeLaunchParamsModifier();
+
+        final TestDisplayContent display = createDisplayContent(ORIENTATION_PORTRAIT,
+                PORTRAIT_DISPLAY_BOUNDS);
+        final Task task = createTask(display, /* isResizeable */ true);
+        final ActivityRecord activity = createActivity(display, SCREEN_ORIENTATION_PORTRAIT,
+                task, /* ignoreOrientationRequest */ false);
+        // Mock desired aspect ratio so min override can take effect.
+        setDesiredAspectRatio(activity, /* aspectRatio */ 1f);
+
+        final int desiredWidth =
+                (int) (PORTRAIT_DISPLAY_BOUNDS.width() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
+        final int desiredHeight = (int) (desiredWidth * OVERRIDE_MIN_ASPECT_RATIO_MEDIUM_VALUE);
+
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(task)
+                .setActivity(activity).calculate());
+        assertEquals(desiredWidth, mResult.mBounds.width());
+        assertEquals(desiredHeight, mResult.mBounds.height());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
+    @EnableCompatChanges({ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO,
+            ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_LARGE})
+    public void testLargeAspectRatioOverride_portraitDevice() {
+        setupDesktopModeLaunchParamsModifier();
+
+        final TestDisplayContent display = createDisplayContent(ORIENTATION_PORTRAIT,
+                PORTRAIT_DISPLAY_BOUNDS);
+        final Task task = createTask(display, /* isResizeable */ true);
+        final ActivityRecord activity = createActivity(display, SCREEN_ORIENTATION_PORTRAIT,
+                task, /* ignoreOrientationRequest */ false);
+        // Mock desired aspect ratio so min override can take effect.
+        setDesiredAspectRatio(activity, /* aspectRatio */ 1f);
+
+        final int desiredHeight =
+                (int) (PORTRAIT_DISPLAY_BOUNDS.height() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
+        final int desiredWidth = (int) (desiredHeight / OVERRIDE_MIN_ASPECT_RATIO_LARGE_VALUE);
+
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(task)
+                .setActivity(activity).calculate());
+        assertEquals(desiredWidth, mResult.mBounds.width());
+        assertEquals(desiredHeight, mResult.mBounds.height());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
+    @EnableCompatChanges({ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO,
+            ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_TO_ALIGN_WITH_SPLIT_SCREEN})
+    public void testSplitScreenAspectRatioOverride_portraitDevice() {
+        setupDesktopModeLaunchParamsModifier();
+
+        final TestDisplayContent display = createDisplayContent(ORIENTATION_PORTRAIT,
+                PORTRAIT_DISPLAY_BOUNDS);
+        final Task task = createTask(display, true);
+        final ActivityRecord activity = createActivity(display, SCREEN_ORIENTATION_PORTRAIT,
+                task, /* ignoreOrientationRequest */ false);
+        // Mock desired aspect ratio so min override can take effect.
+        setDesiredAspectRatio(activity, /* aspectRatio */ 1f);
+
+        final int desiredWidth =
+                (int) (PORTRAIT_DISPLAY_BOUNDS.width() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
+        final int desiredHeight = (int) (desiredWidth * activity.mAppCompatController
+                .getAppCompatAspectRatioOverrides().getSplitScreenAspectRatio());
+
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(task)
+                .setActivity(activity).calculate());
+        assertEquals(desiredWidth, mResult.mBounds.width());
+        assertEquals(desiredHeight, mResult.mBounds.height());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
+    public void testUserAspectRatio32Override_landscapeDevice() {
+        setupDesktopModeLaunchParamsModifier();
+
+        final TestDisplayContent display = createDisplayContent(ORIENTATION_LANDSCAPE,
+                LANDSCAPE_DISPLAY_BOUNDS);
+        final Task task = createTask(display, /* isResizeable */ true);
+        final ActivityRecord activity = createActivity(display, SCREEN_ORIENTATION_UNSPECIFIED,
+                task, /* ignoreOrientationRequest */ true);
+        final float userAspectRatioOverrideValue3_2 = 3 / 2f;
+        applyUserMinAspectRatioOverride(activity, USER_MIN_ASPECT_RATIO_3_2,
+                userAspectRatioOverrideValue3_2);
+
+        final int desiredHeight =
+                (int) (LANDSCAPE_DISPLAY_BOUNDS.height() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
+        final int desiredWidth = (int) (desiredHeight / userAspectRatioOverrideValue3_2);
+
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(task)
+                .setActivity(activity).calculate());
+        assertEquals(desiredWidth, mResult.mBounds.width());
+        assertEquals(desiredHeight, mResult.mBounds.height());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
+    public void testUserAspectRatio43Override_landscapeDevice() {
+        setupDesktopModeLaunchParamsModifier();
+
+        final TestDisplayContent display = createDisplayContent(ORIENTATION_LANDSCAPE,
+                LANDSCAPE_DISPLAY_BOUNDS);
+        final Task task = createTask(display, /* isResizeable */ true);
+        final ActivityRecord activity = createActivity(display, SCREEN_ORIENTATION_UNSPECIFIED,
+                task, /* ignoreOrientationRequest */ true);
+        final float userAspectRatioOverrideValue4_3 = 4 / 3f;
+        applyUserMinAspectRatioOverride(activity, USER_MIN_ASPECT_RATIO_4_3,
+                userAspectRatioOverrideValue4_3);
+
+        final int desiredHeight =
+                (int) (LANDSCAPE_DISPLAY_BOUNDS.height() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
+        final int desiredWidth = (int) (desiredHeight / userAspectRatioOverrideValue4_3);
+
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(task)
+                .setActivity(activity).calculate());
+        assertEquals(desiredWidth, mResult.mBounds.width());
+        assertEquals(desiredHeight, mResult.mBounds.height());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
+    public void testUserAspectRatio169Override_landscapeDevice() {
+        setupDesktopModeLaunchParamsModifier();
+
+        final TestDisplayContent display = createDisplayContent(ORIENTATION_LANDSCAPE,
+                LANDSCAPE_DISPLAY_BOUNDS);
+        final Task task = createTask(display, /* isResizeable */ true);
+        final ActivityRecord activity = createActivity(display, SCREEN_ORIENTATION_UNSPECIFIED,
+                task, /* ignoreOrientationRequest */ true);
+        final float userAspectRatioOverrideValue16_9 = 16 / 9f;
+        applyUserMinAspectRatioOverride(activity, USER_MIN_ASPECT_RATIO_16_9,
+                userAspectRatioOverrideValue16_9);
+
+        final int desiredHeight =
+                (int) (LANDSCAPE_DISPLAY_BOUNDS.height() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
+        final int desiredWidth = (int) (desiredHeight / userAspectRatioOverrideValue16_9);
+
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(task)
+                .setActivity(activity).calculate());
+        assertEquals(desiredWidth, mResult.mBounds.width());
+        assertEquals(desiredHeight, mResult.mBounds.height());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
+    public void testUserAspectRatioSplitScreenOverride_landscapeDevice() {
+        setupDesktopModeLaunchParamsModifier();
+
+        final TestDisplayContent display = createDisplayContent(ORIENTATION_LANDSCAPE,
+                LANDSCAPE_DISPLAY_BOUNDS);
+        final Task task = createTask(display, /* isResizeable */ true);
+        final ActivityRecord activity = createActivity(display, SCREEN_ORIENTATION_UNSPECIFIED,
+                task, /* ignoreOrientationRequest */ true);
+        final float userAspectRatioOverrideValueSplitScreen = activity.mAppCompatController
+                .getAppCompatAspectRatioOverrides().getSplitScreenAspectRatio();
+        applyUserMinAspectRatioOverride(activity, USER_MIN_ASPECT_RATIO_SPLIT_SCREEN,
+                userAspectRatioOverrideValueSplitScreen);
+
+        final int desiredHeight =
+                (int) (LANDSCAPE_DISPLAY_BOUNDS.height() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
+        final int desiredWidth = (int) (desiredHeight / userAspectRatioOverrideValueSplitScreen);
+
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(task)
+                .setActivity(activity).calculate());
+        assertEquals(desiredWidth, mResult.mBounds.width());
+        assertEquals(desiredHeight, mResult.mBounds.height());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
+    public void testUserAspectRatioDisplaySizeOverride_landscapeDevice() {
+        setupDesktopModeLaunchParamsModifier();
+
+        final TestDisplayContent display = createDisplayContent(ORIENTATION_LANDSCAPE,
+                LANDSCAPE_DISPLAY_BOUNDS);
+        final Task task = createTask(display, /* isResizeable */ true);
+        final ActivityRecord activity = createActivity(display, SCREEN_ORIENTATION_UNSPECIFIED,
+                task, /* ignoreOrientationRequest */ true);
+        final float userAspectRatioOverrideValueDisplaySize = activity.mAppCompatController
+                .getAppCompatAspectRatioOverrides().getDisplaySizeMinAspectRatio();
+        applyUserMinAspectRatioOverride(activity, USER_MIN_ASPECT_RATIO_DISPLAY_SIZE,
+                userAspectRatioOverrideValueDisplaySize);
+
+        final int desiredHeight =
+                (int) (LANDSCAPE_DISPLAY_BOUNDS.height() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
+        final int desiredWidth = (int) (desiredHeight / userAspectRatioOverrideValueDisplaySize);
+
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(task)
+                .setActivity(activity).calculate());
+        assertEquals(desiredWidth, mResult.mBounds.width());
+        assertEquals(desiredHeight, mResult.mBounds.height());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
+    public void testUserAspectRatio32Override_portraitDevice() {
+        setupDesktopModeLaunchParamsModifier();
+
+        final TestDisplayContent display = createDisplayContent(ORIENTATION_PORTRAIT,
+                PORTRAIT_DISPLAY_BOUNDS);
+        final Task task = createTask(display, /* isResizeable */ true);
+        final ActivityRecord activity = createActivity(display, SCREEN_ORIENTATION_UNSPECIFIED,
+                task, /* ignoreOrientationRequest */ true);
+        final float userAspectRatioOverrideValue3_2 = 3 / 2f;
+        applyUserMinAspectRatioOverride(activity, USER_MIN_ASPECT_RATIO_3_2,
+                userAspectRatioOverrideValue3_2);
+
+        final int desiredWidth =
+                (int) (PORTRAIT_DISPLAY_BOUNDS.width() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
+        final int desiredHeight = (int) (desiredWidth * userAspectRatioOverrideValue3_2);
+
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(task)
+                .setActivity(activity).calculate());
+        assertEquals(desiredWidth, mResult.mBounds.width());
+        assertEquals(desiredHeight, mResult.mBounds.height());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
+    public void testUserAspectRatio43Override_portraitDevice() {
+        setupDesktopModeLaunchParamsModifier();
+
+        final TestDisplayContent display = createDisplayContent(ORIENTATION_PORTRAIT,
+                PORTRAIT_DISPLAY_BOUNDS);
+        final Task task = createTask(display, /* isResizeable */ true);
+        final ActivityRecord activity = createActivity(display, SCREEN_ORIENTATION_UNSPECIFIED,
+                task, /* ignoreOrientationRequest */ true);
+        final float userAspectRatioOverrideValue4_3 = 4 / 3f;
+        applyUserMinAspectRatioOverride(activity, USER_MIN_ASPECT_RATIO_4_3,
+                userAspectRatioOverrideValue4_3);
+
+        final int desiredWidth =
+                (int) (PORTRAIT_DISPLAY_BOUNDS.width() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
+        final int desiredHeight = (int) (desiredWidth * userAspectRatioOverrideValue4_3);
+
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(task)
+                .setActivity(activity).calculate());
+        assertEquals(desiredWidth, mResult.mBounds.width());
+        assertEquals(desiredHeight, mResult.mBounds.height());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
+    public void testUserAspectRatio169Override_portraitDevice() {
+        setupDesktopModeLaunchParamsModifier();
+
+        final TestDisplayContent display = createDisplayContent(ORIENTATION_PORTRAIT,
+                PORTRAIT_DISPLAY_BOUNDS);
+        final Task task = createTask(display, /* isResizeable */ true);
+        final ActivityRecord activity = createActivity(display, SCREEN_ORIENTATION_UNSPECIFIED,
+                task, /* ignoreOrientationRequest */ true);
+        final float userAspectRatioOverrideValue16_9 = 16 / 9f;
+        applyUserMinAspectRatioOverride(activity, USER_MIN_ASPECT_RATIO_16_9,
+                userAspectRatioOverrideValue16_9);
+
+        final int desiredHeight =
+                (int) (PORTRAIT_DISPLAY_BOUNDS.height() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
+        final int desiredWidth = (int) (desiredHeight / userAspectRatioOverrideValue16_9);
+
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(task)
+                .setActivity(activity).calculate());
+        assertEquals(desiredWidth, mResult.mBounds.width());
+        assertEquals(desiredHeight, mResult.mBounds.height());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
+    public void testUserAspectRatioSplitScreenOverride_portraitDevice() {
+        setupDesktopModeLaunchParamsModifier();
+
+        final TestDisplayContent display = createDisplayContent(ORIENTATION_PORTRAIT,
+                PORTRAIT_DISPLAY_BOUNDS);
+        final Task task = createTask(display, /* isResizeable */ true);
+        final ActivityRecord activity = createActivity(display, SCREEN_ORIENTATION_UNSPECIFIED,
+                task, /* ignoreOrientationRequest */ true);
+        final float userAspectRatioOverrideValueSplitScreen = activity.mAppCompatController
+                .getAppCompatAspectRatioOverrides().getSplitScreenAspectRatio();
+        applyUserMinAspectRatioOverride(activity, USER_MIN_ASPECT_RATIO_SPLIT_SCREEN,
+                userAspectRatioOverrideValueSplitScreen);
+
+        final int desiredWidth =
+                (int) (PORTRAIT_DISPLAY_BOUNDS.width() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
+        final int desiredHeight = (int) (desiredWidth * userAspectRatioOverrideValueSplitScreen);
+
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(task)
+                .setActivity(activity).calculate());
+        assertEquals(desiredWidth, mResult.mBounds.width());
+        assertEquals(desiredHeight, mResult.mBounds.height());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
+    public void testUserAspectRatioDisplaySizeOverride_portraitDevice() {
+        setupDesktopModeLaunchParamsModifier();
+
+        final TestDisplayContent display = createDisplayContent(ORIENTATION_PORTRAIT,
+                PORTRAIT_DISPLAY_BOUNDS);
+        final Task task = createTask(display, /* isResizeable */ true);
+        final ActivityRecord activity = createActivity(display, SCREEN_ORIENTATION_UNSPECIFIED,
+                task, /* ignoreOrientationRequest */ true);
+        final float userAspectRatioOverrideValueDisplaySize = activity.mAppCompatController
+                .getAppCompatAspectRatioOverrides().getDisplaySizeMinAspectRatio();
+        applyUserMinAspectRatioOverride(activity, USER_MIN_ASPECT_RATIO_DISPLAY_SIZE,
+                userAspectRatioOverrideValueDisplaySize);
+
+        final int desiredWidth =
+                (int) (PORTRAIT_DISPLAY_BOUNDS.width() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
+        final int desiredHeight = (int) (desiredWidth * userAspectRatioOverrideValueDisplaySize);
+
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(task)
+                .setActivity(activity).calculate());
         assertEquals(desiredWidth, mResult.mBounds.width());
         assertEquals(desiredHeight, mResult.mBounds.height());
     }
@@ -310,14 +785,18 @@ public class DesktopModeLaunchParamsModifierTests extends
 
         final TestDisplayContent display = createDisplayContent(ORIENTATION_LANDSCAPE,
                 LANDSCAPE_DISPLAY_BOUNDS);
-        final Task task = createTask(display, SCREEN_ORIENTATION_LANDSCAPE, false);
+        final Task task = createTask(display, /* isResizeable */ false);
+        final ActivityRecord activity = createActivity(display, SCREEN_ORIENTATION_LANDSCAPE,
+                task, /* ignoreOrientationRequest */ true);
+
 
         final int desiredWidth =
                 (int) (LANDSCAPE_DISPLAY_BOUNDS.width() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
         final int desiredHeight =
                 (int) (LANDSCAPE_DISPLAY_BOUNDS.height() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
 
-        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(task).calculate());
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(task)
+                .setActivity(activity).calculate());
         assertEquals(desiredWidth, mResult.mBounds.width());
         assertEquals(desiredHeight, mResult.mBounds.height());
     }
@@ -326,18 +805,23 @@ public class DesktopModeLaunchParamsModifierTests extends
     @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
     public void testUnResizablePortraitBounds_landscapeDevice_unResizable_portraitOrientation() {
         setupDesktopModeLaunchParamsModifier();
-        doReturn(LETTERBOX_ASPECT_RATIO).when(()
-                -> calculateAspectRatio(any(), any()));
 
         final TestDisplayContent display = createDisplayContent(ORIENTATION_LANDSCAPE,
                 LANDSCAPE_DISPLAY_BOUNDS);
-        final Task task = createTask(display, SCREEN_ORIENTATION_PORTRAIT, false);
+        final Task task = createTask(display, /* isResizeable */ false);
+        final ActivityRecord activity = createActivity(display, SCREEN_ORIENTATION_PORTRAIT,
+                task, /* ignoreOrientationRequest */ true);
+
+        spyOn(activity.mAppCompatController.getDesktopAppCompatAspectRatioPolicy());
+        doReturn(LETTERBOX_ASPECT_RATIO).when(activity.mAppCompatController
+                .getDesktopAppCompatAspectRatioPolicy()).calculateAspectRatio(any());
 
         final int desiredHeight =
                 (int) (LANDSCAPE_DISPLAY_BOUNDS.height() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
         final int desiredWidth = (int) (desiredHeight / LETTERBOX_ASPECT_RATIO);
 
-        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(task).calculate());
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(task)
+                .setActivity(activity).calculate());
         assertEquals(desiredWidth, mResult.mBounds.width());
         assertEquals(desiredHeight, mResult.mBounds.height());
     }
@@ -350,14 +834,17 @@ public class DesktopModeLaunchParamsModifierTests extends
 
         final TestDisplayContent display = createDisplayContent(ORIENTATION_PORTRAIT,
                 PORTRAIT_DISPLAY_BOUNDS);
-        final Task task = createTask(display, SCREEN_ORIENTATION_UNSPECIFIED, true);
+        final Task task = createTask(display, /* isResizeable */ true);
+        final ActivityRecord activity = createActivity(display, SCREEN_ORIENTATION_UNSPECIFIED,
+                task, /* ignoreOrientationRequest */ true);
 
         final int desiredWidth =
                 (int) (PORTRAIT_DISPLAY_BOUNDS.width() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
         final int desiredHeight =
                 (int) (PORTRAIT_DISPLAY_BOUNDS.height() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
 
-        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(task).calculate());
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(task)
+                .setActivity(activity).calculate());
         assertEquals(desiredWidth, mResult.mBounds.width());
         assertEquals(desiredHeight, mResult.mBounds.height());
     }
@@ -370,14 +857,17 @@ public class DesktopModeLaunchParamsModifierTests extends
 
         final TestDisplayContent display = createDisplayContent(ORIENTATION_PORTRAIT,
                 PORTRAIT_DISPLAY_BOUNDS);
-        final Task task = createTask(display, SCREEN_ORIENTATION_PORTRAIT, true);
+        final Task task = createTask(display, /* isResizeable */ true);
+        final ActivityRecord activity = createActivity(display, SCREEN_ORIENTATION_PORTRAIT,
+                task, /* ignoreOrientationRequest */ true);
 
         final int desiredWidth =
                 (int) (PORTRAIT_DISPLAY_BOUNDS.width() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
         final int desiredHeight =
                 (int) (PORTRAIT_DISPLAY_BOUNDS.height() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
 
-        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(task).calculate());
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(task)
+                .setActivity(activity).calculate());
         assertEquals(desiredWidth, mResult.mBounds.width());
         assertEquals(desiredHeight, mResult.mBounds.height());
     }
@@ -390,11 +880,13 @@ public class DesktopModeLaunchParamsModifierTests extends
 
         final TestDisplayContent display = createDisplayContent(ORIENTATION_PORTRAIT,
                 PORTRAIT_DISPLAY_BOUNDS);
-        final Task task = createTask(display, SCREEN_ORIENTATION_PORTRAIT, true);
+        final Task task = createTask(display, /* isResizeable */ true);
+        final ActivityRecord activity = createActivity(display, SCREEN_ORIENTATION_PORTRAIT,
+                task, /* ignoreOrientationRequest */ true);
 
-        spyOn(mActivity.mAppCompatController.getAppCompatAspectRatioOverrides());
+        spyOn(activity.mAppCompatController.getAppCompatAspectRatioOverrides());
         doReturn(true).when(
-                        mActivity.mAppCompatController.getAppCompatAspectRatioOverrides())
+                        activity.mAppCompatController.getAppCompatAspectRatioOverrides())
                 .isUserFullscreenOverrideEnabled();
 
         final int desiredWidth =
@@ -402,7 +894,8 @@ public class DesktopModeLaunchParamsModifierTests extends
         final int desiredHeight =
                 (int) (PORTRAIT_DISPLAY_BOUNDS.height() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
 
-        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(task).calculate());
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(task)
+                .setActivity(activity).calculate());
         assertEquals(desiredWidth, mResult.mBounds.width());
         assertEquals(desiredHeight, mResult.mBounds.height());
     }
@@ -415,11 +908,13 @@ public class DesktopModeLaunchParamsModifierTests extends
 
         final TestDisplayContent display = createDisplayContent(ORIENTATION_PORTRAIT,
                 PORTRAIT_DISPLAY_BOUNDS);
-        final Task task = createTask(display, SCREEN_ORIENTATION_PORTRAIT, true);
+        final Task task = createTask(display, /* isResizeable */ true);
+        final ActivityRecord activity = createActivity(display, SCREEN_ORIENTATION_PORTRAIT,
+                task, /* ignoreOrientationRequest */ true);
 
-        spyOn(mActivity.mAppCompatController.getAppCompatAspectRatioOverrides());
+        spyOn(activity.mAppCompatController.getAppCompatAspectRatioOverrides());
         doReturn(true).when(
-                        mActivity.mAppCompatController.getAppCompatAspectRatioOverrides())
+                        activity.mAppCompatController.getAppCompatAspectRatioOverrides())
                 .isSystemOverrideToFullscreenEnabled();
 
         final int desiredWidth =
@@ -427,7 +922,8 @@ public class DesktopModeLaunchParamsModifierTests extends
         final int desiredHeight =
                 (int) (PORTRAIT_DISPLAY_BOUNDS.height() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
 
-        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(task).calculate());
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(task)
+                .setActivity(activity).calculate());
         assertEquals(desiredWidth, mResult.mBounds.width());
         assertEquals(desiredHeight, mResult.mBounds.height());
     }
@@ -436,19 +932,24 @@ public class DesktopModeLaunchParamsModifierTests extends
     @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
     public void testResizableLandscapeBounds_portraitDevice_resizable_landscapeOrientation() {
         setupDesktopModeLaunchParamsModifier();
-        doReturn(LETTERBOX_ASPECT_RATIO).when(()
-                -> calculateAspectRatio(any(), any()));
 
         final TestDisplayContent display = createDisplayContent(ORIENTATION_PORTRAIT,
                 PORTRAIT_DISPLAY_BOUNDS);
-        final Task task = createTask(display, SCREEN_ORIENTATION_LANDSCAPE, true);
+        final Task task = createTask(display, /* isResizeable */ true);
+        final ActivityRecord activity = createActivity(display, SCREEN_ORIENTATION_LANDSCAPE,
+                task, /* ignoreOrientationRequest */ true);
+
+        spyOn(activity.mAppCompatController.getDesktopAppCompatAspectRatioPolicy());
+        doReturn(LETTERBOX_ASPECT_RATIO).when(activity.mAppCompatController
+                .getDesktopAppCompatAspectRatioPolicy()).calculateAspectRatio(any());
 
         final int desiredWidth = PORTRAIT_DISPLAY_BOUNDS.width()
                 - (DESKTOP_MODE_LANDSCAPE_APP_PADDING * 2);
         final int desiredHeight = (int)
                 ((PORTRAIT_DISPLAY_BOUNDS.width() / LETTERBOX_ASPECT_RATIO) + 0.5f);
 
-        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(task).calculate());
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(task)
+                .setActivity(activity).calculate());
         assertEquals(desiredWidth, mResult.mBounds.width());
         assertEquals(desiredHeight, mResult.mBounds.height());
     }
@@ -461,14 +962,18 @@ public class DesktopModeLaunchParamsModifierTests extends
 
         final TestDisplayContent display = createDisplayContent(ORIENTATION_PORTRAIT,
                 PORTRAIT_DISPLAY_BOUNDS);
-        final Task task = createTask(display, SCREEN_ORIENTATION_PORTRAIT, false);
+        final Task task = createTask(display, /* isResizeable */ false);
+        final ActivityRecord activity = createActivity(display, SCREEN_ORIENTATION_PORTRAIT,
+                task, /* ignoreOrientationRequest */ true);
+
 
         final int desiredWidth =
                 (int) (PORTRAIT_DISPLAY_BOUNDS.width() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
         final int desiredHeight =
                 (int) (PORTRAIT_DISPLAY_BOUNDS.height() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
 
-        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(task).calculate());
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(task)
+                .setActivity(activity).calculate());
         assertEquals(desiredWidth, mResult.mBounds.width());
         assertEquals(desiredHeight, mResult.mBounds.height());
     }
@@ -477,18 +982,23 @@ public class DesktopModeLaunchParamsModifierTests extends
     @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
     public void testUnResizableLandscapeBounds_portraitDevice_unResizable_landscapeOrientation() {
         setupDesktopModeLaunchParamsModifier();
-        doReturn(LETTERBOX_ASPECT_RATIO).when(()
-                -> calculateAspectRatio(any(), any()));
 
         final TestDisplayContent display = createDisplayContent(ORIENTATION_PORTRAIT,
                 PORTRAIT_DISPLAY_BOUNDS);
-        final Task task = createTask(display, SCREEN_ORIENTATION_LANDSCAPE, false);
+        final Task task = createTask(display, /* isResizeable */ false);
+        final ActivityRecord activity = createActivity(display, SCREEN_ORIENTATION_LANDSCAPE,
+                task, /* ignoreOrientationRequest */ true);
+
+        spyOn(activity.mAppCompatController.getDesktopAppCompatAspectRatioPolicy());
+        doReturn(LETTERBOX_ASPECT_RATIO).when(activity.mAppCompatController
+                .getDesktopAppCompatAspectRatioPolicy()).calculateAspectRatio(any());
 
         final int desiredWidth = PORTRAIT_DISPLAY_BOUNDS.width()
                 - (DESKTOP_MODE_LANDSCAPE_APP_PADDING * 2);
         final int desiredHeight = (int) (desiredWidth / LETTERBOX_ASPECT_RATIO);
 
-        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(task).calculate());
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(task)
+                .setActivity(activity).calculate());
         assertEquals(desiredWidth, mResult.mBounds.width());
         assertEquals(desiredHeight, mResult.mBounds.height());
     }
@@ -755,24 +1265,64 @@ public class DesktopModeLaunchParamsModifierTests extends
         assertEquals(WINDOWING_MODE_FREEFORM, mResult.mWindowingMode);
     }
 
-    private Task createTask(DisplayContent display, int orientation, Boolean isResizeable) {
+    private Task createTask(DisplayContent display, Boolean isResizeable) {
         final int resizeMode = isResizeable ? RESIZE_MODE_RESIZEABLE
                 : RESIZE_MODE_UNRESIZEABLE;
         final Task task = new TaskBuilder(mSupervisor).setActivityType(
                 ACTIVITY_TYPE_STANDARD).setDisplay(display).build();
         task.setResizeMode(resizeMode);
-        mActivity = new ActivityBuilder(task.mAtmService)
+        return task;
+    }
+
+    private ActivityRecord createActivity(DisplayContent display, int orientation, Task task,
+            boolean ignoreOrientationRequest) {
+        final ActivityRecord activity = new ActivityBuilder(task.mAtmService)
                 .setTask(task)
+                .setComponent(ComponentName.createRelative(task.mAtmService.mContext,
+                        DesktopModeLaunchParamsModifierTests.class.getName()))
+                .setUid(android.os.Process.myUid())
                 .setScreenOrientation(orientation)
                 .setOnTop(true).build();
+        activity.onDisplayChanged(display);
+        activity.setOccludesParent(true);
+        activity.setVisible(true);
+        activity.setVisibleRequested(true);
+        activity.mDisplayContent.setIgnoreOrientationRequest(ignoreOrientationRequest);
 
-        mActivity.onDisplayChanged(display);
-        mActivity.setOccludesParent(true);
-        mActivity.setVisible(true);
-        mActivity.setVisibleRequested(true);
-        mActivity.mDisplayContent.setIgnoreOrientationRequest(/* ignoreOrientationRequest */ true);
+        return activity;
+    }
 
-        return task;
+    private void setDesiredAspectRatio(ActivityRecord activity, float aspectRatio) {
+        final DesktopAppCompatAspectRatioPolicy desktopAppCompatAspectRatioPolicy =
+                activity.mAppCompatController.getDesktopAppCompatAspectRatioPolicy();
+        spyOn(desktopAppCompatAspectRatioPolicy);
+        doReturn(aspectRatio).when(desktopAppCompatAspectRatioPolicy)
+                .getDesiredAspectRatio(any());
+    }
+
+    private void applyUserMinAspectRatioOverride(ActivityRecord activity, int overrideCode,
+            float overrideValue) {
+        // Set desired aspect ratio to be below minimum so override can take effect.
+        final DesktopAppCompatAspectRatioPolicy desktopAppCompatAspectRatioPolicy =
+                activity.mAppCompatController.getDesktopAppCompatAspectRatioPolicy();
+        spyOn(desktopAppCompatAspectRatioPolicy);
+        doReturn(1f).when(desktopAppCompatAspectRatioPolicy)
+                .getDesiredAspectRatio(any());
+
+        // Enable user aspect ratio settings
+        final AppCompatConfiguration appCompatConfiguration =
+                activity.mWmService.mAppCompatConfiguration;
+        spyOn(appCompatConfiguration);
+        doReturn(true).when(appCompatConfiguration)
+                .isUserAppAspectRatioSettingsEnabled();
+
+        // Simulate user min aspect ratio override being set.
+        final AppCompatAspectRatioOverrides appCompatAspectRatioOverrides =
+                activity.mAppCompatController.getAppCompatAspectRatioOverrides();
+        spyOn(appCompatAspectRatioOverrides);
+        doReturn(overrideValue).when(appCompatAspectRatioOverrides).getUserMinAspectRatio();
+        doReturn(overrideCode).when(appCompatAspectRatioOverrides)
+                .getUserMinAspectRatioOverrideCode();
     }
 
     private TestDisplayContent createDisplayContent(int orientation, Rect displayBounds) {

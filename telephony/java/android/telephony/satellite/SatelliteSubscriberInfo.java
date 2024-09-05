@@ -268,7 +268,7 @@ public final class SatelliteSubscriberInfo implements Parcelable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof SatelliteSubscriberProvisionStatus)) return false;
+        if (!(o instanceof SatelliteSubscriberInfo)) return false;
         SatelliteSubscriberInfo that = (SatelliteSubscriberInfo) o;
         return Objects.equals(mSubscriberId, that.mSubscriberId) && mCarrierId == that.mCarrierId
                 && Objects.equals(mNiddApn, that.mNiddApn) && mSubId == that.mSubId

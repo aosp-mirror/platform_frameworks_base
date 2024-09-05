@@ -60,7 +60,7 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
 
     @Override
     public int checkAddPermission(int type, boolean isRoundedCornerOverlay, String packageName,
-            int[] outAppOp) {
+            int[] outAppOp, int displayId) {
         return 0;
     }
 

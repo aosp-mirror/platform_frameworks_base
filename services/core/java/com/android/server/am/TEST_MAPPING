@@ -50,32 +50,10 @@
       ]
     },
     {
-      "name": "FrameworksServicesTests",
-      "options": [
-        {
-          "include-filter": "com.android.server.am."
-        },
-        {
-          "include-annotation": "android.platform.test.annotations.Presubmit"
-        },
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
+      "name": "FrameworksServicesTests_android_server_am_Presubmit"
     },
     {
-      "name": "FrameworksMockingServicesTests",
-      "options": [
-        {
-          "include-filter": "com.android.server.am."
-        },
-        {
-          "include-annotation": "android.platform.test.annotations.Presubmit"
-        },
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
+      "name": "FrameworksMockingServicesTests_android_server_am_Presubmit"
     },
     {
       "file_patterns": ["Battery[^/]*\\.java", "MeasuredEnergy[^/]*\\.java"],
@@ -83,10 +61,7 @@
     },
     {
       "file_patterns": ["Battery[^/]*\\.java", "MeasuredEnergy[^/]*\\.java"],
-      "name": "FrameworksServicesTests",
-      "options": [
-        { "include-filter": "com.android.server.am.BatteryStatsServiceTest" }
-      ]
+      "name": "FrameworksServicesTests_battery_stats"
     },
     {
       "file_patterns": ["Battery[^/]*\\.java", "MeasuredEnergy[^/]*\\.java"],
@@ -94,12 +69,7 @@
     },
     {
       "file_patterns": ["Broadcast.*"],
-      "name": "FrameworksMockingServicesTests",
-      "options": [
-        { "include-filter": "com.android.server.am.BroadcastRecordTest" },
-        { "include-filter": "com.android.server.am.BroadcastQueueTest" },
-        { "include-filter": "com.android.server.am.BroadcastQueueModernImplTest" }
-      ]
+      "name": "FrameworksMockingServicesTests_android_server_am_broadcast"
     },
     {
       "file_patterns": ["Broadcast.*"],

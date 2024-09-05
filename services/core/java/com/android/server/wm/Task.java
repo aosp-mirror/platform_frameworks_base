@@ -61,7 +61,6 @@ import static android.window.DisplayAreaOrganizer.FEATURE_UNDEFINED;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_LOCKTASK;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_RECENTS_ANIMATIONS;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STATES;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_TASKS;
 import static com.android.server.wm.ActivityRecord.State.PAUSED;
@@ -95,7 +94,6 @@ import static com.android.server.wm.LockTaskController.LOCK_TASK_AUTH_DONT_LOCK;
 import static com.android.server.wm.LockTaskController.LOCK_TASK_AUTH_LAUNCHABLE;
 import static com.android.server.wm.LockTaskController.LOCK_TASK_AUTH_LAUNCHABLE_PRIV;
 import static com.android.server.wm.LockTaskController.LOCK_TASK_AUTH_PINNABLE;
-import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
 import static com.android.server.wm.TaskProto.AFFINITY;
 import static com.android.server.wm.TaskProto.BOUNDS;
 import static com.android.server.wm.TaskProto.CREATED_BY_ORGANIZER;
@@ -168,7 +166,6 @@ import android.view.InsetsState;
 import android.view.RemoteAnimationAdapter;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
-import android.view.WindowManager.TransitionOldType;
 import android.window.ITaskOrganizer;
 import android.window.PictureInPictureSurfaceTransaction;
 import android.window.StartingWindowInfo;
@@ -498,6 +495,13 @@ class Task extends TaskFragment {
      * default.
      */
     boolean mIsTrimmableFromRecents;
+
+    /**
+     * Bounds offset should be applied when calculating compatible configuration for apps targeting
+     * SDK level 34 or before.
+     */
+    int mOffsetXForInsets;
+    int mOffsetYForInsets;
 
     private final AnimatingActivityRegistry mAnimatingActivityRegistry =
             new AnimatingActivityRegistry();
@@ -1278,8 +1282,8 @@ class Task extends TaskFragment {
         EventLogTags.writeWmTaskMoved(mTaskId, getRootTaskId(), getDisplayId(), toTop ? 1 : 0,
                 position);
         final TaskDisplayArea taskDisplayArea = getDisplayArea();
-        if (taskDisplayArea != null && isLeafTask()) {
-            taskDisplayArea.onLeafTaskMoved(this, toTop, toBottom);
+        if (taskDisplayArea != null) {
+            taskDisplayArea.onTaskMoved(this, toTop, toBottom);
         }
         if (isPersistable) {
             mLastTimeMoved = System.currentTimeMillis();
@@ -2950,14 +2954,6 @@ class Task extends TaskFragment {
         if (isOrganized()) {
             return false;
         }
-        // Don't animate while the task runs recents animation but only if we are in the mode
-        // where we cancel with deferred screenshot, which means that the controller has
-        // transformed the task.
-        final RecentsAnimationController controller = mWmService.getRecentsAnimationController();
-        if (controller != null && controller.isAnimatingTask(this)
-                && controller.shouldDeferCancelUntilNextTransition()) {
-            return false;
-        }
         return true;
     }
 
@@ -2969,8 +2965,7 @@ class Task extends TaskFragment {
 
     /** Checking if self or its child tasks are animated by recents animation. */
     boolean isAnimatingByRecents() {
-        return isAnimating(CHILDREN, ANIMATION_TYPE_RECENTS)
-                || mTransitionController.isTransientHide(this);
+        return mTransitionController.isTransientHide(this);
     }
 
     WindowState getTopVisibleAppMainWindow() {
@@ -3275,30 +3270,6 @@ class Task extends TaskFragment {
     }
 
     @Override
-    protected void applyAnimationUnchecked(WindowManager.LayoutParams lp, boolean enter,
-            @TransitionOldType int transit, boolean isVoiceInteraction,
-            @Nullable ArrayList<WindowContainer> sources) {
-        final RecentsAnimationController control = mWmService.getRecentsAnimationController();
-        if (control != null) {
-            // We let the transition to be controlled by RecentsAnimation, and callback task's
-            // RemoteAnimationTarget for remote runner to animate.
-            if (enter && !isActivityTypeHomeOrRecents()) {
-                ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS,
-                        "applyAnimationUnchecked, control: %s, task: %s, transit: %s",
-                        control, asTask(), AppTransition.appTransitionOldToString(transit));
-                final int size = sources != null ? sources.size() : 0;
-                control.addTaskToTargets(this, (type, anim) -> {
-                    for (int i = 0; i < size; ++i) {
-                        sources.get(i).onAnimationFinished(type, anim);
-                    }
-                });
-            }
-        } else {
-            super.applyAnimationUnchecked(lp, enter, transit, isVoiceInteraction, sources);
-        }
-    }
-
-    @Override
     void dump(PrintWriter pw, String prefix, boolean dumpAll) {
         super.dump(pw, prefix, dumpAll);
         mAnimatingActivityRegistry.dump(pw, "AnimatingApps:", prefix);
@@ -3330,6 +3301,7 @@ class Task extends TaskFragment {
 
         info.userId = isLeafTask() ? mUserId : mCurrentUser;
         info.taskId = mTaskId;
+        info.effectiveUid = effectiveUid;
         info.displayId = getDisplayId();
         info.displayAreaFeatureId = tda != null ? tda.mFeatureId : FEATURE_UNDEFINED;
         final Intent baseIntent = getBaseIntent();
@@ -3535,7 +3507,7 @@ class Task extends TaskFragment {
      * {@link android.window.TaskFragmentOrganizer}
      */
     TaskFragmentParentInfo getTaskFragmentParentInfo() {
-        return new TaskFragmentParentInfo(getConfiguration(), getDisplayId(),
+        return new TaskFragmentParentInfo(getConfiguration(), getDisplayId(), mTaskId,
                 shouldBeVisible(null /* starting */), hasNonFinishingDirectActivity(),
                 getDecorSurface());
     }
@@ -5873,6 +5845,10 @@ class Task extends TaskFragment {
         super.dumpInner(prefix, pw, dumpAll, dumpPackage);
         if (mCreatedByOrganizer) {
             pw.println(prefix + "  mCreatedByOrganizer=true");
+            if (mOffsetXForInsets != 0 || mOffsetYForInsets != 0) {
+                pw.println(prefix + "  mOffsetXForInsets=" + mOffsetXForInsets
+                        + " mOffsetYForInsets=" + mOffsetYForInsets);
+            }
         }
         if (mLastNonFullscreenBounds != null) {
             pw.print(prefix); pw.print("  mLastNonFullscreenBounds=");
@@ -6129,9 +6105,7 @@ class Task extends TaskFragment {
 
         if (canBeLaunchedOnDisplay(newParent.getDisplayId())) {
             reparent(newParent, onTop ? POSITION_TOP : POSITION_BOTTOM);
-            if (isLeafTask()) {
-                newParent.onLeafTaskMoved(this, onTop, !onTop);
-            }
+            newParent.onTaskMoved(this, onTop, !onTop);
         } else {
             Slog.w(TAG, "Task=" + this + " can't reparent to " + newParent);
         }
@@ -6220,26 +6194,6 @@ class Task extends TaskFragment {
         ActivityOptions.abort(options);
     }
 
-    boolean shouldSleepActivities() {
-        final DisplayContent display = mDisplayContent;
-        final boolean isKeyguardGoingAway = (mDisplayContent != null)
-                ? mDisplayContent.isKeyguardGoingAway()
-                : mRootWindowContainer.getDefaultDisplay().isKeyguardGoingAway();
-
-        // Do not sleep activities in this root task if we're marked as focused and the keyguard
-        // is in the process of going away.
-        if (isKeyguardGoingAway && isFocusedRootTaskOnDisplay()
-                // Avoid resuming activities on secondary displays since we don't want bubble
-                // activities to be resumed while bubble is still collapsed.
-                // TODO(b/113840485): Having keyguard going away state for secondary displays.
-                && display != null
-                && display.isDefaultDisplay) {
-            return false;
-        }
-
-        return display != null ? display.isSleeping() : mAtmService.isSleepingLocked();
-    }
-
     private Rect getRawBounds() {
         return super.getBounds();
     }
@@ -6271,8 +6225,8 @@ class Task extends TaskFragment {
 
     @Override
     public void dumpDebug(ProtoOutputStream proto, long fieldId,
-            @WindowTraceLogLevel int logLevel) {
-        if (logLevel == WindowTraceLogLevel.CRITICAL && !isVisible()) {
+            @WindowTracingLogLevel int logLevel) {
+        if (logLevel == WindowTracingLogLevel.CRITICAL && !isVisible()) {
             return;
         }
 

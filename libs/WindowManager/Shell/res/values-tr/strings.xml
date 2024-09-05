@@ -65,14 +65,10 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"Sağ üste taşı"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"Sol alta taşı"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"Sağ alta taşı"</string>
-    <!-- no translation found for bubble_accessibility_action_expand_menu (8637233525952938845) -->
-    <skip />
-    <!-- no translation found for bubble_accessibility_action_collapse_menu (2975310870146231463) -->
-    <skip />
-    <!-- no translation found for bubble_accessibility_action_move_bar_left (4803535120353716759) -->
-    <skip />
-    <!-- no translation found for bubble_accessibility_action_move_bar_right (7686542531917510421) -->
-    <skip />
+    <string name="bubble_accessibility_action_expand_menu" msgid="8637233525952938845">"menüyü genişlet"</string>
+    <string name="bubble_accessibility_action_collapse_menu" msgid="2975310870146231463">"menüyü daralt"</string>
+    <string name="bubble_accessibility_action_move_bar_left" msgid="4803535120353716759">"Sola taşı"</string>
+    <string name="bubble_accessibility_action_move_bar_right" msgid="7686542531917510421">"Sağa taşı"</string>
     <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"genişlet: <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"daralt: <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> ayarları"</string>
@@ -131,4 +127,5 @@
     <string name="expand_menu_text" msgid="3847736164494181168">"Menüyü Aç"</string>
     <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"Ekranı Büyüt"</string>
     <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"Ekranın Yarısına Tuttur"</string>
+    <string name="desktop_mode_non_resizable_snap_text" msgid="1049800446363800707">"Bu uygulama yeniden boyutlandırılamaz"</string>
 </resources>

@@ -17,8 +17,8 @@
 package com.android.systemui.qs.tiles.impl.custom.data.repository
 
 import android.content.pm.PackageManager
-import android.content.pm.ServiceInfo
 import android.graphics.drawable.Icon
+import android.os.RemoteException
 import android.os.UserHandle
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
@@ -163,13 +163,14 @@ constructor(
     override suspend fun isTileActive(): Boolean =
         withContext(backgroundContext) {
             try {
-                val info: ServiceInfo =
+                val info =
                     packageManagerAdapter.getServiceInfo(
                         tileSpec.componentName,
-                        META_DATA_QUERY_FLAGS
+                        META_DATA_QUERY_FLAGS,
+                        getCurrentTileWithUser()?.user?.identifier ?: UserHandle.USER_CURRENT,
                     )
-                info.metaData?.getBoolean(TileService.META_DATA_ACTIVE_TILE, false) == true
-            } catch (e: PackageManager.NameNotFoundException) {
+                info?.metaData?.getBoolean(TileService.META_DATA_ACTIVE_TILE, false) == true
+            } catch (e: RemoteException) {
                 false
             }
         }
@@ -177,13 +178,14 @@ constructor(
     override suspend fun isTileToggleable(): Boolean =
         withContext(backgroundContext) {
             try {
-                val info: ServiceInfo =
+                val info =
                     packageManagerAdapter.getServiceInfo(
                         tileSpec.componentName,
-                        META_DATA_QUERY_FLAGS
+                        META_DATA_QUERY_FLAGS,
+                        getCurrentTileWithUser()?.user?.identifier ?: UserHandle.USER_CURRENT
                     )
-                info.metaData?.getBoolean(TileService.META_DATA_TOGGLEABLE_TILE, false) == true
-            } catch (e: PackageManager.NameNotFoundException) {
+                info?.metaData?.getBoolean(TileService.META_DATA_TOGGLEABLE_TILE, false) == true
+            } catch (e: RemoteException) {
                 false
             }
         }

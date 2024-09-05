@@ -22,12 +22,15 @@ import androidx.datastore.core.CorruptionException
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.core.Serializer
-import androidx.datastore.dataStore
 import androidx.datastore.dataStoreFile
 import com.android.framework.protobuf.InvalidProtocolBufferException
 import com.android.internal.annotations.VisibleForTesting
+import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
+import java.time.Duration
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 
 /**
@@ -46,17 +49,44 @@ constructor(private val dataStore: DataStore<WindowingEducationProto>) {
           serializer = WindowingEducationProtoSerializer,
           produceFile = { context.dataStoreFile(APP_HANDLE_EDUCATION_DATASTORE_FILEPATH) }))
 
+  /** Provides dataStore.data flow and handles exceptions thrown during collection */
+  val dataStoreFlow: Flow<WindowingEducationProto> =
+      dataStore.data.catch { exception ->
+        // dataStore.data throws an IOException when an error is encountered when reading data
+        if (exception is IOException) {
+          Log.e(
+              TAG,
+              "Error in reading app handle education related data from datastore, data is " +
+                  "stored in a file named $APP_HANDLE_EDUCATION_DATASTORE_FILEPATH",
+              exception)
+        } else {
+          throw exception
+        }
+      }
+
   /**
    * Reads and returns the [WindowingEducationProto] Proto object from the DataStore. If the
    * DataStore is empty or there's an error reading, it returns the default value of Proto.
    */
-  suspend fun windowingEducationProto(): WindowingEducationProto =
-      try {
-        dataStore.data.first()
-      } catch (e: Exception) {
-        Log.e(TAG, "Unable to read from datastore")
-        WindowingEducationProto.getDefaultInstance()
-      }
+  suspend fun windowingEducationProto(): WindowingEducationProto = dataStoreFlow.first()
+
+  /**
+   * Updates [AppHandleEducation.appUsageStats] and
+   * [AppHandleEducation.appUsageStatsLastUpdateTimestampMillis] fields in datastore with
+   * [appUsageStats] and [appUsageStatsLastUpdateTimestamp].
+   */
+  suspend fun updateAppUsageStats(
+      appUsageStats: Map<String, Int>,
+      appUsageStatsLastUpdateTimestamp: Duration
+  ) {
+    val currentAppHandleProto = windowingEducationProto().appHandleEducation.toBuilder()
+    currentAppHandleProto
+        .putAllAppUsageStats(appUsageStats)
+        .setAppUsageStatsLastUpdateTimestampMillis(appUsageStatsLastUpdateTimestamp.toMillis())
+    dataStore.updateData { preferences: WindowingEducationProto ->
+      preferences.toBuilder().setAppHandleEducation(currentAppHandleProto).build()
+    }
+  }
 
   companion object {
     private const val TAG = "AppHandleEducationDatastoreRepository"

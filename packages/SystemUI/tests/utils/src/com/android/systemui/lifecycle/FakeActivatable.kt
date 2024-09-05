@@ -21,11 +21,11 @@ import kotlinx.coroutines.awaitCancellation
 class FakeActivatable(
     private val onActivation: () -> Unit = {},
     private val onDeactivation: () -> Unit = {},
-) : SafeActivatable() {
+) : ExclusiveActivatable() {
     var activationCount = 0
     var cancellationCount = 0
 
-    override suspend fun onActivated() {
+    override suspend fun onActivated(): Nothing {
         activationCount++
         onActivation()
         try {

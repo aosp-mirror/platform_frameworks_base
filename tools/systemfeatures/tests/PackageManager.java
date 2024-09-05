@@ -19,6 +19,7 @@ package android.content.pm;
 /** Stub for testing */
 public class PackageManager {
     public static final String FEATURE_AUTO = "automotive";
+    public static final String FEATURE_PC = "pc";
     public static final String FEATURE_VULKAN = "vulkan";
     public static final String FEATURE_WATCH = "watch";
     public static final String FEATURE_WIFI = "wifi";

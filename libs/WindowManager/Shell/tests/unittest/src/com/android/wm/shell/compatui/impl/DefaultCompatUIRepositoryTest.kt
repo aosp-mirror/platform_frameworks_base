@@ -16,9 +16,13 @@
 
 package com.android.wm.shell.compatui.impl
 
+
+import android.graphics.Point
 import android.platform.test.flag.junit.DeviceFlagsValueProvider
 import android.testing.AndroidTestingRunner
+import android.view.View
 import androidx.test.filters.SmallTest
+import com.android.wm.shell.compatui.api.CompatUILayout
 import com.android.wm.shell.compatui.api.CompatUILifecyclePredicates
 import com.android.wm.shell.compatui.api.CompatUIRepository
 import com.android.wm.shell.compatui.api.CompatUISpec
@@ -89,8 +93,14 @@ class DefaultCompatUIRepositoryTest {
     }
 
     private fun specById(name: String): CompatUISpec =
-        CompatUISpec(name = name, lifecycle = CompatUILifecyclePredicates(
-            creationPredicate = { _, _ -> true },
-            removalPredicate = { _, _, _ -> true }
-        ))
+        CompatUISpec(name = name,
+            lifecycle = CompatUILifecyclePredicates(
+                creationPredicate = { _, _ -> true },
+                removalPredicate = { _, _, _ -> true }
+            ),
+            layout = CompatUILayout(
+                viewBuilder = { ctx, _, _ -> View(ctx) },
+                positionFactory = { _, _, _, _ -> Point(0, 0) }
+            )
+        )
 }

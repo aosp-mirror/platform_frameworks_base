@@ -708,8 +708,15 @@ public class Binder implements IBinder {
      *
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodReplace
     @SystemApi(client = SystemApi.Client.PRIVILEGED_APPS)
     public final native void markVintfStability();
+
+    /** @hide */
+    private void markVintfStability$ravenwood() {
+        // This is not useful for Ravenwood which uses local binder.
+        // TODO(b/361785059): Use real native libbinder.
+    }
 
     /**
      * Use a VINTF-stability binder w/o VINTF requirements. Should be called

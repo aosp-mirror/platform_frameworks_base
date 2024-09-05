@@ -24,29 +24,38 @@ import java.io.PrintWriter
  */
 fun main(args: Array<String>) {
     executableName = "HostStubGen"
+    runMainWithBoilerplate {
+        // Parse the command line arguments.
+        var clanupOnError = false
+        try {
+            val options = HostStubGenOptions.parseArgs(args)
+            clanupOnError = options.cleanUpOnError.get
 
+            log.v("$executableName started")
+            log.v("Options: $options")
+
+            // Run.
+            HostStubGen(options).run()
+        } catch (e: Throwable) {
+            if (clanupOnError) {
+                TODO("Remove output jars here")
+            }
+            throw e
+        }
+    }
+}
+
+inline fun runMainWithBoilerplate(realMain: () -> Unit) {
     var success = false
-    var clanupOnError = false
 
     try {
-        // Parse the command line arguments.
-        val options = HostStubGenOptions.parseArgs(args)
-        clanupOnError = options.cleanUpOnError.get
-
-        log.v("$executableName started")
-        log.v("Options: $options")
-
-        // Run.
-        HostStubGen(options).run()
+        realMain()
 
         success = true
     } catch (e: Throwable) {
         log.e("$executableName: Error: ${e.message}")
         if (e !is UserErrorException) {
             e.printStackTrace(PrintWriter(log.getWriter(LogLevel.Error)))
-        }
-        if (clanupOnError) {
-            TODO("Remove output jars here")
         }
     } finally {
         log.i("$executableName finished")

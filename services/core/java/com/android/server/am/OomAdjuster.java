@@ -78,7 +78,6 @@ import static android.os.Process.THREAD_GROUP_TOP_APP;
 import static android.os.Process.THREAD_PRIORITY_DISPLAY;
 import static android.os.Process.THREAD_PRIORITY_TOP_APP_BOOST;
 import static android.os.Process.setProcessGroup;
-import static android.os.Process.setThreadPriority;
 
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALL;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BACKUP;
@@ -447,6 +446,19 @@ public class OomAdjuster {
         long getElapsedRealtimeMillis() {
             return SystemClock.elapsedRealtime();
         }
+
+        void batchSetOomAdj(ArrayList<ProcessRecord> procsToOomAdj) {
+            ProcessList.batchSetOomAdj(procsToOomAdj);
+        }
+
+        void setOomAdj(int pid, int uid, int adj) {
+            ProcessList.setOomAdj(pid, uid, adj);
+        }
+
+        void setThreadPriority(int tid, int priority) {
+            Process.setThreadPriority(tid, priority);
+        }
+
     }
 
     boolean isChangeEnabled(@CachedCompatChangeId int cachedCompatChangeId,
@@ -1126,26 +1138,31 @@ public class OomAdjuster {
         final int numLru = lruList.size();
         if (mConstants.USE_TIERED_CACHED_ADJ) {
             final long now = mInjector.getUptimeMillis();
+            int uiTargetAdj = 10;
             for (int i = numLru - 1; i >= 0; i--) {
                 ProcessRecord app = lruList.get(i);
                 final ProcessStateRecord state = app.mState;
                 final ProcessCachedOptimizerRecord opt = app.mOptRecord;
-                if (!app.isKilledByAm() && app.getThread() != null && state.getCurAdj()
-                        >= UNKNOWN_ADJ) {
+                if (!app.isKilledByAm() && app.getThread() != null
+                        && (state.getCurAdj() >= UNKNOWN_ADJ
+                            || (state.hasShownUi() && state.getCurAdj() >= CACHED_APP_MIN_ADJ))) {
                     final ProcessServiceRecord psr = app.mServices;
                     int targetAdj = CACHED_APP_MIN_ADJ;
 
                     if (opt != null && opt.isFreezeExempt()) {
                         // BIND_WAIVE_PRIORITY and the like get oom_adj 900
                         targetAdj += 0;
+                    } else if (state.hasShownUi() && uiTargetAdj < 15) {
+                        // The most recent 5 apps that have shown UI get 910-914
+                        targetAdj += uiTargetAdj++;
                     } else if ((state.getSetAdj() >= CACHED_APP_MIN_ADJ)
                             && (state.getLastStateTime()
                                     + mConstants.TIERED_CACHED_ADJ_DECAY_TIME) < now) {
                         // Older cached apps get 950
                         targetAdj += 50;
                     } else {
-                        // Newer cached apps get 910
-                        targetAdj += 10;
+                        // Newer cached apps get 920
+                        targetAdj += 20;
                     }
                     state.setCurRawAdj(targetAdj);
                     state.setCurAdj(psr.modifyRawOomAdj(targetAdj));
@@ -1201,6 +1218,7 @@ public class OomAdjuster {
                     >= UNKNOWN_ADJ) {
                     final ProcessServiceRecord psr = app.mServices;
                     switch (state.getCurProcState()) {
+                        case PROCESS_STATE_LAST_ACTIVITY:
                         case PROCESS_STATE_CACHED_ACTIVITY:
                         case ActivityManager.PROCESS_STATE_CACHED_ACTIVITY_CLIENT:
                         case ActivityManager.PROCESS_STATE_CACHED_RECENT:
@@ -1430,7 +1448,7 @@ public class OomAdjuster {
         }
 
         if (!mProcsToOomAdj.isEmpty()) {
-            ProcessList.batchSetOomAdj(mProcsToOomAdj);
+            mInjector.batchSetOomAdj(mProcsToOomAdj);
             mProcsToOomAdj.clear();
         }
 
@@ -2180,7 +2198,6 @@ public class OomAdjuster {
                 procState = PROCESS_STATE_LAST_ACTIVITY;
                 schedGroup = SCHED_GROUP_BACKGROUND;
                 state.setAdjType("previous-expired");
-                adj = CACHED_APP_MIN_ADJ;
                 if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
                     reportOomAdjMessageLocked(TAG_OOM_ADJ, "Expire prev adj: " + app);
                 }
@@ -3400,7 +3417,7 @@ public class OomAdjuster {
             if (isBatchingOomAdj && mConstants.ENABLE_BATCHING_OOM_ADJ) {
                 mProcsToOomAdj.add(app);
             } else {
-                ProcessList.setOomAdj(app.getPid(), app.uid, state.getCurAdj());
+                mInjector.setOomAdj(app.getPid(), app.uid, state.getCurAdj());
             }
 
             if (DEBUG_SWITCH || DEBUG_OOM_ADJ || mService.mCurOomAdjUid == app.info.uid) {
@@ -3460,10 +3477,11 @@ public class OomAdjuster {
                             ActivityManagerService.setFifoPriority(app, true /* enable */);
                         } else {
                             // Boost priority for top app UI and render threads
-                            setThreadPriority(app.getPid(), THREAD_PRIORITY_TOP_APP_BOOST);
+                            mInjector.setThreadPriority(app.getPid(),
+                                    THREAD_PRIORITY_TOP_APP_BOOST);
                             if (renderThreadTid != 0) {
                                 try {
-                                    setThreadPriority(renderThreadTid,
+                                    mInjector.setThreadPriority(renderThreadTid,
                                             THREAD_PRIORITY_TOP_APP_BOOST);
                                 } catch (IllegalArgumentException e) {
                                     // thread died, ignore
@@ -3477,14 +3495,14 @@ public class OomAdjuster {
                     if (app.useFifoUiScheduling()) {
                         // Reset UI pipeline to SCHED_OTHER
                         ActivityManagerService.setFifoPriority(app, false /* enable */);
-                        setThreadPriority(app.getPid(), state.getSavedPriority());
+                        mInjector.setThreadPriority(app.getPid(), state.getSavedPriority());
                     } else {
                         // Reset priority for top app UI and render threads
-                        setThreadPriority(app.getPid(), 0);
+                        mInjector.setThreadPriority(app.getPid(), 0);
                     }
 
                     if (renderThreadTid != 0) {
-                        setThreadPriority(renderThreadTid, THREAD_PRIORITY_DISPLAY);
+                        mInjector.setThreadPriority(renderThreadTid, THREAD_PRIORITY_DISPLAY);
                     }
                 }
             } catch (Exception e) {
@@ -3674,7 +3692,7 @@ public class OomAdjuster {
                 if (app.useFifoUiScheduling()) {
                     mService.scheduleAsFifoPriority(app.getPid(), true);
                 } else {
-                    setThreadPriority(app.getPid(), THREAD_PRIORITY_TOP_APP_BOOST);
+                    mInjector.setThreadPriority(app.getPid(), THREAD_PRIORITY_TOP_APP_BOOST);
                 }
                 if (isScreenOnOrAnimatingLocked(state)) {
                     initialSchedGroup = SCHED_GROUP_TOP_APP;

@@ -326,7 +326,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
      * Figures out the target IME user ID for a given {@link Binder} IPC.
      *
      * @param callingProcessUserId the user ID of the calling process
-     * @return User ID to be used for this {@link Binder} call.
+     * @return the user ID to be used for this {@link Binder} call
      */
     @GuardedBy("ImfLock.class")
     @UserIdInt
@@ -336,6 +336,32 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     }
 
     /**
+     * Figures out the targetIMuser for a given {@link Binder} IPC. In case
+     * {@code callingProcessUserId} is SYSTEM user, then it will return the owner of the display
+     * associated with the {@code client} passed as parameter.
+     *
+     * @param callingProcessUserId the user ID of the calling process
+     * @param client               the input method client used to retrieve the user id in case
+     *                             {@code callingProcessUserId} is assigned to SYSTEM user
+     * @return the user ID to be used for this {@link Binder} call
+     */
+    @GuardedBy("ImfLock.class")
+    @UserIdInt
+    @BinderThread
+    private int resolveImeUserIdLocked(@UserIdInt int callingProcessUserId,
+            @NonNull IInputMethodClient client) {
+        if (mConcurrentMultiUserModeEnabled) {
+            if (callingProcessUserId == UserHandle.USER_SYSTEM) {
+                final var clientState = mClientController.getClient(client.asBinder());
+                return mUserManagerInternal.getUserAssignedToDisplay(
+                        clientState.mSelfReportedDisplayId);
+            }
+            return callingProcessUserId;
+        }
+        return mCurrentImeUserId;
+    }
+
+   /**
      * Figures out the target IME user ID associated with the given {@code displayId}.
      *
      * @param displayId the display ID to be queried about
@@ -3037,6 +3063,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 intent.putExtra("input_method_id", id);
                 mContext.sendBroadcastAsUser(intent, UserHandle.CURRENT);
             }
+            bindingController.unbindCurrentMethod();
             unbindCurrentClientLocked(UnbindReason.SWITCH_IME, userId);
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -3061,14 +3088,14 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     public boolean showSoftInput(IInputMethodClient client, IBinder windowToken,
             @NonNull ImeTracker.Token statsToken, @InputMethodManager.ShowFlags int flags,
             int lastClickToolType, ResultReceiver resultReceiver,
-            @SoftInputShowHideReason int reason) {
+            @SoftInputShowHideReason int reason, boolean async) {
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.showSoftInput");
         ImeTracing.getInstance().triggerManagerServiceDump(
                 "InputMethodManagerService#showSoftInput", mDumper);
         synchronized (ImfLock.class) {
             final int uid = Binder.getCallingUid();
             final int callingUserId = UserHandle.getUserId(uid);
-            final int userId = resolveImeUserIdLocked(callingUserId);
+            final int userId = resolveImeUserIdLocked(callingUserId, client);
             final boolean result = showSoftInputLocked(client, windowToken, statsToken, flags,
                     lastClickToolType, resultReceiver, reason, uid, userId);
             // When ZeroJankProxy is enabled, the app has already received "true" as the return
@@ -3508,13 +3535,13 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     @Override
     public boolean hideSoftInput(IInputMethodClient client, IBinder windowToken,
             @NonNull ImeTracker.Token statsToken, @InputMethodManager.HideFlags int flags,
-            ResultReceiver resultReceiver, @SoftInputShowHideReason int reason) {
+            ResultReceiver resultReceiver, @SoftInputShowHideReason int reason, boolean async) {
         ImeTracing.getInstance().triggerManagerServiceDump(
                 "InputMethodManagerService#hideSoftInput", mDumper);
         synchronized (ImfLock.class) {
             final int uid = Binder.getCallingUid();
             final int callingUserId = UserHandle.getUserId(uid);
-            final int userId = resolveImeUserIdLocked(callingUserId);
+            final int userId = resolveImeUserIdLocked(callingUserId, client);
             final boolean result = hideSoftInputLocked(client, windowToken, statsToken, flags,
                     resultReceiver, reason, uid, userId);
             // When ZeroJankProxy is enabled, the app has already received "true" as the return
@@ -3650,7 +3677,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             IRemoteInputConnection inputConnection,
             IRemoteAccessibilityInputConnection remoteAccessibilityInputConnection,
             int unverifiedTargetSdkVersion, @UserIdInt int userId,
-            @NonNull ImeOnBackInvokedDispatcher imeDispatcher, int startInputSeq) {
+            @NonNull ImeOnBackInvokedDispatcher imeDispatcher, int startInputSeq,
+            boolean useAsyncShowHideMethod) {
         // implemented by ZeroJankProxy
     }
 
@@ -4233,6 +4261,9 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             @NonNull UserData userData) {
         final var bindingController = userData.mBindingController;
         final var currentImi = bindingController.getSelectedMethod();
+        if (currentImi == null) {
+            return false;
+        }
         final ImeSubtypeListItem nextSubtype = userData.mSwitchingController
                 .getNextInputMethodLocked(onlyCurrentIme, currentImi,
                         bindingController.getCurrentSubtype(),
@@ -4250,6 +4281,9 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     private boolean shouldOfferSwitchingToNextInputMethodLocked(@NonNull UserData userData) {
         final var bindingController = userData.mBindingController;
         final var currentImi = bindingController.getSelectedMethod();
+        if (currentImi == null) {
+            return false;
+        }
         final ImeSubtypeListItem nextSubtype = userData.mSwitchingController
                 .getNextInputMethodLocked(false /* onlyCurrentIme */, currentImi,
                         bindingController.getCurrentSubtype(),

@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification.stack.ui.viewbinder
 
 import android.util.Log
+import com.android.app.tracing.coroutines.flow.filter
 import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.common.ui.view.onLayoutChanged
 import com.android.systemui.dagger.SysUISingleton
@@ -35,6 +36,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 
 /** Binds the [NotificationScrollView]. */
@@ -65,6 +67,7 @@ constructor(
 
     suspend fun bind(): Nothing =
         view.asView().viewModel(
+            traceName = "NotificationScrollViewBinder",
             minWindowLifecycleState = WindowLifecycleState.ATTACHED,
             factory = viewModelFactory::create,
         ) { viewModel ->
@@ -84,15 +87,31 @@ constructor(
             launch {
                 viewModel.expandFraction.collect { view.setExpandFraction(it.coerceIn(0f, 1f)) }
             }
+            launch { viewModel.qsExpandFraction.collect { view.setQsExpandFraction(it) } }
             launch { viewModel.isScrollable.collect { view.setScrollingEnabled(it) } }
             launch { viewModel.isDozing.collect { isDozing -> view.setDozing(isDozing) } }
+            launch {
+                viewModel.isPulsing.collect { isPulsing ->
+                    view.setPulsing(isPulsing, viewModel.shouldAnimatePulse.value)
+                }
+            }
+            launch {
+                viewModel.shouldResetStackTop
+                    .filter { it }
+                    .collect { view.setStackTop(-(view.getHeadsUpInset().toFloat())) }
+            }
+            launch {
+                viewModel.shouldCloseGuts.filter { it }.collect { view.closeGutsOnSceneTouch() }
+            }
 
             launchAndDispose {
                 view.setSyntheticScrollConsumer(viewModel.syntheticScrollConsumer)
                 view.setCurrentGestureOverscrollConsumer(viewModel.currentGestureOverscrollConsumer)
+                view.setCurrentGestureInGutsConsumer(viewModel.currentGestureInGutsConsumer)
                 DisposableHandle {
                     view.setSyntheticScrollConsumer(null)
                     view.setCurrentGestureOverscrollConsumer(null)
+                    view.setCurrentGestureInGutsConsumer(null)
                 }
             }
         }

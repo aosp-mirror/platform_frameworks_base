@@ -1174,7 +1174,7 @@ public class CommandQueue extends IStatusBar.Stub implements
         }
     }
 
-    @Override
+    // This was previously called from WM, but is now called from WMShell
     public void onRecentsAnimationStateChanged(boolean running) {
         synchronized (mLock) {
             mHandler.obtainMessage(MSG_RECENTS_ANIMATION_STATE_CHANGED, running ? 1 : 0, 0)

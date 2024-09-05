@@ -699,17 +699,6 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         }
 
         @Override
-        public void onRecentsAnimationStateChanged(boolean running) {
-            IStatusBar bar = mBar;
-            if (bar != null) {
-                try {
-                    bar.onRecentsAnimationStateChanged(running);
-                } catch (RemoteException ex) {}
-            }
-
-        }
-
-        @Override
         public void onSystemBarAttributesChanged(int displayId, @Appearance int appearance,
                 AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme,
                 @Behavior int behavior, @InsetsType int requestedVisibleTypes,

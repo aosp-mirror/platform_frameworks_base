@@ -45,6 +45,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.airbnb.lottie.LottieAnimationView
 import com.airbnb.lottie.LottieCompositionFactory
+import com.android.systemui.Flags.bpIconA11y
+import com.android.systemui.biometrics.Utils.ellipsize
 import com.android.systemui.biometrics.shared.model.BiometricModalities
 import com.android.systemui.biometrics.shared.model.BiometricModality
 import com.android.systemui.biometrics.shared.model.PromptKind
@@ -53,6 +55,7 @@ import com.android.systemui.biometrics.ui.viewmodel.FingerprintStartMode
 import com.android.systemui.biometrics.ui.viewmodel.PromptMessage
 import com.android.systemui.biometrics.ui.viewmodel.PromptSize
 import com.android.systemui.biometrics.ui.viewmodel.PromptViewModel
+import com.android.systemui.common.ui.view.onTouchListener
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.VibratorHelper
@@ -64,10 +67,10 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 private const val TAG = "BiometricViewBinder"
-private const val MAX_LOGO_DESCRIPTION_CHARACTER_NUMBER = 30
 
 /** Top-most view binder for BiometricPrompt views. */
 object BiometricViewBinder {
+    const val MAX_LOGO_DESCRIPTION_CHARACTER_NUMBER = 30
 
     /** Binds a Biometric Prompt View to a [PromptViewModel]. */
     @SuppressLint("ClickableViewAccessibility")
@@ -329,17 +332,31 @@ object BiometricViewBinder {
 
                 // reuse the icon as a confirm button
                 launch {
-                    viewModel.isIconConfirmButton
-                        .map { isPending ->
-                            when {
-                                isPending && modalities.hasFaceAndFingerprint ->
-                                    View.OnTouchListener { _: View, event: MotionEvent ->
-                                        viewModel.onOverlayTouch(event)
-                                    }
-                                else -> null
+                    if (bpIconA11y()) {
+                        viewModel.isIconConfirmButton.collect { isButton ->
+                            if (isButton) {
+                                iconView.onTouchListener { _: View, event: MotionEvent ->
+                                    viewModel.onOverlayTouch(event)
+                                }
+                                iconView.setOnClickListener { viewModel.confirmAuthenticated() }
+                            } else {
+                                iconView.setOnTouchListener(null)
+                                iconView.setOnClickListener(null)
                             }
                         }
-                        .collect { onTouch -> iconView.setOnTouchListener(onTouch) }
+                    } else {
+                        viewModel.isIconConfirmButton
+                            .map { isPending ->
+                                when {
+                                    isPending && modalities.hasFaceAndFingerprint ->
+                                        View.OnTouchListener { _: View, event: MotionEvent ->
+                                            viewModel.onOverlayTouch(event)
+                                        }
+                                    else -> null
+                                }
+                            }
+                            .collect { onTouch -> iconView.setOnTouchListener(onTouch) }
+                    }
                 }
 
                 // dismiss prompt when authenticated and confirmed
@@ -357,7 +374,8 @@ object BiometricViewBinder {
                             // Allow icon to be used as confirmation button with udfps and a11y
                             // enabled
                             if (
-                                accessibilityManager.isTouchExplorationEnabled &&
+                                !bpIconA11y() &&
+                                    accessibilityManager.isTouchExplorationEnabled &&
                                     modalities.hasUdfps
                             ) {
                                 iconView.setOnClickListener { viewModel.confirmAuthenticated() }
@@ -642,9 +660,6 @@ private fun BiometricModalities.asDefaultHelpMessage(context: Context): String =
         hasFingerprint -> context.getString(R.string.fingerprint_dialog_touch_sensor)
         else -> ""
     }
-
-private fun String.ellipsize(cutOffLength: Int) =
-    if (length <= cutOffLength) this else replaceRange(cutOffLength, length, "...")
 
 private fun Boolean.asVisibleOrGone(): Int = if (this) View.VISIBLE else View.GONE
 

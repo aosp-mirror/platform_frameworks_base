@@ -43,7 +43,6 @@ import android.tools.traces.protolog.ProtoLogTrace;
 import android.tracing.perfetto.DataSource;
 import android.util.proto.ProtoInputStream;
 
-import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.internal.protolog.common.IProtoLogGroup;
@@ -73,10 +72,10 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Test class for {@link ProtoLogImpl}.
  */
 @SuppressWarnings("ConstantConditions")
-@SmallTest
 @Presubmit
 @RunWith(JUnit4.class)
 public class PerfettoProtoLogImplTest {
+    private static final String TEST_PROTOLOG_DATASOURCE_NAME = "test.android.protolog";
     private final File mTracingDirectory = InstrumentationRegistry.getInstrumentation()
             .getTargetContext().getFilesDir();
 
@@ -93,6 +92,7 @@ public class PerfettoProtoLogImplTest {
             new TraceConfig(false, true, false)
     );
 
+    private ProtoLogConfigurationService mProtoLogConfigurationService;
     private PerfettoProtoLogImpl mProtoLog;
     private Protolog.ProtoLogViewerConfig.Builder mViewerConfigBuilder;
     private File mFile;
@@ -164,10 +164,15 @@ public class PerfettoProtoLogImplTest {
 
         mCacheUpdater = () -> {};
         mReader = Mockito.spy(new ProtoLogViewerConfigReader(viewerConfigInputStreamProvider));
+
+        final ProtoLogDataSourceBuilder dataSourceBuilder =
+                (onStart, onFlush, onStop) -> new ProtoLogDataSource(
+                        onStart, onFlush, onStop, TEST_PROTOLOG_DATASOURCE_NAME);
+        mProtoLogConfigurationService =
+                new ProtoLogConfigurationService(dataSourceBuilder);
         mProtoLog = new PerfettoProtoLogImpl(
-                viewerConfigInputStreamProvider, mReader,
-                () -> mCacheUpdater.run());
-        mProtoLog.registerGroups(TestProtoLogGroup.values());
+                viewerConfigInputStreamProvider, mReader, () -> mCacheUpdater.run(),
+                TestProtoLogGroup.values(), dataSourceBuilder, mProtoLogConfigurationService);
     }
 
     @After
@@ -186,8 +191,9 @@ public class PerfettoProtoLogImplTest {
 
     @Test
     public void isEnabled_returnsTrueAfterStart() {
-        PerfettoTraceMonitor traceMonitor =
-                PerfettoTraceMonitor.newBuilder().enableProtoLog().build();
+        PerfettoTraceMonitor traceMonitor = PerfettoTraceMonitor.newBuilder()
+                .enableProtoLog(TEST_PROTOLOG_DATASOURCE_NAME)
+                .build();
         try {
             traceMonitor.start();
             assertTrue(mProtoLog.isProtoEnabled());
@@ -198,8 +204,9 @@ public class PerfettoProtoLogImplTest {
 
     @Test
     public void isEnabled_returnsFalseAfterStop() {
-        PerfettoTraceMonitor traceMonitor =
-                PerfettoTraceMonitor.newBuilder().enableProtoLog().build();
+        PerfettoTraceMonitor traceMonitor = PerfettoTraceMonitor.newBuilder()
+                .enableProtoLog(TEST_PROTOLOG_DATASOURCE_NAME)
+                .build();
         try {
             traceMonitor.start();
             assertTrue(mProtoLog.isProtoEnabled());
@@ -212,8 +219,9 @@ public class PerfettoProtoLogImplTest {
 
     @Test
     public void defaultMode() throws IOException {
-        PerfettoTraceMonitor traceMonitor =
-                PerfettoTraceMonitor.newBuilder().enableProtoLog(false).build();
+        PerfettoTraceMonitor traceMonitor = PerfettoTraceMonitor.newBuilder()
+                .enableProtoLog(false, List.of(), TEST_PROTOLOG_DATASOURCE_NAME)
+                .build();
         try {
             traceMonitor.start();
             // Shouldn't be logging anything except WTF unless explicitly requested in the group
@@ -241,11 +249,13 @@ public class PerfettoProtoLogImplTest {
 
     @Test
     public void respectsOverrideConfigs_defaultMode() throws IOException {
-        PerfettoTraceMonitor traceMonitor =
-                PerfettoTraceMonitor.newBuilder().enableProtoLog(true,
+        PerfettoTraceMonitor traceMonitor = PerfettoTraceMonitor.newBuilder()
+                .enableProtoLog(
+                        true,
                         List.of(new PerfettoTraceMonitor.Builder.ProtoLogGroupOverride(
-                                TestProtoLogGroup.TEST_GROUP.toString(), LogLevel.DEBUG, true)))
-                        .build();
+                                TestProtoLogGroup.TEST_GROUP.toString(), LogLevel.DEBUG, true)),
+                        TEST_PROTOLOG_DATASOURCE_NAME
+                ).build();
         try {
             traceMonitor.start();
             mProtoLog.log(LogLevel.DEBUG, TestProtoLogGroup.TEST_GROUP, 1,
@@ -276,10 +286,12 @@ public class PerfettoProtoLogImplTest {
     @Test
     public void respectsOverrideConfigs_allEnabledMode() throws IOException {
         PerfettoTraceMonitor traceMonitor =
-                PerfettoTraceMonitor.newBuilder().enableProtoLog(true,
+                PerfettoTraceMonitor.newBuilder().enableProtoLog(
+                        true,
                         List.of(new PerfettoTraceMonitor.Builder.ProtoLogGroupOverride(
-                                TestProtoLogGroup.TEST_GROUP.toString(), LogLevel.WARN, false)))
-                        .build();
+                                TestProtoLogGroup.TEST_GROUP.toString(), LogLevel.WARN, false)),
+                        TEST_PROTOLOG_DATASOURCE_NAME
+                    ).build();
         try {
             traceMonitor.start();
             mProtoLog.log(LogLevel.DEBUG, TestProtoLogGroup.TEST_GROUP, 1,
@@ -307,9 +319,9 @@ public class PerfettoProtoLogImplTest {
 
     @Test
     public void respectsAllEnabledMode() throws IOException {
-        PerfettoTraceMonitor traceMonitor =
-                PerfettoTraceMonitor.newBuilder().enableProtoLog(true, List.of())
-                        .build();
+        PerfettoTraceMonitor traceMonitor = PerfettoTraceMonitor.newBuilder()
+                .enableProtoLog(true, List.of(), TEST_PROTOLOG_DATASOURCE_NAME)
+                .build();
         try {
             traceMonitor.start();
             mProtoLog.log(LogLevel.DEBUG, TestProtoLogGroup.TEST_GROUP, 1,
@@ -408,8 +420,9 @@ public class PerfettoProtoLogImplTest {
                 ProtologCommon.ProtoLogLevel.PROTOLOG_LEVEL_INFO,
                 "My test message :: %s, %d, %o, %x, %f, %e, %g, %b");
 
-        PerfettoTraceMonitor traceMonitor =
-                PerfettoTraceMonitor.newBuilder().enableProtoLog().build();
+        PerfettoTraceMonitor traceMonitor = PerfettoTraceMonitor.newBuilder()
+                .enableProtoLog(TEST_PROTOLOG_DATASOURCE_NAME)
+                .build();
         long before;
         long after;
         try {
@@ -440,8 +453,9 @@ public class PerfettoProtoLogImplTest {
 
     @Test
     public void log_noProcessing() throws IOException {
-        PerfettoTraceMonitor traceMonitor =
-                PerfettoTraceMonitor.newBuilder().enableProtoLog().build();
+        PerfettoTraceMonitor traceMonitor = PerfettoTraceMonitor.newBuilder()
+                .enableProtoLog(TEST_PROTOLOG_DATASOURCE_NAME)
+                .build();
         long before;
         long after;
         try {
@@ -472,8 +486,9 @@ public class PerfettoProtoLogImplTest {
 
     @Test
     public  void supportsLocationInformation() throws IOException {
-        PerfettoTraceMonitor traceMonitor =
-                PerfettoTraceMonitor.newBuilder().enableProtoLog(true).build();
+        PerfettoTraceMonitor traceMonitor = PerfettoTraceMonitor.newBuilder()
+                .enableProtoLog(true, List.of(), TEST_PROTOLOG_DATASOURCE_NAME)
+                .build();
         try {
             traceMonitor.start();
             mProtoLog.log(LogLevel.DEBUG, TestProtoLogGroup.TEST_GROUP, 1,
@@ -507,8 +522,9 @@ public class PerfettoProtoLogImplTest {
         final long messageHash = addMessageToConfig(
                 ProtologCommon.ProtoLogLevel.PROTOLOG_LEVEL_INFO,
                 "My test message :: %s, %d, %f, %b");
-        PerfettoTraceMonitor traceMonitor =
-                PerfettoTraceMonitor.newBuilder().enableProtoLog().build();
+        PerfettoTraceMonitor traceMonitor = PerfettoTraceMonitor.newBuilder()
+                .enableProtoLog(TEST_PROTOLOG_DATASOURCE_NAME)
+                .build();
         long before;
         long after;
         try {
@@ -529,8 +545,9 @@ public class PerfettoProtoLogImplTest {
 
     @Test
     public void log_protoDisabled() throws Exception {
-        PerfettoTraceMonitor traceMonitor =
-                PerfettoTraceMonitor.newBuilder().enableProtoLog(false).build();
+        PerfettoTraceMonitor traceMonitor = PerfettoTraceMonitor.newBuilder()
+                .enableProtoLog(false, List.of(), TEST_PROTOLOG_DATASOURCE_NAME)
+                .build();
         try {
             traceMonitor.start();
             mProtoLog.log(LogLevel.DEBUG, TestProtoLogGroup.TEST_GROUP, 1,
@@ -547,12 +564,14 @@ public class PerfettoProtoLogImplTest {
 
     @Test
     public void stackTraceTrimmed() throws IOException {
-        PerfettoTraceMonitor traceMonitor =
-                PerfettoTraceMonitor.newBuilder().enableProtoLog(true,
+        PerfettoTraceMonitor traceMonitor = PerfettoTraceMonitor.newBuilder()
+                .enableProtoLog(
+                        true,
                         List.of(new PerfettoTraceMonitor.Builder.ProtoLogGroupOverride(
                                 TestProtoLogGroup.TEST_GROUP.toString(), LogLevel.DEBUG,
-                                true)))
-                        .build();
+                                true)),
+                        TEST_PROTOLOG_DATASOURCE_NAME
+                ).build();
         try {
             traceMonitor.start();
 
@@ -582,18 +601,18 @@ public class PerfettoProtoLogImplTest {
         final AtomicInteger cacheUpdateCallCount = new AtomicInteger(0);
         mCacheUpdater = cacheUpdateCallCount::incrementAndGet;
 
-        PerfettoTraceMonitor traceMonitor1 =
-                PerfettoTraceMonitor.newBuilder().enableProtoLog(true,
-                                List.of(new PerfettoTraceMonitor.Builder.ProtoLogGroupOverride(
-                                        TestProtoLogGroup.TEST_GROUP.toString(), LogLevel.WARN,
-                                        false)))
-                        .build();
+        PerfettoTraceMonitor traceMonitor1 = PerfettoTraceMonitor.newBuilder()
+                .enableProtoLog(true,
+                        List.of(new PerfettoTraceMonitor.Builder.ProtoLogGroupOverride(
+                                TestProtoLogGroup.TEST_GROUP.toString(), LogLevel.WARN,
+                                false)), TEST_PROTOLOG_DATASOURCE_NAME
+                ).build();
 
         PerfettoTraceMonitor traceMonitor2 =
                 PerfettoTraceMonitor.newBuilder().enableProtoLog(true,
                                 List.of(new PerfettoTraceMonitor.Builder.ProtoLogGroupOverride(
                                         TestProtoLogGroup.TEST_GROUP.toString(), LogLevel.DEBUG,
-                                        false)))
+                                        false)), TEST_PROTOLOG_DATASOURCE_NAME)
                         .build();
 
         Truth.assertThat(cacheUpdateCallCount.get()).isEqualTo(0);
@@ -638,14 +657,14 @@ public class PerfettoProtoLogImplTest {
                 PerfettoTraceMonitor.newBuilder().enableProtoLog(true,
                                 List.of(new PerfettoTraceMonitor.Builder.ProtoLogGroupOverride(
                                         TestProtoLogGroup.TEST_GROUP.toString(), LogLevel.WARN,
-                                        false)))
+                                        false)), TEST_PROTOLOG_DATASOURCE_NAME)
                         .build();
 
         PerfettoTraceMonitor traceMonitor2 =
                 PerfettoTraceMonitor.newBuilder().enableProtoLog(true,
                                 List.of(new PerfettoTraceMonitor.Builder.ProtoLogGroupOverride(
                                         TestProtoLogGroup.TEST_GROUP.toString(), LogLevel.DEBUG,
-                                        false)))
+                                        false)), TEST_PROTOLOG_DATASOURCE_NAME)
                         .build();
 
         try {
@@ -715,9 +734,9 @@ public class PerfettoProtoLogImplTest {
 
     @Test
     public void supportsNullString() throws IOException {
-        PerfettoTraceMonitor traceMonitor =
-                PerfettoTraceMonitor.newBuilder().enableProtoLog(true)
-                        .build();
+        PerfettoTraceMonitor traceMonitor = PerfettoTraceMonitor.newBuilder()
+                .enableProtoLog(true, List.of(), TEST_PROTOLOG_DATASOURCE_NAME)
+                .build();
 
         try {
             traceMonitor.start();
@@ -738,9 +757,9 @@ public class PerfettoProtoLogImplTest {
 
     @Test
     public void supportNullParams() throws IOException {
-        PerfettoTraceMonitor traceMonitor =
-                PerfettoTraceMonitor.newBuilder().enableProtoLog(true)
-                        .build();
+        PerfettoTraceMonitor traceMonitor = PerfettoTraceMonitor.newBuilder()
+                .enableProtoLog(true, List.of(), TEST_PROTOLOG_DATASOURCE_NAME)
+                .build();
 
         try {
             traceMonitor.start();
@@ -757,6 +776,81 @@ public class PerfettoProtoLogImplTest {
         Truth.assertThat(protolog.messages).hasSize(1);
         Truth.assertThat(protolog.messages.get(0).getMessage())
                 .isEqualTo("My null args: 0, 0, false");
+    }
+
+    @Test
+    public void handlesConcurrentTracingSessions() throws IOException {
+        PerfettoTraceMonitor traceMonitor1 = PerfettoTraceMonitor.newBuilder()
+                .enableProtoLog(true, List.of(), TEST_PROTOLOG_DATASOURCE_NAME)
+                .build();
+
+        PerfettoTraceMonitor traceMonitor2 = PerfettoTraceMonitor.newBuilder()
+                .enableProtoLog(true, List.of(), TEST_PROTOLOG_DATASOURCE_NAME)
+                .build();
+
+        final ResultWriter writer2 = new ResultWriter()
+                .forScenario(new ScenarioBuilder()
+                        .forClass(createTempFile("temp", "").getName()).build())
+                .withOutputDir(mTracingDirectory)
+                .setRunComplete();
+
+        try {
+            traceMonitor1.start();
+            traceMonitor2.start();
+
+            mProtoLog.log(LogLevel.DEBUG, TestProtoLogGroup.TEST_GROUP, 1,
+                    LogDataType.BOOLEAN, new Object[]{true});
+        } finally {
+            traceMonitor1.stop(mWriter);
+            traceMonitor2.stop(writer2);
+        }
+
+        final ResultReader reader = new ResultReader(mWriter.write(), mTraceConfig);
+        final ProtoLogTrace protologFromMonitor1 = reader.readProtoLogTrace();
+
+        final ResultReader reader2 = new ResultReader(writer2.write(), mTraceConfig);
+        final ProtoLogTrace protologFromMonitor2 = reader2.readProtoLogTrace();
+
+        Truth.assertThat(protologFromMonitor1.messages).hasSize(1);
+        Truth.assertThat(protologFromMonitor1.messages.get(0).getMessage())
+                .isEqualTo("My Test Debug Log Message true");
+
+        Truth.assertThat(protologFromMonitor2.messages).hasSize(1);
+        Truth.assertThat(protologFromMonitor2.messages.get(0).getMessage())
+                .isEqualTo("My Test Debug Log Message true");
+    }
+
+    @Test
+    public void usesDefaultLogFromLevel() throws IOException {
+        PerfettoTraceMonitor traceMonitor = PerfettoTraceMonitor.newBuilder()
+                .enableProtoLog(LogLevel.WARN, List.of(), TEST_PROTOLOG_DATASOURCE_NAME)
+                .build();
+        try {
+            traceMonitor.start();
+            mProtoLog.log(LogLevel.DEBUG, TestProtoLogGroup.TEST_GROUP,
+                "This message should not be logged");
+            mProtoLog.log(LogLevel.WARN, TestProtoLogGroup.TEST_GROUP,
+                "This message should logged %d", 123);
+            mProtoLog.log(LogLevel.ERROR, TestProtoLogGroup.TEST_GROUP,
+                "This message should also be logged %d", 567);
+        } finally {
+            traceMonitor.stop(mWriter);
+        }
+
+        final ResultReader reader = new ResultReader(mWriter.write(), mTraceConfig);
+        final ProtoLogTrace protolog = reader.readProtoLogTrace();
+
+        Truth.assertThat(protolog.messages).hasSize(2);
+
+        Truth.assertThat(protolog.messages.get(0).getLevel())
+                .isEqualTo(LogLevel.WARN);
+        Truth.assertThat(protolog.messages.get(0).getMessage())
+                .isEqualTo("This message should logged 123");
+
+        Truth.assertThat(protolog.messages.get(1).getLevel())
+                .isEqualTo(LogLevel.ERROR);
+        Truth.assertThat(protolog.messages.get(1).getMessage())
+                .isEqualTo("This message should also be logged 567");
     }
 
     private enum TestProtoLogGroup implements IProtoLogGroup {

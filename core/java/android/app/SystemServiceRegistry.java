@@ -31,6 +31,7 @@ import android.app.admin.IDevicePolicyManager;
 import android.app.ambientcontext.AmbientContextManager;
 import android.app.ambientcontext.IAmbientContextManager;
 import android.app.appfunctions.AppFunctionManager;
+import android.app.appfunctions.AppFunctionManagerConfiguration;
 import android.app.appfunctions.IAppFunctionManager;
 import android.app.appsearch.AppSearchManagerFrameworkInitializer;
 import android.app.blob.BlobStoreManagerFrameworkInitializer;
@@ -48,6 +49,8 @@ import android.app.sdksandbox.SdkSandboxManagerFrameworkInitializer;
 import android.app.search.SearchUiManager;
 import android.app.slice.SliceManager;
 import android.app.smartspace.SmartspaceManager;
+import android.app.supervision.ISupervisionManager;
+import android.app.supervision.SupervisionManager;
 import android.app.time.TimeManager;
 import android.app.timedetector.TimeDetector;
 import android.app.timedetector.TimeDetectorImpl;
@@ -475,7 +478,7 @@ public final class SystemServiceRegistry {
                 if (service == null
                         && ctx.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH)
                         && android.server.Flags.allowRemovingVpnService()) {
-                    throw new ServiceNotFoundException(Context.VPN_MANAGEMENT_SERVICE);
+                    return null;
                 }
                 return new VpnManager(ctx, service);
             }});
@@ -935,8 +938,10 @@ public final class SystemServiceRegistry {
                         @Override
                         public AppFunctionManager createService(ContextImpl ctx)
                                 throws ServiceNotFoundException {
+                            if (!AppFunctionManagerConfiguration.isSupported(ctx)) {
+                                return null;
+                            }
                             IAppFunctionManager service;
-                            //TODO(b/357551503): If the feature not present avoid look up every time
                             service = IAppFunctionManager.Stub.asInterface(
                                     ServiceManager.getServiceOrThrow(Context.APP_FUNCTION_SERVICE));
                             return new AppFunctionManager(service, ctx.getOuterContext());
@@ -1703,6 +1708,21 @@ public final class SystemServiceRegistry {
                         return new E2eeContactKeysManager(ctx);
                     }});
 
+        registerService(Context.SUPERVISION_SERVICE, SupervisionManager.class,
+                new CachedServiceFetcher<>() {
+                    @Override
+                    public SupervisionManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        if (!android.app.supervision.flags.Flags.supervisionApi()) {
+                            throw new ServiceNotFoundException(
+                                    "SupervisionManager is not supported");
+                        }
+                        IBinder iBinder = ServiceManager.getServiceOrThrow(
+                                Context.SUPERVISION_SERVICE);
+                        ISupervisionManager service = ISupervisionManager.Stub.asInterface(iBinder);
+                        return new SupervisionManager(ctx, service);
+                    }
+                });
         // DO NOT do a flag check like this unless the flag is read-only.
         // (because this code is executed during preload in zygote.)
         // If the flag is mutable, the check should be inside CachedServiceFetcher.

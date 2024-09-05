@@ -91,7 +91,6 @@ class NonAppWindowAnimationAdapter implements AnimationAdapter {
         return (transit == TRANSIT_OLD_TASK_OPEN || transit == TRANSIT_OLD_TASK_TO_FRONT
                 || transit == TRANSIT_OLD_WALLPAPER_CLOSE)
                 && displayContent.getDisplayPolicy().shouldAttachNavBarToAppDuringTransition()
-                && service.getRecentsAnimationController() == null
                 && displayContent.getAsyncRotationController() == null;
     }
 

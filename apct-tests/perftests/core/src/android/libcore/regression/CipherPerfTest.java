@@ -16,8 +16,8 @@
 
 package android.libcore.regression;
 
-import android.perftests.utils.BenchmarkState;
-import android.perftests.utils.PerfStatusReporter;
+import androidx.benchmark.BenchmarkState;
+import androidx.benchmark.junit4.BenchmarkRule;
 
 import androidx.test.filters.LargeTest;
 
@@ -47,7 +47,7 @@ import javax.crypto.spec.IvParameterSpec;
 @RunWith(JUnitParamsRunner.class)
 @LargeTest
 public class CipherPerfTest {
-    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
+    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
 
     public static Collection getCases() {
         int[] keySizes = new int[] {128, 192, 256};
@@ -180,7 +180,7 @@ public class CipherPerfTest {
             Mode mode, Padding padding, int keySize, int inputSize, Implementation implementation)
             throws Exception {
         setUp(mode, padding, keySize, implementation);
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             mCipherEncrypt.doFinal(DATA, 0, inputSize, mOutput);
         }
@@ -192,7 +192,7 @@ public class CipherPerfTest {
             Mode mode, Padding padding, int keySize, int inputSize, Implementation implementation)
             throws Exception {
         setUp(mode, padding, keySize, implementation);
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             mCipherDecrypt.doFinal(DATA, 0, inputSize, mOutput);
         }

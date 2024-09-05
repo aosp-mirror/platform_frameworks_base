@@ -25,15 +25,19 @@ import androidx.core.util.component1
 import androidx.core.util.component2
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.keyguard.keyguardUpdateMonitor
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.domain.interactor.communalSceneInteractor
 import com.android.systemui.communal.domain.interactor.widgetTrampolineInteractor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.kosmos.backgroundCoroutineContext
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.testKosmos
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -41,12 +45,14 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.refEq
 import org.mockito.kotlin.verify
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class WidgetInteractionHandlerTest : SysuiTestCase() {
@@ -70,8 +76,10 @@ class WidgetInteractionHandlerTest : SysuiTestCase() {
             underTest =
                 WidgetInteractionHandler(
                     applicationScope = applicationCoroutineScope,
+                    uiBackgroundContext = backgroundCoroutineContext,
                     activityStarter = activityStarter,
                     communalSceneInteractor = communalSceneInteractor,
+                    keyguardUpdateMonitor = keyguardUpdateMonitor,
                     logBuffer = logcatLogBuffer(),
                     widgetTrampolineInteractor = widgetTrampolineInteractor,
                 )
@@ -95,16 +103,21 @@ class WidgetInteractionHandlerTest : SysuiTestCase() {
                 // Verify that we set the state correctly
                 assertTrue(launching!!)
                 // Verify that we pass in a non-null Communal animation controller
+
+                val callbackCaptor = argumentCaptor<Runnable>()
                 verify(activityStarter)
                     .startPendingIntentMaybeDismissingKeyguard(
                         /* intent = */ eq(testIntent),
                         /* dismissShade = */ eq(false),
-                        /* intentSentUiThreadCallback = */ isNull(),
+                        /* intentSentUiThreadCallback = */ callbackCaptor.capture(),
                         /* animationController = */ any<CommunalTransitionAnimatorController>(),
                         /* fillInIntent = */ refEq(fillInIntent),
                         /* extraOptions = */ refEq(activityOptions.toBundle()),
                         /* customMessage */ isNull(),
                     )
+                callbackCaptor.firstValue.run()
+                runCurrent()
+                verify(keyguardUpdateMonitor).awakenFromDream()
             }
         }
     }
@@ -123,7 +136,7 @@ class WidgetInteractionHandlerTest : SysuiTestCase() {
             .startPendingIntentMaybeDismissingKeyguard(
                 /* intent = */ eq(testIntent),
                 /* dismissShade = */ eq(false),
-                /* intentSentUiThreadCallback = */ isNull(),
+                /* intentSentUiThreadCallback = */ any(),
                 /* animationController = */ isNull(),
                 /* fillInIntent = */ refEq(fillInIntent),
                 /* extraOptions = */ refEq(activityOptions.toBundle()),
