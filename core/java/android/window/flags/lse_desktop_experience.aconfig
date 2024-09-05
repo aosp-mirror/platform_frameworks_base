@@ -31,6 +31,13 @@ flag {
 }
 
 flag {
+    name: "enable_windowing_scaled_resizing"
+    namespace: "lse_desktop_experience"
+    description: "Enables the resizing of non-resizable apps through scaling their bounds up/down"
+    bug: "319844447"
+}
+
+flag {
     name: "disable_non_resizable_app_snap_resizing"
     namespace: "lse_desktop_experience"
     description: "Stops non-resizable app desktop windows from being snap resized"
