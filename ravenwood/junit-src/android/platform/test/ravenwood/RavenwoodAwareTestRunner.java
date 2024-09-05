@@ -23,7 +23,6 @@ import static java.lang.annotation.ElementType.TYPE;
 
 import android.util.Log;
 
-import com.android.ravenwood.common.RavenwoodCommonUtils;
 import com.android.ravenwood.common.SneakyThrow;
 
 import org.junit.Assume;
@@ -75,7 +74,7 @@ import java.lang.reflect.InvocationTargetException;
  * (no hooks, etc.)
  */
 public class RavenwoodAwareTestRunner extends Runner implements Filterable, Orderable {
-    private static final String TAG = "RavenwoodAwareTestRunner";
+    public static final String TAG = "Ravenwood";
 
     @Inherited
     @Target({TYPE})
@@ -142,16 +141,9 @@ public class RavenwoodAwareTestRunner extends Runner implements Filterable, Orde
     private Description mDescription = null;
     private Throwable mExceptionInConstructor = null;
 
-    /** Simple logging method. */
-    private void log(String message) {
-        RavenwoodCommonUtils.log(TAG, "[" + getTestClass().getJavaClass() + "  @" + this + "] "
-                + message);
-    }
-
-    private Error logAndFail(String message, Throwable innerException) {
-        log(message);
-        log("    Exception=" + innerException);
-        throw new AssertionError(message, innerException);
+    private Error logAndFail(String message, Throwable exception) {
+        Log.e(TAG, message, exception);
+        throw new AssertionError(message, exception);
     }
 
     public TestClass getTestClass() {
@@ -164,6 +156,8 @@ public class RavenwoodAwareTestRunner extends Runner implements Filterable, Orde
     public RavenwoodAwareTestRunner(Class<?> testClass) {
         try {
             mTestClass = new TestClass(testClass);
+
+            onRunnerInitializing();
 
             /*
              * If the class has @DisabledOnRavenwood, then we'll delegate to
@@ -186,10 +180,8 @@ public class RavenwoodAwareTestRunner extends Runner implements Filterable, Orde
                 realRunnerClass = BlockJUnit4ClassRunner.class;
             }
 
-            onRunnerInitializing();
-
             try {
-                log("Initializing the inner runner: " + realRunnerClass);
+                Log.i(TAG, "Initializing the inner runner: " + realRunnerClass);
 
                 mRealRunner = instantiateRealRunner(realRunnerClass, testClass);
                 mDescription = mRealRunner.getDescription();
@@ -201,8 +193,7 @@ public class RavenwoodAwareTestRunner extends Runner implements Filterable, Orde
         } catch (Throwable th) {
             // If we throw in the constructor, Tradefed may not report it and just ignore the class,
             // so record it and throw it when the test actually started.
-            log("Fatal: Exception detected in constructor: " + th.getMessage() + "\n"
-                    + Log.getStackTraceString(th));
+            Log.e(TAG, "Fatal: Exception detected in constructor", th);
             mExceptionInConstructor = new RuntimeException("Exception detected in constructor",
                     th);
             mDescription = Description.createTestDescription(testClass, "Constructor");
@@ -236,8 +227,7 @@ public class RavenwoodAwareTestRunner extends Runner implements Filterable, Orde
         if (!isOnRavenwood()) {
             return;
         }
-
-        log("onRunnerInitializing");
+        // DO NOT USE android.util.Log before calling onRunnerInitializing().
 
         RavenwoodAwareTestRunnerHook.onRunnerInitializing(this, mTestClass);
 
@@ -250,7 +240,7 @@ public class RavenwoodAwareTestRunner extends Runner implements Filterable, Orde
         if (!isOnRavenwood()) {
             return;
         }
-        log("runAnnotatedMethodsOnRavenwood() " + annotationClass.getName());
+        Log.v(TAG, "runAnnotatedMethodsOnRavenwood() " + annotationClass.getName());
 
         for (var method : getTestClass().getAnnotatedMethods(annotationClass)) {
             ensureIsPublicVoidMethod(method.getMethod(), /* isStatic=*/ instance == null);
