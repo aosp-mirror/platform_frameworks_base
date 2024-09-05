@@ -108,3 +108,35 @@ android_test {
         ":OverlayTestApp",
     ],
 }
+
+test_module_config {
+    name: "WmTests_server_policy_Presubmit",
+    base: "WmTests",
+    test_suites: [
+        "automotive-tests",
+        "device-tests",
+    ],
+    include_filters: ["com.android.server.policy."],
+    include_annotations: ["android.platform.test.annotations.Presubmit"],
+}
+
+test_module_config {
+    name: "WmTests_server_policy",
+    base: "WmTests",
+    test_suites: [
+        "automotive-tests",
+        "device-tests",
+    ],
+    include_filters: ["com.android.server.policy."],
+}
+
+test_module_config {
+    name: "WmTests_wm_utils_Presubmit",
+    base: "WmTests",
+    test_suites: [
+        "automotive-tests",
+        "device-tests",
+    ],
+    include_filters: ["com.android.server.wm.utils"],
+    include_annotations: ["android.platform.test.annotations.Presubmit"],
+}
