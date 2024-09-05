@@ -587,6 +587,8 @@ applications that come with the platform
         <permission name="android.permission.OVERRIDE_SYSTEM_KEY_BEHAVIOR_IN_FOCUSED_WINDOW" />
         <!-- Permission required for CTS test - PackageManagerShellCommandInstallTest -->
         <permission name="android.permission.EMERGENCY_INSTALL_PACKAGES" />
+        <!-- Permission required for CTS test - CtsNfcTestCases -->
+        <permission name="android.permission.NFC_SET_CONTROLLER_ALWAYS_ON" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">
