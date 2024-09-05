@@ -42,6 +42,7 @@ import android.util.Log;
 import android.util.MathUtils;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
+import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
@@ -463,6 +464,9 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
         mJavaAdapter.alwaysCollectFlow(
                 mCommunalTransitionViewModelLazy.get().isUmoOnCommunal(),
                 this::setShouldUpdateSquishinessOnMedia);
+        mJavaAdapter.alwaysCollectFlow(
+                mShadeInteractor.isAnyExpanded(),
+                this::onAnyExpandedChanged);
     }
 
     private void initNotificationStackScrollLayoutController() {
@@ -480,6 +484,10 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
             }
             setClippingBounds();
         }
+    }
+
+    private void onAnyExpandedChanged(boolean isAnyExpanded) {
+        mQsFrame.setVisibility(isAnyExpanded ? View.VISIBLE : View.INVISIBLE);
     }
 
     private void onNotificationScrolled(int newScrollPosition) {
