@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.platform.test.ravenwood.nativesubstitution;
+package android.util;
 
-import android.util.Log;
 import android.util.Log.Level;
 
 import com.android.internal.os.RuntimeInit;
@@ -44,7 +43,7 @@ public class Log_host {
             case Log.LOG_ID_SYSTEM: buffer = "system"; break;
             case Log.LOG_ID_CRASH: buffer = "crash"; break;
             default: buffer = "buf:" + bufID; break;
-        };
+        }
 
         final String prio;
         switch (priority) {
@@ -55,7 +54,7 @@ public class Log_host {
             case Log.ERROR: prio = "E"; break;
             case Log.ASSERT: prio = "A"; break;
             default: prio = "prio:" + priority; break;
-        };
+        }
 
         for (String s : msg.split("\\n")) {
             getRealOut().println(String.format("logd: [%s] %s %s: %s", buffer, prio, tag, s));
