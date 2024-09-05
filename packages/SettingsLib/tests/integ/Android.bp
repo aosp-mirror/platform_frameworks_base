@@ -71,3 +71,10 @@ android_test {
     dxflags: ["--multi-dex"],
     manifest: "AndroidManifest.xml",
 }
+
+test_module_config {
+    name: "SettingsLibTests_settingslib_users",
+    base: "SettingsLibTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.settingslib.users."],
+}

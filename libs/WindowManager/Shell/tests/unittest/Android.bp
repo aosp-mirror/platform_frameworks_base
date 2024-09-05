@@ -86,3 +86,10 @@ android_test {
         "com.android.wm.shell.tests",
     ],
 }
+
+test_module_config {
+    name: "WMShellUnitTests_shell_back",
+    base: "WMShellUnitTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.wm.shell.back"],
+}
