@@ -196,7 +196,12 @@ fun CommunalHub(
 
     val gridState =
         rememberLazyGridState(viewModel.savedFirstScrollIndex, viewModel.savedFirstScrollOffset)
-    viewModel.clearPersistedScrollPosition()
+
+    LaunchedEffect(Unit) {
+        if (!viewModel.isEditMode) {
+            viewModel.clearPersistedScrollPosition()
+        }
+    }
 
     val contentListState = rememberContentListState(widgetConfigurator, communalContent, viewModel)
     val reorderingWidgets by viewModel.reorderingWidgets.collectAsStateWithLifecycle()
@@ -219,7 +224,6 @@ fun CommunalHub(
     val windowMetrics = WindowMetricsCalculator.getOrCreate().computeCurrentWindowMetrics(context)
     val screenWidth = windowMetrics.bounds.width()
     val layoutDirection = LocalLayoutDirection.current
-
     if (viewModel.isEditMode) {
         ObserveNewWidgetAddedEffect(communalContent, gridState, viewModel)
     } else {
@@ -543,7 +547,6 @@ private fun ScrollOnUpdatedLiveContentEffect(
     communalContent: List<CommunalContentModel>,
     gridState: LazyGridState,
 ) {
-    val coroutineScope = rememberCoroutineScope()
     val liveContentKeys = remember { mutableListOf<String>() }
     var communalContentPending by remember { mutableStateOf(true) }
 
