@@ -56,3 +56,13 @@ android_test {
         enabled: false,
     },
 }
+
+test_module_config {
+    name: "DisplayServiceTests_server_display",
+    base: "DisplayServiceTests",
+    test_suites: [
+        "automotive-tests",
+        "device-tests",
+    ],
+    include_filters: ["com.android.server.display"],
+}
