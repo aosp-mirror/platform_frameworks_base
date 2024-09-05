@@ -583,6 +583,8 @@ applications that come with the platform
         <!-- Permissions required for CTS test - AppFunctionManagerTest -->
         <permission name="android.permission.EXECUTE_APP_FUNCTIONS_TRUSTED" />
         <permission name="android.permission.EXECUTE_APP_FUNCTIONS" />
+        <!-- Permission required for CTS test - CtsNfcTestCases -->
+        <permission name="android.permission.NFC_SET_CONTROLLER_ALWAYS_ON" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">
