@@ -22,18 +22,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.util.fastMap
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.qs.panels.ui.viewmodel.QuickQuickSettingsViewModel
 
 @Composable
-fun QuickQuickSettings(
-    viewModel: QuickQuickSettingsViewModel,
-    modifier: Modifier = Modifier,
-) {
+fun QuickQuickSettings(viewModel: QuickQuickSettingsViewModel, modifier: Modifier = Modifier) {
     val sizedTiles by
         viewModel.tileViewModels.collectAsStateWithLifecycle(initialValue = emptyList())
-    val tiles = sizedTiles.map { it.tile }
+    val tiles = sizedTiles.fastMap { it.tile }
 
     DisposableEffect(tiles) {
         val token = Any()
@@ -44,14 +42,18 @@ fun QuickQuickSettings(
 
     TileLazyGrid(
         modifier = modifier.sysuiResTag("qqs_tile_layout"),
-        columns = GridCells.Fixed(columns)
+        columns = GridCells.Fixed(columns),
     ) {
         items(
-            tiles.size,
+            sizedTiles.size,
             key = { index -> sizedTiles[index].tile.spec.spec },
-            span = { index -> GridItemSpan(sizedTiles[index].width) }
+            span = { index -> GridItemSpan(sizedTiles[index].width) },
         ) { index ->
-            Tile(tile = tiles[index], iconOnly = sizedTiles[index].isIcon, modifier = Modifier)
+            Tile(
+                tile = sizedTiles[index].tile,
+                iconOnly = sizedTiles[index].isIcon,
+                modifier = Modifier,
+            )
         }
     }
 }
