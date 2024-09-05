@@ -358,7 +358,6 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         mUseFifoUiScheduling = com.android.window.flags.Flags.fifoPriorityForMajorUiProcesses()
                 && (isSysUiPackage || mAtm.isCallerRecents(uid));
 
-        onConfigurationChanged(atm.getGlobalConfiguration());
         mAtm.mPackageConfigPersister.updateConfigIfNeeded(this, mUserId, mInfo.packageName);
     }
 
