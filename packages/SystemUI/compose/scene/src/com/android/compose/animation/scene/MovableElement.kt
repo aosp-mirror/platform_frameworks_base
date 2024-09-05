@@ -37,7 +37,7 @@ internal fun Element(
     modifier: Modifier,
     content: @Composable ElementScope<ElementContentScope>.() -> Unit,
 ) {
-    Box(modifier.element(layoutImpl, sceneOrOverlay, key)) {
+    Box(modifier.element(layoutImpl, sceneOrOverlay, key), propagateMinConstraints = true) {
         val contentScope = sceneOrOverlay.scope
         val boxScope = this
         val elementScope =
@@ -64,7 +64,7 @@ internal fun MovableElement(
             "MovableElementKey($elementName).contentPicker.contents does not contain $contentName"
     }
 
-    Box(modifier.element(layoutImpl, sceneOrOverlay, key)) {
+    Box(modifier.element(layoutImpl, sceneOrOverlay, key), propagateMinConstraints = true) {
         val contentScope = sceneOrOverlay.scope
         val boxScope = this
         val elementScope =
