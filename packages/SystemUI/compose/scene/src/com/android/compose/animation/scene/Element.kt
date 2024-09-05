@@ -48,10 +48,13 @@ import androidx.compose.ui.unit.round
 import androidx.compose.ui.util.fastCoerceIn
 import androidx.compose.ui.util.fastForEachReversed
 import androidx.compose.ui.util.lerp
+import com.android.compose.animation.scene.Element.State
 import com.android.compose.animation.scene.content.Content
 import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.animation.scene.transformation.PropertyTransformation
 import com.android.compose.animation.scene.transformation.SharedElementTransformation
+import com.android.compose.modifiers.thenIf
+import com.android.compose.ui.graphics.drawInContainer
 import com.android.compose.ui.util.lerp
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
@@ -146,8 +149,56 @@ internal fun Modifier.element(
     // TODO(b/341072461): Revert this and read the current transitions in ElementNode directly once
     // we can ensure that SceneTransitionLayoutImpl will compose new contents first.
     val currentTransitionStates = layoutImpl.state.transitionStates
-    return then(ElementModifier(layoutImpl, currentTransitionStates, content, key))
+    return thenIf(layoutImpl.state.isElevationPossible(content.key, key)) {
+            Modifier.maybeElevateInContent(layoutImpl, content, key, currentTransitionStates)
+        }
+        .then(ElementModifier(layoutImpl, currentTransitionStates, content, key))
         .testTag(key.testTag)
+}
+
+private fun Modifier.maybeElevateInContent(
+    layoutImpl: SceneTransitionLayoutImpl,
+    content: Content,
+    key: ElementKey,
+    transitionStates: List<TransitionState>,
+): Modifier {
+    fun isSharedElement(
+        stateByContent: Map<ContentKey, State>,
+        transition: TransitionState.Transition,
+    ): Boolean {
+        fun inFromContent() = transition.fromContent in stateByContent
+        fun inToContent() = transition.toContent in stateByContent
+        fun inCurrentScene() = transition.currentScene in stateByContent
+
+        return if (transition is TransitionState.Transition.ReplaceOverlay) {
+            (inFromContent() && (inToContent() || inCurrentScene())) ||
+                (inToContent() && inCurrentScene())
+        } else {
+            inFromContent() && inToContent()
+        }
+    }
+
+    return drawInContainer(
+        content.containerState,
+        enabled = {
+            val stateByContent = layoutImpl.elements.getValue(key).stateByContent
+            val state = elementState(transitionStates, isInContent = { it in stateByContent })
+
+            state is TransitionState.Transition &&
+                state.transformationSpec
+                    .transformations(key, content.key)
+                    .shared
+                    ?.elevateInContent == content.key &&
+                isSharedElement(stateByContent, state) &&
+                isSharedElementEnabled(key, state) &&
+                shouldPlaceElement(
+                    layoutImpl,
+                    content.key,
+                    layoutImpl.elements.getValue(key),
+                    state,
+                )
+        },
+    )
 }
 
 /**
