@@ -16,6 +16,8 @@
 
 package com.android.internal.protolog;
 
+import android.annotation.NonNull;
+
 public interface ProtoLogDataSourceBuilder {
     /**
      * Builder method for the DataSource the PerfettoProtoLogImpl is going to us.
@@ -24,6 +26,9 @@ public interface ProtoLogDataSourceBuilder {
      * @param onStop The onStop callback that should be used by the created datasource.
      * @return A new DataSource that uses the provided callbacks.
      */
-    ProtoLogDataSource build(ProtoLogDataSource.Instance.TracingInstanceStartCallback onStart,
-            Runnable onFlush, ProtoLogDataSource.Instance.TracingInstanceStopCallback onStop);
+    @NonNull
+    ProtoLogDataSource build(
+            @NonNull ProtoLogDataSource.Instance.TracingInstanceStartCallback onStart,
+            @NonNull Runnable onFlush,
+            @NonNull ProtoLogDataSource.Instance.TracingInstanceStopCallback onStop);
 }
