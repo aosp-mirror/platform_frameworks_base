@@ -46,7 +46,7 @@ constructor(
     private val _isWifiDefault = MutableStateFlow(false)
     override val isWifiDefault: StateFlow<Boolean> = _isWifiDefault
 
-    private val _wifiNetwork = MutableStateFlow<WifiNetworkModel>(WifiNetworkModel.Inactive)
+    private val _wifiNetwork = MutableStateFlow<WifiNetworkModel>(WifiNetworkModel.Inactive())
     override val wifiNetwork: StateFlow<WifiNetworkModel> = _wifiNetwork
 
     private val _secondaryNetworks = MutableStateFlow<List<WifiNetworkModel>>(emptyList())
@@ -82,7 +82,7 @@ constructor(
         _isWifiEnabled.value = false
         _isWifiDefault.value = false
         _wifiActivity.value = DataActivityModel(hasActivityIn = false, hasActivityOut = false)
-        _wifiNetwork.value = WifiNetworkModel.Inactive
+        _wifiNetwork.value = WifiNetworkModel.Inactive()
     }
 
     private fun processEnabledWifiState(event: FakeWifiEventModel.Wifi) {
@@ -100,7 +100,7 @@ constructor(
     }
 
     private fun FakeWifiEventModel.Wifi.toWifiNetworkModel(): WifiNetworkModel =
-        WifiNetworkModel.Active(
+        WifiNetworkModel.Active.of(
             isValidated = validated ?: true,
             level = level ?: 0,
             ssid = ssid ?: DEMO_NET_SSID,
@@ -108,7 +108,7 @@ constructor(
         )
 
     private fun FakeWifiEventModel.CarrierMerged.toCarrierMergedModel(): WifiNetworkModel =
-        WifiNetworkModel.CarrierMerged(
+        WifiNetworkModel.CarrierMerged.of(
             subscriptionId = subscriptionId,
             level = level,
             numberOfLevels = numberOfLevels,
