@@ -14,12 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.telecom
+package com.android.systemui.keyguard.ui.viewmodel
 
-import android.telecom.TelecomManager
+import com.android.systemui.communal.domain.interactor.communalInteractor
+import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
-import com.android.systemui.util.mockito.mock
+import com.android.systemui.shade.domain.interactor.shadeInteractor
 
-val Kosmos.mockTelecomManager by Fixture<TelecomManager> { mock() }
-var Kosmos.telecomManager by Fixture<TelecomManager?> { mockTelecomManager }
+val Kosmos.lockscreenUserActionsViewModel by Fixture {
+    LockscreenUserActionsViewModel(
+        deviceEntryInteractor = deviceEntryInteractor,
+        communalInteractor = communalInteractor,
+        shadeInteractor = shadeInteractor,
+    )
+}
