@@ -113,7 +113,7 @@ flag {
 
 flag {
   name: "keyboard_repeat_keys"
-  namespace: "input"
+  namespace: "input_native"
   description: "Allow configurable timeout before key repeat and repeat delay rate for key repeats"
   bug: "336585002"
 }
