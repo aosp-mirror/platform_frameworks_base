@@ -888,7 +888,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
             return true;
         });
 
-        mockServiceInfoWithMetaData(List.of(cn), service, pm, new ArrayMap<>());
+        mockServiceInfoWithMetaData(List.of(cn), service, new ArrayMap<>());
         service.addApprovedList("a", 0, true);
 
         service.reregisterService(cn, 0);
@@ -919,7 +919,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
             return true;
         });
 
-        mockServiceInfoWithMetaData(List.of(cn), service, pm, new ArrayMap<>());
+        mockServiceInfoWithMetaData(List.of(cn), service, new ArrayMap<>());
         service.addApprovedList("a", 0, false);
 
         service.reregisterService(cn, 0);
@@ -950,7 +950,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
             return true;
         });
 
-        mockServiceInfoWithMetaData(List.of(cn), service, pm, new ArrayMap<>());
+        mockServiceInfoWithMetaData(List.of(cn), service, new ArrayMap<>());
         service.addApprovedList("a/a", 0, true);
 
         service.reregisterService(cn, 0);
@@ -981,7 +981,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
             return true;
         });
 
-        mockServiceInfoWithMetaData(List.of(cn), service, pm, new ArrayMap<>());
+        mockServiceInfoWithMetaData(List.of(cn), service, new ArrayMap<>());
         service.addApprovedList("a/a", 0, false);
 
         service.reregisterService(cn, 0);
@@ -1202,64 +1202,6 @@ public class ManagedServicesTest extends UiServiceTestCase {
                     return null;
                 }
         );
-
-        // Trigger package update
-        service.onPackagesChanged(false, new String[]{"package"}, new int[]{0});
-
-        assertFalse(service.isComponentEnabledForCurrentProfiles(unapprovedComponent));
-        assertTrue(service.isComponentEnabledForCurrentProfiles(approvedComponent));
-    }
-
-    @Test
-    public void testUpgradeAppNoIntentFilterNoRebind() throws Exception {
-        Context context = spy(getContext());
-        doReturn(true).when(context).bindServiceAsUser(any(), any(), anyInt(), any());
-
-        ManagedServices service = new TestManagedServices(context, mLock, mUserProfiles,
-                mIpm, APPROVAL_BY_COMPONENT);
-
-        List<String> packages = new ArrayList<>();
-        packages.add("package");
-        addExpectedServices(service, packages, 0);
-
-        final ComponentName unapprovedComponent = ComponentName.unflattenFromString("package/C1");
-        final ComponentName approvedComponent = ComponentName.unflattenFromString("package/C2");
-
-        // Both components are approved initially
-        mExpectedPrimaryComponentNames.clear();
-        mExpectedPrimaryPackages.clear();
-        mExpectedPrimaryComponentNames.put(0, "package/C1:package/C2");
-        mExpectedSecondaryComponentNames.clear();
-        mExpectedSecondaryPackages.clear();
-
-        loadXml(service);
-
-        //Component package/C1 loses serviceInterface intent filter
-        ManagedServices.Config config = service.getConfig();
-        when(mPm.queryIntentServicesAsUser(any(), anyInt(), anyInt())).
-            thenAnswer(new Answer<List<ResolveInfo>>() {
-                @Override
-                public List<ResolveInfo> answer(InvocationOnMock invocationOnMock)
-                    throws Throwable {
-                    Object[] args = invocationOnMock.getArguments();
-                    Intent invocationIntent = (Intent) args[0];
-                    if (invocationIntent != null) {
-                        if (invocationIntent.getAction().equals(config.serviceInterface)
-                            && packages.contains(invocationIntent.getPackage())) {
-                            List<ResolveInfo> dummyServices = new ArrayList<>();
-                            ResolveInfo resolveInfo = new ResolveInfo();
-                            ServiceInfo serviceInfo = new ServiceInfo();
-                            serviceInfo.packageName = invocationIntent.getPackage();
-                            serviceInfo.name = approvedComponent.getClassName();
-                            serviceInfo.permission = service.getConfig().bindPermission;
-                            resolveInfo.serviceInfo = serviceInfo;
-                            dummyServices.add(resolveInfo);
-                            return dummyServices;
-                        }
-                    }
-                    return new ArrayList<>();
-                }
-            });
 
         // Trigger package update
         service.onPackagesChanged(false, new String[]{"package"}, new int[]{0});
@@ -2002,7 +1944,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
         metaDataAutobindAllow.putBoolean(META_DATA_DEFAULT_AUTOBIND, true);
         metaDatas.put(cn_allowed, metaDataAutobindAllow);
 
-        mockServiceInfoWithMetaData(componentNames, service, pm, metaDatas);
+        mockServiceInfoWithMetaData(componentNames, service, metaDatas);
 
         service.addApprovedList(cn_allowed.flattenToString(), 0, true);
         service.addApprovedList(cn_disallowed.flattenToString(), 0, true);
@@ -2047,7 +1989,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
         metaDataAutobindDisallow.putBoolean(META_DATA_DEFAULT_AUTOBIND, false);
         metaDatas.put(cn_disallowed, metaDataAutobindDisallow);
 
-        mockServiceInfoWithMetaData(componentNames, service, pm, metaDatas);
+        mockServiceInfoWithMetaData(componentNames, service, metaDatas);
 
         service.addApprovedList(cn_disallowed.flattenToString(), 0, true);
 
@@ -2086,7 +2028,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
         metaDataAutobindDisallow.putBoolean(META_DATA_DEFAULT_AUTOBIND, false);
         metaDatas.put(cn_disallowed, metaDataAutobindDisallow);
 
-        mockServiceInfoWithMetaData(componentNames, service, pm, metaDatas);
+        mockServiceInfoWithMetaData(componentNames, service, metaDatas);
 
         service.addApprovedList(cn_disallowed.flattenToString(), 0, true);
 
@@ -2157,8 +2099,8 @@ public class ManagedServicesTest extends UiServiceTestCase {
     }
 
     private void mockServiceInfoWithMetaData(List<ComponentName> componentNames,
-            ManagedServices service, PackageManager packageManager,
-            ArrayMap<ComponentName, Bundle> metaDatas) throws RemoteException {
+            ManagedServices service, ArrayMap<ComponentName, Bundle> metaDatas)
+            throws RemoteException {
         when(mIpm.getServiceInfo(any(), anyLong(), anyInt())).thenAnswer(
                 (Answer<ServiceInfo>) invocation -> {
                     ComponentName invocationCn = invocation.getArgument(0);
@@ -2173,39 +2115,6 @@ public class ManagedServicesTest extends UiServiceTestCase {
                     return null;
                 }
         );
-
-        // add components to queryIntentServicesAsUser response
-        final List<String> packages = new ArrayList<>();
-        for (ComponentName cn: componentNames) {
-            packages.add(cn.getPackageName());
-        }
-        ManagedServices.Config config = service.getConfig();
-        when(packageManager.queryIntentServicesAsUser(any(), anyInt(), anyInt())).
-                thenAnswer(new Answer<List<ResolveInfo>>() {
-                @Override
-                public List<ResolveInfo> answer(InvocationOnMock invocationOnMock)
-                    throws Throwable {
-                    Object[] args = invocationOnMock.getArguments();
-                    Intent invocationIntent = (Intent) args[0];
-                    if (invocationIntent != null) {
-                        if (invocationIntent.getAction().equals(config.serviceInterface)
-                            && packages.contains(invocationIntent.getPackage())) {
-                            List<ResolveInfo> dummyServices = new ArrayList<>();
-                            for (ComponentName cn: componentNames) {
-                                ResolveInfo resolveInfo = new ResolveInfo();
-                                ServiceInfo serviceInfo = new ServiceInfo();
-                                serviceInfo.packageName = invocationIntent.getPackage();
-                                serviceInfo.name = cn.getClassName();
-                                serviceInfo.permission = service.getConfig().bindPermission;
-                                resolveInfo.serviceInfo = serviceInfo;
-                                dummyServices.add(resolveInfo);
-                            }
-                            return dummyServices;
-                        }
-                    }
-                    return new ArrayList<>();
-                }
-            });
     }
 
     private void resetComponentsAndPackages() {
