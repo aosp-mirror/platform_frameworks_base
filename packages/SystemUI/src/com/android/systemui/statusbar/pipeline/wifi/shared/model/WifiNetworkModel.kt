@@ -50,7 +50,6 @@ sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
 
         override fun logFull(row: TableRowLogger) {
             row.logChange(COL_NETWORK_TYPE, TYPE_UNAVAILABLE)
-            row.logChange(COL_NETWORK_ID, NETWORK_ID_DEFAULT)
             row.logChange(COL_SUB_ID, SUB_ID_DEFAULT)
             row.logChange(COL_VALIDATED, false)
             row.logChange(COL_LEVEL, LEVEL_DEFAULT)
@@ -80,7 +79,6 @@ sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
 
         override fun logFull(row: TableRowLogger) {
             row.logChange(COL_NETWORK_TYPE, "$TYPE_UNAVAILABLE $invalidReason")
-            row.logChange(COL_NETWORK_ID, NETWORK_ID_DEFAULT)
             row.logChange(COL_SUB_ID, SUB_ID_DEFAULT)
             row.logChange(COL_VALIDATED, false)
             row.logChange(COL_LEVEL, LEVEL_DEFAULT)
@@ -105,7 +103,6 @@ sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
 
         override fun logFull(row: TableRowLogger) {
             row.logChange(COL_NETWORK_TYPE, TYPE_INACTIVE)
-            row.logChange(COL_NETWORK_ID, NETWORK_ID_DEFAULT)
             row.logChange(COL_SUB_ID, SUB_ID_DEFAULT)
             row.logChange(COL_VALIDATED, false)
             row.logChange(COL_LEVEL, LEVEL_DEFAULT)
@@ -122,14 +119,6 @@ sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
      * See [android.net.wifi.WifiInfo.isCarrierMerged] for more information.
      */
     data class CarrierMerged(
-        /**
-         * The [android.net.Network.netId] we received from
-         * [android.net.ConnectivityManager.NetworkCallback] in association with this wifi network.
-         *
-         * Importantly, **not** [android.net.wifi.WifiInfo.getNetworkId].
-         */
-        val networkId: Int,
-
         /**
          * The subscription ID that this connection represents.
          *
@@ -162,9 +151,6 @@ sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
                 return
             }
 
-            if (prevVal.networkId != networkId) {
-                row.logChange(COL_NETWORK_ID, networkId)
-            }
             if (prevVal.subscriptionId != subscriptionId) {
                 row.logChange(COL_SUB_ID, subscriptionId)
             }
@@ -178,7 +164,6 @@ sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
 
         override fun logFull(row: TableRowLogger) {
             row.logChange(COL_NETWORK_TYPE, TYPE_CARRIER_MERGED)
-            row.logChange(COL_NETWORK_ID, networkId)
             row.logChange(COL_SUB_ID, subscriptionId)
             row.logChange(COL_VALIDATED, true)
             row.logChange(COL_LEVEL, level)
@@ -190,14 +175,6 @@ sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
 
     /** Provides information about an active wifi network. */
     data class Active(
-        /**
-         * The [android.net.Network.netId] we received from
-         * [android.net.ConnectivityManager.NetworkCallback] in association with this wifi network.
-         *
-         * Importantly, **not** [android.net.wifi.WifiInfo.getNetworkId].
-         */
-        val networkId: Int,
-
         /** See [android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED]. */
         val isValidated: Boolean = false,
 
@@ -231,9 +208,6 @@ sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
                 return
             }
 
-            if (prevVal.networkId != networkId) {
-                row.logChange(COL_NETWORK_ID, networkId)
-            }
             if (prevVal.isValidated != isValidated) {
                 row.logChange(COL_VALIDATED, isValidated)
             }
@@ -250,7 +224,6 @@ sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
 
         override fun logFull(row: TableRowLogger) {
             row.logChange(COL_NETWORK_TYPE, TYPE_ACTIVE)
-            row.logChange(COL_NETWORK_ID, networkId)
             row.logChange(COL_SUB_ID, null)
             row.logChange(COL_VALIDATED, isValidated)
             row.logChange(COL_LEVEL, level)
@@ -309,7 +282,6 @@ const val TYPE_INACTIVE = "Inactive"
 const val TYPE_ACTIVE = "Active"
 
 const val COL_NETWORK_TYPE = "type"
-const val COL_NETWORK_ID = "networkId"
 const val COL_SUB_ID = "subscriptionId"
 const val COL_VALIDATED = "isValidated"
 const val COL_LEVEL = "level"
@@ -319,5 +291,4 @@ const val COL_HOTSPOT = "hotspot"
 
 val LEVEL_DEFAULT: String? = null
 val NUM_LEVELS_DEFAULT: String? = null
-val NETWORK_ID_DEFAULT: String? = null
 val SUB_ID_DEFAULT: String? = null

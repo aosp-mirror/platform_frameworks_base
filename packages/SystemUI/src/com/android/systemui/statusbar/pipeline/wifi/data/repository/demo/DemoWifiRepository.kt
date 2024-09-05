@@ -101,7 +101,6 @@ constructor(
 
     private fun FakeWifiEventModel.Wifi.toWifiNetworkModel(): WifiNetworkModel =
         WifiNetworkModel.Active(
-            networkId = DEMO_NET_ID,
             isValidated = validated ?: true,
             level = level ?: 0,
             ssid = ssid ?: DEMO_NET_SSID,
@@ -110,14 +109,12 @@ constructor(
 
     private fun FakeWifiEventModel.CarrierMerged.toCarrierMergedModel(): WifiNetworkModel =
         WifiNetworkModel.CarrierMerged(
-            networkId = DEMO_NET_ID,
             subscriptionId = subscriptionId,
             level = level,
             numberOfLevels = numberOfLevels,
         )
 
     companion object {
-        private const val DEMO_NET_ID = 1234
         private const val DEMO_NET_SSID = "Demo SSID"
     }
 }

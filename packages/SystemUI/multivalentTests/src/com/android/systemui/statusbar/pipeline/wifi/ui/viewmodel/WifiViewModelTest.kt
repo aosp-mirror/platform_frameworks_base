@@ -113,9 +113,7 @@ class WifiViewModelTest : SysuiTestCase() {
             val latestKeyguard by collectLastValue(keyguard.wifiIcon)
             val latestQs by collectLastValue(qs.wifiIcon)
 
-            wifiRepository.setWifiNetwork(
-                WifiNetworkModel.Active(NETWORK_ID, isValidated = true, level = 1)
-            )
+            wifiRepository.setWifiNetwork(WifiNetworkModel.Active(isValidated = true, level = 1))
 
             assertThat(latestHome).isInstanceOf(WifiIcon.Visible::class.java)
             assertThat(latestHome).isEqualTo(latestKeyguard)
@@ -130,7 +128,6 @@ class WifiViewModelTest : SysuiTestCase() {
             // Even WHEN the network has a valid hotspot type
             wifiRepository.setWifiNetwork(
                 WifiNetworkModel.Active(
-                    NETWORK_ID,
                     isValidated = true,
                     level = 1,
                     hotspotDeviceType = WifiNetworkModel.HotspotDeviceType.LAPTOP,
@@ -192,9 +189,7 @@ class WifiViewModelTest : SysuiTestCase() {
             whenever(connectivityConstants.shouldShowActivityConfig).thenReturn(true)
             createAndSetViewModel()
 
-            wifiRepository.setWifiNetwork(
-                WifiNetworkModel.Active(NETWORK_ID, ssid = null, level = 1)
-            )
+            wifiRepository.setWifiNetwork(WifiNetworkModel.Active(ssid = null, level = 1))
 
             val activityIn by collectLastValue(underTest.isActivityInViewVisible)
             val activityOut by collectLastValue(underTest.isActivityOutViewVisible)
@@ -217,9 +212,7 @@ class WifiViewModelTest : SysuiTestCase() {
             whenever(connectivityConstants.shouldShowActivityConfig).thenReturn(true)
             createAndSetViewModel()
 
-            wifiRepository.setWifiNetwork(
-                WifiNetworkModel.Active(NETWORK_ID, ssid = null, level = 1)
-            )
+            wifiRepository.setWifiNetwork(WifiNetworkModel.Active(ssid = null, level = 1))
 
             val activityIn by collectLastValue(underTest.isActivityInViewVisible)
             val activityOut by collectLastValue(underTest.isActivityOutViewVisible)
@@ -468,8 +461,6 @@ class WifiViewModelTest : SysuiTestCase() {
     }
 
     companion object {
-        private const val NETWORK_ID = 2
-        private val ACTIVE_VALID_WIFI_NETWORK =
-            WifiNetworkModel.Active(NETWORK_ID, ssid = "AB", level = 1)
+        private val ACTIVE_VALID_WIFI_NETWORK = WifiNetworkModel.Active(ssid = "AB", level = 1)
     }
 }

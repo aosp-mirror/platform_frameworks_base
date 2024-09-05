@@ -260,7 +260,6 @@ constructor(
             WifiNetworkModel.Invalid(CARRIER_MERGED_INVALID_SUB_ID_REASON)
         } else {
             WifiNetworkModel.CarrierMerged(
-                networkId = NETWORK_ID,
                 subscriptionId = this.subscriptionId,
                 level = this.level,
                 // WifiManager APIs to calculate the signal level start from 0, so
@@ -295,7 +294,6 @@ constructor(
             }
 
         return WifiNetworkModel.Active(
-            networkId = NETWORK_ID,
             isValidated = this.hasInternetAccess(),
             level = currentLevel,
             ssid = this.title,
@@ -442,19 +440,5 @@ constructor(
         val ACTIVITY_DEFAULT = DataActivityModel(hasActivityIn = false, hasActivityOut = false)
 
         private const val TAG = "WifiTrackerLibInputLog"
-
-        /**
-         * [WifiNetworkModel.Active.networkId] is only used at the repository layer. It's used by
-         * [WifiRepositoryImpl], which tracks the ID in order to correctly apply the framework
-         * callbacks within the repository.
-         *
-         * Since this class does not need to manually apply framework callbacks and since the
-         * network ID is not used beyond the repository, it's safe to use an invalid ID in this
-         * repository.
-         *
-         * The [WifiNetworkModel.Active.networkId] field should be deleted once we've fully migrated
-         * to [WifiRepositoryImpl].
-         */
-        private const val NETWORK_ID = -1
     }
 }

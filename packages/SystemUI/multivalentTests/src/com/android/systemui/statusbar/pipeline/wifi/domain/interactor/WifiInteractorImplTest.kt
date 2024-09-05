@@ -93,7 +93,7 @@ class WifiInteractorImplTest : SysuiTestCase() {
     fun ssid_carrierMergedNetwork_outputsNull() =
         testScope.runTest {
             wifiRepository.setWifiNetwork(
-                WifiNetworkModel.CarrierMerged(networkId = 1, subscriptionId = 2, level = 1)
+                WifiNetworkModel.CarrierMerged(subscriptionId = 2, level = 1)
             )
 
             var latest: String? = "default"
@@ -110,7 +110,6 @@ class WifiInteractorImplTest : SysuiTestCase() {
         testScope.runTest {
             wifiRepository.setWifiNetwork(
                 WifiNetworkModel.Active(
-                    networkId = 1,
                     level = 1,
                     ssid = WifiManager.UNKNOWN_SSID,
                 )
@@ -130,7 +129,6 @@ class WifiInteractorImplTest : SysuiTestCase() {
         testScope.runTest {
             wifiRepository.setWifiNetwork(
                 WifiNetworkModel.Active(
-                    networkId = 1,
                     level = 1,
                     ssid = "MyAwesomeWifiNetwork",
                 )
@@ -192,7 +190,6 @@ class WifiInteractorImplTest : SysuiTestCase() {
         testScope.runTest {
             val wifiNetwork =
                 WifiNetworkModel.Active(
-                    networkId = 45,
                     isValidated = true,
                     level = 3,
                     ssid = "AB",
@@ -303,7 +300,6 @@ class WifiInteractorImplTest : SysuiTestCase() {
             wifiRepository.setWifiNetwork(
                 WifiNetworkModel.Active(
                     ssid = "ssid 2",
-                    networkId = 1,
                     level = 2,
                 )
             )
@@ -324,7 +320,6 @@ class WifiInteractorImplTest : SysuiTestCase() {
             wifiRepository.setWifiNetwork(
                 WifiNetworkModel.Active(
                     ssid = "ssid 2",
-                    networkId = 1,
                     level = 2,
                 )
             )
