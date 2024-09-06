@@ -60,7 +60,9 @@ public final class RavenwoodEnvironment {
     public static void ensureRavenwoodInitialized() {
     }
 
-    private static native void ensureRavenwoodInitialized$ravenwood();
+    private static void ensureRavenwoodInitialized$ravenwood() {
+        nativeEnsureRavenwoodInitialized();
+    }
 
     /**
      * USE IT SPARINGLY! Returns true if it's running on Ravenwood, hostside test environment.
@@ -92,7 +94,9 @@ public final class RavenwoodEnvironment {
         throw notSupportedOnDevice();
     }
 
-    private native <T> T fromAddress$ravenwood(long address);
+    private <T> T fromAddress$ravenwood(long address) {
+        return nativeFromAddress(address);
+    }
 
     /**
      * See {@link Workaround}. It's only usable on Ravenwood.
@@ -114,7 +118,14 @@ public final class RavenwoodEnvironment {
         throw notSupportedOnDevice();
     }
 
-    private native String getRavenwoodRuntimePath$ravenwood();
+    private String getRavenwoodRuntimePath$ravenwood() {
+        return nativeGetRavenwoodRuntimePath();
+    }
+
+    // Private native methods that are actually substituted on Ravenwood
+    private native <T> T nativeFromAddress(long address);
+    private native String nativeGetRavenwoodRuntimePath();
+    private static native void nativeEnsureRavenwoodInitialized();
 
     /**
      * A set of APIs used to work around missing features on Ravenwood. Ideally, this class should

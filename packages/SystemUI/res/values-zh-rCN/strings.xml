@@ -104,10 +104,11 @@
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> 及其他打开的应用检测到此屏幕截图。"</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"添加到备注中"</string>
     <string name="backlinks_include_link" msgid="4562093591148248158">"包括链接"</string>
+    <string name="backlinks_duplicate_label_format" msgid="558445128952827926">"<xliff:g id="APPNAME">%1$s</xliff:g> <xliff:g id="FREQUENCYCOUNT">(%2$d)</xliff:g>⁠"</string>
     <string name="screenrecord_title" msgid="4257171601439507792">"屏幕录制器"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"正在处理屏幕录制视频"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"持续显示屏幕录制会话通知"</string>
-    <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"要录制屏幕？"</string>
+    <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"要录制屏幕吗？"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"录制单个应用"</string>
     <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"录制整个屏幕"</string>
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"录制整个屏幕时，屏幕上显示的所有内容均会被录制。因此，请务必小心操作，谨防泄露密码、付款信息、消息、照片、音频、视频等。"</string>
@@ -291,7 +292,8 @@
     <string name="start_dreams" msgid="9131802557946276718">"屏保"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"有线网络"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"勿扰"</string>
-    <string name="quick_settings_modes_label" msgid="5407025818652750501">"优先模式"</string>
+    <!-- no translation found for quick_settings_modes_label (879156359479504244) -->
+    <skip />
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"蓝牙"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"没有可用的配对设备"</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"点按即可连接设备或断开设备连接"</string>
@@ -300,6 +302,7 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"启用蓝牙"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"已连接"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"音频分享"</string>
+    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="3227408556754456024">"点按即可切换或分享音频"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"已保存"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"断开连接"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"启用"</string>
@@ -431,7 +434,8 @@
     <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"打开“设置”"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"其他设备"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"切换概览"</string>
-    <string name="zen_modes_dialog_title" msgid="4159138230418567383">"优先模式"</string>
+    <!-- no translation found for zen_modes_dialog_title (8854640808100096934) -->
+    <skip />
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"完成"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"设置"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"已开启"</string>
@@ -532,8 +536,12 @@
     <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"在录制或投放内容时，提供此功能的服务将可访问屏幕上显示或设备中播放的所有信息，其中包括密码、付款信息、照片、消息及播放的音频等信息。"</string>
     <string name="screen_share_generic_app_selector_title" msgid="8331515850599218288">"分享或录制应用"</string>
     <string name="media_projection_entry_app_permission_dialog_title" msgid="4613857256721708062">"要与“<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>”共享屏幕吗？"</string>
-    <string name="media_projection_entry_app_permission_dialog_option_text_single_app" msgid="6314402084788062644">"共享一个应用"</string>
-    <string name="media_projection_entry_app_permission_dialog_option_text_entire_screen" msgid="7381488112332599632">"共享整个屏幕"</string>
+    <string name="screen_share_permission_dialog_option_single_app" msgid="2974054871681567314">"共享一个应用"</string>
+    <!-- no translation found for media_projection_entry_app_permission_dialog_option_text_single_app (2308901434964846084) -->
+    <skip />
+    <string name="screen_share_permission_dialog_option_entire_screen" msgid="4493174362775038997">"共享整个屏幕"</string>
+    <!-- no translation found for media_projection_entry_app_permission_dialog_option_text_entire_screen (5100078808078139706) -->
+    <skip />
     <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="5504288438067851086">"当您共享整个屏幕时，屏幕上的所有内容均对“<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>”可见。因此，请务必小心操作，谨防泄露密码、付款信息、消息、照片、音频、视频等。"</string>
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="7094417930857938876">"当您共享一个应用时，该应用中显示或播放的所有内容均对“<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>”可见。因此，请务必小心操作，谨防泄露密码、付款信息、消息、照片、音频、视频等。"</string>
     <string name="media_projection_entry_app_permission_dialog_continue_entire_screen" msgid="1850848182344377579">"共享屏幕"</string>
@@ -718,8 +726,7 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"卫星，连接质量良好"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"卫星，可连接"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"卫星紧急呼救"</string>
-    <!-- no translation found for satellite_emergency_only_carrier_text (828510231597991206) -->
-    <skip />
+    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"紧急呼叫或紧急求救"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"工作资料"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"并不适合所有用户"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"系统界面调节工具可让您以更多方式调整及定制 Android 界面。在日后推出的版本中，这些实验性功能可能会变更、失效或消失。操作时请务必谨慎。"</string>
@@ -1386,6 +1393,18 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"收起图标"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"展开图标"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"或"</string>
+    <!-- no translation found for launch_keyboard_tutorial_notification_title (8849933155160522519) -->
+    <skip />
+    <!-- no translation found for launch_keyboard_tutorial_notification_content (2880339951512757918) -->
+    <skip />
+    <!-- no translation found for launch_touchpad_tutorial_notification_title (2243780062772196901) -->
+    <skip />
+    <!-- no translation found for launch_touchpad_tutorial_notification_content (7931085031240753226) -->
+    <skip />
+    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_title (1940023776496198762) -->
+    <skip />
+    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_content (1780725168171929365) -->
+    <skip />
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"返回手势"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"主屏幕手势"</string>
     <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"快捷操作按键"</string>

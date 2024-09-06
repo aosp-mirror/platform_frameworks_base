@@ -31,19 +31,19 @@ import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.shared.quickaffordance.ActivationState
+import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.policy.ZenModeController
+import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
-import com.android.systemui.util.settings.FakeSettings
+import com.android.systemui.util.settings.fakeSettings
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestDispatcher
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -63,26 +63,23 @@ import org.mockito.MockitoAnnotations
 @RunWith(AndroidJUnit4::class)
 class DoNotDisturbQuickAffordanceConfigTest : SysuiTestCase() {
 
+    private val kosmos = testKosmos()
+    private val testDispatcher = kosmos.testDispatcher
+    private val testScope = kosmos.testScope
+    private val settings = kosmos.fakeSettings
+
     @Mock private lateinit var zenModeController: ZenModeController
     @Mock private lateinit var userTracker: UserTracker
     @Mock private lateinit var conditionUri: Uri
     @Mock private lateinit var enableZenModeDialog: EnableZenModeDialog
     @Captor private lateinit var spyZenMode: ArgumentCaptor<Int>
     @Captor private lateinit var spyConditionId: ArgumentCaptor<Uri?>
-    private lateinit var settings: FakeSettings
 
     private lateinit var underTest: DoNotDisturbQuickAffordanceConfig
-    private lateinit var testDispatcher: TestDispatcher
-    private lateinit var testScope: TestScope
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-
-        testDispatcher = StandardTestDispatcher()
-        testScope = TestScope(testDispatcher)
-
-        settings = FakeSettings()
 
         underTest =
             DoNotDisturbQuickAffordanceConfig(

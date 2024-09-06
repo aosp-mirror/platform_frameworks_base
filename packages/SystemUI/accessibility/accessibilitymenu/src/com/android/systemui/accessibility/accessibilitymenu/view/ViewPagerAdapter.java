@@ -36,9 +36,17 @@ class ViewPagerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     /** List of shortcuts, split into sub lists per page */
     private List<List<A11yMenuShortcut>> mShortcutList;
     private final AccessibilityMenuService mService;
+    private int mVerticalSpacing = 0;
 
     ViewPagerAdapter(AccessibilityMenuService service) {
         mService = service;
+    }
+
+    public void setVerticalSpacing(int spacing) {
+        if (mVerticalSpacing != spacing) {
+            mVerticalSpacing = spacing;
+            notifyDataSetChanged();
+        }
     }
 
     public void set(List<List<A11yMenuShortcut>> tList) {
@@ -57,10 +65,11 @@ class ViewPagerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         A11yMenuAdapter adapter = new A11yMenuAdapter(
-                mService, holder.itemView.getContext(), mShortcutList.get(position));
+                mService, mShortcutList.get(position));
         GridView gridView = (GridView) holder.itemView;
         gridView.setNumColumns(A11yMenuViewPager.GridViewParams.getGridColumnCount(mService));
         gridView.setAdapter(adapter);
+        gridView.setVerticalSpacing(mVerticalSpacing);
     }
 
     @Override

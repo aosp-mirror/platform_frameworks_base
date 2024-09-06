@@ -1286,7 +1286,10 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 pw.println("  " + mSupportedModes.valueAt(i));
             }
             pw.println("mSupportedColorModes=" + mSupportedColorModes);
-            pw.println("mDisplayDeviceConfig=" + mDisplayDeviceConfig);
+            pw.println("");
+            pw.println("DisplayDeviceConfig: ");
+            pw.println("---------------------");
+            pw.println(mDisplayDeviceConfig);
         }
 
         private int findSfDisplayModeIdLocked(int displayModeId, int modeGroup) {

@@ -120,7 +120,9 @@ class PreAuthInfo {
                         userId), trustManager)) {
             isMandatoryBiometricsAuthentication = true;
             promptInfo.setAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG);
-            promptInfo.setNegativeButtonText(context.getString(R.string.cancel));
+            if (promptInfo.getNegativeButtonText() == null) {
+                promptInfo.setNegativeButtonText(context.getString(R.string.cancel));
+            }
         }
 
         final boolean biometricRequested = Utils.isBiometricRequested(promptInfo);

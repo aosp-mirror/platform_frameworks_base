@@ -83,7 +83,16 @@ oneway interface ISatellite {
      * is enabled, this may also disable the cellular modem, and if the satellite modem is disabled,
      * this may also re-enable the cellular modem.
      *
+     * Framework might send an enable request to update the enable attributes of an already-started
+     * satellite session. In such cases, modem needs to apply the new enable attrbitues to the
+     * satellite session. Moreover, modem needs to report its current state and signal strength
+     * level to framework right after receiving this request from framework.
+     *
+     * Framework might send a disable request when an enable request is being processed. In such
+     * cases, modem needs to abort the enable request and process the disable request.
+     *
      * @param enableAttributes The enable parameters that will be applied to the satellite session
+     * @param resultCallback The callback to receive the error code result of the operation.
      *
      * Valid result codes returned:
      *   SatelliteResult:SATELLITE_RESULT_SUCCESS

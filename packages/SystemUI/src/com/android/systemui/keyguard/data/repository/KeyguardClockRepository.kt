@@ -101,7 +101,7 @@ constructor(
         secureSettings
             .observerFlow(
                 names = arrayOf(Settings.Secure.LOCKSCREEN_USE_DOUBLE_LINE_CLOCK),
-                userId = UserHandle.USER_SYSTEM,
+                userId = UserHandle.USER_ALL,
             )
             .onStart { emit(Unit) } // Forces an initial update.
             .map { withContext(backgroundDispatcher) { getClockSize() } }

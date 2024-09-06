@@ -28,12 +28,11 @@ import android.util.SparseArray;
 
 import com.android.internal.os.Clock;
 import com.android.internal.os.PowerStats;
+import com.android.server.power.stats.format.WifiPowerStatsLayout;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
 public class WifiPowerStatsCollector extends PowerStatsCollector {
@@ -41,15 +40,13 @@ public class WifiPowerStatsCollector extends PowerStatsCollector {
 
     private static final long WIFI_ACTIVITY_REQUEST_TIMEOUT = 20000;
 
-    private static final long ENERGY_UNSPECIFIED = -1;
-
     interface Observer {
         void onWifiPowerStatsRetrieved(WifiActivityEnergyInfo info,
                 List<BatteryStatsImpl.NetworkStatsDelta> delta, long elapsedRealtimeMs,
                 long uptimeMs);
     }
 
-    interface WifiStatsRetriever {
+    public interface WifiStatsRetriever {
         interface Callback {
             void onWifiScanTime(int uid, long scanTimeMs, long batchScanTimeMs);
         }
@@ -58,14 +55,13 @@ public class WifiPowerStatsCollector extends PowerStatsCollector {
         long getWifiActiveDuration();
     }
 
-    interface Injector {
+    public interface Injector {
         Handler getHandler();
         Clock getClock();
         PowerStatsUidResolver getUidResolver();
         long getPowerStatsCollectionThrottlePeriod(String powerComponentName);
         PackageManager getPackageManager();
         ConsumedEnergyRetriever getConsumedEnergyRetriever();
-        IntSupplier getVoltageSupplier();
         Supplier<NetworkStats> getWifiNetworkStatsSupplier();
         WifiManager getWifiManager();
         WifiStatsRetriever getWifiStatsRetriever();
@@ -83,13 +79,9 @@ public class WifiPowerStatsCollector extends PowerStatsCollector {
     private volatile WifiManager mWifiManager;
     private volatile Supplier<NetworkStats> mNetworkStatsSupplier;
     private volatile WifiStatsRetriever mWifiStatsRetriever;
-    private ConsumedEnergyRetriever mConsumedEnergyRetriever;
-    private IntSupplier mVoltageSupplier;
-    private int[] mEnergyConsumerIds = new int[0];
+    private ConsumedEnergyHelper mConsumedEnergyHelper;
     private WifiActivityEnergyInfo mLastWifiActivityInfo;
     private NetworkStats mLastNetworkStats;
-    private long[] mLastConsumedEnergyUws;
-    private int mLastVoltageMv;
 
     private static class WifiScanTimes {
         public long basicScanTimeMs;
@@ -99,7 +91,7 @@ public class WifiPowerStatsCollector extends PowerStatsCollector {
     private final SparseArray<WifiScanTimes> mLastScanTimes = new SparseArray<>();
     private long mLastWifiActiveDuration;
 
-    WifiPowerStatsCollector(Injector injector, Observer observer) {
+    public WifiPowerStatsCollector(Injector injector, Observer observer) {
         super(injector.getHandler(), injector.getPowerStatsCollectionThrottlePeriod(
                         BatteryConsumer.powerComponentIdToString(
                                 BatteryConsumer.POWER_COMPONENT_WIFI)),
@@ -128,25 +120,17 @@ public class WifiPowerStatsCollector extends PowerStatsCollector {
             return false;
         }
 
-        mConsumedEnergyRetriever = mInjector.getConsumedEnergyRetriever();
-        mVoltageSupplier = mInjector.getVoltageSupplier();
         mWifiManager = mInjector.getWifiManager();
         mNetworkStatsSupplier = mInjector.getWifiNetworkStatsSupplier();
         mWifiStatsRetriever = mInjector.getWifiStatsRetriever();
         mPowerReportingSupported =
                 mWifiManager != null && mWifiManager.isEnhancedPowerReportingSupported();
 
-        mEnergyConsumerIds = mConsumedEnergyRetriever.getEnergyConsumerIds(EnergyConsumerType.WIFI);
-        mLastConsumedEnergyUws = new long[mEnergyConsumerIds.length];
-        Arrays.fill(mLastConsumedEnergyUws, ENERGY_UNSPECIFIED);
+        mConsumedEnergyHelper = new ConsumedEnergyHelper(mInjector.getConsumedEnergyRetriever(),
+                EnergyConsumerType.WIFI);
 
-        mLayout = new WifiPowerStatsLayout();
-        mLayout.addDeviceWifiActivity(mPowerReportingSupported);
-        mLayout.addDeviceSectionEnergyConsumers(mEnergyConsumerIds.length);
-        mLayout.addUidNetworkStats();
-        mLayout.addDeviceSectionUsageDuration();
-        mLayout.addDeviceSectionPowerEstimate();
-        mLayout.addUidSectionPowerEstimate();
+        mLayout = new WifiPowerStatsLayout(mConsumedEnergyHelper.getEnergyConsumerCount(),
+                mPowerReportingSupported);
 
         PersistableBundle extras = new PersistableBundle();
         mLayout.toExtras(extras);
@@ -162,7 +146,7 @@ public class WifiPowerStatsCollector extends PowerStatsCollector {
     }
 
     @Override
-    protected PowerStats collectStats() {
+    public PowerStats collectStats() {
         if (!ensureInitialized()) {
             return null;
         }
@@ -176,9 +160,7 @@ public class WifiPowerStatsCollector extends PowerStatsCollector {
         List<BatteryStatsImpl.NetworkStatsDelta> networkStatsDeltas = collectNetworkStats();
         collectWifiScanTime();
 
-        if (mEnergyConsumerIds.length != 0) {
-            collectEnergyConsumers();
-        }
+        mConsumedEnergyHelper.collectConsumedEnergy(mPowerStats, mLayout);
 
         if (mObserver != null) {
             mObserver.onWifiPowerStatsRetrieved(activityInfo, networkStatsDeltas,
@@ -316,34 +298,6 @@ public class WifiPowerStatsCollector extends PowerStatsCollector {
 
         mLayout.setDeviceBasicScanTime(mDeviceStats, mScanTimes.basicScanTimeMs);
         mLayout.setDeviceBatchedScanTime(mDeviceStats, mScanTimes.batchedScanTimeMs);
-    }
-
-    private void collectEnergyConsumers() {
-        int voltageMv = mVoltageSupplier.getAsInt();
-        if (voltageMv <= 0) {
-            Slog.wtf(TAG, "Unexpected battery voltage (" + voltageMv
-                    + " mV) when querying energy consumers");
-            return;
-        }
-
-        int averageVoltage = mLastVoltageMv != 0 ? (mLastVoltageMv + voltageMv) / 2 : voltageMv;
-        mLastVoltageMv = voltageMv;
-
-        long[] energyUws = mConsumedEnergyRetriever.getConsumedEnergyUws(mEnergyConsumerIds);
-        if (energyUws == null) {
-            return;
-        }
-
-        for (int i = energyUws.length - 1; i >= 0; i--) {
-            long energyDelta = mLastConsumedEnergyUws[i] != ENERGY_UNSPECIFIED
-                    ? energyUws[i] - mLastConsumedEnergyUws[i] : 0;
-            if (energyDelta < 0) {
-                // Likely, restart of powerstats HAL
-                energyDelta = 0;
-            }
-            mLayout.setConsumedEnergy(mPowerStats.stats, i, uJtoUc(energyDelta, averageVoltage));
-            mLastConsumedEnergyUws[i] = energyUws[i];
-        }
     }
 
     @Override

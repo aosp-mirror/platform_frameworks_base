@@ -54,3 +54,13 @@ android_test {
         "automotive-tests",
     ],
 }
+
+test_module_config {
+    name: "RollbackPackageHealthObserverTests_server_rollback",
+    base: "RollbackPackageHealthObserverTests",
+    test_suites: [
+        "automotive-tests",
+        "device-tests",
+    ],
+    include_filters: ["com.android.server.rollback"],
+}

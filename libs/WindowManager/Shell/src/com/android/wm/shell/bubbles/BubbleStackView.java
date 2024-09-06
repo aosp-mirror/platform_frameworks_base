@@ -24,10 +24,10 @@ import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME
 import static com.android.wm.shell.bubbles.BubblePositioner.NUM_VISIBLE_WHEN_RESTING;
 import static com.android.wm.shell.bubbles.BubblePositioner.StackPinnedEdge.LEFT;
 import static com.android.wm.shell.bubbles.BubblePositioner.StackPinnedEdge.RIGHT;
-import static com.android.wm.shell.common.bubbles.BubbleConstants.BUBBLE_EXPANDED_SCRIM_ALPHA;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_BUBBLES;
 import static com.android.wm.shell.shared.animation.Interpolators.ALPHA_IN;
 import static com.android.wm.shell.shared.animation.Interpolators.ALPHA_OUT;
+import static com.android.wm.shell.shared.bubbles.BubbleConstants.BUBBLE_EXPANDED_SCRIM_ALPHA;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -91,8 +91,8 @@ import com.android.wm.shell.bubbles.animation.PhysicsAnimationLayout;
 import com.android.wm.shell.bubbles.animation.StackAnimationController;
 import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.ShellExecutor;
-import com.android.wm.shell.common.bubbles.DismissView;
-import com.android.wm.shell.common.bubbles.RelativeTouchListener;
+import com.android.wm.shell.shared.bubbles.DismissView;
+import com.android.wm.shell.shared.bubbles.RelativeTouchListener;
 import com.android.wm.shell.shared.animation.Interpolators;
 import com.android.wm.shell.shared.animation.PhysicsAnimator;
 import com.android.wm.shell.shared.magnetictarget.MagnetizedObject;

@@ -51,6 +51,7 @@ import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
 import android.service.notification.StatusBarNotification;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -429,6 +430,32 @@ public class StatusBarIconViewTest extends SysuiTestCase {
         float scaleToFitSpIconSize = (float) spIconSize / dpIconSize;
         assertEquals(scaleToFitDrawingSize * scaleToFitSpIconSize,
                 mIconView.getIconScale(), 0.01f);
+    }
+
+    @Test
+    @EnableFlags({Flags.FLAG_MODES_UI, Flags.FLAG_MODES_UI_ICONS})
+    public void set_iconThatWantsFixedSpace_setsScaleType() {
+        mIconView.setScaleType(ImageView.ScaleType.FIT_START);
+        StatusBarIcon icon = new StatusBarIcon(UserHandle.ALL, "mockPackage",
+                Icon.createWithResource(mContext, R.drawable.ic_android), 0, 0, "",
+                StatusBarIcon.Type.SystemIcon, StatusBarIcon.Shape.FIXED_SPACE);
+
+        mIconView.set(icon);
+
+        assertThat(mIconView.getScaleType()).isEqualTo(ImageView.ScaleType.FIT_CENTER);
+    }
+
+    @Test
+    @EnableFlags({Flags.FLAG_MODES_UI, Flags.FLAG_MODES_UI_ICONS})
+    public void set_iconWithOtherShape_keepsScaleType() {
+        mIconView.setScaleType(ImageView.ScaleType.FIT_START);
+        StatusBarIcon icon = new StatusBarIcon(UserHandle.ALL, "mockPackage",
+                Icon.createWithResource(mContext, R.drawable.ic_android), 0, 0, "",
+                StatusBarIcon.Type.SystemIcon, StatusBarIcon.Shape.WRAP_CONTENT);
+
+        mIconView.set(icon);
+
+        assertThat(mIconView.getScaleType()).isEqualTo(ImageView.ScaleType.FIT_START);
     }
 
     private static StatusBarNotification getMockSbn() {

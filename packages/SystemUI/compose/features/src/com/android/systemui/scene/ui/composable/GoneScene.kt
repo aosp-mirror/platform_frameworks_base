@@ -23,8 +23,8 @@ import androidx.compose.ui.Modifier
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
-import com.android.compose.animation.scene.animateSceneDpAsState
-import com.android.compose.animation.scene.animateSceneFloatAsState
+import com.android.compose.animation.scene.animateContentDpAsState
+import com.android.compose.animation.scene.animateContentFloatAsState
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.lifecycle.rememberViewModel
@@ -33,7 +33,7 @@ import com.android.systemui.qs.ui.composable.QuickSettings
 import com.android.systemui.qs.ui.composable.QuickSettings.SharedValues.MediaLandscapeTopOffset
 import com.android.systemui.qs.ui.composable.QuickSettings.SharedValues.MediaOffset.Default
 import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.scene.ui.viewmodel.GoneSceneActionsViewModel
+import com.android.systemui.scene.ui.viewmodel.GoneUserActionsViewModel
 import com.android.systemui.statusbar.notification.stack.ui.view.NotificationScrollView
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
 import dagger.Lazy
@@ -50,14 +50,13 @@ class GoneScene
 constructor(
     private val notificationStackScrolLView: Lazy<NotificationScrollView>,
     private val notificationsPlaceholderViewModelFactory: NotificationsPlaceholderViewModel.Factory,
-    private val viewModelFactory: GoneSceneActionsViewModel.Factory,
-) : ExclusiveActivatable(), ComposableScene {
+    private val viewModelFactory: GoneUserActionsViewModel.Factory,
+) : ExclusiveActivatable(), Scene {
     override val key = Scenes.Gone
 
-    private val actionsViewModel: GoneSceneActionsViewModel by lazy { viewModelFactory.create() }
+    private val actionsViewModel: GoneUserActionsViewModel by lazy { viewModelFactory.create() }
 
-    override val destinationScenes: Flow<Map<UserAction, UserActionResult>> =
-        actionsViewModel.actions
+    override val userActions: Flow<Map<UserAction, UserActionResult>> = actionsViewModel.actions
 
     override suspend fun onActivated(): Nothing {
         actionsViewModel.activate()
@@ -67,11 +66,11 @@ constructor(
     override fun SceneScope.Content(
         modifier: Modifier,
     ) {
-        animateSceneFloatAsState(
+        animateContentFloatAsState(
             value = QuickSettings.SharedValues.SquishinessValues.GoneSceneStarting,
             key = QuickSettings.SharedValues.TilesSquishiness,
         )
-        animateSceneDpAsState(value = Default, key = MediaLandscapeTopOffset, canOverflow = false)
+        animateContentDpAsState(value = Default, key = MediaLandscapeTopOffset, canOverflow = false)
         Spacer(modifier.fillMaxSize())
         SnoozeableHeadsUpNotificationSpace(
             stackScrollView = notificationStackScrolLView.get(),

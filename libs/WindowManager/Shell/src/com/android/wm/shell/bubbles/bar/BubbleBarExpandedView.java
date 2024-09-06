@@ -46,7 +46,7 @@ import com.android.wm.shell.bubbles.BubblePositioner;
 import com.android.wm.shell.bubbles.BubbleTaskView;
 import com.android.wm.shell.bubbles.BubbleTaskViewHelper;
 import com.android.wm.shell.bubbles.Bubbles;
-import com.android.wm.shell.common.bubbles.BubbleBarLocation;
+import com.android.wm.shell.shared.bubbles.BubbleBarLocation;
 import com.android.wm.shell.taskview.TaskView;
 
 import java.util.function.Supplier;
@@ -227,6 +227,13 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
             @Override
             public void onDismissBubble(Bubble bubble) {
                 mManager.dismissBubble(bubble, Bubbles.DISMISS_USER_GESTURE);
+            }
+
+            @Override
+            public void onMoveToFullscreen(Bubble bubble) {
+                if (mTaskView != null) {
+                    mTaskView.moveToFullscreen();
+                }
             }
         });
         mHandleView.setOnClickListener(view -> {

@@ -43,8 +43,8 @@ open class ResizeAppWithCornerResize
 @JvmOverloads
 constructor(
     val rotation: Rotation = Rotation.ROTATION_0,
-    val horizontalChange: Int = 50,
-    val verticalChange: Int = -50,
+    val horizontalChange: Int = 200,
+    val verticalChange: Int = -200,
     val appProperty: AppProperty = AppProperty.STANDARD
 ) {
 

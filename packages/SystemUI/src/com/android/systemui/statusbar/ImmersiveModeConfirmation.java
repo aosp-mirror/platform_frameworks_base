@@ -79,6 +79,7 @@ import android.widget.RelativeLayout;
 import com.android.app.viewcapture.ViewCapture;
 import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.systemui.CoreStartable;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.res.R;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.TaskStackChangeListeners;
@@ -107,6 +108,7 @@ public class ImmersiveModeConfirmation implements CoreStartable, CommandQueue.Ca
     private Context mDisplayContext;
     private final Context mSysUiContext;
     private final Handler mHandler = new H(Looper.getMainLooper());
+    private final Handler mBackgroundHandler;
     private long mShowDelayMs = 0L;
     private final IBinder mWindowToken = new Binder();
     private final CommandQueue mCommandQueue;
@@ -139,7 +141,8 @@ public class ImmersiveModeConfirmation implements CoreStartable, CommandQueue.Ca
     @Inject
     public ImmersiveModeConfirmation(Context context, CommandQueue commandQueue,
                                      SecureSettings secureSettings,
-                                     dagger.Lazy<ViewCapture> daggerLazyViewCapture) {
+                                     dagger.Lazy<ViewCapture> daggerLazyViewCapture,
+                                     @Background Handler backgroundHandler) {
         mSysUiContext = context;
         final Display display = mSysUiContext.getDisplay();
         mDisplayContext = display.getDisplayId() == DEFAULT_DISPLAY
@@ -147,6 +150,7 @@ public class ImmersiveModeConfirmation implements CoreStartable, CommandQueue.Ca
         mCommandQueue = commandQueue;
         mSecureSettings = secureSettings;
         mLazyViewCapture = toKotlinLazy(daggerLazyViewCapture);
+        mBackgroundHandler = backgroundHandler;
     }
 
     boolean loadSetting(int currentUserId) {
@@ -329,7 +333,7 @@ public class ImmersiveModeConfirmation implements CoreStartable, CommandQueue.Ca
                 }
             }
             TaskStackChangeListeners.getInstance().registerTaskStackListener(this);
-            mContentObserver = new ContentObserver(mHandler) {
+            mContentObserver = new ContentObserver(mBackgroundHandler) {
                 @Override
                 public void onChange(boolean selfChange) {
                     onSettingChanged(mSysUiContext.getUserId());
@@ -343,6 +347,9 @@ public class ImmersiveModeConfirmation implements CoreStartable, CommandQueue.Ca
             mSecureSettings.registerContentObserverForUserSync(
                     Settings.Secure.USER_SETUP_COMPLETE, mContentObserver,
                     UserHandle.USER_CURRENT);
+            mBackgroundHandler.post(() -> {
+                loadSetting(UserHandle.USER_CURRENT);
+            });
         }
     }
 

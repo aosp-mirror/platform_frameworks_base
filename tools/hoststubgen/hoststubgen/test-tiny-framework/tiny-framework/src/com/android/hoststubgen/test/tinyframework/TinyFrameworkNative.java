@@ -15,11 +15,12 @@
  */
 package com.android.hoststubgen.test.tinyframework;
 
+import android.hosttest.annotation.HostSideTestKeep;
 import android.hosttest.annotation.HostSideTestNativeSubstitutionClass;
 import android.hosttest.annotation.HostSideTestThrow;
-import android.hosttest.annotation.HostSideTestWholeClassStub;
+import android.hosttest.annotation.HostSideTestWholeClassKeep;
 
-@HostSideTestWholeClassStub
+@HostSideTestWholeClassKeep
 @HostSideTestNativeSubstitutionClass("TinyFrameworkNative_host")
 public class TinyFrameworkNative {
     public static native int nativeAddTwo(int arg);
@@ -48,6 +49,9 @@ public class TinyFrameworkNative {
 
     @HostSideTestThrow
     public static native void nativeStillNotSupported();
+
+    @HostSideTestKeep
+    public static native void nativeStillKeep();
 
     public static void nativeStillNotSupported_should_be_like_this() {
         throw new RuntimeException();

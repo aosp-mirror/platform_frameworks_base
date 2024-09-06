@@ -18,9 +18,14 @@ package com.android.systemui.scene.ui.composable
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import com.android.compose.animation.scene.Back
 import com.android.compose.animation.scene.ContentScope
 import com.android.compose.animation.scene.OverlayKey
+import com.android.compose.animation.scene.UserAction
+import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.lifecycle.Activatable
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 
 /**
  * Defines interface for classes that can describe an "overlay".
@@ -29,9 +34,17 @@ import com.android.systemui.lifecycle.Activatable
  * container takes care of rendering any current overlays and allowing overlays to be shown, hidden,
  * or replaced based on a user action.
  */
-interface Overlay : Activatable {
+interface Overlay : Activatable, ActionableContent {
     /** Uniquely-identifying key for this overlay. The key must be unique within its container. */
     val key: OverlayKey
+
+    /**
+     * The user actions supported by this overlay.
+     *
+     * @see [ActionableContent.userActions]
+     */
+    override val userActions: Flow<Map<UserAction, UserActionResult>>
+        get() = flowOf(mapOf(Back to UserActionResult.HideOverlay(key)))
 
     @Composable fun ContentScope.Content(modifier: Modifier)
 }

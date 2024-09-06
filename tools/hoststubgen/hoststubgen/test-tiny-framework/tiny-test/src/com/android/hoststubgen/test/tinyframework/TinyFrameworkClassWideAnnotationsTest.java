@@ -17,6 +17,8 @@ package com.android.hoststubgen.test.tinyframework;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertThrows;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -29,7 +31,14 @@ public class TinyFrameworkClassWideAnnotationsTest {
     public void testSimple() {
         var tfc = new TinyFrameworkClassWideAnnotations();
         assertThat(tfc.addOne(1)).isEqualTo(2);
-        assertThat(tfc.stub).isEqualTo(1);
+        assertThat(tfc.keep).isEqualTo(1);
+    }
+
+    @Test
+    public void testRemove() {
+        var tfc = new TinyFrameworkClassWideAnnotations();
+        assertThrows(NoSuchMethodError.class, () -> tfc.toBeRemoved("abc"));
+        assertThrows(NoSuchFieldError.class, () -> tfc.remove = 1);
     }
 
     @Test
@@ -39,12 +48,12 @@ public class TinyFrameworkClassWideAnnotationsTest {
     }
 
     @Test
-    public void testVisibleButUsesUnsupportedMethod() {
+    public void testUnsupportedMethod() {
         var tfc = new TinyFrameworkClassWideAnnotations();
 
         thrown.expect(RuntimeException.class);
         thrown.expectMessage("not yet supported");
-        tfc.visibleButUsesUnsupportedMethod();
+        tfc.unsupportedMethod();
     }
 
     @Test

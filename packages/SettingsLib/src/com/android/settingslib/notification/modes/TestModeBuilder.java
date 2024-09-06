@@ -16,6 +16,7 @@
 
 package com.android.settingslib.notification.modes;
 
+import static android.app.NotificationManager.INTERRUPTION_FILTER_PRIORITY;
 import static android.service.notification.ZenModeConfig.ORIGIN_UNKNOWN;
 import static android.service.notification.ZenModeConfig.ORIGIN_USER_IN_SYSTEMUI;
 
@@ -24,11 +25,13 @@ import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.net.Uri;
 import android.service.notification.Condition;
+import android.service.notification.SystemZenRules;
 import android.service.notification.ZenDeviceEffects;
 import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenPolicy;
 
 import androidx.annotation.DrawableRes;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.util.Random;
@@ -40,13 +43,27 @@ public class TestModeBuilder {
     private ZenModeConfig.ZenRule mConfigZenRule;
 
     public static final ZenMode EXAMPLE = new TestModeBuilder().build();
-    public static final ZenMode MANUAL_DND_ACTIVE = manualDnd(Uri.EMPTY, true);
-    public static final ZenMode MANUAL_DND_INACTIVE = manualDnd(Uri.EMPTY, false);
 
-    public static ZenMode manualDnd(Uri conditionId, boolean isActive) {
+    public static final ZenMode MANUAL_DND_ACTIVE = manualDnd(Uri.EMPTY,
+            INTERRUPTION_FILTER_PRIORITY, true);
+
+    public static final ZenMode MANUAL_DND_INACTIVE = manualDnd(Uri.EMPTY,
+            INTERRUPTION_FILTER_PRIORITY, false);
+
+    @NonNull
+    public static ZenMode manualDnd(@NotificationManager.InterruptionFilter int filter,
+            boolean isActive) {
+        return manualDnd(Uri.EMPTY, filter, isActive);
+    }
+
+    private static ZenMode manualDnd(Uri conditionId,
+            @NotificationManager.InterruptionFilter int filter, boolean isActive) {
         return ZenMode.manualDndMode(
                 new AutomaticZenRule.Builder("Do Not Disturb", conditionId)
-                        .setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_PRIORITY)
+                        .setInterruptionFilter(filter)
+                        .setType(AutomaticZenRule.TYPE_OTHER)
+                        .setManualInvocationAllowed(true)
+                        .setPackage(SystemZenRules.PACKAGE_ANDROID)
                         .setZenPolicy(new ZenPolicy.Builder().disallowAllSounds().build())
                         .build(),
                 isActive);
@@ -58,7 +75,7 @@ public class TestModeBuilder {
         mId = "rule_" + id;
         mRule = new AutomaticZenRule.Builder("Test Rule #" + id, Uri.parse("rule://" + id))
                 .setPackage("some_package")
-                .setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_PRIORITY)
+                .setInterruptionFilter(INTERRUPTION_FILTER_PRIORITY)
                 .setZenPolicy(new ZenPolicy.Builder().disallowAllSounds().build())
                 .build();
         mConfigZenRule = new ZenModeConfig.ZenRule();
@@ -134,7 +151,7 @@ public class TestModeBuilder {
             @NotificationManager.InterruptionFilter int interruptionFilter) {
         mRule.setInterruptionFilter(interruptionFilter);
         mConfigZenRule.zenMode = NotificationManager.zenModeFromInterruptionFilter(
-                interruptionFilter, NotificationManager.INTERRUPTION_FILTER_PRIORITY);
+                interruptionFilter, INTERRUPTION_FILTER_PRIORITY);
         return this;
     }
 
