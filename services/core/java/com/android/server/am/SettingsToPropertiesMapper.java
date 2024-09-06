@@ -139,6 +139,7 @@ public class SettingsToPropertiesMapper {
     static final String[] sDeviceConfigAconfigScopes = new String[] {
         "accessibility",
         "android_core_networking",
+        "android_health_services",
         "android_sdk",
         "android_stylus",
         "aoc",
@@ -235,7 +236,6 @@ public class SettingsToPropertiesMapper {
         "wear_connectivity",
         "wear_esim_carriers",
         "wear_frameworks",
-        "wear_health_services",
         "wear_media",
         "wear_offload",
         "wear_security",
