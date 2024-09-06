@@ -103,6 +103,7 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
     private final ProtoLogDataSource mDataSource;
     @Nullable
     private final ProtoLogViewerConfigReader mViewerConfigReader;
+    @Deprecated
     @Nullable
     private final ViewerConfigInputStreamProvider mViewerConfigInputStreamProvider;
     @NonNull
@@ -148,6 +149,7 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
                 cacheUpdater, groups);
     }
 
+    @Deprecated
     @VisibleForTesting
     public PerfettoProtoLogImpl(
             @Nullable ViewerConfigInputStreamProvider viewerConfigInputStreamProvider,
@@ -157,6 +159,18 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
             @NonNull ProtoLogDataSourceBuilder dataSourceBuilder,
             @NonNull ProtoLogConfigurationService configurationService) {
         this(null, viewerConfigInputStreamProvider, viewerConfigReader, cacheUpdater,
+                groups, dataSourceBuilder, configurationService);
+    }
+
+    @VisibleForTesting
+    public PerfettoProtoLogImpl(
+            @Nullable String viewerConfigFilePath,
+            @Nullable ProtoLogViewerConfigReader viewerConfigReader,
+            @NonNull Runnable cacheUpdater,
+            @NonNull IProtoLogGroup[] groups,
+            @NonNull ProtoLogDataSourceBuilder dataSourceBuilder,
+            @NonNull ProtoLogConfigurationService configurationService) {
+        this(viewerConfigFilePath, null, viewerConfigReader, cacheUpdater,
                 groups, dataSourceBuilder, configurationService);
     }
 
@@ -449,6 +463,7 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
         Log.d(LOG_TAG, "Finished onTracingFlush");
     }
 
+    @Deprecated
     private void dumpViewerConfig() {
         if (mViewerConfigInputStreamProvider == null) {
             // No viewer config available
