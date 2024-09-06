@@ -104,23 +104,17 @@
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"Приложение \"<xliff:g id="APPNAME">%1$s</xliff:g>\" и другие запущенные продукты обнаружили создание скриншота."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Добавить в заметку"</string>
     <string name="backlinks_include_link" msgid="4562093591148248158">"Добавить ссылку"</string>
+    <string name="backlinks_duplicate_label_format" msgid="558445128952827926">"<xliff:g id="APPNAME">%1$s</xliff:g> <xliff:g id="FREQUENCYCOUNT">(%2$d)</xliff:g>"</string>
     <string name="screenrecord_title" msgid="4257171601439507792">"Запись видео с экрана"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Обработка записи с экрана…"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Текущее уведомление для записи видео с экрана"</string>
-    <!-- no translation found for screenrecord_permission_dialog_title (7415261783188749730) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_option_text_single_app (1996450687814647583) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen (2794896384693120020) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_entire_screen (1321758636709366068) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_single_app (3738199712880063924) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_continue_entire_screen (5557974446773486600) -->
-    <skip />
-    <!-- no translation found for screenrecord_app_selector_title (3854492366333954736) -->
-    <skip />
+    <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"Начать запись экрана?"</string>
+    <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Записывать одно приложение"</string>
+    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"Записывать весь экран"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Во время записи всего экрана все данные и действия, которые на нем показываются, попадают на видео. Поэтому будьте осторожны с паролями, сведениями о способах оплаты, сообщениями, фотографиями, аудио- и видеозаписями."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Во время записи приложения все данные и действия, которые показываются в его окне, попадают на видео. Поэтому будьте осторожны с паролями, сведениями о способах оплаты, сообщениями, фотографиями, аудио- и видеозаписями."</string>
+    <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Запись экрана"</string>
+    <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"Выбор приложения для записи экрана"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Записывать аудио"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Звук с устройства"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Звук с вашего устройства, например музыка, звонки и рингтоны"</string>
@@ -298,7 +292,8 @@
     <string name="start_dreams" msgid="9131802557946276718">"Заставка"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Не беспокоить"</string>
-    <string name="quick_settings_modes_label" msgid="5407025818652750501">"Режимы приоритета"</string>
+    <!-- no translation found for quick_settings_modes_label (879156359479504244) -->
+    <skip />
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Нет доступных сопряженных устройств"</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"Нажмите, чтобы подключить или отключить устройство."</string>
@@ -307,6 +302,7 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Использовать"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Подключено"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"Отправка аудио"</string>
+    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="3227408556754456024">"Нажмите, чтобы переключить аудио или поделиться им"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Сохранено"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"отключить"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"активировать"</string>
@@ -315,6 +311,7 @@
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bluetooth включится завтра утром"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Отправить аудио"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Отправка аудио"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"перейти в настройки передачи аудио"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Заряд: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Аудиоустройство"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Гарнитура"</string>
@@ -408,7 +405,7 @@
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Нажмите, чтобы подключить новое устройство"</string>
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"Не удалось обновить набор настроек."</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"Набор настроек"</string>
-    <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"Автосубтитры"</string>
+    <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"Автоматические субтитры"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Разблокировать микрофон устройства?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Разблокировать камеру устройства?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Разблокировать камеру и микрофон устройства?"</string>
@@ -437,10 +434,12 @@
     <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"Открыть настройки"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Другое устройство"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Переключить режим обзора"</string>
-    <string name="zen_modes_dialog_title" msgid="4159138230418567383">"Режимы приоритета"</string>
+    <!-- no translation found for zen_modes_dialog_title (8854640808100096934) -->
+    <skip />
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"Готово"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"Настройки"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"Включено"</string>
+    <string name="zen_mode_on_with_details" msgid="7416143430557895497">"Вкл. • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"Отключено"</string>
     <string name="zen_mode_set_up" msgid="7457957033034460064">"Настроить"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"Открыть настройки"</string>
@@ -487,7 +486,7 @@
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"Чтобы ознакомиться с руководством, проведите по экрану влево"</string>
     <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"Настроить"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"Закрыть"</string>
-    <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"Добавление, удаление и упорядочивание виджетов в этом пространстве"</string>
+    <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"Здесь можно добавить, удалить и переместить виджеты"</string>
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Добавить виджеты"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Нажмите и удерживайте, чтобы настроить виджеты."</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Настроить виджеты"</string>
@@ -499,7 +498,7 @@
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Добавить виджет"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"Готово"</string>
     <string name="label_for_button_in_empty_state_cta" msgid="7314975555382055823">"Добавить виджеты"</string>
-    <string name="title_for_empty_state_cta" msgid="6161654421223450530">"Быстрый доступ к виджетам любимых приложений, даже когда планшет заблокирован"</string>
+    <string name="title_for_empty_state_cta" msgid="6161654421223450530">"Добавьте виджеты любимых приложений на заблокированный экран, чтобы их всегда можно было быстро посмотреть."</string>
     <string name="dialog_title_to_allow_any_widget" msgid="1004820948962675644">"Разрешить добавлять любые виджеты на заблокированный экран?"</string>
     <string name="button_text_to_open_settings" msgid="1987729256950941628">"Открыть настройки"</string>
     <string name="work_mode_off_title" msgid="5794818421357835873">"Включить рабочие приложения?"</string>
@@ -535,25 +534,26 @@
     <string name="media_projection_dialog_warning" msgid="1303664408388363598">"Во время записи или трансляции у приложения \"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>\" будет доступ ко всему, что видно или воспроизводится на устройстве, в том числе к паролям, сведениям о способах оплаты, фотографиям, сообщениям и аудио."</string>
     <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"Начать запись или трансляцию?"</string>
     <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"Во время записи или трансляции у сервиса, предоставляющего эту функцию, будет доступ ко всему, что видно или воспроизводится на устройстве, включая пароли, сведения о способах оплаты, фотографии, сообщения и аудио."</string>
-    <!-- no translation found for screen_share_generic_app_selector_title (8331515850599218288) -->
-    <skip />
+    <string name="screen_share_generic_app_selector_title" msgid="8331515850599218288">"Демонстрация или запись экрана приложения"</string>
     <string name="media_projection_entry_app_permission_dialog_title" msgid="4613857256721708062">"Показать экран приложению \"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>\"?"</string>
-    <string name="media_projection_entry_app_permission_dialog_option_text_single_app" msgid="6314402084788062644">"Показать приложение"</string>
-    <string name="media_projection_entry_app_permission_dialog_option_text_entire_screen" msgid="7381488112332599632">"Показать весь экран"</string>
+    <string name="screen_share_permission_dialog_option_single_app" msgid="2974054871681567314">"Показать приложение"</string>
+    <!-- no translation found for media_projection_entry_app_permission_dialog_option_text_single_app (2308901434964846084) -->
+    <skip />
+    <string name="screen_share_permission_dialog_option_entire_screen" msgid="4493174362775038997">"Показать весь экран"</string>
+    <!-- no translation found for media_projection_entry_app_permission_dialog_option_text_entire_screen (5100078808078139706) -->
+    <skip />
     <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="5504288438067851086">"При показе экрана целиком все, что на нем происходит, будет видно в приложении \"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>\". Поэтому будьте осторожны с паролями, сведениями о способах оплаты, сообщениями, фотографиями, аудио- и видеозаписями."</string>
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="7094417930857938876">"При показе приложения все, что в нем происходит, будет видно в приложении \"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>\". Поэтому будьте осторожны с паролями, сведениями о способах оплаты, сообщениями, фотографиями, аудио- и видеозаписями."</string>
     <string name="media_projection_entry_app_permission_dialog_continue_entire_screen" msgid="1850848182344377579">"Показать экран"</string>
     <string name="media_projection_entry_app_permission_dialog_single_app_disabled" msgid="8999903044874669995">"Приложение \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" отключило эту возможность"</string>
-    <!-- no translation found for media_projection_entry_share_app_selector_title (1419515119767501822) -->
-    <skip />
+    <string name="media_projection_entry_share_app_selector_title" msgid="1419515119767501822">"Выбор приложения для демонстрации"</string>
     <string name="media_projection_entry_cast_permission_dialog_title" msgid="752756942658159416">"Начать трансляцию экрана?"</string>
     <string name="media_projection_entry_cast_permission_dialog_option_text_single_app" msgid="6073353940838561981">"Транслировать одно приложение"</string>
     <string name="media_projection_entry_cast_permission_dialog_option_text_entire_screen" msgid="8389508187954155307">"Транслировать весь экран"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="4040447861037324017">"Во время трансляции будет видно все, что происходит на экране. Поэтому будьте осторожны с паролями, сведениями о способах оплаты, сообщениями, фотографиями, аудио- и видеозаписями."</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="7487834861348460736">"Во время трансляции будет видно все, что происходит в выбранном приложении. Поэтому будьте осторожны с паролями, сведениями о способах оплаты, сообщениями, фотографиями, аудио- и видеозаписями."</string>
     <string name="media_projection_entry_cast_permission_dialog_continue_entire_screen" msgid="3261124185304676483">"Транслировать экран"</string>
-    <!-- no translation found for media_projection_entry_cast_app_selector_title (6323062146661922387) -->
-    <skip />
+    <string name="media_projection_entry_cast_app_selector_title" msgid="6323062146661922387">"Выбор приложения для трансляции"</string>
     <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"Начать показ?"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Когда вы демонстрируете, транслируете экран или записываете видео с него, система Android получает доступ ко всему, что видно или воспроизводится на устройстве. Поэтому будьте осторожны с паролями, сведениями о способах оплаты, сообщениями, фотографиями, аудио- и видеозаписями."</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Когда вы демонстрируете, записываете или транслируете экран приложения, система Android получает доступ ко всему, что видно или воспроизводится в нем. Поэтому будьте осторожны с паролями, сведениями о способах оплаты, сообщениями, фотографиями, аудио- и видеозаписями."</string>
@@ -726,6 +726,7 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Спутниковая связь, хорошее качество соединения"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Доступно соединение по спутниковой связи"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"Спутниковый SOS"</string>
+    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"Экстренные вызовы или спутниковый SOS"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Рабочий профиль"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Внимание!"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"System UI Tuner позволяет настраивать интерфейс устройства Android по вашему вкусу. В будущем эта экспериментальная функция может измениться, перестать работать или исчезнуть."</string>
@@ -1392,30 +1393,34 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Значок \"Свернуть\""</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Значок \"Развернуть\""</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"или"</string>
+    <!-- no translation found for launch_keyboard_tutorial_notification_title (8849933155160522519) -->
+    <skip />
+    <!-- no translation found for launch_keyboard_tutorial_notification_content (2880339951512757918) -->
+    <skip />
+    <!-- no translation found for launch_touchpad_tutorial_notification_title (2243780062772196901) -->
+    <skip />
+    <!-- no translation found for launch_touchpad_tutorial_notification_content (7931085031240753226) -->
+    <skip />
+    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_title (1940023776496198762) -->
+    <skip />
+    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_content (1780725168171929365) -->
+    <skip />
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Жест \"назад\""</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Жест \"на главный экран\""</string>
     <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"Клавиша действия"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Готово"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Назад"</string>
     <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"Чтобы вернуться назад, проведите по сенсорной панели тремя пальцами влево или вправо.\n\nВы также можете нажать клавишу действия + Esc."</string>
-    <!-- no translation found for touchpad_back_gesture_success_title (7240576648330612171) -->
-    <skip />
-    <!-- no translation found for touchpad_back_gesture_success_body (2324724953720741719) -->
-    <skip />
+    <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"Отлично!"</string>
+    <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Вы выполнили жест для перехода назад."</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"На главный экран"</string>
     <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"Чтобы перейти на главный экран, проведите снизу вверх тремя пальцами."</string>
-    <!-- no translation found for touchpad_home_gesture_success_title (3778407003948209795) -->
-    <skip />
-    <!-- no translation found for touchpad_home_gesture_success_body (2404031094918807067) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_title (2659466586996495447) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_guidance (5718948664616999196) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_success_title (466467860120112933) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_success_body (7201991081652850430) -->
-    <skip />
+    <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"Неплохо!"</string>
+    <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"Вы выполнили жест для перехода на главный экран."</string>
+    <string name="tutorial_action_key_title" msgid="2659466586996495447">"Клавиша действия"</string>
+    <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"Чтобы перейти к приложениям, нажмите клавишу действия на клавиатуре."</string>
+    <string name="tutorial_action_key_success_title" msgid="466467860120112933">"Готово!"</string>
+    <string name="tutorial_action_key_success_body" msgid="7201991081652850430">"Вы выполнили жест с клавишей действия.\n\nЧтобы посмотреть доступные сочетания, нажмите клавишу действия и \"/\"."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Подсветка клавиатуры"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Уровень %1$d из %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Управление домом"</string>

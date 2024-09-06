@@ -26,9 +26,25 @@ flag {
 }
 
 flag {
-    name: "tis_always_bound_permission"
+    name: "tif_unbind_inactive_tis"
     is_exported: true
     namespace: "media_tv"
-    description: "Introduce ALWAYS_BOUND_TV_INPUT for TIS."
-    bug: "332201346"
+    description: "Unbind hardware TIS when not needed"
+    bug: "279189366"
+}
+
+flag {
+    name: "kids_mode_tvdb_sharing"
+    is_exported: true
+    namespace: "media_tv"
+    description: "Performance and Storage Optimization in Google TV Kids Mode."
+    bug: "288383796"
+}
+
+flag {
+    name: "tuner_w_apis"
+    is_exported: true
+    namespace: "media_tv"
+    description: "Tuner V4.0 APIs for Android W"
+    bug: "320419647"
 }

@@ -104,23 +104,17 @@
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> とその他の開いているアプリがこのスクリーンショットを検出しました。"</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"メモに追加"</string>
     <string name="backlinks_include_link" msgid="4562093591148248158">"リンクを含める"</string>
+    <string name="backlinks_duplicate_label_format" msgid="558445128952827926">"<xliff:g id="APPNAME">%1$s</xliff:g> <xliff:g id="FREQUENCYCOUNT">(%2$d)</xliff:g>"</string>
     <string name="screenrecord_title" msgid="4257171601439507792">"スクリーン レコーダー"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"画面の録画を処理しています"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"画面の録画セッション中の通知"</string>
-    <!-- no translation found for screenrecord_permission_dialog_title (7415261783188749730) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_option_text_single_app (1996450687814647583) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen (2794896384693120020) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_entire_screen (1321758636709366068) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_single_app (3738199712880063924) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_continue_entire_screen (5557974446773486600) -->
-    <skip />
-    <!-- no translation found for screenrecord_app_selector_title (3854492366333954736) -->
-    <skip />
+    <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"画面を録画しますか？"</string>
+    <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"1 つのアプリを録画"</string>
+    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"画面全体を録画"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"画面全体を録画すると、画面に表示されるものがすべて録画されます。パスワード、お支払いの詳細、メッセージ、写真、音声、動画などの情報にご注意ください。"</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"アプリを録画すると、そのアプリで表示または再生される内容がすべて録画されます。パスワード、お支払いの詳細、メッセージ、写真、音声、動画などの情報にご注意ください。"</string>
+    <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"画面を録画"</string>
+    <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"録画するアプリを選択"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"録音"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"デバイスの音声"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"デバイスからの音（音楽、通話、着信音など）"</string>
@@ -298,7 +292,8 @@
     <string name="start_dreams" msgid="9131802557946276718">"スクリーン セーバー"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"イーサネット"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"サイレント モード"</string>
-    <string name="quick_settings_modes_label" msgid="5407025818652750501">"優先モード"</string>
+    <!-- no translation found for quick_settings_modes_label (879156359479504244) -->
+    <skip />
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"ペア設定されたデバイスがありません"</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"タップしてデバイスを接続または接続解除します"</string>
@@ -307,6 +302,7 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Bluetooth を使用"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"接続しました"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"音声の共有"</string>
+    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="3227408556754456024">"タップして音声の切り替えや共有を行えます"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"保存済み"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"接続を解除"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"有効化"</string>
@@ -315,6 +311,7 @@
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"明日の朝に Bluetooth が ON になります"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"音声を共有"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"音声を共有中"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"音声の共有設定を開く"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"バッテリー <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"オーディオ"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"ヘッドセット"</string>
@@ -437,10 +434,12 @@
     <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"設定を開く"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"その他のデバイス"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"概要を切り替え"</string>
-    <string name="zen_modes_dialog_title" msgid="4159138230418567383">"優先モード"</string>
+    <!-- no translation found for zen_modes_dialog_title (8854640808100096934) -->
+    <skip />
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"完了"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"設定"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"ON"</string>
+    <string name="zen_mode_on_with_details" msgid="7416143430557895497">"ON • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"OFF"</string>
     <string name="zen_mode_set_up" msgid="7457957033034460064">"設定"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"設定で管理"</string>
@@ -535,25 +534,26 @@
     <string name="media_projection_dialog_warning" msgid="1303664408388363598">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> は、録画中またはキャスト中に画面上に表示または再生される情報のすべてにアクセスできるようになります。これには、パスワード、お支払いの詳細、写真、メッセージ、音声などが含まれます。"</string>
     <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"録画やキャストを開始しますか？"</string>
     <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"この機能を提供するサービスは、録画中またはキャスト中に画面上に表示または再生される情報のすべてにアクセスできるようになります。これには、パスワード、お支払いの詳細、写真、メッセージ、音声などが含まれます。"</string>
-    <!-- no translation found for screen_share_generic_app_selector_title (8331515850599218288) -->
-    <skip />
+    <string name="screen_share_generic_app_selector_title" msgid="8331515850599218288">"アプリの共有または録画"</string>
     <string name="media_projection_entry_app_permission_dialog_title" msgid="4613857256721708062">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> と画面を共有しますか？"</string>
-    <string name="media_projection_entry_app_permission_dialog_option_text_single_app" msgid="6314402084788062644">"1 つのアプリを共有"</string>
-    <string name="media_projection_entry_app_permission_dialog_option_text_entire_screen" msgid="7381488112332599632">"画面全体を共有"</string>
+    <string name="screen_share_permission_dialog_option_single_app" msgid="2974054871681567314">"1 個のアプリを共有"</string>
+    <!-- no translation found for media_projection_entry_app_permission_dialog_option_text_single_app (2308901434964846084) -->
+    <skip />
+    <string name="screen_share_permission_dialog_option_entire_screen" msgid="4493174362775038997">"画面全体を共有"</string>
+    <!-- no translation found for media_projection_entry_app_permission_dialog_option_text_entire_screen (5100078808078139706) -->
+    <skip />
     <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="5504288438067851086">"画面全体を共有すると、画面に表示される内容が <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> にすべて公開されます。パスワード、お支払いの詳細、メッセージ、写真、音声、動画などの情報にご注意ください。"</string>
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="7094417930857938876">"アプリを共有すると、そのアプリで表示または再生される内容が <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> にすべて公開されます。パスワード、お支払いの詳細、メッセージ、写真、音声、動画などの情報にご注意ください。"</string>
     <string name="media_projection_entry_app_permission_dialog_continue_entire_screen" msgid="1850848182344377579">"画面を共有"</string>
     <string name="media_projection_entry_app_permission_dialog_single_app_disabled" msgid="8999903044874669995">"<xliff:g id="APP_NAME">%1$s</xliff:g> がこのオプションを無効にしています"</string>
-    <!-- no translation found for media_projection_entry_share_app_selector_title (1419515119767501822) -->
-    <skip />
+    <string name="media_projection_entry_share_app_selector_title" msgid="1419515119767501822">"共有するアプリを選択"</string>
     <string name="media_projection_entry_cast_permission_dialog_title" msgid="752756942658159416">"画面をキャストしますか？"</string>
     <string name="media_projection_entry_cast_permission_dialog_option_text_single_app" msgid="6073353940838561981">"1 つのアプリをキャスト"</string>
     <string name="media_projection_entry_cast_permission_dialog_option_text_entire_screen" msgid="8389508187954155307">"画面全体をキャスト"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="4040447861037324017">"画面全体をキャストすると、画面に表示される内容がすべて公開されます。パスワード、お支払いの詳細、メッセージ、写真、音声、動画などの情報にご注意ください。"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="7487834861348460736">"アプリをキャストすると、そのアプリで表示または再生される内容がすべて公開されます。パスワード、お支払いの詳細、メッセージ、写真、音声、動画などの情報にご注意ください。"</string>
     <string name="media_projection_entry_cast_permission_dialog_continue_entire_screen" msgid="3261124185304676483">"画面のキャスト"</string>
-    <!-- no translation found for media_projection_entry_cast_app_selector_title (6323062146661922387) -->
-    <skip />
+    <string name="media_projection_entry_cast_app_selector_title" msgid="6323062146661922387">"キャストするアプリを選択"</string>
     <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"共有を開始しますか？"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"共有、録画、キャスト中は、画面に表示される内容やデバイスで再生される内容に Android がアクセスできるため、パスワード、お支払いの詳細、メッセージ、写真、音声、動画などの情報にご注意ください。"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"アプリの共有、録画、キャスト中は、そのアプリで表示または再生される内容に Android がアクセスできるため、パスワード、お支払いの詳細、メッセージ、写真、音声、動画などの情報にご注意ください。"</string>
@@ -726,6 +726,7 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"衛生、接続状態良好"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"衛生、接続利用可能"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"衛星 SOS"</string>
+    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"緊急通報または SOS"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"仕事用プロファイル"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"一部の方のみお楽しみいただける限定公開ツール"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"システムUI調整ツールでは、Androidユーザーインターフェースの調整やカスタマイズを行えます。これらの試験運用機能は今後のリリースで変更となったり、中止となったり、削除されたりする可能性がありますのでご注意ください。"</string>
@@ -1323,7 +1324,7 @@
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"アプリを選択"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"ショートカットの長押しが必要です"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"キャンセル"</string>
-    <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"画面を切り替えましょう"</string>
+    <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"画面を切り替える"</string>
     <string name="rear_display_folded_bottom_sheet_title" msgid="3930008746560711990">"スマートフォンを開いてください"</string>
     <string name="rear_display_unfolded_bottom_sheet_title" msgid="6291111173057304055">"画面を切り替えますか？"</string>
     <string name="rear_display_folded_bottom_sheet_description" msgid="6842767125783222695">"高解像度で撮るには背面カメラを使用してください"</string>
@@ -1392,6 +1393,18 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"閉じるアイコン"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"開くアイコン"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"または"</string>
+    <!-- no translation found for launch_keyboard_tutorial_notification_title (8849933155160522519) -->
+    <skip />
+    <!-- no translation found for launch_keyboard_tutorial_notification_content (2880339951512757918) -->
+    <skip />
+    <!-- no translation found for launch_touchpad_tutorial_notification_title (2243780062772196901) -->
+    <skip />
+    <!-- no translation found for launch_touchpad_tutorial_notification_content (7931085031240753226) -->
+    <skip />
+    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_title (1940023776496198762) -->
+    <skip />
+    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_content (1780725168171929365) -->
+    <skip />
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"「戻る」ジェスチャー"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"「ホーム」ジェスチャー"</string>
     <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"アクションキー"</string>

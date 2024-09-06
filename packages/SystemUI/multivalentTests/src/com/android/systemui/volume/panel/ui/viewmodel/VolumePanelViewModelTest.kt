@@ -28,6 +28,7 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.configurationController
 import com.android.systemui.statusbar.policy.fakeConfigurationController
 import com.android.systemui.testKosmos
@@ -157,6 +158,10 @@ class VolumePanelViewModelTest : SysuiTestCase() {
     @Test
     fun testDumpingState() =
         test({
+            testableResources.addOverride(R.bool.volume_panel_is_large_screen, false)
+            testableResources.overrideConfiguration(
+                Configuration().apply { orientation = Configuration.ORIENTATION_PORTRAIT }
+            )
             componentByKey =
                 mapOf(
                     COMPONENT_1 to mockVolumePanelUiComponentProvider,

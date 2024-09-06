@@ -171,7 +171,7 @@ public class CameraExtensionsProxyService extends Service {
             EXTENSIONS_VERSION.startsWith(LATENCY_VERSION_PREFIX) ||
             EXTENSIONS_VERSION.startsWith(EFV_VERSION_PREFIX));
 
-    private HashMap<String, Long> mMetadataVendorIdMap = new HashMap<>();
+    private static HashMap<String, Long> mMetadataVendorIdMap = new HashMap<>();
     private CameraManager mCameraManager;
 
     private static boolean checkForLatencyAPI() {
@@ -820,7 +820,7 @@ public class CameraExtensionsProxyService extends Service {
             mCameraManager = getSystemService(CameraManager.class);
 
             String [] cameraIds = mCameraManager.getCameraIdListNoLazy();
-            if (cameraIds != null) {
+            if (cameraIds != null && mMetadataVendorIdMap.isEmpty()) {
                 for (String cameraId : cameraIds) {
                     CameraCharacteristics chars = mCameraManager.getCameraCharacteristics(cameraId);
                     Object thisClass = CameraCharacteristics.Key.class;
@@ -2605,11 +2605,7 @@ public class CameraExtensionsProxyService extends Service {
             ret.size.height = imageReaderOutputConfig.getSize().getHeight();
             ret.imageFormat = imageReaderOutputConfig.getImageFormat();
             ret.capacity = imageReaderOutputConfig.getMaxImages();
-            if (EFV_SUPPORTED) {
-                ret.usage = imageReaderOutputConfig.getUsage();
-            } else {
-                ret.usage = 0;
-            }
+            ret.usage = imageReaderOutputConfig.getUsage();
         } else if (output instanceof MultiResolutionImageReaderOutputConfigImpl) {
             MultiResolutionImageReaderOutputConfigImpl multiResReaderConfig =
                     (MultiResolutionImageReaderOutputConfigImpl) output;

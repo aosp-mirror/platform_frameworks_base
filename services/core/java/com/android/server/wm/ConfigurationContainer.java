@@ -195,12 +195,14 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
      * screenWidthDp, screenHeightDp, smallestScreenWidthDp, and orientation.
      * All overrides to those fields should be in this method.
      *
+     * Task is only needed for split-screen to apply an offset special handling.
+     *
      * TODO: Consider integrate this with computeConfigByResolveHint()
      */
     static void applySizeOverrideIfNeeded(DisplayContent displayContent, ApplicationInfo appInfo,
             Configuration newParentConfiguration, Configuration inOutConfig,
             boolean optsOutEdgeToEdge, boolean hasFixedRotationTransform,
-            boolean hasCompatDisplayInsets) {
+            boolean hasCompatDisplayInsets, Task task) {
         if (displayContent == null) {
             return;
         }
@@ -223,11 +225,14 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
         }
         if (!optsOutEdgeToEdge && (!useOverrideInsetsForConfig
                 || hasCompatDisplayInsets
-                || isFloating
                 || rotation == ROTATION_UNDEFINED)) {
             // If the insets configuration decoupled logic is not enabled for the app, or the app
             // already has a compat override, or the context doesn't contain enough info to
             // calculate the override, skip the override.
+            return;
+        }
+        if (isFloating) {
+            // Floating window won't have any insets affect configuration. Skip the override.
             return;
         }
         // Make sure the orientation related fields will be updated by the override insets, because
@@ -255,17 +260,17 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
             inOutConfig.windowConfiguration.setAppBounds(
                     newParentConfiguration.windowConfiguration.getBounds());
             outAppBounds = inOutConfig.windowConfiguration.getAppBounds();
-            if (inOutConfig.windowConfiguration.getWindowingMode() == WINDOWING_MODE_FULLSCREEN) {
-                final DisplayPolicy.DecorInsets.Info decor =
-                        displayContent.getDisplayPolicy().getDecorInsetsInfo(rotation, dw, dh);
-                if (outAppBounds.contains(decor.mOverrideNonDecorFrame)) {
-                    outAppBounds.intersect(decor.mOverrideNonDecorFrame);
+            if (task != null) {
+                task = task.getCreatedByOrganizerTask();
+                if (task != null && (task.mOffsetYForInsets != 0 || task.mOffsetXForInsets != 0)) {
+                    outAppBounds.offset(task.mOffsetXForInsets, task.mOffsetYForInsets);
                 }
-            } else {
-                // TODO(b/358509380): Handle other windowing mode like split screen and freeform
-                //  cases correctly.
-                outAppBounds.inset(displayContent.getDisplayPolicy()
-                        .getDecorInsetsInfo(rotation, dw, dh).mOverrideNonDecorInsets);
+            }
+            final DisplayPolicy.DecorInsets.Info decor =
+                    displayContent.getDisplayPolicy().getDecorInsetsInfo(rotation, dw, dh);
+            outAppBounds.intersectUnchecked(decor.mOverrideNonDecorFrame);
+            if (task != null && (task.mOffsetYForInsets != 0 || task.mOffsetXForInsets != 0)) {
+                outAppBounds.offset(-task.mOffsetXForInsets, -task.mOffsetYForInsets);
             }
         }
         float density = inOutConfig.densityDpi;

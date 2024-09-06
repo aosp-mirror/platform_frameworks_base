@@ -54,7 +54,7 @@
     <string name="save_sign_in_on_other_device_title" msgid="2827990118560134692">"Guardar o início de sessão noutro dispositivo?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Usar <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> para todos os seus inícios de sessão?"</string>
     <string name="use_provider_for_all_description" msgid="1998772715863958997">"Este gestor de palavras-passe de <xliff:g id="USERNAME">%1$s</xliff:g> armazena as suas palavras-passe e chaves de acesso para ajudar a iniciar sessão facilmente"</string>
-    <string name="set_as_default" msgid="4415328591568654603">"Definir como predefinição"</string>
+    <string name="set_as_default" msgid="4415328591568654603">"Predefinir"</string>
     <string name="settings" msgid="6536394145760913145">"Definições"</string>
     <string name="use_once" msgid="9027366575315399714">"Usar uma vez"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> palavras-passe • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> chaves de acesso"</string>

@@ -104,23 +104,17 @@
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> dan apl lain yang dibuka telah mengesan tangkapan skrin ini."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Tambahkan pada nota"</string>
     <string name="backlinks_include_link" msgid="4562093591148248158">"Sertakan pautan"</string>
+    <string name="backlinks_duplicate_label_format" msgid="558445128952827926">"<xliff:g id="APPNAME">%1$s</xliff:g> <xliff:g id="FREQUENCYCOUNT">(%2$d)</xliff:g>"</string>
     <string name="screenrecord_title" msgid="4257171601439507792">"Perakam Skrin"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Memproses rakaman skrin"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Pemberitahuan breterusan untuk sesi rakaman skrin"</string>
-    <!-- no translation found for screenrecord_permission_dialog_title (7415261783188749730) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_option_text_single_app (1996450687814647583) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen (2794896384693120020) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_entire_screen (1321758636709366068) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_single_app (3738199712880063924) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_continue_entire_screen (5557974446773486600) -->
-    <skip />
-    <!-- no translation found for screenrecord_app_selector_title (3854492366333954736) -->
-    <skip />
+    <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"Rakam skrin anda?"</string>
+    <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Rakam satu apl"</string>
+    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"Rakam seluruh skrin"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Apabila anda merakam seluruh skrin anda, apa-apa sahaja yang dipaparkan pada skrin anda akan dirakam. Oleh hal yang demikian, berhati-hati dengan perkara seperti kata laluan, butiran pembayaran, mesej, foto dan audio serta video."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Apabila anda merakam apl, apa-apa sahaja yang dipaparkan atau dimainkan dalam apl tersebut akan dirakam. Oleh hal yang demikian, berhati-hati dengan perkara seperti kata laluan, butiran pembayaran, mesej, foto dan audio serta video."</string>
+    <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Rakam skrin"</string>
+    <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"Pilih apl untuk merakam"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Rakam audio"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Audio peranti"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Bunyi daripada peranti anda, seperti muzik, panggilan dan nada dering"</string>
@@ -298,7 +292,7 @@
     <string name="start_dreams" msgid="9131802557946276718">"Penyelamat skrin"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Jangan Ganggu"</string>
-    <string name="quick_settings_modes_label" msgid="5407025818652750501">"Mod keutamaan"</string>
+    <string name="quick_settings_modes_label" msgid="879156359479504244">"Mod"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Tiada peranti berpasangan tersedia"</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"Ketik untuk menyambungkan atau memutuskan sambungan peranti"</string>
@@ -307,6 +301,7 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Gunakan Bluetooth"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Disambungkan"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"Perkongsian Audio"</string>
+    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="3227408556754456024">"Ketik untuk menukar atau berkongsi audio"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Disimpan"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"putuskan sambungan"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"aktifkan"</string>
@@ -315,6 +310,7 @@
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bluetooth akan dihidupkan esok pagi"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Kongsi audio"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Perkongsian audio"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"masukkan tetapan perkongsian audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> bateri"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Set Kepala"</string>
@@ -386,7 +382,7 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Rakam skrin"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Mula"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Berhenti"</string>
-    <string name="qs_record_issue_label" msgid="8166290137285529059">"Rekodkan Masalah"</string>
+    <string name="qs_record_issue_label" msgid="8166290137285529059">"Rakam Masalah"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"Mula"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"Hentikan"</string>
     <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"Laporan Pepijat"</string>
@@ -437,10 +433,11 @@
     <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"Buka Tetapan"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Peranti lain"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Togol Ikhtisar"</string>
-    <string name="zen_modes_dialog_title" msgid="4159138230418567383">"Mod keutamaan"</string>
+    <string name="zen_modes_dialog_title" msgid="8854640808100096934">"Mod"</string>
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"Selesai"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"Tetapan"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"Hidup"</string>
+    <string name="zen_mode_on_with_details" msgid="7416143430557895497">"Pada • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"Mati"</string>
     <string name="zen_mode_set_up" msgid="7457957033034460064">"Sediakan"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"Urus dalam tetapan"</string>
@@ -499,7 +496,7 @@
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Tambahkan widget"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"Selesai"</string>
     <string name="label_for_button_in_empty_state_cta" msgid="7314975555382055823">"Tambahkan widget"</string>
-    <string name="title_for_empty_state_cta" msgid="6161654421223450530">"Dapatkan akses pantas kepada widget apl kegemaran anda tanpa membuka kunci tablet anda."</string>
+    <string name="title_for_empty_state_cta" msgid="6161654421223450530">"Dapatkan akses pantas kepada widget apl kegemaran anda tanpa perlu membuka kunci tablet."</string>
     <string name="dialog_title_to_allow_any_widget" msgid="1004820948962675644">"Benarkan sebarang widget pada skrin kunci?"</string>
     <string name="button_text_to_open_settings" msgid="1987729256950941628">"Buka tetapan"</string>
     <string name="work_mode_off_title" msgid="5794818421357835873">"Nyahjeda apl kerja?"</string>
@@ -535,25 +532,26 @@
     <string name="media_projection_dialog_warning" msgid="1303664408388363598">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> akan dapat mengakses semua maklumat yang kelihatan pada skrin anda atau yang dimainkan daripada peranti anda semasa merakam atau membuat penghantaran. Maklumat ini termasuk kata laluan, butiran pembayaran, foto, mesej dan audio yang anda mainkan."</string>
     <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"Mulakan rakaman atau penghantaran?"</string>
     <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"Perkhidmatan yang menyediakan fungsi ini boleh mengakses semua maklumat yang boleh dilihat pada skrin anda atau dimainkan daripada peranti anda semasa membuat rakaman atau penghantaran. Maklumat ini termasuk kata laluan, butiran pembayaran, foto, mesej dan audio yang anda mainkan."</string>
-    <!-- no translation found for screen_share_generic_app_selector_title (8331515850599218288) -->
-    <skip />
+    <string name="screen_share_generic_app_selector_title" msgid="8331515850599218288">"Kongsi atau rakam apl"</string>
     <string name="media_projection_entry_app_permission_dialog_title" msgid="4613857256721708062">"Kongsi skrin anda dengan <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
-    <string name="media_projection_entry_app_permission_dialog_option_text_single_app" msgid="6314402084788062644">"Kongsi satu apl"</string>
-    <string name="media_projection_entry_app_permission_dialog_option_text_entire_screen" msgid="7381488112332599632">"Kongsi seluruh skrin"</string>
+    <string name="screen_share_permission_dialog_option_single_app" msgid="2974054871681567314">"Kongsi satu apl"</string>
+    <!-- no translation found for media_projection_entry_app_permission_dialog_option_text_single_app (2308901434964846084) -->
+    <skip />
+    <string name="screen_share_permission_dialog_option_entire_screen" msgid="4493174362775038997">"Kongsi seluruh skrin"</string>
+    <!-- no translation found for media_projection_entry_app_permission_dialog_option_text_entire_screen (5100078808078139706) -->
+    <skip />
     <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="5504288438067851086">"Apabila anda berkongsi seluruh skrin anda, apa-apa sahaja kandungan pada skrin anda boleh dilihat oleh <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>. Oleh hal yang demikian, berhati-hati dengan perkara seperti kata laluan, butiran pembayaran, mesej, foto dan audio serta video."</string>
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="7094417930857938876">"Apabila anda berkongsi apl, apa-apa sahaja kandungan yang dipaparkan atau dimainkan pada apl boleh dilihat oleh <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>. Oleh hal yang demikian, berhati-hati dengan perkara seperti kata laluan, butiran pembayaran, mesej, foto dan audio serta video."</string>
     <string name="media_projection_entry_app_permission_dialog_continue_entire_screen" msgid="1850848182344377579">"Kongsi skrin"</string>
     <string name="media_projection_entry_app_permission_dialog_single_app_disabled" msgid="8999903044874669995">"<xliff:g id="APP_NAME">%1$s</xliff:g> telah melumpuhkan pilihan ini"</string>
-    <!-- no translation found for media_projection_entry_share_app_selector_title (1419515119767501822) -->
-    <skip />
+    <string name="media_projection_entry_share_app_selector_title" msgid="1419515119767501822">"Pilih apl untuk dikongsi"</string>
     <string name="media_projection_entry_cast_permission_dialog_title" msgid="752756942658159416">"Hantar skrin anda?"</string>
     <string name="media_projection_entry_cast_permission_dialog_option_text_single_app" msgid="6073353940838561981">"Hantar satu apl"</string>
     <string name="media_projection_entry_cast_permission_dialog_option_text_entire_screen" msgid="8389508187954155307">"Hantar keseluruhan skrin"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="4040447861037324017">"Apabila anda menghantar seluruh skrin anda, apa-apa sahaja kandungan pada skrin anda boleh dilihat. Oleh hal yang demikian, berhati-hati dengan perkara seperti kata laluan, butiran pembayaran, mesej, foto dan audio serta video."</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="7487834861348460736">"Apabila anda menghantar apl, apa-apa sahaja kandungan yang dipaparkan atau dimainkan pada apl itu boleh dilihat. Oleh hal yang demikian, berhati-hati dengan perkara seperti kata laluan, butiran pembayaran, mesej, foto dan audio serta video."</string>
     <string name="media_projection_entry_cast_permission_dialog_continue_entire_screen" msgid="3261124185304676483">"Hantar skrin"</string>
-    <!-- no translation found for media_projection_entry_cast_app_selector_title (6323062146661922387) -->
-    <skip />
+    <string name="media_projection_entry_cast_app_selector_title" msgid="6323062146661922387">"Pilih apl untuk membuat penghantaran"</string>
     <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"Mulakan perkongsian?"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Apabila anda membuat perkongsian, rakaman atau penghantaran, Android boleh mengakses apa-apa sahaja yang boleh dilihat pada skrin anda atau dimainkan pada peranti anda. Oleh hal yang demikian, berhati-hati dengan perkara seperti kata laluan, butiran pembayaran, mesej, foto dan audio serta video."</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Apabila anda berkongsi, merakam atau menghantar apl, Android boleh mengakses apa-apa sahaja yang ditunjukan atau dimainkan pada apl tersebut. Oleh hal yang demikian, berhati-hati dengan perkara seperti kata laluan, butiran pembayaran, mesej, foto dan audio serta video."</string>
@@ -726,6 +724,7 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Satelit, sambungan yang baik"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Satelit, sambungan tersedia"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"SOS via Satelit"</string>
+    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"Panggilan kecemasan atau SOS"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Profil kerja"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Menarik untuk sesetengah orang tetapi bukan untuk semua"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Penala UI Sistem memberi anda cara tambahan untuk mengolah dan menyesuaikan antara muka Android. Ciri eksperimen ini boleh berubah, rosak atau hilang dalam keluaran masa hadapan. Teruskan dengan berhati-hati."</string>
@@ -1392,30 +1391,34 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Kuncupkan ikon"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Kembangkan ikon"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"atau"</string>
+    <!-- no translation found for launch_keyboard_tutorial_notification_title (8849933155160522519) -->
+    <skip />
+    <!-- no translation found for launch_keyboard_tutorial_notification_content (2880339951512757918) -->
+    <skip />
+    <!-- no translation found for launch_touchpad_tutorial_notification_title (2243780062772196901) -->
+    <skip />
+    <!-- no translation found for launch_touchpad_tutorial_notification_content (7931085031240753226) -->
+    <skip />
+    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_title (1940023776496198762) -->
+    <skip />
+    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_content (1780725168171929365) -->
+    <skip />
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Gerak isyarat kembali"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Gerak isyarat pergi ke laman utama"</string>
     <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"Kekunci tindakan"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Selesai"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Kembali"</string>
     <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"Untuk kembali, leret ke kiri atau ke kanan menggunakan tiga jari di mana-mana sahaja pada pad sentuh.\n\nAnda juga boleh menggunakan pintasan papan kekunci Action + ESC untuk kembali."</string>
-    <!-- no translation found for touchpad_back_gesture_success_title (7240576648330612171) -->
-    <skip />
-    <!-- no translation found for touchpad_back_gesture_success_body (2324724953720741719) -->
-    <skip />
+    <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"Syabas!"</string>
+    <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Anda telah melengkapkan gerak isyarat undur."</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Akses laman utama"</string>
     <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"Untuk mengakses skrin utama anda pada bila-bila masa, leret ke atas menggunakan tiga jari daripada bahagian bawah skrin anda."</string>
-    <!-- no translation found for touchpad_home_gesture_success_title (3778407003948209795) -->
-    <skip />
-    <!-- no translation found for touchpad_home_gesture_success_body (2404031094918807067) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_title (2659466586996495447) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_guidance (5718948664616999196) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_success_title (466467860120112933) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_success_body (7201991081652850430) -->
-    <skip />
+    <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"Bagus!"</string>
+    <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"Anda telah melengkapkan gerak isyarat akses laman utama."</string>
+    <string name="tutorial_action_key_title" msgid="2659466586996495447">"Kekunci tindakan"</string>
+    <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"Untuk mengakses semua apl anda, tekan kekunci tindakan pada papan kekunci anda."</string>
+    <string name="tutorial_action_key_success_title" msgid="466467860120112933">"Tahniah!"</string>
+    <string name="tutorial_action_key_success_body" msgid="7201991081652850430">"Anda telah melengkapkan gerak isyarat kekunci tindakan.\n\nTindakan + / menunjukkan semua pintasan anda yang tersedia."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Cahaya latar papan kekunci"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Tahap %1$d daripada %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Kawalan Rumah"</string>

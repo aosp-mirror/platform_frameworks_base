@@ -50,3 +50,14 @@ android_test {
     additional_manifests: ["AndroidManifest.xml"],
     manifest: "AndroidManifest-base.xml",
 }
+
+test_module_config {
+    name: "SystemUITests_systemui_accessibility",
+    base: "SystemUITests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.systemui.accessibility"],
+    exclude_annotations: [
+        "android.platform.test.annotations.Postsubmit",
+        "android.platform.test.annotations.FlakyTest",
+    ],
+}

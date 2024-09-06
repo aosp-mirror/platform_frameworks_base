@@ -19,16 +19,6 @@ flag {
 }
 
 flag {
-    name: "do_not_skip_ime_by_target_visibility"
-    namespace: "windowing_frontend"
-    description: "Avoid window traversal missing IME"
-    bug: "339375944"
-    metadata {
-        purpose: PURPOSE_BUGFIX
-    }
-}
-
-flag {
     name: "apply_lifecycle_on_pip_change"
     namespace: "windowing_frontend"
     description: "Make pip activity lifecyle change with windowing mode"
@@ -228,6 +218,16 @@ flag {
 }
 
 flag {
+  name: "ensure_wallpaper_in_wear_transitions"
+  namespace: "windowing_frontend"
+  description: "Ensure that wallpaper window tokens are always present/available for collection in transitions on Wear"
+  bug: "355596979"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   name: "custom_animations_behind_translucent"
   namespace: "windowing_frontend"
   description: "A change can use its own layer parameters to animate behind a translucent activity"
@@ -241,6 +241,17 @@ flag {
   namespace: "windowing_frontend"
   description: "Create transition when visibility change from predictive back"
   bug: "347168362"
+  is_fixed_read_only: true
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "always_capture_activity_snapshot"
+  namespace: "windowing_frontend"
+  description: "Always capture activity snapshot regardless predictive back status"
+  bug: "362183912"
   is_fixed_read_only: true
   metadata {
     purpose: PURPOSE_BUGFIX

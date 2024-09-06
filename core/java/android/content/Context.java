@@ -33,6 +33,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.PermissionMethod;
 import android.annotation.PermissionName;
+import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.StringDef;
 import android.annotation.StringRes;
@@ -87,6 +88,8 @@ import android.os.UserManager;
 import android.os.storage.StorageManager;
 import android.provider.E2eeContactKeysManager;
 import android.provider.MediaStore;
+import android.ravenwood.annotation.RavenwoodKeep;
+import android.ravenwood.annotation.RavenwoodKeepPartialClass;
 import android.telephony.TelephonyRegistryManager;
 import android.util.AttributeSet;
 import android.view.Display;
@@ -104,6 +107,7 @@ import android.window.WindowContext;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.compat.IPlatformCompat;
 import com.android.internal.compat.IPlatformCompatNative;
+import com.android.internal.protolog.ProtoLogConfigurationService;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -128,6 +132,7 @@ import java.util.function.IntConsumer;
  * up-calls for application-level operations such as launching activities,
  * broadcasting and receiving intents, etc.
  */
+@RavenwoodKeepPartialClass
 public abstract class Context {
     /**
      * After {@link Build.VERSION_CODES#TIRAMISU},
@@ -931,6 +936,7 @@ public abstract class Context {
      * @param resId Resource id for the CharSequence text
      */
     @NonNull
+    @RavenwoodKeep
     public final CharSequence getText(@StringRes int resId) {
         return getResources().getText(resId);
     }
@@ -944,6 +950,7 @@ public abstract class Context {
      *         text information.
      */
     @NonNull
+    @RavenwoodKeep
     public final String getString(@StringRes int resId) {
         return getResources().getString(resId);
     }
@@ -960,6 +967,7 @@ public abstract class Context {
      *         stripped of styled text information.
      */
     @NonNull
+    @RavenwoodKeep
     public final String getString(@StringRes int resId, Object... formatArgs) {
         return getResources().getString(resId, formatArgs);
     }
@@ -976,6 +984,7 @@ public abstract class Context {
      *         does not exist.
      */
     @ColorInt
+    @RavenwoodKeep
     public final int getColor(@ColorRes int id) {
         return getResources().getColor(id, getTheme());
     }
@@ -1043,6 +1052,7 @@ public abstract class Context {
      * @see android.content.res.Resources.Theme#obtainStyledAttributes(int[])
      */
     @NonNull
+    @RavenwoodKeep
     public final TypedArray obtainStyledAttributes(@NonNull @StyleableRes int[] attrs) {
         return getTheme().obtainStyledAttributes(attrs);
     }
@@ -1055,6 +1065,7 @@ public abstract class Context {
      * @see android.content.res.Resources.Theme#obtainStyledAttributes(int, int[])
      */
     @NonNull
+    @RavenwoodKeep
     public final TypedArray obtainStyledAttributes(@StyleRes int resid,
             @NonNull @StyleableRes int[] attrs) throws Resources.NotFoundException {
         return getTheme().obtainStyledAttributes(resid, attrs);
@@ -1068,6 +1079,7 @@ public abstract class Context {
      * @see android.content.res.Resources.Theme#obtainStyledAttributes(AttributeSet, int[], int, int)
      */
     @NonNull
+    @RavenwoodKeep
     public final TypedArray obtainStyledAttributes(
             @Nullable AttributeSet set, @NonNull @StyleableRes int[] attrs) {
         return getTheme().obtainStyledAttributes(set, attrs, 0, 0);
@@ -1081,6 +1093,7 @@ public abstract class Context {
      * @see android.content.res.Resources.Theme#obtainStyledAttributes(AttributeSet, int[], int, int)
      */
     @NonNull
+    @RavenwoodKeep
     public final TypedArray obtainStyledAttributes(@Nullable AttributeSet set,
             @NonNull @StyleableRes int[] attrs, @AttrRes int defStyleAttr,
             @StyleRes int defStyleRes) {
@@ -4530,6 +4543,7 @@ public abstract class Context {
      * <b>never</b> throw a {@link RuntimeException} if the name is not supported.
      */
     @SuppressWarnings("unchecked")
+    @RavenwoodKeep
     // TODO(b/347269120): Re-add @Nullable
     public final <T> T getSystemService(@NonNull Class<T> serviceClass) {
         // Because subclasses may override getSystemService(String) we cannot
@@ -6665,6 +6679,8 @@ public abstract class Context {
      * Use with {@link #getSystemService(String)} to retrieve a {@link
      * android.webkit.WebViewUpdateManager} for accessing the WebView update service.
      *
+     * <p>This can only be used on devices with {@link PackageManager#FEATURE_WEBVIEW}.
+     *
      * @see #getSystemService(String)
      * @see android.webkit.WebViewUpdateManager
      * @hide
@@ -6672,6 +6688,7 @@ public abstract class Context {
     @FlaggedApi(android.webkit.Flags.FLAG_UPDATE_SERVICE_IPC_WRAPPER)
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     @SuppressLint("ServiceName")
+    @RequiresFeature(PackageManager.FEATURE_WEBVIEW)
     public static final String WEBVIEW_UPDATE_SERVICE = "webviewupdate";
 
     /**
@@ -6689,13 +6706,23 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve the
-     * {@link com.android.internal.protolog.ProtoLogService} for registering ProtoLog clients.
+     * {@link ProtoLogConfigurationService} for registering ProtoLog clients.
      *
      * @see #getSystemService(String)
-     * @see com.android.internal.protolog.ProtoLogService
+     * @see ProtoLogConfigurationService
      * @hide
      */
-    public static final String PROTOLOG_SERVICE = "protolog";
+    public static final String PROTOLOG_CONFIGURATION_SERVICE = "protolog_configuration";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.app.supervision.SupervisionManager}.
+     *
+     * @see #getSystemService(String)
+     * @see android.app.supervision.SupervisionManager
+     * @hide
+     */
+    public static final String SUPERVISION_SERVICE = "supervision";
 
     /**
      * Determine whether the given permission is allowed for a particular

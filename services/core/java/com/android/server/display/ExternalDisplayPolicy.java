@@ -231,7 +231,7 @@ class ExternalDisplayPolicy {
         if (!isExternalDisplayAllowed()) {
             Slog.w(TAG, "handleExternalDisplayConnectedLocked: External display can not be used"
                                 + " because it is currently not allowed.");
-            mDisplayNotificationManager.onHighTemperatureExternalDisplayNotAllowed();
+            mHandler.post(mDisplayNotificationManager::onHighTemperatureExternalDisplayNotAllowed);
             return;
         }
 
@@ -329,7 +329,7 @@ class ExternalDisplayPolicy {
 
         if (!isExternalDisplayAllowed()) {
             Slog.w(TAG, "External display is currently not allowed and is getting disabled.");
-            mDisplayNotificationManager.onHighTemperatureExternalDisplayNotAllowed();
+            mHandler.post(mDisplayNotificationManager::onHighTemperatureExternalDisplayNotAllowed);
         }
 
         mLogicalDisplayMapper.setDisplayEnabledLocked(logicalDisplay, /*enabled=*/ false);

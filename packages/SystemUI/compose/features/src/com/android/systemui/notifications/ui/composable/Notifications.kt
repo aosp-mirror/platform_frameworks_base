@@ -68,7 +68,6 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInWindow
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.Dp
@@ -82,7 +81,6 @@ import com.android.compose.animation.scene.LowestZIndexContentPicker
 import com.android.compose.animation.scene.NestedScrollBehavior
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.modifiers.thenIf
-import com.android.internal.policy.SystemBarUtils
 import com.android.systemui.common.ui.compose.windowinsets.LocalRawScreenHeight
 import com.android.systemui.common.ui.compose.windowinsets.LocalScreenCornerRadius
 import com.android.systemui.res.R
@@ -137,14 +135,16 @@ fun SceneScope.HeadsUpNotificationSpace(
                 .notificationHeadsUpHeight(stackScrollView)
                 .debugBackground(viewModel, DEBUG_HUN_COLOR)
                 .onGloballyPositioned { coordinates: LayoutCoordinates ->
+                    val positionInWindow = coordinates.positionInWindow()
                     val boundsInWindow = coordinates.boundsInWindow()
                     debugLog(viewModel) {
                         "HUNS onGloballyPositioned:" +
                             " size=${coordinates.size}" +
                             " bounds=$boundsInWindow"
                     }
-                    // Note: boundsInWindow doesn't scroll off the screen
-                    stackScrollView.setHeadsUpTop(boundsInWindow.top)
+                    // Note: boundsInWindow doesn't scroll off the screen, so use positionInWindow
+                    // for top bound, which can scroll off screen while snoozing
+                    stackScrollView.setHeadsUpTop(positionInWindow.y)
                     stackScrollView.setHeadsUpBottom(boundsInWindow.bottom)
                 }
     )
@@ -159,16 +159,10 @@ fun SceneScope.SnoozeableHeadsUpNotificationSpace(
     stackScrollView: NotificationScrollView,
     viewModel: NotificationsPlaceholderViewModel,
 ) {
-    val context = LocalContext.current
-    val density = LocalDensity.current
-    val statusBarHeight = SystemBarUtils.getStatusBarHeight(context)
-    val headsUpPadding =
-        with(density) { dimensionResource(id = R.dimen.heads_up_status_bar_padding).roundToPx() }
-
     val isHeadsUp by viewModel.isHeadsUpOrAnimatingAway.collectAsStateWithLifecycle(false)
 
     var scrollOffset by remember { mutableFloatStateOf(0f) }
-    val minScrollOffset = -(statusBarHeight + headsUpPadding.toFloat())
+    val minScrollOffset = -(stackScrollView.getHeadsUpInset().toFloat())
     val maxScrollOffset = 0f
 
     val scrollableState = rememberScrollableState { delta ->
@@ -327,7 +321,9 @@ fun SceneScope.NotificationScrollingStack(
     val minScrimOffset: () -> Float = { minScrimTop - maxScrimTop() }
 
     // The height of the scrim visible on screen when it is in its resting (collapsed) state.
-    val minVisibleScrimHeight: () -> Float = { screenHeight - maxScrimTop() }
+    val minVisibleScrimHeight: () -> Float = {
+        screenHeight - maxScrimTop() - with(density) { navBarHeight.toPx() }
+    }
 
     // we are not scrolled to the top unless the scrim is at its maximum offset.
     LaunchedEffect(viewModel, scrimOffset) {
@@ -671,4 +667,3 @@ private val DEBUG_HUN_COLOR = Color(0f, 0f, 1f, 0.2f)
 private val DEBUG_BOX_COLOR = Color(0f, 1f, 0f, 0.2f)
 private const val HUN_SNOOZE_POSITIONAL_THRESHOLD_FRACTION = 0.25f
 private const val HUN_SNOOZE_VELOCITY_THRESHOLD = -70f
-internal const val STACK_OVERSCROLL_FLING_MIN_OFFSET = -100f

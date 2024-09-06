@@ -3031,9 +3031,8 @@
     <bool name="config_multiuserDelayUserDataLocking">false</bool>
 
     <!-- Whether the device allows full users to start in background visible on displays.
-         Note: this flag does NOT control the Communal Profile, which is not a full user.
-         Should be false for all devices in production. Can be enabled only for development use
-         in automotive vehicles with passenger displays. -->
+         Should be false for most devices, except automotive vehicle with passenger displays.
+         Note: this flag does NOT control the Communal Profile, which is not a full user. -->
     <bool name="config_multiuserVisibleBackgroundUsers">false</bool>
 
     <!-- Whether the device allows full users to start in background visible on the default display.
@@ -3080,6 +3079,11 @@
 
     <!-- Whether UI for multi user should be shown -->
     <bool name="config_enableMultiUserUI">false</bool>
+
+    <!-- Whether to boot system with the headless system user, i.e. user 0. If set to true,
+         system will be booted with the headless system user, or user 0. It has no effect if device
+         is not in Headless System User Mode (HSUM). -->
+    <bool name="config_bootToHeadlessSystemUser">false</bool>
 
     <!-- Whether multiple admins are allowed on the device. If set to true, new users can be created
          with admin privileges and admin privileges can be granted/revoked from existing users. -->
@@ -4148,6 +4152,9 @@
 
     <!-- Indicating if keyboard vibration settings supported or not. -->
     <bool name="config_keyboardVibrationSettingsSupported">false</bool>
+
+    <!-- Indicating if ringtone vibration settings supported or not. -->
+    <bool name="config_ringtoneVibrationSettingsSupported">false</bool>
 
     <!-- If the device should still vibrate even in low power mode, for certain priority vibrations
      (e.g. accessibility, alarms). This is mainly for Wear devices that don't have speakers. -->
@@ -7025,6 +7032,10 @@
     <!-- Whether the View-based scroll haptic feedback implementation is enabled for
          {@link InputDevice#SOURCE_ROTARY_ENCODER}s. -->
     <bool name="config_viewBasedRotaryEncoderHapticsEnabled">false</bool>
+
+    <!-- Whether the scroll haptic feedback implementation is enabled for
+    {@link InputDevice#SOURCE_TOUCHSCREEN}s. -->
+    <bool name="config_viewTouchScreenHapticScrollFeedbackEnabled">false</bool>
 
     <!-- Whether the media player is shown on the quick settings -->
     <bool name="config_quickSettingsShowMediaPlayer">true</bool>

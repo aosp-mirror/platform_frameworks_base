@@ -93,8 +93,8 @@ constructor(
         val configurationBasedDimensions = MutableStateFlow(loadFromResources(view))
         val disposableHandle =
             view.repeatWhenAttached {
-                repeatOnLifecycle(Lifecycle.State.CREATED) {
-                    launch("$TAG#viewModel") {
+                repeatOnLifecycle(Lifecycle.State.STARTED) {
+                    launch {
                         viewModel.collect { buttonModel ->
                             updateButton(
                                 view = button,
@@ -104,7 +104,7 @@ constructor(
                         }
                     }
 
-                    launch("$TAG#updateButtonAlpha") {
+                    launch {
                         updateButtonAlpha(
                             view = button,
                             viewModel = viewModel,
@@ -112,7 +112,7 @@ constructor(
                         )
                     }
 
-                    launch("$TAG#configurationBasedDimensions") {
+                    launch {
                         configurationBasedDimensions.collect { dimensions ->
                             button.updateLayoutParams<ViewGroup.LayoutParams> {
                                 width = dimensions.buttonSizePx.width
@@ -141,6 +141,7 @@ constructor(
         viewModel: KeyguardQuickAffordanceViewModel,
         messageDisplayer: (Int) -> Unit,
     ) {
+        logger.logUpdate(viewModel)
         if (!viewModel.isVisible) {
             view.isInvisible = true
             return

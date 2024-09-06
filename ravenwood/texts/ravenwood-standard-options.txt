@@ -6,8 +6,6 @@
 --default-throw
 
 # Uncomment below lines to enable each feature.
-# --enable-non-stub-method-check
---no-non-stub-method-check
 
 #--default-method-call-hook
 #    com.android.hoststubgen.hosthelper.HostTestUtils.logMethodCall

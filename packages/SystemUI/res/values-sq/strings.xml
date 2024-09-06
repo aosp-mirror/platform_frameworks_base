@@ -104,23 +104,17 @@
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> dhe aplikacionet e tjera të hapura zbuluan këtë pamje ekrani."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Shto te shënimi"</string>
     <string name="backlinks_include_link" msgid="4562093591148248158">"Përfshi lidhjen"</string>
+    <string name="backlinks_duplicate_label_format" msgid="558445128952827926">"<xliff:g id="APPNAME">%1$s</xliff:g> <xliff:g id="FREQUENCYCOUNT">(%2$d)</xliff:g>⁠"</string>
     <string name="screenrecord_title" msgid="4257171601439507792">"Regjistruesi i ekranit"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Regjistrimi i ekranit po përpunohet"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Njoftim i vazhdueshëm për një seancë regjistrimi të ekranit"</string>
-    <!-- no translation found for screenrecord_permission_dialog_title (7415261783188749730) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_option_text_single_app (1996450687814647583) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen (2794896384693120020) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_entire_screen (1321758636709366068) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_single_app (3738199712880063924) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_continue_entire_screen (5557974446773486600) -->
-    <skip />
-    <!-- no translation found for screenrecord_app_selector_title (3854492366333954736) -->
-    <skip />
+    <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"Të regjistrohet ekrani?"</string>
+    <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Regjistro një aplikacion"</string>
+    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"Regjistro të gjithë ekranin"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Kur regjistron të gjithë ekranin, regjistrohet çdo gjë e shfaqur në ekranin tënd. Prandaj, ki kujdes me gjërat si fjalëkalimet, detajet e pagesave, mesazhet, fotografitë, si dhe audion dhe videon."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Kur regjistron një aplikacion, regjistrohet çdo gjë që shfaqet ose luhet në atë aplikacion. Prandaj, ki kujdes me gjërat si fjalëkalimet, detajet e pagesave, mesazhet, fotografitë, si dhe audion dhe videon."</string>
+    <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Regjistro ekranin"</string>
+    <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"Zgjidh aplikacionin për të regjistruar"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Regjistro audio"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Audioja e pajisjes"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Tingulli nga pajisja, si muzika, telefonatat dhe tonet e ziles"</string>
@@ -298,7 +292,8 @@
     <string name="start_dreams" msgid="9131802557946276718">"Mbrojtësi i ekranit"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"Eternet"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Mos shqetëso"</string>
-    <string name="quick_settings_modes_label" msgid="5407025818652750501">"Modalitetet e përparësisë"</string>
+    <!-- no translation found for quick_settings_modes_label (879156359479504244) -->
+    <skip />
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth-i"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Nuk ofrohet për përdorim asnjë pajisje e çiftuar"</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"Trokit për të lidhur ose shkëputur një pajisje"</string>
@@ -307,6 +302,7 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Përdor Bluetooth-in"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Lidhur"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"Ndarja e audios"</string>
+    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="3227408556754456024">"Trokit për të ndërruar ose ndarë audion"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Ruajtur"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"shkëput"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"aktivizo"</string>
@@ -315,6 +311,7 @@
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bluetooth-i do të aktivizohet nesër në mëngjes"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Ndaj audion"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Audioja po ndahet"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"për të hyrë te cilësimet e ndarjes së audios"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> bateri"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Kufje me mikrofon"</string>
@@ -408,7 +405,7 @@
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Kliko për të çiftuar një pajisje të re"</string>
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"Paravendosja nuk mund të përditësohej"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"Paravendosja"</string>
-    <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"Titra në çast"</string>
+    <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"Titrat në çast"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Të zhbllokohet mikrofoni i pajisjes?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Të zhbllokohet kamera e pajisjes?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Të zhbllokohen kamera dhe mikrofoni i pajisjes?"</string>
@@ -437,10 +434,12 @@
     <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"Hap \"Cilësimet\""</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Pajisje tjetër"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Kalo te përmbledhja"</string>
-    <string name="zen_modes_dialog_title" msgid="4159138230418567383">"Modalitetet e përparësisë"</string>
+    <!-- no translation found for zen_modes_dialog_title (8854640808100096934) -->
+    <skip />
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"U krye"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"Cilësimet"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"Aktiv"</string>
+    <string name="zen_mode_on_with_details" msgid="7416143430557895497">"Aktiv • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"Joaktiv"</string>
     <string name="zen_mode_set_up" msgid="7457957033034460064">"Konfiguro"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"Menaxho te cilësimet"</string>
@@ -535,25 +534,26 @@
     <string name="media_projection_dialog_warning" msgid="1303664408388363598">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> do të ketë qasje te të gjitha informacionet që janë të dukshme në ekran ose që luhen nga pajisja jote gjatë regjistrimit ose transmetimit. Kjo përfshin informacione, si p.sh.: fjalëkalimet, detajet e pagesave, fotografitë, mesazhet, si dhe audion që luan ti."</string>
     <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"Të niset regjistrimi ose transmetimi?"</string>
     <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"Shërbimi që e ofron këtë funksion do të ketë qasje te të gjitha informacionet që janë të dukshme në ekran ose që luhen nga pajisja jote gjatë regjistrimit ose transmetimit. Kjo përfshin informacione, si p.sh.: fjalëkalimet, detajet e pagesave, fotografitë, mesazhet, si dhe audion që luan ti."</string>
-    <!-- no translation found for screen_share_generic_app_selector_title (8331515850599218288) -->
-    <skip />
+    <string name="screen_share_generic_app_selector_title" msgid="8331515850599218288">"Ndaj ose regjistro një aplikacion"</string>
     <string name="media_projection_entry_app_permission_dialog_title" msgid="4613857256721708062">"Të ndahet ekrani yt me <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
-    <string name="media_projection_entry_app_permission_dialog_option_text_single_app" msgid="6314402084788062644">"Ndaj një aplikacion"</string>
-    <string name="media_projection_entry_app_permission_dialog_option_text_entire_screen" msgid="7381488112332599632">"Ndaj të gjithë ekranin"</string>
+    <string name="screen_share_permission_dialog_option_single_app" msgid="2974054871681567314">"Ndaj një aplikacion"</string>
+    <!-- no translation found for media_projection_entry_app_permission_dialog_option_text_single_app (2308901434964846084) -->
+    <skip />
+    <string name="screen_share_permission_dialog_option_entire_screen" msgid="4493174362775038997">"Ndaj të gjithë ekranin"</string>
+    <!-- no translation found for media_projection_entry_app_permission_dialog_option_text_entire_screen (5100078808078139706) -->
+    <skip />
     <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="5504288438067851086">"Kur ti ndan të gjithë ekranin, çdo gjë në ekranin tënd është e dukshme për <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>. Prandaj, ki kujdes me gjërat si fjalëkalimet, detajet e pagesave, mesazhet, fotografitë, si dhe audion dhe videon."</string>
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="7094417930857938876">"Kur ti ndan një aplikacion, çdo gjë që shfaqet ose luhet në atë aplikacion është e dukshme për <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>. Prandaj, ki kujdes me gjërat si fjalëkalimet, detajet e pagesave, mesazhet, fotografitë, si dhe audion dhe videon."</string>
     <string name="media_projection_entry_app_permission_dialog_continue_entire_screen" msgid="1850848182344377579">"Ndaj ekranin"</string>
     <string name="media_projection_entry_app_permission_dialog_single_app_disabled" msgid="8999903044874669995">"<xliff:g id="APP_NAME">%1$s</xliff:g> e ka çaktivizuar këtë opsion"</string>
-    <!-- no translation found for media_projection_entry_share_app_selector_title (1419515119767501822) -->
-    <skip />
+    <string name="media_projection_entry_share_app_selector_title" msgid="1419515119767501822">"Zgjidh aplikacionin për të ndarë"</string>
     <string name="media_projection_entry_cast_permission_dialog_title" msgid="752756942658159416">"Të transmetohet ekrani yt?"</string>
     <string name="media_projection_entry_cast_permission_dialog_option_text_single_app" msgid="6073353940838561981">"Transmeto një aplikacion"</string>
     <string name="media_projection_entry_cast_permission_dialog_option_text_entire_screen" msgid="8389508187954155307">"Transmeto të gjithë ekranin"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="4040447861037324017">"Kur ti transmeton të gjithë ekranin, çdo gjë në ekranin tënd është e dukshme. Prandaj, ki kujdes me gjërat si fjalëkalimet, detajet e pagesave, mesazhet, fotografitë, si dhe audion dhe videon."</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="7487834861348460736">"Kur ti transmeton një aplikacion, çdo gjë që shfaqet ose luhet në atë aplikacion është e dukshme. Prandaj, ki kujdes me gjërat si fjalëkalimet, detajet e pagesave, mesazhet, fotografitë, si dhe audion dhe videon."</string>
     <string name="media_projection_entry_cast_permission_dialog_continue_entire_screen" msgid="3261124185304676483">"Transmeto ekranin"</string>
-    <!-- no translation found for media_projection_entry_cast_app_selector_title (6323062146661922387) -->
-    <skip />
+    <string name="media_projection_entry_cast_app_selector_title" msgid="6323062146661922387">"Zgjidh aplikacionin për të transmetuar"</string>
     <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"Të niset ndarja?"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Kur ti ndan, regjistron ose transmeton, Android ka qasje te çdo gjë e dukshme në ekranin tënd ose që po luhet në pajisjen tënde. Prandaj, ki kujdes me gjërat si fjalëkalimet, detajet e pagesave, mesazhet, fotografitë, si dhe audion dhe videon."</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Kur ti ndan, regjistron ose transmeton një aplikacion, Android ka qasje te çdo gjë e dukshme në ekranin tënd ose që po luhet në atë aplikacion. Prandaj, ki kujdes me gjërat si fjalëkalimet, detajet e pagesave, mesazhet, fotografitë, si dhe audion dhe videon."</string>
@@ -606,9 +606,9 @@
     <string name="monitoring_subtitle_ca_certificate" msgid="8588092029755175800">"Certifikatat CA"</string>
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Shiko politikat"</string>
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"Shiko kontrollet"</string>
-    <string name="monitoring_description_named_management" msgid="505833016545056036">"Kjo pajisje i përket <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nAdministratori i teknologjisë së informacionit mund të monitorojë dhe menaxhojë cilësimet, qasjen e korporatës, aplikacionet, të dhënat e lidhura me pajisjen tënde, si dhe informacionet e vendndodhjes së pajisjes tënde.\n\nPër më shumë informacione, kontakto me administratorin e teknologjisë së informacionit."</string>
+    <string name="monitoring_description_named_management" msgid="505833016545056036">"Kjo pajisje i përket <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nAdministratori i teknologjisë së informacionit mund të monitorojë dhe menaxhojë cilësimet, qasjen e korporatës, aplikacionet, të dhënat e lidhura me pajisjen tënde, si dhe informacionet e vendndodhjes së pajisjes sate.\n\nPër më shumë informacione, kontakto me administratorin e teknologjisë së informacionit."</string>
     <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"<xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g> mund të arrijë të qaset te të dhënat e lidhura me këtë pajisje, të menaxhojë aplikacionet dhe të ndryshojë cilësimet e kësaj pajisjeje.\n\nNëse ke pyetje, kontakto me <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g>."</string>
-    <string name="monitoring_description_management" msgid="4308879039175729014">"Kjo pajisje i përket organizatës sate.\n\nAdministratori i teknologjisë së informacionit mund të monitorojë dhe menaxhojë cilësimet, qasjen e korporatës, aplikacionet, të dhënat e lidhura me pajisjen tënde, si dhe informacionet e vendndodhjes së pajisjes tënde.\n\nPër më shumë informacione, kontakto me administratorin e teknologjisë së informacionit."</string>
+    <string name="monitoring_description_management" msgid="4308879039175729014">"Kjo pajisje i përket organizatës sate.\n\nAdministratori i teknologjisë së informacionit mund të monitorojë dhe menaxhojë cilësimet, qasjen e korporatës, aplikacionet, të dhënat e lidhura me pajisjen tënde, si dhe informacionet e vendndodhjes së pajisjes sate.\n\nPër më shumë informacione, kontakto me administratorin e teknologjisë së informacionit."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Organizata jote instaloi një autoritet certifikate në këtë pajisje. Trafiku i rrjetit tënd të sigurt mund të monitorohet ose modifikohet."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Organizata jote instaloi një autoritet certifikate në profilin tënd të punës. Trafiku i rrjetit tënd të sigurt mund të monitorohet ose modifikohet."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Në këtë pajisje është instaluar një autoritet certifikate. Trafiku i rrjetit tënd të sigurt mund të monitorohet ose modifikohet."</string>
@@ -726,6 +726,7 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Sateliti. Lidhje e mirë"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Sateliti. Ofrohet lidhje"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"SOS satelitor"</string>
+    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"Telefonatat e urgjencës ose SOS"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Profili i punës"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Argëtim për disa, por jo për të gjithë!"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Sintonizuesi i Sistemit të Ndërfaqes së Përdoruesit të jep mënyra shtesë për të tërhequr dhe personalizuar ndërfaqen Android të përdoruesit. Këto funksione eksperimentale mund të ndryshojnë, prishen ose zhduken në versionet e ardhshme. Vazhdo me kujdes."</string>
@@ -1392,30 +1393,34 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Ikona e palosjes"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Ikona e zgjerimit"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"ose"</string>
+    <!-- no translation found for launch_keyboard_tutorial_notification_title (8849933155160522519) -->
+    <skip />
+    <!-- no translation found for launch_keyboard_tutorial_notification_content (2880339951512757918) -->
+    <skip />
+    <!-- no translation found for launch_touchpad_tutorial_notification_title (2243780062772196901) -->
+    <skip />
+    <!-- no translation found for launch_touchpad_tutorial_notification_content (7931085031240753226) -->
+    <skip />
+    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_title (1940023776496198762) -->
+    <skip />
+    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_content (1780725168171929365) -->
+    <skip />
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Gjesti i kthimit prapa"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Gjesti për të shkuar tek ekrani bazë"</string>
     <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"Tasti i veprimit"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"U krye"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Kthehu prapa"</string>
     <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"Për t\'u kthyer, rrëshqit shpejt majtas ose djathtas duke përdorur tri gishta kudo në bllokun me prekje.\n\nPër ta bërë këtë, mund të përdorësh gjithashtu shkurtoren e tastierës \"Action + ESC\"."</string>
-    <!-- no translation found for touchpad_back_gesture_success_title (7240576648330612171) -->
-    <skip />
-    <!-- no translation found for touchpad_back_gesture_success_body (2324724953720741719) -->
-    <skip />
+    <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"Punë e shkëlqyer!"</string>
+    <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"E ke përfunduar gjestin e kthimit prapa."</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Shko tek ekrani bazë"</string>
     <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"Për të shkuar tek ekrani bazë në çdo kohë, rrëshqit shpejt lart me tre gishta nga fundi i ekranit."</string>
-    <!-- no translation found for touchpad_home_gesture_success_title (3778407003948209795) -->
-    <skip />
-    <!-- no translation found for touchpad_home_gesture_success_body (2404031094918807067) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_title (2659466586996495447) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_guidance (5718948664616999196) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_success_title (466467860120112933) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_success_body (7201991081652850430) -->
-    <skip />
+    <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"Bukur!"</string>
+    <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"E ke përfunduar gjestin e kalimit tek ekrani bazë."</string>
+    <string name="tutorial_action_key_title" msgid="2659466586996495447">"Tasti i veprimit"</string>
+    <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"Për t\'u qasur në aplikacionet e tua, shtyp tastin e veprimit në tastierë."</string>
+    <string name="tutorial_action_key_success_title" msgid="466467860120112933">"Urime!"</string>
+    <string name="tutorial_action_key_success_body" msgid="7201991081652850430">"Ke përfunduar gjestin e tastit të veprimit.\n\nVeprimi + / shfaq të gjitha shkurtoret që janë të disponueshme për ty."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Drita e sfondit e tastierës"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Niveli: %1$d nga %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Kontrollet e shtëpisë"</string>

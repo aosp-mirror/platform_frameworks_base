@@ -59,10 +59,10 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.core.animation.addListener
 import com.android.wm.shell.R
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
-import com.android.wm.shell.animation.Interpolators.EMPHASIZED_DECELERATE
-import com.android.wm.shell.animation.Interpolators.FAST_OUT_LINEAR_IN
 import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.SyncTransactionQueue
+import com.android.wm.shell.shared.animation.Interpolators.EMPHASIZED_DECELERATE
+import com.android.wm.shell.shared.animation.Interpolators.FAST_OUT_LINEAR_IN
 import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalViewHostViewContainer
 import com.android.wm.shell.windowdecor.common.DecorThemeUtil
 import com.android.wm.shell.windowdecor.common.OPACITY_12
@@ -121,8 +121,14 @@ class MaximizeMenu(
 
     /** Closes the maximize window and releases its view. */
     fun close() {
-        maximizeMenuView?.animateCloseMenu {
-            maximizeMenu?.releaseView()
+        val view = maximizeMenuView
+        val menu = maximizeMenu
+        if (view == null) {
+            menu?.releaseView()
+        } else {
+            view.animateCloseMenu {
+                menu?.releaseView()
+            }
         }
         maximizeMenu = null
         maximizeMenuView = null
@@ -318,7 +324,7 @@ class MaximizeMenu(
             rootView.setOnTouchListener { _, event ->
                 if (event.actionMasked == ACTION_OUTSIDE) {
                     onOutsideTouchListener?.invoke()
-                    false
+                    return@setOnTouchListener false
                 }
                 true
             }

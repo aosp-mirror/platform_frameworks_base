@@ -187,6 +187,13 @@ public class ZenModeConfig implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     public @interface ConfigOrigin {}
 
+    /**
+     * Prefix for the ids of implicit Zen rules. Implicit rules are those created automatically
+     * on behalf of apps that call {@link NotificationManager#setNotificationPolicy} or
+     * {@link NotificationManager#setInterruptionFilter}.
+     */
+    private static final String IMPLICIT_RULE_ID_PREFIX = "implicit_"; // + pkg_name
+
     public static final int SOURCE_ANYONE = Policy.PRIORITY_SENDERS_ANY;
     public static final int SOURCE_CONTACT = Policy.PRIORITY_SENDERS_CONTACTS;
     public static final int SOURCE_STAR = Policy.PRIORITY_SENDERS_STARRED;
@@ -234,10 +241,11 @@ public class ZenModeConfig implements Parcelable {
     // ZenModeConfig XML versions distinguishing key changes.
     public static final int XML_VERSION_ZEN_UPGRADE = 8;
     public static final int XML_VERSION_MODES_API = 11;
+    public static final int XML_VERSION_MODES_UI = 12;
 
-    // TODO: b/310620812 - Update XML_VERSION and update default_zen_config.xml accordingly when
-    //       modes_api is inlined.
-    private static final int XML_VERSION = 10;
+    // TODO: b/310620812, b/344831624 - Update XML_VERSION and update default_zen_config.xml
+    //  accordingly when modes_api / modes_ui are inlined.
+    private static final int XML_VERSION_PRE_MODES = 10;
     public static final String ZEN_TAG = "zen";
     private static final String ZEN_ATT_VERSION = "version";
     private static final String ZEN_ATT_USER = "user";
@@ -945,7 +953,13 @@ public class ZenModeConfig implements Parcelable {
     }
 
     public static int getCurrentXmlVersion() {
-        return Flags.modesApi() ? XML_VERSION_MODES_API : XML_VERSION;
+        if (Flags.modesUi()) {
+            return XML_VERSION_MODES_UI;
+        } else if (Flags.modesApi()) {
+            return XML_VERSION_MODES_API;
+        } else {
+            return XML_VERSION_PRE_MODES;
+        }
     }
 
     public static ZenModeConfig readXml(TypedXmlPullParser parser)
@@ -1030,23 +1044,19 @@ public class ZenModeConfig implements Parcelable {
                     rt.suppressedVisualEffects = safeInt(parser, DISALLOW_ATT_VISUAL_EFFECTS,
                             DEFAULT_SUPPRESSED_VISUAL_EFFECTS);
                 } else if (MANUAL_TAG.equals(tag)) {
-                    ZenRule manualRule = readRuleXml(parser);
-                    if (manualRule != null) {
-                        rt.manualRule = manualRule;
-
-                        // Manual rule may be present prior to modes_ui if it were on, but in that
-                        // case it would not have a set policy, so make note of the need to set
-                        // it up later.
-                        readManualRule = true;
-                        if (rt.manualRule.zenPolicy == null) {
-                            readManualRuleWithoutPolicy = true;
-                        }
+                    rt.manualRule = readRuleXml(parser);
+                    // Manual rule may be present prior to modes_ui if it were on, but in that
+                    // case it would not have a set policy, so make note of the need to set
+                    // it up later.
+                    readManualRule = true;
+                    if (rt.manualRule.zenPolicy == null) {
+                        readManualRuleWithoutPolicy = true;
                     }
                 } else if (AUTOMATIC_TAG.equals(tag)
                         || (Flags.modesApi() && AUTOMATIC_DELETED_TAG.equals(tag))) {
                     final String id = parser.getAttributeValue(null, RULE_ATT_ID);
-                    final ZenRule automaticRule = readRuleXml(parser);
-                    if (id != null && automaticRule != null) {
+                    if (id != null) {
+                        final ZenRule automaticRule = readRuleXml(parser);
                         automaticRule.id = id;
                         if (Flags.modesApi() && AUTOMATIC_DELETED_TAG.equals(tag)) {
                             String deletedRuleKey = deletedRuleKey(automaticRule);
@@ -1163,16 +1173,13 @@ public class ZenModeConfig implements Parcelable {
         out.endTag(null, ZEN_TAG);
     }
 
+    @NonNull
     public static ZenRule readRuleXml(TypedXmlPullParser parser) {
         final ZenRule rt = new ZenRule();
         rt.enabled = safeBoolean(parser, RULE_ATT_ENABLED, true);
         rt.name = parser.getAttributeValue(null, RULE_ATT_NAME);
         final String zen = parser.getAttributeValue(null, RULE_ATT_ZEN);
-        rt.zenMode = tryParseZenMode(zen, -1);
-        if (rt.zenMode == -1) {
-            Slog.w(TAG, "Bad zen mode in rule xml:" + zen);
-            return null;
-        }
+        rt.zenMode = tryParseZenMode(zen, ZEN_MODE_IMPORTANT_INTERRUPTIONS);
         rt.conditionId = safeUri(parser, RULE_ATT_CONDITION_ID);
         rt.component = safeComponentName(parser, RULE_ATT_COMPONENT);
         rt.configurationActivity = safeComponentName(parser, RULE_ATT_CONFIG_ACTIVITY);
@@ -2492,6 +2499,16 @@ public class ZenModeConfig implements Parcelable {
 
     // ==== End built-in system conditions ====
 
+    /** Generate the rule id for the implicit rule for the specified package. */
+    public static String implicitRuleId(String forPackage) {
+        return IMPLICIT_RULE_ID_PREFIX + forPackage;
+    }
+
+    /** Returns whether the rule id corresponds to an implicit rule. */
+    public static boolean isImplicitRuleId(@NonNull String ruleId) {
+        return ruleId.startsWith(IMPLICIT_RULE_ID_PREFIX);
+    }
+
     private static int[] tryParseHourAndMinute(String value) {
         if (TextUtils.isEmpty(value)) return null;
         final int i = value.indexOf('.');
@@ -2590,7 +2607,7 @@ public class ZenModeConfig implements Parcelable {
         @AutomaticZenRule.Type
         public int type = AutomaticZenRule.TYPE_UNKNOWN;
         public String triggerDescription;
-        public String iconResName;
+        @Nullable public String iconResName;
         public boolean allowManualInvocation;
         @AutomaticZenRule.ModifiableField public int userModifiedFields;
         @ZenPolicy.ModifiableField public int zenPolicyUserModifiedFields;
@@ -2915,7 +2932,7 @@ public class ZenModeConfig implements Parcelable {
             }
         }
 
-        // TODO: b/333527800 - Rename to isActive()
+        // TODO: b/363193376 - Rename to isActive()
         public boolean isAutomaticActive() {
             if (Flags.modesApi() && Flags.modesUi()) {
                 if (!enabled || getPkg() == null) {

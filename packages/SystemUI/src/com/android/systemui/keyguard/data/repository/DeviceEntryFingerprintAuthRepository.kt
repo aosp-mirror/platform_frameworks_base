@@ -39,7 +39,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.SharingStarted.Companion.Eagerly
 import kotlinx.coroutines.flow.SharingStarted.Companion.WhileSubscribed
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.buffer
@@ -53,7 +53,7 @@ import kotlinx.coroutines.flow.stateIn
 /** Encapsulates state about device entry fingerprint auth mechanism. */
 interface DeviceEntryFingerprintAuthRepository {
     /** Whether the device entry fingerprint auth is locked out. */
-    val isLockedOut: Flow<Boolean>
+    val isLockedOut: StateFlow<Boolean>
 
     /**
      * Whether the fingerprint sensor is currently listening, this doesn't mean that the user is
@@ -127,7 +127,7 @@ constructor(
         else if (authController.isRearFpsSupported) BiometricType.REAR_FINGERPRINT else null
     }
 
-    override val isLockedOut: Flow<Boolean> =
+    override val isLockedOut: StateFlow<Boolean> by lazy {
         conflatedCallbackFlow {
                 val sendLockoutUpdate =
                     fun() {
@@ -151,7 +151,12 @@ constructor(
                 sendLockoutUpdate()
                 awaitClose { keyguardUpdateMonitor.removeCallback(callback) }
             }
-            .stateIn(scope, started = SharingStarted.WhileSubscribed(), initialValue = false)
+            .stateIn(
+                scope,
+                started = Eagerly,
+                initialValue = keyguardUpdateMonitor.isFingerprintLockedOut
+            )
+    }
 
     override val isRunning: Flow<Boolean>
         get() =
@@ -309,6 +314,7 @@ constructor(
                         ) {
                             sendShouldUpdateIndicatorVisibility(true)
                         }
+
                         override fun onStrongAuthStateChanged(userId: Int) {
                             sendShouldUpdateIndicatorVisibility(true)
                         }
@@ -318,7 +324,7 @@ constructor(
                 awaitClose { keyguardUpdateMonitor.removeCallback(callback) }
             }
             .flowOn(mainDispatcher)
-            .shareIn(scope, started = SharingStarted.WhileSubscribed(), replay = 1)
+            .shareIn(scope, started = WhileSubscribed(), replay = 1)
 
     companion object {
         const val TAG = "DeviceEntryFingerprintAuthRepositoryImpl"

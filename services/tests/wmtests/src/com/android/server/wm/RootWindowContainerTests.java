@@ -205,6 +205,44 @@ public class RootWindowContainerTests extends WindowTestsBase {
     }
 
     @Test
+    public void testAllResumedActivitiesIdle() {
+        final ActivityRecord activity1 = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final ActivityRecord activity2 = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final WindowProcessController proc2 = activity2.app;
+        activity1.setState(RESUMED, "test");
+        activity2.detachFromProcess();
+        assertThat(mWm.mRoot.allResumedActivitiesIdle()).isFalse();
+
+        activity1.idle = true;
+        assertThat(mWm.mRoot.allResumedActivitiesIdle()).isFalse();
+
+        activity2.setProcess(proc2);
+        activity2.setState(RESUMED, "test");
+        activity2.idle = true;
+        assertThat(mWm.mRoot.allResumedActivitiesIdle()).isTrue();
+
+        activity1.idle = false;
+        activity1.setVisibleRequested(false);
+        assertThat(mWm.mRoot.allResumedActivitiesIdle()).isTrue();
+
+        final TaskFragment taskFragment = new TaskFragmentBuilder(mAtm)
+                .setParentTask(activity2.getTask()).build();
+        final ActivityRecord activity3 = new ActivityBuilder(mAtm).build();
+        taskFragment.addChild(activity3);
+        taskFragment.setVisibleRequested(true);
+        activity3.setState(RESUMED, "test");
+        activity3.idle = true;
+        assertThat(mWm.mRoot.allResumedActivitiesIdle()).isTrue();
+
+        activity3.idle = false;
+        assertThat(mWm.mRoot.allResumedActivitiesIdle()).isFalse();
+
+        activity2.idle = false;
+        activity3.idle = true;
+        assertThat(mWm.mRoot.allResumedActivitiesIdle()).isFalse();
+    }
+
+    @Test
     public void testTaskLayerRank() {
         final Task rootTask = new TaskBuilder(mSupervisor).build();
         final Task task1 = new TaskBuilder(mSupervisor).setParentTask(rootTask).build();
@@ -333,8 +371,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
         ensureTaskPlacement(fullscreenTask, firstActivity, secondActivity);
 
         // Move first activity to pinned root task.
-        mRootWindowContainer.moveActivityToPinnedRootTask(firstActivity,
-                null /* launchIntoPipHostActivity */, "initialMove");
+        mRootWindowContainer.moveActivityToPinnedRootTask(firstActivity, "initialMove");
 
         final TaskDisplayArea taskDisplayArea = fullscreenTask.getDisplayArea();
         Task pinnedRootTask = taskDisplayArea.getRootPinnedTask();
@@ -343,8 +380,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
         ensureTaskPlacement(fullscreenTask, secondActivity);
 
         // Move second activity to pinned root task.
-        mRootWindowContainer.moveActivityToPinnedRootTask(secondActivity,
-                null /* launchIntoPipHostActivity */, "secondMove");
+        mRootWindowContainer.moveActivityToPinnedRootTask(secondActivity, "secondMove");
 
         // Need to get root tasks again as a new instance might have been created.
         pinnedRootTask = taskDisplayArea.getRootPinnedTask();
@@ -375,8 +411,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
 
 
         // Move first activity to pinned root task.
-        mRootWindowContainer.moveActivityToPinnedRootTask(secondActivity,
-                null /* launchIntoPipHostActivity */, "initialMove");
+        mRootWindowContainer.moveActivityToPinnedRootTask(secondActivity, "initialMove");
 
         assertTrue(firstActivity.mRequestForceTransition);
     }
@@ -396,8 +431,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
         transientActivity.setState(RESUMED, "test");
         transientActivity.getTask().moveToFront("test");
 
-        mRootWindowContainer.moveActivityToPinnedRootTask(activity2,
-                null /* launchIntoPipHostActivity */, "test");
+        mRootWindowContainer.moveActivityToPinnedRootTask(activity2, "test");
         assertEquals("Created PiP task must not change focus", transientActivity.getTask(),
                 mRootWindowContainer.getTopDisplayFocusedRootTask());
         final Task newPipTask = activity2.getTask();
@@ -422,8 +456,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
         final Task task = activity.getTask();
 
         // Move activity to pinned root task.
-        mRootWindowContainer.moveActivityToPinnedRootTask(activity,
-                null /* launchIntoPipHostActivity */, "test");
+        mRootWindowContainer.moveActivityToPinnedRootTask(activity, "test");
 
         // Ensure a task has moved over.
         ensureTaskPlacement(task, activity);
@@ -461,8 +494,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
         final Task task = activity.getTask();
 
         // Move activity to pinned root task.
-        mRootWindowContainer.moveActivityToPinnedRootTask(activity,
-                null /* launchIntoPipHostActivity */, "test");
+        mRootWindowContainer.moveActivityToPinnedRootTask(activity, "test");
 
         // Ensure a task has moved over.
         ensureTaskPlacement(task, activity);
@@ -486,8 +518,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
         final ActivityRecord secondActivity = taskFragment.getBottomMostActivity();
 
         // Move first activity to pinned root task.
-        mRootWindowContainer.moveActivityToPinnedRootTask(firstActivity,
-                null /* launchIntoPipHostActivity */, "test");
+        mRootWindowContainer.moveActivityToPinnedRootTask(firstActivity, "test");
 
         final TaskDisplayArea taskDisplayArea = fullscreenTask.getDisplayArea();
         final Task pinnedRootTask = taskDisplayArea.getRootPinnedTask();
@@ -518,8 +549,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
         final ActivityRecord topActivity = taskFragment.getTopMostActivity();
 
         // Move the top activity to pinned root task.
-        mRootWindowContainer.moveActivityToPinnedRootTask(topActivity,
-                null /* launchIntoPipHostActivity */, "test");
+        mRootWindowContainer.moveActivityToPinnedRootTask(topActivity, "test");
 
         final Task pinnedRootTask = task.getDisplayArea().getRootPinnedTask();
 

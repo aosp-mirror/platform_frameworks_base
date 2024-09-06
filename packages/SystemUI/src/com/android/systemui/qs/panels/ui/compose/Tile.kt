@@ -24,6 +24,7 @@ import android.service.quicksettings.Tile.STATE_INACTIVE
 import android.text.TextUtils
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.graphics.ExperimentalAnimationGraphicsApi
@@ -43,7 +44,6 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -81,6 +81,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalContext
@@ -109,6 +110,7 @@ import com.android.systemui.qs.panels.ui.model.GridCell
 import com.android.systemui.qs.panels.ui.model.SpacerGridCell
 import com.android.systemui.qs.panels.ui.model.TileGridCell
 import com.android.systemui.qs.panels.ui.viewmodel.EditTileViewModel
+import com.android.systemui.qs.panels.ui.viewmodel.TileUiState
 import com.android.systemui.qs.panels.ui.viewmodel.TileViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.toUiState
 import com.android.systemui.qs.pipeline.domain.interactor.CurrentTilesInteractor
@@ -129,30 +131,40 @@ fun Tile(
 ) {
     val state by tile.state.collectAsStateWithLifecycle(tile.currentState)
     val uiState = remember(state) { state.toUiState() }
-    val colors = TileDefaults.getColorForState(uiState.state)
+    val colors = TileDefaults.getColorForState(uiState)
+
+    // TODO(b/361789146): Draw the shapes instead of clipping
+    val tileShape = TileDefaults.animateTileShape(uiState.state)
 
     TileContainer(
         colors = colors,
         showLabels = showLabels,
         label = uiState.label,
         iconOnly = iconOnly,
+        shape = tileShape,
         clickEnabled = true,
         onClick = tile::onClick,
         onLongClick = tile::onLongClick,
-        modifier = modifier,
+        modifier = modifier.height(tileHeight()),
     ) {
         val icon = getTileIcon(icon = uiState.icon)
         if (iconOnly) {
             TileIcon(icon = icon, color = colors.icon, modifier = Modifier.align(Alignment.Center))
         } else {
+            val iconShape = TileDefaults.animateIconShape(uiState.state)
             LargeTileContent(
                 label = uiState.label,
                 secondaryLabel = uiState.secondaryLabel,
                 icon = icon,
                 colors = colors,
-                clickEnabled = true,
-                onClick = tile::onSecondaryClick,
-                onLongClick = tile::onLongClick,
+                iconShape = iconShape,
+                toggleClickSupported = state.handlesSecondaryClick,
+                onClick = {
+                    if (state.handlesSecondaryClick) {
+                        tile.onSecondaryClick()
+                    }
+                },
+                onLongClick = { tile.onLongClick(it) },
             )
         }
     }
@@ -164,11 +176,12 @@ private fun TileContainer(
     showLabels: Boolean,
     label: String,
     iconOnly: Boolean,
+    shape: Shape,
     clickEnabled: Boolean = false,
     onClick: (Expandable) -> Unit = {},
     onLongClick: (Expandable) -> Unit = {},
     modifier: Modifier = Modifier,
-    content: @Composable BoxScope.() -> Unit,
+    content: @Composable BoxScope.(Expandable) -> Unit,
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -184,10 +197,8 @@ private fun TileContainer(
             }
         Expandable(
             color = backgroundColor,
-            shape = TileDefaults.TileShape,
-            modifier =
-                Modifier.height(dimensionResource(id = R.dimen.qs_tile_height))
-                    .clip(TileDefaults.TileShape)
+            shape = shape,
+            modifier = Modifier.height(tileHeight()).clip(shape)
         ) {
             Box(
                 modifier =
@@ -200,7 +211,7 @@ private fun TileContainer(
                         }
                         .tilePadding(),
             ) {
-                content()
+                content(it)
             }
         }
 
@@ -222,36 +233,28 @@ private fun LargeTileContent(
     secondaryLabel: String?,
     icon: Icon,
     colors: TileColors,
-    clickEnabled: Boolean = false,
-    onClick: (Expandable) -> Unit = {},
-    onLongClick: (Expandable) -> Unit = {},
+    iconShape: Shape,
+    toggleClickSupported: Boolean = false,
+    onClick: () -> Unit = {},
+    onLongClick: () -> Unit = {},
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = tileHorizontalArrangement()
     ) {
-        Expandable(
-            color = colors.iconBackground,
-            shape = TileDefaults.TileShape,
-            modifier = Modifier.fillMaxHeight().aspectRatio(1f)
+        // Icon
+        Box(
+            modifier =
+                Modifier.size(TileDefaults.ToggleTargetSize).thenIf(toggleClickSupported) {
+                    Modifier.clip(iconShape)
+                        .background(colors.iconBackground, { 1f })
+                        .combinedClickable(onClick = onClick, onLongClick = onLongClick)
+                }
         ) {
-            Box(
-                modifier =
-                    Modifier.fillMaxSize().clip(TileDefaults.TileShape).thenIf(clickEnabled) {
-                        Modifier.combinedClickable(
-                            onClick = { onClick(it) },
-                            onLongClick = { onLongClick(it) }
-                        )
-                    }
-            ) {
-                TileIcon(
-                    icon = icon,
-                    color = colors.icon,
-                    modifier = Modifier.align(Alignment.Center)
-                )
-            }
+            TileIcon(icon = icon, color = colors.icon, modifier = Modifier.align(Alignment.Center))
         }
 
+        // Labels
         Column(verticalArrangement = Arrangement.Center, modifier = Modifier.fillMaxHeight()) {
             Text(
                 label,
@@ -395,7 +398,7 @@ private fun RemoveTileTarget() {
         horizontalArrangement = tileHorizontalArrangement(),
         modifier =
             Modifier.fillMaxHeight()
-                .border(1.dp, LocalContentColor.current, shape = TileDefaults.TileShape)
+                .border(1.dp, LocalContentColor.current, shape = CircleShape)
                 .padding(10.dp)
     ) {
         Icon(imageVector = Icons.Default.Clear, contentDescription = null)
@@ -537,7 +540,7 @@ fun LazyGridScope.editTiles(
                         Modifier.background(
                                 color = MaterialTheme.colorScheme.secondary,
                                 alpha = { EditModeTileDefaults.PLACEHOLDER_ALPHA },
-                                shape = TileDefaults.TileShape
+                                shape = RoundedCornerShape(TileDefaults.InactiveCornerRadius)
                             )
                             .animateItem()
                     )
@@ -623,6 +626,7 @@ fun EditTile(
         showLabels = showLabels,
         label = label,
         iconOnly = iconOnly,
+        shape = RoundedCornerShape(TileDefaults.InactiveCornerRadius),
         modifier = modifier,
     ) {
         if (iconOnly) {
@@ -637,6 +641,7 @@ fun EditTile(
                 secondaryLabel = tileViewModel.appName?.load(),
                 icon = tileViewModel.icon,
                 colors = colors,
+                iconShape = RoundedCornerShape(TileDefaults.InactiveCornerRadius),
             )
         }
     }
@@ -667,7 +672,7 @@ private fun TileIcon(
     animateToEnd: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
-    val iconModifier = modifier.size(dimensionResource(id = R.dimen.qs_icon_size))
+    val iconModifier = modifier.size(TileDefaults.IconSize)
     val context = LocalContext.current
     val loadedDrawable =
         remember(icon, context) {
@@ -704,17 +709,12 @@ private fun TileIcon(
     }
 }
 
-@Composable
 private fun Modifier.tilePadding(): Modifier {
-    return padding(dimensionResource(id = R.dimen.qs_label_container_margin))
+    return padding(TileDefaults.TilePadding)
 }
 
-@Composable
 private fun tileHorizontalArrangement(): Arrangement.Horizontal {
-    return spacedBy(
-        space = dimensionResource(id = R.dimen.qs_label_container_margin),
-        alignment = Alignment.Start
-    )
+    return spacedBy(space = TileDefaults.TileArrangementPadding, alignment = Alignment.Start)
 }
 
 @Composable
@@ -722,7 +722,7 @@ fun tileHeight(iconWithLabel: Boolean = false): Dp {
     return if (iconWithLabel) {
         TileDefaults.IconTileWithLabelHeight
     } else {
-        dimensionResource(id = R.dimen.qs_tile_height)
+        TileDefaults.TileHeight
     }
 }
 
@@ -740,11 +740,33 @@ private object EditModeTileDefaults {
 }
 
 private object TileDefaults {
-    val TileShape = CircleShape
+    val InactiveCornerRadius = 50.dp
+    val ActiveIconCornerRadius = 16.dp
+    val ActiveTileCornerRadius = 24.dp
+
+    val ToggleTargetSize = 56.dp
+    val IconSize = 24.dp
+
+    val TilePadding = 8.dp
+    val TileArrangementPadding = 6.dp
+
+    val TileHeight = 72.dp
     val IconTileWithLabelHeight = 140.dp
 
+    /** An active tile without dual target uses the active color as background */
     @Composable
     fun activeTileColors(): TileColors =
+        TileColors(
+            background = MaterialTheme.colorScheme.primary,
+            iconBackground = MaterialTheme.colorScheme.primary,
+            label = MaterialTheme.colorScheme.onPrimary,
+            secondaryLabel = MaterialTheme.colorScheme.onPrimary,
+            icon = MaterialTheme.colorScheme.onPrimary,
+        )
+
+    /** An active tile with dual target only show the active color on the icon */
+    @Composable
+    fun activeDualTargetTileColors(): TileColors =
         TileColors(
             background = MaterialTheme.colorScheme.surfaceVariant,
             iconBackground = MaterialTheme.colorScheme.primary,
@@ -774,12 +796,51 @@ private object TileDefaults {
         )
 
     @Composable
-    fun getColorForState(state: Int): TileColors {
-        return when (state) {
-            STATE_ACTIVE -> activeTileColors()
+    fun getColorForState(uiState: TileUiState): TileColors {
+        return when (uiState.state) {
+            STATE_ACTIVE -> {
+                if (uiState.handlesSecondaryClick) {
+                    activeDualTargetTileColors()
+                } else {
+                    activeTileColors()
+                }
+            }
             STATE_INACTIVE -> inactiveTileColors()
             else -> unavailableTileColors()
         }
+    }
+
+    @Composable
+    fun animateIconShape(state: Int): Shape {
+        return animateShape(
+            state = state,
+            activeCornerRadius = ActiveIconCornerRadius,
+            label = "QSTileCornerRadius",
+        )
+    }
+
+    @Composable
+    fun animateTileShape(state: Int): Shape {
+        return animateShape(
+            state = state,
+            activeCornerRadius = ActiveTileCornerRadius,
+            label = "QSTileIconCornerRadius",
+        )
+    }
+
+    @Composable
+    fun animateShape(state: Int, activeCornerRadius: Dp, label: String): Shape {
+        val animatedCornerRadius by
+            animateDpAsState(
+                targetValue =
+                    if (state == STATE_ACTIVE) {
+                        activeCornerRadius
+                    } else {
+                        InactiveCornerRadius
+                    },
+                label = label
+            )
+        return RoundedCornerShape(animatedCornerRadius)
     }
 }
 

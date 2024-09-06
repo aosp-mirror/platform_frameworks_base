@@ -39,7 +39,7 @@ class SizeVoteTest {
     }
 
     @Test
-    fun `updates size if width and height not set and display resolution voting disabled`() {
+    fun updatesSize_widthAndHeightNotSet_resolutionVotingDisabled() {
         val summary = createVotesSummary(isDisplayResolutionRangeVotingEnabled = false)
         summary.width = Vote.INVALID_SIZE
         summary.height = Vote.INVALID_SIZE
@@ -55,7 +55,7 @@ class SizeVoteTest {
     }
 
     @Test
-    fun `does not update size if width set and display resolution voting disabled`() {
+    fun doesNotUpdateSiz_widthSet_resolutionVotingDisabled() {
         val summary = createVotesSummary(isDisplayResolutionRangeVotingEnabled = false)
         summary.width = 150
         summary.height = Vote.INVALID_SIZE
@@ -71,7 +71,7 @@ class SizeVoteTest {
     }
 
     @Test
-    fun `does not update size if height set and display resolution voting disabled`() {
+    fun doesNotUpdateSize_heightSet_resolutionVotingDisabled() {
         val summary = createVotesSummary(isDisplayResolutionRangeVotingEnabled = false)
         summary.width = Vote.INVALID_SIZE
         summary.height = 250
@@ -87,7 +87,7 @@ class SizeVoteTest {
     }
 
     @Test
-    fun `updates width if summary has more and display resolution voting enabled`() {
+    fun updatesWidthWithSmallerValue_resolutionVotingEnabled() {
         val summary = createVotesSummary()
         summary.width = 850
 
@@ -97,7 +97,7 @@ class SizeVoteTest {
     }
 
     @Test
-    fun `does not update width if summary has less and display resolution voting enabled`() {
+    fun doesNotUpdateWidthWithBiggerValue_resolutionVotingEnabled() {
         val summary = createVotesSummary()
         summary.width = 750
 
@@ -107,7 +107,7 @@ class SizeVoteTest {
     }
 
     @Test
-    fun `updates height if summary has more and display resolution voting enabled`() {
+    fun updatesHeightWithSmallerValue_resolutionVotingEnabled() {
         val summary = createVotesSummary()
         summary.height = 1650
 
@@ -117,7 +117,7 @@ class SizeVoteTest {
     }
 
     @Test
-    fun `does not update height if summary has less and display resolution voting enabled`() {
+    fun doesNotUpdateHeightWithBiggerValue_resolutionVotingEnabled() {
         val summary = createVotesSummary()
         summary.height = 1550
 
@@ -127,7 +127,7 @@ class SizeVoteTest {
     }
 
     @Test
-    fun `updates minWidth if summary has less and display resolution voting enabled`() {
+    fun updatesMinWidthWithSmallerValue_resolutionVotingEnabled() {
         val summary = createVotesSummary()
         summary.width = 150
         summary.minWidth = 350
@@ -138,7 +138,7 @@ class SizeVoteTest {
     }
 
     @Test
-    fun `does not update minWidth if summary has more and display resolution voting enabled`() {
+    fun doesNotUpdateMinWidthWithBiggerValue_resolutionVotingEnabled() {
         val summary = createVotesSummary()
         summary.width = 150
         summary.minWidth = 450
@@ -149,7 +149,7 @@ class SizeVoteTest {
     }
 
     @Test
-    fun `updates minHeight if summary has less and display resolution voting enabled`() {
+    fun updatesMinHeightWithSmallerValue_resolutionVotingEnabled() {
         val summary = createVotesSummary()
         summary.width = 150
         summary.minHeight = 1150
@@ -160,7 +160,7 @@ class SizeVoteTest {
     }
 
     @Test
-    fun `does not update minHeight if summary has more and display resolution voting enabled`() {
+    fun doesNotUpdateMinHeightWithBiggerValue_resolutionVotingEnabled() {
         val summary = createVotesSummary()
         summary.width = 150
         summary.minHeight = 1250

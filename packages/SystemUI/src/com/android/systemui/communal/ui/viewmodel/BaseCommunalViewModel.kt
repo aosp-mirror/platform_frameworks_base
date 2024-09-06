@@ -55,11 +55,8 @@ abstract class BaseCommunalViewModel(
     /** Whether widgets are currently being re-ordered. */
     open val reorderingWidgets: StateFlow<Boolean> = MutableStateFlow(false)
 
-    private val _selectedKey: MutableStateFlow<String?> = MutableStateFlow(null)
-
     /** The key of the currently selected item, or null if no item selected. */
-    val selectedKey: StateFlow<String?>
-        get() = _selectedKey
+    val selectedKey: StateFlow<String?> = communalInteractor.selectedKey
 
     private val _isTouchConsumed: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
@@ -153,7 +150,7 @@ abstract class BaseCommunalViewModel(
     open fun onAddWidget(
         componentName: ComponentName,
         user: UserHandle,
-        priority: Int,
+        rank: Int? = null,
         configurator: WidgetConfigurator? = null,
     ) {}
 
@@ -161,23 +158,23 @@ abstract class BaseCommunalViewModel(
     open fun onDeleteWidget(
         id: Int,
         componentName: ComponentName,
-        priority: Int,
+        rank: Int,
     ) {}
 
     /** Called as the UI detects a tap event on the widget. */
     open fun onTapWidget(
         componentName: ComponentName,
-        priority: Int,
+        rank: Int,
     ) {}
 
     /**
      * Called as the UI requests reordering widgets.
      *
-     * @param widgetIdToPriorityMap mapping of the widget ids to its priority. When re-ordering to
-     *   add a new item in the middle, provide the priorities of existing widgets as if the new item
-     *   existed, and then, call [onAddWidget] to add the new item at intended order.
+     * @param widgetIdToRankMap mapping of the widget ids to its rank. When re-ordering to add a new
+     *   item in the middle, provide the priorities of existing widgets as if the new item existed,
+     *   and then, call [onAddWidget] to add the new item at intended order.
      */
-    open fun onReorderWidgets(widgetIdToPriorityMap: Map<Int, Int>) {}
+    open fun onReorderWidgets(widgetIdToRankMap: Map<Int, Int>) {}
 
     /** Called as the UI requests opening the widget editor with an optional preselected widget. */
     open fun onOpenWidgetEditor(
@@ -226,7 +223,7 @@ abstract class BaseCommunalViewModel(
 
     /** Set the key of the currently selected item */
     fun setSelectedKey(key: String?) {
-        _selectedKey.value = key
+        communalInteractor.setSelectedKey(key)
     }
 
     /** Invoked once touches inside the lazy grid are consumed */

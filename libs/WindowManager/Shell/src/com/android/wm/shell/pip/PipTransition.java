@@ -41,6 +41,7 @@ import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTI
 import static com.android.wm.shell.pip.PipAnimationController.isInPipDirection;
 import static com.android.wm.shell.pip.PipAnimationController.isOutPipDirection;
 import static com.android.wm.shell.pip.PipTransitionState.ENTERED_PIP;
+import static com.android.wm.shell.transition.Transitions.TRANSIT_CLEANUP_PIP_EXIT;
 import static com.android.wm.shell.transition.Transitions.TRANSIT_EXIT_PIP;
 import static com.android.wm.shell.transition.Transitions.TRANSIT_EXIT_PIP_TO_SPLIT;
 import static com.android.wm.shell.transition.Transitions.TRANSIT_REMOVE_PIP;
@@ -74,6 +75,7 @@ import com.android.wm.shell.common.pip.PipMenuController;
 import com.android.wm.shell.common.pip.PipUtils;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.shared.TransitionUtil;
+import com.android.wm.shell.shared.pip.PipContentOverlay;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.CounterRotatorHelper;
@@ -122,6 +124,8 @@ public class PipTransition extends PipTransitionController {
     @Nullable
     private IBinder mMoveToBackTransition;
     private IBinder mRequestedEnterTransition;
+    private IBinder mCleanupTransition;
+
     private WindowContainerToken mRequestedEnterTask;
     /** The Task window that is currently in PIP windowing mode. */
     @Nullable
@@ -232,10 +236,12 @@ public class PipTransition extends PipTransitionController {
 
         // Exiting PIP.
         final int type = info.getType();
-        if (transition.equals(mExitTransition) || transition.equals(mMoveToBackTransition)) {
+        if (transition.equals(mExitTransition) || transition.equals(mMoveToBackTransition)
+                || transition.equals(mCleanupTransition)) {
             mExitDestinationBounds.setEmpty();
             mExitTransition = null;
             mMoveToBackTransition = null;
+            mCleanupTransition = null;
             mHasFadeOut = false;
             if (mFinishCallback != null) {
                 callFinishCallback(null /* wct */);
@@ -268,6 +274,9 @@ public class PipTransition extends PipTransitionController {
                 case TRANSIT_REMOVE_PIP:
                     removePipImmediately(info, startTransaction, finishTransaction, finishCallback,
                             pipTaskInfo);
+                    break;
+                case TRANSIT_CLEANUP_PIP_EXIT:
+                    cleanupPipExitTransition(startTransaction, finishCallback);
                     break;
                 default:
                     throw new IllegalStateException("mExitTransition with unexpected transit type="
@@ -768,7 +777,19 @@ public class PipTransition extends PipTransitionController {
                 mPipAnimationController.resetAnimatorState();
                 finishTransaction.remove(pipLeash);
             }
-            finishCallback.onTransitionFinished(wct);
+
+            if (mFixedRotationState == FIXED_ROTATION_TRANSITION) {
+                // TODO(b/358226697): start a new transition with the WCT instead of applying it in
+                //  the {@link finishCallback}, to ensure shell creates a transition for it.
+                finishCallback.onTransitionFinished(wct);
+            } else {
+                // Apply wct in separate transition so that it can be correctly handled by the
+                // {@link FreeformTaskTransitionObserver} when desktop windowing (which does not
+                // utilize fixed rotation transitions for exiting pip) is enabled (See b/288910069).
+                mCleanupTransition = mTransitions.startTransition(
+                        TRANSIT_CLEANUP_PIP_EXIT, wct, this);
+                finishCallback.onTransitionFinished(null);
+            }
         };
         mFinishTransaction = finishTransaction;
 
@@ -911,6 +932,16 @@ public class PipTransition extends PipTransitionController {
                     "removePipImmediately is called without pip change");
         }
         mPipOrganizer.onExitPipFinished(taskInfo);
+        finishCallback.onTransitionFinished(null);
+    }
+
+    /**
+     * For {@link Transitions#TRANSIT_CLEANUP_PIP_EXIT} which applies final config changes needed
+     * after the exit from pip transition animation finishes.
+     */
+    private void cleanupPipExitTransition(@NonNull SurfaceControl.Transaction startTransaction,
+            @NonNull Transitions.TransitionFinishCallback finishCallback) {
+        startTransaction.apply();
         finishCallback.onTransitionFinished(null);
     }
 

@@ -182,13 +182,22 @@ public class FingerprintInternalCleanupClientTest {
     public void invalidBiometricUserState() throws Exception {
         mClient =  createClient();
 
+        final List<Fingerprint> templates = List.of(
+                new Fingerprint("one", 1, 1),
+                new Fingerprint("two", 2, 1),
+                new Fingerprint("three", 3, 1)
+        );
+
         final List<Fingerprint> list = new ArrayList<>();
         doReturn(true).when(mFingerprintUtils)
                 .hasValidBiometricUserState(mContext, 2);
         doReturn(list).when(mFingerprintUtils).getBiometricsForUser(mContext, 2);
 
         mClient.start(mCallback);
-        mClient.onEnumerationResult(null, 0);
+        for (int i = templates.size() - 1; i >= 0; i--) {
+            mClient.getCurrentEnumerateClient().onEnumerationResult(templates.get(i), i);
+        }
+        verify(mLogger).logFingerprintsLoe();
         verify(mFingerprintUtils).deleteStateForUser(2);
     }
 

@@ -83,10 +83,10 @@ import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestShellExecutor;
+import com.android.wm.shell.shared.ShellSharedConstants;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
-import com.android.wm.shell.sysui.ShellSharedConstants;
 import com.android.wm.shell.transition.Transitions;
 
 import org.junit.Before;
@@ -881,7 +881,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
         RemoteAnimationTarget[] targets = new RemoteAnimationTarget[]{animationTarget};
         if (mController.mBackAnimationAdapter != null) {
             mController.mBackAnimationAdapter.getRunner().onAnimationStart(
-                    targets, null, null, mBackAnimationFinishedCallback);
+                    targets, null /* prepareOpenTransition */, mBackAnimationFinishedCallback);
             mShellExecutor.flushAll();
         }
     }

@@ -284,11 +284,15 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BooleanSupplier;
 import java.util.stream.Collectors;
 
@@ -405,6 +409,9 @@ public class AudioService extends IAudioService.Stub
 
     /** The controller for the volume UI. */
     private final VolumeController mVolumeController = new VolumeController();
+
+    /** Used only for testing to enable/disable the long press timeout volume actions. */
+    private final AtomicBoolean mVolumeControllerLongPressEnabled = new AtomicBoolean(true);
 
     // sendMsg() flags
     /** If the msg is already queued, replace it with this one. */
@@ -785,6 +792,8 @@ public class AudioService extends IAudioService.Stub
     private final BroadcastReceiver mReceiver = new AudioServiceBroadcastReceiver();
 
     private final Executor mAudioServerLifecycleExecutor;
+    private long mSysPropListenerNativeHandle;
+    private final List<Future> mScheduledPermissionTasks = new ArrayList();
 
     private IMediaProjectionManager mProjectionService; // to validate projection token
 
@@ -1092,7 +1101,8 @@ public class AudioService extends IAudioService.Stub
 
         public Lifecycle(Context context) {
             super(context);
-            var audioserverLifecycleExecutor = Executors.newSingleThreadExecutor();
+            var audioserverLifecycleExecutor = Executors.newSingleThreadScheduledExecutor(
+                    (Runnable r) -> new Thread(r, "audioserver_lifecycle"));
             var audioPolicyFacade = new DefaultAudioPolicyFacade(audioserverLifecycleExecutor);
             mService = new AudioService(context,
                               AudioSystemAdapter.getDefaultAdapter(),
@@ -1221,34 +1231,6 @@ public class AudioService extends IAudioService.Stub
 
         mBroadcastHandlerThread = new HandlerThread("AudioService Broadcast");
         mBroadcastHandlerThread.start();
-
-        // Listen to permission invalidations for the PermissionProvider
-        if (audioserverPermissions()) {
-            final Handler broadcastHandler = mBroadcastHandlerThread.getThreadHandler();
-            mAudioSystem.listenForSystemPropertyChange(PermissionManager.CACHE_KEY_PACKAGE_INFO,
-                    new Runnable() {
-                        // Roughly chosen to be long enough to suppress the autocork behavior
-                        // of the permission cache (50ms), and longer than the task could reasonably
-                        // take, even with many packages and users, while not introducing visible
-                        // permission leaks - since the app needs to restart, and trigger an action
-                        // which requires permissions from audioserver before this delay.
-                        // For RECORD_AUDIO, we are additionally protected by appops.
-                        final long UPDATE_DELAY_MS = 110;
-                        final AtomicLong scheduledUpdateTimestamp = new AtomicLong(0);
-                        @Override
-                        public void run() {
-                            var currentTime = SystemClock.uptimeMillis();
-                            if (currentTime > scheduledUpdateTimestamp.get()) {
-                                scheduledUpdateTimestamp.set(currentTime + UPDATE_DELAY_MS);
-                                broadcastHandler.postAtTime( () ->
-                                        mAudioServerLifecycleExecutor.execute(mPermissionProvider
-                                            ::onPermissionStateChanged),
-                                        currentTime + UPDATE_DELAY_MS
-                                    );
-                            }
-                        }
-            });
-        }
 
         mDeviceBroker = new AudioDeviceBroker(mContext, this, mAudioSystem);
 
@@ -1717,8 +1699,10 @@ public class AudioService extends IAudioService.Stub
 
     public void onSystemReady() {
         mSystemReady = true;
+        if (audioserverPermissions()) {
+            setupPermissionListener();
+        }
         scheduleLoadSoundEffects();
-
         mDeviceBroker.onSystemReady();
 
         if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_HDMI_CEC)) {
@@ -10608,6 +10592,67 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
+    /* Listen to permission invalidations for the PermissionProvider */
+    private void setupPermissionListener() {
+        // Roughly chosen to be long enough to suppress the autocork behavior of the permission
+        // cache (50ms), while not introducing visible permission leaks - since the app needs to
+        // restart, and trigger an action which requires permissions from audioserver before this
+        // delay. For RECORD_AUDIO, we are additionally protected by appops.
+        final long UPDATE_DELAY_MS = 60;
+        // instanceof to simplify the construction requirements of AudioService for testing: no
+        // delayed execution during unit tests.
+        if (mAudioServerLifecycleExecutor instanceof ScheduledExecutorService exec) {
+            // The order on the task list is an embedding on the scheduling order of the executor,
+            // since we synchronously add the scheduled task to our local queue. This list should
+            // almost always have only two elements, except in cases of serious system contention.
+            Runnable task = () -> {
+                synchronized (mScheduledPermissionTasks) {
+                    mScheduledPermissionTasks.add(exec.schedule(() -> {
+                        try {
+                            // Our goal is to remove all tasks which don't correspond to ourselves
+                            // on this queue. Either they are already done (ahead of us), or we
+                            // should cancel them (behind us), since their work is redundant after
+                            // we fire.
+                            // We must be the first non-completed task in the queue, since the
+                            // execution order matches the queue order. Note, this task is the only
+                            // writer on elements in the queue, and the task is serialized, so
+                            //  => no in-flight cancellation
+                            //  => exists at least one non-completed task (ourselves)
+                            //  => the queue is non-empty (only completed tasks removed)
+                            synchronized (mScheduledPermissionTasks) {
+                                final var iter = mScheduledPermissionTasks.iterator();
+                                while (iter.next().isDone()) {
+                                    iter.remove();
+                                }
+                                // iter is on the first element which is not completed (us)
+                                while (iter.hasNext()) {
+                                    if (!iter.next().cancel(false)) {
+                                        throw new AssertionError(
+                                                "Cancel should be infallible since we" +
+                                                "cancel from the executor");
+                                    }
+                                    iter.remove();
+                                }
+                            }
+                            mPermissionProvider.onPermissionStateChanged();
+                        } catch (Exception e) {
+                            // Handle executor routing exceptions to nowhere
+                            Thread.getDefaultUncaughtExceptionHandler()
+                                    .uncaughtException(Thread.currentThread(), e);
+                        }
+                    }, UPDATE_DELAY_MS, TimeUnit.MILLISECONDS));
+                }
+            };
+            mSysPropListenerNativeHandle = mAudioSystem.listenForSystemPropertyChange(
+                    PermissionManager.CACHE_KEY_PACKAGE_INFO,
+                    task);
+        } else {
+            mAudioSystem.listenForSystemPropertyChange(
+                    PermissionManager.CACHE_KEY_PACKAGE_INFO,
+                    () -> mAudioServerLifecycleExecutor.execute(
+                                mPermissionProvider::onPermissionStateChanged));
+        }
+    }
 
     //==========================================================================================
     // Audio Focus
@@ -10691,7 +10736,7 @@ public class AudioService extends IAudioService.Stub
         return true;
     }
 
-    public int requestAudioFocus(AudioAttributes aa, int durationHint, IBinder cb,
+    public int requestAudioFocus(AudioAttributes aa, int focusReqType, IBinder cb,
             IAudioFocusDispatcher fd, String clientId, String callingPackageName,
             String attributionTag, int flags, IAudioPolicyCallback pcb, int sdk) {
         if ((flags & AudioManager.AUDIOFOCUS_FLAG_TEST) != 0) {
@@ -10700,7 +10745,7 @@ public class AudioService extends IAudioService.Stub
         final int uid = Binder.getCallingUid();
         MediaMetrics.Item mmi = new MediaMetrics.Item(mMetricsId + "focus")
                 .setUid(uid)
-                //.putInt("durationHint", durationHint)
+                //.putInt("focusReqType", focusReqType)
                 .set(MediaMetrics.Property.CALLING_PACKAGE, callingPackageName)
                 .set(MediaMetrics.Property.CLIENT_NAME, clientId)
                 .set(MediaMetrics.Property.EVENT, "requestAudioFocus")
@@ -10760,9 +10805,14 @@ public class AudioService extends IAudioService.Stub
 
         final long token = Binder.clearCallingIdentity();
         try {
+            //TODO move inside HardeningEnforcer after refactor that moves permission checks
+            //     in the blockFocusMethod
+            if (permissionOverridesCheck) {
+                mHardeningEnforcer.metricsLogFocusReq(/*blocked*/false, focusReqType, uid);
+            }
             if (!permissionOverridesCheck && mHardeningEnforcer.blockFocusMethod(uid,
                     HardeningEnforcer.METHOD_AUDIO_MANAGER_REQUEST_AUDIO_FOCUS,
-                    clientId, durationHint, callingPackageName, attributionTag, sdk)) {
+                    clientId, focusReqType, callingPackageName, attributionTag, sdk)) {
                 final String reason = "Audio focus request blocked by hardening";
                 Log.w(TAG, reason);
                 mmi.set(MediaMetrics.Property.EARLY_RETURN, reason).record();
@@ -10773,14 +10823,14 @@ public class AudioService extends IAudioService.Stub
         }
 
         mmi.record();
-        return mMediaFocusControl.requestAudioFocus(aa, durationHint, cb, fd,
+        return mMediaFocusControl.requestAudioFocus(aa, focusReqType, cb, fd,
                 clientId, callingPackageName, flags, sdk,
-                forceFocusDuckingForAccessibility(aa, durationHint, uid), -1 /*testUid, ignored*/,
+                forceFocusDuckingForAccessibility(aa, focusReqType, uid), -1 /*testUid, ignored*/,
                 permissionOverridesCheck);
     }
 
     /** see {@link AudioManager#requestAudioFocusForTest(AudioFocusRequest, String, int, int)} */
-    public int requestAudioFocusForTest(AudioAttributes aa, int durationHint, IBinder cb,
+    public int requestAudioFocusForTest(AudioAttributes aa, int focusReqType, IBinder cb,
             IAudioFocusDispatcher fd, String clientId, String callingPackageName,
             int flags, int fakeUid, int sdk) {
         if (!enforceQueryAudioStateForTest("focus request")) {
@@ -10791,7 +10841,7 @@ public class AudioService extends IAudioService.Stub
             Log.e(TAG, reason);
             return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
         }
-        return mMediaFocusControl.requestAudioFocus(aa, durationHint, cb, fd,
+        return mMediaFocusControl.requestAudioFocus(aa, focusReqType, cb, fd,
                 clientId, callingPackageName, flags,
                 sdk, false /*forceDuck*/, fakeUid, true /*permissionOverridesCheck*/);
     }
@@ -12506,6 +12556,15 @@ public class AudioService extends IAudioService.Stub
         if (DEBUG_VOL) Log.d(TAG, "Volume controller visible: " + visible);
     }
 
+    /** @see AudioManager#setVolumeControllerLongPressTimeoutEnabled(boolean) */
+    @Override
+    @android.annotation.EnforcePermission(MODIFY_AUDIO_SETTINGS_PRIVILEGED)
+    public void setVolumeControllerLongPressTimeoutEnabled(boolean enable) {
+        super.setVolumeControllerLongPressTimeoutEnabled_enforcePermission();
+        mVolumeControllerLongPressEnabled.set(enable);
+        Log.i(TAG, "Volume controller long press timeout enabled: " + enable);
+    }
+
     @Override
     public void setVolumePolicy(VolumePolicy policy) {
         enforceVolumeController("set volume policy");
@@ -12584,7 +12643,9 @@ public class AudioService extends IAudioService.Stub
                 if ((flags & AudioManager.FLAG_SHOW_UI) != 0 && !mVisible) {
                     // UI is not visible yet, adjustment is ignored
                     if (mNextLongPress < now) {
-                        mNextLongPress = now + mLongPressTimeout;
+                        mNextLongPress =
+                                now + (mVolumeControllerLongPressEnabled.get() ? mLongPressTimeout
+                                        : 0);
                     }
                     suppress = true;
                 } else if (mNextLongPress > 0) {  // in a long-press
@@ -14661,6 +14722,25 @@ public class AudioService extends IAudioService.Stub
             activeAssistantUids = mActiveAssistantServiceUids.clone();
         }
         return activeAssistantUids;
+    }
+
+    @Override
+    /** @see AudioManager#permissionUpdateBarrier() */
+    public void permissionUpdateBarrier() {
+        mAudioSystem.triggerSystemPropertyUpdate(mSysPropListenerNativeHandle);
+        List<Future> snapshot;
+        synchronized (mScheduledPermissionTasks) {
+            snapshot = List.copyOf(mScheduledPermissionTasks);
+        }
+        for (var x : snapshot) {
+            try {
+                x.get();
+            } catch (CancellationException e) {
+                // Task completed
+            } catch (InterruptedException | ExecutionException e) {
+                Log.wtf(TAG, "Exception which should never occur", e);
+            }
+        }
     }
 
     List<String> getDeviceIdentityAddresses(AudioDeviceAttributes device) {

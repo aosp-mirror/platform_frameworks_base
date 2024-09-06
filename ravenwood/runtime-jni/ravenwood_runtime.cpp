@@ -245,7 +245,7 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
     g_StructStat = findClass(env, "android/system/StructStat");
     g_StructTimespecClass = findClass(env, "android/system/StructTimespec");
 
-    jint res = jniRegisterNativeMethods(env, "com/android/ravenwood/common/RavenwoodRuntimeNative",
+    jint res = jniRegisterNativeMethods(env, "com/android/ravenwood/RavenwoodRuntimeNative",
             sMethods, NELEM(sMethods));
     if (res < 0) {
         return res;

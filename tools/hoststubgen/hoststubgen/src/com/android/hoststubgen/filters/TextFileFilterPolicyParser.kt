@@ -17,12 +17,13 @@ package com.android.hoststubgen.filters
 
 import com.android.hoststubgen.ParseException
 import com.android.hoststubgen.asm.ClassNodes
+import com.android.hoststubgen.asm.splitWithLastPeriod
 import com.android.hoststubgen.asm.toHumanReadableClassName
+import com.android.hoststubgen.asm.toJvmClassName
 import com.android.hoststubgen.log
 import com.android.hoststubgen.normalizeTextLine
 import com.android.hoststubgen.whitespaceRegex
 import org.objectweb.asm.Opcodes
-import org.objectweb.asm.commons.Remapper
 import org.objectweb.asm.tree.ClassNode
 import java.io.BufferedReader
 import java.io.FileReader
@@ -62,7 +63,7 @@ fun createFilterFromTextPolicyFile(
         filename: String,
         classes: ClassNodes,
         fallback: OutputFilter,
-        ): Pair<OutputFilter, Remapper?> {
+        ): OutputFilter {
     log.i("Loading offloaded annotations from $filename ...")
     log.withIndent {
         val subclassFilter = SubclassFilter(classes, fallback)
@@ -75,7 +76,9 @@ fun createFilterFromTextPolicyFile(
         var featureFlagsPolicy: FilterPolicyWithReason? = null
         var syspropsPolicy: FilterPolicyWithReason? = null
         var rFilePolicy: FilterPolicyWithReason? = null
-        val typeRenameSpec = mutableListOf<TextFilePolicyRemapper.TypeRenameSpec>()
+        val typeRenameSpec = mutableListOf<TextFilePolicyRemapperFilter.TypeRenameSpec>()
+        val methodReplaceSpec =
+            mutableListOf<TextFilePolicyMethodReplaceFilter.MethodCallReplaceSpec>()
 
         try {
             BufferedReader(FileReader(filename)).use { reader ->
@@ -237,7 +240,7 @@ fun createFilterFromTextPolicyFile(
 
                             imf.setPolicyForMethod(className, name, signature,
                                     policy.withReason(FILTER_REASON))
-                            if (policy.isSubstitute) {
+                            if (policy == FilterPolicy.Substitute) {
                                 val fromName = fields[3].substring(1)
 
                                 if (fromName == name) {
@@ -245,13 +248,28 @@ fun createFilterFromTextPolicyFile(
                                             "Substitution must have a different name")
                                 }
 
-                                // Set the policy  for the "from" method.
+                                // Set the policy for the "from" method.
                                 imf.setPolicyForMethod(className, fromName, signature,
-                                        policy.getSubstitutionBasePolicy()
-                                                .withReason(FILTER_REASON))
+                                    FilterPolicy.Keep.withReason(FILTER_REASON))
 
-                                // Keep "from" -> "to" mapping.
-                                imf.setRenameTo(className, fromName, signature, name)
+                                val classAndMethod = splitWithLastPeriod(fromName)
+                                if (classAndMethod != null) {
+                                    // If the substitution target contains a ".", then
+                                    // it's a method call redirect.
+                                    methodReplaceSpec.add(
+                                        TextFilePolicyMethodReplaceFilter.MethodCallReplaceSpec(
+                                            className.toJvmClassName(),
+                                            name,
+                                            signature,
+                                            classAndMethod.first.toJvmClassName(),
+                                            classAndMethod.second,
+                                        )
+                                    )
+                                } else {
+                                    // It's an in-class replace.
+                                    // ("@RavenwoodReplace" equivalent)
+                                    imf.setRenameTo(className, fromName, signature, name)
+                                }
                             }
                         }
                         "r", "rename" -> {
@@ -267,7 +285,7 @@ fun createFilterFromTextPolicyFile(
                             // applied. (Which is needed for services.jar)
                             val prefix = fields[2].trimStart('/')
 
-                            typeRenameSpec += TextFilePolicyRemapper.TypeRenameSpec(
+                            typeRenameSpec += TextFilePolicyRemapperFilter.TypeRenameSpec(
                                 pattern, prefix)
                         }
 
@@ -281,16 +299,19 @@ fun createFilterFromTextPolicyFile(
             throw e.withSourceInfo(filename, lineNo)
         }
 
-        var remapper: TextFilePolicyRemapper? = null
+        var ret: OutputFilter = imf
         if (typeRenameSpec.isNotEmpty()) {
-            remapper = TextFilePolicyRemapper(typeRenameSpec)
+            ret = TextFilePolicyRemapperFilter(typeRenameSpec, ret)
+        }
+        if (methodReplaceSpec.isNotEmpty()) {
+            ret = TextFilePolicyMethodReplaceFilter(methodReplaceSpec, classes, ret)
         }
 
         // Wrap the in-memory-filter with AHF.
-        return Pair(
-            AndroidHeuristicsFilter(
-                classes, aidlPolicy, featureFlagsPolicy, syspropsPolicy, rFilePolicy, imf),
-            remapper)
+        ret = AndroidHeuristicsFilter(
+                classes, aidlPolicy, featureFlagsPolicy, syspropsPolicy, rFilePolicy, ret)
+
+        return ret
     }
 }
 
@@ -324,17 +345,14 @@ private fun resolveExtendingClass(className: String): String? {
 
 private fun parsePolicy(s: String): FilterPolicy {
     return when (s.lowercase()) {
-        "s", "stub" -> FilterPolicy.Stub
         "k", "keep" -> FilterPolicy.Keep
         "t", "throw" -> FilterPolicy.Throw
         "r", "remove" -> FilterPolicy.Remove
-        "sc", "stubclass" -> FilterPolicy.StubClass
         "kc", "keepclass" -> FilterPolicy.KeepClass
+        "i", "ignore" -> FilterPolicy.Ignore
         else -> {
             if (s.startsWith("@")) {
-                FilterPolicy.SubstituteAndStub
-            } else if (s.startsWith("%")) {
-                FilterPolicy.SubstituteAndKeep
+                FilterPolicy.Substitute
             } else {
                 throw ParseException("Invalid policy \"$s\"")
             }

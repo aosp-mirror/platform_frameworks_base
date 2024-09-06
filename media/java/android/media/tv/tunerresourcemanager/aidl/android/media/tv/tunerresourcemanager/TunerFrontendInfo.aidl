@@ -26,7 +26,7 @@ parcelable TunerFrontendInfo {
     /**
      * Frontend Handle
      */
-    long handle;
+    int handle;
 
     /**
      * Frontend Type

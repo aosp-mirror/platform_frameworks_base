@@ -22,6 +22,7 @@ import com.android.systemui.contextualeducation.GestureType.BACK
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.education.dagger.ContextualEducationModule.EduClock
+import com.android.systemui.education.data.model.EduDeviceConnectionTime
 import com.android.systemui.education.data.model.GestureEduModel
 import com.android.systemui.education.data.repository.ContextualEducationRepository
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
@@ -32,6 +33,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 
@@ -67,6 +69,10 @@ constructor(
             .flowOn(backgroundDispatcher)
     }
 
+    suspend fun getEduDeviceConnectionTime(): EduDeviceConnectionTime {
+        return repository.readEduDeviceConnectionTime().first()
+    }
+
     suspend fun incrementSignalCount(gestureType: GestureType) {
         repository.updateGestureEduModel(gestureType) {
             it.copy(
@@ -98,6 +104,18 @@ constructor(
     suspend fun startNewUsageSession(gestureType: GestureType) {
         repository.updateGestureEduModel(gestureType) {
             it.copy(usageSessionStartTime = clock.instant(), signalCount = 1)
+        }
+    }
+
+    suspend fun updateKeyboardFirstConnectionTime() {
+        repository.updateEduDeviceConnectionTime {
+            it.copy(keyboardFirstConnectionTime = clock.instant())
+        }
+    }
+
+    suspend fun updateTouchpadFirstConnectionTime() {
+        repository.updateEduDeviceConnectionTime {
+            it.copy(touchpadFirstConnectionTime = clock.instant())
         }
     }
 }

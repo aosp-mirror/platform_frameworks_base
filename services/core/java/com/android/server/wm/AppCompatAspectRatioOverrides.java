@@ -220,7 +220,7 @@ class AppCompatAspectRatioOverrides {
     float getFixedOrientationLetterboxAspectRatio(@NonNull Configuration parentConfiguration) {
         return shouldUseSplitScreenAspectRatio(parentConfiguration)
                 ? getSplitScreenAspectRatio()
-                : mActivityRecord.shouldCreateCompatDisplayInsets()
+                : mActivityRecord.shouldCreateAppCompatDisplayInsets()
                         ? getDefaultMinAspectRatioForUnresizableApps()
                         : getDefaultMinAspectRatio();
     }
@@ -233,7 +233,8 @@ class AppCompatAspectRatioOverrides {
         return mAppCompatConfiguration.getIsSplitScreenAspectRatioForUnresizableAppsEnabled();
     }
 
-    private float getDisplaySizeMinAspectRatio() {
+    @VisibleForTesting
+    float getDisplaySizeMinAspectRatio() {
         final DisplayArea displayArea = mActivityRecord.getDisplayArea();
         if (displayArea == null) {
             return mActivityRecord.info.getMinAspectRatio();
@@ -270,7 +271,6 @@ class AppCompatAspectRatioOverrides {
         return !mAllowUserAspectRatioOverrideOptProp.isFalse();
     }
 
-    @VisibleForTesting
     int getUserMinAspectRatioOverrideCode() {
         try {
             return mActivityRecord.mAtmService.getPackageManager()

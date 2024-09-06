@@ -104,7 +104,7 @@ public class DesktopAppCompatAspectRatioPolicy {
      * resizability.
      */
     private float getFixedOrientationLetterboxAspectRatio(@NonNull Task task) {
-        return mActivityRecord.shouldCreateCompatDisplayInsets()
+        return mActivityRecord.shouldCreateAppCompatDisplayInsets()
                 ? getDefaultMinAspectRatioForUnresizableApps(task)
                 : getDefaultMinAspectRatio(task);
     }
@@ -258,7 +258,7 @@ public class DesktopAppCompatAspectRatioPolicy {
      * Whether we should apply the user aspect ratio override to the min aspect ratio for the
      * current app.
      */
-    private boolean shouldApplyUserMinAspectRatioOverride(@NonNull Task task) {
+    boolean shouldApplyUserMinAspectRatioOverride(@NonNull Task task) {
         if (!shouldEnableUserAspectRatioSettings(task)) {
             return false;
         }

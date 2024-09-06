@@ -17,6 +17,7 @@
 package com.android.internal.protolog;
 
 import static android.internal.perfetto.protos.ProtologConfig.ProtoLogConfig.DEFAULT;
+import static android.internal.perfetto.protos.ProtologConfig.ProtoLogConfig.DEFAULT_LOG_FROM_LEVEL;
 import static android.internal.perfetto.protos.ProtologConfig.ProtoLogConfig.ENABLE_ALL;
 import static android.internal.perfetto.protos.ProtologConfig.ProtoLogConfig.GROUP_OVERRIDES;
 import static android.internal.perfetto.protos.ProtologConfig.ProtoLogConfig.TRACING_MODE;
@@ -24,6 +25,7 @@ import static android.internal.perfetto.protos.ProtologConfig.ProtoLogGroup.COLL
 import static android.internal.perfetto.protos.ProtologConfig.ProtoLogGroup.GROUP_NAME;
 import static android.internal.perfetto.protos.ProtologConfig.ProtoLogGroup.LOG_FROM;
 
+import android.annotation.NonNull;
 import android.internal.perfetto.protos.DataSourceConfigOuterClass.DataSourceConfig;
 import android.internal.perfetto.protos.ProtologCommon;
 import android.tracing.perfetto.CreateIncrementalStateArgs;
@@ -36,6 +38,7 @@ import android.tracing.perfetto.StopCallbackArguments;
 import android.util.proto.ProtoInputStream;
 import android.util.proto.WireTypeMismatchException;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.LogLevel;
 
 import java.io.IOException;
@@ -43,26 +46,41 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Consumer;
 
 public class ProtoLogDataSource extends DataSource<ProtoLogDataSource.Instance,
         ProtoLogDataSource.TlsState,
         ProtoLogDataSource.IncrementalState> {
+    private static final String DATASOURCE_NAME = "android.protolog";
 
+    @NonNull
     private final Instance.TracingInstanceStartCallback mOnStart;
+    @NonNull
     private final Runnable mOnFlush;
+    @NonNull
     private final Instance.TracingInstanceStopCallback mOnStop;
 
-    public ProtoLogDataSource(Instance.TracingInstanceStartCallback onStart, Runnable onFlush,
-            Instance.TracingInstanceStopCallback onStop) {
-        super("android.protolog");
+    public ProtoLogDataSource(
+            @NonNull Instance.TracingInstanceStartCallback onStart,
+            @NonNull Runnable onFlush,
+            @NonNull Instance.TracingInstanceStopCallback onStop) {
+        this(onStart, onFlush, onStop, DATASOURCE_NAME);
+    }
+
+    @VisibleForTesting
+    public ProtoLogDataSource(
+            @NonNull Instance.TracingInstanceStartCallback onStart,
+            @NonNull Runnable onFlush,
+            @NonNull Instance.TracingInstanceStopCallback onStop,
+            @NonNull String dataSourceName) {
+        super(dataSourceName);
         this.mOnStart = onStart;
         this.mOnFlush = onFlush;
         this.mOnStop = onStop;
     }
 
     @Override
-    public Instance createInstance(ProtoInputStream configStream, int instanceIndex) {
+    @NonNull
+    public Instance createInstance(@NonNull ProtoInputStream configStream, int instanceIndex) {
         ProtoLogConfig config = null;
 
         try {
@@ -92,7 +110,8 @@ public class ProtoLogDataSource extends DataSource<ProtoLogDataSource.Instance,
     }
 
     @Override
-    public TlsState createTlsState(CreateTlsStateArgs<Instance> args) {
+    @NonNull
+    public TlsState createTlsState(@NonNull CreateTlsStateArgs<Instance> args) {
         try (Instance dsInstance = args.getDataSourceInstanceLocked()) {
             if (dsInstance == null) {
                 // Datasource instance has been removed
@@ -103,14 +122,17 @@ public class ProtoLogDataSource extends DataSource<ProtoLogDataSource.Instance,
     }
 
     @Override
-    public IncrementalState createIncrementalState(CreateIncrementalStateArgs<Instance> args) {
+    @NonNull
+    public IncrementalState createIncrementalState(
+            @NonNull CreateIncrementalStateArgs<Instance> args) {
         return new IncrementalState();
     }
 
     public static class TlsState {
+        @NonNull
         private final ProtoLogConfig mConfig;
 
-        private TlsState(ProtoLogConfig config) {
+        private TlsState(@NonNull ProtoLogConfig config) {
             this.mConfig = config;
         }
 
@@ -190,73 +212,54 @@ public class ProtoLogDataSource extends DataSource<ProtoLogDataSource.Instance,
         final Map<String, GroupConfig> groupConfigs = new HashMap<>();
 
         while (configStream.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
-            if (configStream.getFieldNumber() == (int) TRACING_MODE) {
-                int tracingMode = configStream.readInt(TRACING_MODE);
-                switch (tracingMode) {
-                    case DEFAULT:
-                        break;
-                    case ENABLE_ALL:
-                        defaultLogFromLevel = LogLevel.DEBUG;
-                        break;
-                    default:
-                        throw new RuntimeException("Unhandled ProtoLog tracing mode type");
-                }
-            }
-            if (configStream.getFieldNumber() == (int) GROUP_OVERRIDES) {
-                final long group_overrides_token  = configStream.start(GROUP_OVERRIDES);
-
-                String tag = null;
-                LogLevel logFromLevel = defaultLogFromLevel;
-                boolean collectStackTrace = false;
-                while (configStream.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
-                    if (configStream.getFieldNumber() == (int) GROUP_NAME) {
-                        tag = configStream.readString(GROUP_NAME);
+            switch (configStream.getFieldNumber()) {
+                case (int) DEFAULT_LOG_FROM_LEVEL:
+                    int defaultLogFromLevelInt = configStream.readInt(DEFAULT_LOG_FROM_LEVEL);
+                    if (defaultLogFromLevelInt < defaultLogFromLevel.ordinal()) {
+                        defaultLogFromLevel =
+                                logLevelFromInt(defaultLogFromLevelInt);
                     }
-                    if (configStream.getFieldNumber() == (int) LOG_FROM) {
-                        final int logFromInt = configStream.readInt(LOG_FROM);
-                        switch (logFromInt) {
-                            case (ProtologCommon.PROTOLOG_LEVEL_DEBUG): {
-                                logFromLevel = LogLevel.DEBUG;
-                                break;
-                            }
-                            case (ProtologCommon.PROTOLOG_LEVEL_VERBOSE): {
-                                logFromLevel = LogLevel.VERBOSE;
-                                break;
-                            }
-                            case (ProtologCommon.PROTOLOG_LEVEL_INFO): {
-                                logFromLevel = LogLevel.INFO;
-                                break;
-                            }
-                            case (ProtologCommon.PROTOLOG_LEVEL_WARN): {
-                                logFromLevel = LogLevel.WARN;
-                                break;
-                            }
-                            case (ProtologCommon.PROTOLOG_LEVEL_ERROR): {
-                                logFromLevel = LogLevel.ERROR;
-                                break;
-                            }
-                            case (ProtologCommon.PROTOLOG_LEVEL_WTF): {
-                                logFromLevel = LogLevel.WTF;
-                                break;
-                            }
-                            default: {
-                                throw new RuntimeException("Unhandled log level");
-                            }
+                    break;
+                case (int) TRACING_MODE:
+                    int tracingMode = configStream.readInt(TRACING_MODE);
+                    switch (tracingMode) {
+                        case DEFAULT:
+                            break;
+                        case ENABLE_ALL:
+                            defaultLogFromLevel = LogLevel.DEBUG;
+                            break;
+                        default:
+                            throw new RuntimeException("Unhandled ProtoLog tracing mode type");
+                    }
+                    break;
+                case (int) GROUP_OVERRIDES:
+                    final long group_overrides_token  = configStream.start(GROUP_OVERRIDES);
+
+                    String tag = null;
+                    LogLevel logFromLevel = defaultLogFromLevel;
+                    boolean collectStackTrace = false;
+                    while (configStream.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
+                        if (configStream.getFieldNumber() == (int) GROUP_NAME) {
+                            tag = configStream.readString(GROUP_NAME);
+                        }
+                        if (configStream.getFieldNumber() == (int) LOG_FROM) {
+                            final int logFromInt = configStream.readInt(LOG_FROM);
+                            logFromLevel = logLevelFromInt(logFromInt);
+                        }
+                        if (configStream.getFieldNumber() == (int) COLLECT_STACKTRACE) {
+                            collectStackTrace = configStream.readBoolean(COLLECT_STACKTRACE);
                         }
                     }
-                    if (configStream.getFieldNumber() == (int) COLLECT_STACKTRACE) {
-                        collectStackTrace = configStream.readBoolean(COLLECT_STACKTRACE);
+
+                    if (tag == null) {
+                        throw new RuntimeException("Failed to decode proto config. "
+                                + "Got a group override without a group tag.");
                     }
-                }
 
-                if (tag == null) {
-                    throw new RuntimeException("Failed to decode proto config. "
-                            + "Got a group override without a group tag.");
-                }
+                    groupConfigs.put(tag, new GroupConfig(logFromLevel, collectStackTrace));
 
-                groupConfigs.put(tag, new GroupConfig(logFromLevel, collectStackTrace));
-
-                configStream.end(group_overrides_token);
+                    configStream.end(group_overrides_token);
+                    break;
             }
         }
 
@@ -265,29 +268,45 @@ public class ProtoLogDataSource extends DataSource<ProtoLogDataSource.Instance,
         return new ProtoLogConfig(defaultLogFromLevel, groupConfigs);
     }
 
+    private LogLevel logLevelFromInt(int logFromInt) {
+        return switch (logFromInt) {
+            case (ProtologCommon.PROTOLOG_LEVEL_DEBUG) -> LogLevel.DEBUG;
+            case (ProtologCommon.PROTOLOG_LEVEL_VERBOSE) -> LogLevel.VERBOSE;
+            case (ProtologCommon.PROTOLOG_LEVEL_INFO) -> LogLevel.INFO;
+            case (ProtologCommon.PROTOLOG_LEVEL_WARN) -> LogLevel.WARN;
+            case (ProtologCommon.PROTOLOG_LEVEL_ERROR) -> LogLevel.ERROR;
+            case (ProtologCommon.PROTOLOG_LEVEL_WTF) -> LogLevel.WTF;
+            default -> throw new RuntimeException("Unhandled log level");
+        };
+    }
+
     public static class Instance extends DataSourceInstance {
 
         public interface TracingInstanceStartCallback {
-            void run(int instanceIdx, ProtoLogConfig config);
+            void run(int instanceIdx, @NonNull ProtoLogConfig config);
         }
 
         public interface TracingInstanceStopCallback {
-            void run(int instanceIdx, ProtoLogConfig config);
+            void run(int instanceIdx, @NonNull ProtoLogConfig config);
         }
 
+        @NonNull
         private final TracingInstanceStartCallback mOnStart;
+        @NonNull
         private final Runnable mOnFlush;
+        @NonNull
         private final TracingInstanceStopCallback mOnStop;
+        @NonNull
         private final ProtoLogConfig mConfig;
         private final int mInstanceIndex;
 
         public Instance(
-                DataSource<Instance, TlsState, IncrementalState> dataSource,
+                @NonNull DataSource<Instance, TlsState, IncrementalState> dataSource,
                 int instanceIdx,
-                ProtoLogConfig config,
-                TracingInstanceStartCallback onStart,
-                Runnable onFlush,
-                TracingInstanceStopCallback onStop
+                @NonNull ProtoLogConfig config,
+                @NonNull TracingInstanceStartCallback onStart,
+                @NonNull Runnable onFlush,
+                @NonNull TracingInstanceStopCallback onStop
         ) {
             super(dataSource, instanceIdx);
             this.mInstanceIndex = instanceIdx;

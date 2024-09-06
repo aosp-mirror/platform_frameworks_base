@@ -55,6 +55,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
+import static com.android.server.wm.WindowStateAnimator.DRAW_PENDING;
 import static com.android.server.wm.WindowStateAnimator.HAS_DRAWN;
 
 import static org.junit.Assert.assertEquals;
@@ -690,6 +691,13 @@ public class WindowTestsBase extends SystemServiceTestsBase {
         makeWindowVisible(windows);
         for (WindowState win : windows) {
             win.mWinAnimator.mDrawState = HAS_DRAWN;
+        }
+    }
+
+    static void makeWindowVisibleAndNotDrawn(WindowState... windows) {
+        makeWindowVisible(windows);
+        for (WindowState win : windows) {
+            win.mWinAnimator.mDrawState = DRAW_PENDING;
         }
     }
 
@@ -2123,7 +2131,7 @@ public class WindowTestsBase extends SystemServiceTestsBase {
         }
 
         public void finish() {
-            mController.finishTransition(mLastTransit);
+            mController.finishTransition(ActionChain.testFinish(mLastTransit));
         }
     }
 }

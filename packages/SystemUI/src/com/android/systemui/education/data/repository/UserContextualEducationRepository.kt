@@ -29,10 +29,12 @@ import com.android.systemui.contextualeducation.GestureType
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.education.dagger.ContextualEducationModule.EduDataStoreScope
+import com.android.systemui.education.data.model.EduDeviceConnectionTime
 import com.android.systemui.education.data.model.GestureEduModel
 import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Provider
+import kotlin.properties.Delegates.notNull
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
@@ -52,9 +54,15 @@ interface ContextualEducationRepository {
 
     fun readGestureEduModelFlow(gestureType: GestureType): Flow<GestureEduModel>
 
+    fun readEduDeviceConnectionTime(): Flow<EduDeviceConnectionTime>
+
     suspend fun updateGestureEduModel(
         gestureType: GestureType,
         transform: (GestureEduModel) -> GestureEduModel
+    )
+
+    suspend fun updateEduDeviceConnectionTime(
+        transform: (EduDeviceConnectionTime) -> EduDeviceConnectionTime
     )
 }
 
@@ -75,9 +83,13 @@ constructor(
         const val LAST_SHORTCUT_TRIGGERED_TIME_SUFFIX = "_LAST_SHORTCUT_TRIGGERED_TIME"
         const val USAGE_SESSION_START_TIME_SUFFIX = "_USAGE_SESSION_START_TIME"
         const val LAST_EDUCATION_TIME_SUFFIX = "_LAST_EDUCATION_TIME"
+        const val KEYBOARD_FIRST_CONNECTION_TIME = "KEYBOARD_FIRST_CONNECTION_TIME"
+        const val TOUCHPAD_FIRST_CONNECTION_TIME = "TOUCHPAD_FIRST_CONNECTION_TIME"
 
         const val DATASTORE_DIR = "education/USER%s_ContextualEducation"
     }
+
+    private var userId by notNull<Int>()
 
     private var dataStoreScope: CoroutineScope? = null
 
@@ -89,6 +101,7 @@ constructor(
     override fun setUser(userId: Int) {
         dataStoreScope?.cancel()
         val newDsScope = dataStoreScopeProvider.get()
+        this.userId = userId
         datastore.value =
             PreferenceDataStoreFactory.create(
                 produceFile = {
@@ -123,6 +136,7 @@ constructor(
                 preferences[getLastEducationTimeKey(gestureType)]?.let {
                     Instant.ofEpochSecond(it)
                 },
+            userId = userId
         )
     }
 
@@ -153,6 +167,37 @@ constructor(
         }
     }
 
+    override fun readEduDeviceConnectionTime(): Flow<EduDeviceConnectionTime> =
+        prefData.map { preferences -> getEduDeviceConnectionTime(preferences) }
+
+    override suspend fun updateEduDeviceConnectionTime(
+        transform: (EduDeviceConnectionTime) -> EduDeviceConnectionTime
+    ) {
+        datastore.filterNotNull().first().edit { preferences ->
+            val currentModel = getEduDeviceConnectionTime(preferences)
+            val updatedModel = transform(currentModel)
+            setInstant(
+                preferences,
+                updatedModel.keyboardFirstConnectionTime,
+                getKeyboardFirstConnectionTimeKey()
+            )
+            setInstant(
+                preferences,
+                updatedModel.touchpadFirstConnectionTime,
+                getTouchpadFirstConnectionTimeKey()
+            )
+        }
+    }
+
+    private fun getEduDeviceConnectionTime(preferences: Preferences): EduDeviceConnectionTime {
+        return EduDeviceConnectionTime(
+            keyboardFirstConnectionTime =
+                preferences[getKeyboardFirstConnectionTimeKey()]?.let { Instant.ofEpochSecond(it) },
+            touchpadFirstConnectionTime =
+                preferences[getTouchpadFirstConnectionTimeKey()]?.let { Instant.ofEpochSecond(it) }
+        )
+    }
+
     private fun getSignalCountKey(gestureType: GestureType): Preferences.Key<Int> =
         intPreferencesKey(gestureType.name + SIGNAL_COUNT_SUFFIX)
 
@@ -167,6 +212,12 @@ constructor(
 
     private fun getLastEducationTimeKey(gestureType: GestureType): Preferences.Key<Long> =
         longPreferencesKey(gestureType.name + LAST_EDUCATION_TIME_SUFFIX)
+
+    private fun getKeyboardFirstConnectionTimeKey(): Preferences.Key<Long> =
+        longPreferencesKey(KEYBOARD_FIRST_CONNECTION_TIME)
+
+    private fun getTouchpadFirstConnectionTimeKey(): Preferences.Key<Long> =
+        longPreferencesKey(TOUCHPAD_FIRST_CONNECTION_TIME)
 
     private fun setInstant(
         preferences: MutablePreferences,

@@ -1164,7 +1164,7 @@ public class SplitControllerTest {
     public void testOnTransactionReady_taskFragmentParentInfoChanged() {
         final TaskFragmentTransaction transaction = new TaskFragmentTransaction();
         final TaskFragmentParentInfo parentInfo = new TaskFragmentParentInfo(Configuration.EMPTY,
-                DEFAULT_DISPLAY, true /* visible */, false /* hasDirectActivity */,
+                DEFAULT_DISPLAY, TASK_ID, true /* visible */, false /* hasDirectActivity */,
                 null /* decorSurface */);
         transaction.addChange(new TaskFragmentTransaction.Change(
                 TYPE_TASK_FRAGMENT_PARENT_INFO_CHANGED)
@@ -1625,7 +1625,7 @@ public class SplitControllerTest {
         final TaskContainer taskContainer = mSplitController.getTaskContainer(TASK_ID);
         final Configuration configuration = new Configuration();
         final TaskFragmentParentInfo originalInfo = new TaskFragmentParentInfo(configuration,
-                DEFAULT_DISPLAY, true /* visible */, false /* hasDirectActivity */,
+                DEFAULT_DISPLAY, TASK_ID, true /* visible */, false /* hasDirectActivity */,
                 null /* decorSurface */);
         mSplitController.onTaskFragmentParentInfoChanged(mock(WindowContainerTransaction.class),
                 TASK_ID, originalInfo);
@@ -1634,7 +1634,7 @@ public class SplitControllerTest {
         // Making a public configuration change while the Task is invisible.
         configuration.densityDpi += 100;
         final TaskFragmentParentInfo invisibleInfo = new TaskFragmentParentInfo(configuration,
-                DEFAULT_DISPLAY, false /* visible */, false /* hasDirectActivity */,
+                DEFAULT_DISPLAY, TASK_ID, false /* visible */, false /* hasDirectActivity */,
                 null /* decorSurface */);
         mSplitController.onTaskFragmentParentInfoChanged(mock(WindowContainerTransaction.class),
                 TASK_ID, invisibleInfo);
@@ -1646,7 +1646,7 @@ public class SplitControllerTest {
 
         // Updates when Task to become visible
         final TaskFragmentParentInfo visibleInfo = new TaskFragmentParentInfo(configuration,
-                DEFAULT_DISPLAY, true /* visible */, false /* hasDirectActivity */,
+                DEFAULT_DISPLAY, TASK_ID, true /* visible */, false /* hasDirectActivity */,
                 null /* decorSurface */);
         mSplitController.onTaskFragmentParentInfoChanged(mock(WindowContainerTransaction.class),
                 TASK_ID, visibleInfo);

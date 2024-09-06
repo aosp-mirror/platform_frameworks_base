@@ -674,6 +674,7 @@ public class NotificationSwipeHelperTest extends SysuiTestCase {
     }
 
     @Test
+    @EnableFlags(NotificationContentAlphaOptimization.FLAG_NAME)
     public void testForceResetSwipeStateDoesNothingIfTranslationIsZeroAndAlphaIsOne() {
         doReturn(FAKE_ROW_WIDTH).when(mNotificationRow).getMeasuredWidth();
         doReturn(0f).when(mNotificationRow).getTranslationX();

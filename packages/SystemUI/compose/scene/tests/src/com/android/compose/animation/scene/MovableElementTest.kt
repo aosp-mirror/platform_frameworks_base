@@ -45,7 +45,6 @@ import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.compose.animation.scene.TestScenes.SceneA
 import com.android.compose.animation.scene.TestScenes.SceneB
-import com.android.compose.animation.scene.content.state.ContentState
 import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.animation.scene.subjects.assertThat
 import com.android.compose.test.assertSizeIsEqualTo
@@ -107,7 +106,7 @@ class MovableElementTest {
                 rule
                     .onNode(
                         hasText("count: 3") and
-                            hasParent(isElement(TestElements.Foo, scene = SceneA))
+                            hasParent(isElement(TestElements.Foo, content = SceneA))
                     )
                     .assertExists()
                     .assertIsNotDisplayed()
@@ -115,7 +114,7 @@ class MovableElementTest {
                 rule
                     .onNode(
                         hasText("count: 0") and
-                            hasParent(isElement(TestElements.Foo, scene = SceneB))
+                            hasParent(isElement(TestElements.Foo, content = SceneB))
                     )
                     .assertIsDisplayed()
                     .assertSizeIsEqualTo(75.dp, 75.dp)
@@ -160,11 +159,11 @@ class MovableElementTest {
 
                         override fun contentDuringTransition(
                             element: ElementKey,
-                            transition: ContentState.Transition<*>,
+                            transition: TransitionState.Transition,
                             fromContentZIndex: Float,
                             toContentZIndex: Float
                         ): ContentKey {
-                            transition as TransitionState.Transition
+                            transition as TransitionState.Transition.ChangeScene
                             assertThat(transition).hasFromScene(SceneA)
                             assertThat(transition).hasToScene(SceneB)
                             assertThat(fromContentZIndex).isEqualTo(0)
@@ -214,7 +213,7 @@ class MovableElementTest {
                 rule
                     .onNode(
                         hasText("count: 3") and
-                            hasParent(isElement(TestElements.Foo, scene = SceneA))
+                            hasParent(isElement(TestElements.Foo, content = SceneA))
                     )
                     .assertIsDisplayed()
                     .assertSizeIsEqualTo(75.dp, 75.dp)
@@ -235,7 +234,7 @@ class MovableElementTest {
                 rule
                     .onNode(
                         hasText("count: 3") and
-                            hasParent(isElement(TestElements.Foo, scene = SceneB))
+                            hasParent(isElement(TestElements.Foo, content = SceneB))
                     )
                     .assertIsDisplayed()
 
@@ -325,7 +324,7 @@ class MovableElementTest {
     fun movableElementScopeExtendsBoxScope() {
         val key = MovableElementKey("Foo", contents = setOf(SceneA))
         rule.setContent {
-            TestContentScope {
+            TestContentScope(currentScene = SceneA) {
                 MovableElement(key, Modifier.size(200.dp)) {
                     content {
                         Box(Modifier.testTag("bottomEnd").align(Alignment.BottomEnd))

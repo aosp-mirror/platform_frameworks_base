@@ -25,6 +25,7 @@ import static android.graphics.Matrix.MSKEW_X;
 import static android.graphics.Matrix.MSKEW_Y;
 import static android.view.View.SYSTEM_UI_FLAG_VISIBLE;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
+import static android.view.flags.Flags.disableDrawWakeLock;
 
 import static com.android.window.flags.Flags.FLAG_OFFLOAD_COLOR_EXTRACTION;
 import static com.android.window.flags.Flags.noDuplicateSurfaceDestroyedEvents;
@@ -51,6 +52,7 @@ import android.app.WallpaperManager;
 import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
+import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.Intent;
@@ -208,6 +210,15 @@ public abstract class WallpaperService extends Service {
     private boolean mIsWearOs;
 
     /**
+     * This change disables the {@code DRAW_WAKE_LOCK}, an internal wakelock acquired per-frame
+     * duration display DOZE. It was added to allow animation during AOD. This wakelock consumes
+     * battery severely if the animation is too heavy, so, it will be removed.
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    private static final long DISABLE_DRAW_WAKE_LOCK_WALLPAPER = 361433696L;
+
+    /**
      * Wear products currently force a slight scaling transition to wallpapers
      * when the QSS is opened. However, on Wear 6 (SDK 35) and above, 1P watch faces
      * will be expected to either implement their own scaling, or to override this
@@ -362,6 +373,8 @@ public abstract class WallpaperService extends Service {
         private SurfaceControl mScreenshotSurfaceControl;
         private Point mScreenshotSize = new Point();
 
+        private final boolean mDisableDrawWakeLock;
+
         final BaseSurfaceHolder mSurfaceHolder = new BaseSurfaceHolder() {
             {
                 mRequestedFormat = PixelFormat.RGBX_8888;
@@ -406,6 +419,9 @@ public abstract class WallpaperService extends Service {
             }
 
             private void prepareToDraw() {
+                if (mDisableDrawWakeLock) {
+                    return;
+                }
                 if (mDisplayState == Display.STATE_DOZE) {
                     try {
                         mSession.pokeDrawLock(mWindow);
@@ -546,6 +562,8 @@ public abstract class WallpaperService extends Service {
         public Engine(Supplier<Long> clockFunction, Handler handler) {
             mClockFunction = clockFunction;
             mHandler = handler;
+            mDisableDrawWakeLock = CompatChanges.isChangeEnabled(DISABLE_DRAW_WAKE_LOCK_WALLPAPER)
+                    && disableDrawWakeLock();
         }
 
         /**
@@ -1078,6 +1096,9 @@ public abstract class WallpaperService extends Service {
             out.print(prefix); out.print("mDisplay="); out.println(mDisplay);
             out.print(prefix); out.print("mCreated="); out.print(mCreated);
                     out.print(" mSurfaceCreated="); out.print(mSurfaceCreated);
+                    if (noDuplicateSurfaceDestroyedEvents()) {
+                        out.print(" mReportedSurfaceCreated="); out.print(mReportedSurfaceCreated);
+                    }
                     out.print(" mIsCreating="); out.print(mIsCreating);
                     out.print(" mDrawingAllowed="); out.println(mDrawingAllowed);
             out.print(prefix); out.print("mWidth="); out.print(mWidth);

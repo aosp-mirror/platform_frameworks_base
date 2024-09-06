@@ -140,11 +140,17 @@
   "ravenwood-presubmit": [
     {
       "name": "CtsUtilTestCasesRavenwood",
-      "host": true
+      "host": true,
+      "file_patterns": [
+        "[Rr]avenwood"
+      ]
     },
     {
       "name": "RavenwoodBivalentTest",
-      "host": true
+      "host": true,
+      "file_patterns": [
+        "[Rr]avenwood"
+      ]
     }
   ],
   "postsubmit-managedprofile-stress": [

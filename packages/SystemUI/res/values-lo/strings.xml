@@ -104,23 +104,17 @@
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> ແລະ ແອັບອື່ນໆທີ່ເປີດຢູ່ກວດພົບຮູບໜ້າຈໍນີ້."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"ເພີ່ມໃສ່ບັນທຶກ"</string>
     <string name="backlinks_include_link" msgid="4562093591148248158">"ຮວມລິ້ງ"</string>
+    <string name="backlinks_duplicate_label_format" msgid="558445128952827926">"<xliff:g id="APPNAME">%1$s</xliff:g> <xliff:g id="FREQUENCYCOUNT">(%2$d)</xliff:g>⁠"</string>
     <string name="screenrecord_title" msgid="4257171601439507792">"ໂປຣແກຣມບັນທຶກໜ້າຈໍ"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"ກຳລັງປະມວນຜົນການບັນທຶກໜ້າຈໍ"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ການແຈ້ງເຕືອນສຳລັບເຊດຊັນການບັນທຶກໜ້າຈໍໃດໜຶ່ງ"</string>
-    <!-- no translation found for screenrecord_permission_dialog_title (7415261783188749730) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_option_text_single_app (1996450687814647583) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen (2794896384693120020) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_entire_screen (1321758636709366068) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_single_app (3738199712880063924) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_continue_entire_screen (5557974446773486600) -->
-    <skip />
-    <!-- no translation found for screenrecord_app_selector_title (3854492366333954736) -->
-    <skip />
+    <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"ບັນທຶກໜ້າຈໍຂອງທ່ານບໍ?"</string>
+    <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"ບັນທຶກແອັບດຽວ"</string>
+    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"ບັນທຶກໝົດໜ້າຈໍ"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"ເມື່ອທ່ານບັນທຶກໝົດໜ້າຈໍຂອງທ່ານ, ລະບົບຈະບັນທຶກທຸກສິ່ງທີ່ສະແດງຢູ່ໜ້າຈໍຂອງທ່ານ. ດັ່ງນັ້ນ, ໃຫ້ລະມັດລະວັງສິ່ງຕ່າງໆ ເຊັ່ນ: ລະຫັດຜ່ານ, ລາຍລະອຽດການຈ່າຍເງິນ, ຂໍ້ຄວາມ, ຮູບພາບ, ພ້ອມທັງສຽງ ແລະ ວິດີໂອ."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"ເມື່ອທ່ານບັນທຶກແອັບ, ລະບົບຈະບັນທຶກທຸກສິ່ງທີ່ສະແດງ ຫຼື ຫຼິ້ນຢູ່ໃນແອັບນັ້ນ. ດັ່ງນັ້ນ, ໃຫ້ລະມັດລະວັງສິ່ງຕ່າງໆ ເຊັ່ນ: ລະຫັດຜ່ານ, ລາຍລະອຽດການຈ່າຍເງິນ, ຂໍ້ຄວາມ, ຮູບພາບ, ພ້ອມທັງສຽງ ແລະ ວິດີໂອ."</string>
+    <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"ບັນທຶກໜ້າຈໍ"</string>
+    <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"ເລືອກແອັບທີ່ຈະບັນທຶກ"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"ບັນທຶກສຽງ"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"ສຽງອຸປະກອນ"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"ສຽງຈາກອຸປະກອນຂອງທ່ານ ເຊັ່ນ: ສຽງເພງ, ສຽງລົມໂທລະສັບ ແລະ ສຽງຣິງໂທນ"</string>
@@ -298,7 +292,8 @@
     <string name="start_dreams" msgid="9131802557946276718">"ພາບພັກໜ້າຈໍ"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"ຫ້າມລົບກວນ"</string>
-    <string name="quick_settings_modes_label" msgid="5407025818652750501">"ໂໝດຄວາມສຳຄັນ"</string>
+    <!-- no translation found for quick_settings_modes_label (879156359479504244) -->
+    <skip />
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"ບໍ່​ມີ​ອຸ​ປະ​ກອນ​ທີ່​ສາ​ມາດ​ຈັບ​ຄູ່​ໄດ້"</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"ແຕະເພື່ອເຊື່ອມຕໍ່ ຫຼື ຕັດການເຊື່ອມຕໍ່ອຸປະກອນ"</string>
@@ -307,6 +302,7 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"ໃຊ້ Bluetooth"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"ເຊື່ອມຕໍ່ແລ້ວ"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"ການແບ່ງປັນສຽງ"</string>
+    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="3227408556754456024">"ແຕະເພື່ອສະຫຼັບ ຫຼື ແບ່ງປັນສຽງ"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"ບັນທຶກແລ້ວ"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"ຕັດການເຊື່ອມຕໍ່"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"ເປີດນຳໃຊ້"</string>
@@ -315,6 +311,7 @@
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bluetooth ຈະເປີດມື້ອື່ນເຊົ້າ"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"ແບ່ງປັນສຽງ"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"ກຳລັງແບ່ງປັນສຽງ"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"ເຂົ້າສູ່ການຕັ້ງຄ່າການແບ່ງປັນສຽງ"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"ແບັດເຕີຣີ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"ສຽງ"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"ຊຸດຫູຟັງ"</string>
@@ -437,10 +434,12 @@
     <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"ເປີດການຕັ້ງຄ່າ"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"ອຸປະກອນອື່ນໆ"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"ສະຫຼັບພາບຮວມ"</string>
-    <string name="zen_modes_dialog_title" msgid="4159138230418567383">"ໂໝດຄວາມສຳຄັນ"</string>
+    <!-- no translation found for zen_modes_dialog_title (8854640808100096934) -->
+    <skip />
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"ແລ້ວໆ"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"ການຕັ້ງຄ່າ"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"ເປີດ"</string>
+    <string name="zen_mode_on_with_details" msgid="7416143430557895497">"ເປີດ • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"ປິດ"</string>
     <string name="zen_mode_set_up" msgid="7457957033034460064">"ຕັ້ງຄ່າ"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"ຈັດການໃນການຕັ້ງຄ່າ"</string>
@@ -535,25 +534,26 @@
     <string name="media_projection_dialog_warning" msgid="1303664408388363598">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ຈະມີສິດເຂົ້າເຖິງຂໍ້ມູນທັງໝົດທີ່ປາກົດຢູ່ໜ້າຈໍຂອງທ່ານ ຫຼື ຫຼິ້ນຈາກອຸປະກອນຂອງທ່ານໃນຂະນະທີ່ບັນທຶກ ຫຼື ສົ່ງສັນຍານ. ເຊິ່ງຈະຮວມທັງຂໍ້ມູນຕ່າງໆ ເຊັ່ນ: ລະຫັດຜ່ານ, ລາຍລະອຽດການຈ່າຍເງິນ, ຮູບພາບ, ຂໍ້ຄວາມ ແລະ ສຽງທີ່ທ່ານຫຼິ້ນ."</string>
     <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"ເລີ່ມການບັນທຶກ ຫຼື ການສົ່ງສັນຍານບໍ?"</string>
     <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"ບໍລິການທີ່ມີຟັງຊັນນີ້ຈະມີສິດເຂົ້າເຖິງຂໍ້ມູນທັງໝົດທີ່ປາກົດຢູ່ໜ້າຈໍຂອງທ່ານ ຫຼື ຫຼິ້ນຈາກອຸປະກອນຂອງທ່ານໃນຂະນະທີ່ບັນທຶກ ຫຼື ສົ່ງສັນຍານ. ເຊິ່ງຈະຮວມທັງຂໍ້ມູນຕ່າງໆ ເຊັ່ນ: ລະຫັດຜ່ານ, ລາຍລະອຽດການຈ່າຍເງິນ, ຮູບພາບ, ຂໍ້ຄວາມ ແລະ ສຽງທີ່ທ່ານຫຼິ້ນ."</string>
-    <!-- no translation found for screen_share_generic_app_selector_title (8331515850599218288) -->
-    <skip />
+    <string name="screen_share_generic_app_selector_title" msgid="8331515850599218288">"ແບ່ງປັນ ຫຼື ບັນທຶກແອັບ"</string>
     <string name="media_projection_entry_app_permission_dialog_title" msgid="4613857256721708062">"ແບ່ງປັນໜ້າຈໍຂອງທ່ານກັບ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ບໍ?"</string>
-    <string name="media_projection_entry_app_permission_dialog_option_text_single_app" msgid="6314402084788062644">"ແບ່ງປັນແອັບດຽວ"</string>
-    <string name="media_projection_entry_app_permission_dialog_option_text_entire_screen" msgid="7381488112332599632">"ແບ່ງປັນໜ້າຈໍທັງໝົດ"</string>
+    <string name="screen_share_permission_dialog_option_single_app" msgid="2974054871681567314">"ແບ່ງປັນແອັບດຽວ"</string>
+    <!-- no translation found for media_projection_entry_app_permission_dialog_option_text_single_app (2308901434964846084) -->
+    <skip />
+    <string name="screen_share_permission_dialog_option_entire_screen" msgid="4493174362775038997">"ແບ່ງປັນໜ້າຈໍທັງໝົດ"</string>
+    <!-- no translation found for media_projection_entry_app_permission_dialog_option_text_entire_screen (5100078808078139706) -->
+    <skip />
     <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="5504288438067851086">"ເມື່ອທ່ານແບ່ງປັນໜ້າຈໍທັງໝົດຂອງທ່ານ, ຄົນອື່ນຈະເບິ່ງເຫັນທຸກຢ່າງທີ່ຢູ່ໜ້າຈໍຂອງທ່ານໃນ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>. ດັ່ງນັ້ນ, ໃຫ້ລະມັດລະວັງສິ່ງຕ່າງໆ ເຊັ່ນ: ລະຫັດຜ່ານ, ລາຍລະອຽດການຈ່າຍເງິນ, ຂໍ້ຄວາມ, ຮູບພາບ, ພ້ອມທັງສຽງ ແລະ ວິດີໂອ."</string>
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="7094417930857938876">"ເມື່ອທ່ານແບ່ງປັນແອັບຂອງທ່ານ, ຄົນອື່ນຈະເບິ່ງເຫັນທຸກຢ່າງທີ່ສະແດງ ຫຼື ຫຼິ້ນໃນແອັບໃນ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>. ດັ່ງນັ້ນ, ໃຫ້ລະມັດລະວັງສິ່ງຕ່າງໆ ເຊັ່ນ: ລະຫັດຜ່ານ, ລາຍລະອຽດການຈ່າຍເງິນ, ຂໍ້ຄວາມ, ຮູບພາບ, ພ້ອມທັງສຽງ ແລະ ວິດີໂອ."</string>
     <string name="media_projection_entry_app_permission_dialog_continue_entire_screen" msgid="1850848182344377579">"ແບ່ງປັນໜ້າຈໍ"</string>
     <string name="media_projection_entry_app_permission_dialog_single_app_disabled" msgid="8999903044874669995">"<xliff:g id="APP_NAME">%1$s</xliff:g> ປິດການນຳໃຊ້ຕົວເລືອກນີ້ແລ້ວ"</string>
-    <!-- no translation found for media_projection_entry_share_app_selector_title (1419515119767501822) -->
-    <skip />
+    <string name="media_projection_entry_share_app_selector_title" msgid="1419515119767501822">"ເລືອກແອັບທີ່ຈະແບ່ງປັນ"</string>
     <string name="media_projection_entry_cast_permission_dialog_title" msgid="752756942658159416">"ສົ່ງສັນຍານໜ້າຈໍຂອງທ່ານບໍ?"</string>
     <string name="media_projection_entry_cast_permission_dialog_option_text_single_app" msgid="6073353940838561981">"ສົ່ງສັນຍານແອັບ 1 ລາຍການ"</string>
     <string name="media_projection_entry_cast_permission_dialog_option_text_entire_screen" msgid="8389508187954155307">"ສົ່ງສັນຍານໜ້າຈໍທັງໝົດ"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="4040447861037324017">"ເມື່ອທ່ານສົ່ງສັນຍານໜ້າຈໍທັງໝົດຂອງທ່ານ, ຄົນອື່ນຈະເບິ່ງເຫັນທຸກຢ່າງທີ່ຢູ່ໜ້າຈໍຂອງທ່ານ. ດັ່ງນັ້ນ, ໃຫ້ລະມັດລະວັງສິ່ງຕ່າງໆ ເຊັ່ນ: ລະຫັດຜ່ານ, ລາຍລະອຽດການຈ່າຍເງິນ, ຂໍ້ຄວາມ, ຮູບພາບ, ພ້ອມທັງສຽງ ແລະ ວິດີໂອ."</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="7487834861348460736">"ເມື່ອທ່ານສົ່ງສັນຍານແອັບ, ຄົນອື່ນຈະເບິ່ງເຫັນທຸກຢ່າງທີ່ສະແດງ ຫຼື ຫຼິ້ນໃນແອັບ. ດັ່ງນັ້ນ, ໃຫ້ລະມັດລະວັງສິ່ງຕ່າງໆ ເຊັ່ນ: ລະຫັດຜ່ານ, ລາຍລະອຽດການຈ່າຍເງິນ, ຂໍ້ຄວາມ, ຮູບພາບ, ພ້ອມທັງສຽງ ແລະ ວິດີໂອ."</string>
     <string name="media_projection_entry_cast_permission_dialog_continue_entire_screen" msgid="3261124185304676483">"ສົ່ງສັນຍານໜ້າຈໍ"</string>
-    <!-- no translation found for media_projection_entry_cast_app_selector_title (6323062146661922387) -->
-    <skip />
+    <string name="media_projection_entry_cast_app_selector_title" msgid="6323062146661922387">"ເລືອກແອັບທີ່ຈະສົ່ງສັນຍານ"</string>
     <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"ເລີ່ມການແບ່ງປັນບໍ?"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"ເມື່ອທ່ານກຳລັງແບ່ງປັນ, ບັນທຶກ ຫຼື ສົ່ງສັນຍານ, Android ຈະມີສິດເຂົ້າເຖິງທຸກສິ່ງທີ່ປາກົດຢູ່ໜ້າຈໍຂອງທ່ານ ຫຼື ຫຼິ້ນຢູ່ອຸປະກອນຂອງທ່ານ. ດັ່ງນັ້ນ, ໃຫ້ລະມັດລະວັງສິ່ງຕ່າງໆ ເຊັ່ນ: ລະຫັດຜ່ານ, ລາຍລະອຽດການຈ່າຍເງິນ, ຂໍ້ຄວາມ, ຮູບພາບ ພ້ອມທັງສຽງ ແລະ ວິດີໂອ."</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"ເມື່ອທ່ານກຳລັງແບ່ງປັນ, ບັນທຶກ ຫຼື ສົ່ງສັນຍານແອັບ, Android ຈະມີສິດເຂົ້າເຖິງທຸກສິ່ງທີ່ສະແດງ ຫຼື ຫຼິ້ນຢູ່ແອັບດັ່ງກ່າວ. ດັ່ງນັ້ນ, ໃຫ້ລະມັດລະວັງສິ່ງຕ່າງໆ ເຊັ່ນ: ລະຫັດຜ່ານ, ລາຍລະອຽດການຈ່າຍເງິນ, ຂໍ້ຄວາມ, ຮູບພາບ ພ້ອມທັງສຽງ ແລະ ວິດີໂອ."</string>
@@ -608,7 +608,7 @@
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"ເບິ່ງການຄວບຄຸມ"</string>
     <string name="monitoring_description_named_management" msgid="505833016545056036">"ອຸປະກອນນີ້ເປັນຂອງ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nຜູ້ເບິ່ງແຍງໄອທີຂອງທ່ານສາມາດເຝົ້າຕິດຕາມ ແລະ ຈັດການການຕັ້ງຄ່າ, ສິດເຂົ້າເຖິງອົງກອນ, ແອັບ, ຂໍ້ມູນທີ່ເຊື່ອມໂຍງກັບອຸປະກອນຂອງທ່ານ ແລະ ຂໍ້ມູນສະຖານທີ່ອຸປະກອນຂອງທ່ານໄດ້.\n\nສຳລັບຂໍ້ມູນເພີ່ມເຕີມ, ກະລຸນາຕິດຕໍ່ຜູ້ເບິ່ງແຍງໄອທີຂອງທ່ານ."</string>
     <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"<xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g> ອາດສາມາດເຂົ້າເຖິງຂໍ້ມູນທີ່ເຊື່ອມໂຍງກັບອຸປະກອນນີ້, ຈັດການແອັບ ແລະ ປ່ຽນການຕັ້ງຄ່າອຸປະກອນນີ້ໄດ້.\n\nຫາກທ່ານມີຄຳຖາມ, ກະລຸນາຕິດຕໍ່ <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g>."</string>
-    <string name="monitoring_description_management" msgid="4308879039175729014">"ອຸປະກອນນີ້ເປັນຂອງອົງການທ່ານ.\n\nຜູ້ເບິ່ງແຍງໄອທີຂອງທ່ານສາມາດເຝົ້າຕິດຕາມ ແລະ ຈັດການການຕັ້ງຄ່າ, ສິດເຂົ້າເຖິງອົງກອນ, ແອັບ, ຂໍ້ມູນທີ່ເຊື່ອມໂຍງກັບອຸປະກອນຂອງທ່ານ ແລະ ຂໍ້ມູນສະຖານທີ່ອຸປະກອນຂອງທ່ານໄດ້.\n\nສຳລັບຂໍ້ມູນເພີ່ມເຕີມ, ກະລຸນາຕິດຕໍ່ຜູ້ເບິ່ງແຍງໄອທີຂອງທ່ານ."</string>
+    <string name="monitoring_description_management" msgid="4308879039175729014">"ອຸປະກອນນີ້ເປັນຂອງອົງກອນທ່ານ.\n\nຜູ້ເບິ່ງແຍງໄອທີຂອງທ່ານສາມາດເຝົ້າຕິດຕາມ ແລະ ຈັດການການຕັ້ງຄ່າ, ສິດເຂົ້າເຖິງອົງກອນ, ແອັບ, ຂໍ້ມູນທີ່ເຊື່ອມໂຍງກັບອຸປະກອນຂອງທ່ານ ແລະ ຂໍ້ມູນສະຖານທີ່ອຸປະກອນຂອງທ່ານໄດ້.\n\nສຳລັບຂໍ້ມູນເພີ່ມເຕີມ, ກະລຸນາຕິດຕໍ່ຜູ້ເບິ່ງແຍງໄອທີຂອງທ່ານ."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"ອົງກອນຂອງທ່ານຕິດຕັ້ງອຳນາດໃບຮັບຮອງໄວ້ໃນອຸປະກອນນີ້. ທຣາບຟິກເຄືອຂ່າຍທີ່ເຂົ້າລະຫັດໄວ້ຂອງທ່ານອາດຖືກຕິດຕາມ ຫຼື ແກ້ໄຂໄດ້."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"ອົງກອນຂອງທ່ານຕິດຕັ້ງອຳນາດໃບຮັບຮອງໄວ້ໃນໂປຣໄຟລ໌ບ່ອນເຮັດວຽກນີ້. ທຣາບຟິກເຄືອຂ່າຍທີ່ເຂົ້າລະຫັດໄວ້ຂອງທ່ານອາດຖືກຕິດຕາມ ຫຼື ແກ້ໄຂໄດ້."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"ມີອຳນາດໃບຮັບຮອງຕິດຕັ້ງຢູ່ໃນອຸປະກອນນີ້. ທຣາບຟິກເຄືອຂ່າຍທີ່ເຂົ້າລະຫັດໄວ້ຂອງທ່ານອາດຖືກຕິດຕາມ ຫຼື ແກ້ໄຂໄດ້."</string>
@@ -726,6 +726,7 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"ດາວທຽມ, ການເຊື່ອມຕໍ່ດີ"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"ດາວທຽມ, ການເຊື່ອມຕໍ່ທີ່ພ້ອມນຳໃຊ້"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"SOS ດາວທຽມ"</string>
+    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"ໂທສຸກເສີນ ຫຼື SOS"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"​ໂປຣ​ໄຟລ໌​ບ່ອນ​ເຮັດ​ວຽກ"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"ມ່ວນຊື່ນສຳລັບບາງຄົນ ແຕ່ບໍ່ແມ່ນສຳລັບທຸກຄົນ"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"System UI Tuner ໃຫ້ທ່ານມີວິທີພິເສດຕື່ມອີກໃນການປັບປ່ຽນ ແລະຕົບແຕ່ງສ່ວນຕໍ່ປະສານຜູ້ໃຊ້ຂອງ Android. ຄຸນສົມບັດທົດລອງໃຊ້ເຫຼົ່ານີ້ອາດຈະປ່ຽນແປງ, ຢຸດເຊົາ ຫຼືຫາຍໄປໃນການວາງຈຳໜ່າຍໃນອະນາຄົດ. ຈົ່ງດຳເນີນຕໍ່ດ້ວຍຄວາມລະມັດລະວັງ."</string>
@@ -1392,30 +1393,34 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"ໄອຄອນຫຍໍ້ລົງ"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"ໄອຄອນຂະຫຍາຍ"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"ຫຼື"</string>
+    <!-- no translation found for launch_keyboard_tutorial_notification_title (8849933155160522519) -->
+    <skip />
+    <!-- no translation found for launch_keyboard_tutorial_notification_content (2880339951512757918) -->
+    <skip />
+    <!-- no translation found for launch_touchpad_tutorial_notification_title (2243780062772196901) -->
+    <skip />
+    <!-- no translation found for launch_touchpad_tutorial_notification_content (7931085031240753226) -->
+    <skip />
+    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_title (1940023776496198762) -->
+    <skip />
+    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_content (1780725168171929365) -->
+    <skip />
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"ທ່າທາງສຳລັບກັບຄືນ"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"ທ່າທາງສຳລັບໜ້າຫຼັກ"</string>
     <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"ປຸ່ມຄຳສັ່ງ"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"ແລ້ວໆ"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"ກັບຄືນ"</string>
     <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"ເພື່ອກັບຄືນ, ໃຫ້ໃຊ້ 3 ນິ້ວປັດຊ້າຍ ຫຼື ຂວາບ່ອນໃດກໍໄດ້ເທິງແຜ່ນສຳຜັດ.\n\nທ່ານຍັງສາມາດໃຊ້ຄຳສັ່ງຄີລັດ + ESC ສຳລັບການດຳເນີນການນີ້ໄດ້ນຳ."</string>
-    <!-- no translation found for touchpad_back_gesture_success_title (7240576648330612171) -->
-    <skip />
-    <!-- no translation found for touchpad_back_gesture_success_body (2324724953720741719) -->
-    <skip />
+    <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"ເກັ່ງຫຼາຍ!"</string>
+    <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"ທ່ານໃຊ້ທ່າທາງກັບຄືນສຳເລັດແລ້ວ."</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"ໄປຫາໜ້າຫຼັກ"</string>
     <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"ເພື່ອໄປຫາໜ້າຫຼັກຂອງທ່ານຕອນໃດກໍໄດ້, ໃຫ້ປັດຂຶ້ນດ້ວຍສາມນິ້ວຈາກລຸ່ມສຸດຂອງໜ້າຈໍຂອງທ່ານ."</string>
-    <!-- no translation found for touchpad_home_gesture_success_title (3778407003948209795) -->
-    <skip />
-    <!-- no translation found for touchpad_home_gesture_success_body (2404031094918807067) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_title (2659466586996495447) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_guidance (5718948664616999196) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_success_title (466467860120112933) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_success_body (7201991081652850430) -->
-    <skip />
+    <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"ດີຫຼາຍ!"</string>
+    <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"ທ່ານໃຊ້ທ່າທາງໄປໜ້າຫຼັກສຳເລັດແລ້ວ."</string>
+    <string name="tutorial_action_key_title" msgid="2659466586996495447">"ປຸ່ມຄຳສັ່ງ"</string>
+    <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"ເພື່ອເຂົ້າເຖິງແອັບ, ໃຫ້ກົດປຸ່ມຄຳສັ່ງຢູ່ແປ້ນພິມຂອງທ່ານ."</string>
+    <string name="tutorial_action_key_success_title" msgid="466467860120112933">"ຂໍສະແດງຄວາມຍິນດີ!"</string>
+    <string name="tutorial_action_key_success_body" msgid="7201991081652850430">"ທ່ານໃຊ້ທ່າທາງປຸ່ມຄຳສັ່ງສໍາເລັດແລ້ວ.\n\nຄໍາສັ່ງ + / ຈະສະແດງທາງລັດທັງໝົດທີ່ທ່ານມີ."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"ໄຟປຸ່ມແປ້ນພິມ"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"ລະດັບທີ %1$d ຈາກ %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"ການຄວບຄຸມເຮືອນ"</string>

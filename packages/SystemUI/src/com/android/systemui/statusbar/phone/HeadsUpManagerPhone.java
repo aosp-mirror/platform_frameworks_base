@@ -35,6 +35,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.res.R;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -46,7 +47,6 @@ import com.android.systemui.statusbar.notification.data.repository.HeadsUpReposi
 import com.android.systemui.statusbar.notification.data.repository.HeadsUpRowRepository;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.shared.NotificationThrottleHun;
-import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRefactor;
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.statusbar.policy.AnimationStateHandler;
 import com.android.systemui.statusbar.policy.AvalancheController;
@@ -60,6 +60,11 @@ import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.settings.GlobalSettings;
 import com.android.systemui.util.time.SystemClock;
 
+import kotlinx.coroutines.flow.Flow;
+import kotlinx.coroutines.flow.MutableStateFlow;
+import kotlinx.coroutines.flow.StateFlow;
+import kotlinx.coroutines.flow.StateFlowKt;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -69,11 +74,6 @@ import java.util.Set;
 import java.util.Stack;
 
 import javax.inject.Inject;
-
-import kotlinx.coroutines.flow.Flow;
-import kotlinx.coroutines.flow.MutableStateFlow;
-import kotlinx.coroutines.flow.StateFlow;
-import kotlinx.coroutines.flow.StateFlowKt;
 
 /** A implementation of HeadsUpManager for phone. */
 @SysUISingleton
@@ -251,6 +251,12 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
         return entry != null && mSystemClock.elapsedRealtime() < entry.mPostTime;
     }
 
+    @Override
+    public void releaseAfterExpansion() {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
+        onExpandingFinished();
+    }
+
     public void onExpandingFinished() {
         if (mReleaseOnExpandFinish) {
             releaseAllImmediately();
@@ -277,7 +283,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
     private void onShadeOrQsExpanded(Boolean isExpanded) {
         if (isExpanded != mIsExpanded) {
             mIsExpanded = isExpanded;
-            if (!NotificationsHeadsUpRefactor.isEnabled() && isExpanded) {
+            if (!SceneContainerFlag.isEnabled() && isExpanded) {
                 mHeadsUpAnimatingAway.setValue(false);
             }
         }
@@ -295,6 +301,11 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
             }
             mHeadsUpAnimatingAway.setValue(headsUpAnimatingAway);
         }
+    }
+
+    @Override
+    public void unpinAll(boolean userUnPinned) {
+        super.unpinAll(userUnPinned);
     }
 
     /**
@@ -505,7 +516,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
 
     @Nullable
     private HeadsUpEntryPhone getTopHeadsUpEntryPhone() {
-        if (NotificationsHeadsUpRefactor.isEnabled()) {
+        if (SceneContainerFlag.isEnabled()) {
             return (HeadsUpEntryPhone) mTopHeadsUpRow.getValue();
         } else {
             return (HeadsUpEntryPhone) getTopHeadsUpEntry();
@@ -624,6 +635,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
                             mOnReorderingAllowedListener);
                 } else if (mTrackingHeadsUp) {
                     mEntriesToRemoveAfterExpand.add(entry);
+                    mLogger.logRemoveEntryAfterExpand(entry);
                 } else if (mVisualStabilityProvider.isReorderingAllowed()
                         || entry.showingPulsing()) {
                     removeEntry(entry.getKey(), "createRemoveRunnable");
@@ -698,7 +710,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
         }
 
         private NotificationEntry requireEntry() {
-            /* check if */ NotificationsHeadsUpRefactor.isUnexpectedlyInLegacyMode();
+            /* check if */ SceneContainerFlag.isUnexpectedlyInLegacyMode();
             return Objects.requireNonNull(mEntry);
         }
     }

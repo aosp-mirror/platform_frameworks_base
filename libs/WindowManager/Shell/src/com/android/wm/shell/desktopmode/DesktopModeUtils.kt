@@ -66,7 +66,7 @@ fun calculateInitialBounds(
     val initialSize: Size =
         when (taskInfo.configuration.orientation) {
             ORIENTATION_LANDSCAPE -> {
-                if (taskInfo.isResizeable) {
+                if (taskInfo.canChangeAspectRatio) {
                     if (isFixedOrientationPortrait(topActivityInfo.screenOrientation)) {
                         // For portrait resizeable activities, respect apps fullscreen width but
                         // apply ideal size height.
@@ -85,7 +85,7 @@ fun calculateInitialBounds(
             ORIENTATION_PORTRAIT -> {
                 val customPortraitWidthForLandscapeApp =
                     screenBounds.width() - (DESKTOP_MODE_LANDSCAPE_APP_PADDING * 2)
-                if (taskInfo.isResizeable) {
+                if (taskInfo.canChangeAspectRatio) {
                     if (isFixedOrientationLandscape(topActivityInfo.screenOrientation)) {
                         // For landscape resizeable activities, respect apps fullscreen height and
                         // apply custom app width.
@@ -171,6 +171,18 @@ fun calculateAspectRatio(taskInfo: RunningTaskInfo): Float {
         minOf(appBounds.height(), appBounds.width()).toFloat()
 }
 
+/** Returns true if task's width or height is maximized else returns false. */
+fun isTaskWidthOrHeightEqual(taskBounds: Rect, stableBounds: Rect): Boolean {
+    return taskBounds.width() == stableBounds.width() ||
+            taskBounds.height() == stableBounds.height()
+}
+
+/** Returns true if task bound is equal to stable bounds else returns false. */
+fun isTaskBoundsEqual(taskBounds: Rect, stableBounds: Rect): Boolean {
+    return taskBounds.width() == stableBounds.width() &&
+            taskBounds.height() == stableBounds.height()
+}
+
 /**
  * Calculates the desired initial bounds for applications in desktop windowing. This is done as a
  * scale of the screen bounds.
@@ -189,6 +201,13 @@ private fun positionInScreen(desiredSize: Size, stableBounds: Rect): Rect =
     }
 
 /**
+ * Whether the activity's aspect ratio can be changed or if it should be maintained as if it was
+ * unresizeable.
+ */
+private val TaskInfo.canChangeAspectRatio: Boolean
+    get() = isResizeable && !appCompatTaskInfo.hasMinAspectRatioOverride()
+
+/**
  * Adjusts bounds to be positioned in the middle of the area provided, not necessarily the
  * entire screen, as area can be offset by left and top start.
  */
@@ -204,7 +223,7 @@ fun centerInArea(desiredSize: Size, areaBounds: Rect, leftStart: Int, topStart: 
     return Rect(newLeft, newTop, newRight, newBottom)
 }
 
-fun TaskInfo.hasPortraitTopActivity(): Boolean {
+private fun TaskInfo.hasPortraitTopActivity(): Boolean {
     val topActivityScreenOrientation =
         topActivityInfo?.screenOrientation ?: SCREEN_ORIENTATION_UNSPECIFIED
     val appBounds = configuration.windowConfiguration.appBounds

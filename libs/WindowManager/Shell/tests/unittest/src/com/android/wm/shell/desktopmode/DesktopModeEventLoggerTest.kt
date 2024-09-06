@@ -104,7 +104,9 @@ class DesktopModeEventLoggerTest {
                 /* session_id */
                 eq(SESSION_ID),
                 eq(UNSET_MINIMIZE_REASON),
-                eq(UNSET_UNMINIMIZE_REASON))
+                eq(UNSET_UNMINIMIZE_REASON),
+                /* visible_task_count */
+                eq(TASK_COUNT))
         }
     }
 
@@ -131,7 +133,9 @@ class DesktopModeEventLoggerTest {
                 /* session_id */
                 eq(SESSION_ID),
                 eq(UNSET_MINIMIZE_REASON),
-                eq(UNSET_UNMINIMIZE_REASON))
+                eq(UNSET_UNMINIMIZE_REASON),
+                /* visible_task_count */
+                eq(TASK_COUNT))
         }
     }
 
@@ -159,7 +163,9 @@ class DesktopModeEventLoggerTest {
                 /* session_id */
                 eq(SESSION_ID),
                 eq(UNSET_MINIMIZE_REASON),
-                eq(UNSET_UNMINIMIZE_REASON))
+                eq(UNSET_UNMINIMIZE_REASON),
+                /* visible_task_count */
+                eq(TASK_COUNT))
         }
     }
 
@@ -190,7 +196,9 @@ class DesktopModeEventLoggerTest {
                 /* minimize_reason */
                 eq(MinimizeReason.TASK_LIMIT.reason),
                 /* unminimize_reason */
-                eq(UNSET_UNMINIMIZE_REASON))
+                eq(UNSET_UNMINIMIZE_REASON),
+                /* visible_task_count */
+                eq(TASK_COUNT))
         }
     }
 
@@ -221,7 +229,9 @@ class DesktopModeEventLoggerTest {
                 /* minimize_reason */
                 eq(UNSET_MINIMIZE_REASON),
                 /* unminimize_reason */
-                eq(UnminimizeReason.TASKBAR_TAP.reason))
+                eq(UnminimizeReason.TASKBAR_TAP.reason),
+                /* visible_task_count */
+                eq(TASK_COUNT))
         }
     }
 
@@ -233,15 +243,17 @@ class DesktopModeEventLoggerTest {
         private const val TASK_Y = 0
         private const val TASK_HEIGHT = 100
         private const val TASK_WIDTH = 100
+        private const val TASK_COUNT = 1
 
         private val TASK_UPDATE = TaskUpdate(
-            TASK_ID, TASK_UID, TASK_HEIGHT, TASK_WIDTH, TASK_X, TASK_Y
+            TASK_ID, TASK_UID, TASK_HEIGHT, TASK_WIDTH, TASK_X, TASK_Y,
+            visibleTaskCount = TASK_COUNT,
         )
 
         private fun createTaskUpdate(
             minimizeReason: MinimizeReason? = null,
             unminimizeReason: UnminimizeReason? = null,
         ) = TaskUpdate(TASK_ID, TASK_UID, TASK_HEIGHT, TASK_WIDTH, TASK_X, TASK_Y, minimizeReason,
-            unminimizeReason)
+            unminimizeReason, TASK_COUNT)
     }
 }

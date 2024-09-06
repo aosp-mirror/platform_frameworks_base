@@ -1199,6 +1199,7 @@
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"رجوع"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"تبديل أسلوب الإدخال"</string>
     <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"فتح أداة اختيار أسلوب الإدخال"</string>
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"الإعدادات"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"مساحة التخزين منخفضة"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"قد لا تعمل بعض وظائف النظام"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"ليست هناك مساحة تخزين كافية للنظام. تأكد من أنه لديك مساحة خالية تبلغ ٢٥٠ ميغابايت وأعد التشغيل."</string>
@@ -1749,7 +1750,8 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"تعذَّر التحقّق من ردّك بسبب حجب أحد التطبيقات طلب الحصول على الإذن."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"انقر على ميزة لبدء استخدامها:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"اختيار الميزات التي تريد استخدامها مع زر أدوات تمكين الوصول"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"اختيار الميزات التي تريد استخدامها مع اختصار مفتاح التحكّم في مستوى الصوت"</string>
+    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
+    <skip />
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"تم إيقاف <xliff:g id="SERVICE_NAME">%s</xliff:g>."</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"تعديل الاختصارات"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"تم"</string>

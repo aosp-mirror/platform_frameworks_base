@@ -16,30 +16,24 @@
 
 package com.android.server.appfunctions;
 
-import static android.app.appfunctions.flags.Flags.enableAppFunctionManager;
-
-import android.app.appfunctions.IAppFunctionManager;
+import android.app.appfunctions.AppFunctionManagerConfiguration;
 import android.content.Context;
 
 import com.android.server.SystemService;
 
-/**
- * Service that manages app functions.
- */
+/** Service that manages app functions. */
 public class AppFunctionManagerService extends SystemService {
+    private final AppFunctionManagerServiceImpl mServiceImpl;
 
     public AppFunctionManagerService(Context context) {
         super(context);
+        mServiceImpl = new AppFunctionManagerServiceImpl(context);
     }
 
     @Override
     public void onStart() {
-        if (enableAppFunctionManager()) {
-            publishBinderService(Context.APP_FUNCTION_SERVICE, new AppFunctionManagerStub());
+        if (AppFunctionManagerConfiguration.isSupported(getContext())) {
+            publishBinderService(Context.APP_FUNCTION_SERVICE, mServiceImpl);
         }
-    }
-
-    private static class AppFunctionManagerStub extends IAppFunctionManager.Stub {
-
     }
 }

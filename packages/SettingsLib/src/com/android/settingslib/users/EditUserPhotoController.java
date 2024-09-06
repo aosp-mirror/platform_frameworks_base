@@ -32,6 +32,7 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.util.UserIcons;
 import com.android.settingslib.drawable.CircleFramedDrawable;
+import com.android.settingslib.R;
 import com.android.settingslib.utils.ThreadUtils;
 
 import com.google.common.util.concurrent.FutureCallback;
@@ -132,6 +133,13 @@ public class EditUserPhotoController {
         intent.addCategory(Intent.CATEGORY_DEFAULT);
         if (Flags.avatarSync()) {
             intent.putExtra(EXTRA_IS_USER_NEW, isUserNew);
+            // Fix vulnerability b/341688848 by explicitly set the class name of avatar picker.
+            if (Flags.fixAvatarCrossUserLeak()) {
+                final String packageName =
+                        mActivity.getString(R.string.config_avatar_picker_package);
+                final String className = mActivity.getString(R.string.config_avatar_picker_class);
+                intent.setClassName(packageName, className);
+            }
         } else {
             // SettingsLib is used by multiple apps therefore we need to know out of all apps
             // using settingsLib which one is the one we return value to.

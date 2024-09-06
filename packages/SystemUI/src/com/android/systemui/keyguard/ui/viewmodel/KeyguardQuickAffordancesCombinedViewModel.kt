@@ -28,7 +28,9 @@ import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.quickaffordance.ActivationState
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancePosition
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.shared.Flags
 import com.android.systemui.shared.keyguard.shared.model.KeyguardQuickAffordanceSlots
+import com.android.systemui.utils.coroutines.flow.flatMapLatestConflated
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -83,9 +85,7 @@ constructor(
     private val previewMode = MutableStateFlow(PreviewMode())
 
     private val showingLockscreen: Flow<Boolean> =
-        transitionInteractor.finishedKeyguardState.map { keyguardState ->
-            keyguardState == KeyguardState.LOCKSCREEN
-        }
+        transitionInteractor.isFinishedIn(KeyguardState.LOCKSCREEN)
 
     /** The only time the expansion is important is while lockscreen is actively displayed */
     private val shadeExpansionAlpha =
@@ -164,13 +164,50 @@ constructor(
             .map { alpha -> alpha >= AFFORDANCE_FULLY_OPAQUE_ALPHA_THRESHOLD }
             .distinctUntilChanged()
 
+    private val previewAffordances =
+        MutableStateFlow<Map<KeyguardQuickAffordancePosition, String>>(emptyMap())
+
     /** An observable for the view-model of the "start button" quick affordance. */
     val startButton: Flow<KeyguardQuickAffordanceViewModel> =
-        button(KeyguardQuickAffordancePosition.BOTTOM_START)
+        if (Flags.newCustomizationPickerUi()) {
+            previewAffordances.flatMapLatestConflated {
+                button(
+                    position = KeyguardQuickAffordancePosition.BOTTOM_START,
+                    overrideQuickAffordanceId = it[KeyguardQuickAffordancePosition.BOTTOM_START],
+                )
+            }
+        } else {
+            button(KeyguardQuickAffordancePosition.BOTTOM_START)
+        }
+        .stateIn(
+            scope = applicationScope,
+            started = SharingStarted.WhileSubscribed(),
+            initialValue =
+                KeyguardQuickAffordanceViewModel(
+                    slotId = KeyguardQuickAffordancePosition.BOTTOM_START.toSlotId()
+                ),
+        )
 
     /** An observable for the view-model of the "end button" quick affordance. */
     val endButton: Flow<KeyguardQuickAffordanceViewModel> =
-        button(KeyguardQuickAffordancePosition.BOTTOM_END)
+        if (Flags.newCustomizationPickerUi()) {
+            previewAffordances.flatMapLatestConflated {
+                button(
+                    position = KeyguardQuickAffordancePosition.BOTTOM_END,
+                    overrideQuickAffordanceId = it[KeyguardQuickAffordancePosition.BOTTOM_END],
+                )
+            }
+        } else {
+            button(KeyguardQuickAffordancePosition.BOTTOM_END)
+        }
+        .stateIn(
+            scope = applicationScope,
+            started = SharingStarted.WhileSubscribed(),
+            initialValue =
+                KeyguardQuickAffordanceViewModel(
+                    slotId = KeyguardQuickAffordancePosition.BOTTOM_END.toSlotId()
+                ),
+        )
 
     /**
      * Notifies that a slot with the given ID has been selected in the preview experience that is
@@ -180,6 +217,28 @@ constructor(
      */
     fun onPreviewSlotSelected(slotId: String) {
         selectedPreviewSlotId.value = slotId
+    }
+
+    /**
+     * Notifies to preview an affordance at a given slot ID. This is ignored for the real lock
+     * screen experience.
+     */
+    fun onPreviewQuickAffordanceSelected(slotId: String, affordanceId: String) {
+        val position =
+            KeyguardQuickAffordancePosition.parseKeyguardQuickAffordancePosition(slotId) ?: return
+        previewAffordances.value =
+            previewAffordances.value.toMutableMap().let {
+                it[position] = affordanceId
+                HashMap(it)
+            }
+    }
+
+    /**
+     * Notifies to clear up the preview affordances map. This is ignored for the real lock screen
+     * experience.
+     */
+    fun onClearPreviewQuickAffordances() {
+        previewAffordances.value = emptyMap()
     }
 
     /**
@@ -207,14 +266,16 @@ constructor(
     }
 
     private fun button(
-        position: KeyguardQuickAffordancePosition
+        position: KeyguardQuickAffordancePosition,
+        overrideQuickAffordanceId: String? = null,
     ): Flow<KeyguardQuickAffordanceViewModel> {
         return previewMode
             .flatMapLatest { previewMode ->
                 combine(
                         if (previewMode.isInPreviewMode) {
                             quickAffordanceInteractor.quickAffordanceAlwaysVisible(
-                                position = position
+                                position = position,
+                                overrideQuickAffordanceId = overrideQuickAffordanceId,
                             )
                         } else {
                             quickAffordanceInteractor.quickAffordance(position = position)

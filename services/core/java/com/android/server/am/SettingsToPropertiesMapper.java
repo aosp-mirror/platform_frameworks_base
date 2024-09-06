@@ -33,6 +33,7 @@ import android.util.proto.ProtoInputStream;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.providers.settings.Flags;
 
 import android.aconfigd.Aconfigd.StorageRequestMessage;
 import android.aconfigd.Aconfigd.StorageRequestMessages;
@@ -51,6 +52,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Set;
 import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
 
 /**
@@ -201,6 +203,7 @@ public class SettingsToPropertiesMapper {
         "pixel_watch",
         "platform_compat",
         "platform_security",
+        "pixel_watch_debug_trace",
         "pmw",
         "power",
         "preload_safety",
@@ -215,6 +218,7 @@ public class SettingsToPropertiesMapper {
         "stability",
         "statsd",
         "system_performance",
+        "system_sw_battery",
         "system_sw_touch",
         "system_sw_usb",
         "test_suites",
@@ -455,6 +459,24 @@ public class SettingsToPropertiesMapper {
     }
 
     /**
+     * Send a request to aconfig storage to remove a flag local override.
+     *
+     * @param proto
+     * @param packageName the package of the flag
+     * @param flagName the name of the flag
+     */
+    static void writeFlagOverrideRemovalRequest(
+        ProtoOutputStream proto, String packageName, String flagName) {
+      long msgsToken = proto.start(StorageRequestMessages.MSGS);
+      long msgToken = proto.start(StorageRequestMessage.REMOVE_LOCAL_OVERRIDE_MESSAGE);
+      proto.write(StorageRequestMessage.RemoveLocalOverrideMessage.PACKAGE_NAME, packageName);
+      proto.write(StorageRequestMessage.RemoveLocalOverrideMessage.FLAG_NAME, flagName);
+      proto.write(StorageRequestMessage.RemoveLocalOverrideMessage.REMOVE_ALL, false);
+      proto.end(msgToken);
+      proto.end(msgsToken);
+    }
+
+    /**
      * deserialize a flag input proto stream and log
      * @param proto
      */
@@ -499,8 +521,15 @@ public class SettingsToPropertiesMapper {
         ProtoOutputStream requests = new ProtoOutputStream();
         for (String flagName : props.getKeyset()) {
             String flagValue = props.getString(flagName, null);
-            if (flagName == null || flagValue == null) {
-                continue;
+
+            if (Flags.syncLocalOverridesRemovalNewStorage()) {
+                if (flagName == null) {
+                    continue;
+                }
+            } else {
+                if (flagName == null || flagValue == null) {
+                    continue;
+                }
             }
 
             int idx = flagName.indexOf(":");
@@ -517,7 +546,13 @@ public class SettingsToPropertiesMapper {
             }
             String packageName = fullFlagName.substring(0, idx);
             String realFlagName = fullFlagName.substring(idx+1);
-            writeFlagOverrideRequest(requests, packageName, realFlagName, flagValue, true);
+
+            if (Flags.syncLocalOverridesRemovalNewStorage() && flagValue == null) {
+              writeFlagOverrideRemovalRequest(requests, packageName, realFlagName);
+            } else {
+              writeFlagOverrideRequest(requests, packageName, realFlagName, flagValue, true);
+            }
+
             ++num_requests;
         }
 

@@ -1195,6 +1195,7 @@
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Terug"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Invoermethode wijzigen"</string>
     <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"Kiezer voor invoermethoden openen"</string>
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"Instellingen"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Opslagruimte is bijna vol"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Bepaalde systeemfuncties werken mogelijk niet"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Onvoldoende opslagruimte voor het systeem. Zorg ervoor dat je 250 MB vrije ruimte hebt en start opnieuw."</string>
@@ -1720,7 +1721,7 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Verwijderen"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Volume verhogen tot boven het aanbevolen niveau?\n\nAls je langere tijd op hoog volume naar muziek luistert, raakt je gehoor mogelijk beschadigd."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Wil je blijven luisteren op hoog volume?\n\nHet hoofdtelefoonvolume is langer dan de aanbevolen tijd hoog geweest. Dit kan je gehoor beschadigen."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Wil je blijven luisteren op hoog volume?\n\nHet koptelefoonvolume is langer dan de aanbevolen tijd hoog geweest. Dit kan je gehoor beschadigen."</string>
     <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Hard geluid gedetecteerd\n\nHet hoofdtelefoonvolume is hoger dan aanbevolen. Dit kan je gehoor beschadigen."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Snelkoppeling toegankelijkheid gebruiken?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Als de snelkoppeling aanstaat, houd je beide volumeknoppen 3 seconden ingedrukt om een toegankelijkheidsfunctie te starten."</string>
@@ -1745,7 +1746,8 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"Een app dekt het verzoek om rechten af, waardoor je reactie niet kan worden geverifieerd."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Tik op een functie om deze te gebruiken:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Functies kiezen voor gebruik met de knop Toegankelijkheid"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Functies kiezen voor gebruik met de sneltoets via de volumeknop"</string>
+    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
+    <skip />
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> is uitgezet"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Snelkoppelingen bewerken"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Klaar"</string>

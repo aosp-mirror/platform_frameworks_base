@@ -3462,6 +3462,15 @@ public interface WindowManager extends ViewManager {
         public static final int PRIVATE_FLAG_NOT_MAGNIFIABLE = 1 << 22;
 
         /**
+         * Indicates that the window should receive key events including Action/Meta key.
+         * They will not be intercepted as usual and instead will be passed to the window with other
+         * key events.
+         * TODO(b/358569822) Remove this once we have nicer API for listening to shortcuts
+         * @hide
+         */
+        public static final int PRIVATE_FLAG_ALLOW_ACTION_KEY_EVENTS = 1 << 23;
+
+        /**
          * Flag to indicate that the window is color space agnostic, and the color can be
          * interpreted to any color space.
          * @hide

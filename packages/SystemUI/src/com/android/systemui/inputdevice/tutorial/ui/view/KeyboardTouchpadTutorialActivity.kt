@@ -54,6 +54,7 @@ constructor(
         const val INTENT_TUTORIAL_TYPE_KEY = "tutorial_type"
         const val INTENT_TUTORIAL_TYPE_TOUCHPAD = "touchpad"
         const val INTENT_TUTORIAL_TYPE_KEYBOARD = "keyboard"
+        const val INTENT_TUTORIAL_TYPE_BOTH = "both"
     }
 
     private val vm by
@@ -68,6 +69,7 @@ constructor(
         enableEdgeToEdge()
         // required to handle 3+ fingers on touchpad
         window.addPrivateFlags(WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY)
+        window.addPrivateFlags(WindowManager.LayoutParams.PRIVATE_FLAG_ALLOW_ACTION_KEY_EVENTS)
         lifecycle.addObserver(vm)
         lifecycleScope.launch {
             vm.closeActivity.collect { finish ->

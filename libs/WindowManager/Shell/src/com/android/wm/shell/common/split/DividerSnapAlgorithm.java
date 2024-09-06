@@ -19,14 +19,14 @@ package com.android.wm.shell.common.split;
 import static android.view.WindowManager.DOCKED_LEFT;
 import static android.view.WindowManager.DOCKED_RIGHT;
 
-import static com.android.wm.shell.common.split.SplitScreenConstants.SNAP_TO_30_70;
-import static com.android.wm.shell.common.split.SplitScreenConstants.SNAP_TO_50_50;
-import static com.android.wm.shell.common.split.SplitScreenConstants.SNAP_TO_70_30;
-import static com.android.wm.shell.common.split.SplitScreenConstants.SNAP_TO_END_AND_DISMISS;
-import static com.android.wm.shell.common.split.SplitScreenConstants.SNAP_TO_MINIMIZE;
-import static com.android.wm.shell.common.split.SplitScreenConstants.SNAP_TO_NONE;
-import static com.android.wm.shell.common.split.SplitScreenConstants.SNAP_TO_START_AND_DISMISS;
-import static com.android.wm.shell.common.split.SplitScreenConstants.SnapPosition;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_30_70;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_50_50;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_70_30;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_END_AND_DISMISS;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_MINIMIZE;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_NONE;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_START_AND_DISMISS;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SnapPosition;
 
 import android.content.res.Resources;
 import android.graphics.Rect;

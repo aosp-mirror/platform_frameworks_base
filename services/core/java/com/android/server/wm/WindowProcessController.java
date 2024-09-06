@@ -89,6 +89,7 @@ import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.Watchdog;
 import com.android.server.grammaticalinflection.GrammaticalInflectionManagerInternal;
 import com.android.server.wm.ActivityTaskManagerService.HotPath;
+import com.android.server.wm.BackgroundLaunchProcessController.BalCheckConfiguration;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -284,14 +285,11 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     static final int ANIMATING_REASON_REMOTE_ANIMATION = 1;
     /** It is set for wakefulness transition. */
     static final int ANIMATING_REASON_WAKEFULNESS_CHANGE = 1 << 1;
-    /** Whether the legacy {@link RecentsAnimation} is running. */
-    static final int ANIMATING_REASON_LEGACY_RECENT_ANIMATION = 1 << 2;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({
             ANIMATING_REASON_REMOTE_ANIMATION,
             ANIMATING_REASON_WAKEFULNESS_CHANGE,
-            ANIMATING_REASON_LEGACY_RECENT_ANIMATION,
     })
     @interface AnimatingReason {}
 
@@ -360,7 +358,6 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         mUseFifoUiScheduling = com.android.window.flags.Flags.fifoPriorityForMajorUiProcesses()
                 && (isSysUiPackage || mAtm.isCallerRecents(uid));
 
-        onConfigurationChanged(atm.getGlobalConfiguration());
         mAtm.mPackageConfigPersister.updateConfigIfNeeded(this, mUserId, mInfo.packageName);
     }
 
@@ -698,20 +695,13 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     public boolean areBackgroundFgsStartsAllowed() {
         return areBackgroundActivityStartsAllowed(
                 mAtm.getBalAppSwitchesState(),
-                true /* isCheckingForFgsStart */).allows();
+                BackgroundLaunchProcessController.CHECK_FOR_FGS_START).allows();
     }
 
     BackgroundActivityStartController.BalVerdict areBackgroundActivityStartsAllowed(
-            int appSwitchState) {
-        return areBackgroundActivityStartsAllowed(
-                appSwitchState,
-                false /* isCheckingForFgsStart */);
-    }
-
-    private BackgroundActivityStartController.BalVerdict areBackgroundActivityStartsAllowed(
-            int appSwitchState, boolean isCheckingForFgsStart) {
+            int appSwitchState, BalCheckConfiguration checkConfiguration) {
         return mBgLaunchController.areBackgroundActivityStartsAllowed(mPid, mUid,
-                mInfo.packageName, appSwitchState, isCheckingForFgsStart,
+                mInfo.packageName, appSwitchState, checkConfiguration,
                 hasActivityInVisibleTask(), mInstrumentingWithBackgroundActivityStartPrivileges,
                 mAtm.getLastStopAppSwitchesTime(),
                 mLastActivityLaunchTime, mLastActivityFinishTime);
@@ -1689,7 +1679,8 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                 resolvedConfig,
                 false /* optsOutEdgeToEdge */,
                 false /* hasFixedRotationTransform */,
-                false /* hasCompatDisplayInsets */);
+                false /* hasCompatDisplayInsets */,
+                null /* task */);
     }
 
     void dispatchConfiguration(@NonNull Configuration config) {
@@ -1934,7 +1925,12 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                 // showing.
                 // If the configuration has been overridden by previous activity, empty it.
                 mIsActivityConfigOverrideAllowed = false;
-                unregisterActivityConfigurationListener();
+                // The call to `onServiceStarted` is not guarded with WM lock.
+                mAtm.mH.post(() -> {
+                    synchronized (mAtm.mGlobalLock) {
+                        unregisterActivityConfigurationListener();
+                    }
+                });
                 break;
             default:
                 break;
@@ -2014,14 +2010,6 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     /** Returns whether this app is being launched for the first time since install */
     boolean wasFirstLaunch() {
         return mStoppedState == STOPPED_STATE_FIRST_LAUNCH;
-    }
-
-    void setRunningRecentsAnimation(boolean running) {
-        if (running) {
-            addAnimatingReason(ANIMATING_REASON_LEGACY_RECENT_ANIMATION);
-        } else {
-            removeAnimatingReason(ANIMATING_REASON_LEGACY_RECENT_ANIMATION);
-        }
     }
 
     void setRunningRemoteAnimation(boolean running) {
@@ -2117,9 +2105,6 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             }
             if ((animatingReasons & ANIMATING_REASON_WAKEFULNESS_CHANGE) != 0) {
                 pw.print("wakefulness|");
-            }
-            if ((animatingReasons & ANIMATING_REASON_LEGACY_RECENT_ANIMATION) != 0) {
-                pw.print("legacy-recents");
             }
             pw.println();
         }

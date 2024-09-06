@@ -205,7 +205,7 @@
     <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"Espaço privado removido"</string>
     <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"A sua organização não permite espaços privados neste dispositivo gerido."</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"O dispositivo é gerido"</string>
-    <string name="network_logging_notification_text" msgid="1327373071132562512">"A sua entidade gere este dispositivo e pode monitorizar o tráfego de rede. Toque para obter mais detalhes."</string>
+    <string name="network_logging_notification_text" msgid="1327373071132562512">"A sua entidade gere este dispositivo e pode monitorizar o tráfego de rede. Toque para ver mais detalhes."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"As apps podem aceder à sua localização"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"Contacte o administrador de TI para saber mais."</string>
     <string name="geofencing_service" msgid="3826902410740315456">"Serviço de geofencing"</string>
@@ -1196,6 +1196,7 @@
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Voltar"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Alternar o método de introdução"</string>
     <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"Abrir o selecionador do método de introdução"</string>
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"Definições"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Está quase sem espaço de armazenamento"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Algumas funções do sistema poderão não funcionar"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Não existe armazenamento suficiente para o sistema. Certifique-se de que tem 250 MB de espaço livre e reinicie."</string>
@@ -1746,7 +1747,8 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"Uma app está a ocultar o pedido de autorização e, por isso, não é possível validar a sua resposta."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Toque numa funcionalidade para começar a utilizá-la:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Escolha funcionalidades para utilizar com o botão Acessibilidade"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Escolha funcionalidades para usar com o atalho das teclas de volume"</string>
+    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
+    <skip />
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"O serviço <xliff:g id="SERVICE_NAME">%s</xliff:g> foi desativado."</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Editar atalhos"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Concluído"</string>

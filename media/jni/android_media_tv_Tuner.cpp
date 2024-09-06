@@ -1448,7 +1448,7 @@ jobject JTuner::getFrontendIds() {
     return obj;
 }
 
-jobject JTuner::openFrontendByHandle(jlong feHandle) {
+jobject JTuner::openFrontendByHandle(int feHandle) {
     // TODO: Handle reopening frontend with different handle
     sp<FrontendClient> feClient = sTunerClient->openFrontend(feHandle);
     if (feClient == nullptr) {
@@ -1824,7 +1824,7 @@ jobjectArray JTuner::getFrontendStatusReadiness(jintArray types) {
     return valObj;
 }
 
-jobject JTuner::openLnbByHandle(jlong handle) {
+jobject JTuner::openLnbByHandle(int handle) {
     if (sTunerClient == nullptr) {
         return nullptr;
     }
@@ -1833,7 +1833,7 @@ jobject JTuner::openLnbByHandle(jlong handle) {
     sp<LnbClientCallbackImpl> callback = new LnbClientCallbackImpl();
     lnbClient = sTunerClient->openLnb(handle);
     if (lnbClient == nullptr) {
-        ALOGD("Failed to open lnb, handle = %ld", handle);
+        ALOGD("Failed to open lnb, handle = %d", handle);
         return nullptr;
     }
 
@@ -1947,7 +1947,7 @@ int JTuner::setLna(bool enable) {
     return (int)result;
 }
 
-Result JTuner::openDemux(jlong handle) {
+Result JTuner::openDemux(int handle) {
     if (sTunerClient == nullptr) {
         return Result::NOT_INITIALIZED;
     }
@@ -2215,7 +2215,7 @@ jobject JTuner::getDemuxCaps() {
             numBytesInSectionFilter, filterCaps, filterCapsList, linkCaps, bTimeFilter);
 }
 
-jobject JTuner::getDemuxInfo(jlong handle) {
+jobject JTuner::getDemuxInfo(int handle) {
     if (sTunerClient == nullptr) {
         ALOGE("tuner is not initialized");
         return nullptr;
@@ -3768,8 +3768,8 @@ static jobject android_media_tv_Tuner_get_frontend_ids(JNIEnv *env, jobject thiz
     return tuner->getFrontendIds();
 }
 
-static jobject android_media_tv_Tuner_open_frontend_by_handle(JNIEnv *env, jobject thiz,
-                                                              jlong handle) {
+static jobject android_media_tv_Tuner_open_frontend_by_handle(
+        JNIEnv *env, jobject thiz, jint handle) {
     sp<JTuner> tuner = getTuner(env, thiz);
     return tuner->openFrontendByHandle(handle);
 }
@@ -3901,7 +3901,7 @@ static jobject android_media_tv_Tuner_get_frontend_info(JNIEnv *env, jobject thi
     return tuner->getFrontendInfo(id);
 }
 
-static jobject android_media_tv_Tuner_open_lnb_by_handle(JNIEnv *env, jobject thiz, jlong handle) {
+static jobject android_media_tv_Tuner_open_lnb_by_handle(JNIEnv *env, jobject thiz, jint handle) {
     sp<JTuner> tuner = getTuner(env, thiz);
     return tuner->openLnbByHandle(handle);
 }
@@ -4622,7 +4622,7 @@ static int android_media_tv_Tuner_time_filter_close(JNIEnv *env, jobject filter)
     return (int)r;
 }
 
-static jobject android_media_tv_Tuner_open_descrambler(JNIEnv *env, jobject thiz, jlong) {
+static jobject android_media_tv_Tuner_open_descrambler(JNIEnv *env, jobject thiz, jint) {
     sp<JTuner> tuner = getTuner(env, thiz);
     return tuner->openDescrambler();
 }
@@ -4690,12 +4690,12 @@ static jobject android_media_tv_Tuner_get_demux_caps(JNIEnv* env, jobject thiz) 
     return tuner->getDemuxCaps();
 }
 
-static jobject android_media_tv_Tuner_get_demux_info(JNIEnv *env, jobject thiz, jlong handle) {
+static jobject android_media_tv_Tuner_get_demux_info(JNIEnv* env, jobject thiz, jint handle) {
     sp<JTuner> tuner = getTuner(env, thiz);
     return tuner->getDemuxInfo(handle);
 }
 
-static jint android_media_tv_Tuner_open_demux(JNIEnv *env, jobject thiz, jlong handle) {
+static jint android_media_tv_Tuner_open_demux(JNIEnv* env, jobject thiz, jint handle) {
     sp<JTuner> tuner = getTuner(env, thiz);
     return (jint)tuner->openDemux(handle);
 }
@@ -4706,7 +4706,7 @@ static jint android_media_tv_Tuner_close_tuner(JNIEnv* env, jobject thiz) {
     return (jint)tuner->close();
 }
 
-static jint android_media_tv_Tuner_close_demux(JNIEnv *env, jobject thiz, jlong /* handle */) {
+static jint android_media_tv_Tuner_close_demux(JNIEnv* env, jobject thiz, jint /* handle */) {
     sp<JTuner> tuner = getTuner(env, thiz);
     return tuner->closeDemux();
 }
@@ -4766,7 +4766,7 @@ static jobjectArray android_media_tv_Tuner_get_frontend_status_readiness(JNIEnv 
     return tuner->getFrontendStatusReadiness(types);
 }
 
-static jint android_media_tv_Tuner_close_frontend(JNIEnv *env, jobject thiz, jlong /* handle */) {
+static jint android_media_tv_Tuner_close_frontend(JNIEnv* env, jobject thiz, jint /* handle */) {
     sp<JTuner> tuner = getTuner(env, thiz);
     return tuner->closeFrontend();
 }
@@ -5035,7 +5035,7 @@ static const JNINativeMethod gTunerMethods[] = {
     { "nativeGetTunerVersion", "()I", (void *)android_media_tv_Tuner_native_get_tuner_version },
     { "nativeGetFrontendIds", "()Ljava/util/List;",
             (void *)android_media_tv_Tuner_get_frontend_ids },
-    { "nativeOpenFrontendByHandle", "(J)Landroid/media/tv/tuner/Tuner$Frontend;",
+    { "nativeOpenFrontendByHandle", "(I)Landroid/media/tv/tuner/Tuner$Frontend;",
             (void *)android_media_tv_Tuner_open_frontend_by_handle },
     { "nativeShareFrontend", "(I)I",
             (void *)android_media_tv_Tuner_share_frontend },
@@ -5074,11 +5074,11 @@ static const JNINativeMethod gTunerMethods[] = {
             (void *)android_media_tv_Tuner_open_filter },
     { "nativeOpenTimeFilter", "()Landroid/media/tv/tuner/filter/TimeFilter;",
             (void *)android_media_tv_Tuner_open_time_filter },
-    { "nativeOpenLnbByHandle", "(J)Landroid/media/tv/tuner/Lnb;",
+    { "nativeOpenLnbByHandle", "(I)Landroid/media/tv/tuner/Lnb;",
             (void *)android_media_tv_Tuner_open_lnb_by_handle },
     { "nativeOpenLnbByName", "(Ljava/lang/String;)Landroid/media/tv/tuner/Lnb;",
             (void *)android_media_tv_Tuner_open_lnb_by_name },
-    { "nativeOpenDescramblerByHandle", "(J)Landroid/media/tv/tuner/Descrambler;",
+    { "nativeOpenDescramblerByHandle", "(I)Landroid/media/tv/tuner/Descrambler;",
             (void *)android_media_tv_Tuner_open_descrambler },
     { "nativeOpenDvrRecorder", "(J)Landroid/media/tv/tuner/dvr/DvrRecorder;",
             (void *)android_media_tv_Tuner_open_dvr_recorder },
@@ -5086,12 +5086,12 @@ static const JNINativeMethod gTunerMethods[] = {
             (void *)android_media_tv_Tuner_open_dvr_playback },
     { "nativeGetDemuxCapabilities", "()Landroid/media/tv/tuner/DemuxCapabilities;",
             (void *)android_media_tv_Tuner_get_demux_caps },
-    { "nativeGetDemuxInfo", "(J)Landroid/media/tv/tuner/DemuxInfo;",
+    { "nativeGetDemuxInfo", "(I)Landroid/media/tv/tuner/DemuxInfo;",
             (void *)android_media_tv_Tuner_get_demux_info },
-    { "nativeOpenDemuxByhandle", "(J)I", (void *)android_media_tv_Tuner_open_demux },
+    { "nativeOpenDemuxByhandle", "(I)I", (void *)android_media_tv_Tuner_open_demux },
     { "nativeClose", "()I", (void *)android_media_tv_Tuner_close_tuner },
-    { "nativeCloseFrontend", "(J)I", (void *)android_media_tv_Tuner_close_frontend },
-    { "nativeCloseDemux", "(J)I", (void *)android_media_tv_Tuner_close_demux },
+    { "nativeCloseFrontend", "(I)I", (void *)android_media_tv_Tuner_close_frontend },
+    { "nativeCloseDemux", "(I)I", (void *)android_media_tv_Tuner_close_demux },
     { "nativeOpenSharedFilter",
             "(Ljava/lang/String;)Landroid/media/tv/tuner/filter/SharedFilter;",
             (void *)android_media_tv_Tuner_open_shared_filter},

@@ -41,6 +41,7 @@ import android.widget.ScrollView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.app.viewcapture.ViewCapture
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.widget.LockPatternUtils
 import com.android.launcher3.icons.IconProvider
@@ -60,10 +61,12 @@ import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor
 import com.android.systemui.biometrics.ui.viewmodel.CredentialViewModel
 import com.android.systemui.biometrics.ui.viewmodel.PromptViewModel
 import com.android.systemui.display.data.repository.FakeDisplayRepository
+import com.android.systemui.haptics.msdl.msdlPlayer
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.events.ANIMATING_OUT
+import com.android.systemui.testKosmos
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.time.FakeSystemClock
@@ -111,6 +114,7 @@ open class AuthContainerViewTest : SysuiTestCase() {
     @Mock lateinit var selectedUserInteractor: SelectedUserInteractor
     @Mock private lateinit var packageManager: PackageManager
     @Mock private lateinit var activityTaskManager: ActivityTaskManager
+    @Mock private lateinit var lazyViewCapture: Lazy<ViewCapture>
 
     private lateinit var displayRepository: FakeDisplayRepository
     private lateinit var displayStateInteractor: DisplayStateInteractor
@@ -142,6 +146,9 @@ open class AuthContainerViewTest : SysuiTestCase() {
 
     private val credentialViewModel = CredentialViewModel(mContext, bpCredentialInteractor)
     private val defaultLogoIcon = context.getDrawable(R.drawable.ic_android)
+
+    private val kosmos = testKosmos()
+    private val msdlPlayer = kosmos.msdlPlayer
 
     private var authContainer: TestAuthContainerView? = null
 
@@ -665,7 +672,9 @@ open class AuthContainerViewTest : SysuiTestCase() {
             ),
             { credentialViewModel },
             fakeExecutor,
-            vibrator
+            vibrator,
+            lazyViewCapture,
+            msdlPlayer,
         ) {
         override fun postOnAnimation(runnable: Runnable) {
             runnable.run()

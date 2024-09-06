@@ -53,12 +53,7 @@
             "file_patterns": ["StorageManagerService\\.java"]
         },
         {
-            "name": "FrameworksMockingServicesTests",
-            "options": [
-                {
-                    "include-filter": "com.android.server.sensorprivacy"
-                }
-            ],
+            "name": "FrameworksMockingServicesTests_sensorprivacy",
             "file_patterns": ["SensorPrivacyService\\.java"]
         },
         {
@@ -204,6 +199,15 @@
             "options": [
                 {
                     "include-filter": "com.android.server.wm.BackgroundActivityStart*"
+                }
+            ]
+        },
+        {
+            "name": "CtsOsTestCases",
+            "file_patterns": ["StorageManagerService\\.java"],
+            "options": [
+                {
+                    "include-filter": "android.os.storage.cts.StorageManagerTest"
                 }
             ]
         }

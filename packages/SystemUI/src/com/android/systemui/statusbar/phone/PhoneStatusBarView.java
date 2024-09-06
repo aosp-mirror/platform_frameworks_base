@@ -84,10 +84,12 @@ public class PhoneStatusBarView extends FrameLayout {
 
     void setHasCornerCutoutFetcher(@NonNull HasCornerCutoutFetcher cornerCutoutFetcher) {
         mHasCornerCutoutFetcher = cornerCutoutFetcher;
+        updateCutoutLocation();
     }
 
     void setInsetsFetcher(@NonNull InsetsFetcher insetsFetcher) {
         mInsetsFetcher = insetsFetcher;
+        updateSafeInsets();
     }
 
     void init(StatusBarUserChipViewModel viewModel) {

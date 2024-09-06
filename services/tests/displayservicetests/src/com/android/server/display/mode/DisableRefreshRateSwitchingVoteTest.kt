@@ -28,7 +28,7 @@ import org.junit.runner.RunWith
 class DisableRefreshRateSwitchingVoteTest {
 
     @Test
-    fun `disabled refresh rate switching is not changed`(
+    fun testDisableRefreshRateSwitch_alreadyDisabled(
             @TestParameter voteDisableSwitching: Boolean
     ) {
         val summary = createVotesSummary()
@@ -41,7 +41,7 @@ class DisableRefreshRateSwitchingVoteTest {
     }
 
     @Test
-    fun `disables refresh rate switching if requested`() {
+    fun disablesRefreshRateSwitch_notDisabled_requested() {
         val summary = createVotesSummary()
         val vote = DisableRefreshRateSwitchingVote(true)
 
@@ -51,7 +51,7 @@ class DisableRefreshRateSwitchingVoteTest {
     }
 
     @Test
-    fun `does not disable refresh rate switching if not requested`() {
+    fun doesNotDisableRefreshRateSwitch_notDisabled_notRequested() {
         val summary = createVotesSummary()
         val vote = DisableRefreshRateSwitchingVote(false)
 

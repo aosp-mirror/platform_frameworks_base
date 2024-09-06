@@ -50,12 +50,14 @@ internal fun transitionsImpl(
         impl.transitionSpecs,
         impl.transitionOverscrollSpecs,
         impl.interruptionHandler,
+        impl.defaultOverscrollProgressConverter,
     )
 }
 
 private class SceneTransitionsBuilderImpl : SceneTransitionsBuilder {
     override var defaultSwipeSpec: SpringSpec<Float> = SceneTransitions.DefaultSwipeSpec
     override var interruptionHandler: InterruptionHandler = DefaultInterruptionHandler
+    override var defaultOverscrollProgressConverter: ProgressConverter = ProgressConverter.Default
 
     val transitionSpecs = mutableListOf<TransitionSpecImpl>()
     val transitionOverscrollSpecs = mutableListOf<OverscrollSpecImpl>()
@@ -82,30 +84,30 @@ private class SceneTransitionsBuilderImpl : SceneTransitionsBuilder {
     }
 
     override fun overscroll(
-        scene: SceneKey,
+        content: ContentKey,
         orientation: Orientation,
         builder: OverscrollBuilder.() -> Unit
     ): OverscrollSpec {
         val impl = OverscrollBuilderImpl().apply(builder)
         check(impl.transformations.isNotEmpty()) {
             "This method does not allow empty transformations. " +
-                "Use overscrollDisabled($scene, $orientation) instead."
+                "Use overscrollDisabled($content, $orientation) instead."
         }
-        return overscrollSpec(scene, orientation, impl)
+        return overscrollSpec(content, orientation, impl)
     }
 
-    override fun overscrollDisabled(scene: SceneKey, orientation: Orientation): OverscrollSpec {
-        return overscrollSpec(scene, orientation, OverscrollBuilderImpl())
+    override fun overscrollDisabled(content: ContentKey, orientation: Orientation): OverscrollSpec {
+        return overscrollSpec(content, orientation, OverscrollBuilderImpl())
     }
 
     private fun overscrollSpec(
-        scene: SceneKey,
+        content: ContentKey,
         orientation: Orientation,
         impl: OverscrollBuilderImpl,
     ): OverscrollSpec {
         val spec =
             OverscrollSpecImpl(
-                scene = scene,
+                content = content,
                 orientation = orientation,
                 transformationSpec =
                     TransformationSpecImpl(
@@ -271,7 +273,7 @@ internal class TransitionBuilderImpl : BaseTransitionBuilderImpl(), TransitionBu
 }
 
 internal open class OverscrollBuilderImpl : BaseTransitionBuilderImpl(), OverscrollBuilder {
-    override var progressConverter: (Float) -> Float = { it }
+    override var progressConverter: ProgressConverter? = null
 
     override fun translate(
         matcher: ElementMatcher,

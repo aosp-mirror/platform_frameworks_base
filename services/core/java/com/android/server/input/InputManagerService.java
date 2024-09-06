@@ -26,6 +26,8 @@ import android.Manifest;
 import android.annotation.EnforcePermission;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.PermissionManuallyEnforced;
+import android.annotation.RequiresPermission;
 import android.annotation.UserIdInt;
 import android.app.ActivityManagerInternal;
 import android.bluetooth.BluetoothAdapter;
@@ -35,6 +37,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.graphics.PixelFormat;
 import android.graphics.PointF;
 import android.hardware.SensorPrivacyManager;
@@ -124,7 +127,6 @@ import com.android.server.Watchdog;
 import com.android.server.input.InputManagerInternal.LidSwitchCallback;
 import com.android.server.input.debug.FocusEventDebugView;
 import com.android.server.input.debug.TouchpadDebugViewController;
-import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.policy.WindowManagerPolicy;
 
 import libcore.io.IoUtils;
@@ -174,7 +176,7 @@ public class InputManagerService extends IInputManager.Stub
     private final InputManagerHandler mHandler;
     private DisplayManagerInternal mDisplayManagerInternal;
 
-    private InputMethodManagerInternal mInputMethodManagerInternal;
+    private PackageManagerInternal mPackageManagerInternal;
 
     private final File mDoubleTouchGestureEnableFile;
 
@@ -466,7 +468,7 @@ public class InputManagerService extends IInputManager.Stub
                 injector.getLooper());
         mTouchpadDebugViewController =
                 touchpadVisualizer() ? new TouchpadDebugViewController(mContext,
-                        injector.getLooper()) : null;
+                        injector.getLooper(), this) : null;
         mBatteryController = new BatteryController(mContext, mNative, injector.getLooper(),
                 injector.getUEventManager());
         mKeyboardBacklightController = InputFeatureFlagProvider.isKeyboardBacklightControlEnabled()
@@ -545,8 +547,7 @@ public class InputManagerService extends IInputManager.Stub
         }
 
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
-        mInputMethodManagerInternal =
-                LocalServices.getService(InputMethodManagerInternal.class);
+        mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
 
         mSettingsObserver.registerAndUpdate();
 
@@ -596,9 +597,6 @@ public class InputManagerService extends IInputManager.Stub
         mKeyRemapper.systemRunning();
         mPointerIconCache.systemRunning();
         mKeyboardGlyphManager.systemRunning();
-        if (mTouchpadDebugViewController != null) {
-            mTouchpadDebugViewController.systemRunning();
-        }
     }
 
     private void reloadDeviceAliases() {
@@ -1798,6 +1796,16 @@ public class InputManagerService extends IInputManager.Stub
         return mNative.getSensorList(deviceId);
     }
 
+    /**
+     * Retrieves the hardware properties of the touchpad for the given device ID.
+     * Returns null if the device has no touchpad hardware properties
+     * or if the device ID is invalid.
+     */
+    @Nullable
+    public TouchpadHardwareProperties getTouchpadHardwareProperties(int deviceId) {
+        return mNative.getTouchpadHardwareProperties(deviceId);
+    }
+
     @Override // Binder call
     public boolean registerSensorListener(IInputSensorEventListener listener) {
         if (DEBUG) {
@@ -2256,6 +2264,18 @@ public class InputManagerService extends IInputManager.Stub
         // Input device change can possibly change configuration, so notify window manager to update
         // its configuration.
         mWindowManagerCallbacks.notifyConfigurationChanged();
+    }
+
+    // Native callback.
+    @SuppressWarnings("unused")
+    private void notifyTouchpadHardwareState(TouchpadHardwareState hardwareStates, int deviceId) {
+        // TODO(b/286551975): sent the touchpad hardware state data here to TouchpadDebugActivity
+        Slog.d(TAG, "notifyTouchpadHardwareState: Time: "
+                + hardwareStates.getTimestamp() + ", No. Buttons: "
+                + hardwareStates.getButtonsDown() + ", No. Fingers: "
+                + hardwareStates.getFingerCount() + ", No. Touch: "
+                + hardwareStates.getTouchCount() + ", Id: "
+                + deviceId);
     }
 
     // Native callback.
@@ -2720,21 +2740,48 @@ public class InputManagerService extends IInputManager.Stub
                 lockedModifierState);
     }
 
+    /**
+     * Enforces the caller contains the necessary permission to manage key gestures.
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_KEY_GESTURES)
+    private void enforceManageKeyGesturePermission() {
+        // TODO(b/361567988): Use @EnforcePermission to enforce permission once flag guarding the
+        //  permission is rolled out
+        String systemUIPackage = mContext.getString(R.string.config_systemUi);
+        int systemUIAppId = UserHandle.getAppId(mPackageManagerInternal
+                .getPackageUid(systemUIPackage, PackageManager.MATCH_SYSTEM_ONLY,
+                        UserHandle.USER_SYSTEM));
+        if (UserHandle.getCallingAppId() == systemUIAppId) {
+            return;
+        }
+        if (mContext.checkCallingOrSelfPermission(
+                Manifest.permission.MANAGE_KEY_GESTURES) == PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+
+        String message = "Managing Key Gestures requires the following permission: "
+                + Manifest.permission.MANAGE_KEY_GESTURES;
+        throw new SecurityException(message);
+    }
+
+
     @Override
-    @EnforcePermission(Manifest.permission.MANAGE_KEY_GESTURES)
+    @PermissionManuallyEnforced
     public void registerKeyGestureEventListener(
             @NonNull IKeyGestureEventListener listener) {
-        super.registerKeyGestureEventListener_enforcePermission();
+        enforceManageKeyGesturePermission();
+
         Objects.requireNonNull(listener);
         mKeyGestureController.registerKeyGestureEventListener(listener,
                 Binder.getCallingPid());
     }
 
     @Override
-    @EnforcePermission(Manifest.permission.MANAGE_KEY_GESTURES)
+    @PermissionManuallyEnforced
     public void unregisterKeyGestureEventListener(
             @NonNull IKeyGestureEventListener listener) {
-        super.unregisterKeyGestureEventListener_enforcePermission();
+        enforceManageKeyGesturePermission();
+
         Objects.requireNonNull(listener);
         mKeyGestureController.unregisterKeyGestureEventListener(listener,
                 Binder.getCallingPid());
@@ -3314,6 +3361,13 @@ public class InputManagerService extends IInputManager.Stub
             if (properties.allDefaults()) {
                 mAdditionalDisplayInputProperties.remove(displayId);
             }
+        }
+    }
+
+    void updateTouchpadVisualizerEnabled(boolean enabled) {
+        mNative.setShouldNotifyTouchpadHardwareState(enabled);
+        if (mTouchpadDebugViewController != null) {
+            mTouchpadDebugViewController.updateTouchpadVisualizerEnabled(enabled);
         }
     }
 

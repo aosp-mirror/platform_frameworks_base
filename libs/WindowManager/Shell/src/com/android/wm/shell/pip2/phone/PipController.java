@@ -19,7 +19,7 @@ package com.android.wm.shell.pip2.phone;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
 
-import static com.android.wm.shell.sysui.ShellSharedConstants.KEY_EXTRA_SHELL_PIP;
+import static com.android.wm.shell.shared.ShellSharedConstants.KEY_EXTRA_SHELL_PIP;
 
 import android.app.ActivityManager;
 import android.app.PictureInPictureParams;
@@ -29,7 +29,6 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Bundle;
-import android.view.InsetsState;
 import android.view.SurfaceControl;
 import android.window.DisplayAreaInfo;
 import android.window.WindowContainerTransaction;
@@ -200,16 +199,7 @@ public class PipController implements ConfigurationChangeListener,
         DisplayLayout layout = new DisplayLayout(mContext, mContext.getDisplay());
         mPipDisplayLayoutState.setDisplayLayout(layout);
 
-        mDisplayController.addDisplayWindowListener(this);
         mDisplayController.addDisplayChangingController(this);
-        mDisplayInsetsController.addInsetsChangedListener(mPipDisplayLayoutState.getDisplayId(),
-                new DisplayInsetsController.OnInsetsChangedListener() {
-                    @Override
-                    public void insetsChanged(InsetsState insetsState) {
-                        setDisplayLayout(mDisplayController
-                                        .getDisplayLayout(mPipDisplayLayoutState.getDisplayId()));
-                    }
-                });
         mDisplayInsetsController.addInsetsChangedListener(mPipDisplayLayoutState.getDisplayId(),
                 new ImeListener(mDisplayController, mPipDisplayLayoutState.getDisplayId()) {
                     @Override
@@ -285,34 +275,37 @@ public class PipController implements ConfigurationChangeListener,
         setDisplayLayout(mDisplayController.getDisplayLayout(displayId));
     }
 
-    @Override
-    public void onDisplayConfigurationChanged(int displayId, Configuration newConfig) {
-        if (displayId != mPipDisplayLayoutState.getDisplayId()) {
-            return;
-        }
-        setDisplayLayout(mDisplayController.getDisplayLayout(displayId));
-    }
-
     /**
      * A callback for any observed transition that contains a display change in its
-     * {@link android.window.TransitionRequestInfo} with a non-zero rotation delta.
+     * {@link android.window.TransitionRequestInfo},
      */
     @Override
     public void onDisplayChange(int displayId, int fromRotation, int toRotation,
             @Nullable DisplayAreaInfo newDisplayAreaInfo, WindowContainerTransaction t) {
+        if (displayId != mPipDisplayLayoutState.getDisplayId()) {
+            return;
+        }
+        final float snapFraction = mPipBoundsAlgorithm.getSnapFraction(mPipBoundsState.getBounds());
+        final float boundsScale = mPipBoundsState.getBoundsScale();
+
+        // Update the display layout caches even if we are not in PiP.
+        setDisplayLayout(mDisplayController.getDisplayLayout(displayId));
+
         if (!mPipTransitionState.isInPip()) {
             return;
         }
 
-        // Calculate the snap fraction pre-rotation.
-        float snapFraction = mPipBoundsAlgorithm.getSnapFraction(mPipBoundsState.getBounds());
+        mPipTouchHandler.updateMinMaxSize(mPipBoundsState.getAspectRatio());
 
-        // Update the caches to reflect the new display layout and movement bounds.
-        mPipDisplayLayoutState.rotateTo(toRotation);
+        // Update the caches to reflect the new display layout in the movement bounds;
+        // temporarily update bounds to be at the top left for the movement bounds calculation.
+        Rect toBounds = new Rect(0, 0,
+                (int) Math.ceil(mPipBoundsState.getMaxSize().x * boundsScale),
+                (int) Math.ceil(mPipBoundsState.getMaxSize().y * boundsScale));
+        mPipBoundsState.setBounds(toBounds);
         mPipTouchHandler.updateMovementBounds();
 
-        // The policy is to keep PiP width, height and snap fraction invariant.
-        Rect toBounds = mPipBoundsState.getBounds();
+        // The policy is to keep PiP snap fraction invariant.
         mPipBoundsAlgorithm.applySnapFraction(toBounds, snapFraction);
         mPipBoundsState.setBounds(toBounds);
         t.setBounds(mPipTransitionState.mPipTaskToken, toBounds);

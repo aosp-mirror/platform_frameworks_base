@@ -104,23 +104,17 @@
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"I-<xliff:g id="APPNAME">%1$s</xliff:g> namanye ama-app avuliwe athole lesi sithombe-skrini."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Engeza kunothi"</string>
     <string name="backlinks_include_link" msgid="4562093591148248158">"Faka ilinki"</string>
+    <string name="backlinks_duplicate_label_format" msgid="558445128952827926">"<xliff:g id="APPNAME">%1$s</xliff:g> <xliff:g id="FREQUENCYCOUNT">(%2$d)</xliff:g>"</string>
     <string name="screenrecord_title" msgid="4257171601439507792">"Okokuqopha iskrini"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Icubungula okokuqopha iskrini"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Isaziso esiqhubekayo seseshini yokurekhoda isikrini"</string>
-    <!-- no translation found for screenrecord_permission_dialog_title (7415261783188749730) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_option_text_single_app (1996450687814647583) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen (2794896384693120020) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_entire_screen (1321758636709366068) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_single_app (3738199712880063924) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_continue_entire_screen (5557974446773486600) -->
-    <skip />
-    <!-- no translation found for screenrecord_app_selector_title (3854492366333954736) -->
-    <skip />
+    <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"Rekhoda isikrini sakho?"</string>
+    <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Rekhoda i-app eyodwa"</string>
+    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"Rekhoda sonke isikrini"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Uma urekhoda sonke isikrini sakho, noma yini evela esikrinini iyarekhodwa. Ngakho-ke qaphela ngezinto ezifana namaphasiwedi, imininingwane yenkokhelo, imilayezo, izithombe, nomsindo nevidiyo."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Uma urekhoda i-app, noma yini evezwa noma edlala kuleyo app iyarekhodwa. Ngakho-ke qaphela ngezinto ezifana namaphasiwedi, imininingwane yenkokhelo, imilayezo, izithombe, nomsindo nevidiyo."</string>
+    <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Rekhoda isikrini"</string>
+    <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"Khetha i-app yokurekhoda"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Rekhoda umsindo"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Umsindo wedivayisi"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Umsindo ophuma kudivayisi yakho, njengomculo, amakholi, namathoni okukhala"</string>
@@ -298,7 +292,8 @@
     <string name="start_dreams" msgid="9131802557946276718">"Isigciniskrini"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"I-Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Ungaphazamisi"</string>
-    <string name="quick_settings_modes_label" msgid="5407025818652750501">"Amamodi okubalulekile"</string>
+    <!-- no translation found for quick_settings_modes_label (879156359479504244) -->
+    <skip />
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"I-Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Awekho amadivayisi abhanqiwe atholakalayo"</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"Thepha ukuze uxhumae noma ungaxhumi idivaysi"</string>
@@ -307,6 +302,7 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Sebenzisa iBluetooth"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Ixhunyiwe"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"Ukwabelana Ngokuqoshiwe"</string>
+    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="3227408556754456024">"Thepha ukuze ushintshe noma wabelane ngokulalelwayo"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Ilondoloziwe"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"nqamula"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"yenza kusebenze"</string>
@@ -315,6 +311,7 @@
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"IBluetooth izovuleka kusasa ekuseni"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Yabelana ngomsindo"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Yabelana ngomsindo"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"faka amasethingi okwabelana ngokuqoshiwe"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> ibhethri"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Umsindo"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Ihedisethi"</string>
@@ -408,7 +405,7 @@
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Chofoza ukuze ubhangqe idivayisi entsha"</string>
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"Ayikwazanga ukubuyekeza ukusetha ngaphambilini"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"Ukusetha ngaphambilini"</string>
-    <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"Amagama-ncazo abukhoma"</string>
+    <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"Okushuthwe Bukhoma"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Vulela imakrofoni yedivayisi?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Vulela ikhamera yedivayisi?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Vulela ikhamera yedivayisi nemakrofoni?"</string>
@@ -437,10 +434,12 @@
     <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"Vula Amasethingi"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Enye idivayisi"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Guqula ukubuka konke"</string>
-    <string name="zen_modes_dialog_title" msgid="4159138230418567383">"Amamodi okubalulekile"</string>
+    <!-- no translation found for zen_modes_dialog_title (8854640808100096934) -->
+    <skip />
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"Kwenziwe"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"Amasethingi"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"Vuliwe"</string>
+    <string name="zen_mode_on_with_details" msgid="7416143430557895497">"Vuliwe • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"Valiwe"</string>
     <string name="zen_mode_set_up" msgid="7457957033034460064">"Setha"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"Phatha kumasethingi"</string>
@@ -535,25 +534,26 @@
     <string name="media_projection_dialog_warning" msgid="1303664408388363598">"I-<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> izothola ukufinyelela kulo lonke ulwazi olubonakalayo esikrinini sakho noma idlalwe kusuka kudivayisi yakho ngenkathi urekhoda noma usakaza. Lokhu kubandakanya ulwazi olufana namaphasiwedi, imininingwane yenkokhelo, izithombe, imilayezo, nomsindo owudlalayo."</string>
     <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"Qala ukurekhoda noma ukusakaza?"</string>
     <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"Isevisi enikezela ngalo msebenzi izothola ukufinyelela kulo lonke ulwazi olubonakalayo esikrinini sakho noma oludlalwa kusuka kudivayisi yakho ngenkathi urekhoda noma usakaza. Lokhu kubandakanya ulwazi olufana namaphasiwedi, imininingwane yenkokhelo, izithombe, imilayezo, nomsindo owudlalayo."</string>
-    <!-- no translation found for screen_share_generic_app_selector_title (8331515850599218288) -->
-    <skip />
+    <string name="screen_share_generic_app_selector_title" msgid="8331515850599218288">"Yabelana noma urekhode i-app"</string>
     <string name="media_projection_entry_app_permission_dialog_title" msgid="4613857256721708062">"Yabelana ngesikrini sakho ne-<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
-    <string name="media_projection_entry_app_permission_dialog_option_text_single_app" msgid="6314402084788062644">"Yabelana nge-app eyodwa"</string>
-    <string name="media_projection_entry_app_permission_dialog_option_text_entire_screen" msgid="7381488112332599632">"Yabelana ngesikrini sonke"</string>
+    <string name="screen_share_permission_dialog_option_single_app" msgid="2974054871681567314">"Yabelana nge-app eyodwa"</string>
+    <!-- no translation found for media_projection_entry_app_permission_dialog_option_text_single_app (2308901434964846084) -->
+    <skip />
+    <string name="screen_share_permission_dialog_option_entire_screen" msgid="4493174362775038997">"Yabelana ngesikrini sonke"</string>
+    <!-- no translation found for media_projection_entry_app_permission_dialog_option_text_entire_screen (5100078808078139706) -->
+    <skip />
     <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="5504288438067851086">"Uma wabelana ngesikrini sakho sonke, noma yini esesikrinini sakho ibonakala ku-<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>. Ngakho-ke qaphela ngezinto ezifana namaphasiwedi, imininingwane yenkokhelo, imilayezo, izithombe, nomsindo nevidiyo."</string>
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="7094417930857938876">"Uma wabelana nge-app, noma yini eboniswayo noma edlalwayo kuleyo app ibonakala ku-<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>. Ngakho-ke qaphela ngezinto ezifana namaphasiwedi, imininingwane yenkokhelo, imilayezo, izithombe, nomsindo nevidiyo."</string>
     <string name="media_projection_entry_app_permission_dialog_continue_entire_screen" msgid="1850848182344377579">"Yabelana ngesikrini"</string>
     <string name="media_projection_entry_app_permission_dialog_single_app_disabled" msgid="8999903044874669995">"<xliff:g id="APP_NAME">%1$s</xliff:g> ivale le nketho"</string>
-    <!-- no translation found for media_projection_entry_share_app_selector_title (1419515119767501822) -->
-    <skip />
+    <string name="media_projection_entry_share_app_selector_title" msgid="1419515119767501822">"Khetha i-app yokwabelana"</string>
     <string name="media_projection_entry_cast_permission_dialog_title" msgid="752756942658159416">"Sakaza isikrini sakho?"</string>
     <string name="media_projection_entry_cast_permission_dialog_option_text_single_app" msgid="6073353940838561981">"Sakaza i-app eyodwa"</string>
     <string name="media_projection_entry_cast_permission_dialog_option_text_entire_screen" msgid="8389508187954155307">"Sakaza isikrini sonke"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="4040447861037324017">"Uma usakaza isikrini sakho sonke, noma yini esesikrinini sakho iyabonakala. Ngakho-ke qaphela ngezinto ezifana namaphasiwedi, imininingwane yokukhokha, imilayezo, izithombe, nomsindo nevidiyo."</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="7487834861348460736">"Uma usakaza i-app, noma yini ekhonjiswe noma edlalwe kuleyo-app iyabonakala. Ngakho-ke qaphela ngezinto ezifana namaphasiwedi, imininingwane yokukhokha, imilayezo, izithombe, nomsindo nevidiyo."</string>
     <string name="media_projection_entry_cast_permission_dialog_continue_entire_screen" msgid="3261124185304676483">"Isikrini sokusakaza"</string>
-    <!-- no translation found for media_projection_entry_cast_app_selector_title (6323062146661922387) -->
-    <skip />
+    <string name="media_projection_entry_cast_app_selector_title" msgid="6323062146661922387">"Khetha i-app yokusakaza"</string>
     <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"Qala ukwabelana?"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Uma wabelana, ukurekhoda, noma ukusakaza, i-Android inokufinyelela kunoma yini ebonakala esikrinini sakho noma okudlalwayo kudivayisi yakho. Ngakho-ke qaphela ngezinto ezifana namaphasiwedi, imininingwane yokukhokha, imilayezo, izithombe, nomsindo nevidiyo."</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Uma wabelana, ukurekhoda, noma ukusakaza ku-app, i-Android inokufinyelela kunoma yini eboniswayo noma edlalwa kuleyo app. Ngakho-ke qaphela ngezinto ezfana namaphasiwedi, imininingwane yokukhokha, imilayezo, izithombe, nomsindo nevidiyo."</string>
@@ -726,6 +726,7 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Isethelayithi, uxhumano oluhle"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Isethelayithi, uxhumano luyatholakala"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"Isethelayithi yokuxhumana ngezimo eziphuthumayo"</string>
+    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"Ikholi ephuthumayo noma i-SOS"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Iphrofayela yomsebenzi"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Kuyajabulisa kwabanye kodwa hhayi bonke"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Isishuni se-UI sesistimu sikunika izindlela ezingeziwe zokuhlobisa nokwenza ngezifiso isixhumanisi sokubona se-Android. Lezi zici zesilingo zingashintsha, zephuke, noma zinyamalale ekukhishweni kwangakusasa. Qhubeka ngokuqaphela."</string>
@@ -1392,30 +1393,34 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Goqa isithonjana"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Nweba isithonjana"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"noma"</string>
+    <!-- no translation found for launch_keyboard_tutorial_notification_title (8849933155160522519) -->
+    <skip />
+    <!-- no translation found for launch_keyboard_tutorial_notification_content (2880339951512757918) -->
+    <skip />
+    <!-- no translation found for launch_touchpad_tutorial_notification_title (2243780062772196901) -->
+    <skip />
+    <!-- no translation found for launch_touchpad_tutorial_notification_content (7931085031240753226) -->
+    <skip />
+    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_title (1940023776496198762) -->
+    <skip />
+    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_content (1780725168171929365) -->
+    <skip />
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Ukunyakazisa umzimba kwangemuva"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Ukunyakazisa umzimba kwasekhaya"</string>
     <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"Inkinobho yokufinyelela"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Kwenziwe"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Buyela emuva"</string>
     <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"Ukuze ubuyele emuva, swayiphela kwesokunxele noma kwesokudla usebenzisa iminwe emithathu noma yikuphi ephedini yokuthinta.\n\nUngasebenzisa nesinqamuleli sekhibhodi Isenzo + ESC kulokhu."</string>
-    <!-- no translation found for touchpad_back_gesture_success_title (7240576648330612171) -->
-    <skip />
-    <!-- no translation found for touchpad_back_gesture_success_body (2324724953720741719) -->
-    <skip />
+    <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"Umsebenzi omuhle!"</string>
+    <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Ukuqedile ukuthinta kokubuyela emuva."</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Iya ekhasini lokuqala"</string>
     <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"Ukuze uye esikrinini sakho sasekhaya nganoma isiphi isikhathi, swayipha uye phezulu ngeminwe emithathu usuka phansi esikrinini sakho."</string>
-    <!-- no translation found for touchpad_home_gesture_success_title (3778407003948209795) -->
-    <skip />
-    <!-- no translation found for touchpad_home_gesture_success_body (2404031094918807067) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_title (2659466586996495447) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_guidance (5718948664616999196) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_success_title (466467860120112933) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_success_body (7201991081652850430) -->
-    <skip />
+    <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"Kuhle!"</string>
+    <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"Ukuqedile ukuthinta kokuya ekhaya."</string>
+    <string name="tutorial_action_key_title" msgid="2659466586996495447">"Inkinobho yokufinyelela"</string>
+    <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"Ukuze ufinyelele ama-app wakho, cindezela inkinobho yokufinyelela kukhibhodi yakho."</string>
+    <string name="tutorial_action_key_success_title" msgid="466467860120112933">"Halala!"</string>
+    <string name="tutorial_action_key_success_body" msgid="7201991081652850430">"Uqedele ukuthinta inkinobho yokufinyelela.\n\nIsenzo +/ sibonisa zonke izinqamuleli onazo."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Ilambu lekhibhodi"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Ileveli %1$d ka-%2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Izilawuli Zasekhaya"</string>

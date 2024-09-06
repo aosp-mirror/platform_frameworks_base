@@ -104,23 +104,17 @@
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"„<xliff:g id="APPNAME">%1$s</xliff:g>“ ir kitos atidarytos programos aptiko šią ekrano kopiją."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Pridėti prie užrašo"</string>
     <string name="backlinks_include_link" msgid="4562093591148248158">"Įtraukti nuorodą"</string>
+    <string name="backlinks_duplicate_label_format" msgid="558445128952827926">"„<xliff:g id="APPNAME">%1$s</xliff:g>“ <xliff:g id="FREQUENCYCOUNT">(%2$d)</xliff:g>"</string>
     <string name="screenrecord_title" msgid="4257171601439507792">"Ekrano vaizdo įrašytuvas"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Apdorojam. ekrano vaizdo įraš."</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Šiuo metu rodomas ekrano įrašymo sesijos pranešimas"</string>
-    <!-- no translation found for screenrecord_permission_dialog_title (7415261783188749730) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_option_text_single_app (1996450687814647583) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen (2794896384693120020) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_entire_screen (1321758636709366068) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_single_app (3738199712880063924) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_continue_entire_screen (5557974446773486600) -->
-    <skip />
-    <!-- no translation found for screenrecord_app_selector_title (3854492366333954736) -->
-    <skip />
+    <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"Įrašyti ekraną?"</string>
+    <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Įrašyti vieną programą"</string>
+    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"Įrašyti visą ekraną"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Kai įrašote visą ekraną, įrašomas visas ekrane rodomas turinys. Todėl būkite atsargūs naudodami slaptažodžius, išsamią mokėjimo metodo informaciją, pranešimus, nuotraukas ir garso bei vaizdo įrašus."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Kai įrašote programą, įrašomas visas toje programoje rodomas ar leidžiamas turinys. Todėl būkite atsargūs naudodami slaptažodžius, išsamią mokėjimo metodo informaciją, pranešimus, nuotraukas ir garso bei vaizdo įrašus."</string>
+    <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Įrašyti ekraną"</string>
+    <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"Norimos įrašyti programos pasirinkimas"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Įrašyti garsą"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Įrenginio garsas"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Garsas iš jūsų įrenginio, pvz., muzika, skambučiai ir skambėjimo tonai"</string>
@@ -298,7 +292,8 @@
     <string name="start_dreams" msgid="9131802557946276718">"Ekrano užsklanda"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"Eternetas"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Netrukdymo režimas"</string>
-    <string name="quick_settings_modes_label" msgid="5407025818652750501">"Prioriteto režimai"</string>
+    <!-- no translation found for quick_settings_modes_label (879156359479504244) -->
+    <skip />
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Nėra pasiekiamų susietų įrenginių"</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"Palieskite, kad prijungtumėte ar atjungtumėte įrenginį"</string>
@@ -307,6 +302,7 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"„Bluetooth“ naudojimas"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Prisijungta"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"Garso įrašų bendrinimas"</string>
+    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="3227408556754456024">"Palieskite, jei norite perjungti arba bendrinti garsą"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Išsaugota"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"atjungti"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"suaktyvinti"</string>
@@ -315,6 +311,7 @@
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"„Bluetooth“ ryšys bus įjungtas rytoj ryte"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Bendrinti garsą"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Bendrinamas garsas"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"įvesti garso įrašų bendrinimo nustatymus"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Akumuliatorius: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Garsas"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Virtualiosios realybės įrenginys"</string>
@@ -437,10 +434,12 @@
     <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"Atidaryti nustatymus"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Kitas įrenginys"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Perjungti apžvalgą"</string>
-    <string name="zen_modes_dialog_title" msgid="4159138230418567383">"Prioriteto režimai"</string>
+    <!-- no translation found for zen_modes_dialog_title (8854640808100096934) -->
+    <skip />
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"Atlikta"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"Nustatymai"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"Įjungta"</string>
+    <string name="zen_mode_on_with_details" msgid="7416143430557895497">"Įjungta • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"Išjungta"</string>
     <string name="zen_mode_set_up" msgid="7457957033034460064">"Nustatyti"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"Tvarkyti skiltyje „Nustatymai“"</string>
@@ -535,25 +534,26 @@
     <string name="media_projection_dialog_warning" msgid="1303664408388363598">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> galės pasiekti visą informaciją, matomą ekrane ir leidžiamą iš įrenginio įrašant ar perduodant turinį. Tai apima įvairią informaciją, pvz., slaptažodžius, išsamią mokėjimo informaciją, nuotraukas, pranešimus ir leidžiamus garso įrašus."</string>
     <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"Pradėti įrašyti ar perduoti turinį?"</string>
     <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"Šią funkciją teikianti paslauga galės pasiekti visą informaciją, matomą ekrane ir leidžiamą iš įrenginio įrašant ar perduodant turinį. Tai apima įvairią informaciją, pvz., slaptažodžius, išsamią mokėjimo informaciją, nuotraukas, pranešimus ir leidžiamus garso įrašus."</string>
-    <!-- no translation found for screen_share_generic_app_selector_title (8331515850599218288) -->
-    <skip />
+    <string name="screen_share_generic_app_selector_title" msgid="8331515850599218288">"Programos bendrinimas ar įrašymas"</string>
     <string name="media_projection_entry_app_permission_dialog_title" msgid="4613857256721708062">"Bendrinti ekraną su „<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>“?"</string>
-    <string name="media_projection_entry_app_permission_dialog_option_text_single_app" msgid="6314402084788062644">"Bendrinti vieną programą"</string>
-    <string name="media_projection_entry_app_permission_dialog_option_text_entire_screen" msgid="7381488112332599632">"Bendrinti visą ekraną"</string>
+    <string name="screen_share_permission_dialog_option_single_app" msgid="2974054871681567314">"Bendrinti vieną programą"</string>
+    <!-- no translation found for media_projection_entry_app_permission_dialog_option_text_single_app (2308901434964846084) -->
+    <skip />
+    <string name="screen_share_permission_dialog_option_entire_screen" msgid="4493174362775038997">"Bendrinti visą ekraną"</string>
+    <!-- no translation found for media_projection_entry_app_permission_dialog_option_text_entire_screen (5100078808078139706) -->
+    <skip />
     <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="5504288438067851086">"Kai bendrinate visą ekraną, „<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>“ matomas visas ekrano turinys. Todėl būkite atsargūs naudodami slaptažodžius, išsamią mokėjimo metodo informaciją, pranešimus, nuotraukas ir garso bei vaizdo įrašus."</string>
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="7094417930857938876">"Kai bendrinate programą, „<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>“ matomas visas toje programoje rodomas ar leidžiamas turinys. Todėl būkite atsargūs naudodami slaptažodžius, išsamią mokėjimo metodo informaciją, pranešimus, nuotraukas ir garso bei vaizdo įrašus."</string>
     <string name="media_projection_entry_app_permission_dialog_continue_entire_screen" msgid="1850848182344377579">"Bendrinti ekraną"</string>
     <string name="media_projection_entry_app_permission_dialog_single_app_disabled" msgid="8999903044874669995">"Programoje „<xliff:g id="APP_NAME">%1$s</xliff:g>“ ši parinktis išjungta"</string>
-    <!-- no translation found for media_projection_entry_share_app_selector_title (1419515119767501822) -->
-    <skip />
+    <string name="media_projection_entry_share_app_selector_title" msgid="1419515119767501822">"Norimos bendrinti programos pasirinkimas"</string>
     <string name="media_projection_entry_cast_permission_dialog_title" msgid="752756942658159416">"Perduoti ekraną?"</string>
     <string name="media_projection_entry_cast_permission_dialog_option_text_single_app" msgid="6073353940838561981">"Perduoti vieną programą"</string>
     <string name="media_projection_entry_cast_permission_dialog_option_text_entire_screen" msgid="8389508187954155307">"Perduoti visą ekraną"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="4040447861037324017">"Kai perduodate visą ekraną, matomas visas ekrano turinys. Todėl būkite atsargūs naudodami slaptažodžius, išsamią mokėjimo metodo informaciją, pranešimus, nuotraukas ir garso bei vaizdo įrašus."</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="7487834861348460736">"Kai perduodate programą, matomas visas toje programoje rodomas ar leidžiamas turinys. Todėl būkite atsargūs naudodami slaptažodžius, išsamią mokėjimo metodo informaciją, pranešimus, nuotraukas ir garso bei vaizdo įrašus."</string>
     <string name="media_projection_entry_cast_permission_dialog_continue_entire_screen" msgid="3261124185304676483">"Perduoti ekraną"</string>
-    <!-- no translation found for media_projection_entry_cast_app_selector_title (6323062146661922387) -->
-    <skip />
+    <string name="media_projection_entry_cast_app_selector_title" msgid="6323062146661922387">"Norimos perduoti programos pasirinkimas"</string>
     <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"Pradėti bendrinti?"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Kai bendrinate, įrašote ar perduodate turinį, „Android“ gali pasiekti viską, kas rodoma ekrane ar leidžiama įrenginyje. Todėl būkite atsargūs naudodami slaptažodžius, išsamią mokėjimo metodo informaciją, pranešimus, nuotraukas ir garso bei vaizdo įrašus."</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Kai bendrinate, įrašote ar perduodate programą, „Android“ gali pasiekti viską, kas rodoma ar leidžiama programoje. Todėl būkite atsargūs naudodami slaptažodžius, išsamią mokėjimo metodo informaciją, pranešimus, nuotraukas ir garso bei vaizdo įrašus."</string>
@@ -726,6 +726,7 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Palydovas, geras ryšys"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Palydovas, pasiekiamas ryšys"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"Prisijungimas prie palydovo kritiniu atveju"</string>
+    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"Skambučiai pagalbos numeriu arba pagalbos iškvietimas kritiniu atveju"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Darbo profilis"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Smagu, bet ne visada"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Sistemos naudotojo sąsajos derinimo priemonė suteikia papildomų galimybių pagerinti ir tinkinti „Android“ naudotojo sąsają. Šios eksperimentinės funkcijos gali pasikeisti, nutrūkti ar išnykti iš būsimų laidų. Tęskite atsargiai."</string>
@@ -1392,30 +1393,34 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Sutraukimo piktograma"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Išskleidimo piktograma"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"arba"</string>
+    <!-- no translation found for launch_keyboard_tutorial_notification_title (8849933155160522519) -->
+    <skip />
+    <!-- no translation found for launch_keyboard_tutorial_notification_content (2880339951512757918) -->
+    <skip />
+    <!-- no translation found for launch_touchpad_tutorial_notification_title (2243780062772196901) -->
+    <skip />
+    <!-- no translation found for launch_touchpad_tutorial_notification_content (7931085031240753226) -->
+    <skip />
+    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_title (1940023776496198762) -->
+    <skip />
+    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_content (1780725168171929365) -->
+    <skip />
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Grįžimo atgal gestas"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Pagrindinio ekrano gestas"</string>
     <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"Veiksmų klavišas"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Atlikta"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Grįžti"</string>
     <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"Jei norite grįžti, perbraukite kairėn arba dešinėn trimis pirštais bet kurioje jutiklinės dalies vietoje.\n\nTaip pat galite naudoti šį spartųjį klavišą: veiksmų klavišas + klavišas „Esc“."</string>
-    <!-- no translation found for touchpad_back_gesture_success_title (7240576648330612171) -->
-    <skip />
-    <!-- no translation found for touchpad_back_gesture_success_body (2324724953720741719) -->
-    <skip />
+    <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"Puiku!"</string>
+    <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Atlikote grįžimo atgal gestą."</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Eikite į pagrindinį ekraną"</string>
     <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"Jei norite bet kada pasiekti pagrindinį ekraną, perbraukite aukštyn trim pirštais iš ekrano apačios."</string>
-    <!-- no translation found for touchpad_home_gesture_success_title (3778407003948209795) -->
-    <skip />
-    <!-- no translation found for touchpad_home_gesture_success_body (2404031094918807067) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_title (2659466586996495447) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_guidance (5718948664616999196) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_success_title (466467860120112933) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_success_body (7201991081652850430) -->
-    <skip />
+    <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"Šaunu!"</string>
+    <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"Atlikote perėjimo į pagrindinį ekraną gestą."</string>
+    <string name="tutorial_action_key_title" msgid="2659466586996495447">"Veiksmų klavišas"</string>
+    <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"Jei norite pasiekti programas, paspauskite klaviatūros veiksmų klavišą."</string>
+    <string name="tutorial_action_key_success_title" msgid="466467860120112933">"Sveikiname!"</string>
+    <string name="tutorial_action_key_success_body" msgid="7201991081652850430">"Atlikote veiksmų klavišo gestą.\n\nVeiksmas + / rodo visus pasiekiamus sparčiuosius klavišus."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Klaviatūros foninis apšvietimas"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%1$d lygis iš %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Namų sistemos valdymas"</string>

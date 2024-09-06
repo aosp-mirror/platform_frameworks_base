@@ -63,6 +63,7 @@ import com.android.systemui.keyguard.domain.interactor.StartKeyguardTransitionMo
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancesMetricsLogger;
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancesMetricsLoggerImpl;
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransitionModule;
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardQuickAffordancesCombinedViewModelModule;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.process.ProcessWrapper;
@@ -111,6 +112,7 @@ import java.util.concurrent.Executor;
             DeviceEntryIconTransitionModule.class,
             FalsingModule.class,
             KeyguardDataQuickAffordanceModule.class,
+            KeyguardQuickAffordancesCombinedViewModelModule.class,
             KeyguardRepositoryModule.class,
             DeviceEntryFaceAuthModule.class,
             KeyguardDisplayModule.class,

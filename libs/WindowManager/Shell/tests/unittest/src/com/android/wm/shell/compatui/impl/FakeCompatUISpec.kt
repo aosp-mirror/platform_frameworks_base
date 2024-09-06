@@ -23,10 +23,13 @@ import com.android.wm.shell.compatui.api.CompatUISpec
  */
 class FakeCompatUISpec(
     val name: String,
-    val lifecycle: FakeCompatUILifecyclePredicates
+    val lifecycle: FakeCompatUILifecyclePredicates = FakeCompatUILifecyclePredicates(),
+    val layout: FakeCompatUILayout
 ) {
     fun getSpec(): CompatUISpec = CompatUISpec(
         name = name,
-        lifecycle = lifecycle.getLifecycle()
+        log = {str -> android.util.Log.d("COMPAT_UI_TEST", str)},
+        lifecycle = lifecycle.getLifecycle(),
+        layout = layout.getLayout()
     )
 }

@@ -51,7 +51,7 @@ class TrustedOverlayHost {
 
     void requireOverlaySurfaceControl() {
         if (mSurfaceControl == null) {
-            final SurfaceControl.Builder b = mWmService.makeSurfaceBuilder(null)
+            final SurfaceControl.Builder b = mWmService.makeSurfaceBuilder()
                 .setContainerLayer()
                 .setHidden(true)
                 .setCallsite("TrustedOverlayHost.requireOverlaySurfaceControl")
@@ -112,11 +112,16 @@ class TrustedOverlayHost {
         final SurfaceControl.Transaction t = mWmService.mTransactionFactory.get();
 
         for (int i = mOverlays.size() - 1; i >= 0; i--) {
-           SurfaceControlViewHost.SurfacePackage l = mOverlays.get(i);
-           if (l.getSurfaceControl().isSameSurface(p.getSurfaceControl())) {
-               mOverlays.remove(i);
-               t.reparent(l.getSurfaceControl(), null);
-               l.release();
+            SurfaceControlViewHost.SurfacePackage l = mOverlays.get(i);
+            SurfaceControl overlaySurfaceControl = l.getSurfaceControl();
+            if (overlaySurfaceControl == null) {
+                // Remove the overlay if the surfacepackage was released. Ownership
+                // is shared, so this may happen.
+                mOverlays.remove(i);
+            } else if (overlaySurfaceControl.isSameSurface(p.getSurfaceControl())) {
+                mOverlays.remove(i);
+                t.reparent(l.getSurfaceControl(), null);
+                l.release();
            }
         }
         t.apply();

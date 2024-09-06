@@ -41,7 +41,8 @@ constructor(
     override suspend fun handleInput(input: QSTileInput<ModesTileModel>) {
         with(input) {
             when (action) {
-                is QSTileUserAction.Click -> {
+                is QSTileUserAction.Click,
+                is QSTileUserAction.ToggleClick -> {
                     handleClick(action.expandable)
                 }
                 is QSTileUserAction.LongClick -> {

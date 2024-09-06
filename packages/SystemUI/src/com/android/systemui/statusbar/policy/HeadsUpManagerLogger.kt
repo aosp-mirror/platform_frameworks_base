@@ -293,6 +293,14 @@ constructor(@NotificationHeadsUpLog private val buffer: LogBuffer) {
             { "has pinned notification changed to $bool1" }
         )
     }
+
+    fun logRemoveEntryAfterExpand(entry: NotificationEntry) {
+        buffer.log(TAG, VERBOSE, {
+            str1 = entry.logKey
+        }, {
+            "remove entry after expand: $str1"
+        })
+    }
 }
 
 private const val TAG = "HeadsUpManager"

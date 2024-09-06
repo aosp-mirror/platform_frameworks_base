@@ -131,8 +131,8 @@ constructor(
     }
 
     override fun secondaryClick(expandable: Expandable?) {
-        if (isActionSupported(QSTileState.UserAction.CLICK)) {
-            qsTileViewModel.onActionPerformed(QSTileUserAction.Click(expandable))
+        if (isActionSupported(QSTileState.UserAction.TOGGLE_CLICK)) {
+            qsTileViewModel.onActionPerformed(QSTileUserAction.ToggleClick(expandable))
         }
     }
 
@@ -184,8 +184,7 @@ constructor(
         }
     }
 
-    override fun isListening(): Boolean =
-        listeningClients.isNotEmpty()
+    override fun isListening(): Boolean = listeningClients.isNotEmpty()
 
     override fun setDetailListening(show: Boolean) {
         // do nothing like QSTileImpl
@@ -238,6 +237,8 @@ constructor(
                 secondaryLabel = viewModelState.secondaryLabel
                 handlesLongClick =
                     viewModelState.supportedActions.contains(QSTileState.UserAction.LONG_CLICK)
+                handlesSecondaryClick =
+                    viewModelState.supportedActions.contains(QSTileState.UserAction.TOGGLE_CLICK)
 
                 icon =
                     when (val stateIcon = viewModelState.icon()) {

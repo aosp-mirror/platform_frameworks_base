@@ -29,6 +29,7 @@ import android.view.ViewGroup;
 import androidx.dynamicanimation.animation.DynamicAnimation;
 import androidx.dynamicanimation.animation.SpringForce;
 
+import com.android.wm.shell.Flags;
 import com.android.wm.shell.R;
 import com.android.wm.shell.bubbles.Bubble;
 import com.android.wm.shell.shared.animation.PhysicsAnimator;
@@ -219,6 +220,21 @@ class BubbleBarMenuViewController {
                 }
         ));
 
+        if (Flags.enableBubbleAnything() || Flags.enableBubbleToFullscreen()) {
+            menuActions.add(new BubbleBarMenuView.MenuAction(
+                    Icon.createWithResource(resources,
+                            R.drawable.desktop_mode_ic_handle_menu_fullscreen),
+                    resources.getString(R.string.bubble_fullscreen_text),
+                    tintColor,
+                    view -> {
+                        hideMenu(true /* animated */);
+                        if (mListener != null) {
+                            mListener.onMoveToFullscreen(bubble);
+                        }
+                    }
+            ));
+        }
+
         return menuActions;
     }
 
@@ -249,5 +265,10 @@ class BubbleBarMenuViewController {
          * Dismiss bubble and remove it from the bubble stack
          */
         void onDismissBubble(Bubble bubble);
+
+        /**
+         * Move the bubble to fullscreen.
+         */
+        void onMoveToFullscreen(Bubble bubble);
     }
 }

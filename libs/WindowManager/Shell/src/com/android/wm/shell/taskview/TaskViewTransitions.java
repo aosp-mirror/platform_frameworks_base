@@ -236,6 +236,12 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
         startNextTransition();
     }
 
+    void moveTaskViewToFullscreen(@NonNull WindowContainerTransaction wct,
+            @NonNull TaskViewTaskController taskView) {
+        mPending.add(new PendingTransition(TRANSIT_CHANGE, wct, taskView, null /* cookie */));
+        startNextTransition();
+    }
+
     /** Starts a new transition to make the given {@code taskView} visible. */
     public void setTaskViewVisible(TaskViewTaskController taskView, boolean visible) {
         setTaskViewVisible(taskView, visible, false /* reorder */);

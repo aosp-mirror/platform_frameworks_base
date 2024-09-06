@@ -37,6 +37,7 @@ import androidx.lifecycle.lifecycleScope
 import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.compose.theme.PlatformTheme
 import com.android.internal.logging.UiEventLogger
+import com.android.systemui.Flags.communalEditWidgetsActivityFinishFix
 import com.android.systemui.communal.shared.log.CommunalUiEvent
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.shared.model.CommunalTransitionKeys
@@ -67,7 +68,6 @@ constructor(
     companion object {
         private const val TAG = "EditWidgetsActivity"
         private const val EXTRA_IS_PENDING_WIDGET_DRAG = "is_pending_widget_drag"
-        const val EXTRA_PRESELECTED_KEY = "preselected_key"
         const val EXTRA_OPEN_WIDGET_PICKER_ON_START = "open_widget_picker_on_start"
     }
 
@@ -75,12 +75,34 @@ constructor(
      * [ActivityController] handles closing the activity in the case it is backgrounded without
      * waiting for an activity result
      */
-    class ActivityController(activity: Activity) {
+    interface ActivityController {
+        /**
+         * Invoked when waiting for an activity result changes, either initiating such wait or
+         * finishing due to the return of a result.
+         */
+        fun onWaitingForResult(waitingForResult: Boolean) {}
+
+        /** Set the visibility of the activity under control. */
+        fun setActivityFullyVisible(fullyVisible: Boolean) {}
+    }
+
+    /**
+     * A nop ActivityController to be use when the communalEditWidgetsActivityFinishFix flag is
+     * false.
+     */
+    class NopActivityController : ActivityController
+
+    /**
+     * A functional ActivityController to be used when the communalEditWidgetsActivityFinishFix flag
+     * is true.
+     */
+    class ActivityControllerImpl(activity: Activity) : ActivityController {
         companion object {
             private const val STATE_EXTRA_IS_WAITING_FOR_RESULT = "extra_is_waiting_for_result"
         }
 
-        private var waitingForResult: Boolean = false
+        private var waitingForResult = false
+        private var activityFullyVisible = false
 
         init {
             activity.registerActivityLifecycleCallbacks(
@@ -107,10 +129,14 @@ constructor(
                     }
 
                     override fun onActivityStopped(activity: Activity) {
-                        // If we're not backgrounded due to waiting for a resul (either widget
-                        // selection
-                        // or configuration), finish activity.
-                        if (!waitingForResult) {
+                        // If we're not backgrounded due to waiting for a result (either widget
+                        // selection or configuration), and we are fully visible, then finish the
+                        // activity.
+                        if (
+                            !waitingForResult &&
+                                activityFullyVisible &&
+                                !activity.isChangingConfigurations
+                        ) {
                             activity.finish()
                         }
                     }
@@ -126,12 +152,12 @@ constructor(
             )
         }
 
-        /**
-         * Invoked when waiting for an activity result changes, either initiating such wait or
-         * finishing due to the return of a result.
-         */
-        fun onWaitingForResult(waitingForResult: Boolean) {
+        override fun onWaitingForResult(waitingForResult: Boolean) {
             this.waitingForResult = waitingForResult
+        }
+
+        override fun setActivityFullyVisible(fullyVisible: Boolean) {
+            activityFullyVisible = fullyVisible
         }
     }
 
@@ -141,7 +167,9 @@ constructor(
 
     private var shouldOpenWidgetPickerOnStart = false
 
-    private val activityController: ActivityController = ActivityController(this)
+    private val activityController: ActivityController =
+        if (communalEditWidgetsActivityFinishFix()) ActivityControllerImpl(this)
+        else NopActivityController()
 
     private val addWidgetActivityLauncher: ActivityResultLauncher<Intent> =
         registerForActivityResult(StartActivityForResult()) { result ->
@@ -158,11 +186,11 @@ constructor(
                         if (!isPendingWidgetDrag) {
                             val (componentName, user) = getWidgetExtraFromIntent(intent)
                             if (componentName != null && user != null) {
+                                // Add widget at the end.
                                 communalViewModel.onAddWidget(
                                     componentName,
                                     user,
-                                    0,
-                                    widgetConfigurator
+                                    configurator = widgetConfigurator,
                                 )
                             } else {
                                 run { Log.w(TAG, "No AppWidgetProviderInfo found in result.") }
@@ -180,19 +208,18 @@ constructor(
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         listenForTransitionAndChangeScene()
 
+        activityController.setActivityFullyVisible(false)
         communalViewModel.setEditModeOpen(true)
 
         val windowInsetsController = window.decorView.windowInsetsController
         windowInsetsController?.hide(WindowInsets.Type.systemBars())
         window.setDecorFitsSystemWindows(false)
 
-        val preselectedKey = intent.getStringExtra(EXTRA_PRESELECTED_KEY)
         shouldOpenWidgetPickerOnStart =
             intent.getBooleanExtra(EXTRA_OPEN_WIDGET_PICKER_ON_START, false)
-
-        communalViewModel.setSelectedKey(preselectedKey)
 
         setContent {
             PlatformTheme {
@@ -228,6 +255,9 @@ constructor(
                 communalViewModel.currentScene.first { it == CommunalScenes.Blank }
                 communalViewModel.setEditModeState(EditModeState.SHOWING)
 
+                // Inform the ActivityController that we are now fully visible.
+                activityController.setActivityFullyVisible(true)
+
                 // Show the widget picker, if necessary, after the edit activity has animated in.
                 // Waiting until after the activity has appeared avoids transitions issues.
                 if (shouldOpenWidgetPickerOnStart) {
@@ -240,11 +270,7 @@ constructor(
 
     private fun onOpenWidgetPicker() {
         lifecycleScope.launch {
-            communalViewModel.onOpenWidgetPicker(
-                resources,
-                packageManager,
-                addWidgetActivityLauncher
-            )
+            communalViewModel.onOpenWidgetPicker(resources, addWidgetActivityLauncher)
         }
     }
 

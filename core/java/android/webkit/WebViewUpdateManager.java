@@ -19,12 +19,14 @@ package android.webkit;
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.app.SystemServiceRegistry;
 import android.content.Context;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.RemoteException;
 
 /** @hide */
@@ -43,8 +45,11 @@ public final class WebViewUpdateManager {
      *
      * This exists for the benefit of callsites without a {@link Context}; prefer
      * {@link Context#getSystemService(Class)} otherwise.
+     *
+     * This can only be used on devices with {@link PackageManager#FEATURE_WEBVIEW}.
      */
     @SuppressLint("ManagerLookup") // service opts in to getSystemServiceWithNoContext()
+    @RequiresFeature(PackageManager.FEATURE_WEBVIEW)
     public static @Nullable WebViewUpdateManager getInstance() {
         return (WebViewUpdateManager) SystemServiceRegistry.getSystemServiceWithNoContext(
                 Context.WEBVIEW_UPDATE_SERVICE);

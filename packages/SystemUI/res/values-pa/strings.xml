@@ -104,23 +104,17 @@
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> ਅਤੇ ਹੋਰ ਖੁੱਲ੍ਹੀਆਂ ਐਪਾਂ ਨੂੰ ਇਸ ਸਕ੍ਰੀਨਸ਼ਾਟ ਦਾ ਪਤਾ ਲੱਗਿਆ ਹੈ।"</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"ਨੋਟ ਵਿੱਚ ਸ਼ਾਮਲ ਕਰੋ"</string>
     <string name="backlinks_include_link" msgid="4562093591148248158">"ਲਿੰਕ ਸ਼ਾਮਲ ਕਰੋ"</string>
+    <string name="backlinks_duplicate_label_format" msgid="558445128952827926">"<xliff:g id="APPNAME">%1$s</xliff:g> <xliff:g id="FREQUENCYCOUNT">(%2$d)</xliff:g>"</string>
     <string name="screenrecord_title" msgid="4257171601439507792">"ਸਕ੍ਰੀਨ ਰਿਕਾਰਡਰ"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"ਸਕ੍ਰੀਨ ਰਿਕਾਰਡਿੰਗ ਜਾਰੀ ਹੈ"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ਕਿਸੇ ਸਕ੍ਰੀਨ ਰਿਕਾਰਡ ਸੈਸ਼ਨ ਲਈ ਚੱਲ ਰਹੀ ਸੂਚਨਾ"</string>
-    <!-- no translation found for screenrecord_permission_dialog_title (7415261783188749730) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_option_text_single_app (1996450687814647583) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen (2794896384693120020) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_entire_screen (1321758636709366068) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_single_app (3738199712880063924) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_continue_entire_screen (5557974446773486600) -->
-    <skip />
-    <!-- no translation found for screenrecord_app_selector_title (3854492366333954736) -->
-    <skip />
+    <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"ਕੀ ਤੁਹਾਡੀ ਸਕ੍ਰੀਨ ਨੂੰ ਰਿਕਾਰਡ ਕਰਨਾ ਹੈ?"</string>
+    <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"ਇੱਕ ਐਪ ਨੂੰ ਰਿਕਾਰਡ ਕਰੋ"</string>
+    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"ਪੂਰੀ ਸਕ੍ਰੀਨ ਨੂੰ ਰਿਕਾਰਡ ਕਰੋ"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"ਜਦੋਂ ਤੁਸੀਂ ਆਪਣੀ ਪੂਰੀ ਸਕ੍ਰੀਨ ਨੂੰ ਰਿਕਾਰਡ ਕਰ ਰਹੇ ਹੁੰਦੇ ਹੋ, ਤਾਂ ਤੁਹਾਡੀ ਸਕ੍ਰੀਨ \'ਤੇ ਦਿਖਾਈ ਜਾ ਰਹੀ ਹਰ ਚੀਜ਼ ਨੂੰ ਰਿਕਾਰਡ ਕੀਤਾ ਜਾਂਦਾ ਹੈ। ਇਸ ਲਈ ਪਾਸਵਰਡਾਂ, ਭੁਗਤਾਨ ਵੇਰਵਿਆਂ, ਸੁਨੇਹਿਆਂ, ਫ਼ੋਟੋਆਂ ਅਤੇ ਨਾਲ ਹੀ ਆਡੀਓ ਅਤੇ ਵੀਡੀਓ ਵਰਗੀਆਂ ਚੀਜ਼ਾਂ ਵਾਸਤੇ ਸਾਵਧਾਨ ਰਹੋ।"</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"ਜਦੋਂ ਤੁਸੀਂ ਕਿਸੇ ਐਪ ਨੂੰ ਰਿਕਾਰਡ ਕਰ ਰਹੇ ਹੁੰਦੇ ਹੋ, ਤਾਂ ਉਸ ਐਪ ਵਿੱਚ ਦਿਖਾਈ ਜਾਂ ਚਲਾਈ ਜਾ ਰਹੀ ਹਰ ਚੀਜ਼ ਨੂੰ ਰਿਕਾਰਡ ਕੀਤਾ ਜਾਂਦਾ ਹੈ। ਇਸ ਲਈ ਪਾਸਵਰਡਾਂ, ਭੁਗਤਾਨ ਵੇਰਵਿਆਂ, ਸੁਨੇਹਿਆਂ, ਫ਼ੋਟੋਆਂ ਅਤੇ ਆਡੀਓ ਅਤੇ ਵੀਡੀਓ ਵਰਗੀਆਂ ਚੀਜ਼ਾਂ ਵਾਸਤੇ ਸਾਵਧਾਨ ਰਹੋ।"</string>
+    <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"ਸਕ੍ਰੀਨ ਰਿਕਾਰਡ ਕਰੋ"</string>
+    <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"ਰਿਕਾਰਡ ਕਰਨ ਲਈ ਐਪ ਚੁਣੋ"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"ਆਡੀਓ ਰਿਕਾਰਡ ਕਰੋ"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"ਡੀਵਾਈਸ ਆਡੀਓ"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"ਤੁਹਾਡੇ ਡੀਵਾਈਸ ਦੀ ਧੁਨੀ, ਜਿਵੇਂ ਕਿ ਸੰਗੀਤ, ਕਾਲਾਂ ਅਤੇ ਰਿੰਗਟੋਨਾਂ"</string>
@@ -298,7 +292,8 @@
     <string name="start_dreams" msgid="9131802557946276718">"ਸਕ੍ਰੀਨ ਸੇਵਰ"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"ਈਥਰਨੈਟ"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ"</string>
-    <string name="quick_settings_modes_label" msgid="5407025818652750501">"ਤਰਜੀਹ ਮੋਡ"</string>
+    <!-- no translation found for quick_settings_modes_label (879156359479504244) -->
+    <skip />
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"ਬਲੂਟੁੱਥ"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"ਕੋਈ ਜੋੜਾਬੱਧ ਕੀਤੀਆਂ ਡੀਵਾਈਸਾਂ ਉਪਲਬਧ ਨਹੀਂ"</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"ਡੀਵਾਈਸ ਨੂੰ ਕਨੈਕਟ ਜਾਂ ਡਿਸਕਨੈਕਟ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ"</string>
@@ -307,6 +302,7 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"ਬਲੂਟੁੱਥ ਵਰਤੋ"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"ਕਨੈਕਟ ਹੈ"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"ਆਡੀਓ ਸਾਂਝਾਕਰਨ"</string>
+    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="3227408556754456024">"ਆਡੀਓ ਨੂੰ ਸਵਿੱਚ ਜਾਂ ਸਾਂਝਾ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"ਰੱਖਿਅਤ ਕੀਤਾ ਗਿਆ"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"ਡਿਸਕਨੈਕਟ ਕਰੋ"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"ਕਿਰਿਆਸ਼ੀਲ ਕਰੋ"</string>
@@ -315,6 +311,7 @@
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"ਬਲੂਟੁੱਥ ਕੱਲ੍ਹ ਸਵੇਰੇ ਚਾਲੂ ਹੋ ਜਾਵੇਗਾ"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"ਆਡੀਓ ਨੂੰ ਸਾਂਝਾ ਕਰੋ"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"ਆਡੀਓ ਨੂੰ ਸਾਂਝਾ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"ਆਡੀਓ ਸਾਂਝਾਕਰਨ ਸੈਟਿੰਗਾਂ ਦਾਖਲ ਕਰੋ"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> ਬੈਟਰੀ"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"ਆਡੀਓ"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"ਹੈੱਡਸੈੱਟ"</string>
@@ -437,10 +434,12 @@
     <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"ਸੈਟਿੰਗਾਂ ਖੋਲ੍ਹੋ"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"ਹੋਰ ਡੀਵਾਈਸ"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"ਰੂਪ-ਰੇਖਾ ਨੂੰ ਟੌਗਲ ਕਰੋ"</string>
-    <string name="zen_modes_dialog_title" msgid="4159138230418567383">"ਤਰਜੀਹ ਮੋਡ"</string>
+    <!-- no translation found for zen_modes_dialog_title (8854640808100096934) -->
+    <skip />
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"ਹੋ ਗਿਆ"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"ਸੈਟਿੰਗਾਂ"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"ਚਾਲੂ"</string>
+    <string name="zen_mode_on_with_details" msgid="7416143430557895497">"<xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g> • \'ਤੇ"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"ਬੰਦ"</string>
     <string name="zen_mode_set_up" msgid="7457957033034460064">"ਸੈੱਟਅੱਪ ਕਰੋ"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਪ੍ਰਬੰਧਨ ਕਰੋ"</string>
@@ -514,7 +513,7 @@
     <string name="communal_widget_picker_description" msgid="490515450110487871">"ਕੋਈ ਵੀ ਤੁਹਾਡੀ ਲਾਕ ਸਕ੍ਰੀਨ \'ਤੇ ਵਿਜੇਟ ਦੇਖ ਸਕਦਾ ਹੈ, ਭਾਵੇਂ ਤੁਹਾਡਾ ਟੈਬਲੈੱਟ ਲਾਕ ਹੋਵੇ।"</string>
     <string name="accessibility_action_label_unselect_widget" msgid="1041811747619468698">"ਵਿਜੇਟ ਨੂੰ ਅਣਚੁਣਿਆ ਕਰੋ"</string>
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"ਲਾਕ ਸਕ੍ਰੀਨ ਵਿਜੇਟ"</string>
-    <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"ਵਿਜੇਟ ਦੀ ਵਰਤੋਂ ਕਰ ਕੇ ਐਪ ਖੋਲ੍ਹਣ ਲਈ, ਤੁਹਾਨੂੰ ਇਹ ਪੁਸ਼ਟੀ ਕਰਨ ਦੀ ਲੋੜ ਪਵੇਗੀ ਕਿ ਇਹ ਤੁਸੀਂ ਹੀ ਹੋ। ਨਾਲ ਹੀ, ਇਹ ਵੀ ਧਿਆਨ ਵਿੱਚ ਰੱਖੋ ਕਿ ਕੋਈ ਵੀ ਉਨ੍ਹਾਂ ਨੂੰ ਦੇਖ ਸਕਦਾ ਹੈ, ਭਾਵੇਂ ਤੁਹਾਡੀ ਟੈਬਲੈੱਟ ਲਾਕ ਹੋਵੇ। ਹੋ ਸਕਦਾ ਹੈ ਕਿ ਕੁਝ ਵਿਜੇਟ ਤੁਹਾਡੀ ਲਾਕ ਸਕ੍ਰੀਨ ਲਈ ਨਾ ਬਣੇ ਹੋਣ ਅਤੇ ਉਨ੍ਹਾਂ ਨੂੰ ਇੱਥੇ ਸ਼ਾਮਲ ਕਰਨਾ ਅਸੁਰੱਖਿਅਤ ਹੋਵੇ।"</string>
+    <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"ਵਿਜੇਟ ਦੀ ਵਰਤੋਂ ਕਰ ਕੇ ਐਪ ਖੋਲ੍ਹਣ ਲਈ, ਤੁਹਾਨੂੰ ਇਹ ਪੁਸ਼ਟੀ ਕਰਨ ਦੀ ਲੋੜ ਪਵੇਗੀ ਕਿ ਇਹ ਤੁਸੀਂ ਹੀ ਹੋ। ਨਾਲ ਹੀ, ਇਹ ਵੀ ਧਿਆਨ ਵਿੱਚ ਰੱਖੋ ਕਿ ਕੋਈ ਵੀ ਉਨ੍ਹਾਂ ਨੂੰ ਦੇਖ ਸਕਦਾ ਹੈ, ਭਾਵੇਂ ਤੁਹਾਡਾ ਟੈਬਲੈੱਟ ਲਾਕ ਹੋਵੇ। ਹੋ ਸਕਦਾ ਹੈ ਕਿ ਕੁਝ ਵਿਜੇਟ ਤੁਹਾਡੀ ਲਾਕ ਸਕ੍ਰੀਨ ਲਈ ਨਾ ਬਣੇ ਹੋਣ ਅਤੇ ਉਨ੍ਹਾਂ ਨੂੰ ਇੱਥੇ ਸ਼ਾਮਲ ਕਰਨਾ ਅਸੁਰੱਖਿਅਤ ਹੋਵੇ।"</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"ਸਮਝ ਲਿਆ"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"ਵਰਤੋਂਕਾਰ ਸਵਿੱਚ ਕਰੋ"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"ਪੁੱਲਡਾਊਨ ਮੀਨੂ"</string>
@@ -535,25 +534,26 @@
     <string name="media_projection_dialog_warning" msgid="1303664408388363598">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ਕੋਲ ਬਾਕੀ ਸਾਰੀ ਜਾਣਕਾਰੀ ਤੱਕ ਪਹੁੰਚ ਹੋਵੇਗੀ ਜੋ ਕਿ ਤੁਹਾਡੀ ਸਕ੍ਰੀਨ \'ਤੇ ਦਿਖਣਯੋਗ ਹੈ ਜਾਂ ਰਿਕਾਰਡਿੰਗ ਜਾਂ ਕਾਸਟ ਕਰਨ ਵੇਲੇ ਤੁਹਾਡੇ ਡੀਵਾਈਸ \'ਤੇ ਚਲਾਈ ਜਾਂਦੀ ਹੈ। ਇਸ ਵਿੱਚ ਪਾਸਵਰਡਾਂ, ਭੁਗਤਾਨ ਵੇਰਵਿਆਂ, ਫ਼ੋਟੋਆਂ, ਸੁਨੇਹਿਆਂ ਅਤੇ ਤੁਹਾਡੇ ਚਲਾਈ ਜਾਣ ਵਾਲੀ ਆਡੀਓ ਦੀ ਜਾਣਕਾਰੀ ਸ਼ਾਮਲ ਹੈ।"</string>
     <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"ਕੀ ਰਿਕਾਰਡਿੰਗ ਜਾਂ ਕਾਸਟ ਕਰਨਾ ਸ਼ੁਰੂ ਕਰਨਾ ਹੈ?"</string>
     <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"ਇਸ ਫੰਕਸ਼ਨ ਦੇ ਸੇਵਾ ਪ੍ਰਦਾਨਕ ਕੋਲ ਬਾਕੀ ਸਾਰੀ ਜਾਣਕਾਰੀ ਤੱਕ ਪਹੁੰਚ ਹੋਵੇਗੀ ਜੋ ਕਿ ਤੁਹਾਡੀ ਸਕ੍ਰੀਨ \'ਤੇ ਦਿਖਣਯੋਗ ਹੁੰਦੀ ਹੈ ਜਾਂ ਰਿਕਾਰਡਿੰਗ ਜਾਂ ਕਾਸਟ ਕਰਨ ਵੇਲੇ ਤੁਹਾਡੇ ਡੀਵਾਈਸ \'ਤੇ ਚਲਾਈ ਜਾਂਦੀ ਹੈ। ਇਸ ਵਿੱਚ ਪਾਸਵਰਡਾਂ, ਭੁਗਤਾਨ ਵੇਰਵਿਆਂ, ਫ਼ੋਟੋਆਂ, ਸੁਨੇਹਿਆਂ ਅਤੇ ਤੁਹਾਡੇ ਚਲਾਈ ਜਾਣ ਵਾਲੀ ਆਡੀਓ ਦੀ ਜਾਣਕਾਰੀ ਸ਼ਾਮਲ ਹੈ।"</string>
-    <!-- no translation found for screen_share_generic_app_selector_title (8331515850599218288) -->
-    <skip />
+    <string name="screen_share_generic_app_selector_title" msgid="8331515850599218288">"ਐਪ ਨੂੰ ਸਾਂਝਾ ਕਰੋ ਜਾਂ ਰਿਕਾਰਡ ਕਰੋ"</string>
     <string name="media_projection_entry_app_permission_dialog_title" msgid="4613857256721708062">"ਕੀ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ਨਾਲ ਆਪਣੀ ਸਕ੍ਰੀਨ ਸਾਂਝੀ ਕਰਨੀ ਹੈ?"</string>
-    <string name="media_projection_entry_app_permission_dialog_option_text_single_app" msgid="6314402084788062644">"ਇੱਕ ਐਪ ਸਾਂਝੀ ਕਰੋ"</string>
-    <string name="media_projection_entry_app_permission_dialog_option_text_entire_screen" msgid="7381488112332599632">"ਪੂਰੀ ਸਕ੍ਰੀਨ ਸਾਂਝੀ ਕਰੋ"</string>
+    <string name="screen_share_permission_dialog_option_single_app" msgid="2974054871681567314">"ਇੱਕ ਐਪ ਸਾਂਝੀ ਕਰੋ"</string>
+    <!-- no translation found for media_projection_entry_app_permission_dialog_option_text_single_app (2308901434964846084) -->
+    <skip />
+    <string name="screen_share_permission_dialog_option_entire_screen" msgid="4493174362775038997">"ਪੂਰੀ ਸਕ੍ਰੀਨ ਸਾਂਝੀ ਕਰੋ"</string>
+    <!-- no translation found for media_projection_entry_app_permission_dialog_option_text_entire_screen (5100078808078139706) -->
+    <skip />
     <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="5504288438067851086">"ਪੂਰੀ ਸਕ੍ਰੀਨ ਨੂੰ ਸਾਂਝਾ ਕਰਨ ਦੌਰਾਨ, ਤੁਹਾਡੀ ਸਕ੍ਰੀਨ \'ਤੇ ਦਿਖ ਰਹੀ ਹਰੇਕ ਚੀਜ਼ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> \'ਤੇ ਵੀ ਦਿਖਣਯੋਗ ਹੁੰਦੀ ਹੈ। ਇਸ ਲਈ ਪਾਸਵਰਡਾਂ, ਭੁਗਤਾਨ ਵੇਰਵਿਆਂ, ਸੁਨੇਹਿਆਂ, ਫ਼ੋਟੋਆਂ ਅਤੇ ਆਡੀਓ ਅਤੇ ਵੀਡੀਓ ਵਰਗੀਆਂ ਚੀਜ਼ਾਂ ਵਾਸਤੇ ਸਾਵਧਾਨ ਰਹੋ।"</string>
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="7094417930857938876">"ਕਿਸੇ ਐਪ ਨੂੰ ਸਾਂਝਾ ਕਰਨ ਦੌਰਾਨ, ਉਸ ਐਪ \'ਤੇ ਦਿਖ ਰਹੀ ਜਾਂ ਚਲਾਈ ਗਈ ਹਰੇਕ ਚੀਜ਼ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ਨੂੰ ਦਿਖਣਯੋਗ ਹੁੰਦੀ ਹੈ। ਇਸ ਲਈ ਪਾਸਵਰਡਾਂ, ਭੁਗਤਾਨ ਵੇਰਵਿਆਂ, ਸੁਨੇਹਿਆਂ, ਫ਼ੋਟੋਆਂ ਅਤੇ ਆਡੀਓ ਅਤੇ ਵੀਡੀਓ ਵਰਗੀਆਂ ਚੀਜ਼ਾਂ ਵਾਸਤੇ ਸਾਵਧਾਨ ਰਹੋ।"</string>
     <string name="media_projection_entry_app_permission_dialog_continue_entire_screen" msgid="1850848182344377579">"ਸਕ੍ਰੀਨ ਸਾਂਝੀ ਕਰੋ"</string>
     <string name="media_projection_entry_app_permission_dialog_single_app_disabled" msgid="8999903044874669995">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਨੇ ਇਸ ਵਿਕਲਪ ਨੂੰ ਬੰਦ ਕਰ ਦਿੱਤਾ ਹੈ"</string>
-    <!-- no translation found for media_projection_entry_share_app_selector_title (1419515119767501822) -->
-    <skip />
+    <string name="media_projection_entry_share_app_selector_title" msgid="1419515119767501822">"ਸਾਂਝਾ ਕਰਨ ਲਈ ਐਪ ਚੁਣੋ"</string>
     <string name="media_projection_entry_cast_permission_dialog_title" msgid="752756942658159416">"ਕੀ ਸਕ੍ਰੀਨ ਨੂੰ ਕਾਸਟ ਕਰਨਾ ਹੈ?"</string>
     <string name="media_projection_entry_cast_permission_dialog_option_text_single_app" msgid="6073353940838561981">"ਇੱਕ ਐਪ ਨੂੰ ਕਾਸਟ ਕਰੋ"</string>
     <string name="media_projection_entry_cast_permission_dialog_option_text_entire_screen" msgid="8389508187954155307">"ਪੂਰੀ ਸਕ੍ਰੀਨ ਨੂੰ ਕਾਸਟ ਕਰੋ"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="4040447861037324017">"ਪੂਰੀ ਸਕ੍ਰੀਨ ਨੂੰ ਕਾਸਟ ਕਰਨ ਦੌਰਾਨ, ਤੁਹਾਡੀ ਸਕ੍ਰੀਨ \'ਤੇ ਦਿਖ ਰਹੀ ਹਰੇਕ ਚੀਜ਼ ਦੂਸਰੀ ਸਕ੍ਰੀਨ \'ਤੇ ਵੀ ਦਿਖਣਯੋਗ ਹੁੰਦੀ ਹੈ। ਇਸ ਲਈ ਪਾਸਵਰਡਾਂ, ਭੁਗਤਾਨ ਵੇਰਵਿਆਂ, ਸੁਨੇਹਿਆਂ, ਫ਼ੋਟੋਆਂ ਅਤੇ ਆਡੀਓ ਅਤੇ ਵੀਡੀਓ ਵਰਗੀਆਂ ਚੀਜ਼ਾਂ ਵਾਸਤੇ ਸਾਵਧਾਨ ਰਹੋ।"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="7487834861348460736">"ਕਿਸੇ ਐਪ ਨੂੰ ਕਾਸਟ ਕਰਨ ਦੌਰਾਨ, ਉਸ ਐਪ \'ਤੇ ਦਿਖ ਰਹੀ ਜਾਂ ਚਲਾਈ ਗਈ ਹਰੇਕ ਚੀਜ਼ ਸਾਰੇ ਲੋਕਾਂ ਨੂੰ ਦਿਖਣਯੋਗ ਹੁੰਦੀ ਹੈ। ਇਸ ਲਈ ਪਾਸਵਰਡਾਂ, ਭੁਗਤਾਨ ਵੇਰਵਿਆਂ, ਸੁਨੇਹਿਆਂ, ਫ਼ੋਟੋਆਂ ਅਤੇ ਆਡੀਓ ਅਤੇ ਵੀਡੀਓ ਵਰਗੀਆਂ ਚੀਜ਼ਾਂ ਵਾਸਤੇ ਸਾਵਧਾਨ ਰਹੋ।"</string>
     <string name="media_projection_entry_cast_permission_dialog_continue_entire_screen" msgid="3261124185304676483">"ਸਕ੍ਰੀਨ ਕਾਸਟ ਕਰੋ"</string>
-    <!-- no translation found for media_projection_entry_cast_app_selector_title (6323062146661922387) -->
-    <skip />
+    <string name="media_projection_entry_cast_app_selector_title" msgid="6323062146661922387">"ਕਾਸਟ ਕਰਨ ਲਈ ਐਪ ਚੁਣੋ"</string>
     <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"ਕੀ ਸਾਂਝਾਕਰਨ ਸ਼ੁਰੂ ਕਰਨਾ ਹੈ?"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"ਤੁਹਾਡੇ ਵੱਲੋਂ ਸਾਂਝਾ ਕਰਨ, ਰਿਕਾਰਡ ਕਰਨ, ਜਾਂ ਕਾਸਟ ਕਰਨ \'ਤੇ, Android ਕੋਲ ਤੁਹਾਡੀ ਸਕ੍ਰੀਨ \'ਤੇ ਦਿਸਦੀ ਜਾਂ ਤੁਹਾਡੇ ਡੀਵਾਈਸ \'ਤੇ ਚਲਾਈ ਗਈ ਹਰੇਕ ਚੀਜ਼ ਤੱਕ ਪਹੁੰਚ ਹੁੰਦੀ ਹੈ। ਇਸ ਲਈ ਪਾਸਵਰਡਾਂ, ਭੁਗਤਾਨ ਵੇਰਵਿਆਂ, ਸੁਨੇਹਿਆਂ, ਫ਼ੋਟੋਆਂ ਅਤੇ ਆਡੀਓ ਅਤੇ ਵੀਡੀਓ ਵਰਗੀਆਂ ਚੀਜ਼ਾਂ ਵਾਸਤੇ ਸਾਵਧਾਨ ਰਹੋ।"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"ਤੁਹਾਡੇ ਵੱਲੋਂ ਸਾਂਝਾ ਕਰਨ, ਰਿਕਾਰਡ ਕਰਨ, ਜਾਂ ਕਾਸਟ ਕਰਨ \'ਤੇ, Android ਕੋਲ ਉਸ ਐਪ \'ਤੇ ਦਿਖਾਈ ਗਈ ਜਾਂ ਚਲਾਈ ਗਈ ਹਰੇਕ ਚੀਜ਼ ਤੱਕ ਪਹੁੰਚ ਹੁੰਦੀ ਹੈ। ਇਸ ਲਈ ਪਾਸਵਰਡਾਂ, ਭੁਗਤਾਨ ਵੇਰਵਿਆਂ, ਸੁਨੇਹਿਆਂ, ਫ਼ੋਟੋਆਂ ਅਤੇ ਆਡੀਓ ਅਤੇ ਵੀਡੀਓ ਵਰਗੀਆਂ ਚੀਜ਼ਾਂ ਸੰਬੰਧੀ ਸਾਵਧਾਨ ਰਹੋ।"</string>
@@ -726,6 +726,7 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"ਸੈਟੇਲਾਈਟ, ਕਨੈਕਸ਼ਨ ਵਧੀਆ ਹੈ"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"ਸੈਟੇਲਾਈਟ, ਕਨੈਕਸ਼ਨ ਉਪਲਬਧ ਹੈ"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"ਸੈਟੇਲਾਈਟ SOS"</string>
+    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"ਐਮਰਜੈਂਸੀ ਕਾਲਾਂ ਜਾਂ ਸਹਾਇਤਾ"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"ਕੁਝ ਵਾਸਤੇ ਤਾਂ ਮਜ਼ੇਦਾਰ ਹੈ ਲੇਕਿਨ ਸਾਰਿਆਂ ਵਾਸਤੇ ਨਹੀਂ"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"ਸਿਸਟਮ UI ਟਿਊਨਰ ਤੁਹਾਨੂੰ Android ਵਰਤੋਂਕਾਰ ਇੰਟਰਫ਼ੇਸ ਤਬਦੀਲ ਕਰਨ ਅਤੇ ਵਿਉਂਤਬੱਧ ਕਰਨ ਲਈ ਵਾਧੂ ਤਰੀਕੇ ਦਿੰਦਾ ਹੈ। ਇਹ ਪ੍ਰਯੋਗਾਤਮਿਕ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਭਵਿੱਖ ਦੀ ਰੀਲੀਜ਼ ਵਿੱਚ ਬਦਲ ਸਕਦੀਆਂ ਹਨ, ਟੁੱਟ ਸਕਦੀਆਂ ਹਨ, ਜਾਂ ਅਲੋਪ ਹੋ ਸਕਦੀਆਂ ਹਨ। ਸਾਵਧਾਨੀ ਨਾਲ ਅੱਗੇ ਵੱਧੋ।"</string>
@@ -1392,30 +1393,34 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"ਪ੍ਰਤੀਕ ਨੂੰ ਸਮੇਟੋ"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"ਪ੍ਰਤੀਕ ਦਾ ਵਿਸਤਾਰ ਕਰੋ"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"ਜਾਂ"</string>
+    <!-- no translation found for launch_keyboard_tutorial_notification_title (8849933155160522519) -->
+    <skip />
+    <!-- no translation found for launch_keyboard_tutorial_notification_content (2880339951512757918) -->
+    <skip />
+    <!-- no translation found for launch_touchpad_tutorial_notification_title (2243780062772196901) -->
+    <skip />
+    <!-- no translation found for launch_touchpad_tutorial_notification_content (7931085031240753226) -->
+    <skip />
+    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_title (1940023776496198762) -->
+    <skip />
+    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_content (1780725168171929365) -->
+    <skip />
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"ਪਿੱਛੇ ਜਾਣ ਦਾ ਇਸ਼ਾਰਾ"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"ਹੋਮ \'ਤੇ ਜਾਣ ਦਾ ਇਸ਼ਾਰਾ"</string>
     <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"ਕਾਰਵਾਈ ਕੁੰਜੀ"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"ਹੋ ਗਿਆ"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"ਵਾਪਸ ਜਾਓ"</string>
     <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"ਵਾਪਸ ਜਾਣ ਲਈ, ਟੱਚਪੈਡ \'ਤੇ ਕਿਤੇ ਵੀ ਤਿੰਨ ਉਂਗਲਾਂ ਦੀ ਵਰਤੋਂ ਕਰ ਕੇ ਖੱਬੇ ਜਾਂ ਸੱਜੇ ਪਾਸੇ ਵੱਲ ਸਵਾਈਪ ਕਰੋ।\n\nਤੁਸੀਂ ਇਸ ਲਈ ਕੀ-ਬੋਰਡ ਸ਼ਾਰਟਕੱਟ Action + ESC ਦੀ ਵਰਤੋਂ ਵੀ ਕਰ ਸਕਦੇ ਹੋ।"</string>
-    <!-- no translation found for touchpad_back_gesture_success_title (7240576648330612171) -->
-    <skip />
-    <!-- no translation found for touchpad_back_gesture_success_body (2324724953720741719) -->
-    <skip />
+    <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"ਬਹੁਤ ਵਧੀਆ!"</string>
+    <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"ਤੁਸੀਂ \'ਵਾਪਸ ਜਾਓ\' ਦਾ ਇਸ਼ਾਰਾ ਪੂਰਾ ਕੀਤਾ।"</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"ਹੋਮ \'ਤੇ ਜਾਓ"</string>
     <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"ਕਿਸੇ ਵੀ ਸਮੇਂ ਆਪਣੀ ਹੋਮ ਸਕ੍ਰੀਨ \'ਤੇ ਜਾਣ ਲਈ, ਤਿੰਨ ਉਂਗਲਾਂ ਨਾਲ ਆਪਣੀ ਸਕ੍ਰੀਨ ਦੇ ਹੇਠਾਂ ਤੋਂ ਉੱਪਰ ਵੱਲ ਸਵਾਈਪ ਕਰੋ।"</string>
-    <!-- no translation found for touchpad_home_gesture_success_title (3778407003948209795) -->
-    <skip />
-    <!-- no translation found for touchpad_home_gesture_success_body (2404031094918807067) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_title (2659466586996495447) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_guidance (5718948664616999196) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_success_title (466467860120112933) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_success_body (7201991081652850430) -->
-    <skip />
+    <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"ਵਧੀਆ!"</string>
+    <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"ਤੁਸੀਂ \'ਹੋਮ \'ਤੇ ਜਾਓ\' ਦਾ ਇਸ਼ਾਰਾ ਪੂਰਾ ਕੀਤਾ।"</string>
+    <string name="tutorial_action_key_title" msgid="2659466586996495447">"ਕਾਰਵਾਈ ਕੁੰਜੀ"</string>
+    <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"ਆਪਣੀਆਂ ਐਪਾਂ ਤੱਕ ਪਹੁੰਚ ਕਰਨ ਲਈ, ਆਪਣੇ ਕੀ-ਬੋਰਡ \'ਤੇ ਕਾਰਵਾਈ ਕੁੰਜੀ ਨੂੰ ਦਬਾਓ।"</string>
+    <string name="tutorial_action_key_success_title" msgid="466467860120112933">"ਵਧਾਈਆਂ!"</string>
+    <string name="tutorial_action_key_success_body" msgid="7201991081652850430">"ਤੁਸੀਂ \'ਕਾਰਵਾਈ ਕੁੰਜੀ\' ਦਾ ਇਸ਼ਾਰਾ ਪੂਰਾ ਕੀਤਾ।\n\nਕਾਰਵਾਈ ਬਟਨ ਅਤੇ / ਨੂੰ ਇਕੱਠੇ ਦਬਾਉਣ \'ਤੇ, ਤੁਹਾਡੇ ਕੋਲ ਉਪਲਬਧ ਸਾਰੇ ਸ਼ਾਰਟਕੱਟ ਦਿਖਦੇ ਹਨ।"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"ਕੀ-ਬੋਰਡ ਬੈਕਲਾਈਟ"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%2$d ਵਿੱਚੋਂ %1$d ਪੱਧਰ"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"ਹੋਮ ਕੰਟਰੋਲ"</string>
