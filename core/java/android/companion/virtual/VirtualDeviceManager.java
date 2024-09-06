@@ -620,6 +620,45 @@ public final class VirtualDeviceManager {
         }
 
         /**
+         * Forces all trusted non-mirror displays of the virtual device to turn off.
+         *
+         * <p>After this action, if all displays across all devices, including the default one, are
+         * off, then the physical device will be put to sleep. If the displays of this virtual
+         * device are already off, then nothing will happen.</p>
+         *
+         * <p>Overrides all the wake locks that are held. This is equivalent to pressing a "virtual
+         * power key" to turn off the screen.</p>
+         *
+         * @see #wakeUp()
+         * @see DisplayManager#VIRTUAL_DISPLAY_FLAG_TRUSTED
+         * @see DisplayManager#VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY
+         */
+        @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_DEVICE_AWARE_DISPLAY_POWER)
+        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+        public void goToSleep() {
+            mVirtualDeviceInternal.goToSleep();
+        }
+
+        /**
+         * Forces all trusted non-mirror displays of the virtual device to turn on.
+         *
+         * <p>If the displays of this virtual device are turned off, then they will be turned on.
+         * Additionally, if the device is asleep it will be awoken. If the displays of this virtual
+         * device are already on, then nothing will happen.</p>
+         *
+         * <p>This is equivalent to pressing a "virtual power key" to turn on the screen.</p>
+         *
+         * @see #goToSleep()
+         * @see DisplayManager#VIRTUAL_DISPLAY_FLAG_TRUSTED
+         * @see DisplayManager#VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY
+         */
+        @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_DEVICE_AWARE_DISPLAY_POWER)
+        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+        public void wakeUp() {
+            mVirtualDeviceInternal.wakeUp();
+        }
+
+        /**
          * Launches a given pending intent on the give display ID.
          *
          * @param displayId The display to launch the pending intent on. This display must be
