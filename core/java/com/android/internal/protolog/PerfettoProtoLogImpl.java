@@ -688,7 +688,7 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
 
             os.write(MessageData.MESSAGE_ID, messageHash);
             os.write(MESSAGE, message);
-            os.write(LEVEL, level.ordinal());
+            os.write(LEVEL, level.id);
             os.write(GROUP_ID, logGroup.getId());
 
             os.end(messageConfigToken);

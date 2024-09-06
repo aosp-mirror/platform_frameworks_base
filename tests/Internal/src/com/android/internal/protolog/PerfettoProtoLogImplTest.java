@@ -399,13 +399,16 @@ public class PerfettoProtoLogImplTest {
         TestProtoLogGroup.TEST_GROUP.setLogToLogcat(true);
         TestProtoLogGroup.TEST_GROUP.setLogToProto(false);
 
-        implSpy.log(
+        var assertion = assertThrows(RuntimeException.class, () -> implSpy.log(
                 LogLevel.INFO, TestProtoLogGroup.TEST_GROUP, 1234, 4321,
-                new Object[]{5});
+                new Object[]{5}));
 
-        verify(implSpy).passToLogcat(eq(TestProtoLogGroup.TEST_GROUP.getTag()), eq(
-                LogLevel.INFO), eq("UNKNOWN MESSAGE args = (5)"));
+        verify(implSpy, never()).passToLogcat(eq(TestProtoLogGroup.TEST_GROUP.getTag()), eq(
+                LogLevel.INFO), any());
         verify(sReader).getViewerString(eq(1234L));
+
+        Truth.assertThat(assertion).hasMessageThat()
+                .contains("Failed to get log message with hash 1234 and args (5)");
     }
 
     @Test
@@ -434,6 +437,7 @@ public class PerfettoProtoLogImplTest {
         long before;
         long after;
         try {
+            assertFalse(sProtoLog.isProtoEnabled());
             traceMonitor.start();
             assertTrue(sProtoLog.isProtoEnabled());
 
@@ -456,7 +460,8 @@ public class PerfettoProtoLogImplTest {
         Truth.assertThat(protolog.messages.getFirst().getTimestamp().getElapsedNanos())
                 .isAtMost(after);
         Truth.assertThat(protolog.messages.getFirst().getMessage())
-                .isEqualTo("My test message :: test, 2, 4, 6, 0.400000, 5.000000e-01, 0.6, true");
+                .isEqualTo(
+                        "My test message :: test, 1, 2, 3, 0.400000, 5.000000e-01, 0.6, true");
     }
 
     @Test
@@ -489,7 +494,7 @@ public class PerfettoProtoLogImplTest {
         Truth.assertThat(protolog.messages.getFirst().getTimestamp().getElapsedNanos())
                 .isAtMost(after);
         Truth.assertThat(protolog.messages.getFirst().getMessage())
-                .isEqualTo("My test message :: test, 2, 6, 0.400000, true");
+                .isEqualTo("My test message :: test, 1, 3, 0.400000, true");
     }
 
     @Test
@@ -783,7 +788,7 @@ public class PerfettoProtoLogImplTest {
 
         Truth.assertThat(protolog.messages).hasSize(1);
         Truth.assertThat(protolog.messages.get(0).getMessage())
-                .isEqualTo("My null args: 0, 0, false");
+                .isEqualTo("My null args: 0, 0.000000, false");
     }
 
     @Test
@@ -836,11 +841,11 @@ public class PerfettoProtoLogImplTest {
         try {
             traceMonitor.start();
             sProtoLog.log(LogLevel.DEBUG, TestProtoLogGroup.TEST_GROUP,
-                "This message should not be logged");
+                    "This message should not be logged");
             sProtoLog.log(LogLevel.WARN, TestProtoLogGroup.TEST_GROUP,
-                "This message should logged %d", 123);
+                    "This message should be logged %d", 123);
             sProtoLog.log(LogLevel.ERROR, TestProtoLogGroup.TEST_GROUP,
-                "This message should also be logged %d", 567);
+                    "This message should also be logged %d", 567);
         } finally {
             traceMonitor.stop(mWriter);
         }
@@ -853,12 +858,25 @@ public class PerfettoProtoLogImplTest {
         Truth.assertThat(protolog.messages.get(0).getLevel())
                 .isEqualTo(LogLevel.WARN);
         Truth.assertThat(protolog.messages.get(0).getMessage())
-                .isEqualTo("This message should logged 123");
+                .isEqualTo("This message should be logged 123");
 
         Truth.assertThat(protolog.messages.get(1).getLevel())
                 .isEqualTo(LogLevel.ERROR);
         Truth.assertThat(protolog.messages.get(1).getMessage())
                 .isEqualTo("This message should also be logged 567");
+    }
+
+    @Test
+    public void throwsOnLogToLogcatForProcessedMessageMissingLoadedDefinition() {
+        TestProtoLogGroup.TEST_GROUP.setLogToLogcat(true);
+        var protolog = new PerfettoProtoLogImpl(TestProtoLogGroup.values());
+
+        var exception = assertThrows(RuntimeException.class, () -> {
+            protolog.log(LogLevel.DEBUG, TestProtoLogGroup.TEST_GROUP, 123, 0, new Object[0]);
+        });
+
+        Truth.assertThat(exception).hasMessageThat()
+                .contains("Failed to get log message with hash 123");
     }
 
     private enum TestProtoLogGroup implements IProtoLogGroup {
