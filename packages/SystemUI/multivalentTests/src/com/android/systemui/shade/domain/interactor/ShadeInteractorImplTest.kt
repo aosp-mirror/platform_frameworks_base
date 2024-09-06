@@ -24,6 +24,7 @@ import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.FlagsParameterization
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.parameterizeSceneContainerFlag
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
@@ -38,7 +39,6 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.power.data.repository.fakePowerRepository
 import com.android.systemui.power.shared.model.WakeSleepReason
 import com.android.systemui.power.shared.model.WakefulnessState
-import com.android.systemui.shade.data.repository.fakeShadeRepository
 import com.android.systemui.shade.data.repository.shadeRepository
 import com.android.systemui.shade.shadeTestUtil
 import com.android.systemui.shade.shared.flag.DualShade
@@ -66,18 +66,18 @@ import platform.test.runner.parameterized.Parameters
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4::class)
 class ShadeInteractorImplTest(flags: FlagsParameterization) : SysuiTestCase() {
-    private val kosmos = testKosmos()
-    private val testScope = kosmos.testScope
-    private val deviceProvisioningRepository by lazy { kosmos.fakeDeviceProvisioningRepository }
-    private val disableFlagsRepository by lazy { kosmos.fakeDisableFlagsRepository }
-    private val keyguardRepository by lazy { kosmos.fakeKeyguardRepository }
-    private val keyguardTransitionRepository by lazy { kosmos.fakeKeyguardTransitionRepository }
-    private val powerRepository by lazy { kosmos.fakePowerRepository }
-    private val shadeRepository by lazy { kosmos.fakeShadeRepository }
-    private val shadeTestUtil by lazy { kosmos.shadeTestUtil }
-    private val userRepository by lazy { kosmos.fakeUserRepository }
-    private val userSetupRepository by lazy { kosmos.fakeUserSetupRepository }
-    private val dozeParameters by lazy { kosmos.dozeParameters }
+    val kosmos = testKosmos()
+    val testScope = kosmos.testScope
+    val configurationRepository by lazy { kosmos.fakeConfigurationRepository }
+    val deviceProvisioningRepository by lazy { kosmos.fakeDeviceProvisioningRepository }
+    val disableFlagsRepository by lazy { kosmos.fakeDisableFlagsRepository }
+    val keyguardRepository by lazy { kosmos.fakeKeyguardRepository }
+    val keyguardTransitionRepository by lazy { kosmos.fakeKeyguardTransitionRepository }
+    val powerRepository by lazy { kosmos.fakePowerRepository }
+    val shadeTestUtil by lazy { kosmos.shadeTestUtil }
+    val userRepository by lazy { kosmos.fakeUserRepository }
+    val userSetupRepository by lazy { kosmos.fakeUserSetupRepository }
+    val dozeParameters by lazy { kosmos.dozeParameters }
 
     lateinit var underTest: ShadeInteractorImpl
 
@@ -496,25 +496,5 @@ class ShadeInteractorImplTest(flags: FlagsParameterization) : SysuiTestCase() {
             kosmos.shadeRepository.setShadeLayoutWide(false)
 
             assertThat(shadeMode).isEqualTo(ShadeMode.Dual)
-        }
-
-    @Test
-    fun getTopEdgeSplitFraction_narrowScreen_splitInHalf() =
-        testScope.runTest {
-            // Ensure isShadeLayoutWide is collected.
-            val isShadeLayoutWide by collectLastValue(underTest.isShadeLayoutWide)
-            shadeRepository.setShadeLayoutWide(false)
-
-            assertThat(underTest.getTopEdgeSplitFraction()).isEqualTo(0.5f)
-        }
-
-    @Test
-    fun getTopEdgeSplitFraction_wideScreen_leftSideLarger() =
-        testScope.runTest {
-            // Ensure isShadeLayoutWide is collected.
-            val isShadeLayoutWide by collectLastValue(underTest.isShadeLayoutWide)
-            shadeRepository.setShadeLayoutWide(true)
-
-            assertThat(underTest.getTopEdgeSplitFraction()).isGreaterThan(0.5f)
         }
 }

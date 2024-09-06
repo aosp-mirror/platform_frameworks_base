@@ -128,11 +128,7 @@ fun SceneContainer(
                 }
             },
     ) {
-        SceneTransitionLayout(
-            state = state,
-            modifier = modifier.fillMaxSize(),
-            swipeSourceDetector = viewModel.edgeDetector,
-        ) {
+        SceneTransitionLayout(state = state, modifier = modifier.fillMaxSize()) {
             sceneByKey.forEach { (sceneKey, scene) ->
                 scene(
                     key = sceneKey,
