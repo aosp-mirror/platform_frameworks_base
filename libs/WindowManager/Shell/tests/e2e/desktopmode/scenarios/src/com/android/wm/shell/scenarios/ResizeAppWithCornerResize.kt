@@ -36,8 +36,7 @@ import org.junit.Rule
 import org.junit.Test
 
 @Ignore("Test Base Class")
-abstract class ResizeAppWithCornerResize
-constructor(
+abstract class ResizeAppWithCornerResize(
     val rotation: Rotation = Rotation.ROTATION_0,
     val horizontalChange: Int = 200,
     val verticalChange: Int = -200,
@@ -76,6 +75,25 @@ constructor(
             DesktopModeAppHelper.Corners.RIGHT_TOP,
             horizontalChange,
             verticalChange
+        )
+    }
+
+    @Test
+    open fun resizeAppWithCornerResizeToMaximumSize() {
+        val maxResizeChange = 3000
+        testApp.cornerResize(
+            wmHelper,
+            device,
+            DesktopModeAppHelper.Corners.RIGHT_TOP,
+            maxResizeChange,
+            -maxResizeChange
+        )
+        testApp.cornerResize(
+            wmHelper,
+            device,
+            DesktopModeAppHelper.Corners.LEFT_BOTTOM,
+            -maxResizeChange,
+            maxResizeChange
         )
     }
 
