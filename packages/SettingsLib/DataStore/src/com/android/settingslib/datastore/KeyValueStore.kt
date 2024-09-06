@@ -19,7 +19,7 @@ package com.android.settingslib.datastore
 import android.content.SharedPreferences
 
 /** Interface of key-value store. */
-interface KeyValueStore {
+interface KeyValueStore : KeyedObservable<String> {
 
     /** Returns if the storage contains persistent value of given key. */
     fun contains(key: String): Boolean
