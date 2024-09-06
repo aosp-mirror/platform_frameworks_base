@@ -107,6 +107,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.MessageQueue;
+import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemProperties;
@@ -3050,6 +3051,74 @@ public class DisplayManagerServiceTest {
             fail("SettingNotFoundException should have been thrown.");
         } catch (SettingNotFoundException expected) {
         }
+    }
+
+    @Test
+    public void testBrightnessUpdates() {
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mShortMockedInjector);
+        DisplayManagerInternal localService = displayManager.new LocalService();
+        DisplayManagerService.BinderService displayManagerBinderService =
+                displayManager.new BinderService();
+        registerDefaultDisplays(displayManager);
+        initDisplayPowerController(localService);
+
+        final float invalidBrightness = -0.3f;
+        final float brightnessOff = -1.0f;
+        final float minimumBrightness = 0.0f;
+        final float validBrightness = 0.5f;
+
+        Settings.System.putInt(mContext.getContentResolver(),
+                Settings.System.SCREEN_BRIGHTNESS_MODE,
+                Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL);
+
+        // set and check valid brightness
+        waitForIdleHandler(mPowerHandler);
+        displayManagerBinderService.setBrightness(Display.DEFAULT_DISPLAY, validBrightness);
+        waitForIdleHandler(mPowerHandler);
+        assertEquals(validBrightness,
+                displayManagerBinderService.getBrightness(Display.DEFAULT_DISPLAY),
+                FLOAT_TOLERANCE);
+
+        // set and check invalid brightness
+        waitForIdleHandler(mPowerHandler);
+        displayManagerBinderService.setBrightness(Display.DEFAULT_DISPLAY, invalidBrightness);
+        waitForIdleHandler(mPowerHandler);
+        assertEquals(PowerManager.BRIGHTNESS_MIN,
+                displayManagerBinderService.getBrightness(Display.DEFAULT_DISPLAY),
+                FLOAT_TOLERANCE);
+
+        // reset and check valid brightness
+        waitForIdleHandler(mPowerHandler);
+        displayManagerBinderService.setBrightness(Display.DEFAULT_DISPLAY, validBrightness);
+        waitForIdleHandler(mPowerHandler);
+        assertEquals(validBrightness,
+                displayManagerBinderService.getBrightness(Display.DEFAULT_DISPLAY),
+                FLOAT_TOLERANCE);
+
+        // set and check brightness off
+        waitForIdleHandler(mPowerHandler);
+        displayManagerBinderService.setBrightness(Display.DEFAULT_DISPLAY, brightnessOff);
+        waitForIdleHandler(mPowerHandler);
+        assertEquals(PowerManager.BRIGHTNESS_MIN,
+                displayManagerBinderService.getBrightness(Display.DEFAULT_DISPLAY),
+                FLOAT_TOLERANCE);
+
+        // reset and check valid brightness
+        waitForIdleHandler(mPowerHandler);
+        displayManagerBinderService.setBrightness(Display.DEFAULT_DISPLAY, validBrightness);
+        waitForIdleHandler(mPowerHandler);
+        assertEquals(validBrightness,
+                displayManagerBinderService.getBrightness(Display.DEFAULT_DISPLAY),
+                FLOAT_TOLERANCE);
+
+        // set and check minimum brightness
+        waitForIdleHandler(mPowerHandler);
+        displayManagerBinderService.setBrightness(Display.DEFAULT_DISPLAY, minimumBrightness);
+        waitForIdleHandler(mPowerHandler);
+        assertEquals(PowerManager.BRIGHTNESS_MIN,
+                displayManagerBinderService.getBrightness(Display.DEFAULT_DISPLAY),
+                FLOAT_TOLERANCE);
     }
 
     @Test
