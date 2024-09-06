@@ -25,7 +25,9 @@ import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.R
+import com.android.settingslib.notification.modes.TestModeBuilder
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.SysuiTestableContext
 import com.android.systemui.common.shared.model.asIcon
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
@@ -62,7 +64,12 @@ class ModesTileDataInteractorTest : SysuiTestCase() {
         context.orCreateTestableResources.apply {
             addOverride(MODES_DRAWABLE_ID, MODES_DRAWABLE)
             addOverride(R.drawable.ic_zen_mode_type_bedtime, BEDTIME_DRAWABLE)
-            addOverride(R.drawable.ic_zen_mode_type_driving, DRIVING_DRAWABLE)
+        }
+
+        val customPackageContext = SysuiTestableContext(context)
+        context.prepareCreatePackageContext(CUSTOM_PACKAGE, customPackageContext)
+        customPackageContext.orCreateTestableResources.apply {
+            addOverride(CUSTOM_DRAWABLE_ID, CUSTOM_DRAWABLE)
         }
     }
 
@@ -146,35 +153,41 @@ class ModesTileDataInteractorTest : SysuiTestCase() {
             assertThat(tileData?.icon).isEqualTo(MODES_ICON)
             assertThat(tileData?.iconResId).isEqualTo(MODES_DRAWABLE_ID)
 
-            // Add an active mode: icon should be the mode icon. No iconResId, because we don't
-            // really know that it's a system icon.
+            // Add an active mode with a default icon: icon should be the mode icon, and the
+            // iconResId is also populated, because we know it's a system icon.
             zenModeRepository.addMode(
-                id = "Bedtime",
+                id = "Bedtime with default icon",
                 type = AutomaticZenRule.TYPE_BEDTIME,
                 active = true
             )
             runCurrent()
             assertThat(tileData?.icon).isEqualTo(BEDTIME_ICON)
-            assertThat(tileData?.iconResId).isNull()
+            assertThat(tileData?.iconResId).isEqualTo(R.drawable.ic_zen_mode_type_bedtime)
 
-            // Add another, less-prioritized mode: icon should remain the first mode icon
+            // Add another, less-prioritized mode that has a *custom* icon: for now, icon should
+            // remain the first mode icon
             zenModeRepository.addMode(
-                id = "Driving",
-                type = AutomaticZenRule.TYPE_DRIVING,
-                active = true
+                TestModeBuilder()
+                    .setId("Driving with custom icon")
+                    .setType(AutomaticZenRule.TYPE_DRIVING)
+                    .setPackage(CUSTOM_PACKAGE)
+                    .setIconResId(CUSTOM_DRAWABLE_ID)
+                    .setActive(true)
+                    .build()
             )
             runCurrent()
             assertThat(tileData?.icon).isEqualTo(BEDTIME_ICON)
-            assertThat(tileData?.iconResId).isNull()
+            assertThat(tileData?.iconResId).isEqualTo(R.drawable.ic_zen_mode_type_bedtime)
 
             // Deactivate more important mode: icon should be the less important, still active mode
-            zenModeRepository.deactivateMode("Bedtime")
+            // And because it's a package-provided icon, iconResId is not populated.
+            zenModeRepository.deactivateMode("Bedtime with default icon")
             runCurrent()
-            assertThat(tileData?.icon).isEqualTo(DRIVING_ICON)
+            assertThat(tileData?.icon).isEqualTo(CUSTOM_ICON)
             assertThat(tileData?.iconResId).isNull()
 
             // Deactivate remaining mode: back to the default modes icon
-            zenModeRepository.deactivateMode("Driving")
+            zenModeRepository.deactivateMode("Driving with custom icon")
             runCurrent()
             assertThat(tileData?.icon).isEqualTo(MODES_ICON)
             assertThat(tileData?.iconResId).isEqualTo(MODES_DRAWABLE_ID)
@@ -241,15 +254,17 @@ class ModesTileDataInteractorTest : SysuiTestCase() {
 
     private companion object {
         val TEST_USER = UserHandle.of(1)!!
+        const val CUSTOM_PACKAGE = "com.some.mode.owner.package"
 
         val MODES_DRAWABLE_ID = R.drawable.ic_zen_priority_modes
+        const val CUSTOM_DRAWABLE_ID = 12345
 
         val MODES_DRAWABLE = TestStubDrawable("modes_icon")
         val BEDTIME_DRAWABLE = TestStubDrawable("bedtime")
-        val DRIVING_DRAWABLE = TestStubDrawable("driving")
+        val CUSTOM_DRAWABLE = TestStubDrawable("custom")
 
         val MODES_ICON = MODES_DRAWABLE.asIcon()
         val BEDTIME_ICON = BEDTIME_DRAWABLE.asIcon()
-        val DRIVING_ICON = DRIVING_DRAWABLE.asIcon()
+        val CUSTOM_ICON = CUSTOM_DRAWABLE.asIcon()
     }
 }

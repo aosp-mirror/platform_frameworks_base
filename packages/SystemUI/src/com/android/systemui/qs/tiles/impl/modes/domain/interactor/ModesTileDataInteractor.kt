@@ -20,13 +20,16 @@ import android.app.Flags
 import android.content.Context
 import android.os.UserHandle
 import com.android.app.tracing.coroutines.flow.map
+import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.asIcon
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.qs.tiles.ModesTile
 import com.android.systemui.qs.tiles.base.interactor.DataUpdateTrigger
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataInteractor
 import com.android.systemui.qs.tiles.impl.modes.domain.model.ModesTileModel
 import com.android.systemui.statusbar.policy.domain.interactor.ZenModeInteractor
 import com.android.systemui.statusbar.policy.domain.model.ActiveZenModes
+import com.android.systemui.statusbar.policy.domain.model.ZenModeInfo
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
@@ -61,25 +64,36 @@ constructor(
     suspend fun getCurrentTileModel() = buildTileData(zenModeInteractor.getActiveModes())
 
     private fun buildTileData(activeModes: ActiveZenModes): ModesTileModel {
-        val modesIconResId = com.android.internal.R.drawable.ic_zen_priority_modes
-
         if (usesModeIcons()) {
-            val mainModeDrawable = activeModes.mainMode?.icon?.drawable
-            val iconResId = if (mainModeDrawable == null) modesIconResId else null
-
+            val tileIcon = getTileIcon(activeModes.mainMode)
             return ModesTileModel(
                 isActivated = activeModes.isAnyActive(),
-                icon = (mainModeDrawable ?: context.getDrawable(modesIconResId)!!).asIcon(),
-                iconResId = iconResId,
+                icon = tileIcon.icon,
+                iconResId = tileIcon.resId,
                 activeModes = activeModes.modeNames
             )
         } else {
             return ModesTileModel(
                 isActivated = activeModes.isAnyActive(),
-                icon = context.getDrawable(modesIconResId)!!.asIcon(),
-                iconResId = modesIconResId,
+                icon = context.getDrawable(ModesTile.ICON_RES_ID)!!.asIcon(),
+                iconResId = ModesTile.ICON_RES_ID,
                 activeModes = activeModes.modeNames
             )
+        }
+    }
+
+    private data class TileIcon(val icon: Icon.Loaded, val resId: Int?)
+
+    private fun getTileIcon(activeMode: ZenModeInfo?): TileIcon {
+        return if (activeMode != null) {
+            // ZenIconKey.resPackage is null if its resId is a system icon.
+            if (activeMode.icon.key.resPackage == null) {
+                TileIcon(activeMode.icon.drawable.asIcon(), activeMode.icon.key.resId)
+            } else {
+                TileIcon(activeMode.icon.drawable.asIcon(), null)
+            }
+        } else {
+            TileIcon(context.getDrawable(ModesTile.ICON_RES_ID)!!.asIcon(), ModesTile.ICON_RES_ID)
         }
     }
 
