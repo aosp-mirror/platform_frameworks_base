@@ -1276,6 +1276,9 @@ public final class DisplayManagerService extends SystemService {
                         || isUidPresentOnDisplayInternal(callingUid, displayId)) {
                     return info;
                 }
+            } else if (displayId == Display.DEFAULT_DISPLAY) {
+                Slog.e(TAG, "Default display is null for info request from uid "
+                        + callingUid);
             }
             return null;
         }
@@ -2224,10 +2227,11 @@ public final class DisplayManagerService extends SystemService {
             if (display.isValidLocked()) {
                 applyDisplayChangedLocked(display);
             }
-            return;
+        } else {
+            releaseDisplayAndEmitEvent(display, DisplayManagerGlobal.EVENT_DISPLAY_REMOVED);
         }
 
-        releaseDisplayAndEmitEvent(display, DisplayManagerGlobal.EVENT_DISPLAY_REMOVED);
+        Slog.i(TAG, "Logical display removed: " + display.getDisplayIdLocked());
     }
 
     private void releaseDisplayAndEmitEvent(LogicalDisplay display, int event) {
