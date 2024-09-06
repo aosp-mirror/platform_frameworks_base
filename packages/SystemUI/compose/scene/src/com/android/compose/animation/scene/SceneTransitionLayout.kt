@@ -475,7 +475,7 @@ interface SwipeSourceDetector {
         position: IntOffset,
         density: Density,
         orientation: Orientation,
-    ): SwipeSource?
+    ): SwipeSource.Resolved?
 }
 
 /** The result of performing a [UserAction]. */
