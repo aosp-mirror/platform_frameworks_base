@@ -8661,6 +8661,7 @@ public class DevicePolicyManager {
      *             {@link DeviceAdminInfo#USES_POLICY_DISABLE_CAMERA}.
      */
     @RequiresPermission(value = MANAGE_DEVICE_POLICY_CAMERA, conditional = true)
+    @SupportsCoexistence
     public void setCameraDisabled(@Nullable ComponentName admin, boolean disabled) {
         if (mService != null) {
             try {
@@ -10246,6 +10247,7 @@ public class DevicePolicyManager {
      * permission {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_LOCK_TASK}.
      */
     @RequiresPermission(value = MANAGE_DEVICE_POLICY_LOCK_TASK, conditional = true)
+    @SupportsCoexistence
     public void clearPackagePersistentPreferredActivities(@Nullable ComponentName admin,
             String packageName) {
         throwIfParentInstance("clearPackagePersistentPreferredActivities");
@@ -11937,6 +11939,7 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not a device or profile owner and if the caller
      * has not been granted the permission to set the given user restriction.
      */
+    @SupportsCoexistence
     public void addUserRestriction(@NonNull ComponentName admin,
             @UserManager.UserRestrictionKey String key) {
         if (mService != null) {
@@ -12018,6 +12021,7 @@ public class DevicePolicyManager {
      * @throws IllegalStateException if caller is not targeting Android
      * {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} or above.
      */
+    @SupportsCoexistence
     public void addUserRestrictionGlobally(@NonNull @UserManager.UserRestrictionKey String key) {
         throwIfParentInstance("addUserRestrictionGlobally");
         if (mService != null) {
@@ -12073,6 +12077,7 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not a device or profile owner  and if the
      *  caller has not been granted the permission to set the given user restriction.
      */
+    @SupportsCoexistence
     public void clearUserRestriction(@NonNull ComponentName admin,
             @UserManager.UserRestrictionKey String key) {
         if (mService != null) {
@@ -12309,6 +12314,7 @@ public class DevicePolicyManager {
      * @see #DELEGATION_PACKAGE_ACCESS
      */
     @RequiresPermission(value = MANAGE_DEVICE_POLICY_PACKAGE_STATE, conditional = true)
+    @SupportsCoexistence
     public boolean setApplicationHidden(@Nullable ComponentName admin, String packageName,
             boolean hidden) {
         if (mService != null) {
@@ -12489,6 +12495,7 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     @RequiresPermission(value = MANAGE_DEVICE_POLICY_ACCOUNT_MANAGEMENT, conditional = true)
+    @SupportsCoexistence
     public void setAccountManagementDisabled(@Nullable ComponentName admin, String accountType,
             boolean disabled) {
         if (mService != null) {
@@ -14287,6 +14294,7 @@ public class DevicePolicyManager {
      * @see #retrieveSecurityLogs
      */
     @RequiresPermission(value = MANAGE_DEVICE_POLICY_SECURITY_LOGGING, conditional = true)
+    @SupportsCoexistence
     public void setSecurityLoggingEnabled(@Nullable ComponentName admin, boolean enabled) {
         throwIfParentInstance("setSecurityLoggingEnabled");
         try {
@@ -17192,6 +17200,7 @@ public class DevicePolicyManager {
      * if USB data signaling fails to be enabled/disabled.
      */
     @RequiresPermission(value = MANAGE_DEVICE_POLICY_USB_DATA_SIGNALLING, conditional = true)
+    @SupportsCoexistence
     public void setUsbDataSignalingEnabled(boolean enabled) {
         throwIfParentInstance("setUsbDataSignalingEnabled");
         if (mService != null) {
