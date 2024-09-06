@@ -38,6 +38,7 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.activityembedding.ActivityEmbeddingController;
 import com.android.wm.shell.apptoweb.AppToWebGenericLinksParser;
+import com.android.wm.shell.apptoweb.AssistContentRequester;
 import com.android.wm.shell.bubbles.BubbleController;
 import com.android.wm.shell.bubbles.BubbleData;
 import com.android.wm.shell.bubbles.BubbleDataRepository;
@@ -240,6 +241,7 @@ public abstract class WMShellModule {
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
             InteractionJankMonitor interactionJankMonitor,
             AppToWebGenericLinksParser genericLinksParser,
+            AssistContentRequester assistContentRequester,
             MultiInstanceHelper multiInstanceHelper,
             Optional<DesktopTasksLimiter> desktopTasksLimiter,
             Optional<DesktopActivityOrientationChangeHandler> desktopActivityOrientationHandler) {
@@ -263,6 +265,7 @@ public abstract class WMShellModule {
                     rootTaskDisplayAreaOrganizer,
                     interactionJankMonitor,
                     genericLinksParser,
+                    assistContentRequester,
                     multiInstanceHelper,
                     desktopTasksLimiter,
                     desktopActivityOrientationHandler);
@@ -289,6 +292,15 @@ public abstract class WMShellModule {
             @ShellMainThread ShellExecutor mainExecutor
     ) {
         return new AppToWebGenericLinksParser(context, mainExecutor);
+    }
+
+    @Provides
+    static AssistContentRequester provideAssistContentRequester(
+            Context context,
+            @ShellMainThread ShellExecutor shellExecutor,
+            @ShellBackgroundThread ShellExecutor bgExecutor
+    ) {
+        return new AssistContentRequester(context, shellExecutor, bgExecutor);
     }
 
     //
