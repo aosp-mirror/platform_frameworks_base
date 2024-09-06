@@ -106,6 +106,17 @@ flag {
 
 flag {
      namespace: "backstage_power"
+     name: "use_app_info_not_launched"
+     description: "Use the notLaunched state from ApplicationInfo instead of current value"
+     is_fixed_read_only: true
+     bug: "362516211"
+     metadata {
+         purpose: PURPOSE_BUGFIX
+     }
+}
+
+flag {
+     namespace: "backstage_power"
      name: "cache_get_current_user_id"
      description: "Add caching for getCurrentUserId"
      is_fixed_read_only: true
