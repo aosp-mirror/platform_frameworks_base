@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package com.android.systemui.view.accessibility.data.repository
+package com.android.systemui.accessibility.data.repository
 
-import com.android.settingslib.view.accessibility.data.repository.CaptioningRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

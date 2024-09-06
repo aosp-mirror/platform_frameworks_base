@@ -233,7 +233,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             .thenReturn(dreamOverlayComponent)
 
         val ambientTouchComponent = mock<AmbientTouchComponent>()
-        whenever(ambientTouchComponentFactory.create(any(), any()))
+        whenever(ambientTouchComponentFactory.create(any(), any(), any()))
             .thenReturn(ambientTouchComponent)
         whenever(ambientTouchComponent.getTouchMonitor()).thenReturn(mTouchMonitor)
 
@@ -1159,6 +1159,43 @@ class DreamOverlayServiceTest : SysuiTestCase() {
 
         val dreamTaskInfo = TaskInfo(mock<ComponentName>(), WindowConfiguration.ACTIVITY_TYPE_DREAM)
         assertThat(matcher.matches(dreamTaskInfo)).isTrue()
+
+        val callbackCaptor = ArgumentCaptor.forClass(KeyguardUpdateMonitorCallback::class.java)
+        verify(mKeyguardUpdateMonitor).registerCallback(callbackCaptor.capture())
+
+        // Notification shade opens.
+        callbackCaptor.value.onShadeExpandedChanged(true)
+        mMainExecutor.runAllReady()
+
+        verify(gestureInteractor)
+            .removeGestureBlockedMatcher(eq(matcher), eq(GestureInteractor.Scope.Global))
+    }
+
+    @Test
+    fun testDreamActivityGesturesNotBlockedDreamEndedBeforeKeyguardStateChanged() {
+        val client = client
+
+        // Inform the overlay service of dream starting.
+        client.startDream(
+            mWindowParams,
+            mDreamOverlayCallback,
+            DREAM_COMPONENT,
+            false /*isPreview*/,
+            false /*shouldShowComplication*/
+        )
+        mMainExecutor.runAllReady()
+
+        val matcherCaptor = argumentCaptor<TaskMatcher>()
+        verify(gestureInteractor)
+            .addGestureBlockedMatcher(matcherCaptor.capture(), eq(GestureInteractor.Scope.Global))
+        val matcher = matcherCaptor.firstValue
+
+        val dreamTaskInfo = TaskInfo(mock<ComponentName>(), WindowConfiguration.ACTIVITY_TYPE_DREAM)
+        assertThat(matcher.matches(dreamTaskInfo)).isTrue()
+
+        client.endDream()
+        mMainExecutor.runAllReady()
+        clearInvocations(gestureInteractor)
 
         val callbackCaptor = ArgumentCaptor.forClass(KeyguardUpdateMonitorCallback::class.java)
         verify(mKeyguardUpdateMonitor).registerCallback(callbackCaptor.capture())

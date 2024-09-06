@@ -69,6 +69,7 @@ class DisplayWindowSettings {
         mSettingsProvider.updateOverrideSettings(displayInfo, overrideSettings);
     }
 
+    /** Stores the size override settings. If the width or height is zero, it means to clear. */
     void setForcedSize(@NonNull DisplayContent displayContent, int width, int height) {
         if (displayContent.isDefaultDisplay) {
             final String sizeString = (width == 0 || height == 0) ? "" : (width + "," + height);

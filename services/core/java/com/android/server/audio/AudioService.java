@@ -285,7 +285,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.CancellationException;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -410,6 +409,9 @@ public class AudioService extends IAudioService.Stub
 
     /** The controller for the volume UI. */
     private final VolumeController mVolumeController = new VolumeController();
+
+    /** Used only for testing to enable/disable the long press timeout volume actions. */
+    private final AtomicBoolean mVolumeControllerLongPressEnabled = new AtomicBoolean(true);
 
     // sendMsg() flags
     /** If the msg is already queued, replace it with this one. */
@@ -12554,6 +12556,15 @@ public class AudioService extends IAudioService.Stub
         if (DEBUG_VOL) Log.d(TAG, "Volume controller visible: " + visible);
     }
 
+    /** @see AudioManager#setVolumeControllerLongPressTimeoutEnabled(boolean) */
+    @Override
+    @android.annotation.EnforcePermission(MODIFY_AUDIO_SETTINGS_PRIVILEGED)
+    public void setVolumeControllerLongPressTimeoutEnabled(boolean enable) {
+        super.setVolumeControllerLongPressTimeoutEnabled_enforcePermission();
+        mVolumeControllerLongPressEnabled.set(enable);
+        Log.i(TAG, "Volume controller long press timeout enabled: " + enable);
+    }
+
     @Override
     public void setVolumePolicy(VolumePolicy policy) {
         enforceVolumeController("set volume policy");
@@ -12632,7 +12643,9 @@ public class AudioService extends IAudioService.Stub
                 if ((flags & AudioManager.FLAG_SHOW_UI) != 0 && !mVisible) {
                     // UI is not visible yet, adjustment is ignored
                     if (mNextLongPress < now) {
-                        mNextLongPress = now + mLongPressTimeout;
+                        mNextLongPress =
+                                now + (mVolumeControllerLongPressEnabled.get() ? mLongPressTimeout
+                                        : 0);
                     }
                     suppress = true;
                 } else if (mNextLongPress > 0) {  // in a long-press

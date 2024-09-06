@@ -201,6 +201,15 @@
                     "include-filter": "com.android.server.wm.BackgroundActivityStart*"
                 }
             ]
+        },
+        {
+            "name": "CtsOsTestCases",
+            "file_patterns": ["StorageManagerService\\.java"],
+            "options": [
+                {
+                    "include-filter": "android.os.storage.cts.StorageManagerTest"
+                }
+            ]
         }
    ]
 }

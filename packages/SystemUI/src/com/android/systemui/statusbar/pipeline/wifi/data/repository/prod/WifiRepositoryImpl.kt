@@ -250,7 +250,6 @@ constructor(
             WifiNetworkModel.Invalid(CARRIER_MERGED_INVALID_SUB_ID_REASON)
         } else {
             WifiNetworkModel.CarrierMerged(
-                networkId = NETWORK_ID,
                 subscriptionId = this.subscriptionId,
                 level = this.level,
                 // WifiManager APIs to calculate the signal level start from 0, so
@@ -261,7 +260,17 @@ constructor(
     }
 
     private fun WifiEntry.convertNormalToModel(): WifiNetworkModel {
-        if (this.level == WIFI_LEVEL_UNREACHABLE || this.level !in WIFI_LEVEL_MIN..WIFI_LEVEL_MAX) {
+        // WifiEntry instance values aren't guaranteed to be stable between method calls because
+        // WifiPickerTracker is continuously updating the same object. Save the level in a local
+        // variable so that checking the level validity here guarantees that the level will still be
+        // valid when we create the `WifiNetworkModel.Active` instance later. Otherwise, the level
+        // could be valid here but become invalid later, and `WifiNetworkModel.Active` will throw
+        // an exception. See b/362384551.
+        val currentLevel = this.level
+        if (
+            currentLevel == WIFI_LEVEL_UNREACHABLE ||
+                currentLevel !in WIFI_LEVEL_MIN..WIFI_LEVEL_MAX
+        ) {
             // If our level means the network is unreachable or the level is otherwise invalid, we
             // don't have an active network.
             return WifiNetworkModel.Inactive
@@ -275,19 +284,10 @@ constructor(
             }
 
         return WifiNetworkModel.Active(
-            networkId = NETWORK_ID,
             isValidated = this.hasInternetAccess(),
-            level = this.level,
+            level = currentLevel,
             ssid = this.title,
             hotspotDeviceType = hotspotDeviceType,
-            // With WifiTrackerLib, [WifiEntry.title] will appropriately fetch the  SSID for
-            // typical wifi networks *and* passpoint/OSU APs. So, the AP-specific values can
-            // always be false/null in this repository.
-            // TODO(b/292534484): Remove these fields from the wifi network model once this
-            //  repository is fully enabled.
-            isPasspointAccessPoint = false,
-            isOnlineSignUpForPasspointAccessPoint = false,
-            passpointProviderFriendlyName = null,
         )
     }
 
@@ -428,19 +428,5 @@ constructor(
         val ACTIVITY_DEFAULT = DataActivityModel(hasActivityIn = false, hasActivityOut = false)
 
         private const val TAG = "WifiTrackerLibInputLog"
-
-        /**
-         * [WifiNetworkModel.Active.networkId] is only used at the repository layer. It's used by
-         * [WifiRepositoryImpl], which tracks the ID in order to correctly apply the framework
-         * callbacks within the repository.
-         *
-         * Since this class does not need to manually apply framework callbacks and since the
-         * network ID is not used beyond the repository, it's safe to use an invalid ID in this
-         * repository.
-         *
-         * The [WifiNetworkModel.Active.networkId] field should be deleted once we've fully migrated
-         * to [WifiRepositoryImpl].
-         */
-        private const val NETWORK_ID = -1
     }
 }
