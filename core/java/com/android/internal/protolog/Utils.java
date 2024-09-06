@@ -40,6 +40,11 @@ import java.io.IOException;
 public class Utils {
     private static final String LOG_TAG = "ProtoLogUtils";
 
+    /**
+     * Dump the viewer config provided by the input stream to the target datasource.
+     * @param dataSource The datasource to dump the ProtoLog viewer config to.
+     * @param viewerConfigInputStreamProvider The InputStream that provided the proto viewer config.
+     */
     public static void dumpViewerConfig(@NonNull ProtoLogDataSource dataSource,
             @NonNull ViewerConfigInputStreamProvider viewerConfigInputStreamProvider) {
         dataSource.trace(ctx -> {
