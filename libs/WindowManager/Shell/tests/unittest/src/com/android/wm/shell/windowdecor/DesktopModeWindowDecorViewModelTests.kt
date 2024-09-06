@@ -34,6 +34,7 @@ import android.hardware.display.VirtualDisplay
 import android.hardware.input.InputManager
 import android.net.Uri
 import android.os.Handler
+import android.os.SystemClock
 import android.os.UserHandle
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
@@ -52,10 +53,12 @@ import android.view.InputMonitor
 import android.view.InsetsSource
 import android.view.InsetsState
 import android.view.KeyEvent
+import android.view.MotionEvent
 import android.view.Surface
 import android.view.SurfaceControl
 import android.view.SurfaceView
 import android.view.View
+import android.view.ViewRootImpl
 import android.view.WindowInsets.Type.statusBars
 import android.widget.Toast
 import android.window.WindowContainerTransaction
@@ -172,6 +175,10 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     @Mock private lateinit var mockFreeformTaskTransitionStarter: FreeformTaskTransitionStarter
     @Mock private lateinit var mockActivityOrientationChangeHandler:
             DesktopActivityOrientationChangeHandler
+    @Mock private lateinit var mockInputManager: InputManager
+    @Mock private lateinit var mockTaskPositionerFactory:
+            DesktopModeWindowDecorViewModel.TaskPositionerFactory
+    @Mock private lateinit var mockTaskPositioner: TaskPositioner
     private lateinit var spyContext: TestableContext
 
     private val transactionFactory = Supplier<SurfaceControl.Transaction> {
@@ -201,6 +208,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         doNothing().`when`(spyContext).startActivity(any())
         shellInit = ShellInit(mockShellExecutor)
         windowDecorByTaskIdSpy.clear()
+        spyContext.addMockSystemService(InputManager::class.java, mockInputManager)
         desktopModeWindowDecorViewModel = DesktopModeWindowDecorViewModel(
                 spyContext,
                 mockShellExecutor,
@@ -226,12 +234,15 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
                 windowDecorByTaskIdSpy,
                 mockInteractionJankMonitor,
                 Optional.of(mockTasksLimiter),
-                Optional.of(mockActivityOrientationChangeHandler)
+                Optional.of(mockActivityOrientationChangeHandler),
+                mockTaskPositionerFactory
         )
         desktopModeWindowDecorViewModel.setSplitScreenController(mockSplitScreenController)
         whenever(mockDisplayController.getDisplayLayout(any())).thenReturn(mockDisplayLayout)
         whenever(mockDisplayLayout.stableInsets()).thenReturn(STABLE_INSETS)
         whenever(mockInputMonitorFactory.create(any(), any())).thenReturn(mockInputMonitor)
+        whenever(mockTaskPositionerFactory.create(any(), any(), any(), any(), any(), any(), any()))
+            .thenReturn(mockTaskPositioner)
 
         doReturn(mockToast).`when` { Toast.makeText(any(), anyInt(), anyInt()) }
 
@@ -1055,6 +1066,55 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         verify(wct, never()).setBounds(eq(thirdTask.token), any())
     }
 
+    @Test
+    fun testCloseButtonInFreeform_closeWindow_ignoreMoveEventsWithoutBoundsChange() {
+        val onClickListenerCaptor = forClass(View.OnClickListener::class.java)
+                as ArgumentCaptor<View.OnClickListener>
+        val onTouchListenerCaptor = forClass(View.OnTouchListener::class.java)
+                as ArgumentCaptor<View.OnTouchListener>
+        val decor = createOpenTaskDecoration(
+            windowingMode = WINDOWING_MODE_FREEFORM,
+            onCaptionButtonClickListener = onClickListenerCaptor,
+            onCaptionButtonTouchListener = onTouchListenerCaptor
+        )
+
+        whenever(mockTaskPositioner.onDragPositioningStart(any(), any(), any()))
+            .thenReturn(INITIAL_BOUNDS)
+        whenever(mockTaskPositioner.onDragPositioningMove(any(), any()))
+            .thenReturn(INITIAL_BOUNDS)
+        whenever(mockTaskPositioner.onDragPositioningEnd(any(), any()))
+            .thenReturn(INITIAL_BOUNDS)
+
+        val view = mock(View::class.java)
+        whenever(view.id).thenReturn(R.id.close_window)
+        val viewRootImpl = mock(ViewRootImpl::class.java)
+        whenever(view.getViewRootImpl()).thenReturn(viewRootImpl)
+        whenever(viewRootImpl.getInputToken()).thenReturn(null)
+
+        desktopModeWindowDecorViewModel
+            .setFreeformTaskTransitionStarter(mockFreeformTaskTransitionStarter)
+
+        onTouchListenerCaptor.value.onTouch(view,
+            MotionEvent.obtain(SystemClock.uptimeMillis(), SystemClock.uptimeMillis(),
+            MotionEvent.ACTION_DOWN, /* x= */ 0f, /* y= */ 0f, /* metaState= */ 0))
+        onTouchListenerCaptor.value.onTouch(view,
+            MotionEvent.obtain(SystemClock.uptimeMillis(), SystemClock.uptimeMillis(),
+            MotionEvent.ACTION_MOVE, /* x= */ 0f, /* y= */ 0f, /* metaState= */ 0))
+        onTouchListenerCaptor.value.onTouch(view,
+            MotionEvent.obtain(SystemClock.uptimeMillis(), SystemClock.uptimeMillis(),
+            MotionEvent.ACTION_UP, /* x= */ 0f, /* y= */ 0f, /* metaState= */ 0))
+        onClickListenerCaptor.value.onClick(view)
+
+        val transactionCaptor = argumentCaptor<WindowContainerTransaction>()
+        verify(mockFreeformTaskTransitionStarter).startRemoveTransition(transactionCaptor.capture())
+        val wct = transactionCaptor.firstValue
+
+        assertEquals(1, wct.getHierarchyOps().size)
+        assertEquals(HierarchyOp.HIERARCHY_OP_TYPE_REMOVE_TASK,
+                     wct.getHierarchyOps().get(0).getType())
+        assertEquals(decor.mTaskInfo.token.asBinder(), wct.getHierarchyOps().get(0).getContainer())
+    }
+
     private fun createOpenTaskDecoration(
         @WindowingMode windowingMode: Int,
         taskSurface: SurfaceControl = SurfaceControl(),
@@ -1073,7 +1133,9 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         onOpenInBrowserClickListener: ArgumentCaptor<Consumer<Uri>> =
             forClass(Consumer::class.java) as ArgumentCaptor<Consumer<Uri>>,
         onCaptionButtonClickListener: ArgumentCaptor<View.OnClickListener> =
-            forClass(View.OnClickListener::class.java) as ArgumentCaptor<View.OnClickListener>
+            forClass(View.OnClickListener::class.java) as ArgumentCaptor<View.OnClickListener>,
+        onCaptionButtonTouchListener: ArgumentCaptor<View.OnTouchListener> =
+            forClass(View.OnTouchListener::class.java) as ArgumentCaptor<View.OnTouchListener>
     ): DesktopModeWindowDecoration {
         val decor = setUpMockDecorationForTask(createTask(windowingMode = windowingMode))
         onTaskOpening(decor.mTaskInfo, taskSurface)
@@ -1085,7 +1147,8 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         verify(decor).setOnToSplitScreenClickListener(onToSplitScreenClickListenerCaptor.capture())
         verify(decor).setOpenInBrowserClickListener(onOpenInBrowserClickListener.capture())
         verify(decor).setCaptionListeners(
-                onCaptionButtonClickListener.capture(), any(), any(), any())
+                onCaptionButtonClickListener.capture(), onCaptionButtonTouchListener.capture(),
+                any(), any())
         return decor
     }
 
@@ -1172,5 +1235,6 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     companion object {
         private const val TAG = "DesktopModeWindowDecorViewModelTests"
         private val STABLE_INSETS = Rect(0, 100, 0, 0)
+        private val INITIAL_BOUNDS = Rect(0, 0, 100, 100)
     }
 }

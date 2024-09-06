@@ -197,6 +197,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                     });
                 }
             };
+    private final TaskPositionerFactory mTaskPositionerFactory;
 
     public DesktopModeWindowDecorViewModel(
             Context context,
@@ -246,7 +247,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 new SparseArray<>(),
                 interactionJankMonitor,
                 desktopTasksLimiter,
-                activityOrientationChangeHandler);
+                activityOrientationChangeHandler,
+                new TaskPositionerFactory());
     }
 
     @VisibleForTesting
@@ -275,7 +277,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             SparseArray<DesktopModeWindowDecoration> windowDecorByTaskId,
             InteractionJankMonitor interactionJankMonitor,
             Optional<DesktopTasksLimiter> desktopTasksLimiter,
-            Optional<DesktopActivityOrientationChangeHandler> activityOrientationChangeHandler) {
+            Optional<DesktopActivityOrientationChangeHandler> activityOrientationChangeHandler,
+            TaskPositionerFactory taskPositionerFactory) {
         mContext = context;
         mMainExecutor = shellExecutor;
         mMainHandler = mainHandler;
@@ -329,6 +332,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 }
             }
         };
+        mTaskPositionerFactory = taskPositionerFactory;
 
         shellInit.addInitCallback(this::onInit, this);
     }
@@ -822,7 +826,10 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                             decoration.mTaskSurface,
                             e.getRawX(dragPointerIdx),
                             newTaskBounds);
-                    updateDragStatus(e.getActionMasked());
+                    //  Flip mIsDragging only if the bounds actually changed.
+                    if (mIsDragging || !newTaskBounds.equals(mOnDragStartInitialBounds)) {
+                        updateDragStatus(e.getActionMasked());
+                    }
                     return true;
                 }
                 case MotionEvent.ACTION_UP:
@@ -1273,23 +1280,18 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                         mMultiInstanceHelper);
         mWindowDecorByTaskId.put(taskInfo.taskId, windowDecoration);
 
-        final DragPositioningCallback dragPositioningCallback;
-        if (!DesktopModeStatus.isVeiledResizeEnabled()) {
-            dragPositioningCallback = new FluidResizeTaskPositioner(
-                    mTaskOrganizer, mTransitions, windowDecoration, mDisplayController,
-                    mDragStartListener, mTransactionFactory);
-            windowDecoration.setTaskDragResizer(
-                    (FluidResizeTaskPositioner) dragPositioningCallback);
-        } else {
-            dragPositioningCallback = new VeiledResizeTaskPositioner(
-                    mTaskOrganizer, windowDecoration, mDisplayController,
-                    mDragStartListener, mTransitions, mInteractionJankMonitor);
-            windowDecoration.setTaskDragResizer(
-                    (VeiledResizeTaskPositioner) dragPositioningCallback);
-        }
+        final TaskPositioner taskPositioner = mTaskPositionerFactory.create(
+                mTaskOrganizer,
+                windowDecoration,
+                mDisplayController,
+                mDragStartListener,
+                mTransitions,
+                mInteractionJankMonitor,
+                mTransactionFactory);
+        windowDecoration.setTaskDragResizer(taskPositioner);
 
         final DesktopModeTouchEventListener touchEventListener =
-                new DesktopModeTouchEventListener(taskInfo, dragPositioningCallback);
+                new DesktopModeTouchEventListener(taskInfo, taskPositioner);
         windowDecoration.setOnMaximizeOrRestoreClickListener(() -> {
             onMaximizeOrRestore(taskInfo.taskId, "maximize_menu");
             return Unit.INSTANCE;
@@ -1323,7 +1325,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         windowDecoration.setCaptionListeners(
                 touchEventListener, touchEventListener, touchEventListener, touchEventListener);
         windowDecoration.setExclusionRegionListener(mExclusionRegionListener);
-        windowDecoration.setDragPositioningCallback(dragPositioningCallback);
+        windowDecoration.setDragPositioningCallback(taskPositioner);
         windowDecoration.setDragDetector(touchEventListener.mDragDetector);
         windowDecoration.relayout(taskInfo, startT, finishT,
                 false /* applyStartTransactionOnDraw */, false /* shouldSetTaskPositionAndCrop */);
@@ -1472,6 +1474,25 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             }
         }
     }
+
+    @VisibleForTesting
+    static class TaskPositionerFactory {
+        TaskPositioner create(
+                ShellTaskOrganizer taskOrganizer,
+                DesktopModeWindowDecoration windowDecoration,
+                DisplayController displayController,
+                DragPositioningCallbackUtility.DragStartListener dragStartListener,
+                Transitions transitions,
+                InteractionJankMonitor interactionJankMonitor,
+                Supplier<SurfaceControl.Transaction> transactionFactory) {
+            if (!DesktopModeStatus.isVeiledResizeEnabled()) {
+                return new FluidResizeTaskPositioner(
+                        taskOrganizer, transitions, windowDecoration, displayController,
+                        dragStartListener, transactionFactory);
+            }
+            return new VeiledResizeTaskPositioner(
+                    taskOrganizer, windowDecoration, displayController,
+                    dragStartListener, transitions, interactionJankMonitor);
+        }
+    }
 }
-
-
