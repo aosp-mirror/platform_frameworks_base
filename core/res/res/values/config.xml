@@ -4447,17 +4447,25 @@
     <string-array translatable="false" name="config_defaultPinnerServiceFiles">
     </string-array>
 
-    <!-- True if camera app should be pinned via Pinner Service -->
+    <!-- Note: This config is deprecated, use config_pinnerCameraPinBytes instead.
+         True if camera app should be pinned via Pinner Service -->
     <bool name="config_pinnerCameraApp">false</bool>
 
     <!-- Bytes that the PinnerService will pin for Home app -->
     <integer name="config_pinnerHomePinBytes">0</integer>
 
-    <!-- True if assistant app should be pinned via Pinner Service -->
+    <!-- Default: 80 MB. Bytes that the PinnerService will pin for Camera app -->
+    <integer name="config_pinnerCameraPinBytes">83886080</integer>
+
+    <!-- Note: This config is deprecated, use config_pinnerAssistantPinBytes instead.
+         True if assistant app should be pinned via Pinner Service -->
     <bool name="config_pinnerAssistantApp">false</bool>
 
-    <!-- Bytes that the PinnerService will pin for WebView -->
-    <integer name="config_pinnerWebviewPinBytes">0</integer>
+     <!-- Default: 60 MB. Bytes that the PinnerService will pin for Assistant -->
+    <integer name="config_pinnerAssistantPinBytes">62914560</integer>
+
+    <!-- Default: 20 MB. Bytes that the PinnerService will pin for WebView -->
+    <integer name="config_pinnerWebviewPinBytes">20971520</integer>
 
     <!-- Maximum memory that PinnerService will pin for apps expressed
          as a percentage of total device memory [0,100].
