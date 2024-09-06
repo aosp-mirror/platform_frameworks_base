@@ -41,11 +41,12 @@
 
 enum class SkBlendMode;
 class SkRRect;
-class Mesh;
 
 namespace android {
-namespace uirenderer {
 
+class Mesh;
+
+namespace uirenderer {
 namespace skiapipeline {
 class FunctorDrawable;
 }
@@ -67,18 +68,6 @@ struct DisplayListOp {
 };
 
 static_assert(sizeof(DisplayListOp) == 4);
-
-class DrawMeshPayload {
-public:
-    explicit DrawMeshPayload(const SkMesh* mesh) : mesh(mesh) {}
-    explicit DrawMeshPayload(const Mesh* meshWrapper) : meshWrapper(meshWrapper) {}
-
-    [[nodiscard]] const SkMesh& getSkMesh() const;
-
-private:
-    const SkMesh* mesh = nullptr;
-    const Mesh* meshWrapper = nullptr;
-};
 
 struct DrawImagePayload {
     explicit DrawImagePayload(Bitmap& bitmap)

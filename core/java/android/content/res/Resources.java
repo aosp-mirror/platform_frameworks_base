@@ -43,6 +43,7 @@ import android.annotation.StyleRes;
 import android.annotation.StyleableRes;
 import android.annotation.XmlRes;
 import android.app.Application;
+import android.app.ResourcesManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
@@ -338,14 +339,17 @@ public class Resources {
     public Resources(@Nullable ClassLoader classLoader) {
         mClassLoader = classLoader == null ? ClassLoader.getSystemClassLoader() : classLoader;
         sResourcesHistory.add(this);
+        ResourcesManager.getInstance().registerAllResourcesReference(this);
     }
 
     /**
-     * Only for creating the System resources.
+     * Only for creating the System resources. This is the only constructor that doesn't add
+     * Resources itself to the ResourcesManager list of all Resources references.
      */
     @UnsupportedAppUsage
     private Resources() {
-        this(null);
+        mClassLoader = ClassLoader.getSystemClassLoader();
+        sResourcesHistory.add(this);
 
         final DisplayMetrics metrics = new DisplayMetrics();
         metrics.setToDefaults();
@@ -2741,17 +2745,6 @@ public class Resources {
                 ar.recycle();
                 Log.i(TAG, "...preloaded " + numberOfEntries + " resources in "
                         + (SystemClock.uptimeMillis() - startTime) + "ms.");
-
-                if (sysRes.getBoolean(
-                        com.android.internal.R.bool.config_freeformWindowManagement)) {
-                    startTime = SystemClock.uptimeMillis();
-                    ar = sysRes.obtainTypedArray(
-                            com.android.internal.R.array.preloaded_freeform_multi_window_drawables);
-                    numberOfEntries = preloadDrawables(sysRes, ar);
-                    ar.recycle();
-                    Log.i(TAG, "...preloaded " + numberOfEntries + " resource in "
-                            + (SystemClock.uptimeMillis() - startTime) + "ms.");
-                }
             }
             sysRes.finishPreloading();
         } catch (RuntimeException e) {
@@ -2854,6 +2847,11 @@ public class Resources {
     @FlaggedApi(android.content.res.Flags.FLAG_REGISTER_RESOURCE_PATHS)
     public static void registerResourcePaths(@NonNull String uniqueId,
             @NonNull ApplicationInfo appInfo) {
-        throw new UnsupportedOperationException("The implementation has not been done yet.");
+        if (Flags.registerResourcePaths()) {
+            ResourcesManager.getInstance().registerResourcePaths(uniqueId, appInfo);
+        } else {
+            throw new UnsupportedOperationException("Flag " + Flags.FLAG_REGISTER_RESOURCE_PATHS
+                    + " is disabled.");
+        }
     }
 }

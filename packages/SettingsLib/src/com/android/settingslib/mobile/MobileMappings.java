@@ -236,7 +236,8 @@ public class MobileMappings {
             // Handle specific carrier config values for the default data SIM
             int defaultDataSubId = SubscriptionManager.from(context)
                     .getDefaultDataSubscriptionId();
-            PersistableBundle b = configMgr.getConfigForSubId(defaultDataSubId);
+            PersistableBundle b = configMgr == null ? null
+                        : configMgr.getConfigForSubId(defaultDataSubId);
             if (b != null) {
                 config.alwaysShowDataRatIcon = b.getBoolean(
                         CarrierConfigManager.KEY_ALWAYS_SHOW_DATA_RAT_ICON_BOOL);

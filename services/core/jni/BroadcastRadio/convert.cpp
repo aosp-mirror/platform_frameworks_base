@@ -350,7 +350,7 @@ static Rds RdsForRegion(bool rds, Region region) {
         case Region::ITU_2:
             return Rds::US;
         default:
-            ALOGE("Unexpected region: %d", region);
+            ALOGE("Unexpected region: %d", static_cast<int>(region));
             return Rds::NONE;
     }
 }
@@ -365,7 +365,7 @@ static Deemphasis DeemphasisForRegion(Region region) {
         case Region::JAPAN:
             return Deemphasis::D50;
         default:
-            ALOGE("Unexpected region: %d", region);
+            ALOGE("Unexpected region: %d", static_cast<int>(region));
             return Deemphasis::D50;
     }
 }
@@ -433,7 +433,7 @@ static JavaRef<jobject> BandDescriptorFromHal(JNIEnv *env, const V1_0::BandConfi
                 gjni.AmBandDescriptor.clazz, gjni.AmBandDescriptor.cstor,
                 region, config.type, config.lowerLimit, config.upperLimit, spacing, am.stereo));
     } else {
-        ALOGE("Unsupported band type: %d", config.type);
+        ALOGE("Unsupported band type: %d", static_cast<int>(config.type));
         return nullptr;
     }
 }
@@ -451,7 +451,7 @@ JavaRef<jobject> BandConfigFromHal(JNIEnv *env, const V1_0::BandConfig &config, 
         return make_javaref(env, env->NewObject(
                 gjni.AmBandConfig.clazz, gjni.AmBandConfig.cstor, descriptor.get()));
     } else {
-        ALOGE("Unsupported band type: %d", config.type);
+        ALOGE("Unsupported band type: %d", static_cast<int>(config.type));
         return nullptr;
     }
 }
@@ -539,9 +539,9 @@ JavaRef<jobject> MetadataFromHal(JNIEnv *env, const hidl_vec<V1_0::MetaData> &me
                         item.clockValue.timezoneOffsetInMinutes);
                 break;
             default:
-                ALOGW("invalid metadata type %d", item.type);
+                ALOGW("invalid metadata type %d", static_cast<int>(item.type));
         }
-        ALOGE_IF(status != 0, "Failed inserting metadata %d (of type %d)", key, item.type);
+        ALOGE_IF(status != 0, "Failed inserting metadata %d (of type %d)", key, static_cast<int>(item.type));
     }
 
     return jMetadata;

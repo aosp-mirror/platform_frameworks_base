@@ -17,16 +17,15 @@
 #ifndef ANDROID_GUI_BUFFERITEM_H
 #define ANDROID_GUI_BUFFERITEM_H
 
+#include <system/graphics.h>
 #include <ui/Fence.h>
 #include <ui/Rect.h>
-
-#include <system/graphics.h>
-
 #include <utils/StrongPointer.h>
 
 namespace android {
 
 class Fence;
+
 class GraphicBuffer;
 
 // The only thing we need here for layoutlib is mGraphicBuffer. The rest of the fields are added
@@ -37,6 +36,7 @@ public:
     enum { INVALID_BUFFER_SLOT = -1 };
 
     BufferItem() : mGraphicBuffer(nullptr), mFence(Fence::NO_FENCE) {}
+
     ~BufferItem() {}
 
     sp<GraphicBuffer> mGraphicBuffer;
@@ -60,6 +60,6 @@ public:
     bool mTransformToDisplayInverse;
 };
 
-}
+} // namespace android
 
 #endif // ANDROID_GUI_BUFFERITEM_H

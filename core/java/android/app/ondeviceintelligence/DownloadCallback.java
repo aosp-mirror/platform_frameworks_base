@@ -105,7 +105,7 @@ public interface DownloadCallback {
     }
 
     /**
-     * Called when model download via MDD completed. The remote implementation can populate any
+     * Called when model download is completed. The remote implementation can populate any
      * associated download params like file stats etc. in this callback to inform the client.
      *
      * @param downloadParams params containing info about the completed download.

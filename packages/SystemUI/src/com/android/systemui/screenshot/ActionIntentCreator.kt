@@ -23,7 +23,9 @@ import android.content.ContentProvider
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.UserHandle
 import com.android.systemui.res.R
+import com.android.systemui.screenshot.scroll.LongScreenshotActivity
 
 object ActionIntentCreator {
     /** @return a chooser intent to share the given URI. */
@@ -87,6 +89,15 @@ object ActionIntentCreator {
             .addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+    }
+
+    /** @return an Intent to start the LongScreenshotActivity */
+    fun createLongScreenshotIntent(owner: UserHandle, context: Context): Intent {
+        return Intent(context, LongScreenshotActivity::class.java)
+            .putExtra(LongScreenshotActivity.EXTRA_SCREENSHOT_USER_HANDLE, owner)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            .addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
     }
 
     private const val EXTRA_EDIT_SOURCE = "edit_source"

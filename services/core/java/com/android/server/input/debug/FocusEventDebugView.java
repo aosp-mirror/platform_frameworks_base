@@ -229,7 +229,8 @@ public class FocusEventDebugView extends RelativeLayout {
     /** Report a key event to the debug view. */
     @AnyThread
     public void reportKeyEvent(KeyEvent event) {
-        post(() -> handleKeyEvent(KeyEvent.obtain((KeyEvent) event)));
+        KeyEvent keyEvent = KeyEvent.obtain(event);
+        post(() -> handleKeyEvent(keyEvent));
     }
 
     /** Report a motion event to the debug view. */
@@ -239,7 +240,8 @@ public class FocusEventDebugView extends RelativeLayout {
             return;
         }
 
-        post(() -> handleRotaryInput(MotionEvent.obtain((MotionEvent) event)));
+        MotionEvent motionEvent = MotionEvent.obtain(event);
+        post(() -> handleRotaryInput(motionEvent));
     }
 
     private void handleKeyEvent(KeyEvent keyEvent) {

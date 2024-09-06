@@ -38,6 +38,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.eq;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.reset;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.same;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
@@ -66,6 +67,7 @@ import android.os.PowerManagerInternal;
 import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
 import android.provider.Settings;
+import android.view.Display;
 import android.view.DisplayAddress;
 import android.view.IRotationWatcher;
 import android.view.Surface;
@@ -214,6 +216,79 @@ public class DisplayRotationTests {
 
         verify(mMockDisplayWindowSettings).setUserRotation(mMockDisplayContent,
                 WindowManagerPolicy.USER_ROTATION_LOCKED, Surface.ROTATION_180);
+    }
+
+    @Test
+    public void testUserRotationSystemProperty_NonDefault_InternalDisplay() throws Exception {
+        mBuilder.setIsDefaultDisplay(false).build();
+        when(mMockDisplayContent.getDisplay().getType()).thenReturn(Display.TYPE_INTERNAL);
+        spyOn(mTarget);
+        when(mTarget.getDemoUserRotationOverride()).thenReturn(Surface.ROTATION_90);
+
+        mTarget.restoreSettings(WindowManagerPolicy.USER_ROTATION_FREE, Surface.ROTATION_270,
+                /*fixedToUserRotation=*/ 0);
+
+        assertEquals(Surface.ROTATION_270, mTarget.getUserRotation());
+        assertEquals(WindowManagerPolicy.USER_ROTATION_FREE, mTarget.getUserRotationMode());
+        assertEquals(0, mTarget.getFixedToUserRotationMode());
+    }
+
+    @Test
+    public void testUserRotationSystemProperty_NonDefault_ExternalDisplay() throws Exception {
+        mBuilder.setIsDefaultDisplay(false).build();
+        when(mMockDisplayContent.getDisplay().getType()).thenReturn(Display.TYPE_EXTERNAL);
+        spyOn(mTarget);
+        when(mTarget.getDemoUserRotationOverride()).thenReturn(Surface.ROTATION_90);
+
+        mTarget.restoreSettings(WindowManagerPolicy.USER_ROTATION_FREE, Surface.ROTATION_270,
+                /*fixedToUserRotation=*/ 0);
+
+        assertEquals(WindowManagerPolicy.USER_ROTATION_LOCKED, mTarget.getUserRotationMode());
+        assertEquals(Surface.ROTATION_90, mTarget.getUserRotation());
+        assertEquals(0, mTarget.getFixedToUserRotationMode());
+    }
+
+    @Test
+    public void testUserRotationSystemProperty_NonDefault_OverlayDisplay() throws Exception {
+        mBuilder.setIsDefaultDisplay(false).build();
+        when(mMockDisplayContent.getDisplay().getType()).thenReturn(Display.TYPE_OVERLAY);
+        spyOn(mTarget);
+        when(mTarget.getDemoUserRotationOverride()).thenReturn(Surface.ROTATION_90);
+
+        mTarget.restoreSettings(WindowManagerPolicy.USER_ROTATION_FREE, Surface.ROTATION_270,
+                /*fixedToUserRotation=*/ 0);
+
+        assertEquals(WindowManagerPolicy.USER_ROTATION_LOCKED, mTarget.getUserRotationMode());
+        assertEquals(Surface.ROTATION_90, mTarget.getUserRotation());
+        assertEquals(0, mTarget.getFixedToUserRotationMode());
+    }
+
+    @Test
+    public void testUserRotationSystemProperty_NonDefault_VirtualDisplay() throws Exception {
+        mBuilder.setIsDefaultDisplay(false).build();
+        when(mMockDisplayContent.getDisplay().getType()).thenReturn(Display.TYPE_VIRTUAL);
+        final var packageName = "abc";
+        when(mMockDisplayContent.getDisplay().getOwnerPackageName()).thenReturn(packageName);
+        spyOn(mTarget);
+        when(mTarget.getDemoUserRotationOverride()).thenReturn(Surface.ROTATION_90);
+
+        // Without package name
+        when(mTarget.getDemoUserRotationPackage()).thenReturn("");
+        mTarget.restoreSettings(WindowManagerPolicy.USER_ROTATION_FREE, Surface.ROTATION_270,
+                /*fixedToUserRotation=*/ 0);
+
+        assertEquals(WindowManagerPolicy.USER_ROTATION_FREE, mTarget.getUserRotationMode());
+        assertEquals(Surface.ROTATION_270, mTarget.getUserRotation());
+        assertEquals(0, mTarget.getFixedToUserRotationMode());
+
+        // Use package name
+        when(mTarget.getDemoUserRotationPackage()).thenReturn(packageName);
+        mTarget.restoreSettings(WindowManagerPolicy.USER_ROTATION_FREE, Surface.ROTATION_270,
+                /*fixedToUserRotation=*/ 0);
+
+        assertEquals(WindowManagerPolicy.USER_ROTATION_LOCKED, mTarget.getUserRotation());
+        assertEquals(Surface.ROTATION_90, mTarget.getUserRotationMode());
+        assertEquals(0, mTarget.getFixedToUserRotationMode());
     }
 
     @Test
@@ -1450,6 +1525,7 @@ public class DisplayRotationTests {
             mMockContext = mock(Context.class);
 
             mMockDisplayContent = mock(DisplayContent.class);
+            when(mMockDisplayContent.getDisplay()).thenReturn(mock(Display.class));
             mMockDisplayContent.isDefaultDisplay = mIsDefaultDisplay;
             when(mMockDisplayContent.calculateDisplayCutoutForRotation(anyInt()))
                     .thenReturn(NO_CUTOUT);

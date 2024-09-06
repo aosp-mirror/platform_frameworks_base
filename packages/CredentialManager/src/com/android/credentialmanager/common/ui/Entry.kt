@@ -21,13 +21,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -46,7 +46,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -54,7 +53,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.android.compose.theme.LocalAndroidColorScheme
-import com.android.credentialmanager.R
 import com.android.credentialmanager.ui.theme.EntryShape
 import com.android.credentialmanager.ui.theme.Shapes
 
@@ -94,7 +92,7 @@ fun Entry(
         label = {
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth().padding(
+                modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp).padding(
                     // Total end padding should be 16dp, but the suggestion chip itself
                     // has 8dp horizontal elements padding
                     horizontal = 8.dp, vertical = 16.dp,
@@ -152,14 +150,14 @@ fun Entry(
                                 },
                             )
                         }
-                    } else if (entrySecondLineText != null) {
+                    } else if (!entrySecondLineText.isNullOrBlank()) {
                         BodySmallText(
                             text = entrySecondLineText,
                             enforceOneLine = enforceOneLine,
                             onTextLayout = onTextLayout,
                         )
                     }
-                    if (entryThirdLineText != null) {
+                    if (!entryThirdLineText.isNullOrBlank()) {
                         BodySmallText(
                             text = entryThirdLineText,
                             enforceOneLine = enforceOneLine,
@@ -258,10 +256,14 @@ fun ActionEntry(
         onClick = onClick,
         shape = Shapes.large,
         label = {
-            Column(modifier = Modifier.wrapContentSize()
-                .padding(start = 16.dp, top = 16.dp, bottom = 16.dp)) {
+            Column(
+                    modifier = Modifier.heightIn(min = 56.dp).wrapContentSize().padding(
+                            start = 16.dp, top = 16.dp, bottom = 16.dp
+                    ),
+                    verticalArrangement = Arrangement.Center,
+            ) {
                 SmallTitleText(entryHeadlineText)
-                if (entrySecondLineText != null && entrySecondLineText.isNotEmpty()) {
+                if (!entrySecondLineText.isNullOrBlank()) {
                     BodySmallText(entrySecondLineText)
                 }
             }
@@ -300,10 +302,14 @@ fun CtaButtonRow(
         modifier = Modifier.fillMaxWidth()
     ) {
         if (leftButton != null) {
-            leftButton()
+            Box(modifier = Modifier.wrapContentSize().weight(1f, fill = false)) {
+                leftButton()
+            }
         }
         if (rightButton != null) {
-            rightButton()
+            Box(modifier = Modifier.wrapContentSize().weight(1f, fill = false)) {
+                rightButton()
+            }
         }
     }
 }
@@ -312,6 +318,8 @@ fun CtaButtonRow(
 fun MoreOptionTopAppBar(
     text: String,
     onNavigationIconClicked: () -> Unit,
+    navigationIcon: ImageVector,
+    navigationIconContentDescription: String,
     bottomPadding: Dp,
 ) {
     Row(
@@ -327,10 +335,8 @@ fun MoreOptionTopAppBar(
                     contentAlignment = Alignment.Center,
             ) {
                 Icon(
-                        imageVector = Icons.Filled.ArrowBack,
-                        contentDescription = stringResource(
-                                R.string.accessibility_back_arrow_button
-                        ),
+                        imageVector = navigationIcon,
+                        contentDescription = navigationIconContentDescription,
                         modifier = Modifier.size(24.dp).autoMirrored(),
                         tint = LocalAndroidColorScheme.current.onSurfaceVariant,
                 )

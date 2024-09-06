@@ -28,7 +28,7 @@ import android.content.pm.ServiceInfo
 import android.os.Bundle
 import android.os.UserHandle
 import android.service.controls.ControlsProviderService
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.settingslib.applications.ServiceListing
 import com.android.systemui.res.R
@@ -65,7 +65,7 @@ import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class ControlsListingControllerImplTest : SysuiTestCase() {
 
     companion object {

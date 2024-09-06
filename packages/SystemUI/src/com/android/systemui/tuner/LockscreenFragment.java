@@ -41,8 +41,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.RecyclerView.ViewHolder;
 
 import com.android.systemui.Dependency;
-import com.android.systemui.res.R;
 import com.android.systemui.plugins.IntentButtonProvider.IntentButton;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.ScalingDrawableWrapper;
 import com.android.systemui.statusbar.phone.ExpandableIndicator;
 import com.android.systemui.statusbar.policy.ExtensionController.TunerFactory;

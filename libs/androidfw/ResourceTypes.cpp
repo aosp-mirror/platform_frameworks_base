@@ -2650,8 +2650,9 @@ bool ResTable_config::isBetterThan(const ResTable_config& o,
                 return (mnc);
             }
         }
-
-        if (isLocaleBetterThan(o, requested)) {
+        // Cheaper to check for the empty locales here before calling the function
+        // as we often can skip it completely.
+        if (requested->locale && (locale || o.locale) && isLocaleBetterThan(o, requested)) {
             return true;
         }
 
@@ -7237,27 +7238,11 @@ void DynamicRefTable::addMapping(uint8_t buildPackageId, uint8_t runtimePackageI
 
 status_t DynamicRefTable::lookupResourceId(uint32_t* resId) const {
     uint32_t res = *resId;
-    size_t packageId = Res_GETPACKAGE(res) + 1;
-
     if (!Res_VALIDID(res)) {
         // Cannot look up a null or invalid id, so no lookup needs to be done.
         return NO_ERROR;
     }
-
-    const auto alias_it = std::lower_bound(mAliasId.begin(), mAliasId.end(), res,
-        [](const AliasMap::value_type& pair, uint32_t val) { return pair.first < val; });
-    if (alias_it != mAliasId.end() && alias_it->first == res) {
-      // Rewrite the resource id to its alias resource id. Since the alias resource id is a
-      // compile-time id, it still needs to be resolved further.
-      res = alias_it->second;
-    }
-
-    if (packageId == SYS_PACKAGE_ID || (packageId == APP_PACKAGE_ID && !mAppAsLib)) {
-        // No lookup needs to be done, app and framework package IDs are absolute.
-        *resId = res;
-        return NO_ERROR;
-    }
-
+    const size_t packageId = Res_GETPACKAGE(res) + 1;
     if (packageId == 0 || (packageId == APP_PACKAGE_ID && mAppAsLib)) {
         // The package ID is 0x00. That means that a shared library is accessing
         // its own local resource.
@@ -7265,6 +7250,24 @@ status_t DynamicRefTable::lookupResourceId(uint32_t* resId) const {
         // app package Id is local resources.
         // so we fix up those resources with the calling package ID.
         *resId = (0xFFFFFF & (*resId)) | (((uint32_t) mAssignedPackageId) << 24);
+        return NO_ERROR;
+    }
+    // All aliases are coming from the framework, and usually have their own separate ID range,
+    // skipping the whole binary search is much more efficient than not finding anything.
+    if (packageId == SYS_PACKAGE_ID && !mAliasId.empty() &&
+            res >= mAliasId.front().first && res <= mAliasId.back().first) {
+        const auto alias_it = std::lower_bound(mAliasId.begin(), mAliasId.end(), res,
+                                               [](const AliasMap::value_type& pair,
+                                                  uint32_t val) { return pair.first < val; });
+        if (alias_it != mAliasId.end() && alias_it->first == res) {
+            // Rewrite the resource id to its alias resource id. Since the alias resource id is a
+            // compile-time id, it still needs to be resolved further.
+            res = alias_it->second;
+        }
+    }
+    if (packageId == SYS_PACKAGE_ID || (packageId == APP_PACKAGE_ID && !mAppAsLib)) {
+        // No lookup needs to be done, app and framework package IDs are absolute.
+        *resId = res;
         return NO_ERROR;
     }
 

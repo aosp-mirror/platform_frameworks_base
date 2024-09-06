@@ -133,6 +133,8 @@ a similar way.
         <item name="colorControlActivated">?attr/colorControlHighlight</item>
         <item name="listPreferredItemPaddingStart">?attr/dialogPreferredPadding</item>
         <item name="listPreferredItemPaddingEnd">?attr/dialogPreferredPadding</item>
+        <item name="iconfactoryIconSize">@dimen/resolver_icon_size</item>
+        <item name="iconfactoryBadgeSize">@dimen/resolver_badge_size</item>
     </style>
 
     <!-- Use a dark theme for watches. -->
@@ -146,7 +148,7 @@ a similar way.
         <item name="windowAnimationStyle">@style/Animation.InputMethod</item>
         <item name="imeFullscreenBackground">?colorBackground</item>
         <item name="imeExtractEnterAnimation">@anim/input_method_extract_enter</item>
-        <item name="windowSwipeToDismiss">false</item>
+        <item name="windowSwipeToDismiss">true</item>
     </style>
 
     <!-- DeviceDefault theme for dialog windows and activities. In contrast to Material, the
@@ -181,19 +183,95 @@ a similar way.
 
     <style name="Theme.DeviceDefault.Dialog.Alert" parent="Theme.Material.Dialog.Alert">
         <item name="android:windowFullscreen">true</item>
-        <!-- Color palette Dark -->
+        <!-- Dialog attributes -->
+        <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
+        <item name="alertDialogTheme">@style/Theme.DeviceDefault.Dialog.Alert</item>
+        <!-- Color palette -->
         <item name="colorPrimary">@color/primary_device_default_dark</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
-        <item name="colorForeground">@color/foreground_device_default_dark</item>
         <item name="colorAccent">@color/accent_device_default_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
+        <item name="colorAccentSecondary">@color/accent_secondary_device_default</item>
+        <item name="colorAccentTertiary">@color/accent_tertiary_device_default</item>
+        <item name="colorAccentPrimaryVariant">@color/accent_primary_variant_dark_device_default</item>
+        <item name="colorAccentSecondaryVariant">@color/accent_secondary_variant_dark_device_default</item>
+        <item name="colorAccentTertiaryVariant">@color/accent_tertiary_variant_dark_device_default</item>
+        <item name="colorSurface">@color/surface_dark</item>
+        <item name="colorSurfaceHighlight">@color/surface_highlight_dark</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_dark</item>
+        <item name="colorSurfaceHeader">@color/surface_header_dark</item>
+        <item name="colorError">@color/error_color_device_default_dark</item>
         <item name="colorBackground">@color/background_device_default_dark</item>
         <item name="colorBackgroundFloating">@color/background_floating_device_default_dark</item>
-        <item name="colorBackgroundCacheHint">@color/background_cache_hint_selector_device_default</item>
-        <item name="colorButtonNormal">@color/button_normal_device_default_dark</item>
-        <item name="colorError">@color/error_color_device_default_dark</item>
-        <item name="disabledAlpha">@dimen/disabled_alpha_device_default</item>
-        <item name="primaryContentAlpha">@dimen/primary_content_alpha_device_default</item>
-        <item name="secondaryContentAlpha">@dimen/secondary_content_alpha_device_default</item>
+        <item name="textColorPrimary">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondary">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiary">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
+        <item name="colorForeground">@color/foreground_device_default_dark</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_light</item>
+
+        <!-- Text styles -->
+        <item name="textAppearanceButton">@style/TextAppearance.DeviceDefault.Widget.Button</item>
+
+        <!-- Button styles -->
+        <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
+        <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
+
+        <!-- Progress bar attributes -->
+        <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
+        <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
+
+        <!-- Toolbar attributes -->
+        <item name="toolbarStyle">@style/Widget.DeviceDefault.Toolbar</item>
+
+        <item name="materialColorOnSecondaryFixedVariant">@color/system_on_secondary_fixed_variant</item>
+        <item name="materialColorOnTertiaryFixedVariant">@color/system_on_tertiary_fixed_variant</item>
+        <item name="materialColorSurfaceContainerLowest">@color/system_surface_container_lowest_dark</item>
+        <item name="materialColorOnPrimaryFixedVariant">@color/system_on_primary_fixed_variant</item>
+        <item name="materialColorOnSecondaryContainer">@color/system_on_secondary_container_dark</item>
+        <item name="materialColorOnTertiaryContainer">@color/system_on_tertiary_container_dark</item>
+        <item name="materialColorSurfaceContainerLow">@color/system_surface_container_low_dark</item>
+        <item name="materialColorOnPrimaryContainer">@color/system_on_primary_container_dark</item>
+        <item name="materialColorSecondaryFixedDim">@color/system_secondary_fixed_dim</item>
+        <item name="materialColorOnErrorContainer">@color/system_on_error_container_dark</item>
+        <item name="materialColorOnSecondaryFixed">@color/system_on_secondary_fixed</item>
+        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_light</item>
+        <item name="materialColorTertiaryFixedDim">@color/system_tertiary_fixed_dim</item>
+        <item name="materialColorOnTertiaryFixed">@color/system_on_tertiary_fixed</item>
+        <item name="materialColorPrimaryFixedDim">@color/system_primary_fixed_dim</item>
+        <item name="materialColorSecondaryContainer">@color/system_secondary_container_dark</item>
+        <item name="materialColorErrorContainer">@color/system_error_container_dark</item>
+        <item name="materialColorOnPrimaryFixed">@color/system_on_primary_fixed</item>
+        <item name="materialColorPrimaryInverse">@color/system_primary_light</item>
+        <item name="materialColorSecondaryFixed">@color/system_secondary_fixed</item>
+        <item name="materialColorSurfaceInverse">@color/system_surface_light</item>
+        <item name="materialColorSurfaceVariant">@color/system_surface_variant_dark</item>
+        <item name="materialColorTertiaryContainer">@color/system_tertiary_container_dark</item>
+        <item name="materialColorTertiaryFixed">@color/system_tertiary_fixed</item>
+        <item name="materialColorPrimaryContainer">@color/system_primary_container_dark</item>
+        <item name="materialColorOnBackground">@color/system_on_background_dark</item>
+        <item name="materialColorPrimaryFixed">@color/system_primary_fixed</item>
+        <item name="materialColorOnSecondary">@color/system_on_secondary_dark</item>
+        <item name="materialColorOnTertiary">@color/system_on_tertiary_dark</item>
+        <item name="materialColorSurfaceDim">@color/system_surface_dim_dark</item>
+        <item name="materialColorSurfaceBright">@color/system_surface_bright_dark</item>
+        <item name="materialColorOnError">@color/system_on_error_dark</item>
+        <item name="materialColorSurface">@color/system_surface_dark</item>
+        <item name="materialColorSurfaceContainerHigh">@color/system_surface_container_high_dark</item>
+        <item name="materialColorSurfaceContainerHighest">@color/system_surface_container_highest_dark</item>
+        <item name="materialColorOnSurfaceVariant">@color/system_on_surface_variant_dark</item>
+        <item name="materialColorOutline">@color/system_outline_dark</item>
+        <item name="materialColorOutlineVariant">@color/system_outline_variant_dark</item>
+        <item name="materialColorOnPrimary">@color/system_on_primary_dark</item>
+        <item name="materialColorOnSurface">@color/system_on_surface_dark</item>
+        <item name="materialColorSurfaceContainer">@color/system_surface_container_dark</item>
+        <item name="materialColorPrimary">@color/system_primary_dark</item>
+        <item name="materialColorSecondary">@color/system_secondary_dark</item>
+        <item name="materialColorTertiary">@color/system_tertiary_dark</item>
+        <item name="materialColorError">@color/system_error_dark</item>
     </style>
 
     <!-- DeviceDefault theme for a window that should look like the Settings app.  -->

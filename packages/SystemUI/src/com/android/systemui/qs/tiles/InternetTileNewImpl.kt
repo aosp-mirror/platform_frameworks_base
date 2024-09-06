@@ -20,9 +20,9 @@ import android.content.Intent
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
-import android.view.View
 import android.widget.Switch
 import com.android.internal.logging.MetricsLogger
+import com.android.systemui.animation.Expandable
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.ActivityStarter
@@ -44,18 +44,18 @@ import javax.inject.Inject
 class InternetTileNewImpl
 @Inject
 constructor(
-        host: QSHost,
-        uiEventLogger: QsEventLogger,
-        @Background backgroundLooper: Looper,
-        @Main private val mainHandler: Handler,
-        falsingManager: FalsingManager,
-        metricsLogger: MetricsLogger,
-        statusBarStateController: StatusBarStateController,
-        activityStarter: ActivityStarter,
-        qsLogger: QSLogger,
-        viewModel: InternetTileViewModel,
-        private val internetDialogManager: InternetDialogManager,
-        private val accessPointController: AccessPointController,
+    host: QSHost,
+    uiEventLogger: QsEventLogger,
+    @Background backgroundLooper: Looper,
+    @Main private val mainHandler: Handler,
+    falsingManager: FalsingManager,
+    metricsLogger: MetricsLogger,
+    statusBarStateController: StatusBarStateController,
+    activityStarter: ActivityStarter,
+    qsLogger: QSLogger,
+    viewModel: InternetTileViewModel,
+    private val internetDialogManager: InternetDialogManager,
+    private val accessPointController: AccessPointController,
 ) :
     QSTileImpl<QSTile.BooleanState>(
         host,
@@ -84,13 +84,13 @@ constructor(
         return QSTile.BooleanState().also { it.forceExpandIcon = true }
     }
 
-    override fun handleClick(view: View?) {
+    override fun handleClick(expandable: Expandable?) {
         mainHandler.post {
             internetDialogManager.create(
                 aboveStatusBar = true,
                 accessPointController.canConfigMobileData(),
                 accessPointController.canConfigWifi(),
-                view,
+                expandable,
             )
         }
     }

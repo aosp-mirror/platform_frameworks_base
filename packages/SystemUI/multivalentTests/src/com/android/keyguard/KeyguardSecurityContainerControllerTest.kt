@@ -17,9 +17,11 @@
 
 package com.android.keyguard
 
+import android.app.admin.DevicePolicyManager
+import android.app.admin.flags.Flags as DevicePolicyFlags
 import android.content.res.Configuration
-import android.hardware.biometrics.BiometricRequestConstants
 import android.media.AudioManager
+import android.platform.test.annotations.EnableFlags
 import android.telephony.TelephonyManager
 import android.testing.TestableLooper.RunWithLooper
 import android.testing.TestableResources
@@ -41,21 +43,21 @@ import com.android.keyguard.domain.interactor.KeyguardKeyboardInteractor
 import com.android.systemui.Flags as AConfigFlags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.FaceAuthAccessibilityDelegate
-import com.android.systemui.biometrics.SideFpsController
-import com.android.systemui.biometrics.SideFpsUiRequestSource
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants
 import com.android.systemui.classifier.FalsingA11yDelegate
 import com.android.systemui.classifier.FalsingCollector
-import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
+import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyboard.data.repository.FakeKeyboardRepository
+import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.SessionTracker
@@ -64,11 +66,10 @@ import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
-import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.FakeSceneDataSource
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
-import com.android.systemui.shared.Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.DevicePostureController
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
@@ -85,8 +86,6 @@ import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.settings.GlobalSettings
 import com.google.common.truth.Truth
-import dagger.Lazy
-import java.util.Optional
 import junit.framework.Assert
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -142,7 +141,6 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
     @Mock private lateinit var userSwitcherController: UserSwitcherController
     @Mock private lateinit var sessionTracker: SessionTracker
     @Mock private lateinit var keyguardViewController: KeyguardViewController
-    @Mock private lateinit var sideFpsController: SideFpsController
     @Mock private lateinit var keyguardPasswordViewControllerMock: KeyguardPasswordViewController
     @Mock private lateinit var falsingA11yDelegate: FalsingA11yDelegate
     @Mock private lateinit var telephonyManager: TelephonyManager
@@ -153,6 +151,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
     @Mock private lateinit var faceAuthAccessibilityDelegate: FaceAuthAccessibilityDelegate
     @Mock private lateinit var deviceProvisionedController: DeviceProvisionedController
     @Mock private lateinit var postureController: DevicePostureController
+    @Mock private lateinit var devicePolicyManager: DevicePolicyManager
 
     @Captor
     private lateinit var swipeListenerArgumentCaptor:
@@ -169,7 +168,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
     private lateinit var sceneInteractor: SceneInteractor
     private lateinit var keyguardTransitionInteractor: KeyguardTransitionInteractor
     private lateinit var deviceEntryInteractor: DeviceEntryInteractor
-    @Mock private lateinit var primaryBouncerInteractor: Lazy<PrimaryBouncerInteractor>
+    @Mock private lateinit var primaryBouncerInteractor: PrimaryBouncerInteractor
     private lateinit var sceneTransitionStateFlow: MutableStateFlow<ObservableTransitionState>
     private lateinit var fakeSceneDataSource: FakeSceneDataSource
 
@@ -208,16 +207,16 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
 
         val keyguardKeyboardInteractor = KeyguardKeyboardInteractor(FakeKeyboardRepository())
         featureFlags = FakeFeatureFlags()
-        featureFlags.set(Flags.REFACTOR_KEYGUARD_DISMISS_INTENT, false)
         featureFlags.set(Flags.LOCKSCREEN_ENABLE_LANDSCAPE, false)
 
         mSetFlagsRule.enableFlags(
             AConfigFlags.FLAG_REVAMPED_BOUNCER_MESSAGES,
         )
-        mSetFlagsRule.disableFlags(
-            FLAG_SIDEFPS_CONTROLLER_REFACTOR,
-            AConfigFlags.FLAG_KEYGUARD_WM_STATE_REFACTOR
-        )
+        if (!SceneContainerFlag.isEnabled) {
+            mSetFlagsRule.disableFlags(
+                AConfigFlags.FLAG_KEYGUARD_WM_STATE_REFACTOR,
+            )
+        }
 
         keyguardPasswordViewController =
             KeyguardPasswordViewController(
@@ -266,10 +265,8 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                 falsingManager,
                 userSwitcherController,
                 featureFlags,
-                kosmos.fakeSceneContainerFlags,
                 globalSettings,
                 sessionTracker,
-                Optional.of(sideFpsController),
                 falsingA11yDelegate,
                 telephonyManager,
                 viewMediatorCallback,
@@ -280,8 +277,9 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                 mSelectedUserInteractor,
                 deviceProvisionedController,
                 faceAuthAccessibilityDelegate,
+                devicePolicyManager,
                 keyguardTransitionInteractor,
-                primaryBouncerInteractor,
+                { primaryBouncerInteractor },
             ) {
                 deviceEntryInteractor
             }
@@ -777,24 +775,6 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun sideFpsControllerShow() {
-        mSetFlagsRule.disableFlags(FLAG_SIDEFPS_CONTROLLER_REFACTOR)
-        underTest.updateSideFpsVisibility(/* isVisible= */ true)
-        verify(sideFpsController)
-            .show(
-                SideFpsUiRequestSource.PRIMARY_BOUNCER,
-                BiometricRequestConstants.REASON_AUTH_KEYGUARD
-            )
-    }
-
-    @Test
-    fun sideFpsControllerHide() {
-        mSetFlagsRule.disableFlags(FLAG_SIDEFPS_CONTROLLER_REFACTOR)
-        underTest.updateSideFpsVisibility(/* isVisible= */ false)
-        verify(sideFpsController).hide(SideFpsUiRequestSource.PRIMARY_BOUNCER)
-    }
-
-    @Test
     fun setExpansion_setsAlpha() {
         underTest.setExpansion(KeyguardBouncerConstants.EXPANSION_VISIBLE)
         verify(view).alpha = 1f
@@ -802,17 +782,17 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
     }
 
     @Test
+    @EnableSceneContainer
     fun dismissesKeyguard_whenSceneChangesToGone() =
         kosmos.testScope.runTest {
-            kosmos.fakeSceneContainerFlags.enabled = true
             // Upon init, we have never dismisses the keyguard.
             underTest.onInit()
             runCurrent()
-            verify(viewMediatorCallback, never()).keyguardDone(anyInt())
+            verify(primaryBouncerInteractor, never())
+                .notifyKeyguardAuthenticatedPrimaryAuth(anyInt())
 
             // Once the view is attached, we start listening but simply going to the bouncer scene
-            // is
-            // not enough to trigger a dismissal of the keyguard.
+            // is not enough to trigger a dismissal of the keyguard.
             underTest.onViewAttached()
             fakeSceneDataSource.pause()
             sceneInteractor.changeScene(Scenes.Bouncer, "reason")
@@ -820,6 +800,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                 ObservableTransitionState.Transition(
                     Scenes.Lockscreen,
                     Scenes.Bouncer,
+                    flowOf(Scenes.Bouncer),
                     flowOf(.5f),
                     false,
                     isUserInputOngoing = flowOf(false),
@@ -828,11 +809,14 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
             fakeSceneDataSource.unpause(expectedScene = Scenes.Bouncer)
             sceneTransitionStateFlow.value = ObservableTransitionState.Idle(Scenes.Bouncer)
             runCurrent()
-            verify(viewMediatorCallback, never()).keyguardDone(anyInt())
+            verify(primaryBouncerInteractor, never())
+                .notifyKeyguardAuthenticatedPrimaryAuth(anyInt())
 
             // While listening, going from the bouncer scene to the gone scene, does dismiss the
             // keyguard.
-            kosmos.fakeDeviceEntryRepository.setUnlocked(true)
+            kosmos.fakeDeviceEntryFingerprintAuthRepository.setAuthenticationStatus(
+                SuccessFingerprintAuthenticationStatus(0, true)
+            )
             runCurrent()
             fakeSceneDataSource.pause()
             sceneInteractor.changeScene(Scenes.Gone, "reason")
@@ -840,6 +824,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                 ObservableTransitionState.Transition(
                     Scenes.Bouncer,
                     Scenes.Gone,
+                    flowOf(Scenes.Gone),
                     flowOf(.5f),
                     false,
                     isUserInputOngoing = flowOf(false),
@@ -848,17 +833,18 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
             fakeSceneDataSource.unpause(expectedScene = Scenes.Gone)
             sceneTransitionStateFlow.value = ObservableTransitionState.Idle(Scenes.Gone)
             runCurrent()
-            verify(viewMediatorCallback).keyguardDone(anyInt())
+            verify(primaryBouncerInteractor).notifyKeyguardAuthenticatedPrimaryAuth(anyInt())
 
             // While listening, moving back to the bouncer scene does not dismiss the keyguard
             // again.
-            clearInvocations(viewMediatorCallback)
+            clearInvocations(primaryBouncerInteractor)
             fakeSceneDataSource.pause()
             sceneInteractor.changeScene(Scenes.Bouncer, "reason")
             sceneTransitionStateFlow.value =
                 ObservableTransitionState.Transition(
                     Scenes.Gone,
                     Scenes.Bouncer,
+                    flowOf(Scenes.Bouncer),
                     flowOf(.5f),
                     false,
                     isUserInputOngoing = flowOf(false),
@@ -867,7 +853,8 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
             fakeSceneDataSource.unpause(expectedScene = Scenes.Bouncer)
             sceneTransitionStateFlow.value = ObservableTransitionState.Idle(Scenes.Bouncer)
             runCurrent()
-            verify(viewMediatorCallback, never()).keyguardDone(anyInt())
+            verify(primaryBouncerInteractor, never())
+                .notifyKeyguardAuthenticatedPrimaryAuth(anyInt())
 
             // Detaching the view stops listening, so moving from the bouncer scene to the gone
             // scene
@@ -879,6 +866,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                 ObservableTransitionState.Transition(
                     Scenes.Bouncer,
                     Scenes.Gone,
+                    flowOf(Scenes.Gone),
                     flowOf(.5f),
                     false,
                     isUserInputOngoing = flowOf(false),
@@ -887,7 +875,8 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
             fakeSceneDataSource.unpause(expectedScene = Scenes.Gone)
             sceneTransitionStateFlow.value = ObservableTransitionState.Idle(Scenes.Gone)
             runCurrent()
-            verify(viewMediatorCallback, never()).keyguardDone(anyInt())
+            verify(primaryBouncerInteractor, never())
+                .notifyKeyguardAuthenticatedPrimaryAuth(anyInt())
 
             // While not listening, moving to the lockscreen does not dismiss the keyguard.
             fakeSceneDataSource.pause()
@@ -896,6 +885,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                 ObservableTransitionState.Transition(
                     Scenes.Gone,
                     Scenes.Lockscreen,
+                    flowOf(Scenes.Lockscreen),
                     flowOf(.5f),
                     false,
                     isUserInputOngoing = flowOf(false),
@@ -904,7 +894,8 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
             fakeSceneDataSource.unpause(expectedScene = Scenes.Lockscreen)
             sceneTransitionStateFlow.value = ObservableTransitionState.Idle(Scenes.Lockscreen)
             runCurrent()
-            verify(viewMediatorCallback, never()).keyguardDone(anyInt())
+            verify(primaryBouncerInteractor, never())
+                .notifyKeyguardAuthenticatedPrimaryAuth(anyInt())
 
             // Reattaching the view starts listening again so moving from the bouncer scene to the
             // gone scene now does dismiss the keyguard again, this time from lockscreen.
@@ -915,6 +906,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                 ObservableTransitionState.Transition(
                     Scenes.Lockscreen,
                     Scenes.Gone,
+                    flowOf(Scenes.Gone),
                     flowOf(.5f),
                     false,
                     isUserInputOngoing = flowOf(false),
@@ -923,7 +915,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
             fakeSceneDataSource.unpause(expectedScene = Scenes.Gone)
             sceneTransitionStateFlow.value = ObservableTransitionState.Idle(Scenes.Gone)
             runCurrent()
-            verify(viewMediatorCallback).keyguardDone(anyInt())
+            verify(primaryBouncerInteractor).notifyKeyguardAuthenticatedPrimaryAuth(anyInt())
         }
 
     @Test
@@ -945,6 +937,45 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
             .addUserSwitchCallback(capture(userSwitchCallbackArgumentCaptor))
         userSwitchCallbackArgumentCaptor.value.onUserSwitched()
         verify(viewFlipperController).asynchronouslyInflateView(any(), any(), any())
+    }
+
+    @Test
+    @EnableFlags(DevicePolicyFlags.FLAG_HEADLESS_SINGLE_USER_FIXES)
+    fun showAlmostAtWipeDialog_calledOnMainUser_setsCorrectUserType() {
+        val mainUserId = 10
+
+        underTest.showMessageForFailedUnlockAttempt(
+            /* userId = */ mainUserId,
+            /* expiringUserId = */ mainUserId,
+            /* mainUserId = */ mainUserId,
+            /* remainingBeforeWipe = */ 1,
+            /* failedAttempts = */ 1
+        )
+
+        verify(view)
+            .showAlmostAtWipeDialog(any(), any(), eq(KeyguardSecurityContainer.USER_TYPE_PRIMARY))
+    }
+
+    @Test
+    @EnableFlags(DevicePolicyFlags.FLAG_HEADLESS_SINGLE_USER_FIXES)
+    fun showAlmostAtWipeDialog_calledOnNonMainUser_setsCorrectUserType() {
+        val secondaryUserId = 10
+        val mainUserId = 0
+
+        underTest.showMessageForFailedUnlockAttempt(
+            /* userId = */ secondaryUserId,
+            /* expiringUserId = */ secondaryUserId,
+            /* mainUserId = */ mainUserId,
+            /* remainingBeforeWipe = */ 1,
+            /* failedAttempts = */ 1
+        )
+
+        verify(view)
+            .showAlmostAtWipeDialog(
+                any(),
+                any(),
+                eq(KeyguardSecurityContainer.USER_TYPE_SECONDARY_USER)
+            )
     }
 
     private val registeredSwipeListener: KeyguardSecurityContainer.SwipeListener

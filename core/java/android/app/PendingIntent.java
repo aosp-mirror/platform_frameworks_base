@@ -44,8 +44,6 @@ import android.content.IntentSender;
 import android.content.pm.PackageManager.ResolveInfoFlagsBits;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
-import android.net.Uri;
-import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -71,7 +69,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executor;
-import java.util.function.Consumer;
 
 /**
  * A description of an Intent and target action to perform with it.  Instances
@@ -1469,21 +1466,6 @@ public final class PendingIntent implements Parcelable {
         sb.append(mTarget.asBinder());
         sb.append('}');
         return sb.toString();
-    }
-
-    /**
-     * See {@link Intent#visitUris(Consumer)}.
-     *
-     * @hide
-     */
-    public void visitUris(@NonNull Consumer<Uri> visitor) {
-        if (android.app.Flags.visitRiskyUris()) {
-            Intent intent = Binder.withCleanCallingIdentity(this::getIntent);
-
-            if (intent != null) {
-                intent.visitUris(visitor);
-            }
-        }
     }
 
     /** @hide */

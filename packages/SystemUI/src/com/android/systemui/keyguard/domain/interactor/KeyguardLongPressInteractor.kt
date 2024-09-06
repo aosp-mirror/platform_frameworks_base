@@ -24,7 +24,6 @@ import android.view.accessibility.AccessibilityManager
 import androidx.annotation.VisibleForTesting
 import com.android.internal.logging.UiEvent
 import com.android.internal.logging.UiEventLogger
-import com.android.systemui.res.R
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -32,6 +31,7 @@ import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -206,7 +206,9 @@ constructor(
         return accessibilityManager
             .getRecommendedTimeoutMillis(
                 DEFAULT_POPUP_AUTO_HIDE_TIMEOUT_MS.toInt(),
-                AccessibilityManager.FLAG_CONTENT_ICONS or AccessibilityManager.FLAG_CONTENT_TEXT,
+                AccessibilityManager.FLAG_CONTENT_ICONS or
+                    AccessibilityManager.FLAG_CONTENT_TEXT or
+                    AccessibilityManager.FLAG_CONTENT_CONTROLS,
             )
             .toLong()
     }

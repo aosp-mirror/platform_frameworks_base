@@ -16,12 +16,10 @@
 
 package com.android.server.biometrics.sensors;
 
-import static com.android.systemui.shared.Flags.sidefpsControllerRefactor;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.hardware.biometrics.BiometricRequestConstants;
-import android.hardware.fingerprint.ISidefpsController;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.hardware.fingerprint.IUdfpsOverlayControllerCallback;
 import android.os.RemoteException;
@@ -45,22 +43,6 @@ public final class SensorOverlays {
 
     @NonNull private final Optional<IUdfpsOverlayController> mUdfpsOverlayController;
 
-    // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
-    @NonNull private final Optional<ISidefpsController> mSidefpsController;
-
-    /**
-     * Create an overlay controller for each modality.
-     *
-     * @param udfpsOverlayController under display fps or null if not present on device
-     * @param sidefpsController side fps or null if not present on device
-     */
-    public SensorOverlays(
-            @Nullable IUdfpsOverlayController udfpsOverlayController,
-            @Nullable ISidefpsController sidefpsController) {
-        mUdfpsOverlayController = Optional.ofNullable(udfpsOverlayController);
-        mSidefpsController = Optional.ofNullable(sidefpsController);
-    }
-
     /**
      * Create an overlay controller for each modality.
      *
@@ -68,8 +50,6 @@ public final class SensorOverlays {
      */
     public SensorOverlays(@Nullable IUdfpsOverlayController udfpsOverlayController) {
         mUdfpsOverlayController = Optional.ofNullable(udfpsOverlayController);
-        // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
-        mSidefpsController = Optional.empty();
     }
 
     /**
@@ -81,16 +61,6 @@ public final class SensorOverlays {
      */
     public void show(int sensorId, @BiometricRequestConstants.RequestReason int reason,
             @NonNull AcquisitionClient<?> client) {
-        if (!sidefpsControllerRefactor()) {
-            if (mSidefpsController.isPresent()) {
-                try {
-                    mSidefpsController.get().show(sensorId, reason);
-                } catch (RemoteException e) {
-                    Slog.e(TAG, "Remote exception when showing the side-fps overlay", e);
-                }
-            }
-        }
-
         if (mUdfpsOverlayController.isPresent()) {
             final IUdfpsOverlayControllerCallback callback =
                     new IUdfpsOverlayControllerCallback.Stub() {
@@ -115,16 +85,6 @@ public final class SensorOverlays {
      * @param sensorId sensor id
      */
     public void hide(int sensorId) {
-        if (!sidefpsControllerRefactor()) {
-            if (mSidefpsController.isPresent()) {
-                try {
-                    mSidefpsController.get().hide(sensorId);
-                } catch (RemoteException e) {
-                    Slog.e(TAG, "Remote exception when hiding the side-fps overlay", e);
-                }
-            }
-        }
-
         if (mUdfpsOverlayController.isPresent()) {
             try {
                 mUdfpsOverlayController.get().hideUdfpsOverlay(sensorId);

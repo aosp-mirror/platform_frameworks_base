@@ -21,7 +21,11 @@ import androidx.compose.ui.test.assertHeightIsEqualTo
 import androidx.compose.ui.test.assertWidthIsEqualTo
 import androidx.compose.ui.unit.Dp
 
-fun SemanticsNodeInteraction.assertSizeIsEqualTo(expectedWidth: Dp, expectedHeight: Dp) {
+fun SemanticsNodeInteraction.assertSizeIsEqualTo(
+    expectedWidth: Dp,
+    expectedHeight: Dp = expectedWidth,
+): SemanticsNodeInteraction {
     assertWidthIsEqualTo(expectedWidth)
     assertHeightIsEqualTo(expectedHeight)
+    return this
 }

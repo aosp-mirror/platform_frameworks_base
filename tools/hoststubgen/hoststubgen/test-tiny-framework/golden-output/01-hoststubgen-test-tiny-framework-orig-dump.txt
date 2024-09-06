@@ -322,6 +322,78 @@ NestMembers:
 InnerClasses:
   public static #x= #x of #x;            // Stub=class com/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub of class com/android/hoststubgen/test/tinyframework/IPretendingAidl
   public static #x= #x of #x;           // Proxy=class com/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub$Proxy of class com/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub
+## Class: com/android/hoststubgen/test/tinyframework/R$Nested.class
+  Compiled from "R.java"
+public class com.android.hoststubgen.test.tinyframework.R$Nested
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/R$Nested
+  super_class: #x                         // java/lang/Object
+  interfaces: 0, fields: 1, methods: 2, attributes: 3
+  public static int[] ARRAY;
+    descriptor: [I
+    flags: (0x0009) ACC_PUBLIC, ACC_STATIC
+
+  public com.android.hoststubgen.test.tinyframework.R$Nested();
+    descriptor: ()V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=1, locals=1, args_size=1
+         x: aload_0
+         x: invokespecial #x                  // Method java/lang/Object."<init>":()V
+         x: return
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       5     0  this   Lcom/android/hoststubgen/test/tinyframework/R$Nested;
+
+  static {};
+    descriptor: ()V
+    flags: (0x0008) ACC_STATIC
+    Code:
+      stack=4, locals=0, args_size=0
+         x: iconst_1
+         x: newarray       int
+         x: dup
+         x: iconst_0
+         x: iconst_1
+         x: iastore
+         x: putstatic     #x                  // Field ARRAY:[I
+        x: return
+      LineNumberTable:
+}
+SourceFile: "R.java"
+NestHost: class com/android/hoststubgen/test/tinyframework/R
+InnerClasses:
+  public static #x= #x of #x;           // Nested=class com/android/hoststubgen/test/tinyframework/R$Nested of class com/android/hoststubgen/test/tinyframework/R
+## Class: com/android/hoststubgen/test/tinyframework/R.class
+  Compiled from "R.java"
+public class com.android.hoststubgen.test.tinyframework.R
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/R
+  super_class: #x                         // java/lang/Object
+  interfaces: 0, fields: 0, methods: 1, attributes: 3
+  public com.android.hoststubgen.test.tinyframework.R();
+    descriptor: ()V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=1, locals=1, args_size=1
+         x: aload_0
+         x: invokespecial #x                  // Method java/lang/Object."<init>":()V
+         x: return
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       5     0  this   Lcom/android/hoststubgen/test/tinyframework/R;
+}
+SourceFile: "R.java"
+NestMembers:
+  com/android/hoststubgen/test/tinyframework/R$Nested
+InnerClasses:
+  public static #x= #x of #x;           // Nested=class com/android/hoststubgen/test/tinyframework/R$Nested of class com/android/hoststubgen/test/tinyframework/R
 ## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkCallerCheck$Impl.class
   Compiled from "TinyFrameworkCallerCheck.java"
 class com.android.hoststubgen.test.tinyframework.TinyFrameworkCallerCheck$Impl
@@ -572,9 +644,9 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkClassAnnota
           suffix="_host"
         )
 
-  public static int nativeAddThree_host(int);
+  private static int nativeAddThree_host(int);
     descriptor: (I)I
-    flags: (0x0009) ACC_PUBLIC, ACC_STATIC
+    flags: (0x000a) ACC_PRIVATE, ACC_STATIC
     Code:
       stack=2, locals=1, args_size=1
          x: iload_0
@@ -1833,7 +1905,7 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNative
   flags: (0x0021) ACC_PUBLIC, ACC_SUPER
   this_class: #x                         // com/android/hoststubgen/test/tinyframework/TinyFrameworkNative
   super_class: #x                         // java/lang/Object
-  interfaces: 0, fields: 1, methods: 10, attributes: 2
+  interfaces: 0, fields: 1, methods: 11, attributes: 2
   int value;
     descriptor: I
     flags: (0x0000)
@@ -1938,6 +2010,10 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNative
          x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":()V
          x: athrow
       LineNumberTable:
+
+  public static native byte nativeBytePlus(byte, byte);
+    descriptor: (BB)B
+    flags: (0x0109) ACC_PUBLIC, ACC_STATIC, ACC_NATIVE
 }
 SourceFile: "TinyFrameworkNative.java"
 RuntimeInvisibleAnnotations:
@@ -1955,7 +2031,7 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNative_host
   flags: (0x0021) ACC_PUBLIC, ACC_SUPER
   this_class: #x                         // com/android/hoststubgen/test/tinyframework/TinyFrameworkNative_host
   super_class: #x                         // java/lang/Object
-  interfaces: 0, fields: 0, methods: 4, attributes: 2
+  interfaces: 0, fields: 0, methods: 5, attributes: 2
   public com.android.hoststubgen.test.tinyframework.TinyFrameworkNative_host();
     descriptor: ()V
     flags: (0x0001) ACC_PUBLIC
@@ -2013,6 +2089,22 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNative_host
         Start  Length  Slot  Name   Signature
             0       7     0 source   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkNative;
             0       7     1   arg   I
+
+  public static byte nativeBytePlus(byte, byte);
+    descriptor: (BB)B
+    flags: (0x0009) ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=2, locals=2, args_size=2
+         x: iload_0
+         x: iload_1
+         x: iadd
+         x: i2b
+         x: ireturn
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       5     0  arg1   B
+            0       5     1  arg2   B
 }
 SourceFile: "TinyFrameworkNative_host.java"
 RuntimeInvisibleAnnotations:
@@ -2614,6 +2706,187 @@ SourceFile: "TinyFrameworkPackageRedirect.java"
 RuntimeInvisibleAnnotations:
   x: #x()
     android.hosttest.annotation.HostSideTestWholeClassStub
+## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkRenamedClassCaller.class
+  Compiled from "TinyFrameworkRenamedClassCaller.java"
+public class com.android.hoststubgen.test.tinyframework.TinyFrameworkRenamedClassCaller
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                         // com/android/hoststubgen/test/tinyframework/TinyFrameworkRenamedClassCaller
+  super_class: #x                         // java/lang/Object
+  interfaces: 0, fields: 0, methods: 2, attributes: 2
+  public com.android.hoststubgen.test.tinyframework.TinyFrameworkRenamedClassCaller();
+    descriptor: ()V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=1, locals=1, args_size=1
+         x: aload_0
+         x: invokespecial #x                  // Method java/lang/Object."<init>":()V
+         x: return
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       5     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkRenamedClassCaller;
+
+  public static int foo(int);
+    descriptor: (I)I
+    flags: (0x0009) ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=3, locals=1, args_size=1
+         x: new           #x                  // class com/android/hoststubgen/test/tinyframework/TinyFrameworkToBeRenamed
+         x: dup
+         x: iload_0
+         x: invokespecial #x                  // Method com/android/hoststubgen/test/tinyframework/TinyFrameworkToBeRenamed."<init>":(I)V
+         x: invokevirtual #x                 // Method com/android/hoststubgen/test/tinyframework/TinyFrameworkToBeRenamed.getValue:()I
+        x: ireturn
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0      12     0 value   I
+}
+SourceFile: "TinyFrameworkRenamedClassCaller.java"
+RuntimeInvisibleAnnotations:
+  x: #x()
+    android.hosttest.annotation.HostSideTestWholeClassStub
+## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkToBeRenamed.class
+  Compiled from "TinyFrameworkToBeRenamed.java"
+public class com.android.hoststubgen.test.tinyframework.TinyFrameworkToBeRenamed
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkToBeRenamed
+  super_class: #x                         // java/lang/Object
+  interfaces: 0, fields: 1, methods: 2, attributes: 2
+  private final int mValue;
+    descriptor: I
+    flags: (0x0012) ACC_PRIVATE, ACC_FINAL
+
+  public com.android.hoststubgen.test.tinyframework.TinyFrameworkToBeRenamed(int);
+    descriptor: (I)V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=2, locals=2, args_size=2
+         x: aload_0
+         x: invokespecial #x                  // Method java/lang/Object."<init>":()V
+         x: aload_0
+         x: iload_1
+         x: putfield      #x                  // Field mValue:I
+         x: return
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0      10     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkToBeRenamed;
+            0      10     1 value   I
+
+  public int getValue();
+    descriptor: ()I
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=1, locals=1, args_size=1
+         x: aload_0
+         x: getfield      #x                  // Field mValue:I
+         x: ireturn
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       5     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkToBeRenamed;
+}
+SourceFile: "TinyFrameworkToBeRenamed.java"
+RuntimeInvisibleAnnotations:
+  x: #x()
+    android.hosttest.annotation.HostSideTestWholeClassStub
+## Class: com/android/hoststubgen/test/tinyframework/packagetest/A.class
+  Compiled from "A.java"
+public class com.android.hoststubgen.test.tinyframework.packagetest.A
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/packagetest/A
+  super_class: #x                         // java/lang/Object
+  interfaces: 0, fields: 0, methods: 1, attributes: 1
+  public com.android.hoststubgen.test.tinyframework.packagetest.A();
+    descriptor: ()V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=1, locals=1, args_size=1
+         x: aload_0
+         x: invokespecial #x                  // Method java/lang/Object."<init>":()V
+         x: return
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       5     0  this   Lcom/android/hoststubgen/test/tinyframework/packagetest/A;
+}
+SourceFile: "A.java"
+## Class: com/android/hoststubgen/test/tinyframework/packagetest/B.class
+  Compiled from "B.java"
+public class com.android.hoststubgen.test.tinyframework.packagetest.B
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/packagetest/B
+  super_class: #x                         // java/lang/Object
+  interfaces: 0, fields: 0, methods: 1, attributes: 1
+  public com.android.hoststubgen.test.tinyframework.packagetest.B();
+    descriptor: ()V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=1, locals=1, args_size=1
+         x: aload_0
+         x: invokespecial #x                  // Method java/lang/Object."<init>":()V
+         x: return
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       5     0  this   Lcom/android/hoststubgen/test/tinyframework/packagetest/B;
+}
+SourceFile: "B.java"
+## Class: com/android/hoststubgen/test/tinyframework/packagetest/sub/A.class
+  Compiled from "A.java"
+public class com.android.hoststubgen.test.tinyframework.packagetest.sub.A
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/packagetest/sub/A
+  super_class: #x                         // java/lang/Object
+  interfaces: 0, fields: 0, methods: 1, attributes: 1
+  public com.android.hoststubgen.test.tinyframework.packagetest.sub.A();
+    descriptor: ()V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=1, locals=1, args_size=1
+         x: aload_0
+         x: invokespecial #x                  // Method java/lang/Object."<init>":()V
+         x: return
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       5     0  this   Lcom/android/hoststubgen/test/tinyframework/packagetest/sub/A;
+}
+SourceFile: "A.java"
+## Class: com/android/hoststubgen/test/tinyframework/packagetest/sub/B.class
+  Compiled from "B.java"
+public class com.android.hoststubgen.test.tinyframework.packagetest.sub.B
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/packagetest/sub/B
+  super_class: #x                         // java/lang/Object
+  interfaces: 0, fields: 0, methods: 1, attributes: 1
+  public com.android.hoststubgen.test.tinyframework.packagetest.sub.B();
+    descriptor: ()V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=1, locals=1, args_size=1
+         x: aload_0
+         x: invokespecial #x                  // Method java/lang/Object."<init>":()V
+         x: return
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       5     0  this   Lcom/android/hoststubgen/test/tinyframework/packagetest/sub/B;
+}
+SourceFile: "B.java"
 ## Class: com/android/hoststubgen/test/tinyframework/subclasstest/C1.class
   Compiled from "C1.java"
 public class com.android.hoststubgen.test.tinyframework.subclasstest.C1

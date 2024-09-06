@@ -1,0 +1,12 @@
+<data-labels>
+    <data-shared dataType="actions_in_app_data_type_user_interaction"
+        purposes="analytics" />
+    <data-shared dataType="actions_in_app_data_type_in_app_search_history"
+        purposes="analytics" />
+    <data-shared dataType="actions_in_app_data_type_installed_apps"
+        purposes="analytics" />
+    <data-shared dataType="actions_in_app_data_type_user_generated_content"
+        purposes="analytics" />
+    <data-shared dataType="actions_in_app_data_type_other"
+        purposes="analytics" />
+</data-labels>

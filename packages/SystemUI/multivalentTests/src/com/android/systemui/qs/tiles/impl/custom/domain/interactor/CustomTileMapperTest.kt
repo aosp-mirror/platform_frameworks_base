@@ -33,9 +33,9 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.tiles.impl.custom.QSTileStateSubject.Companion.assertThat
 import com.android.systemui.qs.tiles.impl.custom.customTileQsTileConfig
+import com.android.systemui.qs.tiles.impl.custom.customTileSpec
 import com.android.systemui.qs.tiles.impl.custom.domain.CustomTileMapper
 import com.android.systemui.qs.tiles.impl.custom.domain.entity.CustomTileDataModel
-import com.android.systemui.qs.tiles.impl.custom.tileSpec
 import com.android.systemui.qs.tiles.viewmodel.QSTileState
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
@@ -51,7 +51,8 @@ import org.junit.runner.RunWith
 class CustomTileMapperTest : SysuiTestCase() {
 
     private val uriGrantsManager: IUriGrantsManager = mock {}
-    private val kosmos = testKosmos().apply { tileSpec = TileSpec.Companion.create(TEST_COMPONENT) }
+    private val kosmos =
+        testKosmos().apply { customTileSpec = TileSpec.Companion.create(TEST_COMPONENT) }
     private val underTest by lazy {
         CustomTileMapper(
             context = mock { whenever(createContextAsUser(any(), any())).thenReturn(context) },
@@ -202,7 +203,7 @@ class CustomTileMapperTest : SysuiTestCase() {
     ) =
         CustomTileDataModel(
             UserHandle.of(1),
-            tileSpec.componentName,
+            customTileSpec.componentName,
             Tile().apply {
                 state = tileState
                 label = "test label"
@@ -244,6 +245,7 @@ class CustomTileMapperTest : SysuiTestCase() {
     ): QSTileState {
         return QSTileState(
             { icon?.let { com.android.systemui.common.shared.model.Icon.Loaded(icon, null) } },
+            null,
             "test label",
             activationState,
             "test subtitle",

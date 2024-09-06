@@ -61,7 +61,7 @@ import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.ShadeController;
-import com.android.systemui.shade.ShadeViewController;
+import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor;
 import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractor;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationClickNotifier;
@@ -90,12 +90,25 @@ import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
-
 /**
  * Status bar implementation of {@link NotificationActivityStarter}.
  */
 @SysUISingleton
 public class StatusBarNotificationActivityStarter implements NotificationActivityStarter {
+
+    /**
+     * Helps to avoid recalculation of values provided to
+     * {@link #onDismiss(PendingIntent, boolean, boolean, boolean)}} method
+     */
+    private interface OnKeyguardDismissedAction {
+        /**
+         * Invoked when keyguard is dismissed
+         *
+         * @return is used as return value for {@link ActivityStarter.OnDismissAction#onDismiss()}
+         */
+        boolean onDismiss(PendingIntent intent, boolean isActivityIntent, boolean animate,
+                boolean showOverTheLockScreen);
+    }
 
     private final Context mContext;
     private final int mDisplayId;
@@ -115,7 +128,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
     private final Lazy<AssistManager> mAssistManagerLazy;
     private final NotificationRemoteInputManager mRemoteInputManager;
     private final NotificationLockscreenUserManager mLockscreenUserManager;
-    private final com.android.systemui.shade.ShadeController mShadeController;
+    private final ShadeController mShadeController;
     private final KeyguardStateController mKeyguardStateController;
     private final LockPatternUtils mLockPatternUtils;
     private final StatusBarRemoteInputCallback mStatusBarRemoteInputCallback;
@@ -126,7 +139,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
     private final StatusBarNotificationActivityStarterLogger mLogger;
 
     private final NotificationPresenter mPresenter;
-    private final ShadeViewController mShadeViewController;
+    private final PanelExpansionInteractor mPanelExpansionInteractor;
     private final NotificationShadeWindowController mNotificationShadeWindowController;
     private final ActivityTransitionAnimator mActivityTransitionAnimator;
     private final NotificationLaunchAnimatorControllerProvider mNotificationAnimationProvider;
@@ -163,7 +176,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             StatusBarNotificationActivityStarterLogger logger,
             OnUserInteractionCallback onUserInteractionCallback,
             NotificationPresenter presenter,
-            ShadeViewController shadeViewController,
+            PanelExpansionInteractor panelExpansionInteractor,
             NotificationShadeWindowController notificationShadeWindowController,
             ActivityTransitionAnimator activityTransitionAnimator,
             ShadeAnimationInteractor shadeAnimationInteractor,
@@ -192,19 +205,43 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         mLockPatternUtils = lockPatternUtils;
         mStatusBarRemoteInputCallback = remoteInputCallback;
         mActivityIntentHelper = activityIntentHelper;
+        mPanelExpansionInteractor = panelExpansionInteractor;
         mNotificationShadeWindowController = notificationShadeWindowController;
         mShadeAnimationInteractor = shadeAnimationInteractor;
         mMetricsLogger = metricsLogger;
         mLogger = logger;
         mOnUserInteractionCallback = onUserInteractionCallback;
         mPresenter = presenter;
-        mShadeViewController = shadeViewController;
         mActivityTransitionAnimator = activityTransitionAnimator;
         mNotificationAnimationProvider = notificationAnimationProvider;
         mPowerInteractor = powerInteractor;
         mUserTracker = userTracker;
 
         launchFullScreenIntentProvider.registerListener(entry -> launchFullScreenIntent(entry));
+    }
+
+    /**
+     * Called when the user clicks on the notification bubble icon.
+     *
+     * @param entry notification that bubble icon was clicked
+     */
+    @Override
+    public void onNotificationBubbleIconClicked(NotificationEntry entry) {
+        Runnable action = () -> {
+            mBubblesManagerOptional.ifPresent(bubblesManager ->
+                    bubblesManager.onUserChangedBubble(entry, !entry.isBubble()));
+            mHeadsUpManager.removeNotification(entry.getKey(), /* releaseImmediately= */ true);
+        };
+        if (entry.isBubble()) {
+            // entry is being un-bubbled, no need to unlock
+            action.run();
+        } else {
+            performActionAfterKeyguardDismissed(entry,
+                    (intent, isActivityIntent, animate, showOverTheLockScreen) -> {
+                        action.run();
+                        return false;
+                    });
+        }
     }
 
     /**
@@ -218,7 +255,15 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         mLogger.logStartingActivityFromClick(entry, row.isHeadsUpState(),
                 mKeyguardStateController.isVisible(),
                 mNotificationShadeWindowController.getPanelExpanded());
+        OnKeyguardDismissedAction action =
+                (intent, isActivityIntent, animate, showOverTheLockScreen) ->
+                        performActionOnKeyguardDismissed(entry, row, intent, isActivityIntent,
+                                animate, showOverTheLockScreen);
+        performActionAfterKeyguardDismissed(entry, action);
+    }
 
+    private void performActionAfterKeyguardDismissed(NotificationEntry entry,
+            OnKeyguardDismissedAction action) {
         if (mRemoteInputManager.isRemoteInputActive(entry)) {
             // We have an active remote input typed and the user clicked on the notification.
             // this was probably unintentional, so we're closing the edit text instead.
@@ -252,8 +297,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         ActivityStarter.OnDismissAction postKeyguardAction = new ActivityStarter.OnDismissAction() {
             @Override
             public boolean onDismiss() {
-                return handleNotificationClickAfterKeyguardDismissed(
-                        entry, row, intent, isActivityIntent, animate, showOverLockscreen);
+                return action.onDismiss(intent, isActivityIntent, animate, showOverLockscreen);
             }
 
             @Override
@@ -272,7 +316,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         }
     }
 
-    private boolean handleNotificationClickAfterKeyguardDismissed(
+    private boolean performActionOnKeyguardDismissed(
             NotificationEntry entry,
             ExpandableNotificationRow row,
             PendingIntent intent,
@@ -283,7 +327,6 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
 
         final Runnable runnable = () -> handleNotificationClickAfterPanelCollapsed(
                 entry, row, intent, isActivityIntent, animate);
-
         if (showOverLockscreen) {
             mShadeController.addPostCollapseAction(runnable);
             mShadeController.collapseShade(true /* animate */);
@@ -296,7 +339,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         }
 
         // Always defer the keyguard dismiss when animating.
-        return animate || !mShadeViewController.isFullyCollapsed();
+        return animate || !mPanelExpansionInteractor.isFullyCollapsed();
     }
 
     private void handleNotificationClickAfterPanelCollapsed(

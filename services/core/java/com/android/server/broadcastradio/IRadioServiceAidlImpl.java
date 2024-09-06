@@ -52,7 +52,7 @@ final class IRadioServiceAidlImpl extends IRadioService.Stub {
     private static final List<String> SERVICE_NAMES = Arrays.asList(
             IBroadcastRadio.DESCRIPTOR + "/amfm", IBroadcastRadio.DESCRIPTOR + "/dab");
 
-    private final BroadcastRadioServiceImpl mHalAidl;
+    private final BroadcastRadioServiceImpl mAidlHalClient;
     private final BroadcastRadioService mService;
 
     /**
@@ -77,14 +77,14 @@ final class IRadioServiceAidlImpl extends IRadioService.Stub {
     @VisibleForTesting
     IRadioServiceAidlImpl(BroadcastRadioService service, BroadcastRadioServiceImpl halAidl) {
         mService = Objects.requireNonNull(service, "Broadcast radio service cannot be null");
-        mHalAidl = Objects.requireNonNull(halAidl,
+        mAidlHalClient = Objects.requireNonNull(halAidl,
                 "Broadcast radio service implementation for AIDL HAL cannot be null");
     }
 
     @Override
     public List<RadioManager.ModuleProperties> listModules() {
         mService.enforcePolicyAccess();
-        return mHalAidl.listModules();
+        return mAidlHalClient.listModules();
     }
 
     @Override
@@ -97,7 +97,7 @@ final class IRadioServiceAidlImpl extends IRadioService.Stub {
         if (callback == null) {
             throw new IllegalArgumentException("Callback must not be null");
         }
-        return mHalAidl.openSession(moduleId, bandConfig, withAudio, callback);
+        return mAidlHalClient.openSession(moduleId, bandConfig, withAudio, callback);
     }
 
     @Override
@@ -110,7 +110,7 @@ final class IRadioServiceAidlImpl extends IRadioService.Stub {
         Objects.requireNonNull(listener, "Announcement listener cannot be null");
         mService.enforcePolicyAccess();
 
-        return mHalAidl.addAnnouncementListener(enabledTypes, listener);
+        return mAidlHalClient.addAnnouncementListener(enabledTypes, listener);
     }
 
     @Override
@@ -126,10 +126,10 @@ final class IRadioServiceAidlImpl extends IRadioService.Stub {
         radioPrintWriter.printf("BroadcastRadioService\n");
 
         radioPrintWriter.increaseIndent();
-        radioPrintWriter.printf("AIDL HAL:\n");
+        radioPrintWriter.printf("AIDL HAL client:\n");
 
         radioPrintWriter.increaseIndent();
-        mHalAidl.dumpInfo(radioPrintWriter);
+        mAidlHalClient.dumpInfo(radioPrintWriter);
         radioPrintWriter.decreaseIndent();
 
         radioPrintWriter.decreaseIndent();

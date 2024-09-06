@@ -53,9 +53,11 @@ interface IPip {
      * @param destinationBounds the destination bounds the PiP window lands into
      * @param overlay an optional overlay to fade out after entering PiP
      * @param appBounds the bounds used to set the buffer size of the optional content overlay
+     * @param sourceRectHint the bounds to show in the transition to PiP
      */
     oneway void stopSwipePipToHome(int taskId, in ComponentName componentName,
-            in Rect destinationBounds, in SurfaceControl overlay, in Rect appBounds) = 2;
+            in Rect destinationBounds, in SurfaceControl overlay, in Rect appBounds,
+            in Rect sourceRectHint) = 2;
 
     /**
      * Notifies the swiping Activity to PiP onto home transition is aborted

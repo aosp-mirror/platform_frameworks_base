@@ -40,7 +40,6 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
 import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.user.data.repository.fakeUserRepository
-import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.whenever
 import java.util.Optional
@@ -50,7 +49,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
@@ -136,12 +134,17 @@ class HomeControlsDreamStartableTest : SysuiTestCase() {
 
     @Test
     @DisableFlags(FLAG_HOME_PANEL_DREAM)
-    fun testStartDoesNotRunDreamServiceWhenFlagIsDisabled() =
+    fun testStartDisablesDreamServiceWhenFlagIsDisabled() =
         testScope.runTest {
             selectedComponentRepository.setSelectedComponent(TEST_SELECTED_COMPONENT_NON_PANEL)
             startable.start()
             runCurrent()
-            verify(packageManager, never()).setComponentEnabledSetting(any(), any(), any())
+            verify(packageManager)
+                .setComponentEnabledSetting(
+                    eq(componentName),
+                    eq(PackageManager.COMPONENT_ENABLED_STATE_DISABLED),
+                    eq(PackageManager.DONT_KILL_APP)
+                )
         }
 
     private fun ControlsServiceInfo(

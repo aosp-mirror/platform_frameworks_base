@@ -20,7 +20,6 @@ import android.app.Instrumentation
 import android.graphics.Point
 import android.tools.NavBar
 import android.tools.Rotation
-import android.tools.AndroidLoggerSetupRule
 import android.tools.helpers.WindowUtils
 import android.tools.traces.parsers.WindowManagerStateHelper
 import androidx.test.platform.app.InstrumentationRegistry
@@ -30,7 +29,6 @@ import com.android.wm.shell.flicker.service.common.Utils
 import com.android.wm.shell.flicker.utils.SplitScreenUtils
 import org.junit.After
 import org.junit.Before
-import org.junit.ClassRule
 import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
@@ -143,16 +141,12 @@ constructor(val rotation: Rotation = Rotation.ROTATION_0) {
 
     private fun isLandscape(rotation: Rotation): Boolean {
         val displayBounds = WindowUtils.getDisplayBounds(rotation)
-        return displayBounds.width > displayBounds.height
+        return displayBounds.width() > displayBounds.height()
     }
 
     private fun isTablet(): Boolean {
         val sizeDp: Point = device.displaySizeDp
         val LARGE_SCREEN_DP_THRESHOLD = 600
         return sizeDp.x >= LARGE_SCREEN_DP_THRESHOLD && sizeDp.y >= LARGE_SCREEN_DP_THRESHOLD
-    }
-
-    companion object {
-        @ClassRule @JvmField val setupLoggerRule = AndroidLoggerSetupRule()
     }
 }

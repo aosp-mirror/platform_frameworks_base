@@ -30,16 +30,18 @@ import androidx.compose.ui.util.fastForEach
 import kotlinx.coroutines.coroutineScope
 
 /**
- * Observe taps without actually consuming them, so child elements can still respond to them. Long
+ * Observe taps without consuming them by default, so child elements can still respond to them. Long
  * presses are excluded.
  */
-suspend fun PointerInputScope.observeTapsWithoutConsuming(
+suspend fun PointerInputScope.observeTaps(
     pass: PointerEventPass = PointerEventPass.Initial,
+    shouldConsume: Boolean = false,
     onTap: ((Offset) -> Unit)? = null,
 ) = coroutineScope {
     if (onTap == null) return@coroutineScope
     awaitEachGesture {
-        awaitFirstDown(pass = pass)
+        val down = awaitFirstDown(pass = pass)
+        if (shouldConsume) down.consume()
         val tapTimeout = viewConfiguration.longPressTimeoutMillis
         val up = withTimeoutOrNull(tapTimeout) { waitForUpOrCancellation(pass = pass) }
         if (up != null) {

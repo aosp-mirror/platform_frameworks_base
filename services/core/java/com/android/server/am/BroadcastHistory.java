@@ -50,6 +50,11 @@ public class BroadcastHistory {
     }
 
     /**
+     * List of broadcasts in frozen processes that are yet to be enqueued.
+     */
+    private final ArrayList<BroadcastRecord> mFrozenBroadcasts = new ArrayList<>();
+
+    /**
      * List of broadcasts which are being delivered or yet to be delivered.
      */
     private final ArrayList<BroadcastRecord> mPendingBroadcasts = new ArrayList<>();
@@ -77,7 +82,12 @@ public class BroadcastHistory {
     final long[] mSummaryHistoryDispatchTime;
     final long[] mSummaryHistoryFinishTime;
 
+    void onBroadcastFrozenLocked(@NonNull BroadcastRecord r) {
+        mFrozenBroadcasts.add(r);
+    }
+
     void onBroadcastEnqueuedLocked(@NonNull BroadcastRecord r) {
+        mFrozenBroadcasts.remove(r);
         mPendingBroadcasts.add(r);
     }
 
@@ -101,7 +111,7 @@ public class BroadcastHistory {
         mSummaryHistoryNext = ringAdvance(mSummaryHistoryNext, 1, MAX_BROADCAST_SUMMARY_HISTORY);
     }
 
-    private final int ringAdvance(int x, final int increment, final int ringSize) {
+    private int ringAdvance(int x, final int increment, final int ringSize) {
         x += increment;
         if (x < 0) return (ringSize - 1);
         else if (x >= ringSize) return 0;
@@ -113,6 +123,10 @@ public class BroadcastHistory {
         for (int i = 0; i < mPendingBroadcasts.size(); ++i) {
             final BroadcastRecord r = mPendingBroadcasts.get(i);
             r.dumpDebug(proto, BroadcastQueueProto.PENDING_BROADCASTS);
+        }
+        for (int i = 0; i < mFrozenBroadcasts.size(); ++i) {
+            final BroadcastRecord r = mFrozenBroadcasts.get(i);
+            r.dumpDebug(proto, BroadcastQueueProto.FROZEN_BROADCASTS);
         }
 
         int lastIndex = mHistoryNext;
@@ -151,16 +165,8 @@ public class BroadcastHistory {
     public boolean dumpLocked(@NonNull PrintWriter pw, @Nullable String dumpPackage,
             @NonNull String queueName, @NonNull SimpleDateFormat sdf,
             boolean dumpAll, boolean needSep) {
-        pw.println("  Pending broadcasts:");
-        if (mPendingBroadcasts.isEmpty()) {
-            pw.println("    <empty>");
-        } else {
-            for (int idx = mPendingBroadcasts.size() - 1; idx >= 0; --idx) {
-                final BroadcastRecord r = mPendingBroadcasts.get(idx);
-                pw.print("  Broadcast #"); pw.print(idx); pw.println(":");
-                r.dump(pw, "    ", sdf);
-            }
-        }
+        dumpBroadcastList(pw, sdf, mFrozenBroadcasts, "Frozen");
+        dumpBroadcastList(pw, sdf, mPendingBroadcasts, "Pending");
 
         int i;
         boolean printed = false;
@@ -267,5 +273,19 @@ public class BroadcastHistory {
             } while (ringIndex != lastIndex);
         }
         return needSep;
+    }
+
+    private void dumpBroadcastList(@NonNull PrintWriter pw, @NonNull SimpleDateFormat sdf,
+            @NonNull ArrayList<BroadcastRecord> broadcasts, @NonNull String flavor) {
+        pw.print("  "); pw.print(flavor); pw.println(" broadcasts:");
+        if (broadcasts.isEmpty()) {
+            pw.println("    <empty>");
+        } else {
+            for (int idx = broadcasts.size() - 1; idx >= 0; --idx) {
+                final BroadcastRecord r = broadcasts.get(idx);
+                pw.print(flavor); pw.print("  broadcast #"); pw.print(idx); pw.println(":");
+                r.dump(pw, "    ", sdf);
+            }
+        }
     }
 }

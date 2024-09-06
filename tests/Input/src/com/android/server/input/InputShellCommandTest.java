@@ -125,6 +125,14 @@ public class InputShellCommandTest {
         assertThat(mInputEventInjector.mInjectedEvents).isEmpty();
     }
 
+    @Test
+    public void testInvalidKeyEventCommandArgsCombination() {
+        // --duration and --longpress must not be sent together
+        runCommand("keyevent --duration 1000 --longpress KEYCODE_A");
+
+        assertThat(mInputEventInjector.mInjectedEvents).isEmpty();
+    }
+
     private InputEvent getSingleInjectedInputEvent() {
         assertThat(mInputEventInjector.mInjectedEvents).hasSize(1);
         return mInputEventInjector.mInjectedEvents.get(0);

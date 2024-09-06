@@ -19,7 +19,7 @@ import android.content.Context
 import android.database.ContentObserver
 import android.net.Uri
 import android.os.Handler
-import android.test.suitebuilder.annotation.SmallTest
+import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq

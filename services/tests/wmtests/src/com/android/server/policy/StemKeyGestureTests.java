@@ -291,6 +291,101 @@ public class StemKeyGestureTests extends ShortcutKeyTestBase {
         mPhoneWindowManager.assertSwitchToTask(referenceId);
     }
 
+    /**
+     * Ensure the stem rule is added even when button behaviors are set to nothing.
+     *
+     * This makes sure that if stem key behaviors are overridden to NOTHING, then we check the
+     * XML config as the source of truth upon reboot to see whether a device should have a stem
+     * key rule. This test walks us through a scenario where a device powers off during Wear's
+     * Touch Lock mode.
+     */
+    @Test
+    public void stemKeyRuleIsAddedEvenWhenBehaviorsRemoved() {
+        // deactivate stem button presses
+        overrideBehavior(STEM_PRIMARY_BUTTON_SHORT_PRESS,
+                PhoneWindowManager.SHORT_PRESS_PRIMARY_NOTHING);
+        overrideBehavior(STEM_PRIMARY_BUTTON_DOUBLE_PRESS,
+                PhoneWindowManager.DOUBLE_PRESS_PRIMARY_NOTHING);
+        overrideBehavior(STEM_PRIMARY_BUTTON_TRIPLE_PRESS,
+                PhoneWindowManager.TRIPLE_PRESS_PRIMARY_NOTHING);
+        overrideBehavior(STEM_PRIMARY_BUTTON_LONG_PRESS,
+                PhoneWindowManager.LONG_PRESS_PRIMARY_NOTHING);
+
+        // pretend like we have stem keys enabled in the xmls
+        overrideResource(
+                com.android.internal.R.integer.config_shortPressOnStemPrimaryBehavior,
+                SHORT_PRESS_PRIMARY_LAUNCH_ALL_APPS);
+
+        // start the PhoneWindowManager, just like would happen with a reboot
+        setUpPhoneWindowManager(/* supportSettingsUpdate= */ true);
+        // Set the stem behavior back to something normal after boot
+        overrideBehavior(STEM_PRIMARY_BUTTON_SHORT_PRESS,
+                SHORT_PRESS_PRIMARY_LAUNCH_ALL_APPS);
+        // manually trigger the SettingsObserver's onChange() method because subclasses of
+        // ShortcutKeyTestBase cannot automatically pick up Settings changes.
+        triggerSettingsObserverChange();
+
+        // These calls are required to make the All Apps view show up
+        mPhoneWindowManager.overrideShouldEarlyShortPressOnStemPrimary(false);
+        mPhoneWindowManager.overrideStartActivity();
+        mPhoneWindowManager.setKeyguardServiceDelegateIsShowing(false);
+        mPhoneWindowManager.overrideIsUserSetupComplete(true);
+
+        sendKey(KEYCODE_STEM_PRIMARY);
+
+        // Because the rule was loaded and we changed the behavior back to non-zero, PWM should
+        // actually perform this action. It would not perform the action if the rule was missing.
+        mPhoneWindowManager.assertOpenAllAppView();
+    }
+
+    /**
+     * Ensure the stem rule is not added when stem behavior is not defined in the xml.
+     *
+     * This is the opposite of the test above.
+     */
+    @Test
+    public void stemKeyRuleIsNotAddedWhenXmlDoesntDefineIt() {
+        // deactivate stem button presses
+        overrideBehavior(STEM_PRIMARY_BUTTON_SHORT_PRESS,
+                PhoneWindowManager.SHORT_PRESS_PRIMARY_NOTHING);
+        overrideBehavior(STEM_PRIMARY_BUTTON_DOUBLE_PRESS,
+                PhoneWindowManager.DOUBLE_PRESS_PRIMARY_NOTHING);
+        overrideBehavior(STEM_PRIMARY_BUTTON_TRIPLE_PRESS,
+                PhoneWindowManager.TRIPLE_PRESS_PRIMARY_NOTHING);
+        overrideBehavior(STEM_PRIMARY_BUTTON_LONG_PRESS,
+                PhoneWindowManager.LONG_PRESS_PRIMARY_NOTHING);
+
+        // pretend like we do not have stem keys enabled in the xmls
+        overrideResource(
+                com.android.internal.R.integer.config_shortPressOnStemPrimaryBehavior,
+                PhoneWindowManager.SHORT_PRESS_PRIMARY_NOTHING);
+        overrideResource(
+                com.android.internal.R.integer.config_longPressOnStemPrimaryBehavior,
+                PhoneWindowManager.LONG_PRESS_PRIMARY_NOTHING);
+
+        // start the PhoneWindowManager, just like would happen with a reboot
+        setUpPhoneWindowManager(/* supportSettingsUpdate= */ true);
+        // Set the stem behavior back to something normal after boot
+        // (Despite this fact, a stem press shouldn't have any behavior because there's no rule.)
+        overrideBehavior(STEM_PRIMARY_BUTTON_SHORT_PRESS,
+                SHORT_PRESS_PRIMARY_LAUNCH_ALL_APPS);
+        // manually trigger the SettingsObserver's onChange() method because subclasses of
+        // ShortcutKeyTestBase cannot automatically pick up Settings changes.
+        triggerSettingsObserverChange();
+
+        // These calls are required to make the All Apps view show up
+        mPhoneWindowManager.overrideShouldEarlyShortPressOnStemPrimary(false);
+        mPhoneWindowManager.overrideStartActivity();
+        mPhoneWindowManager.setKeyguardServiceDelegateIsShowing(false);
+        mPhoneWindowManager.overrideIsUserSetupComplete(true);
+
+        sendKey(KEYCODE_STEM_PRIMARY);
+
+        // Because the rule was not loaded, PWM should not actually perform this action, even
+        // though the Settings override is set to non-null.
+        mPhoneWindowManager.assertNotOpenAllAppView();
+    }
+
     private void overrideBehavior(String key, int expectedBehavior) {
         Settings.Global.putLong(mContext.getContentResolver(), key, expectedBehavior);
     }

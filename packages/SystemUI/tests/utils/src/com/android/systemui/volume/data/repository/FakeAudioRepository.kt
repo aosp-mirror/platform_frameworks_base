@@ -17,11 +17,11 @@
 package com.android.systemui.volume.data.repository
 
 import android.media.AudioDeviceInfo
+import android.media.AudioManager
 import com.android.settingslib.volume.data.repository.AudioRepository
 import com.android.settingslib.volume.shared.model.AudioStream
 import com.android.settingslib.volume.shared.model.AudioStreamModel
 import com.android.settingslib.volume.shared.model.RingerMode
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -29,20 +29,19 @@ import kotlinx.coroutines.flow.update
 
 class FakeAudioRepository : AudioRepository {
 
-    private val mutableMode = MutableStateFlow(0)
-    override val mode: StateFlow<Int>
-        get() = mutableMode.asStateFlow()
+    private val mutableMode = MutableStateFlow(AudioManager.MODE_NORMAL)
+    override val mode: StateFlow<Int> = mutableMode.asStateFlow()
 
-    private val mutableRingerMode = MutableStateFlow(RingerMode(0))
-    override val ringerMode: StateFlow<RingerMode>
-        get() = mutableRingerMode.asStateFlow()
+    private val mutableRingerMode = MutableStateFlow(RingerMode(AudioManager.RINGER_MODE_NORMAL))
+    override val ringerMode: StateFlow<RingerMode> = mutableRingerMode.asStateFlow()
 
     private val mutableCommunicationDevice = MutableStateFlow<AudioDeviceInfo?>(null)
-    override val communicationDevice: StateFlow<AudioDeviceInfo?>
-        get() = mutableCommunicationDevice.asStateFlow()
+    override val communicationDevice: StateFlow<AudioDeviceInfo?> =
+        mutableCommunicationDevice.asStateFlow()
 
     private val models: MutableMap<AudioStream, MutableStateFlow<AudioStreamModel>> = mutableMapOf()
     private val lastAudibleVolumes: MutableMap<AudioStream, Int> = mutableMapOf()
+    private val deviceCategories: MutableMap<String, Int> = mutableMapOf()
 
     private fun getAudioStreamModelState(
         audioStream: AudioStream
@@ -53,22 +52,29 @@ class FakeAudioRepository : AudioRepository {
                     audioStream = audioStream,
                     volume = 0,
                     minVolume = 0,
-                    maxVolume = 0,
+                    maxVolume = 10,
+                    isAffectedByMute = false,
                     isAffectedByRingerMode = false,
                     isMuted = false,
                 )
             )
         }
 
-    override fun getAudioStream(audioStream: AudioStream): Flow<AudioStreamModel> =
+    override fun getAudioStream(audioStream: AudioStream): StateFlow<AudioStreamModel> =
         getAudioStreamModelState(audioStream).asStateFlow()
 
     override suspend fun setVolume(audioStream: AudioStream, volume: Int) {
         getAudioStreamModelState(audioStream).update { it.copy(volume = volume) }
     }
 
-    override suspend fun setMuted(audioStream: AudioStream, isMuted: Boolean) {
-        getAudioStreamModelState(audioStream).update { it.copy(isMuted = isMuted) }
+    override suspend fun setMuted(audioStream: AudioStream, isMuted: Boolean): Boolean {
+        val modelState = getAudioStreamModelState(audioStream)
+        return if (modelState.value.isMuted == isMuted) {
+            false
+        } else {
+            modelState.update { it.copy(isMuted = isMuted) }
+            true
+        }
     }
 
     override suspend fun getLastAudibleVolume(audioStream: AudioStream): Int =
@@ -92,5 +98,17 @@ class FakeAudioRepository : AudioRepository {
 
     fun setLastAudibleVolume(audioStream: AudioStream, volume: Int) {
         lastAudibleVolumes[audioStream] = volume
+    }
+
+    override suspend fun setRingerMode(audioStream: AudioStream, mode: RingerMode) {
+        mutableRingerMode.value = mode
+    }
+
+    fun setBluetoothAudioDeviceCategory(bluetoothAddress: String, category: Int) {
+        deviceCategories[bluetoothAddress] = category
+    }
+
+    override suspend fun getBluetoothAudioDeviceCategory(bluetoothAddress: String): Int {
+        return deviceCategories[bluetoothAddress] ?: AudioManager.AUDIO_DEVICE_CATEGORY_UNKNOWN
     }
 }

@@ -59,6 +59,8 @@ import android.hardware.camera2.extension.Request;
 import android.hardware.camera2.extension.SizeList;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.impl.PhysicalCaptureResultInfo;
+import android.hardware.camera2.params.ColorSpaceProfiles;
+import android.hardware.camera2.params.DynamicRangeProfiles;
 import android.hardware.camera2.utils.SurfaceUtils;
 import android.media.Image;
 import android.media.ImageReader;
@@ -526,7 +528,7 @@ public class CameraExtensionsProxyService extends Service {
      */
     public static Pair<PreviewExtenderImpl, ImageCaptureExtenderImpl> initializeExtension(
             int extensionType) {
-        if (Flags.concertMode()) {
+        if (Flags.concertModeApi()) {
             if (extensionType == CameraExtensionCharacteristics.EXTENSION_EYES_FREE_VIDEOGRAPHY) {
                 // Basic extensions are deprecated starting with extension version 1.5
                 return new Pair<>(new PreviewExtenderImpl() {
@@ -711,7 +713,7 @@ public class CameraExtensionsProxyService extends Service {
      * @hide
      */
     public static AdvancedExtenderImpl initializeAdvancedExtensionImpl(int extensionType) {
-        if (Flags.concertMode()) {
+        if (Flags.concertModeApi()) {
             if (extensionType == CameraExtensionCharacteristics.EXTENSION_EYES_FREE_VIDEOGRAPHY) {
                 if (EFV_SUPPORTED) {
                     return new EyesFreeVideographyAdvancedExtenderImpl();
@@ -1228,7 +1230,6 @@ public class CameraExtensionsProxyService extends Service {
 
             return null;
         }
-
     }
 
     private class CaptureCallbackStub implements SessionProcessorImpl.CaptureCallback {
@@ -1566,6 +1567,10 @@ public class CameraExtensionsProxyService extends Service {
         private String mCameraId = null;
         private IBinder mToken;
 
+        OutputSurfaceImplStub mOutputPreviewSurfaceImpl;
+        OutputSurfaceImplStub mOutputImageCaptureSurfaceImpl;
+        OutputSurfaceImplStub mOutputPostviewSurfaceImpl;
+
         public SessionProcessorImplStub(SessionProcessorImpl sessionProcessor) {
             mSessionProcessor = sessionProcessor;
         }
@@ -1574,21 +1579,20 @@ public class CameraExtensionsProxyService extends Service {
         public CameraSessionConfig initSession(IBinder token, String cameraId,
                 Map<String, CameraMetadataNative> charsMapNative, OutputSurface previewSurface,
                 OutputSurface imageCaptureSurface, OutputSurface postviewSurface) {
-            OutputSurfaceImplStub outputPreviewSurfaceImpl =
-                    new OutputSurfaceImplStub(previewSurface);
-            OutputSurfaceImplStub outputImageCaptureSurfaceImpl =
-                    new OutputSurfaceImplStub(imageCaptureSurface);
-            OutputSurfaceImplStub outputPostviewSurfaceImpl =
-                    new OutputSurfaceImplStub(postviewSurface);
+            mOutputPreviewSurfaceImpl = new OutputSurfaceImplStub(previewSurface);
+            mOutputImageCaptureSurfaceImpl = new OutputSurfaceImplStub(imageCaptureSurface);
+            mOutputPostviewSurfaceImpl = new OutputSurfaceImplStub(postviewSurface);
 
             Camera2SessionConfigImpl sessionConfig;
 
             if (LATENCY_IMPROVEMENTS_SUPPORTED) {
+                int outputsColorSpace = getColorSpaceFromOutputSurfaces(previewSurface,
+                        imageCaptureSurface, postviewSurface);
                 OutputSurfaceConfigurationImplStub outputSurfaceConfigs =
-                        new OutputSurfaceConfigurationImplStub(outputPreviewSurfaceImpl,
+                        new OutputSurfaceConfigurationImplStub(mOutputPreviewSurfaceImpl,
                         // Image Analysis Output is currently only supported in CameraX
-                        outputImageCaptureSurfaceImpl, null /*imageAnalysisSurfaceConfig*/,
-                        outputPostviewSurfaceImpl);
+                        mOutputImageCaptureSurfaceImpl, null /*imageAnalysisSurfaceConfig*/,
+                        mOutputPostviewSurfaceImpl, outputsColorSpace);
 
                 sessionConfig = mSessionProcessor.initSession(cameraId,
                         getCharacteristicsMap(charsMapNative),
@@ -1596,8 +1600,8 @@ public class CameraExtensionsProxyService extends Service {
             } else {
                 sessionConfig = mSessionProcessor.initSession(cameraId,
                         getCharacteristicsMap(charsMapNative),
-                        getApplicationContext(), outputPreviewSurfaceImpl,
-                        outputImageCaptureSurfaceImpl, null /*imageAnalysisSurfaceConfig*/);
+                        getApplicationContext(), mOutputPreviewSurfaceImpl,
+                        mOutputImageCaptureSurfaceImpl, null /*imageAnalysisSurfaceConfig*/);
             }
 
             List<Camera2OutputConfigImpl> outputConfigs = sessionConfig.getOutputConfigs();
@@ -1614,6 +1618,11 @@ public class CameraExtensionsProxyService extends Service {
                     }
                 }
                 ret.outputConfigs.add(entry);
+            }
+            if (Flags.extension10Bit() && EFV_SUPPORTED) {
+                ret.colorSpace = sessionConfig.getColorSpace();
+            } else {
+                ret.colorSpace = ColorSpaceProfiles.UNSPECIFIED;
             }
             ret.sessionTemplateId = sessionConfig.getSessionTemplateId();
             ret.sessionType = -1;
@@ -1632,6 +1641,18 @@ public class CameraExtensionsProxyService extends Service {
         public void deInitSession(IBinder token) {
             CameraExtensionsProxyService.unregisterDeathRecipient(mToken, this);
             mSessionProcessor.deInitSession();
+
+            if (Flags.surfaceLeakFix()) {
+                if (mOutputImageCaptureSurfaceImpl.mSurface != null) {
+                    mOutputImageCaptureSurfaceImpl.mSurface.release();
+                }
+                if (mOutputPreviewSurfaceImpl.mSurface != null) {
+                    mOutputPreviewSurfaceImpl.mSurface.release();
+                }
+                if (mOutputPostviewSurfaceImpl.mSurface != null) {
+                    mOutputPostviewSurfaceImpl.mSurface.release();
+                }
+            }
         }
 
         @Override
@@ -1707,6 +1728,24 @@ public class CameraExtensionsProxyService extends Service {
         public void binderDied() {
             mSessionProcessor.deInitSession();
         }
+
+        // Get the color space of the output configurations. All of the OutputSurfaces
+        // can be assumed to have the same color space so return the color space
+        // of any non-null OutputSurface
+        private int getColorSpaceFromOutputSurfaces(OutputSurface previewSurface,
+                OutputSurface imageCaptureSurface, OutputSurface postviewSurface) {
+            int colorSpace = ColorSpaceProfiles.UNSPECIFIED;
+
+            if (previewSurface.surface != null) {
+                colorSpace = previewSurface.colorSpace;
+            } else if (imageCaptureSurface.surface != null) {
+                colorSpace = imageCaptureSurface.colorSpace;
+            } else if (postviewSurface.surface != null) {
+                colorSpace = postviewSurface.colorSpace;
+            }
+
+            return colorSpace;
+        }
     }
 
     private class OutputSurfaceConfigurationImplStub implements OutputSurfaceConfigurationImpl {
@@ -1714,6 +1753,17 @@ public class CameraExtensionsProxyService extends Service {
         private OutputSurfaceImpl mOutputImageCaptureSurfaceImpl;
         private OutputSurfaceImpl mOutputImageAnalysisSurfaceImpl;
         private OutputSurfaceImpl mOutputPostviewSurfaceImpl;
+        private int mColorSpace;
+
+        public OutputSurfaceConfigurationImplStub(OutputSurfaceImpl previewOutput,
+                OutputSurfaceImpl imageCaptureOutput, OutputSurfaceImpl imageAnalysisOutput,
+                OutputSurfaceImpl postviewOutput, int colorSpace) {
+            mOutputPreviewSurfaceImpl = previewOutput;
+            mOutputImageCaptureSurfaceImpl = imageCaptureOutput;
+            mOutputImageAnalysisSurfaceImpl = imageAnalysisOutput;
+            mOutputPostviewSurfaceImpl = postviewOutput;
+            mColorSpace = colorSpace;
+        }
 
         public OutputSurfaceConfigurationImplStub(OutputSurfaceImpl previewOutput,
                 OutputSurfaceImpl imageCaptureOutput, OutputSurfaceImpl imageAnalysisOutput,
@@ -1722,6 +1772,7 @@ public class CameraExtensionsProxyService extends Service {
             mOutputImageCaptureSurfaceImpl = imageCaptureOutput;
             mOutputImageAnalysisSurfaceImpl = imageAnalysisOutput;
             mOutputPostviewSurfaceImpl = postviewOutput;
+            mColorSpace = ColorSpaceProfiles.UNSPECIFIED;
         }
 
         @Override
@@ -1743,6 +1794,11 @@ public class CameraExtensionsProxyService extends Service {
         public OutputSurfaceImpl getPostviewOutputSurface() {
             return mOutputPostviewSurfaceImpl;
         }
+
+        @Override
+        public int getColorSpace() {
+            return mColorSpace;
+        }
     }
 
     private class OutputSurfaceImplStub implements OutputSurfaceImpl {
@@ -1751,11 +1807,10 @@ public class CameraExtensionsProxyService extends Service {
         private final int mImageFormat;
         private final int mDataspace;
         private final long mUsage;
+        private final long mDynamicRangeProfile;
 
         public OutputSurfaceImplStub(OutputSurface outputSurface) {
             mSurface = outputSurface.surface;
-            mSize = new Size(outputSurface.size.width, outputSurface.size.height);
-            mImageFormat = outputSurface.imageFormat;
             if (mSurface != null) {
                 mDataspace = SurfaceUtils.getSurfaceDataspace(mSurface);
                 mUsage = SurfaceUtils.getSurfaceUsage(mSurface);
@@ -1763,6 +1818,9 @@ public class CameraExtensionsProxyService extends Service {
                 mDataspace = -1;
                 mUsage = 0;
             }
+            mDynamicRangeProfile = outputSurface.dynamicRangeProfile;
+            mSize = new Size(outputSurface.size.width, outputSurface.size.height);
+            mImageFormat = outputSurface.imageFormat;
         }
 
         @Override
@@ -1789,6 +1847,12 @@ public class CameraExtensionsProxyService extends Service {
         public long getUsage() {
             return mUsage;
         }
+
+        @Override
+        public long getDynamicRangeProfile() {
+            return mDynamicRangeProfile;
+        }
+
     }
 
     private class PreviewExtenderImplStub extends IPreviewExtenderImpl.Stub implements
@@ -2518,6 +2582,11 @@ public class CameraExtensionsProxyService extends Service {
 
     private static CameraOutputConfig getCameraOutputConfig(Camera2OutputConfigImpl output) {
         CameraOutputConfig ret = new CameraOutputConfig();
+        if (Flags.extension10Bit() && EFV_SUPPORTED) {
+            ret.dynamicRangeProfile = output.getDynamicRangeProfile();
+        } else {
+            ret.dynamicRangeProfile = DynamicRangeProfiles.STANDARD;
+        }
         ret.outputId = new OutputConfigId();
         ret.outputId.id = output.getId();
         ret.physicalCameraId = output.getPhysicalCameraId();

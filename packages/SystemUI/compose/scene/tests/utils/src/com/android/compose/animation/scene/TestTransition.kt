@@ -17,12 +17,24 @@
 package com.android.compose.animation.scene
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.SemanticsNode
 import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.compose.ui.test.SemanticsNodeInteractionsProvider
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
+import platform.test.motion.MotionTestRule
+import platform.test.motion.RecordedMotion
+import platform.test.motion.compose.ComposeRecordingSpec
+import platform.test.motion.compose.ComposeToolkit
+import platform.test.motion.compose.MotionControl
+import platform.test.motion.compose.feature
+import platform.test.motion.compose.recordMotion
+import platform.test.motion.golden.FeatureCapture
+import platform.test.motion.golden.TimeSeriesCaptureScope
 
 @DslMarker annotation class TransitionTestDsl
 
@@ -97,6 +109,66 @@ fun ComposeContentTestRule.testTransition(
             }
         },
         builder,
+    )
+}
+
+data class TransitionRecordingSpec(
+    val recordBefore: Boolean = true,
+    val recordAfter: Boolean = true,
+    val timeSeriesCapture: TimeSeriesCaptureScope<SemanticsNodeInteractionsProvider>.() -> Unit
+)
+
+/** Captures the feature using [capture] on the [element]. */
+fun TimeSeriesCaptureScope<SemanticsNodeInteractionsProvider>.featureOfElement(
+    element: ElementKey,
+    capture: FeatureCapture<SemanticsNode, *>,
+    name: String = "${element.debugName}_${capture.name}"
+) {
+    feature(isElement(element), capture, name)
+}
+
+/** Records the transition between two scenes of [transitionLayout][SceneTransitionLayout]. */
+fun MotionTestRule<ComposeToolkit>.recordTransition(
+    fromSceneContent: @Composable SceneScope.() -> Unit,
+    toSceneContent: @Composable SceneScope.() -> Unit,
+    transition: TransitionBuilder.() -> Unit,
+    recordingSpec: TransitionRecordingSpec,
+    layoutModifier: Modifier = Modifier,
+    fromScene: SceneKey = TestScenes.SceneA,
+    toScene: SceneKey = TestScenes.SceneB,
+): RecordedMotion {
+    val state =
+        toolkit.composeContentTestRule.runOnUiThread {
+            MutableSceneTransitionLayoutState(
+                fromScene,
+                transitions { from(fromScene, to = toScene, builder = transition) }
+            )
+        }
+
+    return recordMotion(
+        content = { play ->
+            LaunchedEffect(play) {
+                if (play) {
+                    state.setTargetScene(toScene, coroutineScope = this)
+                }
+            }
+
+            SceneTransitionLayout(
+                state,
+                layoutModifier,
+            ) {
+                scene(fromScene, content = fromSceneContent)
+                scene(toScene, content = toSceneContent)
+            }
+        },
+        ComposeRecordingSpec(
+            MotionControl(delayRecording = { awaitCondition { state.isTransitioning() } }) {
+                awaitCondition { !state.isTransitioning() }
+            },
+            recordBefore = recordingSpec.recordBefore,
+            recordAfter = recordingSpec.recordAfter,
+            timeSeriesCapture = recordingSpec.timeSeriesCapture
+        )
     )
 }
 

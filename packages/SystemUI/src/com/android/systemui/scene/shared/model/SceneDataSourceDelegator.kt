@@ -20,9 +20,6 @@ package com.android.systemui.scene.shared.model
 
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.TransitionKey
-import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,14 +33,10 @@ import kotlinx.coroutines.flow.stateIn
  * Delegates calls to a runtime-provided [SceneDataSource] or to a no-op implementation if a
  * delegate isn't set.
  */
-@SysUISingleton
-class SceneDataSourceDelegator
-@Inject
-constructor(
-    @Application private val applicationScope: CoroutineScope,
+class SceneDataSourceDelegator(
+    applicationScope: CoroutineScope,
     config: SceneContainerConfig,
 ) : SceneDataSource {
-
     private val noOpDelegate = NoOpSceneDataSource(config.initialSceneKey)
     private val delegateMutable = MutableStateFlow<SceneDataSource>(noOpDelegate)
 
@@ -60,6 +53,12 @@ constructor(
         delegateMutable.value.changeScene(
             toScene = toScene,
             transitionKey = transitionKey,
+        )
+    }
+
+    override fun snapToScene(toScene: SceneKey) {
+        delegateMutable.value.snapToScene(
+            toScene = toScene,
         )
     }
 
@@ -82,6 +81,9 @@ constructor(
     ) : SceneDataSource {
         override val currentScene: StateFlow<SceneKey> =
             MutableStateFlow(initialSceneKey).asStateFlow()
+
         override fun changeScene(toScene: SceneKey, transitionKey: TransitionKey?) = Unit
+
+        override fun snapToScene(toScene: SceneKey) = Unit
     }
 }

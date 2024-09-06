@@ -46,7 +46,7 @@ abstract class SwipeUpGestureHandler(
     private var monitoringCurrentTouch: Boolean = false
 
     private var swipeDistanceThreshold: Int = context.resources.getDimensionPixelSize(
-        com.android.internal.R.dimen.system_gestures_start_threshold
+        com.android.internal.R.dimen.system_gestures_distance_threshold
     )
 
     override fun onInputEvent(ev: InputEvent) {

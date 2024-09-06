@@ -140,9 +140,7 @@
     <color name="biometric_dialog_gray">#ff757575</color>
     <color name="biometric_dialog_accent">@color/material_dynamic_primary40</color>
     <color name="biometric_dialog_error">#ffd93025</color>                  <!-- red 600 -->
-    <!-- Color for biometric prompt content view -->
-    <color name="biometric_prompt_content_background_color">#8AB4F8</color>
-    <color name="biometric_prompt_content_list_item_bullet_color">#1d873b</color>
+    <color name="biometric_dialog_face_checkmark">#34A853</color> <!-- green 500 -->
 
     <!-- SFPS colors -->
     <color name="sfps_chevron_fill">@color/material_dynamic_primary90</color>
@@ -239,11 +237,8 @@
     <!-- Internet Dialog -->
     <!-- Material next state on color-->
     <color name="settingslib_state_on_color">@color/settingslib_state_on</color>
-    <!-- Material next track on color-->
-    <color name="settingslib_track_on_color">@color/settingslib_track_on</color>
     <!-- Material next track off color-->
     <color name="settingslib_track_off_color">@color/settingslib_track_off</color>
-    <color name="connected_network_primary_color">#191C18</color>
     <color name="connected_network_secondary_color">#41493D</color>
 
     <color name="dream_overlay_camera_mic_off_dot_color">#FCBE03</color>

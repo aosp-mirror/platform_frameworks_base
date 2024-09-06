@@ -21,6 +21,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.data.repository.FakeFingerprintPropertyRepository
 import com.android.systemui.biometrics.data.repository.fakeFingerprintPropertyRepository
+import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
@@ -32,6 +33,7 @@ import com.android.systemui.keyguard.shared.model.TransitionState.RUNNING
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
+import com.google.common.collect.Range
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -102,6 +104,24 @@ class GoneToDozingTransitionViewModelTest : SysuiTestCase() {
             )
 
             values.forEach { assertThat(it).isNull() }
+        }
+
+    @Test
+    fun notificationAlpha_fadesOut() =
+        testScope.runTest {
+            val alpha by collectLastValue(underTest.notificationAlpha)
+
+            keyguardTransitionRepository.sendTransitionStep(step(0f, TransitionState.STARTED))
+            assertThat(alpha).isEqualTo(1f)
+
+            keyguardTransitionRepository.sendTransitionStep(step(0.25f))
+            assertThat(alpha).isIn(Range.open(.25f, .75f))
+
+            keyguardTransitionRepository.sendTransitionStep(step(1f))
+            assertThat(alpha).isEqualTo(0f)
+
+            keyguardTransitionRepository.sendTransitionStep(step(1f, TransitionState.FINISHED))
+            assertThat(alpha).isEqualTo(1f)
         }
 
     private fun step(value: Float, state: TransitionState = RUNNING): TransitionStep {

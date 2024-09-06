@@ -22,6 +22,9 @@
     <!-- Threshold in micro watts above which a charger is rated as "fast"; 1.5A @ 5V  -->
     <integer name="config_chargingFastThreshold">7500000</integer>
 
+    <!-- Threshold in micro watts above which a charger is rated as "fast"; 20W  -->
+    <integer name="config_chargingFastThreshold_v2">20000000</integer>
+
     <!-- When true, show 1/2G networks as 3G. -->
     <bool name="config_showMin3G">false</bool>
 

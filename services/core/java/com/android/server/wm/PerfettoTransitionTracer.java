@@ -16,6 +16,8 @@
 
 package com.android.server.wm;
 
+import static android.tracing.perfetto.DataSourceParams.PERFETTO_DS_BUFFER_EXHAUSTED_POLICY_DROP;
+
 import android.annotation.NonNull;
 import android.internal.perfetto.protos.ShellTransitionOuterClass.ShellTransition;
 import android.internal.perfetto.protos.TracePacketOuterClass.TracePacket;
@@ -39,7 +41,12 @@ class PerfettoTransitionTracer implements TransitionTracer {
 
     PerfettoTransitionTracer() {
         Producer.init(InitArguments.DEFAULTS);
-        mDataSource.register(DataSourceParams.DEFAULTS);
+        DataSourceParams params =
+                new DataSourceParams.Builder()
+                        .setBufferExhaustedPolicy(
+                                PERFETTO_DS_BUFFER_EXHAUSTED_POLICY_DROP)
+                        .build();
+        mDataSource.register(params);
     }
 
     /**

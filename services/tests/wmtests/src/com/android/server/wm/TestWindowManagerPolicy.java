@@ -167,6 +167,10 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
+    public void onDisplaySwitchStart(int displayId) {
+    }
+
+    @Override
     public boolean okToAnimate(boolean ignoreScreenOn) {
         return mOkToAnimate;
     }

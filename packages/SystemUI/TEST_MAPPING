@@ -66,6 +66,9 @@
       "options" : [
         {
           "include-filter": "android.platform.tests.HomeTest"
+        },
+        {
+          "exclude-filter": "android.platform.tests.HomeTest#testAssistantWidget"
         }
       ]
     },

@@ -22,6 +22,7 @@ import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
+import com.android.systemui.scene.domain.interactor.sceneInteractor
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 val Kosmos.aodAlphaViewModel by Fixture {
@@ -30,5 +31,6 @@ val Kosmos.aodAlphaViewModel by Fixture {
         goneToAodTransitionViewModel = goneToAodTransitionViewModel,
         goneToDozingTransitionViewModel = goneToDozingTransitionViewModel,
         keyguardInteractor = keyguardInteractor,
+        sceneInteractor = sceneInteractor,
     )
 }

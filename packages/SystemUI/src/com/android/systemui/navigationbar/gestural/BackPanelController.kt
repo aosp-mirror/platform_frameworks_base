@@ -21,7 +21,6 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Point
 import android.os.Handler
-import android.os.SystemClock
 import android.util.Log
 import android.util.MathUtils
 import android.view.Gravity
@@ -34,14 +33,16 @@ import androidx.annotation.VisibleForTesting
 import androidx.core.os.postDelayed
 import androidx.core.view.isVisible
 import androidx.dynamicanimation.animation.DynamicAnimation
-import com.android.internal.jank.Cuj.CUJ_BACK_PANEL_ARROW
+import com.android.internal.jank.Cuj
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.util.LatencyTracker
-import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.NavigationEdgeBackPlugin
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.ViewController
+import com.android.systemui.util.concurrency.BackPanelUiThread
+import com.android.systemui.util.concurrency.UiThreadContext
+import com.android.systemui.util.time.SystemClock
 import java.io.PrintWriter
 import javax.inject.Inject
 import kotlin.math.abs
@@ -84,10 +85,11 @@ internal constructor(
     context: Context,
     private val windowManager: WindowManager,
     private val viewConfiguration: ViewConfiguration,
-    @Main private val mainHandler: Handler,
+    private val mainHandler: Handler,
+    private val systemClock: SystemClock,
     private val vibratorHelper: VibratorHelper,
     private val configurationController: ConfigurationController,
-    private val latencyTracker: LatencyTracker,
+    latencyTracker: LatencyTracker,
     private val interactionJankMonitor: InteractionJankMonitor,
 ) : ViewController<BackPanel>(BackPanel(context, latencyTracker)), NavigationEdgeBackPlugin {
 
@@ -102,7 +104,8 @@ internal constructor(
     constructor(
         private val windowManager: WindowManager,
         private val viewConfiguration: ViewConfiguration,
-        @Main private val mainHandler: Handler,
+        @BackPanelUiThread private val uiThreadContext: UiThreadContext,
+        private val systemClock: SystemClock,
         private val vibratorHelper: VibratorHelper,
         private val configurationController: ConfigurationController,
         private val latencyTracker: LatencyTracker,
@@ -110,19 +113,19 @@ internal constructor(
     ) {
         /** Construct a [BackPanelController]. */
         fun create(context: Context): BackPanelController {
-            val backPanelController =
-                BackPanelController(
+            uiThreadContext.isCurrentThread()
+            return BackPanelController(
                     context,
                     windowManager,
                     viewConfiguration,
-                    mainHandler,
+                    uiThreadContext.handler,
+                    systemClock,
                     vibratorHelper,
                     configurationController,
                     latencyTracker,
                     interactionJankMonitor
                 )
-            backPanelController.init()
-            return backPanelController
+                .also { it.init() }
         }
     }
 
@@ -159,9 +162,10 @@ internal constructor(
     private var gestureInactiveTime = 0L
 
     private val elapsedTimeSinceInactive
-        get() = SystemClock.uptimeMillis() - gestureInactiveTime
+        get() = systemClock.uptimeMillis() - gestureInactiveTime
+
     private val elapsedTimeSinceEntry
-        get() = SystemClock.uptimeMillis() - gestureEntryTime
+        get() = systemClock.uptimeMillis() - gestureEntryTime
 
     private var pastThresholdWhileEntryOrInactiveTime = 0L
     private var entryToActiveDelay = 0F
@@ -179,7 +183,7 @@ internal constructor(
     // Distance in pixels a drag can be considered for a fling event
     private var minFlingDistance = 0
 
-    private val failsafeRunnable = Runnable { onFailsafe() }
+    internal val failsafeRunnable = Runnable { onFailsafe() }
 
     internal enum class GestureState {
         /* Arrow is off the screen and invisible */
@@ -371,6 +375,7 @@ internal constructor(
                 // Receiving a CANCEL implies that something else intercepted
                 // the gesture, i.e., the user did not cancel their gesture.
                 // Therefore, disappear immediately, with minimum fanfare.
+                interactionJankMonitor.cancel(Cuj.CUJ_BACK_PANEL_ARROW)
                 updateArrowState(GestureState.GONE)
                 velocityTracker = null
             }
@@ -607,6 +612,7 @@ internal constructor(
     }
 
     private var previousPreThresholdWidthInterpolator = params.entryWidthInterpolator
+
     private fun preThresholdWidthStretchAmount(progress: Float): Float {
         val interpolator = run {
             val isPastSlop = totalTouchDeltaInactive > viewConfiguration.scaledTouchSlop
@@ -672,8 +678,7 @@ internal constructor(
             velocityTracker?.run {
                 computeCurrentVelocity(PX_PER_SEC)
                 xVelocity.takeIf { mView.isLeftPanel } ?: (xVelocity * -1)
-            }
-                ?: 0f
+            } ?: 0f
         val isPastFlingVelocityThreshold =
             flingVelocity > viewConfiguration.scaledMinimumFlingVelocity
         return flingDistance > minFlingDistance && isPastFlingVelocityThreshold
@@ -693,10 +698,10 @@ internal constructor(
         }
 
         if (isPastThresholdForFirstTime) {
-            pastThresholdWhileEntryOrInactiveTime = SystemClock.uptimeMillis()
+            pastThresholdWhileEntryOrInactiveTime = systemClock.uptimeMillis()
             entryToActiveDelay = dynamicDelay()
         }
-        val timePastThreshold = SystemClock.uptimeMillis() - pastThresholdWhileEntryOrInactiveTime
+        val timePastThreshold = systemClock.uptimeMillis() - pastThresholdWhileEntryOrInactiveTime
 
         return timePastThreshold > entryToActiveDelay
     }
@@ -882,6 +887,16 @@ internal constructor(
         previousState = currentState
         currentState = newState
 
+        // First, update the jank tracker
+        when (currentState) {
+            GestureState.ENTRY -> {
+                interactionJankMonitor.cancel(Cuj.CUJ_BACK_PANEL_ARROW)
+                interactionJankMonitor.begin(mView, Cuj.CUJ_BACK_PANEL_ARROW)
+            }
+            GestureState.GONE -> interactionJankMonitor.end(Cuj.CUJ_BACK_PANEL_ARROW)
+            else -> {}
+        }
+
         when (currentState) {
             GestureState.CANCELLED -> {
                 backCallback.cancelBack()
@@ -913,7 +928,7 @@ internal constructor(
                 mView.isVisible = true
 
                 updateRestingArrowDimens()
-                gestureEntryTime = SystemClock.uptimeMillis()
+                gestureEntryTime = systemClock.uptimeMillis()
             }
             GestureState.ACTIVE -> {
                 previousXTranslationOnActiveOffset = previousXTranslation
@@ -928,7 +943,7 @@ internal constructor(
                 mView.popOffEdge(popVelocity)
             }
             GestureState.INACTIVE -> {
-                gestureInactiveTime = SystemClock.uptimeMillis()
+                gestureInactiveTime = systemClock.uptimeMillis()
 
                 // Typically entering INACTIVE means
                 // totalTouchDelta <= deactivationSwipeTriggerThreshold
@@ -991,15 +1006,15 @@ internal constructor(
 
     private fun performDeactivatedHapticFeedback() {
         vibratorHelper.performHapticFeedback(
-                mView,
-                HapticFeedbackConstants.GESTURE_THRESHOLD_DEACTIVATE
+            mView,
+            HapticFeedbackConstants.GESTURE_THRESHOLD_DEACTIVATE
         )
     }
 
     private fun performActivatedHapticFeedback() {
         vibratorHelper.performHapticFeedback(
-                mView,
-                HapticFeedbackConstants.GESTURE_THRESHOLD_ACTIVATE
+            mView,
+            HapticFeedbackConstants.GESTURE_THRESHOLD_ACTIVATE
         )
     }
 
@@ -1013,8 +1028,7 @@ internal constructor(
             velocityTracker?.run {
                 computeCurrentVelocity(PX_PER_MS)
                 MathUtils.smoothStep(slowVelocityBound, fastVelocityBound, abs(xVelocity))
-            }
-                ?: valueOnFastVelocity
+            } ?: valueOnFastVelocity
 
         return MathUtils.lerp(valueOnFastVelocity, valueOnSlowVelocity, 1 - factor)
     }
@@ -1039,7 +1053,12 @@ internal constructor(
     override fun dump(pw: PrintWriter) {
         pw.println("$TAG:")
         pw.println("  currentState=$currentState")
-        pw.println("  isLeftPanel=$mView.isLeftPanel")
+        pw.println("  isLeftPanel=${mView.isLeftPanel}")
+    }
+
+    @VisibleForTesting
+    internal fun getBackPanelView(): BackPanel {
+        return mView
     }
 
     init {

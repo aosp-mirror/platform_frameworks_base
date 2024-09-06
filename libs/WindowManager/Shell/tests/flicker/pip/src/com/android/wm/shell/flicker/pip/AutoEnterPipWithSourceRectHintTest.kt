@@ -17,10 +17,10 @@
 package com.android.wm.shell.flicker.pip
 
 import android.platform.test.annotations.Presubmit
-import android.tools.traces.component.ComponentNameMatcher
 import android.tools.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.flicker.legacy.FlickerBuilder
 import android.tools.flicker.legacy.LegacyFlickerTest
+import android.tools.traces.component.ComponentNameMatcher
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -30,7 +30,7 @@ import org.junit.runners.Parameterized
 /**
  * Test auto entering pip using a source rect hint.
  *
- * To run this test: `atest AutoEnterPipWithSourceRectHintTest`
+ * To run this test: `atest WMShellFlickerTestsPip1:AutoEnterPipWithSourceRectHintTest`
  *
  * Actions:
  * ```
@@ -66,9 +66,7 @@ class AutoEnterPipWithSourceRectHintTest(flicker: LegacyFlickerTest) :
     @Test
     fun pipOverlayNotShown() {
         val overlay = ComponentNameMatcher.PIP_CONTENT_OVERLAY
-        flicker.assertLayers {
-            this.notContains(overlay)
-        }
+        flicker.assertLayers { this.notContains(overlay) }
     }
     @Presubmit
     @Test

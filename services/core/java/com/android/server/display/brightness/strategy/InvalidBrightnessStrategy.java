@@ -16,12 +16,13 @@
 
 package com.android.server.display.brightness.strategy;
 
-import android.hardware.display.DisplayManagerInternal;
 import android.os.PowerManager;
 
 import com.android.server.display.DisplayBrightnessState;
 import com.android.server.display.brightness.BrightnessReason;
 import com.android.server.display.brightness.BrightnessUtils;
+import com.android.server.display.brightness.StrategyExecutionRequest;
+import com.android.server.display.brightness.StrategySelectionNotifyRequest;
 
 import java.io.PrintWriter;
 
@@ -31,7 +32,7 @@ import java.io.PrintWriter;
 public class InvalidBrightnessStrategy implements DisplayBrightnessStrategy {
     @Override
     public DisplayBrightnessState updateBrightness(
-            DisplayManagerInternal.DisplayPowerRequest displayPowerRequest) {
+            StrategyExecutionRequest strategyExecutionRequest) {
         return BrightnessUtils.constructDisplayBrightnessState(BrightnessReason.REASON_UNKNOWN,
                 PowerManager.BRIGHTNESS_INVALID_FLOAT, PowerManager.BRIGHTNESS_INVALID_FLOAT,
                 getName());
@@ -39,9 +40,20 @@ public class InvalidBrightnessStrategy implements DisplayBrightnessStrategy {
 
     @Override
     public String getName() {
-        return "InvalidBrightnessStrategy";
+        return DisplayBrightnessStrategyConstants.INVALID_BRIGHTNESS_STRATEGY_NAME;
     }
 
     @Override
     public void dump(PrintWriter writer) {}
+
+    @Override
+    public void strategySelectionPostProcessor(
+            StrategySelectionNotifyRequest strategySelectionNotifyRequest) {
+        // DO NOTHING
+    }
+
+    @Override
+    public int getReason() {
+        return BrightnessReason.REASON_UNKNOWN;
+    }
 }

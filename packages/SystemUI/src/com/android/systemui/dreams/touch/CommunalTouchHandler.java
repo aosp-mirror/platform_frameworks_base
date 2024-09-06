@@ -16,7 +16,6 @@
 
 package com.android.systemui.dreams.touch;
 
-import static com.android.systemui.dreams.touch.dagger.ShadeModule.COMMUNAL_GESTURE_INITIATION_WIDTH;
 import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
 import android.graphics.Rect;
@@ -27,7 +26,9 @@ import android.view.MotionEvent;
 import androidx.annotation.VisibleForTesting;
 import androidx.lifecycle.Lifecycle;
 
+import com.android.systemui.ambient.touch.TouchHandler;
 import com.android.systemui.communal.domain.interactor.CommunalInteractor;
+import com.android.systemui.dreams.touch.dagger.CommunalTouchModule;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 
 import java.util.Optional;
@@ -36,8 +37,8 @@ import java.util.function.Consumer;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-/** {@link DreamTouchHandler} responsible for handling touches to open communal hub. **/
-public class CommunalTouchHandler implements DreamTouchHandler {
+/** {@link TouchHandler} responsible for handling touches to open communal hub. **/
+public class CommunalTouchHandler implements TouchHandler {
     private final int mInitiationWidth;
     private final Optional<CentralSurfaces> mCentralSurfaces;
     private final Lifecycle mLifecycle;
@@ -53,7 +54,7 @@ public class CommunalTouchHandler implements DreamTouchHandler {
     @Inject
     public CommunalTouchHandler(
             Optional<CentralSurfaces> centralSurfaces,
-            @Named(COMMUNAL_GESTURE_INITIATION_WIDTH) int initiationWidth,
+            @Named(CommunalTouchModule.COMMUNAL_GESTURE_INITIATION_WIDTH) int initiationWidth,
             CommunalInteractor communalInteractor,
             Lifecycle lifecycle) {
         mInitiationWidth = initiationWidth;
@@ -87,7 +88,7 @@ public class CommunalTouchHandler implements DreamTouchHandler {
     }
 
     @Override
-    public void getTouchInitiationRegion(Rect bounds, Region region) {
+    public void getTouchInitiationRegion(Rect bounds, Region region, Rect exclusionRect) {
         final Rect outBounds = new Rect(bounds);
         outBounds.inset(outBounds.width() - mInitiationWidth, 0, 0, 0);
         region.op(outBounds, Region.Op.UNION);
@@ -97,7 +98,7 @@ public class CommunalTouchHandler implements DreamTouchHandler {
         // Notification shade window has its own logic to be visible if the hub is open, no need to
         // do anything here other than send touch events over.
         session.registerInputListener(ev -> {
-            surfaces.handleDreamTouch((MotionEvent) ev);
+            surfaces.handleCommunalHubTouch((MotionEvent) ev);
             if (ev != null && ((MotionEvent) ev).getAction() == MotionEvent.ACTION_UP) {
                 var unused = session.pop();
             }

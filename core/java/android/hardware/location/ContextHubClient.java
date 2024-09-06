@@ -205,14 +205,12 @@ public class ContextHubClient implements Closeable {
     @FlaggedApi(Flags.FLAG_RELIABLE_MESSAGE)
     public ContextHubTransaction<Void> sendReliableMessageToNanoApp(
             @NonNull NanoAppMessage message) {
-        if (!Flags.reliableMessageImplementation()) {
-            return null;
-        }
-
         ContextHubTransaction<Void> transaction =
                 new ContextHubTransaction<>(ContextHubTransaction.TYPE_RELIABLE_MESSAGE);
 
-        if (!mAttachedHub.supportsReliableMessages()) {
+        if (!Flags.reliableMessageImplementation() ||
+            !mAttachedHub.supportsReliableMessages() ||
+            message.isBroadcastMessage()) {
             transaction.setResponse(new ContextHubTransaction.Response<Void>(
                     ContextHubTransaction.RESULT_FAILED_NOT_SUPPORTED, null));
             return transaction;

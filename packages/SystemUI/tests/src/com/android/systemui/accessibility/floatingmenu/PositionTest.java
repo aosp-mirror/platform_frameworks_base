@@ -18,8 +18,8 @@ package com.android.systemui.accessibility.floatingmenu;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import android.testing.AndroidTestingRunner;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -29,7 +29,7 @@ import org.junit.runner.RunWith;
 
 /** Tests for {@link Position}. */
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class PositionTest extends SysuiTestCase {
 
     @Test

@@ -44,6 +44,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.ContrastColorUtil;
+import com.android.wm.shell.Flags;
 import com.android.wm.shell.R;
 
 import java.util.ArrayList;
@@ -195,7 +196,9 @@ public class BubbleOverflowContainerView extends LinearLayout {
     }
 
     void updateEmptyStateVisibility() {
-        mEmptyState.setVisibility(mOverflowBubbles.isEmpty() ? View.VISIBLE : View.GONE);
+        boolean showEmptyState = mOverflowBubbles.isEmpty()
+                && !Flags.enableOptionalBubbleOverflow();
+        mEmptyState.setVisibility(showEmptyState ? View.VISIBLE : View.GONE);
         mRecyclerView.setVisibility(mOverflowBubbles.isEmpty() ? View.GONE : View.VISIBLE);
     }
 

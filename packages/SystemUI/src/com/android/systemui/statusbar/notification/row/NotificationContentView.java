@@ -699,8 +699,7 @@ public class NotificationContentView extends FrameLayout implements Notification
         int hint;
         if (mHeadsUpChild != null && isVisibleOrTransitioning(VISIBLE_TYPE_HEADSUP)) {
             hint = getViewHeight(VISIBLE_TYPE_HEADSUP);
-            if (mHeadsUpRemoteInput != null && mHeadsUpRemoteInput.isAnimatingAppearance()
-                    && mHeadsUpRemoteInputController.isFocusAnimationFlagActive()) {
+            if (mHeadsUpRemoteInput != null && mHeadsUpRemoteInput.isAnimatingAppearance()) {
                 // While the RemoteInputView is animating its appearance, it should be allowed
                 // to overlap the hint, therefore no space is reserved for the hint during the
                 // appearance animation of the RemoteInputView
@@ -1515,7 +1514,7 @@ public class NotificationContentView extends FrameLayout implements Notification
         }
         ImageView bubbleButton = layout.findViewById(com.android.internal.R.id.bubble_button);
         View actionContainer = layout.findViewById(com.android.internal.R.id.actions_container);
-        LinearLayout actionListMarginTarget = layout.findViewById(
+        ViewGroup actionListMarginTarget = layout.findViewById(
                 com.android.internal.R.id.notification_action_list_margin_target);
         if (bubbleButton == null || actionContainer == null) {
             return;

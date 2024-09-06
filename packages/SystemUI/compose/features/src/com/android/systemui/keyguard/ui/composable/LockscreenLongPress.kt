@@ -26,13 +26,13 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardLongPressViewModel
 
 /** Container for lockscreen content that handles long-press to bring up the settings menu. */
@@ -42,7 +42,8 @@ fun LockscreenLongPress(
     modifier: Modifier = Modifier,
     content: @Composable BoxScope.(onSettingsMenuPlaces: (coordinates: Rect?) -> Unit) -> Unit,
 ) {
-    val isEnabled: Boolean by viewModel.isLongPressHandlingEnabled.collectAsState(initial = false)
+    val isEnabled: Boolean by
+        viewModel.isLongPressHandlingEnabled.collectAsStateWithLifecycle(initialValue = false)
     val (settingsMenuBounds, setSettingsMenuBounds) = remember { mutableStateOf<Rect?>(null) }
     val interactionSource = remember { MutableInteractionSource() }
 

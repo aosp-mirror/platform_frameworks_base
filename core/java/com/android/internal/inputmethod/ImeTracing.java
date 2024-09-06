@@ -16,6 +16,7 @@
 
 package com.android.internal.inputmethod;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.app.ActivityThread;
@@ -59,7 +60,9 @@ public abstract class ImeTracing {
      */
     public static ImeTracing getInstance() {
         if (sInstance == null) {
-            if (isSystemProcess()) {
+            if (android.tracing.Flags.perfettoIme()) {
+                sInstance = new ImeTracingPerfettoImpl();
+            } else if (isSystemProcess()) {
                 sInstance = new ImeTracingServerImpl();
             } else {
                 sInstance = new ImeTracingClientImpl();
@@ -77,7 +80,7 @@ public abstract class ImeTracing {
      * and {@see #IME_TRACING_FROM_IMS}
      * @param where
      */
-    public void sendToService(byte[] protoDump, int source, String where) {
+    protected void sendToService(byte[] protoDump, int source, String where) {
         InputMethodManagerGlobal.startProtoDump(protoDump, source, where,
                 e -> Log.e(TAG, "Exception while sending ime-related dump to server", e));
     }
@@ -144,7 +147,7 @@ public abstract class ImeTracing {
      *
      * @param where Place where the trace was triggered.
      */
-    public abstract void triggerManagerServiceDump(String where);
+    public abstract void triggerManagerServiceDump(String where, @NonNull ServiceDumper dumper);
 
     /**
      * Being called while taking a bugreport so that tracing files can be included in the bugreport

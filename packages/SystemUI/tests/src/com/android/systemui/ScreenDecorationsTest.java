@@ -39,6 +39,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -1182,6 +1183,24 @@ public class ScreenDecorationsTest extends SysuiTestCase {
     }
 
     @Test
+    public void testUpdateOverlayProviderViews_PendingConfigChange() {
+        final DecorProvider cutout = new CutoutDecorProviderImpl(BOUNDS_POSITION_TOP);
+        spyOn(cutout);
+        doNothing().when(cutout).onReloadResAndMeasure(any(), anyInt(), anyInt(), anyInt(), any());
+        mMockCutoutList.add(cutout);
+        mScreenDecorations.start();
+        doCallRealMethod().when(mScreenDecorations).updateOverlayProviderViews(any());
+
+        mScreenDecorations.mPendingConfigChange = true;
+        mScreenDecorations.updateOverlayProviderViews(null /* filterIds */);
+        verify(cutout, never()).onReloadResAndMeasure(any(), anyInt(), anyInt(), anyInt(), any());
+
+        mScreenDecorations.mPendingConfigChange = false;
+        mScreenDecorations.updateOverlayProviderViews(null /* filterIds */);
+        verify(cutout).onReloadResAndMeasure(any(), anyInt(), anyInt(), anyInt(), any());
+    }
+
+    @Test
     public void testSupportHwcLayer_SwitchFrom_NotSupport() {
         setupResources(0 /* radius */, 10 /* radiusTop */, 20 /* radiusBottom */,
                 null /* roundedTopDrawable */, null /* roundedBottomDrawable */,
@@ -1271,6 +1290,28 @@ public class ScreenDecorationsTest extends SysuiTestCase {
                 anyInt(),
                 anyInt(),
                 any());
+    }
+
+    @Test
+    public void delayedFaceSensorLocationChangesAddsFaceScanningOverlay() {
+        setupResources(0 /* radius */, 0 /* radiusTop */, 0 /* radiusBottom */,
+                null /* roundedTopDrawable */, null /* roundedBottomDrawable */,
+                0 /* roundedPadding */, true /* privacyDot */, false /* faceScanning */);
+        mScreenDecorations.start();
+        verifyFaceScanningViewExists(false); // face scanning view not added yet
+
+        // WHEN the sensor location is updated
+        mFaceScanningProviders = new ArrayList<>();
+        mFaceScanningProviders.add(mFaceScanningDecorProvider);
+        when(mFaceScanningProviderFactory.getProviders()).thenReturn(mFaceScanningProviders);
+        when(mFaceScanningProviderFactory.getHasProviders()).thenReturn(true);
+        final Point location = new Point();
+        mFakeFacePropertyRepository.setSensorLocation(location);
+        mScreenDecorations.onFaceSensorLocationChanged(location);
+        mExecutor.runAllReady();
+
+        // THEN the face scanning view is added
+        verifyFaceScanningViewExists(true);
     }
 
     @Test

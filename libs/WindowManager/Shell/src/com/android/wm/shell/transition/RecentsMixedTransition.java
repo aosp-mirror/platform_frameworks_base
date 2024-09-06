@@ -43,7 +43,7 @@ class RecentsMixedTransition extends DefaultMixedHandler.MixedTransition {
     private final DesktopTasksController mDesktopTasksController;
 
     RecentsMixedTransition(int type, IBinder transition, Transitions player,
-            DefaultMixedHandler mixedHandler, PipTransitionController pipHandler,
+            MixedTransitionHandler mixedHandler, PipTransitionController pipHandler,
             StageCoordinator splitHandler, KeyguardTransitionHandler keyguardHandler,
             RecentsTransitionHandler recentsHandler,
             DesktopTasksController desktopTasksController) {
@@ -142,7 +142,8 @@ class RecentsMixedTransition extends DefaultMixedHandler.MixedTransition {
                     && mSplitHandler.getSplitItemPosition(change.getLastParent())
                     != SPLIT_POSITION_UNDEFINED) {
                 return animateEnterPipFromSplit(this, info, startTransaction, finishTransaction,
-                        finishCallback, mPlayer, mMixedHandler, mPipHandler, mSplitHandler);
+                        finishCallback, mPlayer, mMixedHandler, mPipHandler, mSplitHandler,
+                        /*replacingPip*/ false);
             }
         }
 
@@ -212,6 +213,7 @@ class RecentsMixedTransition extends DefaultMixedHandler.MixedTransition {
         switch (mType) {
             case TYPE_RECENTS_DURING_DESKTOP:
             case TYPE_RECENTS_DURING_SPLIT:
+            case TYPE_RECENTS_DURING_KEYGUARD:
                 mLeftoversHandler.onTransitionConsumed(transition, aborted, finishT);
                 break;
             default:

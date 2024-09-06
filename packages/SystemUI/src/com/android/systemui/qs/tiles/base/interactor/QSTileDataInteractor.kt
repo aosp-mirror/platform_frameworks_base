@@ -19,6 +19,7 @@ package com.android.systemui.qs.tiles.base.interactor
 import android.os.UserHandle
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 
 /**
  * Provides data and availability for the tile. In most cases it would delegate data retrieval to
@@ -26,7 +27,7 @@ import kotlinx.coroutines.flow.Flow
  * these methods because there is no background thread guarantee. Use [Flow.flowOn] (typically
  * with @Background [CoroutineDispatcher]) instead to move the calculations to another thread.
  */
-interface QSTileDataInteractor<DATA_TYPE> {
+interface QSTileDataInteractor<DATA_TYPE> : QSTileAvailabilityInteractor {
 
     /**
      * Returns a data flow scoped to the user. This means the subscription will live when the tile
@@ -36,7 +37,9 @@ interface QSTileDataInteractor<DATA_TYPE> {
      * as possible.
      */
     fun tileData(user: UserHandle, triggers: Flow<DataUpdateTrigger>): Flow<DATA_TYPE>
+}
 
+interface QSTileAvailabilityInteractor {
     /**
      * Returns tile availability - whether this device currently supports this tile.
      *
@@ -44,4 +47,12 @@ interface QSTileDataInteractor<DATA_TYPE> {
      * as possible.
      */
     fun availability(user: UserHandle): Flow<Boolean>
+
+    companion object {
+        val AlwaysAvailableInteractor = object : QSTileAvailabilityInteractor {
+            override fun availability(user: UserHandle): Flow<Boolean> {
+                return flowOf(true)
+            }
+        }
+    }
 }

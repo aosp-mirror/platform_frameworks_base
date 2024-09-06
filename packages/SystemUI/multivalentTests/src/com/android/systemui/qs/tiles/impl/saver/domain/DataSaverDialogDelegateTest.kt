@@ -33,7 +33,6 @@ import kotlin.coroutines.EmptyCoroutineContext
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 
 /** Test [DataSaverDialogDelegate]. */
@@ -69,7 +68,7 @@ class DataSaverDialogDelegateTest : SysuiTestCase() {
     fun delegateSetsDialogTitleCorrectly() {
         val expectedResId = R.string.data_saver_enable_title
 
-        dataSaverDialogDelegate.onCreate(sysuiDialog, null)
+        dataSaverDialogDelegate.beforeCreate(sysuiDialog, null)
 
         verify(sysuiDialog).setTitle(eq(expectedResId))
     }
@@ -78,7 +77,7 @@ class DataSaverDialogDelegateTest : SysuiTestCase() {
     fun delegateSetsDialogMessageCorrectly() {
         val expectedResId = R.string.data_saver_description
 
-        dataSaverDialogDelegate.onCreate(sysuiDialog, null)
+        dataSaverDialogDelegate.beforeCreate(sysuiDialog, null)
 
         verify(sysuiDialog).setMessage(expectedResId)
     }
@@ -87,7 +86,7 @@ class DataSaverDialogDelegateTest : SysuiTestCase() {
     fun delegateSetsDialogPositiveButtonCorrectly() {
         val expectedResId = R.string.data_saver_enable_button
 
-        dataSaverDialogDelegate.onCreate(sysuiDialog, null)
+        dataSaverDialogDelegate.beforeCreate(sysuiDialog, null)
 
         verify(sysuiDialog).setPositiveButton(eq(expectedResId), any())
     }
@@ -96,7 +95,7 @@ class DataSaverDialogDelegateTest : SysuiTestCase() {
     fun delegateSetsDialogCancelButtonCorrectly() {
         val expectedResId = R.string.cancel
 
-        dataSaverDialogDelegate.onCreate(sysuiDialog, null)
+        dataSaverDialogDelegate.beforeCreate(sysuiDialog, null)
 
         verify(sysuiDialog).setNeutralButton(eq(expectedResId), eq(null))
     }

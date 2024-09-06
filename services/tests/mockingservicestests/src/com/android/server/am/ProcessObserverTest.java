@@ -200,7 +200,7 @@ public class ProcessObserverTest {
             Log.v(TAG, "Intercepting bindApplication() for "
                     + Arrays.toString(invocation.getArguments()));
             if (mRealAms.mConstants.mEnableWaitForFinishAttachApplication) {
-                mRealAms.finishAttachApplication(0);
+                mRealAms.finishAttachApplication(0, 0);
             }
             return null;
         }).when(thread).bindApplication(
@@ -215,7 +215,7 @@ public class ProcessObserverTest {
                 any(), any(), any(),
                 any(), any(),
                 any(), any(),
-                any(),
+                any(), any(),
                 anyLong(), anyLong());
         final ProcessRecord r = spy(new ProcessRecord(mAms, ai, ai.processName, ai.uid));
         r.setPid(myPid());
@@ -263,7 +263,7 @@ public class ProcessObserverTest {
                 null, null,
                 null,
                 null, null, null,
-                null, null,
+                null, null, null,
                 0, 0);
         return app;
     }

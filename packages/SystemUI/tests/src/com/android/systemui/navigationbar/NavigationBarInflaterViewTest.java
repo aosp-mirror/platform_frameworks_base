@@ -22,12 +22,12 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 import android.util.SparseArray;
 import android.view.View;
 import android.widget.FrameLayout;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -41,7 +41,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 /** atest NavigationBarInflaterViewTest */
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @RunWithLooper
 @SmallTest
 public class NavigationBarInflaterViewTest extends SysuiTestCase {

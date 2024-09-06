@@ -38,6 +38,9 @@ android_ravenwood_test {
         "androidx.annotation_annotation",
         "androidx.test.ext.junit",
         "androidx.test.rules",
+
+        // To make sure it won't cause VerifyError (b/324063814)
+        "platformprotosnano",
     ],
     srcs: [
         "test/**/*.java",
@@ -45,7 +48,6 @@ android_ravenwood_test {
     jni_libs: [
         "libravenwoodbivalenttest_jni",
     ],
-    sdk_version: "test_current",
     auto_gen_config: true,
 }
 

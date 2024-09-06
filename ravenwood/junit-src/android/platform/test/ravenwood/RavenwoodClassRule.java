@@ -25,6 +25,7 @@ import static android.platform.test.ravenwood.RavenwoodRule.shouldStillIgnoreInP
 import android.platform.test.annotations.DisabledOnRavenwood;
 import android.platform.test.annotations.EnabledOnRavenwood;
 
+import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
@@ -41,27 +42,16 @@ import org.junit.runners.model.Statement;
 public class RavenwoodClassRule implements TestRule {
     @Override
     public Statement apply(Statement base, Description description) {
-        // No special treatment when running outside Ravenwood; run tests as-is
         if (!IS_ON_RAVENWOOD) {
-            Assume.assumeTrue(shouldEnableOnDevice(description));
-            return base;
-        }
-
-        if (ENABLE_PROBE_IGNORED) {
+            // This should be "Assume", not Assert, but if we use assume here, the device side
+            // test runner would complain.
+            // See the TODO comment in RavenwoodClassRuleRavenwoodOnlyTest.
+            Assert.assertTrue(shouldEnableOnDevice(description));
+        } else if (ENABLE_PROBE_IGNORED) {
             Assume.assumeFalse(shouldStillIgnoreInProbeIgnoreMode(description));
-            // Pass through to possible underlying RavenwoodRule for both environment
-            // configuration and handling method-level annotations
-            return base;
         } else {
-            return new Statement() {
-                @Override
-                public void evaluate() throws Throwable {
-                    Assume.assumeTrue(shouldEnableOnRavenwood(description));
-                    // Pass through to possible underlying RavenwoodRule for both environment
-                    // configuration and handling method-level annotations
-                    base.evaluate();
-                }
-            };
+            Assume.assumeTrue(shouldEnableOnRavenwood(description));
         }
+        return base;
     }
 }

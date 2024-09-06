@@ -34,6 +34,7 @@ import android.graphics.Insets;
 import android.graphics.Rect;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
+import android.view.InsetsController.LayoutInsetsDuringAnimation;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsAnimation.Bounds;
 import android.view.animation.Interpolator;
@@ -241,5 +242,10 @@ public class InsetsResizeAnimationRunner implements InsetsAnimationControlRunner
 
     @Override
     public void onCancelled(WindowInsetsAnimationController controller) {
+    }
+
+    @Override
+    public void updateLayoutInsetsDuringAnimation(
+            @LayoutInsetsDuringAnimation int layoutInsetsDuringAnimation) {
     }
 }

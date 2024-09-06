@@ -20,11 +20,11 @@ import android.app.Instrumentation
 import android.content.Intent
 import android.platform.test.annotations.Presubmit
 import android.tools.Rotation
-import android.tools.traces.component.ComponentNameMatcher
 import android.tools.flicker.legacy.FlickerBuilder
 import android.tools.flicker.legacy.LegacyFlickerTest
 import android.tools.flicker.rules.RemoveAllTasksButHomeRule.Companion.removeAllTasksButHome
 import android.tools.helpers.WindowUtils
+import android.tools.traces.component.ComponentNameMatcher
 import com.android.server.wm.flicker.helpers.PipAppHelper
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.testapp.ActivityOptions

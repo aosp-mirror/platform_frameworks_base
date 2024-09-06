@@ -26,8 +26,9 @@ import android.util.IndentingPrintWriter;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.WorkerThread;
 
-import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.util.DumpUtilsKt;
 import com.android.systemui.util.annotations.WeaklyReferencedCallback;
@@ -118,7 +119,7 @@ public class ObservableServiceConnection<T> implements ServiceConnection {
     private final Intent mServiceIntent;
     private final UserTracker mUserTracker;
     private final int mFlags;
-    private final Executor mExecutor;
+    private final Executor mBgExecutor;
     private final ServiceTransformer<T> mTransformer;
     private final ArrayList<WeakReference<Callback<T>>> mCallbacks;
     private Optional<Integer> mLastDisconnectReason;
@@ -130,30 +131,34 @@ public class ObservableServiceConnection<T> implements ServiceConnection {
      * Default constructor for {@link ObservableServiceConnection}.
      * @param context       The context from which the service will be bound with.
      * @param serviceIntent The intent to  bind service with.
-     * @param executor      The executor for connection callbacks to be delivered on
+     * @param bgExecutor    The executor for connection callbacks to be delivered on
      * @param transformer   A {@link ServiceTransformer} for transforming the resulting service
      *                      into a desired type.
      */
     @Inject
     public ObservableServiceConnection(Context context, Intent serviceIntent,
             UserTracker userTracker,
-            @Main Executor executor,
+            @Background Executor bgExecutor,
             ServiceTransformer<T> transformer) {
         mContext = context;
         mServiceIntent = serviceIntent;
         mUserTracker = userTracker;
         mFlags = Context.BIND_AUTO_CREATE;
-        mExecutor = executor;
+        mBgExecutor = bgExecutor;
         mTransformer = transformer;
         mCallbacks = new ArrayList<>();
         mLastDisconnectReason = Optional.empty();
     }
 
     /**
-     * Initiate binding to the service.
-     * @return {@code true} if initiating binding succeed, {@code false} otherwise.
+     * Initiate binding to the service in the background.
      */
-    public boolean bind() {
+    public void bind() {
+        mBgExecutor.execute(this::bindInternal);
+    }
+
+    @WorkerThread
+    private void bindInternal() {
         boolean bindResult = false;
         try {
             bindResult = mContext.bindServiceAsUser(mServiceIntent, this, mFlags,
@@ -166,18 +171,17 @@ public class ObservableServiceConnection<T> implements ServiceConnection {
         if (DEBUG) {
             Log.d(TAG, "bind. bound:" + bindResult);
         }
-        return bindResult;
     }
 
     /**
      * Disconnect from the service if bound.
      */
     public void unbind() {
-        onDisconnected(DISCONNECT_REASON_UNBIND);
+        mBgExecutor.execute(() -> onDisconnected(DISCONNECT_REASON_UNBIND));
     }
 
     /**
-     * Adds a callback for receiving connection updates.
+     * Adds a callback for receiving connection updates. The callback is executed in the background.
      * @param callback The {@link Callback} to receive future updates.
      */
     public void addCallback(Callback<T> callback) {
@@ -185,7 +189,7 @@ public class ObservableServiceConnection<T> implements ServiceConnection {
             Log.d(TAG, "addCallback:" + callback);
         }
 
-        mExecutor.execute(() -> {
+        mBgExecutor.execute(() -> {
             final Iterator<WeakReference<Callback<T>>> iterator = mCallbacks.iterator();
 
             while (iterator.hasNext()) {
@@ -210,14 +214,15 @@ public class ObservableServiceConnection<T> implements ServiceConnection {
      * Removes previously added callback from receiving future connection updates.
      * @param callback The {@link Callback} to be removed.
      */
-    public void removeCallback(Callback callback) {
+    public void removeCallback(Callback<T> callback) {
         if (DEBUG) {
             Log.d(TAG, "removeCallback:" + callback);
         }
 
-        mExecutor.execute(() -> mCallbacks.removeIf(el-> el.get() == callback));
+        mBgExecutor.execute(() -> mCallbacks.removeIf(el-> el.get() == callback));
     }
 
+    @WorkerThread
     private void onDisconnected(@DisconnectReason int reason) {
         if (DEBUG) {
             Log.d(TAG, "onDisconnected:" + reason);
@@ -240,7 +245,7 @@ public class ObservableServiceConnection<T> implements ServiceConnection {
 
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
-        mExecutor.execute(() -> {
+        mBgExecutor.execute(() -> {
             if (DEBUG) {
                 Log.d(TAG, "onServiceConnected");
             }
@@ -268,7 +273,7 @@ public class ObservableServiceConnection<T> implements ServiceConnection {
         final Iterator<WeakReference<Callback<T>>> iterator = mCallbacks.iterator();
 
         while (iterator.hasNext()) {
-            final Callback cb = iterator.next().get();
+            final Callback<T> cb = iterator.next().get();
             if (cb != null) {
                 applicator.accept(cb);
             } else {
@@ -279,16 +284,16 @@ public class ObservableServiceConnection<T> implements ServiceConnection {
 
     @Override
     public void onServiceDisconnected(ComponentName name) {
-        mExecutor.execute(() -> onDisconnected(DISCONNECT_REASON_DISCONNECTED));
+        mBgExecutor.execute(() -> onDisconnected(DISCONNECT_REASON_DISCONNECTED));
     }
 
     @Override
     public void onBindingDied(ComponentName name) {
-        mExecutor.execute(() -> onDisconnected(DISCONNECT_REASON_BINDING_DIED));
+        mBgExecutor.execute(() -> onDisconnected(DISCONNECT_REASON_BINDING_DIED));
     }
 
     @Override
     public void onNullBinding(ComponentName name) {
-        mExecutor.execute(() -> onDisconnected(DISCONNECT_REASON_NULL_BINDING));
+        mBgExecutor.execute(() -> onDisconnected(DISCONNECT_REASON_NULL_BINDING));
     }
 }

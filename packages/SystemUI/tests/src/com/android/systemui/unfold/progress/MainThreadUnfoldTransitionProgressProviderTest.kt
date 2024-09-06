@@ -23,7 +23,7 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.unfold.TestUnfoldTransitionProvider
+import com.android.systemui.unfold.FakeUnfoldTransitionProvider
 import com.android.systemui.utils.os.FakeHandler
 import kotlin.test.Test
 import kotlinx.coroutines.test.runTest
@@ -34,7 +34,7 @@ import org.junit.runner.RunWith
 @RunWithLooper(setAsMainLooper = true)
 class MainThreadUnfoldTransitionProgressProviderTest : SysuiTestCase() {
 
-    private val wrappedProgressProvider = TestUnfoldTransitionProvider()
+    private val wrappedProgressProvider = FakeUnfoldTransitionProvider()
     private val fakeHandler = FakeHandler(Looper.getMainLooper())
     private val listener = TestUnfoldProgressListener()
 

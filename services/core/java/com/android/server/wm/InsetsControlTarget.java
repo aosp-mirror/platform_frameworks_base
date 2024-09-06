@@ -85,6 +85,13 @@ interface InsetsControlTarget {
         return false;
     }
 
+    /**
+     * @param visible the requested visibility for the IME, used for
+     * {@link com.android.server.wm.DisplayContent.RemoteInsetsControlTarget}
+     */
+    default void setImeInputTargetRequestedVisibility(boolean visible) {
+    }
+
     /** Returns {@code target.getWindow()}, or null if {@code target} is {@code null}. */
     static WindowState asWindowOrNull(InsetsControlTarget target) {
         return target != null ? target.getWindow() : null;

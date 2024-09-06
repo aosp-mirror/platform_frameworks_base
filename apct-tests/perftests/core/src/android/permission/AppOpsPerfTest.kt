@@ -17,8 +17,7 @@ package android.permission
 
 import android.app.AppOpsManager
 import android.content.Context
-import androidx.benchmark.BenchmarkState
-import androidx.benchmark.junit4.BenchmarkRule
+import android.perftests.utils.PerfStatusReporter
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.filters.LargeTest
 import org.junit.Before
@@ -34,7 +33,7 @@ import org.junit.Test
  * these APIs should be monitored closely for performance.
  */
 class AppOpsPerfTest {
-    @get:Rule val mBenchmarkRule: BenchmarkRule = BenchmarkRule()
+    @get:Rule val perfStatusReporter = PerfStatusReporter()
     private lateinit var appOpsManager: AppOpsManager
     private lateinit var opPackageName: String
     private var opPackageUid: Int = 0
@@ -49,7 +48,7 @@ class AppOpsPerfTest {
 
     @Test
     fun testNoteOp() {
-        val state: BenchmarkState = mBenchmarkRule.getState()
+        val state = perfStatusReporter.benchmarkState
         while (state.keepRunning()) {
             appOpsManager.noteOp(
                     AppOpsManager.OPSTR_FINE_LOCATION,
@@ -63,7 +62,7 @@ class AppOpsPerfTest {
 
     @Test
     fun testUnsafeCheckOp() {
-        val state: BenchmarkState = mBenchmarkRule.getState()
+        val state = perfStatusReporter.benchmarkState
         while (state.keepRunning()) {
             appOpsManager.unsafeCheckOp(
                     AppOpsManager.OPSTR_FINE_LOCATION,

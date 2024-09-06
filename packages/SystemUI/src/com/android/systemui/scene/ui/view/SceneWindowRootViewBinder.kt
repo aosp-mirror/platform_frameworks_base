@@ -39,14 +39,13 @@ import com.android.systemui.common.ui.compose.windowinsets.DisplayCutout
 import com.android.systemui.common.ui.compose.windowinsets.ScreenDecorProvider
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
-import com.android.systemui.scene.shared.flag.SceneContainerFlags
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scene
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.SceneDataSourceDelegator
 import com.android.systemui.scene.ui.composable.ComposableScene
 import com.android.systemui.scene.ui.composable.SceneContainer
 import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
-import com.android.systemui.statusbar.notification.stack.shared.flexiNotifsEnabled
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
@@ -64,7 +63,6 @@ object SceneWindowRootViewBinder {
         windowInsets: StateFlow<WindowInsets?>,
         containerConfig: SceneContainerConfig,
         sharedNotificationContainer: SharedNotificationContainer,
-        flags: SceneContainerFlags,
         scenes: Set<Scene>,
         onVisibilityChangedInternal: (isVisible: Boolean) -> Unit,
         dataSourceDelegator: SceneDataSourceDelegator,
@@ -116,7 +114,7 @@ object SceneWindowRootViewBinder {
                     //  the SceneContainerView. This SharedNotificationContainer should contain NSSL
                     //  due to the NotificationStackScrollLayoutSection (legacy) or
                     //  NotificationSection (scene container) moving it there.
-                    if (flags.flexiNotifsEnabled()) {
+                    if (SceneContainerFlag.isEnabled) {
                         (sharedNotificationContainer.parent as? ViewGroup)?.removeView(
                             sharedNotificationContainer
                         )
@@ -184,12 +182,14 @@ object SceneWindowRootViewBinder {
                         right >= getDisplayWidth(context) -> CutoutLocation.RIGHT
                         else -> CutoutLocation.CENTER
                     }
+                val viewDisplayCutout = it?.displayCutout
                 DisplayCutout(
                     left,
                     top,
                     right,
                     bottom,
                     location,
+                    viewDisplayCutout,
                 )
             }
             .stateIn(scope, SharingStarted.WhileSubscribed(), DisplayCutout())
@@ -198,7 +198,7 @@ object SceneWindowRootViewBinder {
     private fun getDisplayWidth(context: Context): Dp {
         val point = Point()
         checkNotNull(context.display).getRealSize(point)
-        return point.x.dp
+        return point.x.toDp(context)
     }
 
     // TODO(b/298525212): remove once Compose exposes window inset bounds.

@@ -26,8 +26,11 @@
     <string name="profile_name_glasses" msgid="3506504967216601277">"eszköz"</string>
     <string name="summary_glasses" msgid="2872254734959842579">"Az alkalmazás hozzáférhet majd ezekhez az engedélyekhez az Ön <xliff:g id="DEVICE_NAME">%1$s</xliff:g> eszközén"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"Engedélyezi a(z) „<xliff:g id="APP_NAME">%1$s</xliff:g>” alkalmazás számára az információhoz való hozzáférést a telefonról"</string>
+    <string name="title_app_streaming_with_mirroring" msgid="3364582597581570658">"Engedélyezi a(z) &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; számára a telefonja alkalmazásainak streamelését?"</string>
+    <string name="summary_app_streaming" msgid="295548145144086753">"A(z) %1$s hozzáférhet mindenhez, ami a telefonon látható vagy lejátszható, így az audiotartalomhoz, fényképekhez, jelszavakhoz és üzenetekhez is.&lt;br/&gt;&lt;br/&gt;Amíg Ön el nem távolítja az ehhez az engedélyhez való hozzáférést, a(z) %1$s képes lesz majd az alkalmazások streamelésére."</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"Többeszközös szolgáltatások"</string>
     <string name="helper_summary_app_streaming" msgid="2396773196949578425">"A(z) <xliff:g id="APP_NAME">%1$s</xliff:g> engedélyt kér a(z) <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> nevében az alkalmazások eszközök közötti streameléséhez"</string>
+    <string name="helper_summary_app_streaming_with_mirroring" msgid="6138581029144467467">"A(z) <xliff:g id="APP_NAME">%1$s</xliff:g> engedélyt kér a(z) <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> nevében az alkalmazások eszközök közötti megjelenítéséhez és streameléséhez."</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
     <string name="title_computer" msgid="4693714143506569253">"Engedélyezi a(z) „<xliff:g id="APP_NAME">%1$s</xliff:g>” alkalmazás számára az információhoz való hozzáférést a telefonról"</string>
@@ -35,6 +38,8 @@
     <string name="helper_title_computer" msgid="4671071173916176037">"Google Play-szolgáltatások"</string>
     <string name="helper_summary_computer" msgid="8774832742608187072">"A(z) <xliff:g id="APP_NAME">%1$s</xliff:g> engedélyt kér a(z) <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> nevében a telefonon tárolt fotókhoz, médiatartalmakhoz és értesítésekhez való hozzáféréshez"</string>
     <string name="title_nearby_device_streaming" msgid="7269956847378799794">"Engedélyezi a(z) &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; számára ennek a műveletnek a végrehajtását?"</string>
+    <string name="title_nearby_device_streaming_with_mirroring" msgid="242855799919611657">"Engedélyezi a(z) &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; számára a telefonja alkalmazásainak és rendszerfunkcióinak streamelését?"</string>
+    <string name="summary_nearby_device_streaming" msgid="4039565463149145573">"A(z) %1$s hozzáférhet mindenhez, ami a telefonon látható vagy lejátszható, így az audiotartalomhoz, fényképekhez, fizetési adatokhoz, jelszavakhoz és üzenetekhez is.&lt;br/&gt;&lt;br/&gt;Amíg Ön el nem távolítja az ehhez az engedélyhez való hozzáférést, a(z) %1$s képes lesz majd az alkalmazások és a rendszerfunkciók streamelésére."</string>
     <string name="helper_summary_nearby_device_streaming" msgid="2063965070936844876">"A(z) <xliff:g id="APP_NAME">%1$s</xliff:g> engedélyt kér a(z) <xliff:g id="DEVICE_NAME">%2$s</xliff:g> nevében az alkalmazások és más rendszerfunkciók közeli eszközökre történő streamelésére"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"eszköz"</string>
     <string name="summary_generic" msgid="1761976003668044801">"Ez az alkalmazás képes lesz szinkronizálni az olyan információkat a telefon és a kiválasztott eszköz között, mint például a hívó fél neve."</string>
@@ -49,7 +54,7 @@
     <string name="vendor_header_button_description" msgid="7994879208461111473">"További információ"</string>
     <string name="permission_phone" msgid="2661081078692784919">"Telefon"</string>
     <string name="permission_sms" msgid="6337141296535774786">"SMS"</string>
-    <string name="permission_contacts" msgid="3858319347208004438">"Címtár"</string>
+    <string name="permission_contacts" msgid="3858319347208004438">"Névjegyek"</string>
     <string name="permission_calendar" msgid="6805668388691290395">"Naptár"</string>
     <string name="permission_microphone" msgid="2152206421428732949">"Mikrofon"</string>
     <string name="permission_call_logs" msgid="5546761417694586041">"Hívásnaplók"</string>

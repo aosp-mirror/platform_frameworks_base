@@ -25,7 +25,6 @@ import com.android.tools.lint.detector.api.Issue
 import com.android.tools.lint.detector.api.JavaContext
 import com.android.tools.lint.detector.api.Location
 import com.android.tools.lint.detector.api.Scope
-import com.android.tools.lint.detector.api.Severity
 import com.android.tools.lint.detector.api.SourceCodeScanner
 import java.time.Year
 import org.jetbrains.uast.UComment
@@ -117,8 +116,13 @@ class MissingApacheLicenseDetector : Detector(), SourceCodeScanner {
                         attached at the beginning.""",
                 category = Category.COMPLIANCE,
                 priority = 8,
-                // ignored by default and then explicitly overridden in SysUI's soong configuration
-                severity = Severity.IGNORE,
+                // This check is disabled by default so that it is not accidentally used by internal
+                // modules that have different silencing. This check can be enabled in Soong using
+                // the following configuration:
+                //   lint: {
+                //    warning_checks: ["MissingApacheLicenseDetector"],
+                //   }
+                enabledByDefault = false,
                 implementation =
                     Implementation(MissingApacheLicenseDetector::class.java, Scope.JAVA_FILE_SCOPE),
             )

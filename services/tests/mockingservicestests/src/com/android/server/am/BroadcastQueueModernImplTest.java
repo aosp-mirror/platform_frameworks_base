@@ -42,6 +42,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -99,7 +100,7 @@ public final class BroadcastQueueModernImplTest extends BaseBroadcastQueueTest {
     private static final int TEST_UID = android.os.Process.FIRST_APPLICATION_UID;
     private static final int TEST_UID2 = android.os.Process.FIRST_APPLICATION_UID + 1;
 
-    @Mock ProcessRecord mProcess;
+    ProcessRecord mProcess;
 
     @Mock BroadcastProcessQueue mQueue1;
     @Mock BroadcastProcessQueue mQueue2;
@@ -118,20 +119,17 @@ public final class BroadcastQueueModernImplTest extends BaseBroadcastQueueTest {
         mConstants.DELAY_NORMAL_MILLIS = 10_000;
         mConstants.DELAY_CACHED_MILLIS = 120_000;
 
-        final BroadcastHistory emptyHistory = new BroadcastHistory(mConstants) {
-            public void addBroadcastToHistoryLocked(BroadcastRecord original) {
-                // Ignored
-            }
-        };
-
         mImpl = new BroadcastQueueModernImpl(mAms, mHandlerThread.getThreadHandler(),
-            mConstants, mConstants, mSkipPolicy, emptyHistory);
-        mBroadcastQueues[0] = mImpl;
+                mConstants, mConstants, mSkipPolicy, mEmptyHistory);
+        mAms.setBroadcastQueueForTest(mImpl);
 
         doReturn(1L).when(mQueue1).getRunnableAt();
         doReturn(2L).when(mQueue2).getRunnableAt();
         doReturn(3L).when(mQueue3).getRunnableAt();
         doReturn(4L).when(mQueue4).getRunnableAt();
+
+        final ApplicationInfo ai = makeApplicationInfo(PACKAGE_ORANGE);
+        mProcess = spy(new ProcessRecord(mAms, ai, ai.processName, ai.uid));
     }
 
     @After
@@ -1415,6 +1413,9 @@ public final class BroadcastQueueModernImplTest extends BaseBroadcastQueueTest {
         final BroadcastRecord userPresentRecord2 = makeBroadcastRecord(userPresent);
 
         mImpl.enqueueBroadcastLocked(userPresentRecord1);
+        // Wait for a few ms before sending another broadcast to allow comparing the
+        // enqueue timestamps of these broadcasts.
+        SystemClock.sleep(5);
         mImpl.enqueueBroadcastLocked(userPresentRecord2);
 
         final BroadcastProcessQueue queue = mImpl.getProcessQueue(PACKAGE_GREEN,
@@ -1481,7 +1482,8 @@ public final class BroadcastQueueModernImplTest extends BaseBroadcastQueueTest {
                 eq(BROADCAST_DELIVERY_EVENT_REPORTED__RECEIVER_TYPE__MANIFEST),
                 eq(BROADCAST_DELIVERY_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_COLD),
                 anyLong(), anyLong(), anyLong(), anyInt(), nullable(String.class),
-                anyString(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt()),
+                anyString(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt(),
+                anyBoolean(), anyLong()),
                 times(1));
     }
 
@@ -1750,6 +1752,31 @@ public final class BroadcastQueueModernImplTest extends BaseBroadcastQueueTest {
             assertEquals("Unexpected state for " + r,
                     BroadcastRecord.DELIVERY_PENDING, r.getDeliveryState(i));
         }, false /* andRemove */);
+    }
+
+    @Test
+    public void testIsProcessFreezable() throws Exception {
+        final ProcessRecord greenProcess = makeProcessRecord(makeApplicationInfo(PACKAGE_GREEN));
+
+        setProcessFreezable(greenProcess, true /* pendingFreeze */, true /* frozen */);
+        mImpl.onProcessFreezableChangedLocked(greenProcess);
+        waitForIdle();
+        assertTrue(mImpl.isProcessFreezable(greenProcess));
+
+        setProcessFreezable(greenProcess, true /* pendingFreeze */, false /* frozen */);
+        mImpl.onProcessFreezableChangedLocked(greenProcess);
+        waitForIdle();
+        assertTrue(mImpl.isProcessFreezable(greenProcess));
+
+        setProcessFreezable(greenProcess, false /* pendingFreeze */, true /* frozen */);
+        mImpl.onProcessFreezableChangedLocked(greenProcess);
+        waitForIdle();
+        assertTrue(mImpl.isProcessFreezable(greenProcess));
+
+        setProcessFreezable(greenProcess, false /* pendingFreeze */, false /* frozen */);
+        mImpl.onProcessFreezableChangedLocked(greenProcess);
+        waitForIdle();
+        assertFalse(mImpl.isProcessFreezable(greenProcess));
     }
 
     // TODO: Reuse BroadcastQueueTest.makeActiveProcessRecord()

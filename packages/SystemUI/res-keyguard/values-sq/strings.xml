@@ -111,6 +111,9 @@
     <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Për më shumë siguri, përdor motivin më mirë"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Për më shumë siguri, përdor kodin PIN më mirë"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Për më shumë siguri, përdor fjalëkalimin më mirë"</string>
+    <string name="kg_prompt_added_security_pin" msgid="5487992065995475528">"Kërkohet kodi PIN për më shumë siguri"</string>
+    <string name="kg_prompt_added_security_pattern" msgid="1017068086102168544">"Kërkohet motivi për më shumë siguri"</string>
+    <string name="kg_prompt_added_security_password" msgid="6053156069765029006">"Kërkohet fjalëkalimi për më shumë siguri"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Pajisja është e kyçur nga administratori"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Pajisja është kyçur manualisht"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Nuk njihet"</string>

@@ -18,7 +18,6 @@ package com.android.wm.shell.common.pip
 
 import android.content.Context
 import android.content.res.Resources
-import android.os.SystemProperties
 import android.util.Size
 import com.android.wm.shell.R
 import java.io.PrintWriter
@@ -36,29 +35,80 @@ class PhoneSizeSpecSource(
     private var mOverrideMinSize: Size? = null
 
 
-    /** Default and minimum percentages for the PIP size logic.  */
-    private val mDefaultSizePercent: Float
-    private val mMinimumSizePercent: Float
+    /**
+     * Default percentages for the PIP size logic.
+     * 1. Determine max widths
+     * Subtract width of system UI and default padding from the shortest edge of the device.
+     * This is the max width.
+     * 2. Calculate Default and Mins
+     * Default is mSystemPreferredDefaultSizePercent of max-width/height.
+     * Min is mSystemPreferredMinimumSizePercent of it.
+     *
+     * NOTE: Do not use this directly, use the mPreferredDefaultSizePercent getter instead.
+     */
+    private var mSystemPreferredDefaultSizePercent = 0.6f
+    /** Minimum percentages for the PIP size logic. */
+    private var mSystemPreferredMinimumSizePercent = 0.5f
+
+    /** Threshold to categorize the Display as square, calculated as min(w, h) / max(w, h). */
+    private var mSquareDisplayThresholdForSystemPreferredSize = 0.95f
+    /**
+     * Default percentages for the PIP size logic when the Display is square-ish.
+     * This is used instead when the display is square-ish, like fold-ables when unfolded,
+     * to make sure that default PiP does not cover the hinge (halfway of the display).
+     * 1. Determine max widths
+     * Subtract width of system UI and default padding from the shortest edge of the device.
+     * This is the max width.
+     * 2. Calculate Default and Mins
+     * Default is mSystemPreferredDefaultSizePercent of max-width/height.
+     * Min is mSystemPreferredMinimumSizePercent of it.
+     *
+     * NOTE: Do not use this directly, use the mPreferredDefaultSizePercent getter instead.
+     */
+    private var mSystemPreferredDefaultSizePercentForSquareDisplay = 0.5f
+    /** Minimum percentages for the PIP size logic. */
+    private var mSystemPreferredMinimumSizePercentForSquareDisplay = 0.4f
+
+    private val mIsSquareDisplay
+        get() = minOf(pipDisplayLayoutState.displayLayout.width(),
+                        pipDisplayLayoutState.displayLayout.height()).toFloat() /
+                maxOf(pipDisplayLayoutState.displayLayout.width(),
+                        pipDisplayLayoutState.displayLayout.height()) >
+                mSquareDisplayThresholdForSystemPreferredSize
+    private val mPreferredDefaultSizePercent
+        get() = if (mIsSquareDisplay) mSystemPreferredDefaultSizePercentForSquareDisplay else
+            mSystemPreferredDefaultSizePercent
+
+    private val mPreferredMinimumSizePercent
+        get() = if (mIsSquareDisplay) mSystemPreferredMinimumSizePercentForSquareDisplay else
+            mSystemPreferredMinimumSizePercent
 
     /** Aspect ratio that the PIP size spec logic optimizes for.  */
     private var mOptimizedAspectRatio = 0f
 
     init {
-        mDefaultSizePercent = SystemProperties
-                .get("com.android.wm.shell.pip.phone.def_percentage", "0.6").toFloat()
-        mMinimumSizePercent = SystemProperties
-                .get("com.android.wm.shell.pip.phone.min_percentage", "0.5").toFloat()
-
         reloadResources()
     }
 
     private fun reloadResources() {
-        val res: Resources = context.getResources()
+        val res: Resources = context.resources
 
         mDefaultMinSize = res.getDimensionPixelSize(
                 R.dimen.default_minimal_size_pip_resizable_task)
         mOverridableMinSize = res.getDimensionPixelSize(
                 R.dimen.overridable_minimal_size_pip_resizable_task)
+
+        mSystemPreferredDefaultSizePercent = res.getFloat(
+                R.dimen.config_pipSystemPreferredDefaultSizePercent)
+        mSystemPreferredMinimumSizePercent = res.getFloat(
+                R.dimen.config_pipSystemPreferredMinimumSizePercent)
+
+        mSquareDisplayThresholdForSystemPreferredSize = res.getFloat(
+                R.dimen.config_pipSquareDisplayThresholdForSystemPreferredSize)
+        mSystemPreferredDefaultSizePercentForSquareDisplay = res.getFloat(
+                R.dimen.config_pipSystemPreferredDefaultSizePercentForSquareDisplay)
+        mSystemPreferredMinimumSizePercentForSquareDisplay = res.getFloat(
+                R.dimen.config_pipSystemPreferredMinimumSizePercentForSquareDisplay)
 
         val requestedOptAspRatio = res.getFloat(R.dimen.config_pipLargeScreenOptimizedAspectRatio)
         // make sure the optimized aspect ratio is valid with a default value to fall back to
@@ -128,7 +178,7 @@ class PhoneSizeSpecSource(
             return minSize
         }
         val maxSize = getMaxSize(aspectRatio)
-        val defaultWidth = Math.max(Math.round(maxSize.width * mDefaultSizePercent),
+        val defaultWidth = Math.max(Math.round(maxSize.width * mPreferredDefaultSizePercent),
                 minSize.width)
         val defaultHeight = Math.round(defaultWidth / aspectRatio)
         return Size(defaultWidth, defaultHeight)
@@ -146,8 +196,8 @@ class PhoneSizeSpecSource(
             return adjustOverrideMinSizeToAspectRatio(aspectRatio)!!
         }
         val maxSize = getMaxSize(aspectRatio)
-        var minWidth = Math.round(maxSize.width * mMinimumSizePercent)
-        var minHeight = Math.round(maxSize.height * mMinimumSizePercent)
+        var minWidth = Math.round(maxSize.width * mPreferredMinimumSizePercent)
+        var minHeight = Math.round(maxSize.height * mPreferredMinimumSizePercent)
 
         // make sure the calculated min size is not smaller than the allowed default min size
         if (aspectRatio > 1f) {
@@ -244,8 +294,8 @@ class PhoneSizeSpecSource(
         pw.println(innerPrefix + "mOverrideMinSize=" + mOverrideMinSize)
         pw.println(innerPrefix + "mOverridableMinSize=" + mOverridableMinSize)
         pw.println(innerPrefix + "mDefaultMinSize=" + mDefaultMinSize)
-        pw.println(innerPrefix + "mDefaultSizePercent=" + mDefaultSizePercent)
-        pw.println(innerPrefix + "mMinimumSizePercent=" + mMinimumSizePercent)
+        pw.println(innerPrefix + "mDefaultSizePercent=" + mPreferredDefaultSizePercent)
+        pw.println(innerPrefix + "mMinimumSizePercent=" + mPreferredMinimumSizePercent)
         pw.println(innerPrefix + "mOptimizedAspectRatio=" + mOptimizedAspectRatio)
     }
 }

@@ -18,6 +18,10 @@ package com.android.server.camera;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
 import static android.os.Build.VERSION_CODES.M;
 
+import static com.android.internal.util.FrameworkStatsLog.CAMERA_FEATURE_COMBINATION_QUERY_EVENT__STATUS_CODE__OK;
+import static com.android.internal.util.FrameworkStatsLog.CAMERA_FEATURE_COMBINATION_QUERY_EVENT__STATUS_CODE__ERROR_ILLEGAL_ARGUMENT;
+import static com.android.internal.util.FrameworkStatsLog.CAMERA_FEATURE_COMBINATION_QUERY_EVENT__STATUS_CODE__ERROR_INVALID_OPERATION;
+
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -37,8 +41,10 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.res.Configuration;
+import android.graphics.ImageFormat;
 import android.graphics.Rect;
 import android.hardware.CameraExtensionSessionStats;
+import android.hardware.CameraFeatureCombinationStats;
 import android.hardware.CameraSessionStats;
 import android.hardware.CameraStreamStats;
 import android.hardware.ICameraService;
@@ -61,6 +67,9 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
+import android.os.ShellCallback;
+import android.os.ShellCommand;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -69,6 +78,7 @@ import android.stats.camera.nano.CameraProtos.CameraStreamProto;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
+import android.util.Range;
 import android.util.Slog;
 import android.view.Display;
 import android.view.IDisplayWindowListener;
@@ -85,6 +95,8 @@ import com.android.server.ServiceThread;
 import com.android.server.SystemService;
 import com.android.server.wm.WindowManagerInternal;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -210,7 +222,7 @@ public class CameraServiceProxy extends SystemService
 
     // Map of currently active camera IDs
     private final ArrayMap<String, CameraUsageEvent> mActiveCameraUsage = new ArrayMap<>();
-    private final List<CameraUsageEvent> mCameraUsageHistory = new ArrayList<>();
+    private final List<CameraEvent> mCameraEventHistory = new ArrayList<CameraEvent>();
 
     private static final String NFC_NOTIFICATION_PROP = "ro.camera.notify_nfc";
     private static final IBinder nfcInterfaceToken = new Binder();
@@ -221,9 +233,16 @@ public class CameraServiceProxy extends SystemService
             /*corePoolSize*/ 1);
 
     /**
+     * Interface to track camera analytics
+     */
+    private interface CameraEvent {
+        void logSelf();
+    }
+
+    /**
      * Structure to track camera usage
      */
-    private static class CameraUsageEvent {
+    private static class CameraUsageEvent implements CameraEvent {
         public final String mCameraId;
         public final int mCameraFacing;
         public final String mClientName;
@@ -243,6 +262,7 @@ public class CameraServiceProxy extends SystemService
         public int mVideoStabilizationMode;
         public boolean mUsedUltraWide;
         public boolean mUsedZoomOverride;
+        public Range<Integer> mMostRequestedFpsRange;
         public final long mLogId;
         public final int mSessionIndex;
 
@@ -265,13 +285,15 @@ public class CameraServiceProxy extends SystemService
             mDeviceError = deviceError;
             mLogId = logId;
             mSessionIndex = sessionIdx;
+            mMostRequestedFpsRange = new Range<Integer>(0, 0);
         }
 
         public void markCompleted(int internalReconfigure, long requestCount,
                 long resultErrorCount, boolean deviceError,
                 List<CameraStreamStats>  streamStats, String userTag,
                 int videoStabilizationMode, boolean usedUltraWide,
-                boolean usedZoomOverride, CameraExtensionSessionStats extStats) {
+                boolean usedZoomOverride, Range<Integer> mostRequestedFpsRange,
+                CameraExtensionSessionStats extStats) {
             if (mCompleted) {
                 return;
             }
@@ -287,6 +309,7 @@ public class CameraServiceProxy extends SystemService
             mUsedUltraWide = usedUltraWide;
             mUsedZoomOverride = usedZoomOverride;
             mExtSessionStats = extStats;
+            mMostRequestedFpsRange = mostRequestedFpsRange;
             if (CameraServiceProxy.DEBUG) {
                 Slog.v(TAG, "A camera facing " + cameraFacingToString(mCameraFacing) +
                         " was in use by " + mClientName + " for " +
@@ -299,6 +322,214 @@ public class CameraServiceProxy extends SystemService
          */
         public long getDuration() {
             return mCompleted ? mDurationOrStartTimeMs : 0;
+        }
+
+        public void logSelf() {
+            int facing = FrameworkStatsLog.CAMERA_ACTION_EVENT__FACING__UNKNOWN;
+            switch(mCameraFacing) {
+                case CameraSessionStats.CAMERA_FACING_BACK:
+                    facing = FrameworkStatsLog.CAMERA_ACTION_EVENT__FACING__BACK;
+                    break;
+                case CameraSessionStats.CAMERA_FACING_FRONT:
+                    facing = FrameworkStatsLog.CAMERA_ACTION_EVENT__FACING__FRONT;
+                    break;
+                case CameraSessionStats.CAMERA_FACING_EXTERNAL:
+                    facing = FrameworkStatsLog.CAMERA_ACTION_EVENT__FACING__EXTERNAL;
+                    break;
+                default:
+                    Slog.w(TAG, "Unknown camera facing: " + mCameraFacing);
+            }
+
+            int extensionType = FrameworkStatsLog.CAMERA_ACTION_EVENT__EXT_TYPE__EXTENSION_NONE;
+            boolean extensionIsAdvanced = false;
+            int extensionCaptureFormat = ImageFormat.UNKNOWN;
+            if (mExtSessionStats != null) {
+                switch (mExtSessionStats.type) {
+                    case CameraExtensionSessionStats.Type.EXTENSION_AUTOMATIC:
+                        extensionType = FrameworkStatsLog
+                                .CAMERA_ACTION_EVENT__EXT_TYPE__EXTENSION_AUTOMATIC;
+                        break;
+                    case CameraExtensionSessionStats.Type.EXTENSION_FACE_RETOUCH:
+                        extensionType = FrameworkStatsLog
+                                .CAMERA_ACTION_EVENT__EXT_TYPE__EXTENSION_FACE_RETOUCH;
+                        break;
+                    case CameraExtensionSessionStats.Type.EXTENSION_BOKEH:
+                        extensionType =
+                                FrameworkStatsLog.CAMERA_ACTION_EVENT__EXT_TYPE__EXTENSION_BOKEH;
+                        break;
+                    case CameraExtensionSessionStats.Type.EXTENSION_HDR:
+                        extensionType =
+                                FrameworkStatsLog.CAMERA_ACTION_EVENT__EXT_TYPE__EXTENSION_HDR;
+                        break;
+                    case CameraExtensionSessionStats.Type.EXTENSION_NIGHT:
+                        extensionType =
+                                FrameworkStatsLog.CAMERA_ACTION_EVENT__EXT_TYPE__EXTENSION_NIGHT;
+                        break;
+                    default:
+                        Slog.w(TAG, "Unknown extension type: " + mExtSessionStats.type);
+                }
+                extensionIsAdvanced = mExtSessionStats.isAdvanced;
+                if (Flags.analytics24q3()) {
+                    extensionCaptureFormat = mExtSessionStats.captureFormat;
+                }
+            }
+
+            int streamCount = 0;
+            if (mStreamStats != null) {
+                streamCount = mStreamStats.size();
+            }
+            if (CameraServiceProxy.DEBUG) {
+                String ultrawideDebug = Flags.logUltrawideUsage()
+                        ? ", wideAngleUsage " + mUsedUltraWide
+                        : "";
+                String zoomOverrideDebug = Flags.logZoomOverrideUsage()
+                        ? ", zoomOverrideUsage " + mUsedZoomOverride
+                        : "";
+                String mostRequestedFpsRangeDebug = Flags.analytics24q3()
+                        ? ", mostRequestedFpsRange " + mMostRequestedFpsRange
+                        : "";
+                String extensionCaptureFormatDebug = Flags.analytics24q3()
+                        ? " extensionCaptureFormat " + mExtSessionStats.captureFormat
+                        : "";
+
+                Slog.v(TAG, "CAMERA_ACTION_EVENT: action " + mAction
+                        + " clientName " + mClientName
+                        + ", duration " + getDuration()
+                        + ", APILevel " + mAPILevel
+                        + ", cameraId " + mCameraId
+                        + ", facing " + facing
+                        + ", isNdk " + mIsNdk
+                        + ", latencyMs " + mLatencyMs
+                        + ", operatingMode " + mOperatingMode
+                        + ", internalReconfigure " + mInternalReconfigure
+                        + ", requestCount " + mRequestCount
+                        + ", resultErrorCount " + mResultErrorCount
+                        + ", deviceError " + mDeviceError
+                        + ", streamCount is " + streamCount
+                        + ", userTag is " + mUserTag
+                        + ", videoStabilizationMode " + mVideoStabilizationMode
+                        + ultrawideDebug
+                        + zoomOverrideDebug
+                        + mostRequestedFpsRangeDebug
+                        + ", logId " + mLogId
+                        + ", sessionIndex " + mSessionIndex
+                        + ", mExtSessionStats {type " + extensionType
+                        + " isAdvanced " + extensionIsAdvanced
+                        + extensionCaptureFormatDebug + "}");
+            }
+
+            // Convert from CameraStreamStats to CameraStreamProto
+            CameraStreamProto[] streamProtos = new CameraStreamProto[MAX_STREAM_STATISTICS];
+            for (int i = 0; i < MAX_STREAM_STATISTICS; i++) {
+                streamProtos[i] = new CameraStreamProto();
+                if (i < streamCount) {
+                    CameraStreamStats streamStats = mStreamStats.get(i);
+                    streamProtos[i].width = streamStats.getWidth();
+                    streamProtos[i].height = streamStats.getHeight();
+                    streamProtos[i].format = streamStats.getFormat();
+                    streamProtos[i].dataSpace = streamStats.getDataSpace();
+                    streamProtos[i].usage = streamStats.getUsage();
+                    streamProtos[i].requestCount = streamStats.getRequestCount();
+                    streamProtos[i].errorCount = streamStats.getErrorCount();
+                    streamProtos[i].firstCaptureLatencyMillis = streamStats.getStartLatencyMs();
+                    streamProtos[i].maxHalBuffers = streamStats.getMaxHalBuffers();
+                    streamProtos[i].maxAppBuffers = streamStats.getMaxAppBuffers();
+                    streamProtos[i].histogramType = streamStats.getHistogramType();
+                    streamProtos[i].histogramBins = streamStats.getHistogramBins();
+                    streamProtos[i].histogramCounts = streamStats.getHistogramCounts();
+                    streamProtos[i].dynamicRangeProfile = streamStats.getDynamicRangeProfile();
+                    streamProtos[i].streamUseCase = streamStats.getStreamUseCase();
+                    streamProtos[i].colorSpace = streamStats.getColorSpace();
+
+                    if (CameraServiceProxy.DEBUG) {
+                        String histogramTypeName =
+                                cameraHistogramTypeToString(streamProtos[i].histogramType);
+                        Slog.v(TAG, "Stream " + i + ": width " + streamProtos[i].width
+                                + ", height " + streamProtos[i].height
+                                + ", format " + streamProtos[i].format
+                                + ", maxPreviewFps " + streamStats.getMaxPreviewFps()
+                                + ", dataSpace " + streamProtos[i].dataSpace
+                                + ", usage " + streamProtos[i].usage
+                                + ", requestCount " + streamProtos[i].requestCount
+                                + ", errorCount " + streamProtos[i].errorCount
+                                + ", firstCaptureLatencyMillis "
+                                + streamProtos[i].firstCaptureLatencyMillis
+                                + ", maxHalBuffers " + streamProtos[i].maxHalBuffers
+                                + ", maxAppBuffers " + streamProtos[i].maxAppBuffers
+                                + ", histogramType " + histogramTypeName
+                                + ", histogramBins "
+                                + Arrays.toString(streamProtos[i].histogramBins)
+                                + ", histogramCounts "
+                                + Arrays.toString(streamProtos[i].histogramCounts)
+                                + ", dynamicRangeProfile " + streamProtos[i].dynamicRangeProfile
+                                + ", streamUseCase " + streamProtos[i].streamUseCase
+                                + ", colorSpace " + streamProtos[i].colorSpace);
+                    }
+                }
+            }
+            FrameworkStatsLog.write(FrameworkStatsLog.CAMERA_ACTION_EVENT, getDuration(),
+                    mAPILevel, mClientName, facing, mCameraId, mAction, mIsNdk,
+                    mLatencyMs, mOperatingMode, mInternalReconfigure,
+                    mRequestCount, mResultErrorCount, mDeviceError,
+                    streamCount, MessageNano.toByteArray(streamProtos[0]),
+                    MessageNano.toByteArray(streamProtos[1]),
+                    MessageNano.toByteArray(streamProtos[2]),
+                    MessageNano.toByteArray(streamProtos[3]),
+                    MessageNano.toByteArray(streamProtos[4]),
+                    mUserTag, mVideoStabilizationMode,
+                    mLogId, mSessionIndex,
+                    extensionType, extensionIsAdvanced, mUsedUltraWide,
+                    mUsedZoomOverride,
+                    mMostRequestedFpsRange.getLower(), mMostRequestedFpsRange.getUpper(),
+                    extensionCaptureFormat);
+
+        }
+    }
+    /**
+     * Structure to track feature combination query
+     */
+    private static class CameraFeatureCombinationQueryEvent implements CameraEvent {
+        private CameraFeatureCombinationStats mFeatureCombinationStats;
+
+        CameraFeatureCombinationQueryEvent(CameraFeatureCombinationStats featureCombinationStats) {
+            mFeatureCombinationStats = featureCombinationStats;
+        }
+
+        public void logSelf() {
+            int statusCode = -1;
+            switch (mFeatureCombinationStats.mStatus) {
+                case 0:
+                    statusCode = CAMERA_FEATURE_COMBINATION_QUERY_EVENT__STATUS_CODE__OK;
+                    break;
+                case ICameraService.ERROR_ILLEGAL_ARGUMENT:
+                    statusCode = CAMERA_FEATURE_COMBINATION_QUERY_EVENT__STATUS_CODE__ERROR_ILLEGAL_ARGUMENT;
+                    break;
+                case ICameraService.ERROR_INVALID_OPERATION:
+                    statusCode = CAMERA_FEATURE_COMBINATION_QUERY_EVENT__STATUS_CODE__ERROR_INVALID_OPERATION;
+                    break;
+                default:
+                    break;
+            }
+            if (statusCode == -1) {
+                Slog.w(TAG, "Unknown feature combination query status code: "
+                        + mFeatureCombinationStats.mStatus);
+                return;
+            }
+
+            if (CameraServiceProxy.DEBUG) {
+                Slog.v(TAG, "CAMERA_FEATURE_COMBINATION_QUERY_EVENT: uid "
+                        + mFeatureCombinationStats.mUid
+                        + ", cameraId " + mFeatureCombinationStats.mCameraId
+                        + ", queryType " + mFeatureCombinationStats.mQueryType
+                        + ", featureCombination " + mFeatureCombinationStats.mFeatureCombination
+                        + ", status " + statusCode);
+            }
+            FrameworkStatsLog.write(FrameworkStatsLog.CAMERA_FEATURE_COMBINATION_QUERY_EVENT,
+                    mFeatureCombinationStats.mUid,
+                    mFeatureCombinationStats.mCameraId,
+                    mFeatureCombinationStats.mQueryType,
+                    mFeatureCombinationStats.mFeatureCombination,
+                    statusCode);
         }
     }
 
@@ -614,6 +845,32 @@ public class CameraServiceProxy extends SystemService
         }
 
         @Override
+        public void notifyFeatureCombinationStats(CameraFeatureCombinationStats featureCombStats) {
+            if (!Flags.analytics24q3()) {
+                return;
+            }
+            if (Binder.getCallingUid() != Process.CAMERASERVER_UID) {
+                Slog.e(TAG, "Calling UID: " + Binder.getCallingUid() + " doesn't match expected "
+                        + " camera service UID!");
+                return;
+            }
+
+            if (DEBUG) {
+                String combinationTypeStr = cameraFeatureCombinationTypeToString(
+                        featureCombStats.mQueryType);
+                String combinationStr = cameraFeatureCombinationToString(
+                        featureCombStats.mFeatureCombination);
+                Slog.v(TAG, "Camera " + featureCombStats.mCameraId
+                        + " query " + combinationTypeStr
+                        + " combination " + combinationStr
+                        + " for client UID " + featureCombStats.mUid
+                        + " returns " + featureCombStats.mStatus);
+            }
+
+            updateFeatureCombinationQuery(featureCombStats);
+        }
+
+        @Override
         public boolean isCameraDisabled(int userId) {
             if (Binder.getCallingUid() != Process.CAMERASERVER_UID) {
                 Slog.e(TAG, "Calling UID: " + Binder.getCallingUid()
@@ -635,6 +892,60 @@ public class CameraServiceProxy extends SystemService
                 }
             } finally {
                 Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override
+        public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
+                String[] args, ShellCallback callback, ResultReceiver resultReceiver)
+                throws RemoteException {
+            new CSPShellCmd(CameraServiceProxy.this)
+                .exec(this, in, out, err, args, callback, resultReceiver);
+        }
+
+        private static class CSPShellCmd extends ShellCommand {
+            private static final String TAG = "CSPShellCmd";
+            private static final String USAGE = """
+                    usage: cmd media.camera.proxy SUBCMD [args]
+
+                    SUBCMDs:
+                        dump_events: Write out all collected camera usage events to statsd.
+                            Does not print to terminal.
+                        help: You're reading it.
+                    """;
+
+            private final CameraServiceProxy mCameraServiceProxy;
+
+            CSPShellCmd(CameraServiceProxy proxy) {
+                mCameraServiceProxy = proxy;
+            }
+
+            @Override
+            public int onCommand(String cmd) {
+                if (cmd == null) {
+                    return handleDefaultCommands(cmd);
+                }
+                final PrintWriter pw = getOutPrintWriter();
+                try {
+                    switch (cmd.replace('-', '_')) {
+                        case "dump_events":
+                            int eventCount = mCameraServiceProxy.getUsageEventCount();
+                            mCameraServiceProxy.dumpCameraEvents();
+                            pw.println("Camera usage events dumped: " + eventCount);
+                            break;
+                        default:
+                            return handleDefaultCommands(cmd);
+                    }
+                } catch (Exception e) {
+                    Slog.e(mCameraServiceProxy.TAG, "Error running shell command", e);
+                    return 1;
+                }
+                return 0;
+            }
+
+            @Override
+            public void onHelp() {
+                getOutPrintWriter().println(USAGE);
             }
         }
     };
@@ -800,18 +1111,18 @@ public class CameraServiceProxy extends SystemService
     }
 
     private class EventWriterTask implements Runnable {
-        private ArrayList<CameraUsageEvent> mEventList;
+        private List<CameraEvent> mEventList;
         private static final long WRITER_SLEEP_MS = 100;
 
-        public EventWriterTask(ArrayList<CameraUsageEvent> eventList) {
+        EventWriterTask(List<CameraEvent> eventList) {
             mEventList = eventList;
         }
 
         @Override
         public void run() {
             if (mEventList != null) {
-                for (CameraUsageEvent event : mEventList) {
-                    logCameraUsageEvent(event);
+                for (CameraEvent event : mEventList) {
+                    event.logSelf();
                     try {
                         Thread.sleep(WRITER_SLEEP_MS);
                     } catch (InterruptedException e) {}
@@ -819,169 +1130,29 @@ public class CameraServiceProxy extends SystemService
                 mEventList.clear();
             }
         }
+    }
 
-        /**
-         * Write camera usage events to stats log.
-         * Package-private
-         */
-        private void logCameraUsageEvent(CameraUsageEvent e) {
-            int facing = FrameworkStatsLog.CAMERA_ACTION_EVENT__FACING__UNKNOWN;
-            switch(e.mCameraFacing) {
-                case CameraSessionStats.CAMERA_FACING_BACK:
-                    facing = FrameworkStatsLog.CAMERA_ACTION_EVENT__FACING__BACK;
-                    break;
-                case CameraSessionStats.CAMERA_FACING_FRONT:
-                    facing = FrameworkStatsLog.CAMERA_ACTION_EVENT__FACING__FRONT;
-                    break;
-                case CameraSessionStats.CAMERA_FACING_EXTERNAL:
-                    facing = FrameworkStatsLog.CAMERA_ACTION_EVENT__FACING__EXTERNAL;
-                    break;
-                default:
-                    Slog.w(TAG, "Unknown camera facing: " + e.mCameraFacing);
-            }
-
-            int extensionType = FrameworkStatsLog.CAMERA_ACTION_EVENT__EXT_TYPE__EXTENSION_NONE;
-            boolean extensionIsAdvanced = false;
-            if (e.mExtSessionStats != null) {
-                switch (e.mExtSessionStats.type) {
-                    case CameraExtensionSessionStats.Type.EXTENSION_AUTOMATIC:
-                        extensionType = FrameworkStatsLog
-                                .CAMERA_ACTION_EVENT__EXT_TYPE__EXTENSION_AUTOMATIC;
-                        break;
-                    case CameraExtensionSessionStats.Type.EXTENSION_FACE_RETOUCH:
-                        extensionType = FrameworkStatsLog
-                                .CAMERA_ACTION_EVENT__EXT_TYPE__EXTENSION_FACE_RETOUCH;
-                        break;
-                    case CameraExtensionSessionStats.Type.EXTENSION_BOKEH:
-                        extensionType =
-                                FrameworkStatsLog.CAMERA_ACTION_EVENT__EXT_TYPE__EXTENSION_BOKEH;
-                        break;
-                    case CameraExtensionSessionStats.Type.EXTENSION_HDR:
-                        extensionType =
-                                FrameworkStatsLog.CAMERA_ACTION_EVENT__EXT_TYPE__EXTENSION_HDR;
-                        break;
-                    case CameraExtensionSessionStats.Type.EXTENSION_NIGHT:
-                        extensionType =
-                                FrameworkStatsLog.CAMERA_ACTION_EVENT__EXT_TYPE__EXTENSION_NIGHT;
-                        break;
-                    default:
-                        Slog.w(TAG, "Unknown extension type: " + e.mExtSessionStats.type);
-                }
-                extensionIsAdvanced = e.mExtSessionStats.isAdvanced;
-            }
-
-            int streamCount = 0;
-            if (e.mStreamStats != null) {
-                streamCount = e.mStreamStats.size();
-            }
-            if (CameraServiceProxy.DEBUG) {
-                String ultrawideDebug = Flags.logUltrawideUsage()
-                        ? ", wideAngleUsage " + e.mUsedUltraWide
-                        : "";
-                String zoomOverrideDebug = Flags.logZoomOverrideUsage()
-                        ? ", zoomOverrideUsage " + e.mUsedZoomOverride
-                        : "";
-
-                Slog.v(TAG, "CAMERA_ACTION_EVENT: action " + e.mAction
-                        + " clientName " + e.mClientName
-                        + ", duration " + e.getDuration()
-                        + ", APILevel " + e.mAPILevel
-                        + ", cameraId " + e.mCameraId
-                        + ", facing " + facing
-                        + ", isNdk " + e.mIsNdk
-                        + ", latencyMs " + e.mLatencyMs
-                        + ", operatingMode " + e.mOperatingMode
-                        + ", internalReconfigure " + e.mInternalReconfigure
-                        + ", requestCount " + e.mRequestCount
-                        + ", resultErrorCount " + e.mResultErrorCount
-                        + ", deviceError " + e.mDeviceError
-                        + ", streamCount is " + streamCount
-                        + ", userTag is " + e.mUserTag
-                        + ", videoStabilizationMode " + e.mVideoStabilizationMode
-                        + ultrawideDebug
-                        + zoomOverrideDebug
-                        + ", logId " + e.mLogId
-                        + ", sessionIndex " + e.mSessionIndex
-                        + ", mExtSessionStats {type " + extensionType
-                        + " isAdvanced " + extensionIsAdvanced + "}");
-            }
-            // Convert from CameraStreamStats to CameraStreamProto
-            CameraStreamProto[] streamProtos = new CameraStreamProto[MAX_STREAM_STATISTICS];
-            for (int i = 0; i < MAX_STREAM_STATISTICS; i++) {
-                streamProtos[i] = new CameraStreamProto();
-                if (i < streamCount) {
-                    CameraStreamStats streamStats = e.mStreamStats.get(i);
-                    streamProtos[i].width = streamStats.getWidth();
-                    streamProtos[i].height = streamStats.getHeight();
-                    streamProtos[i].format = streamStats.getFormat();
-                    streamProtos[i].dataSpace = streamStats.getDataSpace();
-                    streamProtos[i].usage = streamStats.getUsage();
-                    streamProtos[i].requestCount = streamStats.getRequestCount();
-                    streamProtos[i].errorCount = streamStats.getErrorCount();
-                    streamProtos[i].firstCaptureLatencyMillis = streamStats.getStartLatencyMs();
-                    streamProtos[i].maxHalBuffers = streamStats.getMaxHalBuffers();
-                    streamProtos[i].maxAppBuffers = streamStats.getMaxAppBuffers();
-                    streamProtos[i].histogramType = streamStats.getHistogramType();
-                    streamProtos[i].histogramBins = streamStats.getHistogramBins();
-                    streamProtos[i].histogramCounts = streamStats.getHistogramCounts();
-                    streamProtos[i].dynamicRangeProfile = streamStats.getDynamicRangeProfile();
-                    streamProtos[i].streamUseCase = streamStats.getStreamUseCase();
-                    streamProtos[i].colorSpace = streamStats.getColorSpace();
-
-                    if (CameraServiceProxy.DEBUG) {
-                        String histogramTypeName =
-                                cameraHistogramTypeToString(streamProtos[i].histogramType);
-                        Slog.v(TAG, "Stream " + i + ": width " + streamProtos[i].width
-                                + ", height " + streamProtos[i].height
-                                + ", format " + streamProtos[i].format
-                                + ", maxPreviewFps " + streamStats.getMaxPreviewFps()
-                                + ", dataSpace " + streamProtos[i].dataSpace
-                                + ", usage " + streamProtos[i].usage
-                                + ", requestCount " + streamProtos[i].requestCount
-                                + ", errorCount " + streamProtos[i].errorCount
-                                + ", firstCaptureLatencyMillis "
-                                + streamProtos[i].firstCaptureLatencyMillis
-                                + ", maxHalBuffers " + streamProtos[i].maxHalBuffers
-                                + ", maxAppBuffers " + streamProtos[i].maxAppBuffers
-                                + ", histogramType " + histogramTypeName
-                                + ", histogramBins "
-                                + Arrays.toString(streamProtos[i].histogramBins)
-                                + ", histogramCounts "
-                                + Arrays.toString(streamProtos[i].histogramCounts)
-                                + ", dynamicRangeProfile " + streamProtos[i].dynamicRangeProfile
-                                + ", streamUseCase " + streamProtos[i].streamUseCase
-                                + ", colorSpace " + streamProtos[i].colorSpace);
-                    }
-                }
-            }
-            FrameworkStatsLog.write(FrameworkStatsLog.CAMERA_ACTION_EVENT, e.getDuration(),
-                    e.mAPILevel, e.mClientName, facing, e.mCameraId, e.mAction, e.mIsNdk,
-                    e.mLatencyMs, e.mOperatingMode, e.mInternalReconfigure,
-                    e.mRequestCount, e.mResultErrorCount, e.mDeviceError,
-                    streamCount, MessageNano.toByteArray(streamProtos[0]),
-                    MessageNano.toByteArray(streamProtos[1]),
-                    MessageNano.toByteArray(streamProtos[2]),
-                    MessageNano.toByteArray(streamProtos[3]),
-                    MessageNano.toByteArray(streamProtos[4]),
-                    e.mUserTag, e.mVideoStabilizationMode,
-                    e.mLogId, e.mSessionIndex,
-                    extensionType, extensionIsAdvanced, e.mUsedUltraWide,
-                    e.mUsedZoomOverride);
+    /**
+     * Get camera usage event count
+     */
+    int getUsageEventCount() {
+        synchronized (mLock) {
+            return mCameraEventHistory.size();
         }
     }
 
     /**
-     * Dump camera usage events to log.
+     * Dump camera events to log.
      * Package-private
      */
-    void dumpUsageEvents() {
+    void dumpCameraEvents() {
         synchronized(mLock) {
             // Randomize order of events so that it's not meaningful
-            Collections.shuffle(mCameraUsageHistory);
+            Collections.shuffle(mCameraEventHistory);
             mLogWriterService.execute(new EventWriterTask(
-                        new ArrayList<CameraUsageEvent>(mCameraUsageHistory)));
+                        new ArrayList(mCameraEventHistory)));
 
-            mCameraUsageHistory.clear();
+            mCameraEventHistory.clear();
         }
         final long ident = Binder.clearCallingIdentity();
         try {
@@ -1173,6 +1344,10 @@ public class CameraServiceProxy extends SystemService
         long logId = cameraState.getLogId();
         int sessionIdx = cameraState.getSessionIndex();
         CameraExtensionSessionStats extSessionStats = cameraState.getExtensionSessionStats();
+        Range<Integer> mostRequestedFpsRange = Flags.analytics24q3()
+                ? cameraState.getMostRequestedFpsRange()
+                : new Range<Integer>(0, 0);
+
         synchronized(mLock) {
             // Update active camera list and notify NFC if necessary
             boolean wasEmpty = mActiveCameraUsage.isEmpty();
@@ -1195,7 +1370,7 @@ public class CameraServiceProxy extends SystemService
                             cameraId, facing, clientName, apiLevel, isNdk,
                             FrameworkStatsLog.CAMERA_ACTION_EVENT__ACTION__OPEN,
                             latencyMs, sessionType, deviceError, logId, sessionIdx);
-                    mCameraUsageHistory.add(openEvent);
+                    mCameraEventHistory.add(openEvent);
                     break;
                 case CameraSessionStats.CAMERA_STATE_ACTIVE:
                     // Check current active camera IDs to see if this package is already talking to
@@ -1228,8 +1403,9 @@ public class CameraServiceProxy extends SystemService
                         oldEvent.markCompleted(/*internalReconfigure*/0, /*requestCount*/0,
                                 /*resultErrorCount*/0, /*deviceError*/false, streamStats,
                                 /*userTag*/"", /*videoStabilizationMode*/-1, /*usedUltraWide*/false,
-                                /*usedZoomOverride*/false, new CameraExtensionSessionStats());
-                        mCameraUsageHistory.add(oldEvent);
+                                /*usedZoomOverride*/false, new Range<Integer>(0, 0),
+                                new CameraExtensionSessionStats());
+                        mCameraEventHistory.add(oldEvent);
                     }
                     break;
                 case CameraSessionStats.CAMERA_STATE_IDLE:
@@ -1240,8 +1416,8 @@ public class CameraServiceProxy extends SystemService
                         doneEvent.markCompleted(internalReconfigureCount, requestCount,
                                 resultErrorCount, deviceError, streamStats, userTag,
                                 videoStabilizationMode, usedUltraWide, usedZoomOverride,
-                                extSessionStats);
-                        mCameraUsageHistory.add(doneEvent);
+                                mostRequestedFpsRange, extSessionStats);
+                        mCameraEventHistory.add(doneEvent);
                         // Do not double count device error
                         deviceError = false;
 
@@ -1268,11 +1444,11 @@ public class CameraServiceProxy extends SystemService
                                 cameraId, facing, clientName, apiLevel, isNdk,
                                 FrameworkStatsLog.CAMERA_ACTION_EVENT__ACTION__CLOSE,
                                 latencyMs, sessionType, deviceError, logId, sessionIdx);
-                        mCameraUsageHistory.add(closeEvent);
+                        mCameraEventHistory.add(closeEvent);
                     }
 
-                    if (mCameraUsageHistory.size() > MAX_USAGE_HISTORY) {
-                        dumpUsageEvents();
+                    if (mCameraEventHistory.size() > MAX_USAGE_HISTORY) {
+                        dumpCameraEvents();
                     }
 
                     break;
@@ -1280,6 +1456,18 @@ public class CameraServiceProxy extends SystemService
             boolean isEmpty = mActiveCameraUsage.isEmpty();
             if ( mNotifyNfc && (wasEmpty != isEmpty) ) {
                 notifyNfcService(isEmpty);
+            }
+        }
+    }
+
+    private void updateFeatureCombinationQuery(CameraFeatureCombinationStats featureCombStats) {
+        synchronized (mLock) {
+            CameraFeatureCombinationQueryEvent e =
+                    new CameraFeatureCombinationQueryEvent(featureCombStats);
+            mCameraEventHistory.add(e);
+
+            if (mCameraEventHistory.size() > MAX_USAGE_HISTORY) {
+                dumpCameraEvents();
             }
         }
     }
@@ -1340,4 +1528,41 @@ public class CameraServiceProxy extends SystemService
         return "HISTOGRAM_TYPE_UNKNOWN";
     }
 
+    private static String cameraFeatureCombinationTypeToString(int featureCombinationType) {
+        switch (featureCombinationType) {
+            case CameraFeatureCombinationStats.QueryType.QUERY_FEATURE_COMBINATION:
+                return "QUERY_FEATURE_COMBINATION";
+            case CameraFeatureCombinationStats.QueryType.QUERY_SESSION_CHARACTERISTICS:
+                return "QUERY_SESSION_CHARACTERISTICS";
+            default:
+                break;
+        }
+        return "FEATURE_COMBINATION_TYPE_UNKNOWN";
+    }
+
+    private static String cameraFeatureCombinationToString(long featureCombination) {
+        StringBuilder combinationStr = new StringBuilder("{");
+        if ((featureCombination & CameraFeatureCombinationStats.CAMERA_FEATURE_60_FPS) != 0) {
+            combinationStr.append("60fps ");
+        }
+        if ((featureCombination & CameraFeatureCombinationStats.CAMERA_FEATURE_STABILIZATION)
+                != 0) {
+            combinationStr.append("stabilization ");
+        }
+        if ((featureCombination & CameraFeatureCombinationStats.CAMERA_FEATURE_HLG10) != 0) {
+            combinationStr.append("hlg10 ");
+        }
+        if ((featureCombination & CameraFeatureCombinationStats.CAMERA_FEATURE_JPEG) != 0) {
+            combinationStr.append("jpeg ");
+        }
+        if ((featureCombination & CameraFeatureCombinationStats.CAMERA_FEATURE_JPEG_R) != 0) {
+            combinationStr.append("jpeg_r ");
+        }
+        if ((featureCombination & CameraFeatureCombinationStats.CAMERA_FEATURE_4K) != 0) {
+            combinationStr.append("4k ");
+        }
+        combinationStr.append("}");
+
+        return combinationStr.toString();
+    }
 }

@@ -16,6 +16,7 @@
 package com.android.server.broadcastradio.hal2;
 
 import android.hardware.broadcastradio.V2_0.IdentifierType;
+import android.hardware.broadcastradio.V2_0.Metadata;
 import android.hardware.broadcastradio.V2_0.ProgramIdentifier;
 import android.hardware.broadcastradio.V2_0.ProgramInfo;
 import android.hardware.broadcastradio.V2_0.VendorKeyValue;
@@ -127,13 +128,21 @@ final class TestUtils {
 
     static ProgramInfo makeHalProgramInfo(
             android.hardware.broadcastradio.V2_0.ProgramSelector hwSel, int hwSignalQuality) {
+        return makeHalProgramInfo(hwSel, hwSignalQuality, /* relatedContent= */ new ArrayList<>(),
+                /* metadata= */ new ArrayList<>());
+    }
+
+    @SuppressWarnings("NonApiType")
+    static ProgramInfo makeHalProgramInfo(
+            android.hardware.broadcastradio.V2_0.ProgramSelector hwSel, int hwSignalQuality,
+            ArrayList<ProgramIdentifier> relatedContent, ArrayList<Metadata> metadata) {
         ProgramInfo hwInfo = new ProgramInfo();
         hwInfo.selector = hwSel;
         hwInfo.logicallyTunedTo = hwSel.primaryId;
         hwInfo.physicallyTunedTo = hwSel.primaryId;
         hwInfo.signalQuality = hwSignalQuality;
-        hwInfo.relatedContent = new ArrayList<>();
-        hwInfo.metadata = new ArrayList<>();
+        hwInfo.relatedContent = relatedContent;
+        hwInfo.metadata = metadata;
         return hwInfo;
     }
 

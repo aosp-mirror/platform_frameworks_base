@@ -36,9 +36,9 @@ import static org.mockito.Mockito.when;
 
 import android.content.res.ColorStateList;
 import android.graphics.Color;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.logging.KeyguardLogger;
@@ -56,7 +56,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @RunWithLooper
 @SmallTest
 public class KeyguardIndicationRotateTextViewControllerTest extends SysuiTestCase {
@@ -340,6 +340,24 @@ public class KeyguardIndicationRotateTextViewControllerTest extends SysuiTestCas
 
         // WHEN the device is dozing
         mStatusBarStateListener.onDozingChanged(true);
+
+        // THEN switch to INDICATION_TYPE_NONE
+        verify(mView).switchIndication(null);
+    }
+
+    @Test
+    public void testStartDozing_withMinShowTime() {
+        // GIVEN a biometric message is showing
+        mController.updateIndication(INDICATION_TYPE_BIOMETRIC_MESSAGE,
+                new KeyguardIndication.Builder()
+                        .setMessage("test_message")
+                        .setMinVisibilityMillis(5000L)
+                        .setTextColor(ColorStateList.valueOf(Color.WHITE))
+                        .build(),
+                true);
+
+        // WHEN the device wants to hide the biometric message
+        mController.hideIndication(INDICATION_TYPE_BIOMETRIC_MESSAGE);
 
         // THEN switch to INDICATION_TYPE_NONE
         verify(mView).switchIndication(null);

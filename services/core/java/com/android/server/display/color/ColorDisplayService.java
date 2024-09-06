@@ -78,6 +78,7 @@ import com.android.internal.util.DumpUtils;
 import com.android.server.DisplayThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.accessibility.Flags;
 import com.android.server.display.feature.DisplayManagerFlags;
 import com.android.server.twilight.TwilightListener;
 import com.android.server.twilight.TwilightManager;
@@ -356,6 +357,11 @@ public final class ColorDisplayService extends SystemService {
                             case Secure.ACCESSIBILITY_DISPLAY_DALTONIZER:
                                 onAccessibilityDaltonizerChanged();
                                 break;
+                            case Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_SATURATION_LEVEL:
+                                if (Flags.enableColorCorrectionSaturation()) {
+                                    onAccessibilityDaltonizerChanged();
+                                }
+                                break;
                             case Secure.DISPLAY_WHITE_BALANCE_ENABLED:
                                 updateDisplayWhiteBalanceStatus();
                                 break;
@@ -398,6 +404,11 @@ public final class ColorDisplayService extends SystemService {
                 false /* notifyForDescendants */, mContentObserver, mCurrentUser);
         cr.registerContentObserver(Secure.getUriFor(Secure.REDUCE_BRIGHT_COLORS_LEVEL),
                 false /* notifyForDescendants */, mContentObserver, mCurrentUser);
+        if (Flags.enableColorCorrectionSaturation()) {
+            cr.registerContentObserver(
+                    Secure.getUriFor(Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_SATURATION_LEVEL),
+                    false /* notifyForDescendants */, mContentObserver, mCurrentUser);
+        }
 
         // Apply the accessibility settings first, since they override most other settings.
         onAccessibilityInversionChanged();
@@ -597,21 +608,31 @@ public final class ColorDisplayService extends SystemService {
         if (mCurrentUser == UserHandle.USER_NULL) {
             return;
         }
+        var contentResolver = getContext().getContentResolver();
         final int daltonizerMode = isAccessiblityDaltonizerEnabled()
-                ? Secure.getIntForUser(getContext().getContentResolver(),
-                    Secure.ACCESSIBILITY_DISPLAY_DALTONIZER,
-                    AccessibilityManager.DALTONIZER_CORRECT_DEUTERANOMALY, mCurrentUser)
+                ? Secure.getIntForUser(contentResolver,
+                Secure.ACCESSIBILITY_DISPLAY_DALTONIZER,
+                AccessibilityManager.DALTONIZER_CORRECT_DEUTERANOMALY, mCurrentUser)
                 : AccessibilityManager.DALTONIZER_DISABLED;
+
+        int saturation = NOT_SET;
+        if (Flags.enableColorCorrectionSaturation()) {
+            saturation = Secure.getIntForUser(
+                    contentResolver,
+                    Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_SATURATION_LEVEL,
+                    NOT_SET,
+                    mCurrentUser);
+        }
 
         final DisplayTransformManager dtm = getLocalService(DisplayTransformManager.class);
         if (daltonizerMode == AccessibilityManager.DALTONIZER_SIMULATE_MONOCHROMACY) {
             // Monochromacy isn't supported by the native Daltonizer implementation; use grayscale.
             dtm.setColorMatrix(DisplayTransformManager.LEVEL_COLOR_MATRIX_GRAYSCALE,
                     MATRIX_GRAYSCALE);
-            dtm.setDaltonizerMode(AccessibilityManager.DALTONIZER_DISABLED);
+            dtm.setDaltonizerMode(AccessibilityManager.DALTONIZER_DISABLED, saturation);
         } else {
             dtm.setColorMatrix(DisplayTransformManager.LEVEL_COLOR_MATRIX_GRAYSCALE, null);
-            dtm.setDaltonizerMode(daltonizerMode);
+            dtm.setDaltonizerMode(daltonizerMode, saturation);
         }
     }
 
@@ -1631,6 +1652,15 @@ public final class ColorDisplayService extends SystemService {
                 WeakReference<ColorTransformController> controller) {
             return mAppSaturationController
                     .addColorTransformController(packageName, userId, controller);
+        }
+
+        /**
+         * Applies tint changes for even dimmer feature.
+         */
+        public void applyEvenDimmerColorChanges(boolean enabled, int strength) {
+            mReduceBrightColorsTintController.setActivated(enabled);
+            mReduceBrightColorsTintController.setMatrix(strength);
+            mHandler.sendEmptyMessage(MSG_APPLY_REDUCE_BRIGHT_COLORS);
         }
     }
 

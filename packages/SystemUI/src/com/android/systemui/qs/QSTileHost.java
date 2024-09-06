@@ -108,7 +108,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
     private AutoTileManager mAutoTiles;
     private final ArrayList<QSFactory> mQsFactories = new ArrayList<>();
     private int mCurrentUser;
-    private final ShadeController mShadeController;
+    private final Lazy<ShadeController> mShadeControllerProvider;
     private Context mUserContext;
     private UserTracker mUserTracker;
     private SecureSettings mSecureSettings;
@@ -130,7 +130,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
             PluginManager pluginManager,
             TunerService tunerService,
             Provider<AutoTileManager> autoTiles,
-            ShadeController shadeController,
+            Lazy<ShadeController> shadeControllerProvider,
             QSLogger qsLogger,
             UserTracker userTracker,
             SecureSettings secureSettings,
@@ -149,7 +149,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
         mUserFileManager = userFileManager;
         mFeatureFlags = featureFlags;
 
-        mShadeController = shadeController;
+        mShadeControllerProvider = shadeControllerProvider;
 
         if (featureFlags.getTilesEnabled()) {
             mQsFactories.add(newQsTileFactoryProvider.get());
@@ -216,17 +216,17 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
 
     @Override
     public void collapsePanels() {
-        mShadeController.postAnimateCollapseShade();
+        mShadeControllerProvider.get().postAnimateCollapseShade();
     }
 
     @Override
     public void forceCollapsePanels() {
-        mShadeController.postAnimateForceCollapseShade();
+        mShadeControllerProvider.get().postAnimateForceCollapseShade();
     }
 
     @Override
     public void openPanels() {
-        mShadeController.postAnimateExpandQs();
+        mShadeControllerProvider.get().postAnimateExpandQs();
     }
 
     @Override

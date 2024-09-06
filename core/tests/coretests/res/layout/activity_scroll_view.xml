@@ -14,105 +14,150 @@
   ~ limitations under the License
   -->
 
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/scroll_view">
+    android:orientation="horizontal">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+    <ScrollView
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:id="@+id/scroll_view">
 
-        <View
-            android:background="#F00"
-            android:layout_width="100dp"
-            android:layout_height="100dp" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
-        <View
-            android:background="#880"
-            android:layout_width="100dp"
-            android:layout_height="100dp" />
+            <View
+                android:background="#F00"
+                android:layout_width="100dp"
+                android:layout_height="100dp" />
 
-        <View
-            android:background="#0F0"
-            android:layout_width="100dp"
-            android:layout_height="100dp" />
+            <View
+                android:background="#880"
+                android:layout_width="100dp"
+                android:layout_height="100dp" />
 
-        <View
-            android:background="#088"
-            android:layout_width="100dp"
-            android:layout_height="100dp" />
+            <View
+                android:background="#0F0"
+                android:layout_width="100dp"
+                android:layout_height="100dp" />
 
-        <View
-            android:background="#00F"
-            android:layout_width="100dp"
-            android:layout_height="100dp" />
+            <View
+                android:background="#088"
+                android:layout_width="100dp"
+                android:layout_height="100dp" />
 
-        <View
-            android:background="#808"
-            android:layout_width="100dp"
-            android:layout_height="100dp" />
+            <View
+                android:background="#00F"
+                android:layout_width="100dp"
+                android:layout_height="100dp" />
 
-        <View
-            android:background="#F00"
-            android:layout_width="100dp"
-            android:layout_height="100dp" />
+            <View
+                android:background="#808"
+                android:layout_width="100dp"
+                android:layout_height="100dp" />
 
-        <View
-            android:background="#880"
-            android:layout_width="100dp"
-            android:layout_height="100dp" />
+            <View
+                android:background="#F00"
+                android:layout_width="100dp"
+                android:layout_height="100dp" />
 
-        <View
-            android:background="#0F0"
-            android:layout_width="100dp"
-            android:layout_height="100dp" />
+            <View
+                android:background="#880"
+                android:layout_width="100dp"
+                android:layout_height="100dp" />
 
-        <View
-            android:background="#088"
-            android:layout_width="100dp"
-            android:layout_height="100dp" />
+            <View
+                android:background="#0F0"
+                android:layout_width="100dp"
+                android:layout_height="100dp" />
 
-        <View
-            android:background="#00F"
-            android:layout_width="100dp"
-            android:layout_height="100dp" />
+            <View
+                android:background="#088"
+                android:layout_width="100dp"
+                android:layout_height="100dp" />
 
-        <View
-            android:background="#808"
-            android:layout_width="100dp"
-            android:layout_height="100dp" />
+            <View
+                android:background="#00F"
+                android:layout_width="100dp"
+                android:layout_height="100dp" />
 
-        <View
-            android:background="#F00"
-            android:layout_width="100dp"
-            android:layout_height="100dp" />
+            <View
+                android:background="#808"
+                android:layout_width="100dp"
+                android:layout_height="100dp" />
 
-        <View
-            android:background="#880"
-            android:layout_width="100dp"
-            android:layout_height="100dp" />
+            <View
+                android:background="#F00"
+                android:layout_width="100dp"
+                android:layout_height="100dp" />
 
-        <View
-            android:background="#0F0"
-            android:layout_width="100dp"
-            android:layout_height="100dp" />
+            <View
+                android:background="#880"
+                android:layout_width="100dp"
+                android:layout_height="100dp" />
 
-        <View
-            android:background="#088"
-            android:layout_width="100dp"
-            android:layout_height="100dp" />
+            <View
+                android:background="#0F0"
+                android:layout_width="100dp"
+                android:layout_height="100dp" />
 
-        <View
-            android:background="#00F"
-            android:layout_width="100dp"
-            android:layout_height="100dp" />
+            <View
+                android:background="#088"
+                android:layout_width="100dp"
+                android:layout_height="100dp" />
 
-        <View
-            android:background="#808"
-            android:layout_width="100dp"
-            android:layout_height="100dp" />
+            <View
+                android:background="#00F"
+                android:layout_width="100dp"
+                android:layout_height="100dp" />
 
-    </LinearLayout>
-</ScrollView>
+            <View
+                android:background="#808"
+                android:layout_width="100dp"
+                android:layout_height="100dp" />
+
+        </LinearLayout>
+    </ScrollView>
+
+    <view
+        class="android.widget.ScrollViewFunctionalTest$MyScrollView"
+        android:id="@+id/my_scroll_view"
+        android:layout_width="90dp"
+        android:layout_height="90dp"
+        android:background="#FFF"
+        android:defaultFocusHighlightEnabled="false">
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <View
+                android:background="#00F"
+                android:layout_width="90dp"
+                android:layout_height="50dp"/>
+            <View
+                android:background="#0FF"
+                android:layout_width="90dp"
+                android:layout_height="50dp"/>
+            <View
+                android:background="#0F0"
+                android:layout_width="90dp"
+                android:layout_height="50dp"/>
+            <View
+                android:background="#FF0"
+                android:layout_width="90dp"
+                android:layout_height="50dp"/>
+            <View
+                android:background="#F00"
+                android:layout_width="90dp"
+                android:layout_height="50dp"/>
+            <View
+                android:background="#F0F"
+                android:layout_width="90dp"
+                android:layout_height="50dp"/>
+        </LinearLayout>
+    </view>
+</LinearLayout>

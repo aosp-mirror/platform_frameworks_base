@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.content.pm.ActivityInfo.INSETS_DECOUPLED_CONFIGURATION_ENFORCED;
 import static android.content.res.Configuration.GRAMMATICAL_GENDER_NOT_SPECIFIED;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
@@ -86,6 +87,7 @@ public class WindowProcessControllerTests extends WindowTestsBase {
 
         ApplicationInfo info = mock(ApplicationInfo.class);
         info.packageName = "test.package.name";
+        doReturn(true).when(info).isChangeEnabled(INSETS_DECOUPLED_CONFIGURATION_ENFORCED);
         mWpc = new WindowProcessController(
                 mAtm, info, null, 0, -1, null, mMockListener);
         mWpc.setThread(mock(IApplicationThread.class));
@@ -406,6 +408,7 @@ public class WindowProcessControllerTests extends WindowTestsBase {
         verify(tracker).onActivityResumedWhileVisible(mWpc);
         assertTrue(tracker.hasResumedActivity(mWpc.mUid));
 
+        mAtm.mTopApp = null;
         activity.makeFinishingLocked();
         activity.setState(PAUSING, "test");
 

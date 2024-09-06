@@ -17,55 +17,33 @@
 package com.android.systemui.mediaprojection.taskswitcher.domain.interactor
 
 import android.content.Intent
-import android.os.Handler
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.mediaprojection.taskswitcher.data.repository.ActivityTaskManagerTasksRepository
-import com.android.systemui.mediaprojection.taskswitcher.data.repository.FakeActivityTaskManager
-import com.android.systemui.mediaprojection.taskswitcher.data.repository.FakeActivityTaskManager.Companion.createTask
-import com.android.systemui.mediaprojection.taskswitcher.data.repository.FakeMediaProjectionManager
-import com.android.systemui.mediaprojection.taskswitcher.data.repository.FakeMediaProjectionManager.Companion.createSingleTaskSession
-import com.android.systemui.mediaprojection.taskswitcher.data.repository.MediaProjectionManagerRepository
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.mediaprojection.taskswitcher.FakeActivityTaskManager.Companion.createTask
+import com.android.systemui.mediaprojection.taskswitcher.FakeMediaProjectionManager
+import com.android.systemui.mediaprojection.taskswitcher.FakeMediaProjectionManager.Companion.createSingleTaskSession
 import com.android.systemui.mediaprojection.taskswitcher.domain.model.TaskSwitchState
+import com.android.systemui.mediaprojection.taskswitcher.fakeActivityTaskManager
+import com.android.systemui.mediaprojection.taskswitcher.fakeMediaProjectionManager
+import com.android.systemui.mediaprojection.taskswitcher.taskSwitcherInteractor
+import com.android.systemui.mediaprojection.taskswitcher.taskSwitcherKosmos
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@OptIn(ExperimentalCoroutinesApi::class)
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class TaskSwitchInteractorTest : SysuiTestCase() {
 
-    private val dispatcher = UnconfinedTestDispatcher()
-    private val testScope = TestScope(dispatcher)
-
-    private val fakeActivityTaskManager = FakeActivityTaskManager()
-    private val fakeMediaProjectionManager = FakeMediaProjectionManager()
-
-    private val tasksRepo =
-        ActivityTaskManagerTasksRepository(
-            activityTaskManager = fakeActivityTaskManager.activityTaskManager,
-            applicationScope = testScope.backgroundScope,
-            backgroundDispatcher = dispatcher
-        )
-
-    private val mediaRepo =
-        MediaProjectionManagerRepository(
-            mediaProjectionManager = fakeMediaProjectionManager.mediaProjectionManager,
-            handler = Handler.getMain(),
-            applicationScope = testScope.backgroundScope,
-            tasksRepository = tasksRepo,
-            backgroundDispatcher = dispatcher,
-            mediaProjectionServiceHelper = fakeMediaProjectionManager.helper,
-        )
-
-    private val interactor = TaskSwitchInteractor(mediaRepo, tasksRepo)
+    private val kosmos = taskSwitcherKosmos()
+    private val testScope = kosmos.testScope
+    private val fakeActivityTaskManager = kosmos.fakeActivityTaskManager
+    private val fakeMediaProjectionManager = kosmos.fakeMediaProjectionManager
+    private val interactor = kosmos.taskSwitcherInteractor
 
     @Test
     fun taskSwitchChanges_notProjecting_foregroundTaskChange_emitsNotProjectingTask() =

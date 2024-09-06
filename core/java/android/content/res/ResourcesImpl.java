@@ -144,6 +144,10 @@ public class ResourcesImpl {
 
     // Cyclical cache used for recently-accessed XML files.
     private int mLastCachedXmlBlockIndex = -1;
+
+    // The hash that allows to detect when the shared libraries applied to this object have changed,
+    // and it is outdated and needs to be replaced.
+    private final int mAppliedSharedLibsHash;
     private final int[] mCachedXmlBlockCookies = new int[XML_BLOCK_CACHE_SIZE];
     private final String[] mCachedXmlBlockFiles = new String[XML_BLOCK_CACHE_SIZE];
     private final XmlBlock[] mCachedXmlBlocks = new XmlBlock[XML_BLOCK_CACHE_SIZE];
@@ -197,6 +201,8 @@ public class ResourcesImpl {
     public ResourcesImpl(@NonNull AssetManager assets, @Nullable DisplayMetrics metrics,
             @Nullable Configuration config, @NonNull DisplayAdjustments displayAdjustments) {
         mAssets = assets;
+        mAppliedSharedLibsHash =
+                ResourcesManager.getInstance().updateResourceImplWithRegisteredLibs(this);
         mMetrics.setToDefaults();
         mDisplayAdjustments = displayAdjustments;
         mConfiguration.setToDefaults();
@@ -212,6 +218,11 @@ public class ResourcesImpl {
         return mAssets;
     }
 
+    @UnsupportedAppUsage
+    public DisplayMetrics getMetrics() {
+        return mMetrics;
+    }
+
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     DisplayMetrics getDisplayMetrics() {
         if (DEBUG_CONFIG) Slog.v(TAG, "Returning DisplayMetrics: " + mMetrics.widthPixels
@@ -219,7 +230,8 @@ public class ResourcesImpl {
         return mMetrics;
     }
 
-    Configuration getConfiguration() {
+    @UnsupportedAppUsage
+    public Configuration getConfiguration() {
         return mConfiguration;
     }
 
@@ -1591,5 +1603,9 @@ public class ResourcesImpl {
         public void pop() {
             mSize--;
         }
+    }
+
+    public int getAppliedSharedLibsHash() {
+        return mAppliedSharedLibsHash;
     }
 }

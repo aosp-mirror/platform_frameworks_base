@@ -33,11 +33,11 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.res.R
-import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags
 import com.android.systemui.scene.ui.view.WindowRootView
 import com.android.systemui.shade.ShadeControllerImpl
 import com.android.systemui.shade.ShadeLogger
 import com.android.systemui.shade.ShadeViewController
+import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.window.StatusBarWindowStateController
@@ -50,6 +50,8 @@ import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.view.ViewUtil
 import com.google.common.truth.Truth.assertThat
+import java.util.Optional
+import javax.inject.Provider
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentCaptor
@@ -60,13 +62,12 @@ import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
-import java.util.Optional
-import javax.inject.Provider
 
 @SmallTest
 class PhoneStatusBarViewControllerTest : SysuiTestCase() {
 
     @Mock private lateinit var shadeViewController: ShadeViewController
+    @Mock private lateinit var panelExpansionInteractor: PanelExpansionInteractor
     @Mock private lateinit var featureFlags: FeatureFlags
     @Mock private lateinit var moveFromCenterAnimation: StatusBarMoveFromCenterAnimationController
     @Mock private lateinit var sysuiUnfoldComponent: SysUIUnfoldComponent
@@ -195,7 +196,7 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
     @Test
     fun handleTouchEventFromStatusBar_topEdgeTouch_viewNeverReceivesEvent() {
         `when`(centralSurfacesImpl.commandQueuePanelsEnabled).thenReturn(true)
-        `when`(shadeViewController.isFullyCollapsed).thenReturn(true)
+        `when`(panelExpansionInteractor.isFullyCollapsed).thenReturn(true)
         val event = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0)
 
         view.onTouchEvent(event)
@@ -291,21 +292,21 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
 
     private fun createAndInitController(view: PhoneStatusBarView): PhoneStatusBarViewController {
         return PhoneStatusBarViewController.Factory(
-                Optional.of(sysuiUnfoldComponent),
-                Optional.of(progressProvider),
-                featureFlags,
-                FakeSceneContainerFlags(),
-                userChipViewModel,
-                centralSurfacesImpl,
-                statusBarWindowStateController,
-                shadeControllerImpl,
-                shadeViewController,
-                windowRootView,
-                shadeLogger,
-                viewUtil,
-                configurationController,
-                mStatusOverlayHoverListenerFactory
-            )
+            Optional.of(sysuiUnfoldComponent),
+            Optional.of(progressProvider),
+            featureFlags,
+            userChipViewModel,
+            centralSurfacesImpl,
+            statusBarWindowStateController,
+            shadeControllerImpl,
+            shadeViewController,
+            panelExpansionInteractor,
+            windowRootView,
+            shadeLogger,
+            viewUtil,
+            configurationController,
+            mStatusOverlayHoverListenerFactory
+        )
             .create(view)
             .also { it.init() }
     }
@@ -313,6 +314,7 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
     private class UnfoldConfig : UnfoldTransitionConfig {
         override var isEnabled: Boolean = false
         override var isHingeAngleEnabled: Boolean = false
+        override val isHapticsEnabled: Boolean = false
         override val halfFoldedTimeoutMillis: Int = 0
     }
 

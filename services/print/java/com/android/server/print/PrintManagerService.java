@@ -875,7 +875,7 @@ public final class PrintManagerService extends SystemService {
         }
 
         private void registerBroadcastReceivers() {
-            PackageMonitor monitor = new PackageMonitor() {
+            PackageMonitor monitor = new PackageMonitor(true) {
                 /**
                  * Checks if the package contains a print service.
                  *

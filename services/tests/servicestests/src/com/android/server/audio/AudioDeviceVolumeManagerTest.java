@@ -23,12 +23,14 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
+import android.app.AppOpsManager;
 import android.content.Context;
 import android.media.AudioDeviceAttributes;
 import android.media.AudioDeviceInfo;
 import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.media.VolumeInfo;
+import android.os.PermissionEnforcer;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.RequiresFlagsDisabled;
 import android.platform.test.annotations.RequiresFlagsEnabled;
@@ -75,7 +77,8 @@ public class AudioDeviceVolumeManagerTest {
         mAudioVolumeGroupHelper = new AudioVolumeGroupHelperBase();
         mAudioService = new AudioService(mContext, mSpyAudioSystem, mSystemServer,
                 mSettingsAdapter, mAudioVolumeGroupHelper, mAudioPolicyMock,
-                mTestLooper.getLooper()) {
+                mTestLooper.getLooper(), mock(AppOpsManager.class), mock(PermissionEnforcer.class),
+                mock(AudioServerPermissionProvider.class)) {
             @Override
             public int getDeviceForStream(int stream) {
                 return AudioSystem.DEVICE_OUT_SPEAKER;

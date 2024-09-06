@@ -16,29 +16,54 @@
 
 package com.android.systemui.media.controls.ui.controller
 
+import android.animation.AnimatorSet
+import android.content.Context
 import android.content.res.Configuration
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
-import android.testing.AndroidTestingRunner
+import android.graphics.drawable.Drawable
+import android.graphics.drawable.GradientDrawable
+import android.graphics.drawable.RippleDrawable
 import android.testing.TestableLooper
 import android.view.View
+import android.view.ViewGroup
+import android.view.animation.Interpolator
+import android.widget.FrameLayout
+import android.widget.ImageButton
+import android.widget.ImageView
+import android.widget.SeekBar
+import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintSet
+import androidx.lifecycle.LiveData
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.internal.widget.CachingIconView
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.media.controls.ui.view.GutsViewHolder
 import com.android.systemui.media.controls.ui.view.MediaHost
 import com.android.systemui.media.controls.ui.view.MediaViewHolder
 import com.android.systemui.media.controls.ui.view.RecommendationViewHolder
+import com.android.systemui.media.controls.ui.viewmodel.SeekBarViewModel
 import com.android.systemui.media.controls.util.MediaFlags
 import com.android.systemui.res.R
+import com.android.systemui.surfaceeffects.loadingeffect.LoadingEffectView
+import com.android.systemui.surfaceeffects.ripple.MultiRippleView
+import com.android.systemui.surfaceeffects.turbulencenoise.TurbulenceNoiseView
 import com.android.systemui.util.animation.MeasurementInput
 import com.android.systemui.util.animation.TransitionLayout
 import com.android.systemui.util.animation.TransitionViewState
 import com.android.systemui.util.animation.WidgetState
+import com.android.systemui.util.concurrency.FakeExecutor
+import com.android.systemui.util.mockito.withArgCaptor
+import com.android.systemui.util.settings.GlobalSettings
+import com.android.systemui.util.time.FakeSystemClock
+import com.google.common.truth.Truth.assertThat
 import junit.framework.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.floatThat
 import org.mockito.Mock
+import org.mockito.Mockito
 import org.mockito.Mockito.never
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
@@ -47,7 +72,7 @@ import org.mockito.MockitoAnnotations
 
 @SmallTest
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class MediaViewControllerTest : SysuiTestCase() {
     private val mediaHostStateHolder = MediaHost.MediaHostStateHolder()
     private val mediaHostStatesManager = MediaHostStatesManager()
@@ -55,6 +80,31 @@ class MediaViewControllerTest : SysuiTestCase() {
         com.android.systemui.statusbar.phone.ConfigurationControllerImpl(context)
     private var player = TransitionLayout(context, /* attrs */ null, /* defStyleAttr */ 0)
     private var recommendation = TransitionLayout(context, /* attrs */ null, /* defStyleAttr */ 0)
+    private val clock = FakeSystemClock()
+    private lateinit var mainExecutor: FakeExecutor
+    private lateinit var seekBar: SeekBar
+    private lateinit var multiRippleView: MultiRippleView
+    private lateinit var turbulenceNoiseView: TurbulenceNoiseView
+    private lateinit var loadingEffectView: LoadingEffectView
+    private lateinit var settings: ImageButton
+    private lateinit var cancel: View
+    private lateinit var cancelText: TextView
+    private lateinit var dismiss: FrameLayout
+    private lateinit var dismissText: TextView
+    private lateinit var titleText: TextView
+    private lateinit var artistText: TextView
+    private lateinit var explicitIndicator: CachingIconView
+    private lateinit var seamless: ViewGroup
+    private lateinit var seamlessButton: View
+    private lateinit var seamlessIcon: ImageView
+    private lateinit var seamlessText: TextView
+    private lateinit var scrubbingElapsedTimeView: TextView
+    private lateinit var scrubbingTotalTimeView: TextView
+    private lateinit var actionPlayPause: ImageButton
+    private lateinit var actionNext: ImageButton
+    private lateinit var actionPrev: ImageButton
+    @Mock private lateinit var seamlessBackground: RippleDrawable
+    @Mock private lateinit var albumView: ImageView
     @Mock lateinit var logger: MediaViewLogger
     @Mock private lateinit var mockViewState: TransitionViewState
     @Mock private lateinit var mockCopiedState: TransitionViewState
@@ -64,6 +114,14 @@ class MediaViewControllerTest : SysuiTestCase() {
     @Mock private lateinit var mediaSubTitleWidgetState: WidgetState
     @Mock private lateinit var mediaContainerWidgetState: WidgetState
     @Mock private lateinit var mediaFlags: MediaFlags
+    @Mock private lateinit var seekBarViewModel: SeekBarViewModel
+    @Mock private lateinit var seekBarData: LiveData<SeekBarViewModel.Progress>
+    @Mock private lateinit var globalSettings: GlobalSettings
+    @Mock private lateinit var viewHolder: MediaViewHolder
+    @Mock private lateinit var view: TransitionLayout
+    @Mock private lateinit var mockAnimator: AnimatorSet
+    @Mock private lateinit var gutsViewHolder: GutsViewHolder
+    @Mock private lateinit var gutsText: TextView
 
     private val delta = 0.1F
 
@@ -72,14 +130,30 @@ class MediaViewControllerTest : SysuiTestCase() {
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
+        mainExecutor = FakeExecutor(clock)
         mediaViewController =
-            MediaViewController(
-                context,
-                configurationController,
-                mediaHostStatesManager,
-                logger,
-                mediaFlags,
-            )
+            object :
+                MediaViewController(
+                    context,
+                    configurationController,
+                    mediaHostStatesManager,
+                    logger,
+                    seekBarViewModel,
+                    mainExecutor,
+                    mediaFlags,
+                    globalSettings,
+                ) {
+                override fun loadAnimator(
+                    context: Context,
+                    animId: Int,
+                    motionInterpolator: Interpolator?,
+                    vararg targets: View?
+                ): AnimatorSet {
+                    return mockAnimator
+                }
+            }
+        initGutsViewHolderMocks()
+        initMediaViewHolderMocks()
     }
 
     @Test
@@ -298,5 +372,271 @@ class MediaViewControllerTest : SysuiTestCase() {
         mediaViewController.squishViewState(mockViewState, 360F / 360F)
         verify(mediaTitleWidgetState).alpha = floatThat { kotlin.math.abs(it - 1.0F) < delta }
         verify(mediaSubTitleWidgetState).alpha = floatThat { kotlin.math.abs(it - 1.0F) < delta }
+    }
+
+    @Test
+    fun attachPlayer_seekBarDisabled_seekBarVisibilityIsSetToInvisible() {
+        whenever(mediaFlags.isSceneContainerEnabled()).thenReturn(true)
+
+        mediaViewController.attachPlayer(viewHolder)
+        getEnabledChangeListener().onEnabledChanged(enabled = true)
+        getEnabledChangeListener().onEnabledChanged(enabled = false)
+
+        assertThat(mediaViewController.expandedLayout.getVisibility(R.id.media_progress_bar))
+            .isEqualTo(ConstraintSet.INVISIBLE)
+    }
+
+    @Test
+    fun attachPlayer_seekBarEnabled_seekBarVisible() {
+        whenever(mediaFlags.isSceneContainerEnabled()).thenReturn(true)
+
+        mediaViewController.attachPlayer(viewHolder)
+        getEnabledChangeListener().onEnabledChanged(enabled = true)
+
+        assertThat(mediaViewController.expandedLayout.getVisibility(R.id.media_progress_bar))
+            .isEqualTo(ConstraintSet.VISIBLE)
+    }
+
+    @Test
+    fun attachPlayer_seekBarStatusUpdate_seekBarVisibilityChanges() {
+        whenever(mediaFlags.isSceneContainerEnabled()).thenReturn(true)
+
+        mediaViewController.attachPlayer(viewHolder)
+        getEnabledChangeListener().onEnabledChanged(enabled = true)
+
+        assertThat(mediaViewController.expandedLayout.getVisibility(R.id.media_progress_bar))
+            .isEqualTo(ConstraintSet.VISIBLE)
+
+        getEnabledChangeListener().onEnabledChanged(enabled = false)
+
+        assertThat(mediaViewController.expandedLayout.getVisibility(R.id.media_progress_bar))
+            .isEqualTo(ConstraintSet.INVISIBLE)
+    }
+
+    @Test
+    fun attachPlayer_notScrubbing_scrubbingViewsGone() {
+        whenever(mediaFlags.isSceneContainerEnabled()).thenReturn(true)
+
+        mediaViewController.attachPlayer(viewHolder)
+        mediaViewController.canShowScrubbingTime = true
+        getScrubbingChangeListener().onScrubbingChanged(true)
+        getScrubbingChangeListener().onScrubbingChanged(false)
+        mainExecutor.runAllReady()
+
+        assertThat(
+                mediaViewController.expandedLayout.getVisibility(R.id.media_scrubbing_elapsed_time)
+            )
+            .isEqualTo(ConstraintSet.GONE)
+        assertThat(
+                mediaViewController.expandedLayout.getVisibility(R.id.media_scrubbing_total_time)
+            )
+            .isEqualTo(ConstraintSet.GONE)
+    }
+
+    @Test
+    fun setIsScrubbing_noSemanticActions_scrubbingViewsGone() {
+        whenever(mediaFlags.isSceneContainerEnabled()).thenReturn(true)
+
+        mediaViewController.attachPlayer(viewHolder)
+        mediaViewController.canShowScrubbingTime = false
+        getScrubbingChangeListener().onScrubbingChanged(true)
+        mainExecutor.runAllReady()
+
+        assertThat(
+                mediaViewController.expandedLayout.getVisibility(R.id.media_scrubbing_elapsed_time)
+            )
+            .isEqualTo(ConstraintSet.GONE)
+        assertThat(
+                mediaViewController.expandedLayout.getVisibility(R.id.media_scrubbing_total_time)
+            )
+            .isEqualTo(ConstraintSet.GONE)
+    }
+
+    @Test
+    fun setIsScrubbing_noPrevButton_scrubbingTimesNotShown() {
+        whenever(mediaFlags.isSceneContainerEnabled()).thenReturn(true)
+
+        mediaViewController.attachPlayer(viewHolder)
+        mediaViewController.setUpNextButtonInfo(true)
+        mediaViewController.setUpPrevButtonInfo(false)
+        getScrubbingChangeListener().onScrubbingChanged(true)
+        mainExecutor.runAllReady()
+
+        assertThat(mediaViewController.expandedLayout.getVisibility(R.id.actionNext))
+            .isEqualTo(ConstraintSet.VISIBLE)
+        assertThat(
+                mediaViewController.expandedLayout.getVisibility(R.id.media_scrubbing_elapsed_time)
+            )
+            .isEqualTo(ConstraintSet.GONE)
+        assertThat(
+                mediaViewController.expandedLayout.getVisibility(R.id.media_scrubbing_total_time)
+            )
+            .isEqualTo(ConstraintSet.GONE)
+    }
+
+    @Test
+    fun setIsScrubbing_noNextButton_scrubbingTimesNotShown() {
+        whenever(mediaFlags.isSceneContainerEnabled()).thenReturn(true)
+
+        mediaViewController.attachPlayer(viewHolder)
+        mediaViewController.setUpNextButtonInfo(false)
+        mediaViewController.setUpPrevButtonInfo(true)
+        getScrubbingChangeListener().onScrubbingChanged(true)
+        mainExecutor.runAllReady()
+
+        assertThat(mediaViewController.expandedLayout.getVisibility(R.id.actionPrev))
+            .isEqualTo(ConstraintSet.VISIBLE)
+        assertThat(
+                mediaViewController.expandedLayout.getVisibility(R.id.media_scrubbing_elapsed_time)
+            )
+            .isEqualTo(ConstraintSet.GONE)
+        assertThat(
+                mediaViewController.expandedLayout.getVisibility(R.id.media_scrubbing_total_time)
+            )
+            .isEqualTo(ConstraintSet.GONE)
+    }
+
+    @Test
+    fun setIsScrubbing_scrubbingViewsShownAndPrevNextHiddenOnlyInExpanded() {
+        whenever(mediaFlags.isSceneContainerEnabled()).thenReturn(true)
+
+        mediaViewController.attachPlayer(viewHolder)
+        mediaViewController.setUpNextButtonInfo(true)
+        mediaViewController.setUpPrevButtonInfo(true)
+        mediaViewController.canShowScrubbingTime = true
+        getScrubbingChangeListener().onScrubbingChanged(true)
+        mainExecutor.runAllReady()
+
+        // Only in expanded, we should show the scrubbing times and hide prev+next
+        assertThat(mediaViewController.expandedLayout.getVisibility(R.id.actionPrev))
+            .isEqualTo(ConstraintSet.GONE)
+        assertThat(mediaViewController.expandedLayout.getVisibility(R.id.actionNext))
+            .isEqualTo(ConstraintSet.GONE)
+        assertThat(
+                mediaViewController.expandedLayout.getVisibility(R.id.media_scrubbing_elapsed_time)
+            )
+            .isEqualTo(ConstraintSet.VISIBLE)
+        assertThat(
+                mediaViewController.expandedLayout.getVisibility(R.id.media_scrubbing_total_time)
+            )
+            .isEqualTo(ConstraintSet.VISIBLE)
+    }
+
+    @Test
+    fun setIsScrubbing_trueThenFalse_reservePrevAndNextButtons() {
+        whenever(mediaFlags.isSceneContainerEnabled()).thenReturn(true)
+
+        mediaViewController.attachPlayer(viewHolder)
+        mediaViewController.setUpNextButtonInfo(true, ConstraintSet.INVISIBLE)
+        mediaViewController.setUpPrevButtonInfo(true, ConstraintSet.INVISIBLE)
+        mediaViewController.canShowScrubbingTime = true
+
+        getScrubbingChangeListener().onScrubbingChanged(true)
+        mainExecutor.runAllReady()
+
+        assertThat(mediaViewController.expandedLayout.getVisibility(R.id.actionPrev))
+            .isEqualTo(ConstraintSet.INVISIBLE)
+        assertThat(mediaViewController.expandedLayout.getVisibility(R.id.actionNext))
+            .isEqualTo(ConstraintSet.INVISIBLE)
+        assertThat(
+                mediaViewController.expandedLayout.getVisibility(R.id.media_scrubbing_elapsed_time)
+            )
+            .isEqualTo(ConstraintSet.VISIBLE)
+        assertThat(
+                mediaViewController.expandedLayout.getVisibility(R.id.media_scrubbing_total_time)
+            )
+            .isEqualTo(ConstraintSet.VISIBLE)
+
+        getScrubbingChangeListener().onScrubbingChanged(false)
+        mainExecutor.runAllReady()
+
+        // Only in expanded, we should hide the scrubbing times and show prev+next
+        assertThat(mediaViewController.expandedLayout.getVisibility(R.id.actionPrev))
+            .isEqualTo(ConstraintSet.VISIBLE)
+        assertThat(mediaViewController.expandedLayout.getVisibility(R.id.actionNext))
+            .isEqualTo(ConstraintSet.VISIBLE)
+        assertThat(
+                mediaViewController.expandedLayout.getVisibility(R.id.media_scrubbing_elapsed_time)
+            )
+            .isEqualTo(ConstraintSet.GONE)
+        assertThat(
+                mediaViewController.expandedLayout.getVisibility(R.id.media_scrubbing_total_time)
+            )
+            .isEqualTo(ConstraintSet.GONE)
+    }
+
+    private fun initGutsViewHolderMocks() {
+        settings = ImageButton(context)
+        cancel = View(context)
+        cancelText = TextView(context)
+        dismiss = FrameLayout(context)
+        dismissText = TextView(context)
+        whenever(gutsViewHolder.gutsText).thenReturn(gutsText)
+        whenever(gutsViewHolder.settings).thenReturn(settings)
+        whenever(gutsViewHolder.cancel).thenReturn(cancel)
+        whenever(gutsViewHolder.cancelText).thenReturn(cancelText)
+        whenever(gutsViewHolder.dismiss).thenReturn(dismiss)
+        whenever(gutsViewHolder.dismissText).thenReturn(dismissText)
+    }
+
+    private fun initMediaViewHolderMocks() {
+        titleText = TextView(context)
+        artistText = TextView(context)
+        explicitIndicator = CachingIconView(context).also { it.id = R.id.media_explicit_indicator }
+        seamless = FrameLayout(context)
+        seamless.foreground = seamlessBackground
+        seamlessButton = View(context)
+        seamlessIcon = ImageView(context)
+        seamlessText = TextView(context)
+        seekBar = SeekBar(context).also { it.id = R.id.media_progress_bar }
+
+        actionPlayPause = ImageButton(context).also { it.id = R.id.actionPlayPause }
+        actionPrev = ImageButton(context).also { it.id = R.id.actionPrev }
+        actionNext = ImageButton(context).also { it.id = R.id.actionNext }
+        scrubbingElapsedTimeView =
+            TextView(context).also { it.id = R.id.media_scrubbing_elapsed_time }
+        scrubbingTotalTimeView = TextView(context).also { it.id = R.id.media_scrubbing_total_time }
+
+        multiRippleView = MultiRippleView(context, null)
+        turbulenceNoiseView = TurbulenceNoiseView(context, null)
+        loadingEffectView = LoadingEffectView(context, null)
+
+        whenever(viewHolder.player).thenReturn(view)
+        whenever(view.context).thenReturn(context)
+        whenever(viewHolder.albumView).thenReturn(albumView)
+        whenever(albumView.foreground).thenReturn(Mockito.mock(Drawable::class.java))
+        whenever(viewHolder.titleText).thenReturn(titleText)
+        whenever(viewHolder.artistText).thenReturn(artistText)
+        whenever(viewHolder.explicitIndicator).thenReturn(explicitIndicator)
+        whenever(seamlessBackground.getDrawable(0))
+            .thenReturn(Mockito.mock(GradientDrawable::class.java))
+        whenever(viewHolder.seamless).thenReturn(seamless)
+        whenever(viewHolder.seamlessButton).thenReturn(seamlessButton)
+        whenever(viewHolder.seamlessIcon).thenReturn(seamlessIcon)
+        whenever(viewHolder.seamlessText).thenReturn(seamlessText)
+        whenever(viewHolder.seekBar).thenReturn(seekBar)
+        whenever(viewHolder.scrubbingElapsedTimeView).thenReturn(scrubbingElapsedTimeView)
+        whenever(viewHolder.scrubbingTotalTimeView).thenReturn(scrubbingTotalTimeView)
+        whenever(viewHolder.gutsViewHolder).thenReturn(gutsViewHolder)
+        whenever(seekBarViewModel.progress).thenReturn(seekBarData)
+
+        // Action buttons
+        whenever(viewHolder.actionPlayPause).thenReturn(actionPlayPause)
+        whenever(viewHolder.getAction(R.id.actionNext)).thenReturn(actionNext)
+        whenever(viewHolder.getAction(R.id.actionPrev)).thenReturn(actionPrev)
+        whenever(viewHolder.getAction(R.id.actionPlayPause)).thenReturn(actionPlayPause)
+
+        whenever(viewHolder.multiRippleView).thenReturn(multiRippleView)
+        whenever(viewHolder.turbulenceNoiseView).thenReturn(turbulenceNoiseView)
+        whenever(viewHolder.loadingEffectView).thenReturn(loadingEffectView)
+    }
+
+    private fun getScrubbingChangeListener(): SeekBarViewModel.ScrubbingChangeListener =
+        withArgCaptor {
+            verify(seekBarViewModel).setScrubbingChangeListener(capture())
+        }
+
+    private fun getEnabledChangeListener(): SeekBarViewModel.EnabledChangeListener = withArgCaptor {
+        verify(seekBarViewModel).setEnabledChangeListener(capture())
     }
 }

@@ -20,6 +20,7 @@ import static android.media.AudioManager.RINGER_MODE_NORMAL;
 import static android.media.AudioManager.RINGER_MODE_SILENT;
 import static android.media.AudioManager.RINGER_MODE_VIBRATE;
 
+import static com.android.systemui.Flags.FLAG_HAPTIC_VOLUME_SLIDER;
 import static com.android.systemui.volume.Events.DISMISS_REASON_UNKNOWN;
 import static com.android.systemui.volume.Events.SHOW_REASON_UNKNOWN;
 import static com.android.systemui.volume.VolumeDialogControllerImpl.STREAMS;
@@ -46,9 +47,11 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
+import android.media.AudioSystem;
 import android.os.SystemClock;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.provider.Settings;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.Log;
 import android.view.Gravity;
@@ -61,6 +64,7 @@ import android.widget.ImageButton;
 import android.widget.SeekBar;
 
 import androidx.test.core.view.MotionEventBuilder;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.jank.InteractionJankMonitor;
@@ -69,7 +73,7 @@ import com.android.systemui.Prefs;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.AnimatorTestRule;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.media.dialog.MediaOutputDialogFactory;
+import com.android.systemui.media.dialog.MediaOutputDialogManager;
 import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.plugins.VolumeDialogController.State;
 import com.android.systemui.res.R;
@@ -82,7 +86,9 @@ import com.android.systemui.statusbar.policy.FakeConfigurationController;
 import com.android.systemui.util.settings.FakeSettings;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.util.time.FakeSystemClock;
+import com.android.systemui.volume.domain.interactor.VolumeDialogInteractor;
 import com.android.systemui.volume.domain.interactor.VolumePanelNavigationInteractor;
+import com.android.systemui.volume.panel.shared.flag.VolumePanelFlag;
 import com.android.systemui.volume.ui.navigation.VolumeNavigator;
 
 import dagger.Lazy;
@@ -103,7 +109,7 @@ import java.util.Arrays;
 import java.util.function.Predicate;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class VolumeDialogImplTest extends SysuiTestCase {
     VolumeDialogImpl mDialog;
@@ -114,7 +120,6 @@ public class VolumeDialogImplTest extends SysuiTestCase {
     View mDrawerNormal;
     ViewGroup mDialogRowsView;
     CaptionsToggleImageButton mODICaptionsIcon;
-
     private TestableLooper mTestableLooper;
     private ConfigurationController mConfigurationController;
     private int mOriginalOrientation;
@@ -130,7 +135,7 @@ public class VolumeDialogImplTest extends SysuiTestCase {
     @Mock
     DeviceProvisionedController mDeviceProvisionedController;
     @Mock
-    MediaOutputDialogFactory mMediaOutputDialogFactory;
+    MediaOutputDialogManager mMediaOutputDialogManager;
     @Mock
     InteractionJankMonitor mInteractionJankMonitor;
     @Mock
@@ -144,6 +149,10 @@ public class VolumeDialogImplTest extends SysuiTestCase {
     private VolumePanelNavigationInteractor mVolumePanelNavigationInteractor;
     @Mock
     private VolumeNavigator mVolumeNavigator;
+    @Mock
+    private VolumePanelFlag mVolumePanelFlag;
+    @Mock
+    private VolumeDialogInteractor mVolumeDialogInteractor;
 
     private final CsdWarningDialog.Factory mCsdWarningDialogFactory =
             new CsdWarningDialog.Factory() {
@@ -196,7 +205,7 @@ public class VolumeDialogImplTest extends SysuiTestCase {
                 mAccessibilityMgr,
                 mDeviceProvisionedController,
                 mConfigurationController,
-                mMediaOutputDialogFactory,
+                mMediaOutputDialogManager,
                 mInteractionJankMonitor,
                 mVolumePanelNavigationInteractor,
                 mVolumeNavigator,
@@ -204,10 +213,12 @@ public class VolumeDialogImplTest extends SysuiTestCase {
                 mCsdWarningDialogFactory,
                 mPostureController,
                 mTestableLooper.getLooper(),
+                mVolumePanelFlag,
                 mDumpManager,
                 mLazySecureSettings,
                 mVibratorHelper,
-                new FakeSystemClock());
+                new FakeSystemClock(),
+                mVolumeDialogInteractor);
         mDialog.init(0, null);
         State state = createShellState();
         mDialog.onStateChangedH(state);
@@ -243,6 +254,8 @@ public class VolumeDialogImplTest extends SysuiTestCase {
             VolumeDialogController.StreamState ss = new VolumeDialogController.StreamState();
             ss.name = STREAMS.get(i);
             ss.level = 1;
+            ss.levelMin = 0;
+            ss.levelMax = 25;
             state.states.append(i, ss);
         }
         return state;
@@ -262,6 +275,34 @@ public class VolumeDialogImplTest extends SysuiTestCase {
             assertTrue("View " + resourceName != null ? resourceName : view.getId()
                     + " failed test", condition.test(view));
         }
+    }
+
+    @Test
+    @DisableFlags(FLAG_HAPTIC_VOLUME_SLIDER)
+    public void addSliderHaptics_withHapticsDisabled_doesNotDeliverOnProgressChangedHaptics() {
+        // GIVEN that the slider haptics flag is disabled and we try to add haptics to volume rows
+        mDialog.addSliderHapticsToRows();
+
+        // WHEN haptics try to be delivered to a volume stream
+        boolean canDeliverHaptics =
+                mDialog.canDeliverProgressHapticsToStream(AudioSystem.STREAM_MUSIC, true, 50);
+
+        // THEN the result is that haptics are not successfully delivered
+        assertFalse(canDeliverHaptics);
+    }
+
+    @Test
+    @EnableFlags(FLAG_HAPTIC_VOLUME_SLIDER)
+    public void addSliderHaptics_withHapticsEnabled_canDeliverOnProgressChangedHaptics() {
+        // GIVEN that the slider haptics flag is enabled and we try to add haptics to volume rows
+        mDialog.addSliderHapticsToRows();
+
+        // WHEN haptics try to be delivered to a volume stream
+        boolean canDeliverHaptics =
+                mDialog.canDeliverProgressHapticsToStream(AudioSystem.STREAM_MUSIC, true, 50);
+
+        // THEN the result is that haptics are successfully delivered
+        assertTrue(canDeliverHaptics);
     }
 
     @Test
@@ -735,6 +776,15 @@ public class VolumeDialogImplTest extends SysuiTestCase {
 
         boolean foundDnDIcon = findDndIconAmongVolumeRows();
         assertFalse(foundDnDIcon);
+    }
+
+    @Test
+    public void testInteractor_onShow() {
+        mDialog.show(SHOW_REASON_UNKNOWN);
+        mTestableLooper.processAllMessages();
+
+        verify(mVolumeDialogInteractor).onDialogShown();
+        verify(mVolumeDialogInteractor).onDialogDismissed(); // dismiss by timeout
     }
 
     /**

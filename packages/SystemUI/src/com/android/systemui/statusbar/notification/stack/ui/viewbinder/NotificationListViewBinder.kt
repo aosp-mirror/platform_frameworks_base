@@ -36,6 +36,7 @@ import com.android.systemui.statusbar.notification.footer.ui.view.FooterView
 import com.android.systemui.statusbar.notification.footer.ui.viewbinder.FooterViewBinder
 import com.android.systemui.statusbar.notification.footer.ui.viewmodel.FooterViewModel
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerShelfViewBinder
+import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRefactor
 import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor
 import com.android.systemui.statusbar.notification.shelf.ui.viewbinder.NotificationShelfViewBinder
 import com.android.systemui.statusbar.notification.stack.DisplaySwitchNotificationsHiderTracker
@@ -44,6 +45,7 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.notification.stack.ui.view.NotificationStatsLogger
 import com.android.systemui.statusbar.notification.stack.ui.viewbinder.HideNotificationsBinder.bindHideList
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationListViewModel
+import com.android.systemui.statusbar.notification.ui.viewbinder.HeadsUpNotificationViewBinder
 import com.android.systemui.statusbar.phone.NotificationIconAreaController
 import com.android.systemui.util.kotlin.awaitCancellationThenDispose
 import com.android.systemui.util.kotlin.getOrNull
@@ -71,6 +73,7 @@ constructor(
     private val hiderTracker: DisplaySwitchNotificationsHiderTracker,
     private val configuration: ConfigurationState,
     private val falsingManager: FalsingManager,
+    private val hunBinder: HeadsUpNotificationViewBinder,
     private val iconAreaController: NotificationIconAreaController,
     private val loggerOptional: Optional<NotificationStatsLogger>,
     private val metricsLogger: MetricsLogger,
@@ -92,6 +95,9 @@ constructor(
 
         view.repeatWhenAttached {
             lifecycleScope.launch {
+                if (NotificationsHeadsUpRefactor.isEnabled) {
+                    launch { hunBinder.bindHeadsUpNotifications(view) }
+                }
                 launch { bindShelf(shelf) }
                 bindHideList(viewController, viewModel, hiderTracker)
 
@@ -167,7 +173,6 @@ constructor(
                 footerView,
                 footerViewModel,
                 clearAllNotifications = {
-                    metricsLogger.action(MetricsProto.MetricsEvent.ACTION_DISMISS_ALL_NOTES)
                     clearAllNotifications(
                         parentView,
                         // Hide the silent section header (if present) if there will be
@@ -187,13 +192,14 @@ constructor(
                 },
             )
         launch {
-            viewModel.shouldShowFooterView.collect { animatedVisibility ->
+            viewModel.shouldIncludeFooterView.collect { animatedVisibility ->
                 footerView.setVisible(
                     /* visible = */ animatedVisibility.value,
                     /* animate = */ animatedVisibility.isAnimating,
                 )
             }
         }
+        launch { viewModel.shouldHideFooterView.collect { footerView.setShouldBeHidden(it) } }
         disposableHandle.awaitCancellationThenDispose()
     }
 

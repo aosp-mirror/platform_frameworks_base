@@ -17,6 +17,7 @@ flag {
 
 flag {
     name: "autofill_credman_dev_integration"
+    is_exported: true
     namespace: "autofill"
     description: "Guards against Autofill-Credman Phase1 developer integration via new APIs"
     bug: "320730001"

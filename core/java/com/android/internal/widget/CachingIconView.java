@@ -113,7 +113,7 @@ public class CachingIconView extends ImageView {
     }
 
     @Nullable
-    private Drawable loadSizeRestrictedIcon(@Nullable Icon icon) {
+    Drawable loadSizeRestrictedIcon(@Nullable Icon icon) {
         return LocalImageResolver.resolveImage(icon, getContext(), mMaxDrawableWidth,
                 mMaxDrawableHeight);
     }

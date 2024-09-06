@@ -19,8 +19,6 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.widget.TextView;
 
-import com.android.settingslib.WirelessUtils;
-
 /** Shows the operator name */
 public class OperatorNameView extends TextView {
     private boolean mDemoMode;
@@ -41,13 +39,14 @@ public class OperatorNameView extends TextView {
         mDemoMode = demoMode;
     }
 
-    void update(boolean showOperatorName,
+    void update(
+            boolean showOperatorName,
             boolean hasMobile,
+            boolean airplaneMode,
             OperatorNameViewController.SubInfo sub
     ) {
         setVisibility(showOperatorName ? VISIBLE : GONE);
 
-        boolean airplaneMode = WirelessUtils.isAirplaneModeOn(mContext);
         if (!hasMobile || airplaneMode) {
             setText(null);
             setVisibility(GONE);

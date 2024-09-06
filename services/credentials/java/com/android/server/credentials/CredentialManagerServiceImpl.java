@@ -16,11 +16,14 @@
 
 package com.android.server.credentials;
 
+import static com.android.server.credentials.CredentialManagerService.getPrimaryProvidersForUserId;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
+import android.credentials.CredentialManager;
 import android.credentials.CredentialProviderInfo;
 import android.service.credentials.CredentialProviderInfoFactory;
 import android.util.Slog;
@@ -29,6 +32,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.server.infra.AbstractPerUserSystemService;
 
 import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -36,7 +40,7 @@ import java.util.List;
  */
 public final class CredentialManagerServiceImpl extends
         AbstractPerUserSystemService<CredentialManagerServiceImpl, CredentialManagerService> {
-    private static final String TAG = "CredManSysServiceImpl";
+    private static final String TAG = CredentialManager.TAG;
 
     @GuardedBy("mLock")
     @NonNull
@@ -79,9 +83,12 @@ public final class CredentialManagerServiceImpl extends
             Slog.i(TAG, "newServiceInfoLocked, mInfo null, "
                     + serviceComponent.flattenToString());
         }
+        Set<ComponentName> primaryProviders =
+                getPrimaryProvidersForUserId(mMaster.getContext(), mUserId);
         mInfo = CredentialProviderInfoFactory.create(
                 getContext(), serviceComponent,
-                mUserId, /*isSystemProvider=*/false);
+                mUserId, /*isSystemProvider=*/false,
+                primaryProviders.contains(serviceComponent));
         return mInfo.getServiceInfo();
     }
 
@@ -93,7 +100,10 @@ public final class CredentialManagerServiceImpl extends
     public ProviderSession initiateProviderSessionForRequestLocked(
             RequestSession requestSession, List<String> requestOptions) {
         if (!requestOptions.isEmpty() && !isServiceCapableLocked(requestOptions)) {
-            Slog.i(TAG, "Service does not have the required capabilities");
+            if (mInfo != null) {
+                Slog.i(TAG, "Service does not have the required capabilities: "
+                        + mInfo.getComponentName());
+            }
             return null;
         }
         if (mInfo == null) {

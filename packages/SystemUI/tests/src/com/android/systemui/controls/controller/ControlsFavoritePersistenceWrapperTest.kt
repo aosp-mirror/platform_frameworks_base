@@ -18,7 +18,7 @@ package com.android.systemui.controls.controller
 
 import android.content.ComponentName
 import android.service.controls.DeviceTypes
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.concurrency.FakeExecutor
@@ -32,7 +32,7 @@ import org.junit.runner.RunWith
 import java.io.File
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class ControlsFavoritePersistenceWrapperTest : SysuiTestCase() {
 
     private lateinit var file: File

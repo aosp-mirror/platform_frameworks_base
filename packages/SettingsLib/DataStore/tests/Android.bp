@@ -1,0 +1,30 @@
+package {
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+android_app {
+    name: "SettingsLibDataStoreShell",
+    platform_apis: true,
+}
+
+android_robolectric_test {
+    name: "SettingsLibDataStoreTest",
+    srcs: [
+        ":SettingsLibDataStore-srcs", // b/240432457
+        "src/**/*",
+    ],
+    static_libs: [
+        "androidx.collection_collection-ktx",
+        "androidx.core_core-ktx",
+        "androidx.test.ext.junit",
+        "guava",
+        "kotlin-test",
+        "mockito-robolectric-prebuilt", // mockito deps order matters!
+        "mockito-kotlin2",
+    ],
+    java_resource_dirs: ["config"],
+    instrumentation_for: "SettingsLibDataStoreShell",
+    coverage_libs: ["SettingsLibDataStore"],
+    upstream: true,
+    strict_mode: false,
+}

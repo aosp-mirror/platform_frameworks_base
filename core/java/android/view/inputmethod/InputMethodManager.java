@@ -129,6 +129,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.Collections;
@@ -707,6 +708,7 @@ public final class InputMethodManager {
     private static final int MSG_BIND_ACCESSIBILITY_SERVICE = 11;
     private static final int MSG_UNBIND_ACCESSIBILITY_SERVICE = 12;
     private static final int MSG_SET_INTERACTIVE = 13;
+    private static final int MSG_SET_VISIBILITY = 14;
     private static final int MSG_ON_SHOW_REQUESTED = 31;
     private static final int MSG_START_INPUT_RESULT = 40;
 
@@ -903,6 +905,21 @@ public final class InputMethodManager {
             synchronized (mH) {
                 if (mCurRootView == viewRootImpl) {
                     mCurRootViewWindowFocused = false;
+
+                    if (Flags.refactorInsetsController() && mCurRootView != null) {
+                        final int softInputMode = mCurRootView.mWindowAttributes.softInputMode;
+                        final int state =
+                                softInputMode & WindowManager.LayoutParams.SOFT_INPUT_MASK_STATE;
+                        if (state == WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN) {
+                            // when losing focus (e.g., by going to another window), we reset the
+                            // requestedVisibleTypes of WindowInsetsController by hiding the IME
+                            if (DEBUG) {
+                                Log.d(TAG, "onWindowLostFocus, hiding IME because "
+                                        + "of STATE_ALWAYS_HIDDEN");
+                            }
+                            mCurRootView.getInsetsController().hide(WindowInsets.Type.ime());
+                        }
+                    }
 
                     clearCurRootViewIfNeeded();
                 }
@@ -1153,7 +1170,9 @@ public final class InputMethodManager {
                     }
                     final boolean startInput;
                     synchronized (mH) {
-                        mImeDispatcher.clear();
+                        if (reason == UnbindReason.DISCONNECT_IME) {
+                            mImeDispatcher.clear();
+                        }
                         if (getBindSequenceLocked() != sequence) {
                             return;
                         }
@@ -1330,6 +1349,19 @@ public final class InputMethodManager {
                     }
                     return;
                 }
+                case MSG_SET_VISIBILITY:
+                    final boolean visible = msg.arg1 != 0;
+                    synchronized (mH) {
+                        if (visible) {
+                            showSoftInput(mServedView, /* flags */ 0);
+                        } else {
+                            if (mCurRootView != null
+                                    && mCurRootView.getInsetsController() != null) {
+                                mCurRootView.getInsetsController().hide(WindowInsets.Type.ime());
+                            }
+                        }
+                    }
+                    break;
                 case MSG_SEND_INPUT_EVENT: {
                     sendInputEventAndReportResultOnMainLooper((PendingEvent)msg.obj);
                     return;
@@ -1424,6 +1456,11 @@ public final class InputMethodManager {
         public void setInteractive(boolean interactive, boolean fullscreen) {
             mH.obtainMessage(MSG_SET_INTERACTIVE, interactive ? 1 : 0, fullscreen ? 1 : 0)
                     .sendToTarget();
+        }
+
+        @Override
+        public void setImeVisibility(boolean visible) {
+            mH.obtainMessage(MSG_SET_VISIBILITY, visible ? 1 : 0, 0).sendToTarget();
         }
 
         @Override
@@ -1669,7 +1706,6 @@ public final class InputMethodManager {
     @NonNull
     @RequiresPermission(value = Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)
     @TestApi
-    @FlaggedApi(Flags.FLAG_IMM_USERHANDLE_HOSTSIDETESTS)
     @SuppressLint("UserHandle")
     public boolean isStylusHandwritingAvailableAsUser(@NonNull UserHandle user) {
         final Context fallbackContext = ActivityThread.currentApplication();
@@ -1814,7 +1850,6 @@ public final class InputMethodManager {
     @NonNull
     @RequiresPermission(value = Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)
     @TestApi
-    @FlaggedApi(Flags.FLAG_IMM_USERHANDLE_HOSTSIDETESTS)
     @SuppressLint("UserHandle")
     public List<InputMethodInfo> getEnabledInputMethodListAsUser(@NonNull UserHandle user) {
         return IInputMethodManagerGlobalInvoker.getEnabledInputMethodList(user.getIdentifier());
@@ -1856,7 +1891,6 @@ public final class InputMethodManager {
     @NonNull
     @RequiresPermission(value = Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)
     @TestApi
-    @FlaggedApi(Flags.FLAG_IMM_USERHANDLE_HOSTSIDETESTS)
     @SuppressLint("UserHandle")
     public List<InputMethodSubtype> getEnabledInputMethodSubtypeListAsUser(
             @NonNull String imeId, boolean allowsImplicitlyEnabledSubtypes,
@@ -2299,19 +2333,32 @@ public final class InputMethodManager {
 
             ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
 
-            // Makes sure to call ImeInsetsSourceConsumer#onShowRequested on the UI thread.
-            // TODO(b/229426865): call WindowInsetsController#show instead.
-            mH.executeOrSendMessage(Message.obtain(mH, MSG_ON_SHOW_REQUESTED));
-            Log.d(TAG, "showSoftInput() view=" + view + " flags=" + flags + " reason="
-                    + InputMethodDebug.softInputDisplayReasonToString(reason));
-            return IInputMethodManagerGlobalInvoker.showSoftInput(
-                    mClient,
-                    view.getWindowToken(),
-                    statsToken,
-                    flags,
-                    mCurRootView.getLastClickToolType(),
-                    resultReceiver,
-                    reason);
+            if (Flags.refactorInsetsController()) {
+                // In case of a running show IME animation, it should not be requested visible,
+                // otherwise the animation would jump and not be controlled by the user anymore
+                if ((mCurRootView.getInsetsController().computeUserAnimatingTypes()
+                        & WindowInsets.Type.ime()) == 0) {
+                    // TODO(b/322992891) handle case of SHOW_IMPLICIT
+                    view.getWindowInsetsController().show(WindowInsets.Type.ime());
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                // Makes sure to call ImeInsetsSourceConsumer#onShowRequested on the UI thread.
+                // TODO(b/229426865): call WindowInsetsController#show instead.
+                mH.executeOrSendMessage(Message.obtain(mH, MSG_ON_SHOW_REQUESTED));
+                Log.d(TAG, "showSoftInput() view=" + view + " flags=" + flags + " reason="
+                        + InputMethodDebug.softInputDisplayReasonToString(reason));
+                return IInputMethodManagerGlobalInvoker.showSoftInput(
+                        mClient,
+                        view.getWindowToken(),
+                        statsToken,
+                        flags,
+                        mCurRootView.getLastClickToolType(),
+                        resultReceiver,
+                        reason);
+            }
         }
     }
 
@@ -2448,8 +2495,14 @@ public final class InputMethodManager {
 
             ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
 
-            return IInputMethodManagerGlobalInvoker.hideSoftInput(mClient, windowToken, statsToken,
-                    flags, resultReceiver, reason);
+            if (Flags.refactorInsetsController()) {
+                // TODO(b/322992891) handle case of HIDE_IMPLICIT_ONLY
+                servedView.getWindowInsetsController().hide(WindowInsets.Type.ime());
+                return true;
+            } else {
+                return IInputMethodManagerGlobalInvoker.hideSoftInput(mClient, windowToken,
+                        statsToken, flags, resultReceiver, reason);
+            }
         }
     }
 
@@ -2462,24 +2515,25 @@ public final class InputMethodManager {
      * @hide
      */
     public boolean hideSoftInputFromView(@NonNull View view, @HideFlags int flags) {
+        checkFocus();
         final boolean isFocusedAndWindowFocused = view.hasWindowFocus() && view.isFocused();
         synchronized (mH) {
-            if (!isFocusedAndWindowFocused && !hasServedByInputMethodLocked(view)) {
+            final boolean hasServedByInputMethod = hasServedByInputMethodLocked(view);
+            if (!isFocusedAndWindowFocused && !hasServedByInputMethod) {
                 // Fail early if the view is not focused and not served
                 // to avoid logging many erroneous calls.
                 return false;
             }
-        }
 
-        final int reason = SoftInputShowHideReason.HIDE_SOFT_INPUT_FROM_VIEW;
-        final var statsToken = ImeTracker.forLogging().onStart(ImeTracker.TYPE_HIDE,
-                ImeTracker.ORIGIN_CLIENT, reason, ImeTracker.isFromUser(view));
-        ImeTracker.forLatency().onRequestHide(statsToken,
-                ImeTracker.ORIGIN_CLIENT, reason, ActivityThread::currentApplication);
-        ImeTracing.getInstance().triggerClientDump("InputMethodManager#hideSoftInputFromView",
-                this, null /* icProto */);
-        synchronized (mH) {
-            if (!hasServedByInputMethodLocked(view)) {
+            final int reason = SoftInputShowHideReason.HIDE_SOFT_INPUT_FROM_VIEW;
+            final var statsToken = ImeTracker.forLogging().onStart(ImeTracker.TYPE_HIDE,
+                    ImeTracker.ORIGIN_CLIENT, reason, ImeTracker.isFromUser(view));
+            ImeTracker.forLatency().onRequestHide(statsToken,
+                    ImeTracker.ORIGIN_CLIENT, reason, ActivityThread::currentApplication);
+            ImeTracing.getInstance().triggerClientDump("InputMethodManager#hideSoftInputFromView",
+                    this, null /* icProto */);
+
+            if (!hasServedByInputMethod) {
                 ImeTracker.forLogging().onFailed(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
                 ImeTracker.forLatency().onShowFailed(statsToken,
                         ImeTracker.PHASE_CLIENT_VIEW_SERVED, ActivityThread::currentApplication);
@@ -2530,18 +2584,6 @@ public final class InputMethodManager {
                 view, /* delegatorPackageName= */ null, /* handwritingDelegateFlags= */ 0);
     }
 
-    private void startStylusHandwritingInternalAsync(
-            @NonNull View view, @Nullable String delegatorPackageName,
-            @HandwritingDelegateFlags int handwritingDelegateFlags,
-            @NonNull @CallbackExecutor Executor executor, @NonNull Consumer<Boolean> callback) {
-        Objects.requireNonNull(view);
-        Objects.requireNonNull(executor);
-        Objects.requireNonNull(callback);
-
-        startStylusHandwritingInternal(
-                view, delegatorPackageName, handwritingDelegateFlags, executor, callback);
-    }
-
     private void sendFailureCallback(@NonNull @CallbackExecutor Executor executor,
             @NonNull Consumer<Boolean> callback) {
         if (executor == null || callback == null) {
@@ -2589,13 +2631,17 @@ public final class InputMethodManager {
                 return false;
             }
             if (useDelegation) {
+                WeakReference<Executor> executorRef = new WeakReference<>(executor);
+                WeakReference<Consumer<Boolean>> callbackRef = new WeakReference<>(callback);
                 if (useCallback) {
                     IBooleanListener listener = new IBooleanListener.Stub() {
                         @Override
                         public void onResult(boolean value) {
-                            executor.execute(() -> {
-                                callback.accept(value);
-                            });
+                            Executor executor = executorRef.get();
+                            Consumer<Boolean> callback = callbackRef.get();
+                            if (executor != null && callback != null) {
+                                executor.execute(() -> callback.accept(value));
+                            }
                         }
                     };
                     if (!IInputMethodManagerGlobalInvoker.acceptStylusHandwritingDelegationAsync(
@@ -2891,7 +2937,7 @@ public final class InputMethodManager {
         if (Flags.homeScreenHandwritingDelegator()) {
             flags = delegateView.getHandwritingDelegateFlags();
         }
-        startStylusHandwritingInternalAsync(
+        acceptStylusHandwritingDelegation(
                 delegateView, delegatorPackageName, flags, executor, callback);
     }
 
@@ -2909,8 +2955,6 @@ public final class InputMethodManager {
      * @param flags {@link #HANDWRITING_DELEGATE_FLAG_HOME_DELEGATOR_ALLOWED} or {@code 0}
      * @param executor The executor to run the callback on.
      * @param callback {@code true>} would be received if delegation was accepted.
-     * @return {@code true} if view belongs to allowed delegate package declared in {@link
-     *     #prepareStylusHandwritingDelegation(View, String)} and delegation is accepted
      * @see #prepareStylusHandwritingDelegation(View, String)
      * @see #acceptStylusHandwritingDelegation(View)
      */
@@ -2928,6 +2972,9 @@ public final class InputMethodManager {
             @HandwritingDelegateFlags int flags, @NonNull @CallbackExecutor Executor executor,
             @NonNull Consumer<Boolean> callback) {
         Objects.requireNonNull(delegatorPackageName);
+        Objects.requireNonNull(delegateView);
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
 
         startStylusHandwritingInternal(
                 delegateView, delegatorPackageName, flags, executor, callback);
@@ -3502,10 +3549,6 @@ public final class InputMethodManager {
             return false;
         }
         mServedView = mNextServedView;
-        if (initiationWithoutInputConnection() && mServedView.isHandwritingDelegate()) {
-            mServedView.getViewRootImpl().getHandwritingInitiator().onDelegateViewFocused(
-                    mServedView);
-        }
         if (mServedInputConnection != null) {
             mServedInputConnection.finishComposingTextFromImm();
         }
@@ -4320,6 +4363,19 @@ public final class InputMethodManager {
     @RequiresPermission(Manifest.permission.TEST_INPUT_METHOD)
     public boolean hasPendingImeVisibilityRequests() {
         return IInputMethodManagerGlobalInvoker.hasPendingImeVisibilityRequests();
+    }
+
+    /**
+     * A test API for CTS to finish the tracking of any pending IME visibility requests. This
+     * won't stop the actual requests, but allows resetting the state when starting up test runs.
+     *
+     * @hide
+     */
+    @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
+    @TestApi
+    @RequiresPermission(Manifest.permission.TEST_INPUT_METHOD)
+    public void finishTrackingPendingImeVisibilityRequests() {
+        IInputMethodManagerGlobalInvoker.finishTrackingPendingImeVisibilityRequests();
     }
 
     /**

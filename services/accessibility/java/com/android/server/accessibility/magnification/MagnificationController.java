@@ -587,7 +587,7 @@ public class MagnificationController implements MagnificationConnectionManager.C
 
     @Override
     public void onFullScreenMagnificationActivationState(int displayId, boolean activated) {
-        if (Flags.magnificationAlwaysDrawFullscreenBorder()) {
+        if (Flags.alwaysDrawMagnificationFullscreenBorder()) {
             getMagnificationConnectionManager()
                     .onFullscreenMagnificationActivationChanged(displayId, activated);
         }
@@ -798,11 +798,17 @@ public class MagnificationController implements MagnificationConnectionManager.C
                         mLock,
                         this,
                         mScaleProvider,
-                        mBackgroundExecutor
+                        mBackgroundExecutor,
+                        () -> isMagnificationSystemUIConnectionReady()
                 );
             }
         }
         return mFullScreenMagnificationController;
+    }
+
+    private boolean isMagnificationSystemUIConnectionReady() {
+        return isMagnificationConnectionManagerInitialized()
+                && getMagnificationConnectionManager().waitConnectionWithTimeoutIfNeeded();
     }
 
     /**
@@ -828,6 +834,12 @@ public class MagnificationController implements MagnificationConnectionManager.C
                         mScaleProvider);
             }
             return mMagnificationConnectionManager;
+        }
+    }
+
+    private boolean isMagnificationConnectionManagerInitialized() {
+        synchronized (mLock) {
+            return mMagnificationConnectionManager != null;
         }
     }
 

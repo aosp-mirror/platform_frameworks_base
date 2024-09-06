@@ -35,6 +35,9 @@ import java.util.regex.Matcher;
 
 public final class DomainVerificationUtils {
 
+    public static final int MAX_DOMAIN_LENGTH = 254;
+    public static final int MAX_DOMAIN_LABEL_LENGTH = 63;
+
     private static final ThreadLocal<Matcher> sCachedMatcher = ThreadLocal.withInitial(
             () -> Patterns.DOMAIN_NAME.matcher(""));
 
@@ -107,5 +110,42 @@ public final class DomainVerificationUtils {
         appInfo.packageName = pkg.getPackageName();
         appInfo.targetSdkVersion = pkg.getTargetSdkVersion();
         return appInfo;
+    }
+
+    static boolean isValidDomain(String domain) {
+        if (domain.length() > MAX_DOMAIN_LENGTH || domain.equals("*")) {
+            return false;
+        }
+        if (domain.charAt(0) == '*') {
+            if (domain.charAt(1) != '.') {
+                return false;
+            }
+            domain = domain.substring(2);
+        }
+        int labels = 1;
+        int labelStart = -1;
+        for (int i = 0; i < domain.length(); i++) {
+            char c = domain.charAt(i);
+            if (c == '.') {
+                int labelLength = i - labelStart - 1;
+                if (labelLength == 0 || labelLength > MAX_DOMAIN_LABEL_LENGTH) {
+                    return false;
+                }
+                labelStart = i;
+                labels += 1;
+            } else if (!isValidDomainChar(c)) {
+                return false;
+            }
+        }
+        int lastLabelLength = domain.length() - labelStart - 1;
+        if (lastLabelLength == 0 || lastLabelLength > 63) {
+            return false;
+        }
+        return labels > 1;
+    }
+
+    private static boolean isValidDomainChar(char c) {
+        return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')
+                || (c >= '0' && c <= '9') || c == '-';
     }
 }

@@ -38,8 +38,8 @@ import com.android.systemui.qs.tiles.impl.custom.customTileInteractor
 import com.android.systemui.qs.tiles.impl.custom.customTilePackagesUpdatesRepository
 import com.android.systemui.qs.tiles.impl.custom.customTileRepository
 import com.android.systemui.qs.tiles.impl.custom.customTileServiceInteractor
+import com.android.systemui.qs.tiles.impl.custom.customTileSpec
 import com.android.systemui.qs.tiles.impl.custom.data.entity.CustomTileDefaults
-import com.android.systemui.qs.tiles.impl.custom.tileSpec
 import com.android.systemui.testKosmos
 import com.android.systemui.user.data.repository.fakeUserRepository
 import com.android.systemui.user.data.repository.userRepository
@@ -60,12 +60,12 @@ class CustomTileDataInteractorTest : SysuiTestCase() {
     private val kosmos =
         testKosmos().apply {
             componentName = TEST_COMPONENT
-            tileSpec = TileSpec.create(componentName)
+            customTileSpec = TileSpec.create(componentName)
         }
     private val underTest =
         with(kosmos) {
             CustomTileDataInteractor(
-                tileSpec = tileSpec,
+                tileSpec = customTileSpec,
                 defaultsRepository = customTileDefaultsRepository,
                 serviceInteractor = customTileServiceInteractor,
                 customTileInteractor = customTileInteractor,
@@ -180,7 +180,7 @@ class CustomTileDataInteractorTest : SysuiTestCase() {
                 setup()
                 customTileDefaultsRepository.putDefaults(
                     TEST_USER_1.userHandle,
-                    tileSpec.componentName,
+                    customTileSpec.componentName,
                     CustomTileDefaults.Result(TEST_TILE.icon, TEST_TILE.label),
                 )
 
@@ -198,7 +198,7 @@ class CustomTileDataInteractorTest : SysuiTestCase() {
                 setup()
                 customTileDefaultsRepository.putDefaults(
                     TEST_USER_1.userHandle,
-                    tileSpec.componentName,
+                    customTileSpec.componentName,
                     CustomTileDefaults.Error,
                 )
 
@@ -216,7 +216,7 @@ class CustomTileDataInteractorTest : SysuiTestCase() {
                 setup()
                 customTileDefaultsRepository.putDefaults(
                     TEST_USER_2.userHandle,
-                    tileSpec.componentName,
+                    customTileSpec.componentName,
                     CustomTileDefaults.Error,
                 )
 

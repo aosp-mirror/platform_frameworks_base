@@ -16,9 +16,9 @@
 
 package com.android.systemui.dagger;
 
-import javax.inject.Singleton;
-
 import dagger.Component;
+
+import javax.inject.Singleton;
 
 /**
  * Root component for Dagger injection used in AOSP.

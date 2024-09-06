@@ -52,11 +52,8 @@ class NotifUiAdjustment internal constructor(
             oldAdjustment.needsRedaction != newAdjustment.needsRedaction -> true
             areDifferent(oldAdjustment.smartActions, newAdjustment.smartActions) -> true
             newAdjustment.smartReplies != oldAdjustment.smartReplies -> true
-            // TODO(b/217799515): Here we decide whether to re-inflate the row on every group-status
-            //  change if we want to keep the single-line view, the following line should be:
-            //  !oldAdjustment.isChildInGroup && newAdjustment.isChildInGroup -> true
             AsyncHybridViewInflation.isEnabled &&
-                    oldAdjustment.isChildInGroup != newAdjustment.isChildInGroup -> true
+                    !oldAdjustment.isChildInGroup && newAdjustment.isChildInGroup -> true
             AsyncGroupHeaderViewInflation.isEnabled &&
                 !oldAdjustment.isGroupSummary && newAdjustment.isGroupSummary -> true
             else -> false

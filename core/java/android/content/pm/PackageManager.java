@@ -62,6 +62,7 @@ import android.content.pm.dex.ArtManager;
 import android.content.pm.verify.domain.DomainVerificationManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.graphics.Rect;
 import android.graphics.drawable.AdaptiveIconDrawable;
@@ -74,6 +75,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
 import android.os.Parcel;
+import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
@@ -265,6 +267,24 @@ public abstract class PackageManager {
      */
     public static final String PROPERTY_LEGACY_UPDATE_OWNERSHIP_DENYLIST =
             "android.app.PROPERTY_LEGACY_UPDATE_OWNERSHIP_DENYLIST";
+
+    /**
+     * Application level {@link android.content.pm.PackageManager.Property PackageManager
+     * .Property} for a app to inform the installer that a file containing the app's android
+     * safety label data is bundled into the APK as a raw resource.
+     *
+     * <p>For example:
+     * <pre>
+     * &lt;application&gt;
+     *   &lt;property
+     *     android:name="android.content.PROPERTY_ANDROID_SAFETY_LABEL"
+     *     android:resource="@raw/app-metadata"/&gt;
+     * &lt;/application&gt;
+     * </pre>
+     * @hide
+     */
+    public static final String PROPERTY_ANDROID_SAFETY_LABEL =
+            "android.content.PROPERTY_ANDROID_SAFETY_LABEL";
 
     /**
      * A property value set within the manifest.
@@ -895,7 +915,7 @@ public abstract class PackageManager {
             GET_DISABLED_COMPONENTS,
             GET_DISABLED_UNTIL_USED_COMPONENTS,
             GET_UNINSTALLED_PACKAGES,
-            MATCH_CLONE_PROFILE,
+            MATCH_CLONE_PROFILE_LONG,
             MATCH_QUARANTINED_COMPONENTS,
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -1235,10 +1255,11 @@ public abstract class PackageManager {
     public static final int MATCH_DEBUG_TRIAGED_MISSING = MATCH_DIRECT_BOOT_AUTO;
 
     /**
-     * Use {@link #MATCH_CLONE_PROFILE_LONG} instead.
+     * @deprecated Use {@link #MATCH_CLONE_PROFILE_LONG} instead.
      *
      * @hide
      */
+    @Deprecated
     @SystemApi
     public static final int MATCH_CLONE_PROFILE = 0x20000000;
 
@@ -4376,8 +4397,6 @@ public abstract class PackageManager {
      * {@link #hasSystemFeature}: The device supports freeform window management.
      * Windows have title bars and can be moved and resized.
      */
-    // If this feature is present, you also need to set
-    // com.android.internal.R.config_freeformWindowManagement to true in your configuration overlay.
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_FREEFORM_WINDOW_MANAGEMENT
             = "android.software.freeform_window_management";
@@ -11732,5 +11751,39 @@ public abstract class PackageManager {
             @NonNull Function<XmlResourceParser, T> parserFunction) throws IOException {
         throw new UnsupportedOperationException(
                 "parseAndroidManifest not implemented in subclass");
+    }
+
+    /**
+     * Similar to {@link #parseAndroidManifest(File, Function)}, but accepting a file descriptor
+     * instead of a File object.
+     *
+     * @param apkFileDescriptor The file descriptor of an application apk.
+     * The parserFunction will be invoked with the XmlResourceParser object
+     *        after getting the AndroidManifest.xml of an application package.
+     *
+     * @return Returns the result of the {@link Function#apply(Object)}.
+     *
+     * @throws IOException if the AndroidManifest.xml of an application package cannot be
+     *             read or accessed.
+     */
+    @FlaggedApi(android.content.pm.Flags.FLAG_GET_PACKAGE_INFO_WITH_FD)
+    @WorkerThread
+    public <T> T parseAndroidManifest(@NonNull ParcelFileDescriptor apkFileDescriptor,
+            @NonNull Function<XmlResourceParser, T> parserFunction) throws IOException {
+        throw new UnsupportedOperationException(
+                "parseAndroidManifest not implemented in subclass");
+    }
+
+    /**
+     * @param info    The {@link ServiceInfo} to pull the attributes from.
+     * @param name    The name of the Xml metadata where the attributes are stored.
+     * @param rootTag The root tag of the attributes.
+     * @return A {@link TypedArray} of attributes if successful, {@code null} otherwise.
+     * @hide
+     */
+    public TypedArray extractPackageItemInfoAttributes(PackageItemInfo info, String name,
+            String rootTag, int[] attributes) {
+        throw new UnsupportedOperationException(
+                "parseServiceMetadata not implemented in subclass");
     }
 }

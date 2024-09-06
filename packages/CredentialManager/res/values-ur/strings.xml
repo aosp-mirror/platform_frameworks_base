@@ -39,9 +39,9 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"چونکہ ہم بغیر پاس ورڈ والے مستقبل کی طرف جا رہے ہیں اس کے باوجود پاس ورڈز پاس کیز کے ساتھ ہی دستیاب ہوں گے۔"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"منتخب کریں کہ آپ کی <xliff:g id="CREATETYPES">%1$s</xliff:g> کو کہاں محفوظ کرنا ہے"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"اپنی معلومات کو محفوظ کرنے اور اگلی بار تیزی سے سائن ان کرنے کے لیے پاس ورڈ مینیجر منتخب کریں"</string>
-    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"<xliff:g id="APPNAME">%1$s</xliff:g> میں سائن ان کرنے کیلئے پاس کی تخلیق کریں؟"</string>
-    <string name="choose_create_option_password_title" msgid="6238446571944651980">"<xliff:g id="APPNAME">%1$s</xliff:g> میں سائن ان کرنے کیلئے پاس ورڈ محفوظ کریں؟"</string>
-    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"<xliff:g id="APPNAME">%1$s</xliff:g> کے لیے سائن ان کی معلومات محفوظ کریں؟"</string>
+    <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"<xliff:g id="APP_NAME">%1$s</xliff:g> میں سائن ان کرنے کیلئے پاس کی تخلیق کریں؟"</string>
+    <string name="choose_create_option_password_title" msgid="4481366993598649224">"<xliff:g id="APP_NAME">%1$s</xliff:g> میں سائن ان کرنے کیلئے پاس ورڈ محفوظ کریں؟"</string>
+    <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"<xliff:g id="APP_NAME">%1$s</xliff:g> کے لیے سائن ان کی معلومات محفوظ کریں؟"</string>
     <string name="passkey" msgid="632353688396759522">"پاس کی"</string>
     <string name="password" msgid="6738570945182936667">"پاس ورڈ"</string>
     <string name="passkeys" msgid="5733880786866559847">"پاس کیز"</string>
@@ -68,14 +68,15 @@
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"گزشتہ صفحے پر واپس جائیں"</string>
     <string name="accessibility_close_button" msgid="1163435587545377687">"بند کریں"</string>
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"برخاست کریں"</string>
-    <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"<xliff:g id="APP_NAME">%1$s</xliff:g> کے لیے اپنی محفوظ کردہ پاس کی استعمال کریں؟"</string>
-    <string name="get_dialog_title_use_password_for" msgid="625828023234318484">"<xliff:g id="APP_NAME">%1$s</xliff:g> کے لیے آپ کا محفوظ کردہ پاس ورڈ استعمال کریں؟"</string>
-    <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"<xliff:g id="APP_NAME">%1$s</xliff:g> کے لیے آپ کی سائن ان تفصیلات استعمال کریں؟"</string>
-    <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"<xliff:g id="APP_NAME">%1$s</xliff:g> کے لیے سائن ان کے اختیارات کو غیر مقفل کریں؟"</string>
+    <string name="get_dialog_title_use_passkey_for" msgid="479261099705979148">"<xliff:g id="APP_NAME">%1$s</xliff:g> کے لیے اپنی محفوظ کردہ پاس کی استعمال کریں"</string>
+    <string name="get_dialog_title_use_password_for" msgid="688557784207167647">"<xliff:g id="APP_NAME">%1$s</xliff:g> کیلئے آپ کا محفوظ کردہ پاس ورڈ استعمال کریں"</string>
+    <string name="get_dialog_title_use_sign_in_for" msgid="4233553937542583226">"<xliff:g id="APP_NAME">%1$s</xliff:g> کے لیے اپنا اکاؤنٹ استعمال کریں"</string>
+    <string name="get_dialog_description_single_tap" msgid="2797059565126030879">"<xliff:g id="USERNAME">%2$s</xliff:g> کے ساتھ <xliff:g id="APP_NAME">%1$s</xliff:g> میں سائن ان کرنے کے لیے اپنا اسکرین لاک استعمال کریں"</string>
+    <string name="get_dialog_title_unlock_options_for" msgid="7096423827682163270">"<xliff:g id="APP_NAME">%1$s</xliff:g> کے لیے سائن ان کے اختیارات کو غیر مقفل کریں"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"<xliff:g id="APP_NAME">%1$s</xliff:g> کے لیے ایک محفوظ کردہ پاس کی منتخب کریں"</string>
     <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"<xliff:g id="APP_NAME">%1$s</xliff:g> کے لیے ایک محفوظ کردہ پاس ورڈ منتخب کریں"</string>
     <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"<xliff:g id="APP_NAME">%1$s</xliff:g> کے لیے محفوظ کردہ سائن ان منتخب کریں"</string>
-    <string name="get_dialog_title_choose_sign_in_for" msgid="3048870756117876514">"<xliff:g id="APP_NAME">%1$s</xliff:g> کے لیے سائن ان منتخب کریں"</string>
+    <string name="get_dialog_title_choose_sign_in_for" msgid="645728947702442421">"<xliff:g id="APP_NAME">%1$s</xliff:g> کیلئے ایک اکاؤنٹ منتخب کریں"</string>
     <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"<xliff:g id="APP_NAME">%1$s</xliff:g> کے لیے ایک اختیار منتخب کریں؟"</string>
     <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"<xliff:g id="APP_NAME">%1$s</xliff:g> پر اس معلومات کا استعمال کریں؟"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"دوسرے طریقے سے سائن ان کریں"</string>

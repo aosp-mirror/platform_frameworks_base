@@ -26,7 +26,10 @@ import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
 import android.util.PathParser
 import android.view.Gravity
+import android.view.View
 import com.android.systemui.res.R
+import kotlin.math.ceil
+import kotlin.math.floor
 import kotlin.math.roundToInt
 
 /**
@@ -53,9 +56,6 @@ import kotlin.math.roundToInt
  *          - The internal space is divided into 12x10 and 6x6 rectangles
  *          - The attribution is aligned left
  *          - The percent text is scaled based on the number of characters (1,2, or 3) in the string
- *
- * When [BatteryDrawableState.showErrorState] is true, we will only show either the percent text OR
- * the battery fill, in order to maximize contrast when using the error colors.
  */
 @Suppress("RtlHardcoded")
 class BatteryLayersDrawable(
@@ -69,8 +69,11 @@ class BatteryLayersDrawable(
 ) : LayerDrawable(arrayOf(frameBg, frame, fill, textOnly, spaceSharingText, attribution)) {
 
     private val scaleMatrix = Matrix().also { it.setScale(1f, 1f) }
-    private val scaledAttrFullCanvas = RectF(Metrics.AttrFullCanvas)
-    private val scaledAttrRightCanvas = RectF(Metrics.AttrRightCanvas)
+
+    private val attrFullCanvas = RectF()
+    private val attrRightCanvas = RectF()
+    private val scaledAttrFullCanvas = RectF()
+    private val scaledAttrRightCanvas = RectF()
 
     var batteryState = batteryState
         set(value) {
@@ -85,55 +88,74 @@ class BatteryLayersDrawable(
     var colors: BatteryColors = BatteryColors.LightThemeColors
         set(value) {
             field = value
-            updateColors(batteryState.showErrorState, value)
+            updateColorProfile(batteryState.hasForegroundContent(), batteryState.color, value)
         }
+
+    init {
+        isAutoMirrored = true
+        // Initialize the canvas rects since they are not static
+        setAttrRects(layoutDirection == View.LAYOUT_DIRECTION_RTL)
+    }
 
     private fun handleUpdateState(old: BatteryDrawableState, new: BatteryDrawableState) {
-        if (new.showErrorState != old.showErrorState) {
-            updateColors(new.showErrorState, colors)
-        }
-
         if (new.level != old.level) {
             fill.batteryLevel = new.level
             textOnly.batteryLevel = new.level
             spaceSharingText.batteryLevel = new.level
         }
 
+        val shouldUpdateColors =
+            new.color != old.color ||
+                new.attribution != attribution.drawable ||
+                new.hasForegroundContent() != old.hasForegroundContent()
+
         if (new.attribution != null && new.attribution != attribution.drawable) {
             attribution.drawable = new.attribution
-            updateColors(new.showErrorState, colors)
         }
 
         if (new.hasForegroundContent() != old.hasForegroundContent()) {
-            setFillColor(new.hasForegroundContent(), new.showErrorState, colors)
+            setFillInsets(new.hasForegroundContent())
+        }
+
+        // Finally, update colors last if any of the above conditions were met, so that everything
+        // is properly tinted
+        if (shouldUpdateColors) {
+            updateColorProfile(new.hasForegroundContent(), new.color, colors)
         }
     }
 
-    /** In error states, we don't draw fill unless there is no foreground content (e.g., percent) */
-    private fun updateColors(showErrorState: Boolean, colorInfo: BatteryColors) {
-        frameBg.setTint(if (showErrorState) colorInfo.errorBackground else colorInfo.bg)
-        frame.setTint(colorInfo.fg)
-        attribution.setTint(if (showErrorState) colorInfo.errorForeground else colorInfo.fg)
-        textOnly.setTint(if (showErrorState) colorInfo.errorForeground else colorInfo.fg)
-        spaceSharingText.setTint(if (showErrorState) colorInfo.errorForeground else colorInfo.fg)
-        setFillColor(batteryState.hasForegroundContent(), showErrorState, colorInfo)
-    }
-
-    /**
-     * If there is a foreground layer, then we draw the fill with the low opacity
-     * [BatteryColors.fill] color. Otherwise, if there is no other foreground layer, we will use
-     * either the error or fillOnly colors for more contrast
-     */
-    private fun setFillColor(
+    private fun updateColorProfile(
         hasFg: Boolean,
-        error: Boolean,
+        color: ColorProfile,
         colorInfo: BatteryColors,
     ) {
-        if (hasFg) {
-            fill.fillColor = colorInfo.fill
-        } else {
-            fill.fillColor = if (error) colorInfo.errorForeground else colorInfo.fillOnly
+        frame.setTint(colorInfo.fg)
+        frameBg.setTint(colorInfo.bg)
+        textOnly.setTint(colorInfo.fg)
+        spaceSharingText.setTint(colorInfo.fg)
+        attribution.setTint(colorInfo.fg)
+
+        when (color) {
+            ColorProfile.None -> {
+                fill.fillColor = if (hasFg) colorInfo.fill else colorInfo.fillOnly
+            }
+            ColorProfile.Active -> {
+                fill.fillColor = colorInfo.activeFill
+            }
+            ColorProfile.Warning -> {
+                fill.fillColor = colorInfo.warnFill
+            }
+            ColorProfile.Error -> {
+                fill.fillColor = colorInfo.errorFill
+            }
         }
+    }
+
+    private fun setFillInsets(
+        hasFg: Boolean,
+    ) {
+        // Extra padding around the fill if there is nothing in the foreground
+        fill.fillInsetAmount = if (hasFg) 0f else 1.5f
     }
 
     override fun onBoundsChange(bounds: Rect) {
@@ -144,9 +166,42 @@ class BatteryLayersDrawable(
             bounds.height() / Metrics.ViewportHeight
         )
 
-        // Scale the attribution bounds
-        scaleMatrix.mapRect(scaledAttrFullCanvas, Metrics.AttrFullCanvas)
-        scaleMatrix.mapRect(scaledAttrRightCanvas, Metrics.AttrRightCanvas)
+        scaleAttributionBounds()
+    }
+
+    override fun onLayoutDirectionChanged(layoutDirection: Int): Boolean {
+        setAttrRects(layoutDirection == View.LAYOUT_DIRECTION_RTL)
+        scaleAttributionBounds()
+
+        return super.onLayoutDirectionChanged(layoutDirection)
+    }
+
+    private fun setAttrRects(rtl: Boolean) {
+        // Local refs make the math easier to parse
+        val full = Metrics.AttrFullCanvasInsets
+        val side = Metrics.AttrRightCanvasInsets
+        val sideRtl = Metrics.AttrRightCanvasInsetsRtl
+        val vh = Metrics.ViewportHeight
+        val vw = Metrics.ViewportWidth
+
+        attrFullCanvas.set(
+            if (rtl) full.right else full.left,
+            full.top,
+            vw - if (rtl) full.left else full.right,
+            vh - full.bottom,
+        )
+        attrRightCanvas.set(
+            if (rtl) sideRtl.left else side.left,
+            side.top,
+            vw - (if (rtl) sideRtl.right else side.right),
+            vh - side.bottom,
+        )
+    }
+
+    /** If bounds (i.e., scale), or RTL properties change, we have to recalculate the attr bounds */
+    private fun scaleAttributionBounds() {
+        scaleMatrix.mapRect(scaledAttrFullCanvas, attrFullCanvas)
+        scaleMatrix.mapRect(scaledAttrRightCanvas, attrRightCanvas)
     }
 
     override fun draw(canvas: Canvas) {
@@ -155,21 +210,21 @@ class BatteryLayersDrawable(
         // 2. Then the frame itself
         frame.draw(canvas)
 
-        // 3. Fill it the appropriate amount if non-error state or error + no attribute
-        if (!batteryState.showErrorState || !batteryState.hasForegroundContent()) {
-            fill.draw(canvas)
-        }
+        // 3. Fill it the appropriate amount
+        fill.draw(canvas)
+
         // 4. Decide what goes inside
         if (batteryState.showPercent && batteryState.attribution != null) {
             // 4a. percent & attribution. Implies space-sharing
 
-            // Configure the attribute to draw in a smaller bounding box and align left
+            // Configure the attribute to draw in a smaller bounding box and align left and use
+            // floor/ceil math to make sure we get every available pixel
             attribution.gravity = Gravity.LEFT
             attribution.setBounds(
-                scaledAttrRightCanvas.left.roundToInt(),
-                scaledAttrRightCanvas.top.roundToInt(),
-                scaledAttrRightCanvas.right.roundToInt(),
-                scaledAttrRightCanvas.bottom.roundToInt(),
+                floor(scaledAttrRightCanvas.left).toInt(),
+                floor(scaledAttrRightCanvas.top).toInt(),
+                ceil(scaledAttrRightCanvas.right).toInt(),
+                ceil(scaledAttrRightCanvas.bottom).toInt(),
             )
             attribution.draw(canvas)
 
@@ -196,16 +251,44 @@ class BatteryLayersDrawable(
      */
     override fun setAlpha(alpha: Int) {}
 
+    /**
+     * Interface that describes relevant top-level metrics for the proper rendering of this icon.
+     * The overall canvas is defined as ViewportWidth x ViewportHeight, which is hard coded to 24x14
+     * points.
+     *
+     * The attr canvas insets are rect inset definitions. That is, they are defined as l,t,r,b
+     * points from the nearest edge. Note that for RTL, we don't actually flip the text since
+     * numbers do not reverse for RTL locales.
+     */
     interface M {
         val ViewportWidth: Float
         val ViewportHeight: Float
 
-        // Bounds, oriented in the above viewport, where we will fit-center and center-align
-        // an attribution that is the sole foreground element
-        val AttrFullCanvas: RectF
-        // Bounds, oriented in the above viewport, where we will fit-center and left-align
-        // an attribution that is sharing space with the percent text of the drawable
-        val AttrRightCanvas: RectF
+        /**
+         * Insets, oriented in the above viewport in LTR, that define the full canvas for a single
+         * foreground element. The element will be fit-center and center-aligned on this canvas
+         *
+         * 18x8 point size
+         */
+        val AttrFullCanvasInsets: RectF
+
+        /**
+         * Insets, oriented in the above viewport in LTR, that define the partial canvas for a
+         * foreground element that shares space with the percent text. The element will be
+         * fit-center and left-aligned on this canvas.
+         *
+         * 6x6 point size
+         */
+        val AttrRightCanvasInsets: RectF
+
+        /**
+         * Insets, oriented in the above viewport in RTL, that define the partial canvas for a
+         * foreground element that shares space with the percent text. The element will be
+         * fit-center and left-aligned on this canvas.
+         *
+         * 6x6 point size
+         */
+        val AttrRightCanvasInsetsRtl: RectF
     }
 
     companion object {
@@ -220,20 +303,9 @@ class BatteryLayersDrawable(
                 override val ViewportWidth: Float = 24f
                 override val ViewportHeight: Float = 14f
 
-                /**
-                 * Bounds, oriented in the above viewport, where we will fit-center and center-align
-                 * an attribution that is the sole foreground element
-                 *
-                 * 18x8 point size
-                 */
-                override val AttrFullCanvas: RectF = RectF(4f, 3f, 22f, 11f)
-                /**
-                 * Bounds, oriented in the above viewport, where we will fit-center and left-align
-                 * an attribution that is sharing space with the percent text of the drawable
-                 *
-                 * 6x6 point size
-                 */
-                override val AttrRightCanvas: RectF = RectF(16f, 4f, 22f, 10f)
+                override val AttrFullCanvasInsets = RectF(4f, 3f, 2f, 3f)
+                override val AttrRightCanvasInsets = RectF(16f, 4f, 2f, 4f)
+                override val AttrRightCanvasInsetsRtl = RectF(14f, 4f, 4f, 4f)
             }
 
         /**
@@ -246,6 +318,7 @@ class BatteryLayersDrawable(
          *
          * See [BatteryDrawableState] for how to set the properties of the resulting class
          */
+        @Suppress("UseCompatLoadingForDrawables")
         fun newBatteryDrawable(
             context: Context,
             initialState: BatteryDrawableState = BatteryDrawableState.DefaultInitialState,

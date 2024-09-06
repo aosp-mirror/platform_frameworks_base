@@ -30,9 +30,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.UserHandle;
 import android.provider.Settings.Secure;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -54,7 +54,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.List;
 import java.util.concurrent.Executor;
 
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @RunWithLooper
 @SmallTest
 public class AutoAddTrackerTest extends SysuiTestCase {

@@ -16,11 +16,10 @@
 
 package android.app.admin;
 
-import static android.app.admin.flags.Flags.devicePolicySizeTrackingEnabled;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.app.admin.flags.Flags;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -136,7 +135,7 @@ public final class LockTaskPolicy extends PolicyValue<LockTaskPolicy> {
     }
 
     private void setPackagesInternal(Set<String> packages) {
-        if (devicePolicySizeTrackingEnabled()) {
+        if (Flags.devicePolicySizeTrackingInternalBugFixEnabled()) {
             for (String p : packages) {
                 PolicySizeVerifier.enforceMaxPackageNameLength(p);
             }

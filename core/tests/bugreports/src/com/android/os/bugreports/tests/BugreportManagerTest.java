@@ -16,6 +16,8 @@
 
 package com.android.os.bugreports.tests;
 
+import static android.content.Context.RECEIVER_EXPORTED;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertNotNull;
@@ -110,8 +112,6 @@ public class BugreportManagerTest {
             Paths.get("/data/misc/wmtrace/ime_trace_service.winscope"),
             Paths.get("/data/misc/wmtrace/wm_trace.winscope"),
             Paths.get("/data/misc/wmtrace/wm_log.winscope"),
-            Paths.get("/data/misc/wmtrace/wm_transition_trace.winscope"),
-            Paths.get("/data/misc/wmtrace/shell_transition_trace.winscope"),
     };
 
     private Handler mHandler;
@@ -257,6 +257,38 @@ public class BugreportManagerTest {
         assertThatAllFileContentsAreDifferent(preDumpedTraceFiles, actualTraceFiles);
     }
 
+    @LargeTest
+    @Test
+    public void noPreDumpData_then_fullWithUsePreDumpFlag_ignoresFlag() throws Exception {
+        startPreDumpedUiTraces();
+
+        mBrm.preDumpUiData();
+        waitTillDumpstateExitedOrTimeout();
+
+        // Simulate lost of pre-dumped data.
+        // For example it can happen in this scenario:
+        // 1. Pre-dump data
+        // 2. Start bugreport + "use pre-dump" flag (USE AND REMOVE THE PRE-DUMP FROM DISK)
+        // 3. Start bugreport + "use pre-dump" flag (NO PRE-DUMP AVAILABLE ON DISK)
+        removeFilesIfNeeded(UI_TRACES_PREDUMPED);
+
+        // Start bugreport with "use predump" flag. Because the pre-dumped data is not available
+        // the flag will be ignored and data will be dumped as in normal flow.
+        BugreportCallbackImpl callback = new BugreportCallbackImpl();
+        mBrm.startBugreport(mBugreportFd, null, fullWithUsePreDumpFlag(), mExecutor,
+                callback);
+        shareConsentDialog(ConsentReply.ALLOW);
+        waitTillDoneOrTimeout(callback);
+
+        stopPreDumpedUiTraces();
+
+        assertThat(callback.isDone()).isTrue();
+        assertThat(mBugreportFile.length()).isGreaterThan(0L);
+        assertFdsAreClosed(mBugreportFd);
+
+        assertThatBugreportContainsFiles(UI_TRACES_PREDUMPED);
+    }
+
     @Test
     public void simultaneousBugreportsNotAllowed() throws Exception {
         // Start bugreport #1
@@ -328,7 +360,10 @@ public class BugreportManagerTest {
         // shell UID rather than our own.
         BugreportBroadcastReceiver br = new BugreportBroadcastReceiver();
         InstrumentationRegistry.getContext()
-                .registerReceiver(br, new IntentFilter(INTENT_BUGREPORT_FINISHED));
+                .registerReceiver(
+                        br,
+                        new IntentFilter(INTENT_BUGREPORT_FINISHED),
+                        RECEIVER_EXPORTED);
         UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
                 .executeShellCommand("am bug-report");
 
@@ -506,9 +541,6 @@ public class BugreportManagerTest {
         InstrumentationRegistry.getInstrumentation().getUiAutomation().executeShellCommand(
                 "cmd window tracing start"
         );
-        InstrumentationRegistry.getInstrumentation().getUiAutomation().executeShellCommand(
-                "service call SurfaceFlinger 1025 i32 1"
-        );
     }
 
     private static void stopPreDumpedUiTraces() {
@@ -609,6 +641,14 @@ public class BugreportManagerTest {
             files.add(dst);
         }
         return files;
+    }
+
+    private static void removeFilesIfNeeded(Path[] paths) throws Exception {
+        for (Path path : paths) {
+            InstrumentationRegistry.getInstrumentation().getUiAutomation().executeShellCommand(
+                    "rm -f " + path.toString()
+            );
+        }
     }
 
     private static ParcelFileDescriptor parcelFd(File file) throws Exception {

@@ -17,8 +17,6 @@
 package com.android.systemui.shade
 
 import com.android.systemui.assist.AssistManager
-import com.android.systemui.log.LogBuffer
-import com.android.systemui.shade.TouchLogger.Companion.logTouchesTo
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.NotificationPresenter
 import com.android.systemui.statusbar.NotificationShadeWindowController
@@ -29,7 +27,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 /** A base class for non-empty implementations of ShadeController. */
 @OptIn(ExperimentalCoroutinesApi::class)
 abstract class BaseShadeControllerImpl(
-    private val touchLog: LogBuffer,
     protected val commandQueue: CommandQueue,
     protected val statusBarKeyguardViewManager: StatusBarKeyguardViewManager,
     protected val notificationShadeWindowController: NotificationShadeWindowController,
@@ -40,7 +37,7 @@ abstract class BaseShadeControllerImpl(
     private val postCollapseActions = ArrayList<Runnable>()
 
     override fun start() {
-        logTouchesTo(touchLog)
+        // Do nothing by default
     }
 
     final override fun animateExpandShade() {

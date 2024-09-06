@@ -48,6 +48,9 @@ android_test {
         "notification_flags_lib",
         "platform-test-rules",
         "SettingsLib",
+        "libprotobuf-java-lite",
+        "platformprotoslite",
+        "platform-parametric-runner-lib",
     ],
 
     libs: [

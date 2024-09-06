@@ -20,6 +20,8 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 import java.lang.annotation.Retention;
@@ -71,6 +73,10 @@ public interface NotificationRowContentBinder {
             @NonNull NotificationEntry entry,
             @NonNull ExpandableNotificationRow row,
             @InflationFlag int contentToUnbind);
+
+    /** For testing, ensure all inflation is synchronous. */
+    @VisibleForTesting
+    void setInflateSynchronously(boolean inflateSynchronously);
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag = true,
@@ -128,9 +134,9 @@ public interface NotificationRowContentBinder {
     class BindParams {
 
         /**
-         * Bind a low priority version of the content views.
+         * Bind a minimized version of the content views.
          */
-        public boolean isLowPriority;
+        public boolean isMinimized;
 
         /**
          * Use increased height when binding contracted view.
@@ -141,11 +147,6 @@ public interface NotificationRowContentBinder {
          * Use increased height when binding heads up views.
          */
         public boolean usesIncreasedHeadsUpHeight;
-
-        /**
-         * Is group summary notification
-         */
-        public boolean mIsGroupSummary;
     }
 
     /**

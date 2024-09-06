@@ -30,7 +30,6 @@ import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
-import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.hardware.display.DisplayManager;
@@ -54,7 +53,6 @@ import android.window.SplashScreenView;
 import android.window.StartingWindowInfo;
 import android.window.StartingWindowRemovalInfo;
 
-import com.android.internal.R;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.ContrastColorUtil;
 import com.android.wm.shell.common.ShellExecutor;
@@ -206,7 +204,6 @@ class SplashscreenWindowCreator extends AbsSplashWindowCreator {
                 final SplashWindowRecord record =
                         (SplashWindowRecord) mStartingWindowRecordManager.getRecord(taskId);
                 if (record != null) {
-                    record.parseAppSystemBarColor(context);
                     // Block until we get the background color.
                     final SplashScreenView contentView = viewSupplier.get();
                     if (suggestType != STARTING_WINDOW_TYPE_LEGACY_SPLASH_SCREEN) {
@@ -427,8 +424,6 @@ class SplashscreenWindowCreator extends AbsSplashWindowCreator {
 
         private boolean mSetSplashScreen;
         private SplashScreenView mSplashView;
-        private int mSystemBarAppearance;
-        private boolean mDrawsSystemBarBackgrounds;
 
         SplashWindowRecord(IBinder appToken, View decorView,
                 @StartingWindowInfo.StartingWindowType int suggestType) {
@@ -448,38 +443,6 @@ class SplashscreenWindowCreator extends AbsSplashWindowCreator {
             mSetSplashScreen = true;
         }
 
-        void parseAppSystemBarColor(Context context) {
-            final TypedArray a = context.obtainStyledAttributes(R.styleable.Window);
-            mDrawsSystemBarBackgrounds = a.getBoolean(
-                    R.styleable.Window_windowDrawsSystemBarBackgrounds, false);
-            if (a.getBoolean(R.styleable.Window_windowLightStatusBar, false)) {
-                mSystemBarAppearance |= WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
-            }
-            if (a.getBoolean(R.styleable.Window_windowLightNavigationBar, false)) {
-                mSystemBarAppearance |= WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
-            }
-            a.recycle();
-        }
-
-        // Reset the system bar color which set by splash screen, make it align to the app.
-        void clearSystemBarColor() {
-            if (mRootView == null || !mRootView.isAttachedToWindow()) {
-                return;
-            }
-            if (mRootView.getLayoutParams() instanceof WindowManager.LayoutParams) {
-                final WindowManager.LayoutParams lp =
-                        (WindowManager.LayoutParams) mRootView.getLayoutParams();
-                if (mDrawsSystemBarBackgrounds) {
-                    lp.flags |= WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
-                } else {
-                    lp.flags &= ~WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
-                }
-                mRootView.setLayoutParams(lp);
-            }
-            mRootView.getWindowInsetsController().setSystemBarsAppearance(
-                    mSystemBarAppearance, LIGHT_BARS_MASK);
-        }
-
         @Override
         public boolean removeIfPossible(StartingWindowRemovalInfo info, boolean immediately) {
             if (mRootView == null) {
@@ -491,7 +454,6 @@ class SplashscreenWindowCreator extends AbsSplashWindowCreator {
                 removeWindowInner(mRootView, false);
                 return true;
             }
-            clearSystemBarColor();
             if (immediately
                     || mSuggestType == STARTING_WINDOW_TYPE_LEGACY_SPLASH_SCREEN) {
                 removeWindowInner(mRootView, false);

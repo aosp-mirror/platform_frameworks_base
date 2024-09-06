@@ -17,13 +17,14 @@
 #ifndef ANDROID_OS_HW_PARCEL_H
 #define ANDROID_OS_HW_PARCEL_H
 
-#include "hwbinder/EphemeralStorage.h"
-
 #include <android-base/macros.h>
 #include <hwbinder/IBinder.h>
 #include <hwbinder/Parcel.h>
 #include <jni.h>
 #include <utils/RefBase.h>
+
+#include "android_os_HwBlob.h"
+#include "hwbinder/EphemeralStorage.h"
 
 namespace android {
 
@@ -44,6 +45,8 @@ struct JHwParcel : public RefBase {
 
     EphemeralStorage *getStorage();
 
+    void addBlob(const sp<JHwBlob> &blob);
+
     void setTransactCallback(::android::hardware::IBinder::TransactCallback cb);
 
     void send();
@@ -60,6 +63,7 @@ private:
 
     ::android::hardware::IBinder::TransactCallback mTransactCallback;
     bool mWasSent;
+    std::vector<sp<JHwBlob>> mBlobs;
 
     DISALLOW_COPY_AND_ASSIGN(JHwParcel);
 };

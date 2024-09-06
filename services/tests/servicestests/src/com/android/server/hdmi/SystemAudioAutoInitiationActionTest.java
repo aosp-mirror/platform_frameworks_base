@@ -25,8 +25,10 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.spy;
 
+import android.annotation.RequiresPermission;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.Intent;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiPortInfo;
 import android.os.Looper;
@@ -82,23 +84,16 @@ public class SystemAudioAutoInitiationActionTest {
                 // do nothing
             }
 
-	    /**
-             * Override displayOsd to prevent it from broadcasting an intent, which
-             * can trigger a SecurityException.
-             */
             @Override
-            void displayOsd(int messageId) {
-                // do nothing
-            }
-
-            @Override
-            void displayOsd(int messageId, int extra) {
+            protected void sendBroadcastAsUser(@RequiresPermission Intent intent) {
                 // do nothing
             }
         };
 
         mHdmiControlService.setIoLooper(myLooper);
         mNativeWrapper = new FakeNativeWrapper();
+        mPhysicalAddress = 0x0000;
+        mNativeWrapper.setPhysicalAddress(mPhysicalAddress);
         HdmiCecController hdmiCecController = HdmiCecController.createWithNativeWrapper(
                 mHdmiControlService, mNativeWrapper, mHdmiControlService.getAtomWriter());
         mHdmiControlService.setDeviceConfig(new FakeDeviceConfigWrapper());
@@ -122,8 +117,6 @@ public class SystemAudioAutoInitiationActionTest {
         mHdmiControlService.onBootPhase(PHASE_SYSTEM_SERVICES_READY);
         mPowerManager = new FakePowerManagerWrapper(mContextSpy);
         mHdmiControlService.setPowerManager(mPowerManager);
-        mPhysicalAddress = 0x0000;
-        mNativeWrapper.setPhysicalAddress(mPhysicalAddress);
         mTestLooper.dispatchAll();
         mHdmiCecLocalDeviceTv = mHdmiControlService.tv();
         mPhysicalAddress = mHdmiCecLocalDeviceTv.getDeviceInfo().getLogicalAddress();

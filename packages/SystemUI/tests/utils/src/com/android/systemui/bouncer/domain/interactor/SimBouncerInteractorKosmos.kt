@@ -38,7 +38,7 @@ val Kosmos.simBouncerInteractor by Fixture {
         telephonyManager = telephonyManager,
         resources = mainResources,
         keyguardUpdateMonitor = keyguardUpdateMonitor,
-        euiccManager = applicationContext.getSystemService(Context.EUICC_SERVICE) as EuiccManager,
+        euiccManager = applicationContext.getSystemService(Context.EUICC_SERVICE) as EuiccManager?,
         mobileConnectionsRepository = mobileConnectionsRepository,
     )
 }

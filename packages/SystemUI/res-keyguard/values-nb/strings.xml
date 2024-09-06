@@ -111,6 +111,9 @@
     <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Bruk mønster i stedet, for å øke sikkerheten"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Bruk PIN-kode i stedet, for å øke sikkerheten"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Bruk passord i stedet, for å øke sikkerheten"</string>
+    <string name="kg_prompt_added_security_pin" msgid="5487992065995475528">"Du må skrive inn PIN-koden for ekstra sikkerhet"</string>
+    <string name="kg_prompt_added_security_pattern" msgid="1017068086102168544">"Du må tegne mønsteret for ekstra sikkerhet"</string>
+    <string name="kg_prompt_added_security_password" msgid="6053156069765029006">"Du må skrive inn passordet for ekstra sikkerhet"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Enheten er låst av administratoren"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Enheten ble låst manuelt"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Ikke gjenkjent"</string>

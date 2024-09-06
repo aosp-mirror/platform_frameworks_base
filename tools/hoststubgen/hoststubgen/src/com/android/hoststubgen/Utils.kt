@@ -16,6 +16,11 @@
 package com.android.hoststubgen
 
 /**
+ * Name of this executable. Set it in the main method.
+ */
+var executableName = "[command name not set]"
+
+/**
  * A regex that maches whitespate.
  */
 val whitespaceRegex = """\s+""".toRegex()
@@ -83,4 +88,11 @@ class ParseException : Exception, UserErrorException {
             return ParseException(this.message ?: "", filename, lineNo)
         }
     }
+}
+
+/**
+ * Escape a string for a CSV field.
+ */
+fun csvEscape(value: String): String {
+    return "\"" + value.replace("\"", "\"\"") + "\""
 }

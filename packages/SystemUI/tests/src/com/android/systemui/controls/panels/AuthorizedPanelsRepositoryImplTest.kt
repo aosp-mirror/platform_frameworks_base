@@ -19,7 +19,7 @@ package com.android.systemui.controls.panels
 
 import android.content.SharedPreferences
 import android.content.pm.UserInfo
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
@@ -37,7 +37,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class AuthorizedPanelsRepositoryImplTest : SysuiTestCase() {
     val kosmos = testKosmos()

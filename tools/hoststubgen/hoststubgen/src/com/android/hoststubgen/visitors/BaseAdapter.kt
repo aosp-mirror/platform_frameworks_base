@@ -20,8 +20,8 @@ import com.android.hoststubgen.HostStubGenStats
 import com.android.hoststubgen.LogLevel
 import com.android.hoststubgen.asm.ClassNodes
 import com.android.hoststubgen.asm.UnifiedVisitor
-import com.android.hoststubgen.asm.getPackageNameFromClassName
-import com.android.hoststubgen.asm.resolveClassName
+import com.android.hoststubgen.asm.getPackageNameFromFullClassName
+import com.android.hoststubgen.asm.resolveClassNameWithDefaultPackage
 import com.android.hoststubgen.asm.toJvmClassName
 import com.android.hoststubgen.filters.FilterPolicy
 import com.android.hoststubgen.filters.FilterPolicyWithReason
@@ -34,6 +34,7 @@ import org.objectweb.asm.FieldVisitor
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.commons.ClassRemapper
+import org.objectweb.asm.commons.Remapper
 import org.objectweb.asm.util.TraceClassVisitor
 import java.io.PrintWriter
 
@@ -89,7 +90,7 @@ abstract class BaseAdapter (
     ) {
         super.visit(version, access, name, signature, superName, interfaces)
         currentClassName = name
-        currentPackageName = getPackageNameFromClassName(name)
+        currentPackageName = getPackageNameFromFullClassName(name)
         classPolicy = filter.getPolicyForClass(currentClassName)
 
         log.d("[%s] visit: %s (package: %s)", this.javaClass.simpleName, name, currentPackageName)
@@ -98,7 +99,8 @@ abstract class BaseAdapter (
         log.indent()
 
         filter.getNativeSubstitutionClass(currentClassName)?.let { className ->
-            val fullClassName = resolveClassName(className, currentPackageName).toJvmClassName()
+            val fullClassName = resolveClassNameWithDefaultPackage(className, currentPackageName)
+                .toJvmClassName()
             log.d("  NativeSubstitutionClass: $fullClassName")
             if (classes.findClass(fullClassName) == null) {
                 log.w("Native substitution class $fullClassName not found. Class must be " +
@@ -194,6 +196,8 @@ abstract class BaseAdapter (
                 return null
             }
 
+            var newAccess = access
+
             // Maybe rename the method.
             val newName: String
             val renameTo = filter.getRenameTo(currentClassName, name, descriptor)
@@ -204,8 +208,9 @@ abstract class BaseAdapter (
                 // (the one with the @substitute/replace annotation).
                 // `name` is the name of the method we're currently visiting, so it's usually a
                 // "...$ravewnwood" name.
-                if (!checkSubstitutionMethodCompatibility(
-                        classes, currentClassName, newName, name, descriptor, options.errors)) {
+                newAccess = checkSubstitutionMethodCompatibility(
+                        classes, currentClassName, newName, name, descriptor, options.errors)
+                if (newAccess == NOT_COMPATIBLE) {
                     return null
                 }
 
@@ -220,7 +225,7 @@ abstract class BaseAdapter (
             // But note, we only use it when calling the super's method,
             // but not for visitMethodInner(), because when subclass wants to change access,
             // it can do so inside visitMethodInner().
-            val newAccess = updateAccessFlags(access, name, descriptor)
+            newAccess = updateAccessFlags(newAccess, name, descriptor)
 
             val ret = visitMethodInner(access, newName, descriptor, signature, exceptions, policy,
                 renameTo != null,
@@ -255,13 +260,14 @@ abstract class BaseAdapter (
 
     companion object {
         fun getVisitor(
-                classInternalName: String,
-                classes: ClassNodes,
-                nextVisitor: ClassVisitor,
-                filter: OutputFilter,
-                packageRedirector: PackageRedirectRemapper,
-                forImpl: Boolean,
-                options: Options,
+            classInternalName: String,
+            classes: ClassNodes,
+            nextVisitor: ClassVisitor,
+            filter: OutputFilter,
+            packageRedirector: PackageRedirectRemapper,
+            remapper: Remapper?,
+            forImpl: Boolean,
+            options: Options,
         ): ClassVisitor {
             var next = nextVisitor
 

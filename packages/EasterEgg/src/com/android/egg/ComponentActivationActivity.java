@@ -18,11 +18,14 @@ package com.android.egg;
 
 import android.app.Activity;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.provider.Settings;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.android.egg.flags.Flags;
+import com.android.egg.landroid.DreamUniverse;
 import com.android.egg.neko.NekoControlsService;
 import com.android.egg.widget.PaintChipsActivity;
 import com.android.egg.widget.PaintChipsWidget;
@@ -33,7 +36,9 @@ import com.android.egg.widget.PaintChipsWidget;
 public class ComponentActivationActivity extends Activity {
     private static final String TAG = "EasterEgg";
 
+    // check PlatLogoActivity.java for these
     private static final String S_EGG_UNLOCK_SETTING = "egg_mode_s";
+    private static final String V_EGG_UNLOCK_SETTING = "egg_mode_v";
 
     private void toastUp(String s) {
         Toast toast = Toast.makeText(this, s, Toast.LENGTH_SHORT);
@@ -44,14 +49,39 @@ public class ComponentActivationActivity extends Activity {
     public void onStart() {
         super.onStart();
 
-        final PackageManager pm = getPackageManager();
-        final ComponentName[] cns = new ComponentName[] {
-                new ComponentName(this, NekoControlsService.class),
-                new ComponentName(this, PaintChipsActivity.class),
-                new ComponentName(this, PaintChipsWidget.class)
-        };
-        final long unlockValue = Settings.System.getLong(getContentResolver(),
-                S_EGG_UNLOCK_SETTING, 0);
+        lockUnlockComponents(this);
+
+        finish();
+    }
+
+    /**
+     * Check easter egg unlock state and update unlockable components to match.
+     */
+    public static void lockUnlockComponents(Context context) {
+        final PackageManager pm = context.getPackageManager();
+        final ComponentName[] cns;
+        final String unlockSettingsKey;
+        final boolean shouldReLock;
+        final long unlockValue;
+        if (Flags.flagFlag()) {
+            unlockSettingsKey = V_EGG_UNLOCK_SETTING;
+            unlockValue = 1; // since we're not toggling we actually don't need to check the setting
+            shouldReLock = false;
+            cns = new ComponentName[]{
+                    new ComponentName(context, DreamUniverse.class)
+            };
+        } else {
+            unlockSettingsKey = S_EGG_UNLOCK_SETTING;
+            unlockValue = Settings.System.getLong(context.getContentResolver(),
+                    unlockSettingsKey, 0);
+            shouldReLock = true;
+            cns = new ComponentName[]{
+                    new ComponentName(context, NekoControlsService.class),
+                    new ComponentName(context, PaintChipsActivity.class),
+                    new ComponentName(context, PaintChipsWidget.class),
+                    new ComponentName(context, DreamUniverse.class)
+            };
+        }
         for (ComponentName cn : cns) {
             final boolean componentEnabled = pm.getComponentEnabledSetting(cn)
                     == PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
@@ -77,7 +107,5 @@ public class ComponentActivationActivity extends Activity {
                 }
             }
         }
-
-        finish();
     }
 }

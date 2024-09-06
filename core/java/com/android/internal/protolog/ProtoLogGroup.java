@@ -18,6 +18,8 @@ package com.android.internal.protolog;
 
 import com.android.internal.protolog.common.IProtoLogGroup;
 
+import java.util.UUID;
+
 /**
  * Defines logging groups for ProtoLog.
  *
@@ -153,10 +155,18 @@ public enum ProtoLogGroup implements IProtoLogGroup {
         this.mLogToLogcat = logToLogcat;
     }
 
+    @Override
+    public int getId() {
+        return Consts.START_ID + this.ordinal();
+    }
+
     private static class Consts {
         private static final String TAG_WM = "WindowManager";
 
         private static final boolean ENABLE_DEBUG = true;
         private static final boolean ENABLE_LOG_TO_PROTO_DEBUG = true;
+        private static final int START_ID = (int) (
+                UUID.nameUUIDFromBytes(ProtoLogGroup.class.getName().getBytes())
+                        .getMostSignificantBits() % Integer.MAX_VALUE);
     }
 }

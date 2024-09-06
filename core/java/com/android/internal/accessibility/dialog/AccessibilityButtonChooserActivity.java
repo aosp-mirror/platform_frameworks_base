@@ -17,10 +17,10 @@
 package com.android.internal.accessibility.dialog;
 
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
-import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_BUTTON;
 
 import static com.android.internal.accessibility.AccessibilityShortcutController.MAGNIFICATION_COMPONENT_NAME;
 import static com.android.internal.accessibility.AccessibilityShortcutController.MAGNIFICATION_CONTROLLER_NAME;
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.SOFTWARE;
 import static com.android.internal.accessibility.dialog.AccessibilityTargetHelper.getTargets;
 import static com.android.internal.accessibility.util.AccessibilityStatsLogUtils.logAccessibilityButtonLongPressStatus;
 
@@ -85,7 +85,7 @@ public class AccessibilityButtonChooserActivity extends Activity {
             prompt.setVisibility(View.VISIBLE);
         }
 
-        mTargets.addAll(getTargets(this, ACCESSIBILITY_BUTTON));
+        mTargets.addAll(getTargets(this, SOFTWARE));
 
         final GridView gridview = findViewById(R.id.accessibility_button_chooser_grid);
         gridview.setAdapter(new ButtonTargetAdapter(mTargets));

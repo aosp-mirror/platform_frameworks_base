@@ -91,8 +91,8 @@ public final class InputMethodManagerServiceTests {
     @Test
     public void testSoftInputShowHideHistoryDump_withNulls_doesntThrow() {
         var writer = new StringWriter();
-        var history = new InputMethodManagerService.SoftInputShowHideHistory();
-        history.addEntry(new InputMethodManagerService.SoftInputShowHideHistory.Entry(
+        var history = new SoftInputShowHideHistory();
+        history.addEntry(new SoftInputShowHideHistory.Entry(
                 null,
                 null,
                 null,

@@ -3,6 +3,7 @@ container: "system"
 
 flag {
     name: "quarantined_enabled"
+    is_exported: true
     namespace: "package_manager_service"
     description: "Feature flag for Quarantined state"
     bug: "269127435"
@@ -10,6 +11,7 @@ flag {
 
 flag {
     name: "archiving"
+    is_exported: true
     namespace: "package_manager_service"
     description: "Feature flag to enable the archiving feature."
     bug: "278553670"
@@ -25,6 +27,7 @@ flag {
 
 flag {
     name: "stay_stopped"
+    is_exported: true
     namespace: "backstage_power"
     description: "Feature flag to improve stopped state enforcement"
     bug: "296644915"
@@ -40,6 +43,7 @@ flag {
 
 flag {
     name: "get_package_info"
+    is_exported: true
     namespace: "package_manager_service"
     description: "Feature flag to enable the feature to retrieve package info without installation."
     bug: "269149275"
@@ -55,6 +59,7 @@ flag {
 
 flag {
     name: "sdk_lib_independence"
+    is_exported: true
     namespace: "package_manager_service"
     description: "Feature flag to keep app working even if its declared sdk-library dependency is unavailable."
     bug: "295827951"
@@ -79,6 +84,7 @@ flag {
 
 flag {
     name: "get_resolved_apk_path"
+    is_exported: true
     namespace: "package_manager_service"
     description: "Feature flag to retrieve resolved path of the base APK during an app install."
     bug: "269728874"
@@ -93,6 +99,7 @@ flag {
 
 flag {
     name: "read_install_info"
+    is_exported: true
     namespace: "package_manager_service"
     description: "Feature flag to read install related information from an APK."
     bug: "275658500"
@@ -114,6 +121,7 @@ flag {
 
 flag {
     name: "relative_reference_intent_filters"
+    is_exported: true
     namespace: "package_manager_service"
     description: "Feature flag to enable relative reference intent filters"
     bug: "307556883"
@@ -122,13 +130,27 @@ flag {
 
 flag {
     name: "fix_duplicated_flags"
+    is_exported: true
     namespace: "package_manager_service"
     description: "Feature flag to fix duplicated PackageManager flag values"
     bug: "314815969"
 }
 
 flag {
+    name: "get_package_storage_stats"
+    namespace: "system_performance"
+    is_exported: true
+    description: "Add dumpsys entry point for package StorageStats"
+    bug: "332905331"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "provide_info_of_apk_in_apex"
+    is_exported: true
     namespace: "package_manager_service"
     description: "Feature flag to provide the information of APK-in-APEX"
     bug: "306329516"
@@ -145,6 +167,7 @@ flag {
 
 flag {
     name: "introduce_media_processing_type"
+    is_exported: true
     namespace: "backstage_power"
     description: "Add a new FGS type for media processing use cases."
     bug: "317788011"
@@ -183,6 +206,7 @@ flag {
 
 flag {
     name: "emergency_install_permission"
+    is_exported: true
     namespace: "permissions"
     description: "Feature flag to enable permission EMERGENCY_INSTALL_PACKAGES"
     bug: "321080601"
@@ -190,6 +214,7 @@ flag {
 
 flag {
     name: "asl_in_apk_app_metadata_source"
+    is_exported: true
     namespace: "package_manager_service"
     description: "Feature flag to allow to know if the Android Safety Label (ASL) of an app is provided by the app's APK itself, or provided by an installer."
     bug: "287487923"
@@ -206,6 +231,7 @@ flag {
 
 flag {
     name: "set_pre_verified_domains"
+    is_exported: true
     namespace: "package_manager_service"
     description: "Feature flag to enable pre-verified domains"
     bug: "307327678"
@@ -225,4 +251,36 @@ flag {
     description: "Feature flag to bump min target sdk to 24"
     bug: "297603927"
     is_fixed_read_only: true
+}
+
+flag {
+    name: "wait_application_killed"
+    namespace: "package_manager_service"
+    description: "Feature flag to control whether to wait until the application is killed when clear application data"
+    bug: "31009094"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "component_state_changed_metrics"
+    namespace: "package_manager_service"
+    description: "Feature flag to log the metrics when the component state is changed."
+    bug: "316916801"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "package_restart_query_disabled_by_default"
+    namespace: "package_manager_service"
+    description: "Feature flag to register broadcast receiver only support package restart query."
+    bug: "300309050"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "get_package_info_with_fd"
+    is_exported: true
+    namespace: "package_manager_service"
+    description: "Feature flag to enable the feature to retrieve package info without installation with a file descriptor."
+    bug: "340879905"
 }

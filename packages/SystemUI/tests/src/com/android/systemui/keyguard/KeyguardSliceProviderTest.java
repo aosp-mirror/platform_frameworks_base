@@ -34,7 +34,6 @@ import android.media.session.PlaybackState;
 import android.net.Uri;
 import android.os.Handler;
 import android.provider.Settings;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 
@@ -44,6 +43,7 @@ import androidx.slice.SliceProvider;
 import androidx.slice.SliceSpecs;
 import androidx.slice.builders.ListBuilder;
 import androidx.slice.core.SliceQuery;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
@@ -72,7 +72,7 @@ import java.util.HashSet;
 import java.util.concurrent.TimeUnit;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @RunWithLooper
 public class KeyguardSliceProviderTest extends SysuiTestCase {
 

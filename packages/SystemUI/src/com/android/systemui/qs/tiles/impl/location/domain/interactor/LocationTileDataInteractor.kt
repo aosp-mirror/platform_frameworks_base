@@ -17,15 +17,15 @@
 package com.android.systemui.qs.tiles.impl.location.domain.interactor
 
 import android.os.UserHandle
-import com.android.systemui.common.coroutine.ConflatedCallbackFlow
 import com.android.systemui.qs.tiles.base.interactor.DataUpdateTrigger
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataInteractor
 import com.android.systemui.qs.tiles.impl.location.domain.model.LocationTileModel
 import com.android.systemui.statusbar.policy.LocationController
+import com.android.systemui.util.kotlin.isLocationEnabledFlow
 import javax.inject.Inject
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 
 /** Observes location state changes providing the [LocationTileModel]. */
 class LocationTileDataInteractor
@@ -38,19 +38,7 @@ constructor(
         user: UserHandle,
         triggers: Flow<DataUpdateTrigger>
     ): Flow<LocationTileModel> =
-        ConflatedCallbackFlow.conflatedCallbackFlow {
-            val initialValue = locationController.isLocationEnabled
-            trySend(LocationTileModel(initialValue))
-
-            val callback =
-                object : LocationController.LocationChangeCallback {
-                    override fun onLocationSettingsChanged(locationEnabled: Boolean) {
-                        trySend(LocationTileModel(locationEnabled))
-                    }
-                }
-            locationController.addCallback(callback)
-            awaitClose { locationController.removeCallback(callback) }
-        }
+        locationController.isLocationEnabledFlow().map { LocationTileModel(it) }
 
     override fun availability(user: UserHandle): Flow<Boolean> = flowOf(true)
 }
