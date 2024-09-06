@@ -21,6 +21,7 @@ import android.view.Display
 import com.android.server.display.DisplayDeviceConfig
 import com.android.server.display.brightness.clamper.BrightnessClamperController.DisplayDeviceData
 
+@JvmOverloads
 fun createDisplayDeviceData(
     displayDeviceConfig: DisplayDeviceConfig,
     displayToken: IBinder,

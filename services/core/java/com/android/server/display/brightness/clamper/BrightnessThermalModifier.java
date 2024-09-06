@@ -22,6 +22,8 @@ import static com.android.server.display.brightness.clamper.BrightnessClamperCon
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.hardware.display.BrightnessInfo;
+import android.hardware.display.DisplayManagerInternal;
 import android.os.Handler;
 import android.os.IThermalEventListener;
 import android.os.IThermalService;
@@ -33,8 +35,10 @@ import android.provider.DeviceConfigInterface;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.display.DisplayBrightnessState;
 import com.android.server.display.DisplayDeviceConfig.ThermalBrightnessThrottlingData;
 import com.android.server.display.DisplayDeviceConfig.ThermalBrightnessThrottlingData.ThrottlingLevel;
+import com.android.server.display.brightness.BrightnessReason;
 import com.android.server.display.config.SensorData;
 import com.android.server.display.feature.DeviceConfigParameterProvider;
 import com.android.server.display.utils.DeviceConfigParsingUtils;
@@ -43,12 +47,15 @@ import com.android.server.display.utils.SensorUtils;
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
 
-class BrightnessThermalClamper extends
-        BrightnessClamper<BrightnessThermalClamper.ThermalData> {
+class BrightnessThermalModifier implements BrightnessStateModifier,
+        BrightnessClamperController.DisplayDeviceDataListener,
+        BrightnessClamperController.StatefulModifier,
+        BrightnessClamperController.DeviceConfigListener {
 
     private static final String TAG = "BrightnessThermalClamper";
     @NonNull
@@ -57,6 +64,11 @@ class BrightnessThermalClamper extends
     private final DeviceConfigParameterProvider mConfigParameterProvider;
     // data from DeviceConfig, for all displays, for all dataSets
     // mapOf(uniqueDisplayId to mapOf(dataSetId to ThermalBrightnessThrottlingData))
+    @NonNull
+    protected final Handler mHandler;
+    @NonNull
+    protected final BrightnessClamperController.ClamperChangeListener mChangeListener;
+
     @NonNull
     private Map<String, Map<String, ThermalBrightnessThrottlingData>>
             mThermalThrottlingDataOverride = Map.of();
@@ -73,6 +85,8 @@ class BrightnessThermalClamper extends
     private String mDataId = null;
     @Temperature.ThrottlingStatus
     private int mThrottlingStatus = Temperature.THROTTLING_NONE;
+    private float mBrightnessCap = PowerManager.BRIGHTNESS_MAX;
+    private boolean mApplied = false;
 
     private final BiFunction<String, String, ThrottlingLevel> mDataPointMapper = (key, value) -> {
         try {
@@ -88,53 +102,51 @@ class BrightnessThermalClamper extends
             mDataSetMapper = ThermalBrightnessThrottlingData::create;
 
 
-    BrightnessThermalClamper(Handler handler, ClamperChangeListener listener,
-            ThermalData thermalData) {
-        this(new Injector(), handler, listener, thermalData);
+    BrightnessThermalModifier(Handler handler, ClamperChangeListener listener,
+            BrightnessClamperController.DisplayDeviceData data) {
+        this(new Injector(), handler, listener, data);
     }
 
     @VisibleForTesting
-    BrightnessThermalClamper(Injector injector, Handler handler,
-            ClamperChangeListener listener, ThermalData thermalData) {
-        super(handler, listener);
+    BrightnessThermalModifier(Injector injector, @NonNull Handler handler,
+            @NonNull ClamperChangeListener listener,
+            @NonNull BrightnessClamperController.DisplayDeviceData data) {
+        mHandler = handler;
+        mChangeListener = listener;
         mConfigParameterProvider = injector.getDeviceConfigParameterProvider();
         mThermalStatusObserver = new ThermalStatusObserver(injector, handler);
         mHandler.post(() -> {
-            setDisplayData(thermalData);
-            loadOverrideData();
-        });
-
-    }
-
-    @Override
-    @NonNull
-    Type getType() {
-        return Type.THERMAL;
-    }
-
-    @Override
-    void onDeviceConfigChanged() {
-        mHandler.post(() -> {
-            loadOverrideData();
-            recalculateActiveData();
-        });
-    }
-
-    @Override
-    void onDisplayChanged(ThermalData data) {
-        mHandler.post(() -> {
             setDisplayData(data);
-            recalculateActiveData();
+            loadOverrideData();
         });
+    }
+    //region BrightnessStateModifier
+    @Override
+    public void apply(DisplayManagerInternal.DisplayPowerRequest request,
+            DisplayBrightnessState.Builder stateBuilder) {
+        if (stateBuilder.getMaxBrightness() > mBrightnessCap) {
+            stateBuilder.setMaxBrightness(mBrightnessCap);
+            stateBuilder.setBrightness(Math.min(stateBuilder.getBrightness(), mBrightnessCap));
+            stateBuilder.setBrightnessMaxReason(BrightnessInfo.BRIGHTNESS_MAX_REASON_THERMAL);
+            stateBuilder.getBrightnessReason().addModifier(BrightnessReason.MODIFIER_THROTTLED);
+            // set fast change only when modifier is activated.
+            // this will allow auto brightness to apply slow change even when modifier is active
+            if (!mApplied) {
+                stateBuilder.setIsSlowChange(false);
+            }
+            mApplied = true;
+        } else {
+            mApplied = false;
+        }
     }
 
     @Override
-    void stop() {
+    public void stop() {
         mThermalStatusObserver.stopObserving();
     }
 
     @Override
-    void dump(PrintWriter writer) {
+    public void dump(PrintWriter writer) {
         writer.println("BrightnessThermalClamper:");
         writer.println("  mThrottlingStatus: " + mThrottlingStatus);
         writer.println("  mUniqueDisplayId: " + mUniqueDisplayId);
@@ -142,9 +154,52 @@ class BrightnessThermalClamper extends
         writer.println("  mDataOverride: " + mThermalThrottlingDataOverride);
         writer.println("  mDataFromDeviceConfig: " + mThermalThrottlingDataFromDeviceConfig);
         writer.println("  mDataActive: " + mThermalThrottlingDataActive);
+        writer.println("  mBrightnessCap:" + mBrightnessCap);
+        writer.println("  mApplied:" + mApplied);
         mThermalStatusObserver.dump(writer);
-        super.dump(writer);
     }
+
+    @Override
+    public boolean shouldListenToLightSensor() {
+        return false;
+    }
+
+    @Override
+    public void setAmbientLux(float lux) {
+        // noop
+    }
+    //endregion
+
+    //region DisplayDeviceDataListener
+    @Override
+    public void onDisplayChanged(BrightnessClamperController.DisplayDeviceData data) {
+        mHandler.post(() -> {
+            setDisplayData(data);
+            recalculateActiveData();
+        });
+    }
+    //endregion
+
+    //region StatefulModifier
+    @Override
+    public void applyStateChange(
+            BrightnessClamperController.ModifiersAggregatedState aggregatedState) {
+        if (aggregatedState.mMaxBrightness > mBrightnessCap) {
+            aggregatedState.mMaxBrightness = mBrightnessCap;
+            aggregatedState.mMaxBrightnessReason = BrightnessInfo.BRIGHTNESS_MAX_REASON_THERMAL;
+        }
+    }
+    //endregion
+
+    //region DeviceConfigListener
+    @Override
+    public void onDeviceConfigChanged() {
+        mHandler.post(() -> {
+            loadOverrideData();
+            recalculateActiveData();
+        });
+    }
+    //endregion
 
     private void recalculateActiveData() {
         if (mUniqueDisplayId == null || mDataId == null) {
@@ -176,14 +231,11 @@ class BrightnessThermalClamper extends
 
     private void recalculateBrightnessCap() {
         float brightnessCap = PowerManager.BRIGHTNESS_MAX;
-        boolean isActive = false;
-
         if (mThermalThrottlingDataActive != null) {
             // Throttling levels are sorted by increasing severity
             for (ThrottlingLevel level : mThermalThrottlingDataActive.throttlingLevels) {
                 if (level.thermalStatus <= mThrottlingStatus) {
                     brightnessCap = level.brightness;
-                    isActive = true;
                 } else {
                     // Throttling levels that are greater than the current status are irrelevant
                     break;
@@ -191,9 +243,8 @@ class BrightnessThermalClamper extends
             }
         }
 
-        if (brightnessCap  != mBrightnessCap || mIsActive != isActive) {
+        if (brightnessCap  != mBrightnessCap) {
             mBrightnessCap = brightnessCap;
-            mIsActive = isActive;
             mChangeListener.onChanged();
         }
     }
@@ -204,7 +255,6 @@ class BrightnessThermalClamper extends
             recalculateBrightnessCap();
         }
     }
-
 
     private final class ThermalStatusObserver extends IThermalEventListener.Stub {
         private final Injector mInjector;
@@ -228,7 +278,7 @@ class BrightnessThermalClamper extends
 
             String curType = mObserverTempSensor.type;
             mObserverTempSensor = tempSensor;
-            if (curType.equals(tempSensor.type)) {
+            if (Objects.equals(curType, tempSensor.type)) {
                 Slog.d(TAG, "Thermal status observer already started");
                 return;
             }
