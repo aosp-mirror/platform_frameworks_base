@@ -879,8 +879,14 @@ public class LockSettingsService extends ILockSettings.Stub {
                 // Hide notification first, as tie profile lock takes time
                 hideEncryptionNotification(new UserHandle(userId));
 
-                if (isCredentialSharableWithParent(userId)) {
-                    tieProfileLockIfNecessary(userId, LockscreenCredential.createNone());
+                if (android.app.admin.flags.Flags.fixRaceConditionInTieProfileLock()) {
+                    synchronized (mSpManager) {
+                        tieProfileLockIfNecessary(userId, LockscreenCredential.createNone());
+                    }
+                } else {
+                    if (isCredentialSharableWithParent(userId)) {
+                        tieProfileLockIfNecessary(userId, LockscreenCredential.createNone());
+                    }
                 }
             }
         });
@@ -1245,7 +1251,13 @@ public class LockSettingsService extends ILockSettings.Stub {
                 mStorage.removeChildProfileLock(userId);
                 removeKeystoreProfileKey(userId);
             } else {
-                tieProfileLockIfNecessary(userId, profileUserPassword);
+                if (android.app.admin.flags.Flags.fixRaceConditionInTieProfileLock()) {
+                    synchronized (mSpManager) {
+                        tieProfileLockIfNecessary(userId, profileUserPassword);
+                    }
+                } else {
+                    tieProfileLockIfNecessary(userId, profileUserPassword);
+                }
             }
         } catch (IllegalStateException e) {
             setBoolean(SEPARATE_PROFILE_CHALLENGE_KEY, old, userId);

@@ -100,6 +100,16 @@ flag {
 }
 
 flag {
+  name: "fix_race_condition_in_tie_profile_lock"
+  namespace: "enterprise"
+  description: "Fix race condition in tieProfileLockIfNecessary()"
+  bug: "355905501"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   name: "quiet_mode_credential_bug_fix"
   namespace: "enterprise"
   description: "Guards a bugfix that ends the credential input flow if the managed user has not stopped."
