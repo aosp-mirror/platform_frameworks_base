@@ -29,6 +29,7 @@ import android.view.View.OnClickListener
 import android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
 import android.view.WindowManager
 import android.widget.ImageButton
+import com.android.internal.policy.SystemBarUtils
 import com.android.window.flags.Flags
 import com.android.wm.shell.R
 import com.android.wm.shell.shared.animation.Interpolators
@@ -74,7 +75,10 @@ internal class AppHandleViewHolder(
     ) {
         captionHandle.imageTintList = ColorStateList.valueOf(getCaptionHandleBarColor(taskInfo))
         this.taskInfo = taskInfo
-        if (!isCaptionVisible && hasStatusBarInputLayer()) {
+        // If handle is not in status bar region(i.e., bottom stage in vertical split),
+        // do not create an input layer
+        if (position.y >= SystemBarUtils.getStatusBarHeight(context)) return
+        if (!isCaptionVisible && hasStatusBarInputLayer() ) {
             disposeStatusBarInputLayer()
             return
         }
@@ -120,7 +124,7 @@ internal class AppHandleViewHolder(
                 inputManager.pilferPointers(v.viewRootImpl.inputToken)
             }
             captionHandle.dispatchTouchEvent(event)
-            true
+            return@setOnTouchListener true
         }
         windowManagerWrapper.updateViewLayout(view, lp)
     }
