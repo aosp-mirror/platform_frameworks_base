@@ -25,7 +25,6 @@ import android.app.appsearch.AppSearchManager;
 import android.app.appsearch.AppSearchManager.SearchContext;
 import android.app.appsearch.AppSearchResult;
 import android.app.appsearch.AppSearchSession;
-import android.app.appsearch.BatchResultCallback;
 import android.app.appsearch.GetSchemaResponse;
 import android.app.appsearch.PutDocumentsRequest;
 import android.app.appsearch.SearchResult;
@@ -50,7 +49,6 @@ import java.util.concurrent.Executor;
 public class FutureAppSearchSession implements Closeable {
     private static final String TAG = FutureAppSearchSession.class.getSimpleName();
     private final Executor mExecutor;
-    private final AppSearchManager mAppSearchManager;
     private final AndroidFuture<AppSearchResult<AppSearchSession>> mSettableSessionFuture;
 
     public FutureAppSearchSession(
@@ -62,9 +60,8 @@ public class FutureAppSearchSession implements Closeable {
         Objects.requireNonNull(appSearchContext);
 
         mExecutor = executor;
-        mAppSearchManager = appSearchManager;
         mSettableSessionFuture = new AndroidFuture<>();
-        mAppSearchManager.createSearchSession(
+        appSearchManager.createSearchSession(
                 appSearchContext, mExecutor, mSettableSessionFuture::complete);
     }
 

@@ -37,7 +37,7 @@ android_test {
         "androidx.test.runner",
         "androidx.test.ext.truth",
         "platform-test-annotations",
-        "services.core",
+        "services.appfunctions",
         "servicestests-core-utils",
         "truth",
         "frameworks-base-testutils",
