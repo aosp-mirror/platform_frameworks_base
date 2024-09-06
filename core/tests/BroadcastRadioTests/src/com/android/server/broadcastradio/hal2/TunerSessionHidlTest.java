@@ -44,16 +44,12 @@ import android.hardware.radio.ProgramList;
 import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
 import android.hardware.radio.RadioTuner;
-import android.os.Binder;
 import android.os.DeadObjectException;
 import android.os.ParcelableException;
 import android.os.RemoteException;
-import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 
-import com.android.dx.mockito.inline.extended.StaticMockitoSessionBuilder;
-import com.android.server.broadcastradio.ExtendedRadioMockitoTestCase;
 import com.android.server.broadcastradio.RadioServiceUserController;
 
 import com.google.common.truth.Expect;
@@ -76,7 +72,7 @@ import java.util.Map;
  * Tests for HIDL HAL TunerSession.
  */
 @RunWith(MockitoJUnitRunner.class)
-public final class TunerSessionHidlTest extends ExtendedRadioMockitoTestCase {
+public final class TunerSessionHidlTest {
 
     private static final int USER_ID_1 = 11;
     private static final int USER_ID_2 = 12;
@@ -104,8 +100,6 @@ public final class TunerSessionHidlTest extends ExtendedRadioMockitoTestCase {
     public final Expect mExpect = Expect.create();
 
     @Mock
-    private UserHandle mUserHandleMock;
-    @Mock
     private IBroadcastRadio mBroadcastRadioMock;
     @Mock
     ITunerSession mHalTunerSessionMock;
@@ -113,15 +107,9 @@ public final class TunerSessionHidlTest extends ExtendedRadioMockitoTestCase {
     @Mock
     private RadioServiceUserController mUserControllerMock;
 
-    @Override
-    protected void initializeSession(StaticMockitoSessionBuilder builder) {
-        builder.spyStatic(Binder.class);
-    }
-
     @Before
     public void setup() throws Exception {
-        doReturn(USER_ID_1).when(mUserHandleMock).getIdentifier();
-        doReturn(mUserHandleMock).when(() -> Binder.getCallingUserHandle());
+        doReturn(USER_ID_1).when(mUserControllerMock).getCallingUserId();
         doReturn(true).when(mUserControllerMock).isCurrentOrSystemUser();
         doReturn(USER_ID_1).when(mUserControllerMock).getCurrentUser();
 
