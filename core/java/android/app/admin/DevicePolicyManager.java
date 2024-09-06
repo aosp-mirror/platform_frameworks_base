@@ -55,7 +55,6 @@ import static android.Manifest.permission.SET_TIME;
 import static android.Manifest.permission.SET_TIME_ZONE;
 import static android.app.admin.DeviceAdminInfo.HEADLESS_DEVICE_OWNER_MODE_UNSUPPORTED;
 import static android.app.admin.flags.Flags.FLAG_DEVICE_THEFT_API_ENABLED;
-import static android.app.admin.flags.Flags.FLAG_DEVICE_POLICY_SIZE_TRACKING_ENABLED;
 import static android.app.admin.flags.Flags.onboardingBugreportV2Enabled;
 import static android.app.admin.flags.Flags.onboardingConsentlessBugreports;
 import static android.content.Intent.LOCAL_FLAG_FROM_SYSTEM;
@@ -17744,7 +17743,6 @@ public class DevicePolicyManager {
      */
     @SystemApi
     @RequiresPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
-    @FlaggedApi(FLAG_DEVICE_POLICY_SIZE_TRACKING_ENABLED)
     public void setMaxPolicyStorageLimit(int storageLimit) {
         if (mService != null) {
             try {
@@ -17764,7 +17762,6 @@ public class DevicePolicyManager {
      */
     @SystemApi
     @RequiresPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
-    @FlaggedApi(FLAG_DEVICE_POLICY_SIZE_TRACKING_ENABLED)
     public int getMaxPolicyStorageLimit() {
         if (mService != null) {
             try {
