@@ -18,8 +18,8 @@ package com.android.wm.shell.transition;
 
 import static android.app.ActivityOptions.ANIM_CLIP_REVEAL;
 import static android.app.ActivityOptions.ANIM_CUSTOM;
-import static android.app.ActivityOptions.ANIM_NONE;
 import static android.app.ActivityOptions.ANIM_FROM_STYLE;
+import static android.app.ActivityOptions.ANIM_NONE;
 import static android.app.ActivityOptions.ANIM_OPEN_CROSS_PROFILE_APPS;
 import static android.app.ActivityOptions.ANIM_SCALE_UP;
 import static android.app.ActivityOptions.ANIM_SCENE_TRANSITION;
@@ -473,7 +473,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                                 change.getLeash(),
                                 startTransaction);
                     } else if (isOnlyTranslucent && TransitionUtil.isOpeningType(info.getType())
-                                && TransitionUtil.isClosingType(mode)) {
+                            && TransitionUtil.isClosingType(mode)) {
                         // If there is a closing translucent task in an OPENING transition, we will
                         // actually select a CLOSING animation, so move the closing task into
                         // the animating part of the z-order.
@@ -759,6 +759,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             options = info.getAnimationOptions();
         }
         final int overrideType = options != null ? options.getType() : ANIM_NONE;
+        final int userId = options != null ? options.getUserId() : UserHandle.USER_CURRENT;
         final Rect endBounds = TransitionUtil.isClosingType(changeMode)
                 ? mRotator.getEndBoundsInStartRotation(change)
                 : change.getEndAbsBounds();
@@ -767,12 +768,12 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             a = mTransitionAnimation.loadKeyguardExitAnimation(flags,
                     (changeFlags & FLAG_SHOW_WALLPAPER) != 0);
         } else if (type == TRANSIT_KEYGUARD_UNOCCLUDE) {
-            a = mTransitionAnimation.loadKeyguardUnoccludeAnimation();
+            a = mTransitionAnimation.loadKeyguardUnoccludeAnimation(userId);
         } else if ((changeFlags & FLAG_IS_VOICE_INTERACTION) != 0) {
             if (isOpeningType) {
-                a = mTransitionAnimation.loadVoiceActivityOpenAnimation(enter);
+                a = mTransitionAnimation.loadVoiceActivityOpenAnimation(enter, userId);
             } else {
-                a = mTransitionAnimation.loadVoiceActivityExitAnimation(enter);
+                a = mTransitionAnimation.loadVoiceActivityExitAnimation(enter, userId);
             }
         } else if (changeMode == TRANSIT_CHANGE) {
             // In the absence of a specific adapter, we just want to keep everything stationary.
@@ -783,9 +784,9 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         } else if (overrideType == ANIM_CUSTOM
                 && (!isTask || options.getOverrideTaskTransition())) {
             a = mTransitionAnimation.loadAnimationRes(options.getPackageName(), enter
-                    ? options.getEnterResId() : options.getExitResId());
+                    ? options.getEnterResId() : options.getExitResId(), userId);
         } else if (overrideType == ANIM_OPEN_CROSS_PROFILE_APPS && enter) {
-            a = mTransitionAnimation.loadCrossProfileAppEnterAnimation();
+            a = mTransitionAnimation.loadCrossProfileAppEnterAnimation(userId);
         } else if (overrideType == ANIM_CLIP_REVEAL) {
             a = mTransitionAnimation.createClipRevealAnimationLocked(type, wallpaperTransit, enter,
                     endBounds, endBounds, options.getTransitionBounds());
@@ -905,9 +906,9 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         final Rect bounds = change.getEndAbsBounds();
         // Show the right drawable depending on the user we're transitioning to.
         final Drawable thumbnailDrawable = change.hasFlags(FLAG_CROSS_PROFILE_OWNER_THUMBNAIL)
-                        ? mContext.getDrawable(R.drawable.ic_account_circle)
-                        : change.hasFlags(FLAG_CROSS_PROFILE_WORK_THUMBNAIL)
-                                ? mEnterpriseThumbnailDrawable : null;
+                ? mContext.getDrawable(R.drawable.ic_account_circle)
+                : change.hasFlags(FLAG_CROSS_PROFILE_WORK_THUMBNAIL)
+                        ? mEnterpriseThumbnailDrawable : null;
         if (thumbnailDrawable == null) {
             return;
         }
