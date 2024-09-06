@@ -20,11 +20,17 @@ import static android.app.appfunctions.flags.Flags.FLAG_ENABLE_APP_FUNCTION_MANA
 
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
+import android.app.appsearch.AppSearchBatchResult;
 import android.app.appsearch.AppSearchManager;
 import android.app.appsearch.AppSearchManager.SearchContext;
 import android.app.appsearch.AppSearchResult;
 import android.app.appsearch.AppSearchSession;
+import android.app.appsearch.BatchResultCallback;
 import android.app.appsearch.GetSchemaResponse;
+import android.app.appsearch.PutDocumentsRequest;
+import android.app.appsearch.SearchResult;
+import android.app.appsearch.SearchResults;
+import android.app.appsearch.SearchSpec;
 import android.app.appsearch.SetSchemaRequest;
 import android.app.appsearch.SetSchemaResponse;
 import android.util.Slog;
@@ -33,22 +39,21 @@ import com.android.internal.infra.AndroidFuture;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 
 /**
- * Helper class for interacting with a system server local appsearch session asynchronously.
- *
- * <p>Converts the AppSearch Callback API to {@link AndroidFuture}.
+ * A future API wrapper of {@link AppSearchSession} APIs.
  */
 @FlaggedApi(FLAG_ENABLE_APP_FUNCTION_MANAGER)
-public class SyncAppSearchCallHelper implements Closeable {
-    private static final String TAG = SyncAppSearchCallHelper.class.getSimpleName();
+public class FutureAppSearchSession implements Closeable {
+    private static final String TAG = FutureAppSearchSession.class.getSimpleName();
     private final Executor mExecutor;
     private final AppSearchManager mAppSearchManager;
     private final AndroidFuture<AppSearchResult<AppSearchSession>> mSettableSessionFuture;
 
-    public SyncAppSearchCallHelper(
+    public FutureAppSearchSession(
             @NonNull AppSearchManager appSearchManager,
             @NonNull Executor executor,
             @NonNull SearchContext appSearchContext) {
@@ -65,14 +70,14 @@ public class SyncAppSearchCallHelper implements Closeable {
 
     /** Converts a failed app search result codes into an exception. */
     @NonNull
-    private static Exception failedResultToException(@NonNull AppSearchResult appSearchResult) {
+    private static Exception failedResultToException(@NonNull AppSearchResult<?> appSearchResult) {
         return switch (appSearchResult.getResultCode()) {
-            case AppSearchResult.RESULT_INVALID_ARGUMENT ->
-                    new IllegalArgumentException(appSearchResult.getErrorMessage());
-            case AppSearchResult.RESULT_IO_ERROR ->
-                    new IOException(appSearchResult.getErrorMessage());
-            case AppSearchResult.RESULT_SECURITY_ERROR ->
-                    new SecurityException(appSearchResult.getErrorMessage());
+            case AppSearchResult.RESULT_INVALID_ARGUMENT -> new IllegalArgumentException(
+                    appSearchResult.getErrorMessage());
+            case AppSearchResult.RESULT_IO_ERROR -> new IOException(
+                    appSearchResult.getErrorMessage());
+            case AppSearchResult.RESULT_SECURITY_ERROR -> new SecurityException(
+                    appSearchResult.getErrorMessage());
             default -> new IllegalStateException(appSearchResult.getErrorMessage());
         };
     }
@@ -91,7 +96,7 @@ public class SyncAppSearchCallHelper implements Closeable {
     /** Gets the schema for a given app search session. */
     public AndroidFuture<GetSchemaResponse> getSchema() {
         return getSessionAsync()
-                .thenComposeAsync(
+                .thenCompose(
                         session -> {
                             AndroidFuture<AppSearchResult<GetSchemaResponse>>
                                     settableSchemaResponse = new AndroidFuture<>();
@@ -105,14 +110,13 @@ public class SyncAppSearchCallHelper implements Closeable {
                                                     failedResultToException(result));
                                         }
                                     });
-                        },
-                        mExecutor);
+                        });
     }
 
     /** Sets the schema for a given app search session. */
     public AndroidFuture<SetSchemaResponse> setSchema(@NonNull SetSchemaRequest setSchemaRequest) {
         return getSessionAsync()
-                .thenComposeAsync(
+                .thenCompose(
                         session -> {
                             AndroidFuture<AppSearchResult<SetSchemaResponse>>
                                     settableSchemaResponse = new AndroidFuture<>();
@@ -130,8 +134,32 @@ public class SyncAppSearchCallHelper implements Closeable {
                                                     failedResultToException(result));
                                         }
                                     });
-                        },
-                        mExecutor);
+                        });
+    }
+
+    /** Indexes documents into the AppSearchSession database. */
+    public AndroidFuture<AppSearchBatchResult<String, Void>> put(
+            @NonNull PutDocumentsRequest putDocumentsRequest) {
+        return getSessionAsync().thenCompose(
+                session -> {
+                    AndroidFuture<AppSearchBatchResult<String, Void>> batchResultFuture =
+                            new AndroidFuture<>();
+
+                    session.put(putDocumentsRequest, mExecutor, batchResultFuture::complete);
+                    return batchResultFuture;
+                });
+    }
+
+    /**
+     * Retrieves documents from the open AppSearchSession that match a given query string and type
+     * of search provided.
+     */
+    public AndroidFuture<FutureSearchResults> search(
+            @NonNull String queryExpression,
+            @NonNull SearchSpec searchSpec) {
+        return getSessionAsync().thenApply(
+                        session -> session.search(queryExpression, searchSpec))
+                .thenApply(result -> new FutureSearchResults(result, mExecutor));
     }
 
     @Override
@@ -141,5 +169,33 @@ public class SyncAppSearchCallHelper implements Closeable {
         } catch (Exception ex) {
             Slog.e(TAG, "Failed to close app search session", ex);
         }
+    }
+
+    /** A future API wrapper of {@link android.app.appsearch.SearchResults}. */
+    public static class FutureSearchResults {
+        private final SearchResults mSearchResults;
+        private final Executor mExecutor;
+
+        public FutureSearchResults(@NonNull SearchResults searchResults,
+                @NonNull Executor executor) {
+            mSearchResults = Objects.requireNonNull(searchResults);
+            mExecutor = Objects.requireNonNull(executor);
+        }
+
+        public AndroidFuture<List<SearchResult>> getNextPage() {
+            AndroidFuture<AppSearchResult<List<SearchResult>>> nextPageFuture =
+                    new AndroidFuture<>();
+
+            mSearchResults.getNextPage(mExecutor, nextPageFuture::complete);
+            return nextPageFuture.thenApply(result -> {
+                if (result.isSuccess()) {
+                    return result.getResultValue();
+                } else {
+                    throw new RuntimeException(
+                            failedResultToException(result));
+                }
+            });
+        }
+
     }
 }
