@@ -49,7 +49,7 @@ constructor(
             context = context,
             attrs = attrs,
             longPressDuration = { ViewConfiguration.getLongPressTimeout().toLong() },
-            allowedTouchSlop = ViewConfiguration.getTouchSlop(),
+            allowedTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop(),
             logger = logger,
         )
     val iconView: ImageView = ImageView(context, attrs).apply { id = R.id.device_entry_icon_fg }
