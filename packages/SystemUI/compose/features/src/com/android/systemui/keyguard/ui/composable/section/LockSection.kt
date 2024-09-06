@@ -44,6 +44,9 @@ import com.android.systemui.keyguard.ui.view.DeviceEntryIconView
 import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryBackgroundViewModel
 import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryForegroundViewModel
 import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryIconViewModel
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.LongPressHandlingViewLogger
+import com.android.systemui.log.dagger.LongPressTouchLog
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.VibratorHelper
@@ -64,6 +67,7 @@ constructor(
     private val deviceEntryBackgroundViewModel: Lazy<DeviceEntryBackgroundViewModel>,
     private val falsingManager: Lazy<FalsingManager>,
     private val vibratorHelper: Lazy<VibratorHelper>,
+    @LongPressTouchLog private val logBuffer: LogBuffer,
 ) {
     @Composable
     fun SceneScope.LockIcon(overrideColor: Color? = null, modifier: Modifier = Modifier) {
@@ -77,19 +81,24 @@ constructor(
             factory = { context ->
                 val view =
                     if (DeviceEntryUdfpsRefactor.isEnabled) {
-                        DeviceEntryIconView(context, null).apply {
-                            id = R.id.device_entry_icon_view
-                            DeviceEntryIconViewBinder.bind(
-                                applicationScope,
-                                this,
-                                deviceEntryIconViewModel.get(),
-                                deviceEntryForegroundViewModel.get(),
-                                deviceEntryBackgroundViewModel.get(),
-                                falsingManager.get(),
-                                vibratorHelper.get(),
-                                overrideColor,
+                        DeviceEntryIconView(
+                                context,
+                                null,
+                                logger = LongPressHandlingViewLogger(logBuffer, tag = TAG)
                             )
-                        }
+                            .apply {
+                                id = R.id.device_entry_icon_view
+                                DeviceEntryIconViewBinder.bind(
+                                    applicationScope,
+                                    this,
+                                    deviceEntryIconViewModel.get(),
+                                    deviceEntryForegroundViewModel.get(),
+                                    deviceEntryBackgroundViewModel.get(),
+                                    falsingManager.get(),
+                                    vibratorHelper.get(),
+                                    overrideColor,
+                                )
+                            }
                     } else {
                         // KeyguardBottomAreaRefactor.isEnabled
                         LockIconView(context, null).apply {
@@ -177,6 +186,10 @@ constructor(
             }
 
         return IntRect(center, radius)
+    }
+
+    companion object {
+        private const val TAG = "LockSection"
     }
 }
 
