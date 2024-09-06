@@ -122,7 +122,8 @@ public final class ProtoLogConfigurationService extends IProtoLogConfigurationSe
         this(ProtoLogDataSource::new, tracer);
     }
 
-    private ProtoLogConfigurationService(
+    @VisibleForTesting
+    public ProtoLogConfigurationService(
             @NonNull ProtoLogDataSourceBuilder dataSourceBuilder,
             @NonNull ViewerConfigFileTracer tracer) {
         mDataSource = dataSourceBuilder.build(
