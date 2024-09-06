@@ -35,13 +35,6 @@ public class ClientFlags {
     }
 
     /**
-     * @see Flags#phraseStrictFallback()
-     */
-    public static boolean phraseStrictFallback() {
-        return TextFlags.isFeatureEnabled(Flags.FLAG_PHRASE_STRICT_FALLBACK);
-    }
-
-    /**
      * @see Flags#fixLineHeightForLocale()
      */
     public static boolean fixLineHeightForLocale() {
