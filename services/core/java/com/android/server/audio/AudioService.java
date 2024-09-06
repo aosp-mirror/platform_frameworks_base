@@ -285,7 +285,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.CancellationException;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -12699,11 +12698,6 @@ public class AudioService extends IAudioService.Stub
             if (mController == null)
                 return;
             try {
-                // TODO: remove this when deprecating STREAM_BLUETOOTH_SCO
-                if (isStreamBluetoothSco(streamType)) {
-                    // TODO: notify both sco and voice_call about volume changes
-                    streamType = AudioSystem.STREAM_BLUETOOTH_SCO;
-                }
                 mController.volumeChanged(streamType, flags);
             } catch (RemoteException e) {
                 Log.w(TAG, "Error calling volumeChanged", e);
