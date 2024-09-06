@@ -12572,10 +12572,24 @@ public class DevicePolicyManager {
      **/
     @SystemApi
     public void setSecondaryLockscreenEnabled(@NonNull ComponentName admin, boolean enabled) {
+        setSecondaryLockscreenEnabled(admin, enabled, null);
+    }
+
+    /**
+     * Called by the system supervision app to set whether a secondary lockscreen needs to be shown.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
+     *              caller is not a device admin.
+     * @param enabled Whether or not the lockscreen needs to be shown.
+     * @param options A {@link PersistableBundle} to supply options to the lock screen.
+     * @hide
+     */
+    public void setSecondaryLockscreenEnabled(@Nullable ComponentName admin, boolean enabled,
+            @Nullable PersistableBundle options) {
         throwIfParentInstance("setSecondaryLockscreenEnabled");
         if (mService != null) {
             try {
-                mService.setSecondaryLockscreenEnabled(admin, enabled);
+                mService.setSecondaryLockscreenEnabled(admin, enabled, options);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
