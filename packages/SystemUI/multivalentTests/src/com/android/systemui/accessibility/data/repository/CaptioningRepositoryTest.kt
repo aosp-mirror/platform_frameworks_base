@@ -14,11 +14,12 @@
  *  limitations under the License.
  */
 
-package com.android.settingslib.view.accessibility.data.repository
+package com.android.systemui.accessibility.data.repository
 
 import android.view.accessibility.CaptioningManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.SysuiTestCase
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
@@ -40,7 +41,7 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 @Suppress("UnspecifiedRegisterReceiverFlag")
 @RunWith(AndroidJUnit4::class)
-class CaptioningRepositoryTest {
+class CaptioningRepositoryTest : SysuiTestCase() {
 
     @Captor
     private lateinit var listenerCaptor: ArgumentCaptor<CaptioningManager.CaptioningChangeListener>

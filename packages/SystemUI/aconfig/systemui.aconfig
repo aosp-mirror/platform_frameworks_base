@@ -637,10 +637,13 @@ flag {
 }
 
 flag {
-   name: "smartspace_remoteviews_rendering"
+   name: "smartspace_remoteviews_rendering_fix"
    namespace: "systemui"
    description: "Indicate Smartspace RemoteViews rendering"
    bug: "326292691"
+   metadata {
+     purpose: PURPOSE_BUGFIX
+   }
 }
 
 flag {
@@ -648,6 +651,13 @@ flag {
    namespace: "systemui"
    description: "Indicate Smartspace lockscreen viewmodel"
    bug: "331451011"
+}
+
+flag {
+    name: "smartspace_viewpager2"
+    namespace: "systemui"
+    description: "Use viewpager2 in Smartspace"
+    bug: "259566300"
 }
 
 flag {
@@ -1329,15 +1339,6 @@ flag {
    }
 }
 
-flag {
-   name: "lockscreen_preview_renderer_create_on_main_thread"
-   namespace: "systemui"
-   description: "Force preview renderer to be created on the main thread"
-   bug: "343732179"
-   metadata {
-        purpose: PURPOSE_BUGFIX
-   }
-}
 flag {
    name: "classic_flags_multi_user"
    namespace: "systemui"

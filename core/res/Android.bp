@@ -167,6 +167,7 @@ android_app {
         "android.os.flags-aconfig",
         "android.os.vibrator.flags-aconfig",
         "android.media.tv.flags-aconfig",
+        "com.android.hardware.input.input-aconfig",
     ],
 }
 

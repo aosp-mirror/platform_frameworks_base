@@ -19,6 +19,7 @@ package com.android.wm.shell.scenarios
 import android.platform.test.annotations.Postsubmit
 import android.tools.NavBar
 import android.tools.Rotation
+import android.tools.flicker.rules.ChangeDisplayOrientationRule
 import com.android.window.flags.Flags
 import com.android.wm.shell.Utils
 import org.junit.After
@@ -46,6 +47,8 @@ constructor(
         Assume.assumeTrue(Flags.enableDesktopWindowingMode() && tapl.isTablet)
         tapl.setEnableRotation(true)
         tapl.setExpectedRotation(rotation.value)
+        ChangeDisplayOrientationRule.setRotation(rotation)
+        tapl.enableTransientTaskbar(false)
     }
 
     @Test

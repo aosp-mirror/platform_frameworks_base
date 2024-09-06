@@ -33,7 +33,7 @@ import java.util.Optional;
 
 /**
  * Main stage for split-screen mode. When split-screen is active all standard activity types launch
- * on the main stage, except for task that are explicitly pinned to the {@link SideStage}.
+ * on the main stage, except for task that are explicitly pinned to the {@link StageTaskListener}.
  * @see StageCoordinator
  */
 class MainStage extends StageTaskListener {

@@ -121,7 +121,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private MultiSourceMinAlphaController mEndSideAlphaController;
     private LinearLayout mEndSideContent;
     private View mClockView;
-    private View mOngoingActivityChip;
+    private View mPrimaryOngoingActivityChip;
     private View mNotificationIconAreaInner;
     // Visibilities come in from external system callers via disable flags, but we also sometimes
     // modify the visibilities internally. We need to store both so that we don't accidentally
@@ -354,7 +354,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mEndSideContent = mStatusBar.findViewById(R.id.status_bar_end_side_content);
         mEndSideAlphaController = new MultiSourceMinAlphaController(mEndSideContent);
         mClockView = mStatusBar.findViewById(R.id.clock);
-        mOngoingActivityChip = mStatusBar.findViewById(R.id.ongoing_activity_chip);
+        mPrimaryOngoingActivityChip = mStatusBar.findViewById(R.id.ongoing_activity_chip_primary);
         showEndSideContent(false);
         showClock(false);
         initOperatorName();
@@ -636,9 +636,9 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         // icons so if the icons are disabled then the activity chip should be, too.)
         boolean showOngoingActivityChip = hasOngoingActivity && !disableNotifications;
         if (showOngoingActivityChip) {
-            showOngoingActivityChip(animate);
+            showPrimaryOngoingActivityChip(animate);
         } else {
-            hideOngoingActivityChip(animate);
+            hidePrimaryOngoingActivityChip(animate);
         }
     }
 
@@ -729,20 +729,20 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         animateShow(mClockView, animate);
     }
 
-    /** Hides the ongoing activity chip. */
-    private void hideOngoingActivityChip(boolean animate) {
-        animateHiddenState(mOngoingActivityChip, View.GONE, animate);
+    /** Hides the primary ongoing activity chip. */
+    private void hidePrimaryOngoingActivityChip(boolean animate) {
+        animateHiddenState(mPrimaryOngoingActivityChip, View.GONE, animate);
     }
 
     /**
-     * Displays the ongoing activity chip.
+     * Displays the primary ongoing activity chip.
      *
      * If Flags.statusBarScreenSharingChips is disabled, this chip will only ever contain the
      * ongoing call information, If that flag is enabled, it will support different kinds of ongoing
      * activities. See b/332662551.
      */
-    private void showOngoingActivityChip(boolean animate) {
-        animateShow(mOngoingActivityChip, animate);
+    private void showPrimaryOngoingActivityChip(boolean animate) {
+        animateShow(mPrimaryOngoingActivityChip, animate);
     }
 
     /**
@@ -850,7 +850,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
 
     private void initOngoingCallChip() {
         mOngoingCallController.addCallback(mOngoingCallListener);
-        mOngoingCallController.setChipView(mOngoingActivityChip);
+        mOngoingCallController.setChipView(mPrimaryOngoingActivityChip);
     }
 
     @Override

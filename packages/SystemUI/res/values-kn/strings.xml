@@ -45,7 +45,7 @@
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> ಅನ್ನು ನಿಯಂತ್ರಿಸಲು <xliff:g id="APPLICATION">%1$s</xliff:g> ಅನ್ನು ತೆರೆಯುವುದೇ?\nಈ ಆ್ಯಪ್‌ಗೆ ರೆಕಾರ್ಡ್ ಅನುಮತಿಯನ್ನು ನೀಡಲಾಗಿಲ್ಲ, ಆದರೆ ಈ USB ಸಾಧನದ ಮೂಲಕ ಆಡಿಯೊವನ್ನು ಸೆರೆಹಿಡಿಯಬಹುದು."</string>
     <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g> ಅನ್ನು ನಿರ್ವಹಿಸಲು <xliff:g id="APPLICATION">%1$s</xliff:g> ಅನ್ನು ತೆರೆಯುವುದೇ?"</string>
     <string name="usb_accessory_uri_prompt" msgid="6756649383432542382">"ಆಪ್‌ಗಳು USB ಪರಿಕರದಲ್ಲಿ ಕಾರ್ಯನಿರ್ವಹಿಸುವುದಿಲ್ಲ. ಆ ಬಗ್ಗೆ <xliff:g id="URL">%1$s</xliff:g> ನಲ್ಲಿ ಇನ್ನಷ್ಟು ತಿಳಿಯಿರಿ"</string>
-    <string name="title_usb_accessory" msgid="1236358027511638648">"USB ಪರಿಕರ"</string>
+    <string name="title_usb_accessory" msgid="1236358027511638648">"USB ಆ್ಯಕ್ಸೆಸರಿ"</string>
     <string name="label_view" msgid="6815442985276363364">"ವೀಕ್ಷಿಸು"</string>
     <string name="always_use_device" msgid="210535878779644679">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> ಸಂಪರ್ಕಗೊಂಡಾಗ ಯಾವಾಗಲೂ <xliff:g id="APPLICATION">%1$s</xliff:g> ಅನ್ನು ತೆರೆಯಿರಿ"</string>
     <string name="always_use_accessory" msgid="1977225429341838444">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g> ಸಂಪರ್ಕಗೊಂಡಾಗ ಯಾವಾಗಲೂ <xliff:g id="APPLICATION">%1$s</xliff:g> ಅನ್ನು ತೆರೆಯಿರಿ"</string>
@@ -104,6 +104,7 @@
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> ಹಾಗೂ ತೆರೆದಿರುವ ಇತರ ಆ್ಯಪ್‌ಗಳು ಈ ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಅನ್ನು ಪತ್ತೆಹಚ್ಚಿವೆ."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"ಟಿಪ್ಪಣಿಗೆ ಸೇರಿಸಿ"</string>
     <string name="backlinks_include_link" msgid="4562093591148248158">"ಲಿಂಕ್ ಅನ್ನು ಸೇರಿಸಿ"</string>
+    <string name="backlinks_duplicate_label_format" msgid="558445128952827926">"<xliff:g id="APPNAME">%1$s</xliff:g> <xliff:g id="FREQUENCYCOUNT">(%2$d)</xliff:g>⁠"</string>
     <string name="screenrecord_title" msgid="4257171601439507792">"ಸ್ಕ್ರೀನ್ ರೆಕಾರ್ಡರ್"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"ಸ್ಕ್ರೀನ್ ರೆಕಾರ್ಡಿಂಗ್ ಆಗುತ್ತಿದೆ"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ಸ್ಕ್ರೀನ್ ರೆಕಾರ್ಡಿಂಗ್ ಸೆಶನ್‌ಗಾಗಿ ಚಾಲ್ತಿಯಲ್ಲಿರುವ ನೋಟಿಫಿಕೇಶನ್"</string>
@@ -291,7 +292,8 @@
     <string name="start_dreams" msgid="9131802557946276718">"ಸ್ಕ್ರೀನ್ ಸೇವರ್"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"ಇಥರ್ನೆಟ್"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"ಅಡಚಣೆ ಮಾಡಬೇಡಿ"</string>
-    <string name="quick_settings_modes_label" msgid="5407025818652750501">"ಆದ್ಯತೆಯ ಮೋಡ್‌ಗಳು"</string>
+    <!-- no translation found for quick_settings_modes_label (879156359479504244) -->
+    <skip />
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"ಬ್ಲೂಟೂತ್‌"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"ಯಾವುದೇ ಜೋಡಿಸಲಾದ ಸಾಧನಗಳು ಲಭ್ಯವಿಲ್ಲ"</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"ಸಾಧನವನ್ನು ಕನೆಕ್ಟ್ ಅಥವಾ ಡಿಸ್‌ಕನೆಕ್ಟ್ ಮಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
@@ -300,8 +302,7 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"ಬ್ಲೂಟೂತ್ ಬಳಸಿ"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"ಕನೆಕ್ಟ್ ಆಗಿದೆ"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"ಆಡಿಯೋ ಹಂಚಿಕೊಳ್ಳುವಿಕೆ"</string>
-    <!-- no translation found for quick_settings_bluetooth_device_audio_sharing_or_switch_active (3227408556754456024) -->
-    <skip />
+    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="3227408556754456024">"ಆಡಿಯೊವನ್ನು ಬದಲಾಯಿಸಲು ಅಥವಾ ಹಂಚಿಕೊಳ್ಳಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"ಸೇವ್ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"ಡಿಸ್‌ಕನೆಕ್ಟ್ ಮಾಡಿ"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
@@ -433,7 +434,8 @@
     <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ತೆರೆಯಿರಿ"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"ಅನ್ಯ ಸಾಧನ"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"ಟಾಗಲ್ ನ ಅವಲೋಕನ"</string>
-    <string name="zen_modes_dialog_title" msgid="4159138230418567383">"ಆದ್ಯತೆಯ ಮೋಡ್‌ಗಳು"</string>
+    <!-- no translation found for zen_modes_dialog_title (8854640808100096934) -->
+    <skip />
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"ಮುಗಿದಿದೆ"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"ಆನ್ ಆಗಿದೆ"</string>
@@ -534,8 +536,12 @@
     <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"ಈ ಕಾರ್ಯವನ್ನು ಒದಗಿಸುವ ಸೇವೆಗಳು, ನಿಮ್ಮ ಸ್ಕ್ರೀನ್ ಮೇಲೆ ಗೋಚರಿಸುವ ಅಥವಾ ರೆಕಾರ್ಡಿಂಗ್ ಮಾಡುವಾಗ ಅಥವಾ ಕ್ಯಾಸ್ಟ್ ಮಾಡುವಾಗ ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಪ್ಲೇ ಮಾಡುವ ಎಲ್ಲಾ ಮಾಹಿತಿಗಳಿಗೆ ಆ್ಯಕ್ಸೆಸ್ ಅನ್ನು ಹೊಂದಿರುತ್ತವೆ. ಇದು ಪಾಸ್‌ವರ್ಡ್‌ಗಳು, ಪಾವತಿ ವಿವರಗಳು, ಫೋಟೋಗಳು, ಸಂದೇಶಗಳು ಮತ್ತು ನೀವು ಪ್ಲೇ ಮಾಡುವ ಆಡಿಯೊದಂತಹ ಮಾಹಿತಿಯನ್ನು ಒಳಗೊಂಡಿರುತ್ತದೆ."</string>
     <string name="screen_share_generic_app_selector_title" msgid="8331515850599218288">"ಆ್ಯಪ್ ಅನ್ನು ಹಂಚಿಕೊಳ್ಳಿ ಅಥವಾ ರೆಕಾರ್ಡ್ ಮಾಡಿ"</string>
     <string name="media_projection_entry_app_permission_dialog_title" msgid="4613857256721708062">"ನಿಮ್ಮ ಸ್ಕ್ರೀನ್‌ ಅನ್ನು <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ನೊಂದಿಗೆ ಹಂಚಿಕೊಳ್ಳಬೇಕೇ?"</string>
-    <string name="media_projection_entry_app_permission_dialog_option_text_single_app" msgid="6314402084788062644">"ಒಂದು ಆ್ಯಪ್‌ ಅನ್ನು ಹಂಚಿಕೊಳ್ಳಿ"</string>
-    <string name="media_projection_entry_app_permission_dialog_option_text_entire_screen" msgid="7381488112332599632">"ಸಂಪೂರ್ಣ ಸ್ಕ್ರೀನ್ ಅನ್ನು ಹಂಚಿಕೊಳ್ಳಿ"</string>
+    <string name="screen_share_permission_dialog_option_single_app" msgid="2974054871681567314">"ಒಂದು ಆ್ಯಪ್‌ ಅನ್ನು ಹಂಚಿಕೊಳ್ಳಿ"</string>
+    <!-- no translation found for media_projection_entry_app_permission_dialog_option_text_single_app (2308901434964846084) -->
+    <skip />
+    <string name="screen_share_permission_dialog_option_entire_screen" msgid="4493174362775038997">"ಸಂಪೂರ್ಣ ಸ್ಕ್ರೀನ್ ಅನ್ನು ಹಂಚಿಕೊಳ್ಳಿ"</string>
+    <!-- no translation found for media_projection_entry_app_permission_dialog_option_text_entire_screen (5100078808078139706) -->
+    <skip />
     <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="5504288438067851086">"ನಿಮ್ಮ ಸಂಪೂರ್ಣ ಸ್ಕ್ರೀನ್‌ ಅನ್ನು ನೀವು ಹಂಚಿಕೊಳ್ಳುತ್ತಿರುವಾಗ, ನಿಮ್ಮ ಸ್ಕ್ರೀನ್‌ನಲ್ಲಿರುವ ಏನಾದರೂ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ಗೆ ಗೋಚರಿಸುತ್ತದೆ. ಆದ್ದರಿಂದ ಪಾಸ್‌ವರ್ಡ್‌ಗಳು, ಪಾವತಿ ವಿವರಗಳು, ಸಂದೇಶಗಳು, ಫೋಟೋಗಳು ಮತ್ತು ಆಡಿಯೋ ಮತ್ತು ವೀಡಿಯೊದಂತಹ ವಿಷಯಗಳ ಬಗ್ಗೆ ಜಾಗರೂಕರಾಗಿರಿ."</string>
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="7094417930857938876">"ನೀವು ಆ್ಯಪ್ ಅನ್ನು ಹಂಚಿಕೊಳ್ಳುತ್ತಿರುವಾಗ, ಆ ಆ್ಯಪ್‌ನಲ್ಲಿ ತೋರಿಸಿರುವ ಅಥವಾ ಪ್ಲೇ ಮಾಡಿದ ಏನಾದರೂ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ಗೆ ಗೋಚರಿಸುತ್ತದೆ. ಆದ್ದರಿಂದ ಪಾಸ್‌ವರ್ಡ್‌ಗಳು, ಪಾವತಿ ವಿವರಗಳು, ಸಂದೇಶಗಳು, ಫೋಟೋಗಳು ಮತ್ತು ಆಡಿಯೋ ಮತ್ತು ವೀಡಿಯೊದಂತಹ ವಿಷಯಗಳ ಬಗ್ಗೆ ಜಾಗರೂಕರಾಗಿರಿ."</string>
     <string name="media_projection_entry_app_permission_dialog_continue_entire_screen" msgid="1850848182344377579">"ಸ್ಕ್ರೀನ್‌ ಹಂಚಿಕೊಳ್ಳಿ"</string>
@@ -1387,6 +1393,18 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"ಕುಗ್ಗಿಸುವ ಐಕಾನ್"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"ವಿಸ್ತೃತಗೊಳಿಸುವ ಐಕಾನ್"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"ಅಥವಾ"</string>
+    <!-- no translation found for launch_keyboard_tutorial_notification_title (8849933155160522519) -->
+    <skip />
+    <!-- no translation found for launch_keyboard_tutorial_notification_content (2880339951512757918) -->
+    <skip />
+    <!-- no translation found for launch_touchpad_tutorial_notification_title (2243780062772196901) -->
+    <skip />
+    <!-- no translation found for launch_touchpad_tutorial_notification_content (7931085031240753226) -->
+    <skip />
+    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_title (1940023776496198762) -->
+    <skip />
+    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_content (1780725168171929365) -->
+    <skip />
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"ಹಿಂಬದಿ ಗೆಸ್ಚರ್"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"ಹೋಮ್ ಗೆಸ್ಚರ್"</string>
     <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"ಆ್ಯಕ್ಷನ್‌ ಕೀ"</string>

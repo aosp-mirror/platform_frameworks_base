@@ -50,7 +50,7 @@ public final class AppFunctionManager {
      * Creates an instance.
      *
      * @param service An interface to the backing service.
-     * @param context  A {@link Context}.
+     * @param context A {@link Context}.
      * @hide
      */
     public AppFunctionManager(IAppFunctionManager service, Context context) {
@@ -60,42 +60,42 @@ public final class AppFunctionManager {
 
     /**
      * Executes the app function.
-     * <p>
-     * Note: Applications can execute functions they define. To execute functions defined in
-     * another component, apps would need to have
-     * {@code android.permission.EXECUTE_APP_FUNCTIONS_TRUSTED} or
-     * {@code android.permission.EXECUTE_APP_FUNCTIONS}.
      *
-     * @param request  the request to execute the app function
+     * <p>Note: Applications can execute functions they define. To execute functions defined in
+     * another component, apps would need to have {@code
+     * android.permission.EXECUTE_APP_FUNCTIONS_TRUSTED} or {@code
+     * android.permission.EXECUTE_APP_FUNCTIONS}.
+     *
+     * @param request the request to execute the app function
      * @param executor the executor to run the callback
      * @param callback the callback to receive the function execution result. if the calling app
-     *                 does not own the app function or does not have {@code
-     *                 android.permission.EXECUTE_APP_FUNCTIONS_TRUSTED} or {@code
-     *                 android.permission.EXECUTE_APP_FUNCTIONS}, the execution result will contain
-     *                 {@code ExecuteAppFunctionResponse.RESULT_DENIED}.
+     *     does not own the app function or does not have {@code
+     *     android.permission.EXECUTE_APP_FUNCTIONS_TRUSTED} or {@code
+     *     android.permission.EXECUTE_APP_FUNCTIONS}, the execution result will contain {@code
+     *     ExecuteAppFunctionResponse.RESULT_DENIED}.
      */
     // TODO(b/360864791): Document that apps can opt-out from being executed by callers with
     //   EXECUTE_APP_FUNCTIONS and how a caller knows whether a function is opted out.
     // TODO(b/357551503): Update documentation when get / set APIs are implemented that this will
     //   also return RESULT_DENIED if the app function is disabled.
     @RequiresPermission(
-            anyOf = {Manifest.permission.EXECUTE_APP_FUNCTIONS_TRUSTED,
-                    Manifest.permission.EXECUTE_APP_FUNCTIONS}, conditional = true)
+            anyOf = {
+                Manifest.permission.EXECUTE_APP_FUNCTIONS_TRUSTED,
+                Manifest.permission.EXECUTE_APP_FUNCTIONS
+            },
+            conditional = true)
     @UserHandleAware
     public void executeAppFunction(
             @NonNull ExecuteAppFunctionRequest request,
             @NonNull @CallbackExecutor Executor executor,
-            @NonNull Consumer<ExecuteAppFunctionResponse> callback
-    ) {
+            @NonNull Consumer<ExecuteAppFunctionResponse> callback) {
         Objects.requireNonNull(request);
         Objects.requireNonNull(executor);
         Objects.requireNonNull(callback);
 
         ExecuteAppFunctionAidlRequest aidlRequest =
                 new ExecuteAppFunctionAidlRequest(
-                        request,
-                        mContext.getUser(),
-                        mContext.getPackageName());
+                        request, mContext.getUser(), mContext.getPackageName());
         try {
             mService.executeAppFunction(
                     aidlRequest,
@@ -107,8 +107,11 @@ public final class AppFunctionManager {
                             } catch (RuntimeException e) {
                                 // Ideally shouldn't happen since errors are wrapped into the
                                 // response, but we catch it here for additional safety.
-                                callback.accept(ExecuteAppFunctionResponse.newFailure(
-                                        getResultCode(e), e.getMessage(), /*extras=*/ null));
+                                callback.accept(
+                                        ExecuteAppFunctionResponse.newFailure(
+                                                getResultCode(e),
+                                                e.getMessage(),
+                                                /* extras= */ null));
                             }
                         }
                     });
