@@ -34,7 +34,6 @@ import static android.internal.perfetto.protos.Protolog.ProtoLogViewerConfig.Gro
 import static android.internal.perfetto.protos.Protolog.ProtoLogViewerConfig.MESSAGES;
 import static android.internal.perfetto.protos.Protolog.ProtoLogViewerConfig.MessageData.GROUP_ID;
 import static android.internal.perfetto.protos.Protolog.ProtoLogViewerConfig.MessageData.LEVEL;
-import static android.internal.perfetto.protos.Protolog.ProtoLogViewerConfig.MessageData.LOCATION;
 import static android.internal.perfetto.protos.Protolog.ProtoLogViewerConfig.MessageData.MESSAGE;
 import static android.internal.perfetto.protos.TracePacketOuterClass.TracePacket.INTERNED_DATA;
 import static android.internal.perfetto.protos.TracePacketOuterClass.TracePacket.PROTOLOG_MESSAGE;
@@ -72,7 +71,6 @@ import com.android.internal.protolog.common.LogLevel;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -472,94 +470,9 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
 
         Log.d(LOG_TAG, "Dumping viewer config to trace");
 
-        mDataSource.trace(ctx -> {
-            try {
-                ProtoInputStream pis = mViewerConfigInputStreamProvider.getInputStream();
-
-                final ProtoOutputStream os = ctx.newTracePacket();
-
-                os.write(TIMESTAMP, SystemClock.elapsedRealtimeNanos());
-
-                final long outProtologViewerConfigToken = os.start(PROTOLOG_VIEWER_CONFIG);
-                while (pis.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
-                    if (pis.getFieldNumber() == (int) MESSAGES) {
-                        writeViewerConfigMessage(pis, os);
-                    }
-
-                    if (pis.getFieldNumber() == (int) GROUPS) {
-                        writeViewerConfigGroup(pis, os);
-                    }
-                }
-
-                os.end(outProtologViewerConfigToken);
-            } catch (IOException e) {
-                Log.e(LOG_TAG, "Failed to read ProtoLog viewer config to dump on tracing end", e);
-            }
-        });
+        Utils.dumpViewerConfig(mDataSource, mViewerConfigInputStreamProvider);
 
         Log.d(LOG_TAG, "Dumped viewer config to trace");
-    }
-
-    private static void writeViewerConfigGroup(
-            ProtoInputStream pis, ProtoOutputStream os) throws IOException {
-        final long inGroupToken = pis.start(GROUPS);
-        final long outGroupToken = os.start(GROUPS);
-
-        while (pis.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
-            switch (pis.getFieldNumber()) {
-                case (int) ID:
-                    int id = pis.readInt(ID);
-                    os.write(ID, id);
-                    break;
-                case (int) NAME:
-                    String name = pis.readString(NAME);
-                    os.write(NAME, name);
-                    break;
-                case (int) TAG:
-                    String tag = pis.readString(TAG);
-                    os.write(TAG, tag);
-                    break;
-                default:
-                    throw new RuntimeException(
-                            "Unexpected field id " + pis.getFieldNumber());
-            }
-        }
-
-        pis.end(inGroupToken);
-        os.end(outGroupToken);
-    }
-
-    private static void writeViewerConfigMessage(
-            ProtoInputStream pis, ProtoOutputStream os) throws IOException {
-        final long inMessageToken = pis.start(MESSAGES);
-        final long outMessagesToken = os.start(MESSAGES);
-
-        while (pis.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
-            switch (pis.getFieldNumber()) {
-                case (int) MessageData.MESSAGE_ID:
-                    os.write(MessageData.MESSAGE_ID,
-                            pis.readLong(MessageData.MESSAGE_ID));
-                    break;
-                case (int) MESSAGE:
-                    os.write(MESSAGE, pis.readString(MESSAGE));
-                    break;
-                case (int) LEVEL:
-                    os.write(LEVEL, pis.readInt(LEVEL));
-                    break;
-                case (int) GROUP_ID:
-                    os.write(GROUP_ID, pis.readInt(GROUP_ID));
-                    break;
-                case (int) LOCATION:
-                    os.write(LOCATION, pis.readString(LOCATION));
-                    break;
-                default:
-                    throw new RuntimeException(
-                            "Unexpected field id " + pis.getFieldNumber());
-            }
-        }
-
-        pis.end(inMessageToken);
-        os.end(outMessagesToken);
     }
 
     private void logToLogcat(String tag, LogLevel level, Message message,
