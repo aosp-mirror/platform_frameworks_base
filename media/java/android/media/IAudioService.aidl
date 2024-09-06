@@ -303,6 +303,9 @@ interface IAudioService {
 
     void notifyVolumeControllerVisible(in IVolumeController controller, boolean visible);
 
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
+    oneway void setVolumeControllerLongPressTimeoutEnabled(boolean enable);
+
     boolean isStreamAffectedByRingerMode(int streamType);
 
     boolean isStreamAffectedByMute(int streamType);

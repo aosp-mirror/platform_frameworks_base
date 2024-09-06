@@ -14,10 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.systemui.media.controls.domain.pipeline
+package com.android.systemui.keyguard.ui.viewmodel
 
+import com.android.systemui.communal.domain.interactor.communalInteractor
+import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.log.logcatLogBuffer
+import com.android.systemui.kosmos.Kosmos.Fixture
+import com.android.systemui.shade.domain.interactor.shadeInteractor
 
-var Kosmos.mediaDeviceLogger by
-    Kosmos.Fixture { MediaDeviceLogger(logcatLogBuffer("MediaDeviceLoggerKosmos")) }
+val Kosmos.lockscreenUserActionsViewModel by Fixture {
+    LockscreenUserActionsViewModel(
+        deviceEntryInteractor = deviceEntryInteractor,
+        communalInteractor = communalInteractor,
+        shadeInteractor = shadeInteractor,
+    )
+}

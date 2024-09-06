@@ -116,11 +116,11 @@ public class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     private boolean mWasActiveSourceSetToConnectedDevice = false;
 
     @VisibleForTesting
-    protected boolean getWasActiveSourceSetToConnectedDevice() {
+    protected boolean getWasActivePathSetToConnectedDevice() {
         return mWasActiveSourceSetToConnectedDevice;
     }
 
-    protected void setWasActiveSourceSetToConnectedDevice(
+    protected void setWasActivePathSetToConnectedDevice(
             boolean wasActiveSourceSetToConnectedDevice) {
         mWasActiveSourceSetToConnectedDevice = wasActiveSourceSetToConnectedDevice;
     }
@@ -404,6 +404,15 @@ public class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         }
     }
 
+    @Override
+    void setActivePath(int path) {
+        super.setActivePath(path);
+        if (path != Constants.INVALID_PHYSICAL_ADDRESS
+                && path != Constants.TV_PHYSICAL_ADDRESS) {
+            setWasActivePathSetToConnectedDevice(true);
+        }
+    }
+
     @ServiceThreadOnly
     void updateActiveInput(int path, boolean notifyInputChange) {
         assertRunOnServiceThread();
@@ -512,7 +521,6 @@ public class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
                 || info.getDeviceType() == HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM) {
             mService.getHdmiCecNetwork().updateDevicePowerStatus(logicalAddress,
                     HdmiControlManager.POWER_STATUS_ON);
-            setWasActiveSourceSetToConnectedDevice(true);
             ActiveSource activeSource = ActiveSource.of(logicalAddress, physicalAddress);
             ActiveSourceHandler.create(this, null).process(activeSource, info.getDeviceType());
         } else {
@@ -528,16 +536,16 @@ public class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     protected int handleStandby(HdmiCecMessage message) {
         assertRunOnServiceThread();
 
-        // If a device has previously asserted the active source status, ignore <Standby> from
-        // non-active source.
-        if (getWasActiveSourceSetToConnectedDevice()
+        // If the TV has previously changed the active path, ignore <Standby> from non-active
+        // source.
+        if (getWasActivePathSetToConnectedDevice()
                 && getActiveSource().logicalAddress != message.getSource()) {
             Slog.d(TAG, "<Standby> was not sent by the current active source, ignoring."
                     + " Current active source has logical address "
                     + getActiveSource().logicalAddress);
             return Constants.HANDLED;
         }
-        setWasActiveSourceSetToConnectedDevice(false);
+        setWasActivePathSetToConnectedDevice(false);
         return super.handleStandby(message);
     }
 
@@ -1509,7 +1517,7 @@ public class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             invokeStandbyCompletedCallback(callback);
             return;
         }
-        setWasActiveSourceSetToConnectedDevice(false);
+        setWasActivePathSetToConnectedDevice(false);
         boolean sendStandbyOnSleep =
                 mService.getHdmiCecConfig().getIntValue(
                     HdmiControlManager.CEC_SETTING_NAME_TV_SEND_STANDBY_ON_SLEEP)

@@ -75,6 +75,7 @@ import com.android.wm.shell.R;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.apptoweb.AppToWebGenericLinksParser;
+import com.android.wm.shell.apptoweb.AppToWebUtils;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.MultiInstanceHelper;
@@ -478,6 +479,12 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
 
     @Nullable
     private Uri getBrowserLink() {
+        // Do not show browser link in browser applications
+        final ComponentName baseActivity = mTaskInfo.baseActivity;
+        if (baseActivity != null && AppToWebUtils.isBrowserApp(mContext,
+                baseActivity.getPackageName(), mUserContext.getUserId())) {
+            return null;
+        }
         // If the captured link is available and has not expired, return the captured link.
         // Otherwise, return the generic link which is set to null if a generic link is unavailable.
         if (mCapturedLink != null && !mCapturedLink.mExpired) {

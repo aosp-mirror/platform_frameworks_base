@@ -107,69 +107,69 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
     }
 
     @Test
-    fun chip_allHidden_hidden() =
+    fun primaryChip_allHidden_hidden() =
         testScope.runTest {
             screenRecordState.value = ScreenRecordModel.DoingNothing
             mediaProjectionState.value = MediaProjectionState.NotProjecting
             callRepo.setOngoingCallState(OngoingCallModel.NoCall)
 
-            val latest by collectLastValue(underTest.chip)
+            val latest by collectLastValue(underTest.primaryChip)
 
             assertThat(latest).isInstanceOf(OngoingActivityChipModel.Hidden::class.java)
         }
 
     @Test
-    fun chip_screenRecordShow_restHidden_screenRecordShown() =
+    fun primaryChip_screenRecordShow_restHidden_screenRecordShown() =
         testScope.runTest {
             screenRecordState.value = ScreenRecordModel.Recording
             mediaProjectionState.value = MediaProjectionState.NotProjecting
             callRepo.setOngoingCallState(OngoingCallModel.NoCall)
 
-            val latest by collectLastValue(underTest.chip)
+            val latest by collectLastValue(underTest.primaryChip)
 
             assertIsScreenRecordChip(latest)
         }
 
     @Test
-    fun chip_screenRecordShowAndCallShow_screenRecordShown() =
+    fun primaryChip_screenRecordShowAndCallShow_screenRecordShown() =
         testScope.runTest {
             screenRecordState.value = ScreenRecordModel.Recording
 
             callRepo.setOngoingCallState(inCallModel(startTimeMs = 34))
 
-            val latest by collectLastValue(underTest.chip)
+            val latest by collectLastValue(underTest.primaryChip)
 
             assertIsScreenRecordChip(latest)
         }
 
     @Test
-    fun chip_screenRecordShowAndShareToAppShow_screenRecordShown() =
+    fun primaryChip_screenRecordShowAndShareToAppShow_screenRecordShown() =
         testScope.runTest {
             screenRecordState.value = ScreenRecordModel.Recording
             mediaProjectionState.value =
                 MediaProjectionState.Projecting.EntireScreen(NORMAL_PACKAGE)
             callRepo.setOngoingCallState(OngoingCallModel.NoCall)
 
-            val latest by collectLastValue(underTest.chip)
+            val latest by collectLastValue(underTest.primaryChip)
 
             assertIsScreenRecordChip(latest)
         }
 
     @Test
-    fun chip_shareToAppShowAndCallShow_shareToAppShown() =
+    fun primaryChip_shareToAppShowAndCallShow_shareToAppShown() =
         testScope.runTest {
             screenRecordState.value = ScreenRecordModel.DoingNothing
             mediaProjectionState.value =
                 MediaProjectionState.Projecting.EntireScreen(NORMAL_PACKAGE)
             callRepo.setOngoingCallState(inCallModel(startTimeMs = 34))
 
-            val latest by collectLastValue(underTest.chip)
+            val latest by collectLastValue(underTest.primaryChip)
 
             assertIsShareToAppChip(latest)
         }
 
     @Test
-    fun chip_screenRecordAndShareToAppAndCastToOtherHideAndCallShown_callShown() =
+    fun primaryChip_screenRecordAndShareToAppAndCastToOtherHideAndCallShown_callShown() =
         testScope.runTest {
             screenRecordState.value = ScreenRecordModel.DoingNothing
             // MediaProjection covers both share-to-app and cast-to-other-device
@@ -177,14 +177,14 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
 
             callRepo.setOngoingCallState(inCallModel(startTimeMs = 34))
 
-            val latest by collectLastValue(underTest.chip)
+            val latest by collectLastValue(underTest.primaryChip)
 
             assertIsCallChip(latest)
         }
 
     @Test
     @EnableFlags(FLAG_STATUS_BAR_RON_CHIPS)
-    fun chip_higherPriorityChipAdded_lowerPriorityChipReplaced() =
+    fun primaryChip_higherPriorityChipAdded_lowerPriorityChipReplaced() =
         testScope.runTest {
             // Start with just the lowest priority chip shown
             addDemoRonChip(commandRegistry, pw)
@@ -193,7 +193,7 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
             mediaProjectionState.value = MediaProjectionState.NotProjecting
             screenRecordState.value = ScreenRecordModel.DoingNothing
 
-            val latest by collectLastValue(underTest.chip)
+            val latest by collectLastValue(underTest.primaryChip)
 
             assertIsDemoRonChip(latest)
 
@@ -223,7 +223,7 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(FLAG_STATUS_BAR_RON_CHIPS)
-    fun chip_highestPriorityChipRemoved_showsNextPriorityChip() =
+    fun primaryChip_highestPriorityChipRemoved_showsNextPriorityChip() =
         testScope.runTest {
             // WHEN all chips are active
             screenRecordState.value = ScreenRecordModel.Recording
@@ -232,7 +232,7 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
             callRepo.setOngoingCallState(inCallModel(startTimeMs = 34))
             addDemoRonChip(commandRegistry, pw)
 
-            val latest by collectLastValue(underTest.chip)
+            val latest by collectLastValue(underTest.primaryChip)
 
             // THEN the highest priority screen record is used
             assertIsScreenRecordChip(latest)
@@ -258,11 +258,11 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
 
     /** Regression test for b/347726238. */
     @Test
-    fun chip_timerDoesNotResetAfterSubscribersRestart() =
+    fun primaryChip_timerDoesNotResetAfterSubscribersRestart() =
         testScope.runTest {
             var latest: OngoingActivityChipModel? = null
 
-            val job1 = underTest.chip.onEach { latest = it }.launchIn(this)
+            val job1 = underTest.primaryChip.onEach { latest = it }.launchIn(this)
 
             // Start a chip with a timer
             systemClock.setElapsedRealtime(1234)
@@ -279,7 +279,7 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
             systemClock.setElapsedRealtime(5678)
 
             // WHEN we re-subscribe to the chip flow
-            val job2 = underTest.chip.onEach { latest = it }.launchIn(this)
+            val job2 = underTest.primaryChip.onEach { latest = it }.launchIn(this)
 
             runCurrent()
 
@@ -290,13 +290,13 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun chip_screenRecordStoppedViaDialog_chipHiddenWithoutAnimation() =
+    fun primaryChip_screenRecordStoppedViaDialog_chipHiddenWithoutAnimation() =
         testScope.runTest {
             screenRecordState.value = ScreenRecordModel.Recording
             mediaProjectionState.value = MediaProjectionState.NotProjecting
             callRepo.setOngoingCallState(OngoingCallModel.NoCall)
 
-            val latest by collectLastValue(underTest.chip)
+            val latest by collectLastValue(underTest.primaryChip)
 
             assertIsScreenRecordChip(latest)
 
@@ -310,14 +310,14 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun chip_projectionStoppedViaDialog_chipHiddenWithoutAnimation() =
+    fun primaryChip_projectionStoppedViaDialog_chipHiddenWithoutAnimation() =
         testScope.runTest {
             mediaProjectionState.value =
                 MediaProjectionState.Projecting.EntireScreen(NORMAL_PACKAGE)
             screenRecordState.value = ScreenRecordModel.DoingNothing
             callRepo.setOngoingCallState(OngoingCallModel.NoCall)
 
-            val latest by collectLastValue(underTest.chip)
+            val latest by collectLastValue(underTest.primaryChip)
 
             assertIsShareToAppChip(latest)
 

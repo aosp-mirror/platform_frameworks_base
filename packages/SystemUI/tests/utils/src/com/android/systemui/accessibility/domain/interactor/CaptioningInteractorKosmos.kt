@@ -14,13 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.systemui.log.dagger
+package com.android.systemui.accessibility.domain.interactor
 
-import com.android.systemui.log.LogBuffer
-import javax.inject.Qualifier
+import com.android.systemui.accessibility.data.repository.captioningRepository
+import com.android.systemui.kosmos.Kosmos
 
-/** A [LogBuffer] for [com.android.systemui.media.controls.domain.pipeline.MediaDeviceLogger] */
-@Qualifier
-@MustBeDocumented
-@Retention(AnnotationRetention.RUNTIME)
-annotation class MediaDeviceLog
+val Kosmos.captioningInteractor by Kosmos.Fixture { CaptioningInteractor(captioningRepository) }

@@ -44,3 +44,13 @@ android_test {
         enabled: false,
     },
 }
+
+test_module_config {
+    name: "PowerServiceTests_server_power",
+    base: "PowerServiceTests",
+    test_suites: [
+        "automotive-tests",
+        "device-tests",
+    ],
+    include_filters: ["com.android.server.power"],
+}

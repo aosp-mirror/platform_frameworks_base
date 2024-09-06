@@ -17,7 +17,7 @@
 package com.android.systemui.volume.panel.component.captioning.domain
 
 import com.android.internal.logging.UiEventLogger
-import com.android.settingslib.view.accessibility.domain.interactor.CaptioningInteractor
+import com.android.systemui.accessibility.domain.interactor.CaptioningInteractor
 import com.android.systemui.volume.panel.dagger.scope.VolumePanelScope
 import com.android.systemui.volume.panel.domain.ComponentAvailabilityCriteria
 import com.android.systemui.volume.panel.ui.VolumePanelUiEvent
