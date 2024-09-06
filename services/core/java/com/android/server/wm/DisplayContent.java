@@ -738,8 +738,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     /** All tokens used to put activities on this root task to sleep (including mOffToken) */
     final ArrayList<RootWindowContainer.SleepToken> mAllSleepTokens = new ArrayList<>();
-    /** The token acquirer to put root tasks on the display to sleep */
-    private final ActivityTaskManagerInternal.SleepTokenAcquirer mOffTokenAcquirer;
 
     private boolean mSleeping;
 
@@ -1134,7 +1132,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mDisplay = display;
         mDisplayId = display.getDisplayId();
         mCurrentUniqueDisplayId = display.getUniqueId();
-        mOffTokenAcquirer = mRootWindowContainer.mDisplayOffTokenAcquirer;
         mWallpaperController = new WallpaperController(mWmService, this);
         mWallpaperController.resetLargestDisplay(display);
         display.getDisplayInfo(mDisplayInfo);
@@ -6167,9 +6164,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         final int displayState = mDisplayInfo.state;
         if (displayId != DEFAULT_DISPLAY) {
             if (displayState == Display.STATE_OFF) {
-                mOffTokenAcquirer.acquire(mDisplayId);
+                mRootWindowContainer.mDisplayOffTokenAcquirer.acquire(mDisplayId);
             } else if (displayState == Display.STATE_ON) {
-                mOffTokenAcquirer.release(mDisplayId);
+                mRootWindowContainer.mDisplayOffTokenAcquirer.release(mDisplayId);
             }
             ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
                     "Content Recording: Display %d state was (%d), is now (%d), so update "
