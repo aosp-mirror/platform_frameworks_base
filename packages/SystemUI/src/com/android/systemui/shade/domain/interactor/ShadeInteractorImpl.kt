@@ -16,6 +16,7 @@
 
 package com.android.systemui.shade.domain.interactor
 
+import androidx.annotation.FloatRange
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
@@ -103,6 +104,16 @@ constructor(
         }
 
     override val isShadeLayoutWide: StateFlow<Boolean> = shadeRepository.isShadeLayoutWide
+
+    @FloatRange(from = 0.0, to = 1.0)
+    override fun getTopEdgeSplitFraction(): Float {
+        // Note: this implicitly relies on isShadeLayoutWide being hot (i.e. collected). This
+        // assumption allows us to query its value on demand (during swipe source detection) instead
+        // of running another infinite coroutine.
+        // TODO(b/338577208): Instead of being fixed at 0.8f, this should dynamically updated based
+        //  on the position of system-status icons in the status bar.
+        return if (shadeRepository.isShadeLayoutWide.value) 0.8f else 0.5f
+    }
 
     override val shadeMode: StateFlow<ShadeMode> =
         isShadeLayoutWide
