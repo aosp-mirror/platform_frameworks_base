@@ -411,13 +411,12 @@ object BiometricViewSizeBinder {
                                     ANIMATE_SMALL_TO_MEDIUM_DURATION_MS.toLong()
                                 )
 
-                                TransitionManager.beginDelayedTransition(view, autoTransition)
-
                                 if (position.isLeft) {
                                     flipConstraintSet.applyTo(view)
                                 } else {
                                     mediumConstraintSet.applyTo(view)
                                 }
+                                TransitionManager.beginDelayedTransition(view, autoTransition)
                             }
                             size.isMedium -> {
                                 if (position.isLeft) {
@@ -436,8 +435,8 @@ object BiometricViewSizeBinder {
                                     }
                                 )
 
-                                TransitionManager.beginDelayedTransition(view, autoTransition)
                                 largeConstraintSet.applyTo(view)
+                                TransitionManager.beginDelayedTransition(view, autoTransition)
                             }
                         }
 
