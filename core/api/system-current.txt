@@ -442,6 +442,7 @@ package android {
 
   public static final class R.attr {
     field public static final int allowClearUserDataOnFailedRestore = 16844288; // 0x1010600
+    field @FlaggedApi("android.permission.flags.replace_body_sensor_permission_enabled") public static final int backgroundPermission;
     field @FlaggedApi("android.content.res.manifest_flagging") public static final int featureFlag = 16844428; // 0x101068c
     field public static final int gameSessionService = 16844373; // 0x1010655
     field public static final int hotwordDetectionService = 16844326; // 0x1010626
