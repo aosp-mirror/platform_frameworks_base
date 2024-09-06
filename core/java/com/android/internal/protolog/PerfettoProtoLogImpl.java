@@ -480,8 +480,19 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
         String messageString;
         if (mViewerConfigReader == null) {
             messageString = message.getMessage();
+
+            if (messageString == null) {
+                Log.e(LOG_TAG, "Failed to decode message for logcat. "
+                        + "Message not available without ViewerConfig to decode the hash.");
+            }
         } else {
             messageString = message.getMessage(mViewerConfigReader);
+
+            if (messageString == null) {
+                Log.e(LOG_TAG, "Failed to decode message for logcat. "
+                        + "Message hash either not available in viewerConfig file or "
+                        + "not loaded into memory from file before decoding.");
+            }
         }
 
         if (messageString == null) {
