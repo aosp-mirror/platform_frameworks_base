@@ -379,6 +379,10 @@ sealed class UserAction {
         return this to UserActionResult(toScene = scene)
     }
 
+    infix fun to(overlay: OverlayKey): Pair<UserAction, UserActionResult> {
+        return this to UserActionResult(toOverlay = overlay)
+    }
+
     /** Resolve this into a [Resolved] user action given [layoutDirection]. */
     internal abstract fun resolve(layoutDirection: LayoutDirection): Resolved
 
