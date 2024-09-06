@@ -42,13 +42,6 @@ public class ClientFlags {
     }
 
     /**
-     * @see Flags#useBoundsForWidth()
-     */
-    public static boolean useBoundsForWidth() {
-        return TextFlags.isFeatureEnabled(Flags.FLAG_USE_BOUNDS_FOR_WIDTH);
-    }
-
-    /**
      * @see Flags#fixLineHeightForLocale()
      */
     public static boolean fixLineHeightForLocale() {
