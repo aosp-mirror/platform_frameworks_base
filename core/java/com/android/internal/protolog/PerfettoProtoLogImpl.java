@@ -882,8 +882,7 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
     private static class Message {
         @Nullable
         private final Long mMessageHash;
-        @Nullable
-        private final Integer mMessageMask;
+        private final int mMessageMask;
         @Nullable
         private final String mMessageString;
 
@@ -900,8 +899,7 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
             this.mMessageString = messageString;
         }
 
-        @Nullable
-        private Integer getMessageMask() {
+        private int getMessageMask() {
             return mMessageMask;
         }
 
