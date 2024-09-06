@@ -18,6 +18,7 @@ package com.android.systemui.classifier;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -25,13 +26,20 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.hardware.devicestate.DeviceStateManager.FoldStateListener;
+import android.hardware.input.IInputManager;
+import android.hardware.input.InputManagerGlobal;
+import android.os.RemoteException;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.util.DisplayMetrics;
+import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import com.android.systemui.Flags;
 import com.android.systemui.classifier.FalsingDataProvider.GestureFinalizedListener;
 import com.android.systemui.dock.DockManagerFake;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -56,11 +64,15 @@ public class FalsingDataProviderTest extends ClassifierTest {
     private FoldStateListener mFoldStateListener;
     private final DockManagerFake mDockManager = new DockManagerFake();
     private DisplayMetrics mDisplayMetrics;
+    private IInputManager mIInputManager;
+    private InputManagerGlobal.TestSession inputManagerGlobalTestSession;
 
     @Before
     public void setup() {
         super.setup();
         MockitoAnnotations.initMocks(this);
+        mIInputManager = mock(IInputManager.Stub.class);
+        inputManagerGlobalTestSession = InputManagerGlobal.createTestSession(mIInputManager);
         mDisplayMetrics = new DisplayMetrics();
         mDisplayMetrics.xdpi = 100;
         mDisplayMetrics.ydpi = 100;
@@ -73,6 +85,7 @@ public class FalsingDataProviderTest extends ClassifierTest {
     public void tearDown() {
         super.tearDown();
         mDataProvider.onSessionEnd();
+        inputManagerGlobalTestSession.close();
     }
 
     @Test
@@ -378,6 +391,79 @@ public class FalsingDataProviderTest extends ClassifierTest {
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_NON_TOUCHSCREEN_DEVICES_BYPASS_FALSING)
+    public void test_isTouchscreenSource_flagOff_alwaysTrue() {
+        assertThat(mDataProvider.isTouchScreenSource()).isTrue();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_NON_TOUCHSCREEN_DEVICES_BYPASS_FALSING)
+    public void test_isTouchscreenSource_recentEventsEmpty_true() {
+        //send no events into the data provider
+        assertThat(mDataProvider.isTouchScreenSource()).isTrue();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_NON_TOUCHSCREEN_DEVICES_BYPASS_FALSING)
+    public void test_isTouchscreenSource_latestDeviceTouchscreen_true() throws RemoteException {
+        int deviceId = 999;
+
+        InputDevice device = new InputDevice.Builder()
+                .setSources(InputDevice.SOURCE_CLASS_TRACKBALL | InputDevice.SOURCE_TOUCHSCREEN)
+                .setId(deviceId)
+                .build();
+        when(mIInputManager.getInputDeviceIds()).thenReturn(new int[]{deviceId});
+        when(mIInputManager.getInputDevice(anyInt())).thenReturn(device);
+
+        MotionEvent event = MotionEvent.obtain(1, 0, MotionEvent.ACTION_UP, 1,
+                MotionEvent.PointerProperties.createArray(1),
+                MotionEvent.PointerCoords.createArray(1), 0, 0, 1.0f, 1.0f, deviceId, 0,
+                InputDevice.SOURCE_CLASS_NONE, 0, 0, 0);
+
+        mDataProvider.onMotionEvent(event);
+        boolean result = mDataProvider.isTouchScreenSource();
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_NON_TOUCHSCREEN_DEVICES_BYPASS_FALSING)
+    public void test_isTouchscreenSource_latestDeviceNonTouchscreen_false() throws RemoteException {
+        int deviceId = 9999;
+
+        InputDevice device = new InputDevice.Builder()
+                .setSources(InputDevice.SOURCE_CLASS_TRACKBALL)
+                .setId(deviceId)
+                .build();
+        when(mIInputManager.getInputDeviceIds()).thenReturn(new int[]{deviceId});
+        when(mIInputManager.getInputDevice(anyInt())).thenReturn(device);
+
+        MotionEvent event = MotionEvent.obtain(1, 0, MotionEvent.ACTION_UP, 1,
+                MotionEvent.PointerProperties.createArray(1),
+                MotionEvent.PointerCoords.createArray(1), 0, 0, 1.0f, 1.0f, deviceId, 0,
+                InputDevice.SOURCE_CLASS_NONE, 0, 0, 0);
+
+        mDataProvider.onMotionEvent(event);
+        boolean result = mDataProvider.isTouchScreenSource();
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_NON_TOUCHSCREEN_DEVICES_BYPASS_FALSING)
+    public void test_isTouchscreenSource_latestDeviceNull_true() {
+        // Do not mock InputManager for this test
+        inputManagerGlobalTestSession.close();
+
+        int nonExistentDeviceId = 9997;
+        MotionEvent event = MotionEvent.obtain(1, 0, MotionEvent.ACTION_UP, 1,
+                MotionEvent.PointerProperties.createArray(1),
+                MotionEvent.PointerCoords.createArray(1), 0, 0, 1.0f, 1.0f, nonExistentDeviceId, 0,
+                InputDevice.SOURCE_CLASS_NONE, 0, 0, 0);
+
+        mDataProvider.onMotionEvent(event);
+        assertThat(mDataProvider.isTouchScreenSource()).isTrue();
+    }
+
+    @Test
     public void test_UnfoldedState_Folded() {
         FalsingDataProvider falsingDataProvider = createWithFoldCapability(true);
         when(mFoldStateListener.getFolded()).thenReturn(true);
@@ -413,7 +499,7 @@ public class FalsingDataProviderTest extends ClassifierTest {
     }
 
     private FalsingDataProvider createWithFoldCapability(boolean foldable) {
-        return new FalsingDataProvider(
-                mDisplayMetrics, mBatteryController, mFoldStateListener, mDockManager, foldable);
+        return new FalsingDataProvider(mDisplayMetrics, mBatteryController, mFoldStateListener,
+                mDockManager, foldable);
     }
 }
