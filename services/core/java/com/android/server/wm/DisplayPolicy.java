@@ -1036,7 +1036,7 @@ public class DisplayPolicy {
     /**
      * Check if a window can be added to the system.
      *
-     * Currently enforces that two window types are singletons per display:
+     * Currently enforces that these window types are singletons per display:
      * <ul>
      * <li>{@link WindowManager.LayoutParams#TYPE_STATUS_BAR}</li>
      * <li>{@link WindowManager.LayoutParams#TYPE_NOTIFICATION_SHADE}</li>
@@ -1058,41 +1058,39 @@ public class DisplayPolicy {
             ActivityTaskManagerService.enforceTaskPermission("DisplayPolicy");
         }
 
+        final String systemUiPermission =
+                mService.isCallerVirtualDeviceOwner(mDisplayContent.getDisplayId(), callingUid)
+                        // Allow virtual device owners to add system windows on their displays.
+                        ? android.Manifest.permission.CREATE_VIRTUAL_DEVICE
+                        : android.Manifest.permission.STATUS_BAR_SERVICE;
+
         switch (attrs.type) {
             case TYPE_STATUS_BAR:
-                mContext.enforcePermission(
-                        android.Manifest.permission.STATUS_BAR_SERVICE, callingPid, callingUid,
+                mContext.enforcePermission(systemUiPermission, callingPid, callingUid,
                         "DisplayPolicy");
                 if (mStatusBar != null && mStatusBar.isAlive()) {
                     return WindowManagerGlobal.ADD_MULTIPLE_SINGLETON;
                 }
                 break;
             case TYPE_NOTIFICATION_SHADE:
-                mContext.enforcePermission(
-                        android.Manifest.permission.STATUS_BAR_SERVICE, callingPid, callingUid,
+                mContext.enforcePermission(systemUiPermission, callingPid, callingUid,
                         "DisplayPolicy");
-                if (mNotificationShade != null) {
-                    if (mNotificationShade.isAlive()) {
-                        return WindowManagerGlobal.ADD_MULTIPLE_SINGLETON;
-                    }
+                if (mNotificationShade != null && mNotificationShade.isAlive()) {
+                    return WindowManagerGlobal.ADD_MULTIPLE_SINGLETON;
                 }
                 break;
             case TYPE_NAVIGATION_BAR:
-                mContext.enforcePermission(android.Manifest.permission.STATUS_BAR_SERVICE,
-                        callingPid, callingUid, "DisplayPolicy");
+                mContext.enforcePermission(systemUiPermission, callingPid, callingUid,
+                        "DisplayPolicy");
                 if (mNavigationBar != null && mNavigationBar.isAlive()) {
                     return WindowManagerGlobal.ADD_MULTIPLE_SINGLETON;
                 }
                 break;
             case TYPE_NAVIGATION_BAR_PANEL:
-                mContext.enforcePermission(android.Manifest.permission.STATUS_BAR_SERVICE,
-                        callingPid, callingUid, "DisplayPolicy");
-                break;
             case TYPE_STATUS_BAR_ADDITIONAL:
             case TYPE_STATUS_BAR_SUB_PANEL:
             case TYPE_VOICE_INTERACTION_STARTING:
-                mContext.enforcePermission(
-                        android.Manifest.permission.STATUS_BAR_SERVICE, callingPid, callingUid,
+                mContext.enforcePermission(systemUiPermission, callingPid, callingUid,
                         "DisplayPolicy");
                 break;
             case TYPE_STATUS_BAR_PANEL:
@@ -1102,8 +1100,7 @@ public class DisplayPolicy {
         if (attrs.providedInsets != null) {
             // Recents component is allowed to add inset types.
             if (!mService.mAtmService.isCallerRecents(callingUid)) {
-                mContext.enforcePermission(
-                        android.Manifest.permission.STATUS_BAR_SERVICE, callingPid, callingUid,
+                mContext.enforcePermission(systemUiPermission, callingPid, callingUid,
                         "DisplayPolicy");
             }
         }

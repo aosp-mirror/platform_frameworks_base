@@ -2,6 +2,7 @@ package com.android.systemui.scene.ui.composable
 
 import androidx.compose.foundation.gestures.Orientation
 import com.android.compose.animation.scene.ProgressConverter
+import com.android.compose.animation.scene.TransitionKey
 import com.android.compose.animation.scene.transitions
 import com.android.systemui.bouncer.ui.composable.Bouncer
 import com.android.systemui.notifications.ui.composable.Notifications
@@ -9,6 +10,7 @@ import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.TransitionKeys.SlightlyFasterShadeCollapse
 import com.android.systemui.scene.shared.model.TransitionKeys.ToSplitShade
 import com.android.systemui.scene.ui.composable.transitions.bouncerToGoneTransition
+import com.android.systemui.scene.ui.composable.transitions.bouncerToLockscreenPreview
 import com.android.systemui.scene.ui.composable.transitions.goneToNotificationsShadeTransition
 import com.android.systemui.scene.ui.composable.transitions.goneToQuickSettingsShadeTransition
 import com.android.systemui.scene.ui.composable.transitions.goneToQuickSettingsTransition
@@ -59,6 +61,14 @@ val SceneContainerTransitions = transitions {
     }
 
     from(Scenes.Lockscreen, to = Scenes.Bouncer) { lockscreenToBouncerTransition() }
+    from(
+        Scenes.Lockscreen,
+        to = Scenes.Bouncer,
+        key = TransitionKey.PredictiveBack,
+        reversePreview = { bouncerToLockscreenPreview() }
+    ) {
+        lockscreenToBouncerTransition()
+    }
     from(Scenes.Lockscreen, to = Scenes.Communal) { lockscreenToCommunalTransition() }
     from(Scenes.Lockscreen, to = Scenes.NotificationsShade) {
         lockscreenToNotificationsShadeTransition()

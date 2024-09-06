@@ -72,9 +72,7 @@ object Scenes {
      * and one for quick settings, [NotificationsShade] and [QuickSettingsShade] scenes are used
      * respectively.
      */
-    @Deprecated("The quick settings shade scene has been replaced by an overlay")
-    @JvmField
-    val QuickSettings = SceneKey("quick_settings")
+    @JvmField val QuickSettings = SceneKey("quick_settings")
 
     /**
      * The quick settings shade scene shows the quick setting tiles as an overlay UI.
@@ -87,7 +85,9 @@ object Scenes {
      * large screens or unfolded foldables, where notifications and quick settings are shown
      * side-by-side in their own columns).
      */
-    @JvmField val QuickSettingsShade = SceneKey("quick_settings_shade")
+    @Deprecated("The quick settings shade scene has been replaced by an overlay")
+    @JvmField
+    val QuickSettingsShade = SceneKey("quick_settings_shade")
 
     /**
      * The shade is the scene that shows a scrollable list of notifications and the minimized

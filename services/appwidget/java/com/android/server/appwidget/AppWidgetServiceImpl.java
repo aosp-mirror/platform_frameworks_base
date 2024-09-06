@@ -16,6 +16,7 @@
 
 package com.android.server.appwidget;
 
+import static android.appwidget.flags.Flags.remoteAdapterConversion;
 import static android.appwidget.flags.Flags.removeAppWidgetServiceIoFromCriticalPath;
 import static android.appwidget.flags.Flags.supportResumeRestoreAfterReboot;
 import static android.content.Context.KEYGUARD_SERVICE;
@@ -1650,6 +1651,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     public boolean bindRemoteViewsService(String callingPackage, int appWidgetId, Intent intent,
             IApplicationThread caller, IBinder activtiyToken, IServiceConnection connection,
             long flags) {
+        if (remoteAdapterConversion()) {
+            throw new UnsupportedOperationException("bindRemoteViewsService is deprecated");
+        }
         final int userId = UserHandle.getCallingUserId();
         if (DEBUG) {
             Slog.i(TAG, "bindRemoteViewsService() " + userId);

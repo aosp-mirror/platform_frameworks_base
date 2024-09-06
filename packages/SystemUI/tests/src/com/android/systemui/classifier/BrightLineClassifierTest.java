@@ -39,8 +39,6 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.testing.FakeMetricsLogger;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingDataProvider.GestureFinalizedListener;
-import com.android.systemui.flags.FakeFeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
@@ -84,7 +82,6 @@ public class BrightLineClassifierTest extends SysuiTestCase {
     private AccessibilityManager mAccessibilityManager;
 
     private final FakeExecutor mFakeExecutor = new FakeExecutor(new FakeSystemClock());
-    private final FakeFeatureFlags mFakeFeatureFlags = new FakeFeatureFlags();
 
     private final FalsingClassifier.Result mFalsedResult =
             FalsingClassifier.Result.falsed(1, getClass().getSimpleName(), "");
@@ -110,7 +107,7 @@ public class BrightLineClassifierTest extends SysuiTestCase {
         mBrightLineFalsingManager = new BrightLineFalsingManager(mFalsingDataProvider,
                 mMetricsLogger, mClassifiers, mSingleTapClassfier, mLongTapClassifier,
                 mDoubleTapClassifier, mHistoryTracker, mKeyguardStateController,
-                mAccessibilityManager, false, mFakeFeatureFlags);
+                mAccessibilityManager, false);
 
 
         ArgumentCaptor<GestureFinalizedListener> gestureCompleteListenerCaptor =
@@ -120,7 +117,6 @@ public class BrightLineClassifierTest extends SysuiTestCase {
                 gestureCompleteListenerCaptor.capture());
 
         mGestureFinalizedListener = gestureCompleteListenerCaptor.getValue();
-        mFakeFeatureFlags.set(Flags.FALSING_OFF_FOR_UNFOLDED, true);
     }
 
     @Test

@@ -33,6 +33,12 @@ import kotlinx.coroutines.flow.update
 
 class FakeAudioRepository : AudioRepository {
 
+    private val unMutableStreams =
+        setOf(
+            AudioManager.STREAM_VOICE_CALL,
+            AudioManager.STREAM_ALARM,
+        )
+
     private val mutableMode = MutableStateFlow(AudioManager.MODE_NORMAL)
     override val mode: StateFlow<Int> = mutableMode.asStateFlow()
 
@@ -73,7 +79,7 @@ class FakeAudioRepository : AudioRepository {
                     volume = 0,
                     minVolume = 0,
                     maxVolume = 10,
-                    isAffectedByMute = false,
+                    isAffectedByMute = audioStream.value !in unMutableStreams,
                     isAffectedByRingerMode = false,
                     isMuted = false,
                 )

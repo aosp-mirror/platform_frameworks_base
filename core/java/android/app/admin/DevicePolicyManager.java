@@ -55,10 +55,8 @@ import static android.Manifest.permission.SET_TIME;
 import static android.Manifest.permission.SET_TIME_ZONE;
 import static android.app.admin.DeviceAdminInfo.HEADLESS_DEVICE_OWNER_MODE_UNSUPPORTED;
 import static android.app.admin.flags.Flags.FLAG_DEVICE_THEFT_API_ENABLED;
-import static android.app.admin.flags.Flags.FLAG_DEVICE_POLICY_SIZE_TRACKING_ENABLED;
 import static android.app.admin.flags.Flags.onboardingBugreportV2Enabled;
 import static android.app.admin.flags.Flags.onboardingConsentlessBugreports;
-import static android.app.admin.flags.Flags.FLAG_IS_MTE_POLICY_ENFORCED;
 import static android.content.Intent.LOCAL_FLAG_FROM_SYSTEM;
 import static android.net.NetworkCapabilities.NET_ENTERPRISE_ID_1;
 import static android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE;
@@ -4232,7 +4230,6 @@ public class DevicePolicyManager {
      *
      * @return whether MTE is currently enabled on the device.
      */
-    @FlaggedApi(FLAG_IS_MTE_POLICY_ENFORCED)
     public static boolean isMtePolicyEnforced() {
         return Zygote.nativeSupportsMemoryTagging();
     }
@@ -10476,10 +10473,6 @@ public class DevicePolicyManager {
     @WorkerThread
     public void setApplicationRestrictions(@Nullable ComponentName admin, String packageName,
             Bundle settings) {
-        if (!Flags.dmrhSetAppRestrictions()) {
-            throwIfParentInstance("setApplicationRestrictions");
-        }
-
         if (mService != null) {
             try {
                 mService.setApplicationRestrictions(admin, mContext.getPackageName(), packageName,
@@ -11884,9 +11877,6 @@ public class DevicePolicyManager {
     @WorkerThread
     public @NonNull Bundle getApplicationRestrictions(
             @Nullable ComponentName admin, String packageName) {
-        if (!Flags.dmrhSetAppRestrictions()) {
-            throwIfParentInstance("getApplicationRestrictions");
-        }
 
         if (mService != null) {
             try {
@@ -14231,21 +14221,11 @@ public class DevicePolicyManager {
      */
     public @NonNull DevicePolicyManager getParentProfileInstance(@NonNull ComponentName admin) {
         throwIfParentInstance("getParentProfileInstance");
-        try {
-            if (Flags.dmrhSetAppRestrictions()) {
-                UserManager um = mContext.getSystemService(UserManager.class);
-                if (!um.isManagedProfile()) {
-                    throw new SecurityException("The current user does not have a parent profile.");
-                }
-            } else {
-                if (!mService.isManagedProfile(admin)) {
-                    throw new SecurityException("The current user does not have a parent profile.");
-                }
-            }
-            return new DevicePolicyManager(mContext, mService, true);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+        UserManager um = mContext.getSystemService(UserManager.class);
+        if (!um.isManagedProfile()) {
+            throw new SecurityException("The current user does not have a parent profile.");
         }
+        return new DevicePolicyManager(mContext, mService, true);
     }
 
     /**
@@ -17763,7 +17743,6 @@ public class DevicePolicyManager {
      */
     @SystemApi
     @RequiresPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
-    @FlaggedApi(FLAG_DEVICE_POLICY_SIZE_TRACKING_ENABLED)
     public void setMaxPolicyStorageLimit(int storageLimit) {
         if (mService != null) {
             try {
@@ -17783,7 +17762,6 @@ public class DevicePolicyManager {
      */
     @SystemApi
     @RequiresPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
-    @FlaggedApi(FLAG_DEVICE_POLICY_SIZE_TRACKING_ENABLED)
     public int getMaxPolicyStorageLimit() {
         if (mService != null) {
             try {

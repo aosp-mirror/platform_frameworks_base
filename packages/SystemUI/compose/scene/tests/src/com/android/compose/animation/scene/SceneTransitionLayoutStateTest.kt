@@ -32,7 +32,7 @@ import com.android.compose.animation.scene.subjects.assertThat
 import com.android.compose.animation.scene.transition.link.StateLink
 import com.android.compose.animation.scene.transition.seekToScene
 import com.android.compose.test.MonotonicClockTestScope
-import com.android.compose.test.TestTransition
+import com.android.compose.test.TestSceneTransition
 import com.android.compose.test.runMonotonicClockTest
 import com.android.compose.test.transition
 import com.google.common.truth.Truth.assertThat
@@ -556,8 +556,8 @@ class SceneTransitionLayoutStateTest {
 
     @Test
     fun multipleTransitions() = runTest {
-        val frozenTransitions = mutableSetOf<TestTransition>()
-        fun onFreezeAndAnimate(transition: TestTransition): () -> Unit {
+        val frozenTransitions = mutableSetOf<TestSceneTransition>()
+        fun onFreezeAndAnimate(transition: TestSceneTransition): () -> Unit {
             // Instead of letting the transition finish when it is frozen, we put the transition in
             // the frozenTransitions set so that we can verify that freezeAndAnimateToCurrentState()
             // is called when expected and then we call finish() ourselves to finish the

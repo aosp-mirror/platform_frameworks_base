@@ -475,6 +475,30 @@ public class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         });
     }
 
+    // --------
+    // Previously only used in SideStage
+    boolean removeAllTasks(WindowContainerTransaction wct, boolean toTop) {
+        ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "remove all side stage tasks: childCount=%d toTop=%b",
+                mChildrenTaskInfo.size(), toTop);
+        if (mChildrenTaskInfo.size() == 0) return false;
+        wct.reparentTasks(
+                mRootTaskInfo.token,
+                null /* newParent */,
+                null /* windowingModes */,
+                null /* activityTypes */,
+                toTop);
+        return true;
+    }
+
+    boolean removeTask(int taskId, WindowContainerToken newParent, WindowContainerTransaction wct) {
+        final ActivityManager.RunningTaskInfo task = mChildrenTaskInfo.get(taskId);
+        ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "remove side stage task: task=%d exists=%b", taskId,
+                task != null);
+        if (task == null) return false;
+        wct.reparent(task.token, newParent, false /* onTop */);
+        return true;
+    }
+
     private void sendStatusChanged() {
         mCallbacks.onStatusChanged(mRootTaskInfo.isVisible, mChildrenTaskInfo.size() > 0);
     }
