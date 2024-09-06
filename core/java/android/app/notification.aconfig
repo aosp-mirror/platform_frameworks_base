@@ -128,6 +128,16 @@ flag {
 }
 
 flag {
+  name: "notif_channel_crop_vibration_effects"
+  namespace: "systemui"
+  description: "Limits the size of vibration effects that can be stored in a NotificationChannel"
+  bug: "345881518"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   name: "evenly_divided_call_style_action_layout"
   namespace: "systemui"
   description: "Evenly divides horizontal space for action buttons in CallStyle notifications."

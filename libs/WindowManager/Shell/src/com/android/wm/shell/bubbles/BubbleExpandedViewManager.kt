@@ -16,7 +16,7 @@
 
 package com.android.wm.shell.bubbles
 
-import com.android.wm.shell.common.bubbles.BubbleBarLocation
+import com.android.wm.shell.shared.bubbles.BubbleBarLocation
 
 /** Manager interface for bubble expanded views. */
 interface BubbleExpandedViewManager {

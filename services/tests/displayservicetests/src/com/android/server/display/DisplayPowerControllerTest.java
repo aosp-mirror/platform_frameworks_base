@@ -2587,7 +2587,7 @@ public final class DisplayPowerControllerTest {
         BrightnessClamperController getBrightnessClamperController(Handler handler,
                 BrightnessClamperController.ClamperChangeListener clamperChangeListener,
                 BrightnessClamperController.DisplayDeviceData data, Context context,
-                DisplayManagerFlags flags, SensorManager sensorManager) {
+                DisplayManagerFlags flags, SensorManager sensorManager, float currentBrightness) {
             return mClamperController;
         }
 

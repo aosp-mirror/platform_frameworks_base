@@ -1302,7 +1302,7 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
         mEventLogger.enqueue((new EventLogger.StringEvent(
                 "abandonAudioFocus() from uid/pid " + Binder.getCallingUid()
                     + "/" + Binder.getCallingPid()
-                    + " clientId=" + clientId))
+                    + " clientId=" + clientId + " callingPack=" + callingPackageName))
                 .printLog(TAG));
         try {
             // this will take care of notifying the new focus owner if needed

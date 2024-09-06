@@ -233,7 +233,6 @@ import android.view.InsetsState;
 import android.view.Surface;
 import android.view.Surface.Rotation;
 import android.view.SurfaceControl;
-import android.view.SurfaceSession;
 import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewTreeObserver;
@@ -5159,15 +5158,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return false;
         }
         return true;
-    }
-
-    @Override
-    SurfaceSession getSession() {
-        if (mSession.mSurfaceSession != null) {
-            return mSession.mSurfaceSession;
-        } else {
-            return getParent().getSession();
-        }
     }
 
     @Override

@@ -233,6 +233,33 @@ public class NotificationChannelTest {
     }
 
     @Test
+    @EnableFlags({Flags.FLAG_NOTIFICATION_CHANNEL_VIBRATION_EFFECT_API,
+            Flags.FLAG_NOTIF_CHANNEL_CROP_VIBRATION_EFFECTS})
+    public void testLongVibrationFields_canWriteToXml() throws Exception {
+        NotificationChannel channel = new NotificationChannel("id", "name", 3);
+        // populate pattern with contents
+        long[] pattern = new long[65550 / 2];
+        for (int i = 0; i < pattern.length; i++) {
+            pattern[i] = 100;
+        }
+        channel.setVibrationPattern(pattern);  // with flag on, also sets effect
+
+        // Send it through parceling & unparceling to simulate being passed through a binder call
+        NotificationChannel fromParcel = writeToAndReadFromParcel(channel);
+        assertThat(fromParcel.getVibrationPattern().length).isEqualTo(
+                NotificationChannel.MAX_VIBRATION_LENGTH);
+
+        // Confirm that this also survives writing to & restoring from XML
+        NotificationChannel result = backUpAndRestore(fromParcel);
+        assertThat(result.getVibrationPattern().length).isEqualTo(
+                NotificationChannel.MAX_VIBRATION_LENGTH);
+        assertThat(result.getVibrationEffect()).isNotNull();
+        assertThat(result.getVibrationEffect()
+                .computeCreateWaveformOffOnTimingsOrNull())
+                .isEqualTo(result.getVibrationPattern());
+    }
+
+    @Test
     public void testRestoreSoundUri_customLookup() throws Exception {
         Uri uriToBeRestoredUncanonicalized = Uri.parse("content://media/1");
         Uri uriToBeRestoredCanonicalized = Uri.parse("content://media/1?title=Song&canonical=1");

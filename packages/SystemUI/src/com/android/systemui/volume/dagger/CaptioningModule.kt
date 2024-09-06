@@ -17,9 +17,9 @@
 package com.android.systemui.volume.dagger
 
 import android.view.accessibility.CaptioningManager
-import com.android.settingslib.view.accessibility.data.repository.CaptioningRepository
-import com.android.settingslib.view.accessibility.data.repository.CaptioningRepositoryImpl
-import com.android.settingslib.view.accessibility.domain.interactor.CaptioningInteractor
+import com.android.systemui.accessibility.data.repository.CaptioningRepository
+import com.android.systemui.accessibility.data.repository.CaptioningRepositoryImpl
+import com.android.systemui.accessibility.domain.interactor.CaptioningInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background

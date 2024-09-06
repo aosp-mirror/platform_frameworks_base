@@ -350,13 +350,15 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     @BinderThread
     private int resolveImeUserIdLocked(@UserIdInt int callingProcessUserId,
             @NonNull IInputMethodClient client) {
-        if (mConcurrentMultiUserModeEnabled
-                && callingProcessUserId == UserHandle.USER_SYSTEM) {
-            final var clientState = mClientController.getClient(client.asBinder());
-            return mUserManagerInternal.getUserAssignedToDisplay(
-                    clientState.mSelfReportedDisplayId);
+        if (mConcurrentMultiUserModeEnabled) {
+            if (callingProcessUserId == UserHandle.USER_SYSTEM) {
+                final var clientState = mClientController.getClient(client.asBinder());
+                return mUserManagerInternal.getUserAssignedToDisplay(
+                        clientState.mSelfReportedDisplayId);
+            }
+            return callingProcessUserId;
         }
-        return callingProcessUserId;
+        return mCurrentImeUserId;
     }
 
    /**
@@ -3086,7 +3088,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     public boolean showSoftInput(IInputMethodClient client, IBinder windowToken,
             @NonNull ImeTracker.Token statsToken, @InputMethodManager.ShowFlags int flags,
             int lastClickToolType, ResultReceiver resultReceiver,
-            @SoftInputShowHideReason int reason) {
+            @SoftInputShowHideReason int reason, boolean async) {
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.showSoftInput");
         ImeTracing.getInstance().triggerManagerServiceDump(
                 "InputMethodManagerService#showSoftInput", mDumper);
@@ -3533,7 +3535,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     @Override
     public boolean hideSoftInput(IInputMethodClient client, IBinder windowToken,
             @NonNull ImeTracker.Token statsToken, @InputMethodManager.HideFlags int flags,
-            ResultReceiver resultReceiver, @SoftInputShowHideReason int reason) {
+            ResultReceiver resultReceiver, @SoftInputShowHideReason int reason, boolean async) {
         ImeTracing.getInstance().triggerManagerServiceDump(
                 "InputMethodManagerService#hideSoftInput", mDumper);
         synchronized (ImfLock.class) {
@@ -3675,7 +3677,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             IRemoteInputConnection inputConnection,
             IRemoteAccessibilityInputConnection remoteAccessibilityInputConnection,
             int unverifiedTargetSdkVersion, @UserIdInt int userId,
-            @NonNull ImeOnBackInvokedDispatcher imeDispatcher, int startInputSeq) {
+            @NonNull ImeOnBackInvokedDispatcher imeDispatcher, int startInputSeq,
+            boolean useAsyncShowHideMethod) {
         // implemented by ZeroJankProxy
     }
 

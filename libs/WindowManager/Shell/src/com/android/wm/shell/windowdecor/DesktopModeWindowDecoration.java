@@ -75,6 +75,7 @@ import com.android.wm.shell.R;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.apptoweb.AppToWebGenericLinksParser;
+import com.android.wm.shell.apptoweb.AppToWebUtils;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.MultiInstanceHelper;
@@ -114,6 +115,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     private final Choreographer mChoreographer;
     private final SyncTransactionQueue mSyncQueue;
     private final SplitScreenController mSplitScreenController;
+    private final WindowManagerWrapper mWindowManagerWrapper;
 
     private WindowDecorationViewHolder mWindowDecorViewHolder;
     private View.OnClickListener mOnCaptionButtonClickListener;
@@ -188,7 +190,9 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 taskInfo, taskSurface, handler, bgExecutor, choreographer, syncQueue,
                 rootTaskDisplayAreaOrganizer, genericLinksParser, SurfaceControl.Builder::new,
                 SurfaceControl.Transaction::new,  WindowContainerTransaction::new,
-                SurfaceControl::new, new SurfaceControlViewHostFactory() {},
+                SurfaceControl::new, new WindowManagerWrapper(
+                        context.getSystemService(WindowManager.class)),
+                new SurfaceControlViewHostFactory() {},
                 DefaultMaximizeMenuFactory.INSTANCE, DefaultHandleMenuFactory.INSTANCE,
                 multiInstanceHelper);
     }
@@ -211,6 +215,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             Supplier<SurfaceControl.Transaction> surfaceControlTransactionSupplier,
             Supplier<WindowContainerTransaction> windowContainerTransactionSupplier,
             Supplier<SurfaceControl> surfaceControlSupplier,
+            WindowManagerWrapper windowManagerWrapper,
             SurfaceControlViewHostFactory surfaceControlViewHostFactory,
             MaximizeMenuFactory maximizeMenuFactory,
             HandleMenuFactory handleMenuFactory,
@@ -229,6 +234,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         mMaximizeMenuFactory = maximizeMenuFactory;
         mHandleMenuFactory = handleMenuFactory;
         mMultiInstanceHelper = multiInstanceHelper;
+        mWindowManagerWrapper = windowManagerWrapper;
     }
 
     /**
@@ -473,6 +479,12 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
 
     @Nullable
     private Uri getBrowserLink() {
+        // Do not show browser link in browser applications
+        final ComponentName baseActivity = mTaskInfo.baseActivity;
+        if (baseActivity != null && AppToWebUtils.isBrowserApp(mContext,
+                baseActivity.getPackageName(), mUserContext.getUserId())) {
+            return null;
+        }
         // If the captured link is available and has not expired, return the captured link.
         // Otherwise, return the generic link which is set to null if a generic link is unavailable.
         if (mCapturedLink != null && !mCapturedLink.mExpired) {
@@ -574,7 +586,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             return new AppHandleViewHolder(
                     mResult.mRootView,
                     mOnCaptionTouchListener,
-                    mOnCaptionButtonClickListener
+                    mOnCaptionButtonClickListener,
+                    mWindowManagerWrapper
             );
         } else if (mRelayoutParams.mLayoutResId
                 == R.layout.desktop_mode_app_header) {
@@ -988,6 +1001,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         updateGenericLink();
         mHandleMenu = mHandleMenuFactory.create(
                 this,
+                mWindowManagerWrapper,
                 mRelayoutParams.mLayoutResId,
                 mAppIconBitmap,
                 mAppName,

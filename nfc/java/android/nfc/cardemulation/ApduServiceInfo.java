@@ -308,6 +308,8 @@ public final class ApduServiceInfo implements Parcelable {
                         mOffHostName = "eSE1";
                     } else if (mOffHostName.equals("SIM")) {
                         mOffHostName = "SIM1";
+                    } else if (Flags.enableCardEmulationEuicc() && mOffHostName.equals("eSIM")) {
+                        mOffHostName = "eSIM1";
                     }
                 }
                 mStaticOffHostName = mOffHostName;

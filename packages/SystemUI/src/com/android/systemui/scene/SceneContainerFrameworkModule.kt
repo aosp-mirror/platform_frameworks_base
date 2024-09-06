@@ -48,6 +48,7 @@ import dagger.multibindings.IntoMap
             LockscreenSceneModule::class,
             QuickSettingsSceneModule::class,
             ShadeSceneModule::class,
+            QuickSettingsShadeOverlayModule::class,
             QuickSettingsShadeSceneModule::class,
             NotificationsShadeOverlayModule::class,
             NotificationsShadeSceneModule::class,
@@ -111,6 +112,7 @@ interface SceneContainerFrameworkModule {
                 overlayKeys =
                     listOfNotNull(
                         Overlays.NotificationsShade.takeIf { DualShade.isEnabled },
+                        Overlays.QuickSettingsShade.takeIf { DualShade.isEnabled },
                     ),
                 navigationDistances =
                     mapOf(

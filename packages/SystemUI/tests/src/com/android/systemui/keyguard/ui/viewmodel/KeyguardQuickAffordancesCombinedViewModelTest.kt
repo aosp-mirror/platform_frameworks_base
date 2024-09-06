@@ -72,7 +72,7 @@ import com.android.systemui.testKosmos
 import com.android.systemui.util.FakeSharedPreferences
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
-import com.android.systemui.util.settings.FakeSettings
+import com.android.systemui.util.settings.fakeSettings
 import com.google.common.truth.Truth
 import kotlin.math.min
 import kotlin.test.assertEquals
@@ -93,6 +93,10 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
+
+    private val kosmos = testKosmos()
+    private val testScope = kosmos.testScope
+    private val settings = kosmos.fakeSettings
 
     @Mock private lateinit var activityStarter: ActivityStarter
     @Mock private lateinit var devicePolicyManager: DevicePolicyManager
@@ -151,11 +155,8 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
     private lateinit var glanceableHubToLockscreenTransitionViewModel:
         GlanceableHubToLockscreenTransitionViewModel
 
-    private val kosmos = testKosmos()
-
     private lateinit var underTest: KeyguardQuickAffordancesCombinedViewModel
 
-    private val testScope = kosmos.testScope
     private lateinit var repository: FakeKeyguardRepository
     private lateinit var homeControlsQuickAffordanceConfig: FakeKeyguardQuickAffordanceConfig
     private lateinit var quickAccessWalletAffordanceConfig: FakeKeyguardQuickAffordanceConfig
@@ -244,7 +245,7 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
                     KeyguardQuickAffordanceLegacySettingSyncer(
                         scope = testScope.backgroundScope,
                         backgroundDispatcher = kosmos.testDispatcher,
-                        secureSettings = FakeSettings(),
+                        secureSettings = settings,
                         selectionsManager = localUserSelectionManager,
                     ),
                 configs =
@@ -403,7 +404,7 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    @EnableFlags(com.android.systemui.Flags.FLAG_NEW_PICKER_UI)
+    @EnableFlags(com.android.systemui.shared.Flags.FLAG_NEW_CUSTOMIZATION_PICKER_UI)
     fun startButton_inPreviewMode_onPreviewQuickAffordanceSelected() =
         testScope.runTest {
             underTest.onPreviewSlotSelected(KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START)

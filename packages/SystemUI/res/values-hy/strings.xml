@@ -104,6 +104,7 @@
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g>-ն ու բացված այլ հավելվածներ հայտնաբերել են այս սքրինշոթը։"</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Ավելացնել նշմանը"</string>
     <string name="backlinks_include_link" msgid="4562093591148248158">"Ներառել հղումը"</string>
+    <string name="backlinks_duplicate_label_format" msgid="558445128952827926">"<xliff:g id="APPNAME">%1$s</xliff:g> <xliff:g id="FREQUENCYCOUNT">(%2$d)</xliff:g>"</string>
     <string name="screenrecord_title" msgid="4257171601439507792">"Էկրանի տեսագրում"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Էկրանի տեսագրության մշակում"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Էկրանի տեսագրման աշխատաշրջանի ընթացիկ ծանուցում"</string>
@@ -291,7 +292,8 @@
     <string name="start_dreams" msgid="9131802557946276718">"Էկրանապահ"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Չանհանգստացնել"</string>
-    <string name="quick_settings_modes_label" msgid="5407025818652750501">"Կարևոր ռեժիմներ"</string>
+    <!-- no translation found for quick_settings_modes_label (879156359479504244) -->
+    <skip />
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Զուգակցված սարքեր չկան"</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"Հպեք՝ սարք միացնելու կամ անջատելու համար"</string>
@@ -300,13 +302,14 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Միացնել Bluetooth-ը"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Միացված է"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"Աուդիոյի փոխանցում"</string>
+    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="3227408556754456024">"Հպեք՝ աուդիոն փոխանջատելու կամ դրանով կիսվելու համար"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Պահված է"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"անջատել"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"ակտիվացնել"</string>
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="3345758139235739006">"Ավտոմատ միացնել վաղը"</string>
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"Bluetooth-ն օգտագործում են, օրինակ, Quick Share և «Գտնել իմ սարքը» գործառույթները"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bluetooth-ը կմիանա վաղն առավոտյան"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Փոխանցել աուդիո"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Փոխանցել աուդիոն"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Աուդիոյի փոխանցում"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"անցնել աուդիոյի փոխանցման կարգավորումներ"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Մարտկոցի լիցքը՝ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
@@ -431,7 +434,8 @@
     <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"Բացել կարգավորումները"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Այլ սարք"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Միացնել/անջատել համատեսքը"</string>
-    <string name="zen_modes_dialog_title" msgid="4159138230418567383">"Կարևոր ռեժիմներ"</string>
+    <!-- no translation found for zen_modes_dialog_title (8854640808100096934) -->
+    <skip />
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"Պատրաստ է"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"Կարգավորումներ"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"Միացված է"</string>
@@ -532,8 +536,12 @@
     <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"Տեսագրման և հեռարձակման ընթացքում ծառայությունների մատակարարին հասանելի կլինեն ձեր սարքի էկրանին ցուցադրվող տեղեկությունները և ձեր սարքով նվագարկվող նյութերը։ Սա ներառում է այնպիսի տեղեկություններ, ինչպիսիք են, օրինակ, գաղտնաբառերը, վճարային տվյալները, լուսանկարները, հաղորդագրությունները և նվագարկվող աուդիո ֆայլերը։"</string>
     <string name="screen_share_generic_app_selector_title" msgid="8331515850599218288">"Հավելվածի էկրանի ցուցադրում կամ տեսագրում"</string>
     <string name="media_projection_entry_app_permission_dialog_title" msgid="4613857256721708062">"Ցուցադրե՞լ ձեր էկրանը <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> հավելվածով"</string>
-    <string name="media_projection_entry_app_permission_dialog_option_text_single_app" msgid="6314402084788062644">"Ցուցադրել մեկ հավելված"</string>
-    <string name="media_projection_entry_app_permission_dialog_option_text_entire_screen" msgid="7381488112332599632">"Ցուցադրել ամբողջ էկրանը"</string>
+    <string name="screen_share_permission_dialog_option_single_app" msgid="2974054871681567314">"Ցուցադրել մեկ հավելված"</string>
+    <!-- no translation found for media_projection_entry_app_permission_dialog_option_text_single_app (2308901434964846084) -->
+    <skip />
+    <string name="screen_share_permission_dialog_option_entire_screen" msgid="4493174362775038997">"Ցուցադրել ամբողջ էկրանը"</string>
+    <!-- no translation found for media_projection_entry_app_permission_dialog_option_text_entire_screen (5100078808078139706) -->
+    <skip />
     <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="5504288438067851086">"Երբ ցուցադրում եք ամբողջ էկրանը, տեսանելի կլինի այն ամենը, ինչ ձեր էկրանին տեսանելի է <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> հավելվածին։ Ուստի ուշադիր եղեք այնպիսի բաների հետ, ինչպիսիք են գաղտնաբառերը, վճարային տվյալները, հաղորդագրությունները, լուսանկարները, աուդիո և վիդեո բովանդակությունը։"</string>
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="7094417930857938876">"Երբ դուք որևէ հավելված եք հեռարձակում, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> հավելվածին տեսանելի կլինի այն ամենը, ինչ ցուցադրվում կամ նվագարկվում է այդ հավելվածում։ Ուստի ուշադիր եղեք այնպիսի բաների հետ, ինչպիսիք են գաղտնաբառերը, վճարային տվյալները, հաղորդագրությունները, լուսանկարները, աուդիո և վիդեո բովանդակությունը։"</string>
     <string name="media_projection_entry_app_permission_dialog_continue_entire_screen" msgid="1850848182344377579">"Ցուցադրել էկրանը"</string>
@@ -718,8 +726,7 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Արբանյակային լավ կապ"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Հասանելի է արբանյակային կապ"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"Satellite SOS"</string>
-    <!-- no translation found for satellite_emergency_only_carrier_text (828510231597991206) -->
-    <skip />
+    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"Շտապ կանչեր կամ SOS"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Աշխատանքային պրոֆիլ"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Զվարճանք մեկ՝ որոշակի մարդու համար"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Համակարգի ՕՄ-ի կարգավորիչը հնարավորություն է տալիս հարմարեցնել Android-ի օգտատիրոջ միջերեսը: Այս փորձնական գործառույթները կարող են հետագա թողարկումների մեջ փոփոխվել, խափանվել կամ ընդհանրապես չհայտնվել: Եթե շարունակում եք, զգուշացեք:"</string>
@@ -1386,6 +1393,18 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Ծալել պատկերակը"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Ծավալել պատկերակը"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"կամ"</string>
+    <!-- no translation found for launch_keyboard_tutorial_notification_title (8849933155160522519) -->
+    <skip />
+    <!-- no translation found for launch_keyboard_tutorial_notification_content (2880339951512757918) -->
+    <skip />
+    <!-- no translation found for launch_touchpad_tutorial_notification_title (2243780062772196901) -->
+    <skip />
+    <!-- no translation found for launch_touchpad_tutorial_notification_content (7931085031240753226) -->
+    <skip />
+    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_title (1940023776496198762) -->
+    <skip />
+    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_content (1780725168171929365) -->
+    <skip />
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"«Հետ» ժեստ"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Հիմնական էկրան անցնելու ժեստ"</string>
     <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"Գործողության ստեղն"</string>
