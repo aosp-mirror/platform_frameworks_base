@@ -18155,9 +18155,17 @@ package android.view {
     field public static final int DISPLAY_IME_POLICY_LOCAL = 0; // 0x0
   }
 
+  @FlaggedApi("android.companion.virtualdevice.flags.status_bar_and_insets") public static class WindowManager.InsetsParams {
+    ctor public WindowManager.InsetsParams(int);
+    method @Nullable public android.graphics.Insets getInsetsSize();
+    method public int getType();
+    method @NonNull public android.view.WindowManager.InsetsParams setInsetsSize(@Nullable android.graphics.Insets);
+  }
+
   public static class WindowManager.LayoutParams extends android.view.ViewGroup.LayoutParams implements android.os.Parcelable {
     method public final long getUserActivityTimeout();
     method public boolean isSystemApplicationOverlay();
+    method @FlaggedApi("android.companion.virtualdevice.flags.status_bar_and_insets") public void setInsetsParams(@NonNull java.util.List<android.view.WindowManager.InsetsParams>);
     method @RequiresPermission(android.Manifest.permission.SYSTEM_APPLICATION_OVERLAY) public void setSystemApplicationOverlay(boolean);
     method public final void setUserActivityTimeout(long);
     field @RequiresPermission(android.Manifest.permission.HIDE_NON_SYSTEM_OVERLAY_WINDOWS) public static final int SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS = 524288; // 0x80000
