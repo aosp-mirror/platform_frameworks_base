@@ -72,7 +72,6 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
     @Mock private lateinit var mediaController: MediaController
     @Mock private lateinit var logger: MediaTimeoutLogger
     @Mock private lateinit var statusBarStateController: SysuiStatusBarStateController
-    private lateinit var executor: FakeExecutor
     @Mock private lateinit var timeoutCallback: (String, Boolean) -> Unit
     @Mock private lateinit var stateCallback: (String, PlaybackState) -> Unit
     @Mock private lateinit var sessionCallback: (String) -> Unit
@@ -88,6 +87,9 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
     private lateinit var resumeData: MediaData
     private lateinit var mediaTimeoutListener: MediaTimeoutListener
     private var clock = FakeSystemClock()
+    private lateinit var mainExecutor: FakeExecutor
+    private lateinit var bgExecutor: FakeExecutor
+    private lateinit var uiExecutor: FakeExecutor
     @Mock private lateinit var mediaFlags: MediaFlags
     @Mock private lateinit var smartspaceData: SmartspaceMediaData
 
@@ -95,11 +97,15 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
     fun setup() {
         whenever(mediaControllerFactory.create(any())).thenReturn(mediaController)
         whenever(mediaFlags.isPersistentSsCardEnabled()).thenReturn(false)
-        executor = FakeExecutor(clock)
+        mainExecutor = FakeExecutor(clock)
+        bgExecutor = FakeExecutor(clock)
+        uiExecutor = FakeExecutor(clock)
         mediaTimeoutListener =
             MediaTimeoutListener(
                 mediaControllerFactory,
-                executor,
+                bgExecutor,
+                uiExecutor,
+                mainExecutor,
                 logger,
                 statusBarStateController,
                 clock,
@@ -143,30 +149,31 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
         whenever(playingState.state).thenReturn(PlaybackState.STATE_PLAYING)
 
         whenever(mediaController.playbackState).thenReturn(playingState)
-        mediaTimeoutListener.onMediaDataLoaded(KEY, null, mediaData)
+        loadMediaData(KEY, null, mediaData)
         verify(mediaController).registerCallback(capture(mediaCallbackCaptor))
         verify(logger).logPlaybackState(eq(KEY), eq(playingState))
 
         // Ignores if same key
         clearInvocations(mediaController)
-        mediaTimeoutListener.onMediaDataLoaded(KEY, KEY, mediaData)
+        loadMediaData(KEY, KEY, mediaData)
         verify(mediaController, never()).registerCallback(anyObject())
     }
 
     @Test
     fun testOnMediaDataLoaded_registersTimeout_whenPaused() {
-        mediaTimeoutListener.onMediaDataLoaded(KEY, null, mediaData)
+        loadMediaData(KEY, null, mediaData)
         verify(mediaController).registerCallback(capture(mediaCallbackCaptor))
-        assertThat(executor.numPending()).isEqualTo(1)
+        assertThat(mainExecutor.numPending()).isEqualTo(1)
         verify(timeoutCallback, never()).invoke(anyString(), anyBoolean())
         verify(logger).logScheduleTimeout(eq(KEY), eq(false), eq(false))
-        assertThat(executor.advanceClockToNext()).isEqualTo(PAUSED_MEDIA_TIMEOUT)
+        assertThat(mainExecutor.advanceClockToNext()).isEqualTo(PAUSED_MEDIA_TIMEOUT)
     }
 
     @Test
     fun testOnMediaDataRemoved_unregistersPlaybackListener() {
-        mediaTimeoutListener.onMediaDataLoaded(KEY, null, mediaData)
+        loadMediaData(KEY, null, mediaData)
         mediaTimeoutListener.onMediaDataRemoved(KEY, false)
+        assertThat(bgExecutor.runAllReady()).isEqualTo(1)
         verify(mediaController).unregisterCallback(anyObject())
 
         // Ignores duplicate requests
@@ -178,50 +185,50 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
     @Test
     fun testOnMediaDataRemoved_clearsTimeout() {
         // GIVEN media that is paused
-        mediaTimeoutListener.onMediaDataLoaded(KEY, null, mediaData)
-        assertThat(executor.numPending()).isEqualTo(1)
+        loadMediaData(KEY, null, mediaData)
+        assertThat(mainExecutor.numPending()).isEqualTo(1)
         // WHEN the media is removed
         mediaTimeoutListener.onMediaDataRemoved(KEY, false)
         // THEN the timeout runnable is cancelled
-        assertThat(executor.numPending()).isEqualTo(0)
+        assertThat(mainExecutor.numPending()).isEqualTo(0)
     }
 
     @Test
     fun testOnMediaDataLoaded_migratesKeys() {
         val newKey = "NEWKEY"
         // From not playing
-        mediaTimeoutListener.onMediaDataLoaded(KEY, null, mediaData)
+        loadMediaData(KEY, null, mediaData)
         clearInvocations(mediaController)
 
         // To playing
         val playingState = mock(android.media.session.PlaybackState::class.java)
         whenever(playingState.state).thenReturn(PlaybackState.STATE_PLAYING)
         whenever(mediaController.playbackState).thenReturn(playingState)
-        mediaTimeoutListener.onMediaDataLoaded(newKey, KEY, mediaData)
+        loadMediaData(newKey, KEY, mediaData)
         verify(mediaController).unregisterCallback(anyObject())
         verify(mediaController).registerCallback(anyObject())
         verify(logger).logMigrateListener(eq(KEY), eq(newKey), eq(true))
 
         // Enqueues callback
-        assertThat(executor.numPending()).isEqualTo(1)
+        assertThat(mainExecutor.numPending()).isEqualTo(1)
     }
 
     @Test
     fun testOnMediaDataLoaded_migratesKeys_noTimeoutExtension() {
         val newKey = "NEWKEY"
         // From not playing
-        mediaTimeoutListener.onMediaDataLoaded(KEY, null, mediaData)
+        loadMediaData(KEY, null, mediaData)
         clearInvocations(mediaController)
 
         // Migrate, still not playing
         val playingState = mock(android.media.session.PlaybackState::class.java)
         whenever(playingState.state).thenReturn(PlaybackState.STATE_PAUSED)
         whenever(mediaController.playbackState).thenReturn(playingState)
-        mediaTimeoutListener.onMediaDataLoaded(newKey, KEY, mediaData)
+        loadMediaData(newKey, KEY, mediaData)
 
         // The number of queued timeout tasks remains the same. The timeout task isn't cancelled nor
         // is another scheduled
-        assertThat(executor.numPending()).isEqualTo(1)
+        assertThat(mainExecutor.numPending()).isEqualTo(1)
         verify(logger).logUpdateListener(eq(newKey), eq(false))
     }
 
@@ -233,8 +240,8 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
         mediaCallbackCaptor.value.onPlaybackStateChanged(
             PlaybackState.Builder().setState(PlaybackState.STATE_PAUSED, 0L, 0f).build()
         )
-        assertThat(executor.numPending()).isEqualTo(1)
-        assertThat(executor.advanceClockToNext()).isEqualTo(PAUSED_MEDIA_TIMEOUT)
+        assertThat(mainExecutor.numPending()).isEqualTo(1)
+        assertThat(mainExecutor.advanceClockToNext()).isEqualTo(PAUSED_MEDIA_TIMEOUT)
     }
 
     @Test
@@ -245,7 +252,7 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
         mediaCallbackCaptor.value.onPlaybackStateChanged(
             PlaybackState.Builder().setState(PlaybackState.STATE_PLAYING, 0L, 0f).build()
         )
-        assertThat(executor.numPending()).isEqualTo(0)
+        assertThat(mainExecutor.numPending()).isEqualTo(0)
         verify(logger).logTimeoutCancelled(eq(KEY), any())
     }
 
@@ -257,7 +264,7 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
         mediaCallbackCaptor.value.onPlaybackStateChanged(
             PlaybackState.Builder().setState(PlaybackState.STATE_STOPPED, 0L, 0f).build()
         )
-        assertThat(executor.numPending()).isEqualTo(1)
+        assertThat(mainExecutor.numPending()).isEqualTo(1)
     }
 
     @Test
@@ -265,7 +272,7 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
         // Assuming we're have a pending timeout
         testOnPlaybackStateChanged_schedulesTimeout_whenPaused()
 
-        with(executor) {
+        with(mainExecutor) {
             advanceClockToNext()
             runAllReady()
         }
@@ -274,7 +281,7 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
 
     @Test
     fun testIsTimedOut() {
-        mediaTimeoutListener.onMediaDataLoaded(KEY, null, mediaData)
+        loadMediaData(KEY, null, mediaData)
         assertThat(mediaTimeoutListener.isTimedOut(KEY)).isFalse()
     }
 
@@ -282,16 +289,17 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
     fun testOnSessionDestroyed_active_clearsTimeout() {
         // GIVEN media that is paused
         val mediaPaused = mediaData.copy(isPlaying = false)
-        mediaTimeoutListener.onMediaDataLoaded(KEY, null, mediaPaused)
+        loadMediaData(KEY, null, mediaPaused)
         verify(mediaController).registerCallback(capture(mediaCallbackCaptor))
-        assertThat(executor.numPending()).isEqualTo(1)
+        assertThat(mainExecutor.numPending()).isEqualTo(1)
 
         // WHEN the session is destroyed
         mediaCallbackCaptor.value.onSessionDestroyed()
 
         // THEN the controller is unregistered and timeout run
+        assertThat(bgExecutor.runAllReady()).isEqualTo(1)
         verify(mediaController).unregisterCallback(anyObject())
-        assertThat(executor.numPending()).isEqualTo(0)
+        assertThat(mainExecutor.numPending()).isEqualTo(0)
         verify(logger).logSessionDestroyed(eq(KEY))
         verify(sessionCallback).invoke(eq(KEY))
     }
@@ -306,11 +314,11 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
         whenever(playingState.state).thenReturn(PlaybackState.STATE_PLAYING)
         whenever(mediaController.playbackState).thenReturn(playingState)
         val mediaPlaying = mediaData.copy(isPlaying = true)
-        mediaTimeoutListener.onMediaDataLoaded(KEY, null, mediaPlaying)
+        loadMediaData(KEY, null, mediaPlaying)
 
         // THEN the timeout runnable will update the state
-        assertThat(executor.numPending()).isEqualTo(1)
-        with(executor) {
+        assertThat(mainExecutor.numPending()).isEqualTo(1)
+        with(mainExecutor) {
             advanceClockToNext()
             runAllReady()
         }
@@ -322,31 +330,32 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
     fun testOnSessionDestroyed_resume_continuesTimeout() {
         // GIVEN resume media with session info
         val resumeWithSession = resumeData.copy(token = session.sessionToken)
-        mediaTimeoutListener.onMediaDataLoaded(PACKAGE, null, resumeWithSession)
+        loadMediaData(PACKAGE, null, resumeWithSession)
         verify(mediaController).registerCallback(capture(mediaCallbackCaptor))
-        assertThat(executor.numPending()).isEqualTo(1)
+        assertThat(mainExecutor.numPending()).isEqualTo(1)
 
         // WHEN the session is destroyed
         mediaCallbackCaptor.value.onSessionDestroyed()
 
         // THEN the controller is unregistered, but the timeout is still scheduled
+        assertThat(bgExecutor.runAllReady()).isEqualTo(1)
         verify(mediaController).unregisterCallback(anyObject())
-        assertThat(executor.numPending()).isEqualTo(1)
+        assertThat(mainExecutor.numPending()).isEqualTo(1)
         verify(sessionCallback, never()).invoke(eq(KEY))
     }
 
     @Test
     fun testOnMediaDataLoaded_activeToResume_registersTimeout() {
         // WHEN a regular media is loaded
-        mediaTimeoutListener.onMediaDataLoaded(KEY, null, mediaData)
+        loadMediaData(KEY, null, mediaData)
 
         // AND it turns into a resume control
-        mediaTimeoutListener.onMediaDataLoaded(PACKAGE, KEY, resumeData)
+        loadMediaData(PACKAGE, KEY, resumeData)
 
         // THEN we register a timeout
-        assertThat(executor.numPending()).isEqualTo(1)
+        assertThat(mainExecutor.numPending()).isEqualTo(1)
         verify(timeoutCallback, never()).invoke(anyString(), anyBoolean())
-        assertThat(executor.advanceClockToNext()).isEqualTo(RESUME_MEDIA_TIMEOUT)
+        assertThat(mainExecutor.advanceClockToNext()).isEqualTo(RESUME_MEDIA_TIMEOUT)
     }
 
     @Test
@@ -355,42 +364,42 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
         val pausedState =
             PlaybackState.Builder().setState(PlaybackState.STATE_PAUSED, 0L, 0f).build()
         whenever(mediaController.playbackState).thenReturn(pausedState)
-        mediaTimeoutListener.onMediaDataLoaded(KEY, null, mediaData)
-        assertThat(executor.numPending()).isEqualTo(1)
+        loadMediaData(KEY, null, mediaData)
+        assertThat(mainExecutor.numPending()).isEqualTo(1)
 
         // AND it turns into a resume control
-        mediaTimeoutListener.onMediaDataLoaded(PACKAGE, KEY, resumeData)
+        loadMediaData(PACKAGE, KEY, resumeData)
 
         // THEN we update the timeout length
-        assertThat(executor.numPending()).isEqualTo(1)
+        assertThat(mainExecutor.numPending()).isEqualTo(1)
         verify(timeoutCallback, never()).invoke(anyString(), anyBoolean())
-        assertThat(executor.advanceClockToNext()).isEqualTo(RESUME_MEDIA_TIMEOUT)
+        assertThat(mainExecutor.advanceClockToNext()).isEqualTo(RESUME_MEDIA_TIMEOUT)
     }
 
     @Test
     fun testOnMediaDataLoaded_resumption_registersTimeout() {
         // WHEN a resume media is loaded
-        mediaTimeoutListener.onMediaDataLoaded(PACKAGE, null, resumeData)
+        loadMediaData(PACKAGE, null, resumeData)
 
         // THEN we register a timeout
-        assertThat(executor.numPending()).isEqualTo(1)
+        assertThat(mainExecutor.numPending()).isEqualTo(1)
         verify(timeoutCallback, never()).invoke(anyString(), anyBoolean())
-        assertThat(executor.advanceClockToNext()).isEqualTo(RESUME_MEDIA_TIMEOUT)
+        assertThat(mainExecutor.advanceClockToNext()).isEqualTo(RESUME_MEDIA_TIMEOUT)
     }
 
     @Test
     fun testOnMediaDataLoaded_resumeToActive_updatesTimeout() {
         // WHEN we have a resume control
-        mediaTimeoutListener.onMediaDataLoaded(PACKAGE, null, resumeData)
+        loadMediaData(PACKAGE, null, resumeData)
 
         // AND that media is resumed
         val playingState =
             PlaybackState.Builder().setState(PlaybackState.STATE_PAUSED, 0L, 0f).build()
         whenever(mediaController.playbackState).thenReturn(playingState)
-        mediaTimeoutListener.onMediaDataLoaded(KEY, PACKAGE, mediaData)
+        loadMediaData(oldKey = PACKAGE, data = mediaData)
 
         // THEN the timeout length is changed to a regular media control
-        assertThat(executor.advanceClockToNext()).isEqualTo(PAUSED_MEDIA_TIMEOUT)
+        assertThat(mainExecutor.advanceClockToNext()).isEqualTo(PAUSED_MEDIA_TIMEOUT)
     }
 
     @Test
@@ -401,7 +410,7 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
         mediaTimeoutListener.onMediaDataRemoved(PACKAGE, false)
 
         // THEN the timeout runnable is cancelled
-        assertThat(executor.numPending()).isEqualTo(0)
+        assertThat(mainExecutor.numPending()).isEqualTo(0)
     }
 
     @Test
@@ -427,6 +436,7 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
         // When the playback state changes, and has different actions
         val playingState = PlaybackState.Builder().setActions(PlaybackState.ACTION_PLAY).build()
         mediaCallbackCaptor.value.onPlaybackStateChanged(playingState)
+        assertThat(uiExecutor.runAllReady()).isEqualTo(1)
 
         // Then the callback is invoked
         verify(stateCallback).invoke(eq(KEY), eq(playingState!!))
@@ -463,6 +473,7 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
                 .addCustomAction(customTwo)
                 .build()
         mediaCallbackCaptor.value.onPlaybackStateChanged(pausedStateTwoActions)
+        assertThat(uiExecutor.runAllReady()).isEqualTo(1)
 
         // Then the callback is invoked
         verify(stateCallback).invoke(eq(KEY), eq(pausedStateTwoActions!!))
@@ -534,6 +545,7 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
         val playingState =
             PlaybackState.Builder().setState(PlaybackState.STATE_PLAYING, 0L, 1f).build()
         mediaCallbackCaptor.value.onPlaybackStateChanged(playingState)
+        uiExecutor.runAllReady()
 
         // Then the callback is invoked
         verify(stateCallback).invoke(eq(KEY), eq(playingState!!))
@@ -567,7 +579,7 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
         // And we doze past the scheduled timeout
         val time = clock.currentTimeMillis()
         clock.setElapsedRealtime(time + PAUSED_MEDIA_TIMEOUT)
-        assertThat(executor.numPending()).isEqualTo(1)
+        assertThat(mainExecutor.numPending()).isEqualTo(1)
 
         // Then when no longer dozing, the timeout runs immediately
         dozingCallbackCaptor.value.onDozingChanged(false)
@@ -576,7 +588,7 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
 
         // and cancel any later scheduled timeout
         verify(logger).logTimeoutCancelled(eq(KEY), any())
-        assertThat(executor.numPending()).isEqualTo(0)
+        assertThat(mainExecutor.numPending()).isEqualTo(0)
     }
 
     @Test
@@ -592,12 +604,12 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
 
         // And we doze, but not past the scheduled timeout
         clock.setElapsedRealtime(time + PAUSED_MEDIA_TIMEOUT / 2L)
-        assertThat(executor.numPending()).isEqualTo(1)
+        assertThat(mainExecutor.numPending()).isEqualTo(1)
 
         // Then when no longer dozing, the timeout remains scheduled
         dozingCallbackCaptor.value.onDozingChanged(false)
         verify(timeoutCallback, never()).invoke(eq(KEY), eq(true))
-        assertThat(executor.numPending()).isEqualTo(1)
+        assertThat(mainExecutor.numPending()).isEqualTo(1)
     }
 
     @Test
@@ -610,8 +622,8 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
         whenever(smartspaceData.expiryTimeMs).thenReturn(expireTime)
 
         mediaTimeoutListener.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, smartspaceData)
-        assertThat(executor.numPending()).isEqualTo(1)
-        assertThat(executor.advanceClockToNext()).isEqualTo(duration)
+        assertThat(mainExecutor.numPending()).isEqualTo(1)
+        assertThat(mainExecutor.advanceClockToNext()).isEqualTo(duration)
     }
 
     @Test
@@ -619,7 +631,7 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
         // Given a pending timeout
         testSmartspaceDataLoaded_schedulesTimeout()
 
-        executor.runAllReady()
+        mainExecutor.runAllReady()
         verify(timeoutCallback).invoke(eq(SMARTSPACE_KEY), eq(true))
     }
 
@@ -634,14 +646,14 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
         whenever(smartspaceData.expiryTimeMs).thenReturn(expireTime)
 
         mediaTimeoutListener.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, smartspaceData)
-        assertThat(executor.numPending()).isEqualTo(1)
+        assertThat(mainExecutor.numPending()).isEqualTo(1)
 
         val expiryLonger = expireTime + duration
         whenever(smartspaceData.expiryTimeMs).thenReturn(expiryLonger)
         mediaTimeoutListener.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, smartspaceData)
 
-        assertThat(executor.numPending()).isEqualTo(1)
-        assertThat(executor.advanceClockToNext()).isEqualTo(duration * 2)
+        assertThat(mainExecutor.numPending()).isEqualTo(1)
+        assertThat(mainExecutor.advanceClockToNext()).isEqualTo(duration * 2)
     }
 
     @Test
@@ -649,10 +661,10 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
         whenever(mediaFlags.isPersistentSsCardEnabled()).thenReturn(true)
 
         mediaTimeoutListener.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, smartspaceData)
-        assertThat(executor.numPending()).isEqualTo(1)
+        assertThat(mainExecutor.numPending()).isEqualTo(1)
 
         mediaTimeoutListener.onSmartspaceMediaDataRemoved(SMARTSPACE_KEY)
-        assertThat(executor.numPending()).isEqualTo(0)
+        assertThat(mainExecutor.numPending()).isEqualTo(0)
     }
 
     @Test
@@ -667,12 +679,12 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
         whenever(smartspaceData.expiryTimeMs).thenReturn(expireTime)
 
         mediaTimeoutListener.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, smartspaceData)
-        assertThat(executor.numPending()).isEqualTo(1)
+        assertThat(mainExecutor.numPending()).isEqualTo(1)
 
         // And we doze past the scheduled timeout
         val time = clock.currentTimeMillis()
         clock.setElapsedRealtime(time + duration * 2)
-        assertThat(executor.numPending()).isEqualTo(1)
+        assertThat(mainExecutor.numPending()).isEqualTo(1)
 
         // Then when no longer dozing, the timeout runs immediately
         dozingCallbackCaptor.value.onDozingChanged(false)
@@ -680,12 +692,18 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
         verify(logger).logTimeout(eq(SMARTSPACE_KEY))
 
         // and cancel any later scheduled timeout
-        assertThat(executor.numPending()).isEqualTo(0)
+        assertThat(mainExecutor.numPending()).isEqualTo(0)
     }
 
     private fun loadMediaDataWithPlaybackState(state: PlaybackState) {
         whenever(mediaController.playbackState).thenReturn(state)
-        mediaTimeoutListener.onMediaDataLoaded(KEY, null, mediaData)
+        loadMediaData(data = mediaData)
         verify(mediaController).registerCallback(capture(mediaCallbackCaptor))
+    }
+
+    private fun loadMediaData(key: String = KEY, oldKey: String? = null, data: MediaData) {
+        mediaTimeoutListener.onMediaDataLoaded(key, oldKey, data)
+        bgExecutor.runAllReady()
+        uiExecutor.runAllReady()
     }
 }
