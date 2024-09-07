@@ -26,6 +26,7 @@ import static com.google.common.truth.Truth.assertThat;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
+import android.view.Display;
 import android.view.SurfaceControl;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -52,7 +53,9 @@ public class DisplayDeviceTest {
     private static final int WIDTH = 500;
     private static final int HEIGHT = 900;
     private static final Point PORTRAIT_SIZE = new Point(WIDTH, HEIGHT);
+    private static final Point PORTRAIT_DOUBLE_WIDTH = new Point(2 * WIDTH, HEIGHT);
     private static final Point LANDSCAPE_SIZE = new Point(HEIGHT, WIDTH);
+    private static final Point LANDSCAPE_DOUBLE_HEIGHT = new Point(HEIGHT, 2 * WIDTH);
 
     @Mock
     private SurfaceControl.Transaction mMockTransaction;
@@ -69,6 +72,27 @@ public class DisplayDeviceTest {
     }
 
     @Test
+    public void testGetDisplaySurfaceDefaultSizeLocked_notRotated_anisotropyCorrection() {
+        mDisplayDeviceInfo.type = Display.TYPE_EXTERNAL;
+        mDisplayDeviceInfo.xDpi = 0.5f;
+        mDisplayDeviceInfo.yDpi = 1.0f;
+        DisplayDevice displayDevice = new FakeDisplayDevice(mDisplayDeviceInfo,
+                mMockDisplayAdapter, /*isAnisotropyCorrectionEnabled=*/ true);
+        assertThat(displayDevice.getDisplaySurfaceDefaultSizeLocked()).isEqualTo(
+                PORTRAIT_DOUBLE_WIDTH);
+    }
+
+    @Test
+    public void testGetDisplaySurfaceDefaultSizeLocked_notRotated_noAnisotropyCorrection() {
+        mDisplayDeviceInfo.type = Display.TYPE_INTERNAL;
+        mDisplayDeviceInfo.xDpi = 0.5f;
+        mDisplayDeviceInfo.yDpi = 1.0f;
+        DisplayDevice displayDevice = new FakeDisplayDevice(mDisplayDeviceInfo,
+                mMockDisplayAdapter, /*isAnisotropyCorrectionEnabled=*/ true);
+        assertThat(displayDevice.getDisplaySurfaceDefaultSizeLocked()).isEqualTo(PORTRAIT_SIZE);
+    }
+
+    @Test
     public void testGetDisplaySurfaceDefaultSizeLocked_notRotated() {
         DisplayDevice displayDevice = new FakeDisplayDevice(mDisplayDeviceInfo,
                 mMockDisplayAdapter);
@@ -81,6 +105,29 @@ public class DisplayDeviceTest {
                 mMockDisplayAdapter);
         displayDevice.setProjectionLocked(mMockTransaction, ROTATION_0, new Rect(), new Rect());
         assertThat(displayDevice.getDisplaySurfaceDefaultSizeLocked()).isEqualTo(PORTRAIT_SIZE);
+    }
+
+    @Test
+    public void testGetDisplaySurfaceDefaultSizeLocked_rotation90_anisotropyCorrection() {
+        mDisplayDeviceInfo.type = Display.TYPE_EXTERNAL;
+        mDisplayDeviceInfo.xDpi = 0.5f;
+        mDisplayDeviceInfo.yDpi = 1.0f;
+        DisplayDevice displayDevice = new FakeDisplayDevice(mDisplayDeviceInfo,
+                mMockDisplayAdapter, /*isAnisotropyCorrectionEnabled=*/ true);
+        displayDevice.setProjectionLocked(mMockTransaction, ROTATION_90, new Rect(), new Rect());
+        assertThat(displayDevice.getDisplaySurfaceDefaultSizeLocked()).isEqualTo(
+                LANDSCAPE_DOUBLE_HEIGHT);
+    }
+
+    @Test
+    public void testGetDisplaySurfaceDefaultSizeLocked_rotation90_noAnisotropyCorrection() {
+        mDisplayDeviceInfo.type = Display.TYPE_INTERNAL;
+        mDisplayDeviceInfo.xDpi = 0.5f;
+        mDisplayDeviceInfo.yDpi = 1.0f;
+        DisplayDevice displayDevice = new FakeDisplayDevice(mDisplayDeviceInfo,
+                mMockDisplayAdapter, /*isAnisotropyCorrectionEnabled=*/ true);
+        displayDevice.setProjectionLocked(mMockTransaction, ROTATION_90, new Rect(), new Rect());
+        assertThat(displayDevice.getDisplaySurfaceDefaultSizeLocked()).isEqualTo(LANDSCAPE_SIZE);
     }
 
     @Test
@@ -111,8 +158,14 @@ public class DisplayDeviceTest {
         private final DisplayDeviceInfo mDisplayDeviceInfo;
 
         FakeDisplayDevice(DisplayDeviceInfo displayDeviceInfo, DisplayAdapter displayAdapter) {
+            this(displayDeviceInfo, displayAdapter, /*isAnisotropyCorrectionEnabled=*/ false);
+        }
+
+        FakeDisplayDevice(DisplayDeviceInfo displayDeviceInfo, DisplayAdapter displayAdapter,
+                boolean isAnisotropyCorrectionEnabled) {
             super(displayAdapter, /* displayToken= */ null, /* uniqueId= */ "",
-                    InstrumentationRegistry.getInstrumentation().getContext());
+                    InstrumentationRegistry.getInstrumentation().getContext(),
+                    isAnisotropyCorrectionEnabled);
             mDisplayDeviceInfo = displayDeviceInfo;
         }
 

@@ -32,10 +32,10 @@ namespace android {
 
 namespace {
 
-// Max size we allow for the result from HIDIOCGRAWUNIQ (Bluetooth address or USB serial number).
-// Copied from linux/hid.h struct hid_device->uniq char array size; the ioctl implementation
-// writes at most this many bytes to the provided buffer.
-constexpr int UNIQ_SIZE_MAX = 64;
+// Max sizes we allow for results from string ioctl calls, copied from UAPI linux/uhid.h.
+// The ioctl implementation writes at most this many bytes to the provided buffer:
+constexpr int NAME_SIZE_MAX = 128; // HIDIOCGRAWNAME (device name)
+constexpr int UNIQ_SIZE_MAX = 64;  // HIDIOCGRAWUNIQ (BT address or USB serial number)
 
 } // anonymous namespace
 
@@ -82,6 +82,16 @@ static jint com_android_server_accessibility_BrailleDisplayConnection_getHidrawB
     return info.bustype;
 }
 
+static jstring com_android_server_accessibility_BrailleDisplayConnection_getHidrawName(
+        JNIEnv* env, jclass /*clazz*/, int fd) {
+    char buf[NAME_SIZE_MAX];
+    if (ioctl(fd, HIDIOCGRAWNAME(NAME_SIZE_MAX), buf) < 0) {
+        return nullptr;
+    }
+    // Local ref is not deleted because it is returned to Java
+    return env->NewStringUTF(buf);
+}
+
 static const JNINativeMethod gMethods[] = {
         {"nativeGetHidrawDescSize", "(I)I",
          (void*)com_android_server_accessibility_BrailleDisplayConnection_getHidrawDescSize},
@@ -91,6 +101,8 @@ static const JNINativeMethod gMethods[] = {
          (void*)com_android_server_accessibility_BrailleDisplayConnection_getHidrawUniq},
         {"nativeGetHidrawBusType", "(I)I",
          (void*)com_android_server_accessibility_BrailleDisplayConnection_getHidrawBusType},
+        {"nativeGetHidrawName", "(I)Ljava/lang/String;",
+         (void*)com_android_server_accessibility_BrailleDisplayConnection_getHidrawName},
 };
 
 int register_com_android_server_accessibility_BrailleDisplayConnection(JNIEnv* env) {

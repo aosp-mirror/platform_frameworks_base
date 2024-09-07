@@ -35,6 +35,7 @@ import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARE
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.inputmethodservice.InputMethodService;
 import android.net.Uri;
@@ -56,6 +57,7 @@ import android.view.accessibility.AccessibilityManager;
 
 import androidx.annotation.NonNull;
 
+import com.android.internal.accessibility.common.ShortcutConstants;
 import com.android.systemui.Dumpable;
 import com.android.systemui.accessibility.AccessibilityButtonModeObserver;
 import com.android.systemui.accessibility.AccessibilityButtonTargetsObserver;
@@ -73,6 +75,7 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.BarTransitions.TransitionMode;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import dagger.Lazy;
@@ -100,7 +103,7 @@ public final class NavBarHelper implements
         AccessibilityButtonModeObserver.ModeChangedListener,
         AccessibilityButtonTargetsObserver.TargetsChangedListener,
         OverviewProxyService.OverviewProxyListener, NavigationModeController.ModeChangedListener,
-        Dumpable, CommandQueue.Callbacks {
+        Dumpable, CommandQueue.Callbacks, ConfigurationController.ConfigurationListener {
     private static final String TAG = NavBarHelper.class.getSimpleName();
 
     private final Handler mHandler = new Handler(Looper.getMainLooper());
@@ -125,7 +128,7 @@ public final class NavBarHelper implements
     private boolean mLongPressHomeEnabled;
     private boolean mAssistantTouchGestureEnabled;
     private int mNavBarMode;
-    private int mA11yButtonState;
+    private long mA11yButtonState;
     private int mRotationWatcherRotation;
     private boolean mTogglingNavbarTaskbar;
     private boolean mWallpaperVisible;
@@ -188,6 +191,7 @@ public final class NavBarHelper implements
             UserTracker userTracker,
             DisplayTracker displayTracker,
             NotificationShadeWindowController notificationShadeWindowController,
+            ConfigurationController configurationController,
             DumpManager dumpManager,
             CommandQueue commandQueue,
             @Main Executor mainExecutor) {
@@ -214,6 +218,7 @@ public final class NavBarHelper implements
 
         mNavBarMode = navigationModeController.addListener(this);
         mCommandQueue.addCallback(this);
+        configurationController.addCallback(this);
         overviewProxyService.addCallback(this);
         dumpManager.registerDumpable(this);
     }
@@ -243,7 +248,7 @@ public final class NavBarHelper implements
                 Settings.Secure.getUriFor(Settings.Secure.ASSIST_LONG_PRESS_HOME_ENABLED),
                 false, mAssistContentObserver, UserHandle.USER_ALL);
         mContentResolver.registerContentObserver(
-                Settings.Secure.getUriFor(Secure.SEARCH_LONG_PRESS_HOME_ENABLED),
+                Settings.Secure.getUriFor(Secure.SEARCH_ALL_ENTRYPOINTS_ENABLED),
                 false, mAssistContentObserver, UserHandle.USER_ALL);
         mContentResolver.registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.ASSIST_TOUCH_GESTURE_ENABLED),
@@ -358,13 +363,18 @@ public final class NavBarHelper implements
         updateA11yState();
     }
 
+    @Override
+    public void onConfigChanged(Configuration newConfig) {
+        mEdgeBackGestureHandler.onConfigurationChanged(newConfig);
+    }
+
     /**
      * Updates the current accessibility button state. The accessibility button state is only
      * used for {@link Secure#ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR} and
      * {@link Secure#ACCESSIBILITY_BUTTON_MODE_GESTURE}, otherwise it is reset to 0.
      */
     private void updateA11yState() {
-        final int prevState = mA11yButtonState;
+        final long prevState = mA11yButtonState;
         final boolean clickable;
         final boolean longClickable;
         if (mAccessibilityButtonModeObserver.getCurrentAccessibilityButtonMode()
@@ -380,7 +390,7 @@ public final class NavBarHelper implements
             // permission
             final List<String> a11yButtonTargets =
                     mAccessibilityManager.getAccessibilityShortcutTargets(
-                            AccessibilityManager.ACCESSIBILITY_BUTTON);
+                            ShortcutConstants.UserShortcutType.SOFTWARE);
             final int requestingServices = a11yButtonTargets.size();
 
             clickable = requestingServices >= 1;
@@ -421,7 +431,7 @@ public final class NavBarHelper implements
      * 48 = the combination of {@link QuickStepContract#SYSUI_STATE_A11Y_BUTTON_CLICKABLE} and
      * {@link QuickStepContract#SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE}
      */
-    public int getA11yButtonState() {
+    public long getA11yButtonState() {
         return mA11yButtonState;
     }
 
@@ -443,10 +453,10 @@ public final class NavBarHelper implements
         boolean overrideLongPressHome = mAssistManagerLazy.get()
                 .shouldOverrideAssist(AssistManager.INVOCATION_TYPE_HOME_BUTTON_LONG_PRESS);
         boolean longPressDefault = mContext.getResources().getBoolean(overrideLongPressHome
-                ? com.android.internal.R.bool.config_searchLongPressHomeEnabledDefault
+                ? com.android.internal.R.bool.config_searchAllEntrypointsEnabledDefault
                 : com.android.internal.R.bool.config_assistLongPressHomeEnabledDefault);
         mLongPressHomeEnabled = Settings.Secure.getIntForUser(mContentResolver,
-                overrideLongPressHome ? Secure.SEARCH_LONG_PRESS_HOME_ENABLED
+                overrideLongPressHome ? Secure.SEARCH_ALL_ENTRYPOINTS_ENABLED
                         : Settings.Secure.ASSIST_LONG_PRESS_HOME_ENABLED, longPressDefault ? 1 : 0,
                 mUserTracker.getUserId()) != 0;
 

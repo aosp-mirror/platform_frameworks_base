@@ -17,10 +17,8 @@
 package com.android.systemui.communal.data.db
 
 import android.content.Context
-import androidx.room.Room
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.res.R
 import dagger.Module
 import dagger.Provides
 
@@ -33,14 +31,7 @@ interface CommunalDatabaseModule {
             @Application context: Context,
             defaultWidgetPopulation: DefaultWidgetPopulation,
         ): CommunalDatabase {
-            return Room.databaseBuilder(
-                    context,
-                    CommunalDatabase::class.java,
-                    context.resources.getString(R.string.config_communalDatabase)
-                )
-                .fallbackToDestructiveMigration()
-                .addCallback(defaultWidgetPopulation)
-                .build()
+            return CommunalDatabase.getInstance(context, defaultWidgetPopulation)
         }
 
         @SysUISingleton

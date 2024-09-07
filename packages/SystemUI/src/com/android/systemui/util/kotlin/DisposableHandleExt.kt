@@ -17,8 +17,14 @@
 package com.android.systemui.util.kotlin
 
 import com.android.systemui.lifecycle.repeatWhenAttached
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.DisposableHandle
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.launch
 
 /**
  * Suspends to keep getting updates until cancellation. Once cancelled, mark this as eligible for
@@ -42,3 +48,22 @@ suspend fun DisposableHandle.awaitCancellationThenDispose() {
         dispose()
     }
 }
+
+/**
+ * This will [launch], run [onLaunch] to get a [DisposableHandle], and finally
+ * [awaitCancellationThenDispose][DisposableHandle.awaitCancellationThenDispose]. This can be used
+ * to structure self-disposing code which attaches listeners, for example in ViewBinders:
+ * ```
+ * suspend fun bind(view: MyView, viewModel: MyViewModel) = coroutineScope {
+ *     launchAndDispose {
+ *         view.setOnClickListener { viewModel.handleClick() }
+ *         DisposableHandle { view.setOnClickListener(null) }
+ *     }
+ * }
+ * ```
+ */
+inline fun CoroutineScope.launchAndDispose(
+    context: CoroutineContext = EmptyCoroutineContext,
+    start: CoroutineStart = CoroutineStart.DEFAULT,
+    crossinline onLaunch: () -> DisposableHandle
+): Job = launch(context, start) { onLaunch().awaitCancellationThenDispose() }

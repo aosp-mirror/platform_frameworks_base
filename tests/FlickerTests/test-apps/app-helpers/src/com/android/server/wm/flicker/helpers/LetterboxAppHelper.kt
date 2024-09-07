@@ -17,8 +17,8 @@
 package com.android.server.wm.flicker.helpers
 
 import android.app.Instrumentation
-import android.tools.datatypes.Rect
-import android.tools.datatypes.Region
+import android.graphics.Rect
+import android.graphics.Region
 import android.tools.device.apphelpers.StandardAppHelper
 import android.tools.helpers.FIND_TIMEOUT
 import android.tools.helpers.SYSTEMUI_PACKAGE
@@ -86,7 +86,7 @@ constructor(
             .add("letterboxAppRepositioned") {
                 val letterboxAppWindow = getWindowRegion(wmHelper)
                 val appRegionBounds = letterboxAppWindow.bounds
-                val appWidth = appRegionBounds.width
+                val appWidth = appRegionBounds.width()
                 return@add if (right)
                     appRegionBounds.left == displayBounds.right - appWidth &&
                         appRegionBounds.right == displayBounds.right
@@ -108,7 +108,7 @@ constructor(
             .add("letterboxAppRepositioned") {
                 val letterboxAppWindow = getWindowRegion(wmHelper)
                 val appRegionBounds = letterboxAppWindow.bounds
-                val appHeight = appRegionBounds.height
+                val appHeight = appRegionBounds.height()
                 return@add if (bottom)
                     appRegionBounds.bottom == displayBounds.bottom &&
                         appRegionBounds.top == (displayBounds.bottom - appHeight + navBarHeight)

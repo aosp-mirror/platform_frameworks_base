@@ -16,6 +16,7 @@
 package com.android.hoststubgen
 
 import com.android.hoststubgen.asm.ClassNodes
+import com.android.hoststubgen.dumper.ApiDumper
 import com.android.hoststubgen.filters.AnnotationBasedFilter
 import com.android.hoststubgen.filters.ClassWidePolicyPropagatingFilter
 import com.android.hoststubgen.filters.ConstantFilter
@@ -32,7 +33,8 @@ import com.android.hoststubgen.visitors.PackageRedirectRemapper
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.ClassWriter
-import org.objectweb.asm.tree.ClassNode
+import org.objectweb.asm.commons.ClassRemapper
+import org.objectweb.asm.commons.Remapper
 import org.objectweb.asm.util.CheckClassAdapter
 import java.io.BufferedInputStream
 import java.io.FileOutputStream
@@ -52,7 +54,7 @@ class HostStubGen(val options: HostStubGenOptions) {
         val stats = HostStubGenStats()
 
         // Load all classes.
-        val allClasses = loadClassStructures(options.inJar.get)
+        val allClasses = ClassNodes.loadClassStructures(options.inJar.get)
 
         // Dump the classes, if specified.
         options.inputJarDumpFile.ifSet {
@@ -70,7 +72,7 @@ class HostStubGen(val options: HostStubGenOptions) {
         }
 
         // Build the filters.
-        val filter = buildFilter(errors, allClasses, options)
+        val (filter, policyFileRemapper) = buildFilter(errors, allClasses, options)
 
         // Transform the jar.
         convert(
@@ -82,62 +84,24 @@ class HostStubGen(val options: HostStubGenOptions) {
                 allClasses,
                 errors,
                 stats,
+                policyFileRemapper,
+                options.numShards.get,
+                options.shard.get,
         )
 
         // Dump statistics, if specified.
         options.statsFile.ifSet {
-            PrintWriter(it).use { pw -> stats.dump(pw) }
+            PrintWriter(it).use { pw -> stats.dumpOverview(pw) }
             log.i("Dump file created at $it")
         }
-    }
-
-    /**
-     * Load all the classes, without code.
-     */
-    private fun loadClassStructures(inJar: String): ClassNodes {
-        log.i("Reading class structure from $inJar ...")
-        val start = System.currentTimeMillis()
-
-        val allClasses = ClassNodes()
-
-        log.withIndent {
-            ZipFile(inJar).use { inZip ->
-                val inEntries = inZip.entries()
-
-                while (inEntries.hasMoreElements()) {
-                    val entry = inEntries.nextElement()
-
-                    BufferedInputStream(inZip.getInputStream(entry)).use { bis ->
-                        if (entry.name.endsWith(".class")) {
-                            val cr = ClassReader(bis)
-                            val cn = ClassNode()
-                            cr.accept(cn, ClassReader.SKIP_CODE or ClassReader.SKIP_DEBUG
-                                    or ClassReader.SKIP_FRAMES)
-                            if (!allClasses.addClass(cn)) {
-                                log.w("Duplicate class found: ${cn.name}")
-                            }
-                        } else if (entry.name.endsWith(".dex")) {
-                            // Seems like it's an ART jar file. We can't process it.
-                            // It's a fatal error.
-                            throw InvalidJarFileException(
-                                    "$inJar is not a desktop jar file. It contains a *.dex file.")
-                        } else {
-                            // Unknown file type. Skip.
-                            while (bis.available() > 0) {
-                                bis.skip((1024 * 1024).toLong())
-                            }
-                        }
-                    }
-                }
+        options.apiListFile.ifSet {
+            PrintWriter(it).use { pw ->
+                // TODO, when dumping a jar that's not framework-minus-apex.jar, we need to feed
+                // framework-minus-apex.jar so that we can dump inherited methods from it.
+                ApiDumper(pw, allClasses, null, filter).dump()
             }
+            log.i("API list file created at $it")
         }
-        if (allClasses.size == 0) {
-            log.w("$inJar contains no *.class files.")
-        }
-
-        val end = System.currentTimeMillis()
-        log.i("Done reading class structure in %.1f second(s).", (end - start) / 1000.0)
-        return allClasses
     }
 
     /**
@@ -148,7 +112,7 @@ class HostStubGen(val options: HostStubGenOptions) {
             errors: HostStubGenErrors,
             allClasses: ClassNodes,
             options: HostStubGenOptions,
-            ): OutputFilter {
+            ): Pair<OutputFilter, Remapper?> {
         // We build a "chain" of multiple filters here.
         //
         // The filters are build in from "inside", meaning the first filter created here is
@@ -201,10 +165,14 @@ class HostStubGen(val options: HostStubGenOptions) {
             filter,
         )
 
+        var policyFileRemapper: Remapper? = null
+
         // Next, "text based" filter, which allows to override polices without touching
         // the target code.
         options.policyOverrideFile.ifSet {
-            filter = createFilterFromTextPolicyFile(it, allClasses, filter)
+            val (f, p) = createFilterFromTextPolicyFile(it, allClasses, filter)
+            filter = f
+            policyFileRemapper = p
         }
 
         // If `--intersect-stub-jar` is provided, load from these jar files too.
@@ -219,7 +187,7 @@ class HostStubGen(val options: HostStubGenOptions) {
         // Apply the implicit filter.
         filter = ImplicitOutputFilter(errors, allClasses, filter)
 
-        return filter
+        return Pair(filter, policyFileRemapper)
     }
 
     /**
@@ -229,7 +197,7 @@ class HostStubGen(val options: HostStubGenOptions) {
         val intersectingJars = mutableMapOf<String, ClassNodes>()
 
         filenames.forEach { filename ->
-            intersectingJars[filename] = loadClassStructures(filename)
+            intersectingJars[filename] = ClassNodes.loadClassStructures(filename)
         }
         return intersectingJars
     }
@@ -246,6 +214,9 @@ class HostStubGen(val options: HostStubGenOptions) {
             classes: ClassNodes,
             errors: HostStubGenErrors,
             stats: HostStubGenStats,
+            remapper: Remapper?,
+            numShards: Int,
+            shard: Int,
             ) {
         log.i("Converting %s into [stub: %s, impl: %s] ...", inJar, outStubJar, outImplJar)
         log.i("ASM CheckClassAdapter is %s", if (enableChecker) "enabled" else "disabled")
@@ -254,17 +225,32 @@ class HostStubGen(val options: HostStubGenOptions) {
 
         val packageRedirector = PackageRedirectRemapper(options.packageRedirects)
 
+        var itemIndex = 0
+        var numItemsProcessed = 0
+        var numItems = -1 // == Unknown
+
         log.withIndent {
             // Open the input jar file and process each entry.
             ZipFile(inJar).use { inZip ->
+
+                numItems = inZip.size()
+                val shardStart = numItems * shard / numShards
+                val shardNextStart = numItems * (shard + 1) / numShards
+
                 maybeWithZipOutputStream(outStubJar) { stubOutStream ->
                     maybeWithZipOutputStream(outImplJar) { implOutStream ->
                         val inEntries = inZip.entries()
                         while (inEntries.hasMoreElements()) {
                             val entry = inEntries.nextElement()
+                            val inShard = (shardStart <= itemIndex) && (itemIndex < shardNextStart)
+                            itemIndex++
+                            if (!inShard) {
+                                continue
+                            }
                             convertSingleEntry(inZip, entry, stubOutStream, implOutStream,
-                                    filter, packageRedirector, enableChecker, classes, errors,
-                                    stats)
+                                    filter, packageRedirector, remapper,
+                                    enableChecker, classes, errors, stats)
+                            numItemsProcessed++
                         }
                         log.i("Converted all entries.")
                     }
@@ -274,7 +260,8 @@ class HostStubGen(val options: HostStubGenOptions) {
             }
         }
         val end = System.currentTimeMillis()
-        log.i("Done transforming the jar in %.1f second(s).", (end - start) / 1000.0)
+        log.i("Done transforming the jar in %.1f second(s). %d / %d item(s) processed.",
+            (end - start) / 1000.0, numItemsProcessed, numItems)
     }
 
     private fun <T> maybeWithZipOutputStream(filename: String?, block: (ZipOutputStream?) -> T): T {
@@ -294,6 +281,7 @@ class HostStubGen(val options: HostStubGenOptions) {
             implOutStream: ZipOutputStream?,
             filter: OutputFilter,
             packageRedirector: PackageRedirectRemapper,
+            remapper: Remapper?,
             enableChecker: Boolean,
             classes: ClassNodes,
             errors: HostStubGenErrors,
@@ -311,7 +299,7 @@ class HostStubGen(val options: HostStubGenOptions) {
             // If it's a class, convert it.
             if (name.endsWith(".class")) {
                 processSingleClass(inZip, entry, stubOutStream, implOutStream, filter,
-                        packageRedirector, enableChecker, classes, errors, stats)
+                        packageRedirector, remapper, enableChecker, classes, errors, stats)
                 return
             }
 
@@ -362,6 +350,7 @@ class HostStubGen(val options: HostStubGenOptions) {
             implOutStream: ZipOutputStream?,
             filter: OutputFilter,
             packageRedirector: PackageRedirectRemapper,
+            remapper: Remapper?,
             enableChecker: Boolean,
             classes: ClassNodes,
             errors: HostStubGenErrors,
@@ -373,16 +362,24 @@ class HostStubGen(val options: HostStubGenOptions) {
             log.d("Removing class: %s %s", classInternalName, classPolicy)
             return
         }
+        // If we're applying a remapper, we need to rename the file too.
+        var newName = entry.name
+        remapper?.mapType(classInternalName)?.let { remappedName ->
+            if (remappedName != classInternalName) {
+                log.d("Renaming class file: %s -> %s", classInternalName, remappedName)
+                newName = remappedName + ".class"
+            }
+        }
         // Generate stub first.
         if (stubOutStream != null && classPolicy.policy.needsInStub) {
             log.v("Creating stub class: %s Policy: %s", classInternalName, classPolicy)
             log.withIndent {
                 BufferedInputStream(inZip.getInputStream(entry)).use { bis ->
-                    val newEntry = ZipEntry(entry.name)
+                    val newEntry = ZipEntry(newName)
                     stubOutStream.putNextEntry(newEntry)
                     convertClass(classInternalName, /*forImpl=*/false, bis,
-                            stubOutStream, filter, packageRedirector, enableChecker, classes,
-                            errors, null)
+                            stubOutStream, filter, packageRedirector, remapper,
+                            enableChecker, classes, errors, null)
                     stubOutStream.closeEntry()
                 }
             }
@@ -391,11 +388,11 @@ class HostStubGen(val options: HostStubGenOptions) {
             log.v("Creating impl class: %s Policy: %s", classInternalName, classPolicy)
             log.withIndent {
                 BufferedInputStream(inZip.getInputStream(entry)).use { bis ->
-                    val newEntry = ZipEntry(entry.name)
+                    val newEntry = ZipEntry(newName)
                     implOutStream.putNextEntry(newEntry)
                     convertClass(classInternalName, /*forImpl=*/true, bis,
-                            implOutStream, filter, packageRedirector, enableChecker, classes,
-                            errors, stats)
+                            implOutStream, filter, packageRedirector, remapper,
+                            enableChecker, classes, errors, stats)
                     implOutStream.closeEntry()
                 }
             }
@@ -412,6 +409,7 @@ class HostStubGen(val options: HostStubGenOptions) {
             out: OutputStream,
             filter: OutputFilter,
             packageRedirector: PackageRedirectRemapper,
+            remapper: Remapper?,
             enableChecker: Boolean,
             classes: ClassNodes,
             errors: HostStubGenErrors,
@@ -428,6 +426,12 @@ class HostStubGen(val options: HostStubGenOptions) {
         if (enableChecker) {
             outVisitor = CheckClassAdapter(outVisitor)
         }
+
+        // Remapping should happen at the end.
+        remapper?.let {
+            outVisitor = ClassRemapper(outVisitor, remapper)
+        }
+
         val visitorOptions = BaseAdapter.Options(
                 enablePreTrace = options.enablePreTrace.get,
                 enablePostTrace = options.enablePostTrace.get,
@@ -436,7 +440,7 @@ class HostStubGen(val options: HostStubGenOptions) {
                 stats = stats,
         )
         outVisitor = BaseAdapter.getVisitor(classInternalName, classes, outVisitor, filter,
-                packageRedirector, forImpl, visitorOptions)
+                packageRedirector, remapper, forImpl, visitorOptions)
 
         cr.accept(outVisitor, ClassReader.EXPAND_FRAMES)
         val data = cw.toByteArray()

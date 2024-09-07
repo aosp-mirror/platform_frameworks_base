@@ -305,6 +305,7 @@ public class Bubble implements BubbleViewProvider {
                 getUser().getIdentifier(),
                 getPackageName(),
                 getTitle(),
+                getAppName(),
                 isImportantConversation());
     }
 

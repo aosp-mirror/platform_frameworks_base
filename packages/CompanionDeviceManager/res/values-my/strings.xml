@@ -26,8 +26,11 @@
     <string name="profile_name_glasses" msgid="3506504967216601277">"စက်"</string>
     <string name="summary_glasses" msgid="2872254734959842579">"သင့် <xliff:g id="DEVICE_NAME">%1$s</xliff:g> တွင် ၎င်းခွင့်ပြုချက်များရယူရန် ဤအက်ပ်ကိုခွင့်ပြုမည်"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ကို သင့်ဖုန်းမှ ဤအချက်အလက် သုံးခွင့်ပြုမည်"</string>
+    <string name="title_app_streaming_with_mirroring" msgid="3364582597581570658">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ကို သင့်ဖုန်း၏ အက်ပ်များ တိုက်ရိုက်ဖွင့်ခွင့်ပြုမလား။"</string>
+    <string name="summary_app_streaming" msgid="295548145144086753">"%1$s သည် အသံ၊ ဓာတ်ပုံ၊ စကားဝှက်၊ မက်ဆေ့ဂျ် အပါအဝင် ဖုန်းတွင် မြင်နိုင်သော (သို့) ဖွင့်ထားသော အရာအားလုံးကို သုံးခွင့်ရှိပါမည်။&lt;br/&gt;&lt;br/&gt;ဤခွင့်ပြုချက်သုံးခွင့်ကို သင်မဖယ်ရှားမချင်း %1$s သည် အက်ပ်များကို တိုက်ရိုက်ဖွင့်နိုင်ပါမည်။"</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"စက်များကြားသုံး ဝန်ဆောင်မှုများ"</string>
     <string name="helper_summary_app_streaming" msgid="2396773196949578425">"<xliff:g id="APP_NAME">%1$s</xliff:g> သည် သင်၏စက်များအကြား အက်ပ်များတိုက်ရိုက်လွှင့်ရန် <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> ကိုယ်စား ခွင့်ပြုချက်တောင်းနေသည်"</string>
+    <string name="helper_summary_app_streaming_with_mirroring" msgid="6138581029144467467">"<xliff:g id="APP_NAME">%1$s</xliff:g> သည် သင့်စက်များအကြား အက်ပ်များ ပြပြီး တိုက်ရိုက်ဖွင့်ရန် <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> ကိုယ်စား ခွင့်ပြုချက်တောင်းနေသည်"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
     <string name="title_computer" msgid="4693714143506569253">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; အား သင့်ဖုန်းမှ ဤအချက်အလက် သုံးခွင့်ပြုခြင်း"</string>
@@ -35,6 +38,8 @@
     <string name="helper_title_computer" msgid="4671071173916176037">"Google Play ဝန်ဆောင်မှုများ"</string>
     <string name="helper_summary_computer" msgid="8774832742608187072">"<xliff:g id="APP_NAME">%1$s</xliff:g> သည် သင့်ဖုန်း၏ ဓာတ်ပုံ၊ မီဒီယာနှင့် အကြောင်းကြားချက်များသုံးရန် <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> ကိုယ်စား ခွင့်ပြုချက်တောင်းနေသည်"</string>
     <string name="title_nearby_device_streaming" msgid="7269956847378799794">"&lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; ကို ဤသို့လုပ်ဆောင်ခွင့်ပြုမလား။"</string>
+    <string name="title_nearby_device_streaming_with_mirroring" msgid="242855799919611657">"&lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; ကို သင့်ဖုန်း၏ အက်ပ်နှင့် စနစ်အင်္ဂါရပ်များ တိုက်ရိုက်ဖွင့်ခွင့်ပြုမလား။"</string>
+    <string name="summary_nearby_device_streaming" msgid="4039565463149145573">"%1$s သည် အသံ၊ ဓာတ်ပုံ၊ ငွေချေအချက်အလက်၊ စကားဝှက်နှင့် မက်ဆေ့ဂျ်များ အပါအဝင် ဖုန်းတွင် မြင်နိုင်သော (သို့) ဖွင့်ထားသော အရာအားလုံးကို သုံးခွင့်ရှိပါမည်။&lt;br/&gt;&lt;br/&gt;ဤခွင့်ပြုချက်သုံးခွင့်ကို သင်မဖယ်ရှားမချင်း %1$s သည် အက်ပ်နှင့် စနစ်အင်္ဂါရပ်များကို တိုက်ရိုက်ဖွင့်နိုင်ပါမည်။"</string>
     <string name="helper_summary_nearby_device_streaming" msgid="2063965070936844876">"<xliff:g id="APP_NAME">%1$s</xliff:g> သည် အနီးတစ်ဝိုက်ရှိ အက်ပ်များနှင့် အခြားစနစ်အင်္ဂါရပ်များကို တိုက်ရိုက်ဖွင့်ရန် သင့် <xliff:g id="DEVICE_NAME">%2$s</xliff:g> ကိုယ်စား ခွင့်ပြုချက်တောင်းနေသည်"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"စက်"</string>
     <string name="summary_generic" msgid="1761976003668044801">"ဤအက်ပ်သည် သင့်ဖုန်းနှင့် ရွေးထားသောစက်အကြား ခေါ်ဆိုသူ၏အမည်ကဲ့သို့ အချက်အလက်ကို စင့်ခ်လုပ်နိုင်ပါမည်"</string>

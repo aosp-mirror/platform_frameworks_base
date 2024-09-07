@@ -21,20 +21,21 @@ import static com.android.internal.os.PowerProfile.POWER_GROUP_DISPLAY_AMBIENT;
 import static com.android.internal.os.PowerProfile.POWER_GROUP_DISPLAY_SCREEN_FULL;
 import static com.android.internal.os.PowerProfile.POWER_GROUP_DISPLAY_SCREEN_ON;
 
-import static org.junit.Assert.fail;
+import static com.google.common.truth.Truth.assertThat;
 
-import android.annotation.XmlRes;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import android.content.Context;
 import android.content.res.Resources;
-import android.content.res.XmlResourceParser;
-import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.annotations.DisabledOnRavenwood;
 import android.platform.test.ravenwood.RavenwoodRule;
+import android.util.Xml;
 
-import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.frameworks.coretests.R;
 import com.android.internal.power.ModemPowerProfile;
 import com.android.internal.util.XmlUtils;
 
@@ -43,6 +44,11 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.IOException;
+import java.io.StringReader;
 
 /*
  * Keep this file in sync with frameworks/base/core/res/res/xml/power_profile_test.xml and
@@ -53,7 +59,6 @@ import org.junit.runner.RunWith;
  */
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-@IgnoreUnderRavenwood(blockedBy = PowerProfile.class)
 public class PowerProfileTest {
     @Rule
     public final RavenwoodRule mRavenwood = new RavenwoodRule();
@@ -62,17 +67,15 @@ public class PowerProfileTest {
     static final String ATTR_NAME = "name";
 
     private PowerProfile mProfile;
-    private Context mContext;
 
     @Before
     public void setUp() {
-        mContext = InstrumentationRegistry.getContext();
-        mProfile = new PowerProfile(mContext);
+        mProfile = new PowerProfile();
     }
 
     @Test
     public void testPowerProfile() {
-        mProfile.forceInitForTesting(mContext, R.xml.power_profile_test);
+        mProfile.initForTesting(resolveParser("power_profile_test"));
 
         assertEquals(5.0, mProfile.getAveragePower(PowerProfile.POWER_CPU_SUSPEND));
         assertEquals(1.11, mProfile.getAveragePower(PowerProfile.POWER_CPU_IDLE));
@@ -127,11 +130,36 @@ public class PowerProfileTest {
                 PowerProfile.SUBSYSTEM_MODEM | ModemPowerProfile.MODEM_RAT_TYPE_DEFAULT
                         | ModemPowerProfile.MODEM_DRAIN_TYPE_TX
                         | ModemPowerProfile.MODEM_TX_LEVEL_4));
+
+        assertEquals(0.02, mProfile.getAveragePower(PowerProfile.POWER_BLUETOOTH_CONTROLLER_IDLE));
+        assertEquals(3, mProfile.getAveragePower(PowerProfile.POWER_BLUETOOTH_CONTROLLER_RX));
+        assertEquals(5, mProfile.getAveragePower(PowerProfile.POWER_BLUETOOTH_CONTROLLER_TX));
+        assertEquals(3300, mProfile.getAveragePower(
+                PowerProfile.POWER_BLUETOOTH_CONTROLLER_OPERATING_VOLTAGE));
     }
+
+    @DisabledOnRavenwood
+    @Test
+    public void configDefaults() throws XmlPullParserException {
+        Resources mockResources = mock(Resources.class);
+        when(mockResources.getInteger(com.android.internal.R.integer.config_bluetooth_rx_cur_ma))
+                .thenReturn(123);
+        XmlPullParser parser = Xml.newPullParser();
+        parser.setInput(new StringReader(
+                "<device name='Android'>"
+                + "<item name='bluetooth.controller.idle'>10</item>"
+                + "</device>"));
+        mProfile.initForTesting(parser, mockResources);
+        assertThat(mProfile.getAveragePower(PowerProfile.POWER_BLUETOOTH_CONTROLLER_IDLE))
+                .isEqualTo(10);
+        assertThat(mProfile.getAveragePower(PowerProfile.POWER_BLUETOOTH_CONTROLLER_RX))
+                .isEqualTo(123);
+    }
+
     @Test
     public void testPowerProfile_legacyCpuConfig() {
         // This power profile has per-cluster data, rather than per-policy
-        mProfile.forceInitForTesting(mContext, R.xml.power_profile_test_cpu_legacy);
+        mProfile.initForTesting(resolveParser("power_profile_test_cpu_legacy"));
 
         assertEquals(2.11, mProfile.getAveragePowerForCpuScalingPolicy(0));
         assertEquals(2.22, mProfile.getAveragePowerForCpuScalingPolicy(4));
@@ -148,7 +176,7 @@ public class PowerProfileTest {
 
     @Test
     public void testModemPowerProfile_defaultRat() throws Exception {
-        final XmlResourceParser parser = getTestModemElement(R.xml.power_profile_test_modem,
+        final XmlPullParser parser = getTestModemElement("power_profile_test_modem",
                 "testModemPowerProfile_defaultRat");
         ModemPowerProfile mpp = new ModemPowerProfile();
         mpp.parseFromXml(parser);
@@ -216,7 +244,7 @@ public class PowerProfileTest {
 
     @Test
     public void testModemPowerProfile_partiallyDefined() throws Exception {
-        final XmlResourceParser parser = getTestModemElement(R.xml.power_profile_test_modem,
+        final XmlPullParser parser = getTestModemElement("power_profile_test_modem",
                 "testModemPowerProfile_partiallyDefined");
         ModemPowerProfile mpp = new ModemPowerProfile();
         mpp.parseFromXml(parser);
@@ -369,7 +397,7 @@ public class PowerProfileTest {
 
     @Test
     public void testModemPowerProfile_fullyDefined() throws Exception {
-        final XmlResourceParser parser = getTestModemElement(R.xml.power_profile_test_modem,
+        final XmlPullParser parser = getTestModemElement("power_profile_test_modem",
                 "testModemPowerProfile_fullyDefined");
         ModemPowerProfile mpp = new ModemPowerProfile();
         mpp.parseFromXml(parser);
@@ -519,11 +547,10 @@ public class PowerProfileTest {
                 | ModemPowerProfile.MODEM_DRAIN_TYPE_TX | ModemPowerProfile.MODEM_TX_LEVEL_4));
     }
 
-    private XmlResourceParser getTestModemElement(@XmlRes int xmlId, String elementName)
+    private XmlPullParser getTestModemElement(String resourceName, String elementName)
             throws Exception {
+        XmlPullParser parser = resolveParser(resourceName);
         final String element = TAG_TEST_MODEM;
-        final Resources resources = mContext.getResources();
-        XmlResourceParser parser = resources.getXml(xmlId);
         while (true) {
             XmlUtils.nextElement(parser);
             final String e = parser.getName();
@@ -535,8 +562,24 @@ public class PowerProfileTest {
 
             return parser;
         }
-        fail("Unanable to find element " + element + " with name " + elementName);
+        fail("Unable to find element " + element + " with name " + elementName);
         return null;
+    }
+
+    private XmlPullParser resolveParser(String resourceName) {
+        if (RavenwoodRule.isOnRavenwood()) {
+            try {
+                return Xml.resolvePullParser(getClass().getClassLoader()
+                        .getResourceAsStream("res/xml/" + resourceName + ".xml"));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            Context context = androidx.test.InstrumentationRegistry.getContext();
+            Resources resources = context.getResources();
+            int resId = resources.getIdentifier(resourceName, "xml", context.getPackageName());
+            return resources.getXml(resId);
+        }
     }
 
     private void assertEquals(double expected, double actual) {

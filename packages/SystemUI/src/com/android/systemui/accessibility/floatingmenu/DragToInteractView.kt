@@ -39,9 +39,9 @@ import androidx.dynamicanimation.animation.DynamicAnimation
 import androidx.dynamicanimation.animation.SpringForce.DAMPING_RATIO_LOW_BOUNCY
 import androidx.dynamicanimation.animation.SpringForce.STIFFNESS_LOW
 import com.android.wm.shell.R
-import com.android.wm.shell.animation.PhysicsAnimator
 import com.android.wm.shell.common.bubbles.DismissCircleView
 import com.android.wm.shell.common.bubbles.DismissView
+import com.android.wm.shell.shared.animation.PhysicsAnimator
 
 /**
  * View that handles interactions between DismissCircleView and BubbleStackView.
@@ -118,6 +118,12 @@ class DragToInteractView(context: Context) : FrameLayout(context) {
                 iconResId = R.drawable.pip_ic_close_white
             )
         )
+
+        // Ensure this is unfocusable & uninteractable
+        isClickable = false
+        isFocusable = false
+        importantForAccessibility = IMPORTANT_FOR_ACCESSIBILITY_NO
+
         // END DragToInteractView modification
     }
 

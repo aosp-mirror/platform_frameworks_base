@@ -70,7 +70,7 @@ FilterIterator<Iterator, Pred> make_filter_iterator(Iterator begin,
  * exception is when there is no exact matching resource for the minSdk. The next smallest one will
  * be kept.
  */
-static void CollapseVersions(int min_sdk, ResourceEntry* entry) {
+static void CollapseVersions(IAaptContext* context, int min_sdk, ResourceEntry* entry) {
   // First look for all sdks less than minSdk.
   for (auto iter = entry->values.rbegin(); iter != entry->values.rend();
        ++iter) {
@@ -102,7 +102,14 @@ static void CollapseVersions(int min_sdk, ResourceEntry* entry) {
       auto filter_iter =
           make_filter_iterator(iter + 1, entry->values.rend(), pred);
       while (filter_iter.HasNext()) {
-        filter_iter.Next() = {};
+        auto& next = filter_iter.Next();
+        if (context->IsVerbose()) {
+          context->GetDiagnostics()->Note(android::DiagMessage()
+                                          << "removing configuration " << next->config.to_string()
+                                          << " for entry: " << entry->name
+                                          << ", because its SDK version is smaller than minSdk");
+        }
+        next = {};
       }
     }
   }
@@ -126,6 +133,12 @@ static void CollapseVersions(int min_sdk, ResourceEntry* entry) {
           util::make_unique<ResourceConfigValue>(
               config_value->config.CopyWithoutSdkVersion(),
               config_value->product);
+      if (context->IsVerbose()) {
+        context->GetDiagnostics()->Note(android::DiagMessage()
+                                        << "overriding resource: " << entry->name
+                                        << ", removing SDK version from configuration "
+                                        << config_value->config.to_string());
+      }
       new_value->value = std::move(config_value->value);
       config_value = std::move(new_value);
 
@@ -147,10 +160,14 @@ static void CollapseVersions(int min_sdk, ResourceEntry* entry) {
 bool VersionCollapser::Consume(IAaptContext* context, ResourceTable* table) {
   TRACE_NAME("VersionCollapser::Consume");
   const int min_sdk = context->GetMinSdkVersion();
+  if (context->IsVerbose()) {
+    context->GetDiagnostics()->Note(android::DiagMessage()
+                                    << "Running VersionCollapser with minSdk = " << min_sdk);
+  }
   for (auto& package : table->packages) {
     for (auto& type : package->types) {
       for (auto& entry : type->entries) {
-        CollapseVersions(min_sdk, entry.get());
+        CollapseVersions(context, min_sdk, entry.get());
       }
     }
   }

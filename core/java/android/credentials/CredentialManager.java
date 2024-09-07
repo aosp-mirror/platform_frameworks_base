@@ -61,7 +61,9 @@ import java.util.concurrent.Executor;
 @SystemService(Context.CREDENTIAL_SERVICE)
 @RequiresFeature(PackageManager.FEATURE_CREDENTIALS)
 public final class CredentialManager {
-    private static final String TAG = "CredentialManager";
+    /** @hide **/
+    @Hide
+    public static final String TAG = "CredentialManager";
     private static final Bundle OPTIONS_SENDER_BAL_OPTIN = ActivityOptions.makeBasic()
             .setPendingIntentBackgroundActivityStartMode(
                     ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED).toBundle();
@@ -74,6 +76,11 @@ public final class CredentialManager {
                 PROVIDER_FILTER_ALL_PROVIDERS,
                 PROVIDER_FILTER_SYSTEM_PROVIDERS_ONLY,
                 PROVIDER_FILTER_USER_PROVIDERS_ONLY,
+                // By default the returned list of providers will not include any providers that
+                // have been hidden by device policy. However, there are some cases where we want
+                // them to show up (e.g. settings) so this will return the list of providers with
+                // the hidden ones included.
+                PROVIDER_FILTER_USER_PROVIDERS_INCLUDING_HIDDEN,
             })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ProviderFilter {}
@@ -99,6 +106,14 @@ public final class CredentialManager {
      */
     @TestApi public static final int PROVIDER_FILTER_USER_PROVIDERS_ONLY = 2;
 
+    /**
+     * Returns user credential providers only. This will include providers that
+     * have been disabled by the device policy.
+     *
+     * @hide
+     */
+    public static final int PROVIDER_FILTER_USER_PROVIDERS_INCLUDING_HIDDEN = 3;
+
     private final Context mContext;
     private final ICredentialManager mService;
 
@@ -117,6 +132,13 @@ public final class CredentialManager {
      */
     private static final String DEVICE_CONFIG_ENABLE_CREDENTIAL_DESC_API =
             "enable_credential_description_api";
+
+    /**
+     * @hide
+     */
+    @Hide
+    public static final String EXTRA_AUTOFILL_RESULT_RECEIVER =
+            "android.credentials.AUTOFILL_RESULT_RECEIVER";
 
     /**
      * @hide instantiated by ContextImpl.
@@ -448,8 +470,8 @@ public final class CredentialManager {
      * Returns {@code true} if the calling application provides a CredentialProviderService that is
      * enabled for the current user, or {@code false} otherwise. CredentialProviderServices are
      * enabled on a per-service basis so the individual component name of the service should be
-     * passed in here. <strong>Usage of this API is discouraged as it is not fully functional, and
-     * may throw a NullPointerException on certain devices and/or API versions.</strong>
+     * passed in here. <strong>Usage of this API is encouraged in API level 35 and above. It
+     * may throw a NullPointerException on certain devices running other API versions.</strong>
      *
      * @throws IllegalArgumentException if the componentName package does not match the calling
      * package name this call will throw an exception

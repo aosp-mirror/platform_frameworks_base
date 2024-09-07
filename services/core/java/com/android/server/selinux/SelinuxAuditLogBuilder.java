@@ -15,34 +15,65 @@
  */
 package com.android.server.selinux;
 
+import android.provider.DeviceConfig;
+import android.text.TextUtils;
+import android.util.Slog;
+
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 import java.util.stream.Stream;
 
 /** Builder for SelinuxAuditLogs. */
 class SelinuxAuditLogBuilder {
 
-    // Currently logs collection is hardcoded for the sdk_sandbox_audit.
-    private static final String SDK_SANDBOX_AUDIT = "sdk_sandbox_audit";
-    static final Matcher SCONTEXT_MATCHER =
-            Pattern.compile(
-                            "u:r:(?<stype>"
-                                    + SDK_SANDBOX_AUDIT
-                                    + "):s0(:c)?(?<scategories>((,c)?\\d+)+)*")
-                    .matcher("");
+    private static final String TAG = "SelinuxAuditLogs";
 
-    static final Matcher TCONTEXT_MATCHER =
-            Pattern.compile("u:object_r:(?<ttype>\\w+):s0(:c)?(?<tcategories>((,c)?\\d+)+)*")
-                    .matcher("");
+    // This config indicates which Selinux logs for source domains to collect. The string will be
+    // inserted into a regex, so it must follow the regex syntax. For example, a valid value would
+    // be "system_server|untrusted_app".
+    @VisibleForTesting static final String CONFIG_SELINUX_AUDIT_DOMAIN = "selinux_audit_domain";
+    private static final Matcher NO_OP_MATCHER = Pattern.compile("no-op^").matcher("");
+    private static final String TCONTEXT_PATTERN =
+            "u:object_r:(?<ttype>\\w+):s0(:c)?(?<tcategories>((,c)?\\d+)+)*";
+    private static final String PATH_PATTERN = "\"(?<path>/\\w+(/\\w+)?)(/\\w+)*\"";
 
-    static final Matcher PATH_MATCHER =
-            Pattern.compile("\"(?<path>/\\w+(/\\w+)?)(/\\w+)*\"").matcher("");
+    @VisibleForTesting final Matcher mScontextMatcher;
+    @VisibleForTesting final Matcher mTcontextMatcher;
+    @VisibleForTesting final Matcher mPathMatcher;
 
     private Iterator<String> mTokens;
     private final SelinuxAuditLog mAuditLog = new SelinuxAuditLog();
+
+    SelinuxAuditLogBuilder() {
+        Matcher scontextMatcher = NO_OP_MATCHER;
+        Matcher tcontextMatcher = NO_OP_MATCHER;
+        Matcher pathMatcher = NO_OP_MATCHER;
+        try {
+            scontextMatcher =
+                    Pattern.compile(
+                                    TextUtils.formatSimple(
+                                            "u:r:(?<stype>%s):s0(:c)?(?<scategories>((,c)?\\d+)+)*",
+                                            DeviceConfig.getString(
+                                                    DeviceConfig.NAMESPACE_ADSERVICES,
+                                                    CONFIG_SELINUX_AUDIT_DOMAIN,
+                                                    "no_match^")))
+                            .matcher("");
+            tcontextMatcher = Pattern.compile(TCONTEXT_PATTERN).matcher("");
+            pathMatcher = Pattern.compile(PATH_PATTERN).matcher("");
+        } catch (PatternSyntaxException e) {
+            Slog.e(TAG, "Invalid pattern, setting every matcher to no-op.", e);
+        }
+
+        mScontextMatcher = scontextMatcher;
+        mTcontextMatcher = tcontextMatcher;
+        mPathMatcher = pathMatcher;
+    }
 
     void reset(String denialString) {
         mTokens =
@@ -82,18 +113,18 @@ class SelinuxAuditLogBuilder {
                     mAuditLog.mPermissions = permissionsStream.build().toArray(String[]::new);
                     break;
                 case "scontext":
-                    if (!nextTokenMatches(SCONTEXT_MATCHER)) {
+                    if (!nextTokenMatches(mScontextMatcher)) {
                         return null;
                     }
-                    mAuditLog.mSType = SCONTEXT_MATCHER.group("stype");
-                    mAuditLog.mSCategories = toCategories(SCONTEXT_MATCHER.group("scategories"));
+                    mAuditLog.mSType = mScontextMatcher.group("stype");
+                    mAuditLog.mSCategories = toCategories(mScontextMatcher.group("scategories"));
                     break;
                 case "tcontext":
-                    if (!nextTokenMatches(TCONTEXT_MATCHER)) {
+                    if (!nextTokenMatches(mTcontextMatcher)) {
                         return null;
                     }
-                    mAuditLog.mTType = TCONTEXT_MATCHER.group("ttype");
-                    mAuditLog.mTCategories = toCategories(TCONTEXT_MATCHER.group("tcategories"));
+                    mAuditLog.mTType = mTcontextMatcher.group("ttype");
+                    mAuditLog.mTCategories = toCategories(mTcontextMatcher.group("tcategories"));
                     break;
                 case "tclass":
                     if (!mTokens.hasNext()) {
@@ -102,8 +133,8 @@ class SelinuxAuditLogBuilder {
                     mAuditLog.mTClass = mTokens.next();
                     break;
                 case "path":
-                    if (nextTokenMatches(PATH_MATCHER)) {
-                        mAuditLog.mPath = PATH_MATCHER.group("path");
+                    if (nextTokenMatches(mPathMatcher)) {
+                        mAuditLog.mPath = mPathMatcher.group("path");
                     }
                     break;
                 case "permissive":

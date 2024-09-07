@@ -22,6 +22,7 @@ import android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD
 import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
 import android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN
 import android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW
+import android.graphics.Rect
 import android.view.Display.DEFAULT_DISPLAY
 import com.android.wm.shell.MockToken
 import com.android.wm.shell.TestRunningTaskInfoBuilder
@@ -31,13 +32,17 @@ class DesktopTestHelpers {
         /** Create a task that has windowing mode set to [WINDOWING_MODE_FREEFORM] */
         @JvmStatic
         @JvmOverloads
-        fun createFreeformTask(displayId: Int = DEFAULT_DISPLAY): RunningTaskInfo {
+        fun createFreeformTask(
+                displayId: Int = DEFAULT_DISPLAY,
+                bounds: Rect? = null
+        ): RunningTaskInfo {
             return TestRunningTaskInfoBuilder()
                     .setDisplayId(displayId)
                     .setToken(MockToken().token())
                     .setActivityType(ACTIVITY_TYPE_STANDARD)
                     .setWindowingMode(WINDOWING_MODE_FREEFORM)
                     .setLastActiveTime(100)
+                    .apply { bounds?.let { setBounds(it) }}
                     .build()
         }
 

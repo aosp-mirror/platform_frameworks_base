@@ -24,6 +24,13 @@ import static android.accessibilityservice.AccessibilityServiceInfo.FLAG_REQUEST
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
+import static com.google.common.truth.Truth.assertThat;
+
+import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.AccessibilityTrace;
 import android.content.ComponentName;
@@ -31,14 +38,8 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Handler;
+import android.os.test.FakePermissionEnforcer;
 import android.view.accessibility.AccessibilityEvent;
-
-import static com.google.common.truth.Truth.assertThat;
-
-import static org.junit.Assert.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import com.android.server.wm.WindowManagerInternal;
 
@@ -79,6 +80,7 @@ public class ProxyAccessibilityServiceConnectionTest {
     AccessibilityTrace mMockA11yTrace;
     @Mock
     WindowManagerInternal mMockWindowManagerInternal;
+    FakePermissionEnforcer mFakePermissionEnforcer  = new FakePermissionEnforcer();
     ProxyAccessibilityServiceConnection mProxyConnection;
     AccessibilityServiceInfo mAccessibilityServiceInfo;
     private int mFocusStrokeWidthDefaultValue;
@@ -90,6 +92,8 @@ public class ProxyAccessibilityServiceConnectionTest {
         MockitoAnnotations.initMocks(this);
         when(mMockContext.getResources()).thenReturn(resources);
         when(mMockSecurityPolicy.checkAccessibilityAccess(any())).thenReturn(true);
+        when(mMockContext.getSystemService(Context.PERMISSION_ENFORCER_SERVICE))
+                .thenReturn(mFakePermissionEnforcer);
 
         mAccessibilityServiceInfo = new AccessibilityServiceInfo();
         mProxyConnection = new ProxyAccessibilityServiceConnection(mMockContext, COMPONENT_NAME,
@@ -225,12 +229,17 @@ public class ProxyAccessibilityServiceConnectionTest {
     }
 
     @Test
-    public void testDisableSelf_setIllegalOperationExceptionThrown_() {
+    public void testDisableSelf_setIllegalOperationExceptionThrown() {
         UnsupportedOperationException thrown =
                 assertThrows(
                         UnsupportedOperationException.class,
                         () -> mProxyConnection.disableSelf());
 
         assertThat(thrown).hasMessageThat().contains("disableSelf is not supported");
+    }
+
+    @Test
+    public void getInstalledAndEnabledServices_noServices_returnEmpty() {
+        assertThat(mProxyConnection.getInstalledAndEnabledServices()).isEmpty();
     }
 }

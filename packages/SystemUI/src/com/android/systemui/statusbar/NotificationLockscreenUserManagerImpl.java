@@ -16,6 +16,7 @@
 package com.android.systemui.statusbar;
 
 import static android.app.Flags.keyguardPrivateNotifications;
+import static android.app.Flags.redactSensitiveContentNotificationsOnLockscreen;
 import static android.app.StatusBarManager.ACTION_KEYGUARD_PRIVATE_NOTIFICATIONS_CHANGED;
 import static android.app.StatusBarManager.EXTRA_KM_PRIVATE_NOTIFS_ALLOWED;
 import static android.app.admin.DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED;
@@ -33,7 +34,6 @@ import android.annotation.SuppressLint;
 import android.annotation.UserIdInt;
 import android.app.ActivityOptions;
 import android.app.KeyguardManager;
-import android.app.Notification;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -65,7 +65,6 @@ import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlagsClassic;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.recents.OverviewProxyService;
@@ -420,7 +419,7 @@ public class NotificationLockscreenUserManagerImpl implements
         filter.addAction(Intent.ACTION_USER_UNLOCKED);
         filter.addAction(Intent.ACTION_MANAGED_PROFILE_AVAILABLE);
         filter.addAction(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE);
-        if (allowPrivateProfile()){
+        if (privateSpaceFlagsEnabled()) {
             filter.addAction(Intent.ACTION_PROFILE_AVAILABLE);
             filter.addAction(Intent.ACTION_PROFILE_UNAVAILABLE);
         }
@@ -656,10 +655,12 @@ public class NotificationLockscreenUserManagerImpl implements
                 !userAllowsPrivateNotificationsInPublic(mCurrentUserId);
         boolean isNotifForManagedProfile = mCurrentManagedProfiles.contains(userId);
         boolean isNotifUserRedacted = !userAllowsPrivateNotificationsInPublic(userId);
+        boolean isNotifSensitive = redactSensitiveContentNotificationsOnLockscreen()
+                && ent.getRanking() != null && ent.getRanking().hasSensitiveContent();
 
-        // redact notifications if the current user is redacting notifications; however if the
-        // notification is associated with a managed profile, we rely on the managed profile
-        // setting to determine whether to redact it
+        // redact notifications if the current user is redacting notifications or the notification
+        // contains sensitive content. However if the notification is associated with a managed
+        // profile, we rely on the managed profile setting to determine whether to redact it.
         boolean isNotifRedacted = (!isNotifForManagedProfile && isCurrentUserRedactingNotifs)
                 || isNotifUserRedacted;
 
@@ -668,10 +669,11 @@ public class NotificationLockscreenUserManagerImpl implements
         boolean userForcesRedaction = packageHasVisibilityOverride(ent.getSbn().getKey());
 
         if (keyguardPrivateNotifications()) {
-            return !mKeyguardAllowingNotifications
-                    || userForcesRedaction || notificationRequestsRedaction && isNotifRedacted;
+            return !mKeyguardAllowingNotifications || isNotifSensitive
+                    || userForcesRedaction || (notificationRequestsRedaction && isNotifRedacted);
         } else {
-            return userForcesRedaction || notificationRequestsRedaction && isNotifRedacted;
+            return userForcesRedaction || isNotifSensitive
+                    || (notificationRequestsRedaction && isNotifRedacted);
         }
     }
 
@@ -813,11 +815,15 @@ public class NotificationLockscreenUserManagerImpl implements
     }
 
     private boolean profileAvailabilityActions(String action){
-        return allowPrivateProfile()?
+        return privateSpaceFlagsEnabled()?
                 Objects.equals(action,Intent.ACTION_PROFILE_AVAILABLE)||
                         Objects.equals(action,Intent.ACTION_PROFILE_UNAVAILABLE):
                 Objects.equals(action,Intent.ACTION_MANAGED_PROFILE_AVAILABLE)||
                         Objects.equals(action,Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE);
+    }
+
+    private static boolean privateSpaceFlagsEnabled() {
+        return allowPrivateProfile() && android.multiuser.Flags.enablePrivateSpaceFeatures();
     }
 
     @Override

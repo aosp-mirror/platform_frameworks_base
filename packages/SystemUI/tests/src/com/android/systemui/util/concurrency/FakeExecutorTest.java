@@ -22,12 +22,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import android.testing.AndroidTestingRunner;
-
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.util.time.FakeSystemClock;
+
+import kotlin.jvm.functions.Function4;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -36,10 +37,8 @@ import org.junit.runner.RunWith;
 import java.util.ArrayList;
 import java.util.List;
 
-import kotlin.jvm.functions.Function4;
-
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class FakeExecutorTest extends SysuiTestCase {
     @Before
     public void setUp() throws Exception {

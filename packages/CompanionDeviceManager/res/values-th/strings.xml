@@ -26,8 +26,11 @@
     <string name="profile_name_glasses" msgid="3506504967216601277">"อุปกรณ์"</string>
     <string name="summary_glasses" msgid="2872254734959842579">"แอปนี้จะได้รับสิทธิ์ดังต่อไปนี้ใน<xliff:g id="DEVICE_NAME">%1$s</xliff:g>ของคุณ"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"อนุญาตให้ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; เข้าถึงข้อมูลนี้จากโทรศัพท์ของคุณ"</string>
+    <string name="title_app_streaming_with_mirroring" msgid="3364582597581570658">"อนุญาตให้ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; สตรีมแอปในโทรศัพท์ของคุณไหม"</string>
+    <string name="summary_app_streaming" msgid="295548145144086753">"%1$s จะมีสิทธิ์เข้าถึงทุกอย่างที่ปรากฏหรือเล่นบนโทรศัพท์ ซึ่งรวมถึงเสียง รูปภาพ รหัสผ่าน และข้อความ&lt;br/&gt;&lt;br/&gt;%1$s จะสามารถสตรีมแอปได้จนกว่าคุณจะนำสิทธิ์เข้าถึงนี้ออก"</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"บริการข้ามอุปกรณ์"</string>
     <string name="helper_summary_app_streaming" msgid="2396773196949578425">"<xliff:g id="APP_NAME">%1$s</xliff:g> กำลังขอสิทธิ์ในนามของ <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> เพื่อสตรีมแอประหว่างอุปกรณ์ต่างๆ ของคุณ"</string>
+    <string name="helper_summary_app_streaming_with_mirroring" msgid="6138581029144467467">"<xliff:g id="APP_NAME">%1$s</xliff:g> กำลังขอสิทธิ์ในนามของ <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> เพื่อแสดงและสตรีมแอประหว่างอุปกรณ์ต่างๆ ของคุณ"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
     <string name="title_computer" msgid="4693714143506569253">"อนุญาตให้ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; เข้าถึงข้อมูลนี้จากโทรศัพท์ของคุณ"</string>
@@ -35,6 +38,8 @@
     <string name="helper_title_computer" msgid="4671071173916176037">"บริการ Google Play"</string>
     <string name="helper_summary_computer" msgid="8774832742608187072">"<xliff:g id="APP_NAME">%1$s</xliff:g> กำลังขอสิทธิ์ในนามของ <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> เพื่อเข้าถึงรูปภาพ สื่อ และการแจ้งเตือนในโทรศัพท์ของคุณ"</string>
     <string name="title_nearby_device_streaming" msgid="7269956847378799794">"อนุญาตให้ &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; ทำงานนี้ไหม"</string>
+    <string name="title_nearby_device_streaming_with_mirroring" msgid="242855799919611657">"อนุญาตให้ &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; สตรีมแอปและฟีเจอร์ของระบบในโทรศัพท์ไหม"</string>
+    <string name="summary_nearby_device_streaming" msgid="4039565463149145573">"%1$s จะมีสิทธิ์เข้าถึงทุกอย่างที่ปรากฏหรือเล่นบนโทรศัพท์ของคุณ ซึ่งรวมถึงเสียง รูปภาพ ข้อมูลการชำระเงิน รหัสผ่าน และข้อความ&lt;br/&gt;&lt;br/&gt;%1$s จะสามารถสตรีมแอปและฟีเจอร์ของระบบได้จนกว่าคุณจะนำสิทธิ์เข้าถึงนี้ออก"</string>
     <string name="helper_summary_nearby_device_streaming" msgid="2063965070936844876">"<xliff:g id="APP_NAME">%1$s</xliff:g> กำลังขอสิทธิ์ในนามของ <xliff:g id="DEVICE_NAME">%2$s</xliff:g> เพื่อสตรีมแอปและฟีเจอร์อื่นๆ ของระบบไปยังอุปกรณ์ที่อยู่ใกล้เคียง"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"อุปกรณ์"</string>
     <string name="summary_generic" msgid="1761976003668044801">"แอปนี้จะสามารถซิงค์ข้อมูล เช่น ชื่อของบุคคลที่โทรเข้ามา ระหว่างโทรศัพท์ของคุณและอุปกรณ์ที่เลือกไว้ได้"</string>

@@ -26,6 +26,7 @@ import android.graphics.PixelFormat
 import android.graphics.Rect
 import android.graphics.RectF
 import android.graphics.drawable.Drawable
+import android.view.View
 import com.android.systemui.battery.unified.BatteryLayersDrawable.Companion.Metrics
 import kotlin.math.floor
 import kotlin.math.roundToInt
@@ -33,7 +34,7 @@ import kotlin.math.roundToInt
 /**
  * Draws a right-to-left fill inside of the given [framePath]. This fill is designed to exactly fill
  * the usable space inside of [framePath], given that the stroke width of the path is 1.5, and we
- * want an extra 0.25 (canvas units) of a gap between the fill and the stroke
+ * want an extra 0.5 (canvas units) of a gap between the fill and the stroke
  */
 class BatteryFillDrawable(private val framePath: Path) : Drawable() {
     private var hScale = 1f
@@ -42,6 +43,29 @@ class BatteryFillDrawable(private val framePath: Path) : Drawable() {
     private val scaledFillRect = RectF()
     private var scaledLeftOffset = 0f
     private var scaledRightInset = 0f
+
+    /** Scale this to the viewport so we fill correctly! */
+    private val fillRectNotScaled = RectF()
+    private var leftInsetNotScaled = 0f
+    private var rightInsetNotScaled = 0f
+
+    /**
+     * Configure how much space between the battery frame (drawn at 1.5dp stroke width) and the
+     * inner fill. This is accomplished by tracing the exact same path as the frame, but using
+     * [BlendMode.CLEAR] as the blend mode.
+     *
+     * This value also affects the overall width of the fill, so it requires us to re-draw
+     * everything
+     */
+    var fillInsetAmount = -1f
+        set(value) {
+            if (field != value) {
+                field = value
+                updateInsets()
+                updateScale()
+                invalidateSelf()
+            }
+        }
 
     // Drawable.level cannot be overloaded
     var batteryLevel = 0
@@ -60,7 +84,6 @@ class BatteryFillDrawable(private val framePath: Path) : Drawable() {
     private val clearPaint =
         Paint(Paint.ANTI_ALIAS_FLAG).also { p ->
             p.style = Paint.Style.STROKE
-            p.strokeWidth = 5f
             p.blendMode = BlendMode.CLEAR
         }
 
@@ -87,12 +110,32 @@ class BatteryFillDrawable(private val framePath: Path) : Drawable() {
         updateScale()
     }
 
+    /**
+     * To support dynamic insets, we have to keep mutable references to the left/right unscaled
+     * insets, as well as the fill rect.
+     */
+    private fun updateInsets() {
+        leftInsetNotScaled = LeftFillOffsetExcludingPadding + fillInsetAmount
+        rightInsetNotScaled = RightFillInsetExcludingPadding + fillInsetAmount
+
+        fillRectNotScaled.set(
+            leftInsetNotScaled,
+            0f,
+            Metrics.ViewportWidth - rightInsetNotScaled,
+            Metrics.ViewportHeight
+        )
+    }
+
     private fun updateScale() {
         framePath.transform(/* matrix = */ scaleMatrix, /* dst = */ scaledPath)
-        scaleMatrix.mapRect(/* dst = */ scaledFillRect, /* src = */ FillRect)
+        scaleMatrix.mapRect(/* dst = */ scaledFillRect, /* src = */ fillRectNotScaled)
 
-        scaledLeftOffset = LeftFillOffset * hScale
-        scaledRightInset = RightFillInset * hScale
+        scaledLeftOffset = leftInsetNotScaled * hScale
+        scaledRightInset = rightInsetNotScaled * hScale
+
+        // stroke width = 1.5 (same as the outer frame) + 2x fillInsetAmount, since N px of padding
+        // requires the entire stroke to be 2N px wider
+        clearPaint.strokeWidth = (1.5f + 2 * fillInsetAmount) * hScale
     }
 
     override fun draw(canvas: Canvas) {
@@ -102,6 +145,11 @@ class BatteryFillDrawable(private val framePath: Path) : Drawable() {
 
         // saveLayer is needed here so we don't clip the other layers of our drawable
         canvas.saveLayer(null, null)
+
+        // Fill from the opposite direction in rtl mode
+        if (layoutDirection == View.LAYOUT_DIRECTION_RTL) {
+            canvas.scale(-1f, 1f, bounds.width() / 2f, bounds.height() / 2f)
+        }
 
         // We need to use 3 draw commands:
         // 1. Clip to the current level
@@ -149,23 +197,13 @@ class BatteryFillDrawable(private val framePath: Path) : Drawable() {
     override fun setAlpha(alpha: Int) {}
 
     companion object {
-        // 3.75f =
+        // 3.5f =
         //       2.75 (left-most edge of the frame path)
         //     + 0.75 (1/2 of the stroke width)
-        //     + 0.25 (padding between stroke and fill edge)
-        private const val LeftFillOffset = 3.75f
+        private const val LeftFillOffsetExcludingPadding = 3.5f
 
-        // 1.75, calculated the same way, but from the right edge (without the battery cap), which
+        // 1.5, calculated the same way, but from the right edge (without the battery cap), which
         // consumes 2 units of width.
-        private const val RightFillInset = 1.75f
-
-        /** Scale this to the viewport so we fill correctly! */
-        private val FillRect =
-            RectF(
-                LeftFillOffset,
-                0f,
-                Metrics.ViewportWidth - RightFillInset,
-                Metrics.ViewportHeight
-            )
+        private const val RightFillInsetExcludingPadding = 1.5f
     }
 }

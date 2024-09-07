@@ -17,7 +17,9 @@
 package com.android.systemui.deviceentry.domain.interactor
 
 import android.content.res.mainResources
-import android.hardware.face.FaceManager
+import android.hardware.biometrics.BiometricFaceConstants.FACE_ACQUIRED_TOO_RIGHT
+import android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_HW_UNAVAILABLE
+import android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_TIMEOUT
 import android.hardware.fingerprint.FingerprintManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -266,7 +268,7 @@ class BiometricMessageInteractorTest : SysuiTestCase() {
             faceAuthRepository.setAuthenticationStatus(
                 HelpFaceAuthenticationStatus(
                     msg = "Move left",
-                    msgId = FaceManager.FACE_ACQUIRED_TOO_RIGHT,
+                    msgId = FACE_ACQUIRED_TOO_RIGHT,
                 )
             )
 
@@ -293,7 +295,7 @@ class BiometricMessageInteractorTest : SysuiTestCase() {
             faceAuthRepository.setAuthenticationStatus(
                 HelpFaceAuthenticationStatus(
                     msg = "Move left",
-                    msgId = FaceManager.FACE_ACQUIRED_TOO_RIGHT,
+                    msgId = FACE_ACQUIRED_TOO_RIGHT,
                 )
             )
 
@@ -318,7 +320,7 @@ class BiometricMessageInteractorTest : SysuiTestCase() {
             faceAuthRepository.setAuthenticationStatus(
                 HelpFaceAuthenticationStatus(
                     msg = "Move left",
-                    msgId = FaceManager.FACE_ACQUIRED_TOO_RIGHT,
+                    msgId = FACE_ACQUIRED_TOO_RIGHT,
                 )
             )
 
@@ -333,10 +335,7 @@ class BiometricMessageInteractorTest : SysuiTestCase() {
 
             // WHEN authentication status error is FACE_ERROR_HW_UNAVAILABLE
             faceAuthRepository.setAuthenticationStatus(
-                ErrorFaceAuthenticationStatus(
-                    msgId = FaceManager.FACE_ERROR_HW_UNAVAILABLE,
-                    msg = "test"
-                )
+                ErrorFaceAuthenticationStatus(msgId = FACE_ERROR_HW_UNAVAILABLE, msg = "test")
             )
 
             // THEN faceErrorMessage isn't updated - it's still null since it was suppressed
@@ -350,10 +349,7 @@ class BiometricMessageInteractorTest : SysuiTestCase() {
 
             // WHEN authentication status error is FACE_ERROR_HW_UNAVAILABLE
             faceAuthRepository.setAuthenticationStatus(
-                ErrorFaceAuthenticationStatus(
-                    msgId = FaceManager.FACE_ERROR_HW_UNAVAILABLE,
-                    msg = "test"
-                )
+                ErrorFaceAuthenticationStatus(msgId = FACE_ERROR_HW_UNAVAILABLE, msg = "test")
             )
 
             // GIVEN face is allowed
@@ -370,7 +366,7 @@ class BiometricMessageInteractorTest : SysuiTestCase() {
 
             // WHEN authentication status error is FACE_ERROR_TIMEOUT
             faceAuthRepository.setAuthenticationStatus(
-                ErrorFaceAuthenticationStatus(msgId = FaceManager.FACE_ERROR_TIMEOUT, msg = "test")
+                ErrorFaceAuthenticationStatus(msgId = FACE_ERROR_TIMEOUT, msg = "test")
             )
 
             // GIVEN face is allowed
@@ -389,7 +385,7 @@ class BiometricMessageInteractorTest : SysuiTestCase() {
 
             // WHEN authentication status error is FACE_ERROR_TIMEOUT
             faceAuthRepository.setAuthenticationStatus(
-                ErrorFaceAuthenticationStatus(msgId = FaceManager.FACE_ERROR_TIMEOUT, msg = "test")
+                ErrorFaceAuthenticationStatus(msgId = FACE_ERROR_TIMEOUT, msg = "test")
             )
 
             // GIVEN face is allowed

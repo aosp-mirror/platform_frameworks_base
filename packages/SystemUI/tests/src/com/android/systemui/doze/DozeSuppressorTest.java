@@ -38,14 +38,16 @@ import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
 import android.hardware.display.AmbientDisplayConfiguration;
-import android.testing.AndroidTestingRunner;
 import android.testing.UiThreadTest;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
+
+import dagger.Lazy;
 
 import org.junit.After;
 import org.junit.Before;
@@ -57,10 +59,8 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import dagger.Lazy;
-
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @UiThreadTest
 public class DozeSuppressorTest extends SysuiTestCase {
 

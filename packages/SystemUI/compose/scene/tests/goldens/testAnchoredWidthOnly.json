@@ -1,0 +1,41 @@
+{
+  "frame_ids": [
+    "before",
+    0,
+    16,
+    32,
+    48,
+    "after"
+  ],
+  "features": [
+    {
+      "name": "Bar_size",
+      "type": "dpSize",
+      "data_points": [
+        {
+          "type": "not_found"
+        },
+        {
+          "width": 100,
+          "height": 60
+        },
+        {
+          "width": 125.14286,
+          "height": 60
+        },
+        {
+          "width": 150,
+          "height": 60
+        },
+        {
+          "width": 175.14285,
+          "height": 60
+        },
+        {
+          "width": 200,
+          "height": 60
+        }
+      ]
+    }
+  ]
+}

@@ -25,8 +25,8 @@ import android.content.pm.PackageManager.ApplicationInfoFlags
 import android.hardware.input.InputSettings
 import android.os.UserHandle
 import android.os.UserManager
-import android.test.suitebuilder.annotation.SmallTest
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.filters.SmallTest
 import com.android.dx.mockito.inline.extended.ExtendedMockito
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.ContentDescription
@@ -63,7 +63,7 @@ import org.mockito.quality.Strictness
 
 /** atest SystemUITests:NoteTaskQuickAffordanceConfigTest */
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 internal class NoteTaskQuickAffordanceConfigTest : SysuiTestCase() {
 
     @Mock lateinit var controller: NoteTaskController

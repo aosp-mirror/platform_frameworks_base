@@ -16,10 +16,18 @@
 
 package com.android.compose.animation.scene
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.compose.animation.scene.TestScenes.SceneA
+import com.android.compose.animation.scene.TestScenes.SceneB
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -55,8 +63,8 @@ class ObservableTransitionStateTest {
         }
 
         rule.testTransition(
-            from = TestScenes.SceneA,
-            to = TestScenes.SceneB,
+            from = SceneA,
+            to = SceneB,
             transitionLayout = { currentScene, onChangeScene ->
                 state =
                     updateSceneTransitionLayoutState(
@@ -66,34 +74,90 @@ class ObservableTransitionStateTest {
                     )
 
                 SceneTransitionLayout(state = state) {
-                    scene(TestScenes.SceneA) {}
-                    scene(TestScenes.SceneB) {}
+                    scene(SceneA) {}
+                    scene(SceneB) {}
                 }
             }
         ) {
             before {
-                assertThat(observableState())
-                    .isEqualTo(ObservableTransitionState.Idle(TestScenes.SceneA))
+                assertThat(observableState()).isEqualTo(ObservableTransitionState.Idle(SceneA))
             }
             at(0) {
                 val state = observableState()
                 assertThat(state).isInstanceOf(ObservableTransitionState.Transition::class.java)
                 assertThat((state as ObservableTransitionState.Transition).fromScene)
-                    .isEqualTo(TestScenes.SceneA)
-                assertThat(state.toScene).isEqualTo(TestScenes.SceneB)
+                    .isEqualTo(SceneA)
+                assertThat(state.toScene).isEqualTo(SceneB)
                 assertThat(state.progress()).isEqualTo(0f)
             }
             at(TestTransitionDuration / 2) {
                 val state = observableState()
                 assertThat((state as ObservableTransitionState.Transition).fromScene)
-                    .isEqualTo(TestScenes.SceneA)
-                assertThat(state.toScene).isEqualTo(TestScenes.SceneB)
+                    .isEqualTo(SceneA)
+                assertThat(state.toScene).isEqualTo(SceneB)
                 assertThat(state.progress()).isEqualTo(0.5f)
             }
             after {
-                assertThat(observableState())
-                    .isEqualTo(ObservableTransitionState.Idle(TestScenes.SceneB))
+                assertThat(observableState()).isEqualTo(ObservableTransitionState.Idle(SceneB))
             }
+        }
+    }
+
+    @Test
+    fun observableCurrentScene() = runTestWithSnapshots {
+        val state =
+            MutableSceneTransitionLayoutStateImpl(
+                initialScene = SceneA,
+                transitions = transitions {},
+            )
+        val observableCurrentScene =
+            state.observableTransitionState().flatMapLatest { it.currentScene() }
+
+        // Collect observableCurrentScene into currentScene (unfortunately we can't use
+        // collectValues in this test target).
+        val currentScene =
+            object {
+                private var _value: SceneKey? = null
+                val value: SceneKey
+                    get() {
+                        runCurrent()
+                        return _value ?: error("observableCurrentScene has no value")
+                    }
+
+                init {
+                    backgroundScope.launch { observableCurrentScene.collect { _value = it } }
+                }
+            }
+
+        assertThat(currentScene.value).isEqualTo(SceneA)
+
+        // Start a transition to Scene B.
+        var transitionCurrentScene by mutableStateOf(SceneA)
+        val transition =
+            transition(from = SceneA, to = SceneB, current = { transitionCurrentScene })
+        state.startTransition(transition)
+        assertThat(currentScene.value).isEqualTo(SceneA)
+
+        // Change the transition current scene.
+        transitionCurrentScene = SceneB
+        assertThat(currentScene.value).isEqualTo(SceneB)
+
+        transitionCurrentScene = SceneA
+        assertThat(currentScene.value).isEqualTo(SceneA)
+    }
+
+    // See http://shortn/_hj4Mhikmos for inspiration.
+    private fun runTestWithSnapshots(testBody: suspend TestScope.() -> Unit) {
+        val globalWriteObserverHandle =
+            Snapshot.registerGlobalWriteObserver {
+                // This is normally done by the compose runtime.
+                Snapshot.sendApplyNotifications()
+            }
+
+        try {
+            runTest(testBody = testBody)
+        } finally {
+            globalWriteObserverHandle.dispose()
         }
     }
 }

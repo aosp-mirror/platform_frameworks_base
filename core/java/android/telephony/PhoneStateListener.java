@@ -1685,6 +1685,10 @@ public class PhoneStateListener {
         public final void onSimultaneousCallingStateChanged(int[] subIds) {
             // not supported on the deprecated interface - Use TelephonyCallback instead
         }
+
+        public final void onCarrierRoamingNtnModeChanged(boolean active) {
+            // not supported on the deprecated interface - Use TelephonyCallback instead
+        }
     }
 
     private void log(String s) {

@@ -53,8 +53,8 @@ class MediaDataCombineLatest @Inject constructor() :
         listeners.toSet().forEach { it.onSmartspaceMediaDataLoaded(key, data) }
     }
 
-    override fun onMediaDataRemoved(key: String) {
-        remove(key)
+    override fun onMediaDataRemoved(key: String, userInitiated: Boolean) {
+        remove(key, userInitiated)
     }
 
     override fun onSmartspaceMediaDataRemoved(key: String, immediately: Boolean) {
@@ -71,8 +71,8 @@ class MediaDataCombineLatest @Inject constructor() :
         }
     }
 
-    override fun onKeyRemoved(key: String) {
-        remove(key)
+    override fun onKeyRemoved(key: String, userInitiated: Boolean) {
+        remove(key, userInitiated)
     }
 
     /**
@@ -92,10 +92,10 @@ class MediaDataCombineLatest @Inject constructor() :
         }
     }
 
-    private fun remove(key: String) {
+    private fun remove(key: String, userInitiated: Boolean) {
         entries.remove(key)?.let {
             val listenersCopy = listeners.toSet()
-            listenersCopy.forEach { it.onMediaDataRemoved(key) }
+            listenersCopy.forEach { it.onMediaDataRemoved(key, userInitiated) }
         }
     }
 }

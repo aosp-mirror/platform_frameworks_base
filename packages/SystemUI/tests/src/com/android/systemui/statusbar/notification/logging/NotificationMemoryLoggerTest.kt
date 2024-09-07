@@ -21,10 +21,11 @@ import android.app.StatsManager
 import android.graphics.Bitmap
 import android.graphics.drawable.Icon
 import android.stats.sysui.NotificationEnums
-import android.testing.AndroidTestingRunner
 import android.util.StatsEvent
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.log.assertLogsWtf
 import com.android.systemui.shared.system.SysUiStatsLog
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
@@ -45,7 +46,7 @@ import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class NotificationMemoryLoggerTest : SysuiTestCase() {
 
     @Rule @JvmField val expect = Expect.create()
@@ -133,8 +134,10 @@ class NotificationMemoryLoggerTest : SysuiTestCase() {
         val pipeline: NotifPipeline = mock()
         whenever(pipeline.allNotifs).thenThrow(RuntimeException("Something broke!"))
         val logger = NotificationMemoryLogger(pipeline, statsManager, immediate, bgExecutor)
-        assertThat(logger.onPullAtom(SysUiStatsLog.NOTIFICATION_MEMORY_USE, mutableListOf()))
-            .isEqualTo(StatsManager.PULL_SKIP)
+        assertLogsWtf {
+            assertThat(logger.onPullAtom(SysUiStatsLog.NOTIFICATION_MEMORY_USE, mutableListOf()))
+                .isEqualTo(StatsManager.PULL_SKIP)
+        }
     }
 
     @Test

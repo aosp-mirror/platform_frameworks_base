@@ -28,7 +28,9 @@ import com.android.systemui.media.dagger.MediaModule;
 import com.android.systemui.qs.AutoAddTracker;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.ReduceBrightColorsController;
+import com.android.systemui.qs.ReduceBrightColorsControllerImpl;
 import com.android.systemui.qs.external.QSExternalModule;
+import com.android.systemui.qs.panels.dagger.PanelsModule;
 import com.android.systemui.qs.pipeline.dagger.QSPipelineModule;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.qs.tiles.di.QSTilesModule;
@@ -44,14 +46,14 @@ import com.android.systemui.statusbar.policy.SafetyController;
 import com.android.systemui.statusbar.policy.WalletController;
 import com.android.systemui.util.settings.SecureSettings;
 
-import java.util.Map;
-
-import javax.inject.Named;
-
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.Multibinds;
+
+import java.util.Map;
+
+import javax.inject.Named;
 
 /**
  * Module for QS dependencies
@@ -59,6 +61,7 @@ import dagger.multibindings.Multibinds;
 @Module(subcomponents = {QSFragmentComponent.class, QSSceneComponent.class},
         includes = {
                 MediaModule.class,
+                PanelsModule.class,
                 QSExternalModule.class,
                 QSFlagsModule.class,
                 QSHostModule.class,
@@ -116,4 +119,11 @@ public interface QSModule {
 
     @Binds
     QSSceneAdapter bindsQsSceneInteractor(QSSceneAdapterImpl impl);
+
+    /**
+     * Dims the screen
+     */
+    @Binds
+    ReduceBrightColorsController bindReduceBrightColorsController(
+            ReduceBrightColorsControllerImpl impl);
 }

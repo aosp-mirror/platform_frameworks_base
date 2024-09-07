@@ -117,12 +117,12 @@ constructor(
                     }
                 }
 
-                val iconRes =
+                iconRes =
                     if (activationState == QSTileState.ActivationState.ACTIVE)
                         R.drawable.qs_light_dark_theme_icon_on
                     else R.drawable.qs_light_dark_theme_icon_off
                 val loadedIcon =
-                    Icon.Loaded(resources.getDrawable(iconRes, theme), contentDescription = null)
+                    Icon.Loaded(resources.getDrawable(iconRes!!, theme), contentDescription = null)
                 icon = { loadedIcon }
 
                 supportedActions =

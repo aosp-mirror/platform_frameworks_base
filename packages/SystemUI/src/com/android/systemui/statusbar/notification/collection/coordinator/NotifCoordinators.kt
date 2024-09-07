@@ -20,50 +20,55 @@ import com.android.systemui.flags.Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import com.android.systemui.statusbar.notification.collection.PipelineDumpable
 import com.android.systemui.statusbar.notification.collection.PipelineDumper
+import com.android.systemui.statusbar.notification.collection.SortBySectionTimeFlag
 import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner
 import com.android.systemui.statusbar.notification.collection.provider.SectionStyleProvider
+import com.android.systemui.statusbar.notification.shared.NotificationMinimalismPrototype
 import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor
+import com.android.systemui.statusbar.notification.shared.PriorityPeopleSection
 import javax.inject.Inject
 
 /**
- * Handles the attachment of [Coordinator]s to the [NotifPipeline] so that the
- * Coordinators can register their respective callbacks.
+ * Handles the attachment of [Coordinator]s to the [NotifPipeline] so that the Coordinators can
+ * register their respective callbacks.
  */
 interface NotifCoordinators : Coordinator, PipelineDumpable
 
 @CoordinatorScope
-class NotifCoordinatorsImpl @Inject constructor(
-        sectionStyleProvider: SectionStyleProvider,
-        featureFlags: FeatureFlags,
-        dataStoreCoordinator: DataStoreCoordinator,
-        hideLocallyDismissedNotifsCoordinator: HideLocallyDismissedNotifsCoordinator,
-        hideNotifsForOtherUsersCoordinator: HideNotifsForOtherUsersCoordinator,
-        keyguardCoordinator: KeyguardCoordinator,
-        rankingCoordinator: RankingCoordinator,
-        colorizedFgsCoordinator: ColorizedFgsCoordinator,
-        deviceProvisionedCoordinator: DeviceProvisionedCoordinator,
-        bubbleCoordinator: BubbleCoordinator,
-        headsUpCoordinator: HeadsUpCoordinator,
-        gutsCoordinator: GutsCoordinator,
-        conversationCoordinator: ConversationCoordinator,
-        debugModeCoordinator: DebugModeCoordinator,
-        groupCountCoordinator: GroupCountCoordinator,
-        groupWhenCoordinator: GroupWhenCoordinator,
-        mediaCoordinator: MediaCoordinator,
-        preparationCoordinator: PreparationCoordinator,
-        remoteInputCoordinator: RemoteInputCoordinator,
-        rowAlertTimeCoordinator: RowAlertTimeCoordinator,
-        rowAppearanceCoordinator: RowAppearanceCoordinator,
-        stackCoordinator: StackCoordinator,
-        shadeEventCoordinator: ShadeEventCoordinator,
-        smartspaceDedupingCoordinator: SmartspaceDedupingCoordinator,
-        viewConfigCoordinator: ViewConfigCoordinator,
-        visualStabilityCoordinator: VisualStabilityCoordinator,
-        sensitiveContentCoordinator: SensitiveContentCoordinator,
-        dismissibilityCoordinator: DismissibilityCoordinator,
-        dreamCoordinator: DreamCoordinator,
-        statsLoggerCoordinator: NotificationStatsLoggerCoordinator,
+class NotifCoordinatorsImpl
+@Inject
+constructor(
+    sectionStyleProvider: SectionStyleProvider,
+    featureFlags: FeatureFlags,
+    dataStoreCoordinator: DataStoreCoordinator,
+    hideLocallyDismissedNotifsCoordinator: HideLocallyDismissedNotifsCoordinator,
+    hideNotifsForOtherUsersCoordinator: HideNotifsForOtherUsersCoordinator,
+    keyguardCoordinator: KeyguardCoordinator,
+    rankingCoordinator: RankingCoordinator,
+    colorizedFgsCoordinator: ColorizedFgsCoordinator,
+    deviceProvisionedCoordinator: DeviceProvisionedCoordinator,
+    bubbleCoordinator: BubbleCoordinator,
+    headsUpCoordinator: HeadsUpCoordinator,
+    gutsCoordinator: GutsCoordinator,
+    conversationCoordinator: ConversationCoordinator,
+    debugModeCoordinator: DebugModeCoordinator,
+    groupCountCoordinator: GroupCountCoordinator,
+    groupWhenCoordinator: GroupWhenCoordinator,
+    mediaCoordinator: MediaCoordinator,
+    preparationCoordinator: PreparationCoordinator,
+    remoteInputCoordinator: RemoteInputCoordinator,
+    rowAlertTimeCoordinator: RowAlertTimeCoordinator,
+    rowAppearanceCoordinator: RowAppearanceCoordinator,
+    stackCoordinator: StackCoordinator,
+    shadeEventCoordinator: ShadeEventCoordinator,
+    smartspaceDedupingCoordinator: SmartspaceDedupingCoordinator,
+    viewConfigCoordinator: ViewConfigCoordinator,
+    visualStabilityCoordinator: VisualStabilityCoordinator,
+    sensitiveContentCoordinator: SensitiveContentCoordinator,
+    dismissibilityCoordinator: DismissibilityCoordinator,
+    dreamCoordinator: DreamCoordinator,
+    statsLoggerCoordinator: NotificationStatsLoggerCoordinator,
 ) : NotifCoordinators {
 
     private val mCoreCoordinators: MutableList<CoreCoordinator> = ArrayList()
@@ -111,25 +116,47 @@ class NotifCoordinatorsImpl @Inject constructor(
         }
 
         // Manually add Ordered Sections
+        if (NotificationMinimalismPrototype.V2.isEnabled) {
+            mOrderedSections.add(keyguardCoordinator.topOngoingSectioner) // Top Ongoing
+        }
         mOrderedSections.add(headsUpCoordinator.sectioner) // HeadsUp
+        if (NotificationMinimalismPrototype.V2.isEnabled) {
+            mOrderedSections.add(keyguardCoordinator.topUnseenSectioner) // Top Unseen
+        }
         mOrderedSections.add(colorizedFgsCoordinator.sectioner) // ForegroundService
+        if (PriorityPeopleSection.isEnabled) {
+            mOrderedSections.add(conversationCoordinator.priorityPeopleSectioner) // Priority People
+        }
         mOrderedSections.add(conversationCoordinator.peopleAlertingSectioner) // People Alerting
-        mOrderedSections.add(conversationCoordinator.peopleSilentSectioner) // People Silent
+        if (!SortBySectionTimeFlag.isEnabled) {
+            mOrderedSections.add(conversationCoordinator.peopleSilentSectioner) // People Silent
+        }
         mOrderedSections.add(rankingCoordinator.alertingSectioner) // Alerting
         mOrderedSections.add(rankingCoordinator.silentSectioner) // Silent
         mOrderedSections.add(rankingCoordinator.minimizedSectioner) // Minimized
 
         sectionStyleProvider.setMinimizedSections(setOf(rankingCoordinator.minimizedSectioner))
-        sectionStyleProvider.setSilentSections(listOf(
-                conversationCoordinator.peopleSilentSectioner,
-                rankingCoordinator.silentSectioner,
-                rankingCoordinator.minimizedSectioner,
-        ))
+        if (SortBySectionTimeFlag.isEnabled) {
+            sectionStyleProvider.setSilentSections(
+                listOf(
+                    rankingCoordinator.silentSectioner,
+                    rankingCoordinator.minimizedSectioner,
+                )
+            )
+        } else {
+            sectionStyleProvider.setSilentSections(
+                listOf(
+                    conversationCoordinator.peopleSilentSectioner,
+                    rankingCoordinator.silentSectioner,
+                    rankingCoordinator.minimizedSectioner,
+                )
+            )
+        }
     }
 
     /**
-     * Sends the pipeline to each coordinator when the pipeline is ready to accept
-     * [Pluggable]s, [NotifCollectionListener]s and [NotifLifetimeExtender]s.
+     * Sends the pipeline to each coordinator when the pipeline is ready to accept [Pluggable]s,
+     * [NotifCollectionListener]s and [NotifLifetimeExtender]s.
      */
     override fun attach(pipeline: NotifPipeline) {
         for (c in mCoreCoordinators) {
@@ -145,10 +172,11 @@ class NotifCoordinatorsImpl @Inject constructor(
      * As part of the NotifPipeline dumpable, dumps the list of coordinators; sections are omitted
      * as they are dumped in the RenderStageManager instead.
      */
-    override fun dumpPipeline(d: PipelineDumper) = with(d) {
-        dump("core coordinators", mCoreCoordinators)
-        dump("normal coordinators", mCoordinators)
-    }
+    override fun dumpPipeline(d: PipelineDumper) =
+        with(d) {
+            dump("core coordinators", mCoreCoordinators)
+            dump("normal coordinators", mCoordinators)
+        }
 
     companion object {
         private const val TAG = "NotifCoordinators"

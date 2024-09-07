@@ -16,27 +16,34 @@
 
 package com.android.systemui.qs.ui.composable
 
+import android.view.ViewGroup
+import android.widget.FrameLayout
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.MovableElementScenePicker
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.TransitionState
 import com.android.compose.animation.scene.ValueKey
 import com.android.compose.modifiers.thenIf
+import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.qs.ui.adapter.QSSceneAdapter
 import com.android.systemui.qs.ui.adapter.QSSceneAdapter.State.Companion.Collapsing
 import com.android.systemui.qs.ui.adapter.QSSceneAdapter.State.Expanding
-import com.android.systemui.qs.ui.adapter.QSSceneAdapter.State.Unsquishing
+import com.android.systemui.qs.ui.adapter.QSSceneAdapter.State.UnsquishingQQS
+import com.android.systemui.qs.ui.adapter.QSSceneAdapter.State.UnsquishingQS
 import com.android.systemui.scene.shared.model.Scenes
 
 object QuickSettings {
@@ -49,26 +56,40 @@ object QuickSettings {
     object Elements {
         val Content =
             ElementKey("QuickSettingsContent", scenePicker = MovableElementScenePicker(SCENES))
+        val QuickQuickSettings = ElementKey("QuickQuickSettings")
+        val SplitShadeQuickSettings = ElementKey("SplitShadeQuickSettings")
         val FooterActions = ElementKey("QuickSettingsFooterActions")
     }
 
     object SharedValues {
         val TilesSquishiness = ValueKey("QuickSettingsTileSquishiness")
+
         object SquishinessValues {
             val Default = 1f
             val LockscreenSceneStarting = 0f
             val GoneSceneStarting = 0.3f
         }
+
+        val MediaLandscapeTopOffset = ValueKey("MediaLandscapeTopOffset")
+
+        object MediaOffset {
+            val InQQS = 0.dp
+            // Brightness + padding
+            val InQS = 92.dp
+            val Default = 0.dp
+        }
     }
 }
 
 private fun SceneScope.stateForQuickSettingsContent(
-    squishiness: Float = QuickSettings.SharedValues.SquishinessValues.Default
+    isSplitShade: Boolean,
+    squishiness: () -> Float = { QuickSettings.SharedValues.SquishinessValues.Default }
 ): QSSceneAdapter.State {
     return when (val transitionState = layoutState.transitionState) {
         is TransitionState.Idle -> {
             when (transitionState.currentScene) {
-                Scenes.Shade -> QSSceneAdapter.State.QQS
+                Scenes.Shade ->
+                    QSSceneAdapter.State.QQS.takeUnless { isSplitShade } ?: QSSceneAdapter.State.QS
                 Scenes.QuickSettings -> QSSceneAdapter.State.QS
                 else -> QSSceneAdapter.State.CLOSED
             }
@@ -76,11 +97,16 @@ private fun SceneScope.stateForQuickSettingsContent(
         is TransitionState.Transition ->
             with(transitionState) {
                 when {
-                    fromScene == Scenes.Shade && toScene == Scenes.QuickSettings ->
+                    isSplitShade -> UnsquishingQS(squishiness)
+                    fromScene == Scenes.Shade && toScene == Scenes.QuickSettings -> {
                         Expanding(progress)
-                    fromScene == Scenes.QuickSettings && toScene == Scenes.Shade ->
+                    }
+                    fromScene == Scenes.QuickSettings && toScene == Scenes.Shade -> {
                         Collapsing(progress)
-                    fromScene == Scenes.Shade || toScene == Scenes.Shade -> Unsquishing(squishiness)
+                    }
+                    fromScene == Scenes.Shade || toScene == Scenes.Shade -> {
+                        UnsquishingQQS(squishiness)
+                    }
                     fromScene == Scenes.QuickSettings || toScene == Scenes.QuickSettings -> {
                         QSSceneAdapter.State.QS
                     }
@@ -111,18 +137,33 @@ private fun SceneScope.stateForQuickSettingsContent(
 fun SceneScope.QuickSettings(
     qsSceneAdapter: QSSceneAdapter,
     heightProvider: () -> Int,
+    isSplitShade: Boolean,
     modifier: Modifier = Modifier,
-    squishiness: Float = QuickSettings.SharedValues.SquishinessValues.Default,
+    squishiness: () -> Float = { QuickSettings.SharedValues.SquishinessValues.Default },
 ) {
-    val contentState = stateForQuickSettingsContent(squishiness)
+    val contentState = { stateForQuickSettingsContent(isSplitShade, squishiness) }
+    val transitionState = layoutState.transitionState
+    val isClosing =
+        transitionState is TransitionState.Transition &&
+            transitionState.progress >= 0.9f && // almost done closing
+            !(layoutState.isTransitioning(to = Scenes.Shade) ||
+                layoutState.isTransitioning(to = Scenes.QuickSettings))
+
+    if (isClosing) {
+        DisposableEffect(Unit) {
+            onDispose { qsSceneAdapter.setState(QSSceneAdapter.State.CLOSED) }
+        }
+    }
 
     MovableElement(
         key = QuickSettings.Elements.Content,
         modifier =
-            modifier.fillMaxWidth().layout { measurable, constraints ->
+            modifier.sysuiResTag("quick_settings_panel").fillMaxWidth().layout {
+                measurable,
+                constraints ->
                 val placeable = measurable.measure(constraints)
                 // Use the height of the correct view based on the scene it is being composed in
-                val height = heightProvider()
+                val height = heightProvider().coerceAtLeast(0)
 
                 layout(placeable.width, height) { placeable.placeRelative(0, 0) }
             }
@@ -134,11 +175,11 @@ fun SceneScope.QuickSettings(
 @Composable
 private fun QuickSettingsContent(
     qsSceneAdapter: QSSceneAdapter,
-    state: QSSceneAdapter.State,
+    state: () -> QSSceneAdapter.State,
     modifier: Modifier = Modifier,
 ) {
-    val qsView by qsSceneAdapter.qsView.collectAsState(null)
-    val isCustomizing by qsSceneAdapter.isCustomizing.collectAsState()
+    val qsView by qsSceneAdapter.qsView.collectAsStateWithLifecycle()
+    val isCustomizing by qsSceneAdapter.isCustomizerShowing.collectAsStateWithLifecycle()
     QuickSettingsTheme {
         val context = LocalContext.current
 
@@ -150,15 +191,34 @@ private fun QuickSettingsContent(
         qsView?.let { view ->
             Box(
                 modifier =
-                    modifier.fillMaxWidth().thenIf(isCustomizing) { Modifier.fillMaxHeight() }
+                    modifier
+                        .fillMaxWidth()
+                        .thenIf(isCustomizing) { Modifier.fillMaxHeight() }
+                        .drawWithContent {
+                            qsSceneAdapter.applyLatestExpansionAndSquishiness()
+                            drawContent()
+                        }
             ) {
                 AndroidView(
                     modifier = Modifier.fillMaxWidth(),
-                    factory = { _ ->
-                        qsSceneAdapter.setState(state)
-                        view
+                    factory = { context ->
+                        qsSceneAdapter.setState(state())
+                        FrameLayout(context).apply {
+                            (view.parent as? ViewGroup)?.removeView(view)
+                            addView(view)
+                        }
                     },
-                    update = { qsSceneAdapter.setState(state) }
+                    // When the view changes (e.g. due to a theme change), this will be recomposed
+                    // if needed and the new view will be attached to the FrameLayout here.
+                    update = {
+                        qsSceneAdapter.setState(state())
+                        if (view.parent != it) {
+                            it.removeAllViews()
+                            (view.parent as? ViewGroup)?.removeView(view)
+                            it.addView(view)
+                        }
+                    },
+                    onRelease = { it.removeAllViews() }
                 )
             }
         }

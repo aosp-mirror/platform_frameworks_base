@@ -66,4 +66,15 @@ public class Utils {
         ResultReceiver resultReceiver = intent.getParcelableExtra(Intent.EXTRA_RESULT_RECEIVER);
         resultReceiver.send(0, null);
     }
+
+    /**
+     * Wake up the device.
+     */
+    public static void wakeUp() {
+        try {
+            UiDevice.getInstance(InstrumentationRegistry.getInstrumentation()).wakeUp();
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

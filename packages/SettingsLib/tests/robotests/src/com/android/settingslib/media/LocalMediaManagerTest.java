@@ -21,11 +21,14 @@ import static android.media.MediaRoute2ProviderService.REASON_UNKNOWN_ERROR;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -35,7 +38,6 @@ import android.media.AudioDeviceAttributes;
 import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.media.MediaRoute2Info;
-import android.media.MediaRouter2Manager;
 import android.media.RoutingSessionInfo;
 
 import com.android.settingslib.bluetooth.A2dpProfile;
@@ -58,6 +60,7 @@ import org.robolectric.annotation.Config;
 import org.robolectric.shadow.api.Shadow;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @RunWith(RobolectricTestRunner.class)
@@ -75,8 +78,6 @@ public class LocalMediaManagerTest {
     private static final String TEST_ADDRESS = "00:01:02:03:04:05";
 
     @Mock
-    private InfoMediaManager mInfoMediaManager;
-    @Mock
     private LocalBluetoothManager mLocalBluetoothManager;
     @Mock
     private LocalMediaManager.DeviceCallback mCallback;
@@ -87,8 +88,6 @@ public class LocalMediaManagerTest {
     @Mock
     private LocalBluetoothProfileManager mLocalProfileManager;
     @Mock
-    private MediaRouter2Manager mMediaRouter2Manager;
-    @Mock
     private MediaRoute2Info mRouteInfo1;
     @Mock
     private MediaRoute2Info mRouteInfo2;
@@ -97,6 +96,7 @@ public class LocalMediaManagerTest {
 
     private Context mContext;
     private LocalMediaManager mLocalMediaManager;
+    private InfoMediaManager mInfoMediaManager;
     private ShadowBluetoothAdapter mShadowBluetoothAdapter;
     private InfoMediaDevice mInfoMediaDevice1;
     private InfoMediaDevice mInfoMediaDevice2;
@@ -116,20 +116,41 @@ public class LocalMediaManagerTest {
         when(mLocalProfileManager.getA2dpProfile()).thenReturn(mA2dpProfile);
         when(mLocalProfileManager.getHearingAidProfile()).thenReturn(mHapProfile);
 
-        mInfoMediaDevice1 = spy(new InfoMediaDevice(mContext, mRouteInfo1));
-        mInfoMediaDevice2 = new InfoMediaDevice(mContext, mRouteInfo2);
-        mLocalMediaManager = new LocalMediaManager(mContext, mLocalBluetoothManager,
-                mInfoMediaManager, "com.test.packagename");
+        // Need to call constructor to initialize final fields.
+        mInfoMediaManager =
+                mock(
+                        InfoMediaManager.class,
+                        withSettings()
+                                .useConstructor(
+                                        mContext,
+                                        TEST_PACKAGE_NAME,
+                                        android.os.Process.myUserHandle(),
+                                        mLocalBluetoothManager,
+                                        /* mediaController */ null));
+        doReturn(
+                        List.of(
+                                new RoutingSessionInfo.Builder(TEST_SESSION_ID, TEST_PACKAGE_NAME)
+                                        .addSelectedRoute(TEST_DEVICE_ID_1)
+                                        .build()))
+                .when(mInfoMediaManager)
+                .getRoutingSessionsForPackage();
+
+        mInfoMediaDevice1 = spy(new InfoMediaDevice(mContext, mRouteInfo1, /* item */ null));
+        mInfoMediaDevice2 = new InfoMediaDevice(mContext, mRouteInfo2, /* item */ null);
+        mLocalMediaManager =
+                new LocalMediaManager(
+                        mContext, mLocalBluetoothManager, mInfoMediaManager, TEST_PACKAGE_NAME);
         mLocalMediaManager.mAudioManager = mAudioManager;
+        mLocalMediaManager.registerCallback(mCallback);
+        clearInvocations(mCallback);
     }
 
     @Test
-    public void startScan_mediaDevicesListShouldBeClear() {
+    public void onDeviceListAdded_shouldClearDeviceList() {
         final MediaDevice device = mock(MediaDevice.class);
         mLocalMediaManager.mMediaDevices.add(device);
-
         assertThat(mLocalMediaManager.mMediaDevices).hasSize(1);
-        mLocalMediaManager.startScan();
+        mLocalMediaManager.mMediaDeviceCallback.onDeviceListAdded(Collections.emptyList());
         assertThat(mLocalMediaManager.mMediaDevices).isEmpty();
     }
 
@@ -144,9 +165,7 @@ public class LocalMediaManagerTest {
         when(device.getId()).thenReturn(TEST_DEVICE_ID_1);
         when(currentDevice.getId()).thenReturn(TEST_CURRENT_DEVICE_ID);
 
-        mLocalMediaManager.registerCallback(mCallback);
         assertThat(mLocalMediaManager.connectDevice(device)).isTrue();
-
         verify(mInfoMediaManager).connectToDevice(device);
     }
 
@@ -156,7 +175,6 @@ public class LocalMediaManagerTest {
         mLocalMediaManager.mMediaDevices.add(mInfoMediaDevice2);
         mLocalMediaManager.mCurrentConnectedDevice = mInfoMediaDevice1;
 
-        mLocalMediaManager.registerCallback(mCallback);
         assertThat(mLocalMediaManager.connectDevice(mInfoMediaDevice2)).isTrue();
 
         assertThat(mInfoMediaDevice2.getState()).isEqualTo(LocalMediaManager.MediaDeviceState
@@ -169,7 +187,6 @@ public class LocalMediaManagerTest {
         mLocalMediaManager.mMediaDevices.add(mInfoMediaDevice2);
         mLocalMediaManager.mCurrentConnectedDevice = mInfoMediaDevice1;
 
-        mLocalMediaManager.registerCallback(mCallback);
         assertThat(mLocalMediaManager.connectDevice(mInfoMediaDevice1)).isFalse();
 
         assertThat(mInfoMediaDevice1.getState()).isNotEqualTo(LocalMediaManager.MediaDeviceState
@@ -187,7 +204,6 @@ public class LocalMediaManagerTest {
         when(cachedDevice.isConnected()).thenReturn(false);
         when(cachedDevice.isBusy()).thenReturn(false);
 
-        mLocalMediaManager.registerCallback(mCallback);
         assertThat(mLocalMediaManager.connectDevice(device)).isTrue();
 
         verify(cachedDevice).connect();
@@ -250,7 +266,6 @@ public class LocalMediaManagerTest {
         when(device2.getId()).thenReturn(TEST_DEVICE_ID_2);
 
         assertThat(mLocalMediaManager.mMediaDevices).isEmpty();
-        mLocalMediaManager.registerCallback(mCallback);
         mLocalMediaManager.mMediaDeviceCallback.onDeviceListAdded(devices);
 
         assertThat(mLocalMediaManager.mMediaDevices).hasSize(2);
@@ -272,7 +287,6 @@ public class LocalMediaManagerTest {
         when(device3.getId()).thenReturn(TEST_DEVICE_ID_3);
 
         assertThat(mLocalMediaManager.mMediaDevices).hasSize(1);
-        mLocalMediaManager.registerCallback(mCallback);
         mLocalMediaManager.mMediaDeviceCallback.onDeviceListAdded(devices);
 
         assertThat(mLocalMediaManager.mMediaDevices).hasSize(2);
@@ -290,7 +304,6 @@ public class LocalMediaManagerTest {
         mLocalMediaManager.mMediaDevices.add(device2);
 
         assertThat(mLocalMediaManager.mMediaDevices).hasSize(2);
-        mLocalMediaManager.registerCallback(mCallback);
         mLocalMediaManager.mMediaDeviceCallback
                 .onDeviceListRemoved(mLocalMediaManager.mMediaDevices);
 
@@ -300,19 +313,21 @@ public class LocalMediaManagerTest {
 
     @Test
     public void onDeviceListRemoved_phoneDeviceNotLastDeviceAfterRemoveDeviceList_removeList() {
-        final List<MediaDevice> devices = new ArrayList<>();
         final MediaDevice device1 = mock(MediaDevice.class);
         final MediaDevice device2 = mock(MediaDevice.class);
         final MediaDevice device3 = mock(MediaDevice.class);
-        devices.add(device1);
-        devices.add(device3);
+
+        mLocalMediaManager.mMediaDevices.clear();
         mLocalMediaManager.mMediaDevices.add(device1);
         mLocalMediaManager.mMediaDevices.add(device2);
         mLocalMediaManager.mMediaDevices.add(device3);
 
         assertThat(mLocalMediaManager.mMediaDevices).hasSize(3);
-        mLocalMediaManager.registerCallback(mCallback);
-        mLocalMediaManager.mMediaDeviceCallback.onDeviceListRemoved(devices);
+
+        final List<MediaDevice> devicesToRemove = new ArrayList<>();
+        devicesToRemove.add(device1);
+        devicesToRemove.add(device3);
+        mLocalMediaManager.mMediaDeviceCallback.onDeviceListRemoved(devicesToRemove);
 
         assertThat(mLocalMediaManager.mMediaDevices).hasSize(1);
         verify(mCallback).onDeviceListUpdate(any());
@@ -330,7 +345,6 @@ public class LocalMediaManagerTest {
         when(device1.getId()).thenReturn(TEST_DEVICE_ID_1);
         when(device2.getId()).thenReturn(TEST_DEVICE_ID_2);
 
-        mLocalMediaManager.registerCallback(mCallback);
         mLocalMediaManager.mMediaDeviceCallback.onConnectedDeviceChanged(TEST_DEVICE_ID_2);
 
         assertThat(mLocalMediaManager.getCurrentConnectedDevice()).isEqualTo(device2);
@@ -350,7 +364,6 @@ public class LocalMediaManagerTest {
         when(device1.getId()).thenReturn(TEST_DEVICE_ID_1);
         when(device2.getId()).thenReturn(TEST_DEVICE_ID_2);
 
-        mLocalMediaManager.registerCallback(mCallback);
         mLocalMediaManager.mMediaDeviceCallback.onConnectedDeviceChanged(TEST_DEVICE_ID_1);
 
         verify(mCallback, never()).onDeviceAttributesChanged();
@@ -364,7 +377,6 @@ public class LocalMediaManagerTest {
 
         assertThat(mInfoMediaDevice1.getState()).isEqualTo(LocalMediaManager.MediaDeviceState
                 .STATE_DISCONNECTED);
-        mLocalMediaManager.registerCallback(mCallback);
         mLocalMediaManager.mMediaDeviceCallback.onConnectedDeviceChanged(TEST_DEVICE_ID_1);
 
         assertThat(mInfoMediaDevice1.getState()).isEqualTo(LocalMediaManager.MediaDeviceState
@@ -373,7 +385,6 @@ public class LocalMediaManagerTest {
 
     @Test
     public void onConnectedDeviceChanged_nullConnectedDevice_noException() {
-        mLocalMediaManager.registerCallback(mCallback);
         mLocalMediaManager.mMediaDeviceCallback.onConnectedDeviceChanged(TEST_DEVICE_ID_2);
     }
 
@@ -390,7 +401,6 @@ public class LocalMediaManagerTest {
         when(cachedDevice.isConnected()).thenReturn(false);
         when(cachedDevice.isBusy()).thenReturn(false);
 
-        mLocalMediaManager.registerCallback(mCallback);
         mLocalMediaManager.connectDevice(device);
 
         mLocalMediaManager.mDeviceAttributeChangeCallback.onDeviceAttributesChanged();
@@ -408,7 +418,6 @@ public class LocalMediaManagerTest {
                 .STATE_CONNECTING);
         assertThat(mInfoMediaDevice2.getState()).isEqualTo(LocalMediaManager.MediaDeviceState
                 .STATE_CONNECTED);
-        mLocalMediaManager.registerCallback(mCallback);
         mLocalMediaManager.mMediaDeviceCallback.onRequestFailed(REASON_UNKNOWN_ERROR);
 
         assertThat(mInfoMediaDevice1.getState()).isEqualTo(LocalMediaManager.MediaDeviceState
@@ -419,8 +428,6 @@ public class LocalMediaManagerTest {
 
     @Test
     public void onDeviceAttributesChanged_shouldBeCalled() {
-        mLocalMediaManager.registerCallback(mCallback);
-
         mLocalMediaManager.mDeviceAttributeChangeCallback.onDeviceAttributesChanged();
 
         verify(mCallback).onDeviceAttributesChanged();
@@ -473,7 +480,6 @@ public class LocalMediaManagerTest {
         when(device1.getDeviceType()).thenReturn(MediaDevice.MediaDeviceType.TYPE_PHONE_DEVICE);
 
         assertThat(mLocalMediaManager.mMediaDevices).hasSize(0);
-        mLocalMediaManager.registerCallback(mCallback);
         mLocalMediaManager.mMediaDeviceCallback.onDeviceListAdded(devices);
 
         assertThat(mLocalMediaManager.mMediaDevices).hasSize(2);
@@ -495,7 +501,6 @@ public class LocalMediaManagerTest {
         when(cachedDevice.isConnected()).thenReturn(false);
         when(cachedDevice.isBusy()).thenReturn(false);
 
-        mLocalMediaManager.registerCallback(mCallback);
         mLocalMediaManager.connectDevice(device);
 
         verify(cachedDevice).connect();
@@ -510,8 +515,6 @@ public class LocalMediaManagerTest {
 
     @Test
     public void onRequestFailed_shouldDispatchOnRequestFailed() {
-        mLocalMediaManager.registerCallback(mCallback);
-
         mLocalMediaManager.mMediaDeviceCallback.onRequestFailed(1);
 
         verify(mCallback).onRequestFailed(1);
@@ -530,7 +533,6 @@ public class LocalMediaManagerTest {
         mShadowBluetoothAdapter = null;
 
         assertThat(mLocalMediaManager.mMediaDevices).hasSize(1);
-        mLocalMediaManager.registerCallback(mCallback);
         mLocalMediaManager.mMediaDeviceCallback.onDeviceListAdded(devices);
 
         assertThat(mLocalMediaManager.mMediaDevices).hasSize(2);

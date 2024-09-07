@@ -39,7 +39,7 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.hardware.display.DisplayManager;
 import android.os.IBinder;
-import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.os.test.FakePermissionEnforcer;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.view.WindowManager;
@@ -81,12 +81,15 @@ public class UiAutomationManagerTest {
     @Mock IBinder mMockOwner;
     @Mock IAccessibilityServiceClient mMockAccessibilityServiceClient;
     @Mock IBinder mMockServiceAsBinder;
+    FakePermissionEnforcer mFakePermissionEnforcer  = new FakePermissionEnforcer();
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
 
         when(mMockSystemSupport.getKeyEventDispatcher()).thenReturn(mock(KeyEventDispatcher.class));
+        when(mMockContext.getSystemService(Context.PERMISSION_ENFORCER_SERVICE))
+                .thenReturn(mFakePermissionEnforcer);
 
         when(mMockServiceInfo.getResolveInfo()).thenReturn(mMockResolveInfo);
         mMockResolveInfo.serviceInfo = mock(ServiceInfo.class);
@@ -209,7 +212,6 @@ public class UiAutomationManagerTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_ADD_WINDOW_TOKEN_WITHOUT_LOCK)
     public void registerUiAutomationService_callsAddWindowTokenUsingHandler() {
         register(0);
         // registerUiTestAutomationServiceLocked() should not directly call addWindowToken.

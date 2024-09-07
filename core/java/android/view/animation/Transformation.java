@@ -78,6 +78,7 @@ public class Transformation {
         mHasClipRect = false;
         mAlpha = 1.0f;
         mTransformationType = TYPE_BOTH;
+        mInsets = Insets.NONE;
     }
 
     /**

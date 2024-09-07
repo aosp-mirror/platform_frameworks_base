@@ -25,10 +25,11 @@
 
     <application
         android:theme="@style/Theme"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:label="Battery Stats Viewer">
         <activity android:name=".BatteryConsumerPickerActivity"
                   android:label="Battery Stats"
-                  android:icon="@mipmap/ic_launcher"
                   android:launchMode="singleTop"
                   android:exported="true">
             <intent-filter>

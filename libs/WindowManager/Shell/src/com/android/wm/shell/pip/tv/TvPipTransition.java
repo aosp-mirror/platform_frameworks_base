@@ -233,6 +233,7 @@ public class TvPipTransition extends PipTransitionController {
                                 .setContainerLayer()
                                 .setHidden(false)
                                 .setParent(root.getLeash())
+                                .setCallsite("TvPipTransition.startAnimation")
                                 .build();
                         startTransaction.reparent(activitySurface, pipLeash);
                         // Put the activity at local position with offset in case it is letterboxed.

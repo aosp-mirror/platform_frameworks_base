@@ -36,6 +36,8 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.view.Surface;
 
+import com.android.internal.camera.flags.Flags;
+
 import java.nio.ByteBuffer;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -57,6 +59,8 @@ public class CameraExtensionJpegProcessor implements ICaptureProcessorImpl {
     private android.hardware.camera2.extension.Size mResolution = null;
     private android.hardware.camera2.extension.Size mPostviewResolution = null;
     private int mFormat = -1;
+    private int mPostviewFormat = -1;
+    private int mCaptureFormat = -1;
     private Surface mOutputSurface = null;
     private ImageWriter mOutputWriter = null;
     private Surface mPostviewOutputSurface = null;
@@ -204,10 +208,12 @@ public class CameraExtensionJpegProcessor implements ICaptureProcessorImpl {
     }
 
     public void onOutputSurface(Surface surface, int format) throws RemoteException {
-        if (format != ImageFormat.JPEG) {
+        if (!Flags.extension10Bit() && format != ImageFormat.JPEG) {
             Log.e(TAG, "Unsupported output format: " + format);
             return;
         }
+        CameraExtensionUtils.SurfaceInfo surfaceInfo = CameraExtensionUtils.querySurface(surface);
+        mCaptureFormat = surfaceInfo.mFormat;
         mOutputSurface = surface;
         initializePipeline();
     }
@@ -215,10 +221,11 @@ public class CameraExtensionJpegProcessor implements ICaptureProcessorImpl {
     public void onPostviewOutputSurface(Surface surface) throws RemoteException {
         CameraExtensionUtils.SurfaceInfo postviewSurfaceInfo =
                 CameraExtensionUtils.querySurface(surface);
-        if (postviewSurfaceInfo.mFormat != ImageFormat.JPEG) {
+        if (!Flags.extension10Bit() && postviewSurfaceInfo.mFormat != ImageFormat.JPEG) {
             Log.e(TAG, "Unsupported output format: " + postviewSurfaceInfo.mFormat);
             return;
         }
+        mPostviewFormat = postviewSurfaceInfo.mFormat;
         mPostviewOutputSurface = surface;
         initializePostviewPipeline();
     }
@@ -233,7 +240,7 @@ public class CameraExtensionJpegProcessor implements ICaptureProcessorImpl {
     }
 
     public void onImageFormatUpdate(int format) throws RemoteException {
-        if (format != ImageFormat.YUV_420_888) {
+        if (!Flags.extension10Bit() && format != ImageFormat.YUV_420_888) {
             Log.e(TAG, "Unsupported input format: " + format);
             return;
         }
@@ -244,33 +251,45 @@ public class CameraExtensionJpegProcessor implements ICaptureProcessorImpl {
     private void initializePipeline() throws RemoteException {
         if ((mFormat != -1) && (mOutputSurface != null) && (mResolution != null) &&
                 (mYuvReader == null)) {
-            // Jpeg/blobs are expected to be configured with (w*h)x1.5 + 64k Jpeg APP1 segment
-            mOutputWriter = ImageWriter.newInstance(mOutputSurface, 1 /*maxImages*/,
-                    ImageFormat.JPEG,
-                    (mResolution.width * mResolution.height * 3)/2 + JPEG_APP_SEGMENT_SIZE, 1);
-            mYuvReader = ImageReader.newInstance(mResolution.width, mResolution.height, mFormat,
-                    JPEG_QUEUE_SIZE);
-            mYuvReader.setOnImageAvailableListener(
-                    new YuvCallback(mYuvReader, mOutputWriter), mHandler);
-            mProcessor.onOutputSurface(mYuvReader.getSurface(), mFormat);
+            if (Flags.extension10Bit() && mCaptureFormat == ImageFormat.YUV_420_888) {
+                // For the case when postview is JPEG and capture is YUV
+                mProcessor.onOutputSurface(mOutputSurface, mCaptureFormat);
+            } else {
+                // Jpeg/blobs are expected to be configured with (w*h)x1.5 + 64k Jpeg APP1 segment
+                mOutputWriter = ImageWriter.newInstance(mOutputSurface, 1 /*maxImages*/,
+                        ImageFormat.JPEG,
+                        (mResolution.width * mResolution.height * 3) / 2
+                        + JPEG_APP_SEGMENT_SIZE, 1);
+                mYuvReader = ImageReader.newInstance(mResolution.width, mResolution.height,
+                        mFormat, JPEG_QUEUE_SIZE);
+                mYuvReader.setOnImageAvailableListener(
+                        new YuvCallback(mYuvReader, mOutputWriter), mHandler);
+                mProcessor.onOutputSurface(mYuvReader.getSurface(), mFormat);
+            }
             mProcessor.onResolutionUpdate(mResolution, mPostviewResolution);
-            mProcessor.onImageFormatUpdate(mFormat);
+            mProcessor.onImageFormatUpdate(ImageFormat.YUV_420_888);
         }
     }
 
     private void initializePostviewPipeline() throws RemoteException {
         if ((mFormat != -1) && (mPostviewOutputSurface != null) && (mPostviewResolution != null)
                 && (mPostviewYuvReader == null)) {
-            // Jpeg/blobs are expected to be configured with (w*h)x1
-            mPostviewOutputWriter = ImageWriter.newInstance(mPostviewOutputSurface, 1/*maxImages*/,
-                    ImageFormat.JPEG, mPostviewResolution.width * mPostviewResolution.height, 1);
-            mPostviewYuvReader = ImageReader.newInstance(mPostviewResolution.width,
-                    mPostviewResolution.height, mFormat, JPEG_QUEUE_SIZE);
-            mPostviewYuvReader.setOnImageAvailableListener(
-                    new YuvCallback(mPostviewYuvReader, mPostviewOutputWriter), mHandler);
-            mProcessor.onPostviewOutputSurface(mPostviewYuvReader.getSurface());
+            if (Flags.extension10Bit() && mPostviewFormat == ImageFormat.YUV_420_888) {
+                // For the case when postview is YUV and capture is JPEG
+                mProcessor.onPostviewOutputSurface(mPostviewOutputSurface);
+            } else {
+                // Jpeg/blobs are expected to be configured with (w*h)x1
+                mPostviewOutputWriter = ImageWriter.newInstance(mPostviewOutputSurface,
+                        1/*maxImages*/, ImageFormat.JPEG,
+                        mPostviewResolution.width * mPostviewResolution.height, 1);
+                mPostviewYuvReader = ImageReader.newInstance(mPostviewResolution.width,
+                        mPostviewResolution.height, mFormat, JPEG_QUEUE_SIZE);
+                mPostviewYuvReader.setOnImageAvailableListener(
+                        new YuvCallback(mPostviewYuvReader, mPostviewOutputWriter), mHandler);
+                mProcessor.onPostviewOutputSurface(mPostviewYuvReader.getSurface());
+            }
             mProcessor.onResolutionUpdate(mResolution, mPostviewResolution);
-            mProcessor.onImageFormatUpdate(mFormat);
+            mProcessor.onImageFormatUpdate(ImageFormat.YUV_420_888);
         }
     }
 

@@ -47,7 +47,7 @@
         android:layout_marginBottom="@dimen/bluetooth_dialog_layout_margin"
         android:ellipsize="end"
         android:gravity="center_vertical|center_horizontal"
-        android:maxLines="1"
+        android:maxLines="2"
         android:text="@string/quick_settings_bluetooth_tile_subtitle"
         android:textAppearance="@style/TextAppearance.Dialog.Body.Message"
         app:layout_constraintEnd_toEndOf="parent"
@@ -136,7 +136,8 @@
             <TextView
                 android:id="@+id/bluetooth_auto_on_toggle_title"
                 android:layout_width="0dp"
-                android:layout_height="68dp"
+                android:layout_height="wrap_content"
+                android:minHeight="68dp"
                 android:layout_marginBottom="20dp"
                 android:maxLines="2"
                 android:ellipsize="end"
@@ -181,12 +182,11 @@
 
             <TextView
                 android:id="@+id/bluetooth_auto_on_toggle_info_text"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
                 android:paddingStart="36dp"
                 android:paddingEnd="40dp"
-                android:text="@string/turn_on_bluetooth_auto_info"
                 android:textAppearance="@style/TextAppearance.Dialog.Body.Message"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -255,6 +255,30 @@
                 android:layout_height="wrap_content"
                 app:barrierDirection="bottom"
                 app:constraint_referenced_ids="pair_new_device_button,bluetooth_auto_on_toggle_info_text" />
+
+            <Button
+                android:id="@+id/audio_sharing_button"
+                style="@style/Widget.Dialog.Button.BorderButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="9dp"
+                android:layout_marginBottom="@dimen/dialog_bottom_padding"
+                android:layout_marginEnd="@dimen/dialog_side_padding"
+                android:layout_marginStart="@dimen/dialog_side_padding"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="@string/quick_settings_bluetooth_audio_sharing_button"
+                android:drawableStart="@drawable/ic_bt_le_audio_sharing_18dp"
+                android:drawablePadding="10dp"
+                android:drawableTint="?android:attr/textColorPrimary"
+                app:layout_constrainedWidth="true"
+                app:layout_constraintHorizontal_bias="0"
+                app:layout_constraintEnd_toStartOf="@+id/done_button"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/barrier"
+                app:layout_constraintVertical_bias="1"
+                android:visibility="gone" />
 
             <Button
                 android:id="@+id/done_button"

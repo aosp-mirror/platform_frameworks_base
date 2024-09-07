@@ -17,6 +17,7 @@ package com.android.wm.shell.windowdecor
 
 import android.app.ActivityManager
 import android.app.WindowConfiguration
+import android.graphics.Point
 import android.graphics.Rect
 import android.os.IBinder
 import android.testing.AndroidTestingRunner
@@ -25,6 +26,7 @@ import android.view.Surface.ROTATION_0
 import android.view.Surface.ROTATION_270
 import android.view.Surface.ROTATION_90
 import android.view.SurfaceControl
+import android.view.SurfaceControl.Transaction
 import android.view.WindowManager.TRANSIT_CHANGE
 import android.window.TransitionInfo
 import android.window.WindowContainerToken
@@ -39,6 +41,7 @@ import com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_BOTTOM
 import com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_RIGHT
 import com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_TOP
 import com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_UNDEFINED
+import java.util.function.Supplier
 import junit.framework.Assert
 import org.junit.Before
 import org.junit.Test
@@ -47,13 +50,13 @@ import org.mockito.Mock
 import org.mockito.Mockito.any
 import org.mockito.Mockito.argThat
 import org.mockito.Mockito.eq
+import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
-import org.mockito.MockitoAnnotations
-import java.util.function.Supplier
 import org.mockito.Mockito.`when` as whenever
+import org.mockito.MockitoAnnotations
 
 /**
  * Tests for [VeiledResizeTaskPositioner].
@@ -138,8 +141,7 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
                         mockDisplayController,
                         mockDragStartListener,
                         mockTransactionFactory,
-                        mockTransitions,
-                        DISALLOWED_AREA_FOR_END_BOUNDS_HEIGHT
+                        mockTransitions
                 )
     }
 
@@ -195,7 +197,7 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
         rectAfterEnd.top += 20
         rectAfterEnd.bottom += 20
 
-        verify(mockDesktopWindowDecoration, never()).createResizeVeil()
+        verify(mockDesktopWindowDecoration, never()).showResizeVeil(any())
         verify(mockDesktopWindowDecoration, never()).hideResizeVeil()
         verify(mockTransitions).startTransition(eq(TRANSIT_CHANGE), argThat { wct ->
             return@argThat wct.changes.any { (token, change) ->
@@ -355,68 +357,6 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
     }
 
     @Test
-    fun testDragResize_drag_taskPositionedInStableBounds() {
-        taskPositioner.onDragPositioningStart(
-                CTRL_TYPE_UNDEFINED, // drag
-                STARTING_BOUNDS.left.toFloat(),
-                STARTING_BOUNDS.top.toFloat()
-        )
-
-        val newX = STARTING_BOUNDS.left.toFloat()
-        val newY = STABLE_BOUNDS_LANDSCAPE.top.toFloat() - 5
-        taskPositioner.onDragPositioningMove(
-                newX,
-                newY
-        )
-        verify(mockTransaction).setPosition(any(), eq(newX), eq(newY))
-
-        taskPositioner.onDragPositioningEnd(
-                newX,
-                newY
-        )
-        // Verify task's top bound is set to stable bounds top since dragged outside stable bounds
-        // but not in disallowed end bounds area.
-        verify(mockTransitions).startTransition(eq(TRANSIT_CHANGE), argThat { wct ->
-            return@argThat wct.changes.any { (token, change) ->
-                token == taskBinder &&
-                        (change.windowSetMask and WindowConfiguration.WINDOW_CONFIG_BOUNDS) != 0 &&
-                        change.configuration.windowConfiguration.bounds.top ==
-                        STABLE_BOUNDS_LANDSCAPE.top }},
-                eq(taskPositioner))
-    }
-
-    @Test
-    fun testDragResize_drag_taskPositionedInValidDragArea() {
-        taskPositioner.onDragPositioningStart(
-            CTRL_TYPE_UNDEFINED, // drag
-            STARTING_BOUNDS.left.toFloat(),
-            STARTING_BOUNDS.top.toFloat()
-        )
-
-        val newX = VALID_DRAG_AREA.left - 500f
-        val newY = VALID_DRAG_AREA.bottom + 500f
-        taskPositioner.onDragPositioningMove(
-            newX,
-            newY
-        )
-        verify(mockTransaction).setPosition(any(), eq(newX), eq(newY))
-
-        taskPositioner.onDragPositioningEnd(
-            newX,
-            newY
-        )
-        verify(mockTransitions).startTransition(eq(TRANSIT_CHANGE), argThat { wct ->
-            return@argThat wct.changes.any { (token, change) ->
-                token == taskBinder &&
-                        (change.windowSetMask and WindowConfiguration.WINDOW_CONFIG_BOUNDS) != 0 &&
-                        change.configuration.windowConfiguration.bounds.top ==
-                        VALID_DRAG_AREA.bottom &&
-                        change.configuration.windowConfiguration.bounds.left ==
-                        VALID_DRAG_AREA.left }},
-                eq(taskPositioner))
-    }
-
-    @Test
     fun testDragResize_drag_updatesStableBoundsOnRotate() {
         // Test landscape stable bounds
         performDrag(STARTING_BOUNDS.right.toFloat(), STARTING_BOUNDS.bottom.toFloat(),
@@ -500,6 +440,40 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
 
         // isResizingOrAnimating should be set to false until after transition successfully consumed
         Assert.assertFalse(taskPositioner.isResizingOrAnimating)
+    }
+
+    @Test
+    fun testStartAnimation_useEndRelOffset() {
+        val changeMock = mock(TransitionInfo.Change::class.java)
+        val startTransaction = mock(Transaction::class.java)
+        val finishTransaction = mock(Transaction::class.java)
+        val point = Point(10, 20)
+        val bounds = Rect(1, 2, 3, 4)
+        `when`(changeMock.endRelOffset).thenReturn(point)
+        `when`(changeMock.endAbsBounds).thenReturn(bounds)
+        `when`(mockTransitionInfo.changes).thenReturn(listOf(changeMock))
+        `when`(startTransaction.setWindowCrop(
+            any(),
+            eq(bounds.width()),
+            eq(bounds.height())
+        )).thenReturn(startTransaction)
+        `when`(finishTransaction.setWindowCrop(
+            any(),
+            eq(bounds.width()),
+            eq(bounds.height())
+        )).thenReturn(finishTransaction)
+
+        taskPositioner.startAnimation(
+            mockTransitionBinder,
+            mockTransitionInfo,
+            startTransaction,
+            finishTransaction,
+            mockFinishCallback
+        )
+
+        verify(startTransaction).setPosition(any(), eq(point.x.toFloat()), eq(point.y.toFloat()))
+        verify(finishTransaction).setPosition(any(), eq(point.x.toFloat()), eq(point.y.toFloat()))
+        verify(changeMock).endRelOffset
     }
 
     private fun performDrag(

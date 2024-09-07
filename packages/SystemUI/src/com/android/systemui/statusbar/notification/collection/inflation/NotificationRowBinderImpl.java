@@ -138,7 +138,7 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
 
         if (entry.rowExists()) {
             mLogger.logUpdatingRow(entry, params);
-            mIconManager.updateIcons(entry);
+            mIconManager.updateIcons(entry, /* usingCache = */ false);
             ExpandableNotificationRow row = entry.getRow();
             row.reset();
             updateRow(entry, row);
@@ -243,7 +243,7 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
             @Nullable NotificationRowContentBinder.InflationCallback inflationCallback) {
         final boolean useIncreasedCollapsedHeight =
                 mMessagingUtil.isImportantMessaging(entry.getSbn(), entry.getImportance());
-        final boolean isLowPriority = inflaterParams.isLowPriority();
+        final boolean isMinimized = inflaterParams.isMinimized();
 
         // Set show snooze action
         row.setShowSnooze(inflaterParams.getShowSnooze());
@@ -252,13 +252,11 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
         params.requireContentViews(FLAG_CONTENT_VIEW_CONTRACTED);
         params.requireContentViews(FLAG_CONTENT_VIEW_EXPANDED);
         params.setUseIncreasedCollapsedHeight(useIncreasedCollapsedHeight);
-        params.setUseLowPriority(isLowPriority);
+        params.setUseMinimized(isMinimized);
 
-        // If screenshareNotificationHiding is enabled, both public and private views should be
-        // inflated to avoid any latency associated with reinflating all notification views when
-        // screen share starts and stops
         if (screenshareNotificationHiding()
-                || mNotificationLockscreenUserManager.needsRedaction(entry)) {
+                ? inflaterParams.getNeedsRedaction()
+                : mNotificationLockscreenUserManager.needsRedaction(entry)) {
             params.requireContentViews(FLAG_CONTENT_VIEW_PUBLIC);
         } else {
             params.markContentViewsFreeable(FLAG_CONTENT_VIEW_PUBLIC);
@@ -277,7 +275,7 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
         if (AsyncGroupHeaderViewInflation.isEnabled()) {
             if (inflaterParams.isGroupSummary()) {
                 params.requireContentViews(FLAG_GROUP_SUMMARY_HEADER);
-                if (isLowPriority) {
+                if (isMinimized) {
                     params.requireContentViews(FLAG_LOW_PRIORITY_GROUP_SUMMARY_HEADER);
                 }
             } else {
@@ -290,7 +288,7 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
         mRowContentBindStage.requestRebind(entry, en -> {
             mLogger.logRebindComplete(entry);
             row.setUsesIncreasedCollapsedHeight(useIncreasedCollapsedHeight);
-            row.setIsLowPriority(isLowPriority);
+            row.setIsMinimized(isMinimized);
             if (inflationCallback != null) {
                 inflationCallback.onAsyncInflationFinished(en);
             }

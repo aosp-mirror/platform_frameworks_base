@@ -15,6 +15,8 @@
  */
 package com.android.systemui.qs.external;
 
+import static com.android.systemui.Flags.qsCustomTileClickGuaranteedBugFix;
+
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -31,14 +33,13 @@ import android.util.Log;
 
 import androidx.annotation.VisibleForTesting;
 
-import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.qs.external.TileLifecycleManager.TileChangeListener;
 import com.android.systemui.qs.pipeline.data.repository.CustomTileAddedRepository;
 import com.android.systemui.settings.UserTracker;
-import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Manages the priority which lets {@link TileServices} make decisions about which tiles
@@ -73,6 +74,8 @@ public class TileServiceManager {
     // This defaults to true to ensure tiles start out unavailable.
     private boolean mPendingBind = true;
     private boolean mStarted = false;
+
+    private final AtomicBoolean mListeningFromRequest = new AtomicBoolean(false);
 
     TileServiceManager(TileServices tileServices, Handler handler, ComponentName component,
             UserTracker userTracker, TileLifecycleManager.Factory tileLifecycleManagerFactory,
@@ -161,13 +164,28 @@ public class TileServiceManager {
         }
     }
 
+    void onStartListeningFromRequest() {
+        mListeningFromRequest.set(true);
+        mStateManager.onStartListening();
+    }
+
     public void setLastUpdate(long lastUpdate) {
         mLastUpdate = lastUpdate;
         if (mBound && isActiveTile()) {
-            mStateManager.onStopListening();
-            setBindRequested(false);
+            if (qsCustomTileClickGuaranteedBugFix()) {
+                if (mListeningFromRequest.compareAndSet(true, false)) {
+                    stopListeningAndUnbind();
+                }
+            } else {
+                stopListeningAndUnbind();
+            }
         }
         mServices.recalculateBindAllowance();
+    }
+
+    private void stopListeningAndUnbind() {
+        mStateManager.onStopListening();
+        setBindRequested(false);
     }
 
     public void handleDestroy() {

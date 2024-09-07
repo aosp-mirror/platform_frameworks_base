@@ -29,8 +29,8 @@ import androidx.dynamicanimation.animation.DynamicAnimation;
 import androidx.dynamicanimation.animation.SpringForce;
 
 import com.android.wm.shell.R;
-import com.android.wm.shell.animation.PhysicsAnimator;
 import com.android.wm.shell.bubbles.Bubble;
+import com.android.wm.shell.shared.animation.PhysicsAnimator;
 
 import java.util.ArrayList;
 

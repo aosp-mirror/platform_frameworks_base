@@ -18,8 +18,8 @@ package com.android.systemui.qs.tiles
 
 import android.os.Handler
 import android.service.quicksettings.Tile
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
 import com.android.systemui.SysuiTestCase
@@ -30,7 +30,10 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.logging.QSLogger
+import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor
+import com.android.systemui.recordissue.IssueRecordingState
 import com.android.systemui.recordissue.RecordIssueDialogDelegate
+import com.android.systemui.recordissue.TraceurMessageSender
 import com.android.systemui.res.R
 import com.android.systemui.settings.UserContextProvider
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil
@@ -39,6 +42,7 @@ import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
+import java.util.concurrent.Executors
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -52,7 +56,7 @@ import org.mockito.MockitoAnnotations
  * This class tests the functionality of the RecordIssueTile. The initial state of the tile is
  * always be inactive at the start of these tests.
  */
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
 class RecordIssueTileTest : SysuiTestCase() {
@@ -66,7 +70,10 @@ class RecordIssueTileTest : SysuiTestCase() {
     @Mock private lateinit var keyguardDismissUtil: KeyguardDismissUtil
     @Mock private lateinit var keyguardStateController: KeyguardStateController
     @Mock private lateinit var dialogLauncherAnimator: DialogTransitionAnimator
+    @Mock private lateinit var panelInteractor: PanelInteractor
     @Mock private lateinit var userContextProvider: UserContextProvider
+    @Mock private lateinit var issueRecordingState: IssueRecordingState
+    @Mock private lateinit var traceurMessageSender: TraceurMessageSender
     @Mock private lateinit var delegateFactory: RecordIssueDialogDelegate.Factory
     @Mock private lateinit var dialogDelegate: RecordIssueDialogDelegate
     @Mock private lateinit var dialog: SystemUIDialog
@@ -96,14 +103,18 @@ class RecordIssueTileTest : SysuiTestCase() {
                 keyguardDismissUtil,
                 keyguardStateController,
                 dialogLauncherAnimator,
+                panelInteractor,
                 userContextProvider,
+                traceurMessageSender,
+                Executors.newSingleThreadExecutor(),
+                issueRecordingState,
                 delegateFactory,
             )
     }
 
     @Test
     fun qsTileUi_shouldLookCorrect_whenInactive() {
-        tile.isRecording = false
+        whenever(issueRecordingState.isRecording).thenReturn(false)
 
         val testState = tile.newTileState()
         tile.handleUpdateState(testState, null)
@@ -115,8 +126,7 @@ class RecordIssueTileTest : SysuiTestCase() {
 
     @Test
     fun qsTileUi_shouldLookCorrect_whenRecording() {
-        tile.isRecording = true
-
+        whenever(issueRecordingState.isRecording).thenReturn(true)
         val testState = tile.newTileState()
         tile.handleUpdateState(testState, null)
 
@@ -127,7 +137,7 @@ class RecordIssueTileTest : SysuiTestCase() {
 
     @Test
     fun inActiveQsTile_switchesToActive_whenClicked() {
-        tile.isRecording = false
+        whenever(issueRecordingState.isRecording).thenReturn(false)
 
         val testState = tile.newTileState()
         tile.handleUpdateState(testState, null)
@@ -137,7 +147,7 @@ class RecordIssueTileTest : SysuiTestCase() {
 
     @Test
     fun activeQsTile_switchesToInActive_whenClicked() {
-        tile.isRecording = true
+        whenever(issueRecordingState.isRecording).thenReturn(true)
 
         val testState = tile.newTileState()
         tile.handleUpdateState(testState, null)
@@ -147,7 +157,8 @@ class RecordIssueTileTest : SysuiTestCase() {
 
     @Test
     fun showPrompt_shouldUseKeyguardDismissUtil_ToShowDialog() {
-        tile.isRecording = false
+        whenever(issueRecordingState.isRecording).thenReturn(false)
+
         tile.handleClick(null)
         testableLooper.processAllMessages()
 

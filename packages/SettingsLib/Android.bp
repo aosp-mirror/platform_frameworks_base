@@ -11,6 +11,7 @@ android_library {
     name: "SettingsLib",
     defaults: [
         "SettingsLintDefaults",
+        "SettingsLibAvatarPickerDefaults",
     ],
 
     static_libs: [
@@ -21,7 +22,7 @@ android_library {
         "guava",
 
         "WifiTrackerLibRes",
-        "iconloader",
+        "//frameworks/libs/systemui:iconloader",
         "setupdesign",
 
         "SettingsLibActionBarShadow",
@@ -110,4 +111,33 @@ aconfig_declarations {
 java_aconfig_library {
     name: "settingslib_flags_lib",
     aconfig_declarations: "settingslib_flags",
+}
+
+soong_config_module_type {
+    name: "avatar_picker_java_defaults",
+    module_type: "java_defaults",
+    config_namespace: "SettingsLib",
+    bool_variables: [
+        "legacy_avatar_picker_app_enabled",
+    ],
+    properties: [
+        "static_libs",
+        "manifest",
+    ],
+}
+
+soong_config_bool_variable {
+    name: "legacy_avatar_picker_app_enabled",
+}
+
+avatar_picker_java_defaults {
+    name: "SettingsLibAvatarPickerDefaults",
+    soong_config_variables: {
+        // If flag is enabled, add the library
+        legacy_avatar_picker_app_enabled: {
+            static_libs: [
+                "SettingsLibAvatarPicker",
+            ],
+        },
+    },
 }

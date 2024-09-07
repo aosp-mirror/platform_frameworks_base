@@ -18,6 +18,7 @@ package com.android.wm.shell.windowdecor;
 
 import static android.view.WindowManager.TRANSIT_CHANGE;
 
+import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.IBinder;
@@ -60,9 +61,6 @@ class FluidResizeTaskPositioner implements DragPositioningCallback,
     private final Rect mTaskBoundsAtDragStart = new Rect();
     private final PointF mRepositionStartPoint = new PointF();
     private final Rect mRepositionTaskBounds = new Rect();
-    // If a task move (not resize) finishes with the positions y less than this value, do not
-    // finalize the bounds there using WCT#setBounds
-    private final int mDisallowedAreaForEndBoundsHeight;
     private boolean mHasDragResized;
     private boolean mIsResizingOrAnimatingResize;
     private int mCtrlType;
@@ -70,11 +68,9 @@ class FluidResizeTaskPositioner implements DragPositioningCallback,
     @Surface.Rotation private int mRotation;
 
     FluidResizeTaskPositioner(ShellTaskOrganizer taskOrganizer, Transitions transitions,
-            WindowDecoration windowDecoration, DisplayController displayController,
-            int disallowedAreaForEndBoundsHeight) {
+            WindowDecoration windowDecoration, DisplayController displayController) {
         this(taskOrganizer, transitions, windowDecoration, displayController,
-                dragStartListener -> {}, SurfaceControl.Transaction::new,
-                disallowedAreaForEndBoundsHeight);
+                dragStartListener -> {}, SurfaceControl.Transaction::new);
     }
 
     FluidResizeTaskPositioner(ShellTaskOrganizer taskOrganizer,
@@ -82,15 +78,13 @@ class FluidResizeTaskPositioner implements DragPositioningCallback,
             WindowDecoration windowDecoration,
             DisplayController displayController,
             DragPositioningCallbackUtility.DragStartListener dragStartListener,
-            Supplier<SurfaceControl.Transaction> supplier,
-            int disallowedAreaForEndBoundsHeight) {
+            Supplier<SurfaceControl.Transaction> supplier) {
         mTaskOrganizer = taskOrganizer;
         mTransitions = transitions;
         mWindowDecoration = windowDecoration;
         mDisplayController = displayController;
         mDragStartListener = dragStartListener;
         mTransactionSupplier = supplier;
-        mDisallowedAreaForEndBoundsHeight = disallowedAreaForEndBoundsHeight;
     }
 
     @Override
@@ -157,14 +151,10 @@ class FluidResizeTaskPositioner implements DragPositioningCallback,
                 wct.setBounds(mWindowDecoration.mTaskInfo.token, mRepositionTaskBounds);
             }
             mDragResizeEndTransition = mTransitions.startTransition(TRANSIT_CHANGE, wct, this);
-        } else if (mCtrlType == CTRL_TYPE_UNDEFINED
-                && DragPositioningCallbackUtility.isBelowDisallowedArea(
-                mDisallowedAreaForEndBoundsHeight, mTaskBoundsAtDragStart, mRepositionStartPoint,
-                y)) {
+        } else if (mCtrlType == CTRL_TYPE_UNDEFINED) {
             final WindowContainerTransaction wct = new WindowContainerTransaction();
-            DragPositioningCallbackUtility.onDragEnd(mRepositionTaskBounds,
-                    mTaskBoundsAtDragStart, mRepositionStartPoint, x, y,
-                    mWindowDecoration.calculateValidDragArea());
+            DragPositioningCallbackUtility.updateTaskBounds(mRepositionTaskBounds,
+                    mTaskBoundsAtDragStart, mRepositionStartPoint, x, y);
             wct.setBounds(mWindowDecoration.mTaskInfo.token, mRepositionTaskBounds);
             mTransitions.startTransition(TRANSIT_CHANGE, wct, this);
         }
@@ -189,10 +179,11 @@ class FluidResizeTaskPositioner implements DragPositioningCallback,
         for (TransitionInfo.Change change: info.getChanges()) {
             final SurfaceControl sc = change.getLeash();
             final Rect endBounds = change.getEndAbsBounds();
+            final Point endPosition = change.getEndRelOffset();
             startTransaction.setWindowCrop(sc, endBounds.width(), endBounds.height())
-                    .setPosition(sc, endBounds.left, endBounds.top);
+                    .setPosition(sc, endPosition.x, endPosition.y);
             finishTransaction.setWindowCrop(sc, endBounds.width(), endBounds.height())
-                    .setPosition(sc, endBounds.left, endBounds.top);
+                    .setPosition(sc, endPosition.x, endPosition.y);
         }
 
         startTransaction.apply();

@@ -19,9 +19,9 @@ package com.android.systemui.biometrics
 import android.graphics.Point
 import android.hardware.biometrics.BiometricSourceType
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import android.util.DisplayMetrics
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession
 import com.android.keyguard.KeyguardUpdateMonitor
@@ -67,7 +67,7 @@ import javax.inject.Provider
 
 @ExperimentalCoroutinesApi
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class AuthRippleControllerTest : SysuiTestCase() {
     private lateinit var staticMockSession: MockitoSession
 

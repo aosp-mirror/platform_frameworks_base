@@ -28,32 +28,34 @@ import android.net.wifi.sharedconnectivity.app.NetworkProviderInfo
 import android.os.Bundle
 import android.os.SystemClock
 import android.util.Log
+import android.view.WindowManager
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.android.settingslib.R
 import com.android.settingslib.flags.Flags.newStatusBarIcons
-import java.util.Locale
-import kotlin.coroutines.resume
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
-
+import java.util.Locale
+import kotlin.coroutines.resume
 
 open class WifiUtils {
     /**
      * Wrapper the [.getInternetIconResource] for testing compatibility.
      */
-    class InternetIconInjector(protected val context: Context) {
+    open class InternetIconInjector(protected val context: Context) {
         /**
          * Returns the Internet icon for a given RSSI level.
          *
          * @param noInternet True if a connected Wi-Fi network cannot access the Internet
          * @param level The number of bars to show (0-4)
          */
-        fun getIcon(noInternet: Boolean, level: Int): Drawable? {
+        open fun getIcon(noInternet: Boolean, level: Int): Drawable? {
             return context.getDrawable(getInternetIconResource(level, noInternet))
         }
     }
@@ -473,9 +475,28 @@ open class WifiUtils {
             context: Context,
             lifecycleOwner: LifecycleOwner,
             ssid: String,
-            onAllowed: () -> Unit,
+            onAllowed: () -> Unit
         ) {
-            lifecycleOwner.lifecycleScope.launch {
+            checkWepAllowed(
+                context,
+                lifecycleOwner.lifecycleScope,
+                ssid,
+                WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW,
+                { intent -> context.startActivity(intent) },
+                onAllowed
+            )
+        }
+
+        @JvmStatic
+        fun checkWepAllowed(
+            context: Context,
+            coroutineScope: CoroutineScope,
+            ssid: String,
+            dialogWindowType: Int,
+            onStartActivity: (intent: Intent) -> Unit,
+            onAllowed: () -> Unit,
+        ): Job =
+            coroutineScope.launch {
                 val wifiManager = context.getSystemService(WifiManager::class.java) ?: return@launch
                 if (wifiManager.queryWepAllowed()) {
                     onAllowed()
@@ -485,12 +506,12 @@ open class WifiUtils {
                             "com.android.settings",
                             "com.android.settings.network.WepNetworkDialogActivity"
                         )
+                        putExtra(DIALOG_WINDOW_TYPE, dialogWindowType)
                         putExtra(SSID, ssid)
-                    }
-                    context.startActivity(intent)
+                    }.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    onStartActivity(intent)
                 }
             }
-        }
 
         private suspend fun WifiManager.queryWepAllowed(): Boolean =
             withContext(Dispatchers.Default) {
@@ -502,5 +523,6 @@ open class WifiUtils {
             }
 
         const val SSID = "ssid"
+        const val DIALOG_WINDOW_TYPE = "dialog_window_type"
     }
 }

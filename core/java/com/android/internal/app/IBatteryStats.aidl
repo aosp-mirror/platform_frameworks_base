@@ -21,6 +21,7 @@ import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
 import android.os.BluetoothBatteryStats;
 import android.os.ParcelFileDescriptor;
+import android.os.ResultReceiver;
 import android.os.WakeLockStats;
 import android.os.WorkSource;
 import android.os.connectivity.CellularBatteryStats;
@@ -33,6 +34,9 @@ import android.telephony.ModemActivityInfo;
 import android.telephony.SignalStrength;
 
 interface IBatteryStats {
+    /** @hide */
+    const String KEY_UID_SNAPSHOTS = "uid_snapshots";
+
     // These first methods are also called by native code, so must
     // be kept in sync with frameworks/native/libs/binder/include_batterystats/batterystats/IBatteryStats.h
     @EnforcePermission("UPDATE_DEVICE_STATS")
@@ -43,14 +47,16 @@ interface IBatteryStats {
     void noteStartVideo(int uid);
     @EnforcePermission("UPDATE_DEVICE_STATS")
     void noteStopVideo(int uid);
+    // The audio battery stats interface is oneway to prevent inversion. These calls
+    // are ordered with respect to each other, but not with any other calls.
     @EnforcePermission("UPDATE_DEVICE_STATS")
-    void noteStartAudio(int uid);
+    oneway void noteStartAudio(int uid);
     @EnforcePermission("UPDATE_DEVICE_STATS")
-    void noteStopAudio(int uid);
+    oneway void noteStopAudio(int uid);
     @EnforcePermission("UPDATE_DEVICE_STATS")
     void noteResetVideo();
     @EnforcePermission("UPDATE_DEVICE_STATS")
-    void noteResetAudio();
+    oneway void noteResetAudio();
     @EnforcePermission("UPDATE_DEVICE_STATS")
     void noteFlashlightOn(int uid);
     @EnforcePermission("UPDATE_DEVICE_STATS")
@@ -253,6 +259,9 @@ interface IBatteryStats {
     HealthStatsParceler takeUidSnapshot(int uid);
     @PermissionManuallyEnforced
     HealthStatsParceler[] takeUidSnapshots(in int[] uid);
+
+    @PermissionManuallyEnforced
+    oneway void takeUidSnapshotsAsync(in int[] uid, in ResultReceiver result);
 
     @EnforcePermission("UPDATE_DEVICE_STATS")
     oneway void noteBluetoothControllerActivity(in BluetoothActivityEnergyInfo info);

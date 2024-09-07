@@ -46,15 +46,22 @@ object UdfpsTouchOverlayBinder {
         view.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
                 launch {
-                    viewModel.shouldHandleTouches.collect { shouldHandleTouches ->
+                        viewModel.shouldHandleTouches.collect { shouldHandleTouches ->
+                            Log.d(
+                                "UdfpsTouchOverlayBinder",
+                                "[$view]: update shouldHandleTouches=$shouldHandleTouches"
+                            )
+                            view.isInvisible = !shouldHandleTouches
+                            udfpsOverlayInteractor.setHandleTouches(shouldHandleTouches)
+                        }
+                    }
+                    .invokeOnCompletion {
                         Log.d(
                             "UdfpsTouchOverlayBinder",
-                            "[$view]: update shouldHandleTouches=$shouldHandleTouches"
+                            "[$view-detached]: update shouldHandleTouches=false"
                         )
-                        view.isInvisible = !shouldHandleTouches
-                        udfpsOverlayInteractor.setHandleTouches(shouldHandleTouches)
+                        udfpsOverlayInteractor.setHandleTouches(false)
                     }
-                }
             }
         }
     }

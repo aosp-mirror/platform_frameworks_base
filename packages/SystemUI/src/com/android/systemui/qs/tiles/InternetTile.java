@@ -30,7 +30,6 @@ import android.service.quicksettings.Tile;
 import android.text.Html;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.View;
 import android.widget.Switch;
 
 import androidx.annotation.Nullable;
@@ -41,7 +40,7 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.graph.SignalDrawable;
 import com.android.settingslib.mobile.TelephonyIcons;
 import com.android.settingslib.net.DataUsageController;
-import com.android.systemui.res.R;
+import com.android.systemui.animation.Expandable;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
@@ -53,6 +52,7 @@ import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.qs.tiles.dialog.InternetDialogManager;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.connectivity.AccessPointController;
 import com.android.systemui.statusbar.connectivity.IconState;
 import com.android.systemui.statusbar.connectivity.MobileDataIndicators;
@@ -124,10 +124,10 @@ public class InternetTile extends QSTileImpl<QSTile.BooleanState> {
     }
 
     @Override
-    protected void handleClick(@Nullable View view) {
+    protected void handleClick(@Nullable Expandable expandable) {
         mHandler.post(() -> mInternetDialogManager.create(true,
                 mAccessPointController.canConfigMobileData(),
-                mAccessPointController.canConfigWifi(), view));
+                mAccessPointController.canConfigWifi(), expandable));
     }
 
     @Override

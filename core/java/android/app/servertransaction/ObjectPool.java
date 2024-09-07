@@ -16,6 +16,8 @@
 
 package android.app.servertransaction;
 
+import com.android.window.flags.Flags;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -38,6 +40,9 @@ class ObjectPool {
      * @return An instance or null if there is none.
      */
     public static <T extends ObjectPoolItem> T obtain(Class<T> itemClass) {
+        if (Flags.disableObjectPool()) {
+            return null;
+        }
         synchronized (sPoolSync) {
             @SuppressWarnings("unchecked")
             final ArrayList<T> itemPool = (ArrayList<T>) sPoolMap.get(itemClass);
@@ -54,6 +59,9 @@ class ObjectPool {
      * @see ObjectPoolItem#recycle()
      */
     public static <T extends ObjectPoolItem> void recycle(T item) {
+        if (Flags.disableObjectPool()) {
+            return;
+        }
         synchronized (sPoolSync) {
             @SuppressWarnings("unchecked")
             ArrayList<T> itemPool = (ArrayList<T>) sPoolMap.get(item.getClass());

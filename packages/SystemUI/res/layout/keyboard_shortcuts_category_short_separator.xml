@@ -15,6 +15,6 @@
   limitations under the License
   -->
 <View xmlns:android="http://schemas.android.com/apk/res/android"
-      android:layout_marginTop="8dp"
-      android:layout_marginBottom="0dp"
+      android:layout_marginTop="@dimen/ksh_category_separator_margin"
+      android:layout_marginBottom="@dimen/ksh_category_separator_margin"
       style="@style/ShortcutHorizontalDivider" />

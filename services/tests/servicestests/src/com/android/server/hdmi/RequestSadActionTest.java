@@ -21,7 +21,9 @@ import static com.android.server.hdmi.Constants.ADDR_AUDIO_SYSTEM;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import android.annotation.RequiresPermission;
 import android.content.Context;
+import android.content.Intent;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.os.Looper;
@@ -115,12 +117,18 @@ public class RequestSadActionTest {
                     boolean isPowerStandbyOrTransient() {
                         return false;
                     }
+
+                    @Override
+                    protected void sendBroadcastAsUser(@RequiresPermission Intent intent) {
+                        // do nothing
+                    }
                 };
 
         mHdmiControlService.setIoLooper(mMyLooper);
         mHdmiControlService.setHdmiCecConfig(new FakeHdmiCecConfig(context));
         mHdmiControlService.setDeviceConfig(new FakeDeviceConfigWrapper());
         mNativeWrapper = new FakeNativeWrapper();
+        mNativeWrapper.setPhysicalAddress(0x0000);
         mHdmiCecController = HdmiCecController.createWithNativeWrapper(
                 mHdmiControlService, mNativeWrapper, mHdmiControlService.getAtomWriter());
         mHdmiControlService.setCecController(mHdmiCecController);
@@ -129,7 +137,6 @@ public class RequestSadActionTest {
         mHdmiControlService.onBootPhase(PHASE_SYSTEM_SERVICES_READY);
         mPowerManager = new FakePowerManagerWrapper(context);
         mHdmiControlService.setPowerManager(mPowerManager);
-        mNativeWrapper.setPhysicalAddress(0x0000);
         mTestLooper.dispatchAll();
         mHdmiCecLocalDeviceTv = mHdmiControlService.tv();
         mTvLogicalAddress = mHdmiCecLocalDeviceTv.getDeviceInfo().getLogicalAddress();

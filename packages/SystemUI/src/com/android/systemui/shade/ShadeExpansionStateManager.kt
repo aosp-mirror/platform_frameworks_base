@@ -18,13 +18,13 @@ package com.android.systemui.shade
 
 import android.annotation.IntDef
 import android.os.Trace
-import android.os.Trace.TRACE_TAG_APP as TRACE_TAG
 import android.util.Log
 import androidx.annotation.FloatRange
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.util.Compile
 import java.util.concurrent.CopyOnWriteArrayList
 import javax.inject.Inject
+import android.os.Trace.TRACE_TAG_APP as TRACE_TAG
 
 /**
  * A class responsible for managing the notification panel's current state.
@@ -42,7 +42,6 @@ class ShadeExpansionStateManager @Inject constructor() {
     @FloatRange(from = 0.0, to = 1.0) private var fraction: Float = 0f
     private var expanded: Boolean = false
     private var tracking: Boolean = false
-    private var dragDownPxAmount: Float = 0f
 
     /**
      * Adds a listener that will be notified when the panel expansion fraction has changed and
@@ -53,12 +52,7 @@ class ShadeExpansionStateManager @Inject constructor() {
     @Deprecated("Use ShadeInteractor instead")
     fun addExpansionListener(listener: ShadeExpansionListener): ShadeExpansionChangeEvent {
         expansionListeners.add(listener)
-        return ShadeExpansionChangeEvent(fraction, expanded, tracking, dragDownPxAmount)
-    }
-
-    /** Removes an expansion listener. */
-    fun removeExpansionListener(listener: ShadeExpansionListener) {
-        expansionListeners.remove(listener)
+        return ShadeExpansionChangeEvent(fraction, expanded, tracking)
     }
 
     /** Adds a listener that will be notified when the panel state has changed. */
@@ -81,8 +75,7 @@ class ShadeExpansionStateManager @Inject constructor() {
     fun onPanelExpansionChanged(
         @FloatRange(from = 0.0, to = 1.0) fraction: Float,
         expanded: Boolean,
-        tracking: Boolean,
-        dragDownPxAmount: Float
+        tracking: Boolean
     ) {
         require(!fraction.isNaN()) { "fraction cannot be NaN" }
         val oldState = state
@@ -90,7 +83,6 @@ class ShadeExpansionStateManager @Inject constructor() {
         this.fraction = fraction
         this.expanded = expanded
         this.tracking = tracking
-        this.dragDownPxAmount = dragDownPxAmount
 
         var fullyClosed = true
         var fullyOpened = false
@@ -116,7 +108,6 @@ class ShadeExpansionStateManager @Inject constructor() {
                 "f=$fraction " +
                 "expanded=$expanded " +
                 "tracking=$tracking " +
-                "dragDownPxAmount=$dragDownPxAmount " +
                 "${if (fullyOpened) " fullyOpened" else ""} " +
                 if (fullyClosed) " fullyClosed" else ""
         )
@@ -129,8 +120,7 @@ class ShadeExpansionStateManager @Inject constructor() {
             }
         }
 
-        val expansionChangeEvent =
-            ShadeExpansionChangeEvent(fraction, expanded, tracking, dragDownPxAmount)
+        val expansionChangeEvent = ShadeExpansionChangeEvent(fraction, expanded, tracking)
         expansionListeners.forEach { it.onPanelExpansionChanged(expansionChangeEvent) }
     }
 

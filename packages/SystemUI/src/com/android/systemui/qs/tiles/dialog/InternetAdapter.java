@@ -25,6 +25,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -37,7 +38,11 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.Utils;
 import com.android.settingslib.wifi.WifiUtils;
 import com.android.systemui.res.R;
+import com.android.wifi.flags.Flags;
 import com.android.wifitrackerlib.WifiEntry;
+
+import kotlinx.coroutines.CoroutineScope;
+import kotlinx.coroutines.Job;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -50,6 +55,7 @@ public class InternetAdapter extends RecyclerView.Adapter<InternetAdapter.Intern
     private static final String TAG = "InternetAdapter";
 
     private final InternetDialogController mInternetDialogController;
+    private final CoroutineScope mCoroutineScope;
     @Nullable
     private List<WifiEntry> mWifiEntries;
     @VisibleForTesting
@@ -60,8 +66,9 @@ public class InternetAdapter extends RecyclerView.Adapter<InternetAdapter.Intern
     protected View mHolderView;
     protected Context mContext;
 
-    public InternetAdapter(InternetDialogController controller) {
+    public InternetAdapter(InternetDialogController controller, CoroutineScope coroutineScope) {
         mInternetDialogController = controller;
+        mCoroutineScope = coroutineScope;
     }
 
     @Override
@@ -70,7 +77,7 @@ public class InternetAdapter extends RecyclerView.Adapter<InternetAdapter.Intern
         mContext = viewGroup.getContext();
         mHolderView = LayoutInflater.from(mContext).inflate(R.layout.internet_list_item,
                 viewGroup, false);
-        return new InternetViewHolder(mHolderView, mInternetDialogController);
+        return new InternetViewHolder(mHolderView, mInternetDialogController, mCoroutineScope);
     }
 
     @Override
@@ -131,11 +138,16 @@ public class InternetAdapter extends RecyclerView.Adapter<InternetAdapter.Intern
         final ImageView mWifiEndIcon;
         final Context mContext;
         final InternetDialogController mInternetDialogController;
+        final CoroutineScope mCoroutineScope;
+        @Nullable
+        private Job mJob;
 
-        InternetViewHolder(View view, InternetDialogController internetDialogController) {
+        InternetViewHolder(View view, InternetDialogController internetDialogController,
+                CoroutineScope coroutineScope) {
             super(view);
             mContext = view.getContext();
             mInternetDialogController = internetDialogController;
+            mCoroutineScope = coroutineScope;
             mContainerLayout = view.requireViewById(R.id.internet_container);
             mWifiListLayout = view.requireViewById(R.id.wifi_list);
             mWifiNetworkLayout = view.requireViewById(R.id.wifi_network_layout);
@@ -176,6 +188,24 @@ public class InternetAdapter extends RecyclerView.Adapter<InternetAdapter.Intern
         }
 
         void onWifiClick(@NonNull WifiEntry wifiEntry, @NonNull View view) {
+            if (Flags.androidVWifiApi() && wifiEntry.getSecurityTypes().contains(
+                    WifiEntry.SECURITY_WEP)) {
+                if (mJob == null) {
+                    mJob = WifiUtils.checkWepAllowed(mContext, mCoroutineScope, wifiEntry.getSsid(),
+                            WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG, intent -> {
+                                mInternetDialogController.startActivity(intent, view);
+                                return null;
+                            }, () -> {
+                                wifiConnect(wifiEntry, view);
+                                return null;
+                            });
+                }
+                return;
+            }
+            wifiConnect(wifiEntry, view);
+        }
+
+        void wifiConnect(@NonNull WifiEntry wifiEntry, @NonNull View view) {
             if (wifiEntry.shouldEditBeforeConnect()) {
                 final Intent intent = WifiUtils.getWifiDialogIntent(wifiEntry.getKey(),
                         true /* connectForCaller */);

@@ -31,11 +31,11 @@ import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.telecom.TelecomManager;
 import android.telephony.TelephonyManager;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.KeyEvent;
 import android.view.accessibility.Flags;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -43,7 +43,7 @@ import com.android.systemui.recents.Recents;
 import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.ShadeController;
-import com.android.systemui.shade.ShadeViewController;
+import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
@@ -60,7 +60,7 @@ import java.util.Optional;
 
 @TestableLooper.RunWithLooper
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class SystemActionsTest extends SysuiTestCase {
     @Mock
     private UserTracker mUserTracker;
@@ -71,7 +71,7 @@ public class SystemActionsTest extends SysuiTestCase {
     @Mock
     private ShadeController mShadeController;
     @Mock
-    private ShadeViewController mShadeViewController;
+    private PanelExpansionInteractor mPanelExpansionInteractor;
     @Mock
     private Optional<Recents> mRecentsOptional;
     @Mock
@@ -96,7 +96,7 @@ public class SystemActionsTest extends SysuiTestCase {
                 mNotificationShadeController,
                 mKeyguardStateController,
                 mShadeController,
-                () -> mShadeViewController,
+                () -> mPanelExpansionInteractor,
                 mRecentsOptional,
                 mDisplayTracker);
     }

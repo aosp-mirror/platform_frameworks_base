@@ -46,9 +46,7 @@ cc_library_shared {
         "liblog",
         "libutils",
         "libgui",
-        "libui",
         "libinput",
-        "libnativewindow",
     ],
 
     header_libs: [

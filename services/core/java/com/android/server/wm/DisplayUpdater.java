@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import android.annotation.NonNull;
+import android.os.Message;
 import android.view.Surface;
 import android.window.DisplayAreaInfo;
 
@@ -48,5 +49,17 @@ interface DisplayUpdater {
     default void onDisplayContentDisplayPropertiesPostChanged(
             @Surface.Rotation int previousRotation, @Surface.Rotation int newRotation,
             @NonNull DisplayAreaInfo newDisplayAreaInfo) {
+    }
+
+    /**
+     * Called with {@code true} when physical display is going to switch. And {@code false} when
+     * the display is turned on or the device goes to sleep.
+     */
+    default void onDisplaySwitching(boolean switching) {
+    }
+
+    /** Returns {@code true} if the transition will control when to turn on the screen. */
+    default boolean waitForTransition(@NonNull Message screenUnBlocker) {
+        return false;
     }
 }

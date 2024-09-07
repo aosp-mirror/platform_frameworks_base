@@ -18,6 +18,7 @@ package com.android.server.display;
 
 import android.text.TextUtils;
 
+import com.android.server.display.brightness.BrightnessEvent;
 import com.android.server.display.brightness.BrightnessReason;
 
 import java.util.Objects;
@@ -43,6 +44,11 @@ public final class DisplayBrightnessState {
 
     private final float mCustomAnimationRate;
 
+    private final BrightnessEvent mBrightnessEvent;
+    private final int mBrightnessAdjustmentFlag;
+
+    private final boolean mIsUserInitiatedChange;
+
     private DisplayBrightnessState(Builder builder) {
         mBrightness = builder.getBrightness();
         mSdrBrightness = builder.getSdrBrightness();
@@ -54,6 +60,9 @@ public final class DisplayBrightnessState {
         mMinBrightness = builder.getMinBrightness();
         mCustomAnimationRate = builder.getCustomAnimationRate();
         mShouldUpdateScreenBrightnessSetting = builder.shouldUpdateScreenBrightnessSetting();
+        mBrightnessEvent = builder.getBrightnessEvent();
+        mBrightnessAdjustmentFlag = builder.getBrightnessAdjustmentFlag();
+        mIsUserInitiatedChange = builder.isUserInitiatedChange();
     }
 
     /**
@@ -127,6 +136,28 @@ public final class DisplayBrightnessState {
         return mShouldUpdateScreenBrightnessSetting;
     }
 
+    /**
+     * @return The BrightnessEvent object
+     */
+    public BrightnessEvent getBrightnessEvent() {
+        return mBrightnessEvent;
+    }
+
+    /**
+     * Gets the flag representing the reason for the brightness adjustment. This can be
+     * automatic(e.g. because of the change in the lux), or user initiated(e.g. moving the slider)
+     */
+    public int getBrightnessAdjustmentFlag() {
+        return mBrightnessAdjustmentFlag;
+    }
+
+    /**
+     * Gets if the current brightness changes are because of a user initiated change
+     */
+    public boolean isUserInitiatedChange() {
+        return mIsUserInitiatedChange;
+    }
+
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder("DisplayBrightnessState:");
@@ -144,6 +175,10 @@ public final class DisplayBrightnessState {
         stringBuilder.append("\n    customAnimationRate:").append(mCustomAnimationRate);
         stringBuilder.append("\n    shouldUpdateScreenBrightnessSetting:")
                 .append(mShouldUpdateScreenBrightnessSetting);
+        stringBuilder.append("\n    mBrightnessEvent:")
+                .append(Objects.toString(mBrightnessEvent, "null"));
+        stringBuilder.append("\n    mBrightnessAdjustmentFlag:").append(mBrightnessAdjustmentFlag);
+        stringBuilder.append("\n    mIsUserInitiatedChange:").append(mIsUserInitiatedChange);
         return stringBuilder.toString();
     }
 
@@ -173,7 +208,10 @@ public final class DisplayBrightnessState {
                 && mMinBrightness == otherState.getMinBrightness()
                 && mCustomAnimationRate == otherState.getCustomAnimationRate()
                 && mShouldUpdateScreenBrightnessSetting
-                    == otherState.shouldUpdateScreenBrightnessSetting();
+                    == otherState.shouldUpdateScreenBrightnessSetting()
+                && Objects.equals(mBrightnessEvent, otherState.getBrightnessEvent())
+                && mBrightnessAdjustmentFlag == otherState.getBrightnessAdjustmentFlag()
+                && mIsUserInitiatedChange == otherState.isUserInitiatedChange();
     }
 
     @Override
@@ -181,7 +219,8 @@ public final class DisplayBrightnessState {
         return Objects.hash(mBrightness, mSdrBrightness, mBrightnessReason,
                 mShouldUseAutoBrightness, mIsSlowChange, mMaxBrightness, mMinBrightness,
                 mCustomAnimationRate,
-                mShouldUpdateScreenBrightnessSetting);
+                mShouldUpdateScreenBrightnessSetting, mBrightnessEvent, mBrightnessAdjustmentFlag,
+                mIsUserInitiatedChange);
     }
 
     /**
@@ -206,6 +245,12 @@ public final class DisplayBrightnessState {
         private float mCustomAnimationRate = CUSTOM_ANIMATION_RATE_NOT_SET;
         private boolean mShouldUpdateScreenBrightnessSetting;
 
+        private BrightnessEvent mBrightnessEvent;
+
+        public int mBrightnessAdjustmentFlag = 0;
+
+        private boolean mIsUserInitiatedChange;
+
         /**
          * Create a builder starting with the values from the specified {@link
          * DisplayBrightnessState}.
@@ -225,6 +270,9 @@ public final class DisplayBrightnessState {
             builder.setCustomAnimationRate(state.getCustomAnimationRate());
             builder.setShouldUpdateScreenBrightnessSetting(
                     state.shouldUpdateScreenBrightnessSetting());
+            builder.setBrightnessEvent(state.getBrightnessEvent());
+            builder.setBrightnessAdjustmentFlag(state.getBrightnessAdjustmentFlag());
+            builder.setIsUserInitiatedChange(state.isUserInitiatedChange());
             return builder;
         }
 
@@ -399,6 +447,53 @@ public final class DisplayBrightnessState {
          */
         public DisplayBrightnessState build() {
             return new DisplayBrightnessState(this);
+        }
+
+        /**
+         * This is used to get the BrightnessEvent object from its builder
+         */
+        public BrightnessEvent getBrightnessEvent() {
+            return mBrightnessEvent;
+        }
+
+
+        /**
+         * This is used to set the BrightnessEvent object
+         */
+        public Builder setBrightnessEvent(BrightnessEvent brightnessEvent) {
+            mBrightnessEvent = brightnessEvent;
+            return this;
+        }
+
+        /**
+         * This is used to get the brightness adjustment flag from its builder
+         */
+        public int getBrightnessAdjustmentFlag() {
+            return mBrightnessAdjustmentFlag;
+        }
+
+
+        /**
+         * This is used to set the brightness adjustment flag
+         */
+        public Builder setBrightnessAdjustmentFlag(int brightnessAdjustmentFlag) {
+            mBrightnessAdjustmentFlag = brightnessAdjustmentFlag;
+            return this;
+        }
+
+        /**
+         * Gets if the current change is a user initiated change
+         */
+        public boolean isUserInitiatedChange() {
+            return mIsUserInitiatedChange;
+        }
+
+        /**
+         * This is used to set if the current change is a user initiated change
+         */
+        public Builder setIsUserInitiatedChange(boolean isUserInitiatedChange) {
+            mIsUserInitiatedChange = isUserInitiatedChange;
+            return this;
         }
     }
 }

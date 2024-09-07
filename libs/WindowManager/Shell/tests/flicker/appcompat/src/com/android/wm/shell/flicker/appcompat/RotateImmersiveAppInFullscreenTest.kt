@@ -16,19 +16,19 @@
 
 package com.android.wm.shell.flicker.appcompat
 
+import android.graphics.Rect
 import android.os.Build
 import android.platform.test.annotations.Postsubmit
 import android.system.helpers.CommandsHelper
 import android.tools.NavBar
 import android.tools.Rotation
-import android.tools.datatypes.Rect
 import android.tools.flicker.assertions.FlickerTest
-import android.tools.traces.component.ComponentNameMatcher
 import android.tools.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.flicker.legacy.FlickerBuilder
 import android.tools.flicker.legacy.LegacyFlickerTest
 import android.tools.flicker.legacy.LegacyFlickerTestFactory
 import android.tools.helpers.FIND_TIMEOUT
+import android.tools.traces.component.ComponentNameMatcher
 import android.tools.traces.parsers.toFlickerComponent
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
@@ -167,7 +167,7 @@ class RotateImmersiveAppInFullscreenTest(flicker: LegacyFlickerTest) : BaseAppCo
     }
 
     companion object {
-        private var startDisplayBounds = Rect.EMPTY
+        private var startDisplayBounds = Rect()
         const val LAUNCHER_PACKAGE = "com.google.android.apps.nexuslauncher"
 
         /**

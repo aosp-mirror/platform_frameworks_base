@@ -18,6 +18,7 @@ package com.android.wm.shell.desktopmode;
 
 import android.app.ActivityManager.RunningTaskInfo;
 import android.window.RemoteTransition;
+import com.android.wm.shell.common.desktopmode.DesktopModeTransitionSource;
 import com.android.wm.shell.desktopmode.IDesktopTaskListener;
 
 /**
@@ -28,10 +29,10 @@ interface IDesktopMode {
     /** Show apps on the desktop on the given display */
     void showDesktopApps(int displayId, in RemoteTransition remoteTransition);
 
-    /** Stash apps on the desktop to allow launching another app from home screen */
+    /** @deprecated use {@link #showDesktopApps} instead. */
     void stashDesktopApps(int displayId);
 
-    /** Hide apps that may be stashed */
+    /** @deprecated this is no longer supported. */
     void hideStashedDesktopApps(int displayId);
 
     /** Bring task with the given id to front */
@@ -45,4 +46,7 @@ interface IDesktopMode {
 
     /** Set listener that will receive callbacks about updates to desktop tasks */
     oneway void setTaskListener(IDesktopTaskListener listener);
+
+    /** Move a task with given `taskId` to desktop */
+    void moveToDesktop(int taskId, in DesktopModeTransitionSource transitionSource);
 }

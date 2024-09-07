@@ -24,6 +24,7 @@ import android.app.PendingIntent;
 import android.content.ClipData;
 import android.content.ClipDescription;
 import android.view.DragEvent;
+import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -67,14 +68,18 @@ public class DragUtils {
      */
     @Nullable
     public static PendingIntent getLaunchIntent(@NonNull DragEvent dragEvent) {
-        return getLaunchIntent(dragEvent.getClipData());
+        return getLaunchIntent(dragEvent.getClipData(), dragEvent.getDragFlags());
     }
 
     /**
      * Returns a launchable intent in the given `ClipData` or `null` if there is none.
      */
     @Nullable
-    public static PendingIntent getLaunchIntent(@NonNull ClipData data) {
+    public static PendingIntent getLaunchIntent(@NonNull ClipData data, int dragFlags) {
+        if ((dragFlags & View.DRAG_FLAG_START_INTENT_SENDER_ON_UNHANDLED_DRAG) == 0) {
+            // Disallow launching the intent if the app does not want to delegate it to the system
+            return null;
+        }
         for (int i = 0; i < data.getItemCount(); i++) {
             final ClipData.Item item = data.getItemAt(i);
             if (item.getIntentSender() != null) {

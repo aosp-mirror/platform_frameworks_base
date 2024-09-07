@@ -133,6 +133,7 @@ final class HalVibration extends Vibration {
         // Save scale values for debugging purposes.
         mScaleLevel = scaler.getScaleLevel(vibrationUsage);
         mAdaptiveScale = scaler.getAdaptiveHapticsScale(vibrationUsage);
+        stats.reportAdaptiveScale(mAdaptiveScale);
 
         // Scale all VibrationEffect instances in given CombinedVibration.
         CombinedVibration newEffect = mEffectToPlay.transform(scaler::scale, vibrationUsage);

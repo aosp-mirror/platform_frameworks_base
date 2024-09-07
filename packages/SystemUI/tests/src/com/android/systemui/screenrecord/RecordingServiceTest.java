@@ -146,7 +146,8 @@ public class RecordingServiceTest extends SysuiTestCase {
 
     @Test
     public void testLogStartPartialRecording() {
-        MediaProjectionCaptureTarget target = new MediaProjectionCaptureTarget(new LaunchCookie());
+        MediaProjectionCaptureTarget target =
+                new MediaProjectionCaptureTarget(new LaunchCookie(), 12345);
         Intent startIntent = RecordingService.getStartIntent(mContext, 0, 0, false, target);
         mRecordingService.onStartCommand(startIntent, 0, 0);
 

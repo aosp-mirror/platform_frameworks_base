@@ -17,6 +17,7 @@
 package com.android.server.media;
 
 import android.app.ForegroundServiceDelegationOptions;
+import android.app.Notification;
 import android.media.AudioManager;
 import android.media.session.PlaybackState;
 import android.os.ResultReceiver;
@@ -33,8 +34,12 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public abstract class MediaSessionRecordImpl {
 
-    static final AtomicInteger sNextMediaSessionRecordId = new AtomicInteger(1);
-    int mUniqueId;
+    private static final AtomicInteger sNextMediaSessionRecordId = new AtomicInteger(1);
+    private final int mUniqueId;
+
+    protected MediaSessionRecordImpl() {
+        mUniqueId = sNextMediaSessionRecordId.getAndIncrement();
+    }
 
     /**
      * Get the info for this session.
@@ -153,6 +158,9 @@ public abstract class MediaSessionRecordImpl {
      */
     public abstract boolean canHandleVolumeKey();
 
+    /** Returns whether this session is linked to the passed notification. */
+    abstract boolean isLinkedToNotification(Notification notification);
+
     /**
      * Get session policies from custom policy provider set when MediaSessionRecord is instantiated.
      * If custom policy does not exist, will return null.
@@ -191,6 +199,12 @@ public abstract class MediaSessionRecordImpl {
      * Returns whether {@link #close()} is called before.
      */
     public abstract boolean isClosed();
+
+    /**
+     * Note: This method is only used for testing purposes If the session is temporary engaged, the
+     * timeout will expire and it will become disengaged.
+     */
+    public abstract void expireTempEngaged();
 
     @Override
     public final boolean equals(Object o) {

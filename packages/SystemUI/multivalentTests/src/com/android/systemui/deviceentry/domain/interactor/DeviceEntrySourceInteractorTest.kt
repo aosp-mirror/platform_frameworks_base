@@ -21,7 +21,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
-import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
+import com.android.systemui.keyguard.shared.model.BiometricUnlockMode
 import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
@@ -46,8 +46,10 @@ class DeviceEntrySourceInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val deviceEntryFromBiometricAuthentication by
                 collectLastValue(underTest.deviceEntryFromBiometricSource)
-            keyguardRepository.setBiometricUnlockSource(BiometricUnlockSource.FACE_SENSOR)
-            keyguardRepository.setBiometricUnlockState(BiometricUnlockModel.WAKE_AND_UNLOCK)
+            keyguardRepository.setBiometricUnlockState(
+                BiometricUnlockMode.WAKE_AND_UNLOCK,
+                BiometricUnlockSource.FACE_SENSOR,
+            )
             runCurrent()
             assertThat(deviceEntryFromBiometricAuthentication)
                 .isEqualTo(BiometricUnlockSource.FACE_SENSOR)
@@ -57,8 +59,10 @@ class DeviceEntrySourceInteractorTest : SysuiTestCase() {
     fun deviceEntryFromFingerprintUnlock() = runTest {
         val deviceEntryFromBiometricAuthentication by
             collectLastValue(underTest.deviceEntryFromBiometricSource)
-        keyguardRepository.setBiometricUnlockSource(BiometricUnlockSource.FINGERPRINT_SENSOR)
-        keyguardRepository.setBiometricUnlockState(BiometricUnlockModel.WAKE_AND_UNLOCK)
+        keyguardRepository.setBiometricUnlockState(
+            BiometricUnlockMode.WAKE_AND_UNLOCK,
+            BiometricUnlockSource.FINGERPRINT_SENSOR,
+        )
         runCurrent()
         assertThat(deviceEntryFromBiometricAuthentication)
             .isEqualTo(BiometricUnlockSource.FINGERPRINT_SENSOR)
@@ -68,9 +72,10 @@ class DeviceEntrySourceInteractorTest : SysuiTestCase() {
     fun noDeviceEntry() = runTest {
         val deviceEntryFromBiometricAuthentication by
             collectLastValue(underTest.deviceEntryFromBiometricSource)
-        keyguardRepository.setBiometricUnlockSource(BiometricUnlockSource.FINGERPRINT_SENSOR)
-        // doesn't dismiss keyguard:
-        keyguardRepository.setBiometricUnlockState(BiometricUnlockModel.ONLY_WAKE)
+        keyguardRepository.setBiometricUnlockState(
+            BiometricUnlockMode.ONLY_WAKE, // doesn't dismiss keyguard:
+            BiometricUnlockSource.FINGERPRINT_SENSOR,
+        )
         runCurrent()
         assertThat(deviceEntryFromBiometricAuthentication).isNull()
     }

@@ -768,7 +768,7 @@
         <font weight="400" style="normal">NotoSansSymbols-Regular-Subsetted.ttf</font>
     </family>
     <family lang="zh-Hans">
-        <font weight="400" style="normal" index="2" postScriptName="NotoSansCJKjp-Thin"
+        <font weight="400" style="normal" index="2" postScriptName="NotoSansCJKJP-Regular"
             supportedAxes="wght">
             NotoSansCJK-Regular.ttc
             <!-- The default instance of NotoSansCJK-Regular.ttc is wght=100, so specify wght=400
@@ -780,7 +780,7 @@
         </font>
     </family>
     <family lang="zh-Hant,zh-Bopo">
-        <font weight="400" style="normal" index="3" postScriptName="NotoSansCJKjp-Thin"
+        <font weight="400" style="normal" index="3" postScriptName="NotoSansCJKJP-Regular"
             supportedAxes="wght">
             NotoSansCJK-Regular.ttc
             <!-- The default instance of NotoSansCJK-Regular.ttc is wght=100, so specify wght=400
@@ -792,7 +792,7 @@
         </font>
     </family>
     <family lang="ja">
-        <font weight="400" style="normal" index="0" postScriptName="NotoSansCJKjp-Thin"
+        <font weight="400" style="normal" index="0" postScriptName="NotoSansCJKJP-Regular"
             supportedAxes="wght">
             NotoSansCJK-Regular.ttc
             <!-- The default instance of NotoSansCJK-Regular.ttc is wght=100, so specify wght=400
@@ -804,17 +804,13 @@
         </font>
     </family>
     <family lang="ja">
-        <font weight="400" style="normal">
-            NotoSerifHentaigana-EL.ttf
+        <font postScriptName="NotoSerifHentaigana-ExtraLight" supportedAxes="wght">
+            NotoSerifHentaigana.ttf
             <axis tag="wght" stylevalue="400"/>
-        </font>
-        <font weight="700" style="normal">
-            NotoSerifHentaigana-EL.ttf
-            <axis tag="wght" stylevalue="700"/>
         </font>
     </family>
     <family lang="ko">
-        <font weight="400" style="normal" index="1" postScriptName="NotoSansCJKjp-Thin"
+        <font weight="400" style="normal" index="1" postScriptName="NotoSansCJKJP-Regular"
             supportedAxes="wght">
             NotoSansCJK-Regular.ttc
             <!-- The default instance of NotoSansCJK-Regular.ttc is wght=100, so specify wght=400

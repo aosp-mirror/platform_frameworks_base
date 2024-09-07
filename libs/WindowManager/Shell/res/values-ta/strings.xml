@@ -84,6 +84,8 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"பபிள்"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"நிர்வகி"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"குமிழ் நிராகரிக்கப்பட்டது."</string>
+    <string name="bubble_shortcut_label" msgid="666269077944378311">"குமிழ்கள்"</string>
+    <string name="bubble_shortcut_long_label" msgid="6088437544312894043">"குமிழ்களைக் காட்டு"</string>
     <string name="restart_button_description" msgid="4564728020654658478">"இங்கு தட்டுவதன் மூலம் இந்த ஆப்ஸை மீண்டும் தொடங்கி, ஆப்ஸ் காட்டப்படும் விதத்தை இன்னும் சிறப்பாக்கலாம்"</string>
     <string name="user_aspect_ratio_settings_button_hint" msgid="734835849600713016">"அமைப்புகளில் இந்த ஆப்ஸின் தோற்ற விகிதத்தை மாற்றும்"</string>
     <string name="user_aspect_ratio_settings_button_description" msgid="4315566801697411684">"தோற்ற விகிதத்தை மாற்றும்"</string>
@@ -117,4 +119,6 @@
     <string name="close_text" msgid="4986518933445178928">"மூடும்"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"மெனுவை மூடும்"</string>
     <string name="expand_menu_text" msgid="3847736164494181168">"மெனுவைத் திற"</string>
+    <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"திரையைப் பெரிதாக்கு"</string>
+    <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"திரையை ஸ்னாப் செய்"</string>
 </resources>

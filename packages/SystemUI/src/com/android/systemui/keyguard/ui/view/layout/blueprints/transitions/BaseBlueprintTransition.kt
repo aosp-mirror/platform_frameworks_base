@@ -41,7 +41,7 @@ class BaseBlueprintTransition(val clockViewModel: KeyguardClockViewModel) : Tran
 
     private fun excludeClockAndSmartspaceViews(transition: Transition) {
         transition.excludeTarget(SmartspaceView::class.java, true)
-        clockViewModel.clock?.let { clock ->
+        clockViewModel.currentClock.value?.let { clock ->
             clock.largeClock.layout.views.forEach { view -> transition.excludeTarget(view, true) }
             clock.smallClock.layout.views.forEach { view -> transition.excludeTarget(view, true) }
         }

@@ -16,7 +16,8 @@
 
 package com.android.server.appop;
 
-import static com.android.compatibility.common.util.SystemUtil.runWithShellPermissionIdentity;
+import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_CUSTOM;
+import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_CAMERA;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -31,6 +32,7 @@ import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
+import android.Manifest;
 import android.app.AppOpsManager;
 import android.app.AppOpsManager.OnOpActiveChangedListener;
 import android.companion.virtual.VirtualDeviceManager;
@@ -38,7 +40,8 @@ import android.companion.virtual.VirtualDeviceParams;
 import android.content.AttributionSource;
 import android.content.Context;
 import android.os.Process;
-import android.virtualdevice.cts.common.FakeAssociationRule;
+import android.permission.PermissionManager;
+import android.virtualdevice.cts.common.VirtualDeviceRule;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -49,7 +52,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Tests app ops version upgrades
@@ -59,7 +61,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class AppOpsActiveWatcherTest {
 
     @Rule
-    public FakeAssociationRule mFakeAssociationRule = new FakeAssociationRule();
+    public VirtualDeviceRule virtualDeviceRule =
+            VirtualDeviceRule.withAdditionalPermissions(
+                    Manifest.permission.GRANT_RUNTIME_PERMISSIONS,
+                    Manifest.permission.REVOKE_RUNTIME_PERMISSIONS,
+                    Manifest.permission.CREATE_VIRTUAL_DEVICE,
+                    Manifest.permission.GET_APP_OPS_STATS
+            );
     private static final long NOTIFICATION_TIMEOUT_MILLIS = 5000;
 
     @Test
@@ -145,20 +153,28 @@ public class AppOpsActiveWatcherTest {
 
     @Test
     public void testWatchActiveOpsForExternalDevice() {
-        final VirtualDeviceManager virtualDeviceManager = getContext().getSystemService(
-                VirtualDeviceManager.class);
-        AtomicInteger virtualDeviceId = new AtomicInteger();
-        runWithShellPermissionIdentity(() -> {
-            final VirtualDeviceManager.VirtualDevice virtualDevice =
-                    virtualDeviceManager.createVirtualDevice(
-                            mFakeAssociationRule.getAssociationInfo().getId(),
-                            new VirtualDeviceParams.Builder().setName("virtual_device").build());
-            virtualDeviceId.set(virtualDevice.getDeviceId());
-        });
+        VirtualDeviceManager.VirtualDevice virtualDevice =
+                virtualDeviceRule.createManagedVirtualDevice(
+                        new VirtualDeviceParams.Builder()
+                                .setDevicePolicy(POLICY_TYPE_CAMERA, DEVICE_POLICY_CUSTOM)
+                                .build()
+                );
+
+        PermissionManager permissionManager =
+                getContext().getSystemService(PermissionManager.class);
+
+        // Unlike runtime permission being automatically granted to the default device, we need to
+        // grant camera permission to the external device first before we can start op.
+        permissionManager.grantRuntimePermission(
+                getContext().getOpPackageName(),
+                Manifest.permission.CAMERA,
+                virtualDevice.getPersistentDeviceId()
+        );
+
         final OnOpActiveChangedListener listener = mock(OnOpActiveChangedListener.class);
         AttributionSource attributionSource = new AttributionSource(Process.myUid(),
                 getContext().getOpPackageName(), getContext().getAttributionTag(),
-                virtualDeviceId.get());
+                virtualDevice.getDeviceId());
 
         final AppOpsManager appOpsManager = getContext().getSystemService(AppOpsManager.class);
         appOpsManager.startWatchingActive(new String[]{AppOpsManager.OPSTR_CAMERA,
@@ -171,7 +187,7 @@ public class AppOpsActiveWatcherTest {
         verify(listener, timeout(NOTIFICATION_TIMEOUT_MILLIS)
                 .times(1)).onOpActiveChanged(eq(AppOpsManager.OPSTR_CAMERA),
                 eq(Process.myUid()), eq(getContext().getOpPackageName()),
-                eq(getContext().getAttributionTag()), eq(virtualDeviceId.get()), eq(true),
+                eq(getContext().getAttributionTag()), eq(virtualDevice.getDeviceId()), eq(true),
                 eq(AppOpsManager.ATTRIBUTION_FLAGS_NONE),
                 eq(AppOpsManager.ATTRIBUTION_CHAIN_ID_NONE));
         verifyNoMoreInteractions(listener);
@@ -182,7 +198,7 @@ public class AppOpsActiveWatcherTest {
         verify(listener, timeout(NOTIFICATION_TIMEOUT_MILLIS)
                 .times(1)).onOpActiveChanged(eq(AppOpsManager.OPSTR_CAMERA),
                 eq(Process.myUid()), eq(getContext().getOpPackageName()),
-                eq(getContext().getAttributionTag()), eq(virtualDeviceId.get()), eq(false),
+                eq(getContext().getAttributionTag()), eq(virtualDevice.getDeviceId()), eq(false),
                 eq(AppOpsManager.ATTRIBUTION_FLAGS_NONE),
                 eq(AppOpsManager.ATTRIBUTION_CHAIN_ID_NONE));
         verifyNoMoreInteractions(listener);

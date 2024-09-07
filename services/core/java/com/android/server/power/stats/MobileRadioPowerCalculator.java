@@ -387,92 +387,14 @@ public class MobileRadioPowerCalculator extends PowerCalculator {
         return consumptionMah;
     }
 
-    private static long buildModemPowerProfileKey(@ModemPowerProfile.ModemDrainType int drainType,
-            @BatteryStats.RadioAccessTechnology int rat, @ServiceState.FrequencyRange int freqRange,
-            int txLevel) {
-        long key = PowerProfile.SUBSYSTEM_MODEM;
-
-        // Attach Modem drain type to the key if specified.
-        if (drainType != IGNORE) {
-            key |= drainType;
-        }
-
-        // Attach RadioAccessTechnology to the key if specified.
-        switch (rat) {
-            case IGNORE:
-                // do nothing
-                break;
-            case BatteryStats.RADIO_ACCESS_TECHNOLOGY_OTHER:
-                key |= ModemPowerProfile.MODEM_RAT_TYPE_DEFAULT;
-                break;
-            case BatteryStats.RADIO_ACCESS_TECHNOLOGY_LTE:
-                key |= ModemPowerProfile.MODEM_RAT_TYPE_LTE;
-                break;
-            case BatteryStats.RADIO_ACCESS_TECHNOLOGY_NR:
-                key |= ModemPowerProfile.MODEM_RAT_TYPE_NR;
-                break;
-            default:
-                Log.w(TAG, "Unexpected RadioAccessTechnology : " + rat);
-        }
-
-        // Attach NR Frequency Range to the key if specified.
-        switch (freqRange) {
-            case IGNORE:
-                // do nothing
-                break;
-            case ServiceState.FREQUENCY_RANGE_UNKNOWN:
-                key |= ModemPowerProfile.MODEM_NR_FREQUENCY_RANGE_DEFAULT;
-                break;
-            case ServiceState.FREQUENCY_RANGE_LOW:
-                key |= ModemPowerProfile.MODEM_NR_FREQUENCY_RANGE_LOW;
-                break;
-            case ServiceState.FREQUENCY_RANGE_MID:
-                key |= ModemPowerProfile.MODEM_NR_FREQUENCY_RANGE_MID;
-                break;
-            case ServiceState.FREQUENCY_RANGE_HIGH:
-                key |= ModemPowerProfile.MODEM_NR_FREQUENCY_RANGE_HIGH;
-                break;
-            case ServiceState.FREQUENCY_RANGE_MMWAVE:
-                key |= ModemPowerProfile.MODEM_NR_FREQUENCY_RANGE_MMWAVE;
-                break;
-            default:
-                Log.w(TAG, "Unexpected NR frequency range : " + freqRange);
-        }
-
-        // Attach transmission level to the key if specified.
-        switch (txLevel) {
-            case IGNORE:
-                // do nothing
-                break;
-            case 0:
-                key |= ModemPowerProfile.MODEM_TX_LEVEL_0;
-                break;
-            case 1:
-                key |= ModemPowerProfile.MODEM_TX_LEVEL_1;
-                break;
-            case 2:
-                key |= ModemPowerProfile.MODEM_TX_LEVEL_2;
-                break;
-            case 3:
-                key |= ModemPowerProfile.MODEM_TX_LEVEL_3;
-                break;
-            case 4:
-                key |= ModemPowerProfile.MODEM_TX_LEVEL_4;
-                break;
-            default:
-                Log.w(TAG, "Unexpected transmission level : " + txLevel);
-        }
-        return key;
-    }
-
     /**
      * Calculates active receive radio power consumption (in milliamp-hours) from the given state's
      * duration.
      */
     public double calcRxStatePowerMah(@BatteryStats.RadioAccessTechnology int rat,
             @ServiceState.FrequencyRange int freqRange, long rxDurationMs) {
-        final long rxKey = buildModemPowerProfileKey(ModemPowerProfile.MODEM_DRAIN_TYPE_RX, rat,
-                freqRange, IGNORE);
+        final long rxKey = ModemPowerProfile.getAverageBatteryDrainKey(
+                ModemPowerProfile.MODEM_DRAIN_TYPE_RX, rat, freqRange, IGNORE);
         final double drainRateMa = mPowerProfile.getAverageBatteryDrainOrDefaultMa(rxKey,
                 Double.NaN);
         if (Double.isNaN(drainRateMa)) {
@@ -495,8 +417,8 @@ public class MobileRadioPowerCalculator extends PowerCalculator {
      */
     public double calcTxStatePowerMah(@BatteryStats.RadioAccessTechnology int rat,
             @ServiceState.FrequencyRange int freqRange, int txLevel, long txDurationMs) {
-        final long txKey = buildModemPowerProfileKey(ModemPowerProfile.MODEM_DRAIN_TYPE_TX, rat,
-                freqRange, txLevel);
+        final long txKey = ModemPowerProfile.getAverageBatteryDrainKey(
+                ModemPowerProfile.MODEM_DRAIN_TYPE_TX, rat, freqRange, txLevel);
         final double drainRateMa = mPowerProfile.getAverageBatteryDrainOrDefaultMa(txKey,
                 Double.NaN);
         if (Double.isNaN(drainRateMa)) {

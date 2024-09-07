@@ -48,7 +48,7 @@ public class RootContentDescription implements RemoteComposeOperation {
 
     @Override
     public String toString() {
-        return "ROOT_CONTENT_DESCRIPTION " + mContentDescription;
+        return "RootContentDescription " + mContentDescription;
     }
 
     @Override

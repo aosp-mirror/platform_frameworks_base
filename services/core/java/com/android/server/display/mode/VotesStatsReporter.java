@@ -117,11 +117,11 @@ class VotesStatsReporter {
             maxRefreshRate = (int) physicalVote.mMaxRefreshRate;
         } else if (!ignoreRenderRate && (vote instanceof RefreshRateVote.RenderVote renderVote)) {
             maxRefreshRate = (int)  renderVote.mMaxRefreshRate;
-        } else if (vote instanceof SupportedModesVote supportedModesVote) {
-            // SupportedModesVote limits mode by specific refreshRates, so highest rr is allowed
+        } else if (vote instanceof SupportedRefreshRatesVote refreshRatesVote) {
+            // SupportedRefreshRatesVote limits mode by refreshRates, so highest rr is allowed
             maxRefreshRate = 0;
-            for (SupportedModesVote.SupportedMode mode : supportedModesVote.mSupportedModes) {
-                maxRefreshRate = Math.max(maxRefreshRate, (int) mode.mPeakRefreshRate);
+            for (SupportedRefreshRatesVote.RefreshRates rr : refreshRatesVote.mRefreshRates) {
+                maxRefreshRate = Math.max(maxRefreshRate, (int) rr.mPeakRefreshRate);
             }
         } else if (vote instanceof CombinedVote combinedVote) {
             for (Vote subVote: combinedVote.mVotes) {

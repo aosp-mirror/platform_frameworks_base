@@ -24,7 +24,6 @@ import com.android.tools.lint.detector.api.Scope
 import java.util.EnumSet
 import org.junit.Test
 
-@Suppress("UnstableApiUsage")
 class DemotingTestWithoutBugDetectorTest : SystemUILintDetectorTest() {
 
     override fun getDetector(): Detector = DemotingTestWithoutBugDetector()

@@ -25,11 +25,12 @@ import android.content.pm.PackageManager
 import android.content.pm.PackageManager.ResolveInfoFlags
 import android.content.pm.ResolveInfo
 import android.content.pm.UserInfo
+import android.location.LocationManager
 import android.os.Process.SYSTEM_UID
 import android.os.UserHandle
 import android.permission.PermissionGroupUsage
 import android.permission.PermissionManager
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.SysuiTestCase
@@ -63,7 +64,7 @@ import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class PrivacyDialogControllerTest : SysuiTestCase() {
 
     companion object {
@@ -85,6 +86,8 @@ class PrivacyDialogControllerTest : SysuiTestCase() {
     private lateinit var permissionManager: PermissionManager
     @Mock
     private lateinit var packageManager: PackageManager
+    @Mock
+    private lateinit var locationManager: LocationManager
     @Mock
     private lateinit var privacyItemController: PrivacyItemController
     @Mock
@@ -135,6 +138,7 @@ class PrivacyDialogControllerTest : SysuiTestCase() {
         controller = PrivacyDialogController(
                 permissionManager,
                 packageManager,
+                locationManager,
                 privacyItemController,
                 userTracker,
                 activityStarter,
@@ -652,7 +656,7 @@ class PrivacyDialogControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testCorrectIntentSubAttribution() {
+    fun testCorrectIntentSubAttributionForLocationProvider() {
         val usage = createMockPermGroupUsage(
                 attributionTag = TEST_ATTRIBUTION_TAG,
                 attributionLabel = "TEST_LABEL"
@@ -660,6 +664,8 @@ class PrivacyDialogControllerTest : SysuiTestCase() {
 
         val activityInfo = createMockActivityInfo()
         val resolveInfo = createMockResolveInfo(activityInfo)
+        `when`(locationManager.isProviderPackage(null, TEST_PACKAGE_NAME, TEST_ATTRIBUTION_TAG))
+                .thenReturn(true)
         `when`(permissionManager.getIndicatorAppOpUsageData(anyBoolean())).thenReturn(listOf(usage))
         `when`(packageManager.resolveActivity(any(), any<ResolveInfoFlags>()))
                 .thenAnswer { resolveInfo }
@@ -675,6 +681,29 @@ class PrivacyDialogControllerTest : SysuiTestCase() {
                     .isEqualTo(arrayOf(TEST_ATTRIBUTION_TAG.toString()))
             assertThat(navigationIntent.getBooleanExtra(Intent.EXTRA_SHOWING_ATTRIBUTION, false))
                     .isTrue()
+        }
+    }
+
+    @Test
+    fun testCorrectIntentSubAttributionForNonLocationProvider() {
+        val usage = createMockPermGroupUsage(
+            attributionTag = TEST_ATTRIBUTION_TAG,
+            attributionLabel = "TEST_LABEL"
+        )
+
+        val activityInfo = createMockActivityInfo()
+        val resolveInfo = createMockResolveInfo(activityInfo)
+        `when`(locationManager.isProviderPackage(null, TEST_PACKAGE_NAME, TEST_ATTRIBUTION_TAG))
+            .thenReturn(false)
+        `when`(permissionManager.getIndicatorAppOpUsageData(anyBoolean())).thenReturn(listOf(usage))
+        `when`(packageManager.resolveActivity(any(), any<ResolveInfoFlags>()))
+            .thenAnswer { resolveInfo }
+        controller.showDialog(context)
+        exhaustExecutors()
+
+        dialogProvider.list?.let { list ->
+            val navigationIntent = list.get(0).navigationIntent!!
+            assertThat(navigationIntent.action).isEqualTo(Intent.ACTION_MANAGE_APP_PERMISSIONS)
         }
     }
 

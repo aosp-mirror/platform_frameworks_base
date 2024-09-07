@@ -30,6 +30,7 @@ import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dock.DockManagerFake
+import com.android.systemui.flags.DisableSceneContainer
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.keyguard.data.quickaffordance.BuiltInKeyguardQuickAffordanceKeys
 import com.android.systemui.keyguard.data.quickaffordance.FakeKeyguardQuickAffordanceConfig
@@ -43,6 +44,7 @@ import com.android.systemui.keyguard.data.repository.KeyguardQuickAffordanceRepo
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancePosition
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancesMetricsLogger
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.settings.FakeUserTracker
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
@@ -61,11 +63,11 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
+import platform.test.runner.parameterized.Parameter
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.Parameterized
-import org.junit.runners.Parameterized.Parameter
-import org.junit.runners.Parameterized.Parameters
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.ArgumentMatchers.eq
@@ -81,7 +83,8 @@ import org.mockito.MockitoAnnotations
     detail = "on certain architectures all permutations with startActivity=true is causing failures"
 )
 @SmallTest
-@RunWith(Parameterized::class)
+@RunWith(ParameterizedAndroidJunit4::class)
+@DisableSceneContainer
 class KeyguardQuickAffordanceInteractorParameterizedTest : SysuiTestCase() {
 
     companion object {
@@ -278,6 +281,7 @@ class KeyguardQuickAffordanceInteractorParameterizedTest : SysuiTestCase() {
                             .thenReturn(FakeSharedPreferences())
                     },
                 userTracker = userTracker,
+                systemSettings = FakeSettings(),
                 broadcastDispatcher = fakeBroadcastDispatcher,
             )
         val remoteUserSelectionManager =
@@ -329,6 +333,7 @@ class KeyguardQuickAffordanceInteractorParameterizedTest : SysuiTestCase() {
                 biometricSettingsRepository = biometricSettingsRepository,
                 backgroundDispatcher = testDispatcher,
                 appContext = mContext,
+                sceneInteractor = { kosmos.sceneInteractor },
             )
     }
 

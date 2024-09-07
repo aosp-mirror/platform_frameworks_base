@@ -26,11 +26,13 @@ oneway interface ISatelliteTransmissionUpdateCallback {
     /**
      * Called when satellite datagram send state changed.
      *
+     * @param datagramType The datagram type of currently being sent.
      * @param state The new send datagram transfer state.
      * @param sendPendingCount The number of datagrams that are currently being sent.
      * @param errorCode If datagram transfer failed, the reason for failure.
      */
-    void onSendDatagramStateChanged(in int state, in int sendPendingCount, in int errorCode);
+    void onSendDatagramStateChanged(int datagramType, int state, int sendPendingCount,
+            int errorCode);
 
     /**
      * Called when satellite datagram receive state changed.
@@ -39,7 +41,7 @@ oneway interface ISatelliteTransmissionUpdateCallback {
      * @param receivePendingCount The number of datagrams that are currently pending to be received.
      * @param errorCode If datagram transfer failed, the reason for failure.
      */
-    void onReceiveDatagramStateChanged(in int state, in int receivePendingCount, in int errorCode);
+    void onReceiveDatagramStateChanged(int state, int receivePendingCount, int errorCode);
 
     /**
      * Called when the satellite position changed.

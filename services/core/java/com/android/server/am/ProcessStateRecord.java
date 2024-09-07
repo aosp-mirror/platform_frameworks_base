@@ -449,6 +449,9 @@ final class ProcessStateRecord {
     @GuardedBy("mService")
     private boolean mScheduleLikeTopApp = false;
 
+    @GuardedBy("mService")
+    private long mFollowupUpdateUptimeMs = Long.MAX_VALUE;
+
     ProcessStateRecord(ProcessRecord app) {
         mApp = app;
         mService = app.mService;
@@ -1162,6 +1165,16 @@ final class ProcessStateRecord {
     @GuardedBy("mService")
     void setScheduleLikeTopApp(boolean scheduleLikeTopApp) {
         mScheduleLikeTopApp = scheduleLikeTopApp;
+    }
+
+    @GuardedBy("mService")
+    long getFollowupUpdateUptimeMs() {
+        return mFollowupUpdateUptimeMs;
+    }
+
+    @GuardedBy("mService")
+    void setFollowupUpdateUptimeMs(long updateUptimeMs) {
+        mFollowupUpdateUptimeMs = updateUptimeMs;
     }
 
     @GuardedBy(anyOf = {"mService", "mProcLock"})

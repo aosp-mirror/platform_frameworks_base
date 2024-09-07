@@ -25,16 +25,18 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor
 import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor.PendingDisplay
-import com.android.systemui.display.ui.view.MirroringConfirmationDialog
-import com.android.systemui.statusbar.policy.ConfigurationController
+import com.android.systemui.display.ui.view.MirroringConfirmationDialogDelegate
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.ClassKey
 import dagger.multibindings.IntoMap
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.launch
@@ -51,12 +53,13 @@ constructor(
     private val connectedDisplayInteractor: ConnectedDisplayInteractor,
     @Application private val scope: CoroutineScope,
     @Background private val bgDispatcher: CoroutineDispatcher,
-    private val configurationController: ConfigurationController,
+    private val bottomSheetFactory: MirroringConfirmationDialogDelegate.Factory,
 ) : CoreStartable {
 
     private var dialog: Dialog? = null
 
     /** Starts listening for pending displays. */
+    @OptIn(FlowPreview::class)
     override fun start() {
         val pendingDisplayFlow = connectedDisplayInteractor.pendingDisplay
         val concurrentDisplaysInProgessFlow =
@@ -66,6 +69,13 @@ constructor(
                 flow { emit(false) }
             }
         pendingDisplayFlow
+            // Let's debounce for 2 reasons:
+            // - prevent fast dialog flashes in case pending displays are available for just a few
+            // millis
+            // - Prevent jumps related to inset changes: when in 3 buttons navigation, device
+            // unlock triggers a change in insets that might result in a jump of the dialog (if a
+            // display was connected while on the lockscreen).
+            .debounce(200.milliseconds)
             .combine(concurrentDisplaysInProgessFlow) { pendingDisplay, concurrentDisplaysInProgress
                 ->
                 if (pendingDisplay == null) {
@@ -80,8 +90,8 @@ constructor(
     private fun showDialog(pendingDisplay: PendingDisplay, concurrentDisplaysInProgess: Boolean) {
         hideDialog()
         dialog =
-            MirroringConfirmationDialog(
-                    context,
+            bottomSheetFactory
+                .createDialog(
                     onStartMirroringClickListener = {
                         scope.launch(bgDispatcher) { pendingDisplay.enable() }
                         hideDialog()
@@ -91,7 +101,6 @@ constructor(
                         hideDialog()
                     },
                     navbarBottomInsetsProvider = { Utils.getNavbarInsets(context).bottom },
-                    configurationController,
                     showConcurrentDisplayInfo = concurrentDisplaysInProgess
                 )
                 .apply { show() }

@@ -169,7 +169,8 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
         layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
         flags = (Utils.FINGERPRINT_OVERLAY_LAYOUT_PARAM_FLAGS or
                 WindowManager.LayoutParams.FLAG_SPLIT_TOUCH)
-        privateFlags = WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY
+        privateFlags = WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY or
+                WindowManager.LayoutParams.PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_MAGNIFICATION
         // Avoid announcing window title.
         accessibilityTitle = " "
         inputFeatures = WindowManager.LayoutParams.INPUT_FEATURE_SPY
@@ -316,6 +317,21 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
             it.run()
         }
         addViewRunnable = null
+    }
+
+    fun updateOverlayParams(updatedOverlayParams: UdfpsOverlayParams) {
+        DeviceEntryUdfpsRefactor.isUnexpectedlyInLegacyMode()
+        overlayParams = updatedOverlayParams
+        sensorBounds = updatedOverlayParams.sensorBounds
+        getTouchOverlay()?.let {
+            if (addViewRunnable == null) {
+                // Only updateViewLayout if there's no pending view to add to WM.
+                // If there is a pending view, that means the view hasn't been added yet so there's
+                // no need to update any layouts. Instead the correct params will be used when the
+                // view is eventually added.
+                windowManager.updateViewLayout(it, coreLayoutParams.updateDimensions(null))
+            }
+        }
     }
 
     fun inflateUdfpsAnimation(

@@ -21,9 +21,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -40,7 +40,7 @@ import org.mockito.MockitoAnnotations;
  * Tests for ProximitySensor that rely on a single hardware sensor.
  */
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper
 public class ProximitySensorImplSingleTest extends SysuiTestCase {
     private ProximitySensor mProximitySensor;

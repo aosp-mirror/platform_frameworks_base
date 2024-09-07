@@ -25,21 +25,31 @@ import androidx.test.filters.FlakyTest
 import androidx.test.filters.SmallTest
 import com.android.app.animation.Interpolators
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.coroutines.collectValues
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
+import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
+import com.android.systemui.keyguard.shared.model.KeyguardState.OCCLUDED
+import com.android.systemui.keyguard.shared.model.KeyguardState.OFF
 import com.android.systemui.keyguard.shared.model.TransitionInfo
 import com.android.systemui.keyguard.shared.model.TransitionModeOnCanceled
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.keyguard.util.KeyguardTransitionRunner
+import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.util.UUID
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.dropWhile
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -51,6 +61,9 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 @FlakyTest(bugId = 270760395)
 class KeyguardTransitionRepositoryTest : SysuiTestCase() {
+    val kosmos = testKosmos()
+
+    private val testScope = kosmos.testScope
 
     private lateinit var underTest: KeyguardTransitionRepository
     private lateinit var oldWtfHandler: TerribleFailureHandler
@@ -59,7 +72,7 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        underTest = KeyguardTransitionRepositoryImpl()
+        underTest = KeyguardTransitionRepositoryImpl(Dispatchers.Main)
         wtfHandler = WtfHandler()
         oldWtfHandler = Log.setWtfHandler(wtfHandler)
         runner = KeyguardTransitionRunner(underTest)
@@ -72,7 +85,7 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
 
     @Test
     fun startTransitionRunsAnimatorToCompletion() =
-        TestScope().runTest {
+        testScope.runTest {
             val steps = mutableListOf<TransitionStep>()
             val job = underTest.transition(AOD, LOCKSCREEN).onEach { steps.add(it) }.launchIn(this)
 
@@ -88,7 +101,7 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
 
     @Test
     fun startingSecondTransitionWillCancelTheFirstTransitionAndUseLastValue() =
-        TestScope().runTest {
+        testScope.runTest {
             val steps = mutableListOf<TransitionStep>()
             val job = underTest.transition(AOD, LOCKSCREEN).onEach { steps.add(it) }.launchIn(this)
             runner.startTransition(
@@ -123,7 +136,7 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
 
     @Test
     fun startingSecondTransitionWillCancelTheFirstTransitionAndUseReset() =
-        TestScope().runTest {
+        testScope.runTest {
             val steps = mutableListOf<TransitionStep>()
             val job = underTest.transition(AOD, LOCKSCREEN).onEach { steps.add(it) }.launchIn(this)
             runner.startTransition(
@@ -158,7 +171,7 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
 
     @Test
     fun startingSecondTransitionWillCancelTheFirstTransitionAndUseReverse() =
-        TestScope().runTest {
+        testScope.runTest {
             val steps = mutableListOf<TransitionStep>()
             val job = underTest.transition(AOD, LOCKSCREEN).onEach { steps.add(it) }.launchIn(this)
             runner.startTransition(
@@ -193,7 +206,7 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
 
     @Test
     fun nullAnimatorEnablesManualControlWithUpdateTransition() =
-        TestScope().runTest {
+        testScope.runTest {
             val steps = mutableListOf<TransitionStep>()
             val job = underTest.transition(AOD, LOCKSCREEN).onEach { steps.add(it) }.launchIn(this)
 
@@ -224,48 +237,182 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
         }
 
     @Test
+    fun startingSecondManualTransitionWillCancelPreviousManualTransition() =
+        testScope.runTest {
+            // Drop initial steps from OFF which are sent in the constructor
+            val steps = mutableListOf<TransitionStep>()
+            val job =
+                underTest.transitions
+                    .dropWhile { step -> step.from == OFF }
+                    .onEach { steps.add(it) }
+                    .launchIn(this)
+
+            val firstUuid =
+                underTest.startTransition(
+                    TransitionInfo(OWNER_NAME, AOD, LOCKSCREEN, animator = null)
+                )
+            runCurrent()
+
+            checkNotNull(firstUuid)
+            underTest.updateTransition(firstUuid, 0.5f, TransitionState.RUNNING)
+            runCurrent()
+
+            val secondUuid =
+                underTest.startTransition(
+                    TransitionInfo(OWNER_NAME, AOD, DREAMING, animator = null)
+                )
+            runCurrent()
+
+            checkNotNull(secondUuid)
+            underTest.updateTransition(secondUuid, 0.7f, TransitionState.RUNNING)
+            // Trying to transition the old uuid should be ignored.
+            underTest.updateTransition(firstUuid, 0.6f, TransitionState.RUNNING)
+            runCurrent()
+
+            assertThat(steps)
+                .containsExactly(
+                    TransitionStep(AOD, LOCKSCREEN, 0f, TransitionState.STARTED, OWNER_NAME),
+                    TransitionStep(AOD, LOCKSCREEN, 0.5f, TransitionState.RUNNING, OWNER_NAME),
+                    TransitionStep(AOD, LOCKSCREEN, 0.5f, TransitionState.CANCELED, OWNER_NAME),
+                    TransitionStep(AOD, DREAMING, 0.5f, TransitionState.STARTED, OWNER_NAME),
+                    TransitionStep(AOD, DREAMING, 0.7f, TransitionState.RUNNING, OWNER_NAME),
+                )
+                .inOrder()
+
+            job.cancel()
+        }
+
+    @Test
+    fun startingSecondTransitionWillCancelPreviousManualTransition() =
+        testScope.runTest {
+            // Drop initial steps from OFF which are sent in the constructor
+            val steps = mutableListOf<TransitionStep>()
+            val job =
+                underTest.transitions
+                    .dropWhile { step -> step.from == OFF }
+                    .onEach { steps.add(it) }
+                    .launchIn(this)
+
+            val uuid =
+                underTest.startTransition(
+                    TransitionInfo(OWNER_NAME, AOD, LOCKSCREEN, animator = null)
+                )
+            runCurrent()
+
+            checkNotNull(uuid)
+            underTest.updateTransition(uuid, 0.5f, TransitionState.RUNNING)
+            runCurrent()
+
+            // Start new transition to dreaming, should cancel previous one.
+            runner.startTransition(
+                this,
+                TransitionInfo(
+                    OWNER_NAME,
+                    AOD,
+                    DREAMING,
+                    getAnimator(),
+                    TransitionModeOnCanceled.RESET,
+                ),
+            )
+            runCurrent()
+
+            // Trying to transition the old uuid should be ignored.
+            underTest.updateTransition(uuid, 0.6f, TransitionState.RUNNING)
+            runCurrent()
+
+            assertThat(steps.take(3))
+                .containsExactly(
+                    TransitionStep(AOD, LOCKSCREEN, 0f, TransitionState.STARTED, OWNER_NAME),
+                    TransitionStep(AOD, LOCKSCREEN, 0.5f, TransitionState.RUNNING, OWNER_NAME),
+                    TransitionStep(AOD, LOCKSCREEN, 0.5f, TransitionState.CANCELED, OWNER_NAME),
+                )
+                .inOrder()
+
+            job.cancel()
+        }
+
+    @Test
     fun attemptTomanuallyUpdateTransitionWithInvalidUUIDthrowsException() {
         underTest.updateTransition(UUID.randomUUID(), 0f, TransitionState.RUNNING)
         assertThat(wtfHandler.failed).isTrue()
     }
 
     @Test
-    fun attemptToManuallyUpdateTransitionAfterFINISHEDstateThrowsException() {
-        val uuid =
-            underTest.startTransition(
-                TransitionInfo(
-                    ownerName = OWNER_NAME,
-                    from = AOD,
-                    to = LOCKSCREEN,
-                    animator = null,
+    fun attemptToManuallyUpdateTransitionAfterFINISHEDstateThrowsException() =
+        testScope.runTest {
+            val uuid =
+                underTest.startTransition(
+                    TransitionInfo(
+                        ownerName = OWNER_NAME,
+                        from = AOD,
+                        to = LOCKSCREEN,
+                        animator = null,
+                    )
                 )
-            )
 
-        checkNotNull(uuid).let {
-            underTest.updateTransition(it, 1f, TransitionState.FINISHED)
-            underTest.updateTransition(it, 0.5f, TransitionState.RUNNING)
+            checkNotNull(uuid).let {
+                underTest.updateTransition(it, 1f, TransitionState.FINISHED)
+                underTest.updateTransition(it, 0.5f, TransitionState.RUNNING)
+            }
+            assertThat(wtfHandler.failed).isTrue()
         }
-        assertThat(wtfHandler.failed).isTrue()
-    }
 
     @Test
-    fun attemptToManuallyUpdateTransitionAfterCANCELEDstateThrowsException() {
-        val uuid =
-            underTest.startTransition(
-                TransitionInfo(
-                    ownerName = OWNER_NAME,
-                    from = AOD,
-                    to = LOCKSCREEN,
-                    animator = null,
+    fun attemptToManuallyUpdateTransitionAfterCANCELEDstateThrowsException() =
+        testScope.runTest {
+            val uuid =
+                underTest.startTransition(
+                    TransitionInfo(
+                        ownerName = OWNER_NAME,
+                        from = AOD,
+                        to = LOCKSCREEN,
+                        animator = null,
+                    )
                 )
-            )
 
-        checkNotNull(uuid).let {
-            underTest.updateTransition(it, 0.2f, TransitionState.CANCELED)
-            underTest.updateTransition(it, 0.5f, TransitionState.RUNNING)
+            checkNotNull(uuid).let {
+                underTest.updateTransition(it, 0.2f, TransitionState.CANCELED)
+                underTest.updateTransition(it, 0.5f, TransitionState.RUNNING)
+            }
+            assertThat(wtfHandler.failed).isTrue()
         }
-        assertThat(wtfHandler.failed).isTrue()
-    }
+
+    @Test
+    fun simulateRaceConditionIsProcessedInOrder() =
+        testScope.runTest {
+            val ktr = KeyguardTransitionRepositoryImpl(kosmos.testDispatcher)
+            val steps by collectValues(ktr.transitions.dropWhile { step -> step.from == OFF })
+
+            // Add a delay to the first transition in order to attempt to have the second transition
+            // be processed first
+            val info1 = TransitionInfo(OWNER_NAME, AOD, LOCKSCREEN, animator = null)
+            launch {
+                ktr.forceDelayForRaceConditionTest = true
+                ktr.startTransition(info1)
+            }
+            val info2 = TransitionInfo(OWNER_NAME, LOCKSCREEN, OCCLUDED, animator = null)
+            launch {
+                ktr.forceDelayForRaceConditionTest = false
+                ktr.startTransition(info2)
+            }
+
+            runCurrent()
+            assertThat(steps.isEmpty()).isTrue()
+
+            advanceTimeBy(60L)
+            assertThat(steps[0])
+                .isEqualTo(
+                    TransitionStep(info1.from, info1.to, 0f, TransitionState.STARTED, OWNER_NAME)
+                )
+            assertThat(steps[1])
+                .isEqualTo(
+                    TransitionStep(info1.from, info1.to, 0f, TransitionState.CANCELED, OWNER_NAME)
+                )
+            assertThat(steps[2])
+                .isEqualTo(
+                    TransitionStep(info2.from, info2.to, 0f, TransitionState.STARTED, OWNER_NAME)
+                )
+        }
 
     private fun listWithStep(
         step: BigDecimal,
@@ -336,6 +483,7 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
 
     private class WtfHandler : TerribleFailureHandler {
         var failed = false
+
         override fun onTerribleFailure(tag: String, what: TerribleFailure, system: Boolean) {
             failed = true
         }

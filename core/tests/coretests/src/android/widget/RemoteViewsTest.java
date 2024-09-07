@@ -34,6 +34,9 @@ import android.app.PendingIntent;
 import android.appwidget.AppWidgetHostView;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -831,33 +834,6 @@ public class RemoteViewsTest {
         verify(visitor, times(1)).accept(eq(icon2S.getUri()));
         verify(visitor, times(1)).accept(eq(icon3S.getUri()));
         verify(visitor, times(1)).accept(eq(icon4S.getUri()));
-    }
-
-    @Test
-    public void visitUris_intents() {
-        RemoteViews views = new RemoteViews(mPackage, R.layout.remote_views_test);
-
-        Uri fillIntentUri = Uri.parse("content://intent/fill");
-        views.setOnCheckedChangeResponse(
-                R.id.layout,
-                RemoteViews.RemoteResponse.fromFillInIntent(new Intent("action", fillIntentUri)));
-
-        Uri pendingIntentUri = Uri.parse("content://intent/pending");
-        PendingIntent pendingIntent = getPendingIntentWithUri(pendingIntentUri);
-        views.setOnClickResponse(
-                R.id.layout,
-                RemoteViews.RemoteResponse.fromPendingIntent(pendingIntent));
-
-        Consumer<Uri> visitor = (Consumer<Uri>) spy(Consumer.class);
-        views.visitUris(visitor);
-        verify(visitor, times(1)).accept(eq(fillIntentUri));
-        verify(visitor, times(1)).accept(eq(pendingIntentUri));
-    }
-
-    private PendingIntent getPendingIntentWithUri(Uri uri) {
-        return PendingIntent.getActivity(mContext, 0,
-                new Intent("action", uri),
-                PendingIntent.FLAG_IMMUTABLE);
     }
 
     @Test

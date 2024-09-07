@@ -24,13 +24,12 @@ import static org.mockito.Mockito.when;
 
 import android.os.Handler;
 import android.service.quicksettings.Tile;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
-import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.plugins.ActivityStarter;
@@ -41,6 +40,7 @@ import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
+import com.android.systemui.res.R;
 
 import org.junit.After;
 import org.junit.Before;
@@ -49,7 +49,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
 public class QRCodeScannerTileTest extends SysuiTestCase {

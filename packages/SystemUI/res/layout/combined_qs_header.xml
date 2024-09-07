@@ -129,7 +129,7 @@ frame when animating QS <-> QQS transition
             android:id="@+id/hover_system_icons_container"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_gravity="right|center_vertical"
+            android:layout_gravity="end|center_vertical"
             android:gravity="center_vertical"
             android:paddingStart="@dimen/hover_system_icons_container_padding_start"
             android:paddingEnd="@dimen/hover_system_icons_container_padding_end"

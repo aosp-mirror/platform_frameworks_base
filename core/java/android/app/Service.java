@@ -1135,6 +1135,9 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
         } catch (RemoteException ex) {
         }
         onTimeout(startId);
+        if (Flags.introduceNewServiceOntimeoutCallback()) {
+            onTimeout(startId, ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE);
+        }
     }
 
     /**
@@ -1145,6 +1148,12 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
      * {@link ServiceInfo#FOREGROUND_SERVICE_TYPE_SHORT_SERVICE}
      * doesn't finish even after it's timed out,
      * the app will be declared an ANR after a short grace period of several seconds.
+     *
+     * <p>Starting from Android version {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM},
+     * {@link #onTimeout(int, int)} will also be called when a foreground service of type
+     * {@link ServiceInfo#FOREGROUND_SERVICE_TYPE_SHORT_SERVICE} times out.
+     * Developers do not need to implement both of the callbacks on
+     * {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM} and onwards.
      *
      * <p>Note, even though
      * {@link ServiceInfo#FOREGROUND_SERVICE_TYPE_SHORT_SERVICE}
@@ -1187,6 +1196,24 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
 
     /**
      * Callback called when a particular foreground service type has timed out.
+     *
+     * <p>This callback is meant to give the app a small grace period of a few seconds to finish
+     * the foreground service of the associated type - if it fails to do so, the app will crash.
+     *
+     * <p>The foreground service of the associated type can be stopped within the time limit by
+     * {@link android.app.Service#stopSelf()},
+     * {@link android.content.Context#stopService(android.content.Intent)} or their overloads.
+     * {@link android.app.Service#stopForeground(int)} can be used as well, which demotes the
+     * service to a "background" service, which will soon be stopped by the system.
+     *
+     * <p>The specific time limit for each type (if one exists) is mentioned in the documentation
+     * for that foreground service type. See
+     * {@link ServiceInfo#FOREGROUND_SERVICE_TYPE_DATA_SYNC dataSync} for example.
+     *
+     * <p>Note: time limits are restricted to a rolling 24-hour window - for example, if a
+     * foreground service type has a time limit of 6 hours, that time counter begins as soon as the
+     * foreground service starts. This time limit will only be reset once every 24 hours or if the
+     * app comes into the foreground state.
      *
      * @param startId the startId passed to {@link #onStartCommand(Intent, int, int)} when
      *                the service started.

@@ -57,17 +57,11 @@ sealed class AuthMethodBouncerViewModel(
      */
     @get:StringRes abstract val lockoutMessageId: Int
 
-    /** Notifies that the UI has been shown to the user. */
-    fun onShown() {
-        interactor.resetMessage()
-    }
-
     /**
      * Notifies that the UI has been hidden from the user (after any transitions have completed).
      */
     open fun onHidden() {
         clearInput()
-        interactor.resetMessage()
     }
 
     /** Notifies that the user has placed down a pointer. */

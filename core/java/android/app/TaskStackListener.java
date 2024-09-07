@@ -178,6 +178,9 @@ public abstract class TaskStackListener extends ITaskStackListener.Stub {
     }
 
     @Override
+    public void onTaskSnapshotInvalidated(int taskId) { }
+
+    @Override
     public void onBackPressedOnTaskRoot(RunningTaskInfo taskInfo)
             throws RemoteException {
     }

@@ -17,55 +17,70 @@
 package com.android.systemui.volume.panel.component.mediaoutput.ui.viewmodel
 
 import android.content.Context
+import com.android.internal.logging.UiEventLogger
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.Color
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.res.R
+import com.android.systemui.volume.domain.model.AudioOutputDevice
 import com.android.systemui.volume.panel.component.mediaoutput.domain.interactor.MediaOutputActionsInteractor
-import com.android.systemui.volume.panel.component.mediaoutput.domain.interactor.MediaOutputInteractor
-import com.android.systemui.volume.panel.component.mediaoutput.domain.model.MediaDeviceSession
+import com.android.systemui.volume.panel.component.mediaoutput.domain.interactor.MediaOutputComponentInteractor
+import com.android.systemui.volume.panel.component.mediaoutput.domain.model.MediaOutputComponentModel
 import com.android.systemui.volume.panel.dagger.scope.VolumePanelScope
-import com.android.systemui.volume.panel.ui.viewmodel.VolumePanelViewModel
+import com.android.systemui.volume.panel.shared.model.Result
+import com.android.systemui.volume.panel.shared.model.filterData
+import com.android.systemui.volume.panel.ui.VolumePanelUiEvent
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 /** Models the UI of the Media Output Volume Panel component. */
+@OptIn(ExperimentalCoroutinesApi::class)
 @VolumePanelScope
 class MediaOutputViewModel
 @Inject
 constructor(
     private val context: Context,
     @VolumePanelScope private val coroutineScope: CoroutineScope,
-    private val volumePanelViewModel: VolumePanelViewModel,
     private val actionsInteractor: MediaOutputActionsInteractor,
-    interactor: MediaOutputInteractor,
+    private val mediaOutputComponentInteractor: MediaOutputComponentInteractor,
+    private val uiEventLogger: UiEventLogger,
 ) {
 
-    private val mediaDeviceSession: StateFlow<MediaDeviceSession> =
-        interactor.mediaDeviceSession.stateIn(
-            coroutineScope,
-            SharingStarted.Eagerly,
-            MediaDeviceSession.Unknown,
-        )
-
     val connectedDeviceViewModel: StateFlow<ConnectedDeviceViewModel?> =
-        combine(mediaDeviceSession, interactor.currentConnectedDevice) {
-                mediaDeviceSession,
-                currentConnectedDevice ->
+        mediaOutputComponentInteractor.mediaOutputModel
+            .filterData()
+            .map { mediaOutputModel ->
+                val label =
+                    when (mediaOutputModel) {
+                        is MediaOutputComponentModel.Idle -> {
+                            context.getString(R.string.media_output_title_without_playing)
+                        }
+                        is MediaOutputComponentModel.MediaSession -> {
+                            if (mediaOutputModel.isPlaybackActive) {
+                                context.getString(
+                                    R.string.media_output_label_title,
+                                    mediaOutputModel.session.appLabel,
+                                )
+                            } else {
+                                context.getString(R.string.media_output_title_without_playing)
+                            }
+                        }
+                        is MediaOutputComponentModel.Calling -> {
+                            context.getString(R.string.media_output_title_ongoing_call)
+                        }
+                    }
                 ConnectedDeviceViewModel(
-                    if (mediaDeviceSession.isPlaying()) {
-                        context.getString(
-                            R.string.media_output_label_title,
-                            (mediaDeviceSession as MediaDeviceSession.Active).appLabel
-                        )
+                    label,
+                    if (mediaOutputModel.isInAudioSharing) {
+                        context.getString(R.string.audio_sharing_description)
                     } else {
-                        context.getString(R.string.media_output_title_without_playing)
+                        mediaOutputModel.device.name
                     },
-                    currentConnectedDevice?.name,
                 )
             }
             .stateIn(
@@ -75,16 +90,20 @@ constructor(
             )
 
     val deviceIconViewModel: StateFlow<DeviceIconViewModel?> =
-        combine(mediaDeviceSession, interactor.currentConnectedDevice) {
-                mediaDeviceSession,
-                currentConnectedDevice ->
-                if (mediaDeviceSession.isPlaying()) {
-                    val icon =
-                        currentConnectedDevice?.icon?.let { Icon.Loaded(it, null) }
-                            ?: Icon.Resource(
-                                com.android.internal.R.drawable.ic_bt_headphones_a2dp,
-                                null
-                            )
+        mediaOutputComponentInteractor.mediaOutputModel
+            .filterData()
+            .map { mediaOutputModel ->
+                val icon: Icon =
+                    mediaOutputModel.device
+                        .takeIf { it !is AudioOutputDevice.Unknown }
+                        ?.icon
+                        ?.let { Icon.Loaded(it, null) }
+                        ?: Icon.Resource(R.drawable.ic_media_home_devices, null)
+                val isPlaybackActive =
+                    (mediaOutputModel as? MediaOutputComponentModel.MediaSession)
+                        ?.isPlaybackActive == true
+                val isCalling = mediaOutputModel is MediaOutputComponentModel.Calling
+                if (isPlaybackActive || isCalling) {
                     DeviceIconViewModel.IsPlaying(
                         icon = icon,
                         iconColor =
@@ -94,7 +113,7 @@ constructor(
                     )
                 } else {
                     DeviceIconViewModel.IsNotPlaying(
-                        icon = Icon.Resource(R.drawable.ic_media_home_devices, null),
+                        icon = icon,
                         iconColor =
                             Color.Attribute(
                                 com.android.internal.R.attr.materialColorOnSurfaceVariant
@@ -110,16 +129,23 @@ constructor(
                 null,
             )
 
-    private fun MediaDeviceSession.isPlaying(): Boolean =
-        this is MediaDeviceSession.Active && playbackState?.isActive == true
+    val enabled: StateFlow<Boolean> =
+        mediaOutputComponentInteractor.mediaOutputModel
+            .filterData()
+            .map { !it.isInAudioSharing }
+            .stateIn(
+                coroutineScope,
+                SharingStarted.Eagerly,
+                true,
+            )
 
-    fun onDeviceClick(expandable: Expandable) {
-        actionsInteractor.onDeviceClick(expandable)
-        volumePanelViewModel.dismissPanel()
-    }
-
-    fun onBarClick(expandable: Expandable) {
-        actionsInteractor.onBarClick(mediaDeviceSession.value, expandable)
-        volumePanelViewModel.dismissPanel()
+    fun onBarClick(expandable: Expandable?) {
+        uiEventLogger.log(VolumePanelUiEvent.VOLUME_PANEL_MEDIA_OUTPUT_CLICKED)
+        val result: Result<MediaOutputComponentModel> =
+            mediaOutputComponentInteractor.mediaOutputModel.value
+        actionsInteractor.onBarClick(
+            (result as? Result.Data<MediaOutputComponentModel>)?.data,
+            expandable
+        )
     }
 }

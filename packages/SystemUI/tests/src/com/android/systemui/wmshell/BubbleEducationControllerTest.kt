@@ -21,9 +21,9 @@ import android.content.SharedPreferences
 import android.content.pm.ShortcutInfo
 import android.content.res.Resources
 import android.os.UserHandle
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import androidx.core.content.edit
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.model.SysUiStateTest
 import com.android.wm.shell.bubbles.Bubble
@@ -38,7 +38,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 class BubbleEducationControllerTest : SysUiStateTest() {
 

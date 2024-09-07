@@ -14,25 +14,29 @@
      limitations under the License.
 -->
 
-<resources xmlns:android="http://schemas.android.com/apk/res/android">
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android">
 
     <style name="TextAppearance.AuthNonBioCredential.Title">
-        <item name="android:fontFamily">google-sans</item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
         <item name="android:layout_marginTop">16dp</item>
         <item name="android:textSize">36sp</item>
         <item name="android:focusable">true</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
     </style>
 
     <style name="TextAppearance.AuthNonBioCredential.Subtitle">
-        <item name="android:fontFamily">google-sans</item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
         <item name="android:layout_marginTop">16dp</item>
         <item name="android:textSize">18sp</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
     </style>
 
     <style name="TextAppearance.AuthNonBioCredential.Description">
-        <item name="android:fontFamily">google-sans</item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
         <item name="android:layout_marginTop">16dp</item>
         <item name="android:textSize">18sp</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
     </style>
 
 </resources>

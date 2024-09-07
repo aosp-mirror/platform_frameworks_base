@@ -135,3 +135,9 @@ option java_package com.android.server.am
 
 # Caller information to clear application data
 30120 am_clear_app_data_caller (pid|1),(uid|1),(package|3)
+
+30111 am_uid_state_changed (UID|1|5),(Seq|1|5),(UidState|1|5),(OldUidState|1|5),(Capability|1|5),(OldCapability|1|5),(Flags|1|5),(reason|3)
+30112 am_proc_state_changed (UID|1|5),(PID|1|5),(Seq|1|5),(ProcState|1|5),(OldProcState|1|5),(OomAdj|1|5),(OldOomAdj|1|5),(reason|3)
+
+# "Misc" events. See OomAdjusterDebugLogger.java
+30113 am_oom_adj_misc (Event|1|5),(UID|1|5),(PID|1|5),(Seq|1|5),(Arg1|1|5),(Arg2|1|5),(reason|3)

@@ -28,6 +28,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.ICancellationSignal;
 import android.os.RemoteException;
 import android.service.autofill.AutofillService;
@@ -42,7 +43,6 @@ import android.service.autofill.ISaveCallback;
 import android.service.autofill.SaveRequest;
 import android.text.format.DateUtils;
 import android.util.Slog;
-import android.view.autofill.IAutoFillManagerClient;
 
 import com.android.internal.infra.AbstractRemoteService;
 import com.android.internal.infra.ServiceConnector;
@@ -61,10 +61,6 @@ final class RemoteFillService extends ServiceConnector.Impl<IAutoFillService> {
 
     private static final long TIMEOUT_IDLE_BIND_MILLIS = 5 * DateUtils.SECOND_IN_MILLIS;
     private static final long TIMEOUT_REMOTE_REQUEST_MILLIS = 5 * DateUtils.SECOND_IN_MILLIS;
-
-    private static final ComponentName CREDMAN_SERVICE_COMPONENT_NAME =
-            new ComponentName("com.android.credentialmanager",
-                    "com.android.credentialmanager.autofill.CredentialAutofillService");
 
     private final FillServiceCallbacks mCallbacks;
     private final Object mLock = new Object();
@@ -86,9 +82,7 @@ final class RemoteFillService extends ServiceConnector.Impl<IAutoFillService> {
         void onFillRequestSuccess(int requestId, @Nullable FillResponse response,
                 @NonNull String servicePackageName, int requestFlags);
 
-        void onFillRequestFailure(int requestId, @Nullable CharSequence message);
-
-        void onFillRequestTimeout(int requestId);
+        void onFillRequestFailure(int requestId, Throwable t);
 
         void onSaveRequestSuccess(@NonNull String servicePackageName,
                 @Nullable IntentSender intentSender);
@@ -102,14 +96,15 @@ final class RemoteFillService extends ServiceConnector.Impl<IAutoFillService> {
     }
 
     RemoteFillService(Context context, ComponentName componentName, int userId,
-            FillServiceCallbacks callbacks, boolean bindInstantServiceAllowed) {
+            FillServiceCallbacks callbacks, boolean bindInstantServiceAllowed,
+            @Nullable ComponentName credentialAutofillService) {
         super(context, new Intent(AutofillService.SERVICE_INTERFACE).setComponent(componentName),
                 Context.BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS
                         | (bindInstantServiceAllowed ? Context.BIND_ALLOW_INSTANT : 0),
                 userId, IAutoFillService.Stub::asInterface);
         mCallbacks = callbacks;
         mComponentName = componentName;
-        mIsCredentialAutofillService = mComponentName.equals(CREDMAN_SERVICE_COMPONENT_NAME);
+        mIsCredentialAutofillService = mComponentName.equals(credentialAutofillService);
     }
 
     @Override // from ServiceConnector.Impl
@@ -286,8 +281,7 @@ final class RemoteFillService extends ServiceConnector.Impl<IAutoFillService> {
         return callback;
     }
 
-    public void onFillCredentialRequest(@NonNull FillRequest request,
-            IAutoFillManagerClient autofillCallback) {
+    public void onFillCredentialRequest(@NonNull FillRequest request, IBinder autofillCallback) {
         if (sVerbose) {
             Slog.v(TAG, "onFillRequest:" + request);
         }
@@ -349,11 +343,12 @@ final class RemoteFillService extends ServiceConnector.Impl<IAutoFillService> {
                 Slog.e(TAG, "Error calling on fill request", err);
                 if (err instanceof TimeoutException) {
                     dispatchCancellationSignal(cancellationSink.get());
-                    mCallbacks.onFillRequestTimeout(request.getId());
+                    mCallbacks.onFillRequestFailure(request.getId(), err);
                 } else if (err instanceof CancellationException) {
+                    // Cancellation is a part of the user flow - don't mark as failure
                     dispatchCancellationSignal(cancellationSink.get());
                 } else {
-                    mCallbacks.onFillRequestFailure(request.getId(), err.getMessage());
+                    mCallbacks.onFillRequestFailure(request.getId(), err);
                 }
             }
         }));
@@ -417,11 +412,12 @@ final class RemoteFillService extends ServiceConnector.Impl<IAutoFillService> {
                 Slog.e(TAG, "Error calling on fill request", err);
                 if (err instanceof TimeoutException) {
                     dispatchCancellationSignal(cancellationSink.get());
-                    mCallbacks.onFillRequestTimeout(request.getId());
+                    mCallbacks.onFillRequestFailure(request.getId(), err);
                 } else if (err instanceof CancellationException) {
+                    // Cancellation is a part of the user flow - don't mark as failure
                     dispatchCancellationSignal(cancellationSink.get());
                 } else {
-                    mCallbacks.onFillRequestFailure(request.getId(), err.getMessage());
+                    mCallbacks.onFillRequestFailure(request.getId(), err);
                 }
             }
         }));

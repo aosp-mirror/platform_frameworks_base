@@ -3,6 +3,7 @@ container: "system"
 
 flag {
     name: "home_panel_dream"
+    is_exported: true
     namespace: "systemui"
     description: "Enables the home controls dream feature."
     bug: "298025023"

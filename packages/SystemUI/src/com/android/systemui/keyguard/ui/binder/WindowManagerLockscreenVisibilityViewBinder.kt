@@ -16,39 +16,41 @@
 
 package com.android.systemui.keyguard.ui.binder
 
+import com.android.app.tracing.coroutines.launch
 import com.android.systemui.keyguard.WindowManagerLockscreenVisibilityManager
 import com.android.systemui.keyguard.ui.viewmodel.WindowManagerLockscreenVisibilityViewModel
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 
 /**
  * Binds the [WindowManagerLockscreenVisibilityManager] "view", which manages the visibility of the
  * surface behind the keyguard.
  */
 object WindowManagerLockscreenVisibilityViewBinder {
+    private const val TAG = "WindowManagerLockscreenVisibilityViewBinder"
+
     @JvmStatic
     fun bind(
         viewModel: WindowManagerLockscreenVisibilityViewModel,
         lockscreenVisibilityManager: WindowManagerLockscreenVisibilityManager,
         scope: CoroutineScope
     ) {
-        scope.launch {
+        scope.launch("$TAG#viewModel.surfaceBehindVisibility") {
             viewModel.surfaceBehindVisibility.collect {
                 lockscreenVisibilityManager.setSurfaceBehindVisibility(it)
             }
         }
 
-        scope.launch {
+        scope.launch("$TAG#viewModel.lockscreenVisibility") {
             viewModel.lockscreenVisibility.collect {
                 lockscreenVisibilityManager.setLockscreenShown(it)
             }
         }
 
-        scope.launch {
+        scope.launch("$TAG#viewModel.aodVisibility") {
             viewModel.aodVisibility.collect { lockscreenVisibilityManager.setAodVisible(it) }
         }
 
-        scope.launch {
+        scope.launch("$TAG#viewModel.surfaceBehindAnimating") {
             viewModel.surfaceBehindAnimating.collect {
                 lockscreenVisibilityManager.setUsingGoingAwayRemoteAnimation(it)
             }

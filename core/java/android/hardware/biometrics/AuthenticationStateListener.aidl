@@ -15,7 +15,13 @@
  */
 package android.hardware.biometrics;
 
-import android.hardware.biometrics.BiometricSourceType;
+import android.hardware.biometrics.events.AuthenticationAcquiredInfo;
+import android.hardware.biometrics.events.AuthenticationErrorInfo;
+import android.hardware.biometrics.events.AuthenticationFailedInfo;
+import android.hardware.biometrics.events.AuthenticationHelpInfo;
+import android.hardware.biometrics.events.AuthenticationStartedInfo;
+import android.hardware.biometrics.events.AuthenticationStoppedInfo;
+import android.hardware.biometrics.events.AuthenticationSucceededInfo;
 
 /**
  * Low-level callback interface between <Biometric>Manager and <Auth>Service. Allows core system
@@ -25,41 +31,44 @@ import android.hardware.biometrics.BiometricSourceType;
  */
 oneway interface AuthenticationStateListener {
     /**
-     * Defines behavior in response to authentication starting
-     * @param requestReason reason from [BiometricRequestConstants.RequestReason] for requesting
-     * authentication starting
+     * Defines behavior in response to biometric authentication being acquired.
+     * @param authInfo information related to the biometric authentication acquired.
      */
-    void onAuthenticationStarted(int requestReason);
+    void onAuthenticationAcquired(in AuthenticationAcquiredInfo authInfo);
 
     /**
-     * Defines behavior in response to authentication stopping
+     * Defines behavior in response to an unrecoverable error encountered during authentication.
+     * @param authInfo information related to the unrecoverable auth error encountered
      */
-    void onAuthenticationStopped();
-
-    /**
-     * Defines behavior in response to a successful authentication
-     * @param requestReason Reason from [BiometricRequestConstants.RequestReason] for the requested
-     *                      authentication
-     * @param userId The user Id for the requested authentication
-     */
-    void onAuthenticationSucceeded(int requestReason, int userId);
+    void onAuthenticationError(in AuthenticationErrorInfo authInfo);
 
     /**
      * Defines behavior in response to a failed authentication
-     * @param requestReason Reason from [BiometricRequestConstants.RequestReason] for the requested
-     *                      authentication
-     * @param userId The user Id for the requested authentication
+     * @param authInfo information related to the failed authentication
      */
-    void onAuthenticationFailed(int requestReason, int userId);
+    void onAuthenticationFailed(in AuthenticationFailedInfo authInfo);
 
     /**
-     * Defines behavior in response to biometric being acquired.
-     * @param biometricSourceType identifies [BiometricSourceType] biometric was acquired for
-     * @param requestReason reason from [BiometricRequestConstants.RequestReason] for authentication
-     * @param acquiredInfo [BiometricFingerprintConstants.FingerprintAcquired] int corresponding to
-     *                     a known acquired message.
+     * Defines behavior in response to a recoverable error encountered during authentication.
+     * @param authInfo information related to the recoverable auth error encountered
      */
-    void onAuthenticationAcquired(
-        in BiometricSourceType biometricSourceType, int requestReason, int acquiredInfo
-    );
+    void onAuthenticationHelp(in AuthenticationHelpInfo authInfo);
+
+    /**
+     * Defines behavior in response to authentication starting
+     * @param authInfo information related to the authentication starting
+     */
+    void onAuthenticationStarted(in AuthenticationStartedInfo authInfo);
+
+    /**
+     * Defines behavior in response to authentication stopping
+     * @param authInfo information related to the authentication stopping
+     */
+    void onAuthenticationStopped(in AuthenticationStoppedInfo authInfo);
+
+    /**
+     * Defines behavior in response to a successful authentication
+     * @param authInfo information related to the successful authentication
+     */
+    void onAuthenticationSucceeded(in AuthenticationSucceededInfo authInfo);
 }

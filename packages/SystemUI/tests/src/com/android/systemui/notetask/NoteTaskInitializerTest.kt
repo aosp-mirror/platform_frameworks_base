@@ -19,12 +19,12 @@ import android.app.role.RoleManager
 import android.app.role.RoleManager.ROLE_NOTES
 import android.os.UserHandle
 import android.os.UserManager
-import android.testing.AndroidTestingRunner
 import android.view.KeyEvent
 import android.view.KeyEvent.ACTION_DOWN
 import android.view.KeyEvent.ACTION_UP
 import android.view.KeyEvent.KEYCODE_N
 import android.view.KeyEvent.KEYCODE_STYLUS_BUTTON_TAIL
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.SysuiTestCase
@@ -54,7 +54,7 @@ import org.mockito.MockitoAnnotations.initMocks
 /** atest SystemUITests:NoteTaskInitializerTest */
 @OptIn(ExperimentalCoroutinesApi::class, InternalNoteTaskApi::class)
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 internal class NoteTaskInitializerTest : SysuiTestCase() {
 
     @Mock lateinit var commandQueue: CommandQueue

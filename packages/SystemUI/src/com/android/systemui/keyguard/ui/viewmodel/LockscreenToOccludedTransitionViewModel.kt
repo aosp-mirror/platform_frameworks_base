@@ -20,7 +20,9 @@ import com.android.app.animation.Interpolators.EMPHASIZED_ACCELERATE
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.FromLockscreenTransitionInteractor.Companion.TO_OCCLUDED_DURATION
+import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.KeyguardState.OCCLUDED
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import com.android.systemui.res.R
@@ -45,8 +47,7 @@ constructor(
     private val transitionAnimation =
         animationFlow.setup(
             duration = TO_OCCLUDED_DURATION,
-            from = KeyguardState.LOCKSCREEN,
-            to = KeyguardState.OCCLUDED,
+            edge = Edge.create(from = KeyguardState.LOCKSCREEN, to = OCCLUDED),
         )
 
     /** Lockscreen views alpha */

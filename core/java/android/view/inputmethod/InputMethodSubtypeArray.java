@@ -16,13 +16,16 @@
 
 package android.view.inputmethod;
 
+import android.annotation.NonNull;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.BadParcelableException;
 import android.os.Parcel;
+import android.util.Printer;
 import android.util.Slog;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -161,6 +164,18 @@ public class InputMethodSubtypeArray {
     }
 
     /**
+     * @return A list of {@link InputMethodInfo} copied from this array.
+     */
+    @NonNull
+    public ArrayList<InputMethodSubtype> toList() {
+        final ArrayList<InputMethodSubtype> list = new ArrayList<>(mCount);
+        for (int i = 0; i < mCount; ++i) {
+            list.add(get(i));
+        }
+        return list;
+    }
+
+    /**
      * Return the number of {@link InputMethodSubtype} objects.
      */
     public int getCount() {
@@ -173,6 +188,19 @@ public class InputMethodSubtypeArray {
     private volatile InputMethodSubtype[] mInstance;
     private volatile byte[] mCompressedData;
     private volatile int mDecompressedSize;
+
+    void dump(@NonNull Printer pw, @NonNull String prefix) {
+        final var innerPrefix = prefix + "  ";
+        for (int i = 0; i < mCount; i++) {
+            pw.println(prefix + "InputMethodSubtype #" + i + ":");
+            final var subtype = get(i);
+            if (subtype != null) {
+                subtype.dump(pw, innerPrefix);
+            } else {
+                pw.println(innerPrefix + "missing subtype");
+            }
+        }
+    }
 
     private static byte[] marshall(final InputMethodSubtype[] array) {
         Parcel parcel = null;

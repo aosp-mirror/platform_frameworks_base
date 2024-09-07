@@ -63,7 +63,6 @@ public class SettingsBackupTest {
                     Settings.Global.ADB_ENABLED,
                     Settings.Global.ADB_WIFI_ENABLED,
                     Settings.Global.ADB_DISCONNECT_SESSIONS_ON_REVOKE,
-                    Settings.Global.ADD_USERS_WHEN_LOCKED,
                     Settings.Global.AIRPLANE_MODE_ON,
                     Settings.Global.AIRPLANE_MODE_RADIOS,
                     Settings.Global.ALLOW_WORK_PROFILE_TELEPHONY_FOR_NON_DPM_ROLE_HOLDERS,
@@ -223,7 +222,6 @@ public class SettingsBackupTest {
                     Settings.Global.ENABLE_DELETION_HELPER_NO_THRESHOLD_TOGGLE,
                     Settings.Global.ENABLE_DISKSTATS_LOGGING,
                     Settings.Global.ENABLE_EPHEMERAL_FEATURE,
-                    Settings.Global.ENABLE_TARE,
                     Settings.Global.DYNAMIC_POWER_SAVINGS_ENABLED,
                     Settings.Global.DYNAMIC_POWER_SAVINGS_DISABLE_THRESHOLD,
                     Settings.Global.SMART_REPLIES_IN_NOTIFICATIONS_FLAGS,
@@ -234,6 +232,7 @@ public class SettingsBackupTest {
                     Settings.Global.ENHANCED_4G_MODE_ENABLED,
                     Settings.Global.ENABLE_16K_PAGES, // Added for 16K developer option
                     Settings.Global.EPHEMERAL_COOKIE_MAX_SIZE_BYTES,
+                    Settings.Global.ERROR_KERNEL_LOG_PREFIX,
                     Settings.Global.ERROR_LOGCAT_PREFIX,
                     Settings.Global.EUICC_PROVISIONED,
                     Settings.Global.EUICC_SUPPORTED_COUNTRIES,
@@ -381,7 +380,6 @@ public class SettingsBackupTest {
                     Settings.Global.RADIO_WIFI,
                     Settings.Global.RADIO_WIMAX,
                     Settings.Global.RADIO_UWB,
-                    Settings.Global.REMOVE_GUEST_ON_EXIT,
                     Settings.Global.RECOMMENDED_NETWORK_EVALUATOR_CACHE_EXPIRY_MS,
                     Settings.Global.READ_EXTERNAL_STORAGE_ENFORCED_DEFAULT,
                     Settings.Global.RESTRICTED_NETWORKING_MODE,
@@ -408,7 +406,6 @@ public class SettingsBackupTest {
                     Settings.Global.SHOW_PEOPLE_SPACE,
                     Settings.Global.SHOW_NEW_NOTIF_DISMISS,
                     Settings.Global.SHOW_RESTART_IN_CRASH_DIALOG,
-                    Settings.Global.SHOW_TARE_DEVELOPER_OPTIONS,
                     Settings.Global.SHOW_TEMPERATURE_WARNING,
                     Settings.Global.SHOW_USB_TEMPERATURE_ALARM,
                     Settings.Global.SIGNED_CONFIG_VERSION,
@@ -435,8 +432,6 @@ public class SettingsBackupTest {
                     Settings.Global.SYS_UIDCPUPOWER,
                     Settings.Global.SYS_TRACED,
                     Settings.Global.FPS_DEVISOR,
-                    Settings.Global.TARE_ALARM_MANAGER_CONSTANTS,
-                    Settings.Global.TARE_JOB_SCHEDULER_CONSTANTS,
                     Settings.Global.TCP_DEFAULT_INIT_RWND,
                     Settings.Global.TETHER_DUN_APN,
                     Settings.Global.TETHER_DUN_REQUIRED,
@@ -488,7 +483,6 @@ public class SettingsBackupTest {
                     Settings.Global.ENABLE_GNSS_RAW_MEAS_FULL_TRACKING,
                     Settings.Global.INSTALL_CARRIER_APP_NOTIFICATION_PERSISTENT,
                     Settings.Global.INSTALL_CARRIER_APP_NOTIFICATION_SLEEP_MILLIS,
-                    Settings.Global.USER_SWITCHER_ENABLED,
                     Settings.Global.WARNING_TEMPERATURE,
                     Settings.Global.WEBVIEW_DATA_REDUCTION_PROXY_KEY,
                     Settings.Global.WEBVIEW_MULTIPROCESS,
@@ -601,6 +595,7 @@ public class SettingsBackupTest {
                     Settings.Global.Wearable.MOBILE_SIGNAL_DETECTOR,
                     Settings.Global.Wearable.AMBIENT_LOW_BIT_ENABLED_DEV,
                     Settings.Global.Wearable.AMBIENT_TILT_TO_BRIGHT,
+                    Settings.Global.Wearable.BATTERY_SAVER_MODE,
                     Settings.Global.Wearable.DECOMPOSABLE_WATCHFACE,
                     Settings.Global.Wearable.AMBIENT_FORCE_WHEN_DOCKED,
                     Settings.Global.Wearable.AMBIENT_LOW_BIT_ENABLED,
@@ -625,10 +620,8 @@ public class SettingsBackupTest {
                     Settings.Global.Wearable.COOLDOWN_MODE_ON,
                     Settings.Global.Wearable.BEDTIME_MODE,
                     Settings.Global.Wearable.BEDTIME_HARD_MODE,
+                    Settings.Global.Wearable.VIBRATE_FOR_ACTIVE_UNLOCK,
                     Settings.Global.Wearable.LOCK_SCREEN_STATE,
-                    Settings.Global.Wearable.ACCESSIBILITY_VIBRATION_WATCH_ENABLED,
-                    Settings.Global.Wearable.ACCESSIBILITY_VIBRATION_WATCH_TYPE,
-                    Settings.Global.Wearable.ACCESSIBILITY_VIBRATION_WATCH_SPEED,
                     Settings.Global.Wearable.DISABLE_AOD_WHILE_PLUGGED,
                     Settings.Global.Wearable.NETWORK_LOCATION_OPT_IN,
                     Settings.Global.Wearable.CUSTOM_COLOR_FOREGROUND,
@@ -673,7 +666,6 @@ public class SettingsBackupTest {
                  Settings.Secure.AUTOMATIC_STORAGE_MANAGER_ENABLED,
                  Settings.Secure.AUTOMATIC_STORAGE_MANAGER_LAST_RUN,
                  Settings.Secure.AUTOMATIC_STORAGE_MANAGER_TURNED_OFF_BY_POLICY,
-                 Settings.Secure.AUDIO_DEVICE_INVENTORY, // not controllable by user
                  Settings.Secure.AUDIO_SAFE_CSD_AS_A_FEATURE_ENABLED, // not controllable by user
                  Settings.Secure.BACKUP_AUTO_RESTORE,
                  Settings.Secure.BACKUP_ENABLED,
@@ -687,11 +679,13 @@ public class SettingsBackupTest {
                  Settings.Secure.COMPLETED_CATEGORY_PREFIX,
                  Settings.Secure.CONNECTIVITY_RELEASE_PENDING_INTENT_DELAY_MS,
                  Settings.Secure.CONTENT_CAPTURE_ENABLED,
+                 Settings.Secure.CONTEXTUAL_SEARCH_PACKAGE,
                  Settings.Secure.DEFAULT_INPUT_METHOD,
                  Settings.Secure.DEFAULT_DEVICE_INPUT_METHOD,
                  Settings.Secure.DEVICE_PAIRED,
                  Settings.Secure.DIALER_DEFAULT_APPLICATION,
                  Settings.Secure.DISABLED_PRINT_SERVICES,
+                 Settings.Secure.DISABLE_SECURE_WINDOWS,
                  Settings.Secure.DISABLED_SYSTEM_INPUT_METHODS,
                  Settings.Secure.DOCKED_CLOCK_FACE,
                  Settings.Secure.DOZE_PULSE_ON_LONG_PRESS,
@@ -705,7 +699,6 @@ public class SettingsBackupTest {
                  Settings.Secure.ENABLED_PRINT_SERVICES,
                  Settings.Secure.GLOBAL_ACTIONS_PANEL_AVAILABLE,
                  Settings.Secure.GLOBAL_ACTIONS_PANEL_DEBUG_ENABLED,
-                 Settings.Secure.IMMERSIVE_MODE_CONFIRMATIONS,
                  Settings.Secure.INCALL_BACK_BUTTON_BEHAVIOR,
                  Settings.Secure.INPUT_METHOD_SELECTOR_VISIBILITY,
                  Settings.Secure.INPUT_METHODS_SUBTYPE_HISTORY,
@@ -848,6 +841,8 @@ public class SettingsBackupTest {
                         Settings.Secure.BIOMETRIC_APP_ENABLED,
                         Settings.Secure.BIOMETRIC_KEYGUARD_ENABLED,
                         Settings.Secure.BIOMETRIC_VIRTUAL_ENABLED,
+                        Settings.Secure.BIOMETRIC_FINGERPRINT_VIRTUAL_ENABLED,
+                        Settings.Secure.BIOMETRIC_FACE_VIRTUAL_ENABLED,
                         Settings.Secure.BLUETOOTH_ADDR_VALID,
                         Settings.Secure.BLUETOOTH_ADDRESS,
                         Settings.Secure.BLUETOOTH_NAME,
@@ -905,6 +900,7 @@ public class SettingsBackupTest {
                         Settings.System.APPEND_FOR_LAST_AUDIBLE, // suffix deprecated since API 2
                         Settings.System.EGG_MODE, // I am the lolrus
                         Settings.System.END_BUTTON_BEHAVIOR, // bug?
+                        Settings.System.DEFAULT_DEVICE_FONT_SCALE, // Non configurable
                         Settings.System
                                 .HIDE_ROTATION_LOCK_TOGGLE_FOR_ACCESSIBILITY,
                         // candidate for backup?
@@ -941,7 +937,6 @@ public class SettingsBackupTest {
                         Settings.System.VOLUME_VOICE, // deprecated since API 2?
                         Settings.System.WHEN_TO_MAKE_WIFI_CALLS, // bug?
                         Settings.System.WINDOW_ORIENTATION_LISTENER_LOG, // used for debugging only
-                        Settings.System.SCREEN_BRIGHTNESS_FLOAT,
                         Settings.System.SCREEN_BRIGHTNESS_FOR_ALS,
                         Settings.System.WEAR_ACCESSIBILITY_GESTURE_ENABLED_DURING_OOBE,
                         Settings.System.WEAR_TTS_PREWARM_ENABLED,

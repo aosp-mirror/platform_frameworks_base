@@ -16,8 +16,6 @@
 
 package com.android.keyguard.dagger;
 
-import static com.android.systemui.Flags.migrateClocksToBlueprint;
-
 import android.content.Context;
 import android.content.res.Resources;
 import android.view.LayoutInflater;
@@ -28,6 +26,7 @@ import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
+import com.android.systemui.keyguard.MigrateClocksToBlueprint;
 import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.plugins.clocks.ClockMessageBuffers;
 import com.android.systemui.res.R;
@@ -70,7 +69,7 @@ public abstract class ClockRegistryModule {
                         layoutInflater,
                         resources,
                         featureFlags.isEnabled(Flags.STEP_CLOCK_ANIMATION),
-                        migrateClocksToBlueprint()),
+                        MigrateClocksToBlueprint.isEnabled()),
                 context.getString(R.string.lockscreen_clock_id_fallback),
                 clockBuffers,
                 /* keepAllLoaded = */ false,

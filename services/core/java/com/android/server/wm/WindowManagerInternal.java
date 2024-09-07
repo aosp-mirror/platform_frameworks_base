@@ -50,6 +50,7 @@ import android.view.WindowInfo;
 import android.view.WindowManager.DisplayImePolicy;
 import android.view.inputmethod.ImeTracker;
 import android.window.ScreenCapture;
+import android.window.ScreenCapture.ScreenshotHardwareBuffer;
 
 import com.android.internal.policy.KeyInterceptionInfo;
 import com.android.server.input.InputManagerService;
@@ -160,7 +161,7 @@ public abstract class WindowManagerInternal {
 
         /**
          * Called when the windows for accessibility changed. This is called if
-         * {@link com.android.server.accessibility.Flags.FLAG_COMPUTE_WINDOW_CHANGES_ON_A11Y} is
+         * {@link com.android.server.accessibility.Flags.FLAG_COMPUTE_WINDOW_CHANGES_ON_A11Y_V2} is
          * false.
          *
          * @param forceSend Send the windows for accessibility even if they haven't changed.
@@ -173,7 +174,7 @@ public abstract class WindowManagerInternal {
 
         /**
          * Called when the windows for accessibility changed. This is called if
-         * {@link com.android.server.accessibility.Flags.FLAG_COMPUTE_WINDOW_CHANGES_ON_A11Y} is
+         * {@link com.android.server.accessibility.Flags.FLAG_COMPUTE_WINDOW_CHANGES_ON_A11Y_V2} is
          * true.
          * TODO(b/322444245): Remove screenSize parameter by getting it from
          *  DisplayManager#getDisplay(int).getRealSize() on the a11y side.
@@ -305,6 +306,18 @@ public abstract class WindowManagerInternal {
     }
 
     /**
+     * An interface to be notified on window removal.
+     */
+    public interface OnWindowRemovedListener {
+        /**
+         * Called when a window is removed.
+         *
+         * @param token the client token
+         */
+        void onWindowRemoved(IBinder token);
+    }
+
+    /**
      * An interface to be notified when keyguard exit animation should start.
      */
     public interface KeyguardExitAnimationStartListener {
@@ -324,6 +337,19 @@ public abstract class WindowManagerInternal {
       */
     public interface OnHardKeyboardStatusChangeListener {
         public void onHardKeyboardStatusChange(boolean available);
+    }
+
+    /**
+      * An interface to be notified about requested changes in the IME visibility.
+      */
+    public interface OnImeRequestedChangedListener {
+        /**
+         * Called when the requested IME visibility is changed.
+         *
+         * @param windowToken The window token
+         * @param imeVisible {@code true} if the IME should be shown, {@code false} to hide
+         */
+        void onImeRequestedChanged(IBinder windowToken, boolean imeVisible);
     }
 
     /**
@@ -620,14 +646,6 @@ public abstract class WindowManagerInternal {
     public abstract void unregisterTaskSystemBarsListener(TaskSystemBarsListener listener);
 
     /**
-     * Registers a listener to be notified to start the keyguard exit animation.
-     *
-     * @param listener The listener to register.
-     */
-    public abstract void registerKeyguardExitAnimationStartListener(
-            KeyguardExitAnimationStartListener listener);
-
-    /**
      * Reports that the password for the given user has changed.
      */
     public abstract void reportPasswordChanged(int userId);
@@ -676,6 +694,14 @@ public abstract class WindowManagerInternal {
       */
     public abstract void setOnHardKeyboardStatusChangeListener(
         OnHardKeyboardStatusChangeListener listener);
+
+
+    /**
+     * Sets the callback listener for requested IME visibility changes in ImeInsetsSourceProvider
+     *
+     * @param listener The listener to set
+     */
+    public abstract void setOnImeRequestedChangedListener(OnImeRequestedChangedListener listener);
 
     /**
      * Requests the window manager to resend the windows for accessibility on specified display.
@@ -1051,6 +1077,13 @@ public abstract class WindowManagerInternal {
             int[] fromOrientations, int[] toOrientations);
 
     /**
+     * Set current screen capture session id that will be used during sensitive content protections.
+     *
+     * @param sessionId Session id for this screen capture protection
+     */
+    public abstract void setBlockScreenCaptureForAppsSessionId(long sessionId);
+
+    /**
      * Set whether screen capture should be disabled for all windows of a specific app windows based
      * on sensitive content protections.
      *
@@ -1076,13 +1109,28 @@ public abstract class WindowManagerInternal {
     public abstract void clearBlockedApps();
 
     /**
-     * Moves the current focus to the top activity window if the top activity is embedded.
+     * Register a listener to receive a callback on window removal.
+     *
+     * @param listener the listener to be registered.
      */
-    public abstract boolean moveFocusToTopEmbeddedWindowIfNeeded();
+    public abstract void registerOnWindowRemovedListener(OnWindowRemovedListener listener);
 
     /**
-     * Returns an instance of {@link ScreenCapture.ScreenshotHardwareBuffer} containing the current
+     * Removes the listener.
+     *
+     * @param listener the listener to be removed.
+     */
+    public abstract void unregisterOnWindowRemovedListener(OnWindowRemovedListener listener);
+
+    /**
+     * Moves the current focus to the adjacent activity if it has the latest created window.
+     */
+    public abstract boolean moveFocusToAdjacentEmbeddedActivityIfNeeded();
+
+    /**
+     * Returns an instance of {@link ScreenshotHardwareBuffer} containing the current
      * screenshot.
      */
-    public abstract ScreenCapture.ScreenshotHardwareBuffer takeAssistScreenshot();
+    public abstract ScreenshotHardwareBuffer takeAssistScreenshot(
+            Set<Integer> windowTypesToExclude);
 }

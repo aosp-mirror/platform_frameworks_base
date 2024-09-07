@@ -88,6 +88,7 @@ constructor(
     fun logUserActionRejectedByPolicy(
         userAction: QSTileUserAction,
         tileSpec: TileSpec,
+        restriction: String,
     ) {
         tileSpec
             .getLogBuffer()
@@ -95,7 +96,7 @@ constructor(
                 tileSpec.getLogTag(),
                 LogLevel.DEBUG,
                 { str1 = userAction.toLogString() },
-                { "tile $str1: rejected by policy" }
+                { "tile $str1: rejected by policy, restriction: $restriction" }
             )
     }
 
@@ -172,6 +173,26 @@ constructor(
                 { message },
                 error,
             )
+    }
+
+    /** Log with level [LogLevel.WARNING] */
+    fun logWarning(
+        tileSpec: TileSpec,
+        message: String,
+    ) {
+        tileSpec
+            .getLogBuffer()
+            .log(tileSpec.getLogTag(), LogLevel.WARNING, { str1 = message }, { str1!! })
+    }
+
+    /** Log with level [LogLevel.INFO] */
+    fun logInfo(
+        tileSpec: TileSpec,
+        message: String,
+    ) {
+        tileSpec
+            .getLogBuffer()
+            .log(tileSpec.getLogTag(), LogLevel.INFO, { str1 = message }, { str1!! })
     }
 
     fun logCustomTileUserActionDelivered(tileSpec: TileSpec) {

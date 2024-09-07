@@ -158,9 +158,11 @@ final class SendKeyAction extends HdmiCecFeatureAction {
                 mTargetAddress, cecKeycodeAndParams), new SendMessageCallback() {
                 @Override
                 public void onSendCompleted(int error) {
-                    if (error != SendMessageResult.SUCCESS) {
+                    // Disable System Audio Mode, if the AVR doesn't acknowledge
+                    // a <User Control Pressed> message.
+                    if (error == SendMessageResult.NACK) {
                         HdmiLogger.debug(
-                            "AVR did not respond to <User Control Pressed>");
+                            "AVR did not acknowledge <User Control Pressed>");
                         localDevice().mService.setSystemAudioActivated(false);
                     }
                 }

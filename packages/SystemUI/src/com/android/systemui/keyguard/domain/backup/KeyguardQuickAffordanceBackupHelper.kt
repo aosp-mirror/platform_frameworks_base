@@ -17,14 +17,17 @@
 
 package com.android.systemui.keyguard.domain.backup
 
+import android.app.backup.BackupDataInputStream
 import android.app.backup.SharedPreferencesBackupHelper
 import android.content.Context
+import android.util.Log
+import com.android.app.tracing.traceSection
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceSelectionManager
 import com.android.systemui.settings.UserFileManagerImpl
 
 /** Handles backup & restore for keyguard quick affordances. */
 class KeyguardQuickAffordanceBackupHelper(
-    context: Context,
+    private val context: Context,
     userId: Int,
 ) :
     SharedPreferencesBackupHelper(
@@ -34,4 +37,17 @@ class KeyguardQuickAffordanceBackupHelper(
                 fileName = KeyguardQuickAffordanceSelectionManager.FILE_NAME,
             )
             .getPath()
-    )
+    ) {
+
+    override fun restoreEntity(data: BackupDataInputStream?) {
+        Log.d(TAG, "Starting restore for ${data?.key} for user ${context.userId}")
+        traceSection("$TAG File restore: ${data?.key}") {
+            super.restoreEntity(data)
+        }
+        Log.d(TAG, "Finished restore for ${data?.key} for user ${context.userId}")
+    }
+
+    companion object {
+        private const val TAG = "KeyguardQuickAffordanceBackupHelper"
+    }
+}

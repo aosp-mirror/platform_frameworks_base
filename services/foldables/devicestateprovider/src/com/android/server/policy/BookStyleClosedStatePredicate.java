@@ -37,6 +37,7 @@ import android.os.Handler;
 import android.util.ArraySet;
 import android.util.Dumpable;
 import android.view.Display;
+import android.view.DisplayInfo;
 import android.view.Surface;
 
 import com.android.server.policy.BookStylePreferredScreenCalculator.PreferredScreen;
@@ -65,6 +66,7 @@ public class BookStyleClosedStatePredicate implements Predicate<FoldableDeviceSt
     private final Handler mHandler = new Handler();
     private final PostureEstimator mPostureEstimator;
     private final DisplayManager mDisplayManager;
+    private final DisplayInfo mDefaultDisplayInfo = new DisplayInfo();
 
     /**
      * Creates {@link BookStyleClosedStatePredicate}. It is expected that the device has a pair
@@ -140,10 +142,11 @@ public class BookStyleClosedStatePredicate implements Predicate<FoldableDeviceSt
     public void onDisplayChanged(int displayId) {
         if (displayId == DEFAULT_DISPLAY) {
             final Display display = mDisplayManager.getDisplay(displayId);
+            display.getDisplayInfo(mDefaultDisplayInfo);
             int displayState = display.getState();
             boolean isDisplayOn = displayState == Display.STATE_ON;
             mPostureEstimator.onDisplayPowerStatusChanged(isDisplayOn);
-            mPostureEstimator.onDisplayRotationChanged(display.getRotation());
+            mPostureEstimator.onDisplayRotationChanged(mDefaultDisplayInfo.rotation);
         }
     }
 
@@ -174,8 +177,11 @@ public class BookStyleClosedStatePredicate implements Predicate<FoldableDeviceSt
      */
     private static class PostureEstimator implements SensorEventListener, Dumpable {
 
+        private static final String FLAT_INCLINATION_THRESHOLD_DEGREES_PROPERTY
+                = "persist.foldable_postures.wedge_inclination_threshold_degrees";
 
-        private static final int FLAT_INCLINATION_THRESHOLD_DEGREES = 8;
+        private static final int FLAT_INCLINATION_THRESHOLD_DEGREES = Integer.parseInt(
+                System.getProperty(FLAT_INCLINATION_THRESHOLD_DEGREES_PROPERTY, "25"));
 
         /**
          * Alpha parameter of the accelerometer low pass filter: the lower the value, the less high

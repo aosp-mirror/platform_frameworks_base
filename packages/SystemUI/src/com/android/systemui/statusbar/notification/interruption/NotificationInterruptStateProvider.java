@@ -104,7 +104,11 @@ public interface NotificationInterruptStateProvider {
         /**
          * The device is not provisioned, launch FSI.
          */
-        FSI_NOT_PROVISIONED(true);
+        FSI_NOT_PROVISIONED(true),
+        /**
+         * The current user has not completed setup, launch FSI.
+         */
+        FSI_USER_SETUP_INCOMPLETE(true);
 
         public final boolean shouldLaunch;
 

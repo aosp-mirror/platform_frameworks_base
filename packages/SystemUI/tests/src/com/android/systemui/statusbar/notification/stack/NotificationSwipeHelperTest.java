@@ -37,12 +37,12 @@ import android.animation.Animator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.os.Handler;
 import android.service.notification.StatusBarNotification;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -70,7 +70,7 @@ import java.util.stream.Collectors;
  * Tests for {@link NotificationSwipeHelper}.
  */
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper()
 public class NotificationSwipeHelperTest extends SysuiTestCase {
 

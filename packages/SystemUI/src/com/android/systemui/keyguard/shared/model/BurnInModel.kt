@@ -20,6 +20,6 @@ package com.android.systemui.keyguard.shared.model
 data class BurnInModel(
     val translationX: Int = 0,
     val translationY: Int = 0,
-    val scale: Float = 0f,
+    val scale: Float = 1f,
     val scaleClockOnly: Boolean = false,
 )

@@ -30,8 +30,8 @@ import static java.util.Objects.requireNonNull;
 import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.StatusBarNotification;
-import android.testing.AndroidTestingRunner;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -57,7 +57,7 @@ import java.util.Arrays;
 import java.util.Collections;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class GroupCoalescerTest extends SysuiTestCase {
 
     private GroupCoalescer mCoalescer;

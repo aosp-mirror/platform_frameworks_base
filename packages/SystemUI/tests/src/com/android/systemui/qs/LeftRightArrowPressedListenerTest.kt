@@ -16,11 +16,11 @@
 
 package com.android.systemui.qs
 
-import android.testing.AndroidTestingRunner
 import android.view.KeyEvent
 import android.view.KeyEvent.KEYCODE_DPAD_LEFT
 import android.view.View
 import androidx.core.util.Consumer
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.google.common.truth.Truth.assertThat
@@ -28,7 +28,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class LeftRightArrowPressedListenerTest : SysuiTestCase() {
 

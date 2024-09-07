@@ -1,0 +1,12 @@
+package: "com.android.media.performance.flags"
+container: "system"
+
+flag {
+    name: "media_description_ashmem_bitmap"
+    namespace: "systemui"
+    description: "Use ashmem to pass bitmaps in MediaDescription to avoid excessive Bitmap copies."
+    bug: "288241280"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}

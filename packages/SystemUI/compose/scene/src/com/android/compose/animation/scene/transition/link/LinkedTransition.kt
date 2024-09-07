@@ -17,13 +17,16 @@
 package com.android.compose.animation.scene.transition.link
 
 import com.android.compose.animation.scene.SceneKey
+import com.android.compose.animation.scene.TransitionKey
 import com.android.compose.animation.scene.TransitionState
+import kotlinx.coroutines.Job
 
 /** A linked transition which is driven by a [originalTransition]. */
 internal class LinkedTransition(
     private val originalTransition: TransitionState.Transition,
     fromScene: SceneKey,
     toScene: SceneKey,
+    override val key: TransitionKey? = null,
 ) : TransitionState.Transition(fromScene, toScene) {
 
     override val currentScene: SceneKey
@@ -43,4 +46,9 @@ internal class LinkedTransition(
 
     override val progress: Float
         get() = originalTransition.progress
+
+    override val progressVelocity: Float
+        get() = originalTransition.progressVelocity
+
+    override fun finish(): Job = originalTransition.finish()
 }

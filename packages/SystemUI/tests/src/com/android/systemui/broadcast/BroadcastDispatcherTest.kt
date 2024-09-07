@@ -24,7 +24,7 @@ import android.os.Handler
 import android.os.Looper
 import android.os.PatternMatcher
 import android.os.UserHandle
-import android.test.suitebuilder.annotation.SmallTest
+import androidx.test.filters.SmallTest
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import com.android.systemui.SysuiTestCase

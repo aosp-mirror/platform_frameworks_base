@@ -57,7 +57,7 @@
     <string name="kg_wrong_pin" msgid="4160978845968732624">"Pogrešan PIN"</string>
     <string name="kg_wrong_pin_try_again" msgid="3129729383303430190">"Pogrešan PIN. Probajte ponovo."</string>
     <string name="kg_wrong_input_try_fp_suggestion" msgid="3143861542242024833">"Ili otključajte otiskom prsta"</string>
-    <string name="kg_fp_not_recognized" msgid="5183108260932029241">"Otisak prsta neprepoznat"</string>
+    <string name="kg_fp_not_recognized" msgid="5183108260932029241">"Otisak prsta nije prepoznat"</string>
     <string name="bouncer_face_not_recognized" msgid="1666128054475597485">"Lice nije prepoznato"</string>
     <string name="kg_bio_try_again_or_pin" msgid="4752168242723808390">"Probajte ponovo ili unesite PIN"</string>
     <string name="kg_bio_try_again_or_password" msgid="1473132729225398039">"Probajte ponovo ili unesite lozinku"</string>
@@ -111,6 +111,9 @@
     <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Za dodatnu bezbednost koristite šablon"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Za dodatnu bezbednost koristite PIN"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Za dodatnu bezbednost koristite lozinku"</string>
+    <string name="kg_prompt_added_security_pin" msgid="5487992065995475528">"Treba da unesete PIN radi dodatne bezbednosti"</string>
+    <string name="kg_prompt_added_security_pattern" msgid="1017068086102168544">"Treba da unesete šablon radi dodatne bezbednosti"</string>
+    <string name="kg_prompt_added_security_password" msgid="6053156069765029006">"Treba da unesete lozinku radi dodatne bezbednosti"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Administrator je zaključao uređaj"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Uređaj je ručno zaključan"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Nije prepoznat"</string>

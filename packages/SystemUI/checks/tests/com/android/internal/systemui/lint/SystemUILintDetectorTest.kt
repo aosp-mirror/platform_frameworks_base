@@ -10,15 +10,11 @@ import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
 import org.junit.runners.model.Statement
 
-@Suppress("UnstableApiUsage")
 @RunWith(JUnit4::class)
 abstract class SystemUILintDetectorTest : LintDetectorTest() {
 
     companion object {
-        @ClassRule
-        @JvmField
-        val libraryChecker: LibraryExists =
-            LibraryExists("framework.jar", "androidx.annotation_annotation.jar")
+        @ClassRule @JvmField val libraryChecker: LibraryExists = LibraryExists(*libraryNames)
     }
 
     class LibraryExists(vararg val libraryNames: String) : TestRule {

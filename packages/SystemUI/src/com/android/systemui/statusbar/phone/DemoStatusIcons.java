@@ -37,6 +37,7 @@ import com.android.systemui.statusbar.StatusIconDisplayable;
 import com.android.systemui.statusbar.pipeline.mobile.ui.MobileViewLogger;
 import com.android.systemui.statusbar.pipeline.mobile.ui.view.ModernStatusBarMobileView;
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.MobileIconsViewModel;
+import com.android.systemui.statusbar.pipeline.shared.ui.view.ModernStatusBarView;
 import com.android.systemui.statusbar.pipeline.wifi.ui.view.ModernStatusBarWifiView;
 import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.LocationBasedWifiViewModel;
 
@@ -222,7 +223,8 @@ public class DemoStatusIcons extends StatusIconContainer implements DemoMode, Da
             }
             return;
         }
-        StatusBarIcon icon = new StatusBarIcon(iconPkg, UserHandle.SYSTEM, iconId, 0, 0, "Demo");
+        StatusBarIcon icon = new StatusBarIcon(iconPkg, UserHandle.SYSTEM, iconId, 0, 0, "Demo",
+                StatusBarIcon.Type.SystemIcon);
         icon.visible = true;
         StatusBarIconView v = new StatusBarIconView(getContext(), slot, null, false);
         v.setTag(slot);
@@ -275,6 +277,15 @@ public class DemoStatusIcons extends StatusIconContainer implements DemoMode, Da
         mModernWifiView = view;
         mModernWifiView.setStaticDrawableColor(mColor, mContrastColor);
         addView(view, viewIndex, createLayoutParams());
+    }
+
+    /** Adds a bindable icon to the demo mode view. */
+    public void addBindableIcon(StatusBarIconHolder.BindableIconHolder holder) {
+        // This doesn't do any correct ordering, and also doesn't check if we already have an
+        // existing icon for the slot. But since we hope to remove this class soon, we won't spend
+        // the time adding that logic.
+        ModernStatusBarView view = holder.getInitializer().createAndBind(mContext);
+        addView(view, createLayoutParams());
     }
 
     public void onRemoveIcon(StatusIconDisplayable view) {

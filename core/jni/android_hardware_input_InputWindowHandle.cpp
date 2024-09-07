@@ -165,8 +165,8 @@ bool NativeInputWindowHandle::updateInfo() {
     mInfo.ownerUid = gui::Uid{
             static_cast<uid_t>(env->GetIntField(obj, gInputWindowHandleClassInfo.ownerUid))};
     mInfo.packageName = getStringField(env, obj, gInputWindowHandleClassInfo.packageName, "<null>");
-    mInfo.displayId = env->GetIntField(obj,
-            gInputWindowHandleClassInfo.displayId);
+    mInfo.displayId =
+            ui::LogicalDisplayId{env->GetIntField(obj, gInputWindowHandleClassInfo.displayId)};
 
     jobject inputApplicationHandleObj = env->GetObjectField(obj,
             gInputWindowHandleClassInfo.inputApplicationHandle);

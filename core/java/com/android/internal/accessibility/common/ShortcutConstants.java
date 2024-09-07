@@ -16,10 +16,25 @@
 
 package com.android.internal.accessibility.common;
 
+import static com.android.internal.accessibility.AccessibilityShortcutController.ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME;
+import static com.android.internal.accessibility.AccessibilityShortcutController.ACCESSIBILITY_HEARING_AIDS_TILE_COMPONENT_NAME;
+import static com.android.internal.accessibility.AccessibilityShortcutController.COLOR_INVERSION_COMPONENT_NAME;
+import static com.android.internal.accessibility.AccessibilityShortcutController.COLOR_INVERSION_TILE_COMPONENT_NAME;
+import static com.android.internal.accessibility.AccessibilityShortcutController.DALTONIZER_COMPONENT_NAME;
+import static com.android.internal.accessibility.AccessibilityShortcutController.DALTONIZER_TILE_COMPONENT_NAME;
+import static com.android.internal.accessibility.AccessibilityShortcutController.FONT_SIZE_COMPONENT_NAME;
+import static com.android.internal.accessibility.AccessibilityShortcutController.FONT_SIZE_TILE_COMPONENT_NAME;
+import static com.android.internal.accessibility.AccessibilityShortcutController.ONE_HANDED_COMPONENT_NAME;
+import static com.android.internal.accessibility.AccessibilityShortcutController.ONE_HANDED_TILE_COMPONENT_NAME;
+import static com.android.internal.accessibility.AccessibilityShortcutController.REDUCE_BRIGHT_COLORS_COMPONENT_NAME;
+import static com.android.internal.accessibility.AccessibilityShortcutController.REDUCE_BRIGHT_COLORS_TILE_SERVICE_COMPONENT_NAME;
+
 import android.annotation.IntDef;
+import android.content.ComponentName;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Map;
 
 /**
  * Collection of common constants for accessibility shortcut.
@@ -44,6 +59,10 @@ public final class ShortcutConstants {
      * choose accessibility shortcut as preferred shortcut.
      * {@code TRIPLETAP} for displaying specifying magnification to be toggled via quickly
      * tapping screen 3 times as preferred shortcut.
+     * {@code TWOFINGER_DOUBLETAP} for displaying specifying magnification to be toggled via
+     * quickly tapping screen 2 times with two fingers as preferred shortcut.
+     * {@code QUICK_SETTINGS} for displaying specifying the accessibility services or features which
+     * choose Quick Settings as preferred shortcut.
      */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({
@@ -51,12 +70,18 @@ public final class ShortcutConstants {
             UserShortcutType.SOFTWARE,
             UserShortcutType.HARDWARE,
             UserShortcutType.TRIPLETAP,
+            UserShortcutType.TWOFINGER_DOUBLETAP,
+            UserShortcutType.QUICK_SETTINGS,
     })
     public @interface UserShortcutType {
         int DEFAULT = 0;
-        int SOFTWARE = 1; // 1 << 0
-        int HARDWARE = 2; // 1 << 1
-        int TRIPLETAP = 4; // 1 << 2
+        // LINT.IfChange(shortcut_type_intdef)
+        int SOFTWARE = 1 << 0;
+        int HARDWARE = 1 << 1;
+        int TRIPLETAP = 1 << 2;
+        int TWOFINGER_DOUBLETAP = 1 << 3;
+        int QUICK_SETTINGS = 1 << 4;
+        // LINT.ThenChange(:shortcut_type_array)
     }
 
     /**
@@ -64,9 +89,13 @@ public final class ShortcutConstants {
      * non-default IntDef types.
      */
     public static final int[] USER_SHORTCUT_TYPES = {
+            // LINT.IfChange(shortcut_type_array)
             UserShortcutType.SOFTWARE,
             UserShortcutType.HARDWARE,
-            UserShortcutType.TRIPLETAP
+            UserShortcutType.TRIPLETAP,
+            UserShortcutType.TWOFINGER_DOUBLETAP,
+            UserShortcutType.QUICK_SETTINGS,
+            // LINT.ThenChange(:shortcut_type_intdef)
     };
 
 
@@ -109,4 +138,32 @@ public final class ShortcutConstants {
         int LAUNCH = 0;
         int EDIT = 1;
     }
+
+    /**
+     * Annotation for different FAB shortcut type's menu size
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({
+            FloatingMenuSize.UNKNOWN,
+            FloatingMenuSize.SMALL,
+            FloatingMenuSize.LARGE,
+    })
+    public @interface FloatingMenuSize {
+        int UNKNOWN = -1;
+        int SMALL = 0;
+        int LARGE = 1;
+    }
+
+    /**
+     * A map of a11y feature to its qs tile component
+     */
+    public static final Map<ComponentName, ComponentName> A11Y_FEATURE_TO_FRAMEWORK_TILE = Map.of(
+            COLOR_INVERSION_COMPONENT_NAME, COLOR_INVERSION_TILE_COMPONENT_NAME,
+            DALTONIZER_COMPONENT_NAME, DALTONIZER_TILE_COMPONENT_NAME,
+            ONE_HANDED_COMPONENT_NAME, ONE_HANDED_TILE_COMPONENT_NAME,
+            REDUCE_BRIGHT_COLORS_COMPONENT_NAME, REDUCE_BRIGHT_COLORS_TILE_SERVICE_COMPONENT_NAME,
+            FONT_SIZE_COMPONENT_NAME, FONT_SIZE_TILE_COMPONENT_NAME,
+            ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME,
+            ACCESSIBILITY_HEARING_AIDS_TILE_COMPONENT_NAME
+    );
 }

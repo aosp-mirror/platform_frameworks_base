@@ -94,18 +94,34 @@
     <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"Koblet til (ingen telefon), batteri <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="6499078454894324287">"Koblet til (ingen medier), batteri <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="8477440576953067242">"Koblet til (ingen telefon eller medier), batteri <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
-    <string name="bluetooth_active_battery_level" msgid="3450745316700494425">"Aktiv, <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batteri"</string>
-    <string name="bluetooth_active_battery_level_untethered" msgid="2706188607604205362">"Aktiv, V: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> batteri, H: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> batteri"</string>
+    <string name="bluetooth_active_battery_level" msgid="2685517576209066008">"Aktiv. <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batteri."</string>
+    <string name="bluetooth_active_battery_level_untethered" msgid="4961338936672922617">"Aktiv. L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, H: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> batteri."</string>
+    <string name="bluetooth_active_battery_level_untethered_left" msgid="2895644748625343977">"Aktiv. V: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batteri."</string>
+    <string name="bluetooth_active_battery_level_untethered_right" msgid="7407517998880370179">"Aktiv. H: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batteri."</string>
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batteri"</string>
     <string name="tv_bluetooth_battery_level" msgid="8786353985605532846">"Batteri: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"V: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> batteri, H: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> batteri"</string>
-    <string name="bluetooth_battery_level_untethered_left" msgid="2952823007648782646">"Venstre: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_battery_level_untethered_right" msgid="6525710737740083276">"Høyre: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered" msgid="1616774716076301755">"L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, H: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> batteri."</string>
+    <string name="bluetooth_battery_level_untethered_left" msgid="5725764679536058365">"Venstre: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batteri"</string>
+    <string name="bluetooth_battery_level_untethered_right" msgid="8377995536997790142">"Høyre: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batteri"</string>
+    <string name="tv_bluetooth_battery_level_untethered_left" msgid="337629670583744410">"Venstre: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="tv_bluetooth_battery_level_untethered_right" msgid="8610019317279155595">"Høyre: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Aktiv"</string>
     <string name="bluetooth_saved_device" msgid="4895871321722311428">"Lagret"</string>
-    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Aktiv, bare venstre"</string>
-    <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Aktiv, bare høyre"</string>
-    <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Aktiv, venstre og høyre"</string>
+    <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"Aktiv (bare venstre)"</string>
+    <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"Aktiv (bare høyre)"</string>
+    <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"Aktiv (venstre og høyre)"</string>
+    <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"Aktiv (bare medieinnhold) <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batteri."</string>
+    <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"Aktiv (bare medieinnhold). V: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> batteri, H: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> batteri."</string>
+    <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"Tilkoblet (støtter lyddeling). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batteri."</string>
+    <string name="bluetooth_battery_level_untethered_lea_support" msgid="803110681688633362">"Tilkoblet (støtter lyddeling). V: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> batteri, H: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> batteri."</string>
+    <string name="bluetooth_battery_level_untethered_left_lea_support" msgid="7707464334346454950">"Tilkoblet (støtter lyddeling). Venstre: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batteri."</string>
+    <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="8941549024377771038">"Tilkoblet (støtter lyddeling). Høyre: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batteri."</string>
+    <string name="bluetooth_no_battery_level_lea_support" msgid="5721725041048434075">"Tilkoblet (støtter lyddeling)"</string>
+    <string name="bluetooth_active_media_only_no_battery_level" msgid="71106861912593126">"Aktiv (bare medieinnhold)"</string>
+    <string name="bluetooth_saved_device_lea_support" msgid="7231323139968285768">"Støtter lyddeling"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_active" msgid="1632152540901488645">"Aktiv (bare medieinnhold), bare venstre"</string>
+    <string name="bluetooth_hearing_aid_media_only_right_active" msgid="3854140683042617230">"Aktiv (bare medieinnhold), bare høyre"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_and_right_active" msgid="1299913413062528417">"Aktiv (bare medieinnhold), høyre og venstre"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Medielyd"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Telefonsamtaler"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Filoverføring"</string>
@@ -437,9 +453,6 @@
     <string name="transcode_default" msgid="3784803084573509491">"Anta at apper støtter moderne formater"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"Vis omkodingsvarsler"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"Slå av omkodingsbuffer"</string>
-    <string name="widevine_settings_title" msgid="4023329801172572917">"Widevine-innstillinger"</string>
-    <string name="force_l3_fallback_title" msgid="4987972688770202547">"Tving bruk av L3-reservealternativet"</string>
-    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"Velg for å tvinge bruk av L3-reservealternativet"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Aktive tjenester"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Se og kontroller tjenester som kjører"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView-implementering"</string>
@@ -479,6 +492,10 @@
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – Fulladet om <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> – Ladingen er optimalisert"</string>
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> – lader"</string>
+    <string name="power_fast_charging_duration_v2" msgid="3797735998640359490">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATUS">%2$s</xliff:g> – Fulladet innen <xliff:g id="TIME">%3$s</xliff:g>"</string>
+    <string name="power_charging_duration_v2" msgid="2938998284074003248">"<xliff:g id="LEVEL">%1$s</xliff:g> – Fulladet innen <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="power_remaining_charging_duration_only_v2" msgid="5358176435722950193">"Fulladet innen <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_fast_charging_duration_only_v2" msgid="6270950195810579563">"Fulladet innen <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Ukjent"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Lader"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Lader raskt"</string>
@@ -490,6 +507,8 @@
     <string name="battery_info_status_full" msgid="1339002294876531312">"Ladet"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"Fulladet"</string>
     <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"Ladingen er satt på vent"</string>
+    <string name="battery_info_status_charging_v2" msgid="6118522107222245505">"Lading"</string>
+    <string name="battery_info_status_charging_fast_v2" msgid="1825439848151256589">"Hurtiglading"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Kontrollert av administratoren"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Kontrollert av en begrenset innstilling"</string>
     <string name="disabled" msgid="8017887509554714950">"Slått av"</string>
@@ -619,7 +638,7 @@
     <string name="add_user_failed" msgid="4809887794313944872">"Kunne ikke opprette noen ny bruker"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"Kunne ikke opprette en ny gjest"</string>
     <string name="user_nickname" msgid="262624187455825083">"Kallenavn"</string>
-    <string name="edit_user_info_message" msgid="5199468585059260053">"Navnet og bildet ditt blir synlige for alle som bruker denne enheten."</string>
+    <string name="edit_user_info_message" msgid="6677556031419002895">"Navnet og bildet du velger, blir synlige for alle som bruker denne enheten."</string>
     <string name="user_add_user" msgid="7876449291500212468">"Legg til bruker"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Legg til gjest"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Fjern gjesten"</string>
@@ -646,8 +665,6 @@
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"All aktivitet slettes når du avslutter"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Du kan lagre eller slette aktiviteten når du avslutter"</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Tilbakestill for å slette øktaktivitet nå, eller du kan lagre eller slette aktivitet når du avslutter"</string>
-    <string name="user_image_take_photo" msgid="467512954561638530">"Ta et bilde"</string>
-    <string name="user_image_choose_photo" msgid="1363820919146782908">"Velg et bilde"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Velg et bilde"</string>
     <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"For mange mislykkede forsøk. Dataene på denne enheten blir slettet."</string>
     <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"For mange mislykkede forsøk. Denne brukeren blir slettet."</string>
@@ -678,6 +695,7 @@
     <string name="accessibility_phone_one_bar" msgid="5719721147018970063">"Telefon – én stolpe."</string>
     <string name="accessibility_phone_two_bars" msgid="2531458337458953263">"Telefon – to stolper."</string>
     <string name="accessibility_phone_three_bars" msgid="1523967995996696619">"Telefon – tre stolper."</string>
+    <string name="accessibility_phone_four_bars" msgid="4477202400261338403">"Fire streker for telefon."</string>
     <string name="accessibility_phone_signal_full" msgid="4302338883816077134">"Telefonsignal er fullt."</string>
     <string name="accessibility_no_data" msgid="4563181886936931008">"Ingen data."</string>
     <string name="accessibility_data_one_bar" msgid="6892888138070752480">"Data – én stolpe"</string>
@@ -687,12 +705,10 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Ethernet er frakoblet."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Ingen ringing."</string>
-    <string name="avatar_picker_title" msgid="8492884172713170652">"Velg et profilbilde"</string>
-    <string name="default_user_icon_description" msgid="6554047177298972638">"Standard brukerikon"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Fysisk tastatur"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Velg et tastaturoppsett"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Standard"</string>
-    <string name="turn_screen_on_title" msgid="3266937298097573424">"Slå på skjermen"</string>
+    <string name="turn_screen_on_title" msgid="2662312432042116026">"Kontroller når skjermen slås på"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Tillat å slå på skjermen"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Tillat at en app slår på skjermen. Hvis tillatelsen gis, kan appen slå på skjermen når som helst uten din eksplisitte intensjon."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Vil du stoppe kringkastingen av <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
@@ -707,4 +723,5 @@
     <string name="neuter" msgid="2075249330106127310">"Intetkjønn"</string>
     <string name="feminine" msgid="1529155595310784757">"Hunkjønn"</string>
     <string name="masculine" msgid="4653978041013996303">"Hankjønn"</string>
+    <string name="system_update_settings_list_item_title" msgid="6618098383615432484">"Systemoppdateringer"</string>
 </resources>

@@ -23,7 +23,6 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
-import com.android.systemui.scene.shared.flag.sceneContainerFlags
 import com.android.systemui.shade.ShadeModule
 import com.android.systemui.shade.data.repository.shadeRepository
 import com.android.systemui.statusbar.disableflags.data.repository.disableFlagsRepository
@@ -36,7 +35,6 @@ import com.android.systemui.user.domain.interactor.userSwitcherInteractor
 var Kosmos.baseShadeInteractor: BaseShadeInteractor by
     Kosmos.Fixture {
         ShadeModule.provideBaseShadeInteractor(
-            sceneContainerFlags = sceneContainerFlags,
             sceneContainerOn = { shadeInteractorSceneContainerImpl },
             sceneContainerOff = { shadeInteractorLegacyImpl },
         )
@@ -47,6 +45,7 @@ val Kosmos.shadeInteractorSceneContainerImpl by
             scope = applicationCoroutineScope,
             sceneInteractor = sceneInteractor,
             sharedNotificationContainerInteractor = sharedNotificationContainerInteractor,
+            shadeRepository = shadeRepository,
         )
     }
 val Kosmos.shadeInteractorLegacyImpl by

@@ -26,12 +26,13 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.platform.test.flag.junit.FlagsParameterization;
 import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
-import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.android.internal.logging.UiEventLogger;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.res.R;
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
@@ -48,6 +49,8 @@ import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.settings.GlobalSettings;
 import com.android.systemui.util.time.SystemClock;
 
+import kotlinx.coroutines.flow.StateFlowKt;
+
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Rule;
@@ -57,10 +60,13 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
-import kotlinx.coroutines.flow.StateFlowKt;
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
+import platform.test.runner.parameterized.Parameters;
+
+import java.util.List;
 
 @SmallTest
-@RunWith(AndroidJUnit4.class)
+@RunWith(ParameterizedAndroidJunit4.class)
 @TestableLooper.RunWithLooper
 public class HeadsUpManagerPhoneTest extends BaseHeadsUpManagerTest {
     @Rule public MockitoRule rule = MockitoJUnit.rule();
@@ -76,6 +82,8 @@ public class HeadsUpManagerPhoneTest extends BaseHeadsUpManagerTest {
     @Mock private UiEventLogger mUiEventLogger;
     @Mock private JavaAdapter mJavaAdapter;
     @Mock private ShadeInteractor mShadeInteractor;
+    @Mock private DumpManager dumpManager;
+    private AvalancheController mAvalancheController;
 
     private static final class TestableHeadsUpManagerPhone extends HeadsUpManagerPhone {
         TestableHeadsUpManagerPhone(
@@ -92,7 +100,8 @@ public class HeadsUpManagerPhoneTest extends BaseHeadsUpManagerTest {
                 AccessibilityManagerWrapper accessibilityManagerWrapper,
                 UiEventLogger uiEventLogger,
                 JavaAdapter javaAdapter,
-                ShadeInteractor shadeInteractor
+                ShadeInteractor shadeInteractor,
+                AvalancheController avalancheController
         ) {
             super(
                     context,
@@ -109,7 +118,8 @@ public class HeadsUpManagerPhoneTest extends BaseHeadsUpManagerTest {
                     accessibilityManagerWrapper,
                     uiEventLogger,
                     javaAdapter,
-                    shadeInteractor
+                    shadeInteractor,
+                    avalancheController
             );
             mMinimumDisplayTime = TEST_MINIMUM_DISPLAY_TIME;
             mAutoDismissTime = TEST_AUTO_DISMISS_TIME;
@@ -131,14 +141,22 @@ public class HeadsUpManagerPhoneTest extends BaseHeadsUpManagerTest {
                 mAccessibilityManagerWrapper,
                 mUiEventLogger,
                 mJavaAdapter,
-                mShadeInteractor
+                mShadeInteractor,
+                mAvalancheController
         );
+    }
+
+    @Parameters(name = "{0}")
+    public static List<FlagsParameterization> getFlags() {
+        return FlagsParameterization.allCombinationsOf(NotificationThrottleHun.FLAG_NAME);
+    }
+
+    public HeadsUpManagerPhoneTest(FlagsParameterization flags) {
+        super(flags);
     }
 
     @Before
     public void setUp() {
-        mSetFlagsRule.disableFlags(NotificationThrottleHun.FLAG_NAME);
-
         when(mShadeInteractor.isAnyExpanded()).thenReturn(StateFlowKt.MutableStateFlow(false));
         final AccessibilityManagerWrapper accessibilityMgr =
                 mDependency.injectMockDependency(AccessibilityManagerWrapper.class);
@@ -148,6 +166,8 @@ public class HeadsUpManagerPhoneTest extends BaseHeadsUpManagerTest {
         mDependency.injectMockDependency(NotificationShadeWindowController.class);
         mContext.getOrCreateTestableResources().addOverride(
                 R.integer.ambient_notification_extension_time, 500);
+
+        mAvalancheController = new AvalancheController(dumpManager, mUiEventLogger);
     }
 
     @Test

@@ -21,7 +21,6 @@ import android.content.Context
 import android.content.Intent
 import android.credentials.selection.BaseDialogResult
 import android.credentials.selection.BaseDialogResult.RESULT_CODE_DIALOG_USER_CANCELED
-import android.credentials.selection.Constants
 import android.credentials.selection.ProviderPendingIntentResponse
 import android.credentials.selection.UserSelectionDialogResult
 import android.os.Bundle
@@ -117,21 +116,17 @@ class CredentialManagerClientImpl @Inject constructor(
         sendCancellationCode(
             cancelCode = cancelCode,
             requestToken = token,
-            resultReceiver = resultReceiver,
-            finalResponseReceiver = finalResponseReceiver
+            resultReceiver = resultReceiver
         )
     }
 
     private fun sendCancellationCode(
         cancelCode: Int,
         requestToken: IBinder?,
-        resultReceiver: ResultReceiver?,
-        finalResponseReceiver: ResultReceiver?
+        resultReceiver: ResultReceiver?
     ) {
         if (requestToken != null && resultReceiver != null) {
-            val resultData = Bundle().apply {
-                putParcelable(Constants.EXTRA_FINAL_RESPONSE_RECEIVER, finalResponseReceiver)
-            }
+            val resultData = Bundle()
             BaseDialogResult.addToBundle(BaseDialogResult(requestToken), resultData)
             resultReceiver.send(cancelCode, resultData)
         }

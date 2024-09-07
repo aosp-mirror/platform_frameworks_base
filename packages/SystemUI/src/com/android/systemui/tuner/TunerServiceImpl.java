@@ -38,14 +38,14 @@ import androidx.annotation.WorkerThread;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.systemui.DejankUtils;
-import com.android.systemui.res.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
-import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
+import com.android.systemui.statusbar.phone.ui.StatusBarIconController;
 import com.android.systemui.util.leak.LeakDetector;
 
 import dagger.Lazy;
@@ -55,7 +55,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.inject.Inject;
-
 
 /**
  * @deprecated Don't use this class to listen to Secure Settings. Use {@code SecureSettings} instead
