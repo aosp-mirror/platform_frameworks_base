@@ -411,7 +411,7 @@ class InsetsSourceProvider {
             changed = true;
         }
         if (changed) {
-            mStateController.notifyControlChanged(mControlTarget);
+            mStateController.notifyControlChanged(mControlTarget, this);
         }
     }
 
@@ -556,9 +556,35 @@ class InsetsSourceProvider {
         }
         mControl = new InsetsSourceControl(mSource.getId(), mSource.getType(), leash,
                 initiallyVisible, surfacePosition, getInsetsHint());
+        mStateController.notifySurfaceTransactionReady(this, getSurfaceTransactionId(leash), true);
 
         ProtoLog.d(WM_DEBUG_WINDOW_INSETS,
                 "InsetsSource Control %s for target %s", mControl, mControlTarget);
+    }
+
+    private long getSurfaceTransactionId(SurfaceControl leash) {
+        // Here returns mNativeObject (long) as the ID instead of the leash itself so that
+        // InsetsStateController won't keep referencing the leash unexpectedly.
+        return leash != null ? leash.mNativeObject : 0;
+    }
+
+    /**
+     * This is called when the surface transaction of the leash initialization has been committed.
+     *
+     * @param id Indicates which transaction is committed so that stale callbacks can be dropped.
+     */
+    void onSurfaceTransactionCommitted(long id) {
+        if (mIsLeashReadyForDispatching) {
+            return;
+        }
+        if (mControl == null) {
+            return;
+        }
+        if (id != getSurfaceTransactionId(mControl.getLeash())) {
+            return;
+        }
+        mIsLeashReadyForDispatching = true;
+        mStateController.notifySurfaceTransactionReady(this, 0, false);
     }
 
     void startSeamlessRotation() {
@@ -580,10 +606,6 @@ class InsetsSourceProvider {
         }
         setClientVisible(requestedVisible);
         return true;
-    }
-
-    void onSurfaceTransactionApplied() {
-        mIsLeashReadyForDispatching = true;
     }
 
     void setClientVisible(boolean clientVisible) {
@@ -612,8 +634,9 @@ class InsetsSourceProvider {
                 mServerVisible, mClientVisible);
     }
 
-    protected boolean isLeashReadyForDispatching() {
-        return mIsLeashReadyForDispatching;
+    protected boolean isLeashReadyForDispatching(InsetsControlTarget target) {
+        // If the target is not the control target, we are ready for dispatching a null-leash to it.
+        return target != mControlTarget || mIsLeashReadyForDispatching;
     }
 
     /**
@@ -626,7 +649,7 @@ class InsetsSourceProvider {
     @Nullable
     InsetsSourceControl getControl(InsetsControlTarget target) {
         if (target == mControlTarget) {
-            if (!isLeashReadyForDispatching() && mControl != null) {
+            if (!isLeashReadyForDispatching(target) && mControl != null) {
                 // The surface transaction of preparing leash is not applied yet. We don't send it
                 // to the client in case that the client applies its transaction sooner than ours
                 // that we could unexpectedly overwrite the surface state.
@@ -799,6 +822,7 @@ class InsetsSourceProvider {
         public void onAnimationCancelled(SurfaceControl animationLeash) {
             if (mAdapter == this) {
                 mStateController.notifyControlRevoked(mControlTarget, InsetsSourceProvider.this);
+                mStateController.notifySurfaceTransactionReady(InsetsSourceProvider.this, 0, false);
                 mControl = null;
                 mControlTarget = null;
                 mAdapter = null;

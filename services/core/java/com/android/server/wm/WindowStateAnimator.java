@@ -321,8 +321,7 @@ class WindowStateAnimator {
         }
 
         if (DEBUG_VISIBILITY) {
-            Slog.v(TAG, "Creating surface in session "
-                    + mSession.mSurfaceSession + " window " + this
+            Slog.v(TAG, "Creating surface " + this
                     + " format=" + attrs.format + " flags=" + flags);
         }
 
@@ -358,9 +357,8 @@ class WindowStateAnimator {
             w.mInputWindowHandle.forceChange();
 
             ProtoLog.i(WM_SHOW_SURFACE_ALLOC,
-                        "  CREATE SURFACE %s IN SESSION %s: pid=%d format=%d flags=0x%x / %s",
-                    mSurfaceControl, mSession.mSurfaceSession, mSession.mPid, attrs.format,
-                        flags, this);
+                    "  CREATE SURFACE %s: pid=%d format=%d flags=0x%x / %s",
+                    mSurfaceControl, mSession.mPid, attrs.format, flags, this);
         } catch (OutOfResourcesException e) {
             Slog.w(TAG, "OutOfResourcesException creating surface");
             mService.mRoot.reclaimSomeSurfaceMemory(this, "create", true);

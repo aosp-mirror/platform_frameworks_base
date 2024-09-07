@@ -559,8 +559,8 @@ final class VibratorControlService extends IVibratorControlService.Stub {
     }
 
     /**
-     * Record for a single {@link Vibration.DebugInfo}, that can be grouped by usage and aggregated
-     * by UID, {@link VibrationAttributes} and {@link VibrationEffect}.
+     * Record for a single {@link VibrationSession.DebugInfo}, that can be grouped by usage and
+     * aggregated by UID, {@link VibrationAttributes} and {@link VibrationEffect}.
      */
     private static final class VibrationScaleParamRecord
             implements GroupedAggregatedLogRecords.SingleLogRecord {

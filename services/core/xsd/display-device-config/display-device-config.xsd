@@ -42,7 +42,7 @@
                     <xs:annotation name="nonnull"/>
                     <xs:annotation name="final"/>
                 </xs:element>
-                <xs:element type="thermalThrottling" name="thermalThrottling">
+                <xs:element type="thermalThrottling" name="thermalThrottling" minOccurs="0" maxOccurs="1">
                     <xs:annotation name="nonnull"/>
                     <xs:annotation name="final"/>
                 </xs:element>
@@ -464,7 +464,15 @@
             <xs:annotation name="nonnull"/>
             <xs:annotation name="final"/>
         </xs:element>
-        <xs:element name="pollingWindowMillis" type="xs:nonNegativeInteger">
+        <xs:element name="customAnimationRateSec" type="nonNegativeDecimal" minOccurs="0" maxOccurs="1">
+            <xs:annotation name="nonnull"/>
+            <xs:annotation name="final"/>
+        </xs:element>
+        <xs:element name="pollingWindowMaxMillis" type="xs:nonNegativeInteger">
+            <xs:annotation name="nonnull"/>
+            <xs:annotation name="final"/>
+        </xs:element>
+        <xs:element name="pollingWindowMinMillis" type="xs:nonNegativeInteger">
             <xs:annotation name="nonnull"/>
             <xs:annotation name="final"/>
         </xs:element>

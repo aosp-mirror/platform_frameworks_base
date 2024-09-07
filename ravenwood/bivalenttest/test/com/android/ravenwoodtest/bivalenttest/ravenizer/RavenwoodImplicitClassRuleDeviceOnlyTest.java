@@ -34,7 +34,12 @@ public class RavenwoodImplicitClassRuleDeviceOnlyTest {
 
     @BeforeClass
     public static void beforeClass() {
-        Assert.assertFalse(RavenwoodRule.isOnRavenwood());
+        // This method shouldn't be called -- unless RUN_DISABLED_TESTS is enabled.
+
+        // If we're doing RUN_DISABLED_TESTS, don't throw here, because that'd confuse junit.
+        if (!RavenwoodRule.private$ravenwood().isRunningDisabledTests()) {
+            Assert.assertFalse(RavenwoodRule.isOnRavenwood());
+        }
     }
 
     @Test
@@ -46,7 +51,10 @@ public class RavenwoodImplicitClassRuleDeviceOnlyTest {
     public static void afterClass() {
         if (RavenwoodRule.isOnRavenwood()) {
             Log.e(TAG, "Even @AfterClass shouldn't be executed!");
-            System.exit(1);
+
+            if (!RavenwoodRule.private$ravenwood().isRunningDisabledTests()) {
+                System.exit(1);
+            }
         }
     }
 }

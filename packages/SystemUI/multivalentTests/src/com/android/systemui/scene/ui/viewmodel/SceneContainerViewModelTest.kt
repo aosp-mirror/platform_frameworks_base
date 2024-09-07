@@ -31,9 +31,10 @@ import com.android.systemui.lifecycle.activateIn
 import com.android.systemui.power.data.repository.fakePowerRepository
 import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
+import com.android.systemui.scene.fakeOverlaysByKeys
 import com.android.systemui.scene.sceneContainerConfig
-import com.android.systemui.scene.sceneKeys
 import com.android.systemui.scene.shared.logger.sceneLogger
+import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
 import com.android.systemui.testKosmos
@@ -49,6 +50,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @EnableSceneContainer
@@ -111,11 +113,6 @@ class SceneContainerViewModelTest : SysuiTestCase() {
             runCurrent()
             assertThat(underTest.isVisible).isTrue()
         }
-
-    @Test
-    fun allSceneKeys() {
-        assertThat(underTest.allSceneKeys).isEqualTo(kosmos.sceneKeys)
-    }
 
     @Test
     fun sceneTransition() =
@@ -237,7 +234,7 @@ class SceneContainerViewModelTest : SysuiTestCase() {
             sceneInteractor.setVisible(false, "reason")
             runCurrent()
             assertThat(underTest.isVisible).isFalse()
-            sceneInteractor.onRemoteUserInteractionStarted("reason")
+            sceneInteractor.onRemoteUserInputStarted("reason")
             runCurrent()
             assertThat(underTest.isVisible).isTrue()
 
@@ -247,5 +244,47 @@ class SceneContainerViewModelTest : SysuiTestCase() {
             runCurrent()
 
             assertThat(underTest.isVisible).isFalse()
+        }
+
+    @Test
+    fun getActionableContentKey_noOverlays_returnsCurrentScene() =
+        testScope.runTest {
+            val currentScene by collectLastValue(underTest.currentScene)
+            val currentOverlays by collectLastValue(sceneInteractor.currentOverlays)
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+            assertThat(currentOverlays).isEmpty()
+
+            val actionableContentKey =
+                underTest.getActionableContentKey(
+                    currentScene = checkNotNull(currentScene),
+                    currentOverlays = checkNotNull(currentOverlays),
+                    overlayByKey = kosmos.fakeOverlaysByKeys,
+                )
+
+            assertThat(actionableContentKey).isEqualTo(Scenes.Lockscreen)
+        }
+
+    @Test
+    fun getActionableContentKey_multipleOverlays_returnsTopOverlay() =
+        testScope.runTest {
+            val currentScene by collectLastValue(underTest.currentScene)
+            val currentOverlays by collectLastValue(sceneInteractor.currentOverlays)
+            fakeSceneDataSource.showOverlay(Overlays.QuickSettingsShade)
+            fakeSceneDataSource.showOverlay(Overlays.NotificationsShade)
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+            assertThat(currentOverlays)
+                .containsExactly(
+                    Overlays.QuickSettingsShade,
+                    Overlays.NotificationsShade,
+                )
+
+            val actionableContentKey =
+                underTest.getActionableContentKey(
+                    currentScene = checkNotNull(currentScene),
+                    currentOverlays = checkNotNull(currentOverlays),
+                    overlayByKey = kosmos.fakeOverlaysByKeys,
+                )
+
+            assertThat(actionableContentKey).isEqualTo(Overlays.QuickSettingsShade)
         }
 }

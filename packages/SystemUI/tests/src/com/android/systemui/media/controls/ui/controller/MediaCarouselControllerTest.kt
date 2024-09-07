@@ -27,22 +27,28 @@ import android.util.MathUtils.abs
 import android.view.View
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.compose.animation.scene.ObservableTransitionState
+import com.android.compose.animation.scene.SceneKey
 import com.android.internal.logging.InstanceId
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.DisableSceneContainer
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.fakeFeatureFlagsClassic
+import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.kosmos.unconfinedTestDispatcher
 import com.android.systemui.media.controls.MediaTestUtils
 import com.android.systemui.media.controls.domain.pipeline.EMPTY_SMARTSPACE_MEDIA_DATA
 import com.android.systemui.media.controls.domain.pipeline.MediaDataManager
@@ -67,18 +73,19 @@ import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.testKosmos
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.concurrency.FakeExecutor
-import com.android.systemui.util.settings.FakeSettings
 import com.android.systemui.util.settings.GlobalSettings
-import com.android.systemui.util.settings.SecureSettings
+import com.android.systemui.util.settings.unconfinedDispatcherFakeSettings
 import com.android.systemui.util.time.FakeSystemClock
+import com.google.common.truth.Truth.assertThat
 import java.util.Locale
 import javax.inject.Provider
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertTrue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestDispatcher
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
@@ -106,11 +113,14 @@ private val SMARTSPACE_KEY = "smartspace"
 private const val PAUSED_LOCAL = "paused local"
 private const val PLAYING_LOCAL = "playing local"
 
+@ExperimentalCoroutinesApi
 @SmallTest
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @RunWith(AndroidJUnit4::class)
 class MediaCarouselControllerTest : SysuiTestCase() {
-    val kosmos = testKosmos()
+    private val kosmos = testKosmos()
+    private val testDispatcher = kosmos.unconfinedTestDispatcher
+    private val secureSettings = kosmos.unconfinedDispatcherFakeSettings
 
     @Mock lateinit var mediaControlPanelFactory: Provider<MediaControlPanel>
     @Mock lateinit var mediaViewControllerFactory: Provider<MediaViewController>
@@ -132,7 +142,6 @@ class MediaCarouselControllerTest : SysuiTestCase() {
     @Mock lateinit var mediaFlags: MediaFlags
     @Mock lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
     @Mock lateinit var globalSettings: GlobalSettings
-    private lateinit var secureSettings: SecureSettings
     private val transitionRepository = kosmos.fakeKeyguardTransitionRepository
     @Captor lateinit var listener: ArgumentCaptor<MediaDataManager.Listener>
     @Captor
@@ -144,7 +153,6 @@ class MediaCarouselControllerTest : SysuiTestCase() {
 
     private val clock = FakeSystemClock()
     private lateinit var bgExecutor: FakeExecutor
-    private lateinit var testDispatcher: TestDispatcher
     private lateinit var mediaCarouselController: MediaCarouselController
 
     private var originalResumeSetting =
@@ -153,10 +161,8 @@ class MediaCarouselControllerTest : SysuiTestCase() {
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        secureSettings = FakeSettings()
         context.resources.configuration.setLocales(LocaleList(Locale.US, Locale.UK))
         bgExecutor = FakeExecutor(clock)
-        testDispatcher = UnconfinedTestDispatcher()
         mediaCarouselController =
             MediaCarouselController(
                 applicationScope = kosmos.applicationCoroutineScope,
@@ -183,7 +189,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
                 secureSettings = secureSettings,
                 mediaCarouselViewModel = kosmos.mediaCarouselViewModel,
                 mediaViewControllerFactory = mediaViewControllerFactory,
-                sceneInteractor = kosmos.sceneInteractor,
+                deviceEntryInteractor = kosmos.deviceEntryInteractor,
             )
         verify(configurationController).addCallback(capture(configListener))
         verify(visualStabilityProvider)
@@ -868,7 +874,6 @@ class MediaCarouselControllerTest : SysuiTestCase() {
     }
 
     @DisableSceneContainer
-    @ExperimentalCoroutinesApi
     @Test
     fun testKeyguardGone_showMediaCarousel() =
         kosmos.testScope.runTest {
@@ -892,7 +897,6 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         }
 
     @EnableSceneContainer
-    @ExperimentalCoroutinesApi
     @Test
     fun testKeyguardGone_showMediaCarousel_scene_container() =
         kosmos.testScope.runTest {
@@ -910,7 +914,6 @@ class MediaCarouselControllerTest : SysuiTestCase() {
             job.cancel()
         }
 
-    @ExperimentalCoroutinesApi
     @Test
     fun keyguardShowing_notAllowedOnLockscreen_updateVisibility() {
         kosmos.testScope.runTest {
@@ -940,7 +943,6 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         }
     }
 
-    @ExperimentalCoroutinesApi
     @Test
     fun keyguardShowing_allowedOnLockscreen_updateVisibility() {
         kosmos.testScope.runTest {
@@ -967,6 +969,74 @@ class MediaCarouselControllerTest : SysuiTestCase() {
 
             settingsJob.cancel()
             keyguardJob.cancel()
+        }
+    }
+
+    @EnableSceneContainer
+    @Test
+    fun deviceEntered_mediaAllowed_notLockedAndHidden() {
+        kosmos.testScope.runTest {
+            val settingsJob =
+                mediaCarouselController.listenForLockscreenSettingChanges(
+                    kosmos.applicationCoroutineScope
+                )
+            secureSettings.putBool(Settings.Secure.MEDIA_CONTROLS_LOCK_SCREEN, true)
+            setDeviceEntered(true)
+
+            assertEquals(false, mediaCarouselController.isLockedAndHidden())
+
+            settingsJob.cancel()
+        }
+    }
+
+    @EnableSceneContainer
+    @Test
+    fun deviceEntered_mediaNotAllowed_notLockedAndHidden() {
+        kosmos.testScope.runTest {
+            val settingsJob =
+                mediaCarouselController.listenForLockscreenSettingChanges(
+                    kosmos.applicationCoroutineScope
+                )
+            secureSettings.putBool(Settings.Secure.MEDIA_CONTROLS_LOCK_SCREEN, false)
+            setDeviceEntered(true)
+
+            assertEquals(false, mediaCarouselController.isLockedAndHidden())
+
+            settingsJob.cancel()
+        }
+    }
+
+    @EnableSceneContainer
+    @Test
+    fun deviceNotEntered_mediaAllowed_notLockedAndHidden() {
+        kosmos.testScope.runTest {
+            val settingsJob =
+                mediaCarouselController.listenForLockscreenSettingChanges(
+                    kosmos.applicationCoroutineScope
+                )
+            secureSettings.putBool(Settings.Secure.MEDIA_CONTROLS_LOCK_SCREEN, true)
+            setDeviceEntered(false)
+
+            assertEquals(false, mediaCarouselController.isLockedAndHidden())
+
+            settingsJob.cancel()
+        }
+    }
+
+    @EnableSceneContainer
+    @Test
+    fun deviceNotEntered_mediaNotAllowed_lockedAndHidden() {
+        kosmos.testScope.runTest {
+            val settingsJob =
+                mediaCarouselController.listenForLockscreenSettingChanges(
+                    kosmos.applicationCoroutineScope
+                )
+            secureSettings.putBool(Settings.Secure.MEDIA_CONTROLS_LOCK_SCREEN, false)
+            setDeviceEntered(false)
+
+            assertEquals(true, mediaCarouselController.isLockedAndHidden())
+
+            settingsJob.cancel()
         }
     }
 
@@ -1128,5 +1198,31 @@ class MediaCarouselControllerTest : SysuiTestCase() {
             MediaPlayerData.getMediaPlayerIndex(PLAYING_LOCAL),
             mediaCarouselController.mediaCarouselScrollHandler.visibleMediaIndex
         )
+    }
+
+    private fun TestScope.setDeviceEntered(isEntered: Boolean) {
+        if (isEntered) {
+            // Unlock the device, marking the device as entered
+            kosmos.fakeDeviceEntryFingerprintAuthRepository.setAuthenticationStatus(
+                SuccessFingerprintAuthenticationStatus(0, true)
+            )
+            runCurrent()
+        }
+        setScene(
+            if (isEntered) {
+                Scenes.Gone
+            } else {
+                Scenes.Lockscreen
+            }
+        )
+        assertThat(kosmos.deviceEntryInteractor.isDeviceEntered.value).isEqualTo(isEntered)
+    }
+
+    private fun TestScope.setScene(key: SceneKey) {
+        kosmos.sceneInteractor.changeScene(key, "test")
+        kosmos.sceneInteractor.setTransitionState(
+            MutableStateFlow<ObservableTransitionState>(ObservableTransitionState.Idle(key))
+        )
+        runCurrent()
     }
 }

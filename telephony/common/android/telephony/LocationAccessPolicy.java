@@ -33,7 +33,6 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.android.internal.telephony.TelephonyPermissions;
-import com.android.internal.telephony.flags.Flags;
 import com.android.internal.telephony.util.TelephonyUtils;
 
 /**
@@ -312,18 +311,10 @@ public final class LocationAccessPolicy {
         // This avoid breaking legacy code that rely on public-facing APIs to access cell location,
         // and it doesn't create an info leak risk because the cell location is stored in the phone
         // process anyway, and the system server already has location access.
-        if (Flags.supportPhoneUidCheckForMultiuser()) {
-            if (TelephonyPermissions.isSystemOrPhone(query.callingUid)
-                    || UserHandle.isSameApp(query.callingUid, Process.NETWORK_STACK_UID)
-                    || UserHandle.isSameApp(query.callingUid, Process.ROOT_UID)) {
-                return LocationPermissionResult.ALLOWED;
-            }
-        } else {
-            if (query.callingUid == Process.PHONE_UID || query.callingUid == Process.SYSTEM_UID
-                    || query.callingUid == Process.NETWORK_STACK_UID
-                    || query.callingUid == Process.ROOT_UID) {
-                return LocationPermissionResult.ALLOWED;
-            }
+        if (TelephonyPermissions.isSystemOrPhone(query.callingUid)
+                || UserHandle.isSameApp(query.callingUid, Process.NETWORK_STACK_UID)
+                || UserHandle.isSameApp(query.callingUid, Process.ROOT_UID)) {
+            return LocationPermissionResult.ALLOWED;
         }
 
         // Check the system-wide requirements. If the location main switch is off and the caller is

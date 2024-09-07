@@ -29,6 +29,7 @@ import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_T
 import static java.util.stream.Collectors.joining;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -78,6 +79,7 @@ import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.navigationbar.gestural.domain.GestureInteractor;
+import com.android.systemui.navigationbar.gestural.domain.TaskMatcher;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.NavigationEdgeBackPlugin;
 import com.android.systemui.plugins.PluginListener;
@@ -474,9 +476,14 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
                 } else {
                     String[] gestureBlockingActivities = resources.getStringArray(resId);
                     for (String gestureBlockingActivity : gestureBlockingActivities) {
-                        mGestureInteractor.addGestureBlockedActivity(
-                                ComponentName.unflattenFromString(gestureBlockingActivity),
-                                GestureInteractor.Scope.Local);
+                        final ComponentName component =
+                                ComponentName.unflattenFromString(gestureBlockingActivity);
+
+                        if (component != null) {
+                            mGestureInteractor.addGestureBlockedMatcher(
+                                    new TaskMatcher.TopActivityComponent(component),
+                                    GestureInteractor.Scope.Local);
+                        }
                     }
                 }
             } catch (NameNotFoundException e) {
@@ -1325,21 +1332,20 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
         }
     }
 
-    public void setBackAnimation(BackAnimation backAnimation) {
+    public void setBackAnimation(@Nullable BackAnimation backAnimation) {
         mBackAnimation = backAnimation;
-        mBackAnimation.setPilferPointerCallback(() -> {
-            pilferPointers();
-        });
-        mBackAnimation.setTopUiRequestCallback(
-                (requestTopUi, tag) -> mUiThreadContext.getExecutor().execute(() ->
-                        mNotificationShadeWindowController.setRequestTopUi(requestTopUi, tag)));
-        updateBackAnimationThresholds();
-        if (mLightBarControllerProvider.get() != null) {
-            mBackAnimation.setStatusBarCustomizer((appearance) -> {
-                mUiThreadContext.getExecutor().execute(() ->
-                        mLightBarControllerProvider.get()
-                                .customizeStatusBarAppearance(appearance));
-            });
+        if (backAnimation != null) {
+            backAnimation.setPilferPointerCallback(this::pilferPointers);
+            backAnimation.setTopUiRequestCallback(
+                    (requestTopUi, tag) -> mUiThreadContext.getExecutor().execute(() ->
+                            mNotificationShadeWindowController.setRequestTopUi(requestTopUi, tag)));
+            updateBackAnimationThresholds();
+            if (mLightBarControllerProvider.get() != null) {
+                mBackAnimation.setStatusBarCustomizer((appearance) ->
+                        mUiThreadContext.getExecutor().execute(() ->
+                            mLightBarControllerProvider.get()
+                                    .customizeStatusBarAppearance(appearance)));
+            }
         }
     }
 

@@ -50,7 +50,7 @@ genrule_defaults {
 framework_minus_apex_cmd = "$(location hoststubgen) " +
     "@$(location :ravenwood-standard-options) " +
     "--debug-log $(location hoststubgen_framework-minus-apex.log) " +
-    "--out-impl-jar $(location ravenwood.jar) " +
+    "--out-jar $(location ravenwood.jar) " +
     "--in-jar $(location :framework-minus-apex-for-hoststubgen) " +
     "--policy-override-file $(location :ravenwood-framework-policies) " +
     "--annotation-allowed-classes-file $(location :ravenwood-annotation-allowed-classes) "
@@ -183,7 +183,7 @@ java_genrule {
         "--stats-file $(location hoststubgen_services.core_stats.csv) " +
         "--supported-api-list-file $(location hoststubgen_services.core_apis.csv) " +
 
-        "--out-impl-jar $(location ravenwood.jar) " +
+        "--out-jar $(location ravenwood.jar) " +
 
         "--gen-keep-all-file $(location hoststubgen_services.core_keep_all.txt) " +
         "--gen-input-dump-file $(location hoststubgen_services.core_dump.txt) " +

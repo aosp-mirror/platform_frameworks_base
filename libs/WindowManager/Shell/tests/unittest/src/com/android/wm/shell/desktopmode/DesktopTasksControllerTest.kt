@@ -84,6 +84,7 @@ import com.android.wm.shell.common.MultiInstanceHelper
 import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.common.SyncTransactionQueue
 import com.android.wm.shell.desktopmode.DesktopTasksController.SnapPosition
+import com.android.wm.shell.desktopmode.DesktopTasksController.TaskbarDesktopTaskListener
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createFreeformTask
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createFullscreenTask
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createHomeTask
@@ -122,12 +123,12 @@ import org.mockito.ArgumentMatchers.isA
 import org.mockito.ArgumentMatchers.isNull
 import org.mockito.Mock
 import org.mockito.Mockito
-import org.mockito.Mockito.any
 import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
+import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.atLeastOnce
 import org.mockito.kotlin.eq
@@ -175,6 +176,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   @Mock
   private lateinit var mockInteractionJankMonitor: InteractionJankMonitor
   @Mock private lateinit var mockSurface: SurfaceControl
+  @Mock private lateinit var taskbarDesktopTaskListener: TaskbarDesktopTaskListener
 
   private lateinit var mockitoSession: StaticMockitoSession
   private lateinit var controller: DesktopTasksController
@@ -237,6 +239,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
     val captor = ArgumentCaptor.forClass(RecentsTransitionStateListener::class.java)
     verify(recentsTransitionHandler).addTransitionStateListener(captor.capture())
     recentsTransitionStateListener = captor.value
+
+    controller.taskbarDesktopTaskListener = taskbarDesktopTaskListener
   }
 
   private fun createController(): DesktopTasksController {
@@ -280,6 +284,52 @@ class DesktopTasksControllerTest : ShellTestCase() {
   fun instantiate_addInitCallback() {
     verify(shellInit).addInitCallback(any(), any<DesktopTasksController>())
   }
+
+  @Test
+  fun doesAnyTaskRequireTaskbarRounding_onlyFreeFormTaskIsRunning_returnFalse() {
+    setUpFreeformTask()
+
+    assertThat(controller.doesAnyTaskRequireTaskbarRounding(DEFAULT_DISPLAY)).isFalse()
+  }
+
+  @Test
+  fun doesAnyTaskRequireTaskbarRounding_toggleResizeOfFreeFormTask_returnTrue() {
+    val task1 = setUpFreeformTask()
+
+    val argumentCaptor = ArgumentCaptor.forClass(Boolean::class.java)
+    controller.toggleDesktopTaskSize(task1)
+    verify(taskbarDesktopTaskListener).onTaskbarCornerRoundingUpdate(argumentCaptor.capture())
+
+    assertThat(argumentCaptor.value).isTrue()
+  }
+
+  @Test
+  fun doesAnyTaskRequireTaskbarRounding_fullScreenTaskIsRunning_returnTrue() {
+    val stableBounds = Rect().apply { displayLayout.getStableBounds(this) }
+    setUpFreeformTask(bounds = stableBounds, active = true)
+    assertThat(controller.doesAnyTaskRequireTaskbarRounding(DEFAULT_DISPLAY)).isTrue()
+  }
+
+  @Test
+  fun doesAnyTaskRequireTaskbarRounding_toggleResizeOfFullScreenTask_returnFalse() {
+    val stableBounds = Rect().apply { displayLayout.getStableBounds(this) }
+    val task1 = setUpFreeformTask(bounds = stableBounds, active = true)
+
+    val argumentCaptor = ArgumentCaptor.forClass(Boolean::class.java)
+    controller.toggleDesktopTaskSize(task1)
+    verify(taskbarDesktopTaskListener).onTaskbarCornerRoundingUpdate(argumentCaptor.capture())
+
+    assertThat(argumentCaptor.value).isFalse()
+  }
+
+  @Test
+  fun doesAnyTaskRequireTaskbarRounding_splitScreenTaskIsRunning_returnTrue() {
+    val stableBounds = Rect().apply { displayLayout.getStableBounds(this) }
+    setUpFreeformTask(bounds = Rect(stableBounds.left, stableBounds.top, 500, stableBounds.bottom))
+
+    assertThat(controller.doesAnyTaskRequireTaskbarRounding(DEFAULT_DISPLAY)).isTrue()
+  }
+
 
   @Test
   fun instantiate_cannotEnterDesktopMode_doNotAddInitCallback() {
@@ -2809,7 +2859,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   }
 
   @Test
-  fun getSnapBounds_calculatesBoundsForResizable() {
+  fun snapToHalfScreen_getSnapBounds_calculatesBoundsForResizable() {
     val bounds = Rect(100, 100, 300, 300)
     val task = setUpFreeformTask(DEFAULT_DISPLAY, bounds).apply {
       topActivityInfo = ActivityInfo().apply {
@@ -2824,10 +2874,42 @@ class DesktopTasksControllerTest : ShellTestCase() {
       STABLE_BOUNDS.left, STABLE_BOUNDS.top, STABLE_BOUNDS.right / 2, STABLE_BOUNDS.bottom
     )
 
-    controller.snapToHalfScreen(task, currentDragBounds, SnapPosition.LEFT)
+    controller.snapToHalfScreen(task, mockSurface, currentDragBounds, SnapPosition.LEFT)
     // Assert bounds set to stable bounds
     val wct = getLatestToggleResizeDesktopTaskWct(currentDragBounds)
     assertThat(findBoundsChange(wct, task)).isEqualTo(expectedBounds)
+  }
+
+  @Test
+  fun snapToHalfScreen_snapBoundsWhenAlreadySnapped_animatesSurfaceWithoutWCT() {
+    assumeTrue(ENABLE_SHELL_TRANSITIONS)
+    // Set up task to already be in snapped-left bounds
+    val bounds = Rect(
+      STABLE_BOUNDS.left, STABLE_BOUNDS.top, STABLE_BOUNDS.right / 2, STABLE_BOUNDS.bottom
+    )
+    val task = setUpFreeformTask(DEFAULT_DISPLAY, bounds).apply {
+      topActivityInfo = ActivityInfo().apply {
+        screenOrientation = SCREEN_ORIENTATION_LANDSCAPE
+        configuration.windowConfiguration.appBounds = bounds
+      }
+      isResizeable = true
+    }
+
+    // Attempt to snap left again
+    val currentDragBounds = Rect(bounds).apply { offset(-100, 0) }
+    controller.snapToHalfScreen(task, mockSurface, currentDragBounds, SnapPosition.LEFT)
+
+    // Assert that task is NOT updated via WCT
+    verify(toggleResizeDesktopTaskTransitionHandler, never()).startTransition(any(), any())
+
+    // Assert that task leash is updated via Surface Animations
+    verify(mReturnToDragStartAnimator).start(
+      eq(task.taskId),
+      eq(mockSurface),
+      eq(currentDragBounds),
+      eq(bounds),
+      eq(true)
+    )
   }
 
   @Test
@@ -2861,7 +2943,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
       eq(task.taskId),
       eq(mockSurface),
       eq(currentDragBounds),
-      eq(preDragBounds)
+      eq(preDragBounds),
+      eq(false)
     )
   }
 

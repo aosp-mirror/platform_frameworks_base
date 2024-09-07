@@ -36,11 +36,9 @@ import android.view.DisplayAdjustments;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import com.android.internal.os.RuntimeInit;
 import com.android.server.LocalServices;
 
 import org.junit.runner.Description;
-import org.junit.runners.model.Statement;
 
 import java.io.File;
 import java.io.IOException;
@@ -92,8 +90,6 @@ public class RavenwoodRuleImpl {
             maybeThrowPendingUncaughtException(false);
             Thread.setDefaultUncaughtExceptionHandler(sUncaughtExceptionHandler);
         }
-
-        RuntimeInit.redirectLogStreams();
 
         android.os.Process.init$ravenwood(rule.mUid, rule.mPid);
         android.os.Binder.init$ravenwood();
@@ -224,11 +220,6 @@ public class RavenwoodRuleImpl {
                         "Found an uncaught exception before this test started", pending);
             }
         }
-    }
-
-    public static void validate(Statement base, Description description,
-            boolean enableOptionalValidation) {
-        // Nothing to check, for now.
     }
 
     /**

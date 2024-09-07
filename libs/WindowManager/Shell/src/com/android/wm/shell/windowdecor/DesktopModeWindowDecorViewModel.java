@@ -90,6 +90,7 @@ import com.android.wm.shell.R;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.apptoweb.AppToWebGenericLinksParser;
+import com.android.wm.shell.apptoweb.AssistContentRequester;
 import com.android.wm.shell.common.DisplayChangeController;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayInsetsController;
@@ -97,6 +98,7 @@ import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.MultiInstanceHelper;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
+import com.android.wm.shell.desktopmode.DesktopActivityOrientationChangeHandler;
 import com.android.wm.shell.desktopmode.DesktopModeVisualIndicator;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
 import com.android.wm.shell.desktopmode.DesktopTasksController.SnapPosition;
@@ -166,6 +168,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     private TaskOperations mTaskOperations;
     private final Supplier<SurfaceControl.Transaction> mTransactionFactory;
     private final Transitions mTransitions;
+    private final Optional<DesktopActivityOrientationChangeHandler>
+            mActivityOrientationChangeHandler;
 
     private SplitScreenController mSplitScreenController;
 
@@ -179,6 +183,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     private final Region mExclusionRegion = Region.obtain();
     private boolean mInImmersiveMode;
     private final String mSysUIPackageName;
+    private final AssistContentRequester mAssistContentRequester;
 
     private final DisplayChangeController.OnDisplayChangingListener mOnDisplayChangingListener;
     private final ISystemGestureExclusionListener mGestureExclusionListener =
@@ -214,8 +219,10 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
             InteractionJankMonitor interactionJankMonitor,
             AppToWebGenericLinksParser genericLinksParser,
+            AssistContentRequester assistContentRequester,
             MultiInstanceHelper multiInstanceHelper,
-            Optional<DesktopTasksLimiter> desktopTasksLimiter
+            Optional<DesktopTasksLimiter> desktopTasksLimiter,
+            Optional<DesktopActivityOrientationChangeHandler> activityOrientationChangeHandler
     ) {
         this(
                 context,
@@ -234,6 +241,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 transitions,
                 desktopTasksController,
                 genericLinksParser,
+                assistContentRequester,
                 multiInstanceHelper,
                 new DesktopModeWindowDecoration.Factory(),
                 new InputMonitorFactory(),
@@ -241,7 +249,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 rootTaskDisplayAreaOrganizer,
                 new SparseArray<>(),
                 interactionJankMonitor,
-                desktopTasksLimiter);
+                desktopTasksLimiter,
+                activityOrientationChangeHandler);
     }
 
     @VisibleForTesting
@@ -262,6 +271,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             Transitions transitions,
             Optional<DesktopTasksController> desktopTasksController,
             AppToWebGenericLinksParser genericLinksParser,
+            AssistContentRequester assistContentRequester,
             MultiInstanceHelper multiInstanceHelper,
             DesktopModeWindowDecoration.Factory desktopModeWindowDecorFactory,
             InputMonitorFactory inputMonitorFactory,
@@ -269,7 +279,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
             SparseArray<DesktopModeWindowDecoration> windowDecorByTaskId,
             InteractionJankMonitor interactionJankMonitor,
-            Optional<DesktopTasksLimiter> desktopTasksLimiter) {
+            Optional<DesktopTasksLimiter> desktopTasksLimiter,
+            Optional<DesktopActivityOrientationChangeHandler> activityOrientationChangeHandler) {
         mContext = context;
         mMainExecutor = shellExecutor;
         mMainHandler = mainHandler;
@@ -297,6 +308,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 com.android.internal.R.string.config_systemUi);
         mInteractionJankMonitor = interactionJankMonitor;
         mDesktopTasksLimiter = desktopTasksLimiter;
+        mActivityOrientationChangeHandler = activityOrientationChangeHandler;
+        mAssistContentRequester = assistContentRequester;
         mOnDisplayChangingListener = (displayId, fromRotation, toRotation, displayAreaInfo, t) -> {
             DesktopModeWindowDecoration decoration;
             RunningTaskInfo taskInfo;
@@ -388,6 +401,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             incrementEventReceiverTasks(taskInfo.displayId);
         }
         decoration.relayout(taskInfo);
+        mActivityOrientationChangeHandler.ifPresent(handler ->
+                handler.handleActivityOrientationChange(oldTaskInfo, taskInfo));
     }
 
     @Override
@@ -482,7 +497,9 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         } else {
             mInteractionJankMonitor.begin(decoration.mTaskSurface, mContext,
                     Cuj.CUJ_DESKTOP_MODE_SNAP_RESIZE, "maximize_menu_resizable");
-            mDesktopTasksController.snapToHalfScreen(decoration.mTaskInfo,
+            mDesktopTasksController.snapToHalfScreen(
+                    decoration.mTaskInfo,
+                    decoration.mTaskSurface,
                     decoration.mTaskInfo.configuration.windowConfiguration.getBounds(),
                     left ? SnapPosition.LEFT : SnapPosition.RIGHT);
         }
@@ -496,16 +513,16 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         if (decoration == null) {
             return;
         }
-        openInBrowser(uri);
+        openInBrowser(uri, decoration.getUser());
         decoration.closeHandleMenu();
         decoration.closeMaximizeMenu();
     }
 
-    private void openInBrowser(Uri uri) {
+    private void openInBrowser(Uri uri, @NonNull UserHandle userHandle) {
         final Intent intent = Intent.makeMainSelectorActivity(ACTION_MAIN, CATEGORY_APP_BROWSER)
                 .setData(uri)
                 .addFlags(FLAG_ACTIVITY_NEW_TASK);
-        mContext.startActivity(intent);
+        mContext.startActivityAsUser(intent, userHandle);
     }
 
     private void onToDesktop(int taskId, DesktopModeTransitionSource source) {
@@ -615,7 +632,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             } else if (id == R.id.caption_handle || id == R.id.open_menu_button) {
                 if (!decoration.isHandleMenuActive()) {
                     moveTaskToFront(decoration.mTaskInfo);
-                    decoration.createHandleMenu(mSplitScreenController);
+                    decoration.createHandleMenu();
                 }
             } else if (id == R.id.maximize_window) {
                 // TODO(b/346441962): move click detection logic into the decor's
@@ -1259,6 +1276,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                         mSyncQueue,
                         mRootTaskDisplayAreaOrganizer,
                         mGenericLinksParser,
+                        mAssistContentRequester,
                         mMultiInstanceHelper);
         mWindowDecorByTaskId.put(taskInfo.taskId, windowDecoration);
 

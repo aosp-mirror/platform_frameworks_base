@@ -104,10 +104,10 @@ interface SceneTransitionLayoutScope {
      * call order. Calling overlay(A) followed by overlay(B) will mean that overlay B renders
      * after/above overlay A.
      */
-    // TODO(b/353679003): Allow to specify user actions. When overlays are shown, the user actions
-    // of the top-most overlay in currentOverlays will be used.
     fun overlay(
         key: OverlayKey,
+        userActions: Map<UserAction, UserActionResult> =
+            mapOf(Back to UserActionResult.HideOverlay(key)),
         alignment: Alignment = Alignment.Center,
         content: @Composable ContentScope.() -> Unit,
     )
@@ -379,6 +379,10 @@ sealed class UserAction {
         return this to UserActionResult(toScene = scene)
     }
 
+    infix fun to(overlay: OverlayKey): Pair<UserAction, UserActionResult> {
+        return this to UserActionResult(toOverlay = overlay)
+    }
+
     /** Resolve this into a [Resolved] user action given [layoutDirection]. */
     internal abstract fun resolve(layoutDirection: LayoutDirection): Resolved
 
@@ -475,24 +479,99 @@ interface SwipeSourceDetector {
         position: IntOffset,
         density: Density,
         orientation: Orientation,
-    ): SwipeSource?
+    ): SwipeSource.Resolved?
 }
 
 /** The result of performing a [UserAction]. */
-data class UserActionResult(
-    /** The scene we should be transitioning to during the [UserAction]. */
-    val toScene: SceneKey,
-
+sealed class UserActionResult(
     /** The key of the transition that should be used. */
-    val transitionKey: TransitionKey? = null,
+    open val transitionKey: TransitionKey? = null,
 
     /**
      * If `true`, the swipe will be committed and we will settle to [toScene] if only if the user
      * swiped at least the swipe distance, i.e. the transition progress was already equal to or
      * bigger than 100% when the user released their finger. `
      */
-    val requiresFullDistanceSwipe: Boolean = false,
-)
+    open val requiresFullDistanceSwipe: Boolean,
+) {
+    internal abstract fun toContent(currentScene: SceneKey): ContentKey
+
+    data class ChangeScene
+    internal constructor(
+        /** The scene we should be transitioning to during the [UserAction]. */
+        val toScene: SceneKey,
+        override val transitionKey: TransitionKey? = null,
+        override val requiresFullDistanceSwipe: Boolean = false,
+    ) : UserActionResult(transitionKey, requiresFullDistanceSwipe) {
+        override fun toContent(currentScene: SceneKey): ContentKey = toScene
+    }
+
+    /** A [UserActionResult] that shows [overlay]. */
+    data class ShowOverlay(
+        val overlay: OverlayKey,
+        override val transitionKey: TransitionKey? = null,
+        override val requiresFullDistanceSwipe: Boolean = false,
+    ) : UserActionResult(transitionKey, requiresFullDistanceSwipe) {
+        override fun toContent(currentScene: SceneKey): ContentKey = overlay
+    }
+
+    /** A [UserActionResult] that hides [overlay]. */
+    data class HideOverlay(
+        val overlay: OverlayKey,
+        override val transitionKey: TransitionKey? = null,
+        override val requiresFullDistanceSwipe: Boolean = false,
+    ) : UserActionResult(transitionKey, requiresFullDistanceSwipe) {
+        override fun toContent(currentScene: SceneKey): ContentKey = currentScene
+    }
+
+    /**
+     * A [UserActionResult] that replaces the current overlay by [overlay].
+     *
+     * Note: This result can only be used for user actions of overlays and an exception will be
+     * thrown if it is used for a scene.
+     */
+    data class ReplaceByOverlay(
+        val overlay: OverlayKey,
+        override val transitionKey: TransitionKey? = null,
+        override val requiresFullDistanceSwipe: Boolean = false,
+    ) : UserActionResult(transitionKey, requiresFullDistanceSwipe) {
+        override fun toContent(currentScene: SceneKey): ContentKey = overlay
+    }
+
+    companion object {
+        /** A [UserActionResult] that changes the current scene to [toScene]. */
+        operator fun invoke(
+            /** The scene we should be transitioning to during the [UserAction]. */
+            toScene: SceneKey,
+
+            /** The key of the transition that should be used. */
+            transitionKey: TransitionKey? = null,
+
+            /**
+             * If `true`, the swipe will be committed if only if the user swiped at least the swipe
+             * distance, i.e. the transition progress was already equal to or bigger than 100% when
+             * the user released their finger.
+             */
+            requiresFullDistanceSwipe: Boolean = false,
+        ): UserActionResult = ChangeScene(toScene, transitionKey, requiresFullDistanceSwipe)
+
+        /** A [UserActionResult] that shows [toOverlay]. */
+        operator fun invoke(
+            /** The overlay we should be transitioning to during the [UserAction]. */
+            toOverlay: OverlayKey,
+
+            /** The key of the transition that should be used. */
+            transitionKey: TransitionKey? = null,
+
+            /**
+             * If `true`, the swipe will be committed if only if the user swiped at least the swipe
+             * distance, i.e. the transition progress was already equal to or bigger than 100% when
+             * the user released their finger.
+             */
+            requiresFullDistanceSwipe: Boolean = false,
+        ): UserActionResult = ShowOverlay(toOverlay, transitionKey, requiresFullDistanceSwipe)
+    }
+}
 
 fun interface UserActionDistance {
     /**
@@ -538,7 +617,7 @@ internal fun SceneTransitionLayoutForTesting(
 ) {
     val density = LocalDensity.current
     val layoutDirection = LocalLayoutDirection.current
-    val coroutineScope = rememberCoroutineScope()
+    val animationScope = rememberCoroutineScope()
     val layoutImpl = remember {
         SceneTransitionLayoutImpl(
                 state = state as MutableSceneTransitionLayoutStateImpl,
@@ -547,7 +626,7 @@ internal fun SceneTransitionLayoutForTesting(
                 swipeSourceDetector = swipeSourceDetector,
                 transitionInterceptionThreshold = transitionInterceptionThreshold,
                 builder = builder,
-                coroutineScope = coroutineScope,
+                animationScope = animationScope,
             )
             .also { onLayoutImpl?.invoke(it) }
     }

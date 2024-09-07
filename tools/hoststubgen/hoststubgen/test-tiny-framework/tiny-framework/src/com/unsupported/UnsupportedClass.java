@@ -15,10 +15,10 @@
  */
 package com.unsupported;
 
-import android.hosttest.annotation.HostSideTestWholeClassStub;
+import android.hosttest.annotation.HostSideTestWholeClassKeep;
 
 // Used for testing --package-redirect.
-@HostSideTestWholeClassStub
+@HostSideTestWholeClassKeep
 public class UnsupportedClass {
     public UnsupportedClass(int value) {
         throw new RuntimeException("This class is not supported");

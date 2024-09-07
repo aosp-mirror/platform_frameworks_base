@@ -58,8 +58,7 @@ public abstract class AppFunctionService extends Service {
      * applications can not abuse it.
      */
     @NonNull
-    public static final String SERVICE_INTERFACE =
-            "android.app.appfunctions.AppFunctionService";
+    public static final String SERVICE_INTERFACE = "android.app.appfunctions.AppFunctionService";
 
     private final Binder mBinder =
             new IAppFunctionService.Stub() {
@@ -67,22 +66,20 @@ public abstract class AppFunctionService extends Service {
                 public void executeAppFunction(
                         @NonNull ExecuteAppFunctionRequest request,
                         @NonNull IExecuteAppFunctionCallback callback) {
-                    if (AppFunctionService.this.checkCallingPermission(
-                            BIND_APP_FUNCTION_SERVICE) == PERMISSION_DENIED) {
+                    if (AppFunctionService.this.checkCallingPermission(BIND_APP_FUNCTION_SERVICE)
+                            == PERMISSION_DENIED) {
                         throw new SecurityException("Can only be called by the system server.");
                     }
                     SafeOneTimeExecuteAppFunctionCallback safeCallback =
                             new SafeOneTimeExecuteAppFunctionCallback(callback);
                     try {
-                        AppFunctionService.this.onExecuteFunction(
-                                request,
-                                safeCallback::onResult);
+                        AppFunctionService.this.onExecuteFunction(request, safeCallback::onResult);
                     } catch (Exception ex) {
                         // Apps should handle exceptions. But if they don't, report the error on
                         // behalf of them.
                         safeCallback.onResult(
-                                new ExecuteAppFunctionResponse.Builder(
-                                        getResultCode(ex), getExceptionMessage(ex)).build());
+                                ExecuteAppFunctionResponse.newFailure(
+                                        getResultCode(ex), ex.getMessage(), /* extras= */ null));
                     }
                 }
             };
@@ -110,15 +107,11 @@ public abstract class AppFunctionService extends Service {
      * thread and dispatch the result with the given callback. You should always report back the
      * result using the callback, no matter if the execution was successful or not.
      *
-     * @param request  The function execution request.
+     * @param request The function execution request.
      * @param callback A callback to report back the result.
      */
     @MainThread
     public abstract void onExecuteFunction(
             @NonNull ExecuteAppFunctionRequest request,
             @NonNull Consumer<ExecuteAppFunctionResponse> callback);
-
-    private String getExceptionMessage(Exception exception) {
-        return exception.getMessage() == null ? "" : exception.getMessage();
-    }
 }

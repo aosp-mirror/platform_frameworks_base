@@ -727,6 +727,10 @@
         .75
     </item>
 
+    <!-- The last x ms of face acquired info messages to analyze to determine
+         whether to show a deferred face auth help message. -->
+    <integer name="config_face_help_msgs_defer_analyze_timeframe">500</integer>
+
     <!-- Which face help messages to surface when fingerprint is also enrolled.
          Message ids correspond with the acquired ids in BiometricFaceConstants -->
     <integer-array name="config_face_help_msgs_when_fingerprint_enrolled">
@@ -1047,9 +1051,6 @@
 
     <!-- The width of the shortcut helper container, as a fraction of the screen's width. -->
     <item name="shortcut_helper_screen_width_fraction" format="float" type="dimen">1.0</item>
-
-    <!-- Only applicable for dual shade - Allow Notifications/QS shade to anchor to the bottom. -->
-    <bool name="config_dualShadeAlignedToBottom">false</bool>
 
     <!-- List of packages for which we want to use activity info (instead of application info) for biometric prompt logo. Empty for AOSP. [DO NOT TRANSLATE] -->
     <string-array name="config_useActivityLogoForBiometricPrompt" translatable="false"/>

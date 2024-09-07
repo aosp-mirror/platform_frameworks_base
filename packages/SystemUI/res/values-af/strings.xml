@@ -104,6 +104,7 @@
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> en ander oop apps het hierdie skermskoot bespeur."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Voeg by nota"</string>
     <string name="backlinks_include_link" msgid="4562093591148248158">"Sluit skakel in"</string>
+    <string name="backlinks_duplicate_label_format" msgid="558445128952827926">"<xliff:g id="APPNAME">%1$s</xliff:g> <xliff:g id="FREQUENCYCOUNT">(%2$d)</xliff:g>"</string>
     <string name="screenrecord_title" msgid="4257171601439507792">"Skermopnemer"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Verwerk tans skermopname"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Deurlopende kennisgewing vir \'n skermopnamesessie"</string>
@@ -291,7 +292,8 @@
     <string name="start_dreams" msgid="9131802557946276718">"Sluimerskerm"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Moenie Steur Nie"</string>
-    <string name="quick_settings_modes_label" msgid="5407025818652750501">"Prioriteitmodusse"</string>
+    <!-- no translation found for quick_settings_modes_label (879156359479504244) -->
+    <skip />
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Geen saamgebinde toestelle beskikbaar nie"</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"Tik om ’n toestel te koppel of ontkoppel"</string>
@@ -300,6 +302,7 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Gebruik Bluetooth"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Gekoppel"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"Oudiodeling"</string>
+    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="3227408556754456024">"Tik om oor te skakel of oudio te deel"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Gestoor"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"ontkoppel"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"aktiveer"</string>
@@ -308,8 +311,7 @@
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bluetooth sal môreoggend aanskakel"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Deel oudio"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Deel tans oudio"</string>
-    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_accessibility (7604615019302091708) -->
-    <skip />
+    <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"voer instellings vir oudiodeling in"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> batterykrag"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Oudio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Kopstuk"</string>
@@ -432,10 +434,12 @@
     <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"Maak Instellings oop"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Ander toestel"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Wissel oorsig"</string>
-    <string name="zen_modes_dialog_title" msgid="4159138230418567383">"Prioriteitmodusse"</string>
+    <!-- no translation found for zen_modes_dialog_title (8854640808100096934) -->
+    <skip />
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"Klaar"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"Instellings"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"Aan"</string>
+    <string name="zen_mode_on_with_details" msgid="7416143430557895497">"Op • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"Af"</string>
     <string name="zen_mode_set_up" msgid="7457957033034460064">"Stel op"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"Bestuur in instellings"</string>
@@ -532,8 +536,12 @@
     <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"Die diens wat hierdie funksie verskaf, sal toegang hê tot al die inligting wat op jou skerm sigbaar is of op jou toestel gespeel word terwyl dit opneem of uitsaai. Dit sluit in inligting soos wagwoorde, betalingbesonderhede, foto’s, boodskappe en oudio wat jy speel."</string>
     <string name="screen_share_generic_app_selector_title" msgid="8331515850599218288">"Deel of neem ’n app op"</string>
     <string name="media_projection_entry_app_permission_dialog_title" msgid="4613857256721708062">"Deel jou skerm met <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
-    <string name="media_projection_entry_app_permission_dialog_option_text_single_app" msgid="6314402084788062644">"Deel een app"</string>
-    <string name="media_projection_entry_app_permission_dialog_option_text_entire_screen" msgid="7381488112332599632">"Deel hele skerm"</string>
+    <string name="screen_share_permission_dialog_option_single_app" msgid="2974054871681567314">"Deel een app"</string>
+    <!-- no translation found for media_projection_entry_app_permission_dialog_option_text_single_app (2308901434964846084) -->
+    <skip />
+    <string name="screen_share_permission_dialog_option_entire_screen" msgid="4493174362775038997">"Deel hele skerm"</string>
+    <!-- no translation found for media_projection_entry_app_permission_dialog_option_text_entire_screen (5100078808078139706) -->
+    <skip />
     <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="5504288438067851086">"Wanneer jy jou hele skerm deel, is enigiets op jou skerm sigbaar aan <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>. Wees dus versigtig met dinge soos wagwoorde, betalingbesonderhede, boodskappe, foto’s, en oudio en video."</string>
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="7094417930857938876">"Wanneer jy ’n app deel, is enigiets wat in die app wys of speel, sigbaar aan <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>. Wees dus versigtig met dinge soos wagwoorde, betalingbesonderhede, boodskappe, foto’s, en oudio en video."</string>
     <string name="media_projection_entry_app_permission_dialog_continue_entire_screen" msgid="1850848182344377579">"Deel skerm"</string>
@@ -718,6 +726,7 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Satelliet, goeie toestand"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Satelliet, verbinding is beskikbaar"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"Satelliet-SOS"</string>
+    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"Noodoproepe of SOS"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Werkprofiel"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Pret vir party mense, maar nie vir almal nie"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Stelsel-UI-ontvanger gee jou ekstra maniere om die Android-gebruikerkoppelvlak in te stel en te pasmaak. Hierdie eksperimentele kenmerke kan in toekomstige uitreikings verander, breek of verdwyn. Gaan versigtig voort."</string>
@@ -1384,6 +1393,18 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Vou ikoon in"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Vou ikoon uit"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"of"</string>
+    <!-- no translation found for launch_keyboard_tutorial_notification_title (8849933155160522519) -->
+    <skip />
+    <!-- no translation found for launch_keyboard_tutorial_notification_content (2880339951512757918) -->
+    <skip />
+    <!-- no translation found for launch_touchpad_tutorial_notification_title (2243780062772196901) -->
+    <skip />
+    <!-- no translation found for launch_touchpad_tutorial_notification_content (7931085031240753226) -->
+    <skip />
+    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_title (1940023776496198762) -->
+    <skip />
+    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_content (1780725168171929365) -->
+    <skip />
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Teruggebaar"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Tuisgebaar"</string>
     <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"Handelingsleutel"</string>

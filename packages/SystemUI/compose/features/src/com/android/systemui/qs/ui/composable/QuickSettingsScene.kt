@@ -93,12 +93,12 @@ import com.android.systemui.notifications.ui.composable.NotificationStackCutoffG
 import com.android.systemui.qs.footer.ui.compose.FooterActionsWithAnimatedVisibility
 import com.android.systemui.qs.ui.composable.QuickSettings.SharedValues.MediaLandscapeTopOffset
 import com.android.systemui.qs.ui.composable.QuickSettings.SharedValues.MediaOffset.InQS
-import com.android.systemui.qs.ui.viewmodel.QuickSettingsSceneActionsViewModel
 import com.android.systemui.qs.ui.viewmodel.QuickSettingsSceneContentViewModel
+import com.android.systemui.qs.ui.viewmodel.QuickSettingsUserActionsViewModel
 import com.android.systemui.res.R
 import com.android.systemui.scene.session.ui.composable.SaveableSession
 import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.scene.ui.composable.ComposableScene
+import com.android.systemui.scene.ui.composable.Scene
 import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.shade.ui.composable.CollapsedShadeHeader
 import com.android.systemui.shade.ui.composable.ExpandedShadeHeader
@@ -113,9 +113,11 @@ import dagger.Lazy
 import javax.inject.Inject
 import javax.inject.Named
 import kotlin.math.roundToInt
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 
 /** The Quick Settings (AKA "QS") scene shows the quick setting tiles. */
+@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class QuickSettingsScene
 @Inject
@@ -123,22 +125,21 @@ constructor(
     private val shadeSession: SaveableSession,
     private val notificationStackScrollView: Lazy<NotificationScrollView>,
     private val notificationsPlaceholderViewModelFactory: NotificationsPlaceholderViewModel.Factory,
-    private val actionsViewModelFactory: QuickSettingsSceneActionsViewModel.Factory,
+    private val actionsViewModelFactory: QuickSettingsUserActionsViewModel.Factory,
     private val contentViewModelFactory: QuickSettingsSceneContentViewModel.Factory,
     private val tintedIconManagerFactory: TintedIconManager.Factory,
     private val batteryMeterViewControllerFactory: BatteryMeterViewController.Factory,
     private val statusBarIconController: StatusBarIconController,
     private val mediaCarouselController: MediaCarouselController,
     @Named(MediaModule.QS_PANEL) private val mediaHost: MediaHost,
-) : ExclusiveActivatable(), ComposableScene {
+) : ExclusiveActivatable(), Scene {
     override val key = Scenes.QuickSettings
 
-    private val actionsViewModel: QuickSettingsSceneActionsViewModel by lazy {
+    private val actionsViewModel: QuickSettingsUserActionsViewModel by lazy {
         actionsViewModelFactory.create()
     }
 
-    override val destinationScenes: Flow<Map<UserAction, UserActionResult>> =
-        actionsViewModel.actions
+    override val userActions: Flow<Map<UserAction, UserActionResult>> = actionsViewModel.actions
 
     override suspend fun onActivated(): Nothing {
         actionsViewModel.activate()
@@ -152,7 +153,9 @@ constructor(
             notificationStackScrollView = notificationStackScrollView.get(),
             viewModelFactory = contentViewModelFactory,
             notificationsPlaceholderViewModel =
-                rememberViewModel { notificationsPlaceholderViewModelFactory.create() },
+                rememberViewModel("QuickSettingsScene-notifPlaceholderViewModel") {
+                    notificationsPlaceholderViewModelFactory.create()
+                },
             createTintedIconManager = tintedIconManagerFactory::create,
             createBatteryMeterViewController = batteryMeterViewControllerFactory::create,
             statusBarIconController = statusBarIconController,
@@ -179,10 +182,11 @@ private fun SceneScope.QuickSettingsScene(
 ) {
     val cutoutLocation = LocalDisplayCutout.current.location
 
-    val viewModel = rememberViewModel { viewModelFactory.create() }
-    val brightnessMirrorViewModel = rememberViewModel {
-        viewModel.brightnessMirrorViewModelFactory.create()
-    }
+    val viewModel = rememberViewModel("QuickSettingsScene-viewModel") { viewModelFactory.create() }
+    val brightnessMirrorViewModel =
+        rememberViewModel("QuickSettingsScene-brightnessMirrorViewModel") {
+            viewModel.brightnessMirrorViewModelFactory.create()
+        }
     val brightnessMirrorShowing by brightnessMirrorViewModel.isShowing.collectAsStateWithLifecycle()
     val contentAlpha by
         animateFloatAsState(

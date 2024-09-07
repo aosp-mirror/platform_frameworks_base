@@ -16,7 +16,6 @@
 
 package com.android.systemui.navigationbar.gestural.domain
 
-import android.content.ComponentName
 import com.android.app.tracing.coroutines.flow.flowOn
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
@@ -25,7 +24,6 @@ import com.android.systemui.navigationbar.gestural.data.respository.GestureRepos
 import com.android.systemui.shared.system.ActivityManagerWrapper
 import com.android.systemui.shared.system.TaskStackChangeListener
 import com.android.systemui.shared.system.TaskStackChangeListeners
-import com.android.systemui.util.kotlin.combine
 import com.android.systemui.util.kotlin.emitOnStart
 import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
 import javax.inject.Inject
@@ -60,7 +58,7 @@ constructor(
         Global
     }
 
-    private val _localGestureBlockedActivities = MutableStateFlow<Set<ComponentName>>(setOf())
+    private val _localGestureBlockedMatchers = MutableStateFlow<Set<TaskMatcher>>(setOf())
 
     private val _topActivity =
         conflatedCallbackFlow {
@@ -79,53 +77,47 @@ constructor(
             .mapLatest { getTopActivity() }
             .distinctUntilChanged()
 
-    private suspend fun getTopActivity(): ComponentName? =
+    private suspend fun getTopActivity(): TaskInfo? =
         withContext(backgroundCoroutineContext) {
-            val runningTask = activityManagerWrapper.runningTask
-            runningTask?.topActivity
+            activityManagerWrapper.runningTask?.let { TaskInfo(it.topActivity, it.activityType) }
         }
 
     val topActivityBlocked =
         combine(
             _topActivity,
-            gestureRepository.gestureBlockedActivities,
-            _localGestureBlockedActivities.asStateFlow()
-        ) { activity, global, local ->
-            activity != null && (global + local).contains(activity)
+            gestureRepository.gestureBlockedMatchers,
+            _localGestureBlockedMatchers.asStateFlow()
+        ) { runningTask, global, local ->
+            runningTask != null && (global + local).any { it.matches(runningTask) }
         }
 
-    /**
-     * Adds an {@link Activity} to be blocked based on component when the topmost, focused {@link
-     * Activity}.
-     */
-    fun addGestureBlockedActivity(activity: ComponentName, gestureScope: Scope) {
+    /** Adds an [TaskMatcher] to decide whether gestures should be blocked. */
+    fun addGestureBlockedMatcher(matcher: TaskMatcher, gestureScope: Scope) {
         scope.launch {
             when (gestureScope) {
                 Scope.Local -> {
-                    _localGestureBlockedActivities.emit(
-                        _localGestureBlockedActivities.value.toMutableSet().apply { add(activity) }
+                    _localGestureBlockedMatchers.emit(
+                        _localGestureBlockedMatchers.value.toMutableSet().apply { add(matcher) }
                     )
                 }
                 Scope.Global -> {
-                    gestureRepository.addGestureBlockedActivity(activity)
+                    gestureRepository.addGestureBlockedMatcher(matcher)
                 }
             }
         }
     }
 
-    /** Removes an {@link Activity} from being blocked from gestures. */
-    fun removeGestureBlockedActivity(activity: ComponentName, gestureScope: Scope) {
+    /** Removes a gesture from deciding whether gestures should be blocked */
+    fun removeGestureBlockedMatcher(matcher: TaskMatcher, gestureScope: Scope) {
         scope.launch {
             when (gestureScope) {
                 Scope.Local -> {
-                    _localGestureBlockedActivities.emit(
-                        _localGestureBlockedActivities.value.toMutableSet().apply {
-                            remove(activity)
-                        }
+                    _localGestureBlockedMatchers.emit(
+                        _localGestureBlockedMatchers.value.toMutableSet().apply { remove(matcher) }
                     )
                 }
                 Scope.Global -> {
-                    gestureRepository.removeGestureBlockedActivity(activity)
+                    gestureRepository.removeGestureBlockedMatcher(matcher)
                 }
             }
         }

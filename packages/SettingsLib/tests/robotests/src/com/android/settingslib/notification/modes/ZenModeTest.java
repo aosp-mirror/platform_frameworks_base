@@ -20,9 +20,11 @@ import static android.app.AutomaticZenRule.TYPE_BEDTIME;
 import static android.app.AutomaticZenRule.TYPE_DRIVING;
 import static android.app.AutomaticZenRule.TYPE_IMMERSIVE;
 import static android.app.AutomaticZenRule.TYPE_OTHER;
+import static android.app.AutomaticZenRule.TYPE_SCHEDULE_CALENDAR;
 import static android.app.AutomaticZenRule.TYPE_THEATER;
 import static android.app.AutomaticZenRule.TYPE_UNKNOWN;
 import static android.app.NotificationManager.INTERRUPTION_FILTER_ALARMS;
+import static android.app.NotificationManager.INTERRUPTION_FILTER_ALL;
 import static android.app.NotificationManager.INTERRUPTION_FILTER_NONE;
 import static android.app.NotificationManager.INTERRUPTION_FILTER_PRIORITY;
 import static android.service.notification.SystemZenRules.PACKAGE_ANDROID;
@@ -30,29 +32,22 @@ import static android.service.notification.SystemZenRules.PACKAGE_ANDROID;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
+import static org.junit.Assert.assertThrows;
 
 import android.app.AutomaticZenRule;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Parcel;
 import android.service.notification.Condition;
 import android.service.notification.SystemZenRules;
+import android.service.notification.ZenDeviceEffects;
 import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenPolicy;
 
 import com.android.internal.R;
 
-import com.google.common.util.concurrent.ListenableFuture;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -78,20 +73,26 @@ public class ZenModeTest {
                     .build();
 
     @Test
-    public void testBasicMethods() {
+    public void testBasicMethods_mode() {
         ZenMode zenMode = new ZenMode("id", ZEN_RULE, zenConfigRuleFor(ZEN_RULE, true));
 
         assertThat(zenMode.getId()).isEqualTo("id");
         assertThat(zenMode.getRule()).isEqualTo(ZEN_RULE);
         assertThat(zenMode.isManualDnd()).isFalse();
         assertThat(zenMode.canEditNameAndIcon()).isTrue();
+        assertThat(zenMode.canEditPolicy()).isTrue();
         assertThat(zenMode.canBeDeleted()).isTrue();
         assertThat(zenMode.isActive()).isTrue();
+    }
 
-        ZenMode manualMode = ZenMode.manualDndMode(ZEN_RULE, false);
+    @Test
+    public void testBasicMethods_manualDnd() {
+        ZenMode manualMode = TestModeBuilder.MANUAL_DND_INACTIVE;
+
         assertThat(manualMode.getId()).isEqualTo(ZenMode.MANUAL_DND_MODE_ID);
         assertThat(manualMode.isManualDnd()).isTrue();
         assertThat(manualMode.canEditNameAndIcon()).isFalse();
+        assertThat(manualMode.canEditPolicy()).isTrue();
         assertThat(manualMode.canBeDeleted()).isFalse();
         assertThat(manualMode.isActive()).isFalse();
         assertThat(manualMode.getRule().getPackageName()).isEqualTo(PACKAGE_ANDROID);
@@ -212,7 +213,7 @@ public class ZenModeTest {
         ZenMode zenMode = new ZenMode("id", azr, zenConfigRuleFor(azr, false));
 
         assertThat(zenMode.getPolicy()).isEqualTo(
-                new ZenPolicy.Builder()
+                new ZenPolicy.Builder(ZenModeConfig.getDefaultZenPolicy())
                         .disallowAllSounds()
                         .allowAlarms(true)
                         .allowMedia(true)
@@ -229,9 +230,8 @@ public class ZenModeTest {
         ZenMode zenMode = new ZenMode("id", azr, zenConfigRuleFor(azr, false));
 
         assertThat(zenMode.getPolicy()).isEqualTo(
-                new ZenPolicy.Builder()
+                new ZenPolicy.Builder(ZenModeConfig.getDefaultZenPolicy())
                         .disallowAllSounds()
-                        .hideAllVisualEffects()
                         .allowPriorityChannels(false)
                         .build());
     }
@@ -249,6 +249,77 @@ public class ZenModeTest {
                 INTERRUPTION_FILTER_PRIORITY);
         assertThat(zenMode.getPolicy()).isEqualTo(ZEN_POLICY);
         assertThat(zenMode.getRule().getZenPolicy()).isEqualTo(ZEN_POLICY);
+    }
+
+    @Test
+    public void getInterruptionFilter_returnsFilter() {
+        ZenMode mode = new TestModeBuilder().setInterruptionFilter(
+                INTERRUPTION_FILTER_ALARMS).build();
+
+        assertThat(mode.getInterruptionFilter()).isEqualTo(INTERRUPTION_FILTER_ALARMS);
+    }
+
+    @Test
+    public void setInterruptionFilter_setsFilter() {
+        ZenMode mode = new TestModeBuilder().setInterruptionFilter(
+                INTERRUPTION_FILTER_ALARMS).build();
+
+        mode.setInterruptionFilter(INTERRUPTION_FILTER_ALL);
+
+        assertThat(mode.getInterruptionFilter()).isEqualTo(INTERRUPTION_FILTER_ALL);
+    }
+
+    @Test
+    public void setInterruptionFilter_manualDnd_throws() {
+        ZenMode manualDnd = TestModeBuilder.MANUAL_DND_INACTIVE;
+
+        assertThrows(IllegalStateException.class,
+                () -> manualDnd.setInterruptionFilter(INTERRUPTION_FILTER_ALL));
+    }
+
+    @Test
+    public void canEditPolicy_onlyFalseForSpecialDnd() {
+        assertThat(TestModeBuilder.EXAMPLE.canEditPolicy()).isTrue();
+        assertThat(TestModeBuilder.MANUAL_DND_ACTIVE.canEditPolicy()).isTrue();
+        assertThat(TestModeBuilder.MANUAL_DND_INACTIVE.canEditPolicy()).isTrue();
+
+        ZenMode dndWithAlarms = TestModeBuilder.manualDnd(INTERRUPTION_FILTER_ALARMS, true);
+        assertThat(dndWithAlarms.canEditPolicy()).isFalse();
+        ZenMode dndWithNone = TestModeBuilder.manualDnd(INTERRUPTION_FILTER_NONE, true);
+        assertThat(dndWithNone.canEditPolicy()).isFalse();
+
+        // Note: Backend will never return an inactive manual mode with custom filter.
+        ZenMode badDndWithAlarms = TestModeBuilder.manualDnd(INTERRUPTION_FILTER_ALARMS, false);
+        assertThat(badDndWithAlarms.canEditPolicy()).isFalse();
+        ZenMode badDndWithNone = TestModeBuilder.manualDnd(INTERRUPTION_FILTER_NONE, false);
+        assertThat(badDndWithNone.canEditPolicy()).isFalse();
+    }
+
+    @Test
+    public void canEditPolicy_whenTrue_allowsSettingPolicyAndEffects() {
+        ZenMode normalDnd = TestModeBuilder.manualDnd(INTERRUPTION_FILTER_PRIORITY, true);
+
+        assertThat(normalDnd.canEditPolicy()).isTrue();
+
+        ZenPolicy somePolicy = new ZenPolicy.Builder().showBadges(true).build();
+        normalDnd.setPolicy(somePolicy);
+        assertThat(normalDnd.getPolicy()).isEqualTo(somePolicy);
+
+        ZenDeviceEffects someEffects = new ZenDeviceEffects.Builder()
+                .setShouldUseNightMode(true).build();
+        normalDnd.setDeviceEffects(someEffects);
+        assertThat(normalDnd.getDeviceEffects()).isEqualTo(someEffects);
+    }
+
+    @Test
+    public void canEditPolicy_whenFalse_preventsSettingFilterPolicyOrEffects() {
+        ZenMode specialDnd = TestModeBuilder.manualDnd(INTERRUPTION_FILTER_ALARMS, true);
+
+        assertThat(specialDnd.canEditPolicy()).isFalse();
+        assertThrows(IllegalStateException.class,
+                () -> specialDnd.setPolicy(ZEN_POLICY));
+        assertThrows(IllegalStateException.class,
+                () -> specialDnd.setDeviceEffects(new ZenDeviceEffects.Builder().build()));
     }
 
     @Test
@@ -289,37 +360,97 @@ public class ZenModeTest {
     }
 
     @Test
-    public void getIcon_normalMode_loadsIconNormally() {
-        ZenIconLoader iconLoader = mock(ZenIconLoader.class);
-        ZenMode mode = new ZenMode("id", ZEN_RULE, zenConfigRuleFor(ZEN_RULE, false));
+    public void getIconKey_normalModeWithCustomIcon_isCustomIcon() {
+        ZenMode mode = new TestModeBuilder()
+                .setType(TYPE_BEDTIME)
+                .setPackage("some.package")
+                .setIconResId(123)
+                .build();
 
-        ListenableFuture<Drawable> unused = mode.getIcon(RuntimeEnvironment.getApplication(),
-                iconLoader);
+        ZenIcon.Key iconKey = mode.getIconKey();
 
-        verify(iconLoader).getIcon(any(), eq(ZEN_RULE));
+        assertThat(iconKey.resPackage()).isEqualTo("some.package");
+        assertThat(iconKey.resId()).isEqualTo(123);
     }
 
     @Test
-    public void getIcon_manualDnd_returnsFixedIcon() {
-        ZenIconLoader iconLoader = mock(ZenIconLoader.class);
+    public void getIconKey_systemOwnedModeWithCustomIcon_isCustomIcon() {
+        ZenMode mode = new TestModeBuilder()
+                .setType(TYPE_SCHEDULE_CALENDAR)
+                .setPackage(PACKAGE_ANDROID)
+                .setIconResId(123)
+                .build();
 
-        ListenableFuture<Drawable> future = TestModeBuilder.MANUAL_DND_INACTIVE.getIcon(
-                RuntimeEnvironment.getApplication(), iconLoader);
+        ZenIcon.Key iconKey = mode.getIconKey();
 
-        assertThat(future.isDone()).isTrue();
-        verify(iconLoader, never()).getIcon(any(), any());
+        assertThat(iconKey.resPackage()).isNull();
+        assertThat(iconKey.resId()).isEqualTo(123);
     }
 
     @Test
-    public void getIcon_implicitMode_loadsIconNormally() {
-        ZenIconLoader iconLoader = mock(ZenIconLoader.class);
-        ZenMode mode = new ZenMode(IMPLICIT_RULE_ID, IMPLICIT_ZEN_RULE,
-                zenConfigRuleFor(IMPLICIT_ZEN_RULE, false));
+    public void getIconKey_implicitModeWithCustomIcon_isCustomIcon() {
+        ZenMode mode = new TestModeBuilder()
+                .setId(ZenModeConfig.implicitRuleId("some.package"))
+                .setPackage("some.package")
+                .setIconResId(123)
+                .build();
 
-        ListenableFuture<Drawable> unused = mode.getIcon(RuntimeEnvironment.getApplication(),
-                iconLoader);
+        ZenIcon.Key iconKey = mode.getIconKey();
 
-        verify(iconLoader).getIcon(any(), eq(IMPLICIT_ZEN_RULE));
+        assertThat(iconKey.resPackage()).isEqualTo("some.package");
+        assertThat(iconKey.resId()).isEqualTo(123);
+    }
+
+    @Test
+    public void getIconKey_manualDnd_isDndIcon() {
+        ZenIcon.Key iconKey = TestModeBuilder.MANUAL_DND_INACTIVE.getIconKey();
+
+        assertThat(iconKey.resPackage()).isNull();
+        assertThat(iconKey.resId()).isEqualTo(
+                com.android.internal.R.drawable.ic_zen_mode_type_special_dnd);
+    }
+
+    @Test
+    public void getIconKey_normalModeWithoutCustomIcon_isModeTypeIcon() {
+        ZenMode mode = new TestModeBuilder()
+                .setType(TYPE_BEDTIME)
+                .setPackage("some.package")
+                .build();
+
+        ZenIcon.Key iconKey = mode.getIconKey();
+
+        assertThat(iconKey.resPackage()).isNull();
+        assertThat(iconKey.resId()).isEqualTo(
+                com.android.internal.R.drawable.ic_zen_mode_type_bedtime);
+    }
+
+    @Test
+    public void getIconKey_systemOwnedModeWithoutCustomIcon_isModeTypeIcon() {
+        ZenMode mode = new TestModeBuilder()
+                .setType(TYPE_SCHEDULE_CALENDAR)
+                .setPackage(PACKAGE_ANDROID)
+                .build();
+
+        ZenIcon.Key iconKey = mode.getIconKey();
+
+        assertThat(iconKey.resPackage()).isNull();
+        assertThat(iconKey.resId()).isEqualTo(
+                com.android.internal.R.drawable.ic_zen_mode_type_schedule_calendar);
+    }
+
+    @Test
+    public void getIconKey_implicitModeWithoutCustomIcon_isDndIcon() {
+        ZenMode mode = new TestModeBuilder()
+                .setId(ZenModeConfig.implicitRuleId("some.package"))
+                .setPackage("some_package")
+                .setType(TYPE_BEDTIME) // Type should be ignored.
+                .build();
+
+        ZenIcon.Key iconKey = mode.getIconKey();
+
+        assertThat(iconKey.resPackage()).isNull();
+        assertThat(iconKey.resId()).isEqualTo(
+                com.android.internal.R.drawable.ic_zen_mode_type_special_dnd);
     }
 
     private static void assertUnparceledIsEqualToOriginal(String type, ZenMode original) {

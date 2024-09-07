@@ -574,7 +574,7 @@ public class LogModule {
     @SysUISingleton
     @KeyguardQuickAffordancesLog
     public static LogBuffer provideKeyguardQuickAffordancesLogBuffer(LogBufferFactory factory) {
-        return factory.create("KeyguardQuickAffordancesLog", 25);
+        return factory.create("KeyguardQuickAffordancesLog", 100);
     }
 
     /**
@@ -716,5 +716,13 @@ public class LogModule {
     @VolumeLog
     public static LogBuffer provideVolumeLogBuffer(LogBufferFactory factory) {
         return factory.create("VolumeLog", 50);
+    }
+
+    /** Provides a {@link LogBuffer} for use by long touch event handlers. */
+    @Provides
+    @SysUISingleton
+    @LongPressTouchLog
+    public static LogBuffer providesLongPressTouchLog(LogBufferFactory factory) {
+        return factory.create("LongPressViewLog", 200);
     }
 }

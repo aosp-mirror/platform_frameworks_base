@@ -73,6 +73,8 @@
     <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"kuncupkan <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"Tetapan <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"Ketepikan gelembung"</string>
+    <!-- no translation found for bubble_fullscreen_text (1006758103218086231) -->
+    <skip />
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"Jangan jadikan perbualan dalam bentuk gelembung"</string>
     <string name="bubbles_user_education_title" msgid="2112319053732691899">"Bersembang menggunakan gelembung"</string>
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"Perbualan baharu muncul sebagai ikon terapung atau gelembung. Ketik untuk membuka gelembung. Seret untuk mengalihkan gelembung tersebut."</string>
@@ -127,6 +129,5 @@
     <string name="expand_menu_text" msgid="3847736164494181168">"Buka Menu"</string>
     <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"Maksimumkan Skrin"</string>
     <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"Tangkap Skrin"</string>
-    <!-- no translation found for desktop_mode_non_resizable_snap_text (1049800446363800707) -->
-    <skip />
+    <string name="desktop_mode_non_resizable_snap_text" msgid="1049800446363800707">"Apl ini tidak boleh diubah saiz"</string>
 </resources>

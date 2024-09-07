@@ -127,6 +127,7 @@ java_library {
     libs: [
         "framework-minus-apex.ravenwood",
         "ravenwood-junit",
+        "ravenwood-helper-libcore-runtime",
     ],
     visibility: ["//visibility:private"],
 }
@@ -160,6 +161,7 @@ java_library {
         "ravenwood-framework",
         "services.core.ravenwood",
         "junit",
+        "framework-annotations-lib",
     ],
     sdk_version: "core_current",
     visibility: ["//frameworks/base"],

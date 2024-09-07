@@ -28,6 +28,7 @@ import com.android.systemui.communal.smartspace.CommunalSmartspaceController
 import com.android.systemui.concurrency.fakeExecutor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.plugins.BcSmartspaceDataPlugin.SmartspaceTargetListener
 import com.android.systemui.testKosmos
 import com.android.systemui.util.time.fakeSystemClock
@@ -67,6 +68,7 @@ class CommunalSmartspaceRepositoryImplTest : SysuiTestCase() {
                 smartspaceController,
                 fakeExecutor,
                 systemClock,
+                logcatLogBuffer("CommunalSmartspaceRepositoryImplTest"),
             )
     }
 

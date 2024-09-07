@@ -18,11 +18,12 @@ package com.android.settingslib.notification.modes;
 
 import static android.app.AutomaticZenRule.TYPE_SCHEDULE_CALENDAR;
 import static android.app.AutomaticZenRule.TYPE_SCHEDULE_TIME;
+import static android.app.NotificationManager.INTERRUPTION_FILTER_ALARMS;
 import static android.app.NotificationManager.INTERRUPTION_FILTER_ALL;
+import static android.app.NotificationManager.INTERRUPTION_FILTER_NONE;
 import static android.app.NotificationManager.INTERRUPTION_FILTER_PRIORITY;
 import static android.service.notification.SystemZenRules.getTriggerDescriptionForScheduleEvent;
 import static android.service.notification.SystemZenRules.getTriggerDescriptionForScheduleTime;
-import static android.service.notification.SystemZenRules.PACKAGE_ANDROID;
 import static android.service.notification.ZenModeConfig.tryParseCountdownConditionId;
 import static android.service.notification.ZenModeConfig.tryParseEventConditionId;
 import static android.service.notification.ZenModeConfig.tryParseScheduleConditionId;
@@ -36,7 +37,6 @@ import android.annotation.SuppressLint;
 import android.app.AutomaticZenRule;
 import android.app.NotificationManager;
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -50,12 +50,8 @@ import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.android.settingslib.R;
-
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 
 import java.util.Comparator;
 import java.util.Objects;
@@ -72,23 +68,6 @@ public class ZenMode implements Parcelable {
 
     static final String MANUAL_DND_MODE_ID = ZenModeConfig.MANUAL_RULE_ID;
     static final String TEMP_NEW_MODE_ID = "temp_new_mode";
-
-    // Must match com.android.server.notification.ZenModeHelper#applyCustomPolicy.
-    private static final ZenPolicy POLICY_INTERRUPTION_FILTER_ALARMS =
-            new ZenPolicy.Builder()
-                    .disallowAllSounds()
-                    .allowAlarms(true)
-                    .allowMedia(true)
-                    .allowPriorityChannels(false)
-                    .build();
-
-    // Must match com.android.server.notification.ZenModeHelper#applyCustomPolicy.
-    private static final ZenPolicy POLICY_INTERRUPTION_FILTER_NONE =
-            new ZenPolicy.Builder()
-                    .disallowAllSounds()
-                    .hideAllVisualEffects()
-                    .allowPriorityChannels(false)
-                    .build();
 
     private static final Comparator<Integer> PRIORITIZED_TYPE_COMPARATOR = new Comparator<>() {
 
@@ -176,13 +155,9 @@ public class ZenMode implements Parcelable {
     }
 
     static ZenMode manualDndMode(AutomaticZenRule manualRule, boolean isActive) {
-        // Manual rule is owned by the system, so we set it here
-        AutomaticZenRule manualRuleWithPkg = new AutomaticZenRule.Builder(manualRule)
-                .setPackage(PACKAGE_ANDROID)
-                .build();
         return new ZenMode(
                 MANUAL_DND_MODE_ID,
-                manualRuleWithPkg,
+                manualRule,
                 Kind.MANUAL_DND,
                 isActive ? Status.ENABLED_AND_ACTIVE : Status.ENABLED);
     }
@@ -275,28 +250,49 @@ public class ZenMode implements Parcelable {
     }
 
     /**
-     * Returns an icon "key" that is guaranteed to be different if the icon is different. Note that
-     * the inverse is not true, i.e. two keys can be different and the icon still be visually the
-     * same.
+     * Returns the {@link ZenIcon.Key} corresponding to the icon resource for this mode. This can be
+     * either app-provided (via {@link AutomaticZenRule#setIconResId}, user-chosen (via the icon
+     * picker in Settings), or a default icon based on the mode {@link Kind} and {@link #getType}.
      */
     @NonNull
-    public String getIconKey() {
-        return mRule.getType() + ":" + mRule.getPackageName() + ":" + mRule.getIconResId();
+    public ZenIcon.Key getIconKey() {
+        if (isManualDnd()) {
+            return ZenIconKeys.MANUAL_DND;
+        }
+        if (mRule.getIconResId() != 0) {
+            if (isSystemOwned()) {
+                // System-owned rules can only have system icons.
+                return ZenIcon.Key.forSystemResource(mRule.getIconResId());
+            } else {
+                // Technically, the icon of an app-provided rule could be a system icon if the
+                // user chose one with the picker. However, we cannot know for sure.
+                return new ZenIcon.Key(mRule.getPackageName(), mRule.getIconResId());
+            }
+        } else {
+            // Using a default icon (which is always a system icon).
+            if (mKind == Kind.IMPLICIT) {
+                return ZenIconKeys.IMPLICIT_MODE_DEFAULT;
+            } else {
+                return ZenIconKeys.forType(getType());
+            }
+        }
+    }
+
+    /** Returns the interruption filter of the mode. */
+    @NotificationManager.InterruptionFilter
+    public int getInterruptionFilter() {
+        return mRule.getInterruptionFilter();
     }
 
     /**
-     * Returns the mode icon -- which can be either app-provided (via {@code addAutomaticZenRule}),
-     * user-chosen (via the icon picker in Settings), or a default icon based on the mode type.
+     * Sets the interruption filter of the mode. This is valid for {@link AutomaticZenRule}-backed
+     * modes (and not manual DND).
      */
-    @NonNull
-    public ListenableFuture<Drawable> getIcon(@NonNull Context context,
-            @NonNull ZenIconLoader iconLoader) {
-        if (mKind == Kind.MANUAL_DND) {
-            return Futures.immediateFuture(requireNonNull(
-                    context.getDrawable(R.drawable.ic_do_not_disturb_on_24dp)));
+    public void setInterruptionFilter(@NotificationManager.InterruptionFilter int filter) {
+        if (isManualDnd() || !canEditPolicy()) {
+            throw new IllegalStateException("Cannot update interruption filter for mode " + this);
         }
-
-        return iconLoader.getIcon(context, mRule);
+        mRule.setInterruptionFilter(filter);
     }
 
     @NonNull
@@ -307,10 +303,12 @@ public class ZenMode implements Parcelable {
                 return requireNonNull(mRule.getZenPolicy());
 
             case NotificationManager.INTERRUPTION_FILTER_ALARMS:
-                return POLICY_INTERRUPTION_FILTER_ALARMS;
+                return new ZenPolicy.Builder(ZenModeConfig.getDefaultZenPolicy()).build()
+                        .overwrittenWith(ZenPolicy.getBasePolicyInterruptionFilterAlarms());
 
             case NotificationManager.INTERRUPTION_FILTER_NONE:
-                return POLICY_INTERRUPTION_FILTER_NONE;
+                return new ZenPolicy.Builder(ZenModeConfig.getDefaultZenPolicy()).build()
+                        .overwrittenWith(ZenPolicy.getBasePolicyInterruptionFilterNone());
 
             case NotificationManager.INTERRUPTION_FILTER_UNKNOWN:
             default:
@@ -327,6 +325,10 @@ public class ZenMode implements Parcelable {
      */
     @SuppressLint("WrongConstant")
     public void setPolicy(@NonNull ZenPolicy policy) {
+        if (!canEditPolicy()) {
+            throw new IllegalStateException("Cannot update ZenPolicy for mode " + this);
+        }
+
         ZenPolicy currentPolicy = getPolicy();
         if (currentPolicy.equals(policy)) {
             return;
@@ -343,11 +345,26 @@ public class ZenMode implements Parcelable {
         mRule.setZenPolicy(policy);
     }
 
+    /**
+     * Returns the {@link ZenDeviceEffects} of the mode.
+     *
+     * <p>This is never {@code null}; if the backing AutomaticZenRule doesn't have effects set then
+     * a default (empty) effects set is returned.
+     */
     @NonNull
     public ZenDeviceEffects getDeviceEffects() {
         return mRule.getDeviceEffects() != null
                 ? mRule.getDeviceEffects()
                 : new ZenDeviceEffects.Builder().build();
+    }
+
+    /** Sets the {@link ZenDeviceEffects} of the mode. */
+    public void setDeviceEffects(@NonNull ZenDeviceEffects effects) {
+        checkNotNull(effects);
+        if (!canEditPolicy()) {
+            throw new IllegalStateException("Cannot update device effects for mode " + this);
+        }
+        mRule.setDeviceEffects(effects);
     }
 
     public void setCustomModeConditionId(Context context, Uri conditionId) {
@@ -392,12 +409,30 @@ public class ZenMode implements Parcelable {
         return !isManualDnd();
     }
 
+    /**
+     * Whether the mode has an editable policy. Calling {@link #setPolicy},
+     * {@link #setDeviceEffects}, or {@link #setInterruptionFilter} is not valid for modes with a
+     * read-only policy.
+     */
+    public boolean canEditPolicy() {
+        // Cannot edit the policy of a temporarily active non-PRIORITY DND mode.
+        // Note that it's fine to edit the policy of an *AutomaticZenRule* with non-PRIORITY filter;
+        // the filter will we set to PRIORITY if you do.
+        return !isManualDndWithSpecialFilter();
+    }
+
     public boolean canBeDeleted() {
         return !isManualDnd();
     }
 
     public boolean isManualDnd() {
         return mKind == Kind.MANUAL_DND;
+    }
+
+    private boolean isManualDndWithSpecialFilter() {
+        return isManualDnd()
+                && (mRule.getInterruptionFilter() == INTERRUPTION_FILTER_ALARMS
+                || mRule.getInterruptionFilter() == INTERRUPTION_FILTER_NONE);
     }
 
     /**
@@ -413,6 +448,18 @@ public class ZenMode implements Parcelable {
 
     public boolean isEnabled() {
         return mRule.isEnabled();
+    }
+
+    /**
+     * Enables or disables the mode.
+     *
+     * <p>The DND mode cannot be disabled; trying to do so will fail.
+     */
+    public void setEnabled(boolean enabled) {
+        if (isManualDnd()) {
+            throw new IllegalStateException("Cannot update enabled for manual DND mode " + this);
+        }
+        mRule.setEnabled(enabled);
     }
 
     public boolean isActive() {

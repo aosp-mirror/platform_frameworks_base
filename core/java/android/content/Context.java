@@ -33,6 +33,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.PermissionMethod;
 import android.annotation.PermissionName;
+import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.StringDef;
 import android.annotation.StringRes;
@@ -6678,6 +6679,8 @@ public abstract class Context {
      * Use with {@link #getSystemService(String)} to retrieve a {@link
      * android.webkit.WebViewUpdateManager} for accessing the WebView update service.
      *
+     * <p>This can only be used on devices with {@link PackageManager#FEATURE_WEBVIEW}.
+     *
      * @see #getSystemService(String)
      * @see android.webkit.WebViewUpdateManager
      * @hide
@@ -6685,6 +6688,7 @@ public abstract class Context {
     @FlaggedApi(android.webkit.Flags.FLAG_UPDATE_SERVICE_IPC_WRAPPER)
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     @SuppressLint("ServiceName")
+    @RequiresFeature(PackageManager.FEATURE_WEBVIEW)
     public static final String WEBVIEW_UPDATE_SERVICE = "webviewupdate";
 
     /**
@@ -6709,6 +6713,16 @@ public abstract class Context {
      * @hide
      */
     public static final String PROTOLOG_CONFIGURATION_SERVICE = "protolog_configuration";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.app.supervision.SupervisionManager}.
+     *
+     * @see #getSystemService(String)
+     * @see android.app.supervision.SupervisionManager
+     * @hide
+     */
+    public static final String SUPERVISION_SERVICE = "supervision";
 
     /**
      * Determine whether the given permission is allowed for a particular

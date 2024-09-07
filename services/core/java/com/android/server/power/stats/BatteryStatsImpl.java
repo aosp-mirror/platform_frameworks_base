@@ -23,8 +23,6 @@ import static android.os.BatteryStats.Uid.NUM_WIFI_BATCHED_SCAN_BINS;
 import static android.os.BatteryStatsManager.NUM_WIFI_STATES;
 import static android.os.BatteryStatsManager.NUM_WIFI_SUPPL_STATES;
 
-import static com.android.server.power.stats.MobileRadioPowerStatsCollector.mapRadioAccessNetworkTypeToRadioAccessTechnology;
-
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -149,6 +147,7 @@ import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.LocalServices;
 import com.android.server.power.optimization.Flags;
 import com.android.server.power.stats.SystemServerCpuThreadReader.SystemServiceCpuThreadTimes;
+import com.android.server.power.stats.format.MobileRadioPowerStatsLayout;
 
 import libcore.util.EmptyArray;
 
@@ -180,7 +179,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.IntSupplier;
 import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 
@@ -2028,7 +2026,7 @@ public class BatteryStatsImpl extends BatteryStats {
         void setContext(Context context) {
             mPackageManager = context.getPackageManager();
             mConsumedEnergyRetriever = new PowerStatsCollector.ConsumedEnergyRetrieverImpl(
-                    LocalServices.getService(PowerStatsInternal.class));
+                    LocalServices.getService(PowerStatsInternal.class), () -> mBatteryVoltageMv);
             mNetworkStatsManager = context.getSystemService(NetworkStatsManager.class);
             mTelephonyManager =
                     (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
@@ -2080,11 +2078,6 @@ public class BatteryStatsImpl extends BatteryStats {
         @Override
         public PowerStatsCollector.ConsumedEnergyRetriever getConsumedEnergyRetriever() {
             return mConsumedEnergyRetriever;
-        }
-
-        @Override
-        public IntSupplier getVoltageSupplier() {
-            return () -> mBatteryVoltageMv;
         }
 
         @Override
@@ -13191,7 +13184,8 @@ public class BatteryStatsImpl extends BatteryStats {
                 final int freq = deltaInfo.getSpecificInfoFrequencyRange(index);
 
                 // Map RadioAccessNetworkType to course grain RadioAccessTechnology.
-                final int ratBucket = mapRadioAccessNetworkTypeToRadioAccessTechnology(rat);
+                final int ratBucket = MobileRadioPowerStatsLayout
+                        .mapRadioAccessNetworkTypeToRadioAccessTechnology(rat);
                 final RadioAccessTechnologyBatteryStats ratStats = getRatBatteryStatsLocked(
                         ratBucket);
 
@@ -15300,15 +15294,6 @@ public class BatteryStatsImpl extends BatteryStats {
                 mHistory.writeHistoryItem(elapsedRealtimeMs, uptimeMs);
             }
         }
-        if (!onBattery &&
-                (status == BatteryManager.BATTERY_STATUS_FULL ||
-                        status == BatteryManager.BATTERY_STATUS_UNKNOWN)) {
-            // We don't record history while we are plugged in and fully charged
-            // (or when battery is not present).  The next time we are
-            // unplugged, history will be cleared.
-            mHistory.setHistoryRecordingEnabled(DEBUG);
-        }
-
         mLastLearnedBatteryCapacityUah = chargeFullUah;
         if (mMinLearnedBatteryCapacityUah == -1) {
             mMinLearnedBatteryCapacityUah = chargeFullUah;

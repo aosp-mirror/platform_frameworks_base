@@ -16,7 +16,6 @@
 
 package com.android.systemui.keyguard.ui.composable
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
@@ -53,6 +52,7 @@ import com.android.systemui.keyguard.ui.view.DeviceEntryIconView
 import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerDependencies
 import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerMessageAreaViewModel
 import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerUdfpsIconViewModel
+import com.android.systemui.log.LongPressHandlingViewLogger
 import com.android.systemui.res.R
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
@@ -72,9 +72,6 @@ fun AlternateBouncer(
         alternateBouncerDependencies.udfpsIconViewModel.iconLocation.collectAsStateWithLifecycle(
             initialValue = null
         )
-
-    // TODO (b/353955910): back handling doesn't work
-    BackHandler { alternateBouncerDependencies.viewModel.onBackRequested() }
 
     AnimatedVisibility(
         visible = isVisible,
@@ -101,6 +98,7 @@ fun AlternateBouncer(
             Box {
                 DeviceEntryIcon(
                     viewModel = alternateBouncerDependencies.udfpsIconViewModel,
+                    logger = alternateBouncerDependencies.logger,
                     modifier =
                         Modifier.width { udfpsLocation.width }
                             .height { udfpsLocation.height }
@@ -155,13 +153,14 @@ private fun StatusMessage(
 @Composable
 private fun DeviceEntryIcon(
     viewModel: AlternateBouncerUdfpsIconViewModel,
+    logger: LongPressHandlingViewLogger,
     modifier: Modifier = Modifier,
 ) {
     AndroidView(
         modifier = modifier,
         factory = { context ->
             val view =
-                DeviceEntryIconView(context, null).apply {
+                DeviceEntryIconView(context, null, logger = logger).apply {
                     id = R.id.alternate_bouncer_udfps_icon_view
                     contentDescription =
                         context.resources.getString(R.string.accessibility_fingerprint_label)

@@ -16,6 +16,8 @@
 
 package com.android.systemui.qs.tiles;
 
+import static com.android.systemui.accessibility.hearingaid.HearingDevicesUiEventLogger.LAUNCH_SOURCE_QS_TILE;
+
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
@@ -96,7 +98,7 @@ public class HearingDevicesTile extends QSTileImpl<BooleanState> {
 
     @Override
     protected void handleClick(@Nullable Expandable expandable) {
-        mUiHandler.post(() -> mDialogManager.showDialog(expandable));
+        mUiHandler.post(() -> mDialogManager.showDialog(expandable, LAUNCH_SOURCE_QS_TILE));
     }
 
     @Override

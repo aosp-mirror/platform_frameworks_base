@@ -252,7 +252,7 @@
     <string name="shutdown_confirm_question" msgid="796151167261608447">"Itzali egin nahi duzu?"</string>
     <string name="reboot_safemode_title" msgid="5853949122655346734">"Berrabiarazi modu seguruan"</string>
     <string name="reboot_safemode_confirm" msgid="1658357874737219624">"Modu seguruan berrabiarazi nahi duzu? Instalatutako hirugarrenen aplikazioak desgaituko dira. Berriro berrabiarazi ondoren leheneratuko dira."</string>
-    <string name="recent_tasks_title" msgid="8183172372995396653">"Azkenak"</string>
+    <string name="recent_tasks_title" msgid="8183172372995396653">"Azkenaldikoak"</string>
     <string name="no_recent_tasks" msgid="9063946524312275906">"Ez dago azkenaldian erabilitako aplikaziorik."</string>
     <string name="global_actions" product="tablet" msgid="4412132498517933867">"Tabletaren aukerak"</string>
     <string name="global_actions" product="tv" msgid="3871763739487450369">"Android TV gailuaren aukerak"</string>
@@ -1195,8 +1195,7 @@
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Atzera"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Aldatu idazketa-metodoa"</string>
     <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"Ireki idazketa-metodoaren hautatzailea"</string>
-    <!-- no translation found for input_method_switcher_settings_button (5609835654697108485) -->
-    <skip />
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"Ezarpenak"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Memoria betetzen ari da"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Sistemaren funtzio batzuek ez dute agian funtzionatuko"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Sisteman ez dago behar adina memoria. Ziurtatu gutxienez 250 MB erabilgarri dituzula eta, ondoren, berrabiarazi gailua."</string>
@@ -1335,7 +1334,7 @@
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"Alarma-soinuak"</string>
     <string name="ringtone_picker_title_notification" msgid="6387191794719608122">"Jakinarazpen-soinuak"</string>
     <string name="ringtone_unknown" msgid="5059495249862816475">"Ezezaguna"</string>
-    <string name="wifi_available_sign_in" msgid="381054692557675237">"Hasi saioa Wi-Fi sarean"</string>
+    <string name="wifi_available_sign_in" msgid="381054692557675237">"Hasi saioa wifi-sarean"</string>
     <string name="network_available_sign_in" msgid="1520342291829283114">"Hasi saioa sarean"</string>
     <!-- no translation found for network_available_sign_in_detailed (7520423801613396556) -->
     <skip />
@@ -1747,7 +1746,8 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"Aplikazio bat baimen-eskaera oztopatzen ari da eta, ondorioz, ezin da egiaztatu erantzuna."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Eginbide bat erabiltzen hasteko, saka ezazu:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Aukeratu zein eginbide erabili nahi duzun Erabilerraztasuna botoiarekin"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Aukeratu zein eginbide erabili nahi duzun bolumen-botoien lasterbidearekin"</string>
+    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
+    <skip />
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Desaktibatu da <xliff:g id="SERVICE_NAME">%s</xliff:g>"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Editatu lasterbideak"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Eginda"</string>

@@ -117,7 +117,7 @@ constructor(
         if (SceneContainerFlag.isEnabled) return
         scope.launch {
             keyguardInteractor.primaryBouncerShowing
-                .sample(startedKeyguardTransitionStep, ::Pair)
+                .sample(transitionInteractor.startedKeyguardTransitionStep, ::Pair)
                 .collect { pair ->
                     val (isBouncerShowing, lastStartedTransitionStep) = pair
                     if (
@@ -132,7 +132,7 @@ constructor(
     fun startToLockscreenOrGlanceableHubTransition(openHub: Boolean) {
         scope.launch {
             if (
-                transitionInteractor.startedKeyguardState.replayCache.last() ==
+                transitionInteractor.startedKeyguardTransitionStep.value.to ==
                     KeyguardState.DREAMING
             ) {
                 if (powerInteractor.detailedWakefulness.value.isAwake()) {

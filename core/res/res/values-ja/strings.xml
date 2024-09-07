@@ -1195,8 +1195,7 @@
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"戻る"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"入力方法の切り替え"</string>
     <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"入力方法の選択ツールを開く"</string>
-    <!-- no translation found for input_method_switcher_settings_button (5609835654697108485) -->
-    <skip />
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"設定"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"空き容量わずか"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"一部のシステム機能が動作しない可能性があります"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"システムに十分な容量がありません。250MBの空き容量を確保して再起動してください。"</string>
@@ -1747,7 +1746,8 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"権限のリクエストを遮っているアプリがあるため、同意の回答を確認できません。"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"使用を開始する機能をタップ:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"ユーザー補助機能ボタンで使用する機能の選択"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"音量ボタンのショートカットで使用する機能の選択"</string>
+    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
+    <skip />
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> はオフになっています"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"ショートカットの編集"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"完了"</string>

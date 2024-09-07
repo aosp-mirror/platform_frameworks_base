@@ -597,19 +597,19 @@ package android.app.admin {
     method @RequiresPermission(android.Manifest.permission.FORCE_DEVICE_POLICY_MANAGER_LOGS) public long forceNetworkLogs();
     method @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public void forceRemoveActiveAdmin(@NonNull android.content.ComponentName, int);
     method @RequiresPermission(android.Manifest.permission.FORCE_DEVICE_POLICY_MANAGER_LOGS) public long forceSecurityLogs();
-    method @FlaggedApi("android.app.admin.flags.device_policy_size_tracking_internal_bug_fix_enabled") @RequiresPermission("android.permission.MANAGE_DEVICE_POLICY_STORAGE_LIMIT") public void forceSetMaxPolicyStorageLimit(int);
+    method @RequiresPermission("android.permission.MANAGE_DEVICE_POLICY_STORAGE_LIMIT") public void forceSetMaxPolicyStorageLimit(int);
     method public void forceUpdateUserSetupComplete(int);
     method @NonNull public java.util.Set<java.lang.String> getDefaultCrossProfilePackages();
     method @Deprecated public int getDeviceOwnerType(@NonNull android.content.ComponentName);
     method @Nullable public String getDevicePolicyManagementRoleHolderUpdaterPackage();
     method @NonNull public java.util.Set<java.lang.String> getDisallowedSystemApps(@NonNull android.content.ComponentName, int, @NonNull String);
-    method @FlaggedApi("android.app.admin.flags.headless_device_owner_provisioning_fix_enabled") @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public int getHeadlessDeviceOwnerMode();
+    method @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public int getHeadlessDeviceOwnerMode();
     method public long getLastBugReportRequestTime();
     method public long getLastNetworkLogRetrievalTime();
     method public long getLastSecurityLogRetrievalTime();
     method public java.util.List<java.lang.String> getOwnerInstalledCaCerts(@NonNull android.os.UserHandle);
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_DEVICE_ADMINS) public java.util.Set<java.lang.String> getPolicyExemptApps();
-    method @FlaggedApi("android.app.admin.flags.device_policy_size_tracking_internal_bug_fix_enabled") @RequiresPermission("android.permission.MANAGE_DEVICE_POLICY_STORAGE_LIMIT") public int getPolicySizeForAdmin(@NonNull android.app.admin.EnforcingAdmin);
+    method @RequiresPermission("android.permission.MANAGE_DEVICE_POLICY_STORAGE_LIMIT") public int getPolicySizeForAdmin(@NonNull android.app.admin.EnforcingAdmin);
     method public boolean isCurrentInputMethodSetByOwner();
     method public boolean isFactoryResetProtectionPolicySupported();
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}) public boolean isNewUserDisclaimerAcknowledged();
@@ -680,7 +680,7 @@ package android.app.admin {
   }
 
   public final class EnforcingAdmin implements android.os.Parcelable {
-    ctor @FlaggedApi("android.app.admin.flags.device_policy_size_tracking_internal_bug_fix_enabled") public EnforcingAdmin(@NonNull String, @NonNull android.app.admin.Authority, @NonNull android.os.UserHandle, @Nullable android.content.ComponentName);
+    ctor public EnforcingAdmin(@NonNull String, @NonNull android.app.admin.Authority, @NonNull android.os.UserHandle, @Nullable android.content.ComponentName);
   }
 
   public final class FlagUnion extends android.app.admin.ResolutionMechanism<java.lang.Integer> {
@@ -1269,10 +1269,6 @@ package android.content.res {
 
 package android.content.rollback {
 
-  public final class RollbackInfo implements android.os.Parcelable {
-    method @FlaggedApi("android.content.pm.recoverability_detection") public int getRollbackImpactLevel();
-  }
-
   public final class RollbackManager {
     method @RequiresPermission(android.Manifest.permission.TEST_MANAGE_ROLLBACKS) public void blockRollbackManager(long);
     method @RequiresPermission(android.Manifest.permission.TEST_MANAGE_ROLLBACKS) public void expireRollbackForPackage(@NonNull String);
@@ -1542,6 +1538,10 @@ package android.hardware {
     method @Deprecated public final void setPreviewSurface(android.view.Surface) throws java.io.IOException;
   }
 
+  public final class Sensor {
+    method public int getHandle();
+  }
+
   public final class SensorPrivacyManager {
     method @FlaggedApi("com.android.internal.camera.flags.camera_privacy_allowlist") @RequiresPermission(android.Manifest.permission.MANAGE_SENSOR_PRIVACY) public void setCameraPrivacyAllowlist(@NonNull java.util.List<java.lang.String>);
     method @RequiresPermission(android.Manifest.permission.MANAGE_SENSOR_PRIVACY) public void setSensorPrivacy(int, int, boolean);
@@ -1797,11 +1797,15 @@ package android.hardware.input {
 
   public class InputSettings {
     method @FlaggedApi("com.android.hardware.input.keyboard_a11y_bounce_keys_flag") public static int getAccessibilityBounceKeysThreshold(@NonNull android.content.Context);
+    method @FlaggedApi("com.android.hardware.input.keyboard_repeat_keys") public static int getAccessibilityRepeatKeysDelay(@NonNull android.content.Context);
+    method @FlaggedApi("com.android.hardware.input.keyboard_repeat_keys") public static int getAccessibilityRepeatKeysTimeout(@NonNull android.content.Context);
     method @FlaggedApi("com.android.hardware.input.keyboard_a11y_slow_keys_flag") public static int getAccessibilitySlowKeysThreshold(@NonNull android.content.Context);
     method @FlaggedApi("com.android.hardware.input.keyboard_a11y_mouse_keys") public static boolean isAccessibilityMouseKeysEnabled(@NonNull android.content.Context);
     method @FlaggedApi("com.android.hardware.input.keyboard_a11y_sticky_keys_flag") public static boolean isAccessibilityStickyKeysEnabled(@NonNull android.content.Context);
     method @FlaggedApi("com.android.hardware.input.keyboard_a11y_bounce_keys_flag") @RequiresPermission(android.Manifest.permission.WRITE_SETTINGS) public static void setAccessibilityBounceKeysThreshold(@NonNull android.content.Context, int);
     method @FlaggedApi("com.android.hardware.input.keyboard_a11y_mouse_keys") @RequiresPermission(android.Manifest.permission.WRITE_SETTINGS) public static void setAccessibilityMouseKeysEnabled(@NonNull android.content.Context, boolean);
+    method @FlaggedApi("com.android.hardware.input.keyboard_repeat_keys") @RequiresPermission(android.Manifest.permission.WRITE_SETTINGS) public static void setAccessibilityRepeatKeysDelay(@NonNull android.content.Context, int);
+    method @FlaggedApi("com.android.hardware.input.keyboard_repeat_keys") @RequiresPermission(android.Manifest.permission.WRITE_SETTINGS) public static void setAccessibilityRepeatKeysTimeout(@NonNull android.content.Context, int);
     method @FlaggedApi("com.android.hardware.input.keyboard_a11y_slow_keys_flag") @RequiresPermission(android.Manifest.permission.WRITE_SETTINGS) public static void setAccessibilitySlowKeysThreshold(@NonNull android.content.Context, int);
     method @FlaggedApi("com.android.hardware.input.keyboard_a11y_sticky_keys_flag") @RequiresPermission(android.Manifest.permission.WRITE_SETTINGS) public static void setAccessibilityStickyKeysEnabled(@NonNull android.content.Context, boolean);
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public static void setMaximumObscuringOpacityForTouch(@NonNull android.content.Context, @FloatRange(from=0, to=1) float);
@@ -1999,6 +2003,7 @@ package android.media {
     method public void setRampingRingerEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED) public void setRs2Value(float);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void setTestDeviceConnectionState(@NonNull android.media.AudioDeviceAttributes, boolean);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED) public void setVolumeControllerLongPressTimeoutEnabled(boolean);
     method @FlaggedApi("android.media.audio.focus_exclusive_with_recording") @RequiresPermission(android.Manifest.permission.QUERY_AUDIO_STATE) public boolean shouldNotificationSoundPlay(@NonNull android.media.AudioAttributes);
   }
 
@@ -3134,6 +3139,7 @@ package android.service.dreams {
 
   public abstract class DreamOverlayService extends android.app.Service {
     ctor public DreamOverlayService();
+    method @FlaggedApi("android.service.dreams.publish_preview_state_to_overlay") public final boolean isDreamInPreviewMode();
     method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
     method public void onEndDream();
     method public abstract void onStartDream(@NonNull android.view.WindowManager.LayoutParams);
@@ -3666,7 +3672,11 @@ package android.view {
     method @Nullable public android.view.Display.Mode getUserPreferredDisplayMode();
     method public boolean hasAccess(int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_USER_PREFERRED_DISPLAY_MODE) public void setUserPreferredDisplayMode(@NonNull android.view.Display.Mode);
+    field public static final int FLAG_ALWAYS_UNLOCKED = 512; // 0x200
+    field public static final int FLAG_OWN_FOCUS = 2048; // 0x800
+    field public static final int FLAG_TOUCH_FEEDBACK_DISABLED = 1024; // 0x400
     field public static final int FLAG_TRUSTED = 128; // 0x80
+    field public static final int REMOVE_MODE_DESTROY_CONTENT = 1; // 0x1
     field public static final int TYPE_EXTERNAL = 2; // 0x2
     field public static final int TYPE_INTERNAL = 1; // 0x1
     field public static final int TYPE_OVERLAY = 4; // 0x4

@@ -33,7 +33,7 @@ import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.accessibility.utils.TestUtils;
 import com.android.systemui.util.settings.SecureSettings;
-import com.android.wm.shell.common.bubbles.DismissView;
+import com.android.wm.shell.shared.bubbles.DismissView;
 import com.android.wm.shell.shared.magnetictarget.MagnetizedObject;
 
 import org.junit.Before;

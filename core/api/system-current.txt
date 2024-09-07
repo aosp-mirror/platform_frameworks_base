@@ -61,6 +61,7 @@ package android {
     field @FlaggedApi("com.android.internal.telephony.flags.use_oem_domain_selection_service") public static final String BIND_DOMAIN_SELECTION_SERVICE = "android.permission.BIND_DOMAIN_SELECTION_SERVICE";
     field public static final String BIND_DOMAIN_VERIFICATION_AGENT = "android.permission.BIND_DOMAIN_VERIFICATION_AGENT";
     field public static final String BIND_EUICC_SERVICE = "android.permission.BIND_EUICC_SERVICE";
+    field @FlaggedApi("android.crashrecovery.flags.enable_crashrecovery") public static final String BIND_EXPLICIT_HEALTH_CHECK_SERVICE = "android.permission.BIND_EXPLICIT_HEALTH_CHECK_SERVICE";
     field public static final String BIND_EXTERNAL_STORAGE_SERVICE = "android.permission.BIND_EXTERNAL_STORAGE_SERVICE";
     field public static final String BIND_FIELD_CLASSIFICATION_SERVICE = "android.permission.BIND_FIELD_CLASSIFICATION_SERVICE";
     field public static final String BIND_GBA_SERVICE = "android.permission.BIND_GBA_SERVICE";
@@ -1321,7 +1322,7 @@ package android.app.admin {
     method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public android.os.UserHandle getDeviceOwnerUser();
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public android.app.admin.DevicePolicyState getDevicePolicyState();
     method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public String getFinancedDeviceKioskRoleHolder();
-    method @FlaggedApi("android.app.admin.flags.device_policy_size_tracking_enabled") @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public int getMaxPolicyStorageLimit();
+    method @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public int getMaxPolicyStorageLimit();
     method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.QUERY_ADMIN_POLICY}) public java.util.List<java.lang.String> getPermittedAccessibilityServices(int);
     method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.QUERY_ADMIN_POLICY}) public java.util.List<java.lang.String> getPermittedInputMethodsForCurrentUser();
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public java.util.List<android.os.UserHandle> getPolicyManagedProfiles(@NonNull android.os.UserHandle);
@@ -1348,7 +1349,7 @@ package android.app.admin {
     method @RequiresPermission(android.Manifest.permission.MANAGE_DEVICE_POLICY_AUDIT_LOGGING) public void setAuditLogEventCallback(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.util.List<android.app.admin.SecurityLog.SecurityEvent>>);
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public void setDeviceProvisioningConfigApplied();
     method @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public void setDpcDownloaded(boolean);
-    method @FlaggedApi("android.app.admin.flags.device_policy_size_tracking_enabled") @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public void setMaxPolicyStorageLimit(int);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public void setMaxPolicyStorageLimit(int);
     method @Deprecated @RequiresPermission(value=android.Manifest.permission.GRANT_PROFILE_OWNER_DEVICE_IDS_ACCESS, conditional=true) public void setProfileOwnerCanAccessDeviceIds(@NonNull android.content.ComponentName);
     method public void setSecondaryLockscreenEnabled(@NonNull android.content.ComponentName, boolean);
     method @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public void setUserProvisioningState(int, @NonNull android.os.UserHandle);
@@ -1422,7 +1423,7 @@ package android.app.admin {
     field public static final int STATUS_DEVICE_ADMIN_NOT_SUPPORTED = 13; // 0xd
     field public static final int STATUS_HAS_DEVICE_OWNER = 1; // 0x1
     field public static final int STATUS_HAS_PAIRED = 8; // 0x8
-    field @FlaggedApi("android.app.admin.flags.headless_device_owner_single_user_enabled") public static final int STATUS_HEADLESS_ONLY_SYSTEM_USER = 17; // 0x11
+    field public static final int STATUS_HEADLESS_ONLY_SYSTEM_USER = 17; // 0x11
     field public static final int STATUS_HEADLESS_SYSTEM_USER_MODE_NOT_SUPPORTED = 16; // 0x10
     field public static final int STATUS_MANAGED_USERS_NOT_SUPPORTED = 9; // 0x9
     field public static final int STATUS_NONSYSTEM_USER_EXISTS = 5; // 0x5
@@ -3469,6 +3470,7 @@ package android.companion.virtual {
   public static interface VirtualDeviceManager.ActivityListener {
     method @FlaggedApi("android.companion.virtualdevice.flags.activity_control_api") public default void onActivityLaunchBlocked(int, @NonNull android.content.ComponentName, @NonNull android.os.UserHandle, @Nullable android.content.IntentSender);
     method public void onDisplayEmpty(int);
+    method @FlaggedApi("android.companion.virtualdevice.flags.activity_control_api") public default void onSecureWindowShown(int, @NonNull android.content.ComponentName, @NonNull android.os.UserHandle);
     method @Deprecated public void onTopActivityChanged(int, @NonNull android.content.ComponentName);
     method public default void onTopActivityChanged(int, @NonNull android.content.ComponentName, int);
   }
@@ -3694,9 +3696,11 @@ package android.companion.virtual.sensor {
     method public int getMinDelay();
     method @NonNull public String getName();
     method public float getPower();
+    method @FlaggedApi("android.companion.virtualdevice.flags.device_aware_display_power") public int getReportingMode();
     method public float getResolution();
     method public int getType();
     method @Nullable public String getVendor();
+    method @FlaggedApi("android.companion.virtualdevice.flags.device_aware_display_power") public boolean isWakeUpSensor();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.companion.virtual.sensor.VirtualSensorConfig> CREATOR;
   }
@@ -3710,8 +3714,10 @@ package android.companion.virtual.sensor {
     method @NonNull public android.companion.virtual.sensor.VirtualSensorConfig.Builder setMaximumRange(float);
     method @NonNull public android.companion.virtual.sensor.VirtualSensorConfig.Builder setMinDelay(int);
     method @NonNull public android.companion.virtual.sensor.VirtualSensorConfig.Builder setPower(float);
+    method @FlaggedApi("android.companion.virtualdevice.flags.device_aware_display_power") @NonNull public android.companion.virtual.sensor.VirtualSensorConfig.Builder setReportingMode(int);
     method @NonNull public android.companion.virtual.sensor.VirtualSensorConfig.Builder setResolution(float);
     method @NonNull public android.companion.virtual.sensor.VirtualSensorConfig.Builder setVendor(@Nullable String);
+    method @FlaggedApi("android.companion.virtualdevice.flags.device_aware_display_power") @NonNull public android.companion.virtual.sensor.VirtualSensorConfig.Builder setWakeUpSensor(boolean);
   }
 
   public interface VirtualSensorDirectChannelCallback {
@@ -4627,6 +4633,7 @@ package android.content.rollback {
     method public int getCommittedSessionId();
     method @NonNull public java.util.List<android.content.rollback.PackageRollbackInfo> getPackages();
     method public int getRollbackId();
+    method @FlaggedApi("android.crashrecovery.flags.enable_crashrecovery") public int getRollbackImpactLevel();
     method public boolean isStaged();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.content.rollback.RollbackInfo> CREATOR;
@@ -6742,6 +6749,14 @@ package android.hardware.soundtrigger {
     field public static final int STATUS_OK = 0; // 0x0
   }
 
+  @FlaggedApi("android.media.soundtrigger.generic_model_api") public static final class SoundTrigger.GenericSoundModel extends android.hardware.soundtrigger.SoundTrigger.SoundModel implements android.os.Parcelable {
+    ctor public SoundTrigger.GenericSoundModel(@NonNull java.util.UUID, @NonNull java.util.UUID, @Nullable byte[], int);
+    ctor public SoundTrigger.GenericSoundModel(@NonNull java.util.UUID, @NonNull java.util.UUID, @Nullable byte[]);
+    method public int describeContents();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.soundtrigger.SoundTrigger.GenericSoundModel> CREATOR;
+  }
+
   public static final class SoundTrigger.Keyphrase implements android.os.Parcelable {
     ctor public SoundTrigger.Keyphrase(int, int, @NonNull java.util.Locale, @NonNull String, @Nullable int[]);
     method public int describeContents();
@@ -8083,6 +8098,7 @@ package android.media.tv.tuner {
   public class Tuner implements java.lang.AutoCloseable {
     ctor @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public Tuner(@NonNull android.content.Context, @Nullable String, int);
     method public int applyFrontend(@NonNull android.media.tv.tuner.frontend.FrontendInfo);
+    method @FlaggedApi("android.media.tv.flags.tuner_w_apis") @RequiresPermission(allOf={"android.permission.TUNER_RESOURCE_ACCESS", "android.permission.ACCESS_TV_TUNER"}) public int applyFrontendByType(int);
     method public int cancelScanning();
     method public int cancelTuning();
     method public void clearOnTuneEventListener();
@@ -11155,6 +11171,7 @@ package android.os {
     method @RequiresPermission(android.Manifest.permission.RECOVERY) public static void processPackage(android.content.Context, java.io.File, android.os.RecoverySystem.ProgressListener) throws java.io.IOException;
     method @Deprecated @RequiresPermission(android.Manifest.permission.RECOVERY) public static void rebootAndApply(@NonNull android.content.Context, @NonNull String, @NonNull String) throws java.io.IOException;
     method @RequiresPermission(anyOf={android.Manifest.permission.RECOVERY, android.Manifest.permission.REBOOT}) public static int rebootAndApply(@NonNull android.content.Context, @NonNull String, boolean) throws java.io.IOException;
+    method @FlaggedApi("android.crashrecovery.flags.enable_crashrecovery") @RequiresPermission(android.Manifest.permission.RECOVERY) public static void rebootPromptAndWipeUserData(@NonNull android.content.Context, @NonNull String) throws java.io.IOException;
     method @RequiresPermission(allOf={android.Manifest.permission.RECOVERY, android.Manifest.permission.REBOOT}) public static void rebootWipeAb(android.content.Context, java.io.File, String) throws java.io.IOException;
     method @RequiresPermission(android.Manifest.permission.RECOVERY) public static void scheduleUpdateOnBoot(android.content.Context, java.io.File) throws java.io.IOException;
     method @Deprecated public static boolean verifyPackageCompatibility(java.io.File) throws java.io.IOException;

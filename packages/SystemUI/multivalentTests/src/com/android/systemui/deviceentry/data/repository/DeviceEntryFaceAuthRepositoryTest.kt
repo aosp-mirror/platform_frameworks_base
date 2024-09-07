@@ -75,7 +75,7 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.FaceAuthenticationLogger
 import com.android.systemui.log.SessionTracker
 import com.android.systemui.log.logcatLogBuffer
-import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.log.table.logcatTableLogBuffer
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
 import com.android.systemui.power.domain.interactor.powerInteractor
@@ -90,12 +90,12 @@ import com.android.systemui.util.mockito.KotlinArgumentCaptor
 import com.android.systemui.util.mockito.captureMany
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
-import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import java.io.PrintWriter
 import java.io.StringWriter
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
@@ -198,25 +198,8 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
         fmOverride: FaceManager? = faceManager,
         bypassControllerOverride: KeyguardBypassController? = bypassController
     ): DeviceEntryFaceAuthRepositoryImpl {
-        val systemClock = FakeSystemClock()
-        val faceAuthBuffer =
-            TableLogBuffer(
-                10,
-                "face auth",
-                systemClock,
-                mock(),
-                testDispatcher,
-                testScope.backgroundScope
-            )
-        val faceDetectBuffer =
-            TableLogBuffer(
-                10,
-                "face detect",
-                systemClock,
-                mock(),
-                testDispatcher,
-                testScope.backgroundScope
-            )
+        val faceAuthBuffer = logcatTableLogBuffer(kosmos, "face auth")
+        val faceDetectBuffer = logcatTableLogBuffer(kosmos, "face detect")
 
         return DeviceEntryFaceAuthRepositoryImpl(
             mContext,
@@ -561,14 +544,29 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
     fun withSceneContainerEnabled_authenticateDoesNotRunWhenKeyguardIsGoingAway() =
         testScope.runTest {
             testGatingCheckForFaceAuth(sceneContainerEnabled = true) {
-                keyguardTransitionRepository.sendTransitionStep(
-                    TransitionStep(
-                        KeyguardState.LOCKSCREEN,
-                        KeyguardState.UNDEFINED,
-                        value = 0.5f,
-                        transitionState = TransitionState.RUNNING
-                    ),
-                    validateStep = false
+                kosmos.sceneInteractor.setTransitionState(
+                    MutableStateFlow(
+                        ObservableTransitionState.Transition(
+                            fromScene = Scenes.Bouncer,
+                            toScene = Scenes.Gone,
+                            currentScene = flowOf(Scenes.Bouncer),
+                            progress = MutableStateFlow(0.2f),
+                            isInitiatedByUserInput = true,
+                            isUserInputOngoing = flowOf(false),
+                        )
+                    )
+                )
+                runCurrent()
+            }
+        }
+
+    @Test
+    @EnableSceneContainer
+    fun withSceneContainerEnabled_authenticateDoesNotRunWhenLockscreenIsGone() =
+        testScope.runTest {
+            testGatingCheckForFaceAuth(sceneContainerEnabled = true) {
+                kosmos.sceneInteractor.setTransitionState(
+                    MutableStateFlow(ObservableTransitionState.Idle(Scenes.Gone))
                 )
                 runCurrent()
             }
@@ -898,15 +896,32 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
     fun withSceneContainer_faceDetectDoesNotRunWhenKeyguardGoingAway() =
         testScope.runTest {
             testGatingCheckForDetect(sceneContainerEnabled = true) {
-                keyguardTransitionRepository.sendTransitionStep(
-                    TransitionStep(
-                        KeyguardState.LOCKSCREEN,
-                        KeyguardState.UNDEFINED,
-                        value = 0.5f,
-                        transitionState = TransitionState.RUNNING
-                    ),
-                    validateStep = false
+                kosmos.sceneInteractor.setTransitionState(
+                    MutableStateFlow(
+                        ObservableTransitionState.Transition(
+                            fromScene = Scenes.Bouncer,
+                            toScene = Scenes.Gone,
+                            currentScene = flowOf(Scenes.Bouncer),
+                            progress = MutableStateFlow(0.2f),
+                            isInitiatedByUserInput = true,
+                            isUserInputOngoing = flowOf(false),
+                        )
+                    )
                 )
+
+                runCurrent()
+            }
+        }
+
+    @Test
+    @EnableSceneContainer
+    fun withSceneContainer_faceDetectDoesNotRunWhenLockscreenIsGone() =
+        testScope.runTest {
+            testGatingCheckForDetect(sceneContainerEnabled = true) {
+                kosmos.sceneInteractor.setTransitionState(
+                    MutableStateFlow(ObservableTransitionState.Idle(Scenes.Gone))
+                )
+
                 runCurrent()
             }
         }
@@ -1230,6 +1245,9 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
             kosmos.fakeKeyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(KeyguardState.OFF, KeyguardState.LOCKSCREEN, value = 1.0f),
                 validateStep = false
+            )
+            kosmos.sceneInteractor.setTransitionState(
+                MutableStateFlow(ObservableTransitionState.Idle(Scenes.Lockscreen))
             )
         } else {
             keyguardRepository.setKeyguardGoingAway(false)

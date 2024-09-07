@@ -16,7 +16,6 @@
 
 package com.android.systemui.shade.domain.interactor
 
-import com.android.systemui.shade.shared.model.ShadeAlignment
 import com.android.systemui.shade.shared.model.ShadeMode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -70,9 +69,6 @@ interface ShadeInteractor : BaseShadeInteractor {
      * wide as the entire screen.
      */
     val isShadeLayoutWide: StateFlow<Boolean>
-
-    /** How to align the shade content. */
-    val shadeAlignment: ShadeAlignment
 }
 
 /** ShadeInteractor methods with implementations that differ between non-empty impls. */

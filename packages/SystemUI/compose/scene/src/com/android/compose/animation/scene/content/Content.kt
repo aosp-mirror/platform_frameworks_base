@@ -66,27 +66,7 @@ internal sealed class Content(
     var content by mutableStateOf(content)
     var zIndex by mutableFloatStateOf(zIndex)
     var targetSize by mutableStateOf(IntSize.Zero)
-
-    private var _userActions by mutableStateOf(checkValid(actions))
-    var userActions
-        get() = _userActions
-        set(value) {
-            _userActions = checkValid(value)
-        }
-
-    private fun checkValid(
-        userActions: Map<UserAction.Resolved, UserActionResult>
-    ): Map<UserAction.Resolved, UserActionResult> {
-        userActions.forEach { (action, result) ->
-            if (key == result.toScene) {
-                error(
-                    "Transition to the same content (scene/overlay) is not supported. Content " +
-                        "$key, action $action, result $result"
-                )
-            }
-        }
-        return userActions
-    }
+    var userActions by mutableStateOf(actions)
 
     @Composable
     fun Content(modifier: Modifier = Modifier) {

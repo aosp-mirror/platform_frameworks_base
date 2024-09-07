@@ -795,6 +795,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     WindowOrganizerController mWindowOrganizerController;
     TaskOrganizerController mTaskOrganizerController;
     TaskFragmentOrganizerController mTaskFragmentOrganizerController;
+    ActionChain.Tracker mChainTracker;
 
     @Nullable
     private BackgroundActivityStartCallback mBackgroundActivityStartCallback;
@@ -869,6 +870,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         mInternal = new LocalService();
         GL_ES_VERSION = SystemProperties.getInt("ro.opengles.version", GL_ES_VERSION_UNDEFINED);
         mWindowOrganizerController = new WindowOrganizerController(this);
+        mChainTracker = new ActionChain.Tracker(this);
         mTaskOrganizerController = mWindowOrganizerController.mTaskOrganizerController;
         mTaskFragmentOrganizerController =
                 mWindowOrganizerController.mTaskFragmentOrganizerController;
@@ -1315,7 +1317,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             String resultWho, int requestCode, int flagsMask, int flagsValues, Bundle bOptions) {
         enforceNotIsolatedCaller("startActivityIntentSender");
         if (fillInIntent != null) {
-            fillInIntent.prepareToEnterSystemServer();
+            // Refuse possible leaked file descriptors
+            if (fillInIntent.hasFileDescriptors()) {
+                throw new IllegalArgumentException("File descriptors passed in Intent");
+            }
+            // Remove existing mismatch flag so it can be properly updated later
+            fillInIntent.removeExtendedFlags(Intent.EXTENDED_FLAG_FILTER_MISMATCH);
         }
 
         if (!(target instanceof PendingIntentRecord)) {
@@ -1341,10 +1348,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     @Override
     public boolean startNextMatchingActivity(IBinder callingActivity, Intent intent,
             Bundle bOptions) {
-        if (intent != null) {
-            intent.prepareToEnterSystemServer();
+        // Refuse possible leaked file descriptors
+        if (intent != null && intent.hasFileDescriptors()) {
+            throw new IllegalArgumentException("File descriptors passed in Intent");
         }
-
         SafeActivityOptions options = SafeActivityOptions.fromBundle(bOptions);
 
         synchronized (mGlobalLock) {
@@ -1359,6 +1366,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 return false;
             }
             intent = new Intent(intent);
+            // Remove existing mismatch flag so it can be properly updated later
+            intent.removeExtendedFlags(Intent.EXTENDED_FLAG_FILTER_MISMATCH);
             // The caller is not allowed to change the data.
             intent.setDataAndType(r.intent.getData(), r.intent.getType());
             // And we are resetting to find the next component...
@@ -3794,9 +3803,22 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                         r.shortComponentName, Boolean.toString(isAutoEnter));
                 r.setPictureInPictureParams(params);
                 r.mAutoEnteringPip = isAutoEnter;
-                mRootWindowContainer.moveActivityToPinnedRootTask(r,
-                        null /* launchIntoPipHostActivity */, "enterPictureInPictureMode",
-                        transition);
+
+                if (transition != null) {
+                    mRootWindowContainer.moveActivityToPinnedRootTaskAndRequestStart(r,
+                            "enterPictureInPictureMode");
+                } else if (getTransitionController().isCollecting()
+                        || !getTransitionController().isShellTransitionsEnabled()) {
+                    mRootWindowContainer.moveActivityToPinnedRootTask(r,
+                            null /* launchIntoPipHostActivity */, "enterPictureInPictureMode",
+                            null /* bounds */);
+                } else {
+                    // Need to make a transition just for this. This shouldn't really happen
+                    // though because if transition == null, we should be part of an existing one.
+                    getTransitionController().createTransition(TRANSIT_PIP);
+                    mRootWindowContainer.moveActivityToPinnedRootTaskAndRequestStart(r,
+                            "enterPictureInPictureMode");
+                }
                 // Continue the pausing process after entering pip.
                 if (r.isState(PAUSING) && r.mPauseSchedulePendingForPip) {
                     r.getTask().schedulePauseActivity(r, false /* userLeaving */,
@@ -4753,6 +4775,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 wpc.updateAssetConfiguration(assetSeq);
             }
         }
+    }
+
+    boolean mayBeLaunchingApp() {
+        return (mPowerModeReasons & POWER_MODE_REASON_START_ACTIVITY) != 0;
     }
 
     void startPowerMode(@PowerModeReason int reason) {
@@ -6402,13 +6428,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         @Override
-        public CompatibilityInfo compatibilityInfoForPackage(ApplicationInfo ai) {
-            synchronized (mGlobalLock) {
-                return compatibilityInfoForPackageLocked(ai);
-            }
-        }
-
-        @Override
         public void sendActivityResult(int callingUid, IBinder activityToken, String resultWho,
                 int requestCode, int resultCode, Intent data) {
             final ActivityRecord r;
@@ -6686,9 +6705,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         @HotPath(caller = HotPath.PROCESS_CHANGE)
         @Override
-        public void preBindApplication(WindowProcessController wpc) {
+        public PreBindInfo preBindApplication(WindowProcessController wpc, ApplicationInfo info) {
             synchronized (mGlobalLockWithoutBoost) {
                 mTaskSupervisor.getActivityMetricsLogger().notifyBindApplication(wpc.mInfo);
+                wpc.onConfigurationChanged(getGlobalConfiguration());
+                // The "info" can be the target of instrumentation.
+                return new PreBindInfo(compatibilityInfoForPackageLocked(info),
+                        new Configuration(wpc.getConfiguration()));
             }
         }
 
@@ -7455,9 +7478,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     FEATURE_LEANBACK);
             final boolean isArc = arcFeature != null && arcFeature.version >= 0;
             final boolean isTv = tvFeature != null && tvFeature.version >= 0;
-            sIsPip2ExperimentEnabled = SystemProperties.getBoolean(
-                    "persist.wm_shell.pip2", false)
-                    || (Flags.enablePip2Implementation() && !isArc && !isTv);
+            sIsPip2ExperimentEnabled = Flags.enablePip2() && !isArc && !isTv;
         }
         return sIsPip2ExperimentEnabled;
     }

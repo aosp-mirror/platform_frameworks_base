@@ -29,6 +29,7 @@ import android.view.accessibility.IAccessibilityInteractionConnection;
 import android.view.accessibility.IAccessibilityManagerClient;
 import android.view.accessibility.AccessibilityWindowAttributes;
 import android.view.accessibility.IMagnificationConnection;
+import android.view.accessibility.IUserInitializationCompleteCallback;
 import android.view.InputEvent;
 import android.view.IWindow;
 import android.view.MagnificationSpec;
@@ -156,13 +157,13 @@ interface IAccessibilityManager {
     @EnforcePermission("INJECT_EVENTS")
     void injectInputEventToInputFilter(in InputEvent event);
 
-    @RequiresNoPermission
+    @EnforcePermission("MANAGE_ACCESSIBILITY")
     boolean startFlashNotificationSequence(String opPkg, int reason, IBinder token);
 
-    @RequiresNoPermission
+    @EnforcePermission("MANAGE_ACCESSIBILITY")
     boolean stopFlashNotificationSequence(String opPkg);
 
-    @RequiresNoPermission
+    @EnforcePermission("MANAGE_ACCESSIBILITY")
     boolean startFlashNotificationEvent(String opPkg, int reason, String reasonPkg);
 
     @RequiresNoPermission
@@ -192,4 +193,10 @@ interface IAccessibilityManager {
 
     @EnforcePermission("MANAGE_ACCESSIBILITY")
     Bundle getA11yFeatureToTileMap(int userId);
+
+    @RequiresNoPermission
+    void registerUserInitializationCompleteCallback(IUserInitializationCompleteCallback callback);
+
+    @RequiresNoPermission
+    void unregisterUserInitializationCompleteCallback(IUserInitializationCompleteCallback callback);
 }

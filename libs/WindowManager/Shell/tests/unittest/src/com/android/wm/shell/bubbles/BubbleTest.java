@@ -43,7 +43,7 @@ import androidx.test.filters.SmallTest;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.ShellExecutor;
-import com.android.wm.shell.common.bubbles.BubbleInfo;
+import com.android.wm.shell.shared.bubbles.BubbleInfo;
 
 import org.junit.Before;
 import org.junit.Test;

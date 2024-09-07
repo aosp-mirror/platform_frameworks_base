@@ -83,7 +83,9 @@ class BouncerContentTest : SysuiTestCase() {
         PlatformTheme {
             BouncerContent(
                 viewModel =
-                    rememberViewModel { kosmos.bouncerSceneContentViewModelFactory.create() },
+                    rememberViewModel("test") {
+                        kosmos.bouncerSceneContentViewModelFactory.create()
+                    },
                 layout = BouncerSceneLayout.BESIDE_USER_SWITCHER,
                 modifier = Modifier.fillMaxSize().testTag("BouncerContent"),
                 dialogFactory = bouncerDialogFactory

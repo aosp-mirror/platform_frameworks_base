@@ -34,7 +34,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.Flags.MEDIA_RESUME_PROGRESS
-import com.android.systemui.flags.Flags.MEDIA_SESSION_ACTIONS
 import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.graphics.imageLoader
 import com.android.systemui.kosmos.testDispatcher
@@ -42,7 +41,6 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.media.controls.shared.model.MediaData
 import com.android.systemui.media.controls.util.fakeMediaControllerFactory
 import com.android.systemui.media.controls.util.mediaFlags
-import com.android.systemui.plugins.activityStarter
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.SbnBuilder
 import com.android.systemui.testKosmos
@@ -87,7 +85,6 @@ class MediaDataLoaderTest : SysuiTestCase() {
             context,
             testDispatcher,
             testScope,
-            kosmos.activityStarter,
             mediaControllerFactory,
             mediaFlags,
             kosmos.imageLoader,
@@ -96,7 +93,6 @@ class MediaDataLoaderTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        fakeFeatureFlags.set(MEDIA_SESSION_ACTIONS, true)
         mediaControllerFactory.setControllerForToken(session.sessionToken, mediaController)
     }
 

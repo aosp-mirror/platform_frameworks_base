@@ -2,14 +2,6 @@ package: "com.android.window.flags"
 container: "system"
 
 flag {
-    name: "enable_scaled_resizing"
-    namespace: "lse_desktop_experience"
-    description: "Enable the resizing of un-resizable apps through scaling their bounds up/down"
-    bug: "320350734"
-    is_fixed_read_only: true
-}
-
-flag {
     name: "enable_desktop_windowing_mode"
     namespace: "lse_desktop_experience"
     description: "Enables desktop windowing"
@@ -28,6 +20,13 @@ flag {
     namespace: "lse_desktop_experience"
     description: "Enables new initial bounds for desktop windowing which adjust depending on app constraints"
     bug: "324377962"
+}
+
+flag {
+    name: "enable_windowing_scaled_resizing"
+    namespace: "lse_desktop_experience"
+    description: "Enables the resizing of non-resizable apps through scaling their bounds up/down"
+    bug: "319844447"
 }
 
 flag {
@@ -112,6 +111,16 @@ flag {
     namespace: "lse_desktop_experience"
     description: "Whether to apply cascading effect for placing multiple windows when first launched"
     bug: "325240051"
+}
+
+flag {
+    name: "respect_orientation_change_for_unresizeable"
+    namespace: "lse_desktop_experience"
+    description: "Whether to resize task to respect requested orientation change of unresizeable activity"
+    bug: "353338503"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {
@@ -234,4 +243,11 @@ flag {
     metadata {
       purpose: PURPOSE_BUGFIX
     }
+}
+
+flag {
+    name: "enable_desktop_windowing_persistence"
+    namespace: "lse_desktop_experience"
+    description: "Persists the desktop windowing session across reboots."
+    bug: "350456942"
 }

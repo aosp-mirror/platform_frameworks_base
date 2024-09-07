@@ -424,12 +424,18 @@ public class ActivityStartController {
                 Intent intent = intents[i];
                 NeededUriGrants intentGrants = null;
 
-                intent.prepareToEnterSystemServer();
+                // Refuse possible leaked file descriptors.
+                if (intent.hasFileDescriptors()) {
+                    throw new IllegalArgumentException("File descriptors passed in Intent");
+                }
 
                 // Get the flag earlier because the intent may be modified in resolveActivity below.
                 final boolean componentSpecified = intent.getComponent() != null;
                 // Don't modify the client's object!
                 intent = new Intent(intent);
+
+                // Remove existing mismatch flag so it can be properly updated later
+                intent.removeExtendedFlags(Intent.EXTENDED_FLAG_FILTER_MISMATCH);
 
                 // Collect information about the target of the Intent.
                 ActivityInfo aInfo = mSupervisor.resolveActivity(intent, resolvedTypes[i],

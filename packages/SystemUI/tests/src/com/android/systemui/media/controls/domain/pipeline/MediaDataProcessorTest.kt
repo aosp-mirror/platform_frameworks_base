@@ -41,12 +41,11 @@ import android.os.Bundle
 import android.os.UserHandle
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
+import android.platform.test.flag.junit.FlagsParameterization
 import android.provider.Settings
 import android.service.notification.StatusBarNotification
-import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
 import androidx.media.utils.MediaConstants
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.dx.mockito.inline.extended.ExtendedMockito
 import com.android.internal.logging.InstanceId
@@ -58,36 +57,40 @@ import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.EnableSceneContainer
+import com.android.systemui.flags.Flags.MEDIA_REMOTE_RESUME
+import com.android.systemui.flags.Flags.MEDIA_RESUME_PROGRESS
+import com.android.systemui.flags.Flags.MEDIA_RETAIN_RECOMMENDATIONS
+import com.android.systemui.flags.Flags.MEDIA_RETAIN_SESSIONS
+import com.android.systemui.flags.fakeFeatureFlagsClassic
+import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.media.controls.data.repository.MediaDataRepository
-import com.android.systemui.media.controls.data.repository.MediaFilterRepository
+import com.android.systemui.media.controls.data.repository.mediaDataRepository
 import com.android.systemui.media.controls.data.repository.mediaFilterRepository
 import com.android.systemui.media.controls.domain.pipeline.interactor.MediaCarouselInteractor
 import com.android.systemui.media.controls.domain.resume.MediaResumeListener
 import com.android.systemui.media.controls.domain.resume.ResumeMediaBrowser
+import com.android.systemui.media.controls.shared.mediaLogger
+import com.android.systemui.media.controls.shared.mockMediaLogger
 import com.android.systemui.media.controls.shared.model.EXTRA_KEY_TRIGGER_SOURCE
 import com.android.systemui.media.controls.shared.model.EXTRA_VALUE_TRIGGER_PERIODIC
 import com.android.systemui.media.controls.shared.model.MediaData
 import com.android.systemui.media.controls.shared.model.SmartspaceMediaData
 import com.android.systemui.media.controls.shared.model.SmartspaceMediaDataProvider
-import com.android.systemui.media.controls.util.MediaControllerFactory
-import com.android.systemui.media.controls.util.MediaFlags
 import com.android.systemui.media.controls.util.MediaUiEventLogger
-import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.media.controls.util.fakeMediaControllerFactory
+import com.android.systemui.media.controls.util.mediaFlags
+import com.android.systemui.plugins.activityStarter
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.SbnBuilder
 import com.android.systemui.statusbar.notificationLockscreenUserManager
 import com.android.systemui.testKosmos
 import com.android.systemui.util.concurrency.FakeExecutor
-import com.android.systemui.util.settings.FakeSettings
+import com.android.systemui.util.settings.fakeSettings
 import com.android.systemui.util.time.FakeSystemClock
-import com.android.systemui.utils.os.FakeHandler
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.runCurrent
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -111,6 +114,8 @@ import org.mockito.kotlin.capture
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
 import org.mockito.quality.Strictness
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
 private const val KEY = "KEY"
 private const val KEY_2 = "KEY_2"
@@ -134,13 +139,15 @@ private fun <T> anyObject(): T {
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWithLooper(setAsMainLooper = true)
-@RunWith(AndroidJUnit4::class)
+@RunWith(ParameterizedAndroidJunit4::class)
 @EnableSceneContainer
-class MediaDataProcessorTest : SysuiTestCase() {
-    val kosmos = testKosmos()
+class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
+    private val kosmos = testKosmos().apply { mediaLogger = mockMediaLogger }
+    private val testDispatcher = kosmos.testDispatcher
+    private val testScope = kosmos.testScope
+    private val settings = kosmos.fakeSettings
 
     @JvmField @Rule val mockito = MockitoJUnit.rule()
-    @Mock lateinit var mediaControllerFactory: MediaControllerFactory
     @Mock lateinit var controller: MediaController
     @Mock lateinit var transportControls: MediaController.TransportControls
     @Mock lateinit var playbackInfo: MediaController.PlaybackInfo
@@ -158,7 +165,6 @@ class MediaDataProcessorTest : SysuiTestCase() {
     @Mock lateinit var mediaDataCombineLatest: MediaDataCombineLatest
     @Mock lateinit var listener: MediaDataManager.Listener
     @Mock lateinit var pendingIntent: PendingIntent
-    @Mock lateinit var activityStarter: ActivityStarter
     @Mock lateinit var smartspaceManager: SmartspaceManager
     @Mock lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
     private lateinit var smartspaceMediaDataProvider: SmartspaceMediaDataProvider
@@ -166,7 +172,6 @@ class MediaDataProcessorTest : SysuiTestCase() {
     @Mock private lateinit var mediaRecommendationItem: SmartspaceAction
     private lateinit var validRecommendationList: List<SmartspaceAction>
     @Mock private lateinit var mediaSmartspaceBaseAction: SmartspaceAction
-    @Mock private lateinit var mediaFlags: MediaFlags
     @Mock private lateinit var logger: MediaUiEventLogger
     private lateinit var mediaCarouselInteractor: MediaCarouselInteractor
     private lateinit var mediaDataProcessor: MediaDataProcessor
@@ -179,13 +184,28 @@ class MediaDataProcessorTest : SysuiTestCase() {
     @Captor lateinit var smartSpaceConfigBuilderCaptor: ArgumentCaptor<SmartspaceConfig>
     @Mock private lateinit var ugm: IUriGrantsManager
     @Mock private lateinit var imageSource: ImageDecoder.Source
-    private lateinit var mediaDataRepository: MediaDataRepository
-    private lateinit var testScope: TestScope
-    private lateinit var testDispatcher: TestDispatcher
-    private lateinit var testableLooper: TestableLooper
-    private lateinit var fakeHandler: FakeHandler
 
-    private val settings = FakeSettings()
+    companion object {
+        @JvmStatic
+        @Parameters(name = "{0}")
+        fun getParams(): List<FlagsParameterization> {
+            return FlagsParameterization.progressionOf(
+                Flags.FLAG_MEDIA_LOAD_METADATA_VIA_MEDIA_DATA_LOADER
+            )
+        }
+    }
+
+    init {
+        mSetFlagsRule.setFlagsParameterization(flags)
+    }
+
+    private val fakeFeatureFlags = kosmos.fakeFeatureFlagsClassic
+    private val activityStarter = kosmos.activityStarter
+    private val mediaControllerFactory = kosmos.fakeMediaControllerFactory
+    private val notificationLockscreenUserManager = kosmos.notificationLockscreenUserManager
+    private val mediaFilterRepository = kosmos.mediaFilterRepository
+    private val mediaDataFilter = kosmos.mediaDataFilter
+
     private val instanceIdSequence = InstanceIdSequenceFake(1 shl 20)
 
     private val originalSmartspaceSetting =
@@ -194,9 +214,6 @@ class MediaDataProcessorTest : SysuiTestCase() {
             Settings.Secure.MEDIA_CONTROLS_RECOMMENDATION,
             1
         )
-    private val notificationLockscreenUserManager = kosmos.notificationLockscreenUserManager
-    private val mediaFilterRepository: MediaFilterRepository = kosmos.mediaFilterRepository
-    private val mediaDataFilter: MediaDataFilterImpl = kosmos.mediaDataFilter
 
     private lateinit var staticMockSession: MockitoSession
 
@@ -212,17 +229,12 @@ class MediaDataProcessorTest : SysuiTestCase() {
         foregroundExecutor = FakeExecutor(clock)
         backgroundExecutor = FakeExecutor(clock)
         uiExecutor = FakeExecutor(clock)
-        testableLooper = TestableLooper.get(this)
-        fakeHandler = FakeHandler(testableLooper.looper)
         smartspaceMediaDataProvider = SmartspaceMediaDataProvider()
         Settings.Secure.putInt(
             context.contentResolver,
             Settings.Secure.MEDIA_CONTROLS_RECOMMENDATION,
             1
         )
-        testDispatcher = UnconfinedTestDispatcher()
-        testScope = TestScope(testDispatcher)
-        mediaDataRepository = MediaDataRepository(mediaFlags, dumpManager)
         mediaDataProcessor =
             MediaDataProcessor(
                 context = context,
@@ -231,7 +243,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
                 backgroundExecutor = backgroundExecutor,
                 uiExecutor = uiExecutor,
                 foregroundExecutor = foregroundExecutor,
-                handler = fakeHandler,
+                mainDispatcher = testDispatcher,
                 mediaControllerFactory = mediaControllerFactory,
                 broadcastDispatcher = broadcastDispatcher,
                 dumpManager = dumpManager,
@@ -241,13 +253,16 @@ class MediaDataProcessorTest : SysuiTestCase() {
                 useQsMediaPlayer = true,
                 systemClock = clock,
                 secureSettings = settings,
-                mediaFlags = mediaFlags,
+                mediaFlags = kosmos.mediaFlags,
                 logger = logger,
                 smartspaceManager = smartspaceManager,
                 keyguardUpdateMonitor = keyguardUpdateMonitor,
-                mediaDataRepository = mediaDataRepository,
+                mediaDataRepository = kosmos.mediaDataRepository,
+                mediaDataLoader = { kosmos.mediaDataLoader },
+                mediaLogger = kosmos.mediaLogger,
             )
         mediaDataProcessor.start()
+        testScope.runCurrent()
         mediaCarouselInteractor =
             MediaCarouselInteractor(
                 applicationScope = testScope.backgroundScope,
@@ -259,7 +274,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
                 mediaDataCombineLatest = mediaDataCombineLatest,
                 mediaDataFilter = mediaDataFilter,
                 mediaFilterRepository = mediaFilterRepository,
-                mediaFlags = mediaFlags
+                mediaFlags = kosmos.mediaFlags
             )
         mediaCarouselInteractor.start()
         verify(mediaTimeoutListener).stateCallback = capture(stateCallbackCaptor)
@@ -295,7 +310,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
                 putString(MediaMetadata.METADATA_KEY_TITLE, SESSION_TITLE)
             }
         verify(smartspaceManager).createSmartspaceSession(capture(smartSpaceConfigBuilderCaptor))
-        whenever(mediaControllerFactory.create(eq(session.sessionToken))).thenReturn(controller)
+        mediaControllerFactory.setControllerForToken(session.sessionToken, controller)
         whenever(controller.transportControls).thenReturn(transportControls)
         whenever(controller.playbackInfo).thenReturn(playbackInfo)
         whenever(controller.metadata).thenReturn(metadataBuilder.build())
@@ -325,10 +340,10 @@ class MediaDataProcessorTest : SysuiTestCase() {
         whenever(mediaSmartspaceTarget.iconGrid).thenReturn(validRecommendationList)
         whenever(mediaSmartspaceTarget.creationTimeMillis).thenReturn(SMARTSPACE_CREATION_TIME)
         whenever(mediaSmartspaceTarget.expiryTimeMillis).thenReturn(SMARTSPACE_EXPIRY_TIME)
-        whenever(mediaFlags.areMediaSessionActionsEnabled(any(), any())).thenReturn(false)
-        whenever(mediaFlags.isRetainingPlayersEnabled()).thenReturn(false)
-        whenever(mediaFlags.isPersistentSsCardEnabled()).thenReturn(false)
-        whenever(mediaFlags.isRemoteResumeAllowed()).thenReturn(false)
+        fakeFeatureFlags.set(MEDIA_RETAIN_SESSIONS, false)
+        fakeFeatureFlags.set(MEDIA_RESUME_PROGRESS, false)
+        fakeFeatureFlags.set(MEDIA_REMOTE_RESUME, false)
+        fakeFeatureFlags.set(MEDIA_RETAIN_RECOMMENDATIONS, false)
         whenever(logger.getNewInstanceId()).thenReturn(instanceIdSequence.newInstanceId())
         whenever(keyguardUpdateMonitor.isUserInLockdown(any())).thenReturn(false)
     }
@@ -374,6 +389,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
             PACKAGE_NAME
         )
 
+        testScope.runCurrent()
         backgroundExecutor.runAllReady()
         foregroundExecutor.runAllReady()
         verify(listener)
@@ -399,7 +415,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
     @Test
     fun testLoadsMetadataOnBackground() {
         mediaDataProcessor.onNotificationAdded(KEY, mediaNotification)
-        assertThat(backgroundExecutor.numPending()).isEqualTo(1)
+        testScope.assertRunAllReady(foreground = 0, background = 1)
     }
 
     @Test
@@ -416,8 +432,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
 
         mediaDataProcessor.onNotificationAdded(KEY, mediaNotification)
 
-        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
-        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
+        testScope.assertRunAllReady(foreground = 1, background = 1)
         verify(listener)
             .onMediaDataLoaded(
                 eq(KEY),
@@ -434,8 +449,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
     fun testOnMetaDataLoaded_withoutExplicitIndicator() {
         mediaDataProcessor.onNotificationAdded(KEY, mediaNotification)
 
-        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
-        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
+        testScope.assertRunAllReady(foreground = 1, background = 1)
         verify(listener)
             .onMediaDataLoaded(
                 eq(KEY),
@@ -462,10 +476,8 @@ class MediaDataProcessorTest : SysuiTestCase() {
 
     @Test
     fun testOnMetaDataLoaded_conservesActiveFlag() {
-        whenever(mediaControllerFactory.create(anyObject())).thenReturn(controller)
         mediaDataProcessor.onNotificationAdded(KEY, mediaNotification)
-        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
-        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
+        testScope.assertRunAllReady(foreground = 1, background = 1)
         verify(listener)
             .onMediaDataLoaded(
                 eq(KEY),
@@ -509,8 +521,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
             }
 
         mediaDataProcessor.onNotificationAdded(KEY, notif)
-        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
-        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
+        testScope.assertRunAllReady(foreground = 1, background = 1)
         verify(listener)
             .onMediaDataLoaded(
                 eq(KEY),
@@ -596,8 +607,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
         mediaDataProcessor.onNotificationAdded(KEY, mediaNotification)
 
         // Then a media control is created with a placeholder title string
-        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
-        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
+        testScope.assertRunAllReady(foreground = 1, background = 1)
         verify(listener)
             .onMediaDataLoaded(
                 eq(KEY),
@@ -627,8 +637,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
         mediaDataProcessor.onNotificationAdded(KEY, mediaNotification)
 
         // Then a media control is created with a placeholder title string
-        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
-        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
+        testScope.assertRunAllReady(foreground = 1, background = 1)
         verify(listener)
             .onMediaDataLoaded(
                 eq(KEY),
@@ -669,8 +678,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
         mediaDataProcessor.onNotificationAdded(KEY, mediaNotification)
 
         // Then the media control is added using the notification's title
-        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
-        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
+        testScope.assertRunAllReady(foreground = 1, background = 1)
         verify(listener)
             .onMediaDataLoaded(
                 eq(KEY),
@@ -778,8 +786,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
         // GIVEN that the manager has two notifications with resume actions
         mediaDataProcessor.onNotificationAdded(KEY, mediaNotification)
         mediaDataProcessor.onNotificationAdded(KEY_2, mediaNotification)
-        assertThat(backgroundExecutor.runAllReady()).isEqualTo(2)
-        assertThat(foregroundExecutor.runAllReady()).isEqualTo(2)
+        testScope.assertRunAllReady(foreground = 2, background = 2)
 
         verify(listener)
             .onMediaDataLoaded(
@@ -866,7 +873,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
     @Test
     fun testOnNotificationRemoved_withResumption_isRemoteAndRemoteAllowed() {
         // With the flag enabled to allow remote media to resume
-        whenever(mediaFlags.isRemoteResumeAllowed()).thenReturn(true)
+        fakeFeatureFlags.set(MEDIA_REMOTE_RESUME, true)
 
         // GIVEN that the manager has a notification with a resume action, but is not local
         whenever(controller.metadata).thenReturn(metadataBuilder.build())
@@ -897,7 +904,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
     @Test
     fun testOnNotificationRemoved_withResumption_isRcnAndRemoteAllowed() {
         // With the flag enabled to allow remote media to resume
-        whenever(mediaFlags.isRemoteResumeAllowed()).thenReturn(true)
+        fakeFeatureFlags.set(MEDIA_REMOTE_RESUME, true)
 
         // GIVEN that the manager has a remote cast notification
         addNotificationAndLoad(remoteCastNotification)
@@ -980,7 +987,8 @@ class MediaDataProcessorTest : SysuiTestCase() {
         assertThat(data.resumption).isTrue()
         assertThat(data.song).isEqualTo(SESSION_TITLE)
         assertThat(data.app).isEqualTo(APP_NAME)
-        assertThat(data.actions).hasSize(1)
+        // resume button is a semantic action.
+        assertThat(data.actions).hasSize(0)
         assertThat(data.semanticActions!!.playOrPause).isNotNull()
         assertThat(data.lastActive).isAtLeast(currentTime)
         verify(logger).logResumeMediaAdded(anyInt(), eq(PACKAGE_NAME), eq(data.instanceId))
@@ -1007,7 +1015,8 @@ class MediaDataProcessorTest : SysuiTestCase() {
         assertThat(data.resumption).isTrue()
         assertThat(data.song).isEqualTo(SESSION_TITLE)
         assertThat(data.app).isEqualTo(APP_NAME)
-        assertThat(data.actions).hasSize(1)
+        // resume button is a semantic action.
+        assertThat(data.actions).hasSize(0)
         assertThat(data.semanticActions!!.playOrPause).isNotNull()
         assertThat(data.lastActive).isAtLeast(currentTime)
         assertThat(data.isExplicit).isTrue()
@@ -1016,7 +1025,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
 
     @Test
     fun testAddResumptionControls_hasPartialProgress() {
-        whenever(mediaFlags.isResumeProgressEnabled()).thenReturn(true)
+        fakeFeatureFlags.set(MEDIA_RESUME_PROGRESS, true)
 
         // WHEN resumption controls are added with partial progress
         val progress = 0.5
@@ -1043,7 +1052,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
 
     @Test
     fun testAddResumptionControls_hasNotPlayedProgress() {
-        whenever(mediaFlags.isResumeProgressEnabled()).thenReturn(true)
+        fakeFeatureFlags.set(MEDIA_RESUME_PROGRESS, true)
 
         // WHEN resumption controls are added that have not been played
         val extras =
@@ -1068,7 +1077,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
 
     @Test
     fun testAddResumptionControls_hasFullProgress() {
-        whenever(mediaFlags.isResumeProgressEnabled()).thenReturn(true)
+        fakeFeatureFlags.set(MEDIA_RESUME_PROGRESS, true)
 
         // WHEN resumption controls are added with progress info
         val extras =
@@ -1094,7 +1103,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
 
     @Test
     fun testAddResumptionControls_hasNoExtras() {
-        whenever(mediaFlags.isResumeProgressEnabled()).thenReturn(true)
+        fakeFeatureFlags.set(MEDIA_RESUME_PROGRESS, true)
 
         // WHEN resumption controls are added that do not have any extras
         val desc =
@@ -1112,7 +1121,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
 
     @Test
     fun testAddResumptionControls_hasEmptyTitle() {
-        whenever(mediaFlags.isResumeProgressEnabled()).thenReturn(true)
+        fakeFeatureFlags.set(MEDIA_RESUME_PROGRESS, true)
 
         // WHEN resumption controls are added that have empty title
         val desc =
@@ -1131,8 +1140,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
         )
 
         // Resumption controls are not added.
-        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
-        assertThat(foregroundExecutor.runAllReady()).isEqualTo(0)
+        testScope.assertRunAllReady(foreground = 0, background = 1)
         verify(listener, never())
             .onMediaDataLoaded(
                 eq(PACKAGE_NAME),
@@ -1146,7 +1154,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
 
     @Test
     fun testAddResumptionControls_hasBlankTitle() {
-        whenever(mediaFlags.isResumeProgressEnabled()).thenReturn(true)
+        fakeFeatureFlags.set(MEDIA_RESUME_PROGRESS, true)
 
         // WHEN resumption controls are added that have a blank title
         val desc =
@@ -1165,8 +1173,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
         )
 
         // Resumption controls are not added.
-        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
-        assertThat(foregroundExecutor.runAllReady()).isEqualTo(0)
+        testScope.assertRunAllReady(foreground = 0, background = 1)
         verify(listener, never())
             .onMediaDataLoaded(
                 eq(PACKAGE_NAME),
@@ -1233,8 +1240,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
         mediaDataProcessor.onNotificationAdded(KEY, notif)
 
         // THEN it still loads
-        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
-        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
+        testScope.assertRunAllReady(foreground = 1, background = 1)
         verify(listener)
             .onMediaDataLoaded(
                 eq(KEY),
@@ -1351,7 +1357,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
 
     @Test
     fun testOnSmartspaceMediaDataLoaded_persistentEnabled_headphoneTrigger_isActive() {
-        whenever(mediaFlags.isPersistentSsCardEnabled()).thenReturn(true)
+        fakeFeatureFlags.set(MEDIA_RETAIN_RECOMMENDATIONS, true)
         smartspaceMediaDataProvider.onTargetsAvailable(listOf(mediaSmartspaceTarget))
         val instanceId = instanceIdSequence.lastInstanceId
 
@@ -1377,7 +1383,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
 
     @Test
     fun testOnSmartspaceMediaDataLoaded_persistentEnabled_periodicTrigger_notActive() {
-        whenever(mediaFlags.isPersistentSsCardEnabled()).thenReturn(true)
+        fakeFeatureFlags.set(MEDIA_RETAIN_RECOMMENDATIONS, true)
         val extras =
             Bundle().apply {
                 putString("package_name", PACKAGE_NAME)
@@ -1411,7 +1417,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
 
     @Test
     fun testOnSmartspaceMediaDataLoaded_persistentEnabled_noTargets_inactive() {
-        whenever(mediaFlags.isPersistentSsCardEnabled()).thenReturn(true)
+        fakeFeatureFlags.set(MEDIA_RETAIN_RECOMMENDATIONS, true)
 
         smartspaceMediaDataProvider.onTargetsAvailable(listOf(mediaSmartspaceTarget))
         val instanceId = instanceIdSequence.lastInstanceId
@@ -1443,7 +1449,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
 
     @Test
     fun testSetRecommendationInactive_notifiesListeners() {
-        whenever(mediaFlags.isPersistentSsCardEnabled()).thenReturn(true)
+        fakeFeatureFlags.set(MEDIA_RETAIN_RECOMMENDATIONS, true)
 
         smartspaceMediaDataProvider.onTargetsAvailable(listOf(mediaSmartspaceTarget))
         val instanceId = instanceIdSequence.lastInstanceId
@@ -1476,6 +1482,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
     fun testOnSmartspaceMediaDataLoaded_settingDisabled_doesNothing() {
         // WHEN media recommendation setting is off
         settings.putInt(Settings.Secure.MEDIA_CONTROLS_RECOMMENDATION, 0)
+        testScope.runCurrent()
 
         smartspaceMediaDataProvider.onTargetsAvailable(listOf(mediaSmartspaceTarget))
 
@@ -1493,6 +1500,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
 
         // WHEN the media recommendation setting is turned off
         settings.putInt(Settings.Secure.MEDIA_CONTROLS_RECOMMENDATION, 0)
+        testScope.runCurrent()
 
         // THEN listeners are notified
         uiExecutor.advanceClockToLast()
@@ -1513,8 +1521,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
     fun testOnMediaDataTimedOut_updatesLastActiveTime() {
         // GIVEN that the manager has a notification
         mediaDataProcessor.onNotificationAdded(KEY, mediaNotification)
-        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
-        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
+        testScope.assertRunAllReady(foreground = 1, background = 1)
 
         // WHEN the notification times out
         clock.advanceTime(100)
@@ -1622,8 +1629,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
 
         // WHEN the notification is loaded
         mediaDataProcessor.onNotificationAdded(KEY, notif)
-        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
-        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
+        testScope.assertRunAllReady(foreground = 1, background = 1)
 
         // THEN only the first MAX_COMPACT_ACTIONS are actually set
         verify(listener)
@@ -1658,8 +1664,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
 
         // WHEN the notification is loaded
         mediaDataProcessor.onNotificationAdded(KEY, notif)
-        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
-        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
+        testScope.assertRunAllReady(foreground = 1, background = 1)
 
         // THEN only the first MAX_NOTIFICATION_ACTIONS are actually included
         verify(listener)
@@ -1678,7 +1683,6 @@ class MediaDataProcessorTest : SysuiTestCase() {
     @Test
     fun testPlaybackActions_noState_usesNotification() {
         val desc = "Notification Action"
-        whenever(mediaFlags.areMediaSessionActionsEnabled(any(), any())).thenReturn(true)
         whenever(controller.playbackState).thenReturn(null)
 
         val notifWithAction =
@@ -1693,8 +1697,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
             }
         mediaDataProcessor.onNotificationAdded(KEY, notifWithAction)
 
-        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
-        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
+        testScope.assertRunAllReady(foreground = 1, background = 1)
         verify(listener)
             .onMediaDataLoaded(
                 eq(KEY),
@@ -1713,7 +1716,6 @@ class MediaDataProcessorTest : SysuiTestCase() {
     @Test
     fun testPlaybackActions_hasPrevNext() {
         val customDesc = arrayOf("custom 1", "custom 2", "custom 3", "custom 4")
-        whenever(mediaFlags.areMediaSessionActionsEnabled(any(), any())).thenReturn(true)
         val stateActions =
             PlaybackState.ACTION_PLAY or
                 PlaybackState.ACTION_SKIP_TO_PREVIOUS or
@@ -1757,7 +1759,6 @@ class MediaDataProcessorTest : SysuiTestCase() {
     @Test
     fun testPlaybackActions_noPrevNext_usesCustom() {
         val customDesc = arrayOf("custom 1", "custom 2", "custom 3", "custom 4", "custom 5")
-        whenever(mediaFlags.areMediaSessionActionsEnabled(any(), any())).thenReturn(true)
         val stateActions = PlaybackState.ACTION_PLAY
         val stateBuilder = PlaybackState.Builder().setActions(stateActions)
         customDesc.forEach {
@@ -1789,7 +1790,6 @@ class MediaDataProcessorTest : SysuiTestCase() {
 
     @Test
     fun testPlaybackActions_connecting() {
-        whenever(mediaFlags.areMediaSessionActionsEnabled(any(), any())).thenReturn(true)
         val stateActions = PlaybackState.ACTION_PLAY
         val stateBuilder =
             PlaybackState.Builder()
@@ -1809,87 +1809,73 @@ class MediaDataProcessorTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(Flags.FLAG_MEDIA_CONTROLS_DRAWABLES_REUSE)
-    fun postWithPlaybackActions_drawablesReused() =
-        kosmos.testScope.runTest {
-            whenever(mediaFlags.areMediaSessionActionsEnabled(any(), any())).thenReturn(true)
-            whenever(notificationLockscreenUserManager.isCurrentProfile(USER_ID)).thenReturn(true)
-            whenever(notificationLockscreenUserManager.isProfileAvailable(USER_ID)).thenReturn(true)
-            val stateActions =
-                PlaybackState.ACTION_PAUSE or
-                    PlaybackState.ACTION_SKIP_TO_PREVIOUS or
-                    PlaybackState.ACTION_SKIP_TO_NEXT
-            val stateBuilder =
-                PlaybackState.Builder()
-                    .setState(PlaybackState.STATE_PLAYING, 0, 10f)
-                    .setActions(stateActions)
-            whenever(controller.playbackState).thenReturn(stateBuilder.build())
-            val userEntries by collectLastValue(mediaFilterRepository.selectedUserEntries)
+    fun postWithPlaybackActions_drawablesReused() {
+        whenever(notificationLockscreenUserManager.isCurrentProfile(USER_ID)).thenReturn(true)
+        whenever(notificationLockscreenUserManager.isProfileAvailable(USER_ID)).thenReturn(true)
+        val stateActions =
+            PlaybackState.ACTION_PAUSE or
+                PlaybackState.ACTION_SKIP_TO_PREVIOUS or
+                PlaybackState.ACTION_SKIP_TO_NEXT
+        val stateBuilder =
+            PlaybackState.Builder()
+                .setState(PlaybackState.STATE_PLAYING, 0, 10f)
+                .setActions(stateActions)
+        whenever(controller.playbackState).thenReturn(stateBuilder.build())
+        val userEntries by testScope.collectLastValue(mediaFilterRepository.selectedUserEntries)
 
-            mediaDataProcessor.addInternalListener(mediaDataFilter)
-            mediaDataFilter.mediaDataProcessor = mediaDataProcessor
-            addNotificationAndLoad()
+        mediaDataProcessor.addInternalListener(mediaDataFilter)
+        mediaDataFilter.mediaDataProcessor = mediaDataProcessor
+        addNotificationAndLoad()
 
-            assertThat(userEntries).hasSize(1)
-            val firstSemanticActions = userEntries?.values?.toList()?.get(0)?.semanticActions!!
+        assertThat(userEntries).hasSize(1)
+        val firstSemanticActions = userEntries?.values?.toList()?.get(0)?.semanticActions!!
 
-            addNotificationAndLoad()
+        addNotificationAndLoad()
 
-            assertThat(userEntries).hasSize(1)
-            val secondSemanticActions = userEntries?.values?.toList()?.get(0)?.semanticActions!!
-            assertThat(secondSemanticActions.playOrPause?.icon)
-                .isEqualTo(firstSemanticActions.playOrPause?.icon)
-            assertThat(secondSemanticActions.playOrPause?.background)
-                .isEqualTo(firstSemanticActions.playOrPause?.background)
-            assertThat(secondSemanticActions.nextOrCustom?.icon)
-                .isEqualTo(firstSemanticActions.nextOrCustom?.icon)
-            assertThat(secondSemanticActions.prevOrCustom?.icon)
-                .isEqualTo(firstSemanticActions.prevOrCustom?.icon)
-        }
+        assertThat(userEntries).hasSize(1)
+        val secondSemanticActions = userEntries?.values?.toList()?.get(0)?.semanticActions!!
+        assertThat(secondSemanticActions.nextOrCustom?.icon)
+            .isEqualTo(firstSemanticActions.nextOrCustom?.icon)
+        assertThat(secondSemanticActions.prevOrCustom?.icon)
+            .isEqualTo(firstSemanticActions.prevOrCustom?.icon)
+    }
 
     @Test
     @DisableFlags(Flags.FLAG_MEDIA_CONTROLS_DRAWABLES_REUSE)
-    fun postWithPlaybackActions_drawablesNotReused() =
-        kosmos.testScope.runTest {
-            whenever(mediaFlags.areMediaSessionActionsEnabled(any(), any())).thenReturn(true)
-            whenever(notificationLockscreenUserManager.isCurrentProfile(USER_ID)).thenReturn(true)
-            whenever(notificationLockscreenUserManager.isProfileAvailable(USER_ID)).thenReturn(true)
-            val stateActions =
-                PlaybackState.ACTION_PAUSE or
-                    PlaybackState.ACTION_SKIP_TO_PREVIOUS or
-                    PlaybackState.ACTION_SKIP_TO_NEXT
-            val stateBuilder =
-                PlaybackState.Builder()
-                    .setState(PlaybackState.STATE_PLAYING, 0, 10f)
-                    .setActions(stateActions)
-            whenever(controller.playbackState).thenReturn(stateBuilder.build())
-            val userEntries by collectLastValue(mediaFilterRepository.selectedUserEntries)
+    fun postWithPlaybackActions_drawablesNotReused() {
+        whenever(notificationLockscreenUserManager.isCurrentProfile(USER_ID)).thenReturn(true)
+        whenever(notificationLockscreenUserManager.isProfileAvailable(USER_ID)).thenReturn(true)
+        val stateActions =
+            PlaybackState.ACTION_PAUSE or
+                PlaybackState.ACTION_SKIP_TO_PREVIOUS or
+                PlaybackState.ACTION_SKIP_TO_NEXT
+        val stateBuilder =
+            PlaybackState.Builder()
+                .setState(PlaybackState.STATE_PLAYING, 0, 10f)
+                .setActions(stateActions)
+        whenever(controller.playbackState).thenReturn(stateBuilder.build())
+        val userEntries by testScope.collectLastValue(mediaFilterRepository.selectedUserEntries)
 
-            mediaDataProcessor.addInternalListener(mediaDataFilter)
-            mediaDataFilter.mediaDataProcessor = mediaDataProcessor
-            addNotificationAndLoad()
+        mediaDataProcessor.addInternalListener(mediaDataFilter)
+        mediaDataFilter.mediaDataProcessor = mediaDataProcessor
+        addNotificationAndLoad()
 
-            assertThat(userEntries).hasSize(1)
-            val firstSemanticActions = userEntries?.values?.toList()?.get(0)?.semanticActions!!
+        assertThat(userEntries).hasSize(1)
+        val firstSemanticActions = userEntries?.values?.toList()?.get(0)?.semanticActions!!
 
-            addNotificationAndLoad()
+        addNotificationAndLoad()
 
-            assertThat(userEntries).hasSize(1)
-            val secondSemanticActions = userEntries?.values?.toList()?.get(0)?.semanticActions!!
-
-            assertThat(secondSemanticActions.playOrPause?.icon)
-                .isNotEqualTo(firstSemanticActions.playOrPause?.icon)
-            assertThat(secondSemanticActions.playOrPause?.background)
-                .isNotEqualTo(firstSemanticActions.playOrPause?.background)
-            assertThat(secondSemanticActions.nextOrCustom?.icon)
-                .isNotEqualTo(firstSemanticActions.nextOrCustom?.icon)
-            assertThat(secondSemanticActions.prevOrCustom?.icon)
-                .isNotEqualTo(firstSemanticActions.prevOrCustom?.icon)
-        }
+        assertThat(userEntries).hasSize(1)
+        val secondSemanticActions = userEntries?.values?.toList()?.get(0)?.semanticActions!!
+        assertThat(secondSemanticActions.nextOrCustom?.icon)
+            .isNotEqualTo(firstSemanticActions.nextOrCustom?.icon)
+        assertThat(secondSemanticActions.prevOrCustom?.icon)
+            .isNotEqualTo(firstSemanticActions.prevOrCustom?.icon)
+    }
 
     @Test
     fun testPlaybackActions_reservedSpace() {
         val customDesc = arrayOf("custom 1", "custom 2", "custom 3", "custom 4")
-        whenever(mediaFlags.areMediaSessionActionsEnabled(any(), any())).thenReturn(true)
         val stateActions = PlaybackState.ACTION_PLAY
         val stateBuilder = PlaybackState.Builder().setActions(stateActions)
         customDesc.forEach {
@@ -1927,7 +1913,6 @@ class MediaDataProcessorTest : SysuiTestCase() {
 
     @Test
     fun testPlaybackActions_playPause_hasButton() {
-        whenever(mediaFlags.areMediaSessionActionsEnabled(any(), any())).thenReturn(true)
         val stateActions = PlaybackState.ACTION_PLAY_PAUSE
         val stateBuilder = PlaybackState.Builder().setActions(stateActions)
         whenever(controller.playbackState).thenReturn(stateBuilder.build())
@@ -1964,8 +1949,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
 
         // update to remote cast
         mediaDataProcessor.onNotificationAdded(KEY, remoteCastNotification)
-        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
-        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
+        testScope.assertRunAllReady(foreground = 1, background = 1)
         verify(logger)
             .logPlaybackLocationChange(
                 anyInt(),
@@ -2027,7 +2011,6 @@ class MediaDataProcessorTest : SysuiTestCase() {
 
     @Test
     fun testPlaybackState_PauseWhenFlagTrue_keyExists_callsListener() {
-        whenever(mediaFlags.areMediaSessionActionsEnabled(any(), any())).thenReturn(true)
         val state = PlaybackState.Builder().setState(PlaybackState.STATE_PAUSED, 0L, 1f).build()
         whenever(controller.playbackState).thenReturn(state)
 
@@ -2071,6 +2054,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
             pendingIntent,
             PACKAGE_NAME
         )
+        testScope.runCurrent()
         backgroundExecutor.runAllReady()
         foregroundExecutor.runAllReady()
 
@@ -2149,7 +2133,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
 
     @Test
     fun testRetain_notifPlayer_notifRemoved_setToResume() {
-        whenever(mediaFlags.isRetainingPlayersEnabled()).thenReturn(true)
+        fakeFeatureFlags.set(MEDIA_RETAIN_SESSIONS, true)
 
         // When a media control based on notification is added, times out, and then removed
         addNotificationAndLoad()
@@ -2179,7 +2163,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
 
     @Test
     fun testRetain_notifPlayer_sessionDestroyed_doesNotChange() {
-        whenever(mediaFlags.isRetainingPlayersEnabled()).thenReturn(true)
+        fakeFeatureFlags.set(MEDIA_RETAIN_SESSIONS, true)
 
         // When a media control based on notification is added and times out
         addNotificationAndLoad()
@@ -2197,7 +2181,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
 
     @Test
     fun testRetain_notifPlayer_removeWhileActive_fullyRemoved() {
-        whenever(mediaFlags.isRetainingPlayersEnabled()).thenReturn(true)
+        fakeFeatureFlags.set(MEDIA_RETAIN_SESSIONS, true)
 
         // When a media control based on notification is added and then removed, without timing out
         addNotificationAndLoad()
@@ -2214,7 +2198,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
 
     @Test
     fun testRetain_canResume_removeWhileActive_setToResume() {
-        whenever(mediaFlags.isRetainingPlayersEnabled()).thenReturn(true)
+        fakeFeatureFlags.set(MEDIA_RETAIN_SESSIONS, true)
 
         // When a media control that supports resumption is added
         addNotificationAndLoad()
@@ -2246,8 +2230,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
 
     @Test
     fun testRetain_sessionPlayer_notifRemoved_doesNotChange() {
-        whenever(mediaFlags.isRetainingPlayersEnabled()).thenReturn(true)
-        whenever(mediaFlags.areMediaSessionActionsEnabled(any(), any())).thenReturn(true)
+        fakeFeatureFlags.set(MEDIA_RETAIN_SESSIONS, true)
         addPlaybackStateAction()
 
         // When a media control with PlaybackState actions is added, times out,
@@ -2266,8 +2249,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
 
     @Test
     fun testRetain_sessionPlayer_sessionDestroyed_setToResume() {
-        whenever(mediaFlags.isRetainingPlayersEnabled()).thenReturn(true)
-        whenever(mediaFlags.areMediaSessionActionsEnabled(any(), any())).thenReturn(true)
+        fakeFeatureFlags.set(MEDIA_RETAIN_SESSIONS, true)
         addPlaybackStateAction()
 
         // When a media control with PlaybackState actions is added, times out,
@@ -2300,8 +2282,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
 
     @Test
     fun testRetain_sessionPlayer_destroyedWhileActive_noResume_fullyRemoved() {
-        whenever(mediaFlags.isRetainingPlayersEnabled()).thenReturn(true)
-        whenever(mediaFlags.areMediaSessionActionsEnabled(any(), any())).thenReturn(true)
+        fakeFeatureFlags.set(MEDIA_RETAIN_SESSIONS, true)
         addPlaybackStateAction()
 
         // When a media control using session actions is added, and then the session is destroyed
@@ -2320,8 +2301,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
 
     @Test
     fun testRetain_sessionPlayer_canResume_destroyedWhileActive_setToResume() {
-        whenever(mediaFlags.isRetainingPlayersEnabled()).thenReturn(true)
-        whenever(mediaFlags.areMediaSessionActionsEnabled(any(), any())).thenReturn(true)
+        fakeFeatureFlags.set(MEDIA_RETAIN_SESSIONS, true)
         addPlaybackStateAction()
 
         // When a media control using session actions and that does allow resumption is added,
@@ -2354,7 +2334,6 @@ class MediaDataProcessorTest : SysuiTestCase() {
 
     @Test
     fun testSessionPlayer_sessionDestroyed_noResume_fullyRemoved() {
-        whenever(mediaFlags.areMediaSessionActionsEnabled(any(), any())).thenReturn(true)
         addPlaybackStateAction()
 
         // When a media control with PlaybackState actions is added, times out,
@@ -2381,7 +2360,6 @@ class MediaDataProcessorTest : SysuiTestCase() {
 
     @Test
     fun testSessionPlayer_destroyedWhileActive_noResume_fullyRemoved() {
-        whenever(mediaFlags.areMediaSessionActionsEnabled(any(), any())).thenReturn(true)
         addPlaybackStateAction()
 
         // When a media control using session actions is added, and then the session is destroyed
@@ -2400,7 +2378,6 @@ class MediaDataProcessorTest : SysuiTestCase() {
 
     @Test
     fun testSessionPlayer_canResume_destroyedWhileActive_setToResume() {
-        whenever(mediaFlags.areMediaSessionActionsEnabled(any(), any())).thenReturn(true)
         addPlaybackStateAction()
 
         // When a media control using session actions and that does allow resumption is added,
@@ -2433,8 +2410,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
 
     @Test
     fun testSessionDestroyed_noNotificationKey_stillRemoved() {
-        whenever(mediaFlags.isRetainingPlayersEnabled()).thenReturn(true)
-        whenever(mediaFlags.areMediaSessionActionsEnabled(any(), any())).thenReturn(true)
+        fakeFeatureFlags.set(MEDIA_RETAIN_SESSIONS, true)
 
         // When a notiifcation is added and then removed before it is fully processed
         mediaDataProcessor.onNotificationAdded(KEY, mediaNotification)
@@ -2505,6 +2481,72 @@ class MediaDataProcessorTest : SysuiTestCase() {
         assertThat(mediaDataCaptor.value.artwork).isNull()
     }
 
+    @Test
+    @EnableFlags(Flags.FLAG_MEDIA_CONTROLS_POSTS_OPTIMIZATION)
+    fun postDuplicateNotification_doesNotCallListeners() {
+        whenever(notificationLockscreenUserManager.isCurrentProfile(USER_ID)).thenReturn(true)
+        whenever(notificationLockscreenUserManager.isProfileAvailable(USER_ID)).thenReturn(true)
+
+        mediaDataProcessor.addInternalListener(mediaDataFilter)
+        mediaDataFilter.mediaDataProcessor = mediaDataProcessor
+        addNotificationAndLoad()
+        reset(listener)
+        mediaDataProcessor.onNotificationAdded(KEY, mediaNotification)
+
+        testScope.assertRunAllReady(foreground = 0, background = 1)
+        verify(listener, never())
+            .onMediaDataLoaded(
+                eq(KEY),
+                eq(KEY),
+                capture(mediaDataCaptor),
+                eq(true),
+                eq(0),
+                eq(false)
+            )
+        verify(kosmos.mediaLogger).logDuplicateMediaNotification(eq(KEY))
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_MEDIA_CONTROLS_POSTS_OPTIMIZATION)
+    fun postDuplicateNotification_callsListeners() {
+        whenever(notificationLockscreenUserManager.isCurrentProfile(USER_ID)).thenReturn(true)
+        whenever(notificationLockscreenUserManager.isProfileAvailable(USER_ID)).thenReturn(true)
+
+        mediaDataProcessor.addInternalListener(mediaDataFilter)
+        mediaDataFilter.mediaDataProcessor = mediaDataProcessor
+        addNotificationAndLoad()
+        reset(listener)
+        mediaDataProcessor.onNotificationAdded(KEY, mediaNotification)
+        testScope.assertRunAllReady(foreground = 1, background = 1)
+        verify(listener)
+            .onMediaDataLoaded(
+                eq(KEY),
+                eq(KEY),
+                capture(mediaDataCaptor),
+                eq(true),
+                eq(0),
+                eq(false)
+            )
+        verify(kosmos.mediaLogger, never()).logDuplicateMediaNotification(eq(KEY))
+    }
+
+    private fun TestScope.assertRunAllReady(foreground: Int = 0, background: Int = 0) {
+        runCurrent()
+        if (Flags.mediaLoadMetadataViaMediaDataLoader()) {
+            // It doesn't make much sense to count tasks when we use coroutines in loader
+            // so this check is skipped in that scenario.
+            backgroundExecutor.runAllReady()
+            foregroundExecutor.runAllReady()
+        } else {
+            if (background > 0) {
+                assertThat(backgroundExecutor.runAllReady()).isEqualTo(background)
+            }
+            if (foreground > 0) {
+                assertThat(foregroundExecutor.runAllReady()).isEqualTo(foreground)
+            }
+        }
+    }
+
     /** Helper function to add a basic media notification and capture the resulting MediaData */
     private fun addNotificationAndLoad() {
         addNotificationAndLoad(mediaNotification)
@@ -2513,8 +2555,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
     /** Helper function to add the given notification and capture the resulting MediaData */
     private fun addNotificationAndLoad(sbn: StatusBarNotification) {
         mediaDataProcessor.onNotificationAdded(KEY, sbn)
-        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
-        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
+        testScope.assertRunAllReady(foreground = 1, background = 1)
         verify(listener)
             .onMediaDataLoaded(
                 eq(KEY),
@@ -2548,8 +2589,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
             pendingIntent,
             packageName
         )
-        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
-        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
+        testScope.assertRunAllReady(foreground = 1, background = 1)
 
         verify(listener)
             .onMediaDataLoaded(

@@ -26,7 +26,6 @@ import androidx.compose.runtime.getValue
 import com.android.compose.animation.scene.ContentKey
 import com.android.compose.animation.scene.MutableSceneTransitionLayoutState
 import com.android.compose.animation.scene.OverlayKey
-import com.android.compose.animation.scene.OverscrollScope
 import com.android.compose.animation.scene.OverscrollSpecImpl
 import com.android.compose.animation.scene.ProgressVisibilityThreshold
 import com.android.compose.animation.scene.SceneKey
@@ -36,7 +35,6 @@ import com.android.compose.animation.scene.TransformationSpecImpl
 import com.android.compose.animation.scene.TransitionKey
 import com.android.compose.animation.scene.transition.link.LinkedTransition
 import com.android.compose.animation.scene.transition.link.StateLink
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 /** The state associated to a [SceneTransitionLayout] at some specific point in time. */
@@ -75,7 +73,7 @@ sealed interface TransitionState {
         val replacedTransition: Transition? = null,
     ) : TransitionState {
         /** A transition animating between [fromScene] and [toScene]. */
-        abstract class ChangeCurrentScene(
+        abstract class ChangeScene(
             /** The scene this transition is starting from. Can't be the same as toScene */
             val fromScene: SceneKey,
 
@@ -301,19 +299,19 @@ sealed interface TransitionState {
             return fromContent == content || toContent == content
         }
 
+        /** Run this transition and return once it is finished. */
+        internal abstract suspend fun run()
+
         /**
-         * Force this transition to finish and animate to an [Idle] state.
+         * Freeze this transition state so that neither [currentScene] nor [currentOverlays] will
+         * change in the future, and animate the progress towards that state. For instance, a
+         * [Transition.ChangeScene] should animate the progress to 0f if its [currentScene] is equal
+         * to its [fromScene][Transition.ChangeScene.fromScene] or animate it to 1f if its equal to
+         * its [toScene][Transition.ChangeScene.toScene].
          *
-         * Important: Once this is called, the effective state of the transition should remain
-         * unchanged. For instance, in the case of a [TransitionState.Transition], its
-         * [currentScene][TransitionState.Transition.currentScene] should never change once [finish]
-         * is called.
-         *
-         * @return the [Job] that animates to the idle state. It can be used to wait until the
-         *   animation is complete or cancel it to snap the animation. Calling [finish] multiple
-         *   times will return the same [Job].
+         * This is called when this transition is interrupted (replaced) by another transition.
          */
-        internal abstract fun finish(): Job
+        internal abstract fun freezeAndAnimateToCurrentState()
 
         internal fun updateOverscrollSpecs(
             fromSpec: OverscrollSpecImpl?,
@@ -351,7 +349,7 @@ sealed interface TransitionState {
 
             fun create(): Animatable<Float, AnimationVector1D> {
                 val animatable = Animatable(1f, visibilityThreshold = ProgressVisibilityThreshold)
-                layoutImpl.coroutineScope.launch {
+                layoutImpl.animationScope.launch {
                     val swipeSpec = layoutImpl.state.transitions.defaultSwipeSpec
                     val progressSpec =
                         spring(
@@ -386,10 +384,10 @@ sealed interface TransitionState {
         val orientation: Orientation
 
         /**
-         * Scope which can be used in the Overscroll DSL to define a transformation based on the
-         * distance between [Transition.fromContent] and [Transition.toContent].
+         * Return the absolute distance between fromScene and toScene, if available, otherwise
+         * [DistanceUnspecified].
          */
-        val overscrollScope: OverscrollScope
+        val absoluteDistance: Float
 
         /**
          * The content (scene or overlay) around which the transition is currently bouncing. When

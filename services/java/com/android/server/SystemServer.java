@@ -16,7 +16,6 @@
 
 package com.android.server;
 
-import static android.app.appfunctions.flags.Flags.enableAppFunctionManager;
 import static android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_HIGH;
@@ -38,6 +37,7 @@ import android.app.ApplicationErrorReport;
 import android.app.INotificationManager;
 import android.app.SystemServiceRegistry;
 import android.app.admin.DevicePolicySafetyChecker;
+import android.app.appfunctions.AppFunctionManagerConfiguration;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -106,7 +106,9 @@ import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.BinderInternal;
 import com.android.internal.os.RuntimeInit;
 import com.android.internal.policy.AttributeCache;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.protolog.ProtoLogConfigurationService;
+import com.android.internal.protolog.ProtoLogGroup;
 import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.EmergencyAffordanceManager;
 import com.android.internal.util.FrameworkStatsLog;
@@ -256,6 +258,7 @@ import com.android.server.stats.bootstrap.StatsBootstrapAtomService;
 import com.android.server.stats.pull.StatsPullAtomService;
 import com.android.server.statusbar.StatusBarManagerService;
 import com.android.server.storage.DeviceStorageMonitorService;
+import com.android.server.supervision.SupervisionService;
 import com.android.server.systemcaptions.SystemCaptionsManagerService;
 import com.android.server.telecom.TelecomLoaderService;
 import com.android.server.testharness.TestHarnessModeService;
@@ -1098,6 +1101,10 @@ public final class SystemServer implements Dumpable {
             t.traceEnd();
         }
 
+        t.traceBegin("InitializeProtoLog");
+        ProtoLog.init(ProtoLogGroup.values());
+        t.traceEnd();
+
         // Platform compat service is used by ActivityManagerService, PackageManagerService, and
         // possibly others in the future. b/135010838.
         t.traceBegin("PlatformCompat");
@@ -1598,6 +1605,12 @@ public final class SystemServer implements Dumpable {
             mSystemServiceManager.startService(ROLE_SERVICE_CLASS);
             t.traceEnd();
 
+            if (android.app.supervision.flags.Flags.supervisionApi()) {
+                t.traceBegin("StartSupervisionService");
+                mSystemServiceManager.startService(SupervisionService.Lifecycle.class);
+                t.traceEnd();
+            }
+
             if (!isTv) {
                 t.traceBegin("StartVibratorManagerService");
                 mSystemServiceManager.startService(VibratorManagerService.Lifecycle.class);
@@ -1730,12 +1743,11 @@ public final class SystemServer implements Dumpable {
             mSystemServiceManager.startService(LogcatManagerService.class);
             t.traceEnd();
 
-            t.traceBegin("StartAppFunctionManager");
-            if (enableAppFunctionManager()) {
+            if (AppFunctionManagerConfiguration.isSupported(context)) {
+                t.traceBegin("StartAppFunctionManager");
                 mSystemServiceManager.startService(AppFunctionManagerService.class);
+                t.traceEnd();
             }
-            t.traceEnd();
-
         } catch (Throwable e) {
             Slog.e("System", "******************************************");
             Slog.e("System", "************ Failure starting core service");
@@ -2455,8 +2467,8 @@ public final class SystemServer implements Dumpable {
                 reportWtf("starting RuntimeService", e);
             }
             t.traceEnd();
-
-            if (!isWatch && !disableNetworkTime) {
+            if (!disableNetworkTime && (!isWatch || (isWatch
+                    && android.server.Flags.allowNetworkTimeUpdateService()))) {
                 t.traceBegin("StartNetworkTimeUpdateService");
                 try {
                     networkTimeUpdater = new NetworkTimeUpdateService(context);

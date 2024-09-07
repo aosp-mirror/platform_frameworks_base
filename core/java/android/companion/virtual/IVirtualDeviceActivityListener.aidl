@@ -54,4 +54,13 @@ oneway interface IVirtualDeviceActivityListener {
      */
     void onActivityLaunchBlocked(int displayId, in ComponentName componentName, in UserHandle user,
             in IntentSender intentSender);
+
+    /**
+     * Called when a secure surface is shown on the device.
+     *
+     * @param displayId The display ID on which the secure surface was shown.
+     * @param componentName The component name of the activity that showed the secure surface.
+     * @param user The user associated with the activity.
+     */
+    void onSecureWindowShown(int displayId, in ComponentName componentName, in UserHandle user);
 }

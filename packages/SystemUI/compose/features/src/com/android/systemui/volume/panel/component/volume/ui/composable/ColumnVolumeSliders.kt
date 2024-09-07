@@ -23,7 +23,6 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.core.updateTransition
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -78,7 +77,6 @@ fun ColumnVolumeSliders(
     modifier: Modifier = Modifier,
 ) {
     require(viewModels.isNotEmpty())
-    val transition = updateTransition(isExpanded, label = "CollapsableSliders")
     Column(modifier = modifier) {
         Box(
             modifier = Modifier.fillMaxWidth(),
@@ -106,8 +104,9 @@ fun ColumnVolumeSliders(
                 sliderColors = sliderColors,
             )
         }
-        transition.AnimatedVisibility(
-            visible = { it || !isExpandable },
+        AnimatedVisibility(
+            visible = isExpanded || !isExpandable,
+            label = "CollapsableSliders",
             enter =
                 expandVertically(animationSpec = tween(durationMillis = EXPAND_DURATION_MILLIS)),
             exit =
@@ -120,23 +119,31 @@ fun ColumnVolumeSliders(
                     for (index in 1..viewModels.lastIndex) {
                         val sliderViewModel: SliderViewModel = viewModels[index]
                         val sliderState by sliderViewModel.slider.collectAsStateWithLifecycle()
-                        transition.AnimatedVisibility(
-                            modifier = Modifier.padding(top = 16.dp),
-                            visible = { it || !isExpandable },
-                            enter = enterTransition(index = index, totalCount = viewModels.size),
-                            exit = exitTransition(index = index, totalCount = viewModels.size)
-                        ) {
-                            VolumeSlider(
-                                modifier = Modifier.fillMaxWidth(),
-                                state = sliderState,
-                                onValueChange = { newValue: Float ->
-                                    sliderViewModel.onValueChanged(sliderState, newValue)
-                                },
-                                onValueChangeFinished = { sliderViewModel.onValueChangeFinished() },
-                                onIconTapped = { sliderViewModel.toggleMuted(sliderState) },
-                                sliderColors = sliderColors,
-                            )
-                        }
+
+                        VolumeSlider(
+                            modifier =
+                                Modifier.padding(top = 16.dp)
+                                    .fillMaxWidth()
+                                    .animateEnterExit(
+                                        enter =
+                                            enterTransition(
+                                                index = index,
+                                                totalCount = viewModels.size,
+                                            ),
+                                        exit =
+                                            exitTransition(
+                                                index = index,
+                                                totalCount = viewModels.size,
+                                            ),
+                                    ),
+                            state = sliderState,
+                            onValueChange = { newValue: Float ->
+                                sliderViewModel.onValueChanged(sliderState, newValue)
+                            },
+                            onValueChangeFinished = { sliderViewModel.onValueChangeFinished() },
+                            onIconTapped = { sliderViewModel.toggleMuted(sliderState) },
+                            sliderColors = sliderColors,
+                        )
                     }
                 }
             }

@@ -16,7 +16,7 @@
 
 package com.android.server.wm;
 
-import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
@@ -277,7 +277,7 @@ public class DisplayContentDeferredUpdateTests extends WindowTestsBase {
         mDisplayContent.mDisplayUpdater.onDisplaySwitching(/* switching= */ true);
 
         mWmInternal.waitForAllWindowsDrawn(mScreenUnblocker,
-                /* timeout= */ Integer.MAX_VALUE, DEFAULT_DISPLAY);
+                /* timeout= */ Integer.MAX_VALUE, INVALID_DISPLAY);
         mWmInternal.waitForAllWindowsDrawn(mSecondaryScreenUnblocker,
                 /* timeout= */ Integer.MAX_VALUE, mSecondaryDisplayContent.getDisplayId());
 

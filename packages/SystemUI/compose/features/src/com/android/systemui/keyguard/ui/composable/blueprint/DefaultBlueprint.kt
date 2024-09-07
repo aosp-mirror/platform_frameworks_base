@@ -73,9 +73,7 @@ constructor(
         val isShadeLayoutWide by viewModel.isShadeLayoutWide.collectAsStateWithLifecycle()
         val unfoldTranslations by viewModel.unfoldTranslations.collectAsStateWithLifecycle()
         val areNotificationsVisible by
-            viewModel
-                .areNotificationsVisible(contentKey)
-                .collectAsStateWithLifecycle(initialValue = false)
+            viewModel.areNotificationsVisible().collectAsStateWithLifecycle(initialValue = false)
         val isBypassEnabled by viewModel.isBypassEnabled.collectAsStateWithLifecycle()
 
         if (isBypassEnabled) {

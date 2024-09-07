@@ -21,19 +21,16 @@ import android.os.BatteryConsumer;
 import android.os.BatteryStats;
 import android.os.Handler;
 import android.os.PersistableBundle;
-import android.util.Slog;
 import android.util.SparseLongArray;
 
 import com.android.internal.os.Clock;
 import com.android.internal.os.PowerStats;
-
-import java.util.Arrays;
-import java.util.function.IntSupplier;
+import com.android.server.power.stats.format.ScreenPowerStatsLayout;
 
 public class ScreenPowerStatsCollector extends PowerStatsCollector {
     private static final String TAG = "ScreenPowerStatsCollector";
 
-    interface ScreenUsageTimeRetriever {
+    public interface ScreenUsageTimeRetriever {
         interface Callback {
             void onUidTopActivityTime(int uid, long topActivityTimeMs);
         }
@@ -45,30 +42,23 @@ public class ScreenPowerStatsCollector extends PowerStatsCollector {
         long getScreenDozeTimeMs(int display);
     }
 
-    interface Injector {
+    public interface Injector {
         Handler getHandler();
         Clock getClock();
         PowerStatsUidResolver getUidResolver();
         long getPowerStatsCollectionThrottlePeriod(String powerComponentName);
         ConsumedEnergyRetriever getConsumedEnergyRetriever();
-        IntSupplier getVoltageSupplier();
         ScreenUsageTimeRetriever getScreenUsageTimeRetriever();
         int getDisplayCount();
     }
-
-    private static final long ENERGY_UNSPECIFIED = -1;
 
     private final Injector mInjector;
     private boolean mIsInitialized;
     private ScreenPowerStatsLayout mLayout;
     private int mDisplayCount;
     private PowerStats mPowerStats;
-    private ConsumedEnergyRetriever mConsumedEnergyRetriever;
-    private IntSupplier mVoltageSupplier;
+    private ConsumedEnergyHelper mConsumedEnergyHelper;
     private ScreenUsageTimeRetriever mScreenUsageTimeRetriever;
-    private int[] mEnergyConsumerIds = new int[0];
-    private long[] mLastConsumedEnergyUws;
-    private int mLastVoltageMv;
     private boolean mFirstSample = true;
     private long[] mLastScreenOnTime;
     private long[][] mLastBrightnessLevelTime;
@@ -76,7 +66,7 @@ public class ScreenPowerStatsCollector extends PowerStatsCollector {
     private final SparseLongArray mLastTopActivityTime = new SparseLongArray();
     private long mLastCollectionTime;
 
-    ScreenPowerStatsCollector(Injector injector) {
+    public ScreenPowerStatsCollector(Injector injector) {
         super(injector.getHandler(),
                 injector.getPowerStatsCollectionThrottlePeriod(
                         BatteryConsumer.powerComponentIdToString(
@@ -95,21 +85,12 @@ public class ScreenPowerStatsCollector extends PowerStatsCollector {
         }
 
         mDisplayCount = mInjector.getDisplayCount();
-        mConsumedEnergyRetriever = mInjector.getConsumedEnergyRetriever();
-        mVoltageSupplier = mInjector.getVoltageSupplier();
         mScreenUsageTimeRetriever = mInjector.getScreenUsageTimeRetriever();
-        mEnergyConsumerIds = mConsumedEnergyRetriever.getEnergyConsumerIds(
-                EnergyConsumerType.DISPLAY);
-        mLastConsumedEnergyUws = new long[mEnergyConsumerIds.length];
-        Arrays.fill(mLastConsumedEnergyUws, ENERGY_UNSPECIFIED);
 
-        mLayout = new ScreenPowerStatsLayout();
-        mLayout.addDeviceScreenUsageDurationSection(mInjector.getDisplayCount());
-        mLayout.addDeviceSectionEnergyConsumers(mEnergyConsumerIds.length);
-        mLayout.addDeviceSectionUsageDuration();
-        mLayout.addDeviceSectionPowerEstimate();
-        mLayout.addUidTopActivitiyDuration();
-        mLayout.addUidSectionPowerEstimate();
+        mConsumedEnergyHelper = new ConsumedEnergyHelper(mInjector.getConsumedEnergyRetriever(),
+                EnergyConsumerType.DISPLAY);
+        mLayout = new ScreenPowerStatsLayout(mConsumedEnergyHelper.getEnergyConsumerCount(),
+                mInjector.getDisplayCount());
 
         PersistableBundle extras = new PersistableBundle();
         mLayout.toExtras(extras);
@@ -129,14 +110,12 @@ public class ScreenPowerStatsCollector extends PowerStatsCollector {
     }
 
     @Override
-    protected PowerStats collectStats() {
+    public PowerStats collectStats() {
         if (!ensureInitialized()) {
             return null;
         }
 
-        if (mEnergyConsumerIds.length != 0) {
-            collectEnergyConsumers();
-        }
+        mConsumedEnergyHelper.collectConsumedEnergy(mPowerStats, mLayout);
 
         for (int display = 0; display < mDisplayCount; display++) {
             long screenOnTimeMs = mScreenUsageTimeRetriever.getScreenOnTimeMs(display);
@@ -190,34 +169,6 @@ public class ScreenPowerStatsCollector extends PowerStatsCollector {
         mFirstSample = false;
 
         return mPowerStats;
-    }
-
-    private void collectEnergyConsumers() {
-        int voltageMv = mVoltageSupplier.getAsInt();
-        if (voltageMv <= 0) {
-            Slog.wtf(TAG, "Unexpected battery voltage (" + voltageMv
-                    + " mV) when querying energy consumers");
-            return;
-        }
-
-        int averageVoltage = mLastVoltageMv != 0 ? (mLastVoltageMv + voltageMv) / 2 : voltageMv;
-        mLastVoltageMv = voltageMv;
-
-        long[] energyUws = mConsumedEnergyRetriever.getConsumedEnergyUws(mEnergyConsumerIds);
-        if (energyUws == null) {
-            return;
-        }
-
-        for (int i = energyUws.length - 1; i >= 0; i--) {
-            long energyDelta = mLastConsumedEnergyUws[i] != ENERGY_UNSPECIFIED
-                    ? energyUws[i] - mLastConsumedEnergyUws[i] : 0;
-            if (energyDelta < 0) {
-                // Likely, restart of powerstats HAL
-                energyDelta = 0;
-            }
-            mLayout.setConsumedEnergy(mPowerStats.stats, i, uJtoUc(energyDelta, averageVoltage));
-            mLastConsumedEnergyUws[i] = energyUws[i];
-        }
     }
 
     @Override

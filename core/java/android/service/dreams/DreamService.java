@@ -1701,6 +1701,7 @@ public class DreamService extends Service implements Window.Callback {
                                 try {
                                     overlay.startDream(mWindow.getAttributes(), mOverlayCallback,
                                             mDreamComponent.flattenToString(),
+                                            mPreviewMode,
                                             mShouldShowComplications);
                                 } catch (RemoteException e) {
                                     Log.e(mTag, "could not send window attributes:" + e);

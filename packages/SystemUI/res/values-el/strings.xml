@@ -104,6 +104,7 @@
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"Η εφαρμογή <xliff:g id="APPNAME">%1$s</xliff:g> και άλλες ανοικτές εφαρμογές εντόπισαν το στιγμιότυπο οθόνης."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Προσθήκη σε σημείωση"</string>
     <string name="backlinks_include_link" msgid="4562093591148248158">"Συμπερίληψη συνδέσμου"</string>
+    <string name="backlinks_duplicate_label_format" msgid="558445128952827926">"<xliff:g id="APPNAME">%1$s</xliff:g> <xliff:g id="FREQUENCYCOUNT">(%2$d)</xliff:g>"</string>
     <string name="screenrecord_title" msgid="4257171601439507792">"Εγγραφή οθόνης"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Επεξεργασία εγγραφής οθόνης"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Ειδοποίηση σε εξέλιξη για μια περίοδο λειτουργίας εγγραφής οθόνης"</string>
@@ -291,7 +292,8 @@
     <string name="start_dreams" msgid="9131802557946276718">"Προφύλαξη οθόνης"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Μην ενοχλείτε"</string>
-    <string name="quick_settings_modes_label" msgid="5407025818652750501">"Λειτουργίες προτεραιότητας"</string>
+    <!-- no translation found for quick_settings_modes_label (879156359479504244) -->
+    <skip />
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Δεν υπάρχουν διαθέσιμες συσκευές σε σύζευξη"</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"Πατήστε για σύνδεση ή αποσύνδεση μιας συσκευής"</string>
@@ -300,6 +302,7 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Χρήση Bluetooth"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Συνδέθηκε"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"Κοινή χρήση ήχου"</string>
+    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="3227408556754456024">"Πατήστε για εναλλαγή ή κοινή χρήση ήχου"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Αποθηκεύτηκε"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"αποσύνδεση"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"ενεργοποίηση"</string>
@@ -308,8 +311,7 @@
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Το Bluetooth θα ενεργοποιηθεί αύριο το πρωί"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Κοινή χρήση ήχου"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Κοινή χρήση ήχου σε εξέλιξη"</string>
-    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_accessibility (7604615019302091708) -->
-    <skip />
+    <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"είσοδο στις ρυθμίσεις κοινής χρήσης ήχου"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Μπαταρία <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Ήχος"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Ακουστικά"</string>
@@ -381,7 +383,7 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Εγγραφή οθόνης"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Έναρξη"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Διακοπή"</string>
-    <string name="qs_record_issue_label" msgid="8166290137285529059">"Εγγραφή προβλήματος"</string>
+    <string name="qs_record_issue_label" msgid="8166290137285529059">"Εγγραφή προβλ."</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"Έναρξη"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"Διακοπή"</string>
     <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"Αναφορά σφάλματος"</string>
@@ -432,10 +434,12 @@
     <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"Άνοιγμα Ρυθμίσεων"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Άλλη συσκευή"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Εναλλαγή επισκόπησης"</string>
-    <string name="zen_modes_dialog_title" msgid="4159138230418567383">"Λειτουργίες προτεραιότητας"</string>
+    <!-- no translation found for zen_modes_dialog_title (8854640808100096934) -->
+    <skip />
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"Τέλος"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"Ρυθμίσεις"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"Ενεργό"</string>
+    <string name="zen_mode_on_with_details" msgid="7416143430557895497">"Ενεργή • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"Ανενεργό"</string>
     <string name="zen_mode_set_up" msgid="7457957033034460064">"Ρύθμιση"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"Διαχείριση στις ρυθμίσεις"</string>
@@ -532,8 +536,12 @@
     <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"Η υπηρεσία που παρέχει αυτήν τη λειτουργία θα έχει πρόσβαση σε όλες τις πληροφορίες που εμφανίζονται στην οθόνη σας ή που αναπαράγονται από τη συσκευή σας κατά την εγγραφή ή τη μετάδοση. Αυτό περιλαμβάνει πληροφορίες όπως κωδικούς πρόσβασης, στοιχεία πληρωμής, φωτογραφίες, μηνύματα και ήχο που αναπαράγετε."</string>
     <string name="screen_share_generic_app_selector_title" msgid="8331515850599218288">"Κοινή χρήση ή εγγραφή εφαρμογής"</string>
     <string name="media_projection_entry_app_permission_dialog_title" msgid="4613857256721708062">"Κοινή χρήση της οθόνης με την εφαρμογή <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>;"</string>
-    <string name="media_projection_entry_app_permission_dialog_option_text_single_app" msgid="6314402084788062644">"Κοινή χρήση μίας εφαρμογής"</string>
-    <string name="media_projection_entry_app_permission_dialog_option_text_entire_screen" msgid="7381488112332599632">"Κοινή χρήση ολόκληρης της οθόνης"</string>
+    <string name="screen_share_permission_dialog_option_single_app" msgid="2974054871681567314">"Κοινή χρήση μίας εφαρμογής"</string>
+    <!-- no translation found for media_projection_entry_app_permission_dialog_option_text_single_app (2308901434964846084) -->
+    <skip />
+    <string name="screen_share_permission_dialog_option_entire_screen" msgid="4493174362775038997">"Κοινή χρήση ολόκληρης της οθόνης"</string>
+    <!-- no translation found for media_projection_entry_app_permission_dialog_option_text_entire_screen (5100078808078139706) -->
+    <skip />
     <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="5504288438067851086">"Όταν μοιράζεστε ολόκληρη την οθόνη, οτιδήποτε εμφανίζεται στην οθόνη σας είναι ορατό στην εφαρμογή <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>. Επομένως, να είστε προσεκτικοί με τους κωδικούς πρόσβασης, τα στοιχεία πληρωμής, τα μηνύματα, τις φωτογραφίες, τον ήχο και το βίντεο."</string>
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="7094417930857938876">"Όταν μοιράζεστε μια εφαρμογή, οτιδήποτε εμφανίζεται ή αναπαράγεται σε αυτή την εφαρμογή, είναι ορατό στην εφαρμογή <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>. Επομένως, να είστε προσεκτικοί με τους κωδικούς πρόσβασης, τα στοιχεία πληρωμής, τα μηνύματα, τις φωτογραφίες, τον ήχο και το βίντεο."</string>
     <string name="media_projection_entry_app_permission_dialog_continue_entire_screen" msgid="1850848182344377579">"Κοινή χρήση οθόνης"</string>
@@ -718,6 +726,7 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Δορυφορική, καλή σύνδεση"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Δορυφορική, διαθέσιμη σύνδεση"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"Δορυφορικό SOS"</string>
+    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"Κλήσεις έκτακτης ανάγκης ή SOS"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Προφίλ εργασίας"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Διασκέδαση για ορισμένους, αλλά όχι για όλους"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Το System UI Tuner σάς προσφέρει επιπλέον τρόπους για να τροποποιήσετε και να προσαρμόσετε τη διεπαφή χρήστη Android. Αυτές οι πειραματικές λειτουργίες ενδέχεται να τροποποιηθούν, να παρουσιάσουν σφάλματα ή να καταργηθούν σε μελλοντικές εκδόσεις. Συνεχίστε με προσοχή."</string>
@@ -1384,6 +1393,18 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Εικονίδιο σύμπτυξης"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Εικονίδιο ανάπτυξης"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"ή"</string>
+    <!-- no translation found for launch_keyboard_tutorial_notification_title (8849933155160522519) -->
+    <skip />
+    <!-- no translation found for launch_keyboard_tutorial_notification_content (2880339951512757918) -->
+    <skip />
+    <!-- no translation found for launch_touchpad_tutorial_notification_title (2243780062772196901) -->
+    <skip />
+    <!-- no translation found for launch_touchpad_tutorial_notification_content (7931085031240753226) -->
+    <skip />
+    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_title (1940023776496198762) -->
+    <skip />
+    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_content (1780725168171929365) -->
+    <skip />
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Κίνηση επιστροφής"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Κίνηση μετάβασης στην αρχική οθόνη"</string>
     <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"Πλήκτρο ενέργειας"</string>

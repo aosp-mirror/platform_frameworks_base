@@ -79,21 +79,6 @@ class UserTrackerImplReceiveTest : SysuiTestCase() {
 
     @Test
     fun callsCallbackAndUpdatesProfilesWhenAnIntentReceived() = runTest {
-        tracker =
-            UserTrackerImpl(
-                context,
-                { fakeFeatures },
-                userManager,
-                iActivityManager,
-                dumpManager,
-                this,
-                testDispatcher,
-                handler
-            )
-        tracker.initialize(0)
-        tracker.addCallback(callback, executor)
-        val profileID = tracker.userId + 10
-
         `when`(userManager.getProfiles(anyInt())).thenAnswer { invocation ->
             val id = invocation.getArgument<Int>(0)
             val info = UserInfo(id, "", UserInfo.FLAG_FULL)
@@ -108,6 +93,21 @@ class UserTrackerImplReceiveTest : SysuiTestCase() {
             infoProfile.profileGroupId = id
             listOf(info, infoProfile)
         }
+
+        tracker =
+            UserTrackerImpl(
+                context,
+                { fakeFeatures },
+                userManager,
+                iActivityManager,
+                dumpManager,
+                this,
+                testDispatcher,
+                handler
+            )
+        tracker.initialize(0)
+        tracker.addCallback(callback, executor)
+        val profileID = tracker.userId + 10
 
         tracker.onReceive(context, Intent(intentAction))
 

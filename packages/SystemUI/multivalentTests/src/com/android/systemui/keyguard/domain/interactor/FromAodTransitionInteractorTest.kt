@@ -39,12 +39,15 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.keyguardOcclusionRepository
 import com.android.systemui.keyguard.shared.model.BiometricUnlockMode
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
+import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.keyguard.util.KeyguardTransitionRepositorySpySubject.Companion.assertThat
@@ -53,6 +56,7 @@ import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
 import com.android.systemui.power.domain.interactor.powerInteractor
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.statusbar.domain.interactor.keyguardOcclusionInteractor
 import com.android.systemui.testKosmos
 import junit.framework.Assert.assertEquals
@@ -166,6 +170,10 @@ class FromAodTransitionInteractorTest : SysuiTestCase() {
     @EnableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
     fun testTransitionToGone_onWakeUp_ifPowerButtonGestureDetected_fromGone() =
         testScope.runTest {
+            val isGone by
+                collectLastValue(
+                    kosmos.keyguardTransitionInteractor.isFinishedIn(Scenes.Gone, GONE)
+                )
             powerInteractor.setAwakeForTest()
             transitionRepository.sendTransitionSteps(
                 from = KeyguardState.AOD,
@@ -175,7 +183,7 @@ class FromAodTransitionInteractorTest : SysuiTestCase() {
             runCurrent()
 
             // Make sure we're GONE.
-            assertEquals(KeyguardState.GONE, kosmos.keyguardTransitionInteractor.getFinishedState())
+            assertEquals(true, isGone)
 
             // Get part way to AOD.
             powerInteractor.onStartedGoingToSleep(PowerManager.GO_TO_SLEEP_REASON_MIN)
@@ -204,6 +212,10 @@ class FromAodTransitionInteractorTest : SysuiTestCase() {
     @EnableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
     fun testTransitionToOccluded_onWakeUp_ifPowerButtonGestureDetectedAfterFinishedInAod_fromGone() =
         testScope.runTest {
+            val isGone by
+                collectLastValue(
+                    kosmos.keyguardTransitionInteractor.isFinishedIn(Scenes.Gone, GONE)
+                )
             powerInteractor.setAwakeForTest()
             transitionRepository.sendTransitionSteps(
                 from = KeyguardState.AOD,
@@ -213,7 +225,7 @@ class FromAodTransitionInteractorTest : SysuiTestCase() {
             runCurrent()
 
             // Make sure we're GONE.
-            assertEquals(KeyguardState.GONE, kosmos.keyguardTransitionInteractor.getFinishedState())
+            assertEquals(true, isGone)
 
             // Get all the way to AOD
             powerInteractor.onStartedGoingToSleep(PowerManager.GO_TO_SLEEP_REASON_MIN)
@@ -239,6 +251,10 @@ class FromAodTransitionInteractorTest : SysuiTestCase() {
     @EnableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
     fun testTransitionToOccluded_onWakeUp_ifPowerButtonGestureDetected_fromLockscreen() =
         testScope.runTest {
+            val isLockscreen by
+                collectLastValue(
+                    kosmos.keyguardTransitionInteractor.isFinishedIn(Scenes.Lockscreen, LOCKSCREEN)
+                )
             powerInteractor.setAwakeForTest()
             transitionRepository.sendTransitionSteps(
                 from = KeyguardState.AOD,
@@ -248,10 +264,7 @@ class FromAodTransitionInteractorTest : SysuiTestCase() {
             runCurrent()
 
             // Make sure we're in LOCKSCREEN.
-            assertEquals(
-                KeyguardState.LOCKSCREEN,
-                kosmos.keyguardTransitionInteractor.getFinishedState()
-            )
+            assertEquals(true, isLockscreen)
 
             // Get part way to AOD.
             powerInteractor.onStartedGoingToSleep(PowerManager.GO_TO_SLEEP_REASON_MIN)
@@ -314,7 +327,7 @@ class FromAodTransitionInteractorTest : SysuiTestCase() {
         testScope.runTest {
             kosmos.fakeKeyguardRepository.setKeyguardShowing(false)
             kosmos.fakeKeyguardRepository.setKeyguardDismissible(true)
-            kosmos.keyguardTransitionInteractor.startDismissKeyguardTransition()
+            kosmos.keyguardDismissTransitionInteractor.startDismissKeyguardTransition()
             powerInteractor.setAwakeForTest()
             advanceTimeBy(100) // account for debouncing
 
@@ -327,6 +340,10 @@ class FromAodTransitionInteractorTest : SysuiTestCase() {
     @DisableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
     fun testTransitionToGone_onWakeUp_ifPowerButtonGestureDetectedInAod_fromGone() =
         testScope.runTest {
+            val isGone by
+                collectLastValue(
+                    kosmos.keyguardTransitionInteractor.isFinishedIn(Scenes.Gone, GONE)
+                )
             powerInteractor.setAwakeForTest()
             transitionRepository.sendTransitionSteps(
                 from = KeyguardState.AOD,
@@ -336,7 +353,7 @@ class FromAodTransitionInteractorTest : SysuiTestCase() {
             runCurrent()
 
             // Make sure we're GONE.
-            assertEquals(KeyguardState.GONE, kosmos.keyguardTransitionInteractor.getFinishedState())
+            assertEquals(true, isGone)
 
             // Start going to AOD on first button push
             powerInteractor.onStartedGoingToSleep(PowerManager.GO_TO_SLEEP_REASON_MIN)

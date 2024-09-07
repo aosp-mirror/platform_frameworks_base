@@ -65,3 +65,13 @@ flag {
    description: "Remove started user if user will be stopped due to user switch"
    bug: "321598070"
 }
+
+flag {
+   name: "use_correct_process_state_for_logging"
+   namespace: "backstage_power"
+   description: "Use correct process state for statsd logging"
+   bug: "361308212"
+   metadata {
+       purpose: PURPOSE_BUGFIX
+   }
+}

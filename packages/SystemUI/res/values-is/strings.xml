@@ -104,6 +104,7 @@
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> og önnur opin forrit greindu skjámyndina."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Bæta við glósu"</string>
     <string name="backlinks_include_link" msgid="4562093591148248158">"Hafa tengil með"</string>
+    <string name="backlinks_duplicate_label_format" msgid="558445128952827926">"<xliff:g id="APPNAME">%1$s</xliff:g> <xliff:g id="FREQUENCYCOUNT">(%2$d)</xliff:g>"</string>
     <string name="screenrecord_title" msgid="4257171601439507792">"Skjáupptaka"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Vinnur úr skjáupptöku"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Áframhaldandi tilkynning fyrir skjáupptökulotu"</string>
@@ -291,7 +292,8 @@
     <string name="start_dreams" msgid="9131802557946276718">"Skjávari"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Ónáðið ekki"</string>
-    <string name="quick_settings_modes_label" msgid="5407025818652750501">"Forgangsstillingar"</string>
+    <!-- no translation found for quick_settings_modes_label (879156359479504244) -->
+    <skip />
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Engin pöruð tæki til staðar"</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"Ýttu til að tengja eða aftengja tæki"</string>
@@ -300,6 +302,7 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Nota Bluetooth"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Tengt"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"Hljóði deilt"</string>
+    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="3227408556754456024">"Ýttu til að skipta um eða deila hljóði"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Vistað"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"aftengja"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"virkja"</string>
@@ -308,8 +311,7 @@
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Kveikt verður á Bluetooth í fyrramálið"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Deila hljóði"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Deilir hljóði"</string>
-    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_accessibility (7604615019302091708) -->
-    <skip />
+    <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"slá inn stillingar hljóðdeilingar"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> rafhlöðuhleðsla"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Hljóð"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Höfuðtól"</string>
@@ -432,10 +434,12 @@
     <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"Opna stillingar"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Annað tæki"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Kveikja/slökkva á yfirliti"</string>
-    <string name="zen_modes_dialog_title" msgid="4159138230418567383">"Forgangsstillingar"</string>
+    <!-- no translation found for zen_modes_dialog_title (8854640808100096934) -->
+    <skip />
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"Lokið"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"Stillingar"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"Kveikt"</string>
+    <string name="zen_mode_on_with_details" msgid="7416143430557895497">"Kveikt • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"Slökkt"</string>
     <string name="zen_mode_set_up" msgid="7457957033034460064">"Setja upp"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"Stjórna í stillingum"</string>
@@ -532,8 +536,12 @@
     <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"Þjónustan sem býður upp á þennan eiginleika fær aðgang að öllum upplýsingum sem sjást á skjánum eða eru spilaðar í tækinu á meðan upptaka eða vörpun er í gangi, þar á meðal aðgangsorði, greiðsluupplýsingum, myndum, skilaboðum og hljóðefni sem þú spilar."</string>
     <string name="screen_share_generic_app_selector_title" msgid="8331515850599218288">"Deila eða taka upp forrit"</string>
     <string name="media_projection_entry_app_permission_dialog_title" msgid="4613857256721708062">"Deila skjánum með <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
-    <string name="media_projection_entry_app_permission_dialog_option_text_single_app" msgid="6314402084788062644">"Deila einu forriti"</string>
-    <string name="media_projection_entry_app_permission_dialog_option_text_entire_screen" msgid="7381488112332599632">"Deila öllum skjánum"</string>
+    <string name="screen_share_permission_dialog_option_single_app" msgid="2974054871681567314">"Deila einu forriti"</string>
+    <!-- no translation found for media_projection_entry_app_permission_dialog_option_text_single_app (2308901434964846084) -->
+    <skip />
+    <string name="screen_share_permission_dialog_option_entire_screen" msgid="4493174362775038997">"Deila öllum skjánum"</string>
+    <!-- no translation found for media_projection_entry_app_permission_dialog_option_text_entire_screen (5100078808078139706) -->
+    <skip />
     <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="5504288438067851086">"Þegar þú deilir öllum skjánum verður allt á skjánum sýnilegt <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>. Passaðu því upp á aðgangsorð, greiðsluupplýsingar, skilaboð, myndir, hljóð og vídeó."</string>
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="7094417930857938876">"Þegar þú deilir forriti er allt sem sést eða er spilað í því forriti sýnilegt <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>. Passaðu því upp á aðgangsorð, greiðsluupplýsingar, skilaboð, myndir, hljóð og vídeó."</string>
     <string name="media_projection_entry_app_permission_dialog_continue_entire_screen" msgid="1850848182344377579">"Deila skjá"</string>
@@ -718,6 +726,7 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Gervihnöttur, góð tenging"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Gervihnöttur, tenging tiltæk"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"Gervihnattar-SOS"</string>
+    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"Neyðarsímtöl eða SOS"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Vinnusnið"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Þetta er ekki allra"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Fínstillingar kerfisviðmóts gera þér kleift að fínstilla og sérsníða notendaviðmót Android. Þessir tilraunaeiginleikar geta breyst, bilað eða horfið í síðari útgáfum. Gakktu því hægt um gleðinnar dyr."</string>
@@ -1384,6 +1393,18 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Minnka tákn"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Stækka tákn"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"eða"</string>
+    <!-- no translation found for launch_keyboard_tutorial_notification_title (8849933155160522519) -->
+    <skip />
+    <!-- no translation found for launch_keyboard_tutorial_notification_content (2880339951512757918) -->
+    <skip />
+    <!-- no translation found for launch_touchpad_tutorial_notification_title (2243780062772196901) -->
+    <skip />
+    <!-- no translation found for launch_touchpad_tutorial_notification_content (7931085031240753226) -->
+    <skip />
+    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_title (1940023776496198762) -->
+    <skip />
+    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_content (1780725168171929365) -->
+    <skip />
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Bending til að fara til baka"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Bending til að fara á upphafsskjá"</string>
     <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"Aðgerðalykill"</string>

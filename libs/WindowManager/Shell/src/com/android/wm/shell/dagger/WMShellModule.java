@@ -38,6 +38,7 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.activityembedding.ActivityEmbeddingController;
 import com.android.wm.shell.apptoweb.AppToWebGenericLinksParser;
+import com.android.wm.shell.apptoweb.AssistContentRequester;
 import com.android.wm.shell.bubbles.BubbleController;
 import com.android.wm.shell.bubbles.BubbleData;
 import com.android.wm.shell.bubbles.BubbleDataRepository;
@@ -59,6 +60,7 @@ import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.dagger.back.ShellBackAnimationModule;
 import com.android.wm.shell.dagger.pip.PipModule;
 import com.android.wm.shell.desktopmode.DefaultDragToDesktopTransitionHandler;
+import com.android.wm.shell.desktopmode.DesktopActivityOrientationChangeHandler;
 import com.android.wm.shell.desktopmode.DesktopModeDragAndDropTransitionHandler;
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger;
 import com.android.wm.shell.desktopmode.DesktopModeLoggerTransitionObserver;
@@ -72,6 +74,7 @@ import com.android.wm.shell.desktopmode.ExitDesktopTaskTransitionHandler;
 import com.android.wm.shell.desktopmode.ReturnToDragStartAnimator;
 import com.android.wm.shell.desktopmode.SpringDragToDesktopTransitionHandler;
 import com.android.wm.shell.desktopmode.ToggleResizeDesktopTaskTransitionHandler;
+import com.android.wm.shell.desktopmode.education.AppHandleEducationController;
 import com.android.wm.shell.desktopmode.education.AppHandleEducationFilter;
 import com.android.wm.shell.desktopmode.education.data.AppHandleEducationDatastoreRepository;
 import com.android.wm.shell.draganddrop.DragAndDropController;
@@ -116,6 +119,8 @@ import dagger.Binds;
 import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
+
+import kotlinx.coroutines.CoroutineScope;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -236,8 +241,10 @@ public abstract class WMShellModule {
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
             InteractionJankMonitor interactionJankMonitor,
             AppToWebGenericLinksParser genericLinksParser,
+            AssistContentRequester assistContentRequester,
             MultiInstanceHelper multiInstanceHelper,
-            Optional<DesktopTasksLimiter> desktopTasksLimiter) {
+            Optional<DesktopTasksLimiter> desktopTasksLimiter,
+            Optional<DesktopActivityOrientationChangeHandler> desktopActivityOrientationHandler) {
         if (DesktopModeStatus.canEnterDesktopMode(context)) {
             return new DesktopModeWindowDecorViewModel(
                     context,
@@ -258,8 +265,10 @@ public abstract class WMShellModule {
                     rootTaskDisplayAreaOrganizer,
                     interactionJankMonitor,
                     genericLinksParser,
+                    assistContentRequester,
                     multiInstanceHelper,
-                    desktopTasksLimiter);
+                    desktopTasksLimiter,
+                    desktopActivityOrientationHandler);
         }
         return new CaptionWindowDecorViewModel(
                 context,
@@ -283,6 +292,15 @@ public abstract class WMShellModule {
             @ShellMainThread ShellExecutor mainExecutor
     ) {
         return new AppToWebGenericLinksParser(context, mainExecutor);
+    }
+
+    @Provides
+    static AssistContentRequester provideAssistContentRequester(
+            Context context,
+            @ShellMainThread ShellExecutor shellExecutor,
+            @ShellBackgroundThread ShellExecutor bgExecutor
+    ) {
+        return new AssistContentRequester(context, shellExecutor, bgExecutor);
     }
 
     //
@@ -677,6 +695,24 @@ public abstract class WMShellModule {
 
     @WMSingleton
     @Provides
+    static Optional<DesktopActivityOrientationChangeHandler> provideActivityOrientationHandler(
+            Context context,
+            ShellInit shellInit,
+            ShellTaskOrganizer shellTaskOrganizer,
+            TaskStackListenerImpl taskStackListener,
+            ToggleResizeDesktopTaskTransitionHandler toggleResizeDesktopTaskTransitionHandler,
+            @DynamicOverride DesktopModeTaskRepository desktopModeTaskRepository
+    ) {
+        if (DesktopModeStatus.canEnterDesktopMode(context)) {
+            return Optional.of(new DesktopActivityOrientationChangeHandler(
+                    context, shellInit, shellTaskOrganizer, taskStackListener,
+                    toggleResizeDesktopTaskTransitionHandler, desktopModeTaskRepository));
+        }
+        return Optional.empty();
+    }
+
+    @WMSingleton
+    @Provides
     static Optional<DesktopTasksTransitionObserver> provideDesktopTasksTransitionObserver(
             Context context,
             Optional<DesktopModeTaskRepository> desktopModeTaskRepository,
@@ -722,6 +758,17 @@ public abstract class WMShellModule {
         return new AppHandleEducationFilter(context, appHandleEducationDatastoreRepository);
     }
 
+    @WMSingleton
+    @Provides
+    static AppHandleEducationController provideAppHandleEducationController(
+            AppHandleEducationFilter appHandleEducationFilter,
+            ShellTaskOrganizer shellTaskOrganizer,
+            AppHandleEducationDatastoreRepository appHandleEducationDatastoreRepository,
+            @ShellMainThread CoroutineScope applicationScope) {
+        return new AppHandleEducationController(appHandleEducationFilter,
+                shellTaskOrganizer, appHandleEducationDatastoreRepository, applicationScope);
+    }
+
     //
     // Drag and drop
     //
@@ -763,7 +810,8 @@ public abstract class WMShellModule {
     @Provides
     static Object provideIndependentShellComponentsToCreate(
             DragAndDropController dragAndDropController,
-            Optional<DesktopTasksTransitionObserver> desktopTasksTransitionObserverOptional
+            Optional<DesktopTasksTransitionObserver> desktopTasksTransitionObserverOptional,
+            AppHandleEducationController appHandleEducationController
     ) {
         return new Object();
     }

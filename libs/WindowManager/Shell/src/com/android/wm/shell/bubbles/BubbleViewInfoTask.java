@@ -38,6 +38,7 @@ import android.graphics.drawable.Icon;
 import android.util.Log;
 import android.util.PathParser;
 import android.view.LayoutInflater;
+import android.view.View;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.ColorUtils;
@@ -47,6 +48,7 @@ import com.android.launcher3.icons.BubbleIconFactory;
 import com.android.wm.shell.R;
 import com.android.wm.shell.bubbles.bar.BubbleBarExpandedView;
 import com.android.wm.shell.bubbles.bar.BubbleBarLayerView;
+import com.android.wm.shell.shared.handles.RegionSamplingHelper;
 
 import java.lang.ref.WeakReference;
 import java.util.Objects;
@@ -222,7 +224,16 @@ public class BubbleViewInfoTask {
                 ProtoLog.v(WM_SHELL_BUBBLES, "Task initializing bubble bar expanded view key=%s",
                         mBubble.getKey());
                 viewInfo.bubbleBarExpandedView.initialize(mExpandedViewManager.get(),
-                        mPositioner.get(), false /* isOverflow */, viewInfo.taskView);
+                        mPositioner.get(), false /* isOverflow */, viewInfo.taskView,
+                        mMainExecutor, mBgExecutor, new RegionSamplingProvider() {
+                            @Override
+                            public RegionSamplingHelper createHelper(View sampledView,
+                                    RegionSamplingHelper.SamplingCallback callback,
+                                    Executor backgroundExecutor, Executor mainExecutor) {
+                                return RegionSamplingProvider.super.createHelper(sampledView,
+                                        callback, backgroundExecutor, mainExecutor);
+                            }
+                        });
             }
         }
 

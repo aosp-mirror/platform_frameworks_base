@@ -1659,11 +1659,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         if (!hasUseBoundForWidthValue) {
-            if (CompatChanges.isChangeEnabled(USE_BOUNDS_FOR_WIDTH)) {
-                mUseBoundsForWidth = Flags.useBoundsForWidth();
-            } else {
-                mUseBoundsForWidth = false;
-            }
+            mUseBoundsForWidth = CompatChanges.isChangeEnabled(USE_BOUNDS_FOR_WIDTH);
         }
 
         // TODO(b/179693024): Use a ChangeId instead.
@@ -14375,7 +14371,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         Matrix matrix = mTempMatrix;
         matrix.reset();
-        transformMatrixToLocal(matrix);
+        transformMatrixRootToLocal(matrix);
         editorBounds.set(rect);
         // When the view has transformations like scaleX/scaleY computing the global visible
         // rectangle will already apply the transformations. The getLocalVisibleRect only offsets
@@ -15552,15 +15548,21 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
-    boolean canUndo() {
+    /** @hide */
+    @VisibleForTesting
+    public boolean canUndo() {
         return mEditor != null && mEditor.canUndo();
     }
 
-    boolean canRedo() {
+    /** @hide */
+    @VisibleForTesting
+    public boolean canRedo() {
         return mEditor != null && mEditor.canRedo();
     }
 
-    boolean canCut() {
+    /** @hide */
+    @VisibleForTesting
+    public boolean canCut() {
         if (hasPasswordTransformationMethod()) {
             return false;
         }
@@ -15573,7 +15575,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return false;
     }
 
-    boolean canCopy() {
+    /** @hide */
+    @VisibleForTesting
+    public boolean canCopy() {
         if (hasPasswordTransformationMethod()) {
             return false;
         }
@@ -15594,7 +15598,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 && isSuggestionsEnabled() && mEditor.shouldOfferToShowSuggestions();
     }
 
-    boolean canShare() {
+    /** @hide */
+    @VisibleForTesting
+    public boolean canShare() {
         if (!getContext().canStartActivityForResult() || !isDeviceProvisioned()
                 || !getContext().getResources().getBoolean(
                 com.android.internal.R.bool.config_textShareSupported)) {
@@ -15613,8 +15619,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return mDeviceProvisionedState == DEVICE_PROVISIONED_YES;
     }
 
+    /** @hide */
+    @VisibleForTesting
     @UnsupportedAppUsage
-    boolean canPaste() {
+    public boolean canPaste() {
         return (mText instanceof Editable
                 && mEditor != null && mEditor.mKeyListener != null
                 && getSelectionStart() >= 0
@@ -15622,7 +15630,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 && getClipboardManagerForUser().hasPrimaryClip());
     }
 
-    boolean canPasteAsPlainText() {
+    /** @hide */
+    @VisibleForTesting
+    public boolean canPasteAsPlainText() {
         if (!canPaste()) {
             return false;
         }
@@ -15644,7 +15654,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return canShare();
     }
 
-    boolean canSelectAllText() {
+    /** @hide */
+    @VisibleForTesting
+    public boolean canSelectAllText() {
         return canSelectText() && !hasPasswordTransformationMethod()
                 && !(getSelectionStart() == 0 && getSelectionEnd() == mText.length());
     }

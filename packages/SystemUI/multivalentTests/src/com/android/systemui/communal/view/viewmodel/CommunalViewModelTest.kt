@@ -97,6 +97,7 @@ import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.atLeastOnce
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
@@ -757,7 +758,7 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
 
             // updateViewVisibility is called when the flow is collected.
             assertThat(communalContent).isNotNull()
-            verify(mediaHost).updateViewVisibility()
+            verify(mediaHost, atLeastOnce()).updateViewVisibility()
         }
 
     @Test

@@ -21,6 +21,8 @@ import android.content.Intent
 import android.os.Handler
 import android.os.Looper
 import android.service.quicksettings.Tile
+import androidx.annotation.DrawableRes
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -62,7 +64,7 @@ constructor(
     activityStarter: ActivityStarter,
     qsLogger: QSLogger,
     qsTileConfigProvider: QSTileConfigProvider,
-    dataInteractor: ModesTileDataInteractor,
+    private val dataInteractor: ModesTileDataInteractor,
     private val tileMapper: ModesTileMapper,
     private val userActionInteractor: ModesTileUserActionInteractor,
 ) :
@@ -98,7 +100,7 @@ constructor(
     override fun newTileState(): QSTile.State {
         return QSTile.State().apply {
             label = mContext.getString(R.string.quick_settings_modes_label)
-            icon = ResourceIcon.get(R.drawable.qs_dnd_icon_off)
+            icon = ResourceIcon.get(ICON_RES_ID)
             state = Tile.STATE_INACTIVE
         }
     }
@@ -109,23 +111,26 @@ constructor(
 
     override fun getLongClickIntent(): Intent = userActionInteractor.longClickIntent
 
-    override fun handleUpdateState(state: QSTile.State?, arg: Any?) {
-        if (arg is ModesTileModel) {
-            tileState = tileMapper.map(config, arg)
+    @VisibleForTesting
+    public override fun handleUpdateState(state: QSTile.State?, arg: Any?) {
+        // This runBlocking() will block @Background. Due to caches, it's expected to be fast.
+        val model =
+            if (arg is ModesTileModel) arg else runBlocking { dataInteractor.getCurrentTileModel() }
 
-            state?.apply {
-                this.state = tileState.activationState.legacyState
-                val tileStateIcon = tileState.icon()
-                icon = tileStateIcon?.asQSTileIcon() ?: ResourceIcon.get(R.drawable.qs_dnd_icon_off)
-                label = tileLabel
-                secondaryLabel = tileState.secondaryLabel
-                contentDescription = tileState.contentDescription
-                expandedAccessibilityClassName = tileState.expandedAccessibilityClassName
-            }
+        tileState = tileMapper.map(config, model)
+        state?.apply {
+            this.state = tileState.activationState.legacyState
+            val tileStateIcon = tileState.icon()
+            icon = tileStateIcon?.asQSTileIcon() ?: ResourceIcon.get(ICON_RES_ID)
+            label = tileLabel
+            secondaryLabel = tileState.secondaryLabel
+            contentDescription = tileState.contentDescription
+            expandedAccessibilityClassName = tileState.expandedAccessibilityClassName
         }
     }
 
     companion object {
         const val TILE_SPEC = "dnd"
+        @DrawableRes val ICON_RES_ID = com.android.internal.R.drawable.ic_zen_priority_modes
     }
 }
