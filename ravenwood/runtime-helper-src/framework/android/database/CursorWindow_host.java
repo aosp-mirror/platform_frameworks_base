@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.platform.test.ravenwood.nativesubstitution;
+package android.database;
 
-import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.os.Parcel;
 import android.util.Base64;
@@ -35,8 +34,8 @@ public class CursorWindow_host {
     private String mName;
     private int mColumnNum;
     private static class Row {
-        String[] fields;
-        int[] types;
+        String[] mFields;
+        int[] mTypes;
     }
 
     private final List<Row> mRows = new ArrayList<>();
@@ -69,9 +68,9 @@ public class CursorWindow_host {
     public static boolean nativeAllocRow(long windowPtr) {
         CursorWindow_host instance = sInstances.get(windowPtr);
         Row row = new Row();
-        row.fields = new String[instance.mColumnNum];
-        row.types = new int[instance.mColumnNum];
-        Arrays.fill(row.types, Cursor.FIELD_TYPE_NULL);
+        row.mFields = new String[instance.mColumnNum];
+        row.mTypes = new int[instance.mColumnNum];
+        Arrays.fill(row.mTypes, Cursor.FIELD_TYPE_NULL);
         instance.mRows.add(row);
         return true;
     }
@@ -82,8 +81,8 @@ public class CursorWindow_host {
             return false;
         }
         Row r = instance.mRows.get(row);
-        r.fields[column] = value;
-        r.types[column] = type;
+        r.mFields[column] = value;
+        r.mTypes[column] = type;
         return true;
     }
 
@@ -93,7 +92,7 @@ public class CursorWindow_host {
             return Cursor.FIELD_TYPE_NULL;
         }
 
-        return instance.mRows.get(row).types[column];
+        return instance.mRows.get(row).mTypes[column];
     }
 
     public static boolean nativePutString(long windowPtr, String value,
@@ -107,7 +106,7 @@ public class CursorWindow_host {
             return null;
         }
 
-        return instance.mRows.get(row).fields[column];
+        return instance.mRows.get(row).mFields[column];
     }
 
     public static boolean nativePutLong(long windowPtr, long value, int row, int column) {
@@ -170,8 +169,8 @@ public class CursorWindow_host {
         parcel.writeInt(window.mColumnNum);
         parcel.writeInt(window.mRows.size());
         for (int row = 0; row < window.mRows.size(); row++) {
-            parcel.writeStringArray(window.mRows.get(row).fields);
-            parcel.writeIntArray(window.mRows.get(row).types);
+            parcel.writeStringArray(window.mRows.get(row).mFields);
+            parcel.writeIntArray(window.mRows.get(row).mTypes);
         }
     }
 
@@ -183,8 +182,8 @@ public class CursorWindow_host {
         int rowCount = parcel.readInt();
         for (int row = 0; row < rowCount; row++) {
             Row r = new Row();
-            r.fields = parcel.createStringArray();
-            r.types = parcel.createIntArray();
+            r.mFields = parcel.createStringArray();
+            r.mTypes = parcel.createIntArray();
             window.mRows.add(r);
         }
         return windowPtr;

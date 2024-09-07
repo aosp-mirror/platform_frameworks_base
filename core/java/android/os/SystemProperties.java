@@ -58,8 +58,7 @@ import java.util.function.Predicate;
  */
 @SystemApi
 @RavenwoodKeepWholeClass
-@RavenwoodRedirectionClass(
-        "com.android.platform.test.ravenwood.nativesubstitution.SystemProperties_host")
+@RavenwoodRedirectionClass("SystemProperties_host")
 public class SystemProperties {
     private static final String TAG = "SystemProperties";
     private static final boolean TRACK_KEY_ACCESS = false;
@@ -77,7 +76,7 @@ public class SystemProperties {
 
     @UnsupportedAppUsage
     @GuardedBy("sChangeCallbacks")
-    private static final ArrayList<Runnable> sChangeCallbacks = new ArrayList<Runnable>();
+    static final ArrayList<Runnable> sChangeCallbacks = new ArrayList<Runnable>();
 
     @GuardedBy("sRoReads")
     private static final HashMap<String, MutableInt> sRoReads =
@@ -104,31 +103,15 @@ public class SystemProperties {
     }
 
     /** @hide */
+    @RavenwoodRedirect
     public static void init$ravenwood(Map<String, String> values,
             Predicate<String> keyReadablePredicate, Predicate<String> keyWritablePredicate) {
-        initImpl$ravenwood(values, keyReadablePredicate, keyWritablePredicate,
-                SystemProperties::callChangeCallbacks);
-        synchronized (sChangeCallbacks) {
-            sChangeCallbacks.clear();
-        }
+        throw RavenwoodEnvironment.notSupportedOnDevice();
     }
 
     /** @hide */
+    @RavenwoodRedirect
     public static void reset$ravenwood() {
-        resetImpl$ravenwood();
-        synchronized (sChangeCallbacks) {
-            sChangeCallbacks.clear();
-        }
-    }
-
-    @RavenwoodRedirect
-    private static void initImpl$ravenwood(Map<String, String> values,
-            Predicate<String> keyReadablePredicate, Predicate<String> keyWritablePredicate,
-            Runnable changeCallback) {
-        throw RavenwoodEnvironment.notSupportedOnDevice();
-    }
-    @RavenwoodRedirect
-    private static void resetImpl$ravenwood() {
         throw RavenwoodEnvironment.notSupportedOnDevice();
     }
 
@@ -318,7 +301,7 @@ public class SystemProperties {
     }
 
     @SuppressWarnings("unused")  // Called from native code.
-    private static void callChangeCallbacks() {
+    static void callChangeCallbacks() {
         ArrayList<Runnable> callbacks = null;
         synchronized (sChangeCallbacks) {
             //Log.i("foo", "Calling " + sChangeCallbacks.size() + " change callbacks!");

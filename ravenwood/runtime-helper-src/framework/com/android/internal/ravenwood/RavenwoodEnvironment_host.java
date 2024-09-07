@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.platform.test.ravenwood.nativesubstitution;
+package com.android.internal.ravenwood;
 
+import android.os.SystemProperties_host;
 import android.platform.test.ravenwood.RavenwoodSystemProperties;
 import android.util.Log;
 
-import com.android.internal.ravenwood.RavenwoodEnvironment;
 import com.android.ravenwood.common.JvmWorkaround;
 import com.android.ravenwood.common.RavenwoodCommonUtils;
 

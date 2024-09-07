@@ -50,8 +50,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * {@link Looper#myQueue() Looper.myQueue()}.
  */
 @RavenwoodKeepWholeClass
-@RavenwoodRedirectionClass(
-        "com.android.platform.test.ravenwood.nativesubstitution.MessageQueue_host")
+@RavenwoodRedirectionClass("MessageQueue_host")
 public final class MessageQueue {
     private static final String TAG = "SemiConcurrentMessageQueue";
     private static final boolean DEBUG = false;
