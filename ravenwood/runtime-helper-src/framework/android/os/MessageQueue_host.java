@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.platform.test.ravenwood.nativesubstitution;
+package android.os;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

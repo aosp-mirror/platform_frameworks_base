@@ -24,6 +24,7 @@ import android.os.Build;
 import android.ravenwood.annotation.RavenwoodKeepWholeClass;
 import android.ravenwood.annotation.RavenwoodRedirect;
 import android.ravenwood.annotation.RavenwoodRedirectionClass;
+import android.ravenwood.annotation.RavenwoodThrow;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -52,8 +53,7 @@ import java.util.regex.Pattern;
  * event-log-tags file defines the payload contents for each type code.
  */
 @RavenwoodKeepWholeClass
-@RavenwoodRedirectionClass(
-        "com.android.platform.test.ravenwood.nativesubstitution.EventLog_host")
+@RavenwoodRedirectionClass("EventLog_host")
 public class EventLog {
     /** @hide */ public EventLog() {}
 
@@ -387,7 +387,7 @@ public class EventLog {
      * @param output container to add events into
      * @throws IOException if something goes wrong reading events
      */
-    @RavenwoodRedirect
+    @RavenwoodThrow
     public static native void readEvents(int[] tags, Collection<Event> output)
             throws IOException;
 
@@ -400,7 +400,7 @@ public class EventLog {
      * @hide
      */
     @SystemApi
-    @RavenwoodRedirect
+    @RavenwoodThrow
     public static native void readEventsOnWrapping(int[] tags, long timestamp,
             Collection<Event> output)
             throws IOException;

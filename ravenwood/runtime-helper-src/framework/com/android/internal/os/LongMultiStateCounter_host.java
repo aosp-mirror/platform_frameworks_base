@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.platform.test.ravenwood.nativesubstitution;
+package com.android.internal.os;
 
 import android.os.BadParcelableException;
 import android.os.Parcel;

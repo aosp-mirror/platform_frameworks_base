@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.platform.test.ravenwood.nativesubstitution;
+package android.os;
 
 import android.util.SparseArray;
 
@@ -36,9 +36,6 @@ public class SystemProperties_host {
     /** Predicate tested to determine if a given key can be written. */
     @GuardedBy("sLock")
     private static Predicate<String> sKeyWritablePredicate;
-    /** Callback to trigger when values are changed */
-    @GuardedBy("sLock")
-    private static Runnable sChangeCallback;
 
     /**
      * Reverse mapping that provides a way back to an original key from the
@@ -48,7 +45,7 @@ public class SystemProperties_host {
     private static SparseArray<String> sKeyHandles = new SparseArray<>();
 
     /**
-     * Basically the same as {@link #initImpl$ravenwood}, but it'll only run if no values are
+     * Basically the same as {@link #init$ravenwood}, but it'll only run if no values are
      * set yet.
      */
     public static void initializeIfNeeded(Map<String, String> values,
@@ -57,30 +54,32 @@ public class SystemProperties_host {
             if (sValues != null) {
                 return; // Already initialized.
             }
-            initImpl$ravenwood(values, keyReadablePredicate, keyWritablePredicate,
-                    () -> {});
+            init$ravenwood(values, keyReadablePredicate, keyWritablePredicate);
         }
     }
 
-    public static void initImpl$ravenwood(Map<String, String> values,
-            Predicate<String> keyReadablePredicate, Predicate<String> keyWritablePredicate,
-            Runnable changeCallback) {
+    public static void init$ravenwood(Map<String, String> values,
+            Predicate<String> keyReadablePredicate, Predicate<String> keyWritablePredicate) {
         synchronized (sLock) {
             sValues = Objects.requireNonNull(values);
             sKeyReadablePredicate = Objects.requireNonNull(keyReadablePredicate);
             sKeyWritablePredicate = Objects.requireNonNull(keyWritablePredicate);
-            sChangeCallback = Objects.requireNonNull(changeCallback);
             sKeyHandles.clear();
+            synchronized (SystemProperties.sChangeCallbacks) {
+                SystemProperties.sChangeCallbacks.clear();
+            }
         }
     }
 
-    public static void resetImpl$ravenwood() {
+    public static void reset$ravenwood() {
         synchronized (sLock) {
             sValues = null;
             sKeyReadablePredicate = null;
             sKeyWritablePredicate = null;
-            sChangeCallback = null;
             sKeyHandles.clear();
+            synchronized (SystemProperties.sChangeCallbacks) {
+                SystemProperties.sChangeCallbacks.clear();
+            }
         }
     }
 
@@ -101,7 +100,7 @@ public class SystemProperties_host {
             } else {
                 sValues.put(key, val);
             }
-            sChangeCallback.run();
+            SystemProperties.callChangeCallbacks();
         }
     }
 
@@ -183,7 +182,7 @@ public class SystemProperties_host {
         // Report through callback always registered via init above
         synchronized (sLock) {
             Preconditions.requireNonNullViaRavenwoodRule(sValues);
-            sChangeCallback.run();
+            SystemProperties.callChangeCallbacks();
         }
     }
 
