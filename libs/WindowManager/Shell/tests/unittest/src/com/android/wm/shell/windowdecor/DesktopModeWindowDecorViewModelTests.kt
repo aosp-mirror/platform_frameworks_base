@@ -73,6 +73,7 @@ import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.TestRunningTaskInfoBuilder
 import com.android.wm.shell.TestShellExecutor
 import com.android.wm.shell.apptoweb.AppToWebGenericLinksParser
+import com.android.wm.shell.apptoweb.AssistContentRequester
 import com.android.wm.shell.common.DisplayChangeController
 import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.DisplayInsetsController
@@ -165,6 +166,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     @Mock private lateinit var mockInteractionJankMonitor: InteractionJankMonitor
     @Mock private lateinit var mockGenericLinksParser: AppToWebGenericLinksParser
     @Mock private lateinit var mockUserHandle: UserHandle
+    @Mock private lateinit var mockAssistContentRequester: AssistContentRequester
     @Mock private lateinit var mockToast: Toast
     private val bgExecutor = TestShellExecutor()
     @Mock private lateinit var mockMultiInstanceHelper: MultiInstanceHelper
@@ -218,6 +220,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
                 mockTransitions,
                 Optional.of(mockDesktopTasksController),
                 mockGenericLinksParser,
+                mockAssistContentRequester,
                 mockMultiInstanceHelper,
                 mockDesktopModeWindowDecorFactory,
                 mockInputMonitorFactory,
@@ -1131,7 +1134,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         whenever(
             mockDesktopModeWindowDecorFactory.create(
                 any(), any(), any(), any(), any(), eq(task), any(), any(), any(), any(), any(),
-                any(), any(), any())
+                any(), any(), any(), any())
         ).thenReturn(decoration)
         decoration.mTaskInfo = task
         whenever(decoration.isFocused).thenReturn(task.isFocused)

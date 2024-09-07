@@ -25,14 +25,6 @@ namespace android {
 
 namespace text_feature {
 
-inline bool fix_double_underline() {
-#ifdef __ANDROID__
-    return com_android_text_flags_fix_double_underline();
-#else
-    return true;
-#endif  // __ANDROID__
-}
-
 inline bool deprecate_ui_fonts() {
 #ifdef __ANDROID__
     return com_android_text_flags_deprecate_ui_fonts();

@@ -48,7 +48,7 @@ public class SystemProperties_host {
     private static SparseArray<String> sKeyHandles = new SparseArray<>();
 
     /**
-     * Basically the same as {@link #native_init$ravenwood}, but it'll only run if no values are
+     * Basically the same as {@link #initImpl$ravenwood}, but it'll only run if no values are
      * set yet.
      */
     public static void initializeIfNeeded(Map<String, String> values,
@@ -57,12 +57,12 @@ public class SystemProperties_host {
             if (sValues != null) {
                 return; // Already initialized.
             }
-            native_init$ravenwood(values, keyReadablePredicate, keyWritablePredicate,
+            initImpl$ravenwood(values, keyReadablePredicate, keyWritablePredicate,
                     () -> {});
         }
     }
 
-    public static void native_init$ravenwood(Map<String, String> values,
+    public static void initImpl$ravenwood(Map<String, String> values,
             Predicate<String> keyReadablePredicate, Predicate<String> keyWritablePredicate,
             Runnable changeCallback) {
         synchronized (sLock) {
@@ -74,7 +74,7 @@ public class SystemProperties_host {
         }
     }
 
-    public static void native_reset$ravenwood() {
+    public static void resetImpl$ravenwood() {
         synchronized (sLock) {
             sValues = null;
             sKeyReadablePredicate = null;

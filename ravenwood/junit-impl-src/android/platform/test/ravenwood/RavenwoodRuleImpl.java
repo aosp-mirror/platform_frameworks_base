@@ -36,7 +36,6 @@ import android.view.DisplayAdjustments;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import com.android.internal.os.RuntimeInit;
 import com.android.server.LocalServices;
 
 import org.junit.runner.Description;
@@ -91,8 +90,6 @@ public class RavenwoodRuleImpl {
             maybeThrowPendingUncaughtException(false);
             Thread.setDefaultUncaughtExceptionHandler(sUncaughtExceptionHandler);
         }
-
-        RuntimeInit.redirectLogStreams();
 
         android.os.Process.init$ravenwood(rule.mUid, rule.mPid);
         android.os.Binder.init$ravenwood();

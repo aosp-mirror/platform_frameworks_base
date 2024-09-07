@@ -28,7 +28,8 @@ import android.annotation.TestApi;
 import android.app.AppOpsManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.ravenwood.annotation.RavenwoodKeepWholeClass;
-import android.ravenwood.annotation.RavenwoodNativeSubstitutionClass;
+import android.ravenwood.annotation.RavenwoodRedirect;
+import android.ravenwood.annotation.RavenwoodRedirectionClass;
 import android.ravenwood.annotation.RavenwoodReplace;
 import android.ravenwood.annotation.RavenwoodThrow;
 import android.text.TextUtils;
@@ -233,7 +234,7 @@ import java.util.function.IntFunction;
  * {@link #readSparseArray(ClassLoader, Class)}.
  */
 @RavenwoodKeepWholeClass
-@RavenwoodNativeSubstitutionClass(
+@RavenwoodRedirectionClass(
         "com.android.platform.test.ravenwood.nativesubstitution.Parcel_host")
 public final class Parcel {
 
@@ -387,6 +388,7 @@ public final class Parcel {
     private static final int SIZE_COMPLEX_TYPE = 1;
 
     @CriticalNative
+    @RavenwoodRedirect
     private static native void nativeMarkSensitive(long nativePtr);
     @FastNative
     @RavenwoodThrow
@@ -395,86 +397,126 @@ public final class Parcel {
     @RavenwoodThrow
     private static native boolean nativeIsForRpc(long nativePtr);
     @CriticalNative
+    @RavenwoodRedirect
     private static native int nativeDataSize(long nativePtr);
     @CriticalNative
+    @RavenwoodRedirect
     private static native int nativeDataAvail(long nativePtr);
     @CriticalNative
+    @RavenwoodRedirect
     private static native int nativeDataPosition(long nativePtr);
     @CriticalNative
+    @RavenwoodRedirect
     private static native int nativeDataCapacity(long nativePtr);
     @FastNative
+    @RavenwoodRedirect
     private static native void nativeSetDataSize(long nativePtr, int size);
     @CriticalNative
+    @RavenwoodRedirect
     private static native void nativeSetDataPosition(long nativePtr, int pos);
     @FastNative
+    @RavenwoodRedirect
     private static native void nativeSetDataCapacity(long nativePtr, int size);
 
     @CriticalNative
+    @RavenwoodRedirect
     private static native boolean nativePushAllowFds(long nativePtr, boolean allowFds);
     @CriticalNative
+    @RavenwoodRedirect
     private static native void nativeRestoreAllowFds(long nativePtr, boolean lastValue);
 
+    @RavenwoodRedirect
     private static native void nativeWriteByteArray(long nativePtr, byte[] b, int offset, int len);
+    @RavenwoodRedirect
     private static native void nativeWriteBlob(long nativePtr, byte[] b, int offset, int len);
     @CriticalNative
+    @RavenwoodRedirect
     private static native int nativeWriteInt(long nativePtr, int val);
     @CriticalNative
+    @RavenwoodRedirect
     private static native int nativeWriteLong(long nativePtr, long val);
     @CriticalNative
+    @RavenwoodRedirect
     private static native int nativeWriteFloat(long nativePtr, float val);
     @CriticalNative
+    @RavenwoodRedirect
     private static native int nativeWriteDouble(long nativePtr, double val);
     @RavenwoodThrow
     private static native void nativeSignalExceptionForError(int error);
     @FastNative
+    @RavenwoodRedirect
     private static native void nativeWriteString8(long nativePtr, String val);
     @FastNative
+    @RavenwoodRedirect
     private static native void nativeWriteString16(long nativePtr, String val);
     @FastNative
     @RavenwoodThrow
     private static native void nativeWriteStrongBinder(long nativePtr, IBinder val);
     @FastNative
+    @RavenwoodRedirect
     private static native void nativeWriteFileDescriptor(long nativePtr, FileDescriptor val);
 
+    @RavenwoodRedirect
     private static native byte[] nativeCreateByteArray(long nativePtr);
+    @RavenwoodRedirect
     private static native boolean nativeReadByteArray(long nativePtr, byte[] dest, int destLen);
+    @RavenwoodRedirect
     private static native byte[] nativeReadBlob(long nativePtr);
     @CriticalNative
+    @RavenwoodRedirect
     private static native int nativeReadInt(long nativePtr);
     @CriticalNative
+    @RavenwoodRedirect
     private static native long nativeReadLong(long nativePtr);
     @CriticalNative
+    @RavenwoodRedirect
     private static native float nativeReadFloat(long nativePtr);
     @CriticalNative
+    @RavenwoodRedirect
     private static native double nativeReadDouble(long nativePtr);
     @FastNative
+    @RavenwoodRedirect
     private static native String nativeReadString8(long nativePtr);
     @FastNative
+    @RavenwoodRedirect
     private static native String nativeReadString16(long nativePtr);
     @FastNative
     @RavenwoodThrow
     private static native IBinder nativeReadStrongBinder(long nativePtr);
     @FastNative
+    @RavenwoodRedirect
     private static native FileDescriptor nativeReadFileDescriptor(long nativePtr);
 
+    @RavenwoodRedirect
     private static native long nativeCreate();
+    @RavenwoodRedirect
     private static native void nativeFreeBuffer(long nativePtr);
+    @RavenwoodRedirect
     private static native void nativeDestroy(long nativePtr);
 
+    @RavenwoodRedirect
     private static native byte[] nativeMarshall(long nativePtr);
+    @RavenwoodRedirect
     private static native void nativeUnmarshall(
             long nativePtr, byte[] data, int offset, int length);
+    @RavenwoodRedirect
     private static native int nativeCompareData(long thisNativePtr, long otherNativePtr);
+    @RavenwoodRedirect
     private static native boolean nativeCompareDataInRange(
             long ptrA, int offsetA, long ptrB, int offsetB, int length);
+    @RavenwoodRedirect
     private static native void nativeAppendFrom(
             long thisNativePtr, long otherNativePtr, int offset, int length);
     @CriticalNative
+    @RavenwoodRedirect
     private static native boolean nativeHasFileDescriptors(long nativePtr);
+    @RavenwoodRedirect
     private static native boolean nativeHasFileDescriptorsInRange(
             long nativePtr, int offset, int length);
 
+    @RavenwoodRedirect
     private static native boolean nativeHasBinders(long nativePtr);
+    @RavenwoodRedirect
     private static native boolean nativeHasBindersInRange(
             long nativePtr, int offset, int length);
     @RavenwoodThrow

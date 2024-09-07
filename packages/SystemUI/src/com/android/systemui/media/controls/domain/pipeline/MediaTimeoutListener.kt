@@ -217,6 +217,7 @@ constructor(
             private set
 
         fun Int.isPlaying() = isPlayingState(this)
+
         fun isPlaying() = lastState?.state?.isPlaying() ?: false
 
         init {
@@ -337,60 +338,13 @@ constructor(
         }
     }
 
-    private fun areCustomActionListsEqual(
-        first: List<PlaybackState.CustomAction>?,
-        second: List<PlaybackState.CustomAction>?
-    ): Boolean {
-        // Same object, or both null
-        if (first === second) {
-            return true
-        }
-
-        // Only one null, or different number of actions
-        if ((first == null || second == null) || (first.size != second.size)) {
-            return false
-        }
-
-        // Compare individual actions
-        first.asSequence().zip(second.asSequence()).forEach { (firstAction, secondAction) ->
-            if (!areCustomActionsEqual(firstAction, secondAction)) {
-                return false
-            }
-        }
-        return true
-    }
-
-    private fun areCustomActionsEqual(
-        firstAction: PlaybackState.CustomAction,
-        secondAction: PlaybackState.CustomAction
-    ): Boolean {
-        if (
-            firstAction.action != secondAction.action ||
-                firstAction.name != secondAction.name ||
-                firstAction.icon != secondAction.icon
-        ) {
-            return false
-        }
-
-        if ((firstAction.extras == null) != (secondAction.extras == null)) {
-            return false
-        }
-        if (firstAction.extras != null) {
-            firstAction.extras.keySet().forEach { key ->
-                if (firstAction.extras.get(key) != secondAction.extras.get(key)) {
-                    return false
-                }
-            }
-        }
-        return true
-    }
-
     /** Listens to changes in recommendation card data and schedules a timeout for its expiration */
     private inner class RecommendationListener(var key: String, data: SmartspaceMediaData) {
         private var timedOut = false
         var destroyed = false
         var expiration = Long.MAX_VALUE
             private set
+
         var cancellation: Runnable? = null
             private set
 

@@ -609,7 +609,8 @@ public class Bubble implements BubbleViewProvider {
                             callback.onBubbleViewsReady(bubble);
                         }
                     },
-                    mMainExecutor);
+                    mMainExecutor,
+                    mBgExecutor);
             if (mInflateSynchronously) {
                 mInflationTaskLegacy.onPostExecute(mInflationTaskLegacy.doInBackground());
             } else {

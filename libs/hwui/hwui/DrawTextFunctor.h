@@ -142,32 +142,30 @@ public:
             canvas->drawGlyphs(glyphFunc, glyphCount, paint, x, y, totalAdvance);
         }
 
-        if (text_feature::fix_double_underline()) {
-            // Extract underline position and thickness.
-            if (paint.isUnderline()) {
-                SkFontMetrics metrics;
-                paint.getSkFont().getMetrics(&metrics);
-                const float textSize = paint.getSkFont().getSize();
-                SkScalar position;
-                if (!metrics.hasUnderlinePosition(&position)) {
-                    position = textSize * Paint::kStdUnderline_Top;
-                }
-                SkScalar thickness;
-                if (!metrics.hasUnderlineThickness(&thickness)) {
-                    thickness = textSize * Paint::kStdUnderline_Thickness;
-                }
-
-                // If multiple fonts are used, use the most bottom position and most thick stroke
-                // width as the underline position. This follows the CSS standard:
-                // https://www.w3.org/TR/css-text-decor-3/#text-underline-position-property
-                // <quote>
-                // The exact position and thickness of line decorations is UA-defined in this level.
-                // However, for underlines and overlines the UA must use a single thickness and
-                // position on each line for the decorations deriving from a single decorating box.
-                // </quote>
-                underlinePosition = std::max(underlinePosition, position);
-                underlineThickness = std::max(underlineThickness, thickness);
+        // Extract underline position and thickness.
+        if (paint.isUnderline()) {
+            SkFontMetrics metrics;
+            paint.getSkFont().getMetrics(&metrics);
+            const float textSize = paint.getSkFont().getSize();
+            SkScalar position;
+            if (!metrics.hasUnderlinePosition(&position)) {
+                position = textSize * Paint::kStdUnderline_Top;
             }
+            SkScalar thickness;
+            if (!metrics.hasUnderlineThickness(&thickness)) {
+                thickness = textSize * Paint::kStdUnderline_Thickness;
+            }
+
+            // If multiple fonts are used, use the most bottom position and most thick stroke
+            // width as the underline position. This follows the CSS standard:
+            // https://www.w3.org/TR/css-text-decor-3/#text-underline-position-property
+            // <quote>
+            // The exact position and thickness of line decorations is UA-defined in this level.
+            // However, for underlines and overlines the UA must use a single thickness and
+            // position on each line for the decorations deriving from a single decorating box.
+            // </quote>
+            underlinePosition = std::max(underlinePosition, position);
+            underlineThickness = std::max(underlineThickness, thickness);
         }
     }
 

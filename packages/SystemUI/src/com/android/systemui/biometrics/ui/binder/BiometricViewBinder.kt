@@ -25,7 +25,6 @@ import android.hardware.biometrics.BiometricPrompt
 import android.hardware.biometrics.Flags
 import android.hardware.face.FaceManager
 import android.util.Log
-import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import android.view.View
 import android.view.View.IMPORTANT_FOR_ACCESSIBILITY_NO
@@ -59,6 +58,7 @@ import com.android.systemui.common.ui.view.onTouchListener
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.VibratorHelper
+import com.google.android.msdl.domain.MSDLPlayer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.combine
@@ -83,6 +83,7 @@ object BiometricViewBinder {
         legacyCallback: Spaghetti.Callback,
         applicationScope: CoroutineScope,
         vibratorHelper: VibratorHelper,
+        msdlPlayer: MSDLPlayer,
     ): Spaghetti {
         val accessibilityManager = view.context.getSystemService(AccessibilityManager::class.java)!!
 
@@ -434,21 +435,27 @@ object BiometricViewBinder {
                 // Play haptics
                 launch {
                     viewModel.hapticsToPlay.collect { haptics ->
-                        if (haptics.hapticFeedbackConstant != HapticFeedbackConstants.NO_HAPTICS) {
-                            if (haptics.flag != null) {
-                                vibratorHelper.performHapticFeedback(
-                                    view,
-                                    haptics.hapticFeedbackConstant,
-                                    haptics.flag,
-                                )
-                            } else {
-                                vibratorHelper.performHapticFeedback(
-                                    view,
-                                    haptics.hapticFeedbackConstant,
-                                )
+                        when (haptics) {
+                            is PromptViewModel.HapticsToPlay.HapticConstant -> {
+                                if (haptics.flag != null) {
+                                    vibratorHelper.performHapticFeedback(
+                                        view,
+                                        haptics.constant,
+                                        haptics.flag,
+                                    )
+                                } else {
+                                    vibratorHelper.performHapticFeedback(
+                                        view,
+                                        haptics.constant,
+                                    )
+                                }
                             }
-                            viewModel.clearHaptics()
+                            is PromptViewModel.HapticsToPlay.MSDL -> {
+                                msdlPlayer.playToken(haptics.token, haptics.properties)
+                            }
+                            is PromptViewModel.HapticsToPlay.None -> {}
                         }
+                        viewModel.clearHaptics()
                     }
                 }
 

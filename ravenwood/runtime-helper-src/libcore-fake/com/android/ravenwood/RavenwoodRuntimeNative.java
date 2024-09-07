@@ -53,6 +53,9 @@ public class RavenwoodRuntimeNative {
 
     private static native int nOpen(String path, int flags, int mode) throws ErrnoException;
 
+    public static native void setenv(String name, String value, boolean overwrite)
+            throws ErrnoException;
+
     public static long lseek(FileDescriptor fd, long offset, int whence) throws ErrnoException {
         return nLseek(JvmWorkaround.getInstance().getFdInt(fd), offset, whence);
     }

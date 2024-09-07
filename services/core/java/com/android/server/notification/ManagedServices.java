@@ -103,7 +103,7 @@ import java.util.Set;
  *  - A remote interface definition (aidl) provided by the service used for communication.
  */
 abstract public class ManagedServices {
-    protected final String TAG = getClass().getSimpleName();
+    protected final String TAG = getClass().getSimpleName().replace('$', '.');
     protected final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private static final int ON_BINDING_DIED_REBIND_DELAY_MS = 10000;

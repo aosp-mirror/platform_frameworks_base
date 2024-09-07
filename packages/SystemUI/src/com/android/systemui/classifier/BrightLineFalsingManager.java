@@ -34,8 +34,6 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.classifier.FalsingDataProvider.SessionListener;
 import com.android.systemui.classifier.HistoryTracker.BeliefListener;
 import com.android.systemui.dagger.qualifiers.TestHarness;
-import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
@@ -396,6 +394,7 @@ public class BrightLineFalsingManager implements FalsingManager {
                 || mDataProvider.isA11yAction()
                 || mDataProvider.isFromTrackpad()
                 || mDataProvider.isFromKeyboard()
+                || !mDataProvider.isTouchScreenSource()
                 || mDataProvider.isUnfolded();
     }
 
