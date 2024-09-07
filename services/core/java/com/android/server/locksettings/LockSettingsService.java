@@ -3403,8 +3403,13 @@ public class LockSettingsService extends ILockSettings.Stub {
             // It's OK to dump the credential type since anyone with physical access can just
             // observe it from the keyguard directly.
             pw.println("Quality: " + getKeyguardStoredQuality(userId));
-            pw.println("CredentialType: " + LockPatternUtils.credentialTypeToString(
-                    getCredentialTypeInternal(userId)));
+            final int credentialType = getCredentialTypeInternal(userId);
+            pw.println("CredentialType: "
+                    + LockPatternUtils.credentialTypeToString(credentialType));
+            if (credentialType == CREDENTIAL_TYPE_NONE) {
+                pw.println("IsLockScreenDisabled: "
+                        + getBoolean(LockPatternUtils.DISABLE_LOCKSCREEN_KEY, false, userId));
+            }
             pw.println("SeparateChallenge: " + getSeparateProfileChallengeEnabledInternal(userId));
             pw.println(TextUtils.formatSimple("Metrics: %s",
                     getUserPasswordMetrics(userId) != null ? "known" : "unknown"));

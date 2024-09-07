@@ -1150,6 +1150,13 @@ public class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             return Constants.ABORT_REFUSED;
         }
 
+        if (mArcEstablished) {
+            HdmiLogger.debug("ARC is already established.");
+            HdmiCecMessage command = HdmiCecMessageBuilder.buildReportArcInitiated(
+                getDeviceInfo().getLogicalAddress(), message.getSource());
+            mService.sendCecCommand(command);
+            return Constants.HANDLED;
+        }
         // In case where <Initiate Arc> is started by <Request ARC Initiation>, this message is
         // handled in RequestArcInitiationAction as well.
         SetArcTransmissionStateAction action = new SetArcTransmissionStateAction(this,

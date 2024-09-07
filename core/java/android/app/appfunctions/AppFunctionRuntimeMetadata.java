@@ -72,14 +72,32 @@ public class AppFunctionRuntimeMetadata extends GenericDocument {
      * we need to have per-package app function schemas.
      *
      * <p>This schema should be set visible to callers from the package owner itself and for callers
-     * with {@link android.permission.EXECUTE_APP_FUNCTIONS_TRUSTED} or {@link
-     * android.permission.EXECUTE_APP_FUNCTIONS} permissions.
+     * with {@link android.Manifest.permission#EXECUTE_APP_FUNCTIONS} or {@link
+     * android.Manifest.permission#EXECUTE_APP_FUNCTIONS_TRUSTED} permissions.
      *
      * @param packageName The package name to create a schema for.
      */
     @NonNull
     public static AppSearchSchema createAppFunctionRuntimeSchema(@NonNull String packageName) {
-        return new AppSearchSchema.Builder(getRuntimeSchemaNameForPackage(packageName))
+        return getAppFunctionRuntimeSchemaBuilder(getRuntimeSchemaNameForPackage(packageName))
+                .addParentType(RUNTIME_SCHEMA_TYPE)
+                .build();
+    }
+
+    /**
+     * Creates a parent schema for all app function runtime schemas.
+     *
+     * <p>This schema should be set visible to the owner itself and for callers with {@link
+     * android.permission.EXECUTE_APP_FUNCTIONS_TRUSTED} or {@link
+     * android.permission.EXECUTE_APP_FUNCTIONS} permissions.
+     */
+    public static AppSearchSchema createParentAppFunctionRuntimeSchema() {
+        return getAppFunctionRuntimeSchemaBuilder(RUNTIME_SCHEMA_TYPE).build();
+    }
+
+    private static AppSearchSchema.Builder getAppFunctionRuntimeSchemaBuilder(
+            @NonNull String schemaType) {
+        return new AppSearchSchema.Builder(schemaType)
                 .addProperty(
                         new AppSearchSchema.StringPropertyConfig.Builder(PROPERTY_FUNCTION_ID)
                                 .setCardinality(AppSearchSchema.PropertyConfig.CARDINALITY_OPTIONAL)
@@ -111,9 +129,7 @@ public class AppFunctionRuntimeMetadata extends GenericDocument {
                                 .setJoinableValueType(
                                         AppSearchSchema.StringPropertyConfig
                                                 .JOINABLE_VALUE_TYPE_QUALIFIED_ID)
-                                .build())
-                .addParentType(RUNTIME_SCHEMA_TYPE)
-                .build();
+                                .build());
     }
 
     /** Returns the function id. This might look like "com.example.message#send_message". */

@@ -3394,24 +3394,33 @@ public final class ProcessList {
                 hostingRecord.getDefiningUid(), hostingRecord.getDefiningProcessName());
         final ProcessStateRecord state = r.mState;
 
-        final boolean wasStopped = (info.flags & ApplicationInfo.FLAG_STOPPED) != 0;
+        final boolean wasStopped = info.isStopped();
         // Check if we should mark the processrecord for first launch after force-stopping
         if (wasStopped) {
+            boolean wasEverLaunched;
+            if (android.app.Flags.useAppInfoNotLaunched()) {
+                wasEverLaunched = !info.isNotLaunched();
+            } else {
+                wasEverLaunched = mService.getPackageManagerInternal()
+                        .wasPackageEverLaunched(r.getApplicationInfo().packageName, r.userId);
+            }
             // Check if the hosting record is for an activity or not. Since the stopped
             // state tracking is handled differently to avoid WM calling back into AM,
             // store the state in the correct record
             if (hostingRecord.isTypeActivity()) {
-                final boolean wasPackageEverLaunched = mService
-                        .wasPackageEverLaunched(r.getApplicationInfo().packageName, r.userId);
                 // If the package was launched in the past but is currently stopped, only then
                 // should it be considered as force-stopped.
-                @WindowProcessController.StoppedState int stoppedState = wasPackageEverLaunched
+                @WindowProcessController.StoppedState int stoppedState = wasEverLaunched
                         ? STOPPED_STATE_FORCE_STOPPED
                         : STOPPED_STATE_FIRST_LAUNCH;
                 r.getWindowProcessController().setStoppedState(stoppedState);
             } else {
-                r.setWasForceStopped(true);
-                // first launch is computed just before logging, for non-activity types
+                if (android.app.Flags.useAppInfoNotLaunched()) {
+                    // If it was launched before, then it must be a force-stop
+                    r.setWasForceStopped(wasEverLaunched);
+                } else {
+                    r.setWasForceStopped(true);
+                }
             }
         }
 

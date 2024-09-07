@@ -164,6 +164,12 @@ public class TinyFrameworkClassTest {
     }
 
     @Test
+    public void testNotNativeRedirect() {
+        TinyFrameworkNative.notNativeStaticRedirected();
+        new TinyFrameworkNative().notNativeRedirected();
+    }
+
+    @Test
     public void testExitLog() {
         thrown.expect(RuntimeException.class);
         thrown.expectMessage("Outer exception");

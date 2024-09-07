@@ -14799,7 +14799,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public void setSecondaryLockscreenEnabled(ComponentName who, boolean enabled) {
+    public void setSecondaryLockscreenEnabled(ComponentName who, boolean enabled,
+            PersistableBundle options) {
         Objects.requireNonNull(who, "ComponentName is null");
 
         // Check can set secondary lockscreen enabled
@@ -18644,11 +18645,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         toggleBackupServiceActive(caller.getUserId(), enabled);
 
-        if (Flags.backupServiceSecurityLogEventEnabled()) {
-            if (SecurityLog.isLoggingEnabled()) {
-                SecurityLog.writeEvent(SecurityLog.TAG_BACKUP_SERVICE_TOGGLED,
-                        caller.getPackageName(), caller.getUserId(), enabled ? 1 : 0);
-            }
+        if (SecurityLog.isLoggingEnabled()) {
+            SecurityLog.writeEvent(SecurityLog.TAG_BACKUP_SERVICE_TOGGLED,
+                    caller.getPackageName(), caller.getUserId(), enabled ? 1 : 0);
         }
     }
 

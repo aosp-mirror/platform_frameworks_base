@@ -74,10 +74,10 @@ public class SplitTestUtils {
         final SurfaceControl mRootLeash;
 
         TestStageCoordinator(Context context, int displayId, SyncTransactionQueue syncQueue,
-                ShellTaskOrganizer taskOrganizer, MainStage mainStage, StageTaskListener sideStage,
-                DisplayController displayController, DisplayImeController imeController,
-                DisplayInsetsController insetsController, SplitLayout splitLayout,
-                Transitions transitions, TransactionPool transactionPool,
+                ShellTaskOrganizer taskOrganizer, StageTaskListener mainStage,
+                StageTaskListener sideStage, DisplayController displayController,
+                DisplayImeController imeController, DisplayInsetsController insetsController,
+                SplitLayout splitLayout, Transitions transitions, TransactionPool transactionPool,
                 ShellExecutor mainExecutor, Handler mainHandler,
                 Optional<RecentTasksController> recentTasks,
                 LaunchAdjacentController launchAdjacentController,

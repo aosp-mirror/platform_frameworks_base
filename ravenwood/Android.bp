@@ -127,6 +127,7 @@ java_library {
     libs: [
         "framework-minus-apex.ravenwood",
         "ravenwood-junit",
+        "ravenwood-helper-libcore-runtime",
     ],
     visibility: ["//visibility:private"],
 }

@@ -48,13 +48,35 @@ RuntimeVisibleAnnotations:
     java.lang.annotation.Retention(
       value=Ljava/lang/annotation/RetentionPolicy;.CLASS
     )
-## Class: android/hosttest/annotation/HostSideTestNativeSubstitutionClass.class
-  Compiled from "HostSideTestNativeSubstitutionClass.java"
-public interface android.hosttest.annotation.HostSideTestNativeSubstitutionClass extends java.lang.annotation.Annotation
+## Class: android/hosttest/annotation/HostSideTestRedirect.class
+  Compiled from "HostSideTestRedirect.java"
+public interface android.hosttest.annotation.HostSideTestRedirect extends java.lang.annotation.Annotation
   minor version: 0
   major version: 61
   flags: (0x2601) ACC_PUBLIC, ACC_INTERFACE, ACC_ABSTRACT, ACC_ANNOTATION
-  this_class: #x                          // android/hosttest/annotation/HostSideTestNativeSubstitutionClass
+  this_class: #x                          // android/hosttest/annotation/HostSideTestRedirect
+  super_class: #x                         // java/lang/Object
+  interfaces: 1, fields: 0, methods: 0, attributes: 2
+}
+SourceFile: "HostSideTestRedirect.java"
+RuntimeVisibleAnnotations:
+  x: #x()
+    com.android.hoststubgen.hosthelper.HostStubGenProcessedAsKeep
+  x: #x(#x=[e#x.#x])
+    java.lang.annotation.Target(
+      value=[Ljava/lang/annotation/ElementType;.METHOD]
+    )
+  x: #x(#x=e#x.#x)
+    java.lang.annotation.Retention(
+      value=Ljava/lang/annotation/RetentionPolicy;.CLASS
+    )
+## Class: android/hosttest/annotation/HostSideTestRedirectionClass.class
+  Compiled from "HostSideTestRedirectionClass.java"
+public interface android.hosttest.annotation.HostSideTestRedirectionClass extends java.lang.annotation.Annotation
+  minor version: 0
+  major version: 61
+  flags: (0x2601) ACC_PUBLIC, ACC_INTERFACE, ACC_ABSTRACT, ACC_ANNOTATION
+  this_class: #x                          // android/hosttest/annotation/HostSideTestRedirectionClass
   super_class: #x                         // java/lang/Object
   interfaces: 1, fields: 0, methods: 1, attributes: 2
   public abstract java.lang.String value();
@@ -64,7 +86,7 @@ public interface android.hosttest.annotation.HostSideTestNativeSubstitutionClass
       x: #x()
         com.android.hoststubgen.hosthelper.HostStubGenProcessedAsKeep
 }
-SourceFile: "HostSideTestNativeSubstitutionClass.java"
+SourceFile: "HostSideTestRedirectionClass.java"
 RuntimeVisibleAnnotations:
   x: #x()
     com.android.hoststubgen.hosthelper.HostStubGenProcessedAsKeep
@@ -2076,7 +2098,7 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNative
   flags: (0x0021) ACC_PUBLIC, ACC_SUPER
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkNative
   super_class: #x                         // java/lang/Object
-  interfaces: 0, fields: 1, methods: 12, attributes: 3
+  interfaces: 0, fields: 1, methods: 14, attributes: 3
   int value;
     descriptor: I
     flags: (0x0000)
@@ -2113,6 +2135,9 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNative
         com.android.hoststubgen.hosthelper.HostStubGenProcessedAsSubstitute
       x: #x()
         com.android.hoststubgen.hosthelper.HostStubGenProcessedAsKeep
+    RuntimeInvisibleAnnotations:
+      x: #x()
+        android.hosttest.annotation.HostSideTestRedirect
 
   public static int nativeAddTwo_should_be_like_this(int);
     descriptor: (I)I
@@ -2144,6 +2169,9 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNative
         com.android.hoststubgen.hosthelper.HostStubGenProcessedAsSubstitute
       x: #x()
         com.android.hoststubgen.hosthelper.HostStubGenProcessedAsKeep
+    RuntimeInvisibleAnnotations:
+      x: #x()
+        android.hosttest.annotation.HostSideTestRedirect
 
   public static long nativeLongPlus_should_be_like_this(long, long);
     descriptor: (JJ)J
@@ -2195,6 +2223,9 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNative
         com.android.hoststubgen.hosthelper.HostStubGenProcessedAsSubstitute
       x: #x()
         com.android.hoststubgen.hosthelper.HostStubGenProcessedAsKeep
+    RuntimeInvisibleAnnotations:
+      x: #x()
+        android.hosttest.annotation.HostSideTestRedirect
 
   public int nativeNonStaticAddToValue_should_be_like_this(int);
     descriptor: (I)I
@@ -2240,9 +2271,6 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNative
     RuntimeVisibleAnnotations:
       x: #x()
         com.android.hoststubgen.hosthelper.HostStubGenProcessedAsKeep
-    RuntimeInvisibleAnnotations:
-      x: #x()
-        android.hosttest.annotation.HostSideTestKeep
 
   public static void nativeStillNotSupported_should_be_like_this();
     descriptor: ()V
@@ -2272,6 +2300,42 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNative
         com.android.hoststubgen.hosthelper.HostStubGenProcessedAsSubstitute
       x: #x()
         com.android.hoststubgen.hosthelper.HostStubGenProcessedAsKeep
+    RuntimeInvisibleAnnotations:
+      x: #x()
+        android.hosttest.annotation.HostSideTestRedirect
+
+  public void notNativeRedirected();
+    descriptor: ()V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=1, locals=1, args_size=1
+         x: aload_0
+         x: invokestatic  #x                 // Method com/android/hoststubgen/test/tinyframework/TinyFrameworkNative_host.notNativeRedirected:(Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkNative;)V
+         x: return
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenProcessedAsSubstitute
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenProcessedAsKeep
+    RuntimeInvisibleAnnotations:
+      x: #x()
+        android.hosttest.annotation.HostSideTestRedirect
+
+  public static void notNativeStaticRedirected();
+    descriptor: ()V
+    flags: (0x0009) ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=0, locals=0, args_size=0
+         x: invokestatic  #x                 // Method com/android/hoststubgen/test/tinyframework/TinyFrameworkNative_host.notNativeStaticRedirected:()V
+         x: return
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenProcessedAsSubstitute
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenProcessedAsKeep
+    RuntimeInvisibleAnnotations:
+      x: #x()
+        android.hosttest.annotation.HostSideTestRedirect
 }
 SourceFile: "TinyFrameworkNative.java"
 RuntimeVisibleAnnotations:
@@ -2281,7 +2345,7 @@ RuntimeInvisibleAnnotations:
   x: #x()
     android.hosttest.annotation.HostSideTestWholeClassKeep
   x: #x(#x=s#x)
-    android.hosttest.annotation.HostSideTestNativeSubstitutionClass(
+    android.hosttest.annotation.HostSideTestRedirectionClass(
       value="TinyFrameworkNative_host"
     )
 ## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkNative_host.class
@@ -2292,7 +2356,7 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNative_host
   flags: (0x0021) ACC_PUBLIC, ACC_SUPER
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkNative_host
   super_class: #x                         // java/lang/Object
-  interfaces: 0, fields: 0, methods: 5, attributes: 3
+  interfaces: 0, fields: 0, methods: 7, attributes: 3
   public com.android.hoststubgen.test.tinyframework.TinyFrameworkNative_host();
     descriptor: ()V
     flags: (0x0001) ACC_PUBLIC
@@ -2378,6 +2442,31 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNative_host
         Start  Length  Slot  Name   Signature
             0       5     0  arg1   B
             0       5     1  arg2   B
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenProcessedAsKeep
+
+  public static void notNativeRedirected(com.android.hoststubgen.test.tinyframework.TinyFrameworkNative);
+    descriptor: (Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkNative;)V
+    flags: (0x0009) ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=0, locals=1, args_size=1
+         x: return
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       1     0 source   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkNative;
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenProcessedAsKeep
+
+  public static void notNativeStaticRedirected();
+    descriptor: ()V
+    flags: (0x0009) ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=0, locals=0, args_size=0
+         x: return
+      LineNumberTable:
     RuntimeVisibleAnnotations:
       x: #x()
         com.android.hoststubgen.hosthelper.HostStubGenProcessedAsKeep

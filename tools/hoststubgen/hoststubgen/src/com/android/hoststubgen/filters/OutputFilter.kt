@@ -35,10 +35,6 @@ abstract class OutputFilter {
      * using it.
      */
     open var outermostFilter: OutputFilter = this
-        get() = field
-        set(value) {
-            field = value
-        }
 
     abstract fun getPolicyForClass(className: String): FilterPolicyWithReason
 
@@ -60,13 +56,13 @@ abstract class OutputFilter {
     }
 
     /**
-     * Return a "native substitution class" name for a given class.
+     * Return a "redirection class" name for a given class.
      *
-     * The result will be in a "human readable" form. (e.g. uses '.'s instead of '/'s)
+     * The result will be in a JVM internal form. (e.g. uses '/'s instead of '.'s)
      *
-     * (which corresponds to @HostSideTestNativeSubstitutionClass of the standard annotations.)
+     * (which corresponds to @HostSideTestRedirectClass of the standard annotations.)
      */
-    open fun getNativeSubstitutionClass(className: String): String? {
+    open fun getRedirectionClass(className: String): String? {
         return null
     }
 

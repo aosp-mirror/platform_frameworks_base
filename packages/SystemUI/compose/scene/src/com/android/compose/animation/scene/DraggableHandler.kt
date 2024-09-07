@@ -190,14 +190,12 @@ internal class DraggableHandlerImpl(
     private fun computeSwipes(startedPosition: Offset?, pointersDown: Int): Swipes {
         val fromSource =
             startedPosition?.let { position ->
-                layoutImpl.swipeSourceDetector
-                    .source(
-                        layoutImpl.lastSize,
-                        position.round(),
-                        layoutImpl.density,
-                        orientation,
-                    )
-                    ?.resolve(layoutImpl.layoutDirection)
+                layoutImpl.swipeSourceDetector.source(
+                    layoutImpl.lastSize,
+                    position.round(),
+                    layoutImpl.density,
+                    orientation,
+                )
             }
 
         val upOrLeft =

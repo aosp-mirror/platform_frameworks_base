@@ -33,6 +33,7 @@ import com.android.systemui.media.controls.domain.pipeline.LegacyMediaDataManage
 import com.android.systemui.media.controls.shared.MediaControlDrawables
 import com.android.systemui.media.controls.shared.model.MediaAction
 import com.android.systemui.media.controls.shared.model.MediaButton
+import com.android.systemui.media.controls.shared.model.MediaNotificationAction
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.NotificationMediaManager.isConnectingState
@@ -217,11 +218,10 @@ private fun includesAction(stateActions: Long, @PlaybackState.Actions action: Lo
 /** Generate action buttons based on notification actions */
 fun createActionsFromNotification(
     context: Context,
-    activityStarter: ActivityStarter,
     sbn: StatusBarNotification
-): Pair<List<MediaAction>, List<Int>> {
+): Pair<List<MediaNotificationAction>, List<Int>> {
     val notif = sbn.notification
-    val actionIcons: MutableList<MediaAction> = ArrayList()
+    val actionIcons: MutableList<MediaNotificationAction> = ArrayList()
     val actions = notif.actions
     var actionsToShowCollapsed =
         notif.extras.getIntArray(Notification.EXTRA_COMPACT_ACTIONS)?.toMutableList()
@@ -250,25 +250,6 @@ fun createActionsFromNotification(
                 continue
             }
 
-            val runnable =
-                action.actionIntent?.let { actionIntent ->
-                    Runnable {
-                        when {
-                            actionIntent.isActivity ->
-                                activityStarter.startPendingIntentDismissingKeyguard(
-                                    action.actionIntent
-                                )
-                            action.isAuthenticationRequired ->
-                                activityStarter.dismissKeyguardThenExecute(
-                                    { sendPendingIntent(action.actionIntent) },
-                                    {},
-                                    true
-                                )
-                            else -> sendPendingIntent(actionIntent)
-                        }
-                    }
-                }
-
             val themeText =
                 com.android.settingslib.Utils.getColorAttr(
                         context,
@@ -285,11 +266,51 @@ fun createActionsFromNotification(
                     .setTint(themeText)
                     .loadDrawable(context)
 
-            val mediaAction = MediaAction(mediaActionIcon, runnable, action.title, null)
+            val mediaAction =
+                MediaNotificationAction(
+                    action.isAuthenticationRequired,
+                    action.actionIntent,
+                    mediaActionIcon,
+                    action.title
+                )
             actionIcons.add(mediaAction)
         }
     }
     return Pair(actionIcons, actionsToShowCollapsed)
+}
+
+/**
+ * Converts [MediaNotificationAction] list into [MediaAction] list
+ *
+ * @param actions list of [MediaNotificationAction]
+ * @param activityStarter starter for activities
+ * @return list of [MediaAction]
+ */
+fun getNotificationActions(
+    actions: List<MediaNotificationAction>,
+    activityStarter: ActivityStarter
+): List<MediaAction> {
+    return actions.map { action ->
+        val runnable =
+            action.actionIntent?.let { actionIntent ->
+                Runnable {
+                    when {
+                        actionIntent.isActivity ->
+                            activityStarter.startPendingIntentDismissingKeyguard(
+                                action.actionIntent
+                            )
+                        action.isAuthenticationRequired ->
+                            activityStarter.dismissKeyguardThenExecute(
+                                { sendPendingIntent(action.actionIntent) },
+                                {},
+                                true
+                            )
+                        else -> sendPendingIntent(actionIntent)
+                    }
+                }
+            }
+        MediaAction(action.icon, runnable, action.contentDescription, background = null)
+    }
 }
 
 private fun sendPendingIntent(intent: PendingIntent): Boolean {
