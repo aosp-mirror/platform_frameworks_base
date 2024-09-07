@@ -98,11 +98,11 @@ flag {
 }
 
 flag {
-  name: "camera_multiple_input_streams"
-  is_exported: true
-  namespace: "virtual_devices"
-  description: "Expose multiple surface for the virtual camera owner for different stream resolution"
-  bug: "341083465"
+    name: "camera_multiple_input_streams"
+    is_exported: true
+    namespace: "virtual_devices"
+    description: "Expose multiple surface for the virtual camera owner for different stream resolution"
+    bug: "341083465"
 }
 
 flag {
@@ -113,8 +113,16 @@ flag {
 }
 
 flag {
-  name: "status_bar_and_insets"
-  namespace: "virtual_devices"
-  description: "Allow for status bar and insets on virtual devices"
-  bug: "350007866"
+    namespace: "virtual_devices"
+    name: "display_power_manager_apis"
+    description: "Make relevant PowerManager APIs display aware by default"
+    bug: "365042486"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "status_bar_and_insets"
+    namespace: "virtual_devices"
+    description: "Allow for status bar and insets on virtual devices"
+    bug: "350007866"
 }

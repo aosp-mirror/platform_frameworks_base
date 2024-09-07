@@ -72,8 +72,8 @@ abstract class DelegatingFilter(
         return fallback.getRenameTo(className, methodName, descriptor)
     }
 
-    override fun getNativeSubstitutionClass(className: String): String? {
-        return fallback.getNativeSubstitutionClass(className)
+    override fun getRedirectionClass(className: String): String? {
+        return fallback.getRedirectionClass(className)
     }
 
     override fun getClassLoadHooks(className: String): List<String> {

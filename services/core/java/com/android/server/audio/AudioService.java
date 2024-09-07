@@ -14727,6 +14727,7 @@ public class AudioService extends IAudioService.Stub
     @Override
     /** @see AudioManager#permissionUpdateBarrier() */
     public void permissionUpdateBarrier() {
+        if (!audioserverPermissions()) return;
         mAudioSystem.triggerSystemPropertyUpdate(mSysPropListenerNativeHandle);
         List<Future> snapshot;
         synchronized (mScheduledPermissionTasks) {

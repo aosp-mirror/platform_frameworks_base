@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.scenarios
 
-import android.platform.test.annotations.Postsubmit
 import android.app.Instrumentation
 import android.tools.NavBar
 import android.tools.Rotation
@@ -32,16 +31,12 @@ import com.android.wm.shell.Utils
 import org.junit.After
 import org.junit.Assume
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.junit.runners.BlockJUnit4ClassRunner
 
-@RunWith(BlockJUnit4ClassRunner::class)
-@Postsubmit
-open class ResizeAppWithCornerResize
-@JvmOverloads
-constructor(
+@Ignore("Test Base Class")
+abstract class ResizeAppWithCornerResize(
     val rotation: Rotation = Rotation.ROTATION_0,
     val horizontalChange: Int = 200,
     val verticalChange: Int = -200,
@@ -80,6 +75,25 @@ constructor(
             DesktopModeAppHelper.Corners.RIGHT_TOP,
             horizontalChange,
             verticalChange
+        )
+    }
+
+    @Test
+    open fun resizeAppWithCornerResizeToMaximumSize() {
+        val maxResizeChange = 3000
+        testApp.cornerResize(
+            wmHelper,
+            device,
+            DesktopModeAppHelper.Corners.RIGHT_TOP,
+            maxResizeChange,
+            -maxResizeChange
+        )
+        testApp.cornerResize(
+            wmHelper,
+            device,
+            DesktopModeAppHelper.Corners.LEFT_BOTTOM,
+            -maxResizeChange,
+            maxResizeChange
         )
     }
 

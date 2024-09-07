@@ -33,6 +33,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.icu.text.SimpleDateFormat;
 import android.os.Binder;
+import android.os.Debug;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.IBinder.DeathRecipient;
@@ -495,6 +496,10 @@ public final class AppStartInfoTracker {
 
     private void addBaseFieldsFromProcessRecord(ApplicationStartInfo start, ProcessRecord app) {
         if (app == null) {
+            if (DEBUG) {
+                Slog.w(TAG,
+                        "app is null in addBaseFieldsFromProcessRecord: " + Debug.getCallers(4));
+            }
             return;
         }
         final int definingUid = app.getHostingRecord() != null

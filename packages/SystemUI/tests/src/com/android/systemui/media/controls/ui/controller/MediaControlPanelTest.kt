@@ -79,6 +79,7 @@ import com.android.systemui.media.controls.shared.model.MediaAction
 import com.android.systemui.media.controls.shared.model.MediaButton
 import com.android.systemui.media.controls.shared.model.MediaData
 import com.android.systemui.media.controls.shared.model.MediaDeviceData
+import com.android.systemui.media.controls.shared.model.MediaNotificationAction
 import com.android.systemui.media.controls.shared.model.SmartspaceMediaData
 import com.android.systemui.media.controls.ui.binder.SeekBarObserver
 import com.android.systemui.media.controls.ui.view.GutsViewHolder
@@ -235,6 +236,19 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Mock private lateinit var recProgressBar2: SeekBar
     @Mock private lateinit var recProgressBar3: SeekBar
     @Mock private lateinit var globalSettings: GlobalSettings
+
+    private val intent =
+        Intent().apply {
+            putExtras(Bundle().also { it.putString(KEY_SMARTSPACE_APP_NAME, REC_APP_NAME) })
+            setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+    private val pendingIntent =
+        PendingIntent.getActivity(
+            mContext,
+            0,
+            intent.setPackage(mContext.packageName),
+            PendingIntent.FLAG_MUTABLE
+        )
 
     @JvmField @Rule val mockito = MockitoJUnit.rule()
 
@@ -989,14 +1003,13 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Test
     fun bindNotificationActions() {
         val icon = context.getDrawable(android.R.drawable.ic_media_play)
-        val bg = context.getDrawable(R.drawable.qs_media_round_button_background)
         val actions =
             listOf(
-                MediaAction(icon, Runnable {}, "previous", bg),
-                MediaAction(icon, Runnable {}, "play", bg),
-                MediaAction(icon, null, "next", bg),
-                MediaAction(icon, null, "custom 0", bg),
-                MediaAction(icon, Runnable {}, "custom 1", bg)
+                MediaNotificationAction(true, actionIntent = pendingIntent, icon, "previous"),
+                MediaNotificationAction(true, actionIntent = pendingIntent, icon, "play"),
+                MediaNotificationAction(true, actionIntent = null, icon, "next"),
+                MediaNotificationAction(true, actionIntent = null, icon, "custom 0"),
+                MediaNotificationAction(true, actionIntent = pendingIntent, icon, "custom 1")
             )
         val state =
             mediaData.copy(
@@ -1684,11 +1697,11 @@ public class MediaControlPanelTest : SysuiTestCase() {
     fun actionCustom2Click_isLogged() {
         val actions =
             listOf(
-                MediaAction(null, Runnable {}, "action 0", null),
-                MediaAction(null, Runnable {}, "action 1", null),
-                MediaAction(null, Runnable {}, "action 2", null),
-                MediaAction(null, Runnable {}, "action 3", null),
-                MediaAction(null, Runnable {}, "action 4", null)
+                MediaNotificationAction(true, actionIntent = pendingIntent, null, "action 0"),
+                MediaNotificationAction(true, actionIntent = pendingIntent, null, "action 1"),
+                MediaNotificationAction(true, actionIntent = pendingIntent, null, "action 2"),
+                MediaNotificationAction(true, actionIntent = pendingIntent, null, "action 3"),
+                MediaNotificationAction(true, actionIntent = pendingIntent, null, "action 4")
             )
         val data = mediaData.copy(actions = actions)
 
@@ -1703,11 +1716,11 @@ public class MediaControlPanelTest : SysuiTestCase() {
     fun actionCustom3Click_isLogged() {
         val actions =
             listOf(
-                MediaAction(null, Runnable {}, "action 0", null),
-                MediaAction(null, Runnable {}, "action 1", null),
-                MediaAction(null, Runnable {}, "action 2", null),
-                MediaAction(null, Runnable {}, "action 3", null),
-                MediaAction(null, Runnable {}, "action 4", null)
+                MediaNotificationAction(true, actionIntent = pendingIntent, null, "action 0"),
+                MediaNotificationAction(true, actionIntent = pendingIntent, null, "action 1"),
+                MediaNotificationAction(true, actionIntent = pendingIntent, null, "action 2"),
+                MediaNotificationAction(true, actionIntent = pendingIntent, null, "action 3"),
+                MediaNotificationAction(true, actionIntent = pendingIntent, null, "action 4")
             )
         val data = mediaData.copy(actions = actions)
 
@@ -1722,11 +1735,11 @@ public class MediaControlPanelTest : SysuiTestCase() {
     fun actionCustom4Click_isLogged() {
         val actions =
             listOf(
-                MediaAction(null, Runnable {}, "action 0", null),
-                MediaAction(null, Runnable {}, "action 1", null),
-                MediaAction(null, Runnable {}, "action 2", null),
-                MediaAction(null, Runnable {}, "action 3", null),
-                MediaAction(null, Runnable {}, "action 4", null)
+                MediaNotificationAction(true, actionIntent = pendingIntent, null, "action 0"),
+                MediaNotificationAction(true, actionIntent = pendingIntent, null, "action 1"),
+                MediaNotificationAction(true, actionIntent = pendingIntent, null, "action 2"),
+                MediaNotificationAction(true, actionIntent = pendingIntent, null, "action 3"),
+                MediaNotificationAction(true, actionIntent = pendingIntent, null, "action 4")
             )
         val data = mediaData.copy(actions = actions)
 
