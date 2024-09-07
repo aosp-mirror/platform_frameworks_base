@@ -173,12 +173,9 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     @Mock
     private AppToWebGenericLinksParser mMockGenericLinksParser;
     @Mock
-    private WindowManager mMockWindowManager;
-    @Mock
     private HandleMenu mMockHandleMenu;
     @Mock
     private HandleMenuFactory mMockHandleMenuFactory;
-    @Mock
     private MultiInstanceHelper mMockMultiInstanceHelper;
     @Captor
     private ArgumentCaptor<Function1<Boolean, Unit>> mOnMaxMenuHoverChangeListener;
@@ -223,10 +220,9 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         final Display defaultDisplay = mock(Display.class);
         doReturn(defaultDisplay).when(mMockDisplayController).getDisplay(Display.DEFAULT_DISPLAY);
         doReturn(mInsetsState).when(mMockDisplayController).getInsetsState(anyInt());
-        when(mMockHandleMenuFactory.create(any(), any(), anyInt(), any(), any(),
+        when(mMockHandleMenuFactory.create(any(), anyInt(), any(), any(),
                 any(), anyBoolean(), anyBoolean(), any(), anyInt(), anyInt(), anyInt()))
                 .thenReturn(mMockHandleMenu);
-        when(mMockMultiInstanceHelper.supportsMultiInstanceSplit(any())).thenReturn(false);
     }
 
     @After
@@ -389,7 +385,6 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     }
 
     @Test
-    @DisableFlags(Flags.FLAG_ENABLE_ADDITIONAL_WINDOWS_ABOVE_STATUS_BAR)
     public void updateRelayoutParams_fullscreen_inputChannelNotNeeded() {
         final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
         taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
@@ -406,7 +401,6 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     }
 
     @Test
-    @DisableFlags(Flags.FLAG_ENABLE_ADDITIONAL_WINDOWS_ABOVE_STATUS_BAR)
     public void updateRelayoutParams_multiwindow_inputChannelNotNeeded() {
         final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
         taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
@@ -497,7 +491,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 .isTrue();
     }
 
-    @Test
+    @DisableFlags(Flags.FLAG_ENABLE_ADDITIONAL_WINDOWS_ABOVE_STATUS_BAR)
     public void relayout_fullscreenTask_appliesTransactionImmediately() {
         final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
         final DesktopModeWindowDecoration spyWindowDecor = spy(createWindowDecoration(taskInfo));
@@ -524,6 +518,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_ENABLE_ADDITIONAL_WINDOWS_ABOVE_STATUS_BAR)
     public void relayout_fullscreenTask_doesNotCreateViewHostImmediately() {
         final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
         final DesktopModeWindowDecoration spyWindowDecor = spy(createWindowDecoration(taskInfo));
@@ -535,6 +530,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_ENABLE_ADDITIONAL_WINDOWS_ABOVE_STATUS_BAR)
     public void relayout_fullscreenTask_postsViewHostCreation() {
         final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
         final DesktopModeWindowDecoration spyWindowDecor = spy(createWindowDecoration(taskInfo));
@@ -563,6 +559,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_ENABLE_ADDITIONAL_WINDOWS_ABOVE_STATUS_BAR)
     public void relayout_removesExistingHandlerCallback() {
         final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
         final DesktopModeWindowDecoration spyWindowDecor = spy(createWindowDecoration(taskInfo));
@@ -577,6 +574,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_ENABLE_ADDITIONAL_WINDOWS_ABOVE_STATUS_BAR)
     public void close_removesExistingHandlerCallback() {
         final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
         final DesktopModeWindowDecoration spyWindowDecor = spy(createWindowDecoration(taskInfo));
@@ -828,7 +826,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     }
 
     private void verifyHandleMenuCreated(@Nullable Uri uri) {
-        verify(mMockHandleMenuFactory).create(any(), any(), anyInt(), any(), any(),
+        verify(mMockHandleMenuFactory).create(any(), anyInt(), any(), any(),
                 any(), anyBoolean(), anyBoolean(), eq(uri), anyInt(), anyInt(), anyInt());
     }
 
@@ -896,9 +894,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 mMockChoreographer, mMockSyncQueue, mMockRootTaskDisplayAreaOrganizer,
                 mMockGenericLinksParser, SurfaceControl.Builder::new, mMockTransactionSupplier,
                 WindowContainerTransaction::new, SurfaceControl::new,
-                new WindowManagerWrapper(mMockWindowManager),
                 mMockSurfaceControlViewHostFactory, maximizeMenuFactory, mMockHandleMenuFactory,
-                mMockMultiInstanceHelper);
+                        mMockMultiInstanceHelper);
         windowDecor.setCaptionListeners(mMockTouchEventListener, mMockTouchEventListener,
                 mMockTouchEventListener, mMockTouchEventListener);
         windowDecor.setExclusionRegionListener(mMockExclusionRegionListener);

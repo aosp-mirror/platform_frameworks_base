@@ -180,20 +180,13 @@ final class SendKeyAction extends HdmiCecFeatureAction {
                 && localDevice().getService().isAbsoluteVolumeBehaviorEnabled()) {
             sendCommand(HdmiCecMessageBuilder.buildUserControlReleased(getSourceAddress(),
                     mTargetAddress),
-                    __ -> queryAvrAudioStatus());
+                    __ -> sendCommand(HdmiCecMessageBuilder.buildGiveAudioStatus(
+                            getSourceAddress(),
+                            localDevice().findAudioReceiverAddress())));
         } else {
             sendCommand(HdmiCecMessageBuilder.buildUserControlReleased(getSourceAddress(),
                     mTargetAddress));
         }
-    }
-
-    private void queryAvrAudioStatus() {
-        localDevice().mService.runOnServiceThreadDelayed(
-                () -> sendCommand(HdmiCecMessageBuilder.buildGiveAudioStatus(
-                        getSourceAddress(),
-                        localDevice().findAudioReceiverAddress())),
-                DELAY_GIVE_AUDIO_STATUS);
-
     }
 
     @Override

@@ -33,7 +33,6 @@ import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.res.R
 import com.android.systemui.util.kotlin.BooleanFlowOperators.anyOf
 import javax.inject.Inject
-import javax.inject.Named
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -51,7 +50,6 @@ constructor(
     keyguardBottomAreaViewModel: KeyguardBottomAreaViewModel,
     private val burnInHelperWrapper: BurnInHelperWrapper,
     burnInInteractor: BurnInInteractor,
-    @Named(KeyguardQuickAffordancesCombinedViewModelModule.Companion.LOCKSCREEN_INSTANCE)
     shortcutsCombinedViewModel: KeyguardQuickAffordancesCombinedViewModel,
     configurationInteractor: ConfigurationInteractor,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,

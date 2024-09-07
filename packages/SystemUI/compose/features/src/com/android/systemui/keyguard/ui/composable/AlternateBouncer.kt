@@ -16,6 +16,7 @@
 
 package com.android.systemui.keyguard.ui.composable
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
@@ -71,6 +72,8 @@ fun AlternateBouncer(
         alternateBouncerDependencies.udfpsIconViewModel.iconLocation.collectAsStateWithLifecycle(
             initialValue = null
         )
+
+    BackHandler(enabled = isVisible) { alternateBouncerDependencies.viewModel.onBackRequested() }
 
     AnimatedVisibility(
         visible = isVisible,

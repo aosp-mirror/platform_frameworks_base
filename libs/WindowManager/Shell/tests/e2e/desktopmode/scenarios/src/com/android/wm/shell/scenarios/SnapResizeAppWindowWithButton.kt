@@ -17,6 +17,7 @@
 package com.android.wm.shell.scenarios
 
 import android.app.Instrumentation
+import android.platform.test.annotations.Postsubmit
 import android.tools.NavBar
 import android.tools.Rotation
 import android.tools.traces.parsers.WindowManagerStateHelper
@@ -31,12 +32,15 @@ import com.android.wm.shell.Utils
 import org.junit.After
 import org.junit.Assume
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.junit.runners.BlockJUnit4ClassRunner
 
-@Ignore("Test Base Class")
-abstract class SnapResizeAppWindowWithButton
+@RunWith(BlockJUnit4ClassRunner::class)
+@Postsubmit
+open class SnapResizeAppWindowWithButton
+@JvmOverloads
 constructor(private val toLeft: Boolean = true, isResizable: Boolean = true) {
 
     private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()

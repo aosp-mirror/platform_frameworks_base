@@ -86,7 +86,6 @@ public class TouchState {
     private MotionEvent mLastInjectedHoverEvent;
     // The last injected hover event used for performing clicks.
     private MotionEvent mLastInjectedHoverEventForClick;
-    private boolean mHasResetInputDispatcherState;
     // The time of the last injected down.
     private long mLastInjectedDownEventTime;
     // Keep track of which pointers sent to the system are down.
@@ -360,14 +359,6 @@ public class TouchState {
     /** @return The time of the last injected down event. */
     public long getLastInjectedDownEventTime() {
         return mLastInjectedDownEventTime;
-    }
-
-    boolean hasResetInputDispatcherState() {
-        return mHasResetInputDispatcherState;
-    }
-
-    void setHasResetInputDispatcherState(boolean value) {
-        mHasResetInputDispatcherState = value;
     }
 
     public int getLastTouchedWindowId() {

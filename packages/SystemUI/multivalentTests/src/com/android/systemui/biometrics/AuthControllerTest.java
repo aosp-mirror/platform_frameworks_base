@@ -97,8 +97,6 @@ import com.android.systemui.util.concurrency.FakeExecution;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 
-import com.google.android.msdl.domain.MSDLPlayer;
-
 import dagger.Lazy;
 
 import org.junit.Before;
@@ -187,8 +185,6 @@ public class AuthControllerTest extends SysuiTestCase {
     private Resources mResources;
     @Mock
     private VibratorHelper mVibratorHelper;
-    @Mock
-    private MSDLPlayer mMSDLPlayer;
 
     private TestableContext mContextSpy;
     private Execution mExecution;
@@ -1070,7 +1066,7 @@ public class AuthControllerTest extends SysuiTestCase {
                     () -> mLogContextInteractor, () -> mPromptSelectionInteractor,
                     () -> mCredentialViewModel, () -> mPromptViewModel, mInteractionJankMonitor,
                     mHandler, mBackgroundExecutor, mUdfpsUtils, mVibratorHelper,
-                    mLazyViewCapture, mMSDLPlayer);
+                    mLazyViewCapture);
         }
 
         @Override

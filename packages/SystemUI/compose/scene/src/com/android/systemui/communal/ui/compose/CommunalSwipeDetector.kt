@@ -33,7 +33,7 @@ import kotlin.math.abs
  * SwipeSourceDetector} to enable fullscreen swipe handling to transition to and from the glanceable
  * hub.
  */
-class CommunalSwipeDetector(private var lastDirection: SwipeSource.Resolved? = null) :
+class CommunalSwipeDetector(private var lastDirection: SwipeSource? = null) :
     SwipeSourceDetector, SwipeDetector {
     companion object {
         private const val TRAVEL_RATIO_THRESHOLD = .5f
@@ -44,15 +44,15 @@ class CommunalSwipeDetector(private var lastDirection: SwipeSource.Resolved? = n
         position: IntOffset,
         density: Density,
         orientation: Orientation
-    ): SwipeSource.Resolved? {
+    ): SwipeSource? {
         return lastDirection
     }
 
     override fun detectSwipe(change: PointerInputChange): Boolean {
         if (change.positionChange().x > 0) {
-            lastDirection = Edge.Resolved.Left
+            lastDirection = Edge.Left
         } else {
-            lastDirection = Edge.Resolved.Right
+            lastDirection = Edge.Right
         }
 
         // Determine whether the ratio of the distance traveled horizontally to the distance

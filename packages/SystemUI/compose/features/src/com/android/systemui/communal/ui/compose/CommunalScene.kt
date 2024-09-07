@@ -17,21 +17,20 @@
 package com.android.systemui.communal.ui.compose
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.Swipe
 import com.android.compose.animation.scene.SwipeDirection
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
-import com.android.systemui.communal.shared.model.CommunalBackgroundType
+import com.android.systemui.communal.ui.view.layout.sections.CommunalAppWidgetSection
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
-import com.android.systemui.communal.util.CommunalColors
+import com.android.systemui.communal.widgets.WidgetInteractionHandler
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.composable.Scene
+import com.android.systemui.statusbar.phone.SystemUIDialogFactory
 import javax.inject.Inject
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.Flow
@@ -44,8 +43,9 @@ class CommunalScene
 @Inject
 constructor(
     private val viewModel: CommunalViewModel,
-    private val communalColors: CommunalColors,
-    private val communalContent: CommunalContent,
+    private val dialogFactory: SystemUIDialogFactory,
+    private val interactionHandler: WidgetInteractionHandler,
+    private val widgetSection: CommunalAppWidgetSection,
 ) : ExclusiveActivatable(), Scene {
     override val key = Scenes.Communal
 
@@ -63,17 +63,12 @@ constructor(
 
     @Composable
     override fun SceneScope.Content(modifier: Modifier) {
-        val backgroundType by
-            viewModel.communalBackground.collectAsStateWithLifecycle(
-                initialValue = CommunalBackgroundType.ANIMATED
-            )
-
-        CommunalScene(
-            backgroundType = backgroundType,
-            colors = communalColors,
-            content = communalContent,
+        CommunalHub(
+            modifier = modifier,
             viewModel = viewModel,
-            modifier = modifier.horizontalNestedScrollToScene(),
+            interactionHandler = interactionHandler,
+            widgetSection = widgetSection,
+            dialogFactory = dialogFactory,
         )
     }
 }

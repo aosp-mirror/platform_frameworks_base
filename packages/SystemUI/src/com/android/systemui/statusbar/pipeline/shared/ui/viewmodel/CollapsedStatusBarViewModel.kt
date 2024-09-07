@@ -64,11 +64,8 @@ interface CollapsedStatusBarViewModel {
     /** Emits whenever a transition from lockscreen to dream has started. */
     val transitionFromLockscreenToDreamStartedEvent: Flow<Unit>
 
-    /**
-     * The ongoing activity chip that should be primarily shown on the left-hand side of the status
-     * bar. If there are multiple ongoing activity chips, this one should take priority.
-     */
-    val primaryOngoingActivityChip: StateFlow<OngoingActivityChipModel>
+    /** The ongoing activity chip that should be shown on the left-hand side of the status bar. */
+    val ongoingActivityChip: StateFlow<OngoingActivityChipModel>
 
     /**
      * True if the current scene can show the home status bar (aka this status bar), and false if
@@ -111,7 +108,7 @@ constructor(
             .filter { it.transitionState == TransitionState.STARTED }
             .map {}
 
-    override val primaryOngoingActivityChip = ongoingActivityChipsViewModel.primaryChip
+    override val ongoingActivityChip = ongoingActivityChipsViewModel.chip
 
     override val isHomeStatusBarAllowedByScene: StateFlow<Boolean> =
         combine(

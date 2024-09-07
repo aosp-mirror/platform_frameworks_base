@@ -241,12 +241,12 @@ interface IInputManager {
 
     KeyGlyphMap getKeyGlyphMap(int deviceId);
 
-    @PermissionManuallyEnforced
+    @EnforcePermission("MANAGE_KEY_GESTURES")
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
             + "android.Manifest.permission.MANAGE_KEY_GESTURES)")
     void registerKeyGestureEventListener(IKeyGestureEventListener listener);
 
-    @PermissionManuallyEnforced
+    @EnforcePermission("MANAGE_KEY_GESTURES")
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
             + "android.Manifest.permission.MANAGE_KEY_GESTURES)")
     void unregisterKeyGestureEventListener(IKeyGestureEventListener listener);

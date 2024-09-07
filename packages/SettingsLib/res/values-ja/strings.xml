@@ -564,8 +564,6 @@
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"アラームとリマインダー"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"アラームの設定や時間ベースのアクション設定を、このアプリに許可します。これによりアプリがバックグラウンドで実行できるようになるため、バッテリーの使用量が増えることがあります。\n\nこの権限が OFF の場合、このアプリで設定された既存のアラームと時間ベースのイベントは機能しなくなります。"</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"スケジュール, アラーム, リマインダー, 時計"</string>
-    <!-- no translation found for zen_mode_do_not_disturb_name (6798711401734798283) -->
-    <skip />
     <string name="zen_mode_settings_title" msgid="7374070457626419755">"サイレント モード"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"ON にする"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"サイレント モードを ON にする"</string>

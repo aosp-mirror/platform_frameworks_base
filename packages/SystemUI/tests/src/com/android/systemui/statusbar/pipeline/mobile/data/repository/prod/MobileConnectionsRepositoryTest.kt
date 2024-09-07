@@ -106,7 +106,11 @@ import org.mockito.kotlin.whenever
 class MobileConnectionsRepositoryTest : SysuiTestCase() {
 
     private val flags =
-        FakeFeatureFlagsClassic().also { it.set(Flags.ROAMING_INDICATOR_VIA_DISPLAY_INFO, true) }
+        FakeFeatureFlagsClassic().also {
+            it.set(Flags.ROAMING_INDICATOR_VIA_DISPLAY_INFO, true)
+            it.set(Flags.INSTANT_TETHER, true)
+            it.set(Flags.WIFI_SECONDARY_NETWORKS, true)
+        }
 
     private lateinit var connectionFactory: MobileConnectionRepositoryImpl.Factory
     private lateinit var carrierMergedFactory: CarrierMergedConnectionRepository.Factory
@@ -185,6 +189,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
 
         wifiRepository =
             WifiRepositoryImpl(
+                flags,
                 testScope.backgroundScope,
                 mainExecutor,
                 testDispatcher,

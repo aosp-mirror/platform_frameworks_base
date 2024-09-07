@@ -26,6 +26,7 @@ import android.util.ArrayMap
 import android.util.Log
 import androidx.annotation.VisibleForTesting
 import com.android.app.tracing.coroutines.runBlocking
+import com.android.systemui.Flags
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
@@ -66,7 +67,11 @@ constructor(
         var observer: PreviewLifecycleObserver? = null
         return try {
             val renderer =
-                runBlocking("$TAG#previewRendererFactory.create", mainDispatcher) {
+                if (Flags.lockscreenPreviewRendererCreateOnMainThread()) {
+                    runBlocking("$TAG#previewRendererFactory.create", mainDispatcher) {
+                        previewRendererFactory.create(request)
+                    }
+                } else {
                     previewRendererFactory.create(request)
                 }
 

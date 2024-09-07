@@ -264,22 +264,6 @@ public class PreAuthInfoTest {
         assertThat(preAuthInfo.eligibleSensors).hasSize(0);
     }
 
-    @Test
-    @RequiresFlagsEnabled(Flags.FLAG_MANDATORY_BIOMETRICS)
-    public void testMandatoryBiometricsNegativeButtonText_whenSet()
-            throws Exception {
-        when(mTrustManager.isInSignificantPlace()).thenReturn(false);
-
-        final BiometricSensor sensor = getFaceSensor();
-        final PromptInfo promptInfo = new PromptInfo();
-        promptInfo.setAuthenticators(BiometricManager.Authenticators.MANDATORY_BIOMETRICS);
-        promptInfo.setNegativeButtonText(TEST_PACKAGE_NAME);
-        final PreAuthInfo preAuthInfo = PreAuthInfo.create(mTrustManager, mDevicePolicyManager,
-                mSettingObserver, List.of(sensor), 0 /* userId */, promptInfo, TEST_PACKAGE_NAME,
-                false /* checkDevicePolicyManager */, mContext, mBiometricCameraManager);
-        assertThat(promptInfo.getNegativeButtonText()).isEqualTo(TEST_PACKAGE_NAME);
-    }
-
     private BiometricSensor getFingerprintSensor() {
         BiometricSensor sensor = new BiometricSensor(mContext, SENSOR_ID_FINGERPRINT,
                 TYPE_FINGERPRINT, BiometricManager.Authenticators.BIOMETRIC_STRONG,

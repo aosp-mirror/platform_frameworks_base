@@ -99,7 +99,7 @@ public class StageCoordinatorTests extends ShellTestCase {
     @Mock
     private MainStage mMainStage;
     @Mock
-    private StageTaskListener mSideStage;
+    private SideStage mSideStage;
     @Mock
     private SplitLayout mSplitLayout;
     @Mock

@@ -46,7 +46,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.android.settingslib.spa.framework.theme.SettingsDimension
 import com.android.settingslib.spa.framework.theme.SettingsTheme
-import com.android.settingslib.spa.framework.theme.isSpaExpressiveEnabled
 
 data class SpinnerOption(
     val id: Int,
@@ -71,10 +70,7 @@ fun Spinner(options: List<SpinnerOption>, selectedId: Int?, setId: (id: Int) -> 
             )
             .selectableGroup(),
     ) {
-        val contentPadding = if (isSpaExpressiveEnabled) PaddingValues(
-            horizontal = SettingsDimension.spinnerHorizontalPadding,
-            vertical = SettingsDimension.spinnerVerticalPadding
-        ) else PaddingValues(horizontal = SettingsDimension.itemPaddingEnd)
+        val contentPadding = PaddingValues(horizontal = SettingsDimension.itemPaddingEnd)
         Button(
             modifier = Modifier.semantics { role = Role.DropdownList },
             onClick = { expanded = true },
@@ -133,11 +129,7 @@ private fun SpinnerText(
         text = option?.text ?: "",
         modifier = modifier
             .padding(end = SettingsDimension.itemPaddingEnd)
-            .then(
-                if (!isSpaExpressiveEnabled)
-                    Modifier.padding(vertical = SettingsDimension.itemPaddingAround)
-                else Modifier
-            ),
+            .padding(vertical = SettingsDimension.itemPaddingAround),
         color = color,
         style = MaterialTheme.typography.labelLarge,
     )

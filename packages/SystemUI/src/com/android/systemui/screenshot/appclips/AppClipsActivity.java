@@ -68,8 +68,6 @@ import com.android.settingslib.Utils;
 import com.android.systemui.Flags;
 import com.android.systemui.log.DebugLogger;
 import com.android.systemui.res.R;
-import com.android.systemui.screenshot.appclips.InternalBacklinksData.BacklinksData;
-import com.android.systemui.screenshot.appclips.InternalBacklinksData.CrossProfileError;
 import com.android.systemui.screenshot.scroll.CropView;
 import com.android.systemui.settings.UserTracker;
 
@@ -102,7 +100,6 @@ public class AppClipsActivity extends ComponentActivity {
     private static final String TAG = AppClipsActivity.class.getSimpleName();
     private static final ApplicationInfoFlags APPLICATION_INFO_FLAGS = ApplicationInfoFlags.of(0);
     private static final int DRAWABLE_END = 2;
-    private static final float DISABLE_ALPHA = 0.5f;
 
     private final AppClipsViewModel.Factory mViewModelFactory;
     private final PackageManager mPackageManager;
@@ -119,7 +116,6 @@ public class AppClipsActivity extends ComponentActivity {
     private Button mCancel;
     private CheckBox mBacklinksIncludeDataCheckBox;
     private TextView mBacklinksDataTextView;
-    private TextView mBacklinksCrossProfileError;
     private AppClipsViewModel mViewModel;
 
     private ResultReceiver mResultReceiver;
@@ -196,8 +192,8 @@ public class AppClipsActivity extends ComponentActivity {
         mBacklinksDataTextView = mLayout.findViewById(R.id.backlinks_data);
         mBacklinksIncludeDataCheckBox = mLayout.findViewById(R.id.backlinks_include_data);
         mBacklinksIncludeDataCheckBox.setOnCheckedChangeListener(
-                this::backlinksIncludeDataCheckBoxCheckedChangeListener);
-        mBacklinksCrossProfileError = mLayout.findViewById(R.id.backlinks_cross_profile_error);
+                (buttonView, isChecked) ->
+                        mBacklinksDataTextView.setVisibility(isChecked ? View.VISIBLE : View.GONE));
 
         mViewModel = new ViewModelProvider(this, mViewModelFactory).get(AppClipsViewModel.class);
         mViewModel.getScreenshot().observe(this, this::setScreenshot);
@@ -316,11 +312,10 @@ public class AppClipsActivity extends ComponentActivity {
                 Intent.CAPTURE_CONTENT_FOR_NOTE_SUCCESS);
         data.putParcelable(EXTRA_SCREENSHOT_URI, uri);
 
-        InternalBacklinksData selectedBacklink = mViewModel.mSelectedBacklinksLiveData.getValue();
         if (mBacklinksIncludeDataCheckBox.getVisibility() == View.VISIBLE
                 && mBacklinksIncludeDataCheckBox.isChecked()
-                && selectedBacklink instanceof BacklinksData) {
-            ClipData backlinksData = ((BacklinksData) selectedBacklink).getClipData();
+                && mViewModel.mSelectedBacklinksLiveData.getValue() != null) {
+            ClipData backlinksData = mViewModel.mSelectedBacklinksLiveData.getValue().getClipData();
             data.putParcelable(EXTRA_CLIP_DATA, backlinksData);
 
             DebugLogger.INSTANCE.logcatMessage(this,
@@ -464,38 +459,6 @@ public class AppClipsActivity extends ComponentActivity {
 
         mBacklinksDataTextView.setCompoundDrawablesRelative(/* start= */ appIcon, /* top= */
                 null, /* end= */ dropDownIcon, /* bottom= */ null);
-
-        updateViewsToShowOrHideBacklinkError(backlinksData);
-    }
-
-    /** Updates views to show or hide error with backlink.  */
-    private void updateViewsToShowOrHideBacklinkError(InternalBacklinksData backlinksData) {
-        // Remove the check box change listener before updating it to avoid updating backlink text
-        // view visibility.
-        mBacklinksIncludeDataCheckBox.setOnCheckedChangeListener(null);
-        if (backlinksData instanceof CrossProfileError) {
-            // There's error with the backlink, unselect the checkbox and disable it.
-            mBacklinksIncludeDataCheckBox.setEnabled(false);
-            mBacklinksIncludeDataCheckBox.setChecked(false);
-            mBacklinksIncludeDataCheckBox.setAlpha(DISABLE_ALPHA);
-
-            mBacklinksCrossProfileError.setVisibility(View.VISIBLE);
-        } else {
-            // When there is no error, ensure the check box is enabled and checked.
-            mBacklinksIncludeDataCheckBox.setEnabled(true);
-            mBacklinksIncludeDataCheckBox.setChecked(true);
-            mBacklinksIncludeDataCheckBox.setAlpha(1.0f);
-
-            mBacklinksCrossProfileError.setVisibility(View.GONE);
-        }
-
-        // (Re)Set the check box change listener as we're done making changes to the check box.
-        mBacklinksIncludeDataCheckBox.setOnCheckedChangeListener(
-                this::backlinksIncludeDataCheckBoxCheckedChangeListener);
-    }
-
-    private void backlinksIncludeDataCheckBoxCheckedChangeListener(View unused, boolean isChecked) {
-        mBacklinksDataTextView.setVisibility(isChecked ? View.VISIBLE : View.GONE);
     }
 
     private Rect createBacklinksTextViewDrawableBounds() {

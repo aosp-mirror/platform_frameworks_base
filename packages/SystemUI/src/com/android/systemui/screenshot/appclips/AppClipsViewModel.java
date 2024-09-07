@@ -23,13 +23,13 @@ import static android.content.Intent.CATEGORY_LAUNCHER;
 
 import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
 
+import android.app.ActivityTaskManager.RootTaskInfo;
 import android.app.IActivityTaskManager;
 import android.app.TaskInfo;
 import android.app.WindowConfiguration;
 import android.app.assist.AssistContent;
 import android.content.ClipData;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -51,14 +51,11 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.android.systemui.dagger.qualifiers.Application;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.log.DebugLogger;
 import com.android.systemui.screenshot.AssistContentRequester;
 import com.android.systemui.screenshot.ImageExporter;
-import com.android.systemui.screenshot.appclips.InternalBacklinksData.BacklinksData;
-import com.android.systemui.screenshot.appclips.InternalBacklinksData.CrossProfileError;
 
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
@@ -85,7 +82,7 @@ final class AppClipsViewModel extends ViewModel {
     private final ImageExporter mImageExporter;
     private final IActivityTaskManager mAtmService;
     private final AssistContentRequester mAssistContentRequester;
-    @Application private final Context mContext;
+    private final PackageManager mPackageManager;
 
     @Main
     private final Executor mMainExecutor;
@@ -100,13 +97,13 @@ final class AppClipsViewModel extends ViewModel {
 
     private AppClipsViewModel(AppClipsCrossProcessHelper appClipsCrossProcessHelper,
             ImageExporter imageExporter, IActivityTaskManager atmService,
-            AssistContentRequester assistContentRequester, @Application Context context,
+            AssistContentRequester assistContentRequester, PackageManager packageManager,
             @Main Executor mainExecutor, @Background Executor bgExecutor) {
         mAppClipsCrossProcessHelper = appClipsCrossProcessHelper;
         mImageExporter = imageExporter;
         mAtmService = atmService;
         mAssistContentRequester = assistContentRequester;
-        mContext = context;
+        mPackageManager = packageManager;
         mMainExecutor = mainExecutor;
         mBgExecutor = bgExecutor;
 
@@ -246,10 +243,6 @@ final class AppClipsViewModel extends ViewModel {
                         allTasksOnDisplay
                                 .stream()
                                 .filter(taskInfo -> shouldIncludeTask(taskInfo, taskIdsToIgnore))
-                                .map(taskInfo -> new InternalTaskInfo(taskInfo.topActivityInfo,
-                                        taskInfo.taskId, taskInfo.userId,
-                                        getPackageManagerForUser(taskInfo.userId)))
-                                .filter(this::canAppStartThroughLauncher)
                                 .map(this::getBacklinksDataForTaskInfo)
                                 .toList(),
                         mBgExecutor);
@@ -291,34 +284,33 @@ final class AppClipsViewModel extends ViewModel {
     /**
      * Returns whether the app represented by the provided {@link TaskInfo} should be included for
      * querying for {@link AssistContent}.
-     *
-     * <p>This does not check whether the task has a launcher icon.
      */
     private boolean shouldIncludeTask(TaskInfo taskInfo, Set<Integer> taskIdsToIgnore) {
         DebugLogger.INSTANCE.logcatMessage(this,
                 () -> String.format("shouldIncludeTask taskId %d; topActivity %s", taskInfo.taskId,
                         taskInfo.topActivity));
 
-        // Only consider tasks that shouldn't be ignored, are visible, and running. Furthermore,
-        // types such as launcher/home/dock/assistant are ignored.
+        // Only consider tasks that shouldn't be ignored, are visible, running, and have a launcher
+        // icon. Furthermore, types such as launcher/home/dock/assistant are ignored.
         return !taskIdsToIgnore.contains(taskInfo.taskId)
                 && taskInfo.isVisible
                 && taskInfo.isRunning
                 && taskInfo.numActivities > 0
                 && taskInfo.topActivity != null
                 && taskInfo.topActivityInfo != null
-                && taskInfo.getActivityType() == WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+                && taskInfo.getActivityType() == WindowConfiguration.ACTIVITY_TYPE_STANDARD
+                && canAppStartThroughLauncher(taskInfo.topActivity.getPackageName());
     }
 
     /**
-     * Returns whether the app represented by the {@link InternalTaskInfo} can be launched through
-     * the all apps tray by a user.
+     * Returns whether the app represented by the provided {@code packageName} can be launched
+     * through the all apps tray by a user.
      */
-    private boolean canAppStartThroughLauncher(InternalTaskInfo internalTaskInfo) {
+    private boolean canAppStartThroughLauncher(String packageName) {
         // Use Intent.resolveActivity API to check if the intent resolves as that is what Android
         // uses internally when apps use Context.startActivity.
-        return getMainLauncherIntentForTask(internalTaskInfo)
-                .resolveActivity(internalTaskInfo.getPackageManager()) != null;
+        return getMainLauncherIntentForPackage(packageName).resolveActivity(mPackageManager)
+                != null;
     }
 
     /**
@@ -326,34 +318,16 @@ final class AppClipsViewModel extends ViewModel {
      * is captured by querying the system using {@link TaskInfo#taskId}.
      */
     private ListenableFuture<InternalBacklinksData> getBacklinksDataForTaskInfo(
-            InternalTaskInfo internalTaskInfo) {
+            TaskInfo taskInfo) {
         DebugLogger.INSTANCE.logcatMessage(this,
                 () -> String.format("getBacklinksDataForTaskId for taskId %d; topActivity %s",
-                        internalTaskInfo.getTaskId(),
-                        internalTaskInfo.getTopActivityNameForDebugLogging()));
-
-        // Unlike other SysUI components, App Clips is started by the notes app so it runs as the
-        // same user as the notes app. That is, if the notes app was running as work profile user
-        // then App Clips also runs as work profile user. This is why while checking for user of the
-        // screenshotted app the check is performed using UserHandle.myUserId instead of using the
-        // more complex UserTracker.
-        if (internalTaskInfo.getUserId() != UserHandle.myUserId()) {
-            return getCrossProfileErrorBacklinkForTask(internalTaskInfo);
-        }
+                        taskInfo.taskId, taskInfo.topActivity));
 
         SettableFuture<InternalBacklinksData> backlinksData = SettableFuture.create();
-        int taskId = internalTaskInfo.getTaskId();
-        mAssistContentRequester.requestAssistContent(taskId, assistContent -> backlinksData.set(
-                getBacklinksDataFromAssistContent(internalTaskInfo, assistContent)));
+        int taskId = taskInfo.taskId;
+        mAssistContentRequester.requestAssistContent(taskId, assistContent ->
+                backlinksData.set(getBacklinksDataFromAssistContent(taskInfo, assistContent)));
         return withTimeout(backlinksData);
-    }
-
-    private ListenableFuture<InternalBacklinksData> getCrossProfileErrorBacklinkForTask(
-            InternalTaskInfo internalTaskInfo) {
-        String appName = internalTaskInfo.getTopActivityAppName();
-        Drawable appIcon = internalTaskInfo.getTopActivityAppIcon();
-        InternalBacklinksData errorData = new CrossProfileError(appIcon, appName);
-        return Futures.immediateFuture(errorData);
     }
 
     /** Returns the same {@link ListenableFuture} but with a 5 {@link TimeUnit#SECONDS} timeout. */
@@ -377,24 +351,22 @@ final class AppClipsViewModel extends ViewModel {
      *     {@link Intent#ACTION_MAIN} and {@link Intent#CATEGORY_LAUNCHER}.
      * </ul>
      *
-     * @param internalTaskInfo {@link InternalTaskInfo} of the task which provided the
-     * {@link AssistContent}.
+     * @param taskInfo {@link RootTaskInfo} of the task which provided the {@link AssistContent}.
      * @param content the {@link AssistContent} to map into Backlinks {@link ClipData}.
      * @return {@link InternalBacklinksData} that represents the Backlinks data along with app icon.
      */
-    private InternalBacklinksData getBacklinksDataFromAssistContent(
-            InternalTaskInfo internalTaskInfo,
+    private InternalBacklinksData getBacklinksDataFromAssistContent(TaskInfo taskInfo,
             @Nullable AssistContent content) {
         DebugLogger.INSTANCE.logcatMessage(this,
                 () -> String.format("getBacklinksDataFromAssistContent taskId %d; topActivity %s",
-                        internalTaskInfo.getTaskId(),
-                        internalTaskInfo.getTopActivityNameForDebugLogging()));
+                        taskInfo.taskId, taskInfo.topActivity));
 
-        String appName = internalTaskInfo.getTopActivityAppName();
-        Drawable appIcon = internalTaskInfo.getTopActivityAppIcon();
+        String appName = getAppNameOfTask(taskInfo);
+        String packageName = taskInfo.topActivity.getPackageName();
+        Drawable appIcon = taskInfo.topActivityInfo.loadIcon(mPackageManager);
         ClipData mainLauncherIntent = ClipData.newIntent(appName,
-                getMainLauncherIntentForTask(internalTaskInfo));
-        InternalBacklinksData fallback = new BacklinksData(mainLauncherIntent, appIcon);
+                getMainLauncherIntentForPackage(packageName));
+        InternalBacklinksData fallback = new InternalBacklinksData(mainLauncherIntent, appIcon);
         if (content == null) {
             return fallback;
         }
@@ -406,10 +378,10 @@ final class AppClipsViewModel extends ViewModel {
 
             Uri uri = content.getWebUri();
             Intent backlinksIntent = new Intent(ACTION_VIEW).setData(uri);
-            if (doesIntentResolveToSameTask(backlinksIntent, internalTaskInfo)) {
+            if (doesIntentResolveToSamePackage(backlinksIntent, packageName)) {
                 DebugLogger.INSTANCE.logcatMessage(this,
                         () -> "getBacklinksDataFromAssistContent: using app provided uri");
-                return new BacklinksData(ClipData.newRawUri(appName, uri), appIcon);
+                return new InternalBacklinksData(ClipData.newRawUri(appName, uri), appIcon);
             }
         }
 
@@ -419,10 +391,11 @@ final class AppClipsViewModel extends ViewModel {
                     () -> "getBacklinksDataFromAssistContent: app has provided an intent");
 
             Intent backlinksIntent = content.getIntent();
-            if (doesIntentResolveToSameTask(backlinksIntent, internalTaskInfo)) {
+            if (doesIntentResolveToSamePackage(backlinksIntent, packageName)) {
                 DebugLogger.INSTANCE.logcatMessage(this,
                         () -> "getBacklinksDataFromAssistContent: using app provided intent");
-                return new BacklinksData(ClipData.newIntent(appName, backlinksIntent), appIcon);
+                return new InternalBacklinksData(ClipData.newIntent(appName, backlinksIntent),
+                        appIcon);
             }
         }
 
@@ -431,44 +404,33 @@ final class AppClipsViewModel extends ViewModel {
         return fallback;
     }
 
-    private boolean doesIntentResolveToSameTask(Intent intentToResolve,
-            InternalTaskInfo requiredTaskInfo) {
-        PackageManager packageManager = requiredTaskInfo.getPackageManager();
-        ComponentName resolvedComponent = intentToResolve.resolveActivity(packageManager);
+    private boolean doesIntentResolveToSamePackage(Intent intentToResolve,
+            String requiredPackageName) {
+        ComponentName resolvedComponent = intentToResolve.resolveActivity(mPackageManager);
         if (resolvedComponent == null) {
             return false;
         }
 
-        String requiredPackageName = requiredTaskInfo.getTopActivityPackageName();
         return resolvedComponent.getPackageName().equals(requiredPackageName);
     }
 
-    private Intent getMainLauncherIntentForTask(InternalTaskInfo internalTaskInfo) {
-        String pkgName = internalTaskInfo.getTopActivityPackageName();
+    private String getAppNameOfTask(TaskInfo taskInfo) {
+        return taskInfo.topActivityInfo.loadLabel(mPackageManager).toString();
+    }
+
+    private Intent getMainLauncherIntentForPackage(String pkgName) {
         Intent intent = new Intent(ACTION_MAIN).addCategory(CATEGORY_LAUNCHER).setPackage(pkgName);
 
         // Not all apps use DEFAULT_CATEGORY for their main launcher activity so the exact component
         // needs to be queried and set on the Intent in order for note-taking apps to be able to
         // start this intent. When starting an activity with an implicit intent, Android adds the
         // DEFAULT_CATEGORY flag otherwise it fails to resolve the intent.
-        PackageManager packageManager = internalTaskInfo.getPackageManager();
-        ResolveInfo resolvedActivity = packageManager.resolveActivity(intent, /* flags= */ 0);
+        ResolveInfo resolvedActivity = mPackageManager.resolveActivity(intent, /* flags= */ 0);
         if (resolvedActivity != null) {
             intent.setComponent(resolvedActivity.getComponentInfo().getComponentName());
         }
 
         return intent;
-    }
-
-    private PackageManager getPackageManagerForUser(int userId) {
-        // If app clips was launched as the same user, then reuse the available PM from mContext.
-        if (mContext.getUserId() == userId) {
-            return mContext.getPackageManager();
-        }
-
-        // PackageManager required for a different user, create its context and return its PM.
-        UserHandle userHandle = UserHandle.of(userId);
-        return mContext.createContextAsUser(userHandle, /* flags= */ 0).getPackageManager();
     }
 
     /** Helper factory to help with injecting {@link AppClipsViewModel}. */
@@ -478,7 +440,7 @@ final class AppClipsViewModel extends ViewModel {
         private final ImageExporter mImageExporter;
         private final IActivityTaskManager mAtmService;
         private final AssistContentRequester mAssistContentRequester;
-        @Application private final Context mContext;
+        private final PackageManager mPackageManager;
         @Main
         private final Executor mMainExecutor;
         @Background
@@ -487,13 +449,13 @@ final class AppClipsViewModel extends ViewModel {
         @Inject
         Factory(AppClipsCrossProcessHelper appClipsCrossProcessHelper, ImageExporter imageExporter,
                 IActivityTaskManager atmService, AssistContentRequester assistContentRequester,
-                @Application Context context, @Main Executor mainExecutor,
+                PackageManager packageManager, @Main Executor mainExecutor,
                 @Background Executor bgExecutor) {
             mAppClipsCrossProcessHelper = appClipsCrossProcessHelper;
             mImageExporter = imageExporter;
             mAtmService = atmService;
             mAssistContentRequester = assistContentRequester;
-            mContext = context;
+            mPackageManager = packageManager;
             mMainExecutor = mainExecutor;
             mBgExecutor = bgExecutor;
         }
@@ -507,7 +469,7 @@ final class AppClipsViewModel extends ViewModel {
 
             //noinspection unchecked
             return (T) new AppClipsViewModel(mAppClipsCrossProcessHelper, mImageExporter,
-                    mAtmService, mAssistContentRequester, mContext, mMainExecutor,
+                    mAtmService, mAssistContentRequester, mPackageManager, mMainExecutor,
                     mBgExecutor);
         }
     }

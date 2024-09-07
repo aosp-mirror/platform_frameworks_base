@@ -18,20 +18,20 @@ package com.android.systemui.inputdevice.tutorial
 
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.inputdevice.tutorial.ui.TutorialNotificationCoordinator
+import com.android.systemui.inputdevice.tutorial.domain.interactor.TutorialSchedulerInteractor
 import com.android.systemui.shared.Flags.newTouchpadGesturesTutorial
 import dagger.Lazy
 import javax.inject.Inject
 
-/** A [CoreStartable] to launch a scheduler for keyboard and touchpad tutorial notification */
+/** A [CoreStartable] to launch a scheduler for keyboard and touchpad education */
 @SysUISingleton
 class KeyboardTouchpadTutorialCoreStartable
 @Inject
-constructor(private val tutorialNotificationCoordinator: Lazy<TutorialNotificationCoordinator>) :
+constructor(private val tutorialSchedulerInteractor: Lazy<TutorialSchedulerInteractor>) :
     CoreStartable {
     override fun start() {
         if (newTouchpadGesturesTutorial()) {
-            tutorialNotificationCoordinator.get().start()
+            tutorialSchedulerInteractor.get().start()
         }
     }
 }

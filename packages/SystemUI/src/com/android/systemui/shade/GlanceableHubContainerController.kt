@@ -96,7 +96,7 @@ constructor(
     private val lockscreenSmartspaceController: LockscreenSmartspaceController,
     @CommunalTouchLog logBuffer: LogBuffer,
 ) : LifecycleOwner {
-    private val logger = Logger(logBuffer, TAG)
+    private val logger = Logger(logBuffer, "GlanceableHubContainerController")
 
     private class CommunalWrapper(context: Context) : FrameLayout(context) {
         private val consumers: MutableSet<Consumer<Boolean>> = ArraySet()
@@ -301,7 +301,7 @@ constructor(
 
         if (touchMonitor == null) {
             touchMonitor =
-                ambientTouchComponentFactory.create(this, HashSet(), TAG).getTouchMonitor().apply {
+                ambientTouchComponentFactory.create(this, HashSet()).getTouchMonitor().apply {
                     init()
                 }
         }
@@ -508,11 +508,6 @@ constructor(
     fun onTouchEvent(ev: MotionEvent): Boolean {
         SceneContainerFlag.assertInLegacyMode()
 
-        if (communalContainerView == null) {
-            // Return early so we don't log unnecessarily and fill up our LogBuffer.
-            return false
-        }
-
         // In the case that we are handling full swipes on the lockscreen, are on the lockscreen,
         // and the touch is within the horizontal notification band on the screen, do not process
         // the touch.
@@ -533,7 +528,7 @@ constructor(
             return false
         }
 
-        return handleTouchEventOnCommunalView(ev)
+        return communalContainerView?.let { handleTouchEventOnCommunalView(ev) } ?: false
     }
 
     private fun handleTouchEventOnCommunalView(ev: MotionEvent): Boolean {
@@ -635,8 +630,4 @@ constructor(
 
     override val lifecycle: Lifecycle
         get() = lifecycleRegistry
-
-    companion object {
-        private const val TAG = "GlanceableHubContainer"
-    }
 }

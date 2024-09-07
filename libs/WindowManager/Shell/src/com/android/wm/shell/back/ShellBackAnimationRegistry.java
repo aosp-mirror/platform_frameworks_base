@@ -23,8 +23,6 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.window.BackNavigationInfo;
 
-import java.util.ArrayList;
-
 /** Registry for all types of default back animations */
 public class ShellBackAnimationRegistry {
     private static final String TAG = "ShellBackPreview";
@@ -33,8 +31,6 @@ public class ShellBackAnimationRegistry {
     private ShellBackAnimation mDefaultCrossActivityAnimation;
     private final ShellBackAnimation mCustomizeActivityAnimation;
     private final ShellBackAnimation mCrossTaskAnimation;
-    private boolean mSupportedAnimatorsChanged = false;
-    private final ArrayList<Integer> mSupportedAnimators = new ArrayList<>();
 
     public ShellBackAnimationRegistry(
             @ShellBackAnimation.CrossActivity @Nullable ShellBackAnimation crossActivityAnimation,
@@ -64,7 +60,7 @@ public class ShellBackAnimationRegistry {
         mDefaultCrossActivityAnimation = crossActivityAnimation;
         mCustomizeActivityAnimation = customizeActivityAnimation;
         mCrossTaskAnimation = crossTaskAnimation;
-        updateSupportedAnimators();
+
         // TODO(b/236760237): register dialog close animation when it's completed.
     }
 
@@ -75,7 +71,6 @@ public class ShellBackAnimationRegistry {
         if (BackNavigationInfo.TYPE_CROSS_ACTIVITY == type) {
             mDefaultCrossActivityAnimation = null;
         }
-        updateSupportedAnimators();
     }
 
     void unregisterAnimation(@BackNavigationInfo.BackTargetType int type) {
@@ -84,24 +79,6 @@ public class ShellBackAnimationRegistry {
         if (BackNavigationInfo.TYPE_CROSS_ACTIVITY == type) {
             mDefaultCrossActivityAnimation = null;
         }
-        updateSupportedAnimators();
-    }
-
-    private void updateSupportedAnimators() {
-        mSupportedAnimators.clear();
-        for (int i = mAnimationDefinition.size() - 1; i >= 0; --i) {
-            mSupportedAnimators.add(mAnimationDefinition.keyAt(i));
-        }
-        mSupportedAnimatorsChanged = true;
-    }
-
-    boolean hasSupportedAnimatorsChanged() {
-        return mSupportedAnimatorsChanged;
-    }
-
-    ArrayList<Integer> getSupportedAnimators() {
-        mSupportedAnimatorsChanged = false;
-        return mSupportedAnimators;
     }
 
     /**

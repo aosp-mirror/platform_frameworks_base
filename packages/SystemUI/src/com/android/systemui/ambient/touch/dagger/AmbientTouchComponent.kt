@@ -16,7 +16,6 @@
 package com.android.systemui.ambient.touch.dagger
 
 import androidx.lifecycle.LifecycleOwner
-import com.android.systemui.ambient.dagger.AmbientModule.Companion.LOGGING_NAME
 import com.android.systemui.ambient.dagger.AmbientModule.Companion.TOUCH_HANDLERS
 import com.android.systemui.ambient.touch.TouchHandler
 import com.android.systemui.ambient.touch.TouchMonitor
@@ -37,8 +36,7 @@ interface AmbientTouchComponent {
             @BindsInstance lifecycleOwner: LifecycleOwner,
             @BindsInstance
             @Named(TOUCH_HANDLERS)
-            touchHandlers: Set<@JvmSuppressWildcards TouchHandler>,
-            @BindsInstance @Named(LOGGING_NAME) loggingName: String,
+            touchHandlers: Set<@JvmSuppressWildcards TouchHandler>
         ): AmbientTouchComponent
     }
 

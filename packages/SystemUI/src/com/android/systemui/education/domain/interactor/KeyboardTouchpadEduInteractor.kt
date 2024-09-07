@@ -19,7 +19,6 @@ package com.android.systemui.education.domain.interactor
 import android.hardware.input.InputManager
 import android.hardware.input.InputManager.KeyGestureEventListener
 import android.hardware.input.KeyGestureEvent
-import android.os.SystemProperties
 import com.android.systemui.CoreStartable
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.contextualeducation.GestureType
@@ -36,10 +35,7 @@ import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
 import java.time.Clock
 import java.util.concurrent.Executor
 import javax.inject.Inject
-import kotlin.time.Duration
-import kotlin.time.Duration.Companion.days
-import kotlin.time.DurationUnit
-import kotlin.time.toDuration
+import kotlin.time.Duration.Companion.hours
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -62,21 +58,7 @@ constructor(
     companion object {
         const val TAG = "KeyboardTouchpadEduInteractor"
         const val MAX_SIGNAL_COUNT: Int = 2
-        const val MAX_EDUCATION_SHOW_COUNT: Int = 2
-        val usageSessionDuration =
-            getDurationForConfig("persist.contextual_edu.usage_session_sec", 3.days)
-        val minIntervalBetweenEdu =
-            getDurationForConfig("persist.contextual_edu.edu_interval_sec", 7.days)
-
-        private fun getDurationForConfig(
-            systemPropertyKey: String,
-            defaultDuration: Duration
-        ): Duration =
-            SystemProperties.getLong(
-                    systemPropertyKey,
-                    /* defaultValue= */ defaultDuration.inWholeSeconds
-                )
-                .toDuration(DurationUnit.SECONDS)
+        val usageSessionDuration = 72.hours
     }
 
     private val _educationTriggered = MutableStateFlow<EducationInfo?>(null)
@@ -101,6 +83,7 @@ constructor(
     }
 
     override fun start() {
+        // Listen to back gesture model changes and trigger education if needed
         backgroundScope.launch {
             contextualEducationInteractor.backGestureModelFlow.collect {
                 if (isUsageSessionExpired(it)) {
@@ -112,6 +95,7 @@ constructor(
             }
         }
 
+        // Listen to touchpad connection changes and update the first connection time
         backgroundScope.launch {
             userInputDeviceRepository.isAnyTouchpadConnectedForUser.collect {
                 if (
@@ -125,6 +109,7 @@ constructor(
             }
         }
 
+        // Listen to keyboard connection changes and update the first connection time
         backgroundScope.launch {
             userInputDeviceRepository.isAnyKeyboardConnectedForUser.collect {
                 if (
@@ -138,6 +123,7 @@ constructor(
             }
         }
 
+        // Listen to keyboard shortcut triggered and update the last trigger time
         backgroundScope.launch {
             keyboardShortcutTriggered.collect {
                 contextualEducationInteractor.updateShortcutTriggerTime(it)
@@ -146,20 +132,10 @@ constructor(
     }
 
     private fun isEducationNeeded(model: GestureEduModel): Boolean {
-        val lessThanMaxEduCount = model.educationShownCount < MAX_EDUCATION_SHOW_COUNT
+        // Todo: b/354884305 - add complete education logic to show education in correct scenarios
         val noShortcutTriggered = model.lastShortcutTriggeredTime == null
         val signalCountReached = model.signalCount >= MAX_SIGNAL_COUNT
-        val isPreviousEduOlderThanMinInterval =
-            if (model.educationShownCount == 1) {
-                model.lastEducationTime
-                    ?.plusSeconds(minIntervalBetweenEdu.inWholeSeconds)
-                    ?.isBefore(clock.instant()) ?: true
-            } else true
-
-        return lessThanMaxEduCount &&
-            noShortcutTriggered &&
-            signalCountReached &&
-            isPreviousEduOlderThanMinInterval
+        return noShortcutTriggered && signalCountReached
     }
 
     private fun isUsageSessionExpired(model: GestureEduModel): Boolean {

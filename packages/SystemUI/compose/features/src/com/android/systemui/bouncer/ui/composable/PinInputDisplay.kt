@@ -34,10 +34,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -353,17 +351,14 @@ private class PinInputRow(
 
     @Composable
     fun Content(modifier: Modifier) {
-
-        // Wrap PIN entry in a Box so it is visible to accessibility (even if empty).
-        Box(modifier = modifier.fillMaxWidth().wrapContentHeight()) {
-            Row(
+        Row(
+            modifier =
                 modifier
                     .heightIn(min = shapeAnimations.shapeSize)
                     // Pins overflowing horizontally should still be shown as scrolling.
-                    .wrapContentSize(unbounded = true)
-            ) {
-                entries.forEach { entry -> key(entry.digit) { entry.Content() } }
-            }
+                    .wrapContentSize(unbounded = true),
+        ) {
+            entries.forEach { entry -> key(entry.digit) { entry.Content() } }
         }
     }
 

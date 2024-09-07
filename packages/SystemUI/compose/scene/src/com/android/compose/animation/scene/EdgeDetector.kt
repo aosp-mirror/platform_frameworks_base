@@ -54,23 +54,23 @@ class FixedSizeEdgeDetector(val size: Dp) : SwipeSourceDetector {
         position: IntOffset,
         density: Density,
         orientation: Orientation,
-    ): Edge.Resolved? {
+    ): Edge? {
         val axisSize: Int
         val axisPosition: Int
-        val topOrLeft: Edge.Resolved
-        val bottomOrRight: Edge.Resolved
+        val topOrLeft: Edge
+        val bottomOrRight: Edge
         when (orientation) {
             Orientation.Horizontal -> {
                 axisSize = layoutSize.width
                 axisPosition = position.x
-                topOrLeft = Edge.Resolved.Left
-                bottomOrRight = Edge.Resolved.Right
+                topOrLeft = Edge.Left
+                bottomOrRight = Edge.Right
             }
             Orientation.Vertical -> {
                 axisSize = layoutSize.height
                 axisPosition = position.y
-                topOrLeft = Edge.Resolved.Top
-                bottomOrRight = Edge.Resolved.Bottom
+                topOrLeft = Edge.Top
+                bottomOrRight = Edge.Bottom
             }
         }
 

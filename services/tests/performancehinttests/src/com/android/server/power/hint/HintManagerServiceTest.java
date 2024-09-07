@@ -631,7 +631,7 @@ public class HintManagerServiceTest {
         CountDownLatch stopLatch2 = new CountDownLatch(1);
         // negative value used for test only to avoid conflicting with any real thread that exists
         int isoProc1 = -100;
-        int isoProc2 = 99999999;
+        int isoProc2 = 9999;
         when(mAmInternalMock.getIsolatedProcesses(eq(UID))).thenReturn(List.of(0));
         int[] tids2 = createThreads(threadCount, stopLatch2);
         int[] tids2WithIsolated = Arrays.copyOf(tids2, tids2.length + 2);
@@ -658,7 +658,7 @@ public class HintManagerServiceTest {
         verify(mNativeWrapperMock, never()).halSetThreads(eq(sessionPtr1), any());
         verify(mNativeWrapperMock, never()).halSetThreads(eq(sessionPtr2), any());
         // the new TIDs pending list should be updated
-        assertArrayEquals(expectedTids2, session2.getTidsInternal());
+        assertArrayEquals(session2.getTidsInternal(), expectedTids2);
         reset(mNativeWrapperMock);
 
         // this should resume and update the threads so those never-existed invalid isolated
@@ -713,8 +713,8 @@ public class HintManagerServiceTest {
         // in background, set threads for session 1 then it should not be force paused next time
         session1.setThreads(SESSION_TIDS_A);
         // the new TIDs pending list should be updated
-        assertArrayEquals(SESSION_TIDS_A, session1.getTidsInternal());
-        assertArrayEquals(expectedTids2, session2.getTidsInternal());
+        assertArrayEquals(session1.getTidsInternal(), SESSION_TIDS_A);
+        assertArrayEquals(session2.getTidsInternal(), expectedTids2);
         verifyAllHintsEnabled(session1, false);
         verifyAllHintsEnabled(session2, false);
         reset(mNativeWrapperMock);

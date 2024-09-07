@@ -1748,8 +1748,7 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"Aplikacja zasłania prośbę o uprawnienia, więc nie można zweryfikować Twojej odpowiedzi."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Wybierz funkcję, aby zacząć z niej korzystać:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Wybierz funkcje, których chcesz używać z przyciskiem ułatwień dostępu"</string>
-    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
-    <skip />
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Wybierz funkcje, do których chcesz używać skrótu z klawiszami głośności"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Usługa <xliff:g id="SERVICE_NAME">%s</xliff:g> została wyłączona"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Edytuj skróty"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"OK"</string>

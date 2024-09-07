@@ -35,9 +35,7 @@ import android.util.Log
 import android.util.RotationUtils
 import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
-import com.android.keyguard.AuthInteractionProperties
 import com.android.launcher3.icons.IconProvider
-import com.android.systemui.Flags.msdlFeedback
 import com.android.systemui.biometrics.UdfpsUtils
 import com.android.systemui.biometrics.Utils
 import com.android.systemui.biometrics.Utils.isSystem
@@ -55,8 +53,6 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.shared.model.AcquiredFingerprintAuthenticationStatus
 import com.android.systemui.res.R
 import com.android.systemui.util.kotlin.combine
-import com.google.android.msdl.data.model.MSDLToken
-import com.google.android.msdl.domain.InteractionProperties
 import javax.inject.Inject
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
@@ -249,9 +245,8 @@ constructor(
     private val _forceLargeSize = MutableStateFlow(false)
     private val _forceMediumSize = MutableStateFlow(false)
 
-    private val authInteractionProperties = AuthInteractionProperties()
-    private val _hapticsToPlay: MutableStateFlow<HapticsToPlay> =
-        MutableStateFlow(HapticsToPlay.None)
+    private val _hapticsToPlay =
+        MutableStateFlow(HapticsToPlay(HapticFeedbackConstants.NO_HAPTICS, /* flag= */ null))
 
     /** Event fired to the view indicating a [HapticsToPlay] */
     val hapticsToPlay = _hapticsToPlay.asStateFlow()
@@ -944,52 +939,26 @@ constructor(
     }
 
     private fun vibrateOnSuccess() {
-        val haptics =
-            if (msdlFeedback()) {
-                HapticsToPlay.MSDL(MSDLToken.UNLOCK, authInteractionProperties)
-            } else {
-                HapticsToPlay.HapticConstant(
-                    HapticFeedbackConstants.BIOMETRIC_CONFIRM,
-                    flag = null,
-                )
-            }
-        _hapticsToPlay.value = haptics
+        _hapticsToPlay.value =
+            HapticsToPlay(
+                HapticFeedbackConstants.BIOMETRIC_CONFIRM,
+                null,
+            )
     }
 
     private fun vibrateOnError() {
-        val haptics =
-            if (msdlFeedback()) {
-                HapticsToPlay.MSDL(MSDLToken.FAILURE, authInteractionProperties)
-            } else {
-                HapticsToPlay.HapticConstant(
-                    HapticFeedbackConstants.BIOMETRIC_REJECT,
-                    flag = null,
-                )
-            }
-        _hapticsToPlay.value = haptics
+        _hapticsToPlay.value =
+            HapticsToPlay(
+                HapticFeedbackConstants.BIOMETRIC_REJECT,
+                null,
+            )
     }
 
     /** Clears the [hapticsToPlay] variable by setting its constant to the NO_HAPTICS default. */
     fun clearHaptics() {
-        _hapticsToPlay.update { HapticsToPlay.None }
-    }
-
-    /** The state of haptic feedback to play. */
-    sealed interface HapticsToPlay {
-        /**
-         * Haptics using [HapticFeedbackConstants]. It is composed by a [HapticFeedbackConstants]
-         * and a [HapticFeedbackConstants] flag.
-         */
-        data class HapticConstant(val constant: Int, val flag: Int?) : HapticsToPlay
-
-        /**
-         * Haptics using MSDL feedback. It is composed by a [MSDLToken] and optional
-         * [InteractionProperties]
-         */
-        data class MSDL(val token: MSDLToken, val properties: InteractionProperties?) :
-            HapticsToPlay
-
-        data object None : HapticsToPlay
+        _hapticsToPlay.update { previous ->
+            HapticsToPlay(HapticFeedbackConstants.NO_HAPTICS, previous.flag)
+        }
     }
 
     companion object {
@@ -1126,3 +1095,9 @@ enum class FingerprintStartMode {
     val isStarted: Boolean
         get() = this == Normal || this == Delayed
 }
+
+/**
+ * The state of haptic feedback to play. It is composed by a [HapticFeedbackConstants] and a
+ * [HapticFeedbackConstants] flag.
+ */
+data class HapticsToPlay(val hapticFeedbackConstant: Int, val flag: Int?)

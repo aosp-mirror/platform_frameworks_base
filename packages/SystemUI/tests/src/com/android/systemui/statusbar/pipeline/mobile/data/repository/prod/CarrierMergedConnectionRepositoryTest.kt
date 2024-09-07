@@ -104,7 +104,7 @@ class CarrierMergedConnectionRepositoryTest : SysuiTestCase() {
                 underTest.dataConnectionState.onEach { latestConnState = it }.launchIn(this)
             val netJob = underTest.resolvedNetworkType.onEach { latestNetType = it }.launchIn(this)
 
-            wifiRepository.setWifiNetwork(WifiNetworkModel.Active(level = 1))
+            wifiRepository.setWifiNetwork(WifiNetworkModel.Active(networkId = NET_ID, level = 1))
 
             assertThat(latestConnState).isEqualTo(DataConnectionState.Disconnected)
             assertThat(latestNetType).isNotEqualTo(ResolvedNetworkType.CarrierMergedNetworkType)
@@ -124,6 +124,7 @@ class CarrierMergedConnectionRepositoryTest : SysuiTestCase() {
 
             wifiRepository.setWifiNetwork(
                 WifiNetworkModel.CarrierMerged(
+                    networkId = NET_ID,
                     subscriptionId = SUB_ID,
                     level = 3,
                 )
@@ -144,6 +145,7 @@ class CarrierMergedConnectionRepositoryTest : SysuiTestCase() {
             wifiRepository.setIsWifiDefault(true)
             wifiRepository.setWifiNetwork(
                 WifiNetworkModel.CarrierMerged(
+                    networkId = NET_ID,
                     subscriptionId = SUB_ID,
                     level = 3,
                 )
@@ -181,6 +183,7 @@ class CarrierMergedConnectionRepositoryTest : SysuiTestCase() {
 
             wifiRepository.setWifiNetwork(
                 WifiNetworkModel.CarrierMerged(
+                    networkId = NET_ID,
                     subscriptionId = SUB_ID + 10,
                     level = 3,
                 )
@@ -202,6 +205,7 @@ class CarrierMergedConnectionRepositoryTest : SysuiTestCase() {
 
             wifiRepository.setWifiNetwork(
                 WifiNetworkModel.CarrierMerged(
+                    networkId = NET_ID,
                     subscriptionId = SUB_ID,
                     level = 3,
                 )
@@ -222,6 +226,7 @@ class CarrierMergedConnectionRepositoryTest : SysuiTestCase() {
 
             wifiRepository.setWifiNetwork(
                 WifiNetworkModel.CarrierMerged(
+                    networkId = NET_ID,
                     subscriptionId = SUB_ID,
                     level = 3,
                 )
@@ -241,6 +246,7 @@ class CarrierMergedConnectionRepositoryTest : SysuiTestCase() {
 
             wifiRepository.setWifiNetwork(
                 WifiNetworkModel.CarrierMerged(
+                    networkId = NET_ID,
                     subscriptionId = SUB_ID,
                     level = 1,
                     numberOfLevels = 6,
@@ -304,6 +310,7 @@ class CarrierMergedConnectionRepositoryTest : SysuiTestCase() {
             whenever(telephonyManager.simOperatorName).thenReturn("New SIM name")
             wifiRepository.setWifiNetwork(
                 WifiNetworkModel.CarrierMerged(
+                    networkId = NET_ID,
                     subscriptionId = SUB_ID,
                     level = 3,
                 )
@@ -324,5 +331,6 @@ class CarrierMergedConnectionRepositoryTest : SysuiTestCase() {
 
     private companion object {
         const val SUB_ID = 123
+        const val NET_ID = 456
     }
 }

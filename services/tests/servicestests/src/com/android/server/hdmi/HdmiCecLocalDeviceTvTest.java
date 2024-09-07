@@ -29,7 +29,6 @@ import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_WAKE_UP_ME
 import static com.android.server.hdmi.HdmiControlService.STANDBY_SCREEN_OFF;
 import static com.android.server.hdmi.HdmiControlService.WAKE_UP_SCREEN_ON;
 import static com.android.server.hdmi.RequestActiveSourceAction.TIMEOUT_WAIT_FOR_LAUNCHERX_API_CALL_MS;
-import static com.android.server.hdmi.RoutingControlAction.TIMEOUT_ROUTING_INFORMATION_MS;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -78,7 +77,6 @@ import java.util.concurrent.TimeUnit;
 public class HdmiCecLocalDeviceTvTest {
     private static final int TIMEOUT_MS = HdmiConfig.TIMEOUT_MS + 1;
     private static final int PORT_1 = 1;
-    private static final int PORT_2 = 2;
 
     private static final String[] SADS_NOT_TO_QUERY = new String[]{
             HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_MPEG1,
@@ -217,7 +215,7 @@ public class HdmiCecLocalDeviceTvTest {
                 .setEarcSupported(false)
                 .build();
         hdmiPortInfos[1] =
-                new HdmiPortInfo.Builder(PORT_2, HdmiPortInfo.PORT_INPUT, 0x2000)
+                new HdmiPortInfo.Builder(2, HdmiPortInfo.PORT_INPUT, 0x2000)
                         .setCecSupported(true)
                         .setMhlSupported(false)
                         .setArcSupported(true)
@@ -2023,7 +2021,7 @@ public class HdmiCecLocalDeviceTvTest {
                 ADDR_TV);
         mTestLooper.dispatchAll();
 
-        assertThat(mHdmiCecLocalDeviceTv.getWasActivePathSetToConnectedDevice())
+        assertThat(mHdmiCecLocalDeviceTv.getWasActiveSourceSetToConnectedDevice())
                 .isFalse();
         mPowerManager.setInteractive(true);
         mTestLooper.dispatchAll();
@@ -2033,14 +2031,14 @@ public class HdmiCecLocalDeviceTvTest {
                 "HdmiCecLocalDeviceTvTest");
         mTestLooper.dispatchAll();
 
-        assertThat(mHdmiCecLocalDeviceTv.getWasActivePathSetToConnectedDevice())
+        assertThat(mHdmiCecLocalDeviceTv.getWasActiveSourceSetToConnectedDevice())
                 .isTrue();
         assertThat(mHdmiCecLocalDeviceTv.dispatchMessage(standbyMessage))
                 .isEqualTo(Constants.HANDLED);
         mTestLooper.dispatchAll();
 
         assertThat(mPowerManager.isInteractive()).isFalse();
-        assertThat(mHdmiCecLocalDeviceTv.getWasActivePathSetToConnectedDevice())
+        assertThat(mHdmiCecLocalDeviceTv.getWasActiveSourceSetToConnectedDevice())
                 .isFalse();
     }
 
@@ -2053,7 +2051,7 @@ public class HdmiCecLocalDeviceTvTest {
         mHdmiCecLocalDeviceTv = new MockTvDevice(mHdmiControlService);
         mTestLooper.dispatchAll();
 
-        assertThat(mHdmiCecLocalDeviceTv.getWasActivePathSetToConnectedDevice())
+        assertThat(mHdmiCecLocalDeviceTv.getWasActiveSourceSetToConnectedDevice())
                 .isFalse();
         mPowerManager.setInteractive(true);
 
@@ -2062,7 +2060,7 @@ public class HdmiCecLocalDeviceTvTest {
                 "HdmiCecLocalDeviceTvTest");
         mTestLooper.dispatchAll();
 
-        assertThat(mHdmiCecLocalDeviceTv.getWasActivePathSetToConnectedDevice())
+        assertThat(mHdmiCecLocalDeviceTv.getWasActiveSourceSetToConnectedDevice())
                 .isTrue();
         assertThat(mHdmiCecLocalDeviceTv.dispatchMessage(standbyMessage))
                 .isEqualTo(Constants.HANDLED);
@@ -2078,48 +2076,19 @@ public class HdmiCecLocalDeviceTvTest {
         mHdmiCecLocalDeviceTv = new MockTvDevice(mHdmiControlService);
         mTestLooper.dispatchAll();
 
-        assertThat(mHdmiCecLocalDeviceTv.getWasActivePathSetToConnectedDevice())
+        assertThat(mHdmiCecLocalDeviceTv.getWasActiveSourceSetToConnectedDevice())
                 .isFalse();
         mPowerManager.setInteractive(true);
 
-        assertThat(mHdmiCecLocalDeviceTv.getWasActivePathSetToConnectedDevice())
+        assertThat(mHdmiCecLocalDeviceTv.getWasActiveSourceSetToConnectedDevice())
                 .isFalse();
         assertThat(mHdmiCecLocalDeviceTv.dispatchMessage(standbyMessage))
                 .isEqualTo(Constants.HANDLED);
         mTestLooper.dispatchAll();
 
         assertThat(mPowerManager.isInteractive()).isFalse();
-        assertThat(mHdmiCecLocalDeviceTv.getWasActivePathSetToConnectedDevice())
+        assertThat(mHdmiCecLocalDeviceTv.getWasActiveSourceSetToConnectedDevice())
                 .isFalse();
-    }
-
-    @Test
-    public void handleStandby_fromNonActiveSource_previousActivePathSetToNonCecDevice_Standby() {
-        HdmiCecLocalDeviceTv hdmiCecLocalDeviceTv = new MockTvDevice(mHdmiControlService);
-        hdmiCecLocalDeviceTv.setDeviceInfo(mHdmiCecLocalDeviceTv.getDeviceInfo());
-        mTestLooper.dispatchAll();
-
-        assertThat(hdmiCecLocalDeviceTv.getWasActivePathSetToConnectedDevice())
-                .isFalse();
-        mPowerManager.setInteractive(true);
-        hdmiCecLocalDeviceTv.doManualPortSwitching(PORT_2, null);
-        mTestLooper.dispatchAll();
-
-        // Timeout the action RoutingControlAction such that the active path would be updated.
-        mTestLooper.moveTimeForward(TIMEOUT_ROUTING_INFORMATION_MS);
-        mTestLooper.dispatchAll();
-
-        assertThat(hdmiCecLocalDeviceTv.getWasActivePathSetToConnectedDevice())
-                .isTrue();
-        HdmiCecMessage standbyMessage = HdmiCecMessageBuilder.buildStandby(
-                ADDR_PLAYBACK_1, ADDR_TV);
-        assertThat(hdmiCecLocalDeviceTv.dispatchMessage(standbyMessage))
-                .isEqualTo(Constants.HANDLED);
-        mTestLooper.dispatchAll();
-
-        assertThat(mPowerManager.isInteractive()).isTrue();
-        assertThat(hdmiCecLocalDeviceTv.getWasActivePathSetToConnectedDevice())
-                .isTrue();
     }
 
     @Test
@@ -2220,7 +2189,7 @@ public class HdmiCecLocalDeviceTvTest {
 
         @Override
         protected int handleActiveSource(HdmiCecMessage message) {
-            setWasActivePathSetToConnectedDevice(true);
+            setWasActiveSourceSetToConnectedDevice(true);
             return super.handleActiveSource(message);
         }
     }

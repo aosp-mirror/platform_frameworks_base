@@ -21,6 +21,8 @@
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 #include <GLES3/gl3.h>
+#include <GrDirectContext.h>
+#include <GrTypes.h>
 #include <SkBitmap.h>
 #include <SkCanvas.h>
 #include <SkImage.h>
@@ -28,8 +30,6 @@
 #include <SkImageInfo.h>
 #include <SkRefCnt.h>
 #include <gui/TraceUtils.h>
-#include <include/gpu/ganesh/GrDirectContext.h>
-#include <include/gpu/ganesh/GrTypes.h>
 #include <utils/GLUtils.h>
 #include <utils/NdkUtils.h>
 #include <utils/Trace.h>

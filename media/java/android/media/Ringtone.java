@@ -16,8 +16,6 @@
 
 package android.media;
 
-import static android.media.Utils.parseVibrationEffect;
-
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ContentProvider;
@@ -26,23 +24,17 @@ import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.Resources.NotFoundException;
 import android.database.Cursor;
-import android.media.audio.Flags;
 import android.media.audiofx.HapticGenerator;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.RemoteException;
 import android.os.Trace;
-import android.os.VibrationAttributes;
-import android.os.VibrationEffect;
-import android.os.Vibrator;
 import android.provider.MediaStore;
 import android.provider.MediaStore.MediaColumns;
 import android.provider.Settings;
 import android.util.Log;
-
 import com.android.internal.annotations.VisibleForTesting;
-
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -69,11 +61,6 @@ public class Ringtone {
 
     // keep references on active Ringtones until stopped or completion listener called.
     private static final ArrayList<Ringtone> sActiveRingtones = new ArrayList<Ringtone>();
-
-    private static final VibrationAttributes VIBRATION_ATTRIBUTES =
-            new VibrationAttributes.Builder().setUsage(VibrationAttributes.USAGE_RINGTONE).build();
-
-    private static final int VIBRATION_LOOP_DELAY_MS = 200;
 
     private final Context mContext;
     private final AudioManager mAudioManager;
@@ -108,10 +95,6 @@ public class Ringtone {
     private float mVolume = 1.0f;
     private boolean mHapticGeneratorEnabled = false;
     private final Object mPlaybackSettingsLock = new Object();
-    private final Vibrator mVibrator;
-    private final boolean mRingtoneVibrationSupported;
-    private VibrationEffect mVibrationEffect;
-    private boolean mIsVibrating;
 
     /** {@hide} */
     @UnsupportedAppUsage
@@ -121,8 +104,6 @@ public class Ringtone {
         mAllowRemote = allowRemote;
         mRemotePlayer = allowRemote ? mAudioManager.getRingtonePlayer() : null;
         mRemoteToken = allowRemote ? new Binder() : null;
-        mVibrator = mContext.getSystemService(Vibrator.class);
-        mRingtoneVibrationSupported = Utils.isRingtoneVibrationSettingsSupported(mContext);
     }
 
     /**
@@ -506,23 +487,6 @@ public class Ringtone {
         if (mUri == null) {
             destroyLocalPlayer();
         }
-        if (Flags.enableRingtoneHapticsCustomization()
-                && mRingtoneVibrationSupported && mUri != null) {
-            mVibrationEffect = parseVibrationEffect(mVibrator, Utils.getVibrationUri(mUri));
-            if (mVibrationEffect != null) {
-                mVibrationEffect =
-                        mVibrationEffect.applyRepeatingIndefinitely(true, VIBRATION_LOOP_DELAY_MS);
-            }
-        }
-    }
-
-    /**
-     * Returns the {@link VibrationEffect} has been created for this ringtone.
-     * @hide
-     */
-    @VisibleForTesting
-    public VibrationEffect getVibrationEffect() {
-        return mVibrationEffect;
     }
 
     /** {@hide} */
@@ -566,17 +530,6 @@ public class Ringtone {
                 Log.w(TAG, "Neither local nor remote playback available");
             }
         }
-        if (Flags.enableRingtoneHapticsCustomization() && mRingtoneVibrationSupported) {
-            playVibration();
-        }
-    }
-
-    private void playVibration() {
-        if (mVibrationEffect == null) {
-            return;
-        }
-        mIsVibrating = true;
-        mVibrator.vibrate(mVibrationEffect, VIBRATION_ATTRIBUTES);
     }
 
     /**
@@ -591,11 +544,6 @@ public class Ringtone {
             } catch (RemoteException e) {
                 Log.w(TAG, "Problem stopping ringtone: " + e);
             }
-        }
-        if (Flags.enableRingtoneHapticsCustomization()
-                && mRingtoneVibrationSupported && mIsVibrating) {
-            mVibrator.cancel();
-            mIsVibrating = false;
         }
     }
 

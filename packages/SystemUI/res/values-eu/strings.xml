@@ -104,7 +104,6 @@
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> aplikazioak eta irekitako beste aplikazio batzuek pantaila-argazkia hauteman dute."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Gehitu oharrean"</string>
     <string name="backlinks_include_link" msgid="4562093591148248158">"Sartu esteka"</string>
-    <string name="backlinks_duplicate_label_format" msgid="558445128952827926">"<xliff:g id="APPNAME">%1$s</xliff:g> <xliff:g id="FREQUENCYCOUNT">(%2$d)</xliff:g>"</string>
     <string name="screenrecord_title" msgid="4257171601439507792">"Pantaila-grabagailua"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Pantaila-grabaketa prozesatzen"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Pantailaren grabaketa-saioaren jakinarazpen jarraitua"</string>
@@ -292,8 +291,7 @@
     <string name="start_dreams" msgid="9131802557946276718">"Pantaila-babeslea"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Ez molestatzeko modua"</string>
-    <!-- no translation found for quick_settings_modes_label (879156359479504244) -->
-    <skip />
+    <string name="quick_settings_modes_label" msgid="5407025818652750501">"Lehentasunezko moduak"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetootha"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Ez dago parekatutako gailurik erabilgarri"</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"Sakatu hau gailu bat konektatu edo deskonektatzeko"</string>
@@ -302,7 +300,6 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Erabili Bluetootha"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Konektatuta"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"Audioa partekatzea"</string>
-    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="3227408556754456024">"Audioa aldatu edo partekatzeko, sakatu hau"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Gordeta"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"deskonektatu"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"aktibatu"</string>
@@ -434,8 +431,7 @@
     <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"Ireki Ezarpenak"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Beste gailu bat"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Aldatu ikuspegi orokorra"</string>
-    <!-- no translation found for zen_modes_dialog_title (8854640808100096934) -->
-    <skip />
+    <string name="zen_modes_dialog_title" msgid="4159138230418567383">"Lehentasunezko moduak"</string>
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"Eginda"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"Ezarpenak"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"Aktibatuta"</string>
@@ -536,12 +532,8 @@
     <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"Zerbait grabatzen edo igortzen duzunean, pantailan ikusgai dagoen edo gailuak erreproduzitzen duen informazio guztia erabili ahalko du funtzio hori eskaintzen duen zerbitzuak. Pasahitzak, ordainketen xehetasunak, argazkiak, mezuak eta erreproduzitzen dituzun audioak sartzen dira informazio horretan."</string>
     <string name="screen_share_generic_app_selector_title" msgid="8331515850599218288">"Partekatu edo grabatu aplikazio bat"</string>
     <string name="media_projection_entry_app_permission_dialog_title" msgid="4613857256721708062">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> aplikazioarekin pantaila partekatu nahi duzu?"</string>
-    <string name="screen_share_permission_dialog_option_single_app" msgid="2974054871681567314">"Aplikazio bat partekatu"</string>
-    <!-- no translation found for media_projection_entry_app_permission_dialog_option_text_single_app (2308901434964846084) -->
-    <skip />
-    <string name="screen_share_permission_dialog_option_entire_screen" msgid="4493174362775038997">"Pantaila osoa partekatu"</string>
-    <!-- no translation found for media_projection_entry_app_permission_dialog_option_text_entire_screen (5100078808078139706) -->
-    <skip />
+    <string name="media_projection_entry_app_permission_dialog_option_text_single_app" msgid="6314402084788062644">"Partekatu aplikazio bat"</string>
+    <string name="media_projection_entry_app_permission_dialog_option_text_entire_screen" msgid="7381488112332599632">"Partekatu pantaila osoa"</string>
     <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="5504288438067851086">"Pantaila osoa partekatzen ari zarenean, pantailan duzun guztia ikus dezake <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> aplikazioak. Beraz, kontuz ibili pasahitzekin, ordainketen xehetasunekin, mezuekin, argazkiekin, audioekin eta bideoekin, besteak beste."</string>
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="7094417930857938876">"Aplikazio bat partekatzen ari zarenean, aplikazio horretan agertzen den edo bertan erreproduzitzen ari den guztia ikusi dezake <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> aplikazioak. Beraz, kontuz ibili pasahitzekin, ordainketen xehetasunekin, mezuekin, argazkiekin, audioekin eta bideoekin, besteak beste."</string>
     <string name="media_projection_entry_app_permission_dialog_continue_entire_screen" msgid="1850848182344377579">"Partekatu pantaila"</string>
@@ -726,7 +718,8 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Satelitea, konexio ona"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Satelitea, konexioa erabilgarri"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"Satelite bidezko SOS komunikazioa"</string>
-    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"Larrialdi-deiak edo SOS komunikazioa"</string>
+    <!-- no translation found for satellite_emergency_only_carrier_text (828510231597991206) -->
+    <skip />
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Laneko profila"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Dibertsioa batzuentzat, baina ez guztientzat"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Sistemaren erabiltzaile-interfazearen konfiguratzaileak Android erabiltzaile-interfazea moldatzeko eta pertsonalizatzeko modu gehiago eskaintzen dizkizu. Baliteke eginbide esperimental horiek hurrengo kaleratzeetan aldatuta, etenda edo desagertuta egotea. Kontuz erabili."</string>
@@ -1202,7 +1195,7 @@
     <string name="select_conversation_text" msgid="3376048251434956013">"Sakatu elkarrizketa bat orri nagusian gehitzeko"</string>
     <string name="no_conversations_text" msgid="5354115541282395015">"Azkenaldiko elkarrizketak agertuko dira hemen"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Lehentasunezko elkarrizketak"</string>
-    <string name="recent_conversations" msgid="8531874684782574622">"Azkenaldiko elkarrizketak"</string>
+    <string name="recent_conversations" msgid="8531874684782574622">"Azken elkarrizketak"</string>
     <string name="days_timestamp" msgid="5821854736213214331">"Duela <xliff:g id="DURATION">%1$s</xliff:g> egun"</string>
     <string name="one_week_timestamp" msgid="4925600765473875590">"Duela astebete"</string>
     <string name="two_weeks_timestamp" msgid="9111801081871962155">"Duela bi aste"</string>
@@ -1226,7 +1219,7 @@
     <string name="status_before_loading" msgid="1500477307859631381">"Laster agertuko da edukia"</string>
     <string name="missed_call" msgid="4228016077700161689">"Dei galdua"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
-    <string name="people_tile_description" msgid="8154966188085545556">"Ikusi azkenaldiko mezuak, dei galduak eta egoerei buruzko informazio eguneratua"</string>
+    <string name="people_tile_description" msgid="8154966188085545556">"Ikusi azken mezuak, dei galduak eta egoerei buruzko informazio eguneratua"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Elkarrizketa"</string>
     <string name="paused_by_dnd" msgid="7856941866433556428">"Ez molestatzeko moduak pausatu du"</string>
     <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g> erabiltzaileak mezu bat bidali du: <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>
@@ -1393,18 +1386,6 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Tolesteko ikonoa"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Zabaltzeko ikonoa"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"edo"</string>
-    <!-- no translation found for launch_keyboard_tutorial_notification_title (8849933155160522519) -->
-    <skip />
-    <!-- no translation found for launch_keyboard_tutorial_notification_content (2880339951512757918) -->
-    <skip />
-    <!-- no translation found for launch_touchpad_tutorial_notification_title (2243780062772196901) -->
-    <skip />
-    <!-- no translation found for launch_touchpad_tutorial_notification_content (7931085031240753226) -->
-    <skip />
-    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_title (1940023776496198762) -->
-    <skip />
-    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_content (1780725168171929365) -->
-    <skip />
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Atzera egiteko keinua"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Orri nagusira joateko keinua"</string>
     <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"Ekintza-tekla"</string>

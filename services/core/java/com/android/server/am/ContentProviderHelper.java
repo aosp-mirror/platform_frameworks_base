@@ -554,11 +554,13 @@ public class ContentProviderHelper {
                                     callingProcessState, proc.mState.getCurProcState(),
                                     false, 0L);
                         } else {
-                            final boolean stopped = cpr.appInfo.isStopped();
+                            final boolean stopped =
+                                    (cpr.appInfo.flags & ApplicationInfo.FLAG_STOPPED) != 0;
                             final int packageState = stopped
                                     ? PROVIDER_ACQUISITION_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_STOPPED
                                     : PROVIDER_ACQUISITION_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL;
-                            final boolean firstLaunch = cpr.appInfo.isNotLaunched();
+                            final boolean firstLaunch = !mService.wasPackageEverLaunched(
+                                    cpi.packageName, userId);
                             checkTime(startTime, "getContentProviderImpl: before start process");
                             proc = mService.startProcessLocked(
                                     cpi.processName, cpr.appInfo, false, 0,

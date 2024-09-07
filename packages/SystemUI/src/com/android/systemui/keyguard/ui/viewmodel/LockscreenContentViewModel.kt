@@ -17,6 +17,7 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import android.content.res.Resources
+import com.android.compose.animation.scene.ContentKey
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.biometrics.AuthController
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
@@ -26,6 +27,7 @@ import com.android.systemui.keyguard.shared.model.ClockSize
 import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.SceneContainerOcclusionInteractor
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.unfold.domain.interactor.UnfoldTransitionInteractor
 import dagger.assisted.AssistedFactory
@@ -40,6 +42,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -100,8 +103,17 @@ constructor(
         }
     }
 
-    /** Returns a flow that indicates whether lockscreen notifications should be rendered. */
-    fun areNotificationsVisible(): Flow<Boolean> {
+    /**
+     * Returns a flow that indicates whether lockscreen notifications should be rendered in the
+     * given [contentKey].
+     */
+    fun areNotificationsVisible(contentKey: ContentKey): Flow<Boolean> {
+        // `Scenes.NotificationsShade` renders its own separate notifications stack, so when it's
+        // open we avoid rendering the lockscreen notifications stack.
+        if (contentKey == Scenes.NotificationsShade) {
+            return flowOf(false)
+        }
+
         return combine(
             clockSize,
             shadeInteractor.isShadeLayoutWide,

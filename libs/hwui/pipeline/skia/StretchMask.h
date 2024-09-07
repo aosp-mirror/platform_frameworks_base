@@ -15,10 +15,9 @@
  */
 #pragma once
 
-#include <SkSurface.h>
+#include "GrRecordingContext.h"
 #include <effects/StretchEffect.h>
-#include <include/gpu/ganesh/GrRecordingContext.h>
-
+#include <SkSurface.h>
 #include "SkiaDisplayList.h"
 
 namespace android::uirenderer {

@@ -98,6 +98,9 @@ object Flags {
     @JvmField
     val AUTO_PIN_CONFIRMATION = releasedFlag("auto_pin_confirmation", "auto_pin_confirmation")
 
+    // TODO(b/262859270): Tracking Bug
+    @JvmField val FALSING_OFF_FOR_UNFOLDED = releasedFlag("falsing_off_for_unfolded")
+
     /** Enables code to show contextual loyalty cards in wallet entrypoints */
     // TODO(b/294110497): Tracking Bug
     @JvmField
@@ -200,6 +203,12 @@ object Flags {
     @JvmField
     val INCOMPATIBLE_CHARGING_BATTERY_ICON = releasedFlag("incompatible_charging_battery_icon")
 
+    // TODO(b/293585143): Tracking Bug
+    val INSTANT_TETHER = releasedFlag("instant_tether")
+
+    // TODO(b/294588085): Tracking Bug
+    val WIFI_SECONDARY_NETWORKS = releasedFlag("wifi_secondary_networks")
+
     // TODO(b/290676905): Tracking Bug
     val NEW_SHADE_CARRIER_GROUP_MOBILE_ICONS = releasedFlag("new_shade_carrier_group_mobile_icons")
 
@@ -223,6 +232,9 @@ object Flags {
     // 900 - media
     // TODO(b/254512697): Tracking Bug
     val MEDIA_TAP_TO_TRANSFER = releasedFlag("media_tap_to_transfer")
+
+    // TODO(b/254512502): Tracking Bug
+    val MEDIA_SESSION_ACTIONS = unreleasedFlag("media_session_actions")
 
     // TODO(b/254512654): Tracking Bug
     @JvmField val DREAM_MEDIA_COMPLICATION = unreleasedFlag("dream_media_complication")

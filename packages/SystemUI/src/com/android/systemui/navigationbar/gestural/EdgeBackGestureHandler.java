@@ -29,7 +29,6 @@ import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_T
 import static java.util.stream.Collectors.joining;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -1332,20 +1331,21 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
         }
     }
 
-    public void setBackAnimation(@Nullable BackAnimation backAnimation) {
+    public void setBackAnimation(BackAnimation backAnimation) {
         mBackAnimation = backAnimation;
-        if (backAnimation != null) {
-            backAnimation.setPilferPointerCallback(this::pilferPointers);
-            backAnimation.setTopUiRequestCallback(
-                    (requestTopUi, tag) -> mUiThreadContext.getExecutor().execute(() ->
-                            mNotificationShadeWindowController.setRequestTopUi(requestTopUi, tag)));
-            updateBackAnimationThresholds();
-            if (mLightBarControllerProvider.get() != null) {
-                mBackAnimation.setStatusBarCustomizer((appearance) ->
-                        mUiThreadContext.getExecutor().execute(() ->
-                            mLightBarControllerProvider.get()
-                                    .customizeStatusBarAppearance(appearance)));
-            }
+        mBackAnimation.setPilferPointerCallback(() -> {
+            pilferPointers();
+        });
+        mBackAnimation.setTopUiRequestCallback(
+                (requestTopUi, tag) -> mUiThreadContext.getExecutor().execute(() ->
+                        mNotificationShadeWindowController.setRequestTopUi(requestTopUi, tag)));
+        updateBackAnimationThresholds();
+        if (mLightBarControllerProvider.get() != null) {
+            mBackAnimation.setStatusBarCustomizer((appearance) -> {
+                mUiThreadContext.getExecutor().execute(() ->
+                        mLightBarControllerProvider.get()
+                                .customizeStatusBarAppearance(appearance));
+            });
         }
     }
 

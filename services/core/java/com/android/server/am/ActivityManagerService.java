@@ -299,6 +299,7 @@ import android.content.pm.TestUtilityService;
 import android.content.pm.UserInfo;
 import android.content.pm.UserProperties;
 import android.content.pm.VersionedPackage;
+import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.ContentObserver;
@@ -2970,6 +2971,10 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    CompatibilityInfo compatibilityInfoForPackage(ApplicationInfo ai) {
+        return mAtmInternal.compatibilityInfoForPackage(ai);
+    }
+
     /**
      * Enforces that the uid that calls a method is not an
      * {@link UserHandle#isIsolated(int) isolated} uid.
@@ -4630,6 +4635,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             ProtoLog.v(WM_DEBUG_CONFIGURATION, "Binding proc %s with config %s",
                     processName, app.getWindowProcessController().getConfiguration());
             ApplicationInfo appInfo = instr != null ? instr.mTargetInfo : app.info;
+            app.setCompat(compatibilityInfoForPackage(appInfo));
 
             ProfilerInfo profilerInfo = mAppProfiler.setupProfilerInfoLocked(thread, app, instr);
 
@@ -4668,9 +4674,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             checkTime(startTime, "attachApplicationLocked: immediately before bindApplication");
             bindApplicationTimeMillis = SystemClock.uptimeMillis();
             bindApplicationTimeNanos = SystemClock.uptimeNanos();
-            final ActivityTaskManagerInternal.PreBindInfo preBindInfo =
-                    mAtmInternal.preBindApplication(app.getWindowProcessController(), appInfo);
-            app.setCompat(preBindInfo.compatibilityInfo);
+            mAtmInternal.preBindApplication(app.getWindowProcessController());
             final ActiveInstrumentation instr2 = app.getActiveInstrumentation();
             if (mPlatformCompat != null) {
                 mPlatformCompat.resetReporting(app.info);
@@ -4712,7 +4716,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         enableTrackAllocation,
                         isRestrictedBackupMode || !normalMode,
                         app.isPersistent(),
-                        preBindInfo.configuration,
+                        new Configuration(app.getWindowProcessController().getConfiguration()),
                         app.getCompat(),
                         getCommonServicesLocked(app.isolated),
                         mCoreSettingsObserver.getCoreSettingsLocked(),

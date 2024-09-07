@@ -46,7 +46,6 @@ import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.Settings;
 import android.util.Pair;
 
-import com.android.internal.R;
 import com.android.settingslib.widget.AdaptiveIcon;
 
 import com.google.common.collect.ImmutableList;
@@ -116,34 +115,6 @@ public class BluetoothUtilsTest {
         when(mA2dpProfile.getProfileId()).thenReturn(BluetoothProfile.A2DP);
         when(mLeAudioProfile.getProfileId()).thenReturn(BluetoothProfile.LE_AUDIO);
         when(mHearingAid.getProfileId()).thenReturn(BluetoothProfile.HEARING_AID);
-    }
-
-    @Test
-    public void
-            getDerivedBtClassDrawableWithDescription_isAdvancedUntetheredDevice_returnHeadset() {
-        when(mBluetoothDevice.getMetadata(BluetoothDevice.METADATA_IS_UNTETHERED_HEADSET))
-                .thenReturn(BOOL_METADATA.getBytes());
-        when(mCachedBluetoothDevice.getDevice()).thenReturn(mBluetoothDevice);
-        Pair<Drawable, String> pair =
-                BluetoothUtils.getDerivedBtClassDrawableWithDescription(
-                        mContext, mCachedBluetoothDevice);
-
-        verify(mContext).getDrawable(R.drawable.ic_bt_headphones_a2dp);
-    }
-
-    @Test
-    public void
-            getDerivedBtClassDrawableWithDescription_notAdvancedUntetheredDevice_returnPhone() {
-        when(mBluetoothDevice.getMetadata(BluetoothDevice.METADATA_IS_UNTETHERED_HEADSET))
-                .thenReturn("false".getBytes());
-        when(mCachedBluetoothDevice.getDevice()).thenReturn(mBluetoothDevice);
-        when(mCachedBluetoothDevice.getBtClass().getMajorDeviceClass())
-                .thenReturn(BluetoothClass.Device.Major.PHONE);
-        Pair<Drawable, String> pair =
-                BluetoothUtils.getDerivedBtClassDrawableWithDescription(
-                        mContext, mCachedBluetoothDevice);
-
-        verify(mContext).getDrawable(R.drawable.ic_phone);
     }
 
     @Test
@@ -710,8 +681,8 @@ public class BluetoothUtilsTest {
         when(mAssistant.getAllSources(mBluetoothDevice)).thenReturn(sourceList);
 
         assertThat(
-                        BluetoothUtils.hasActiveLocalBroadcastSourceForBtDevice(
-                                mBluetoothDevice, mLocalBluetoothManager))
+                BluetoothUtils.hasActiveLocalBroadcastSourceForBtDevice(
+                        mBluetoothDevice, mLocalBluetoothManager))
                 .isTrue();
     }
 
@@ -723,10 +694,11 @@ public class BluetoothUtilsTest {
         when(mAssistant.getAllSources(mBluetoothDevice)).thenReturn(sourceList);
 
         assertThat(
-                        BluetoothUtils.hasActiveLocalBroadcastSourceForBtDevice(
-                                mBluetoothDevice, mLocalBluetoothManager))
+                BluetoothUtils.hasActiveLocalBroadcastSourceForBtDevice(
+                        mBluetoothDevice, mLocalBluetoothManager))
                 .isFalse();
     }
+
 
     @Test
     public void isAvailableHearingDevice_isConnectedHearingAid_returnTure() {

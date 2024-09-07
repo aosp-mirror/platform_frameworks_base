@@ -133,8 +133,7 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
                 mVisibilityLocationProvider,
                 mVisualStabilityProvider,
                 mWakefulnessLifecycle,
-                mKosmos.getCommunalSceneInteractor(),
-                mKosmos.getShadeInteractor(),
+                mKosmos.getCommunalInteractor(),
                 mKosmos.getKeyguardTransitionInteractor(),
                 mLogger);
         mCoordinator.attach(mNotifPipeline);
@@ -562,30 +561,15 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
 
     @Test
     public void testCommunalShowingWillNotSuppressReordering() {
-        // GIVEN panel is expanded, communal is showing, and QS is collapsed
+        // GIVEN panel is expanded and communal is showing
         setPulsing(false);
         setFullyDozed(false);
         setSleepy(false);
         setPanelExpanded(true);
-        setQsExpanded(false);
         setCommunalShowing(true);
 
         // Reordering should be allowed
         assertTrue(mNotifStabilityManager.isEntryReorderingAllowed(mEntry));
-    }
-
-    @Test
-    public void testQsExpandedOverCommunalWillSuppressReordering() {
-        // GIVEN panel is expanded and communal is showing, but QS is expanded
-        setPulsing(false);
-        setFullyDozed(false);
-        setSleepy(false);
-        setPanelExpanded(true);
-        setQsExpanded(true);
-        setCommunalShowing(true);
-
-        // Reordering should not be allowed
-        assertFalse(mNotifStabilityManager.isEntryReorderingAllowed(mEntry));
     }
 
     @Test
@@ -647,12 +631,7 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
                         new ObservableTransitionState.Idle(
                                 isShowing ? CommunalScenes.Communal : CommunalScenes.Blank)
                 );
-        mKosmos.getCommunalSceneInteractor().setTransitionState(showingFlow);
-        mTestScope.getTestScheduler().runCurrent();
-    }
-
-    private void setQsExpanded(boolean isExpanded) {
-        mKosmos.getShadeRepository().setQsExpansion(isExpanded ? 1.0f : 0.0f);
+        mKosmos.getCommunalRepository().setTransitionState(showingFlow);
         mTestScope.getTestScheduler().runCurrent();
     }
 

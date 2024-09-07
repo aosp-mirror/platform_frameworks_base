@@ -18,6 +18,7 @@
 
 package com.android.systemui.scene
 
+import android.telecom.TelecomManager
 import android.telephony.TelephonyManager
 import android.testing.TestableLooper.RunWithLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -27,43 +28,54 @@ import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.Swipe
 import com.android.compose.animation.scene.UserActionResult
 import com.android.internal.R
+import com.android.internal.util.EmergencyAffordanceManager
 import com.android.internal.util.emergencyAffordanceManager
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.repository.FakeAuthenticationRepository
 import com.android.systemui.authentication.data.repository.fakeAuthenticationRepository
 import com.android.systemui.authentication.domain.interactor.authenticationInteractor
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
+import com.android.systemui.bouncer.domain.interactor.BouncerActionButtonInteractor
+import com.android.systemui.bouncer.domain.interactor.bouncerActionButtonInteractor
+import com.android.systemui.bouncer.ui.viewmodel.BouncerSceneContentViewModel
 import com.android.systemui.bouncer.ui.viewmodel.PasswordBouncerViewModel
 import com.android.systemui.bouncer.ui.viewmodel.PinBouncerViewModel
 import com.android.systemui.bouncer.ui.viewmodel.bouncerSceneContentViewModel
+import com.android.systemui.classifier.domain.interactor.falsingInteractor
+import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.fakeFeatureFlagsClassic
-import com.android.systemui.keyguard.ui.viewmodel.lockscreenUserActionsViewModel
-import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.keyguard.ui.viewmodel.LockscreenUserActionsViewModel
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.lifecycle.activateIn
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
 import com.android.systemui.power.domain.interactor.powerInteractor
+import com.android.systemui.qs.ui.adapter.fakeQSSceneAdapter
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.domain.resolver.homeSceneFamilyResolver
 import com.android.systemui.scene.domain.startable.sceneContainerStartable
+import com.android.systemui.scene.shared.logger.sceneLogger
 import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
 import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
+import com.android.systemui.shade.domain.interactor.shadeInteractor
+import com.android.systemui.shade.ui.viewmodel.ShadeSceneContentViewModel
+import com.android.systemui.shade.ui.viewmodel.ShadeUserActionsViewModel
 import com.android.systemui.shade.ui.viewmodel.shadeSceneContentViewModel
 import com.android.systemui.shade.ui.viewmodel.shadeUserActionsViewModel
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.fakeMobileConnectionsRepository
 import com.android.systemui.telephony.data.repository.fakeTelephonyRepository
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.whenever
-import com.android.telecom.mockTelecomManager
+import com.android.telecom.telecomManager
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -71,12 +83,14 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.verify
+import org.mockito.MockitoAnnotations
 
 /**
  * Integration test cases for the Scene Framework.
@@ -102,131 +116,195 @@ import org.mockito.Mockito.verify
 @RunWithLooper
 @EnableSceneContainer
 class SceneFrameworkIntegrationTest : SysuiTestCase() {
+
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
+    private val sceneContainerConfig by lazy { kosmos.sceneContainerConfig }
+    private val sceneInteractor by lazy { kosmos.sceneInteractor }
+    private val authenticationInteractor by lazy { kosmos.authenticationInteractor }
+    private val deviceEntryInteractor by lazy { kosmos.deviceEntryInteractor }
+    private val communalInteractor by lazy { kosmos.communalInteractor }
+
+    private val transitionState by lazy {
+        MutableStateFlow<ObservableTransitionState>(
+            ObservableTransitionState.Idle(sceneContainerConfig.initialSceneKey)
+        )
+    }
+    private val sceneContainerViewModel by lazy {
+        SceneContainerViewModel(
+                sceneInteractor = sceneInteractor,
+                falsingInteractor = kosmos.falsingInteractor,
+                powerInteractor = kosmos.powerInteractor,
+                logger = kosmos.sceneLogger,
+                motionEventHandlerReceiver = {},
+            )
+            .apply { setTransitionState(transitionState) }
+    }
+
+    private lateinit var mobileConnectionsRepository: FakeMobileConnectionsRepository
+    private lateinit var bouncerActionButtonInteractor: BouncerActionButtonInteractor
+    private lateinit var bouncerSceneContentViewModel: BouncerSceneContentViewModel
+
+    private val mLockscreenUserActionsViewModel by lazy {
+        LockscreenUserActionsViewModel(
+            deviceEntryInteractor = deviceEntryInteractor,
+            communalInteractor = communalInteractor,
+            shadeInteractor = kosmos.shadeInteractor,
+        )
+    }
+
+    private lateinit var shadeSceneContentViewModel: ShadeSceneContentViewModel
+    private lateinit var mShadeUserActionsViewModel: ShadeUserActionsViewModel
+
+    private val powerInteractor by lazy { kosmos.powerInteractor }
+
     private var bouncerSceneJob: Job? = null
 
+    private val qsFlexiglassAdapter = kosmos.fakeQSSceneAdapter
+
+    private lateinit var emergencyAffordanceManager: EmergencyAffordanceManager
+    private lateinit var telecomManager: TelecomManager
+    private val fakeSceneDataSource = kosmos.fakeSceneDataSource
+
     @Before
-    fun setUp() =
-        kosmos.run {
-            overrideResource(R.bool.config_enable_emergency_call_while_sim_locked, true)
-            whenever(mockTelecomManager.isInCall).thenReturn(false)
-            whenever(emergencyAffordanceManager.needsEmergencyAffordance()).thenReturn(true)
+    fun setUp() {
+        MockitoAnnotations.initMocks(this)
 
-            fakeFeatureFlagsClassic.apply { set(Flags.NEW_NETWORK_SLICE_UI, false) }
+        overrideResource(R.bool.config_enable_emergency_call_while_sim_locked, true)
+        telecomManager = checkNotNull(kosmos.telecomManager)
+        whenever(telecomManager.isInCall).thenReturn(false)
+        emergencyAffordanceManager = kosmos.emergencyAffordanceManager
+        whenever(emergencyAffordanceManager.needsEmergencyAffordance()).thenReturn(true)
 
-            fakeMobileConnectionsRepository.isAnySimSecure.value = false
+        kosmos.fakeFeatureFlagsClassic.apply { set(Flags.NEW_NETWORK_SLICE_UI, false) }
 
-            fakeTelephonyRepository.apply {
-                setHasTelephonyRadio(true)
-                setCallState(TelephonyManager.CALL_STATE_IDLE)
-                setIsInCall(false)
-            }
+        mobileConnectionsRepository = kosmos.fakeMobileConnectionsRepository
+        mobileConnectionsRepository.isAnySimSecure.value = false
 
-            sceneContainerStartable.start()
-
-            lockscreenUserActionsViewModel.activateIn(testScope)
-            shadeSceneContentViewModel.activateIn(testScope)
-            shadeUserActionsViewModel.activateIn(testScope)
-            bouncerSceneContentViewModel.activateIn(testScope)
-            sceneContainerViewModel.activateIn(testScope)
-
-            assertWithMessage("Initial scene key mismatch!")
-                .that(sceneContainerViewModel.currentScene.value)
-                .isEqualTo(sceneContainerConfig.initialSceneKey)
-            assertWithMessage("Initial scene container visibility mismatch!")
-                .that(sceneContainerViewModel.isVisible)
-                .isTrue()
+        kosmos.fakeTelephonyRepository.apply {
+            setHasTelephonyRadio(true)
+            setCallState(TelephonyManager.CALL_STATE_IDLE)
+            setIsInCall(false)
         }
 
+        bouncerActionButtonInteractor = kosmos.bouncerActionButtonInteractor
+        bouncerSceneContentViewModel = kosmos.bouncerSceneContentViewModel
+
+        shadeSceneContentViewModel = kosmos.shadeSceneContentViewModel
+        mShadeUserActionsViewModel = kosmos.shadeUserActionsViewModel
+
+        val startable = kosmos.sceneContainerStartable
+        startable.start()
+
+        mLockscreenUserActionsViewModel.activateIn(testScope)
+        shadeSceneContentViewModel.activateIn(testScope)
+        mShadeUserActionsViewModel.activateIn(testScope)
+        bouncerSceneContentViewModel.activateIn(testScope)
+        sceneContainerViewModel.activateIn(testScope)
+
+        assertWithMessage("Initial scene key mismatch!")
+            .that(sceneContainerViewModel.currentScene.value)
+            .isEqualTo(sceneContainerConfig.initialSceneKey)
+        assertWithMessage("Initial scene container visibility mismatch!")
+            .that(sceneContainerViewModel.isVisible)
+            .isTrue()
+    }
+
     @Test
-    fun startsInLockscreenScene() =
-        testScope.runTest { kosmos.assertCurrentScene(Scenes.Lockscreen) }
+    fun startsInLockscreenScene() = testScope.runTest { assertCurrentScene(Scenes.Lockscreen) }
 
     @Test
     fun clickLockButtonAndEnterCorrectPin_unlocksDevice() =
         testScope.runTest {
-            kosmos.emulateUserDrivenTransition(Scenes.Bouncer)
+            emulateUserDrivenTransition(Scenes.Bouncer)
 
-            kosmos.fakeSceneDataSource.pause()
-            kosmos.enterPin()
-            kosmos.emulatePendingTransitionProgress(expectedVisible = false)
-            kosmos.assertCurrentScene(Scenes.Gone)
+            fakeSceneDataSource.pause()
+            enterPin()
+            emulatePendingTransitionProgress(
+                expectedVisible = false,
+            )
+            assertCurrentScene(Scenes.Gone)
         }
 
     @Test
     fun swipeUpOnLockscreen_enterCorrectPin_unlocksDevice() =
         testScope.runTest {
-            val actions by collectLastValue(kosmos.lockscreenUserActionsViewModel.actions)
+            val actions by collectLastValue(mLockscreenUserActionsViewModel.actions)
             val upDestinationSceneKey =
                 (actions?.get(Swipe.Up) as? UserActionResult.ChangeScene)?.toScene
             assertThat(upDestinationSceneKey).isEqualTo(Scenes.Bouncer)
-            kosmos.emulateUserDrivenTransition(
+            emulateUserDrivenTransition(
                 to = upDestinationSceneKey,
             )
 
-            kosmos.fakeSceneDataSource.pause()
-            kosmos.enterPin()
-            kosmos.emulatePendingTransitionProgress(expectedVisible = false)
-            kosmos.assertCurrentScene(Scenes.Gone)
+            fakeSceneDataSource.pause()
+            enterPin()
+            emulatePendingTransitionProgress(
+                expectedVisible = false,
+            )
+            assertCurrentScene(Scenes.Gone)
         }
 
     @Test
     fun swipeUpOnLockscreen_withAuthMethodSwipe_dismissesLockscreen() =
         testScope.runTest {
-            kosmos.setAuthMethod(AuthenticationMethodModel.None, enableLockscreen = true)
+            setAuthMethod(AuthenticationMethodModel.None, enableLockscreen = true)
 
-            val actions by collectLastValue(kosmos.lockscreenUserActionsViewModel.actions)
+            val actions by collectLastValue(mLockscreenUserActionsViewModel.actions)
             val upDestinationSceneKey =
                 (actions?.get(Swipe.Up) as? UserActionResult.ChangeScene)?.toScene
             assertThat(upDestinationSceneKey).isEqualTo(Scenes.Gone)
-            kosmos.emulateUserDrivenTransition(to = upDestinationSceneKey)
+            emulateUserDrivenTransition(
+                to = upDestinationSceneKey,
+            )
         }
 
     @Test
     fun swipeUpOnShadeScene_withAuthMethodSwipe_lockscreenNotDismissed_goesToLockscreen() =
         testScope.runTest {
-            val actions by collectLastValue(kosmos.shadeUserActionsViewModel.actions)
+            val actions by collectLastValue(mShadeUserActionsViewModel.actions)
             val homeScene by collectLastValue(kosmos.homeSceneFamilyResolver.resolvedScene)
-            kosmos.setAuthMethod(AuthenticationMethodModel.None, enableLockscreen = true)
-            kosmos.assertCurrentScene(Scenes.Lockscreen)
+            setAuthMethod(AuthenticationMethodModel.None, enableLockscreen = true)
+            assertCurrentScene(Scenes.Lockscreen)
 
             // Emulate a user swipe to the shade scene.
-            kosmos.emulateUserDrivenTransition(to = Scenes.Shade)
-            kosmos.assertCurrentScene(Scenes.Shade)
+            emulateUserDrivenTransition(to = Scenes.Shade)
+            assertCurrentScene(Scenes.Shade)
 
             val upDestinationSceneKey =
                 (actions?.get(Swipe.Up) as? UserActionResult.ChangeScene)?.toScene
             assertThat(upDestinationSceneKey).isEqualTo(SceneFamilies.Home)
             assertThat(homeScene).isEqualTo(Scenes.Lockscreen)
-            kosmos.emulateUserDrivenTransition(to = homeScene)
+            emulateUserDrivenTransition(
+                to = homeScene,
+            )
         }
 
     @Test
     fun swipeUpOnShadeScene_withAuthMethodSwipe_lockscreenDismissed_goesToGone() =
         testScope.runTest {
-            val actions by collectLastValue(kosmos.shadeUserActionsViewModel.actions)
-            val canSwipeToEnter by collectLastValue(kosmos.deviceEntryInteractor.canSwipeToEnter)
+            val actions by collectLastValue(mShadeUserActionsViewModel.actions)
+            val canSwipeToEnter by collectLastValue(deviceEntryInteractor.canSwipeToEnter)
             val homeScene by collectLastValue(kosmos.homeSceneFamilyResolver.resolvedScene)
 
-            kosmos.setAuthMethod(AuthenticationMethodModel.None, enableLockscreen = true)
+            setAuthMethod(AuthenticationMethodModel.None, enableLockscreen = true)
 
             assertThat(canSwipeToEnter).isTrue()
-            kosmos.assertCurrentScene(Scenes.Lockscreen)
+            assertCurrentScene(Scenes.Lockscreen)
 
             // Emulate a user swipe to dismiss the lockscreen.
-            kosmos.emulateUserDrivenTransition(to = Scenes.Gone)
-            kosmos.assertCurrentScene(Scenes.Gone)
+            emulateUserDrivenTransition(to = Scenes.Gone)
+            assertCurrentScene(Scenes.Gone)
 
             // Emulate a user swipe to the shade scene.
-            kosmos.emulateUserDrivenTransition(to = Scenes.Shade)
-            kosmos.assertCurrentScene(Scenes.Shade)
+            emulateUserDrivenTransition(to = Scenes.Shade)
+            assertCurrentScene(Scenes.Shade)
 
             val upDestinationSceneKey =
                 (actions?.get(Swipe.Up) as? UserActionResult.ChangeScene)?.toScene
             assertThat(upDestinationSceneKey).isEqualTo(SceneFamilies.Home)
             assertThat(homeScene).isEqualTo(Scenes.Gone)
-            kosmos.emulateUserDrivenTransition(
+            emulateUserDrivenTransition(
                 to = homeScene,
             )
         }
@@ -234,64 +312,64 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
     @Test
     fun withAuthMethodNone_deviceWakeUp_skipsLockscreen() =
         testScope.runTest {
-            kosmos.setAuthMethod(AuthenticationMethodModel.None, enableLockscreen = false)
-            kosmos.putDeviceToSleep(instantlyLockDevice = false)
-            kosmos.assertCurrentScene(Scenes.Lockscreen)
+            setAuthMethod(AuthenticationMethodModel.None, enableLockscreen = false)
+            putDeviceToSleep(instantlyLockDevice = false)
+            assertCurrentScene(Scenes.Lockscreen)
 
-            kosmos.wakeUpDevice()
-            kosmos.assertCurrentScene(Scenes.Gone)
+            wakeUpDevice()
+            assertCurrentScene(Scenes.Gone)
         }
 
     @Test
     fun withAuthMethodSwipe_deviceWakeUp_doesNotSkipLockscreen() =
         testScope.runTest {
-            kosmos.setAuthMethod(AuthenticationMethodModel.None, enableLockscreen = true)
-            kosmos.putDeviceToSleep(instantlyLockDevice = false)
-            kosmos.assertCurrentScene(Scenes.Lockscreen)
+            setAuthMethod(AuthenticationMethodModel.None, enableLockscreen = true)
+            putDeviceToSleep(instantlyLockDevice = false)
+            assertCurrentScene(Scenes.Lockscreen)
 
-            kosmos.wakeUpDevice()
-            kosmos.assertCurrentScene(Scenes.Lockscreen)
+            wakeUpDevice()
+            assertCurrentScene(Scenes.Lockscreen)
         }
 
     @Test
     fun lockDeviceLocksDevice() =
         testScope.runTest {
-            kosmos.unlockDevice()
-            kosmos.assertCurrentScene(Scenes.Gone)
+            unlockDevice()
+            assertCurrentScene(Scenes.Gone)
 
-            kosmos.lockDevice()
-            kosmos.assertCurrentScene(Scenes.Lockscreen)
+            lockDevice()
+            assertCurrentScene(Scenes.Lockscreen)
         }
 
     @Test
     fun deviceGoesToSleep_switchesToLockscreen() =
         testScope.runTest {
-            kosmos.unlockDevice()
-            kosmos.assertCurrentScene(Scenes.Gone)
+            unlockDevice()
+            assertCurrentScene(Scenes.Gone)
 
-            kosmos.putDeviceToSleep()
-            kosmos.assertCurrentScene(Scenes.Lockscreen)
+            putDeviceToSleep()
+            assertCurrentScene(Scenes.Lockscreen)
         }
 
     @Test
     fun deviceGoesToSleep_wakeUp_unlock() =
         testScope.runTest {
-            kosmos.unlockDevice()
-            kosmos.assertCurrentScene(Scenes.Gone)
-            kosmos.putDeviceToSleep()
-            kosmos.assertCurrentScene(Scenes.Lockscreen)
-            kosmos.wakeUpDevice()
-            kosmos.assertCurrentScene(Scenes.Lockscreen)
+            unlockDevice()
+            assertCurrentScene(Scenes.Gone)
+            putDeviceToSleep()
+            assertCurrentScene(Scenes.Lockscreen)
+            wakeUpDevice()
+            assertCurrentScene(Scenes.Lockscreen)
 
-            kosmos.unlockDevice()
-            kosmos.assertCurrentScene(Scenes.Gone)
+            unlockDevice()
+            assertCurrentScene(Scenes.Gone)
         }
 
     @Test
     fun swipeUpOnLockscreenWhileUnlocked_dismissesLockscreen() =
         testScope.runTest {
-            kosmos.unlockDevice()
-            val actions by collectLastValue(kosmos.lockscreenUserActionsViewModel.actions)
+            unlockDevice()
+            val actions by collectLastValue(mLockscreenUserActionsViewModel.actions)
             val upDestinationSceneKey =
                 (actions?.get(Swipe.Up) as? UserActionResult.ChangeScene)?.toScene
             assertThat(upDestinationSceneKey).isEqualTo(Scenes.Gone)
@@ -300,47 +378,46 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
     @Test
     fun deviceGoesToSleep_withLockTimeout_staysOnLockscreen() =
         testScope.runTest {
-            kosmos.unlockDevice()
-            kosmos.assertCurrentScene(Scenes.Gone)
-            kosmos.putDeviceToSleep(instantlyLockDevice = false)
-            kosmos.assertCurrentScene(Scenes.Lockscreen)
+            unlockDevice()
+            assertCurrentScene(Scenes.Gone)
+            putDeviceToSleep(instantlyLockDevice = false)
+            assertCurrentScene(Scenes.Lockscreen)
 
             // Pretend like the timeout elapsed and now lock the device.
-            kosmos.lockDevice()
-            kosmos.assertCurrentScene(Scenes.Lockscreen)
+            lockDevice()
+            assertCurrentScene(Scenes.Lockscreen)
         }
 
     @Test
     fun dismissingIme_whileOnPasswordBouncer_navigatesToLockscreen() =
         testScope.runTest {
-            kosmos.setAuthMethod(AuthenticationMethodModel.Password)
-            val actions by collectLastValue(kosmos.lockscreenUserActionsViewModel.actions)
+            setAuthMethod(AuthenticationMethodModel.Password)
+            val actions by collectLastValue(mLockscreenUserActionsViewModel.actions)
             val upDestinationSceneKey =
                 (actions?.get(Swipe.Up) as? UserActionResult.ChangeScene)?.toScene
             assertThat(upDestinationSceneKey).isEqualTo(Scenes.Bouncer)
-            kosmos.emulateUserDrivenTransition(
+            emulateUserDrivenTransition(
                 to = upDestinationSceneKey,
             )
 
-            kosmos.fakeSceneDataSource.pause()
-            kosmos.dismissIme()
+            fakeSceneDataSource.pause()
+            dismissIme()
 
-            kosmos.emulatePendingTransitionProgress()
-            kosmos.assertCurrentScene(Scenes.Lockscreen)
+            emulatePendingTransitionProgress()
+            assertCurrentScene(Scenes.Lockscreen)
         }
 
     @Test
     fun bouncerActionButtonClick_opensEmergencyServicesDialer() =
         testScope.runTest {
-            kosmos.setAuthMethod(AuthenticationMethodModel.Password)
-            val actions by collectLastValue(kosmos.lockscreenUserActionsViewModel.actions)
+            setAuthMethod(AuthenticationMethodModel.Password)
+            val actions by collectLastValue(mLockscreenUserActionsViewModel.actions)
             val upDestinationSceneKey =
                 (actions?.get(Swipe.Up) as? UserActionResult.ChangeScene)?.toScene
             assertThat(upDestinationSceneKey).isEqualTo(Scenes.Bouncer)
-            kosmos.emulateUserDrivenTransition(to = upDestinationSceneKey)
+            emulateUserDrivenTransition(to = upDestinationSceneKey)
 
-            val bouncerActionButton by
-                collectLastValue(kosmos.bouncerSceneContentViewModel.actionButton)
+            val bouncerActionButton by collectLastValue(bouncerSceneContentViewModel.actionButton)
             assertWithMessage("Bouncer action button not visible")
                 .that(bouncerActionButton)
                 .isNotNull()
@@ -353,55 +430,54 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
     @Test
     fun bouncerActionButtonClick_duringCall_returnsToCall() =
         testScope.runTest {
-            kosmos.setAuthMethod(AuthenticationMethodModel.Password)
-            kosmos.startPhoneCall()
-            val actions by collectLastValue(kosmos.lockscreenUserActionsViewModel.actions)
+            setAuthMethod(AuthenticationMethodModel.Password)
+            startPhoneCall()
+            val actions by collectLastValue(mLockscreenUserActionsViewModel.actions)
             val upDestinationSceneKey =
                 (actions?.get(Swipe.Up) as? UserActionResult.ChangeScene)?.toScene
             assertThat(upDestinationSceneKey).isEqualTo(Scenes.Bouncer)
-            kosmos.emulateUserDrivenTransition(to = upDestinationSceneKey)
+            emulateUserDrivenTransition(to = upDestinationSceneKey)
 
-            val bouncerActionButton by
-                collectLastValue(kosmos.bouncerSceneContentViewModel.actionButton)
+            val bouncerActionButton by collectLastValue(bouncerSceneContentViewModel.actionButton)
             assertWithMessage("Bouncer action button not visible during call")
                 .that(bouncerActionButton)
                 .isNotNull()
             bouncerActionButton?.onClick?.invoke()
             runCurrent()
 
-            verify(kosmos.mockTelecomManager).showInCallScreen(any())
+            verify(telecomManager).showInCallScreen(any())
         }
 
     @Test
     fun showBouncer_whenLockedSimIntroduced() =
         testScope.runTest {
-            kosmos.setAuthMethod(AuthenticationMethodModel.None)
-            kosmos.introduceLockedSim()
-            kosmos.assertCurrentScene(Scenes.Bouncer)
+            setAuthMethod(AuthenticationMethodModel.None)
+            introduceLockedSim()
+            assertCurrentScene(Scenes.Bouncer)
         }
 
     @Test
     fun goesToGone_whenSimUnlocked_whileDeviceUnlocked() =
         testScope.runTest {
-            kosmos.fakeSceneDataSource.pause()
-            kosmos.introduceLockedSim()
-            kosmos.emulatePendingTransitionProgress(expectedVisible = true)
-            kosmos.enterSimPin(
+            fakeSceneDataSource.pause()
+            introduceLockedSim()
+            emulatePendingTransitionProgress(expectedVisible = true)
+            enterSimPin(
                 authMethodAfterSimUnlock = AuthenticationMethodModel.None,
                 enableLockscreen = false
             )
 
-            kosmos.assertCurrentScene(Scenes.Gone)
+            assertCurrentScene(Scenes.Gone)
         }
 
     @Test
     fun showLockscreen_whenSimUnlocked_whileDeviceLocked() =
         testScope.runTest {
-            kosmos.fakeSceneDataSource.pause()
-            kosmos.introduceLockedSim()
-            kosmos.emulatePendingTransitionProgress(expectedVisible = true)
-            kosmos.enterSimPin(authMethodAfterSimUnlock = AuthenticationMethodModel.Pin)
-            kosmos.assertCurrentScene(Scenes.Lockscreen)
+            fakeSceneDataSource.pause()
+            introduceLockedSim()
+            emulatePendingTransitionProgress(expectedVisible = true)
+            enterSimPin(authMethodAfterSimUnlock = AuthenticationMethodModel.Pin)
+            assertCurrentScene(Scenes.Lockscreen)
         }
 
     /**
@@ -409,8 +485,8 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
      *
      * Note that this doesn't assert what the current scene is in the UI.
      */
-    private fun Kosmos.assertCurrentScene(expected: SceneKey) {
-        testScope.runCurrent()
+    private fun TestScope.assertCurrentScene(expected: SceneKey) {
+        runCurrent()
         assertWithMessage("Current scene mismatch!")
             .that(sceneContainerViewModel.currentScene.value)
             .isEqualTo(expected)
@@ -422,7 +498,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
      * This can be different than the value in [SceneContainerViewModel.currentScene], by design, as
      * the UI must gradually transition between scenes.
      */
-    private fun Kosmos.getCurrentSceneInUi(): SceneKey {
+    private fun getCurrentSceneInUi(): SceneKey {
         return when (val state = transitionState.value) {
             is ObservableTransitionState.Idle -> state.currentScene
             is ObservableTransitionState.Transition.ChangeScene -> state.fromScene
@@ -432,7 +508,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
     }
 
     /** Updates the current authentication method and related states in the data layer. */
-    private fun Kosmos.setAuthMethod(
+    private fun TestScope.setAuthMethod(
         authMethod: AuthenticationMethodModel,
         enableLockscreen: Boolean = true
     ) {
@@ -444,20 +520,20 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
         // Set the lockscreen enabled bit _before_ set the auth method as the code picks up on the
         // lockscreen enabled bit _after_ the auth method is changed and the lockscreen enabled bit
         // is not an observable that can trigger a new evaluation.
-        fakeDeviceEntryRepository.setLockscreenEnabled(enableLockscreen)
-        fakeAuthenticationRepository.setAuthenticationMethod(authMethod)
-        testScope.runCurrent()
+        kosmos.fakeDeviceEntryRepository.setLockscreenEnabled(enableLockscreen)
+        kosmos.fakeAuthenticationRepository.setAuthenticationMethod(authMethod)
+        runCurrent()
     }
 
     /** Emulates a phone call in progress. */
-    private fun Kosmos.startPhoneCall() {
-        whenever(mockTelecomManager.isInCall).thenReturn(true)
-        fakeTelephonyRepository.apply {
+    private fun TestScope.startPhoneCall() {
+        whenever(telecomManager.isInCall).thenReturn(true)
+        kosmos.fakeTelephonyRepository.apply {
             setHasTelephonyRadio(true)
             setIsInCall(true)
             setCallState(TelephonyManager.CALL_STATE_OFFHOOK)
         }
-        testScope.runCurrent()
+        runCurrent()
     }
 
     /**
@@ -467,12 +543,14 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
      *
      * In order to use this, the [fakeSceneDataSource] must be paused before this method is called.
      */
-    private fun Kosmos.emulatePendingTransitionProgress(expectedVisible: Boolean = true) {
+    private fun TestScope.emulatePendingTransitionProgress(
+        expectedVisible: Boolean = true,
+    ) {
         assertWithMessage("The FakeSceneDataSource has to be paused for this to do anything.")
-            .that(kosmos.fakeSceneDataSource.isPaused)
+            .that(fakeSceneDataSource.isPaused)
             .isTrue()
 
-        val to = kosmos.fakeSceneDataSource.pendingScene ?: return
+        val to = fakeSceneDataSource.pendingScene ?: return
         val from = getCurrentSceneInUi()
 
         if (to == from) {
@@ -490,19 +568,19 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
                 isInitiatedByUserInput = false,
                 isUserInputOngoing = flowOf(false),
             )
-        testScope.runCurrent()
+        runCurrent()
 
         // Report progress of transition.
         while (progressFlow.value < 1f) {
             progressFlow.value += 0.2f
-            testScope.runCurrent()
+            runCurrent()
         }
 
         // End the transition and report the change.
         transitionState.value = ObservableTransitionState.Idle(to)
 
-        kosmos.fakeSceneDataSource.unpause(force = true)
-        testScope.runCurrent()
+        fakeSceneDataSource.unpause(force = true)
+        runCurrent()
 
         assertWithMessage("Visibility mismatch after scene transition from $from to $to!")
             .that(sceneContainerViewModel.isVisible)
@@ -520,7 +598,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
                 bouncerSceneJob?.cancel()
                 null
             }
-        testScope.runCurrent()
+        runCurrent()
     }
 
     /**
@@ -532,10 +610,12 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
      *
      * @param to The scene to transition to.
      */
-    private fun Kosmos.emulateUserDrivenTransition(to: SceneKey?) {
+    private fun TestScope.emulateUserDrivenTransition(
+        to: SceneKey?,
+    ) {
         checkNotNull(to)
 
-        kosmos.fakeSceneDataSource.pause()
+        fakeSceneDataSource.pause()
         sceneInteractor.changeScene(to, "reason")
 
         emulatePendingTransitionProgress(
@@ -550,17 +630,17 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
      *
      * Not to be confused with [putDeviceToSleep], which may also instantly lock the device.
      */
-    private suspend fun Kosmos.lockDevice() {
+    private suspend fun TestScope.lockDevice() {
         val authMethod = authenticationInteractor.getAuthenticationMethod()
         assertWithMessage("The authentication method of $authMethod is not secure, cannot lock!")
             .that(authMethod.isSecure)
             .isTrue()
-        sceneInteractor.changeScene(Scenes.Lockscreen, "")
-        testScope.runCurrent()
+        kosmos.sceneInteractor.changeScene(Scenes.Lockscreen, "")
+        runCurrent()
     }
 
     /** Unlocks the device by entering the correct PIN. Ends up in the Gone scene. */
-    private fun Kosmos.unlockDevice() {
+    private fun TestScope.unlockDevice() {
         assertWithMessage("Cannot unlock a device that's already unlocked!")
             .that(deviceEntryInteractor.isUnlocked.value)
             .isFalse()
@@ -582,12 +662,12 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
      *
      * Does not assert that the device is locked or unlocked.
      */
-    private fun Kosmos.enterPin() {
+    private fun TestScope.enterPin() {
         assertWithMessage("Cannot enter PIN when not on the Bouncer scene!")
             .that(getCurrentSceneInUi())
             .isEqualTo(Scenes.Bouncer)
         val authMethodViewModel by
-            testScope.collectLastValue(bouncerSceneContentViewModel.authMethodViewModel)
+            collectLastValue(bouncerSceneContentViewModel.authMethodViewModel)
         assertWithMessage("Cannot enter PIN when not using a PIN authentication method!")
             .that(authMethodViewModel)
             .isInstanceOf(PinBouncerViewModel::class.java)
@@ -597,7 +677,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
             pinBouncerViewModel.onPinButtonClicked(digit)
         }
         pinBouncerViewModel.onAuthenticateButtonClicked()
-        testScope.runCurrent()
+        runCurrent()
     }
 
     /**
@@ -608,7 +688,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
      *
      * Does not assert that the device is locked or unlocked.
      */
-    private fun Kosmos.enterSimPin(
+    private fun TestScope.enterSimPin(
         authMethodAfterSimUnlock: AuthenticationMethodModel = AuthenticationMethodModel.None,
         enableLockscreen: Boolean = true,
     ) {
@@ -616,7 +696,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
             .that(getCurrentSceneInUi())
             .isEqualTo(Scenes.Bouncer)
         val authMethodViewModel by
-            testScope.collectLastValue(bouncerSceneContentViewModel.authMethodViewModel)
+            collectLastValue(bouncerSceneContentViewModel.authMethodViewModel)
         assertWithMessage("Cannot enter PIN when not using a PIN authentication method!")
             .that(authMethodViewModel)
             .isInstanceOf(PinBouncerViewModel::class.java)
@@ -626,26 +706,26 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
             pinBouncerViewModel.onPinButtonClicked(digit)
         }
         pinBouncerViewModel.onAuthenticateButtonClicked()
-        fakeMobileConnectionsRepository.isAnySimSecure.value = false
-        testScope.runCurrent()
+        kosmos.fakeMobileConnectionsRepository.isAnySimSecure.value = false
+        runCurrent()
 
         setAuthMethod(authMethodAfterSimUnlock, enableLockscreen)
-        testScope.runCurrent()
+        runCurrent()
     }
 
     /** Changes device wakefulness state from asleep to awake, going through intermediary states. */
-    private fun Kosmos.wakeUpDevice() {
+    private fun TestScope.wakeUpDevice() {
         val wakefulnessModel = powerInteractor.detailedWakefulness.value
         assertWithMessage("Cannot wake up device as it's already awake!")
             .that(wakefulnessModel.isAwake())
             .isFalse()
 
         powerInteractor.setAwakeForTest()
-        testScope.runCurrent()
+        runCurrent()
     }
 
     /** Changes device wakefulness state from awake to asleep, going through intermediary states. */
-    private suspend fun Kosmos.putDeviceToSleep(
+    private suspend fun TestScope.putDeviceToSleep(
         instantlyLockDevice: Boolean = true,
     ) {
         val wakefulnessModel = powerInteractor.detailedWakefulness.value
@@ -654,7 +734,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
             .isTrue()
 
         powerInteractor.setAsleepForTest()
-        testScope.runCurrent()
+        runCurrent()
 
         if (instantlyLockDevice) {
             lockDevice()
@@ -662,16 +742,16 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
     }
 
     /** Emulates the dismissal of the IME (soft keyboard). */
-    private fun Kosmos.dismissIme() {
+    private fun TestScope.dismissIme() {
         (bouncerSceneContentViewModel.authMethodViewModel.value as? PasswordBouncerViewModel)?.let {
             it.onImeDismissed()
-            testScope.runCurrent()
+            runCurrent()
         }
     }
 
-    private fun Kosmos.introduceLockedSim() {
+    private fun TestScope.introduceLockedSim() {
         setAuthMethod(AuthenticationMethodModel.Sim)
-        fakeMobileConnectionsRepository.isAnySimSecure.value = true
-        testScope.runCurrent()
+        kosmos.fakeMobileConnectionsRepository.isAnySimSecure.value = true
+        runCurrent()
     }
 }

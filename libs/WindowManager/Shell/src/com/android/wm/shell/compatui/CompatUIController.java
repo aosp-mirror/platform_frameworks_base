@@ -831,6 +831,7 @@ public class CompatUIController implements OnDisplaysChangedListener,
      */
     static class CompatUIHintsState {
         boolean mHasShownSizeCompatHint;
+        boolean mHasShownCameraCompatHint;
         boolean mHasShownUserAspectRatioSettingsButtonHint;
     }
 

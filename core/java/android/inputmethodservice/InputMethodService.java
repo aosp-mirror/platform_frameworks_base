@@ -664,13 +664,8 @@ public class InputMethodService extends AbstractInputMethodService {
     
     int mStatusIcon;
 
-    /** Latest reported value of back disposition mode. */
     @BackDispositionMode
     int mBackDisposition;
-
-    /** Latest reported value of IME window visibility state. */
-    @ImeWindowVisibility
-    private int mImeWindowVisibility;
 
     private Object mLock = new Object();
     @GuardedBy("mLock")
@@ -1052,7 +1047,7 @@ public class InputMethodService extends AbstractInputMethodService {
                 ImeTracker.forLogging().onFailed(statsToken,
                         ImeTracker.PHASE_IME_ON_SHOW_SOFT_INPUT_TRUE);
             }
-            setImeWindowVisibility(computeImeWindowVis());
+            setImeWindowStatus(mapToImeWindowStatus(), mBackDisposition);
 
             final boolean isVisible = isInputViewShown();
             final boolean visibilityChanged = isVisible != wasVisible;
@@ -1362,22 +1357,9 @@ public class InputMethodService extends AbstractInputMethodService {
         mImeSurfaceRemoverRunnable = null;
     }
 
-    /**
-     * Sets the IME window visibility state.
-     *
-     * @param vis the IME window visibility state to be set.
-     */
-    private void setImeWindowVisibility(@ImeWindowVisibility int vis) {
-        if (vis == mImeWindowVisibility) {
-            return;
-        }
-        mImeWindowVisibility = vis;
-        setImeWindowStatus(mImeWindowVisibility, mBackDisposition);
-    }
-
-    private void setImeWindowStatus(@ImeWindowVisibility int vis,
+    private void setImeWindowStatus(@ImeWindowVisibility int visibilityFlags,
             @BackDispositionMode int backDisposition) {
-        mPrivOps.setImeWindowStatusAsync(vis, backDisposition);
+        mPrivOps.setImeWindowStatusAsync(visibilityFlags, backDisposition);
     }
 
     /** Set region of the keyboard to be avoided from back gesture */
@@ -2004,7 +1986,7 @@ public class InputMethodService extends AbstractInputMethodService {
             }
             // If user uses hard keyboard, IME button should always be shown.
             boolean showing = onEvaluateInputViewShown();
-            setImeWindowVisibility(IME_ACTIVE | (showing ? IME_VISIBLE : 0));
+            setImeWindowStatus(IME_ACTIVE | (showing ? IME_VISIBLE : 0), mBackDisposition);
         }
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }
@@ -2071,7 +2053,7 @@ public class InputMethodService extends AbstractInputMethodService {
             return;
         }
         mBackDisposition = disposition;
-        setImeWindowStatus(mImeWindowVisibility, mBackDisposition);
+        setImeWindowStatus(mapToImeWindowStatus(), mBackDisposition);
     }
 
     /**
@@ -3150,8 +3132,14 @@ public class InputMethodService extends AbstractInputMethodService {
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMS.showWindow");
         mDecorViewWasVisible = mDecorViewVisible;
         mInShowWindow = true;
+        final int previousImeWindowStatus =
+                (mDecorViewVisible ? IME_ACTIVE : 0) | (isInputViewShown()
+                        ? (!mWindowVisible ? -1 : IME_VISIBLE) : 0);
         startViews(prepareWindow(showInput));
-        setImeWindowVisibility(computeImeWindowVis());
+        final int nextImeWindowStatus = mapToImeWindowStatus();
+        if (previousImeWindowStatus != nextImeWindowStatus) {
+            setImeWindowStatus(nextImeWindowStatus, mBackDisposition);
+        }
 
         mNavigationBarController.onWindowShown();
         // compute visibility
@@ -3329,7 +3317,7 @@ public class InputMethodService extends AbstractInputMethodService {
         ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_IME_HIDE_WINDOW);
         ImeTracing.getInstance().triggerServiceDump("InputMethodService#hideWindow", mDumper,
                 null /* icProto */);
-        setImeWindowVisibility(0 /* vis */);
+        setImeWindowStatus(0 /* visibilityFlags */, mBackDisposition);
         if (android.view.inputmethod.Flags.refactorInsetsController()) {
             // The ImeInsetsSourceProvider need the statsToken when dispatching the control. We
             // send the token here, so that another request in the provider can be cancelled.
@@ -4504,10 +4492,10 @@ public class InputMethodService extends AbstractInputMethodService {
         };
     }
 
-    /** Computes the IME window visibility state. */
     @ImeWindowVisibility
-    private int computeImeWindowVis() {
-        return IME_ACTIVE | (isInputViewShown() ? IME_VISIBLE : 0);
+    private int mapToImeWindowStatus() {
+        return IME_ACTIVE
+                | (isInputViewShown() ? IME_VISIBLE : 0);
     }
 
     /**

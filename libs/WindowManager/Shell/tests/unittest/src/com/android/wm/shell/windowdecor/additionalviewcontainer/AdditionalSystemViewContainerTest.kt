@@ -25,7 +25,6 @@ import android.view.WindowManager
 import androidx.test.filters.SmallTest
 import com.android.wm.shell.R
 import com.android.wm.shell.ShellTestCase
-import com.android.wm.shell.windowdecor.WindowManagerWrapper
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -71,7 +70,6 @@ class AdditionalSystemViewContainerTest : ShellTestCase() {
                 WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
         viewContainer = AdditionalSystemViewContainer(
             mockContext,
-            WindowManagerWrapper(mockWindowManager),
             TASK_ID,
             X,
             Y,

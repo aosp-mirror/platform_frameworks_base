@@ -540,17 +540,6 @@ public abstract class VibrationEffect implements Parcelable {
     /** @hide */
     public abstract void validate();
 
-
-    /**
-     * If supported, truncate the length of this vibration effect to the provided length and return
-     * the result. Will always return null for repeating effects.
-     *
-     * @return The desired effect, or {@code null} if truncation is not applicable.
-     * @hide
-     */
-    @Nullable
-    public abstract VibrationEffect cropToLengthOrNull(int length);
-
     /**
      * Gets the estimated duration of the vibration in milliseconds.
      *
@@ -877,30 +866,6 @@ public abstract class VibrationEffect implements Parcelable {
             }
         }
 
-        /** @hide */
-        @Override
-        @Nullable
-        public VibrationEffect cropToLengthOrNull(int length) {
-            // drop repeating effects
-            if (mRepeatIndex >= 0) {
-                return null;
-            }
-
-            int segmentCount = mSegments.size();
-            if (segmentCount <= length) {
-                return this;
-            }
-
-            ArrayList truncated = new ArrayList(mSegments.subList(0, length));
-            Composed updated = new Composed(truncated, mRepeatIndex);
-            try {
-                updated.validate();
-            } catch (IllegalArgumentException e) {
-                return null;
-            }
-            return updated;
-        }
-
         @Override
         public long getDuration() {
             if (mRepeatIndex >= 0) {
@@ -1183,13 +1148,6 @@ public abstract class VibrationEffect implements Parcelable {
         public void validate() {
             Preconditions.checkArgument(!mVendorData.isEmpty(),
                     "Vendor effect bundle must be non-empty");
-        }
-
-        /** @hide */
-        @Override
-        @Nullable
-        public VibrationEffect cropToLengthOrNull(int length) {
-            return null;
         }
 
         @Override

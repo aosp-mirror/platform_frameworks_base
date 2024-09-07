@@ -291,12 +291,4 @@ public class IllustrationPreferenceTest {
 
         assertThat(mPreference.isApplyDynamicColor()).isTrue();
     }
-
-    @Test
-    public void setContentDescription_getContentDescription_isEqual() {
-        final String contentDesc = "content desc";
-        mPreference.setContentDescription(contentDesc);
-
-        assertThat(mPreference.getContentDescription().toString()).isEqualTo(contentDesc);
-    }
 }

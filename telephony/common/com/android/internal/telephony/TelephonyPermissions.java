@@ -35,6 +35,7 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.telephony.flags.Flags;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -933,8 +934,12 @@ public final class TelephonyPermissions {
      * as system user or not.
      */
     public static boolean isSystemOrPhone(int uid) {
-        return UserHandle.isSameApp(uid, Process.SYSTEM_UID) || UserHandle.isSameApp(uid,
-                Process.PHONE_UID);
+        if (Flags.supportPhoneUidCheckForMultiuser()) {
+            return UserHandle.isSameApp(uid, Process.SYSTEM_UID) || UserHandle.isSameApp(uid,
+                    Process.PHONE_UID);
+        } else {
+            return uid == Process.SYSTEM_UID || uid == Process.PHONE_UID;
+        }
     }
 
     /**
@@ -942,7 +947,11 @@ public final class TelephonyPermissions {
      * as system user or not.
      */
     public static boolean isRootOrShell(int uid) {
-        return UserHandle.isSameApp(uid, Process.ROOT_UID) || UserHandle.isSameApp(uid,
-                Process.SHELL_UID);
+        if (Flags.supportPhoneUidCheckForMultiuser()) {
+            return UserHandle.isSameApp(uid, Process.ROOT_UID) || UserHandle.isSameApp(uid,
+                    Process.SHELL_UID);
+        } else {
+            return uid == Process.ROOT_UID || uid == Process.SHELL_UID;
+        }
     }
 }

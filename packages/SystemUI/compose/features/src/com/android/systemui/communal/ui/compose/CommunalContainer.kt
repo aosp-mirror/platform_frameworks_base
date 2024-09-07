@@ -216,7 +216,7 @@ fun CommunalContainer(
 
 /** Scene containing the glanceable hub UI. */
 @Composable
-fun SceneScope.CommunalScene(
+private fun SceneScope.CommunalScene(
     backgroundType: CommunalBackgroundType,
     colors: CommunalColors,
     content: CommunalContent,

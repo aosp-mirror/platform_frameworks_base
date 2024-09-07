@@ -22,16 +22,18 @@ import android.os.UserHandle;
 
 import com.android.internal.annotations.VisibleForTesting;
 
-/** Helper interface for AppFunctionService. */
+/**
+ * Helper interface for AppFunctionService.
+ */
 @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
 public interface ServiceHelper {
     /**
      * Resolves the AppFunctionService for the target package.
      *
      * @param targetPackageName The package name of the target.
-     * @param targetUser The user which the caller is requesting to execute as.
+     * @param targetUser        The user which the caller is requesting to execute as.
      * @return The intent to bind to the target service.
      */
-    Intent resolveAppFunctionService(
-            @NonNull String targetPackageName, @NonNull UserHandle targetUser);
+    Intent resolveAppFunctionService(@NonNull String targetPackageName,
+                                     @NonNull UserHandle targetUser);
 }

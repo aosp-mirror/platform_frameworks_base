@@ -104,14 +104,13 @@
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> et d\'autres applis ouvertes ont détecté cette capture d\'écran."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Ajouter à la note"</string>
     <string name="backlinks_include_link" msgid="4562093591148248158">"Inclure le lien"</string>
-    <string name="backlinks_duplicate_label_format" msgid="558445128952827926">"<xliff:g id="APPNAME">%1$s</xliff:g> <xliff:g id="FREQUENCYCOUNT">(%2$d)</xliff:g>"</string>
     <string name="screenrecord_title" msgid="4257171601439507792">"Enregistreur d\'écran"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Enregistrement de l\'écran…"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notification en cours pour une session d\'enregistrement de l\'écran"</string>
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"Enregistrer l\'écran ?"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Enregistrer une appli"</string>
     <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"Enregistrer tout l\'écran"</string>
-    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Lorsque vous enregistrez l\'intégralité de votre écran, tout ce qui s\'y affiche est enregistré. Faites donc attention aux éléments tels que les mots de passe, les détails du mode de paiement, les messages, les photos, et les contenus audio et vidéo."</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Lorsque vous enregistrez tout votre écran, tout ce qui s\'affiche sur celui-ci est enregistré. Faites donc attention aux éléments tels que les mots de passe, détails de mode de paiement, messages, photos et contenus audio et vidéo."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Lorsque vous enregistrez une appli, tout ce qui est affiché ou lu dans celle-ci est enregistré. Faites donc attention aux éléments tels que les mots de passe, détails de mode de paiement, messages, photos et contenus audio et vidéo."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Enregistrer l\'écran"</string>
     <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"Choisir l\'appli à enregistrer"</string>
@@ -292,8 +291,7 @@
     <string name="start_dreams" msgid="9131802557946276718">"Économiseur d\'écran"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Ne pas déranger"</string>
-    <!-- no translation found for quick_settings_modes_label (879156359479504244) -->
-    <skip />
+    <string name="quick_settings_modes_label" msgid="5407025818652750501">"Modes prioritaires"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Aucun appareil associé disponible."</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"Appuyez pour connecter ou déconnecter un appareil"</string>
@@ -302,7 +300,6 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Utiliser le Bluetooth"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Connecté"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"Partage audio"</string>
-    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="3227408556754456024">"Appuyez pour activer ou partager l\'audio"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Enregistré"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"dissocier"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"activer"</string>
@@ -434,8 +431,7 @@
     <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"Ouvrir les paramètres"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Autre appareil"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Activer/Désactiver l\'écran Récents"</string>
-    <!-- no translation found for zen_modes_dialog_title (8854640808100096934) -->
-    <skip />
+    <string name="zen_modes_dialog_title" msgid="4159138230418567383">"Modes prioritaires"</string>
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"OK"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"Paramètres"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"Activé"</string>
@@ -536,12 +532,8 @@
     <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"Le service qui fournit cette fonction aura accès à toutes les infos visibles sur votre écran ou lues depuis votre appareil pendant un enregistrement ou une diffusion de contenu. Il peut s\'agir de mots de passe, détails de mode de paiement, photos, messages ou encore contenus audio lus."</string>
     <string name="screen_share_generic_app_selector_title" msgid="8331515850599218288">"Partager ou enregistrer une appli"</string>
     <string name="media_projection_entry_app_permission_dialog_title" msgid="4613857256721708062">"Partager votre écran avec <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ?"</string>
-    <string name="screen_share_permission_dialog_option_single_app" msgid="2974054871681567314">"Partager une appli"</string>
-    <!-- no translation found for media_projection_entry_app_permission_dialog_option_text_single_app (2308901434964846084) -->
-    <skip />
-    <string name="screen_share_permission_dialog_option_entire_screen" msgid="4493174362775038997">"Partager tout l\'écran"</string>
-    <!-- no translation found for media_projection_entry_app_permission_dialog_option_text_entire_screen (5100078808078139706) -->
-    <skip />
+    <string name="media_projection_entry_app_permission_dialog_option_text_single_app" msgid="6314402084788062644">"Partager une appli"</string>
+    <string name="media_projection_entry_app_permission_dialog_option_text_entire_screen" msgid="7381488112332599632">"Partager tout l\'écran"</string>
     <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="5504288438067851086">"Lorsque vous partagez tout votre écran, l\'ensemble de son contenu est visible par <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>. Faites donc attention aux éléments tels que les mots de passe, les détails du mode de paiement, les messages, les photos et les contenus audio et vidéo."</string>
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="7094417930857938876">"Lorsque vous partagez une appli, tout ce qui est affiché ou lu dans celle-ci est visible par <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>. Faites donc attention aux éléments tels que les mots de passe, les détails du mode de paiement, les messages, les photos et les contenus audio et vidéo."</string>
     <string name="media_projection_entry_app_permission_dialog_continue_entire_screen" msgid="1850848182344377579">"Partager l\'écran"</string>
@@ -726,7 +718,8 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Bonne connexion satellite"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Connexion satellite disponible"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"SOS par satellite"</string>
-    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"Appels d\'urgence ou SOS"</string>
+    <!-- no translation found for satellite_emergency_only_carrier_text (828510231597991206) -->
+    <skip />
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Profil professionnel"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Divertissant pour certains, mais pas pour tous"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"System UI Tuner vous propose de nouvelles manières d\'adapter et de personnaliser l\'interface utilisateur Android. Ces fonctionnalités expérimentales peuvent être modifiées, cesser de fonctionner ou disparaître dans les versions futures. À utiliser avec prudence."</string>
@@ -1393,18 +1386,6 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Icône Réduire"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Icône Développer"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"ou"</string>
-    <!-- no translation found for launch_keyboard_tutorial_notification_title (8849933155160522519) -->
-    <skip />
-    <!-- no translation found for launch_keyboard_tutorial_notification_content (2880339951512757918) -->
-    <skip />
-    <!-- no translation found for launch_touchpad_tutorial_notification_title (2243780062772196901) -->
-    <skip />
-    <!-- no translation found for launch_touchpad_tutorial_notification_content (7931085031240753226) -->
-    <skip />
-    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_title (1940023776496198762) -->
-    <skip />
-    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_content (1780725168171929365) -->
-    <skip />
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Geste Retour"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Geste Accueil"</string>
     <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"Touche d\'action"</string>

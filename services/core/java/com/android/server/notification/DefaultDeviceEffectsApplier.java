@@ -19,9 +19,6 @@ package com.android.server.notification;
 import static android.app.UiModeManager.MODE_ATTENTION_THEME_OVERLAY_NIGHT;
 import static android.app.UiModeManager.MODE_ATTENTION_THEME_OVERLAY_OFF;
 
-import static com.android.server.notification.ZenLog.traceApplyDeviceEffect;
-import static com.android.server.notification.ZenLog.traceScheduleApplyDeviceEffect;
-
 import android.app.UiModeManager;
 import android.app.WallpaperManager;
 import android.content.BroadcastReceiver;
@@ -80,8 +77,6 @@ class DefaultDeviceEffectsApplier implements DeviceEffectsApplier {
             if (mLastAppliedEffects.shouldSuppressAmbientDisplay()
                     != effects.shouldSuppressAmbientDisplay()) {
                 try {
-                    traceApplyDeviceEffect("suppressAmbientDisplay",
-                            effects.shouldSuppressAmbientDisplay());
                     mPowerManager.suppressAmbientDisplay(SUPPRESS_AMBIENT_DISPLAY_TOKEN,
                             effects.shouldSuppressAmbientDisplay());
                 } catch (Exception e) {
@@ -92,8 +87,6 @@ class DefaultDeviceEffectsApplier implements DeviceEffectsApplier {
             if (mLastAppliedEffects.shouldDisplayGrayscale() != effects.shouldDisplayGrayscale()) {
                 if (mColorDisplayManager != null) {
                     try {
-                        traceApplyDeviceEffect("displayGrayscale",
-                                effects.shouldDisplayGrayscale());
                         mColorDisplayManager.setSaturationLevel(
                                 effects.shouldDisplayGrayscale() ? SATURATION_LEVEL_GRAYSCALE
                                         : SATURATION_LEVEL_FULL_COLOR);
@@ -106,7 +99,6 @@ class DefaultDeviceEffectsApplier implements DeviceEffectsApplier {
             if (mLastAppliedEffects.shouldDimWallpaper() != effects.shouldDimWallpaper()) {
                 if (mWallpaperManager != null) {
                     try {
-                        traceApplyDeviceEffect("dimWallpaper", effects.shouldDimWallpaper());
                         mWallpaperManager.setWallpaperDimAmount(
                                 effects.shouldDimWallpaper() ? WALLPAPER_DIM_AMOUNT_DIMMED
                                         : WALLPAPER_DIM_AMOUNT_NORMAL);
@@ -142,7 +134,6 @@ class DefaultDeviceEffectsApplier implements DeviceEffectsApplier {
             unregisterScreenOffReceiver();
             updateNightModeImmediately(useNightMode);
         } else {
-            traceScheduleApplyDeviceEffect("nightMode", useNightMode);
             registerScreenOffReceiver();
         }
     }
@@ -159,7 +150,6 @@ class DefaultDeviceEffectsApplier implements DeviceEffectsApplier {
     private void updateNightModeImmediately(boolean useNightMode) {
         Binder.withCleanCallingIdentity(() -> {
             try {
-                traceApplyDeviceEffect("nightMode", useNightMode);
                 mUiModeManager.setAttentionModeThemeOverlay(
                         useNightMode ? MODE_ATTENTION_THEME_OVERLAY_NIGHT
                                 : MODE_ATTENTION_THEME_OVERLAY_OFF);

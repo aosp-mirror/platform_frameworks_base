@@ -599,6 +599,13 @@ public final class TvInputManagerService extends SystemService {
             ComponentName component = it.next();
             ServiceState serviceState = userState.serviceStateMap.get(component);
             if (serviceState != null && serviceState.sessionTokens.isEmpty()) {
+                if (serviceState.callback != null) {
+                    try {
+                        serviceState.service.unregisterCallback(serviceState.callback);
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "error in unregisterCallback", e);
+                    }
+                }
                 unbindService(serviceState);
                 it.remove();
             }
@@ -660,6 +667,13 @@ public final class TvInputManagerService extends SystemService {
             // Unregister all callbacks and unbind all services.
             for (ServiceState serviceState : userState.serviceStateMap.values()) {
                 if (serviceState.service != null) {
+                    if (serviceState.callback != null) {
+                        try {
+                            serviceState.service.unregisterCallback(serviceState.callback);
+                        } catch (RemoteException e) {
+                            Slog.e(TAG, "error in unregisterCallback", e);
+                        }
+                    }
                     unbindService(serviceState);
                 }
             }
@@ -3292,20 +3306,7 @@ public final class TvInputManagerService extends SystemService {
         return filteredDisplayName;
     }
 
-    private class TvInputManagerCallbackList extends RemoteCallbackList<ITvInputManagerCallback> {
-        @Override
-        public void onCallbackDied(ITvInputManagerCallback callback) {
-            synchronized (mLock) {
-                for (int i = 0; i < mUserStates.size(); i++) {
-                    int userId = mUserStates.keyAt(i);
-                    UserState userState = getOrCreateUserStateLocked(userId);
-                    userState.callbackPidUidMap.remove(callback);
-                }
-            }
-        }
-    }
-
-    private final class UserState {
+    private static final class UserState {
         // A mapping from the TV input id to its TvInputState.
         private Map<String, TvInputState> inputMap = new HashMap<>();
 
@@ -3326,8 +3327,8 @@ public final class TvInputManagerService extends SystemService {
         private final Map<IBinder, SessionState> sessionStateMap = new HashMap<>();
 
         // A list of callbacks.
-        private final TvInputManagerCallbackList mCallbacks =
-                new TvInputManagerCallbackList();
+        private final RemoteCallbackList<ITvInputManagerCallback> mCallbacks =
+                new RemoteCallbackList<>();
 
         private final Map<ITvInputManagerCallback, Pair<Integer, Integer>> callbackPidUidMap =
                 new HashMap<>();
@@ -3557,18 +3558,11 @@ public final class TvInputManagerService extends SystemService {
 
     @GuardedBy("mLock")
     private void unbindService(ServiceState serviceState) {
-        if (serviceState == null || !serviceState.bound) {
+        if (!serviceState.bound) {
             return;
         }
         if (DEBUG) {
             Slog.d(TAG, "unbindService(service=" + serviceState.component + ")");
-        }
-        if (serviceState.callback != null) {
-            try {
-                serviceState.service.unregisterCallback(serviceState.callback);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "error in unregisterCallback", e);
-            }
         }
         mContext.unbindService(serviceState.connection);
         serviceState.bound = false;
@@ -3787,9 +3781,9 @@ public final class TvInputManagerService extends SystemService {
                     if (serviceState.hardwareInputMap.containsKey(inputInfo.getId())) {
                         return;
                     }
-                    Slog.d(TAG, "ServiceCallback: addHardwareInput, deviceId: " + deviceId +
-                                ", inputInfo: " + inputInfo.toString() + " by " + mComponent +
-                                ", userId: " + mUserId);
+                    Slog.d("ServiceCallback",
+                            "addHardwareInput: device id " + deviceId + ", "
+                                    + inputInfo.toString());
                     mTvInputHardwareManager.addHardwareInput(deviceId, inputInfo);
                     addHardwareInputLocked(inputInfo, mComponent, mUserId);
                 }
@@ -3808,9 +3802,6 @@ public final class TvInputManagerService extends SystemService {
                     if (serviceState.hardwareInputMap.containsKey(inputInfo.getId())) {
                         return;
                     }
-                    Slog.d(TAG, "ServiceCallback: addHdmiInput, id: " + id +
-                                ", inputInfo: "+ inputInfo.toString() + " by " + mComponent +
-                                ", userId: " + mUserId);
                     mTvInputHardwareManager.addHdmiInput(id, inputInfo);
                     addHardwareInputLocked(inputInfo, mComponent, mUserId);
                     if (mOnScreenInputId != null && mOnScreenSessionState != null) {
@@ -3841,8 +3832,8 @@ public final class TvInputManagerService extends SystemService {
             final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
-                    Slog.d(TAG, "ServiceCallback: removeHardwareInput, inputId: " + inputId +
-                                " by " + mComponent + ", userId: " + mUserId);
+                    Slog.d("ServiceCallback",
+                            "removeHardwareInput " + inputId + " by " + mComponent);
                     removeHardwareInputLocked(inputId, mUserId);
                 }
             } finally {

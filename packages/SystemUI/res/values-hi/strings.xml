@@ -104,14 +104,13 @@
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> और खुले हुए अन्य ऐप्लिकेशन को इस स्क्रीनशॉट का पता चला है."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"नोट में जोड़ें"</string>
     <string name="backlinks_include_link" msgid="4562093591148248158">"लिंक जोड़ें"</string>
-    <string name="backlinks_duplicate_label_format" msgid="558445128952827926">"<xliff:g id="APPNAME">%1$s</xliff:g> <xliff:g id="FREQUENCYCOUNT">(%2$d)</xliff:g>"</string>
     <string name="screenrecord_title" msgid="4257171601439507792">"स्क्रीन रिकॉर्डर"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"स्क्रीन रिकॉर्डिंग को प्रोसेस किया जा रहा है"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"स्क्रीन रिकॉर्ड सेशन के लिए जारी सूचना"</string>
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"क्या आपको स्क्रीन रिकॉर्ड करनी है?"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"एक ऐप्लिकेशन की रिकॉर्डिंग करें"</string>
     <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"पूरी स्क्रीन रिकॉर्ड करें"</string>
-    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"पूरी स्क्रीन रिकॉर्ड करते समय, स्क्रीन पर दिखने वाली हर चीज़ रिकॉर्ड की जाती है. इसलिए पासवर्ड, पेमेंट के तरीके की जानकारी, मैसेज,  डिवाइस पर चल रहे ऑडियो और वीडियो, और फ़ोटो जैसी चीज़ों को लेकर सावधानी बरतें."</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"पूरी स्क्रीन रिकॉर्ड करते समय, स्क्रीन पर दिखने वाली हर चीज़ रिकॉर्ड की जाती है. इसलिए, पासवर्ड, पेमेंट के तरीके की जानकारी, मैसेज, फ़ोटो, और डिवाइस पर चल रहे ऑडियो और वीडियो को लेकर सावधानी बरतें."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"किसी ऐप्लिकेशन को रिकॉर्ड करने के दौरान, उस पर दिख रहा कॉन्टेंट या चल रहा मीडिया दूसरी स्क्रीन पर भी रिकॉर्ड होता है. इसलिए, रिकॉर्ड करते समय पासवर्ड, पेमेंट के तरीके की जानकारी, मैसेज, फ़ोटो, ऑडियो, और वीडियो को लेकर सावधानी बरतें."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"स्क्रीन रिकॉर्ड करें"</string>
     <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"रिकॉर्ड करने के लिए ऐप्लिकेशन चुनें"</string>
@@ -292,8 +291,7 @@
     <string name="start_dreams" msgid="9131802557946276718">"स्क्रीन सेवर"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"ईथरनेट"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"परेशान न करें"</string>
-    <!-- no translation found for quick_settings_modes_label (879156359479504244) -->
-    <skip />
+    <string name="quick_settings_modes_label" msgid="5407025818652750501">"अहम मोड"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"ब्लूटूथ"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"कोई भी युग्मित डिवाइस उपलब्ध नहीं"</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"किसी डिवाइस को कनेक्ट या डिसकनेक्ट करने के लिए टैप करें"</string>
@@ -302,7 +300,6 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"ब्लूटूथ इस्तेमाल करें"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"कनेक्ट है"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"ऑडियो शेयर करने की सुविधा"</string>
-    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="3227408556754456024">"ऑडियो को स्विच या शेयर करने के लिए टैप करें"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"सेव किया गया"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"डिसकनेक्ट करें"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"चालू करें"</string>
@@ -434,8 +431,7 @@
     <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"सेटिंग खोलें"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"अन्य डिवाइस"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"खास जानकारी टॉगल करें"</string>
-    <!-- no translation found for zen_modes_dialog_title (8854640808100096934) -->
-    <skip />
+    <string name="zen_modes_dialog_title" msgid="4159138230418567383">"अहम मोड"</string>
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"हो गया"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"सेटिंग"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"चालू है"</string>
@@ -536,12 +532,8 @@
     <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"रिकॉर्ड या कास्ट करते समय, इस सुविधा को उपलब्ध कराने वाली सेवा के पास आपकी स्क्रीन पर दिख रही जानकारी या डिवाइस पर चल रहे हर मीडिया का ऐक्सेस होता है. जैसे, पासवर्ड, पेमेंट के तरीके की जानकारी, फ़ोटो, मैसेज, और डिवाइस पर चल रहा ऑडियो."</string>
     <string name="screen_share_generic_app_selector_title" msgid="8331515850599218288">"ऐप्लिकेशन शेयर करें या उसकी रिकॉर्डिंग करें"</string>
     <string name="media_projection_entry_app_permission_dialog_title" msgid="4613857256721708062">"क्या आपको <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> पर अपनी स्क्रीन शेयर करनी है?"</string>
-    <string name="screen_share_permission_dialog_option_single_app" msgid="2974054871681567314">"एक ऐप्लिकेशन शेयर करें"</string>
-    <!-- no translation found for media_projection_entry_app_permission_dialog_option_text_single_app (2308901434964846084) -->
-    <skip />
-    <string name="screen_share_permission_dialog_option_entire_screen" msgid="4493174362775038997">"पूरी स्क्रीन शेयर करें"</string>
-    <!-- no translation found for media_projection_entry_app_permission_dialog_option_text_entire_screen (5100078808078139706) -->
-    <skip />
+    <string name="media_projection_entry_app_permission_dialog_option_text_single_app" msgid="6314402084788062644">"एक ऐप्लिकेशन शेयर करें"</string>
+    <string name="media_projection_entry_app_permission_dialog_option_text_entire_screen" msgid="7381488112332599632">"पूरी स्क्रीन शेयर करें"</string>
     <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="5504288438067851086">"जब पूरी स्क्रीन शेयर की जाती है, तो आपकी स्क्रीन पर दिख रहा पूरा कॉन्टेंट <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> पर दिखता है. इसलिए, पासवर्ड, पेमेंट के तरीके की जानकारी, मैसेज, फ़ोटो, ऑडियो, और वीडियो को लेकर सावधानी बरतें."</string>
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="7094417930857938876">"जब कोई ऐप्लिकेशन शेयर किया जाता है, तो उस ऐप्लिकेशन में दिख रहा या चलाया जा रहा पूरा कॉन्टेंट <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> पर दिखता है. इसलिए, पासवर्ड, पेमेंट के तरीके की जानकारी, मैसेज, फ़ोटो, ऑडियो, और वीडियो को लेकर सावधानी बरतें."</string>
     <string name="media_projection_entry_app_permission_dialog_continue_entire_screen" msgid="1850848182344377579">"स्क्रीन शेयर करें"</string>
@@ -636,8 +628,8 @@
     <string name="sound_settings" msgid="8874581353127418308">"आवाज़ और वाइब्रेशन"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"सेटिंग"</string>
     <string name="volume_panel_captioning_title" msgid="5984936949147684357">"लाइव कैप्शन"</string>
-    <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"आवाज़ को कम करके, सुरक्षित लेवल पर सेट किया गया"</string>
-    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"हेडफ़ोन की आवाज़ सुझाए गए समय के बाद भी ज़्यादा रही"</string>
+    <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"आवाज़ को कम करके, सुरक्षित लेवल पर सेट कर दिया गया है"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"हेडफ़ोन की आवाज़ सुझाए गए समय से देर तक ज़्यादा रही"</string>
     <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"इस हफ़्ते के लिए हेडफ़ोन की आवाज़, सुझाई गई सीमा से ज़्यादा हो गई है"</string>
     <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"सुनना जारी रखें"</string>
     <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"आवाज़ कम करें"</string>
@@ -726,7 +718,8 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"सैटलाइट कनेक्शन अच्छा है"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"सैटलाइट कनेक्शन उपलब्ध है"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"सैटलाइट एसओएस"</string>
-    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"आपातकालीन कॉल या एसओएस"</string>
+    <!-- no translation found for satellite_emergency_only_carrier_text (828510231597991206) -->
+    <skip />
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"वर्क प्रोफ़ाइल"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"कुछ के लिए मज़ेदार लेकिन सबके लिए नहीं"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"सिस्टम यूज़र इंटरफ़ेस (यूआई) ट्यूनर, आपको Android यूज़र इंटरफ़ेस में सुधार लाने और उसे अपनी पसंद के हिसाब से बदलने के कुछ और तरीके देता है. प्रयोग के तौर पर इस्तेमाल हो रहीं ये सुविधाएं आगे चल कर रिलीज़ की जा सकती हैं, रोकी जा सकती हैं या दिखाई देना बंद हो सकती हैं. सावधानी से आगे बढ़ें."</string>
@@ -1393,18 +1386,6 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"छोटा करने का आइकॉन"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"बड़ा करने का आइकॉन"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"या"</string>
-    <!-- no translation found for launch_keyboard_tutorial_notification_title (8849933155160522519) -->
-    <skip />
-    <!-- no translation found for launch_keyboard_tutorial_notification_content (2880339951512757918) -->
-    <skip />
-    <!-- no translation found for launch_touchpad_tutorial_notification_title (2243780062772196901) -->
-    <skip />
-    <!-- no translation found for launch_touchpad_tutorial_notification_content (7931085031240753226) -->
-    <skip />
-    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_title (1940023776496198762) -->
-    <skip />
-    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_content (1780725168171929365) -->
-    <skip />
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"पीछे जाने का जेस्चर"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"होम स्क्रीन पर जाने का जेस्चर"</string>
     <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"ऐक्शन बटन"</string>

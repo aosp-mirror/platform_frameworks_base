@@ -24,9 +24,7 @@ import java.util.TreeMap;
 public class ProtoLogViewerConfigReader {
     @NonNull
     private final ViewerConfigInputStreamProvider mViewerConfigInputStreamProvider;
-    @NonNull
     private final Map<String, Set<Long>> mGroupHashes = new TreeMap<>();
-    @NonNull
     private final LongSparseArray<String> mLogMessageMap = new LongSparseArray<>();
 
     public ProtoLogViewerConfigReader(
@@ -43,14 +41,14 @@ public class ProtoLogViewerConfigReader {
         return mLogMessageMap.get(messageHash);
     }
 
-    public synchronized void loadViewerConfig(@NonNull String[] groups) {
+    public synchronized void loadViewerConfig(String[] groups) {
         loadViewerConfig(groups, (message) -> {});
     }
 
     /**
      * Loads the viewer config into memory. No-op if already loaded in memory.
      */
-    public synchronized void loadViewerConfig(@NonNull String[] groups, @NonNull ILogger logger) {
+    public synchronized void loadViewerConfig(String[] groups, @NonNull ILogger logger) {
         for (String group : groups) {
             if (mGroupHashes.containsKey(group)) {
                 continue;
@@ -71,14 +69,14 @@ public class ProtoLogViewerConfigReader {
         }
     }
 
-    public synchronized void unloadViewerConfig(@NonNull String[] groups) {
+    public synchronized void unloadViewerConfig(String[] groups) {
         unloadViewerConfig(groups, (message) -> {});
     }
 
     /**
      * Unload the viewer config from memory.
      */
-    public synchronized void unloadViewerConfig(@NonNull String[] groups, @NonNull ILogger logger) {
+    public synchronized void unloadViewerConfig(String[] groups, @NonNull ILogger logger) {
         for (String group : groups) {
             if (!mGroupHashes.containsKey(group)) {
                 continue;
@@ -92,10 +90,8 @@ public class ProtoLogViewerConfigReader {
         }
     }
 
-    @NonNull
-    private Map<Long, String> loadViewerConfigMappingForGroup(@NonNull String group)
-            throws IOException {
-        long targetGroupId = loadGroupId(group);
+    private Map<Long, String> loadViewerConfigMappingForGroup(String group) throws IOException {
+        Long targetGroupId = loadGroupId(group);
 
         final Map<Long, String> hashesForGroup = new TreeMap<>();
         final ProtoInputStream pis = mViewerConfigInputStreamProvider.getInputStream();
@@ -144,7 +140,7 @@ public class ProtoLogViewerConfigReader {
         return hashesForGroup;
     }
 
-    private long loadGroupId(@NonNull String group) throws IOException {
+    private Long loadGroupId(String group) throws IOException {
         final ProtoInputStream pis = mViewerConfigInputStreamProvider.getInputStream();
 
         while (pis.nextField() != ProtoInputStream.NO_MORE_FIELDS) {

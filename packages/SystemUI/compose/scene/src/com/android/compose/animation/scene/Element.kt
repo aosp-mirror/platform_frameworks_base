@@ -154,11 +154,11 @@ internal fun Modifier.element(
  * An element associated to [ElementNode]. Note that this element does not support updates as its
  * arguments should always be the same.
  */
-internal data class ElementModifier(
-    internal val layoutImpl: SceneTransitionLayoutImpl,
+private data class ElementModifier(
+    private val layoutImpl: SceneTransitionLayoutImpl,
     private val currentTransitionStates: List<TransitionState>,
-    internal val content: Content,
-    internal val key: ElementKey,
+    private val content: Content,
+    private val key: ElementKey,
 ) : ModifierNodeElement<ElementNode>() {
     override fun create(): ElementNode =
         ElementNode(layoutImpl, currentTransitionStates, content, key)
@@ -853,32 +853,19 @@ private fun shouldPlaceElement(
         content,
         element.key,
         transition,
-        isInContent = { it in element.stateByContent },
     )
 }
 
-internal inline fun shouldPlaceOrComposeSharedElement(
+internal fun shouldPlaceOrComposeSharedElement(
     layoutImpl: SceneTransitionLayoutImpl,
     content: ContentKey,
     element: ElementKey,
     transition: TransitionState.Transition,
-    isInContent: (ContentKey) -> Boolean,
 ): Boolean {
-    val overscrollContent = transition.currentOverscrollSpec?.content
-    if (overscrollContent != null) {
-        return when (transition) {
-            // If we are overscrolling between scenes, only place/compose the element in the
-            // overscrolling scene.
-            is TransitionState.Transition.ChangeScene -> content == overscrollContent
-
-            // If we are overscrolling an overlay, place/compose the element if [content] is the
-            // overscrolling content or if [content] is the current scene and the overscrolling
-            // overlay does not contain the element.
-            is TransitionState.Transition.ReplaceOverlay,
-            is TransitionState.Transition.ShowOrHideOverlay ->
-                content == overscrollContent ||
-                    (content == transition.currentScene && !isInContent(overscrollContent))
-        }
+    // If we are overscrolling, only place/compose the element in the overscrolling scene.
+    val overscrollScene = transition.currentOverscrollSpec?.content
+    if (overscrollScene != null) {
+        return content == overscrollScene
     }
 
     val scenePicker = element.contentPicker

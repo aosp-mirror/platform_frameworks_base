@@ -1259,8 +1259,6 @@ public final class VirtualDeviceManager {
         /**
          * Called when a window with a secure surface is shown on the device.
          *
-         * <p>Note that this is called only when the window is associated with an activity.</p>
-         *
          * @param displayId The display ID on which the window was shown.
          * @param componentName The component name of the activity that showed the window.
          * @param user The user associated with the activity.

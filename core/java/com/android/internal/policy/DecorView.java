@@ -63,9 +63,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.InsetDrawable;
 import android.graphics.drawable.LayerDrawable;
-import android.os.Handler;
-import android.os.HandlerExecutor;
-import android.os.Looper;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Pair;
@@ -117,7 +114,6 @@ import com.android.internal.widget.floatingtoolbar.FloatingToolbar;
 import com.android.window.flags.Flags;
 
 import java.util.List;
-import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 /** @hide */
@@ -1352,15 +1348,8 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                     mCrossWindowBlurEnabled = enabled;
                     updateBackgroundBlurRadius();
                 };
-                // The executor to receive callback {@link mCrossWindowBlurEnabledListener}. It
-                // should be the executor for this {@link DecorView}'s ui thread (not necessarily
-                // the main thread).
-                final Executor executor = Looper.myLooper() == Looper.getMainLooper()
-                        ? getContext().getMainExecutor()
-                        : new HandlerExecutor(new Handler(Looper.myLooper()));
                 getContext().getSystemService(WindowManager.class)
-                        .addCrossWindowBlurEnabledListener(
-                                executor, mCrossWindowBlurEnabledListener);
+                        .addCrossWindowBlurEnabledListener(mCrossWindowBlurEnabledListener);
                 getViewTreeObserver().addOnPreDrawListener(mBackgroundBlurOnPreDrawListener);
             } else {
                 updateBackgroundBlurRadius();

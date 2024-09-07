@@ -66,7 +66,6 @@ import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.IpcDataCache;
 import android.os.LocaleList;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -237,44 +236,6 @@ public class ActivityManager {
     /** Rate-Limiting Cache that allows no more than 200 calls to the service per second. */
     private static final RateLimitingCache<List<ProcessErrorStateInfo>> mErrorProcessesCache =
             new RateLimitingCache<>(10, 2);
-
-    /**
-     * Query handler for mGetCurrentUserIdCache - returns a cached value of the current foreground
-     * user id if the backstage_power/android.app.cache_get_current_user_id flag is enabled.
-     */
-    private static final IpcDataCache.QueryHandler<Void, Integer> mGetCurrentUserIdQuery =
-            new IpcDataCache.QueryHandler<>() {
-                @Override
-                public Integer apply(Void query) {
-                    try {
-                        return getService().getCurrentUserId();
-                    } catch (RemoteException e) {
-                        throw e.rethrowFromSystemServer();
-                    }
-                }
-
-                @Override
-                public boolean shouldBypassCache(Void query) {
-                    // If the flag to enable the new caching behavior is off, bypass the cache.
-                    return !Flags.cacheGetCurrentUserId();
-                }
-            };
-
-    /** A cache which maintains the current foreground user id. */
-    private static final IpcDataCache<Void, Integer> mGetCurrentUserIdCache =
-            new IpcDataCache<>(1, IpcDataCache.MODULE_SYSTEM,
-                    /* api= */ "getCurrentUserId", /* cacheName= */ "CurrentUserIdCache",
-                    mGetCurrentUserIdQuery);
-
-    /**
-     * The current foreground user has changed - invalidate the cache. Currently only called from
-     * UserController when a user switch occurs.
-     * @hide
-     */
-    public static void invalidateGetCurrentUserIdCache() {
-        IpcDataCache.invalidateCache(
-                IpcDataCache.MODULE_SYSTEM, /* api= */ "getCurrentUserId");
-    }
 
     /**
      * Map of callbacks that have registered for {@link UidFrozenStateChanged} events.
@@ -5283,7 +5244,11 @@ public class ActivityManager {
     })
     @android.ravenwood.annotation.RavenwoodReplace
     public static int getCurrentUser() {
-        return mGetCurrentUserIdCache.query(null);
+        try {
+            return getService().getCurrentUserId();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /** @hide */

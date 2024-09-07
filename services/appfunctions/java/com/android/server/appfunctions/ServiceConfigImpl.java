@@ -18,17 +18,21 @@ package com.android.server.appfunctions;
 
 import android.provider.DeviceConfig;
 
-/** Implementation of {@link ServiceConfig} */
+/**
+ * Implementation of {@link ServiceConfig}
+ */
 public class ServiceConfigImpl implements ServiceConfig {
     static final String DEVICE_CONFIG_PROPERTY_EXECUTION_TIMEOUT =
             "execute_app_function_timeout_millis";
     static final long DEFAULT_EXECUTE_APP_FUNCTION_TIMEOUT_MS = 5000L;
+
 
     @Override
     public long getExecuteAppFunctionTimeoutMillis() {
         return DeviceConfig.getLong(
                 NAMESPACE_APP_FUNCTIONS,
                 DEVICE_CONFIG_PROPERTY_EXECUTION_TIMEOUT,
-                DEFAULT_EXECUTE_APP_FUNCTION_TIMEOUT_MS);
+                DEFAULT_EXECUTE_APP_FUNCTION_TIMEOUT_MS
+        );
     }
 }

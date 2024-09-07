@@ -16,6 +16,8 @@
 
 package android.graphics;
 
+import static com.android.text.flags.Flags.FLAG_VENDOR_CUSTOM_LOCALE_FALLBACK;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -30,6 +32,7 @@ import android.graphics.fonts.FontFamily;
 import android.graphics.fonts.SystemFonts;
 import android.graphics.text.PositionedGlyphs;
 import android.graphics.text.TextRunShaper;
+import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.text.FontConfig;
@@ -928,6 +931,7 @@ public class TypefaceSystemFallbackTest {
         return String.format(xml, op, lang, font);
     }
 
+    @RequiresFlagsEnabled(FLAG_VENDOR_CUSTOM_LOCALE_FALLBACK)
     @Test
     public void testBuildSystemFallback__Customization_locale_prepend() {
         final ArrayMap<String, Typeface> fontMap = new ArrayMap<>();
@@ -943,6 +947,7 @@ public class TypefaceSystemFallbackTest {
         assertB3emFontIsUsed(typeface);
     }
 
+    @RequiresFlagsEnabled(FLAG_VENDOR_CUSTOM_LOCALE_FALLBACK)
     @Test
     public void testBuildSystemFallback__Customization_locale_replace() {
         final ArrayMap<String, Typeface> fontMap = new ArrayMap<>();
@@ -958,6 +963,7 @@ public class TypefaceSystemFallbackTest {
         assertB3emFontIsUsed(typeface);
     }
 
+    @RequiresFlagsEnabled(FLAG_VENDOR_CUSTOM_LOCALE_FALLBACK)
     @Test
     public void testBuildSystemFallback__Customization_locale_append() {
         final ArrayMap<String, Typeface> fontMap = new ArrayMap<>();
@@ -973,6 +979,7 @@ public class TypefaceSystemFallbackTest {
         assertA3emFontIsUsed(typeface);
     }
 
+    @RequiresFlagsEnabled(FLAG_VENDOR_CUSTOM_LOCALE_FALLBACK)
     @Test
     public void testBuildSystemFallback__Customization_locale_ScriptMismatch() {
         final ArrayMap<String, Typeface> fontMap = new ArrayMap<>();
@@ -988,6 +995,7 @@ public class TypefaceSystemFallbackTest {
         assertA3emFontIsUsed(typeface);
     }
 
+    @RequiresFlagsEnabled(FLAG_VENDOR_CUSTOM_LOCALE_FALLBACK)
     @Test
     public void testBuildSystemFallback__Customization_locale_SubscriptMatch() {
         final ArrayMap<String, Typeface> fontMap = new ArrayMap<>();

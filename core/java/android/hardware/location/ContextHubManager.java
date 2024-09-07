@@ -256,10 +256,6 @@ public final class ContextHubManager {
     @Deprecated
     @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     public int[] getContextHubHandles() {
-        if (Flags.removeOldContextHubApis()) {
-            return null;
-        }
-
         try {
             return mService.getContextHubHandles();
         } catch (RemoteException e) {
@@ -281,10 +277,6 @@ public final class ContextHubManager {
     @Deprecated
     @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     public ContextHubInfo getContextHubInfo(int hubHandle) {
-        if (Flags.removeOldContextHubApis()) {
-            return null;
-        }
-
         try {
             return mService.getContextHubInfo(hubHandle);
         } catch (RemoteException e) {
@@ -316,10 +308,6 @@ public final class ContextHubManager {
     @Deprecated
     @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     public int loadNanoApp(int hubHandle, @NonNull NanoApp app) {
-        if (Flags.removeOldContextHubApis()) {
-            return -1;
-        }
-
         try {
             return mService.loadNanoApp(hubHandle, app);
         } catch (RemoteException e) {
@@ -347,10 +335,6 @@ public final class ContextHubManager {
     @Deprecated
     @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     public int unloadNanoApp(int nanoAppHandle) {
-        if (Flags.removeOldContextHubApis()) {
-            return -1;
-        }
-
         try {
             return mService.unloadNanoApp(nanoAppHandle);
         } catch (RemoteException e) {
@@ -391,10 +375,6 @@ public final class ContextHubManager {
     @Deprecated
     @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     @Nullable public NanoAppInstanceInfo getNanoAppInstanceInfo(int nanoAppHandle) {
-        if (Flags.removeOldContextHubApis()) {
-            return null;
-        }
-
         try {
             return mService.getNanoAppInstanceInfo(nanoAppHandle);
         } catch (RemoteException e) {
@@ -418,10 +398,6 @@ public final class ContextHubManager {
     @Deprecated
     @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     @NonNull public int[] findNanoAppOnHub(int hubHandle, @NonNull NanoAppFilter filter) {
-        if (Flags.removeOldContextHubApis()) {
-            return null;
-        }
-
         try {
             return mService.findNanoAppOnHub(hubHandle, filter);
         } catch (RemoteException e) {
@@ -457,10 +433,6 @@ public final class ContextHubManager {
     @Deprecated
     @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     public int sendMessage(int hubHandle, int nanoAppHandle, @NonNull ContextHubMessage message) {
-        if (Flags.removeOldContextHubApis()) {
-            return -1;
-        }
-
         try {
             return mService.sendMessage(hubHandle, nanoAppHandle, message);
         } catch (RemoteException e) {
@@ -676,10 +648,6 @@ public final class ContextHubManager {
     @Deprecated
     @SuppressLint("RequiresPermission")
     public int registerCallback(@NonNull Callback callback) {
-        if (Flags.removeOldContextHubApis()) {
-            return -1;
-        }
-
         return registerCallback(callback, null);
     }
 
@@ -689,10 +657,6 @@ public final class ContextHubManager {
      */
     @Deprecated
     public int registerCallback(ICallback callback) {
-        if (Flags.removeOldContextHubApis()) {
-            return -1;
-        }
-
         if (mLocalCallback != null) {
             Log.w(TAG, "Max number of local callbacks reached!");
             return -1;
@@ -718,10 +682,6 @@ public final class ContextHubManager {
     @Deprecated
     @SuppressLint("RequiresPermission")
     public int registerCallback(Callback callback, Handler handler) {
-        if (Flags.removeOldContextHubApis()) {
-            return -1;
-        }
-
         synchronized(this) {
             if (mCallback != null) {
                 Log.w(TAG, "Max number of callbacks reached!");
@@ -1081,20 +1041,16 @@ public final class ContextHubManager {
     @SuppressLint("RequiresPermission")
     @Deprecated
     public int unregisterCallback(@NonNull Callback callback) {
-        if (Flags.removeOldContextHubApis()) {
-            return -1;
-        }
+      synchronized(this) {
+          if (callback != mCallback) {
+              Log.w(TAG, "Cannot recognize callback!");
+              return -1;
+          }
 
-        synchronized (this) {
-            if (callback != mCallback) {
-                Log.w(TAG, "Cannot recognize callback!");
-                return -1;
-            }
-
-            mCallback = null;
-            mCallbackHandler = null;
-        }
-        return 0;
+          mCallback = null;
+          mCallbackHandler = null;
+      }
+      return 0;
     }
 
     /**
@@ -1103,10 +1059,6 @@ public final class ContextHubManager {
      */
     @Deprecated
     public synchronized int unregisterCallback(ICallback callback) {
-        if (Flags.removeOldContextHubApis()) {
-            return -1;
-        }
-
         if (callback != mLocalCallback) {
             Log.w(TAG, "Cannot recognize local callback!");
             return -1;

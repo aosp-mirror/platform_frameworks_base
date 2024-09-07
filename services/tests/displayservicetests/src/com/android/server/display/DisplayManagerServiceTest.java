@@ -64,7 +64,6 @@ import static org.mockito.Mockito.when;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.ActivityManagerInternal;
 import android.app.ActivityOptions.LaunchCookie;
 import android.app.PropertyInvalidatedCache;
 import android.companion.virtual.IVirtualDevice;
@@ -359,7 +358,6 @@ public class DisplayManagerServiceTest {
     @Mock DisplayDeviceConfig mMockDisplayDeviceConfig;
     @Mock PackageManagerInternal mMockPackageManagerInternal;
     @Mock DisplayManagerInternal mMockDisplayManagerInternal;
-    @Mock ActivityManagerInternal mMockActivityManagerInternal;
     @Mock DisplayAdapter mMockDisplayAdapter;
 
     @Captor ArgumentCaptor<ContentRecordingSession> mContentRecordingSessionCaptor;
@@ -390,8 +388,6 @@ public class DisplayManagerServiceTest {
                 PackageManagerInternal.class, mMockPackageManagerInternal);
         mLocalServiceKeeperRule.overrideLocalService(
                 DisplayManagerInternal.class, mMockDisplayManagerInternal);
-        mLocalServiceKeeperRule.overrideLocalService(
-                ActivityManagerInternal.class, mMockActivityManagerInternal);
         Display display = mock(Display.class);
         when(display.getDisplayAdjustments()).thenReturn(new DisplayAdjustments());
         when(display.getBrightnessInfo()).thenReturn(mock(BrightnessInfo.class));

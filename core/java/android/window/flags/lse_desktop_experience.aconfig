@@ -2,6 +2,14 @@ package: "com.android.window.flags"
 container: "system"
 
 flag {
+    name: "enable_scaled_resizing"
+    namespace: "lse_desktop_experience"
+    description: "Enable the resizing of un-resizable apps through scaling their bounds up/down"
+    bug: "320350734"
+    is_fixed_read_only: true
+}
+
+flag {
     name: "enable_desktop_windowing_mode"
     namespace: "lse_desktop_experience"
     description: "Enables desktop windowing"
@@ -20,13 +28,6 @@ flag {
     namespace: "lse_desktop_experience"
     description: "Enables new initial bounds for desktop windowing which adjust depending on app constraints"
     bug: "324377962"
-}
-
-flag {
-    name: "enable_windowing_scaled_resizing"
-    namespace: "lse_desktop_experience"
-    description: "Enables the resizing of non-resizable apps through scaling their bounds up/down"
-    bug: "319844447"
 }
 
 flag {

@@ -16,11 +16,15 @@
 
 package com.android.server.appfunctions;
 
-/** This interface is used to expose configs to the AppFunctionManagerService. */
+/**
+ * This interface is used to expose configs to the AppFunctionManagerService.
+ */
 public interface ServiceConfig {
     // TODO(b/357551503): Obtain namespace from DeviceConfig.
     String NAMESPACE_APP_FUNCTIONS = "appfunctions";
 
-    /** Returns the maximum time to wait for an app function execution to be complete. */
+    /**
+     * Returns the maximum time to wait for an app function execution to be complete.
+     */
     long getExecuteAppFunctionTimeoutMillis();
 }

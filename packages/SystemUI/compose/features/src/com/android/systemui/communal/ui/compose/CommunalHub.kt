@@ -65,7 +65,6 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
-import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
@@ -197,12 +196,7 @@ fun CommunalHub(
 
     val gridState =
         rememberLazyGridState(viewModel.savedFirstScrollIndex, viewModel.savedFirstScrollOffset)
-
-    LaunchedEffect(Unit) {
-        if (!viewModel.isEditMode) {
-            viewModel.clearPersistedScrollPosition()
-        }
-    }
+    viewModel.clearPersistedScrollPosition()
 
     val contentListState = rememberContentListState(widgetConfigurator, communalContent, viewModel)
     val reorderingWidgets by viewModel.reorderingWidgets.collectAsStateWithLifecycle()
@@ -225,6 +219,7 @@ fun CommunalHub(
     val windowMetrics = WindowMetricsCalculator.getOrCreate().computeCurrentWindowMetrics(context)
     val screenWidth = windowMetrics.bounds.width()
     val layoutDirection = LocalLayoutDirection.current
+
     if (viewModel.isEditMode) {
         ObserveNewWidgetAddedEffect(communalContent, gridState, viewModel)
     } else {
@@ -548,6 +543,7 @@ private fun ScrollOnUpdatedLiveContentEffect(
     communalContent: List<CommunalContentModel>,
     gridState: LazyGridState,
 ) {
+    val coroutineScope = rememberCoroutineScope()
     val liveContentKeys = remember { mutableListOf<String>() }
     var communalContentPending by remember { mutableStateOf(true) }
 
@@ -691,20 +687,21 @@ private fun BoxScope.CommunalHubLazyGrid(
         horizontalArrangement = Arrangement.spacedBy(Dimensions.ItemSpacing),
         verticalArrangement = Arrangement.spacedBy(Dimensions.ItemSpacing),
     ) {
-        itemsIndexed(
-            items = list,
-            key = { _, item -> item.key },
-            contentType = { _, item -> item.key },
-            span = { _, item -> GridItemSpan(item.size.span) },
-        ) { index, item ->
+        items(
+            count = list.size,
+            key = { index -> list[index].key },
+            contentType = { index -> list[index].key },
+            span = { index -> GridItemSpan(list[index].size.span) },
+        ) { index ->
             val size =
                 SizeF(
                     Dimensions.CardWidth.value,
-                    item.size.dp().value,
+                    list[index].size.dp().value,
                 )
             val cardModifier = Modifier.requiredSize(width = size.width.dp, height = size.height.dp)
             if (viewModel.isEditMode && dragDropState != null) {
-                val selected = item.key == selectedKey.value
+                val selected by
+                    remember(index) { derivedStateOf { list[index].key == selectedKey.value } }
                 DraggableItem(
                     modifier =
                         if (dragDropState.draggingItemIndex == index) {
@@ -716,12 +713,12 @@ private fun BoxScope.CommunalHubLazyGrid(
                         },
                     dragDropState = dragDropState,
                     selected = selected,
-                    enabled = item.isWidgetContent(),
+                    enabled = list[index].isWidgetContent(),
                     index = index,
                 ) { isDragging ->
                     CommunalContent(
                         modifier = cardModifier,
-                        model = item,
+                        model = list[index],
                         viewModel = viewModel,
                         size = size,
                         selected = selected && !isDragging,
@@ -734,7 +731,7 @@ private fun BoxScope.CommunalHubLazyGrid(
                 }
             } else {
                 CommunalContent(
-                    model = item,
+                    model = list[index],
                     viewModel = viewModel,
                     size = size,
                     selected = false,

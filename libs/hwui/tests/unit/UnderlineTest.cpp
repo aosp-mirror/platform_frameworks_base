@@ -109,7 +109,9 @@ DrawTextFunctor processFunctor(const std::vector<uint16_t>& text, Paint* paint) 
     return f;
 }
 
-TEST(UnderlineTest, Roboto) {
+TEST_WITH_FLAGS(UnderlineTest, Roboto,
+                REQUIRES_FLAGS_ENABLED(ACONFIG_FLAG(com::android::text::flags,
+                                                    fix_double_underline))) {
     float textSize = 100;
     Paint paint;
     paint.getSkFont().setSize(textSize);
@@ -121,7 +123,9 @@ TEST(UnderlineTest, Roboto) {
     EXPECT_EQ(ROBOTO_THICKNESS_EM * textSize, functor.getUnderlineThickness());
 }
 
-TEST(UnderlineTest, NotoCJK) {
+TEST_WITH_FLAGS(UnderlineTest, NotoCJK,
+                REQUIRES_FLAGS_ENABLED(ACONFIG_FLAG(com::android::text::flags,
+                                                    fix_double_underline))) {
     float textSize = 100;
     Paint paint;
     paint.getSkFont().setSize(textSize);
@@ -133,7 +137,9 @@ TEST(UnderlineTest, NotoCJK) {
     EXPECT_EQ(NOTO_CJK_THICKNESS_EM * textSize, functor.getUnderlineThickness());
 }
 
-TEST(UnderlineTest, Mixture) {
+TEST_WITH_FLAGS(UnderlineTest, Mixture,
+                REQUIRES_FLAGS_ENABLED(ACONFIG_FLAG(com::android::text::flags,
+                                                    fix_double_underline))) {
     float textSize = 100;
     Paint paint;
     paint.getSkFont().setSize(textSize);

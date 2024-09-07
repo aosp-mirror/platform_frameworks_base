@@ -5808,10 +5808,9 @@ public class JobSchedulerService extends com.android.server.SystemService
 
     static void dumpHelp(PrintWriter pw) {
         pw.println("Job Scheduler (jobscheduler) dump options:");
-        pw.println("  [-h] [package] [--proto] ...");
+        pw.println("  [-h] [package] ...");
         pw.println("    -h: print this help");
         pw.println("  [package] is an optional package name to limit the output to.");
-        pw.println("    --proto: output dump in protocol buffer format.");
     }
 
     /** Sort jobs by caller UID, then by Job ID. */

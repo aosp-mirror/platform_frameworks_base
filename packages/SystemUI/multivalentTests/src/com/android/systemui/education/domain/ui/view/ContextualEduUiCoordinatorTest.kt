@@ -25,7 +25,6 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.contextualeducation.GestureType
 import com.android.systemui.contextualeducation.GestureType.BACK
-import com.android.systemui.education.data.repository.fakeEduClock
 import com.android.systemui.education.domain.interactor.KeyboardTouchpadEduInteractor
 import com.android.systemui.education.domain.interactor.contextualEducationInteractor
 import com.android.systemui.education.domain.interactor.keyboardTouchpadEduInteractor
@@ -36,7 +35,6 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
-import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -58,9 +56,6 @@ class ContextualEduUiCoordinatorTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
     private val interactor = kosmos.contextualEducationInteractor
-    private val eduClock = kosmos.fakeEduClock
-    private val minDurationForNextEdu =
-        KeyboardTouchpadEduInteractor.minIntervalBetweenEdu + 1.seconds
     private lateinit var underTest: ContextualEduUiCoordinator
     @Mock private lateinit var toast: Toast
     @Mock private lateinit var notificationManager: NotificationManager
@@ -99,7 +94,6 @@ class ContextualEduUiCoordinatorTest : SysuiTestCase() {
     fun showNotificationOn2ndEdu() =
         testScope.runTest {
             triggerEducation(BACK)
-            eduClock.offset(minDurationForNextEdu)
             triggerEducation(BACK)
             verify(notificationManager).notifyAsUser(any(), anyInt(), any(), any())
         }
@@ -116,10 +110,7 @@ class ContextualEduUiCoordinatorTest : SysuiTestCase() {
         testScope.runTest {
             val notificationCaptor = ArgumentCaptor.forClass(Notification::class.java)
             triggerEducation(BACK)
-
-            eduClock.offset(minDurationForNextEdu)
             triggerEducation(BACK)
-
             verify(notificationManager)
                 .notifyAsUser(any(), anyInt(), notificationCaptor.capture(), any())
             verifyNotificationContent(

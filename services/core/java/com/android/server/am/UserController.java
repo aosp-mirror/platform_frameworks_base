@@ -1978,7 +1978,6 @@ class UserController implements Handler.Callback {
                 boolean userSwitchUiEnabled;
                 synchronized (mLock) {
                     mCurrentUserId = userId;
-                    ActivityManager.invalidateGetCurrentUserIdCache();
                     userSwitchUiEnabled = mUserSwitchUiEnabled;
                 }
                 mInjector.updateUserConfiguration();
@@ -2240,7 +2239,6 @@ class UserController implements Handler.Callback {
                 return true;
             }
             mTargetUserId = targetUserId;
-            ActivityManager.invalidateGetCurrentUserIdCache();
             userSwitchUiEnabled = mUserSwitchUiEnabled;
         }
         if (userSwitchUiEnabled) {
@@ -2318,7 +2316,6 @@ class UserController implements Handler.Callback {
         synchronized (mLock) {
             nextUserId = ObjectUtils.getOrElse(mPendingTargetUserIds.poll(), UserHandle.USER_NULL);
             mTargetUserId = UserHandle.USER_NULL;
-            ActivityManager.invalidateGetCurrentUserIdCache();
         }
         if (nextUserId != UserHandle.USER_NULL) {
             switchUser(nextUserId);
@@ -3024,9 +3021,6 @@ class UserController implements Handler.Callback {
         mInjector.getUserManagerInternal().addUserLifecycleListener(mUserLifecycleListener);
         updateProfileRelatedCaches();
         mInjector.reportCurWakefulnessUsageEvent();
-
-        // IpcDataCache must be invalidated before it starts caching.
-        ActivityManager.invalidateGetCurrentUserIdCache();
     }
 
     // TODO(b/266158156): remove this method if initial system user boot logic is refactored?
@@ -3190,9 +3184,6 @@ class UserController implements Handler.Callback {
 
     @GuardedBy("mLock")
     private int getCurrentOrTargetUserIdLU() {
-        // Note: this result is currently cached by ActivityManager.getCurrentUser() - changes to
-        // the logic here may require updating how the cache is invalidated.
-        // See ActivityManager.invalidateGetCurrentUserIdCache() for more details.
         return mTargetUserId != UserHandle.USER_NULL ? mTargetUserId : mCurrentUserId;
     }
 

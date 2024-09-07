@@ -34,7 +34,6 @@ import android.os.Trace;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.SparseArray;
-import android.util.SparseLongArray;
 import android.util.proto.ProtoOutputStream;
 import android.view.InsetsSource;
 import android.view.InsetsSourceControl;
@@ -60,13 +59,12 @@ class InsetsStateController {
     private final DisplayContent mDisplayContent;
 
     private final SparseArray<InsetsSourceProvider> mProviders = new SparseArray<>();
-    private final SparseLongArray mSurfaceTransactionIds = new SparseLongArray();
     private final ArrayMap<InsetsControlTarget, ArrayList<InsetsSourceProvider>>
             mControlTargetProvidersMap = new ArrayMap<>();
-    private final ArrayMap<InsetsControlTarget, ArrayList<InsetsSourceProvider>>
-            mPendingTargetProvidersMap = new ArrayMap<>();
     private final SparseArray<InsetsControlTarget> mIdControlTargetMap = new SparseArray<>();
     private final SparseArray<InsetsControlTarget> mIdFakeControlTargetMap = new SparseArray<>();
+
+    private final ArraySet<InsetsControlTarget> mPendingControlChanged = new ArraySet<>();
 
     private final Consumer<WindowState> mDispatchInsetsChanged = w -> {
         if (w.isReadyToDispatchInsetsState()) {
@@ -329,11 +327,11 @@ class InsetsStateController {
         }
         if (lastTarget != null) {
             removeFromControlMaps(lastTarget, provider, fake);
-            addToPendingControlMaps(lastTarget, provider);
+            mPendingControlChanged.add(lastTarget);
         }
         if (target != null) {
             addToControlMaps(target, provider, fake);
-            addToPendingControlMaps(target, provider);
+            mPendingControlChanged.add(target);
         }
     }
 
@@ -366,15 +364,8 @@ class InsetsStateController {
         }
     }
 
-    private void addToPendingControlMaps(@NonNull InsetsControlTarget target,
-            InsetsSourceProvider provider) {
-        final ArrayList<InsetsSourceProvider> array =
-                mPendingTargetProvidersMap.computeIfAbsent(target, key -> new ArrayList<>());
-        array.add(provider);
-    }
-
-    void notifyControlChanged(InsetsControlTarget target, InsetsSourceProvider provider) {
-        addToPendingControlMaps(target, provider);
+    void notifyControlChanged(InsetsControlTarget target) {
+        mPendingControlChanged.add(target);
         notifyPendingInsetsControlChanged();
 
         if (android.view.inputmethod.Flags.refactorInsetsController()) {
@@ -385,58 +376,26 @@ class InsetsStateController {
         }
     }
 
-    void notifySurfaceTransactionReady(InsetsSourceProvider provider, long id, boolean ready) {
-        if (ready) {
-            mSurfaceTransactionIds.put(provider.getSource().getId(), id);
-        } else {
-            mSurfaceTransactionIds.delete(provider.getSource().getId());
-        }
-    }
-
     private void notifyPendingInsetsControlChanged() {
-        if (mPendingTargetProvidersMap.isEmpty()) {
+        if (mPendingControlChanged.isEmpty()) {
             return;
         }
-        final int size = mSurfaceTransactionIds.size();
-        final SparseLongArray surfaceTransactionIds = new SparseLongArray(size);
-        for (int i = 0; i < size; i++) {
-            surfaceTransactionIds.append(
-                    mSurfaceTransactionIds.keyAt(i), mSurfaceTransactionIds.valueAt(i));
-        }
         mDisplayContent.mWmService.mAnimator.addAfterPrepareSurfacesRunnable(() -> {
-            for (int i = 0; i < size; i++) {
-                final int sourceId = surfaceTransactionIds.keyAt(i);
-                final InsetsSourceProvider provider = mProviders.get(sourceId);
-                if (provider == null) {
-                    continue;
-                }
-                provider.onSurfaceTransactionCommitted(surfaceTransactionIds.valueAt(i));
+            for (int i = mProviders.size() - 1; i >= 0; i--) {
+                final InsetsSourceProvider provider = mProviders.valueAt(i);
+                provider.onSurfaceTransactionApplied();
             }
             final ArraySet<InsetsControlTarget> newControlTargets = new ArraySet<>();
             int displayId = mDisplayContent.getDisplayId();
-            final ArrayMap<InsetsControlTarget, ArrayList<InsetsSourceProvider>> pendingControlMap =
-                    mPendingTargetProvidersMap;
-            for (int i = pendingControlMap.size() - 1; i >= 0; i--) {
-                final InsetsControlTarget target = pendingControlMap.keyAt(i);
-                final ArrayList<InsetsSourceProvider> providers = pendingControlMap.valueAt(i);
-                for (int p = providers.size() - 1; p >= 0; p--) {
-                    final InsetsSourceProvider provider = providers.get(p);
-                    if (provider.isLeashReadyForDispatching(target)) {
-                        // Stop waiting for this provider.
-                        providers.remove(p);
-                    }
-                }
-                if (providers.isEmpty()) {
-                    pendingControlMap.removeAt(i);
-
-                    // All controls of this target are ready to be dispatched.
-                    target.notifyInsetsControlChanged(displayId);
-                    if (mControlTargetProvidersMap.containsKey(target)) {
-                        // We only collect targets who get controls, not lose controls.
-                        newControlTargets.add(target);
-                    }
+            for (int i = mPendingControlChanged.size() - 1; i >= 0; i--) {
+                final InsetsControlTarget controlTarget = mPendingControlChanged.valueAt(i);
+                controlTarget.notifyInsetsControlChanged(displayId);
+                if (mControlTargetProvidersMap.containsKey(controlTarget)) {
+                    // We only collect targets who get controls, not lose controls.
+                    newControlTargets.add(controlTarget);
                 }
             }
+            mPendingControlChanged.clear();
 
             // This updates the insets visibilities AFTER sending current insets state and controls
             // to the clients, so that the clients can change the current visibilities to the
@@ -465,7 +424,7 @@ class InsetsStateController {
      * @param target the control target to check.
      */
     boolean hasPendingControls(@NonNull InsetsControlTarget target) {
-        return mPendingTargetProvidersMap.containsKey(target);
+        return mPendingControlChanged.contains(target);
     }
 
     void dump(String prefix, PrintWriter pw) {

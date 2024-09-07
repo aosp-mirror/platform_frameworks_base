@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.scenarios
 
+import android.platform.test.annotations.Postsubmit
 import android.tools.NavBar
 import android.tools.Rotation
 import com.android.window.flags.Flags
@@ -23,16 +24,19 @@ import com.android.wm.shell.Utils
 import org.junit.After
 import org.junit.Assume
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.junit.runners.BlockJUnit4ClassRunner
 
-@Ignore("Test Base Class")
-abstract class ExitDesktopWithDragToTopDragZone
+@RunWith(BlockJUnit4ClassRunner::class)
+@Postsubmit
+open class ExitDesktopWithDragToTopDragZone
+@JvmOverloads
 constructor(
     val rotation: Rotation = Rotation.ROTATION_0,
     isResizeable: Boolean = true,
-    isLandscapeApp: Boolean = true,
+    isLandscapeApp: Boolean = true
 ) : DesktopScenarioCustomAppTestBase(isResizeable, isLandscapeApp) {
 
     @Rule @JvmField val testSetupRule = Utils.testSetupRule(NavBar.MODE_GESTURAL, rotation)

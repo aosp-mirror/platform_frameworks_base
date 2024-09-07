@@ -23,13 +23,11 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.IntOffset
 import com.android.compose.nestedscroll.PriorityNestedScrollConnection
-import com.android.systemui.common.ui.compose.windowinsets.LocalRawScreenHeight
-import kotlin.math.max
 import kotlin.math.roundToInt
-import kotlin.math.tanh
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -38,7 +36,6 @@ fun Modifier.stackVerticalOverscroll(
     coroutineScope: CoroutineScope,
     canScrollForward: () -> Boolean
 ): Modifier {
-    val screenHeight = LocalRawScreenHeight.current
     val overscrollOffset = remember { Animatable(0f) }
     val stackNestedScrollConnection = remember {
         NotificationStackNestedScrollConnection(
@@ -46,13 +43,7 @@ fun Modifier.stackVerticalOverscroll(
             canScrollForward = canScrollForward,
             onScroll = { offsetAvailable ->
                 coroutineScope.launch {
-                    val maxProgress = screenHeight * 0.2f
-                    val tilt = 3f
-                    var offset =
-                        overscrollOffset.value +
-                            maxProgress * tanh(x = offsetAvailable / (maxProgress * tilt))
-                    offset = max(offset, -1f * maxProgress)
-                    overscrollOffset.snapTo(offset)
+                    overscrollOffset.snapTo(overscrollOffset.value + offsetAvailable * 0.3f)
                 }
             },
             onStop = { velocityAvailable ->
@@ -88,7 +79,13 @@ fun NotificationStackNestedScrollConnection(
             offsetAvailable < 0f && offsetBeforeStart < 0f && !canScrollForward()
         },
         canStartPostFling = { velocityAvailable -> velocityAvailable < 0f && !canScrollForward() },
-        canContinueScroll = { stackOffset() > 0f },
+        canContinueScroll = { source ->
+            if (source == NestedScrollSource.SideEffect) {
+                stackOffset() > STACK_OVERSCROLL_FLING_MIN_OFFSET
+            } else {
+                true
+            }
+        },
         canScrollOnFling = true,
         onStart = { offsetAvailable -> onStart(offsetAvailable) },
         onScroll = { offsetAvailable ->

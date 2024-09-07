@@ -30,7 +30,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.util.concurrent.MoreExecutors.directExecutor;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
@@ -44,7 +43,6 @@ import android.app.assist.AssistContent;
 import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
@@ -64,8 +62,6 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.screenshot.AssistContentRequester;
 import com.android.systemui.screenshot.ImageExporter;
-import com.android.systemui.screenshot.appclips.InternalBacklinksData.BacklinksData;
-import com.android.systemui.screenshot.appclips.InternalBacklinksData.CrossProfileError;
 
 import com.google.common.util.concurrent.Futures;
 
@@ -96,16 +92,10 @@ public final class AppClipsViewModelTest extends SysuiTestCase {
     private static final String BACKLINKS_TASK_PACKAGE_NAME = "backlinksTaskPackageName";
     private static final AssistContent EMPTY_ASSIST_CONTENT = new AssistContent();
 
-    @Mock
-    private AppClipsCrossProcessHelper mAppClipsCrossProcessHelper;
-    @Mock
-    private ImageExporter mImageExporter;
-    @Mock
-    private IActivityTaskManager mAtmService;
-    @Mock
-    private AssistContentRequester mAssistContentRequester;
-    @Mock
-    Context mMockedContext;
+    @Mock private AppClipsCrossProcessHelper mAppClipsCrossProcessHelper;
+    @Mock private ImageExporter mImageExporter;
+    @Mock private IActivityTaskManager mAtmService;
+    @Mock private AssistContentRequester mAssistContentRequester;
     @Mock
     private PackageManager mPackageManager;
     private ArgumentCaptor<Intent> mPackageManagerIntentCaptor;
@@ -122,14 +112,10 @@ public final class AppClipsViewModelTest extends SysuiTestCase {
         when(mPackageManager.resolveActivity(mPackageManagerIntentCaptor.capture(), anyInt()))
                 .thenReturn(createBacklinksTaskResolveInfo());
         when(mPackageManager.loadItemIcon(any(), any())).thenReturn(FAKE_DRAWABLE);
-        when(mMockedContext.getPackageManager()).thenReturn(mPackageManager);
 
         mViewModel = new AppClipsViewModel.Factory(mAppClipsCrossProcessHelper, mImageExporter,
-                mAtmService, mAssistContentRequester, mMockedContext,
+                mAtmService, mAssistContentRequester, mPackageManager,
                 getContext().getMainExecutor(), directExecutor()).create(AppClipsViewModel.class);
-
-        when(mMockedContext.getPackageManager()).thenReturn(mPackageManager);
-        when(mMockedContext.createContextAsUser(any(), anyInt())).thenReturn(mMockedContext);
     }
 
     @Test
@@ -213,7 +199,7 @@ public final class AppClipsViewModelTest extends SysuiTestCase {
         assertThat(queriedIntent.getData()).isEqualTo(expectedUri);
         assertThat(queriedIntent.getAction()).isEqualTo(ACTION_VIEW);
 
-        BacklinksData result = (BacklinksData) mViewModel.mSelectedBacklinksLiveData.getValue();
+        InternalBacklinksData result = mViewModel.mSelectedBacklinksLiveData.getValue();
         assertThat(result.getAppIcon()).isEqualTo(FAKE_DRAWABLE);
         ClipData clipData = result.getClipData();
         ClipDescription resultDescription = clipData.getDescription();
@@ -252,7 +238,7 @@ public final class AppClipsViewModelTest extends SysuiTestCase {
         Intent queriedIntent = mPackageManagerIntentCaptor.getValue();
         assertThat(queriedIntent.getPackage()).isEqualTo(expectedIntent.getPackage());
 
-        BacklinksData result = (BacklinksData) mViewModel.mSelectedBacklinksLiveData.getValue();
+        InternalBacklinksData result = mViewModel.mSelectedBacklinksLiveData.getValue();
         assertThat(result.getAppIcon()).isEqualTo(FAKE_DRAWABLE);
         ClipData clipData = result.getClipData();
         ClipDescription resultDescription = clipData.getDescription();
@@ -321,8 +307,6 @@ public final class AppClipsViewModelTest extends SysuiTestCase {
 
     @Test
     public void triggerBacklinks_taskIdsToIgnoreConsidered_noBacklinkAvailable() {
-        mockForAssistContent(EMPTY_ASSIST_CONTENT, BACKLINKS_TASK_ID);
-
         mViewModel.triggerBacklinks(Set.of(BACKLINKS_TASK_ID), DEFAULT_DISPLAY);
         waitForIdleSync();
 
@@ -378,56 +362,14 @@ public final class AppClipsViewModelTest extends SysuiTestCase {
         waitForIdleSync();
 
         // Verify two backlinks are received and the first backlink is set as default selected.
-        assertThat(
-                ((BacklinksData) mViewModel.mSelectedBacklinksLiveData.getValue())
-                        .getClipData().getItemAt(0).getUri())
-                .isEqualTo(expectedUri);
+        assertThat(mViewModel.mSelectedBacklinksLiveData.getValue().getClipData().getItemAt(
+                0).getUri()).isEqualTo(expectedUri);
         List<InternalBacklinksData> actualBacklinks = mViewModel.getBacklinksLiveData().getValue();
         assertThat(actualBacklinks).hasSize(2);
-        assertThat(((BacklinksData) actualBacklinks.get(0)).getClipData().getItemAt(0).getUri())
+        assertThat(actualBacklinks.get(0).getClipData().getItemAt(0).getUri())
                 .isEqualTo(expectedUri);
-        assertThat(((BacklinksData) actualBacklinks.get(1)).getClipData().getItemAt(0).getIntent())
+        assertThat(actualBacklinks.get(1).getClipData().getItemAt(0).getIntent())
                 .isEqualTo(expectedIntent);
-    }
-
-    @Test
-    public void triggerBacklinks_singleCrossProfileApp_shouldIndicateError()
-            throws RemoteException {
-        reset(mAtmService);
-        RunningTaskInfo taskInfo = createTaskInfoForBacklinksTask();
-        taskInfo.userId = UserHandle.myUserId() + 1;
-        when(mAtmService.getTasks(Integer.MAX_VALUE, false, false, DEFAULT_DISPLAY))
-                .thenReturn(List.of(taskInfo));
-
-        mViewModel.triggerBacklinks(Collections.emptySet(), DEFAULT_DISPLAY);
-        waitForIdleSync();
-
-        assertThat(mViewModel.mSelectedBacklinksLiveData.getValue())
-                .isInstanceOf(CrossProfileError.class);
-    }
-
-    @Test
-    public void triggerBacklinks_multipleBacklinks_includesCrossProfileError()
-            throws RemoteException {
-        // Set up mocking for multiple backlinks.
-        mockForAssistContent(EMPTY_ASSIST_CONTENT, BACKLINKS_TASK_ID);
-        reset(mAtmService);
-        RunningTaskInfo runningTaskInfo1 = createTaskInfoForBacklinksTask();
-        RunningTaskInfo runningTaskInfo2 = createTaskInfoForBacklinksTask();
-        runningTaskInfo2.userId = UserHandle.myUserId() + 1;
-
-        when(mAtmService.getTasks(anyInt(), anyBoolean(), anyBoolean(), anyInt()))
-                .thenReturn(List.of(runningTaskInfo1, runningTaskInfo2));
-
-        // Set up complete, trigger the backlinks action.
-        mViewModel.triggerBacklinks(Collections.emptySet(), DEFAULT_DISPLAY);
-        waitForIdleSync();
-
-        // Verify two backlinks are received and only second has error.
-        List<InternalBacklinksData> actualBacklinks = mViewModel.getBacklinksLiveData().getValue();
-        assertThat(actualBacklinks).hasSize(2);
-        assertThat(actualBacklinks.get(0)).isInstanceOf(BacklinksData.class);
-        assertThat(actualBacklinks.get(1)).isInstanceOf(CrossProfileError.class);
     }
 
     private void resetPackageManagerMockingForUsingFallbackBacklinks() {
@@ -447,7 +389,7 @@ public final class AppClipsViewModelTest extends SysuiTestCase {
     }
 
     private void verifyMainLauncherBacklinksIntent() {
-        BacklinksData result = (BacklinksData) mViewModel.mSelectedBacklinksLiveData.getValue();
+        InternalBacklinksData result = mViewModel.mSelectedBacklinksLiveData.getValue();
         assertThat(result.getAppIcon()).isEqualTo(FAKE_DRAWABLE);
 
         ClipData clipData = result.getClipData();
@@ -494,7 +436,6 @@ public final class AppClipsViewModelTest extends SysuiTestCase {
         taskInfo.topActivityInfo = createBacklinksTaskResolveInfo().activityInfo;
         taskInfo.baseIntent = new Intent().setComponent(taskInfo.topActivity);
         taskInfo.configuration.windowConfiguration.setActivityType(ACTIVITY_TYPE_STANDARD);
-        taskInfo.userId = UserHandle.myUserId();
         return taskInfo;
     }
 }

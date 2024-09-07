@@ -19,7 +19,6 @@ package com.android.keyguard
 import android.app.ActivityTaskManager
 import android.content.pm.PackageManager
 import android.os.PowerManager
-import android.platform.test.annotations.EnableFlags
 import android.telecom.TelecomManager
 import android.telephony.TelephonyManager
 import android.testing.TestableLooper
@@ -27,20 +26,14 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
 import com.android.internal.widget.LockPatternUtils
-import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.haptics.msdl.fakeMSDLPlayer
-import com.android.systemui.haptics.msdl.msdlPlayer
 import com.android.systemui.shade.ShadeController
 import com.android.systemui.statusbar.policy.ConfigurationController
-import com.android.systemui.testKosmos
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.FakeSystemClock
-import com.google.android.msdl.data.model.MSDLToken
-import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -71,8 +64,6 @@ class EmergencyButtonControllerTest : SysuiTestCase() {
     val fakeSystemClock = FakeSystemClock()
     val mainExecutor = FakeExecutor(fakeSystemClock)
     val backgroundExecutor = FakeExecutor(fakeSystemClock)
-    private val kosmos = testKosmos()
-    private val msdlPlayer = kosmos.fakeMSDLPlayer
 
     lateinit var underTest: EmergencyButtonController
 
@@ -93,7 +84,6 @@ class EmergencyButtonControllerTest : SysuiTestCase() {
                 mainExecutor,
                 backgroundExecutor,
                 mSelectedUserInteractor,
-                msdlPlayer,
             )
         context.setMockPackageManager(packageManager)
         Mockito.`when`(emergencyButton.context).thenReturn(context)
@@ -122,14 +112,5 @@ class EmergencyButtonControllerTest : SysuiTestCase() {
                 /* simLocked= */ any(),
                 /* isSecure= */ eq(true)
             )
-    }
-
-    @Test
-    @EnableFlags(Flags.FLAG_MSDL_FEEDBACK)
-    fun takeEmergencyCallAction_withMSDLFeedback_playsEmergencyButtonTokenAndNullAttributes() {
-        underTest.takeEmergencyCallAction()
-
-        assertThat(msdlPlayer.latestTokenPlayed).isEqualTo(MSDLToken.KEYPRESS_RETURN)
-        assertThat(msdlPlayer.latestPropertiesPlayed).isNull()
     }
 }

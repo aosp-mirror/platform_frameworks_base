@@ -30,8 +30,8 @@ import java.util.concurrent.Executor;
 import java.util.function.Function;
 
 /**
- * An implementation of {@link RemoteServiceCaller} that that is based on {@link
- * Context#bindService}.
+ * An implementation of {@link RemoteServiceCaller} that that is based on
+ * {@link Context#bindService}.
  *
  * @param <T> Class of wrapped service.
  * @hide
@@ -39,16 +39,18 @@ import java.util.function.Function;
 public class RemoteServiceCallerImpl<T> implements RemoteServiceCaller<T> {
     private static final String TAG = "AppFunctionsServiceCall";
 
-    @NonNull private final Context mContext;
-    @NonNull private final Function<IBinder, T> mInterfaceConverter;
+    @NonNull
+    private final Context mContext;
+    @NonNull
+    private final Function<IBinder, T> mInterfaceConverter;
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final Executor mExecutor;
 
     /**
      * @param interfaceConverter A function responsible for converting an IBinder object into the
-     *     desired service interface.
-     * @param executor An Executor instance to dispatch callback.
-     * @param context The system context.
+     *                           desired service interface.
+     * @param executor           An Executor instance to dispatch callback.
+     * @param context            The system context.
      */
     public RemoteServiceCallerImpl(
             @NonNull Context context,

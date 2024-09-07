@@ -6428,6 +6428,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         @Override
+        public CompatibilityInfo compatibilityInfoForPackage(ApplicationInfo ai) {
+            synchronized (mGlobalLock) {
+                return compatibilityInfoForPackageLocked(ai);
+            }
+        }
+
+        @Override
         public void sendActivityResult(int callingUid, IBinder activityToken, String resultWho,
                 int requestCode, int resultCode, Intent data) {
             final ActivityRecord r;
@@ -6705,13 +6712,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         @HotPath(caller = HotPath.PROCESS_CHANGE)
         @Override
-        public PreBindInfo preBindApplication(WindowProcessController wpc, ApplicationInfo info) {
+        public void preBindApplication(WindowProcessController wpc) {
             synchronized (mGlobalLockWithoutBoost) {
                 mTaskSupervisor.getActivityMetricsLogger().notifyBindApplication(wpc.mInfo);
-                wpc.onConfigurationChanged(getGlobalConfiguration());
-                // The "info" can be the target of instrumentation.
-                return new PreBindInfo(compatibilityInfoForPackageLocked(info),
-                        new Configuration(wpc.getConfiguration()));
             }
         }
 
@@ -7478,7 +7481,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     FEATURE_LEANBACK);
             final boolean isArc = arcFeature != null && arcFeature.version >= 0;
             final boolean isTv = tvFeature != null && tvFeature.version >= 0;
-            sIsPip2ExperimentEnabled = Flags.enablePip2() && !isArc && !isTv;
+            sIsPip2ExperimentEnabled = SystemProperties.getBoolean(
+                    "persist.wm_shell.pip2", false)
+                    || (Flags.enablePip2Implementation() && !isArc && !isTv);
         }
         return sIsPip2ExperimentEnabled;
     }

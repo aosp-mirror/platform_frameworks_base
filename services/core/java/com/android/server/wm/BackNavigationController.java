@@ -339,12 +339,13 @@ class BackNavigationController {
                     removedWindowContainer,
                     BackNavigationInfo.typeToString(backType));
 
+            // For now, we only animate when going home, cross task or cross-activity.
             boolean prepareAnimation =
                     (backType == BackNavigationInfo.TYPE_RETURN_TO_HOME
                                     || backType == BackNavigationInfo.TYPE_CROSS_TASK
                                     || backType == BackNavigationInfo.TYPE_CROSS_ACTIVITY
                                     || backType == BackNavigationInfo.TYPE_DIALOG_CLOSE)
-                            && (adapter != null && adapter.isAnimatable(backType));
+                            && adapter != null;
 
             if (prepareAnimation) {
                 final AnimationHandler.ScheduleAnimationBuilder builder =

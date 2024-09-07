@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.scenarios
 
+import android.platform.test.annotations.Postsubmit
 import com.android.server.wm.flicker.helpers.DesktopModeAppHelper
 import com.android.server.wm.flicker.helpers.ImeAppHelper
 import com.android.server.wm.flicker.helpers.MailAppHelper
@@ -25,11 +26,13 @@ import com.android.window.flags.Flags
 import org.junit.After
 import org.junit.Assume
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.junit.runners.BlockJUnit4ClassRunner
 
-@Ignore("Test Base Class")
-abstract class DragAppWindowMultiWindow : DragAppWindowScenarioTestBase()
+@RunWith(BlockJUnit4ClassRunner::class)
+@Postsubmit
+open class DragAppWindowMultiWindow : DragAppWindowScenarioTestBase()
 {
     private val imeAppHelper = ImeAppHelper(instrumentation)
     private val testApp = DesktopModeAppHelper(SimpleAppHelper(instrumentation))

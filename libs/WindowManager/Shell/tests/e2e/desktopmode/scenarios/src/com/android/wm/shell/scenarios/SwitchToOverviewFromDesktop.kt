@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.scenarios
 
+import android.platform.test.annotations.Postsubmit
 import android.app.Instrumentation
 import android.tools.NavBar
 import android.tools.Rotation
@@ -30,17 +31,20 @@ import com.android.wm.shell.Utils
 import org.junit.After
 import org.junit.Assume
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.junit.runners.BlockJUnit4ClassRunner
 
 /**
 * Base test for opening recent apps overview from desktop mode.
 *
 * Navigation mode can be passed as a constructor parameter, by default it is set to gesture navigation.
 */
-@Ignore("Base Test Class")
-abstract class SwitchToOverviewFromDesktop
+@RunWith(BlockJUnit4ClassRunner::class)
+@Postsubmit
+open class SwitchToOverviewFromDesktop
+@JvmOverloads
 constructor(val navigationMode: NavBar = NavBar.MODE_GESTURAL) {
 
     private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()

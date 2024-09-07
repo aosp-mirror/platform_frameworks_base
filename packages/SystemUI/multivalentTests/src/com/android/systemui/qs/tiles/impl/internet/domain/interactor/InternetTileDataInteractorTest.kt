@@ -185,6 +185,7 @@ class InternetTileDataInteractorTest : SysuiTestCase() {
 
             val networkModel =
                 WifiNetworkModel.Active(
+                    networkId = 1,
                     level = 4,
                     ssid = "test ssid",
                 )
@@ -220,6 +221,7 @@ class InternetTileDataInteractorTest : SysuiTestCase() {
 
             val networkModel =
                 WifiNetworkModel.Active(
+                    networkId = 1,
                     level = 4,
                     ssid = "test ssid",
                     hotspotDeviceType = WifiNetworkModel.HotspotDeviceType.NONE,
@@ -544,6 +546,7 @@ class InternetTileDataInteractorTest : SysuiTestCase() {
     private fun setWifiNetworkWithHotspot(hotspot: WifiNetworkModel.HotspotDeviceType) {
         val networkModel =
             WifiNetworkModel.Active(
+                networkId = 1,
                 level = 4,
                 ssid = "test ssid",
                 hotspotDeviceType = hotspot,

@@ -198,22 +198,12 @@ constructor(
                             parentView,
                             /* attachToRoot= */ false
                         ) as EnRouteView
+
                 InflatedContentViewHolder(newView) {
                     EnRouteViewBinder.bindWhileAttached(newView, createViewModel())
                 }
             }
-            RichOngoingNotificationViewType.Expanded -> {
-                val newView =
-                    LayoutInflater.from(systemUiContext)
-                        .inflate(
-                            R.layout.notification_template_en_route_expanded,
-                            parentView,
-                            /* attachToRoot= */ false
-                        ) as EnRouteView
-                InflatedContentViewHolder(newView) {
-                    EnRouteViewBinder.bindWhileAttached(newView, createViewModel())
-                }
-            }
+            RichOngoingNotificationViewType.Expanded,
             RichOngoingNotificationViewType.HeadsUp -> NullContentView
         }
     }

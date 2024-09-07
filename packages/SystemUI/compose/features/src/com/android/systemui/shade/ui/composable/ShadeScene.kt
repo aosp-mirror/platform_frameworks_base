@@ -303,8 +303,6 @@ private fun SceneScope.SingleShade(
             viewModel.qsSceneAdapter,
         )
     }
-    val shadeHorizontalPadding =
-        dimensionResource(id = R.dimen.notification_panel_margin_horizontal)
     val shadeMeasurePolicy =
         remember(mediaInRow) {
             SingleShadeMeasurePolicy(
@@ -356,7 +354,6 @@ private fun SceneScope.SingleShade(
                 Box(
                     Modifier.element(QuickSettings.Elements.QuickQuickSettings)
                         .layoutId(SingleShadeMeasurePolicy.LayoutId.QuickSettings)
-                        .padding(horizontal = shadeHorizontalPadding)
                 ) {
                     QuickSettings(
                         viewModel.qsSceneAdapter,
@@ -384,9 +381,7 @@ private fun SceneScope.SingleShade(
                     shouldPunchHoleBehindScrim = shouldPunchHoleBehindScrim,
                     onEmptySpaceClick =
                         viewModel::onEmptySpaceClicked.takeIf { isEmptySpaceClickable },
-                    modifier =
-                        Modifier.layoutId(SingleShadeMeasurePolicy.LayoutId.Notifications)
-                            .padding(horizontal = shadeHorizontalPadding),
+                    modifier = Modifier.layoutId(SingleShadeMeasurePolicy.LayoutId.Notifications),
                 )
             },
             measurePolicy = shadeMeasurePolicy,

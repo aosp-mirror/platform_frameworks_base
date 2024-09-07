@@ -104,7 +104,7 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
                 mGivenInsetsReady = true;
                 ImeTracker.forLogging().onProgress(mStatsToken,
                         ImeTracker.PHASE_WM_POST_LAYOUT_NOTIFY_CONTROLS_CHANGED);
-                mStateController.notifyControlChanged(mControlTarget, this);
+                mStateController.notifyControlChanged(mControlTarget);
                 setImeShowing(true);
             } else if (wasServerVisible && mServerVisible && mGivenInsetsReady
                     && givenInsetsPending) {
@@ -132,15 +132,15 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
     }
 
     @Override
-    protected boolean isLeashReadyForDispatching(InsetsControlTarget target) {
+    protected boolean isLeashReadyForDispatching() {
         if (android.view.inputmethod.Flags.refactorInsetsController()) {
             final WindowState ws =
                     mWindowContainer != null ? mWindowContainer.asWindowState() : null;
             final boolean isDrawn = ws != null && ws.isDrawn();
-            return super.isLeashReadyForDispatching(target)
-                    && mServerVisible && isDrawn && mGivenInsetsReady;
+            return super.isLeashReadyForDispatching() && mServerVisible && isDrawn
+                    && mGivenInsetsReady;
         } else {
-            return super.isLeashReadyForDispatching(target);
+            return super.isLeashReadyForDispatching();
         }
     }
 

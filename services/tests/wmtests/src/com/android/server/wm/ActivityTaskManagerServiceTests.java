@@ -1047,7 +1047,6 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         info.packageName = packageName;
         WindowProcessController wpc = new WindowProcessController(
                 mAtm, info, packageName, 0, userId, null, mMockListener);
-        mAtm.mInternal.preBindApplication(wpc, info);
         wpc.setThread(mock(IApplicationThread.class));
         return wpc;
     }

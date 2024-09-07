@@ -64,7 +64,6 @@ import com.android.wm.shell.windowdecor.extension.isPinned
  */
 class HandleMenu(
     private val parentDecor: DesktopModeWindowDecoration,
-    private val windowManagerWrapper: WindowManagerWrapper,
     private val layoutResId: Int,
     private val appIconBitmap: Bitmap?,
     private val appName: CharSequence?,
@@ -179,7 +178,7 @@ class HandleMenu(
         handleMenuViewContainer =
             if (!taskInfo.isFreeform && Flags.enableAdditionalWindowsAboveStatusBar()) {
                 AdditionalSystemViewContainer(
-                    windowManagerWrapper = windowManagerWrapper,
+                    context = context,
                     taskId = taskInfo.taskId,
                     x = x,
                     y = y,
@@ -636,7 +635,6 @@ class HandleMenu(
 interface HandleMenuFactory {
     fun create(
         parentDecor: DesktopModeWindowDecoration,
-        windowManagerWrapper: WindowManagerWrapper,
         layoutResId: Int,
         appIconBitmap: Bitmap?,
         appName: CharSequence?,
@@ -654,7 +652,6 @@ interface HandleMenuFactory {
 object DefaultHandleMenuFactory : HandleMenuFactory {
     override fun create(
         parentDecor: DesktopModeWindowDecoration,
-        windowManagerWrapper: WindowManagerWrapper,
         layoutResId: Int,
         appIconBitmap: Bitmap?,
         appName: CharSequence?,
@@ -668,7 +665,6 @@ object DefaultHandleMenuFactory : HandleMenuFactory {
     ): HandleMenu {
         return HandleMenu(
             parentDecor,
-            windowManagerWrapper,
             layoutResId,
             appIconBitmap,
             appName,

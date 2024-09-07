@@ -475,7 +475,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
                 mLifecycleOwner,
                 new HashSet<>(Arrays.asList(
                         dreamComplicationComponent.getHideComplicationTouchHandler(),
-                        dreamOverlayComponent.getCommunalTouchHandler())), TAG);
+                        dreamOverlayComponent.getCommunalTouchHandler())));
 
         setLifecycleStateLocked(Lifecycle.State.STARTED);
 
@@ -552,8 +552,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
     }
 
     private void updateGestureBlockingLocked() {
-        final boolean shouldBlock = mStarted && !mShadeExpanded && !mBouncerShowing
-                && !isDreamInPreviewMode();
+        final boolean shouldBlock = !isDreamInPreviewMode() && !mShadeExpanded && !mBouncerShowing;
 
         if (shouldBlock) {
             mGestureInteractor.addGestureBlockedMatcher(DREAM_TYPE_MATCHER,

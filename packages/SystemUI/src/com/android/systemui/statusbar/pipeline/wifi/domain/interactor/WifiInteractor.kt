@@ -83,6 +83,8 @@ constructor(
                 is WifiNetworkModel.CarrierMerged -> null
                 is WifiNetworkModel.Active ->
                     when {
+                        info.isPasspointAccessPoint || info.isOnlineSignUpForPasspointAccessPoint ->
+                            info.passpointProviderFriendlyName
                         info.hasValidSsid() -> info.ssid
                         else -> null
                     }

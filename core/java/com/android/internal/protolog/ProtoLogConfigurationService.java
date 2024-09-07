@@ -26,6 +26,8 @@ import static android.internal.perfetto.protos.Protolog.ProtoLogViewerConfig.Mes
 import static android.internal.perfetto.protos.Protolog.ProtoLogViewerConfig.MessageData.LOCATION;
 import static android.internal.perfetto.protos.Protolog.ProtoLogViewerConfig.MessageData.MESSAGE;
 import static android.internal.perfetto.protos.Protolog.ProtoLogViewerConfig.MessageData.MESSAGE_ID;
+import static android.internal.perfetto.protos.TracePacketOuterClass.TracePacket.PROTOLOG_VIEWER_CONFIG;
+import static android.internal.perfetto.protos.TracePacketOuterClass.TracePacket.TIMESTAMP;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -34,6 +36,7 @@ import android.content.Context;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
+import android.os.SystemClock;
 import android.tracing.perfetto.DataSourceParams;
 import android.tracing.perfetto.InitArguments;
 import android.tracing.perfetto.Producer;
@@ -72,7 +75,11 @@ import java.util.TreeMap;
 public final class ProtoLogConfigurationService extends IProtoLogConfigurationService.Stub {
     private static final String LOG_TAG = "ProtoLogConfigurationService";
 
-    private final ProtoLogDataSource mDataSource;
+    private final ProtoLogDataSource mDataSource = new ProtoLogDataSource(
+            this::onTracingInstanceStart,
+            this::onTracingInstanceFlush,
+            this::onTracingInstanceStop
+    );
 
     /**
      * Keeps track of how many of each viewer config file is currently registered.
@@ -109,29 +116,11 @@ public final class ProtoLogConfigurationService extends IProtoLogConfigurationSe
     private final ViewerConfigFileTracer mViewerConfigFileTracer;
 
     public ProtoLogConfigurationService() {
-        this(ProtoLogDataSource::new, ProtoLogConfigurationService::dumpTransitionTraceConfig);
-    }
-
-    @VisibleForTesting
-    public ProtoLogConfigurationService(@NonNull ProtoLogDataSourceBuilder dataSourceBuilder) {
-        this(dataSourceBuilder, ProtoLogConfigurationService::dumpTransitionTraceConfig);
+        this(ProtoLogConfigurationService::dumpTransitionTraceConfig);
     }
 
     @VisibleForTesting
     public ProtoLogConfigurationService(@NonNull ViewerConfigFileTracer tracer) {
-        this(ProtoLogDataSource::new, tracer);
-    }
-
-    @VisibleForTesting
-    public ProtoLogConfigurationService(
-            @NonNull ProtoLogDataSourceBuilder dataSourceBuilder,
-            @NonNull ViewerConfigFileTracer tracer) {
-        mDataSource = dataSourceBuilder.build(
-            this::onTracingInstanceStart,
-            this::onTracingInstanceFlush,
-            this::onTracingInstanceStop
-        );
-
         // Initialize the Perfetto producer and register the Perfetto ProtoLog datasource to be
         // receive the lifecycle callbacks of the datasource and write the viewer configs if and
         // when required to the datasource.
@@ -372,12 +361,31 @@ public final class ProtoLogConfigurationService extends IProtoLogConfigurationSe
 
     private static void dumpTransitionTraceConfig(@NonNull ProtoLogDataSource dataSource,
             @NonNull String viewerConfigFilePath) {
-        Utils.dumpViewerConfig(dataSource, () -> {
+        dataSource.trace(ctx -> {
+            final ProtoInputStream pis;
             try {
-                return new ProtoInputStream(new FileInputStream(viewerConfigFilePath));
+                pis = new ProtoInputStream(new FileInputStream(viewerConfigFilePath));
             } catch (FileNotFoundException e) {
                 throw new RuntimeException(
                         "Failed to load viewer config file " + viewerConfigFilePath, e);
+            }
+
+            try {
+                final ProtoOutputStream os = ctx.newTracePacket();
+
+                os.write(TIMESTAMP, SystemClock.elapsedRealtimeNanos());
+
+                final long outProtologViewerConfigToken = os.start(PROTOLOG_VIEWER_CONFIG);
+                while (pis.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
+                    switch (pis.getFieldNumber()) {
+                        case (int) MESSAGES -> writeViewerConfigMessage(pis, os);
+                        case (int) GROUPS -> writeViewerConfigGroup(pis, os);
+                    }
+                }
+
+                os.end(outProtologViewerConfigToken);
+            } catch (IOException e) {
+                Log.e(LOG_TAG, "Failed to read ProtoLog viewer config to dump on tracing end", e);
             }
         });
     }

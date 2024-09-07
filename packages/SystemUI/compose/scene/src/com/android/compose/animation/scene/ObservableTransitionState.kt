@@ -46,21 +46,8 @@ sealed interface ObservableTransitionState {
         }
     }
 
-    /** The current overlays. */
-    fun currentOverlays(): Flow<Set<OverlayKey>> {
-        return when (this) {
-            is Idle -> flowOf(currentOverlays)
-            is Transition -> currentOverlays
-        }
-    }
-
     /** No transition/animation is currently running. */
-    data class Idle
-    @JvmOverloads
-    constructor(
-        val currentScene: SceneKey,
-        val currentOverlays: Set<OverlayKey> = emptySet(),
-    ) : ObservableTransitionState
+    data class Idle(val currentScene: SceneKey) : ObservableTransitionState
 
     /** There is a transition animating between two scenes. */
     sealed class Transition(
@@ -107,7 +94,7 @@ sealed interface ObservableTransitionState {
             val fromScene: SceneKey,
             val toScene: SceneKey,
             val currentScene: Flow<SceneKey>,
-            currentOverlays: Set<OverlayKey>,
+            currentOverlays: Flow<Set<OverlayKey>>,
             progress: Flow<Float>,
             isInitiatedByUserInput: Boolean,
             isUserInputOngoing: Flow<Boolean>,
@@ -117,7 +104,7 @@ sealed interface ObservableTransitionState {
             Transition(
                 fromScene,
                 toScene,
-                flowOf(currentOverlays),
+                currentOverlays,
                 progress,
                 isInitiatedByUserInput,
                 isUserInputOngoing,
@@ -182,7 +169,7 @@ sealed interface ObservableTransitionState {
                 isUserInputOngoing: Flow<Boolean>,
                 previewProgress: Flow<Float> = flowOf(0f),
                 isInPreviewStage: Flow<Boolean> = flowOf(false),
-                currentOverlays: Set<OverlayKey> = emptySet(),
+                currentOverlays: Flow<Set<OverlayKey>> = flowOf(emptySet()),
             ): ChangeScene {
                 return ChangeScene(
                     fromScene,
@@ -218,17 +205,13 @@ sealed interface ObservableTransitionState {
 fun SceneTransitionLayoutState.observableTransitionState(): Flow<ObservableTransitionState> {
     return snapshotFlow {
             when (val state = transitionState) {
-                is TransitionState.Idle ->
-                    ObservableTransitionState.Idle(
-                        state.currentScene,
-                        state.currentOverlays,
-                    )
+                is TransitionState.Idle -> ObservableTransitionState.Idle(state.currentScene)
                 is TransitionState.Transition.ChangeScene -> {
                     ObservableTransitionState.Transition.ChangeScene(
                         fromScene = state.fromScene,
                         toScene = state.toScene,
                         currentScene = snapshotFlow { state.currentScene },
-                        currentOverlays = state.currentOverlays,
+                        currentOverlays = flowOf(state.currentOverlays),
                         progress = snapshotFlow { state.progress },
                         isInitiatedByUserInput = state.isInitiatedByUserInput,
                         isUserInputOngoing = snapshotFlow { state.isUserInputOngoing },

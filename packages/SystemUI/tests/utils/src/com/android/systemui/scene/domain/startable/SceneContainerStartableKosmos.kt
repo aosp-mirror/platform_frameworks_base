@@ -27,7 +27,6 @@ import com.android.systemui.deviceentry.domain.interactor.deviceEntryFaceAuthInt
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryHapticsInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteractor
-import com.android.systemui.haptics.msdl.msdlPlayer
 import com.android.systemui.haptics.vibratorHelper
 import com.android.systemui.keyguard.dismissCallbackRegistry
 import com.android.systemui.keyguard.domain.interactor.keyguardEnabledInteractor
@@ -87,6 +86,5 @@ val Kosmos.sceneContainerStartable by Fixture {
         statusBarStateController = sysuiStatusBarStateController,
         alternateBouncerInteractor = alternateBouncerInteractor,
         vibratorHelper = vibratorHelper,
-        msdlPlayer = msdlPlayer,
     )
 }

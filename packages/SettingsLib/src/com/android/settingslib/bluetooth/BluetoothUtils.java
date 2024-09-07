@@ -104,22 +104,6 @@ public class BluetoothUtils {
     /**
      * @param context to access resources from
      * @param cachedDevice to get class from
-     * @return pair containing the drawable and the description of the type of the device. The type
-     *     could either derived from metadata or CoD.
-     */
-    public static Pair<Drawable, String> getDerivedBtClassDrawableWithDescription(
-            Context context, CachedBluetoothDevice cachedDevice) {
-        return BluetoothUtils.isAdvancedUntetheredDevice(cachedDevice.getDevice())
-                ? new Pair<>(
-                        getBluetoothDrawable(
-                                context, com.android.internal.R.drawable.ic_bt_headphones_a2dp),
-                        context.getString(R.string.bluetooth_talkback_headphone))
-                : BluetoothUtils.getBtClassDrawableWithDescription(context, cachedDevice);
-    }
-
-    /**
-     * @param context to access resources from
-     * @param cachedDevice to get class from
      * @return pair containing the drawable and the description of the Bluetooth class of the
      *     device.
      */
@@ -747,7 +731,9 @@ public class BluetoothUtils {
         int broadcastId = broadcast.getLatestBroadcastId();
         return !sourceList.isEmpty()
                 && broadcastId != UNKNOWN_VALUE_PLACEHOLDER
-                && sourceList.stream().anyMatch(source -> isSourceMatched(source, broadcastId));
+                && sourceList.stream()
+                        .anyMatch(
+                                source -> isSourceMatched(source, broadcastId));
     }
 
     /** Checks the connectivity status based on the provided broadcast receive state. */
@@ -1044,7 +1030,8 @@ public class BluetoothUtils {
                                         cachedDevice.getAddress());
                         break;
                     case BluetoothProfile.LE_AUDIO:
-                        if (audioDeviceCategory == AudioManager.AUDIO_DEVICE_CATEGORY_SPEAKER) {
+                        if (audioDeviceCategory
+                                == AudioManager.AUDIO_DEVICE_CATEGORY_SPEAKER) {
                             saDevice =
                                     new AudioDeviceAttributes(
                                             AudioDeviceAttributes.ROLE_OUTPUT,

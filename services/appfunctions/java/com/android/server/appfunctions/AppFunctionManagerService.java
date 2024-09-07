@@ -21,7 +21,9 @@ import android.content.Context;
 
 import com.android.server.SystemService;
 
-/** Service that manages app functions. */
+/**
+ * Service that manages app functions.
+ */
 public class AppFunctionManagerService extends SystemService {
     private final AppFunctionManagerServiceImpl mServiceImpl;
 

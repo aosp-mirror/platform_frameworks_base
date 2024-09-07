@@ -89,8 +89,6 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.Execution;
 
-import com.google.android.msdl.domain.MSDLPlayer;
-
 import dagger.Lazy;
 
 import kotlin.Unit;
@@ -185,7 +183,6 @@ public class AuthController implements
     private final @Background DelayableExecutor mBackgroundExecutor;
     private final DisplayInfo mCachedDisplayInfo = new DisplayInfo();
     @NonNull private final VibratorHelper mVibratorHelper;
-    @NonNull private final MSDLPlayer mMSDLPlayer;
 
     private final kotlin.Lazy<ViewCapture> mLazyViewCapture;
 
@@ -745,8 +742,7 @@ public class AuthController implements
             @Background DelayableExecutor bgExecutor,
             @NonNull UdfpsUtils udfpsUtils,
             @NonNull VibratorHelper vibratorHelper,
-            Lazy<ViewCapture> daggerLazyViewCapture,
-            @NonNull MSDLPlayer msdlPlayer) {
+            Lazy<ViewCapture> daggerLazyViewCapture) {
         mContext = context;
         mExecution = execution;
         mUserManager = userManager;
@@ -768,7 +764,6 @@ public class AuthController implements
         mUdfpsUtils = udfpsUtils;
         mApplicationCoroutineScope = applicationCoroutineScope;
         mVibratorHelper = vibratorHelper;
-        mMSDLPlayer = msdlPlayer;
 
         mLogContextInteractor = logContextInteractor;
         mPromptSelectorInteractor = promptSelectorInteractorProvider;
@@ -1332,7 +1327,7 @@ public class AuthController implements
                 wakefulnessLifecycle, userManager, lockPatternUtils,
                 mInteractionJankMonitor, mPromptSelectorInteractor, viewModel,
                 mCredentialViewModelProvider, bgExecutor, mVibratorHelper,
-                mLazyViewCapture, mMSDLPlayer);
+                mLazyViewCapture);
     }
 
     @Override

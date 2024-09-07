@@ -182,8 +182,10 @@ public class FontCustomizationParser {
 
             // For ignoring the customization, consume the new-locale-family element but don't
             // register any customizations.
-            outCustomization.add(new FontConfig.Customization.LocaleFallback(
-                    Locale.forLanguageTag(lang), intOp, family));
+            if (com.android.text.flags.Flags.vendorCustomLocaleFallback()) {
+                outCustomization.add(new FontConfig.Customization.LocaleFallback(
+                        Locale.forLanguageTag(lang), intOp, family));
+            }
         } else {
             throw new IllegalArgumentException("Unknown customizationType=" + customizationType);
         }

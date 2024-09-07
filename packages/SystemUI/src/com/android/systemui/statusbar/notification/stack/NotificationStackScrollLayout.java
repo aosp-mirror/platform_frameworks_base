@@ -1389,10 +1389,6 @@ public class NotificationStackScrollLayout
     }
 
     private void clampScrollPosition() {
-        // NSSL doesn't control scrolling with SceneContainer enabled
-        if (SceneContainerFlag.isEnabled()) {
-            return;
-        }
         int scrollRange = getScrollRange();
         if (scrollRange < mOwnScrollY && !mAmbientState.isClearAllInProgress()) {
             // if the scroll boundary updates the position of the stack,
@@ -1403,8 +1399,12 @@ public class NotificationStackScrollLayout
     }
 
     public int getTopPadding() {
-        SceneContainerFlag.assertInLegacyMode();
-        return mAmbientState.getTopPadding();
+        // TODO(b/332574413) replace all usages of getTopPadding()
+        if (SceneContainerFlag.isEnabled()) {
+            return (int) mAmbientState.getStackTop();
+        } else {
+            return mAmbientState.getTopPadding();
+        }
     }
 
     private void onTopPaddingChanged(boolean animate) {
@@ -2446,11 +2446,6 @@ public class NotificationStackScrollLayout
     }
 
     private int getScrollRange() {
-        // TODO(b/360091533) Disable the usages of #getScrollRange() with SceneContainer enabled,
-        // because NSSL shouldn't control its own scrolling.
-        if (SceneContainerFlag.isEnabled()) {
-            return 0;
-        }
         // In current design, it only use the top HUN to treat all of HUNs
         // although there are more than one HUNs
         int contentHeight = mContentHeight;
@@ -2886,9 +2881,7 @@ public class NotificationStackScrollLayout
             NotificationEntry entry = ((ExpandableNotificationRow) child).getEntry();
             entry.removeOnSensitivityChangedListener(mOnChildSensitivityChangedListener);
         }
-        if (!SceneContainerFlag.isEnabled()) {
-            updateScrollStateForRemovedChild(child);
-        }
+        updateScrollStateForRemovedChild(child);
         boolean animationGenerated = container != null && generateRemoveAnimation(child);
         if (animationGenerated) {
             if (!mSwipedOutViews.contains(child) || !isFullySwipedOut(child)) {
@@ -3067,7 +3060,6 @@ public class NotificationStackScrollLayout
      * @param removedChild the removed child
      */
     private void updateScrollStateForRemovedChild(ExpandableView removedChild) {
-        SceneContainerFlag.assertInLegacyMode();
         final int startingPosition = getPositionInLinearLayout(removedChild);
         final int childHeight = getIntrinsicHeight(removedChild) + mPaddingBetweenElements;
         final int endPosition = startingPosition + childHeight;
@@ -3089,7 +3081,6 @@ public class NotificationStackScrollLayout
      * @return the amount of scrolling needed to start clipping notifications.
      */
     private int getScrollAmountToScrollBoundary() {
-        SceneContainerFlag.assertInLegacyMode();
         if (mShouldUseSplitNotificationShade) {
             return mSidePaddings;
         }
@@ -3691,10 +3682,6 @@ public class NotificationStackScrollLayout
         if ((event.getSource() & InputDevice.SOURCE_CLASS_POINTER) != 0) {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_SCROLL: {
-                    // If scene container is active, NSSL should not control its own scrolling.
-                    if (SceneContainerFlag.isEnabled()) {
-                        return false;
-                    }
                     if (!mIsBeingDragged) {
                         final float vscroll = event.getAxisValue(MotionEvent.AXIS_VSCROLL);
                         if (vscroll != 0) {
@@ -3723,7 +3710,7 @@ public class NotificationStackScrollLayout
         if (!isScrollingEnabled()) {
             return false;
         }
-        if (!isInScrollableRegion(ev) && !mIsBeingDragged) {
+        if (isInsideQsHeader(ev) && !mIsBeingDragged) {
             return false;
         }
         mForcedScroll = null;
@@ -3891,26 +3878,11 @@ public class NotificationStackScrollLayout
         return mFlingAfterUpEvent;
     }
 
-    /** Is this touch event inside the scrollable region? */
-    @VisibleForTesting
-    boolean isInScrollableRegion(MotionEvent ev) {
-        if (!SceneContainerFlag.isEnabled()) {
-            return !isInsideQsHeader(ev);
-        }
-        ShadeScrimShape shape = mScrollViewFields.getScrimClippingShape();
-        if (shape == null) {
-            return true; // When there is no scrim, consider this event scrollable.
-        }
-
-        ShadeScrimBounds bounds = shape.getBounds();
-        return ev.getX() >= bounds.getLeft()
-                && ev.getX() <= bounds.getRight()
-                && ev.getY() >= bounds.getTop()
-                && ev.getY() <= bounds.getBottom();
-    }
-
     protected boolean isInsideQsHeader(MotionEvent ev) {
-        SceneContainerFlag.assertInLegacyMode();
+        if (SceneContainerFlag.isEnabled()) {
+            return ev.getY() < mAmbientState.getStackTop();
+        }
+
         if (QSComposeFragment.isEnabled()) {
             if (mQSHeaderBoundsProvider == null) {
                 return false;

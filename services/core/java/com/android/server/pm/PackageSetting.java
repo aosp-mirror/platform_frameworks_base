@@ -42,7 +42,6 @@ import android.service.pm.PackageProto.UserInfoProto.ArchiveState.ArchiveActivit
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-import android.util.IntArray;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 
@@ -982,23 +981,39 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
     }
 
     int[] queryInstalledUsers(int[] users, boolean installed) {
-        IntArray installedUsers = new IntArray(users.length);
+        int num = 0;
         for (int user : users) {
             if (getInstalled(user) == installed) {
-                installedUsers.add(user);
+                num++;
             }
         }
-        return installedUsers.toArray();
+        int[] res = new int[num];
+        num = 0;
+        for (int user : users) {
+            if (getInstalled(user) == installed) {
+                res[num] = user;
+                num++;
+            }
+        }
+        return res;
     }
 
     int[] queryUsersInstalledOrHasData(int[] users) {
-        IntArray usersInstalledOrHasData = new IntArray(users.length);
+        int num = 0;
         for (int user : users) {
             if (getInstalled(user) || readUserState(user).dataExists()) {
-                usersInstalledOrHasData.add(user);
+                num++;
             }
         }
-        return usersInstalledOrHasData.toArray();
+        int[] res = new int[num];
+        num = 0;
+        for (int user : users) {
+            if (getInstalled(user) || readUserState(user).dataExists()) {
+                res[num] = user;
+                num++;
+            }
+        }
+        return res;
     }
 
     long getCeDataInode(int userId) {
@@ -1268,14 +1283,25 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
     }
 
     public int[] getNotInstalledUserIds() {
+        int count = 0;
         int userStateCount = mUserStates.size();
-        IntArray notInstalledUsers = new IntArray(userStateCount);
         for (int i = 0; i < userStateCount; i++) {
             if (!mUserStates.valueAt(i).isInstalled()) {
-                notInstalledUsers.add(mUserStates.keyAt(i));
+                count++;
             }
         }
-        return notInstalledUsers.toArray();
+        if (count == 0) {
+            return EmptyArray.INT;
+        }
+
+        int[] excludedUserIds = new int[count];
+        int idx = 0;
+        for (int i = 0; i < userStateCount; i++) {
+            if (!mUserStates.valueAt(i).isInstalled()) {
+                excludedUserIds[idx++] = mUserStates.keyAt(i);
+            }
+        }
+        return excludedUserIds;
     }
 
     /**

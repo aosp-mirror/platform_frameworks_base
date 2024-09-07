@@ -37,13 +37,9 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.Executor;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Stream;
 
 /**
  * Benchmarks for {@link android.content.om.OverlayManager}.
@@ -53,6 +49,7 @@ public class OverlayManagerPerfTest {
     private static final int OVERLAY_PKG_COUNT = 10;
     private static Context sContext;
     private static OverlayManager sOverlayManager;
+    private static Executor sExecutor;
     private static ArrayList<TestPackageInstaller.InstalledPackage> sSmallOverlays =
             new ArrayList<>();
     private static ArrayList<TestPackageInstaller.InstalledPackage> sLargeOverlays =
@@ -61,45 +58,18 @@ public class OverlayManagerPerfTest {
     @Rule
     public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
-    // Uncheck the checked exceptions in a callable for convenient stream usage.
-    // Any exception will fail the test anyway.
-    private static <T> T uncheck(Callable<T> c) {
-        try {
-            return c.call();
-        } catch (RuntimeException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     @BeforeClass
     public static void classSetUp() throws Exception {
         sContext = InstrumentationRegistry.getTargetContext();
         sOverlayManager = new OverlayManager(sContext);
+        sExecutor = (command) -> new Thread(command).start();
 
-        // Install all of the test overlays. Play Protect likes to block these for 10 sec each
-        // so let's install them in parallel to speed up the wait.
-        final var installer = new TestPackageInstaller(sContext);
-        final var es = Executors.newFixedThreadPool(2 * OVERLAY_PKG_COUNT);
-        final var smallFutures = new ArrayList<Future<TestPackageInstaller.InstalledPackage>>(
-                OVERLAY_PKG_COUNT);
-        final var largeFutures = new ArrayList<Future<TestPackageInstaller.InstalledPackage>>(
-                OVERLAY_PKG_COUNT);
+        // Install all of the test overlays.
+        TestPackageInstaller installer = new TestPackageInstaller(sContext);
         for (int i = 0; i < OVERLAY_PKG_COUNT; i++) {
-            final var index = i;
-            smallFutures.add(es.submit(() -> installer.installPackage("Overlay" + index + ".apk")));
-            largeFutures.add(
-                    es.submit(() -> installer.installPackage("LargeOverlay" + index + ".apk")));
+            sSmallOverlays.add(installer.installPackage("Overlay" + i +".apk"));
+            sLargeOverlays.add(installer.installPackage("LargeOverlay" + i +".apk"));
         }
-        es.shutdown();
-        assertTrue(es.awaitTermination(15 * 2 * OVERLAY_PKG_COUNT, TimeUnit.SECONDS));
-        sSmallOverlays.addAll(smallFutures.stream().map(f -> uncheck(f::get)).sorted(
-                Comparator.comparing(
-                        TestPackageInstaller.InstalledPackage::getPackageName)).toList());
-        sLargeOverlays.addAll(largeFutures.stream().map(f -> uncheck(f::get)).sorted(
-                Comparator.comparing(
-                        TestPackageInstaller.InstalledPackage::getPackageName)).toList());
     }
 
     @AfterClass
@@ -107,6 +77,7 @@ public class OverlayManagerPerfTest {
         for (TestPackageInstaller.InstalledPackage overlay : sSmallOverlays) {
             overlay.uninstall();
         }
+
         for (TestPackageInstaller.InstalledPackage overlay : sLargeOverlays) {
             overlay.uninstall();
         }
@@ -115,39 +86,37 @@ public class OverlayManagerPerfTest {
     @After
     public void tearDown() throws Exception {
         // Disable all test overlays after each test.
-        assertSetEnabled(false, sContext,
-                Stream.concat(sSmallOverlays.stream(), sLargeOverlays.stream()).map(
-                        p -> p.getPackageName()));
+        for (TestPackageInstaller.InstalledPackage overlay : sSmallOverlays) {
+            assertSetEnabled(sContext, overlay.getPackageName(), false);
+        }
+
+        for (TestPackageInstaller.InstalledPackage overlay : sLargeOverlays) {
+            assertSetEnabled(sContext, overlay.getPackageName(), false);
+        }
     }
 
     /**
-     * Enables the overlay and waits for the APK path changes to be propagated to the context
+     * Enables the overlay and waits for the APK path change sto be propagated to the context
      * AssetManager.
      */
-    private void assertSetEnabled(boolean enabled, Context context, Stream<String> packagesStream) {
-        final var overlayPackages = packagesStream.toList();
-        overlayPackages.forEach(
-                name -> sOverlayManager.setEnabled(name, enabled, UserHandle.SYSTEM));
+    private void assertSetEnabled(Context context, String overlayPackage, boolean eanabled)
+            throws Exception {
+        sOverlayManager.setEnabled(overlayPackage, true, UserHandle.SYSTEM);
 
         // Wait for the overlay changes to propagate
-        final var endTime = System.nanoTime() + TimeUnit.SECONDS.toNanos(20);
-        final var expectedPackagesFound = enabled ? overlayPackages.size() : 0;
-        boolean assetsUpdated = false;
-        do {
-            final var packagesFound = Arrays.stream(context.getAssets().getApkPaths()).filter(
-                    assetPath -> overlayPackages.stream().anyMatch(assetPath::contains)).count();
-            if (packagesFound == expectedPackagesFound) {
-                assetsUpdated = true;
-                break;
+        FutureTask<Boolean> task = new FutureTask<>(() -> {
+            while (true) {
+                for (String path : context.getAssets().getApkPaths()) {
+                    if (eanabled == path.contains(overlayPackage)) {
+                        return true;
+                    }
+                }
             }
-            Thread.yield();
-        } while (System.nanoTime() < endTime);
-        assertTrue("Failed to set state to " + enabled + " for overlays " + overlayPackages,
-                assetsUpdated);
-    }
+        });
 
-    private void assertSetEnabled(boolean enabled, Context context, String overlayPackage) {
-        assertSetEnabled(enabled, context, Stream.of(overlayPackage));
+        sExecutor.execute(task);
+        assertTrue("Failed to load overlay " + overlayPackage,
+                task.get(20, TimeUnit.SECONDS));
     }
 
     @Test
@@ -155,11 +124,11 @@ public class OverlayManagerPerfTest {
         String packageName = sSmallOverlays.get(0).getPackageName();
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
-            assertSetEnabled(true, sContext, packageName);
+            assertSetEnabled(sContext, packageName, true);
 
             // Disable the overlay for the next iteration of the test
             state.pauseTiming();
-            assertSetEnabled(false, sContext, packageName);
+            assertSetEnabled(sContext, packageName, false);
             state.resumeTiming();
         }
     }
@@ -169,11 +138,11 @@ public class OverlayManagerPerfTest {
         String packageName = sSmallOverlays.get(0).getPackageName();
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
-            assertSetEnabled(true, sContext, packageName);
+            assertSetEnabled(sContext, packageName, true);
 
             // Disable the overlay and remove the idmap for the next iteration of the test
             state.pauseTiming();
-            assertSetEnabled(false, sContext, packageName);
+            assertSetEnabled(sContext, packageName, false);
             sOverlayManager.invalidateCachesForOverlay(packageName, UserHandle.SYSTEM);
             state.resumeTiming();
         }
@@ -184,11 +153,11 @@ public class OverlayManagerPerfTest {
         String packageName = sLargeOverlays.get(0).getPackageName();
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
-            assertSetEnabled(true, sContext, packageName);
+            assertSetEnabled(sContext, packageName, true);
 
             // Disable the overlay and remove the idmap for the next iteration of the test
             state.pauseTiming();
-            assertSetEnabled(false, sContext, packageName);
+            assertSetEnabled(sContext, packageName, false);
             sOverlayManager.invalidateCachesForOverlay(packageName, UserHandle.SYSTEM);
             state.resumeTiming();
         }
@@ -200,28 +169,30 @@ public class OverlayManagerPerfTest {
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             state.pauseTiming();
-            assertSetEnabled(true, sContext, packageName);
+            assertSetEnabled(sContext, packageName, true);
             state.resumeTiming();
 
-            assertSetEnabled(false, sContext, packageName);
+            assertSetEnabled(sContext, packageName, false);
         }
     }
 
     @Test
     public void getStringOneSmallOverlay() throws Exception {
         String packageName = sSmallOverlays.get(0).getPackageName();
-        assertSetEnabled(true, sContext, packageName);
+        assertSetEnabled(sContext, packageName, true);
 
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             sContext.getString(R.string.short_text);
         }
+
+        assertSetEnabled(sContext, packageName, false);
     }
 
     @Test
     public void getStringOneLargeOverlay() throws Exception {
         String packageName = sLargeOverlays.get(0).getPackageName();
-        assertSetEnabled(true, sContext, packageName);
+        assertSetEnabled(sContext, packageName, true);
 
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
@@ -229,12 +200,16 @@ public class OverlayManagerPerfTest {
                 sContext.getString(resId);
             }
         }
+
+        assertSetEnabled(sContext, packageName, false);
     }
 
     @Test
     public void getStringTenOverlays() throws Exception {
-        // Enable all small test overlays
-        assertSetEnabled(true, sContext, sSmallOverlays.stream().map(p -> p.getPackageName()));
+        // Enable all test overlays
+        for (TestPackageInstaller.InstalledPackage overlay : sSmallOverlays) {
+            assertSetEnabled(sContext, overlay.getPackageName(), true);
+        }
 
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
@@ -244,8 +219,10 @@ public class OverlayManagerPerfTest {
 
     @Test
     public void getStringLargeTenOverlays() throws Exception {
-        // Enable all large test overlays
-        assertSetEnabled(true, sContext, sLargeOverlays.stream().map(p -> p.getPackageName()));
+        // Enable all test overlays
+        for (TestPackageInstaller.InstalledPackage overlay : sLargeOverlays) {
+            assertSetEnabled(sContext, overlay.getPackageName(), true);
+        }
 
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {

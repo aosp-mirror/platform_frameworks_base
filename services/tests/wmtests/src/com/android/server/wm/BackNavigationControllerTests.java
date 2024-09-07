@@ -110,7 +110,6 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         mWindowManagerInternal = mock(WindowManagerInternal.class);
         LocalServices.addService(WindowManagerInternal.class, mWindowManagerInternal);
         mBackAnimationAdapter = mock(BackAnimationAdapter.class);
-        doReturn(true).when(mBackAnimationAdapter).isAnimatable(anyInt());
         mNavigationMonitor = mock(BackNavigationController.NavigationMonitor.class);
         mRootHomeTask = initHomeActivity();
     }

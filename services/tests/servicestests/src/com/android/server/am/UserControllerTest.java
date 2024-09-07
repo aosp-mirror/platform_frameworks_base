@@ -90,7 +90,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IRemoteCallback;
-import android.os.IpcDataCache;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManagerInternal;
@@ -198,9 +197,6 @@ public class UserControllerTest {
     @Before
     public void setUp() throws Exception {
         runWithDexmakerShareClassLoader(() -> {
-            // Disable binder caches in this process.
-            IpcDataCache.disableForTestMode();
-
             mInjector = spy(new TestInjector(getInstrumentation().getTargetContext()));
             doNothing().when(mInjector).clearAllLockedTasks(anyString());
             doNothing().when(mInjector).startHomeActivity(anyInt(), anyString());

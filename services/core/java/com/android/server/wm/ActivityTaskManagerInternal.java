@@ -380,16 +380,7 @@ public abstract class ActivityTaskManagerInternal {
     public abstract void onPackageAdded(String name, boolean replacing);
     public abstract void onPackageReplaced(ApplicationInfo aInfo);
 
-    /** The data for IApplicationThread#bindApplication. */
-    public static final class PreBindInfo {
-        public final @NonNull CompatibilityInfo compatibilityInfo;
-        public final @NonNull Configuration configuration;
-
-        PreBindInfo(@NonNull CompatibilityInfo compatInfo, @NonNull Configuration config) {
-            compatibilityInfo = compatInfo;
-            configuration = config;
-        }
-    }
+    public abstract CompatibilityInfo compatibilityInfoForPackage(ApplicationInfo ai);
 
     public final class ActivityTokens {
         private final @NonNull IBinder mActivityToken;
@@ -511,9 +502,7 @@ public abstract class ActivityTaskManagerInternal {
     public abstract void resumeTopActivities(boolean scheduleIdle);
 
     /** Called by AM just before it binds to an application process. */
-    @NonNull
-    public abstract PreBindInfo preBindApplication(@NonNull WindowProcessController wpc,
-            @NonNull ApplicationInfo info);
+    public abstract void preBindApplication(WindowProcessController wpc);
 
     /** Called by AM when an application process attaches. */
     public abstract boolean attachApplication(WindowProcessController wpc) throws RemoteException;
