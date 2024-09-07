@@ -32,11 +32,11 @@ import static android.content.Intent.EXTRA_USER;
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
-import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_FULLSCREEN;
-import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPLIT_BOTTOM;
-import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPLIT_LEFT;
-import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPLIT_RIGHT;
-import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPLIT_TOP;
+import static com.android.wm.shell.draganddrop.SplitDragPolicy.Target.TYPE_FULLSCREEN;
+import static com.android.wm.shell.draganddrop.SplitDragPolicy.Target.TYPE_SPLIT_BOTTOM;
+import static com.android.wm.shell.draganddrop.SplitDragPolicy.Target.TYPE_SPLIT_LEFT;
+import static com.android.wm.shell.draganddrop.SplitDragPolicy.Target.TYPE_SPLIT_RIGHT;
+import static com.android.wm.shell.draganddrop.SplitDragPolicy.Target.TYPE_SPLIT_TOP;
 import static com.android.wm.shell.shared.draganddrop.DragAndDropConstants.EXTRA_DISALLOW_HIT_REGION;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
@@ -80,9 +80,9 @@ import java.util.ArrayList;
 /**
  * The policy for handling drag and drop operations to shell.
  */
-public class DragAndDropPolicy {
+public class SplitDragPolicy implements DropTarget {
 
-    private static final String TAG = DragAndDropPolicy.class.getSimpleName();
+    private static final String TAG = SplitDragPolicy.class.getSimpleName();
 
     private final Context mContext;
     // Used only for launching a fullscreen task (or as a fallback if there is no split starter)
@@ -90,18 +90,18 @@ public class DragAndDropPolicy {
     // Used for launching tasks into splitscreen
     private final Starter mSplitscreenStarter;
     private final SplitScreenController mSplitScreen;
-    private final ArrayList<DragAndDropPolicy.Target> mTargets = new ArrayList<>();
+    private final ArrayList<SplitDragPolicy.Target> mTargets = new ArrayList<>();
     private final RectF mDisallowHitRegion = new RectF();
 
     private InstanceId mLoggerSessionId;
     private DragSession mSession;
 
-    public DragAndDropPolicy(Context context, SplitScreenController splitScreen) {
+    public SplitDragPolicy(Context context, SplitScreenController splitScreen) {
         this(context, splitScreen, new DefaultStarter(context));
     }
 
     @VisibleForTesting
-    DragAndDropPolicy(Context context, SplitScreenController splitScreen,
+    SplitDragPolicy(Context context, SplitScreenController splitScreen,
             Starter fullscreenStarter) {
         mContext = context;
         mSplitScreen = splitScreen;
@@ -112,7 +112,7 @@ public class DragAndDropPolicy {
     /**
      * Starts a new drag session with the given initial drag data.
      */
-    void start(DragSession session, InstanceId loggerSessionId) {
+    public void start(DragSession session, InstanceId loggerSessionId) {
         mLoggerSessionId = loggerSessionId;
         mSession = session;
         RectF disallowHitRegion = mSession.appData != null
@@ -128,7 +128,8 @@ public class DragAndDropPolicy {
     /**
      * Returns the number of targets.
      */
-    int getNumTargets() {
+    @Override
+    public int getNumTargets() {
         return mTargets.size();
     }
 
@@ -136,7 +137,8 @@ public class DragAndDropPolicy {
      * Returns the target's regions based on the current state of the device and display.
      */
     @NonNull
-    ArrayList<Target> getTargets(Insets insets) {
+    @Override
+    public ArrayList<Target> getTargets(@NonNull Insets insets) {
         mTargets.clear();
         if (mSession == null) {
             // Return early if this isn't an app drag
@@ -222,12 +224,12 @@ public class DragAndDropPolicy {
      * Returns the target at the given position based on the targets previously calculated.
      */
     @Nullable
-    Target getTargetAtLocation(int x, int y) {
+    public Target getTargetAtLocation(int x, int y) {
         if (mDisallowHitRegion.contains(x, y)) {
             return null;
         }
         for (int i = mTargets.size() - 1; i >= 0; i--) {
-            DragAndDropPolicy.Target t = mTargets.get(i);
+            SplitDragPolicy.Target t = mTargets.get(i);
             if (t.hitRegion.contains(x, y)) {
                 return t;
             }
@@ -241,7 +243,7 @@ public class DragAndDropPolicy {
      * container transaction if possible.
      */
     @VisibleForTesting
-    void handleDrop(Target target, @Nullable WindowContainerToken hideTaskToken) {
+    public void onDropped(Target target, @Nullable WindowContainerToken hideTaskToken) {
         if (target == null || !mTargets.contains(target)) {
             return;
         }
@@ -419,8 +421,9 @@ public class DragAndDropPolicy {
 
     /**
      * Represents a drop target.
+     * TODO(b/349828130): Move this into {@link DropTarget}
      */
-    static class Target {
+    public static class Target {
         static final int TYPE_FULLSCREEN = 0;
         static final int TYPE_SPLIT_LEFT = 1;
         static final int TYPE_SPLIT_TOP = 2;

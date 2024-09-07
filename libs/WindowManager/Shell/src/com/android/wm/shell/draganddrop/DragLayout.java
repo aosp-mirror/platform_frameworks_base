@@ -23,10 +23,10 @@ import static android.content.pm.ActivityInfo.CONFIG_UI_MODE;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION;
 
-import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPLIT_BOTTOM;
-import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPLIT_LEFT;
-import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPLIT_RIGHT;
-import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPLIT_TOP;
+import static com.android.wm.shell.draganddrop.SplitDragPolicy.Target.TYPE_SPLIT_BOTTOM;
+import static com.android.wm.shell.draganddrop.SplitDragPolicy.Target.TYPE_SPLIT_LEFT;
+import static com.android.wm.shell.draganddrop.SplitDragPolicy.Target.TYPE_SPLIT_RIGHT;
+import static com.android.wm.shell.draganddrop.SplitDragPolicy.Target.TYPE_SPLIT_TOP;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
 
@@ -47,6 +47,7 @@ import android.graphics.Region;
 import android.graphics.drawable.Drawable;
 import android.view.DragEvent;
 import android.view.SurfaceControl;
+import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.WindowInsets;
 import android.view.WindowInsets.Type;
@@ -66,13 +67,13 @@ import com.android.wm.shell.shared.animation.Interpolators;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 
 import java.io.PrintWriter;
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Coordinates the visible drop targets for the current drag within a single display.
  */
 public class DragLayout extends LinearLayout
-        implements ViewTreeObserver.OnComputeInternalInsetsListener {
+        implements ViewTreeObserver.OnComputeInternalInsetsListener, DragLayoutProvider {
 
     // While dragging the status bar is hidden.
     private static final int HIDE_STATUS_BAR_FLAGS = StatusBarManager.DISABLE_NOTIFICATION_ICONS
@@ -80,7 +81,7 @@ public class DragLayout extends LinearLayout
             | StatusBarManager.DISABLE_CLOCK
             | StatusBarManager.DISABLE_SYSTEM_INFO;
 
-    private final DragAndDropPolicy mPolicy;
+    private final DropTarget mPolicy;
     private final SplitScreenController mSplitScreenController;
     private final IconProvider mIconProvider;
     private final StatusBarManager mStatusBarManager;
@@ -91,7 +92,7 @@ public class DragLayout extends LinearLayout
     // Whether the device is currently in left/right split mode
     private boolean mIsLeftRightSplit;
 
-    private DragAndDropPolicy.Target mCurrentTarget = null;
+    private SplitDragPolicy.Target mCurrentTarget = null;
     private DropZoneView mDropZoneView1;
     private DropZoneView mDropZoneView2;
 
@@ -113,7 +114,7 @@ public class DragLayout extends LinearLayout
         super(context);
         mSplitScreenController = splitScreenController;
         mIconProvider = iconProvider;
-        mPolicy = new DragAndDropPolicy(context, splitScreenController);
+        mPolicy = new SplitDragPolicy(context, splitScreenController);
         mStatusBarManager = context.getSystemService(StatusBarManager.class);
         mLastConfiguration.setTo(context.getResources().getConfiguration());
 
@@ -387,6 +388,13 @@ public class DragLayout extends LinearLayout
         recomputeDropTargets();
     }
 
+    @NonNull
+    @Override
+    public void addDraggingView(ViewGroup rootView) {
+        // TODO(b/349828130) We need to separate out view + logic here
+        rootView.addView(this, new ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT));
+    }
+
     /**
      * Recalculates the drop targets based on the current policy.
      */
@@ -394,9 +402,9 @@ public class DragLayout extends LinearLayout
         if (!mIsShowing) {
             return;
         }
-        final ArrayList<DragAndDropPolicy.Target> targets = mPolicy.getTargets(mInsets);
+        final List<SplitDragPolicy.Target> targets = mPolicy.getTargets(mInsets);
         for (int i = 0; i < targets.size(); i++) {
-            final DragAndDropPolicy.Target target = targets.get(i);
+            final SplitDragPolicy.Target target = targets.get(i);
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DRAG_AND_DROP, "Add target: %s", target);
             // Inset the draw region by a little bit
             target.drawRegion.inset(mDisplayMargin, mDisplayMargin);
@@ -419,7 +427,7 @@ public class DragLayout extends LinearLayout
         }
         // Find containing region, if the same as mCurrentRegion, then skip, otherwise, animate the
         // visibility of the current region
-        DragAndDropPolicy.Target target = mPolicy.getTargetAtLocation(x, y);
+        SplitDragPolicy.Target target = mPolicy.getTargetAtLocation(x, y);
         if (mCurrentTarget != target) {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DRAG_AND_DROP, "Current target: %s", target);
             if (target == null) {
@@ -493,7 +501,7 @@ public class DragLayout extends LinearLayout
         mHasDropped = true;
 
         // Process the drop
-        mPolicy.handleDrop(mCurrentTarget, hideTaskToken);
+        mPolicy.onDropped(mCurrentTarget, hideTaskToken);
 
         // Start animating the drop UI out with the drag surface
         hide(event, dropCompleteCallback);
@@ -576,7 +584,7 @@ public class DragLayout extends LinearLayout
         }
     }
 
-    private void animateHighlight(DragAndDropPolicy.Target target) {
+    private void animateHighlight(SplitDragPolicy.Target target) {
         if (target.type == TYPE_SPLIT_LEFT || target.type == TYPE_SPLIT_TOP) {
             mDropZoneView1.setShowingHighlight(true);
             mDropZoneView2.setShowingHighlight(false);
