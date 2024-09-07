@@ -76,6 +76,7 @@ import com.android.systemui.media.controls.shared.model.MediaAction
 import com.android.systemui.media.controls.shared.model.MediaButton
 import com.android.systemui.media.controls.shared.model.MediaData
 import com.android.systemui.media.controls.shared.model.MediaDeviceData
+import com.android.systemui.media.controls.shared.model.MediaNotificationAction
 import com.android.systemui.media.controls.shared.model.SmartspaceMediaData
 import com.android.systemui.media.controls.shared.model.SmartspaceMediaDataProvider
 import com.android.systemui.media.controls.ui.view.MediaViewHolder
@@ -943,7 +944,7 @@ class LegacyMediaDataManagerImpl(
                     desc.subtitle,
                     desc.title,
                     artworkIcon,
-                    listOf(mediaAction),
+                    listOf(),
                     listOf(0),
                     MediaButton(playOrPause = mediaAction),
                     packageName,
@@ -1074,13 +1075,13 @@ class LegacyMediaDataManagerImpl(
         }
 
         // Control buttons
-        // If flag is enabled and controller has a PlaybackState, create actions from session info
+        // If controller has a PlaybackState, create actions from session info
         // Otherwise, use the notification actions
-        var actionIcons: List<MediaAction> = emptyList()
+        var actionIcons: List<MediaNotificationAction> = emptyList()
         var actionsToShowCollapsed: List<Int> = emptyList()
         val semanticActions = createActionsFromState(sbn.packageName, mediaController, sbn.user)
         if (semanticActions == null) {
-            val actions = createActionsFromNotification(context, activityStarter, sbn)
+            val actions = createActionsFromNotification(context, sbn)
             actionIcons = actions.first
             actionsToShowCollapsed = actions.second
         }
@@ -1464,7 +1465,7 @@ class LegacyMediaDataManagerImpl(
         val updated =
             data.copy(
                 token = null,
-                actions = actions,
+                actions = listOf(),
                 semanticActions = MediaButton(playOrPause = resumeAction),
                 actionsToShowInCompact = listOf(0),
                 active = false,

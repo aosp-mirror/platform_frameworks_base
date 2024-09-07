@@ -184,9 +184,12 @@ class ImplGeneratingAdapter(
                     return IgnoreMethodAdapter(descriptor, forceCreateBody, innerVisitor)
                         .withAnnotation(HostStubGenProcessedAsIgnore.CLASS_DESCRIPTOR)
                 }
-                FilterPolicy.NativeSubstitute -> {
-                    log.v("Rewriting native method...")
-                    return NativeSubstitutingMethodAdapter(access, name, descriptor, innerVisitor)
+                FilterPolicy.Redirect -> {
+                    log.v("Redirecting method...")
+                    return RedirectMethodAdapter(
+                        access, name, descriptor,
+                        forceCreateBody, innerVisitor
+                    )
                         .withAnnotation(HostStubGenProcessedAsSubstitute.CLASS_DESCRIPTOR)
                 }
                 else -> {}
@@ -274,15 +277,16 @@ class ImplGeneratingAdapter(
     }
 
     /**
-     * A method adapter that rewrite a native method body with a
-     * call to a method in the "native substitution" class.
+     * A method adapter that rewrite a method body with a
+     * call to a method in the redirection class.
      */
-    private inner class NativeSubstitutingMethodAdapter(
+    private inner class RedirectMethodAdapter(
         access: Int,
         private val name: String,
         private val descriptor: String,
+        createBody: Boolean,
         next: MethodVisitor?
-    ) : BodyReplacingMethodVisitor(true, next) {
+    ) : BodyReplacingMethodVisitor(createBody, next) {
 
         private val isStatic = (access and Opcodes.ACC_STATIC) != 0
 
@@ -290,7 +294,7 @@ class ImplGeneratingAdapter(
             var targetDescriptor = descriptor
             var argOffset = 0
 
-            // For non-static native method, we need to tweak it a bit.
+            // For non-static method, we need to tweak it a bit.
             if (!isStatic) {
                 // Push `this` as the first argument.
                 this.visitVarInsn(Opcodes.ALOAD, 0)
@@ -310,7 +314,7 @@ class ImplGeneratingAdapter(
 
             visitMethodInsn(
                 INVOKESTATIC,
-                nativeSubstitutionClass,
+                redirectionClass,
                 name,
                 targetDescriptor,
                 false

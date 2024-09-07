@@ -199,4 +199,13 @@ public final class StageTaskListenerTests extends ShellTestCase {
         assertThat(mStageTaskListener.removeTask(task.taskId, null, mWct)).isTrue();
         verify(mWct).reparent(eq(task.token), isNull(), eq(false));
     }
+
+    @Test
+    public void testActiveDeactivate() {
+        mStageTaskListener.activate(mWct, true /* reparent */);
+        assertThat(mStageTaskListener.isActive()).isTrue();
+
+        mStageTaskListener.deactivate(mWct);
+        assertThat(mStageTaskListener.isActive()).isFalse();
+    }
 }

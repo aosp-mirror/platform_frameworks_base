@@ -19,8 +19,9 @@ package android.os;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.TestApi;
-import android.os.Handler;
-import android.os.Trace;
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
+import android.ravenwood.annotation.RavenwoodRedirect;
+import android.ravenwood.annotation.RavenwoodRedirectionClass;
 import android.util.Log;
 import android.util.Printer;
 import android.util.SparseArray;
@@ -37,8 +38,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.PriorityQueue;
-import java.util.PriorityQueue;
-import java.util.PriorityQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -50,8 +49,8 @@ import java.util.concurrent.atomic.AtomicLong;
  * <p>You can retrieve the MessageQueue for the current thread with
  * {@link Looper#myQueue() Looper.myQueue()}.
  */
-@android.ravenwood.annotation.RavenwoodKeepWholeClass
-@android.ravenwood.annotation.RavenwoodNativeSubstitutionClass(
+@RavenwoodKeepWholeClass
+@RavenwoodRedirectionClass(
         "com.android.platform.test.ravenwood.nativesubstitution.MessageQueue_host")
 public final class MessageQueue {
     private static final String TAG = "SemiConcurrentMessageQueue";
@@ -338,11 +337,17 @@ public final class MessageQueue {
     // Barriers are indicated by messages with a null target whose arg1 field carries the token.
     private final AtomicInteger mNextBarrierToken = new AtomicInteger(1);
 
+    @RavenwoodRedirect
     private static native long nativeInit();
+    @RavenwoodRedirect
     private static native void nativeDestroy(long ptr);
+    @RavenwoodRedirect
     private native void nativePollOnce(long ptr, int timeoutMillis); /*non-static for callbacks*/
+    @RavenwoodRedirect
     private static native void nativeWake(long ptr);
+    @RavenwoodRedirect
     private static native boolean nativeIsPolling(long ptr);
+    @RavenwoodRedirect
     private static native void nativeSetFileDescriptorEvents(long ptr, int fd, int events);
 
     MessageQueue(boolean quitAllowed) {

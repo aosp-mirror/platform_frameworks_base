@@ -16,14 +16,15 @@
 package com.android.internal.ravenwood;
 
 import android.ravenwood.annotation.RavenwoodKeepWholeClass;
-import android.ravenwood.annotation.RavenwoodNativeSubstitutionClass;
+import android.ravenwood.annotation.RavenwoodRedirect;
+import android.ravenwood.annotation.RavenwoodRedirectionClass;
 import android.ravenwood.annotation.RavenwoodReplace;
 
 /**
  * Class to interact with the Ravenwood environment.
  */
 @RavenwoodKeepWholeClass
-@RavenwoodNativeSubstitutionClass(
+@RavenwoodRedirectionClass(
         "com.android.platform.test.ravenwood.nativesubstitution.RavenwoodEnvironment_host")
 public final class RavenwoodEnvironment {
     public static final String TAG = "RavenwoodEnvironment";
@@ -40,7 +41,7 @@ public final class RavenwoodEnvironment {
         ensureRavenwoodInitialized();
     }
 
-    private static RuntimeException notSupportedOnDevice() {
+    public static RuntimeException notSupportedOnDevice() {
         return new UnsupportedOperationException("This method can only be used on Ravenwood");
     }
 
@@ -56,12 +57,8 @@ public final class RavenwoodEnvironment {
      *
      * No-op if called on the device side.
      */
-    @RavenwoodReplace
+    @RavenwoodRedirect
     public static void ensureRavenwoodInitialized() {
-    }
-
-    private static void ensureRavenwoodInitialized$ravenwood() {
-        nativeEnsureRavenwoodInitialized();
     }
 
     /**
@@ -89,13 +86,9 @@ public final class RavenwoodEnvironment {
      * Get the object back from the address obtained from
      * {@link dalvik.system.VMRuntime#addressOf(Object)}.
      */
-    @RavenwoodReplace
+    @RavenwoodRedirect
     public <T> T fromAddress(long address) {
         throw notSupportedOnDevice();
-    }
-
-    private <T> T fromAddress$ravenwood(long address) {
-        return nativeFromAddress(address);
     }
 
     /**
@@ -113,19 +106,10 @@ public final class RavenwoodEnvironment {
     /**
      * @return the "ravenwood-runtime" directory.
      */
-    @RavenwoodReplace
+    @RavenwoodRedirect
     public String getRavenwoodRuntimePath() {
         throw notSupportedOnDevice();
     }
-
-    private String getRavenwoodRuntimePath$ravenwood() {
-        return nativeGetRavenwoodRuntimePath();
-    }
-
-    // Private native methods that are actually substituted on Ravenwood
-    private native <T> T nativeFromAddress(long address);
-    private native String nativeGetRavenwoodRuntimePath();
-    private static native void nativeEnsureRavenwoodInitialized();
 
     /**
      * A set of APIs used to work around missing features on Ravenwood. Ideally, this class should

@@ -1396,3 +1396,9 @@ flag {
     }
 }
 
+flag {
+   name: "non_touchscreen_devices_bypass_falsing"
+   namespace: "systemui"
+   description: "Allow non-touchscreen devices to bypass falsing"
+   bug: "319809270"
+}

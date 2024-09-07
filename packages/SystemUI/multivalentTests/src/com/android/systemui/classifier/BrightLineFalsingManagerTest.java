@@ -95,6 +95,7 @@ public class BrightLineFalsingManagerTest extends SysuiTestCase {
         when(mFalsingDataProvider.getRecentMotionEvents()).thenReturn(mMotionEventList);
         when(mKeyguardStateController.isShowing()).thenReturn(true);
         when(mFalsingDataProvider.isUnfolded()).thenReturn(false);
+        when(mFalsingDataProvider.isTouchScreenSource()).thenReturn(true);
         mBrightLineFalsingManager = new BrightLineFalsingManager(mFalsingDataProvider,
                 mMetricsLogger, mClassifiers, mSingleTapClassifier, mLongTapClassifier,
                 mDoubleTapClassifier, mHistoryTracker, mKeyguardStateController,
@@ -189,6 +190,13 @@ public class BrightLineFalsingManagerTest extends SysuiTestCase {
     public void testSkipUnfolded() {
         assertThat(mBrightLineFalsingManager.isFalseTouch(Classifier.GENERIC)).isTrue();
         when(mFalsingDataProvider.isUnfolded()).thenReturn(true);
+        assertThat(mBrightLineFalsingManager.isFalseTouch(Classifier.GENERIC)).isFalse();
+    }
+
+    @Test
+    public void testSkipNonTouchscreenDevices() {
+        assertThat(mBrightLineFalsingManager.isFalseTouch(Classifier.GENERIC)).isTrue();
+        when(mFalsingDataProvider.isTouchScreenSource()).thenReturn(false);
         assertThat(mBrightLineFalsingManager.isFalseTouch(Classifier.GENERIC)).isFalse();
     }
 

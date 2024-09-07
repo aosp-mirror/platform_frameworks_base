@@ -1456,21 +1456,21 @@ public class SubscriptionManager {
     public static final int SERVICE_CAPABILITY_MAX = SERVICE_CAPABILITY_DATA;
 
     /**
-     * Bitmask for {@code SERVICE_CAPABILITY_VOICE}.
+     * Bitmask for {@link #SERVICE_CAPABILITY_VOICE}.
      * @hide
      */
     public static final int SERVICE_CAPABILITY_VOICE_BITMASK =
             serviceCapabilityToBitmask(SERVICE_CAPABILITY_VOICE);
 
     /**
-     * Bitmask for {@code SERVICE_CAPABILITY_SMS}.
+     * Bitmask for {@link #SERVICE_CAPABILITY_SMS}.
      * @hide
      */
     public static final int SERVICE_CAPABILITY_SMS_BITMASK =
             serviceCapabilityToBitmask(SERVICE_CAPABILITY_SMS);
 
     /**
-     * Bitmask for {@code SERVICE_CAPABILITY_DATA}.
+     * Bitmask for {@link #SERVICE_CAPABILITY_DATA}.
      * @hide
      */
     public static final int SERVICE_CAPABILITY_DATA_BITMASK =
