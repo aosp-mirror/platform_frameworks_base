@@ -38,6 +38,7 @@ import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.WindowConfiguration.WindowingMode;
+import android.app.assist.AssistContent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
@@ -76,6 +77,7 @@ import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.apptoweb.AppToWebGenericLinksParser;
 import com.android.wm.shell.apptoweb.AppToWebUtils;
+import com.android.wm.shell.apptoweb.AssistContentRequester;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.MultiInstanceHelper;
@@ -151,6 +153,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     private CharSequence mAppName;
     private CapturedLink mCapturedLink;
     private Uri mGenericLink;
+    private Uri mWebUri;
     private Consumer<Uri> mOpenInBrowserClickListener;
 
     private ExclusionRegionListener mExclusionRegionListener;
@@ -159,6 +162,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     private final MaximizeMenuFactory mMaximizeMenuFactory;
     private final HandleMenuFactory mHandleMenuFactory;
     private final AppToWebGenericLinksParser mGenericLinksParser;
+    private final AssistContentRequester mAssistContentRequester;
 
     // Hover state for the maximize menu and button. The menu will remain open as long as either of
     // these is true. See {@link #onMaximizeHoverStateChanged()}.
@@ -185,16 +189,16 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             SyncTransactionQueue syncQueue,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
             AppToWebGenericLinksParser genericLinksParser,
+            AssistContentRequester assistContentRequester,
             MultiInstanceHelper multiInstanceHelper) {
         this (context, userContext, displayController, splitScreenController, taskOrganizer,
                 taskInfo, taskSurface, handler, bgExecutor, choreographer, syncQueue,
-                rootTaskDisplayAreaOrganizer, genericLinksParser, SurfaceControl.Builder::new,
-                SurfaceControl.Transaction::new,  WindowContainerTransaction::new,
-                SurfaceControl::new, new WindowManagerWrapper(
+                rootTaskDisplayAreaOrganizer, genericLinksParser, assistContentRequester,
+                SurfaceControl.Builder::new, SurfaceControl.Transaction::new,
+                WindowContainerTransaction::new, SurfaceControl::new, new WindowManagerWrapper(
                         context.getSystemService(WindowManager.class)),
-                new SurfaceControlViewHostFactory() {},
-                DefaultMaximizeMenuFactory.INSTANCE, DefaultHandleMenuFactory.INSTANCE,
-                multiInstanceHelper);
+                new SurfaceControlViewHostFactory() {}, DefaultMaximizeMenuFactory.INSTANCE,
+                DefaultHandleMenuFactory.INSTANCE, multiInstanceHelper);
     }
 
     DesktopModeWindowDecoration(
@@ -211,6 +215,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             SyncTransactionQueue syncQueue,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
             AppToWebGenericLinksParser genericLinksParser,
+            AssistContentRequester assistContentRequester,
             Supplier<SurfaceControl.Builder> surfaceControlBuilderSupplier,
             Supplier<SurfaceControl.Transaction> surfaceControlTransactionSupplier,
             Supplier<WindowContainerTransaction> windowContainerTransactionSupplier,
@@ -231,6 +236,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         mSyncQueue = syncQueue;
         mRootTaskDisplayAreaOrganizer = rootTaskDisplayAreaOrganizer;
         mGenericLinksParser = genericLinksParser;
+        mAssistContentRequester = assistContentRequester;
         mMaximizeMenuFactory = maximizeMenuFactory;
         mHandleMenuFactory = handleMenuFactory;
         mMultiInstanceHelper = multiInstanceHelper;
@@ -489,6 +495,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         // Otherwise, return the generic link which is set to null if a generic link is unavailable.
         if (mCapturedLink != null && !mCapturedLink.mExpired) {
             return mCapturedLink.mUri;
+        } else if (mWebUri != null) {
+            return mWebUri;
         }
         return mGenericLink;
     }
@@ -994,18 +1002,32 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     }
 
     /**
-     * Create and display handle menu window.
+     * Updates app info and creates and displays handle menu window.
      */
-    void createHandleMenu(SplitScreenController splitScreenController) {
+    void createHandleMenu() {
+        // Requests assist content. When content is received, calls {@link #onAssistContentReceived}
+        // which sets app info and creates the handle menu.
+        mAssistContentRequester.requestAssistContent(
+                mTaskInfo.taskId, this::onAssistContentReceived);
+    }
+
+    /**
+     * Called when assist content is received. updates the saved links and creates the handle menu.
+     */
+    @VisibleForTesting
+    void onAssistContentReceived(@Nullable AssistContent assistContent) {
+        mWebUri = assistContent == null ? null : assistContent.getWebUri();
         loadAppInfoIfNeeded();
         updateGenericLink();
+
+        // Create and display handle menu
         mHandleMenu = mHandleMenuFactory.create(
                 this,
                 mWindowManagerWrapper,
                 mRelayoutParams.mLayoutResId,
                 mAppIconBitmap,
                 mAppName,
-                splitScreenController,
+                mSplitScreenController,
                 DesktopModeStatus.canEnterDesktopMode(mContext),
                 Flags.enableDesktopWindowingMultiInstanceFeatures()
                         && mMultiInstanceHelper
@@ -1018,6 +1040,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         mWindowDecorViewHolder.onHandleMenuOpened();
         mHandleMenu.show(
                 /* onToDesktopClickListener= */ () -> {
+                    mOnToDesktopClickListener.accept(APP_HANDLE_MENU_BUTTON);
                     mOnToDesktopClickListener.accept(APP_HANDLE_MENU_BUTTON);
                     return Unit.INSTANCE;
                 },
@@ -1340,6 +1363,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 SyncTransactionQueue syncQueue,
                 RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
                 AppToWebGenericLinksParser genericLinksParser,
+                AssistContentRequester assistContentRequester,
                 MultiInstanceHelper multiInstanceHelper) {
             return new DesktopModeWindowDecoration(
                     context,
@@ -1355,6 +1379,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                     syncQueue,
                     rootTaskDisplayAreaOrganizer,
                     genericLinksParser,
+                    assistContentRequester,
                     multiInstanceHelper);
         }
     }

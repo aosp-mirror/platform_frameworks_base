@@ -19,6 +19,8 @@ package com.android.server.hdmi;
 import android.hardware.hdmi.HdmiControlManager;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -36,7 +38,8 @@ final class RequestSadAction extends HdmiCecFeatureAction {
     // State in which the action is waiting for <Report Short Audio Descriptor>.
     private static final int STATE_WAITING_FOR_REPORT_SAD = 1;
     private static final int MAX_SAD_PER_REQUEST = 4;
-    private static final int RETRY_COUNTER_MAX = 1;
+    @VisibleForTesting
+    public static final int RETRY_COUNTER_MAX = 3;
     private final int mTargetAddress;
     private final RequestSadCallback mCallback;
     private final List<Integer> mCecCodecsToQuery = new ArrayList<>();

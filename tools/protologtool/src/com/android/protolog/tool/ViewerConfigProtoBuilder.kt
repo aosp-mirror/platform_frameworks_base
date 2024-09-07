@@ -53,7 +53,7 @@ class ViewerConfigProtoBuilder : ProtoLogTool.ProtologViewerConfigBuilder {
                         .setMessageId(key)
                         .setMessage(log.messageString)
                         .setLevel(
-                            ProtoLogLevel.forNumber(log.logLevel.ordinal + 1))
+                            ProtoLogLevel.forNumber(log.logLevel.id))
                         .setGroupId(groupId)
                         .setLocation(log.position)
             )

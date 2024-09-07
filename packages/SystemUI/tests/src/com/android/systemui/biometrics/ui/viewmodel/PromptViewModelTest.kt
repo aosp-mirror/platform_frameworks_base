@@ -37,12 +37,15 @@ import android.hardware.biometrics.PromptVerticalListContentView
 import android.hardware.face.FaceSensorPropertiesInternal
 import android.hardware.fingerprint.FingerprintSensorProperties
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal
+import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import android.view.Surface
 import androidx.test.filters.SmallTest
 import com.android.app.activityTaskManager
+import com.android.keyguard.AuthInteractionProperties
+import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.AuthController
 import com.android.systemui.biometrics.Utils.toBitmap
@@ -72,6 +75,7 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
 import com.android.systemui.util.mockito.withArgCaptor
+import com.google.android.msdl.data.model.MSDLToken
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
@@ -124,6 +128,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     private val defaultLogoDescriptionFromActivityInfo = "Test Coke App"
     private val logoDescriptionFromApp = "Test Cake App"
     private val packageNameForLogoWithOverrides = "should.use.overridden.logo"
+    private val authInteractionProperties = AuthInteractionProperties()
 
     /** Prompt panel size padding */
     private val smallHorizontalGuidelinePadding =
@@ -707,31 +712,66 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_MSDL_FEEDBACK)
     fun set_haptic_on_confirm_when_confirmation_required_otherwise_on_authenticated() =
         runGenericTest {
             val expectConfirmation = testCase.expectConfirmation(atLeastOneFailure = false)
 
             kosmos.promptViewModel.showAuthenticated(testCase.authenticatedModality, 1_000L)
 
-            val confirmHaptics by collectLastValue(kosmos.promptViewModel.hapticsToPlay)
-            assertThat(confirmHaptics?.hapticFeedbackConstant)
-                .isEqualTo(
-                    if (expectConfirmation) HapticFeedbackConstants.NO_HAPTICS
-                    else HapticFeedbackConstants.BIOMETRIC_CONFIRM
-                )
-            assertThat(confirmHaptics?.flag).isNull()
+            val hapticsPreConfirm by collectLastValue(kosmos.promptViewModel.hapticsToPlay)
+            if (expectConfirmation) {
+                assertThat(hapticsPreConfirm).isEqualTo(PromptViewModel.HapticsToPlay.None)
+            } else {
+                val confirmHaptics =
+                    hapticsPreConfirm as PromptViewModel.HapticsToPlay.HapticConstant
+                assertThat(confirmHaptics.constant)
+                    .isEqualTo(HapticFeedbackConstants.BIOMETRIC_CONFIRM)
+                assertThat(confirmHaptics.flag).isNull()
+            }
 
             if (expectConfirmation) {
                 kosmos.promptViewModel.confirmAuthenticated()
             }
 
-            val confirmedHaptics by collectLastValue(kosmos.promptViewModel.hapticsToPlay)
-            assertThat(confirmedHaptics?.hapticFeedbackConstant)
+            val hapticsPostConfirm by collectLastValue(kosmos.promptViewModel.hapticsToPlay)
+            val confirmedHaptics =
+                hapticsPostConfirm as PromptViewModel.HapticsToPlay.HapticConstant
+            assertThat(confirmedHaptics.constant)
                 .isEqualTo(HapticFeedbackConstants.BIOMETRIC_CONFIRM)
-            assertThat(confirmedHaptics?.flag).isNull()
+            assertThat(confirmedHaptics.flag).isNull()
         }
 
     @Test
+    @EnableFlags(Flags.FLAG_MSDL_FEEDBACK)
+    fun set_msdl_haptic_on_confirm_when_confirmation_required_otherwise_on_authenticated() =
+        runGenericTest {
+            val expectConfirmation = testCase.expectConfirmation(atLeastOneFailure = false)
+
+            kosmos.promptViewModel.showAuthenticated(testCase.authenticatedModality, 1_000L)
+
+            val hapticsPreConfirm by collectLastValue(kosmos.promptViewModel.hapticsToPlay)
+
+            if (expectConfirmation) {
+                assertThat(hapticsPreConfirm).isEqualTo(PromptViewModel.HapticsToPlay.None)
+            } else {
+                val confirmHaptics = hapticsPreConfirm as PromptViewModel.HapticsToPlay.MSDL
+                assertThat(confirmHaptics.token).isEqualTo(MSDLToken.UNLOCK)
+                assertThat(confirmHaptics.properties).isEqualTo(authInteractionProperties)
+            }
+
+            if (expectConfirmation) {
+                kosmos.promptViewModel.confirmAuthenticated()
+            }
+
+            val hapticsPostConfirm by collectLastValue(kosmos.promptViewModel.hapticsToPlay)
+            val confirmedHaptics = hapticsPostConfirm as PromptViewModel.HapticsToPlay.MSDL
+            assertThat(confirmedHaptics.token).isEqualTo(MSDLToken.UNLOCK)
+            assertThat(confirmedHaptics.properties).isEqualTo(authInteractionProperties)
+        }
+
+    @Test
+    @DisableFlags(Flags.FLAG_MSDL_FEEDBACK)
     fun playSuccessHaptic_SetsConfirmConstant() = runGenericTest {
         val expectConfirmation = testCase.expectConfirmation(atLeastOneFailure = false)
         kosmos.promptViewModel.showAuthenticated(testCase.authenticatedModality, 1_000L)
@@ -740,20 +780,48 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
             kosmos.promptViewModel.confirmAuthenticated()
         }
 
-        val currentHaptics by collectLastValue(kosmos.promptViewModel.hapticsToPlay)
-        assertThat(currentHaptics?.hapticFeedbackConstant)
-            .isEqualTo(HapticFeedbackConstants.BIOMETRIC_CONFIRM)
-        assertThat(currentHaptics?.flag).isNull()
+        val haptics by collectLastValue(kosmos.promptViewModel.hapticsToPlay)
+        val currentHaptics = haptics as PromptViewModel.HapticsToPlay.HapticConstant
+        assertThat(currentHaptics.constant).isEqualTo(HapticFeedbackConstants.BIOMETRIC_CONFIRM)
+        assertThat(currentHaptics.flag).isNull()
     }
 
     @Test
+    @EnableFlags(Flags.FLAG_MSDL_FEEDBACK)
+    fun playSuccessHaptic_SetsUnlockMSDLFeedback() = runGenericTest {
+        val expectConfirmation = testCase.expectConfirmation(atLeastOneFailure = false)
+        kosmos.promptViewModel.showAuthenticated(testCase.authenticatedModality, 1_000L)
+
+        if (expectConfirmation) {
+            kosmos.promptViewModel.confirmAuthenticated()
+        }
+
+        val haptics by collectLastValue(kosmos.promptViewModel.hapticsToPlay)
+        val currentHaptics = haptics as PromptViewModel.HapticsToPlay.MSDL
+        assertThat(currentHaptics.token).isEqualTo(MSDLToken.UNLOCK)
+        assertThat(currentHaptics.properties).isEqualTo(authInteractionProperties)
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_MSDL_FEEDBACK)
     fun playErrorHaptic_SetsRejectConstant() = runGenericTest {
         kosmos.promptViewModel.showTemporaryError("test", "messageAfterError", false)
 
-        val currentHaptics by collectLastValue(kosmos.promptViewModel.hapticsToPlay)
-        assertThat(currentHaptics?.hapticFeedbackConstant)
-            .isEqualTo(HapticFeedbackConstants.BIOMETRIC_REJECT)
-        assertThat(currentHaptics?.flag).isNull()
+        val haptics by collectLastValue(kosmos.promptViewModel.hapticsToPlay)
+        val currentHaptics = haptics as PromptViewModel.HapticsToPlay.HapticConstant
+        assertThat(currentHaptics.constant).isEqualTo(HapticFeedbackConstants.BIOMETRIC_REJECT)
+        assertThat(currentHaptics.flag).isNull()
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MSDL_FEEDBACK)
+    fun playErrorHaptic_SetsFailureMSDLFeedback() = runGenericTest {
+        kosmos.promptViewModel.showTemporaryError("test", "messageAfterError", false)
+
+        val haptics by collectLastValue(kosmos.promptViewModel.hapticsToPlay)
+        val currentHaptics = haptics as PromptViewModel.HapticsToPlay.MSDL
+        assertThat(currentHaptics.token).isEqualTo(MSDLToken.FAILURE)
+        assertThat(currentHaptics.properties).isEqualTo(authInteractionProperties)
     }
 
     // biometricprompt_sfps_fingerprint_authenticating reused across rotations
@@ -855,6 +923,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_MSDL_FEEDBACK)
     fun set_haptic_on_errors() = runGenericTest {
         kosmos.promptViewModel.showTemporaryError(
             "so sad",
@@ -863,13 +932,30 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
             hapticFeedback = true,
         )
 
-        val haptics by collectLastValue(kosmos.promptViewModel.hapticsToPlay)
-        assertThat(haptics?.hapticFeedbackConstant)
-            .isEqualTo(HapticFeedbackConstants.BIOMETRIC_REJECT)
-        assertThat(haptics?.flag).isNull()
+        val hapticsToPlay by collectLastValue(kosmos.promptViewModel.hapticsToPlay)
+        val haptics = hapticsToPlay as PromptViewModel.HapticsToPlay.HapticConstant
+        assertThat(haptics.constant).isEqualTo(HapticFeedbackConstants.BIOMETRIC_REJECT)
+        assertThat(haptics.flag).isNull()
     }
 
     @Test
+    @EnableFlags(Flags.FLAG_MSDL_FEEDBACK)
+    fun set_msdl_haptic_on_errors() = runGenericTest {
+        kosmos.promptViewModel.showTemporaryError(
+            "so sad",
+            messageAfterError = "",
+            authenticateAfterError = false,
+            hapticFeedback = true,
+        )
+
+        val hapticsToPlay by collectLastValue(kosmos.promptViewModel.hapticsToPlay)
+        val haptics = hapticsToPlay as PromptViewModel.HapticsToPlay.MSDL
+        assertThat(haptics.token).isEqualTo(MSDLToken.FAILURE)
+        assertThat(haptics.properties).isEqualTo(authInteractionProperties)
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_MSDL_FEEDBACK)
     fun plays_haptic_on_errors_unless_skipped() = runGenericTest {
         kosmos.promptViewModel.showTemporaryError(
             "still sad",
@@ -878,11 +964,26 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
             hapticFeedback = false,
         )
 
-        val haptics by collectLastValue(kosmos.promptViewModel.hapticsToPlay)
-        assertThat(haptics?.hapticFeedbackConstant).isEqualTo(HapticFeedbackConstants.NO_HAPTICS)
+        val hapticsToPlay by collectLastValue(kosmos.promptViewModel.hapticsToPlay)
+        assertThat(hapticsToPlay).isEqualTo(PromptViewModel.HapticsToPlay.None)
     }
 
     @Test
+    @EnableFlags(Flags.FLAG_MSDL_FEEDBACK)
+    fun plays_msdl_haptic_on_errors_unless_skipped() = runGenericTest {
+        kosmos.promptViewModel.showTemporaryError(
+            "still sad",
+            messageAfterError = "",
+            authenticateAfterError = false,
+            hapticFeedback = false,
+        )
+
+        val hapticsToPlay by collectLastValue(kosmos.promptViewModel.hapticsToPlay)
+        assertThat(hapticsToPlay).isEqualTo(PromptViewModel.HapticsToPlay.None)
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_MSDL_FEEDBACK)
     fun plays_haptic_on_error_after_auth_when_confirmation_needed() = runGenericTest {
         val expectConfirmation = testCase.expectConfirmation(atLeastOneFailure = false)
         kosmos.promptViewModel.showAuthenticated(testCase.authenticatedModality, 0)
@@ -894,15 +995,37 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
             hapticFeedback = true,
         )
 
-        val haptics by collectLastValue(kosmos.promptViewModel.hapticsToPlay)
+        val hapticsToPlay by collectLastValue(kosmos.promptViewModel.hapticsToPlay)
+        val haptics = hapticsToPlay as PromptViewModel.HapticsToPlay.HapticConstant
         if (expectConfirmation) {
-            assertThat(haptics?.hapticFeedbackConstant)
-                .isEqualTo(HapticFeedbackConstants.BIOMETRIC_REJECT)
-            assertThat(haptics?.flag).isNull()
+            assertThat(haptics.constant).isEqualTo(HapticFeedbackConstants.BIOMETRIC_REJECT)
+            assertThat(haptics.flag).isNull()
         } else {
-            assertThat(haptics?.hapticFeedbackConstant)
-                .isEqualTo(HapticFeedbackConstants.BIOMETRIC_CONFIRM)
+            assertThat(haptics.constant).isEqualTo(HapticFeedbackConstants.BIOMETRIC_CONFIRM)
         }
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MSDL_FEEDBACK)
+    fun plays_msdl_haptic_on_error_after_auth_when_confirmation_needed() = runGenericTest {
+        val expectConfirmation = testCase.expectConfirmation(atLeastOneFailure = false)
+        kosmos.promptViewModel.showAuthenticated(testCase.authenticatedModality, 0)
+
+        kosmos.promptViewModel.showTemporaryError(
+            "still sad",
+            messageAfterError = "",
+            authenticateAfterError = false,
+            hapticFeedback = true,
+        )
+
+        val hapticsToPlay by collectLastValue(kosmos.promptViewModel.hapticsToPlay)
+        val haptics = hapticsToPlay as PromptViewModel.HapticsToPlay.MSDL
+        if (expectConfirmation) {
+            assertThat(haptics.token).isEqualTo(MSDLToken.FAILURE)
+        } else {
+            assertThat(haptics.token).isEqualTo(MSDLToken.UNLOCK)
+        }
+        assertThat(haptics.properties).isEqualTo(authInteractionProperties)
     }
 
     private suspend fun TestScope.showTemporaryErrors(

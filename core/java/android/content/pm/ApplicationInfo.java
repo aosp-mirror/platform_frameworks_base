@@ -849,6 +849,12 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     public static final int PRIVATE_FLAG_EXT_CPU_OVERRIDE = 1 << 5;
 
+    /**
+     * Whether the app has been previously not launched
+     * @hide
+     */
+    public static final int PRIVATE_FLAG_EXT_NOT_LAUNCHED = 1 << 6;
+
     /** @hide */
     @IntDef(flag = true, prefix = { "PRIVATE_FLAG_EXT_" }, value = {
             PRIVATE_FLAG_EXT_PROFILEABLE,
@@ -857,6 +863,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
             PRIVATE_FLAG_EXT_ENABLE_ON_BACK_INVOKED_CALLBACK,
             PRIVATE_FLAG_EXT_ALLOWLISTED_FOR_HIDDEN_APIS,
             PRIVATE_FLAG_EXT_CPU_OVERRIDE,
+            PRIVATE_FLAG_EXT_NOT_LAUNCHED,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ApplicationInfoPrivateFlagsExt {}
@@ -2661,6 +2668,22 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     public boolean isResourceOverlay() {
         return (privateFlags & ApplicationInfo.PRIVATE_FLAG_IS_RESOURCE_OVERLAY) != 0;
+    }
+
+    /**
+     * Returns whether the app in the STOPPED state.
+     * @hide
+     */
+    public boolean isStopped() {
+        return (flags & ApplicationInfo.FLAG_STOPPED) != 0;
+    }
+
+    /**
+     * Returns whether the app was never launched (any process started) before.
+     * @hide
+     */
+    public boolean isNotLaunched() {
+        return (privateFlagsExt & ApplicationInfo.PRIVATE_FLAG_EXT_NOT_LAUNCHED) != 0;
     }
 
     /**
