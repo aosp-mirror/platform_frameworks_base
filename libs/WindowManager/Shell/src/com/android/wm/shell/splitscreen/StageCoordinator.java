@@ -34,6 +34,7 @@ import static android.view.WindowManager.transitTypeToString;
 import static android.window.TransitionInfo.FLAG_IS_DISPLAY;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REORDER;
 
+import static com.android.wm.shell.Flags.enableFlexibleSplit;
 import static com.android.wm.shell.common.split.SplitLayout.PARALLAX_ALIGN_CENTER;
 import static com.android.wm.shell.common.split.SplitScreenUtils.reverseSplitPosition;
 import static com.android.wm.shell.common.split.SplitScreenUtils.splitFailureMessage;
@@ -154,14 +155,12 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 
 /**
- * Coordinates the staging (visibility, sizing, ...) of the split-screen {@link MainStage} and
- * other stages.
+ * Coordinates the staging (visibility, sizing, ...) of the split-screen stages.
  * Some high-level rules:
  * - The {@link StageCoordinator} is only considered active if the other stages contain at
  * least one child task.
- * - The {@link MainStage} should only have children if the coordinator is active.
- * - The {@link SplitLayout} divider is only visible if both the {@link MainStage}
- * and other stages are visible.
+ * - The {@link SplitLayout} divider is only visible if multiple {@link StageTaskListener}s are
+ * visible
  * - Both stages are put under a single-top root task.
  * This rules are mostly implemented in {@link #onStageVisibilityChanged(StageListenerImpl)} and
  * {@link #onStageHasChildrenChanged(StageListenerImpl).}
@@ -174,7 +173,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
     private final SurfaceSession mSurfaceSession = new SurfaceSession();
 
-    private final MainStage mMainStage;
+    private final StageTaskListener mMainStage;
     private final StageListenerImpl mMainStageListener = new StageListenerImpl();
     private final StageTaskListener mSideStage;
     private final StageListenerImpl mSideStageListener = new StageListenerImpl();
@@ -329,7 +328,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         taskOrganizer.createRootTask(displayId, WINDOWING_MODE_FULLSCREEN, this /* listener */);
 
         ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "Creating main/side root task");
-        mMainStage = new MainStage(
+        mMainStage = new StageTaskListener(
                 mContext,
                 mTaskOrganizer,
                 mDisplayId,
@@ -367,8 +366,9 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
     @VisibleForTesting
     StageCoordinator(Context context, int displayId, SyncTransactionQueue syncQueue,
-            ShellTaskOrganizer taskOrganizer, MainStage mainStage, StageTaskListener sideStage,
-            DisplayController displayController, DisplayImeController displayImeController,
+            ShellTaskOrganizer taskOrganizer, StageTaskListener mainStage,
+            StageTaskListener sideStage, DisplayController displayController,
+            DisplayImeController displayImeController,
             DisplayInsetsController displayInsetsController, SplitLayout splitLayout,
             Transitions transitions, TransactionPool transactionPool, ShellExecutor mainExecutor,
             Handler mainHandler, Optional<RecentTasksController> recentTasks,
@@ -418,6 +418,10 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
     public boolean isSplitScreenVisible() {
         return mSideStageListener.mVisible && mMainStageListener.mVisible;
+    }
+
+    private void activateSplit(WindowContainerTransaction wct, boolean includingTopTask) {
+        mMainStage.activate(wct, includingTopTask);
     }
 
     public boolean isSplitActive() {
@@ -505,10 +509,10 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "removeFromSideStage: task=%d", taskId);
         final WindowContainerTransaction wct = new WindowContainerTransaction();
 
-        /**
-         * {@link MainStage} will be deactivated in {@link #onStageHasChildrenChanged} if the
-         * other stages no longer have children.
-         */
+
+        // MainStage will be deactivated in onStageHasChildrenChanged() if the other stages
+        // no longer have children.
+
         final boolean result = mSideStage.removeTask(taskId,
                 isSplitActive() ? mMainStage.mRootTaskInfo.token : null,
                 wct);
@@ -805,7 +809,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         if (!isSplitActive()) {
             // Build a request WCT that will launch both apps such that task 0 is on the main stage
             // while task 1 is on the side stage.
-            mMainStage.activate(wct, false /* reparent */);
+            activateSplit(wct, false /* reparentToTop */);
         }
         mSplitLayout.setDivideRatio(snapPosition);
         updateWindowBounds(mSplitLayout, wct);
@@ -872,7 +876,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         if (!isSplitActive()) {
             // Build a request WCT that will launch both apps such that task 0 is on the main stage
             // while task 1 is on the side stage.
-            mMainStage.activate(wct, false /* reparent */);
+            activateSplit(wct, false /* reparentToTop */);
         }
 
         setSideStagePosition(splitPosition, wct);
@@ -1439,7 +1443,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             setSideStagePosition(startPosition, wct);
             mSideStage.addTask(taskInfo, wct);
         }
-        mMainStage.activate(wct, true /* includingTopTask */);
+        activateSplit(wct, true /* reparentToTop */);
         prepareSplitLayout(wct, resizeAnim);
     }
 

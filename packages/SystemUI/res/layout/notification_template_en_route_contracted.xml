@@ -16,7 +16,7 @@
 
 <com.android.systemui.statusbar.notification.row.ui.view.EnRouteView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/status_bar_latest_event_content"
+    android:id="@*android:id/status_bar_latest_event_content"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_weight="1"

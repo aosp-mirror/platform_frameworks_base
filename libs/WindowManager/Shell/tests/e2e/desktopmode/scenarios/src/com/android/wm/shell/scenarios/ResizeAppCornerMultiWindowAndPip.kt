@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.scenarios
 
-import android.platform.test.annotations.Postsubmit
 import android.app.Instrumentation
 import android.tools.NavBar
 import android.tools.Rotation
@@ -35,15 +34,12 @@ import com.android.wm.shell.Utils
 import org.junit.After
 import org.junit.Assume
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.junit.runners.BlockJUnit4ClassRunner
 
-@RunWith(BlockJUnit4ClassRunner::class)
-@Postsubmit
-open class ResizeAppCornerMultiWindowAndPip
-@JvmOverloads
+@Ignore("Test Base Class")
+abstract class ResizeAppCornerMultiWindowAndPip
 constructor(val rotation: Rotation = Rotation.ROTATION_0,
     val horizontalChange: Int = 50,
     val verticalChange: Int = -50) {

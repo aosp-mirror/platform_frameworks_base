@@ -810,7 +810,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     event.recycle();
                     break;
                 case MSG_HANDLE_ALL_APPS:
-                    launchAllAppsAction();
+                    launchAllAppsAction((KeyEvent) msg.obj);
                     break;
                 case MSG_RINGER_TOGGLE_CHORD:
                     handleRingerChordGesture();
@@ -1879,26 +1879,31 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    private void launchAllAppsAction() {
-        Intent intent = new Intent(Intent.ACTION_ALL_APPS);
-        if (mHasFeatureLeanback) {
-            Intent intentLauncher = new Intent(Intent.ACTION_MAIN);
-            intentLauncher.addCategory(Intent.CATEGORY_HOME);
-            ResolveInfo resolveInfo = mPackageManager.resolveActivityAsUser(intentLauncher,
-                    PackageManager.MATCH_SYSTEM_ONLY,
-                    mCurrentUserId);
-            if (resolveInfo != null) {
-                intent.setPackage(resolveInfo.activityInfo.packageName);
+    private void launchAllAppsAction(KeyEvent event) {
+        if (mHasFeatureLeanback || mHasFeatureWatch) {
+            // TV and watch support the all apps intent
+            notifyKeyGestureCompleted(event,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_ALL_APPS);
+            Intent intent = new Intent(Intent.ACTION_ALL_APPS);
+            if (mHasFeatureLeanback) {
+                Intent intentLauncher = new Intent(Intent.ACTION_MAIN);
+                intentLauncher.addCategory(Intent.CATEGORY_HOME);
+                ResolveInfo resolveInfo = mPackageManager.resolveActivityAsUser(intentLauncher,
+                        PackageManager.MATCH_SYSTEM_ONLY,
+                        mCurrentUserId);
+                if (resolveInfo != null) {
+                    intent.setPackage(resolveInfo.activityInfo.packageName);
+                }
             }
-        }
-        startActivityAsUser(intent, UserHandle.CURRENT);
-    }
-
-    private void launchAllAppsViaA11y() {
-        AccessibilityManagerInternal accessibilityManager = getAccessibilityManagerInternal();
-        if (accessibilityManager != null) {
-            accessibilityManager.performSystemAction(
-                    AccessibilityService.GLOBAL_ACTION_ACCESSIBILITY_ALL_APPS);
+            startActivityAsUser(intent, UserHandle.CURRENT);
+        } else {
+            notifyKeyGestureCompleted(event,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_ACCESSIBILITY_ALL_APPS);
+            AccessibilityManagerInternal accessibilityManager = getAccessibilityManagerInternal();
+            if (accessibilityManager != null) {
+                accessibilityManager.performSystemAction(
+                        AccessibilityService.GLOBAL_ACTION_ACCESSIBILITY_ALL_APPS);
+            }
         }
         dismissKeyboardShortcutsMenu();
     }
@@ -2076,15 +2081,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             performHapticFeedback(HapticFeedbackConstants.LONG_PRESS, "Home - Long Press");
             switch (mLongPressOnHomeBehavior) {
                 case LONG_PRESS_HOME_ALL_APPS:
-                    if (mHasFeatureLeanback) {
-                        launchAllAppsAction();
-                        notifyKeyGestureCompleted(event,
-                                KeyGestureEvent.KEY_GESTURE_TYPE_ALL_APPS);
-                    } else {
-                        launchAllAppsViaA11y();
-                        notifyKeyGestureCompleted(event,
-                                KeyGestureEvent.KEY_GESTURE_TYPE_ACCESSIBILITY_ALL_APPS);
-                    }
+                    launchAllAppsAction(event);
                     break;
                 case LONG_PRESS_HOME_ASSIST:
                     notifyKeyGestureCompleted(event,
@@ -3695,18 +3692,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 break;
             case KeyEvent.KEYCODE_ALL_APPS:
                 if (firstDown) {
-                    if (mHasFeatureLeanback) {
-                        mHandler.removeMessages(MSG_HANDLE_ALL_APPS);
-                        Message msg = mHandler.obtainMessage(MSG_HANDLE_ALL_APPS);
-                        msg.setAsynchronous(true);
-                        msg.sendToTarget();
-                        notifyKeyGestureCompleted(event,
-                                KeyGestureEvent.KEY_GESTURE_TYPE_ALL_APPS);
-                    } else {
-                        launchAllAppsViaA11y();
-                        notifyKeyGestureCompleted(event,
-                                KeyGestureEvent.KEY_GESTURE_TYPE_ACCESSIBILITY_ALL_APPS);
-                    }
+                    mHandler.removeMessages(MSG_HANDLE_ALL_APPS);
+
+                    Message msg = mHandler.obtainMessage(MSG_HANDLE_ALL_APPS, new KeyEvent(event));
+                    msg.setAsynchronous(true);
+                    msg.sendToTarget();
                 }
                 return true;
             case KeyEvent.KEYCODE_NOTIFICATION:
@@ -3759,9 +3749,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                                 KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_CAPS_LOCK);
                     } else if (mPendingMetaAction) {
                         if (!canceled) {
-                            launchAllAppsViaA11y();
-                            notifyKeyGestureCompleted(event,
-                                    KeyGestureEvent.KEY_GESTURE_TYPE_ACCESSIBILITY_ALL_APPS);
+                            launchAllAppsAction(event);
                         }
                         mPendingMetaAction = false;
                     }

@@ -6907,7 +6907,6 @@ public class TelephonyManager {
         return false;
     }
 
-    // TODO(b/316183370): replace all @code with @link in javadoc after feature is released
     /**
      * @return true if the current device is "voice capable".
      * <p>
@@ -6921,10 +6920,10 @@ public class TelephonyManager {
      * PackageManager.FEATURE_TELEPHONY system feature, which is available
      * on any device with a telephony radio, even if the device is
      * data-only.
-     * @deprecated Replaced by {@code #isDeviceVoiceCapable()}. Starting from Android 15, voice
+     * @deprecated Replaced by {@link #isDeviceVoiceCapable()}. Starting from Android 15, voice
      * capability may also be overridden by carriers for a given subscription. For voice capable
-     * device (when {@code #isDeviceVoiceCapable} return {@code true}), caller should check for
-     * subscription-level voice capability as well. See {@code #isDeviceVoiceCapable} for details.
+     * device (when {@link #isDeviceVoiceCapable} return {@code true}), caller should check for
+     * subscription-level voice capability as well. See {@link #isDeviceVoiceCapable} for details.
      */
     @Deprecated
     public boolean isVoiceCapable() {
@@ -6946,8 +6945,8 @@ public class TelephonyManager {
      * <p>
      * Starting from Android 15, voice capability may also be overridden by carrier for a given
      * subscription on a voice capable device. To check if a subscription is "voice capable",
-     * call method {@code SubscriptionInfo#getServiceCapabilities()} and check if
-     * {@code SubscriptionManager#SERVICE_CAPABILITY_VOICE} is included.
+     * call method {@link SubscriptionInfo#getServiceCapabilities()} and check if
+     * {@link SubscriptionManager#SERVICE_CAPABILITY_VOICE} is included.
      *
      * @see SubscriptionInfo#getServiceCapabilities()
      */
@@ -6964,10 +6963,10 @@ public class TelephonyManager {
      * <p>
      * Note: Voicemail waiting sms, cell broadcasting sms, and MMS are
      *       disabled when device doesn't support sms.
-     * @deprecated Replaced by {@code #isDeviceSmsCapable()}. Starting from Android 15, SMS
+     * @deprecated Replaced by {@link #isDeviceSmsCapable()}. Starting from Android 15, SMS
      * capability may also be overridden by carriers for a given subscription. For SMS capable
-     * device (when {@code #isDeviceSmsCapable} return {@code true}), caller should check for
-     * subscription-level SMS capability as well. See {@code #isDeviceSmsCapable} for details.
+     * device (when {@link #isDeviceSmsCapable} return {@code true}), caller should check for
+     * subscription-level SMS capability as well. See {@link #isDeviceSmsCapable} for details.
      */
     @Deprecated
     public boolean isSmsCapable() {
@@ -6986,8 +6985,8 @@ public class TelephonyManager {
      * <p>
      * Starting from Android 15, SMS capability may also be overridden by carriers for a given
      * subscription on an SMS capable device. To check if a subscription is "SMS capable",
-     * call method {@code SubscriptionInfo#getServiceCapabilities()} and check if
-     * {@code SubscriptionManager#SERVICE_CAPABILITY_SMS} is included.
+     * call method {@link SubscriptionInfo#getServiceCapabilities()} and check if
+     * {@link SubscriptionManager#SERVICE_CAPABILITY_SMS} is included.
      *
      * @see SubscriptionInfo#getServiceCapabilities()
      */

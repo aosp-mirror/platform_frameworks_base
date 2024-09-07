@@ -22,7 +22,9 @@ import android.app.StatusBarManager
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
 import com.android.internal.logging.UiEventLogger
+import com.android.keyguard.AuthInteractionProperties
 import com.android.systemui.CoreStartable
+import com.android.systemui.Flags
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
@@ -73,6 +75,8 @@ import com.android.systemui.util.kotlin.pairwise
 import com.android.systemui.util.kotlin.sample
 import com.android.systemui.util.printSection
 import com.android.systemui.util.println
+import com.google.android.msdl.data.model.MSDLToken
+import com.google.android.msdl.domain.MSDLPlayer
 import dagger.Lazy
 import java.io.PrintWriter
 import java.util.Optional
@@ -139,9 +143,12 @@ constructor(
     private val statusBarStateController: SysuiStatusBarStateController,
     private val alternateBouncerInteractor: AlternateBouncerInteractor,
     private val vibratorHelper: VibratorHelper,
+    private val msdlPlayer: MSDLPlayer,
 ) : CoreStartable {
     private val centralSurfaces: CentralSurfaces?
         get() = centralSurfacesOptLazy.get().getOrNull()
+
+    private val authInteractionProperties = AuthInteractionProperties()
 
     override fun start() {
         if (SceneContainerFlag.isEnabled) {
@@ -541,9 +548,16 @@ constructor(
                             deviceEntryHapticsInteractor.playSuccessHaptic
                                 .sample(sceneInteractor.currentScene)
                                 .collect { currentScene ->
-                                    vibratorHelper.vibrateAuthSuccess(
-                                        "$TAG, $currentScene device-entry::success"
-                                    )
+                                    if (Flags.msdlFeedback()) {
+                                        msdlPlayer.playToken(
+                                            MSDLToken.UNLOCK,
+                                            authInteractionProperties,
+                                        )
+                                    } else {
+                                        vibratorHelper.vibrateAuthSuccess(
+                                            "$TAG, $currentScene device-entry::success"
+                                        )
+                                    }
                                 }
                         }
 
@@ -551,9 +565,16 @@ constructor(
                             deviceEntryHapticsInteractor.playErrorHaptic
                                 .sample(sceneInteractor.currentScene)
                                 .collect { currentScene ->
-                                    vibratorHelper.vibrateAuthError(
-                                        "$TAG, $currentScene device-entry::error"
-                                    )
+                                    if (Flags.msdlFeedback()) {
+                                        msdlPlayer.playToken(
+                                            MSDLToken.FAILURE,
+                                            authInteractionProperties,
+                                        )
+                                    } else {
+                                        vibratorHelper.vibrateAuthError(
+                                            "$TAG, $currentScene device-entry::error"
+                                        )
+                                    }
                                 }
                         }
                     }

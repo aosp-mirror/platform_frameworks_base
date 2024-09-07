@@ -1005,13 +1005,10 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         final ApplicationInfo info = ((ResolveInfo) receiver).activityInfo.applicationInfo;
         final ComponentName component = ((ResolveInfo) receiver).activityInfo.getComponentName();
 
-        if ((info.flags & ApplicationInfo.FLAG_STOPPED) != 0) {
-            queue.setActiveWasStopped(true);
-        }
-        final int intentFlags = r.intent.getFlags() | Intent.FLAG_FROM_BACKGROUND;
-        final boolean firstLaunch = !mService.wasPackageEverLaunched(info.packageName, r.userId);
-        queue.setActiveFirstLaunch(firstLaunch);
+        queue.setActiveWasStopped(info.isStopped());
+        queue.setActiveFirstLaunch(info.isNotLaunched());
 
+        final int intentFlags = r.intent.getFlags() | Intent.FLAG_FROM_BACKGROUND;
         final HostingRecord hostingRecord = new HostingRecord(HostingRecord.HOSTING_TYPE_BROADCAST,
                 component, r.intent.getAction(), r.getHostingRecordTriggerType());
         final boolean isActivityCapable = (r.options != null

@@ -195,6 +195,25 @@ class DesktopModeFlickerScenarios {
                             .associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
             )
 
+        val CORNER_RESIZE_TO_MAXIMUM_SIZE =
+            FlickerConfigEntry(
+                scenarioId = ScenarioId("CORNER_RESIZE_TO_MAXIMUM_SIZE"),
+                extractor =
+                TaggedScenarioExtractorBuilder()
+                    .setTargetTag(CujType.CUJ_DESKTOP_MODE_RESIZE_WINDOW)
+                    .setTransitionMatcher(
+                        TaggedCujTransitionMatcher(associatedTransitionRequired = false)
+                    )
+                    .build(),
+                assertions =
+                AssertionTemplates.DESKTOP_MODE_APP_VISIBILITY_ASSERTIONS +
+                        listOf(
+                            AppLayerIncreasesInSize(DESKTOP_MODE_APP),
+                            AppWindowHasMaxDisplayHeight(DESKTOP_MODE_APP),
+                            AppWindowHasMaxDisplayWidth(DESKTOP_MODE_APP)
+                        ).associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
+            )
+
         val SNAP_RESIZE_LEFT_WITH_BUTTON =
             FlickerConfigEntry(
                 scenarioId = ScenarioId("SNAP_RESIZE_LEFT_WITH_BUTTON"),

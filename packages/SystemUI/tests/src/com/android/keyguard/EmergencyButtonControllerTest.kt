@@ -29,7 +29,7 @@ import com.android.internal.logging.MetricsLogger
 import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.haptics.msdl.FakeMSDLPlayer
+import com.android.systemui.haptics.msdl.fakeMSDLPlayer
 import com.android.systemui.haptics.msdl.msdlPlayer
 import com.android.systemui.shade.ShadeController
 import com.android.systemui.statusbar.policy.ConfigurationController
@@ -72,7 +72,7 @@ class EmergencyButtonControllerTest : SysuiTestCase() {
     val mainExecutor = FakeExecutor(fakeSystemClock)
     val backgroundExecutor = FakeExecutor(fakeSystemClock)
     private val kosmos = testKosmos()
-    private val msdlPlayer: FakeMSDLPlayer = kosmos.msdlPlayer
+    private val msdlPlayer = kosmos.fakeMSDLPlayer
 
     lateinit var underTest: EmergencyButtonController
 

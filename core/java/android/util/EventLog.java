@@ -21,6 +21,9 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
+import android.ravenwood.annotation.RavenwoodRedirect;
+import android.ravenwood.annotation.RavenwoodRedirectionClass;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -48,8 +51,8 @@ import java.util.regex.Pattern;
  * They carry a payload of one or more int, long, or String values.  The
  * event-log-tags file defines the payload contents for each type code.
  */
-@android.ravenwood.annotation.RavenwoodKeepWholeClass
-@android.ravenwood.annotation.RavenwoodNativeSubstitutionClass(
+@RavenwoodKeepWholeClass
+@RavenwoodRedirectionClass(
         "com.android.platform.test.ravenwood.nativesubstitution.EventLog_host")
 public class EventLog {
     /** @hide */ public EventLog() {}
@@ -339,6 +342,7 @@ public class EventLog {
      * @param value A value to log
      * @return The number of bytes written
      */
+    @RavenwoodRedirect
     public static native int writeEvent(int tag, int value);
 
     /**
@@ -347,6 +351,7 @@ public class EventLog {
      * @param value A value to log
      * @return The number of bytes written
      */
+    @RavenwoodRedirect
     public static native int writeEvent(int tag, long value);
 
     /**
@@ -355,6 +360,7 @@ public class EventLog {
      * @param value A value to log
      * @return The number of bytes written
      */
+    @RavenwoodRedirect
     public static native int writeEvent(int tag, float value);
 
     /**
@@ -363,6 +369,7 @@ public class EventLog {
      * @param str A value to log
      * @return The number of bytes written
      */
+    @RavenwoodRedirect
     public static native int writeEvent(int tag, String str);
 
     /**
@@ -371,6 +378,7 @@ public class EventLog {
      * @param list A list of values to log
      * @return The number of bytes written
      */
+    @RavenwoodRedirect
     public static native int writeEvent(int tag, Object... list);
 
     /**
@@ -379,6 +387,7 @@ public class EventLog {
      * @param output container to add events into
      * @throws IOException if something goes wrong reading events
      */
+    @RavenwoodRedirect
     public static native void readEvents(int[] tags, Collection<Event> output)
             throws IOException;
 
@@ -391,6 +400,7 @@ public class EventLog {
      * @hide
      */
     @SystemApi
+    @RavenwoodRedirect
     public static native void readEventsOnWrapping(int[] tags, long timestamp,
             Collection<Event> output)
             throws IOException;
