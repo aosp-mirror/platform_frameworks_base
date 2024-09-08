@@ -73,7 +73,7 @@ constructor(
         if (SceneContainerFlag.isEnabled) return
         listenForGoneToAodOrDozing()
         listenForGoneToDreaming()
-        listenForGoneToLockscreenOrHub()
+        listenForGoneToLockscreenOrHubOrOccluded()
         listenForGoneToOccluded()
         listenForGoneToDreamingLockscreenHosted()
     }
@@ -89,22 +89,19 @@ constructor(
      */
     private fun listenForGoneToOccluded() {
         scope.launch("$TAG#listenForGoneToOccluded") {
-            keyguardInteractor.showDismissibleKeyguard
-                .filterRelevantKeyguardState()
-                .sample(keyguardInteractor.isKeyguardOccluded, ::Pair)
-                .collect { (_, isKeyguardOccluded) ->
-                    if (isKeyguardOccluded) {
-                        startTransitionTo(
-                            KeyguardState.OCCLUDED,
-                            ownerReason = "Dismissible keyguard with occlusion"
-                        )
-                    }
+            keyguardInteractor.showDismissibleKeyguard.filterRelevantKeyguardState().collect {
+                if (keyguardInteractor.isKeyguardOccluded.value) {
+                    startTransitionTo(
+                        KeyguardState.OCCLUDED,
+                        ownerReason = "Dismissible keyguard with occlusion"
+                    )
                 }
+            }
         }
     }
 
     // Primarily for when the user chooses to lock down the device
-    private fun listenForGoneToLockscreenOrHub() {
+    private fun listenForGoneToLockscreenOrHubOrOccluded() {
         if (KeyguardWmStateRefactor.isEnabled) {
             scope.launch("$TAG#listenForGoneToLockscreenOrHub") {
                 biometricSettingsRepository.isCurrentUserInLockdown
@@ -137,7 +134,7 @@ constructor(
                     }
             }
         } else {
-            scope.launch("$TAG#listenForGoneToLockscreenOrHub") {
+            scope.launch("$TAG#listenForGoneToLockscreenOrHubOrOccluded") {
                 keyguardInteractor.isKeyguardShowing
                     .filterRelevantKeyguardStateAnd { isKeyguardShowing -> isKeyguardShowing }
                     .sample(communalSceneInteractor.isIdleOnCommunalNotEditMode, ::Pair)
@@ -145,6 +142,8 @@ constructor(
                         val to =
                             if (isIdleOnCommunal) {
                                 KeyguardState.GLANCEABLE_HUB
+                            } else if (keyguardInteractor.isKeyguardOccluded.value) {
+                                KeyguardState.OCCLUDED
                             } else {
                                 KeyguardState.LOCKSCREEN
                             }
