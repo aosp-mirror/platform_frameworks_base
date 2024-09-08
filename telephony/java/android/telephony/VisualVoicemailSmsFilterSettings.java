@@ -64,6 +64,14 @@ public final class VisualVoicemailSmsFilterSettings implements Parcelable {
      * @hide
      */
     public static final int DEFAULT_DESTINATION_PORT = DESTINATION_PORT_ANY;
+    /**
+     * @hide
+     */
+    public static final int MAX_STRING_LENGTH = 256;
+    /**
+     * @hide
+     */
+    public static final int MAX_LIST_SIZE = 100;
 
     /**
      * Builder class for {@link VisualVoicemailSmsFilterSettings} objects.
@@ -82,10 +90,15 @@ public final class VisualVoicemailSmsFilterSettings implements Parcelable {
         /**
          * Sets the client prefix for the visual voicemail SMS filter. The client prefix will appear
          * at the start of a visual voicemail SMS message, followed by a colon(:).
+         * @throws IllegalArgumentException if the string length is greater than 256 characters
          */
         public Builder setClientPrefix(String clientPrefix) {
             if (clientPrefix == null) {
                 throw new IllegalArgumentException("Client prefix cannot be null");
+            }
+            if (clientPrefix.length() > MAX_STRING_LENGTH) {
+                throw new IllegalArgumentException("Client prefix cannot be greater than "
+                        + MAX_STRING_LENGTH + " characters");
             }
             mClientPrefix = clientPrefix;
             return this;
@@ -95,10 +108,24 @@ public final class VisualVoicemailSmsFilterSettings implements Parcelable {
          * Sets the originating number allow list for the visual voicemail SMS filter. If the list
          * is not null only the SMS messages from a number in the list can be considered as a visual
          * voicemail SMS. Otherwise, messages from any address will be considered.
+         * @throws IllegalArgumentException if the size of the originatingNumbers list is greater
+         * than 100 elements
+         * @throws IllegalArgumentException if an element within the originatingNumbers list has
+         * a string length greater than 256
          */
         public Builder setOriginatingNumbers(List<String> originatingNumbers) {
             if (originatingNumbers == null) {
                 throw new IllegalArgumentException("Originating numbers cannot be null");
+            }
+            if (originatingNumbers.size() > MAX_LIST_SIZE) {
+                throw new IllegalArgumentException("The originatingNumbers list size cannot be"
+                        + " greater than " + MAX_STRING_LENGTH + " elements");
+            }
+            for (String num : originatingNumbers) {
+                if (num != null && num.length() > MAX_STRING_LENGTH) {
+                    throw new IllegalArgumentException("Numbers within the originatingNumbers list"
+                            + " cannot be greater than" + MAX_STRING_LENGTH + " characters");
+                }
             }
             mOriginatingNumbers = originatingNumbers;
             return this;

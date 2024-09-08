@@ -1196,6 +1196,10 @@ public class AccountManagerService
                             obsoleteAuthType.add(type);
                             // And delete it from the TABLE_META
                             accountsDb.deleteMetaByAuthTypeAndUid(type, uid);
+                        } else if (knownUid != null && knownUid != uid) {
+                            Slog.w(TAG, "authenticator no longer exist for type " + type);
+                            obsoleteAuthType.add(type);
+                            accountsDb.deleteMetaByAuthTypeAndUid(type, uid);
                         }
                     }
                 }
@@ -4970,6 +4974,9 @@ public class AccountManagerService
                 PackageManager pm = mContext.getPackageManager();
                 ResolveInfo resolveInfo = pm.resolveActivityAsUser(intent, 0, mAccounts.userId);
                 if (resolveInfo == null) {
+                    return false;
+                }
+                if ("content".equals(intent.getScheme())) {
                     return false;
                 }
                 ActivityInfo targetActivityInfo = resolveInfo.activityInfo;

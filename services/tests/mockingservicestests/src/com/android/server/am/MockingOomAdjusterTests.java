@@ -2567,7 +2567,7 @@ public class MockingOomAdjusterTests {
                 PROCESS_STATE_NONEXISTENT, PROCESS_STATE_NONEXISTENT,
                 0, 0, false, false, false, ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE,
                 false, false, false, hasShownUi, false, false, false, false, false, false, null,
-                0, 0, 0, true, 0, null, false);
+                0, Long.MIN_VALUE, Long.MIN_VALUE, true, 0, null, false);
     }
 
     private ProcessRecord makeProcessRecord(ActivityManagerService service, int pid, int uid,

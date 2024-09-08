@@ -34,7 +34,7 @@ final class ProcessProviderRecord {
     /**
      * The last time someone else was using a provider in this process.
      */
-    private long mLastProviderTime;
+    private long mLastProviderTime = Long.MIN_VALUE;
 
     /**
      * class (String) -> ContentProviderRecord.

@@ -280,7 +280,7 @@ final class ProcessStateRecord {
      * The last time the process was in the TOP state or greater.
      */
     @GuardedBy("mService")
-    private long mLastTopTime;
+    private long mLastTopTime = Long.MIN_VALUE;
 
     /**
      * Is this an empty background process?
