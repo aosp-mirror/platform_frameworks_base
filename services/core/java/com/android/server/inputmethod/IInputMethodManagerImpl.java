@@ -116,11 +116,11 @@ final class IInputMethodManagerImpl extends IInputMethodManager.Stub {
         boolean showSoftInput(IInputMethodClient client, IBinder windowToken,
                 @Nullable ImeTracker.Token statsToken, @InputMethodManager.ShowFlags int flags,
                 @MotionEvent.ToolType int lastClickToolType, ResultReceiver resultReceiver,
-                @SoftInputShowHideReason int reason);
+                @SoftInputShowHideReason int reason, boolean async);
 
         boolean hideSoftInput(IInputMethodClient client, IBinder windowToken,
                 @Nullable ImeTracker.Token statsToken, @InputMethodManager.HideFlags int flags,
-                ResultReceiver resultReceiver, @SoftInputShowHideReason int reason);
+                ResultReceiver resultReceiver, @SoftInputShowHideReason int reason, boolean async);
 
         @PermissionVerified(Manifest.permission.TEST_INPUT_METHOD)
         void hideSoftInputFromServerForTest();
@@ -132,7 +132,8 @@ final class IInputMethodManagerImpl extends IInputMethodManager.Stub {
                 @Nullable EditorInfo editorInfo, IRemoteInputConnection inputConnection,
                 IRemoteAccessibilityInputConnection remoteAccessibilityInputConnection,
                 int unverifiedTargetSdkVersion, @UserIdInt int userId,
-                @NonNull ImeOnBackInvokedDispatcher imeDispatcher, int startInputSeq);
+                @NonNull ImeOnBackInvokedDispatcher imeDispatcher, int startInputSeq,
+                boolean useAsyncShowHideMethod);
 
         InputBindResult startInputOrWindowGainedFocus(
                 @StartInputReason int startInputReason, IInputMethodClient client,
@@ -290,17 +291,17 @@ final class IInputMethodManagerImpl extends IInputMethodManager.Stub {
     public boolean showSoftInput(IInputMethodClient client, IBinder windowToken,
             @NonNull ImeTracker.Token statsToken, @InputMethodManager.ShowFlags int flags,
             @MotionEvent.ToolType int lastClickToolType, ResultReceiver resultReceiver,
-            @SoftInputShowHideReason int reason) {
+            @SoftInputShowHideReason int reason, boolean async) {
         return mCallback.showSoftInput(client, windowToken, statsToken, flags, lastClickToolType,
-                resultReceiver, reason);
+                resultReceiver, reason, async);
     }
 
     @Override
     public boolean hideSoftInput(IInputMethodClient client, IBinder windowToken,
             @NonNull ImeTracker.Token statsToken, @InputMethodManager.HideFlags int flags,
-            ResultReceiver resultReceiver, @SoftInputShowHideReason int reason) {
+            ResultReceiver resultReceiver, @SoftInputShowHideReason int reason, boolean async) {
         return mCallback.hideSoftInput(client, windowToken, statsToken, flags, resultReceiver,
-                reason);
+                reason, async);
     }
 
     @EnforcePermission(Manifest.permission.TEST_INPUT_METHOD)
@@ -336,11 +337,13 @@ final class IInputMethodManagerImpl extends IInputMethodManager.Stub {
             IRemoteInputConnection inputConnection,
             IRemoteAccessibilityInputConnection remoteAccessibilityInputConnection,
             int unverifiedTargetSdkVersion, @UserIdInt int userId,
-            @NonNull ImeOnBackInvokedDispatcher imeDispatcher, int startInputSeq) {
+            @NonNull ImeOnBackInvokedDispatcher imeDispatcher, int startInputSeq,
+            boolean useAsyncShowHideMethod) {
         mCallback.startInputOrWindowGainedFocusAsync(
                 startInputReason, client, windowToken, startInputFlags, softInputMode,
                 windowFlags, editorInfo, inputConnection, remoteAccessibilityInputConnection,
-                unverifiedTargetSdkVersion, userId, imeDispatcher, startInputSeq);
+                unverifiedTargetSdkVersion, userId, imeDispatcher, startInputSeq,
+                useAsyncShowHideMethod);
     }
 
     @Override

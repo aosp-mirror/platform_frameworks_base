@@ -362,6 +362,12 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
          * Invoked when a screenshot is taken of the given display to notify registered listeners.
          */
         List<ComponentName> notifyScreenshotListeners(int displayId);
+
+        /**
+         * Returns whether the given UID is the owner of a virtual device, which the given display
+         * belongs to.
+         */
+        boolean isCallerVirtualDeviceOwner(int displayId, int callingUid);
     }
 
     /**
@@ -421,6 +427,7 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      * @param packageName package name
      * @param outAppOp First element will be filled with the app op corresponding to
      *                 this window, or OP_NONE.
+     * @param displayId The display on which this window is being added.
      *
      * @return {@link WindowManagerGlobal#ADD_OKAY} if the add can proceed;
      *      else an error code, usually
@@ -429,7 +436,7 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      * @see WindowManager.LayoutParams#PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY
      */
     int checkAddPermission(int type, boolean isRoundedCornerOverlay, String packageName,
-            int[] outAppOp);
+            int[] outAppOp, int displayId);
 
     /**
      * After the window manager has computed the current configuration based

@@ -16,12 +16,18 @@
 
 package com.android.systemui.shade.ui.viewmodel
 
+import com.android.systemui.authentication.domain.interactor.authenticationInteractor
+import com.android.systemui.bouncer.domain.interactor.primaryBouncerInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.scene.domain.interactor.sceneInteractor
 
 val Kosmos.notificationShadeWindowModel: NotificationShadeWindowModel by
     Kosmos.Fixture {
         NotificationShadeWindowModel(
             keyguardTransitionInteractor,
+            sceneInteractor = { sceneInteractor },
+            authenticationInteractor = { authenticationInteractor },
+            primaryBouncerInteractor = primaryBouncerInteractor,
         )
     }

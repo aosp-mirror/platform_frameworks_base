@@ -46,6 +46,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
+import android.app.assist.AssistContent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
@@ -88,6 +89,7 @@ import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestRunningTaskInfoBuilder;
 import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.apptoweb.AppToWebGenericLinksParser;
+import com.android.wm.shell.apptoweb.AssistContentRequester;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.MultiInstanceHelper;
 import com.android.wm.shell.common.ShellExecutor;
@@ -133,6 +135,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
 
     private static final Uri TEST_URI1 = Uri.parse("https://www.google.com/");
     private static final Uri TEST_URI2 = Uri.parse("https://docs.google.com/");
+    private static final Uri TEST_URI3 = Uri.parse("https://slides.google.com/");
 
     @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule(DEVICE_DEFAULT);
 
@@ -173,9 +176,14 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     @Mock
     private AppToWebGenericLinksParser mMockGenericLinksParser;
     @Mock
+    private WindowManager mMockWindowManager;
+    @Mock
+    private AssistContentRequester mMockAssistContentRequester;
+    @Mock
     private HandleMenu mMockHandleMenu;
     @Mock
     private HandleMenuFactory mMockHandleMenuFactory;
+    @Mock
     private MultiInstanceHelper mMockMultiInstanceHelper;
     @Captor
     private ArgumentCaptor<Function1<Boolean, Unit>> mOnMaxMenuHoverChangeListener;
@@ -186,7 +194,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     private SurfaceControl.Transaction mMockTransaction;
     private StaticMockitoSession mMockitoSession;
     private TestableContext mTestableContext;
-    private ShellExecutor mBgExecutor = new TestShellExecutor();
+    private final ShellExecutor mBgExecutor = new TestShellExecutor();
+    private final AssistContent mAssistContent = new AssistContent();
 
     /** Set up run before test class. */
     @BeforeClass
@@ -220,9 +229,10 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         final Display defaultDisplay = mock(Display.class);
         doReturn(defaultDisplay).when(mMockDisplayController).getDisplay(Display.DEFAULT_DISPLAY);
         doReturn(mInsetsState).when(mMockDisplayController).getInsetsState(anyInt());
-        when(mMockHandleMenuFactory.create(any(), anyInt(), any(), any(),
+        when(mMockHandleMenuFactory.create(any(), any(), anyInt(), any(), any(),
                 any(), anyBoolean(), anyBoolean(), any(), anyInt(), anyInt(), anyInt()))
                 .thenReturn(mMockHandleMenu);
+        when(mMockMultiInstanceHelper.supportsMultiInstanceSplit(any())).thenReturn(false);
     }
 
     @After
@@ -385,6 +395,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_ENABLE_ADDITIONAL_WINDOWS_ABOVE_STATUS_BAR)
     public void updateRelayoutParams_fullscreen_inputChannelNotNeeded() {
         final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
         taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
@@ -401,6 +412,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_ENABLE_ADDITIONAL_WINDOWS_ABOVE_STATUS_BAR)
     public void updateRelayoutParams_multiwindow_inputChannelNotNeeded() {
         final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
         taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
@@ -491,7 +503,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 .isTrue();
     }
 
-    @DisableFlags(Flags.FLAG_ENABLE_ADDITIONAL_WINDOWS_ABOVE_STATUS_BAR)
+    @Test
     public void relayout_fullscreenTask_appliesTransactionImmediately() {
         final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
         final DesktopModeWindowDecoration spyWindowDecor = spy(createWindowDecoration(taskInfo));
@@ -518,7 +530,6 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     }
 
     @Test
-    @DisableFlags(Flags.FLAG_ENABLE_ADDITIONAL_WINDOWS_ABOVE_STATUS_BAR)
     public void relayout_fullscreenTask_doesNotCreateViewHostImmediately() {
         final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
         final DesktopModeWindowDecoration spyWindowDecor = spy(createWindowDecoration(taskInfo));
@@ -530,7 +541,6 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     }
 
     @Test
-    @DisableFlags(Flags.FLAG_ENABLE_ADDITIONAL_WINDOWS_ABOVE_STATUS_BAR)
     public void relayout_fullscreenTask_postsViewHostCreation() {
         final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
         final DesktopModeWindowDecoration spyWindowDecor = spy(createWindowDecoration(taskInfo));
@@ -559,7 +569,6 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     }
 
     @Test
-    @DisableFlags(Flags.FLAG_ENABLE_ADDITIONAL_WINDOWS_ABOVE_STATUS_BAR)
     public void relayout_removesExistingHandlerCallback() {
         final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
         final DesktopModeWindowDecoration spyWindowDecor = spy(createWindowDecoration(taskInfo));
@@ -574,7 +583,6 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     }
 
     @Test
-    @DisableFlags(Flags.FLAG_ENABLE_ADDITIONAL_WINDOWS_ABOVE_STATUS_BAR)
     public void close_removesExistingHandlerCallback() {
         final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
         final DesktopModeWindowDecoration spyWindowDecor = spy(createWindowDecoration(taskInfo));
@@ -671,10 +679,11 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     public void capturedLink_handleMenuBrowserLinkSetToCapturedLinkIfValid() {
         final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(true /* visible */);
         final DesktopModeWindowDecoration decor = createWindowDecoration(
-                taskInfo, TEST_URI1 /* captured link */, TEST_URI2 /* generic link */);
+                taskInfo, TEST_URI1 /* captured link */, TEST_URI2 /* web uri */,
+                TEST_URI3 /* generic link */);
 
         // Verify handle menu's browser link set as captured link
-        decor.createHandleMenu(mMockSplitScreenController);
+        createHandleMenu(decor);
         verifyHandleMenuCreated(TEST_URI1);
     }
 
@@ -683,7 +692,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     public void capturedLink_postsOnCapturedLinkExpiredRunnable() {
         final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(true /* visible */);
         final DesktopModeWindowDecoration decor = createWindowDecoration(
-                taskInfo, TEST_URI1 /* captured link */, null /* generic link */);
+                taskInfo, TEST_URI1 /* captured link */, null /* web uri */,
+                null /* generic link */);
         final ArgumentCaptor<Runnable> runnableArgument = ArgumentCaptor.forClass(Runnable.class);
 
         // Run runnable to set captured link to expired
@@ -692,7 +702,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
 
         // Verify captured link is no longer valid by verifying link is not set as handle menu
         // browser link.
-        decor.createHandleMenu(mMockSplitScreenController);
+        createHandleMenu(decor);
         verifyHandleMenuCreated(null /* uri */);
     }
 
@@ -701,7 +711,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     public void capturedLink_capturedLinkNotResetToSameLink() {
         final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(true /* visible */);
         final DesktopModeWindowDecoration decor = createWindowDecoration(
-                taskInfo, TEST_URI1 /* captured link */, null /* generic link */);
+                taskInfo, TEST_URI1 /* captured link */, null /* web uri */,
+                null /* generic link */);
         final ArgumentCaptor<Runnable> runnableArgument = ArgumentCaptor.forClass(Runnable.class);
 
         // Run runnable to set captured link to expired
@@ -712,7 +723,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         decor.relayout(taskInfo);
 
         // Verify handle menu's browser link not set to captured link since link is expired
-        decor.createHandleMenu(mMockSplitScreenController);
+        createHandleMenu(decor);
         verifyHandleMenuCreated(null /* uri */);
     }
 
@@ -721,11 +732,12 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     public void capturedLink_capturedLinkStillUsedIfExpiredAfterHandleMenuCreation() {
         final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(true /* visible */);
         final DesktopModeWindowDecoration decor = createWindowDecoration(
-                taskInfo, TEST_URI1 /* captured link */, null /* generic link */);
+                taskInfo, TEST_URI1 /* captured link */, null /* web uri */,
+                null /* generic link */);
         final ArgumentCaptor<Runnable> runnableArgument = ArgumentCaptor.forClass(Runnable.class);
 
         // Create handle menu before link expires
-        decor.createHandleMenu(mMockSplitScreenController);
+        createHandleMenu(decor);
 
         // Run runnable to set captured link to expired
         verify(mMockHandler).postDelayed(runnableArgument.capture(), anyLong());
@@ -733,7 +745,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
 
         // Verify handle menu's browser link is set to captured link since menu was opened before
         // captured link expired
-        decor.createHandleMenu(mMockSplitScreenController);
+        createHandleMenu(decor);
         verifyHandleMenuCreated(TEST_URI1);
     }
 
@@ -742,12 +754,13 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     public void capturedLink_capturedLinkExpiresAfterClick() {
         final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(true /* visible */);
         final DesktopModeWindowDecoration decor = createWindowDecoration(
-                taskInfo, TEST_URI1 /* captured link */, null /* generic link */);
+                taskInfo, TEST_URI1 /* captured link */, null /* web uri */,
+                null /* generic link */);
         final ArgumentCaptor<Function1<Uri, Unit>> openInBrowserCaptor =
                 ArgumentCaptor.forClass(Function1.class);
 
         // Simulate menu opening and clicking open in browser button
-        decor.createHandleMenu(mMockSplitScreenController);
+        createHandleMenu(decor);
         verify(mMockHandleMenu).show(
                 any(),
                 any(),
@@ -761,7 +774,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
 
         // Verify handle menu's browser link not set to captured link since link not valid after
         // open in browser clicked
-        decor.createHandleMenu(mMockSplitScreenController);
+        createHandleMenu(decor);
         verifyHandleMenuCreated(null /* uri */);
     }
 
@@ -770,10 +783,11 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     public void capturedLink_openInBrowserListenerCalledOnClick() {
         final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(true /* visible */);
         final DesktopModeWindowDecoration decor = createWindowDecoration(
-                taskInfo, TEST_URI1 /* captured link */, null /* generic link */);
+                taskInfo, TEST_URI1 /* captured link */, null /* web uri */,
+                null /* generic link */);
         final ArgumentCaptor<Function1<Uri, Unit>> openInBrowserCaptor =
                 ArgumentCaptor.forClass(Function1.class);
-        decor.createHandleMenu(mMockSplitScreenController);
+        createHandleMenu(decor);
         verify(mMockHandleMenu).show(
                 any(),
                 any(),
@@ -791,14 +805,28 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
 
     @Test
     @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_TO_WEB)
-    public void genericLink_genericLinkUsedWhenCapturedLinkUnavailable() {
+    public void webUriLink_webUriLinkUsedWhenCapturedLinkUnavailable() {
         final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(true /* visible */);
         final DesktopModeWindowDecoration decor = createWindowDecoration(
-                taskInfo, null /* captured link */, TEST_URI2 /* generic link */);
-
-        // Verify handle menu's browser link set as generic link no captured link is available
-        decor.createHandleMenu(mMockSplitScreenController);
+                taskInfo, null /* captured link */, TEST_URI2 /* web uri */,
+                TEST_URI3 /* generic link */);
+        // Verify handle menu's browser link set as web uri link when captured link is unavailable
+        createHandleMenu(decor);
         verifyHandleMenuCreated(TEST_URI2);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_TO_WEB)
+    public void genericLink_genericLinkUsedWhenCapturedLinkAndWebUriUnavailable() {
+        final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(true /* visible */);
+        final DesktopModeWindowDecoration decor = createWindowDecoration(
+                taskInfo, null /* captured link */, null /* web uri */,
+                TEST_URI3 /* generic link */);
+
+        // Verify handle menu's browser link set as generic link when captured link and web uri link
+        // are unavailable
+        createHandleMenu(decor);
+        verifyHandleMenuCreated(TEST_URI3);
     }
 
     @Test
@@ -808,7 +836,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 true /* relayout */);
         final ArgumentCaptor<Function0<Unit>> closeClickListener =
                 ArgumentCaptor.forClass(Function0.class);
-        decoration.createHandleMenu(mMockSplitScreenController);
+        createHandleMenu(decoration);
         verify(mMockHandleMenu).show(
                 any(),
                 any(),
@@ -826,7 +854,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     }
 
     private void verifyHandleMenuCreated(@Nullable Uri uri) {
-        verify(mMockHandleMenuFactory).create(any(), anyInt(), any(), any(),
+        verify(mMockHandleMenuFactory).create(any(), any(), anyInt(), any(), any(),
                 any(), anyBoolean(), anyBoolean(), eq(uri), anyInt(), anyInt(), anyInt());
     }
 
@@ -858,9 +886,10 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
 
     private DesktopModeWindowDecoration createWindowDecoration(
             ActivityManager.RunningTaskInfo taskInfo, @Nullable Uri capturedLink,
-            @Nullable Uri genericLink) {
+            @Nullable Uri webUri, @Nullable Uri genericLink) {
         taskInfo.capturedLink = capturedLink;
         taskInfo.capturedLinkTimestamp = System.currentTimeMillis();
+        mAssistContent.setWebUri(webUri);
         final String genericLinkString = genericLink == null ? null : genericLink.toString();
         doReturn(genericLinkString).when(mMockGenericLinksParser).getGenericLink(any());
         // Relayout to set captured link
@@ -892,10 +921,10 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 mContext, mMockDisplayController, mMockSplitScreenController,
                 mMockShellTaskOrganizer, taskInfo, mMockSurfaceControl, mMockHandler, mBgExecutor,
                 mMockChoreographer, mMockSyncQueue, mMockRootTaskDisplayAreaOrganizer,
-                mMockGenericLinksParser, SurfaceControl.Builder::new, mMockTransactionSupplier,
-                WindowContainerTransaction::new, SurfaceControl::new,
-                mMockSurfaceControlViewHostFactory, maximizeMenuFactory, mMockHandleMenuFactory,
-                        mMockMultiInstanceHelper);
+                mMockGenericLinksParser, mMockAssistContentRequester, SurfaceControl.Builder::new,
+                mMockTransactionSupplier, WindowContainerTransaction::new, SurfaceControl::new,
+                new WindowManagerWrapper(mMockWindowManager), mMockSurfaceControlViewHostFactory,
+                maximizeMenuFactory, mMockHandleMenuFactory, mMockMultiInstanceHelper);
         windowDecor.setCaptionListeners(mMockTouchEventListener, mMockTouchEventListener,
                 mMockTouchEventListener, mMockTouchEventListener);
         windowDecor.setExclusionRegionListener(mMockExclusionRegionListener);
@@ -921,6 +950,13 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 "DesktopModeWindowDecorationTests");
         return taskInfo;
 
+    }
+
+    private void createHandleMenu(@NonNull DesktopModeWindowDecoration decor) {
+        decor.createHandleMenu();
+        // Call DesktopModeWindowDecoration#onAssistContentReceived because decor waits to receive
+        // {@link AssistContent} before creating the menu
+        decor.onAssistContentReceived(mAssistContent);
     }
 
     private static boolean hasNoInputChannelFeature(RelayoutParams params) {

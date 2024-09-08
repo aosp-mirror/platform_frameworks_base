@@ -43,7 +43,7 @@ import kotlinx.coroutines.flow.asStateFlow
 /**
  * Models UI state used to render the content of the shade scene.
  *
- * Different from [ShadeSceneActionsViewModel], which only models user actions that can be performed
+ * Different from [ShadeUserActionsViewModel], which only models user actions that can be performed
  * to navigate to other scenes.
  */
 class ShadeSceneContentViewModel

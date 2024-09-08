@@ -6,8 +6,6 @@
 --default-throw
 
 # Uncomment below lines to enable each feature.
-# --enable-non-stub-method-check
---no-non-stub-method-check
 
 #--default-method-call-hook
 #    com.android.hoststubgen.hosthelper.HostTestUtils.logMethodCall
@@ -34,8 +32,11 @@
 --substitute-annotation
     android.ravenwood.annotation.RavenwoodReplace
 
---native-substitute-annotation
-    android.ravenwood.annotation.RavenwoodNativeSubstitutionClass
+--redirect-annotation
+    android.ravenwood.annotation.RavenwoodRedirect
+
+--redirection-class-annotation
+    android.ravenwood.annotation.RavenwoodRedirectionClass
 
 --class-load-hook-annotation
     android.ravenwood.annotation.RavenwoodClassLoadHook

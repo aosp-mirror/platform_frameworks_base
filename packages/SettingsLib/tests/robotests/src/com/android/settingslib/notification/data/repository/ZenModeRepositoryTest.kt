@@ -199,6 +199,15 @@ class ZenModeRepositoryTest {
         }
     }
 
+    @EnableFlags(android.app.Flags.FLAG_MODES_UI)
+    @Test
+    fun getModes_returnsModes() {
+        val modesList = listOf(TestModeBuilder().setId("One").build())
+        `when`(zenModesBackend.modes).thenReturn(modesList)
+
+        assertThat(underTest.getModes()).isEqualTo(modesList)
+    }
+
     private fun triggerIntent(action: String, extras: Map<String, Parcelable>? = null) {
         verify(context).registerReceiver(receiverCaptor.capture(), any(), any(), any())
         val intent = Intent(action)

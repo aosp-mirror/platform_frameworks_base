@@ -214,6 +214,19 @@ static jint Linux_open(JNIEnv* env, jobject, jstring javaPath, jint flags, jint 
     return throwIfMinusOne(env, "open", TEMP_FAILURE_RETRY(open(path.c_str(), flags, mode)));
 }
 
+static void Linux_setenv(JNIEnv* env, jobject, jstring javaName, jstring javaValue,
+        jboolean overwrite) {
+    ScopedRealUtf8Chars name(env, javaName);
+    if (name.c_str() == NULL) {
+        jniThrowNullPointerException(env);
+    }
+    ScopedRealUtf8Chars value(env, javaValue);
+    if (value.c_str() == NULL) {
+        jniThrowNullPointerException(env);
+    }
+    throwIfMinusOne(env, "setenv", setenv(name.c_str(), value.c_str(), overwrite ? 1 : 0));
+}
+
 // ---- Registration ----
 
 static const JNINativeMethod sMethods[] =
@@ -227,6 +240,7 @@ static const JNINativeMethod sMethods[] =
     { "lstat", "(Ljava/lang/String;)Landroid/system/StructStat;", (void*)Linux_lstat },
     { "stat", "(Ljava/lang/String;)Landroid/system/StructStat;", (void*)Linux_stat },
     { "nOpen", "(Ljava/lang/String;II)I", (void*)Linux_open },
+    { "setenv", "(Ljava/lang/String;Ljava/lang/String;Z)V", (void*)Linux_setenv },
 };
 
 extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)

@@ -65,11 +65,12 @@ public class KeyguardPinViewController
             DevicePostureController postureController, FeatureFlags featureFlags,
             SelectedUserInteractor selectedUserInteractor, UiEventLogger uiEventLogger,
             KeyguardKeyboardInteractor keyguardKeyboardInteractor,
-            @Nullable MSDLPlayer msdlPlayer) {
+            @Nullable MSDLPlayer msdlPlayer,
+            UserActivityNotifier userActivityNotifier) {
         super(view, keyguardUpdateMonitor, securityMode, lockPatternUtils, keyguardSecurityCallback,
                 messageAreaControllerFactory, latencyTracker, liftToActivateListener,
                 emergencyButtonController, falsingCollector, featureFlags, selectedUserInteractor,
-                keyguardKeyboardInteractor, msdlPlayer);
+                keyguardKeyboardInteractor, msdlPlayer, userActivityNotifier);
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mPostureController = postureController;
         mLockPatternUtils = lockPatternUtils;

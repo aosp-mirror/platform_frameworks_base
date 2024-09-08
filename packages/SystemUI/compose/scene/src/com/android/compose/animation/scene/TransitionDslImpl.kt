@@ -84,30 +84,30 @@ private class SceneTransitionsBuilderImpl : SceneTransitionsBuilder {
     }
 
     override fun overscroll(
-        scene: SceneKey,
+        content: ContentKey,
         orientation: Orientation,
         builder: OverscrollBuilder.() -> Unit
     ): OverscrollSpec {
         val impl = OverscrollBuilderImpl().apply(builder)
         check(impl.transformations.isNotEmpty()) {
             "This method does not allow empty transformations. " +
-                "Use overscrollDisabled($scene, $orientation) instead."
+                "Use overscrollDisabled($content, $orientation) instead."
         }
-        return overscrollSpec(scene, orientation, impl)
+        return overscrollSpec(content, orientation, impl)
     }
 
-    override fun overscrollDisabled(scene: SceneKey, orientation: Orientation): OverscrollSpec {
-        return overscrollSpec(scene, orientation, OverscrollBuilderImpl())
+    override fun overscrollDisabled(content: ContentKey, orientation: Orientation): OverscrollSpec {
+        return overscrollSpec(content, orientation, OverscrollBuilderImpl())
     }
 
     private fun overscrollSpec(
-        scene: SceneKey,
+        content: ContentKey,
         orientation: Orientation,
         impl: OverscrollBuilderImpl,
     ): OverscrollSpec {
         val spec =
             OverscrollSpecImpl(
-                content = scene,
+                content = content,
                 orientation = orientation,
                 transformationSpec =
                     TransformationSpecImpl(

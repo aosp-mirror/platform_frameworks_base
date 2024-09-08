@@ -95,6 +95,8 @@ import com.android.systemui.statusbar.notification.footer.ui.view.FooterView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.shared.NotificationThrottleHun;
+import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimBounds;
+import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimShape;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
@@ -893,7 +895,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
 
     @Test
     @DisableFlags({QSComposeFragment.FLAG_NAME, NewQsUI.FLAG_NAME})
-    @DisableSceneContainer // TODO(b/312473478): address lack of QS Header
+    @DisableSceneContainer
     public void testInsideQSHeader_noOffset() {
         ViewGroup qsHeader = mock(ViewGroup.class);
         Rect boundsOnScreen = new Rect(0, 0, 1000, 1000);
@@ -911,7 +913,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
 
     @Test
     @DisableFlags({QSComposeFragment.FLAG_NAME, NewQsUI.FLAG_NAME})
-    @DisableSceneContainer // TODO(b/312473478): address lack of QS Header
+    @DisableSceneContainer
     public void testInsideQSHeader_Offset() {
         ViewGroup qsHeader = mock(ViewGroup.class);
         Rect boundsOnScreen = new Rect(100, 100, 1000, 1000);
@@ -932,7 +934,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
 
     @Test
     @EnableFlags({QSComposeFragment.FLAG_NAME, NewQsUI.FLAG_NAME})
-    @DisableSceneContainer // TODO(b/312473478): address lack of QS Header
+    @DisableSceneContainer
     public void testInsideQSHeader_noOffset_qsCompose() {
         ViewGroup qsHeader = mock(ViewGroup.class);
         Rect boundsOnScreen = new Rect(0, 0, 1000, 1000);
@@ -959,7 +961,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
 
     @Test
     @EnableFlags({QSComposeFragment.FLAG_NAME, NewQsUI.FLAG_NAME})
-    @DisableSceneContainer // TODO(b/312473478): address lack of QS Header
+    @DisableSceneContainer
     public void testInsideQSHeader_Offset_qsCompose() {
         ViewGroup qsHeader = mock(ViewGroup.class);
         Rect boundsOnScreen = new Rect(100, 100, 1000, 1000);
@@ -985,6 +987,53 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
 
         MotionEvent event3 = transformEventForView(createMotionEvent(250f, 250f), mStackScroller);
         assertTrue(mStackScroller.isInsideQsHeader(event3));
+    }
+
+    @Test
+    @EnableSceneContainer
+    public void testIsInsideScrollableRegion_noScrim() {
+        mStackScroller.setLeftTopRightBottom(0, 0, 2000, 2000);
+
+        MotionEvent event = transformEventForView(createMotionEvent(250f, 250f), mStackScroller);
+        assertThat(mStackScroller.isInScrollableRegion(event)).isTrue();
+    }
+
+    @Test
+    @EnableSceneContainer
+    public void testIsInsideScrollableRegion_noOffset() {
+        mStackScroller.setLeftTopRightBottom(0, 0, 1000, 2000);
+        mStackScroller.setScrimClippingShape(createScrimShape(100, 500, 900, 2000));
+
+        MotionEvent event1 = transformEventForView(createMotionEvent(500f, 400f), mStackScroller);
+        assertThat(mStackScroller.isInScrollableRegion(event1)).isFalse();
+
+        MotionEvent event2 = transformEventForView(createMotionEvent(50, 1000f), mStackScroller);
+        assertThat(mStackScroller.isInScrollableRegion(event2)).isFalse();
+
+        MotionEvent event3 = transformEventForView(createMotionEvent(950f, 1000f), mStackScroller);
+        assertThat(mStackScroller.isInScrollableRegion(event3)).isFalse();
+
+        MotionEvent event4 = transformEventForView(createMotionEvent(500f, 1000f), mStackScroller);
+        assertThat(mStackScroller.isInScrollableRegion(event4)).isTrue();
+    }
+
+    @Test
+    @EnableSceneContainer
+    public void testIsInsideScrollableRegion_offset() {
+        mStackScroller.setLeftTopRightBottom(1000, 0, 2000, 2000);
+        mStackScroller.setScrimClippingShape(createScrimShape(100, 500, 900, 2000));
+
+        MotionEvent event1 = transformEventForView(createMotionEvent(1500f, 400f), mStackScroller);
+        assertThat(mStackScroller.isInScrollableRegion(event1)).isFalse();
+
+        MotionEvent event2 = transformEventForView(createMotionEvent(1050, 1000f), mStackScroller);
+        assertThat(mStackScroller.isInScrollableRegion(event2)).isFalse();
+
+        MotionEvent event3 = transformEventForView(createMotionEvent(1950f, 1000f), mStackScroller);
+        assertThat(mStackScroller.isInScrollableRegion(event3)).isFalse();
+
+        MotionEvent event4 = transformEventForView(createMotionEvent(1500f, 1000f), mStackScroller);
+        assertThat(mStackScroller.isInScrollableRegion(event4)).isTrue();
     }
 
     @Test
@@ -1438,7 +1487,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     private static MotionEvent transformEventForView(MotionEvent event, View view) {
         // From `ViewGroup#dispatchTransformedTouchEvent`
         MotionEvent transformed = event.copy();
-        transformed.offsetLocation(-view.getTop(), -view.getLeft());
+        transformed.offsetLocation(/* deltaX = */-view.getLeft(), /* deltaY = */ -view.getTop());
         return transformed;
     }
 
@@ -1474,4 +1523,9 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     private abstract static class BooleanConsumer implements Consumer<Boolean> { }
+
+    private ShadeScrimShape createScrimShape(int left, int top, int right, int bottom) {
+        ShadeScrimBounds bounds = new ShadeScrimBounds(left, top, right, bottom);
+        return new ShadeScrimShape(bounds, 0, 0);
+    }
 }

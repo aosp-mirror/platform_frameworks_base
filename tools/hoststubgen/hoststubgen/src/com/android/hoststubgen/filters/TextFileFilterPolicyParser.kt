@@ -142,9 +142,9 @@ fun createFilterFromTextPolicyFile(
                                     throw ParseException(
                                             "Special class can't have a substitution")
                                 }
-                                // It's a native-substitution.
+                                // It's a redirection class.
                                 val toClass = fields[2].substring(1)
-                                imf.setNativeSubstitutionClass(className, toClass)
+                                imf.setRedirectionClass(className, toClass)
                             } else if (fields[2].startsWith("~")) {
                                 if (classType != SpecialClass.NotSpecial) {
                                     // We could support it, but not needed at least for now.
@@ -240,7 +240,7 @@ fun createFilterFromTextPolicyFile(
 
                             imf.setPolicyForMethod(className, name, signature,
                                     policy.withReason(FILTER_REASON))
-                            if (policy.isSubstitute) {
+                            if (policy == FilterPolicy.Substitute) {
                                 val fromName = fields[3].substring(1)
 
                                 if (fromName == name) {
@@ -248,10 +248,9 @@ fun createFilterFromTextPolicyFile(
                                             "Substitution must have a different name")
                                 }
 
-                                // Set the policy  for the "from" method.
+                                // Set the policy for the "from" method.
                                 imf.setPolicyForMethod(className, fromName, signature,
-                                        policy.getSubstitutionBasePolicy()
-                                                .withReason(FILTER_REASON))
+                                    FilterPolicy.Keep.withReason(FILTER_REASON))
 
                                 val classAndMethod = splitWithLastPeriod(fromName)
                                 if (classAndMethod != null) {
@@ -346,18 +345,15 @@ private fun resolveExtendingClass(className: String): String? {
 
 private fun parsePolicy(s: String): FilterPolicy {
     return when (s.lowercase()) {
-        "s", "stub" -> FilterPolicy.Stub
         "k", "keep" -> FilterPolicy.Keep
         "t", "throw" -> FilterPolicy.Throw
         "r", "remove" -> FilterPolicy.Remove
-        "sc", "stubclass" -> FilterPolicy.StubClass
         "kc", "keepclass" -> FilterPolicy.KeepClass
         "i", "ignore" -> FilterPolicy.Ignore
+        "rdr", "redirect" -> FilterPolicy.Redirect
         else -> {
             if (s.startsWith("@")) {
-                FilterPolicy.SubstituteAndStub
-            } else if (s.startsWith("%")) {
-                FilterPolicy.SubstituteAndKeep
+                FilterPolicy.Substitute
             } else {
                 throw ParseException("Invalid policy \"$s\"")
             }

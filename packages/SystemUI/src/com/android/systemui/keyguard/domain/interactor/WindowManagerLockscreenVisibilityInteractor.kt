@@ -127,8 +127,8 @@ constructor(
                     when (transitionState) {
                         is ObservableTransitionState.Transition ->
                             when {
-                                transitionState.fromScene == Scenes.Lockscreen &&
-                                    transitionState.toScene == Scenes.Gone ->
+                                transitionState.fromContent == Scenes.Lockscreen &&
+                                    transitionState.toContent == Scenes.Gone ->
                                     sceneInteractor
                                         .get()
                                         .isTransitionUserInputOngoing
@@ -139,8 +139,8 @@ constructor(
                                                 flowOf(true)
                                             }
                                         }
-                                transitionState.fromScene == Scenes.Bouncer &&
-                                    transitionState.toScene == Scenes.Gone ->
+                                transitionState.fromContent == Scenes.Bouncer &&
+                                    transitionState.toContent == Scenes.Gone ->
                                     transitionState.progress.map { progress ->
                                         progress >
                                             FromPrimaryBouncerTransitionInteractor

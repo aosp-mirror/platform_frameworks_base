@@ -533,8 +533,15 @@ public class AmbientState implements Dumpable {
         if (mDozeAmount == 1.0f && !isPulseExpanding()) {
             return mShelf.getHeight();
         }
-        int height = (int) Math.max(mLayoutMinHeight,
-                Math.min(mLayoutHeight, mContentHeight) - mTopPadding);
+        int height;
+        if (SceneContainerFlag.isEnabled()) {
+            // TODO(b/192348384): This is probably incorrect as mContentHeight is not up to date.
+            //  Consider removing usages of getInnerHeight in flexiglass if possible.
+            height = (int) Math.min(mLayoutHeight, mContentHeight) - mTopPadding;
+        } else {
+            height = (int) Math.max(mLayoutMinHeight,
+                    Math.min(mLayoutHeight, mContentHeight) - mTopPadding);
+        }
         if (ignorePulseHeight) {
             return height;
         }
@@ -571,6 +578,7 @@ public class AmbientState implements Dumpable {
     }
 
     public void setLayoutMinHeight(int layoutMinHeight) {
+        SceneContainerFlag.assertInLegacyMode();
         mLayoutMinHeight = layoutMinHeight;
     }
 

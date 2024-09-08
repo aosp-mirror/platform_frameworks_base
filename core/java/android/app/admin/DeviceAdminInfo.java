@@ -18,7 +18,6 @@ package android.app.admin;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.app.admin.flags.Flags;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
@@ -388,11 +387,8 @@ public final class DeviceAdminInfo implements Parcelable {
                     }
                     mSupportsTransferOwnership = true;
                 } else if (tagName.equals("headless-system-user")) {
-                    String deviceOwnerModeStringValue = null;
-                    if (Flags.headlessSingleUserCompatibilityFix()) {
-                        deviceOwnerModeStringValue = parser.getAttributeValue(
-                                 null, "headless-device-owner-mode");
-                    }
+                    String deviceOwnerModeStringValue = parser.getAttributeValue(
+                            null, "headless-device-owner-mode");
                     if (deviceOwnerModeStringValue == null) {
                         deviceOwnerModeStringValue =
                                 parser.getAttributeValue(null, "device-owner-mode");
@@ -405,13 +401,8 @@ public final class DeviceAdminInfo implements Parcelable {
                     } else if ("single_user".equalsIgnoreCase(deviceOwnerModeStringValue)) {
                         mHeadlessDeviceOwnerMode = HEADLESS_DEVICE_OWNER_MODE_SINGLE_USER;
                     } else {
-                        if (Flags.headlessSingleUserCompatibilityFix()) {
-                            Log.e(TAG, "Unknown headless-system-user mode: "
-                                    + deviceOwnerModeStringValue);
-                        } else {
-                            throw new XmlPullParserException(
-                                    "headless-system-user mode must be valid");
-                        }
+                        Log.e(TAG, "Unknown headless-system-user mode: "
+                                + deviceOwnerModeStringValue);
                     }
                 }
             }

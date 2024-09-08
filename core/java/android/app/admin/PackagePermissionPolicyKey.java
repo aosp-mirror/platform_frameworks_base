@@ -25,7 +25,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
-import android.app.admin.flags.Flags;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -59,10 +58,8 @@ public final class PackagePermissionPolicyKey extends PolicyKey {
     public PackagePermissionPolicyKey(@NonNull String identifier, @NonNull String packageName,
             @NonNull String permissionName) {
         super(identifier);
-        if (Flags.devicePolicySizeTrackingInternalBugFixEnabled()) {
-            PolicySizeVerifier.enforceMaxPackageNameLength(packageName);
-            PolicySizeVerifier.enforceMaxStringLength(permissionName, "permissionName");
-        }
+        PolicySizeVerifier.enforceMaxPackageNameLength(packageName);
+        PolicySizeVerifier.enforceMaxStringLength(permissionName, "permissionName");
         mPackageName = Objects.requireNonNull((packageName));
         mPermissionName = Objects.requireNonNull((permissionName));
     }

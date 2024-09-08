@@ -379,6 +379,10 @@ sealed class UserAction {
         return this to UserActionResult(toScene = scene)
     }
 
+    infix fun to(overlay: OverlayKey): Pair<UserAction, UserActionResult> {
+        return this to UserActionResult(toOverlay = overlay)
+    }
+
     /** Resolve this into a [Resolved] user action given [layoutDirection]. */
     internal abstract fun resolve(layoutDirection: LayoutDirection): Resolved
 
@@ -475,7 +479,7 @@ interface SwipeSourceDetector {
         position: IntOffset,
         density: Density,
         orientation: Orientation,
-    ): SwipeSource?
+    ): SwipeSource.Resolved?
 }
 
 /** The result of performing a [UserAction]. */
@@ -550,6 +554,22 @@ sealed class UserActionResult(
              */
             requiresFullDistanceSwipe: Boolean = false,
         ): UserActionResult = ChangeScene(toScene, transitionKey, requiresFullDistanceSwipe)
+
+        /** A [UserActionResult] that shows [toOverlay]. */
+        operator fun invoke(
+            /** The overlay we should be transitioning to during the [UserAction]. */
+            toOverlay: OverlayKey,
+
+            /** The key of the transition that should be used. */
+            transitionKey: TransitionKey? = null,
+
+            /**
+             * If `true`, the swipe will be committed if only if the user swiped at least the swipe
+             * distance, i.e. the transition progress was already equal to or bigger than 100% when
+             * the user released their finger.
+             */
+            requiresFullDistanceSwipe: Boolean = false,
+        ): UserActionResult = ShowOverlay(toOverlay, transitionKey, requiresFullDistanceSwipe)
     }
 }
 
@@ -597,7 +617,7 @@ internal fun SceneTransitionLayoutForTesting(
 ) {
     val density = LocalDensity.current
     val layoutDirection = LocalLayoutDirection.current
-    val coroutineScope = rememberCoroutineScope()
+    val animationScope = rememberCoroutineScope()
     val layoutImpl = remember {
         SceneTransitionLayoutImpl(
                 state = state as MutableSceneTransitionLayoutStateImpl,
@@ -606,7 +626,7 @@ internal fun SceneTransitionLayoutForTesting(
                 swipeSourceDetector = swipeSourceDetector,
                 transitionInterceptionThreshold = transitionInterceptionThreshold,
                 builder = builder,
-                animationScope = coroutineScope,
+                animationScope = animationScope,
             )
             .also { onLayoutImpl?.invoke(it) }
     }

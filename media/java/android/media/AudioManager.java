@@ -6984,6 +6984,27 @@ public class AudioManager {
     }
 
     /**
+     * Test method for enabling/disabling the volume controller long press timeout for checking
+     * whether two consecutive volume adjustments should be treated as a volume long press.
+     *
+     * <p>Used only for testing
+     *
+     * @param enable true for enabling, otherwise will be disabled (test mode)
+     *
+     * @hide
+     **/
+    @TestApi
+    @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
+    @RequiresPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
+    public void setVolumeControllerLongPressTimeoutEnabled(boolean enable) {
+        try {
+            getService().setVolumeControllerLongPressTimeoutEnabled(enable);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Only useful for volume controllers.
      * @hide
      */
