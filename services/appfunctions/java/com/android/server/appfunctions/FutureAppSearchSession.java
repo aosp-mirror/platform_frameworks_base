@@ -16,9 +16,6 @@
 
 package com.android.server.appfunctions;
 
-import static android.app.appfunctions.flags.Flags.FLAG_ENABLE_APP_FUNCTION_MANAGER;
-
-import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.app.appsearch.AppSearchBatchResult;
 import android.app.appsearch.AppSearchManager;
@@ -42,10 +39,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 
-/**
- * A future API wrapper of {@link AppSearchSession} APIs.
- */
-@FlaggedApi(FLAG_ENABLE_APP_FUNCTION_MANAGER)
+/** A future API wrapper of {@link AppSearchSession} APIs. */
 public class FutureAppSearchSession implements Closeable {
     private static final String TAG = FutureAppSearchSession.class.getSimpleName();
     private final Executor mExecutor;
@@ -67,14 +61,14 @@ public class FutureAppSearchSession implements Closeable {
 
     /** Converts a failed app search result codes into an exception. */
     @NonNull
-    private static Exception failedResultToException(@NonNull AppSearchResult<?> appSearchResult) {
+    public static Exception failedResultToException(@NonNull AppSearchResult<?> appSearchResult) {
         return switch (appSearchResult.getResultCode()) {
-            case AppSearchResult.RESULT_INVALID_ARGUMENT -> new IllegalArgumentException(
-                    appSearchResult.getErrorMessage());
-            case AppSearchResult.RESULT_IO_ERROR -> new IOException(
-                    appSearchResult.getErrorMessage());
-            case AppSearchResult.RESULT_SECURITY_ERROR -> new SecurityException(
-                    appSearchResult.getErrorMessage());
+            case AppSearchResult.RESULT_INVALID_ARGUMENT ->
+                    new IllegalArgumentException(appSearchResult.getErrorMessage());
+            case AppSearchResult.RESULT_IO_ERROR ->
+                    new IOException(appSearchResult.getErrorMessage());
+            case AppSearchResult.RESULT_SECURITY_ERROR ->
+                    new SecurityException(appSearchResult.getErrorMessage());
             default -> new IllegalStateException(appSearchResult.getErrorMessage());
         };
     }
@@ -137,14 +131,16 @@ public class FutureAppSearchSession implements Closeable {
     /** Indexes documents into the AppSearchSession database. */
     public AndroidFuture<AppSearchBatchResult<String, Void>> put(
             @NonNull PutDocumentsRequest putDocumentsRequest) {
-        return getSessionAsync().thenCompose(
-                session -> {
-                    AndroidFuture<AppSearchBatchResult<String, Void>> batchResultFuture =
-                            new AndroidFuture<>();
+        return getSessionAsync()
+                .thenCompose(
+                        session -> {
+                            AndroidFuture<AppSearchBatchResult<String, Void>> batchResultFuture =
+                                    new AndroidFuture<>();
 
-                    session.put(putDocumentsRequest, mExecutor, batchResultFuture::complete);
-                    return batchResultFuture;
-                });
+                            session.put(
+                                    putDocumentsRequest, mExecutor, batchResultFuture::complete);
+                            return batchResultFuture;
+                        });
     }
 
     /**
@@ -152,10 +148,9 @@ public class FutureAppSearchSession implements Closeable {
      * of search provided.
      */
     public AndroidFuture<FutureSearchResults> search(
-            @NonNull String queryExpression,
-            @NonNull SearchSpec searchSpec) {
-        return getSessionAsync().thenApply(
-                        session -> session.search(queryExpression, searchSpec))
+            @NonNull String queryExpression, @NonNull SearchSpec searchSpec) {
+        return getSessionAsync()
+                .thenApply(session -> session.search(queryExpression, searchSpec))
                 .thenApply(result -> new FutureSearchResults(result, mExecutor));
     }
 
@@ -173,8 +168,8 @@ public class FutureAppSearchSession implements Closeable {
         private final SearchResults mSearchResults;
         private final Executor mExecutor;
 
-        public FutureSearchResults(@NonNull SearchResults searchResults,
-                @NonNull Executor executor) {
+        public FutureSearchResults(
+                @NonNull SearchResults searchResults, @NonNull Executor executor) {
             mSearchResults = Objects.requireNonNull(searchResults);
             mExecutor = Objects.requireNonNull(executor);
         }
@@ -184,15 +179,14 @@ public class FutureAppSearchSession implements Closeable {
                     new AndroidFuture<>();
 
             mSearchResults.getNextPage(mExecutor, nextPageFuture::complete);
-            return nextPageFuture.thenApply(result -> {
-                if (result.isSuccess()) {
-                    return result.getResultValue();
-                } else {
-                    throw new RuntimeException(
-                            failedResultToException(result));
-                }
-            });
+            return nextPageFuture.thenApply(
+                    result -> {
+                        if (result.isSuccess()) {
+                            return result.getResultValue();
+                        } else {
+                            throw new RuntimeException(failedResultToException(result));
+                        }
+                    });
         }
-
     }
 }

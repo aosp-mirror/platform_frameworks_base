@@ -34,7 +34,6 @@ import java.util.function.Function;
  * Context#bindService}.
  *
  * @param <T> Class of wrapped service.
- * @hide
  */
 public class RemoteServiceCallerImpl<T> implements RemoteServiceCaller<T> {
     private static final String TAG = "AppFunctionsServiceCall";
