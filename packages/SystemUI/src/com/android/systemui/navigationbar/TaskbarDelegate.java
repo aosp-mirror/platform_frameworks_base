@@ -425,6 +425,18 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         }
     }
 
+    private void appTransitionPending(boolean pending) {
+        if (mOverviewProxyService.getProxy() == null) {
+            return;
+        }
+
+        try {
+            mOverviewProxyService.getProxy().appTransitionPending(pending);
+        } catch (RemoteException e) {
+            Log.e(TAG, "appTransitionPending() failed, pending: " + pending, e);
+        }
+    }
+
     @Override
     public void setImeWindowStatus(int displayId, @ImeWindowVisibility int vis,
             @BackDispositionMode int backDisposition, boolean showImeSwitcher) {
@@ -531,6 +543,21 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         } catch (RemoteException e) {
             Log.e(TAG, "onTaskbarToggled() failed", e);
         }
+    }
+
+    @Override
+    public void appTransitionPending(int displayId, boolean forced) {
+        appTransitionPending(true);
+    }
+
+    @Override
+    public void appTransitionCancelled(int displayId) {
+        appTransitionPending(false);
+    }
+
+    @Override
+    public void appTransitionFinished(int displayId) {
+        appTransitionPending(false);
     }
 
     private void clearTransient() {
