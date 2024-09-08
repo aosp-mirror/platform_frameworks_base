@@ -16,6 +16,7 @@
 
 package com.android.server.policy;
 
+import static android.Manifest.permission.CREATE_VIRTUAL_DEVICE;
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
 import static android.Manifest.permission.OVERRIDE_SYSTEM_KEY_BEHAVIOR_IN_FOCUSED_WINDOW;
 import static android.Manifest.permission.SYSTEM_ALERT_WINDOW;
@@ -59,13 +60,18 @@ import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
+import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE;
 import static android.view.WindowManager.LayoutParams.TYPE_PRESENTATION;
 import static android.view.WindowManager.LayoutParams.TYPE_PRIVATE_PRESENTATION;
 import static android.view.WindowManager.LayoutParams.TYPE_QS_DIALOG;
+import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
+import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_ADDITIONAL;
+import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION;
+import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.isSystemAlertWindowType;
 import static android.view.WindowManager.ScreenshotSource.SCREENSHOT_KEY_CHORD;
@@ -804,7 +810,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     event.recycle();
                     break;
                 case MSG_HANDLE_ALL_APPS:
-                    launchAllAppsAction();
+                    launchAllAppsAction((KeyEvent) msg.obj);
                     break;
                 case MSG_RINGER_TOGGLE_CHORD:
                     handleRingerChordGesture();
@@ -1873,26 +1879,31 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    private void launchAllAppsAction() {
-        Intent intent = new Intent(Intent.ACTION_ALL_APPS);
-        if (mHasFeatureLeanback) {
-            Intent intentLauncher = new Intent(Intent.ACTION_MAIN);
-            intentLauncher.addCategory(Intent.CATEGORY_HOME);
-            ResolveInfo resolveInfo = mPackageManager.resolveActivityAsUser(intentLauncher,
-                    PackageManager.MATCH_SYSTEM_ONLY,
-                    mCurrentUserId);
-            if (resolveInfo != null) {
-                intent.setPackage(resolveInfo.activityInfo.packageName);
+    private void launchAllAppsAction(KeyEvent event) {
+        if (mHasFeatureLeanback || mHasFeatureWatch) {
+            // TV and watch support the all apps intent
+            notifyKeyGestureCompleted(event,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_ALL_APPS);
+            Intent intent = new Intent(Intent.ACTION_ALL_APPS);
+            if (mHasFeatureLeanback) {
+                Intent intentLauncher = new Intent(Intent.ACTION_MAIN);
+                intentLauncher.addCategory(Intent.CATEGORY_HOME);
+                ResolveInfo resolveInfo = mPackageManager.resolveActivityAsUser(intentLauncher,
+                        PackageManager.MATCH_SYSTEM_ONLY,
+                        mCurrentUserId);
+                if (resolveInfo != null) {
+                    intent.setPackage(resolveInfo.activityInfo.packageName);
+                }
             }
-        }
-        startActivityAsUser(intent, UserHandle.CURRENT);
-    }
-
-    private void launchAllAppsViaA11y() {
-        AccessibilityManagerInternal accessibilityManager = getAccessibilityManagerInternal();
-        if (accessibilityManager != null) {
-            accessibilityManager.performSystemAction(
-                    AccessibilityService.GLOBAL_ACTION_ACCESSIBILITY_ALL_APPS);
+            startActivityAsUser(intent, UserHandle.CURRENT);
+        } else {
+            notifyKeyGestureCompleted(event,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_ACCESSIBILITY_ALL_APPS);
+            AccessibilityManagerInternal accessibilityManager = getAccessibilityManagerInternal();
+            if (accessibilityManager != null) {
+                accessibilityManager.performSystemAction(
+                        AccessibilityService.GLOBAL_ACTION_ACCESSIBILITY_ALL_APPS);
+            }
         }
         dismissKeyboardShortcutsMenu();
     }
@@ -2070,15 +2081,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             performHapticFeedback(HapticFeedbackConstants.LONG_PRESS, "Home - Long Press");
             switch (mLongPressOnHomeBehavior) {
                 case LONG_PRESS_HOME_ALL_APPS:
-                    if (mHasFeatureLeanback) {
-                        launchAllAppsAction();
-                        notifyKeyGestureCompleted(event,
-                                KeyGestureEvent.KEY_GESTURE_TYPE_ALL_APPS);
-                    } else {
-                        launchAllAppsViaA11y();
-                        notifyKeyGestureCompleted(event,
-                                KeyGestureEvent.KEY_GESTURE_TYPE_ACCESSIBILITY_ALL_APPS);
-                    }
+                    launchAllAppsAction(event);
                     break;
                 case LONG_PRESS_HOME_ASSIST:
                     notifyKeyGestureCompleted(event,
@@ -3058,7 +3061,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     /** {@inheritDoc} */
     @Override
     public int checkAddPermission(int type, boolean isRoundedCornerOverlay, String packageName,
-            int[] outAppOp) {
+            int[] outAppOp, int displayId) {
         if (isRoundedCornerOverlay && mContext.checkCallingOrSelfPermission(INTERNAL_SYSTEM_WINDOW)
                 != PERMISSION_GRANTED) {
             return ADD_PERMISSION_DENIED;
@@ -3098,6 +3101,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 case TYPE_VOICE_INTERACTION:
                 case TYPE_QS_DIALOG:
                 case TYPE_NAVIGATION_BAR_PANEL:
+                case TYPE_STATUS_BAR:
+                case TYPE_NOTIFICATION_SHADE:
+                case TYPE_NAVIGATION_BAR:
+                case TYPE_STATUS_BAR_ADDITIONAL:
+                case TYPE_STATUS_BAR_SUB_PANEL:
+                case TYPE_VOICE_INTERACTION_STARTING:
                     // The window manager will check these.
                     return ADD_OKAY;
             }
@@ -3137,6 +3146,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         if (mContext.checkCallingOrSelfPermission(SYSTEM_APPLICATION_OVERLAY)
+                == PERMISSION_GRANTED) {
+            return ADD_OKAY;
+        }
+
+        // Allow virtual device owners to add overlays on the displays they own.
+        if (mWindowManagerFuncs.isCallerVirtualDeviceOwner(displayId, callingUid)
+                && mContext.checkCallingOrSelfPermission(CREATE_VIRTUAL_DEVICE)
                 == PERMISSION_GRANTED) {
             return ADD_OKAY;
         }
@@ -3581,18 +3597,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (down) {
                     int direction = keyCode == KeyEvent.KEYCODE_BRIGHTNESS_UP ? 1 : -1;
 
-                    // Disable autobrightness if it's on
-                    int auto = Settings.System.getIntForUser(
-                            mContext.getContentResolver(),
-                            Settings.System.SCREEN_BRIGHTNESS_MODE,
-                            Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL,
-                            UserHandle.USER_CURRENT_OR_SELF);
-                    if (auto != 0) {
-                        Settings.System.putIntForUser(mContext.getContentResolver(),
-                                Settings.System.SCREEN_BRIGHTNESS_MODE,
-                                Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL,
-                                UserHandle.USER_CURRENT_OR_SELF);
-                    }
                     int screenDisplayId = displayId < 0 ? DEFAULT_DISPLAY : displayId;
 
                     float minLinearBrightness = mPowerManager.getBrightnessConstraint(
@@ -3688,18 +3692,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 break;
             case KeyEvent.KEYCODE_ALL_APPS:
                 if (firstDown) {
-                    if (mHasFeatureLeanback) {
-                        mHandler.removeMessages(MSG_HANDLE_ALL_APPS);
-                        Message msg = mHandler.obtainMessage(MSG_HANDLE_ALL_APPS);
-                        msg.setAsynchronous(true);
-                        msg.sendToTarget();
-                        notifyKeyGestureCompleted(event,
-                                KeyGestureEvent.KEY_GESTURE_TYPE_ALL_APPS);
-                    } else {
-                        launchAllAppsViaA11y();
-                        notifyKeyGestureCompleted(event,
-                                KeyGestureEvent.KEY_GESTURE_TYPE_ACCESSIBILITY_ALL_APPS);
-                    }
+                    mHandler.removeMessages(MSG_HANDLE_ALL_APPS);
+
+                    Message msg = mHandler.obtainMessage(MSG_HANDLE_ALL_APPS, new KeyEvent(event));
+                    msg.setAsynchronous(true);
+                    msg.sendToTarget();
                 }
                 return true;
             case KeyEvent.KEYCODE_NOTIFICATION:
@@ -3752,9 +3749,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                                 KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_CAPS_LOCK);
                     } else if (mPendingMetaAction) {
                         if (!canceled) {
-                            launchAllAppsViaA11y();
-                            notifyKeyGestureCompleted(event,
-                                    KeyGestureEvent.KEY_GESTURE_TYPE_ACCESSIBILITY_ALL_APPS);
+                            launchAllAppsAction(event);
                         }
                         mPendingMetaAction = false;
                     }

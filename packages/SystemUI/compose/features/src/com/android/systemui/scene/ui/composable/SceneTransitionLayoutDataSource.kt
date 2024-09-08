@@ -69,7 +69,7 @@ class SceneTransitionLayoutDataSource(
         state.setTargetScene(
             targetScene = toScene,
             transitionKey = transitionKey,
-            coroutineScope = coroutineScope,
+            animationScope = coroutineScope,
         )
     }
 

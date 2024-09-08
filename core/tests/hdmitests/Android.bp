@@ -37,3 +37,10 @@ android_test {
     certificate: "platform",
     test_suites: ["device-tests"],
 }
+
+test_module_config {
+    name: "HdmiCecTests_hardware_hdmi",
+    base: "HdmiCecTests",
+    test_suites: ["device-tests"],
+    include_filters: ["android.hardware.hdmi"],
+}

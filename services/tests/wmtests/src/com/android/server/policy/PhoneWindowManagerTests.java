@@ -188,7 +188,7 @@ public class PhoneWindowManagerTests {
                 .FLAG_CREATE_ACCESSIBILITY_OVERLAY_APP_OP_ENABLED);
         int[] outAppOp = new int[1];
         assertEquals(ADD_OKAY, mPhoneWindowManager.checkAddPermission(TYPE_WALLPAPER,
-                /* isRoundedCornerOverlay= */ false, "test.pkg", outAppOp));
+                /* isRoundedCornerOverlay= */ false, "test.pkg", outAppOp, DEFAULT_DISPLAY));
         assertThat(outAppOp[0]).isEqualTo(AppOpsManager.OP_NONE);
     }
 
@@ -198,7 +198,7 @@ public class PhoneWindowManagerTests {
                 .FLAG_CREATE_ACCESSIBILITY_OVERLAY_APP_OP_ENABLED);
         int[] outAppOp = new int[1];
         assertEquals(ADD_OKAY, mPhoneWindowManager.checkAddPermission(TYPE_ACCESSIBILITY_OVERLAY,
-                /* isRoundedCornerOverlay= */ false, "test.pkg", outAppOp));
+                /* isRoundedCornerOverlay= */ false, "test.pkg", outAppOp, DEFAULT_DISPLAY));
         assertThat(outAppOp[0]).isEqualTo(AppOpsManager.OP_CREATE_ACCESSIBILITY_OVERLAY);
     }
 
@@ -208,7 +208,7 @@ public class PhoneWindowManagerTests {
                 .FLAG_CREATE_ACCESSIBILITY_OVERLAY_APP_OP_ENABLED);
         int[] outAppOp = new int[1];
         assertEquals(ADD_OKAY, mPhoneWindowManager.checkAddPermission(TYPE_ACCESSIBILITY_OVERLAY,
-                /* isRoundedCornerOverlay= */ false, "test.pkg", outAppOp));
+                /* isRoundedCornerOverlay= */ false, "test.pkg", outAppOp, DEFAULT_DISPLAY));
         assertThat(outAppOp[0]).isEqualTo(AppOpsManager.OP_NONE);
     }
 

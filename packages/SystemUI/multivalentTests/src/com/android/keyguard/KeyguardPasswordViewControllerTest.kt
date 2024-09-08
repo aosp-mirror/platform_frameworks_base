@@ -84,6 +84,7 @@ class KeyguardPasswordViewControllerTest : SysuiTestCase() {
     private lateinit var mKeyguardMessageAreaController:
         KeyguardMessageAreaController<BouncerKeyguardMessageArea>
     @Mock private lateinit var postureController: DevicePostureController
+    @Mock private lateinit var mUserActivityNotifier: UserActivityNotifier
     @Captor private lateinit var keyListenerArgumentCaptor: ArgumentCaptor<View.OnKeyListener>
 
     private lateinit var keyguardPasswordViewController: KeyguardPasswordViewController
@@ -132,6 +133,7 @@ class KeyguardPasswordViewControllerTest : SysuiTestCase() {
                 mSelectedUserInteractor,
                 keyguardKeyboardInteractor,
                 null,
+                mUserActivityNotifier
             )
     }
 

@@ -39,12 +39,14 @@ import com.android.systemui.navigation.domain.interactor.NavigationInteractor
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.power.shared.model.WakeSleepReason
 import com.android.systemui.power.shared.model.WakefulnessModel
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -75,62 +77,66 @@ constructor(
     private val disableToken: IBinder = Binder()
 
     private val disableFlagsForUserId =
-        combine(
-                selectedUserInteractor.selectedUser,
-                keyguardTransitionInteractor.startedKeyguardTransitionStep.map { it.to },
-                deviceConfigInteractor.property(
-                    namespace = DeviceConfig.NAMESPACE_SYSTEMUI,
-                    name = SystemUiDeviceConfigFlags.NAV_BAR_HANDLE_SHOW_OVER_LOCKSCREEN,
-                    default = true,
-                ),
-                navigationInteractor.isGesturalMode,
-                authenticationInteractor.authenticationMethod,
-                powerInteractor.detailedWakefulness,
-            ) { values ->
-                val selectedUserId = values[0] as Int
-                val startedState = values[1] as KeyguardState
-                val isShowHomeOverLockscreen = values[2] as Boolean
-                val isGesturalMode = values[3] as Boolean
-                val authenticationMethod = values[4] as AuthenticationMethodModel
-                val wakefulnessModel = values[5] as WakefulnessModel
-                val isOccluded = startedState == KeyguardState.OCCLUDED
+        if (!KeyguardWmStateRefactor.isEnabled || SceneContainerFlag.isEnabled) {
+            flowOf(Pair(0, StatusBarManager.DISABLE_NONE))
+        } else {
+            combine(
+                    selectedUserInteractor.selectedUser,
+                    keyguardTransitionInteractor.startedKeyguardTransitionStep.map { it.to },
+                    deviceConfigInteractor.property(
+                        namespace = DeviceConfig.NAMESPACE_SYSTEMUI,
+                        name = SystemUiDeviceConfigFlags.NAV_BAR_HANDLE_SHOW_OVER_LOCKSCREEN,
+                        default = true,
+                    ),
+                    navigationInteractor.isGesturalMode,
+                    authenticationInteractor.authenticationMethod,
+                    powerInteractor.detailedWakefulness,
+                ) { values ->
+                    val selectedUserId = values[0] as Int
+                    val startedState = values[1] as KeyguardState
+                    val isShowHomeOverLockscreen = values[2] as Boolean
+                    val isGesturalMode = values[3] as Boolean
+                    val authenticationMethod = values[4] as AuthenticationMethodModel
+                    val wakefulnessModel = values[5] as WakefulnessModel
+                    val isOccluded = startedState == KeyguardState.OCCLUDED
 
-                val hideHomeAndRecentsForBouncer =
-                    startedState == KeyguardState.PRIMARY_BOUNCER ||
-                        startedState == KeyguardState.ALTERNATE_BOUNCER
-                val isKeyguardShowing = startedState != KeyguardState.GONE
-                val isPowerGestureIntercepted =
-                    with(wakefulnessModel) {
-                        isAwake() &&
-                            powerButtonLaunchGestureTriggered &&
-                            lastSleepReason == WakeSleepReason.POWER_BUTTON
+                    val hideHomeAndRecentsForBouncer =
+                        startedState == KeyguardState.PRIMARY_BOUNCER ||
+                            startedState == KeyguardState.ALTERNATE_BOUNCER
+                    val isKeyguardShowing = startedState != KeyguardState.GONE
+                    val isPowerGestureIntercepted =
+                        with(wakefulnessModel) {
+                            isAwake() &&
+                                powerButtonLaunchGestureTriggered &&
+                                lastSleepReason == WakeSleepReason.POWER_BUTTON
+                        }
+
+                    var flags = StatusBarManager.DISABLE_NONE
+
+                    if (hideHomeAndRecentsForBouncer || (isKeyguardShowing && !isOccluded)) {
+                        if (!isShowHomeOverLockscreen || !isGesturalMode) {
+                            flags = flags or StatusBarManager.DISABLE_HOME
+                        }
+                        flags = flags or StatusBarManager.DISABLE_RECENT
                     }
 
-                var flags = StatusBarManager.DISABLE_NONE
-
-                if (hideHomeAndRecentsForBouncer || (isKeyguardShowing && !isOccluded)) {
-                    if (!isShowHomeOverLockscreen || !isGesturalMode) {
-                        flags = flags or StatusBarManager.DISABLE_HOME
+                    if (
+                        isPowerGestureIntercepted &&
+                            isOccluded &&
+                            authenticationMethod.isSecure &&
+                            deviceEntryFaceAuthInteractor.isFaceAuthEnabledAndEnrolled()
+                    ) {
+                        flags = flags or StatusBarManager.DISABLE_RECENT
                     }
-                    flags = flags or StatusBarManager.DISABLE_RECENT
-                }
 
-                if (
-                    isPowerGestureIntercepted &&
-                        isOccluded &&
-                        authenticationMethod.isSecure &&
-                        deviceEntryFaceAuthInteractor.isFaceAuthEnabledAndEnrolled()
-                ) {
-                    flags = flags or StatusBarManager.DISABLE_RECENT
+                    selectedUserId to flags
                 }
-
-                selectedUserId to flags
-            }
-            .distinctUntilChanged()
+                .distinctUntilChanged()
+        }
 
     @SuppressLint("WrongConstant", "NonInjectedService")
     override fun start() {
-        if (!KeyguardWmStateRefactor.isEnabled) {
+        if (!KeyguardWmStateRefactor.isEnabled || SceneContainerFlag.isEnabled) {
             return
         }
 

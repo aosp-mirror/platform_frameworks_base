@@ -52,7 +52,6 @@ import android.widget.Spinner;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
-import com.android.internal.logging.UiEventLogger;
 import com.android.settingslib.bluetooth.BluetoothEventManager;
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
 import com.android.settingslib.bluetooth.CachedBluetoothDeviceManager;
@@ -92,6 +91,7 @@ public class HearingDevicesDialogDelegateTest extends SysuiTestCase {
     @Rule
     public MockitoRule mockito = MockitoJUnit.rule();
 
+    private static final int TEST_LAUNCH_SOURCE_ID = 1;
     private static final String DEVICE_ADDRESS = "AA:BB:CC:DD:EE:FF";
     private static final String DEVICE_NAME = "test_name";
     private static final String TEST_PKG = "pkg";
@@ -124,7 +124,7 @@ public class HearingDevicesDialogDelegateTest extends SysuiTestCase {
     @Mock
     private AudioManager mAudioManager;
     @Mock
-    private UiEventLogger mUiEventLogger;
+    private HearingDevicesUiEventLogger mUiEventLogger;
     @Mock
     private CachedBluetoothDevice mCachedDevice;
     @Mock
@@ -182,7 +182,8 @@ public class HearingDevicesDialogDelegateTest extends SysuiTestCase {
                 anyInt(), any());
         assertThat(intentCaptor.getValue().getAction()).isEqualTo(
                 Settings.ACTION_HEARING_DEVICE_PAIRING_SETTINGS);
-        verify(mUiEventLogger).log(HearingDevicesUiEvent.HEARING_DEVICES_PAIR);
+        verify(mUiEventLogger).log(HearingDevicesUiEvent.HEARING_DEVICES_PAIR,
+                TEST_LAUNCH_SOURCE_ID);
     }
 
     @Test
@@ -196,7 +197,8 @@ public class HearingDevicesDialogDelegateTest extends SysuiTestCase {
                 anyInt(), any());
         assertThat(intentCaptor.getValue().getAction()).isEqualTo(
                 HearingDevicesDialogDelegate.ACTION_BLUETOOTH_DEVICE_DETAILS);
-        verify(mUiEventLogger).log(HearingDevicesUiEvent.HEARING_DEVICES_GEAR_CLICK);
+        verify(mUiEventLogger).log(HearingDevicesUiEvent.HEARING_DEVICES_GEAR_CLICK,
+                TEST_LAUNCH_SOURCE_ID);
     }
 
     @Test
@@ -207,7 +209,8 @@ public class HearingDevicesDialogDelegateTest extends SysuiTestCase {
         mDialogDelegate.onDeviceItemClicked(mHearingDeviceItem, new View(mContext));
 
         verify(mCachedDevice).disconnect();
-        verify(mUiEventLogger).log(HearingDevicesUiEvent.HEARING_DEVICES_DISCONNECT);
+        verify(mUiEventLogger).log(HearingDevicesUiEvent.HEARING_DEVICES_DISCONNECT,
+                TEST_LAUNCH_SOURCE_ID);
     }
 
     @Test
@@ -304,6 +307,7 @@ public class HearingDevicesDialogDelegateTest extends SysuiTestCase {
         mDialogDelegate = new HearingDevicesDialogDelegate(
                 mContext,
                 true,
+                TEST_LAUNCH_SOURCE_ID,
                 mDialogFactory,
                 mActivityStarter,
                 mDialogTransitionAnimator,
@@ -327,6 +331,7 @@ public class HearingDevicesDialogDelegateTest extends SysuiTestCase {
         mDialogDelegate = new HearingDevicesDialogDelegate(
                 mContext,
                 false,
+                TEST_LAUNCH_SOURCE_ID,
                 mDialogFactory,
                 mActivityStarter,
                 mDialogTransitionAnimator,

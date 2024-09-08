@@ -29,8 +29,9 @@ import com.android.systemui.qs.tiles.base.interactor.QSTileInputTestKtx.longClic
 import com.android.systemui.qs.tiles.impl.airplane.domain.model.AirplaneModeTileModel
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
-import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.fakeMobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
+import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -40,8 +41,9 @@ import org.junit.runner.RunWith
 @EnabledOnRavenwood
 @RunWith(AndroidJUnit4::class)
 class AirplaneModeTileUserActionInteractorTest : SysuiTestCase() {
+    private val kosmos = testKosmos()
 
-    private val mobileConnectionsRepository = FakeMobileConnectionsRepository()
+    private val mobileConnectionsRepository = kosmos.fakeMobileConnectionsRepository
     private val connectivityRepository = FakeConnectivityRepository()
     private val airplaneModeRepository = FakeAirplaneModeRepository()
     private val inputHandler = FakeQSTileIntentUserInputHandler()

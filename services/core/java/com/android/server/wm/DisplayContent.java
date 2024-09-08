@@ -235,7 +235,6 @@ import android.view.Surface;
 import android.view.Surface.Rotation;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
-import android.view.SurfaceSession;
 import android.view.WindowInsets;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowManager;
@@ -571,8 +570,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     WallpaperController mWallpaperController;
 
     boolean mWallpaperMayChange = false;
-
-    private final SurfaceSession mSession = new SurfaceSession();
 
     /**
      * A perf hint session which will boost the refresh rate for the display and change sf duration
@@ -1284,7 +1281,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * @param transaction as part of which to perform the configuration
      */
     private void configureSurfaces(Transaction transaction) {
-        final SurfaceControl.Builder b = mWmService.makeSurfaceBuilder(mSession)
+        final SurfaceControl.Builder b = mWmService.makeSurfaceBuilder()
                 .setOpaque(true)
                 .setContainerLayer()
                 .setCallsite("DisplayContent");
@@ -1835,7 +1832,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         if (mTransitionController.useShellTransitionsRotation()) {
             return ROTATION_UNDEFINED;
         }
-        final int activityOrientation = r.getOverrideOrientation();
+        int activityOrientation = r.getOverrideOrientation();
         if (!WindowManagerService.ENABLE_FIXED_ROTATION_TRANSFORM
                 || shouldIgnoreOrientationRequest(activityOrientation)) {
             return ROTATION_UNDEFINED;
@@ -1846,14 +1843,15 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                     r /* boundary */, false /* includeBoundary */, true /* traverseTopToBottom */);
             if (nextCandidate != null) {
                 r = nextCandidate;
+                activityOrientation = r.getOverrideOrientation();
             }
         }
-        if (r.inMultiWindowMode() || r.getRequestedConfigurationOrientation(true /* forDisplay */)
-                == getConfiguration().orientation) {
+        if (r.inMultiWindowMode() || r.getRequestedConfigurationOrientation(true /* forDisplay */,
+                activityOrientation) == getConfiguration().orientation) {
             return ROTATION_UNDEFINED;
         }
         final int currentRotation = getRotation();
-        final int rotation = mDisplayRotation.rotationForOrientation(r.getRequestedOrientation(),
+        final int rotation = mDisplayRotation.rotationForOrientation(activityOrientation,
                 currentRotation);
         if (rotation == currentRotation) {
             return ROTATION_UNDEFINED;
@@ -3214,22 +3212,21 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * If xPpi or yDpi is equal to {@link #INVALID_DPI}, the values are ignored.
      */
     void setForcedSize(int width, int height, float xDPI, float yDPI) {
-  	// Can't force size higher than the maximal allowed
-        if (mMaxUiWidth > 0 && width > mMaxUiWidth) {
-            final float ratio = mMaxUiWidth / (float) width;
-            height = (int) (height * ratio);
-            width = mMaxUiWidth;
-        }
-
         mIsSizeForced = mInitialDisplayWidth != width || mInitialDisplayHeight != height;
         if (mIsSizeForced) {
+            if (mMaxUiWidth > 0 && width > mMaxUiWidth) {
+                final float ratio = mMaxUiWidth / (float) width;
+                height = (int) (height * ratio);
+                width = mMaxUiWidth;
+            }
             final Point size = getValidForcedSize(width, height);
             width = size.x;
             height = size.y;
         }
 
         Slog.i(TAG_WM, "Using new display size: " + width + "x" + height);
-        updateBaseDisplayMetrics(width, height, mBaseDisplayDensity,
+        updateBaseDisplayMetrics(width, height,
+                mIsDensityForced ? mBaseDisplayDensity : mInitialDisplayDensity,
                 xDPI != INVALID_DPI ? xDPI : mBaseDisplayPhysicalXDpi,
                 yDPI != INVALID_DPI ? yDPI : mBaseDisplayPhysicalYDpi);
         reconfigureDisplayLocked();
@@ -4596,7 +4593,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // removed on the task.
         removeImeSurfaceImmediately();
         mImeScreenshot = new ImeScreenshot(
-                mWmService.mSurfaceControlFactory.apply(null), imeTarget);
+                mWmService.mSurfaceControlFactory.get(), imeTarget);
         // If the caller requests to hide IME, then allow to show IME snapshot for any target task.
         // So IME won't look like suddenly disappeared. It usually happens when turning off screen.
         mImeScreenshot.attachAndShow(t, hideImeWindow /* anyTargetTask */);
@@ -5429,14 +5426,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     @Override
-    SurfaceSession getSession() {
-        return mSession;
-    }
-
-    @Override
     SurfaceControl.Builder makeChildSurface(WindowContainer child) {
-        SurfaceSession s = child != null ? child.getSession() : getSession();
-        final SurfaceControl.Builder b = mWmService.makeSurfaceBuilder(s).setContainerLayer();
+        final SurfaceControl.Builder b = mWmService.makeSurfaceBuilder().setContainerLayer();
         if (child == null) {
             return b;
         }
@@ -5452,12 +5443,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * and other potpourii.
      */
     SurfaceControl.Builder makeOverlay() {
-        return mWmService.makeSurfaceBuilder(mSession).setParent(getOverlayLayer());
+        return mWmService.makeSurfaceBuilder().setParent(getOverlayLayer());
     }
 
     @Override
     public SurfaceControl.Builder makeAnimationLeash() {
-        return mWmService.makeSurfaceBuilder(mSession).setParent(mSurfaceControl)
+        return mWmService.makeSurfaceBuilder().setParent(mSurfaceControl)
                 .setContainerLayer();
     }
 

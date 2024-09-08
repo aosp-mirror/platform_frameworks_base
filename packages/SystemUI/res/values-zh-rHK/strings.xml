@@ -104,6 +104,7 @@
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> 和其他開啟的應用程式偵測到此螢幕截圖。"</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"新增至筆記"</string>
     <string name="backlinks_include_link" msgid="4562093591148248158">"加入連結"</string>
+    <string name="backlinks_duplicate_label_format" msgid="558445128952827926">"<xliff:g id="APPNAME">%1$s</xliff:g> <xliff:g id="FREQUENCYCOUNT">(%2$d)</xliff:g>"</string>
     <string name="screenrecord_title" msgid="4257171601439507792">"螢幕錄影機"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"正在處理螢幕錄影內容"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"持續顯示錄影畫面工作階段通知"</string>
@@ -291,7 +292,8 @@
     <string name="start_dreams" msgid="9131802557946276718">"螢幕保護程式"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"以太網"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"請勿騷擾"</string>
-    <string name="quick_settings_modes_label" msgid="5407025818652750501">"優先模式"</string>
+    <!-- no translation found for quick_settings_modes_label (879156359479504244) -->
+    <skip />
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"藍牙"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"找不到配對的裝置"</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"輕按即可連結或解除連結裝置"</string>
@@ -300,6 +302,7 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"使用藍牙"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"已連接"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"音訊分享功能"</string>
+    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="3227408556754456024">"輕按即可切換或分享音訊"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"已儲存"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"解除連結"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"啟動"</string>
@@ -431,7 +434,8 @@
     <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"開啟「設定」"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"其他裝置"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"切換概覽"</string>
-    <string name="zen_modes_dialog_title" msgid="4159138230418567383">"優先模式"</string>
+    <!-- no translation found for zen_modes_dialog_title (8854640808100096934) -->
+    <skip />
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"完成"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"設定"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"開啟"</string>
@@ -532,8 +536,12 @@
     <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"在錄影或投放時，此功能的服務供應商可存取螢幕顯示或裝置播放的任何資料，當中包括密碼、付款資料、相片、訊息和播放的語音等資料。"</string>
     <string name="screen_share_generic_app_selector_title" msgid="8331515850599218288">"分享或錄影應用程式"</string>
     <string name="media_projection_entry_app_permission_dialog_title" msgid="4613857256721708062">"要與「<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>」分享螢幕畫面嗎？"</string>
-    <string name="media_projection_entry_app_permission_dialog_option_text_single_app" msgid="6314402084788062644">"分享一個應用程式"</string>
-    <string name="media_projection_entry_app_permission_dialog_option_text_entire_screen" msgid="7381488112332599632">"分享整個螢幕畫面"</string>
+    <string name="screen_share_permission_dialog_option_single_app" msgid="2974054871681567314">"分享一個應用程式"</string>
+    <!-- no translation found for media_projection_entry_app_permission_dialog_option_text_single_app (2308901434964846084) -->
+    <skip />
+    <string name="screen_share_permission_dialog_option_entire_screen" msgid="4493174362775038997">"分享整個螢幕畫面"</string>
+    <!-- no translation found for media_projection_entry_app_permission_dialog_option_text_entire_screen (5100078808078139706) -->
+    <skip />
     <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="5504288438067851086">"當你分享整個螢幕畫面時，「<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>」可看到你畫面上的任何內容。因此，請謹慎處理密碼、付款資料、訊息、相片、音訊和影片等。"</string>
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="7094417930857938876">"當你分享應用程式時，「<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>」可看到該應用程式中顯示或播放的任何內容。因此，請謹慎處理密碼、付款資料、訊息、相片、音訊和影片等。"</string>
     <string name="media_projection_entry_app_permission_dialog_continue_entire_screen" msgid="1850848182344377579">"分享螢幕畫面"</string>
@@ -718,8 +726,7 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"衛星，連線質素好"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"衛星，可以連線"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"緊急衛星連接"</string>
-    <!-- no translation found for satellite_emergency_only_carrier_text (828510231597991206) -->
-    <skip />
+    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"緊急電話或 SOS"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"工作設定檔"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"這只是測試版本，並不包含完整功能"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"使用者介面調諧器讓你以更多方法修改和自訂 Android 使用者介面。但請小心，這些實驗功能可能會在日後發佈時更改、分拆或消失。"</string>
@@ -1386,6 +1393,18 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"收合圖示"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"展開圖示"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"或"</string>
+    <!-- no translation found for launch_keyboard_tutorial_notification_title (8849933155160522519) -->
+    <skip />
+    <!-- no translation found for launch_keyboard_tutorial_notification_content (2880339951512757918) -->
+    <skip />
+    <!-- no translation found for launch_touchpad_tutorial_notification_title (2243780062772196901) -->
+    <skip />
+    <!-- no translation found for launch_touchpad_tutorial_notification_content (7931085031240753226) -->
+    <skip />
+    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_title (1940023776496198762) -->
+    <skip />
+    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_content (1780725168171929365) -->
+    <skip />
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"返去手勢"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"主畫面手勢"</string>
     <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"快捷操作鍵"</string>

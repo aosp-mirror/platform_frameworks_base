@@ -6,4 +6,5 @@ flag {
   namespace: "android_platform_window_surfaces"
   description: "Whether to get the frame duration from SurfaceFlinger, or HWUI"
   bug: "354763298"
+  is_fixed_read_only: true
 }

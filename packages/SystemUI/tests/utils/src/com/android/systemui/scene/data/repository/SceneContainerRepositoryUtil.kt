@@ -29,7 +29,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.runCurrent
 
 private val mutableTransitionState =
     MutableStateFlow<ObservableTransitionState>(ObservableTransitionState.Idle(Scenes.Lockscreen))
@@ -116,13 +115,13 @@ private fun getStateWithUndefined(
         is ObservableTransitionState.Transition -> {
             TransitionStep(
                 from =
-                    if (sceneTransition.fromScene != Scenes.Lockscreen) {
+                    if (sceneTransition.fromContent != Scenes.Lockscreen) {
                         KeyguardState.UNDEFINED
                     } else {
                         state.from
                     },
                 to =
-                    if (sceneTransition.toScene != Scenes.Lockscreen) {
+                    if (sceneTransition.toContent != Scenes.Lockscreen) {
                         KeyguardState.UNDEFINED
                     } else {
                         state.from

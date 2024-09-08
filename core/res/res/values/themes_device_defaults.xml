@@ -131,7 +131,7 @@ easier.
         <item name="progressBarStyleSmallInverse">@style/Widget.DeviceDefault.ProgressBar.Small.Inverse</item>
         <item name="progressBarStyleLargeInverse">@style/Widget.DeviceDefault.ProgressBar.Large.Inverse</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
-        <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
+        <item name="colorProgressBackgroundNormal">?attr/materialColorOutline</item>
         <item name="seekBarStyle">@style/Widget.DeviceDefault.SeekBar</item>
         <item name="ratingBarStyle">@style/Widget.DeviceDefault.RatingBar</item>
         <item name="ratingBarStyleIndicator">@style/Widget.DeviceDefault.RatingBar.Indicator</item>
@@ -351,7 +351,7 @@ easier.
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
 
         <!-- Progress bar attributes -->
-        <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
+        <item name="colorProgressBackgroundNormal">?attr/materialColorOutline</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
 
         <!-- Toolbar attributes -->
@@ -468,7 +468,7 @@ easier.
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
 
         <!-- Progress bar attributes -->
-        <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
+        <item name="colorProgressBackgroundNormal">?attr/materialColorOutline</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
 
         <!-- Toolbar attributes -->
@@ -587,7 +587,7 @@ easier.
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
 
         <!-- Progress bar attributes -->
-        <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
+        <item name="colorProgressBackgroundNormal">?attr/materialColorOutline</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
 
         <!-- Toolbar attributes -->
@@ -705,7 +705,7 @@ easier.
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
 
         <!-- Progress bar attributes -->
-        <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
+        <item name="colorProgressBackgroundNormal">?attr/materialColorOutline</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
 
         <!-- Toolbar attributes -->
@@ -831,7 +831,7 @@ easier.
         <item name="alertDialogTheme">@style/Theme.DeviceDefault.Dialog.Alert</item>
 
         <!-- Progress bar attributes -->
-        <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
+        <item name="colorProgressBackgroundNormal">?attr/materialColorOutline</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
 
         <!-- Toolbar attributes -->
@@ -948,7 +948,7 @@ easier.
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
 
         <!-- Progress bar attributes -->
-        <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
+        <item name="colorProgressBackgroundNormal">?attr/materialColorOutline</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
 
         <!-- Toolbar attributes -->
@@ -1064,7 +1064,7 @@ easier.
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
 
         <!-- Progress bar attributes -->
-        <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
+        <item name="colorProgressBackgroundNormal">?attr/materialColorOutline</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
 
         <!-- Toolbar attributes -->
@@ -1181,7 +1181,7 @@ easier.
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
 
         <!-- Progress bar attributes -->
-        <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
+        <item name="colorProgressBackgroundNormal">?attr/materialColorOutline</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
 
         <!-- Toolbar attributes -->
@@ -1314,7 +1314,7 @@ easier.
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
 
         <!-- Progress bar attributes -->
-        <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
+        <item name="colorProgressBackgroundNormal">?attr/materialColorOutline</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
 
         <!-- Toolbar attributes -->
@@ -1432,7 +1432,7 @@ easier.
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
 
         <!-- Progress bar attributes -->
-        <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
+        <item name="colorProgressBackgroundNormal">?attr/materialColorOutline</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
 
         <!-- Toolbar attributes -->
@@ -1548,7 +1548,7 @@ easier.
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
 
         <!-- Progress bar attributes -->
-        <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
+        <item name="colorProgressBackgroundNormal">?attr/materialColorOutline</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
 
         <!-- Toolbar attributes -->
@@ -1666,7 +1666,7 @@ easier.
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
 
         <!-- Progress bar attributes -->
-        <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
+        <item name="colorProgressBackgroundNormal">?attr/materialColorOutline</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
 
         <!-- Toolbar attributes -->
@@ -1783,7 +1783,7 @@ easier.
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
 
         <!-- Progress bar attributes -->
-        <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
+        <item name="colorProgressBackgroundNormal">?attr/materialColorOutline</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
 
         <!-- Toolbar attributes -->
@@ -1900,7 +1900,7 @@ easier.
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
 
         <!-- Progress bar attributes -->
-        <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
+        <item name="colorProgressBackgroundNormal">?attr/materialColorOutline</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
 
         <!-- Toolbar attributes -->
@@ -2017,7 +2017,7 @@ easier.
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
 
         <!-- Progress bar attributes -->
-        <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
+        <item name="colorProgressBackgroundNormal">?attr/materialColorOutline</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
 
         <!-- Toolbar attributes -->
@@ -2134,7 +2134,7 @@ easier.
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
 
         <!-- Progress bar attributes -->
-        <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
+        <item name="colorProgressBackgroundNormal">?attr/materialColorOutline</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
 
         <!-- Toolbar attributes -->
@@ -2251,7 +2251,7 @@ easier.
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
 
         <!-- Progress bar attributes -->
-        <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
+        <item name="colorProgressBackgroundNormal">?attr/materialColorOutline</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
 
         <!-- Toolbar attributes -->
@@ -2373,7 +2373,7 @@ easier.
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
 
         <!-- Progress bar attributes -->
-        <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
+        <item name="colorProgressBackgroundNormal">?attr/materialColorOutline</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
 
         <!-- Toolbar attributes -->
@@ -2488,7 +2488,7 @@ easier.
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
 
         <!-- Progress bar attributes -->
-        <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
+        <item name="colorProgressBackgroundNormal">?attr/materialColorOutline</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
 
         <!-- Toolbar attributes -->
@@ -2642,7 +2642,7 @@ easier.
         <item name="progressBarStyleSmallInverse">@style/Widget.DeviceDefault.Light.ProgressBar.Small.Inverse</item>
         <item name="progressBarStyleLargeInverse">@style/Widget.DeviceDefault.Light.ProgressBar.Large.Inverse</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
-        <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
+        <item name="colorProgressBackgroundNormal">?attr/materialColorOutline</item>
         <item name="seekBarStyle">@style/Widget.DeviceDefault.Light.SeekBar</item>
         <item name="ratingBarStyle">@style/Widget.DeviceDefault.Light.RatingBar</item>
         <item name="ratingBarStyleIndicator">@style/Widget.DeviceDefault.Light.RatingBar.Indicator</item>
@@ -2858,7 +2858,7 @@ easier.
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
 
         <!-- Progress bar attributes -->
-        <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
+        <item name="colorProgressBackgroundNormal">?attr/materialColorOutline</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
 
         <!-- Toolbar attributes -->
@@ -2974,7 +2974,7 @@ easier.
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
 
         <!-- Progress bar attributes -->
-        <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
+        <item name="colorProgressBackgroundNormal">?attr/materialColorOutline</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
 
         <!-- Toolbar attributes -->
@@ -3091,7 +3091,7 @@ easier.
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
 
         <!-- Progress bar attributes -->
-        <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
+        <item name="colorProgressBackgroundNormal">?attr/materialColorOutline</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
 
         <!-- Toolbar attributes -->
@@ -3210,7 +3210,7 @@ easier.
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
 
         <!-- Progress bar attributes -->
-        <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
+        <item name="colorProgressBackgroundNormal">?attr/materialColorOutline</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
 
         <!-- Toolbar attributes -->
@@ -3328,7 +3328,7 @@ easier.
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
 
         <!-- Progress bar attributes -->
-        <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
+        <item name="colorProgressBackgroundNormal">?attr/materialColorOutline</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
 
         <!-- Toolbar attributes -->
@@ -3452,7 +3452,7 @@ easier.
         <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
 
         <!-- Progress bar attributes -->
-        <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
+        <item name="colorProgressBackgroundNormal">?attr/materialColorOutline</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
 
         <!-- Toolbar attributes -->
@@ -3572,7 +3572,7 @@ easier.
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
 
         <!-- Progress bar attributes -->
-        <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
+        <item name="colorProgressBackgroundNormal">?attr/materialColorOutline</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
 
         <!-- Toolbar attributes -->
@@ -3691,7 +3691,7 @@ easier.
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
 
         <!-- Progress bar attributes -->
-        <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
+        <item name="colorProgressBackgroundNormal">?attr/materialColorOutline</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
 
         <!-- Toolbar attributes -->
@@ -3811,7 +3811,7 @@ easier.
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
 
         <!-- Progress bar attributes -->
-        <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
+        <item name="colorProgressBackgroundNormal">?attr/materialColorOutline</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
 
         <!-- Toolbar attributes -->
@@ -4133,7 +4133,7 @@ easier.
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
 
         <!-- Progress bar attributes -->
-        <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
+        <item name="colorProgressBackgroundNormal">?attr/materialColorOutline</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
 
         <!-- Toolbar attributes -->
@@ -4254,7 +4254,7 @@ easier.
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
 
         <!-- Progress bar attributes -->
-        <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
+        <item name="colorProgressBackgroundNormal">?attr/materialColorOutline</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
 
         <!-- Toolbar attributes -->
@@ -4373,7 +4373,7 @@ easier.
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
 
         <!-- Progress bar attributes -->
-        <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
+        <item name="colorProgressBackgroundNormal">?attr/materialColorOutline</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
 
         <!-- Toolbar attributes -->
@@ -4491,7 +4491,7 @@ easier.
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
 
         <!-- Progress bar attributes -->
-        <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
+        <item name="colorProgressBackgroundNormal">?attr/materialColorOutline</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
 
         <!-- Toolbar attributes -->
@@ -4608,7 +4608,7 @@ easier.
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
 
         <!-- Progress bar attributes -->
-        <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
+        <item name="colorProgressBackgroundNormal">?attr/materialColorOutline</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
 
         <!-- Toolbar attributes -->
@@ -4725,7 +4725,7 @@ easier.
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
 
         <!-- Progress bar attributes -->
-        <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
+        <item name="colorProgressBackgroundNormal">?attr/materialColorOutline</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
 
         <!-- Toolbar attributes -->
@@ -4840,7 +4840,7 @@ easier.
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
 
         <!-- Progress bar attributes -->
-        <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
+        <item name="colorProgressBackgroundNormal">?attr/materialColorOutline</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
 
         <!-- Toolbar attributes -->
@@ -5066,7 +5066,7 @@ easier.
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
 
         <!-- Progress bar attributes -->
-        <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
+        <item name="colorProgressBackgroundNormal">?attr/materialColorOutline</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
 
         <!-- Toolbar attributes -->
@@ -5162,7 +5162,7 @@ easier.
         <item name="alertDialogTheme">@style/Theme.DeviceDefault.Light.Dialog.Alert</item>
 
         <!-- Progress bar attributes -->
-        <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
+        <item name="colorProgressBackgroundNormal">?attr/materialColorOutline</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
 
         <!-- Toolbar attributes -->
@@ -5280,7 +5280,7 @@ easier.
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
 
         <!-- Progress bar attributes -->
-        <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
+        <item name="colorProgressBackgroundNormal">?attr/materialColorOutline</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
 
         <!-- Toolbar attributes -->
@@ -5471,7 +5471,7 @@ easier.
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
 
         <!-- Progress bar attributes -->
-        <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
+        <item name="colorProgressBackgroundNormal">?attr/materialColorOutline</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
 
         <!-- Toolbar attributes -->
@@ -5522,7 +5522,7 @@ easier.
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
 
         <!-- Progress bar attributes -->
-        <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
+        <item name="colorProgressBackgroundNormal">?attr/materialColorOutline</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
 
         <!-- Toolbar attributes -->
@@ -5641,7 +5641,7 @@ easier.
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
 
         <!-- Progress bar attributes -->
-        <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
+        <item name="colorProgressBackgroundNormal">?attr/materialColorOutline</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
 
         <!-- Toolbar attributes -->

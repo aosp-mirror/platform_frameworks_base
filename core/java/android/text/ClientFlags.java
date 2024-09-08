@@ -35,20 +35,6 @@ public class ClientFlags {
     }
 
     /**
-     * @see Flags#phraseStrictFallback()
-     */
-    public static boolean phraseStrictFallback() {
-        return TextFlags.isFeatureEnabled(Flags.FLAG_PHRASE_STRICT_FALLBACK);
-    }
-
-    /**
-     * @see Flags#useBoundsForWidth()
-     */
-    public static boolean useBoundsForWidth() {
-        return TextFlags.isFeatureEnabled(Flags.FLAG_USE_BOUNDS_FOR_WIDTH);
-    }
-
-    /**
      * @see Flags#fixLineHeightForLocale()
      */
     public static boolean fixLineHeightForLocale() {

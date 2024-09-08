@@ -15,11 +15,11 @@
  */
 package com.android.hoststubgen.test.tinyframework;
 
-import android.hosttest.annotation.HostSideTestWholeClassStub;
+import android.hosttest.annotation.HostSideTestWholeClassKeep;
 
 import java.util.function.Supplier;
 
-@HostSideTestWholeClassStub
+@HostSideTestWholeClassKeep
 public class TinyFrameworkNestedClasses {
     public final Supplier<Integer> mSupplier = new Supplier<Integer>() {
         @Override

@@ -34,10 +34,14 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.doze.DozeLogger
+import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepository
 import com.android.systemui.telephony.domain.interactor.TelephonyInteractor
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.EmergencyDialerConstants
+import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
@@ -69,6 +73,7 @@ constructor(
     private val emergencyDialerIntentFactory: EmergencyDialerIntentFactory,
     private val metricsLogger: MetricsLogger,
     private val dozeLogger: DozeLogger,
+    private val sceneInteractor: Lazy<SceneInteractor>,
 ) {
     /** The bouncer action button. If `null`, the button should not be shown. */
     val actionButton: Flow<BouncerActionButtonModel?> =
@@ -158,14 +163,17 @@ constructor(
     }
 
     private fun prepareToPerformAction() {
-        // TODO(b/308001302): Trigger occlusion and resetting bouncer state.
+        if (SceneContainerFlag.isEnabled) {
+            sceneInteractor.get().changeScene(Scenes.Lockscreen, "Bouncer action button clicked")
+        }
+
         metricsLogger.action(MetricsEvent.ACTION_EMERGENCY_CALL)
         activityTaskManager.stopSystemLockTaskMode()
     }
 
     @SuppressLint("MissingPermission")
     private fun returnToCall() {
-        telecomManager?.showInCallScreen(/* showDialpad = */ false)
+        telecomManager?.showInCallScreen(/* showDialpad= */ false)
     }
 
     private val <T> Flow<T>.asUnitFlow: Flow<Unit>

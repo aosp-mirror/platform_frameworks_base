@@ -992,7 +992,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             } else {
                 showBouncerOrKeyguard(hideBouncerWhenShowing, isFalsingReset);
             }
-            if (!SceneContainerFlag.isEnabled() && hideBouncerWhenShowing) {
+            if (!SceneContainerFlag.isEnabled() && hideBouncerWhenShowing && isBouncerShowing()) {
                 hideAlternateBouncer(true);
                 mDismissCallbackRegistry.notifyDismissCancelled();
                 mPrimaryBouncerInteractor.setDismissAction(null, null);

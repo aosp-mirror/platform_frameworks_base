@@ -18,12 +18,17 @@ package com.android.compose.animation.scene
 
 import androidx.activity.BackEventCompat
 import androidx.activity.compose.PredictiveBackHandler
-import androidx.compose.animation.core.AnimationSpec
+import androidx.compose.animation.core.snap
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.runtime.Composable
-import kotlin.coroutines.cancellation.CancellationException
+import com.android.compose.animation.scene.UserActionResult.ChangeScene
+import com.android.compose.animation.scene.UserActionResult.HideOverlay
+import com.android.compose.animation.scene.UserActionResult.ReplaceByOverlay
+import com.android.compose.animation.scene.UserActionResult.ShowOverlay
+import com.android.compose.animation.scene.transition.animateProgress
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 
 @Composable
 internal fun PredictiveBackHandler(
@@ -32,20 +37,21 @@ internal fun PredictiveBackHandler(
 ) {
     PredictiveBackHandler(
         enabled = result != null,
-    ) { progress: Flow<BackEventCompat> ->
+    ) { events: Flow<BackEventCompat> ->
         if (result == null) {
             // Note: We have to collect progress otherwise PredictiveBackHandler will throw.
-            progress.first()
+            events.first()
             return@PredictiveBackHandler
         }
 
         val animation =
             createSwipeAnimation(
                 layoutImpl,
-                layoutImpl.coroutineScope,
-                result.userActionCopy(
-                    transitionKey = result.transitionKey ?: TransitionKey.PredictiveBack
-                ),
+                if (result.transitionKey != null) {
+                    result
+                } else {
+                    result.copy(transitionKey = TransitionKey.PredictiveBack)
+                },
                 isUpOrLeft = false,
                 // Note that the orientation does not matter here given that it's only used to
                 // compute the distance. In our case the distance is always 1f.
@@ -53,43 +59,30 @@ internal fun PredictiveBackHandler(
                 distance = 1f,
             )
 
-        animate(layoutImpl, animation, progress)
+        animateProgress(
+            state = layoutImpl.state,
+            animation = animation,
+            progress = events.map { it.progress },
+
+            // Use the transformationSpec.progressSpec. We will lazily access it later once the
+            // transition has been started, because at this point the transformation spec of the
+            // transition is not computed yet.
+            commitSpec = null,
+
+            // The predictive back APIs will automatically animate the progress for us in this case
+            // so there is no need to animate it.
+            cancelSpec = snap(),
+        )
     }
 }
 
-private suspend fun <T : ContentKey> animate(
-    layoutImpl: SceneTransitionLayoutImpl,
-    animation: SwipeAnimation<T>,
-    progress: Flow<BackEventCompat>,
-) {
-    fun animateOffset(targetContent: T, spec: AnimationSpec<Float>? = null) {
-        if (
-            layoutImpl.state.transitionState != animation.contentTransition || animation.isFinishing
-        ) {
-            return
-        }
-
-        animation.animateOffset(
-            initialVelocity = 0f,
-            targetContent = targetContent,
-            spec = spec,
-        )
-    }
-
-    layoutImpl.state.startTransition(animation.contentTransition)
-    try {
-        progress.collect { backEvent -> animation.dragOffset = backEvent.progress }
-
-        // Back gesture successful.
-        animateOffset(
-            animation.toContent,
-            animation.contentTransition.transformationSpec.progressSpec
-        )
-    } catch (e: CancellationException) {
-        // Back gesture cancelled.
-        // If the back gesture is cancelled, the progress is animated back to 0f by the system.
-        // Since the remaining change in progress is usually very small, the progressSpec is omitted
-        // and the default spring spec used instead.
-        animateOffset(animation.fromContent)
+private fun UserActionResult.copy(
+    transitionKey: TransitionKey? = this.transitionKey
+): UserActionResult {
+    return when (this) {
+        is ChangeScene -> copy(transitionKey = transitionKey)
+        is ShowOverlay -> copy(transitionKey = transitionKey)
+        is HideOverlay -> copy(transitionKey = transitionKey)
+        is ReplaceByOverlay -> copy(transitionKey = transitionKey)
     }
 }

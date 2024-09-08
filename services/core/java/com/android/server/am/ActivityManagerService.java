@@ -299,7 +299,6 @@ import android.content.pm.TestUtilityService;
 import android.content.pm.UserInfo;
 import android.content.pm.UserProperties;
 import android.content.pm.VersionedPackage;
-import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.ContentObserver;
@@ -2971,10 +2970,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    CompatibilityInfo compatibilityInfoForPackage(ApplicationInfo ai) {
-        return mAtmInternal.compatibilityInfoForPackage(ai);
-    }
-
     /**
      * Enforces that the uid that calls a method is not an
      * {@link UserHandle#isIsolated(int) isolated} uid.
@@ -4635,7 +4630,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             ProtoLog.v(WM_DEBUG_CONFIGURATION, "Binding proc %s with config %s",
                     processName, app.getWindowProcessController().getConfiguration());
             ApplicationInfo appInfo = instr != null ? instr.mTargetInfo : app.info;
-            app.setCompat(compatibilityInfoForPackage(appInfo));
 
             ProfilerInfo profilerInfo = mAppProfiler.setupProfilerInfoLocked(thread, app, instr);
 
@@ -4674,7 +4668,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             checkTime(startTime, "attachApplicationLocked: immediately before bindApplication");
             bindApplicationTimeMillis = SystemClock.uptimeMillis();
             bindApplicationTimeNanos = SystemClock.uptimeNanos();
-            mAtmInternal.preBindApplication(app.getWindowProcessController());
+            final ActivityTaskManagerInternal.PreBindInfo preBindInfo =
+                    mAtmInternal.preBindApplication(app.getWindowProcessController(), appInfo);
+            app.setCompat(preBindInfo.compatibilityInfo);
             final ActiveInstrumentation instr2 = app.getActiveInstrumentation();
             if (mPlatformCompat != null) {
                 mPlatformCompat.resetReporting(app.info);
@@ -4716,7 +4712,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         enableTrackAllocation,
                         isRestrictedBackupMode || !normalMode,
                         app.isPersistent(),
-                        new Configuration(app.getWindowProcessController().getConfiguration()),
+                        preBindInfo.configuration,
                         app.getCompat(),
                         getCommonServicesLocked(app.isolated),
                         mCoreSettingsObserver.getCoreSettingsLocked(),
@@ -5426,7 +5422,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             for (int i=0; i<intents.length; i++) {
                 Intent intent = intents[i];
                 if (intent != null) {
-                    intent.prepareToEnterSystemServer();
+                    if (intent.hasFileDescriptors()) {
+                        throw new IllegalArgumentException("File descriptors passed in Intent");
+                    }
                     if (type == ActivityManager.INTENT_SENDER_BROADCAST &&
                             (intent.getFlags()&Intent.FLAG_RECEIVER_BOOT_UPGRADE) != 0) {
                         throw new IllegalArgumentException(
@@ -5459,6 +5457,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         }
                     }
                     intents[i] = new Intent(intent);
+                    intents[i].removeExtendedFlags(Intent.EXTENDED_FLAG_FILTER_MISMATCH);
                 }
             }
             if (resolvedTypes != null && resolvedTypes.length != intents.length) {
@@ -13591,7 +13590,12 @@ public class ActivityManagerService extends IActivityManager.Stub
         enforceNotIsolatedCaller("startService");
         enforceAllowedToStartOrBindServiceIfSdkSandbox(service);
         if (service != null) {
-            service.prepareToEnterSystemServer();
+            // Refuse possible leaked file descriptors
+            if (service.hasFileDescriptors()) {
+                throw new IllegalArgumentException("File descriptors passed in Intent");
+            }
+            // Remove existing mismatch flag so it can be properly updated later
+            service.removeExtendedFlags(Intent.EXTENDED_FLAG_FILTER_MISMATCH);
         }
 
         if (callingPackage == null) {
@@ -13828,7 +13832,12 @@ public class ActivityManagerService extends IActivityManager.Stub
         enforceAllowedToStartOrBindServiceIfSdkSandbox(service);
 
         if (service != null) {
-            service.prepareToEnterSystemServer();
+            // Refuse possible leaked file descriptors
+            if (service.hasFileDescriptors()) {
+                throw new IllegalArgumentException("File descriptors passed in Intent");
+            }
+            // Remove existing mismatch flag so it can be properly updated later
+            service.removeExtendedFlags(Intent.EXTENDED_FLAG_FILTER_MISMATCH);
         }
 
         if (callingPackage == null) {

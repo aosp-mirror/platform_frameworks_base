@@ -24,3 +24,11 @@ android_test {
     resource_dirs: ["res"],
     test_suites: ["device-tests"],
 }
+
+test_module_config {
+    name: "audiopolicytest_audiopolicytest_audiopolicydeathtest_Presubmit",
+    base: "audiopolicytest",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.audiopolicytest.AudioPolicyDeathTest"],
+    include_annotations: ["android.platform.test.annotations.Presubmit"],
+}

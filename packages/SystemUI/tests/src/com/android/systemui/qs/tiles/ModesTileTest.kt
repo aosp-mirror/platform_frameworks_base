@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.tiles
 
+import android.graphics.drawable.TestStubDrawable
 import android.os.Handler
 import android.platform.test.annotations.EnableFlags
 import android.service.quicksettings.Tile
@@ -26,9 +27,11 @@ import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingManagerFake
+import com.android.systemui.common.shared.model.asIcon
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.QsEventLogger
@@ -36,6 +39,7 @@ import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tiles.base.actions.FakeQSTileIntentUserInputHandler
 import com.android.systemui.qs.tiles.impl.modes.domain.interactor.ModesTileDataInteractor
 import com.android.systemui.qs.tiles.impl.modes.domain.interactor.ModesTileUserActionInteractor
+import com.android.systemui.qs.tiles.impl.modes.domain.model.ModesTileModel
 import com.android.systemui.qs.tiles.impl.modes.ui.ModesTileMapper
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfigProvider
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfigTestBuilder
@@ -167,5 +171,44 @@ class ModesTileTest : SysuiTestCase() {
             testableLooper.processAllMessages()
 
             assertThat(underTest.state.state).isEqualTo(Tile.STATE_ACTIVE)
+        }
+
+    @Test
+    fun handleUpdateState_withTileModel_updatesState() =
+        testScope.runTest {
+            val tileState =
+                QSTile.State().apply {
+                    state = Tile.STATE_INACTIVE
+                    secondaryLabel = "Old secondary label"
+                }
+            val model =
+                ModesTileModel(
+                    isActivated = true,
+                    activeModes = listOf("One", "Two"),
+                    icon = TestStubDrawable().asIcon()
+                )
+
+            underTest.handleUpdateState(tileState, model)
+
+            assertThat(tileState.state).isEqualTo(Tile.STATE_ACTIVE)
+            assertThat(tileState.secondaryLabel).isEqualTo("2 modes are active")
+        }
+
+    @Test
+    fun handleUpdateState_withNull_updatesState() =
+        testScope.runTest {
+            val tileState =
+                QSTile.State().apply {
+                    state = Tile.STATE_INACTIVE
+                    secondaryLabel = "Old secondary label"
+                }
+            zenModeRepository.addMode("One", active = true)
+            zenModeRepository.addMode("Two", active = true)
+            runCurrent()
+
+            underTest.handleUpdateState(tileState, null)
+
+            assertThat(tileState.state).isEqualTo(Tile.STATE_ACTIVE)
+            assertThat(tileState.secondaryLabel).isEqualTo("2 modes are active")
         }
 }

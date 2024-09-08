@@ -23,6 +23,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.companion.virtual.VirtualDeviceManager;
 import android.companion.virtual.VirtualDeviceParams;
+import android.hardware.input.InputManager;
 import android.hardware.input.VirtualMouse;
 import android.hardware.input.VirtualMouseButtonEvent;
 import android.hardware.input.VirtualMouseConfig;
@@ -34,7 +35,10 @@ import android.os.Message;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.view.InputDevice;
 import android.view.KeyEvent;
+
+import androidx.annotation.VisibleForTesting;
 
 import com.android.server.LocalServices;
 import com.android.server.companion.virtual.VirtualDeviceManagerInternal;
@@ -60,7 +64,7 @@ import com.android.server.companion.virtual.VirtualDeviceManagerInternal;
  * mouse keys of each physical keyboard will control a single (global) mouse pointer.
  */
 public class MouseKeysInterceptor extends BaseEventStreamTransformation
-        implements Handler.Callback {
+        implements Handler.Callback, InputManager.InputDeviceListener {
     private static final String LOG_TAG = "MouseKeysInterceptor";
 
     // To enable these logs, run: 'adb shell setprop log.tag.MouseKeysInterceptor DEBUG'
@@ -77,9 +81,18 @@ public class MouseKeysInterceptor extends BaseEventStreamTransformation
 
     private final AccessibilityManagerService mAms;
     private final Handler mHandler;
+    private final InputManager mInputManager;
 
     /** Thread to wait for virtual mouse creation to complete */
     private final Thread mCreateVirtualMouseThread;
+
+    /**
+     * Map of device IDs to a map of key codes to their corresponding {@link MouseKeyEvent} values.
+     * To ensure thread safety for the map, all access and modification of the map
+     * should happen on the same thread, i.e., on the handler thread.
+     */
+    private final SparseArray<SparseArray<MouseKeyEvent>> mDeviceKeyCodeMap =
+            new SparseArray<>();
 
     VirtualDeviceManager.VirtualDevice mVirtualDevice = null;
 
@@ -102,6 +115,21 @@ public class MouseKeysInterceptor extends BaseEventStreamTransformation
     /** Whether scroll toggle is on */
     private boolean mScrollToggleOn = false;
 
+    /** The ID of the input device that is currently active */
+    private int mActiveInputDeviceId = 0;
+
+    /**
+     * Enum representing different types of mouse key events, each associated with a specific
+     * key code.
+     *
+     * <p> These events correspond to various mouse actions such as directional movements,
+     * clicks, and scrolls, mapped to specific keys on the keyboard.
+     * The key codes here are the QWERTY key codes, and should be accessed via
+     * {@link MouseKeyEvent#getKeyCode(InputDevice)}
+     * so that it is mapped to the equivalent key on the keyboard layout of the keyboard device
+     * that is actually in use.
+     * </p>
+     */
     public enum MouseKeyEvent {
         DIAGONAL_UP_LEFT_MOVE(KeyEvent.KEYCODE_7),
         UP_MOVE_OR_SCROLL(KeyEvent.KEYCODE_8),
@@ -117,31 +145,61 @@ public class MouseKeysInterceptor extends BaseEventStreamTransformation
         RELEASE(KeyEvent.KEYCODE_COMMA),
         SCROLL_TOGGLE(KeyEvent.KEYCODE_PERIOD);
 
-        private final int mKeyCode;
+        private final int mLocationKeyCode;
         MouseKeyEvent(int enumValue) {
-            mKeyCode = enumValue;
+            mLocationKeyCode = enumValue;
         }
 
-        private static final SparseArray<MouseKeyEvent> VALUE_TO_ENUM_MAP = new SparseArray<>();
-
-        static {
-            for (MouseKeyEvent type : MouseKeyEvent.values()) {
-                VALUE_TO_ENUM_MAP.put(type.mKeyCode, type);
-            }
-        }
-
+        @VisibleForTesting
         public final int getKeyCodeValue() {
-            return mKeyCode;
+            return mLocationKeyCode;
         }
 
         /**
-         * Convert int value of the key code to corresponding MouseEvent enum. If no matching
-         * value is found, this will return {@code null}.
+         * Get the key code associated with the given MouseKeyEvent for the given keyboard
+         * input device, taking into account its layout.
+         * The default is to return the keycode for the default layout (QWERTY).
+         * We check if the input device has been generated using {@link InputDevice#getGeneration()}
+         * to test with the default {@link MouseKeyEvent} values in the unit tests.
+         */
+        public int getKeyCode(InputDevice inputDevice) {
+            if (inputDevice.getGeneration() == -1) {
+                return mLocationKeyCode;
+            }
+            return inputDevice.getKeyCodeForKeyLocation(mLocationKeyCode);
+        }
+
+        /**
+         * Convert int value of the key code to corresponding {@link MouseKeyEvent}
+         * enum for a particular device ID.
+         * If no matching value is found, this will return {@code null}.
          */
         @Nullable
-        public static MouseKeyEvent from(int value) {
-            return VALUE_TO_ENUM_MAP.get(value);
+        public static MouseKeyEvent from(int keyCode, int deviceId,
+                SparseArray<SparseArray<MouseKeyEvent>> deviceKeyCodeMap) {
+            SparseArray<MouseKeyEvent> keyCodeToEnumMap = deviceKeyCodeMap.get(deviceId);
+            if (keyCodeToEnumMap != null) {
+                return keyCodeToEnumMap.get(keyCode);
+            }
+            return null;
         }
+    }
+
+    /**
+     * Create a map of key codes to their corresponding {@link MouseKeyEvent} values
+     * for a specific input device.
+     * The key for {@code mDeviceKeyCodeMap} is the deviceId.
+     * The key for {@code keyCodeToEnumMap} is the keycode for each
+     * {@link MouseKeyEvent} according to the keyboard layout of the input device.
+     */
+    public void initializeDeviceToEnumMap(InputDevice inputDevice) {
+        int deviceId = inputDevice.getId();
+        SparseArray<MouseKeyEvent> keyCodeToEnumMap = new SparseArray<>();
+        for (MouseKeyEvent mouseKeyEventType : MouseKeyEvent.values()) {
+            int keyCode = mouseKeyEventType.getKeyCode(inputDevice);
+            keyCodeToEnumMap.put(keyCode, mouseKeyEventType);
+        }
+        mDeviceKeyCodeMap.put(deviceId, keyCodeToEnumMap);
     }
 
     /**
@@ -152,8 +210,10 @@ public class MouseKeysInterceptor extends BaseEventStreamTransformation
      * @param displayId Display ID to send mouse events to
      */
     @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
-    public MouseKeysInterceptor(AccessibilityManagerService service, Looper looper, int displayId) {
+    public MouseKeysInterceptor(AccessibilityManagerService service,
+            InputManager inputManager, Looper looper, int displayId) {
         mAms = service;
+        mInputManager = inputManager;
         mHandler = new Handler(looper, this);
         // Create the virtual mouse on a separate thread since virtual device creation
         // should happen on an auxiliary thread, and not from the handler's thread.
@@ -163,6 +223,9 @@ public class MouseKeysInterceptor extends BaseEventStreamTransformation
             mVirtualMouse = createVirtualMouse(displayId);
         });
         mCreateVirtualMouseThread.start();
+        // Register an input device listener to watch when input devices are
+        // added, removed or reconfigured.
+        mInputManager.registerInputDeviceListener(this, mHandler);
     }
 
     /**
@@ -215,7 +278,8 @@ public class MouseKeysInterceptor extends BaseEventStreamTransformation
      */
     @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     private void performMouseScrollAction(int keyCode) {
-        MouseKeyEvent mouseKeyEvent = MouseKeyEvent.from(keyCode);
+        MouseKeyEvent mouseKeyEvent = MouseKeyEvent.from(
+                keyCode, mActiveInputDeviceId, mDeviceKeyCodeMap);
         float y = switch (mouseKeyEvent) {
             case UP_MOVE_OR_SCROLL -> 1.0f;
             case DOWN_MOVE_OR_SCROLL -> -1.0f;
@@ -247,15 +311,18 @@ public class MouseKeysInterceptor extends BaseEventStreamTransformation
      */
     @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     private void performMouseButtonAction(int keyCode) {
-        MouseKeyEvent mouseKeyEvent = MouseKeyEvent.from(keyCode);
+        MouseKeyEvent mouseKeyEvent = MouseKeyEvent.from(
+                keyCode, mActiveInputDeviceId, mDeviceKeyCodeMap);
         int buttonCode = switch (mouseKeyEvent) {
             case LEFT_CLICK -> VirtualMouseButtonEvent.BUTTON_PRIMARY;
             case RIGHT_CLICK -> VirtualMouseButtonEvent.BUTTON_SECONDARY;
             default -> VirtualMouseButtonEvent.BUTTON_UNKNOWN;
         };
         if (buttonCode != VirtualMouseButtonEvent.BUTTON_UNKNOWN) {
-            sendVirtualMouseButtonEvent(buttonCode, VirtualMouseButtonEvent.ACTION_BUTTON_PRESS);
-            sendVirtualMouseButtonEvent(buttonCode, VirtualMouseButtonEvent.ACTION_BUTTON_RELEASE);
+            sendVirtualMouseButtonEvent(buttonCode,
+                    VirtualMouseButtonEvent.ACTION_BUTTON_PRESS);
+            sendVirtualMouseButtonEvent(buttonCode,
+                    VirtualMouseButtonEvent.ACTION_BUTTON_RELEASE);
         }
         if (DEBUG) {
             if (buttonCode == VirtualMouseButtonEvent.BUTTON_UNKNOWN) {
@@ -293,7 +360,9 @@ public class MouseKeysInterceptor extends BaseEventStreamTransformation
     private void performMousePointerAction(int keyCode) {
         float x = 0f;
         float y = 0f;
-        MouseKeyEvent mouseKeyEvent = MouseKeyEvent.from(keyCode);
+        MouseKeyEvent mouseKeyEvent = MouseKeyEvent.from(
+                keyCode, mActiveInputDeviceId, mDeviceKeyCodeMap);
+
         switch (mouseKeyEvent) {
             case DIAGONAL_DOWN_LEFT_MOVE -> {
                 x = -MOUSE_POINTER_MOVEMENT_STEP / sqrt(2);
@@ -339,18 +408,19 @@ public class MouseKeysInterceptor extends BaseEventStreamTransformation
         }
     }
 
-    private boolean isMouseKey(int keyCode) {
-        return MouseKeyEvent.VALUE_TO_ENUM_MAP.contains(keyCode);
+    private boolean isMouseKey(int keyCode, int deviceId) {
+        SparseArray<MouseKeyEvent> keyCodeToEnumMap = mDeviceKeyCodeMap.get(deviceId);
+        return keyCodeToEnumMap.contains(keyCode);
     }
 
-    private boolean isMouseButtonKey(int keyCode) {
-        return keyCode == MouseKeyEvent.LEFT_CLICK.getKeyCodeValue()
-                || keyCode == MouseKeyEvent.RIGHT_CLICK.getKeyCodeValue();
+    private boolean isMouseButtonKey(int keyCode, InputDevice inputDevice) {
+        return keyCode == MouseKeyEvent.LEFT_CLICK.getKeyCode(inputDevice)
+                || keyCode == MouseKeyEvent.RIGHT_CLICK.getKeyCode(inputDevice);
     }
 
-    private boolean isMouseScrollKey(int keyCode) {
-        return keyCode == MouseKeyEvent.UP_MOVE_OR_SCROLL.getKeyCodeValue()
-                || keyCode == MouseKeyEvent.DOWN_MOVE_OR_SCROLL.getKeyCodeValue();
+    private boolean isMouseScrollKey(int keyCode, InputDevice inputDevice) {
+        return keyCode == MouseKeyEvent.UP_MOVE_OR_SCROLL.getKeyCode(inputDevice)
+                || keyCode == MouseKeyEvent.DOWN_MOVE_OR_SCROLL.getKeyCode(inputDevice);
     }
 
     /**
@@ -373,7 +443,7 @@ public class MouseKeysInterceptor extends BaseEventStreamTransformation
     }
 
     /**
-     * Handles key events and forwards mouse key events to the virtual mouse.
+     * Handles key events and forwards mouse key events to the virtual mouse on the handler thread.
      *
      * @param event The key event to handle.
      * @param policyFlags The policy flags associated with the key event.
@@ -385,31 +455,45 @@ public class MouseKeysInterceptor extends BaseEventStreamTransformation
             mAms.getTraceManager().logTrace(LOG_TAG + ".onKeyEvent",
                     FLAGS_INPUT_FILTER, "event=" + event + ";policyFlags=" + policyFlags);
         }
+
+        mHandler.post(() -> {
+            onKeyEventInternal(event, policyFlags);
+        });
+    }
+
+    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+    private void onKeyEventInternal(KeyEvent event, int policyFlags) {
         boolean isDown = event.getAction() == KeyEvent.ACTION_DOWN;
         int keyCode = event.getKeyCode();
+        mActiveInputDeviceId = event.getDeviceId();
+        InputDevice inputDevice = mInputManager.getInputDevice(mActiveInputDeviceId);
 
-        if (!isMouseKey(keyCode)) {
+        if (!mDeviceKeyCodeMap.contains(mActiveInputDeviceId)) {
+            initializeDeviceToEnumMap(inputDevice);
+        }
+
+        if (!isMouseKey(keyCode, mActiveInputDeviceId)) {
             // Pass non-mouse key events to the next handler
             super.onKeyEvent(event, policyFlags);
         } else if (isDown) {
-            if (keyCode == MouseKeyEvent.SCROLL_TOGGLE.getKeyCodeValue()) {
+            if (keyCode == MouseKeyEvent.SCROLL_TOGGLE.getKeyCode(inputDevice)) {
                 mScrollToggleOn = !mScrollToggleOn;
                 if (DEBUG) {
                     Slog.d(LOG_TAG, "Scroll toggle " + (mScrollToggleOn ? "ON" : "OFF"));
                 }
-            } else if (keyCode == MouseKeyEvent.HOLD.getKeyCodeValue()) {
+            } else if (keyCode == MouseKeyEvent.HOLD.getKeyCode(inputDevice)) {
                 sendVirtualMouseButtonEvent(
                         VirtualMouseButtonEvent.BUTTON_PRIMARY,
                         VirtualMouseButtonEvent.ACTION_BUTTON_PRESS
                 );
-            } else if (keyCode == MouseKeyEvent.RELEASE.getKeyCodeValue()) {
+            } else if (keyCode == MouseKeyEvent.RELEASE.getKeyCode(inputDevice)) {
                 sendVirtualMouseButtonEvent(
                         VirtualMouseButtonEvent.BUTTON_PRIMARY,
                         VirtualMouseButtonEvent.ACTION_BUTTON_RELEASE
                 );
-            } else if (isMouseButtonKey(keyCode)) {
+            } else if (isMouseButtonKey(keyCode, inputDevice)) {
                 performMouseButtonAction(keyCode);
-            } else if (mScrollToggleOn && isMouseScrollKey(keyCode)) {
+            } else if (mScrollToggleOn && isMouseScrollKey(keyCode, inputDevice)) {
                 // If the scroll key is pressed down and no other key is active,
                 // set it as the active key and send a message to scroll the pointer
                 if (mActiveScrollKey == KEY_NOT_SET) {
@@ -439,7 +523,8 @@ public class MouseKeysInterceptor extends BaseEventStreamTransformation
                 mHandler.removeMessages(MESSAGE_SCROLL_MOUSE_POINTER);
             } else {
                 Slog.i(LOG_TAG, "Dropping event with key code: '" + keyCode
-                        + "', with no matching down event from deviceId = " + event.getDeviceId());
+                        + "', with no matching down event from deviceId = "
+                        + event.getDeviceId());
             }
         }
     }
@@ -503,12 +588,40 @@ public class MouseKeysInterceptor extends BaseEventStreamTransformation
     @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     @Override
     public void onDestroy() {
-        // Clear mouse state
-        mActiveMoveKey = KEY_NOT_SET;
-        mActiveScrollKey = KEY_NOT_SET;
-        mLastTimeKeyActionPerformed = 0;
+        mHandler.post(() -> {
+            // Clear mouse state
+            mActiveMoveKey = KEY_NOT_SET;
+            mActiveScrollKey = KEY_NOT_SET;
+            mLastTimeKeyActionPerformed = 0;
+            mDeviceKeyCodeMap.clear();
+        });
 
         mHandler.removeCallbacksAndMessages(null);
         mVirtualDevice.close();
+    }
+
+    @Override
+    public void onInputDeviceAdded(int deviceId) {
+    }
+
+    @Override
+    public void onInputDeviceRemoved(int deviceId) {
+        mDeviceKeyCodeMap.remove(deviceId);
+    }
+
+    /**
+     * The user can change the keyboard layout from settings at anytime, which would change
+     * key character map for that device. Hence, we should use this callback to
+     * update the key code to enum mapping if there is a change in the physical keyboard detected.
+     *
+     * @param deviceId The id of the input device that changed.
+     */
+    @Override
+    public void onInputDeviceChanged(int deviceId) {
+        InputDevice inputDevice = mInputManager.getInputDevice(deviceId);
+        // Update the enum mapping only if input device that changed is a keyboard
+        if (inputDevice.isFullKeyboard() && !mDeviceKeyCodeMap.contains(deviceId)) {
+            initializeDeviceToEnumMap(inputDevice);
+        }
     }
 }
