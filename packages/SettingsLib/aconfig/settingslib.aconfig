@@ -129,3 +129,13 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "member_device_lea_active_state_sync_fix"
+    namespace: "cross_device_experiences"
+    description: "Gates whether to enable fix for member device active state sync on lea profile"
+    bug: "364201289"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

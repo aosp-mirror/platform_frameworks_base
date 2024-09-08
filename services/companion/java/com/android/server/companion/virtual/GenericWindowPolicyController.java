@@ -27,7 +27,6 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.WindowConfiguration;
 import android.app.compat.CompatChanges;
-import android.companion.virtual.VirtualDeviceManager.ActivityListener;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.content.AttributionSource;
@@ -61,6 +60,9 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
 
     private static final String TAG = "GenericWindowPolicyController";
 
+    private static final ComponentName BLOCKED_APP_STREAMING_COMPONENT =
+            new ComponentName("android", BlockedAppStreamingActivity.class.getName());
+
     /** Interface to listen running applications change on virtual display. */
     public interface RunningAppsChangedListener {
         /**
@@ -69,29 +71,25 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
         void onRunningAppsChanged(ArraySet<Integer> runningUids);
     }
 
-    /**
-     * For communicating when activities are blocked from running on the display by this policy
-     * controller.
-     */
-    public interface ActivityBlockedCallback {
+    /** Interface to react to activity changes on the virtual display. */
+    public interface ActivityListener {
+
+        /** Called when the top activity changes. */
+        void onTopActivityChanged(int displayId, @NonNull ComponentName topActivity,
+                @UserIdInt int userId);
+
+        /** Called when the display becomes empty. */
+        void onDisplayEmpty(int displayId);
+
         /** Called when an activity is blocked.*/
-        void onActivityBlocked(int displayId, ActivityInfo activityInfo, IntentSender intentSender);
-    }
-    private static final ComponentName BLOCKED_APP_STREAMING_COMPONENT =
-            new ComponentName("android", BlockedAppStreamingActivity.class.getName());
+        void onActivityLaunchBlocked(int displayId, @NonNull ActivityInfo activityInfo,
+                @Nullable IntentSender intentSender);
 
-    /**
-     * For communicating when a secure window shows on the virtual display.
-     */
-    public interface SecureWindowCallback {
         /** Called when a secure window shows on the virtual display. */
-        void onSecureWindowShown(int displayId, int uid);
-    }
+        void onSecureWindowShown(int displayId, @NonNull ActivityInfo activityInfo);
 
-    /** Interface to listen for interception of intents. */
-    public interface IntentListenerCallback {
         /** Returns true when an intent should be intercepted */
-        boolean shouldInterceptIntent(Intent intent);
+        boolean shouldInterceptIntent(@NonNull Intent intent);
     }
 
     /**
@@ -118,7 +116,6 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
     private final ArraySet<ComponentName> mCrossTaskNavigationExemptions;
     @NonNull
     private final Object mGenericWindowPolicyControllerLock = new Object();
-    @Nullable private final ActivityBlockedCallback mActivityBlockedCallback;
 
     // Do not access mDisplayId and mIsMirrorDisplay directly, instead use waitAndGetDisplayId()
     // and waitAndGetIsMirrorDisplay()
@@ -129,14 +126,12 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
     @NonNull
     @GuardedBy("mGenericWindowPolicyControllerLock")
     private final ArraySet<Integer> mRunningUids = new ArraySet<>();
-    @Nullable private final ActivityListener mActivityListener;
-    @Nullable private final IntentListenerCallback mIntentListenerCallback;
+    @NonNull private final ActivityListener mActivityListener;
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     @NonNull
     @GuardedBy("mGenericWindowPolicyControllerLock")
     private final ArraySet<RunningAppsChangedListener> mRunningAppsChangedListeners =
             new ArraySet<>();
-    @Nullable private final SecureWindowCallback mSecureWindowCallback;
     @NonNull private final Set<String> mDisplayCategories;
 
     @GuardedBy("mGenericWindowPolicyControllerLock")
@@ -162,12 +157,6 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
      * @param crossTaskNavigationExemptions The set of components explicitly exempt from the default
      *   navigation policy.
      * @param activityListener Activity listener to listen for activity changes.
-     * @param activityBlockedCallback Callback that is called when an activity is blocked from
-     *   launching.
-     * @param secureWindowCallback Callback that is called when a secure window shows on the
-     *   virtual display.
-     * @param intentListenerCallback Callback that is called to intercept intents when matching
-     *   passed in filters.
      * @param showTasksInHostDeviceRecents whether to show activities in recents on the host device.
      * @param customHomeComponent The component acting as a home activity on the virtual display. If
      *   {@code null}, then the system-default secondary home activity will be used. This is only
@@ -184,10 +173,7 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
             @NonNull Set<String> activityPolicyPackageExemptions,
             boolean crossTaskNavigationAllowedByDefault,
             @NonNull Set<ComponentName> crossTaskNavigationExemptions,
-            @Nullable ActivityListener activityListener,
-            @Nullable ActivityBlockedCallback activityBlockedCallback,
-            @Nullable SecureWindowCallback secureWindowCallback,
-            @Nullable IntentListenerCallback intentListenerCallback,
+            @NonNull ActivityListener activityListener,
             @NonNull Set<String> displayCategories,
             boolean showTasksInHostDeviceRecents,
             @Nullable ComponentName customHomeComponent) {
@@ -199,11 +185,8 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
         mActivityPolicyPackageExemptions = new ArraySet<>(activityPolicyPackageExemptions);
         mCrossTaskNavigationAllowedByDefault = crossTaskNavigationAllowedByDefault;
         mCrossTaskNavigationExemptions = new ArraySet<>(crossTaskNavigationExemptions);
-        mActivityBlockedCallback = activityBlockedCallback;
         setInterestedWindowFlags(windowFlags, systemWindowFlags);
         mActivityListener = activityListener;
-        mSecureWindowCallback = secureWindowCallback;
-        mIntentListenerCallback = intentListenerCallback;
         mDisplayCategories = displayCategories;
         mShowTasksInHostDeviceRecents = showTasksInHostDeviceRecents;
         mCustomHomeComponent = customHomeComponent;
@@ -306,8 +289,7 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
             @Nullable Intent intent, @WindowConfiguration.WindowingMode int windowingMode,
             int launchingFromDisplayId, boolean isNewTask, boolean isResultExpected,
             @Nullable Supplier<IntentSender> intentSender) {
-        if (mIntentListenerCallback != null && intent != null
-                && mIntentListenerCallback.shouldInterceptIntent(intent)) {
+        if (intent != null && mActivityListener.shouldInterceptIntent(intent)) {
             logActivityLaunchBlocked("Virtual device intercepting intent");
             return false;
         }
@@ -391,11 +373,9 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
         int displayId = waitAndGetDisplayId();
         // The callback is fired only when windowFlags are changed. To let VirtualDevice owner
         // aware that the virtual display has a secure window on top.
-        if ((windowFlags & FLAG_SECURE) != 0 && mSecureWindowCallback != null
-                && displayId != INVALID_DISPLAY) {
+        if ((windowFlags & FLAG_SECURE) != 0 && displayId != INVALID_DISPLAY) {
             // Post callback on the main thread, so it doesn't block activity launching.
-            mHandler.post(() -> mSecureWindowCallback.onSecureWindowShown(displayId,
-                    activityInfo.applicationInfo.uid));
+            mHandler.post(() -> mActivityListener.onSecureWindowShown(displayId, activityInfo));
         }
 
         if (!CompatChanges.isChangeEnabled(ALLOW_SECURE_ACTIVITY_DISPLAY_ON_REMOTE_DEVICE,
@@ -418,7 +398,7 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
         // Don't send onTopActivityChanged() callback when topActivity is null because it's defined
         // as @NonNull in ActivityListener interface. Sends onDisplayEmpty() callback instead when
         // there is no activity running on virtual display.
-        if (mActivityListener != null && topActivity != null && displayId != INVALID_DISPLAY) {
+        if (topActivity != null && displayId != INVALID_DISPLAY) {
             // Post callback on the main thread so it doesn't block activity launching
             mHandler.post(() ->
                     mActivityListener.onTopActivityChanged(displayId, topActivity, userId));
@@ -431,8 +411,7 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
             mRunningUids.clear();
             mRunningUids.addAll(runningUids);
             int displayId = waitAndGetDisplayId();
-            if (mActivityListener != null && mRunningUids.isEmpty()
-                    && displayId != INVALID_DISPLAY) {
+            if (mRunningUids.isEmpty() && displayId != INVALID_DISPLAY) {
                 // Post callback on the main thread so it doesn't block activity launching
                 mHandler.post(() -> mActivityListener.onDisplayEmpty(displayId));
             }
@@ -482,9 +461,8 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
         int displayId = waitAndGetDisplayId();
         // Don't trigger activity blocked callback for mirror displays, because we can't show
         // any activity or presentation on it anyway.
-        if (!waitAndGetIsMirrorDisplay() && mActivityBlockedCallback != null
-                && displayId != INVALID_DISPLAY) {
-            mActivityBlockedCallback.onActivityBlocked(displayId, activityInfo,
+        if (!waitAndGetIsMirrorDisplay() && displayId != INVALID_DISPLAY) {
+            mActivityListener.onActivityLaunchBlocked(displayId, activityInfo,
                     intentSender == null ? null : intentSender.get());
         }
         Counter.logIncrementWithUid(

@@ -1721,7 +1721,7 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Alisin"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Lakasan ang volume nang lagpas sa inirerekomendang antas?\n\nMaaaring mapinsala ng pakikinig sa malakas na volume sa loob ng mahahabang panahon ang iyong pandinig."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Magpatuloy sa pakikinig nang may malakas na volume?\n\nNaging malakas ang volume nang mas matagal na sa inirerekomenda, at posible nitong mapinsala ang pandinig mo"</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Magpatuloy sa pakikinig nang may malakas na volume?\n\nMalakas ang volume nang mas matagal na sa inirerekomenda, at posible nitong mapinsala ang pandinig mo"</string>
     <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Naka-detect ng malakas na tunog\n\nMas malakas ang volume kaysa sa inirerekomenda, at posible nitong mapinsala ang pandinig mo"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Gagamitin ang Shortcut sa Accessibility?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Kapag naka-on ang shortcut, magsisimula ang isang feature ng pagiging naa-access kapag pinindot ang parehong button ng volume."</string>
@@ -1746,7 +1746,8 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"May app na pumipigil sa kahilingan sa pahintulot kaya hindi ma-verify ang iyong sagot."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"I-tap ang isang feature para simulan itong gamitin:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Pumili ng mga feature na gagana sa pamamagitan ng button ng accessibility"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Pumili ng mga feature na gagana sa pamamagitan ng shortcut ng volume key"</string>
+    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
+    <skip />
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Na-off ang <xliff:g id="SERVICE_NAME">%s</xliff:g>"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"I-edit ang mga shortcut"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Tapos na"</string>

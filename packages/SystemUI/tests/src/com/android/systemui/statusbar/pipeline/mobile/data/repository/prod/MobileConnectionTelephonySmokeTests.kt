@@ -42,7 +42,6 @@ import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetwork
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SystemUiCarrierConfig
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SystemUiCarrierConfigTest
-import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.MobileTelephonyHelpers.getTelephonyCallbackForType
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.MobileTelephonyHelpers.signalStrength
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
@@ -97,7 +96,6 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 class MobileConnectionTelephonySmokeTests : SysuiTestCase() {
     private lateinit var underTest: MobileConnectionRepositoryImpl
-    private lateinit var connectionsRepo: FakeMobileConnectionsRepository
 
     private val flags =
         FakeFeatureFlagsClassic().also { it.set(Flags.ROAMING_INDICATOR_VIA_DISPLAY_INFO, true) }
@@ -122,12 +120,6 @@ class MobileConnectionTelephonySmokeTests : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         whenever(telephonyManager.subscriptionId).thenReturn(SUB_1_ID)
-
-        connectionsRepo =
-            FakeMobileConnectionsRepository(
-                mobileMappings,
-                tableLogger,
-            )
 
         underTest =
             MobileConnectionRepositoryImpl(

@@ -54,6 +54,7 @@ import android.os.ShellCallback;
 import android.os.ShellCommand;
 import android.os.SystemClock;
 import android.os.Temperature;
+import android.os.Trace;
 import android.util.ArrayMap;
 import android.util.EventLog;
 import android.util.Slog;
@@ -247,6 +248,7 @@ public class ThermalManagerService extends SystemService {
 
     private void setStatusLocked(int newStatus) {
         if (newStatus != mStatus) {
+            Trace.traceCounter(Trace.TRACE_TAG_POWER, "ThermalManagerService.status", newStatus);
             mStatus = newStatus;
             notifyStatusListenersLocked();
         }

@@ -17,7 +17,8 @@
 package com.android.wm.shell.scenarios
 
 import android.app.Instrumentation
-import android.platform.test.annotations.Postsubmit
+import android.tools.NavBar
+import android.tools.Rotation
 import android.tools.traces.parsers.WindowManagerStateHelper
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
@@ -26,18 +27,17 @@ import com.android.server.wm.flicker.helpers.DesktopModeAppHelper
 import com.android.server.wm.flicker.helpers.NonResizeableAppHelper
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import com.android.window.flags.Flags
+import com.android.wm.shell.Utils
 import org.junit.After
 import org.junit.Assume
 import org.junit.Before
+import org.junit.Ignore
+import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.junit.runners.BlockJUnit4ClassRunner
 
-@RunWith(BlockJUnit4ClassRunner::class)
-@Postsubmit
-open class SnapResizeAppWindowWithDrag
-@JvmOverloads
-constructor(private val toLeft: Boolean = true, private val isResizable: Boolean = true) {
+@Ignore("Test Base Class")
+abstract class SnapResizeAppWindowWithDrag
+constructor(private val toLeft: Boolean = true, isResizable: Boolean = true) {
 
     private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
     private val tapl = LauncherInstrumentation()
@@ -48,6 +48,10 @@ constructor(private val toLeft: Boolean = true, private val isResizable: Boolean
     } else {
         DesktopModeAppHelper(NonResizeableAppHelper(instrumentation))
     }
+
+    @Rule
+    @JvmField
+    val testSetupRule = Utils.testSetupRule(NavBar.MODE_GESTURAL, Rotation.ROTATION_0)
 
     @Before
     fun setup() {

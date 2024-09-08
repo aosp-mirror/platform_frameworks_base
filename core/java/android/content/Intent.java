@@ -86,6 +86,7 @@ import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.XmlUtils;
+import com.android.modules.expresslog.Counter;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -7650,13 +7651,6 @@ public class Intent implements Parcelable, Cloneable {
             | FLAG_GRANT_PREFIX_URI_PERMISSION;
 
     /**
-     * Flags that are not normally set by application code, but set for you by the system.
-     */
-    private static final int SYSTEM_ONLY_FLAGS = FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY
-            | FLAG_ACTIVITY_BROUGHT_TO_FRONT
-            | FLAG_RECEIVER_FROM_SHELL;
-
-    /**
      * Local flag indicating this instance was created by copy constructor.
      */
     private static final int LOCAL_FLAG_FROM_COPY = 1 << 0;
@@ -7708,11 +7702,6 @@ public class Intent implements Parcelable, Cloneable {
      */
     @TestApi
     public static final int EXTENDED_FLAG_FILTER_MISMATCH = 1 << 0;
-
-    /**
-     * Extended flags that are not normally set by application code, but set for you by the system.
-     */
-    private static final int SYSTEM_ONLY_EXTENDED_FLAGS = EXTENDED_FLAG_FILTER_MISMATCH;
 
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
@@ -12657,28 +12646,6 @@ public class Intent implements Parcelable, Cloneable {
         }
     }
 
-    /**
-     * Prepare this {@link Intent} to enter system_server.
-     *
-     * @hide
-     */
-    public void prepareToEnterSystemServer() {
-        // Refuse possible leaked file descriptors
-        if (hasFileDescriptors()) {
-            throw new IllegalArgumentException("File descriptors passed in Intent");
-        }
-        // These flags are set only by the system, and should be stripped out as soon as the intent
-        // is received by system_server from the caller so it can be properly updated later.
-        removeFlags(SYSTEM_ONLY_FLAGS);
-        removeExtendedFlags(SYSTEM_ONLY_EXTENDED_FLAGS);
-        if (mOriginalIntent != null) {
-            mOriginalIntent.prepareToEnterSystemServer();
-        }
-        if (mSelector != null) {
-            mSelector.prepareToEnterSystemServer();
-        }
-    }
-
     /** @hide */
     public boolean hasWebURI() {
         if (getData() == null) {
@@ -12839,6 +12806,8 @@ public class Intent implements Parcelable, Cloneable {
                             new ClipData.Item(text, htmlText, null, stream));
                     setClipData(clipData);
                     if (stream != null) {
+                        logCounterIfFlagsMissing(FLAG_GRANT_READ_URI_PERMISSION,
+                                "intents.value_explicit_uri_grant_for_send_action");
                         addFlags(FLAG_GRANT_READ_URI_PERMISSION);
                     }
                     return true;
@@ -12880,6 +12849,8 @@ public class Intent implements Parcelable, Cloneable {
 
                     setClipData(clipData);
                     if (streams != null) {
+                        logCounterIfFlagsMissing(FLAG_GRANT_READ_URI_PERMISSION,
+                                "intents.value_explicit_uri_grant_for_send_multiple_action");
                         addFlags(FLAG_GRANT_READ_URI_PERMISSION);
                     }
                     return true;
@@ -12899,12 +12870,22 @@ public class Intent implements Parcelable, Cloneable {
                 putExtra(MediaStore.EXTRA_OUTPUT, output);
 
                 setClipData(ClipData.newRawUri("", output));
+
+                logCounterIfFlagsMissing(
+                        FLAG_GRANT_WRITE_URI_PERMISSION | FLAG_GRANT_READ_URI_PERMISSION,
+                        "intents.value_explicit_uri_grant_for_image_capture_action");
                 addFlags(FLAG_GRANT_WRITE_URI_PERMISSION|FLAG_GRANT_READ_URI_PERMISSION);
                 return true;
             }
         }
 
         return false;
+    }
+
+    private void logCounterIfFlagsMissing(int requiredFlags, String metricId) {
+        if ((getFlags() & requiredFlags) != requiredFlags) {
+            Counter.logIncrement(metricId);
+        }
     }
 
     @android.ravenwood.annotation.RavenwoodThrow

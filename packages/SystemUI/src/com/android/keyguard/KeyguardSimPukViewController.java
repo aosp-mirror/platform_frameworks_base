@@ -96,11 +96,12 @@ public class KeyguardSimPukViewController
             EmergencyButtonController emergencyButtonController, FeatureFlags featureFlags,
             SelectedUserInteractor selectedUserInteractor,
             KeyguardKeyboardInteractor keyguardKeyboardInteractor,
-            @Nullable MSDLPlayer msdlPlayer) {
+            @Nullable MSDLPlayer msdlPlayer,
+            UserActivityNotifier userActivityNotifier) {
         super(view, keyguardUpdateMonitor, securityMode, lockPatternUtils, keyguardSecurityCallback,
                 messageAreaControllerFactory, latencyTracker, liftToActivateListener,
                 emergencyButtonController, falsingCollector, featureFlags, selectedUserInteractor,
-                keyguardKeyboardInteractor, msdlPlayer);
+                keyguardKeyboardInteractor, msdlPlayer, userActivityNotifier);
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mTelephonyManager = telephonyManager;
         mSimImageView = mView.findViewById(R.id.keyguard_sim);

@@ -16,6 +16,8 @@
 
 package android.tracing.perfetto;
 
+import android.annotation.Nullable;
+import android.annotation.NonNull;
 import android.util.proto.ProtoInputStream;
 
 /**
@@ -41,6 +43,7 @@ public abstract class DataSource<DataSourceInstanceType extends DataSourceInstan
      * @param configStream A ProtoInputStream to read the tracing instance's config.
      * @return A new data source instance setup with the provided config.
      */
+    @NonNull
     public abstract DataSourceInstanceType createInstance(
             ProtoInputStream configStream, int instanceIndex);
 
@@ -102,8 +105,8 @@ public abstract class DataSource<DataSourceInstanceType extends DataSourceInstan
     /**
      * Override this method to create a custom TlsState object for your DataSource. A new instance
      * will be created per trace instance per thread.
-     *
      */
+    @Nullable
     public TlsStateType createTlsState(CreateTlsStateArgs<DataSourceInstanceType> args) {
         return null;
     }
@@ -112,6 +115,7 @@ public abstract class DataSource<DataSourceInstanceType extends DataSourceInstan
      * Override this method to create and use a custom IncrementalState object for your DataSource.
      *
      */
+    @Nullable
     public IncrementalStateType createIncrementalState(
             CreateIncrementalStateArgs<DataSourceInstanceType> args) {
         return null;
@@ -141,6 +145,7 @@ public abstract class DataSource<DataSourceInstanceType extends DataSourceInstan
      * @return The DataSourceInstance at index instanceIndex.
      *         Null if the datasource instance at the requested index doesn't exist.
      */
+    @Nullable
     public DataSourceInstanceType getDataSourceInstanceLocked(int instanceIndex) {
         return (DataSourceInstanceType) nativeGetPerfettoInstanceLocked(mNativeObj, instanceIndex);
     }
@@ -159,6 +164,7 @@ public abstract class DataSource<DataSourceInstanceType extends DataSourceInstan
      * @param rawConfig byte array of the PerfettoConfig encoded proto.
      * @return A new Java DataSourceInstance object.
      */
+    @NonNull
     private DataSourceInstanceType createInstance(byte[] rawConfig, int instanceIndex) {
         final ProtoInputStream inputStream = new ProtoInputStream(rawConfig);
         return this.createInstance(inputStream, instanceIndex);

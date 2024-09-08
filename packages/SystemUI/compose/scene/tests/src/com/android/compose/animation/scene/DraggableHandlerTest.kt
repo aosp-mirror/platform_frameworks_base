@@ -41,9 +41,9 @@ import com.android.compose.animation.scene.content.state.TransitionState.Transit
 import com.android.compose.animation.scene.subjects.assertThat
 import com.android.compose.test.MonotonicClockTestScope
 import com.android.compose.test.runMonotonicClockTest
+import com.android.compose.test.transition
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.launch
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -132,7 +132,10 @@ class DraggableHandlerTest {
                     swipeSourceDetector = DefaultEdgeDetector,
                     transitionInterceptionThreshold = transitionInterceptionThreshold,
                     builder = scenesBuilder,
-                    coroutineScope = testScope,
+
+                    // Use testScope and not backgroundScope here because backgroundScope does not
+                    // work well with advanceUntilIdle(), which is used by some tests.
+                    animationScope = testScope,
                 )
                 .apply { setContentsAndLayoutTargetSizeForTest(LAYOUT_SIZE) }
 
@@ -197,6 +200,8 @@ class DraggableHandlerTest {
             fromScene: SceneKey? = null,
             toScene: SceneKey? = null,
             progress: Float? = null,
+            previewProgress: Float? = null,
+            isInPreviewStage: Boolean? = null,
             isUserInputOngoing: Boolean? = null
         ): Transition {
             val transition = assertThat(transitionState).isSceneTransition()
@@ -204,6 +209,10 @@ class DraggableHandlerTest {
             fromScene?.let { assertThat(transition).hasFromScene(it) }
             toScene?.let { assertThat(transition).hasToScene(it) }
             progress?.let { assertThat(transition).hasProgress(it) }
+            previewProgress?.let { assertThat(transition).hasPreviewProgress(it) }
+            isInPreviewStage?.let {
+                assertThat(transition).run { if (it) isInPreviewStage() else isNotInPreviewStage() }
+            }
             isUserInputOngoing?.let { assertThat(transition).hasIsUserInputOngoing(it) }
             return transition
         }
@@ -301,8 +310,20 @@ class DraggableHandlerTest {
         runMonotonicClockTest {
             val testGestureScope = TestGestureScope(testScope = this)
 
-            // run the test
-            testGestureScope.block()
+            try {
+                // Run the test.
+                testGestureScope.block()
+            } finally {
+                // Make sure we stop the last transition if it was not explicitly stopped, otherwise
+                // tests will time out after 10s given that the transitions are now started on the
+                // test scope. We don't use backgroundScope when starting the test transitions
+                // because coroutines started on the background scope don't work well with
+                // advanceUntilIdle(), which is used in a few tests.
+                if (testGestureScope.draggableHandler.isDrivingTransition) {
+                    (testGestureScope.layoutState.transitionState as Transition)
+                        .freezeAndAnimateToCurrentState()
+                }
+            }
         }
     }
 
@@ -336,6 +357,32 @@ class DraggableHandlerTest {
         advanceUntilIdle()
         assertIdle(currentScene = SceneA)
     }
+
+    @Test
+    fun onDragStoppedAfterDrag_velocityLowerThanThreshold_remainSameScene_previewAnimated() =
+        runGestureTest {
+            layoutState.transitions = transitions {
+                // set a preview for the transition
+                from(SceneA, to = SceneC, preview = {}) {}
+            }
+            val dragController = onDragStarted(overSlop = down(fractionOfScreen = 0.1f))
+            assertTransition(currentScene = SceneA)
+
+            dragController.onDragStopped(velocity = velocityThreshold - 0.01f)
+            runCurrent()
+
+            // verify that transition remains in preview stage and animates back to fromScene
+            assertTransition(
+                currentScene = SceneA,
+                isInPreviewStage = true,
+                previewProgress = 0.1f,
+                progress = 0f
+            )
+
+            // wait for the stop animation
+            advanceUntilIdle()
+            assertIdle(currentScene = SceneA)
+        }
 
     @Test
     fun onDragStoppedAfterDrag_velocityAtLeastThreshold_goToNextScene() = runGestureTest {
@@ -940,7 +987,7 @@ class DraggableHandlerTest {
     }
 
     @Test
-    fun finish() = runGestureTest {
+    fun freezeAndAnimateToCurrentState() = runGestureTest {
         // Start at scene C.
         navigateToSceneC()
 
@@ -952,35 +999,25 @@ class DraggableHandlerTest {
         // The current transition can be intercepted.
         assertThat(draggableHandler.shouldImmediatelyIntercept(middle)).isTrue()
 
-        // Finish the transition.
+        // Freeze the transition.
         val transition = transitionState as Transition
-        val job = transition.finish()
+        transition.freezeAndAnimateToCurrentState()
         assertTransition(isUserInputOngoing = false)
-
-        // The current transition can not be intercepted anymore.
-        assertThat(draggableHandler.shouldImmediatelyIntercept(middle)).isFalse()
-
-        // Calling finish() multiple times returns the same Job.
-        assertThat(transition.finish()).isSameInstanceAs(job)
-        assertThat(transition.finish()).isSameInstanceAs(job)
-        assertThat(transition.finish()).isSameInstanceAs(job)
-
-        // We can join the job to wait for the animation to end.
-        assertTransition()
-        job.join()
+        advanceUntilIdle()
         assertIdle(SceneC)
     }
 
     @Test
-    fun finish_cancelled() = runGestureTest {
-        // Swipe up from the middle to transition to scene B.
-        val middle = Offset(SCREEN_SIZE / 2f, SCREEN_SIZE / 2f)
-        onDragStarted(startedPosition = middle, overSlop = up(0.1f))
-        assertTransition(fromScene = SceneA, toScene = SceneB)
+    fun interruptedTransitionCanNotBeImmediatelyIntercepted() = runGestureTest {
+        assertThat(draggableHandler.shouldImmediatelyIntercept(startedPosition = null)).isFalse()
+        onDragStarted(overSlop = up(0.1f))
+        assertThat(draggableHandler.shouldImmediatelyIntercept(startedPosition = null)).isTrue()
 
-        // Finish the transition and cancel the returned job.
-        (transitionState as Transition).finish().cancelAndJoin()
-        assertIdle(SceneA)
+        layoutState.startTransitionImmediately(
+            animationScope = testScope.backgroundScope,
+            transition(SceneA, SceneB)
+        )
+        assertThat(draggableHandler.shouldImmediatelyIntercept(startedPosition = null)).isFalse()
     }
 
     @Test

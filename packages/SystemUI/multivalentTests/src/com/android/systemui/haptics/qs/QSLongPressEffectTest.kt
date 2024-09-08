@@ -23,7 +23,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ActivityTransitionAnimator
-import com.android.systemui.haptics.vibratorHelper
+import com.android.systemui.haptics.fakeVibratorHelper
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.core.FakeLogBuffer
 import com.android.systemui.qs.qsTileFactory
@@ -50,7 +50,7 @@ class QSLongPressEffectTest : SysuiTestCase() {
 
     @Rule @JvmField val mMockitoRule: MockitoRule = MockitoJUnit.rule()
     private val kosmos = testKosmos()
-    private val vibratorHelper = kosmos.vibratorHelper
+    private val vibratorHelper = kosmos.fakeVibratorHelper
     private val qsTile = kosmos.qsTileFactory.createTile("Test Tile")
     @Mock private lateinit var callback: QSLongPressEffect.Callback
     @Mock private lateinit var controller: ActivityTransitionAnimator.Controller

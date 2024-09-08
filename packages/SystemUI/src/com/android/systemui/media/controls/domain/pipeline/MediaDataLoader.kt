@@ -54,10 +54,10 @@ import com.android.systemui.media.controls.shared.model.MediaAction
 import com.android.systemui.media.controls.shared.model.MediaButton
 import com.android.systemui.media.controls.shared.model.MediaData
 import com.android.systemui.media.controls.shared.model.MediaDeviceData
+import com.android.systemui.media.controls.shared.model.MediaNotificationAction
 import com.android.systemui.media.controls.util.MediaControllerFactory
 import com.android.systemui.media.controls.util.MediaDataUtils
 import com.android.systemui.media.controls.util.MediaFlags
-import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.NotificationMediaManager.isPlayingState
 import com.android.systemui.statusbar.notification.row.HybridGroupManager
@@ -80,7 +80,6 @@ constructor(
     @Application val context: Context,
     @Main val mainDispatcher: CoroutineDispatcher,
     @Background val backgroundScope: CoroutineScope,
-    private val activityStarter: ActivityStarter,
     private val mediaControllerFactory: MediaControllerFactory,
     private val mediaFlags: MediaFlags,
     private val imageLoader: ImageLoader,
@@ -209,15 +208,14 @@ constructor(
             val device: MediaDeviceData? = getDeviceInfoForRemoteCast(key, sbn)
 
             // Control buttons
-            // If flag is enabled and controller has a PlaybackState, create actions from session
-            // info
+            // If controller has a PlaybackState, create actions from session info
             // Otherwise, use the notification actions
-            var actionIcons: List<MediaAction> = emptyList()
+            var actionIcons: List<MediaNotificationAction> = emptyList()
             var actionsToShowCollapsed: List<Int> = emptyList()
             val semanticActions = createActionsFromState(sbn.packageName, mediaController, sbn.user)
             logD(TAG) { "Semantic actions: $semanticActions" }
             if (semanticActions == null) {
-                val actions = createActionsFromNotification(context, activityStarter, sbn)
+                val actions = createActionsFromNotification(context, sbn)
                 actionIcons = actions.first
                 actionsToShowCollapsed = actions.second
                 logD(TAG) { "[!!] Semantic actions: $semanticActions" }
@@ -329,7 +327,7 @@ constructor(
                 artist = desc.subtitle,
                 song = desc.title,
                 artworkIcon = artworkIcon,
-                actionIcons = listOf(mediaAction),
+                actionIcons = listOf(),
                 actionsToShowInCompact = listOf(0),
                 semanticActions = MediaButton(playOrPause = mediaAction),
                 token = token,
@@ -514,7 +512,7 @@ constructor(
         val artist: CharSequence?,
         val song: CharSequence?,
         val artworkIcon: Icon?,
-        val actionIcons: List<MediaAction>,
+        val actionIcons: List<MediaNotificationAction>,
         val actionsToShowInCompact: List<Int>,
         val semanticActions: MediaButton?,
         val token: MediaSession.Token?,

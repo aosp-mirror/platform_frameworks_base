@@ -38,12 +38,15 @@ import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalViewConfiguration
+import androidx.compose.ui.test.TouchInjectionScope
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Velocity
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
+import kotlin.properties.Delegates
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.isActive
 import org.junit.Rule
@@ -718,5 +721,89 @@ class MultiPointerDraggableTest {
         stopDrag()
         assertThat(availableOnPreFling).isEqualTo(consumedOnDragStop)
         assertThat(availableOnPostFling).isEqualTo(0f)
+    }
+
+    @Test
+    fun multiPointerOnStopVelocity() {
+        val size = 200f
+        val middle = Offset(size / 2f, size / 2f)
+
+        var stopped = false
+        var lastVelocity = -1f
+        var touchSlop = 0f
+        var density: Density by Delegates.notNull()
+        rule.setContent {
+            touchSlop = LocalViewConfiguration.current.touchSlop
+            density = LocalDensity.current
+            Box(
+                Modifier.size(with(density) { Size(size, size).toDpSize() })
+                    .nestedScrollDispatcher()
+                    .multiPointerDraggable(
+                        orientation = Orientation.Vertical,
+                        enabled = { true },
+                        startDragImmediately = { false },
+                        onDragStarted = { _, _, _ ->
+                            SimpleDragController(
+                                onDrag = { /* do nothing */ },
+                                onStop = {
+                                    stopped = true
+                                    lastVelocity = it
+                                },
+                            )
+                        },
+                        dispatcher = defaultDispatcher,
+                    )
+            )
+        }
+
+        var eventMillis: Long by Delegates.notNull()
+        rule.onRoot().performTouchInput { eventMillis = eventPeriodMillis }
+
+        fun swipeGesture(block: TouchInjectionScope.() -> Unit) {
+            stopped = false
+            rule.onRoot().performTouchInput {
+                down(middle)
+                block()
+                up()
+            }
+            assertThat(stopped).isEqualTo(true)
+        }
+
+        val shortDistance = touchSlop / 2f
+        swipeGesture {
+            moveBy(delta = Offset(0f, shortDistance), delayMillis = eventMillis)
+            moveBy(delta = Offset(0f, shortDistance), delayMillis = eventMillis)
+        }
+        assertThat(lastVelocity).isGreaterThan(0f)
+        assertThat(lastVelocity).isWithin(1f).of((shortDistance / eventMillis) * 1000f)
+
+        val longDistance = touchSlop * 4f
+        swipeGesture {
+            moveBy(delta = Offset(0f, longDistance), delayMillis = eventMillis)
+            moveBy(delta = Offset(0f, longDistance), delayMillis = eventMillis)
+        }
+        assertThat(lastVelocity).isGreaterThan(0f)
+        assertThat(lastVelocity).isWithin(1f).of((longDistance / eventMillis) * 1000f)
+
+        rule.onRoot().performTouchInput {
+            down(pointerId = 0, position = middle)
+            down(pointerId = 1, position = middle)
+            moveBy(pointerId = 0, delta = Offset(0f, longDistance), delayMillis = eventMillis)
+            moveBy(pointerId = 0, delta = Offset(0f, longDistance), delayMillis = eventMillis)
+            // The velocity should be:
+            // (longDistance / eventMillis) pixels/ms
+
+            // 1 pointer left, the second one
+            up(pointerId = 0)
+
+            // After a few events the velocity should be:
+            // (shortDistance / eventMillis) pixels/ms
+            repeat(10) {
+                moveBy(pointerId = 1, delta = Offset(0f, shortDistance), delayMillis = eventMillis)
+            }
+            up(pointerId = 1)
+        }
+        assertThat(lastVelocity).isGreaterThan(0f)
+        assertThat(lastVelocity).isWithin(1f).of((shortDistance / eventMillis) * 1000f)
     }
 }

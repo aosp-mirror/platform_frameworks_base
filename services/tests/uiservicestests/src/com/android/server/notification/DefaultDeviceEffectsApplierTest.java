@@ -46,6 +46,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.hardware.display.ColorDisplayManager;
 import android.os.PowerManager;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.service.notification.ZenDeviceEffects;
 import android.testing.TestableContext;
@@ -63,6 +64,9 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 @RunWith(TestParameterInjector.class)
 public class DefaultDeviceEffectsApplierTest {
@@ -89,6 +93,8 @@ public class DefaultDeviceEffectsApplierTest {
 
         mApplier = new DefaultDeviceEffectsApplier(mContext);
         verify(mWallpaperManager).isWallpaperSupported();
+
+        ZenLog.clear();
     }
 
     @Test
@@ -107,6 +113,41 @@ public class DefaultDeviceEffectsApplierTest {
         verify(mColorDisplayManager).setSaturationLevel(eq(0));
         verify(mWallpaperManager).setWallpaperDimAmount(eq(0.6f));
         verify(mUiModeManager).setAttentionModeThemeOverlay(eq(MODE_ATTENTION_THEME_OVERLAY_NIGHT));
+    }
+
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_MODES_API)
+    public void apply_logsToZenLog() {
+        when(mPowerManager.isInteractive()).thenReturn(true);
+        ArgumentCaptor<BroadcastReceiver> broadcastReceiverCaptor =
+                ArgumentCaptor.forClass(BroadcastReceiver.class);
+        ArgumentCaptor<IntentFilter> intentFilterCaptor =
+                ArgumentCaptor.forClass(IntentFilter.class);
+
+        ZenDeviceEffects effects = new ZenDeviceEffects.Builder()
+                .setShouldDisplayGrayscale(true)
+                .setShouldUseNightMode(true)
+                .build();
+        mApplier.apply(effects, ORIGIN_APP);
+
+        String zenLog = getZenLog();
+        assertThat(zenLog).contains("apply_device_effect: displayGrayscale -> true");
+        assertThat(zenLog).contains("schedule_device_effect: nightMode -> true");
+        assertThat(zenLog).doesNotContain("apply_device_effect: nightMode");
+
+        verify(mContext).registerReceiver(broadcastReceiverCaptor.capture(),
+                intentFilterCaptor.capture(), anyInt());
+        BroadcastReceiver screenOffReceiver = broadcastReceiverCaptor.getValue();
+        screenOffReceiver.onReceive(mContext, new Intent(Intent.ACTION_SCREEN_OFF));
+
+        zenLog = getZenLog();
+        assertThat(zenLog).contains("apply_device_effect: nightMode -> true");
+    }
+
+    private static String getZenLog() {
+        StringWriter zenLogWriter = new StringWriter();
+        ZenLog.dump(new PrintWriter(zenLogWriter), "");
+        return zenLogWriter.toString();
     }
 
     @Test

@@ -60,6 +60,9 @@ public class BubbleTaskViewHelper {
 
         /** Called when back is pressed on the task root. */
         void onBackPressed();
+
+        /** Called when task removal has started. */
+        void onTaskRemovalStarted();
     }
 
     private final Context mContext;
@@ -190,6 +193,7 @@ public class BubbleTaskViewHelper {
                 ((ViewGroup) mParentView).removeView(mTaskView);
                 mTaskView = null;
             }
+            mListener.onTaskRemovalStarted();
         }
 
         @Override

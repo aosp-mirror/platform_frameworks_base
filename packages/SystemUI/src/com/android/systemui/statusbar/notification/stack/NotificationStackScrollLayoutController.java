@@ -1275,6 +1275,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     }
 
     public void setQsExpansionFraction(float expansionFraction) {
+        SceneContainerFlag.assertInLegacyMode();
         mView.setQsExpansionFraction(expansionFraction);
     }
 

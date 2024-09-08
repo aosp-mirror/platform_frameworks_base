@@ -16,8 +16,11 @@
 
 package android.window;
 
+import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import java.util.ArrayList;
 
 /**
  * Object that describes how to run a remote back animation.
@@ -26,6 +29,7 @@ import android.os.Parcelable;
  */
 public class BackAnimationAdapter implements Parcelable {
     private final IBackAnimationRunner mRunner;
+    private int[] mSupportedAnimators;
 
     public BackAnimationAdapter(IBackAnimationRunner runner) {
         mRunner = runner;
@@ -33,10 +37,21 @@ public class BackAnimationAdapter implements Parcelable {
 
     public BackAnimationAdapter(Parcel in) {
         mRunner = IBackAnimationRunner.Stub.asInterface(in.readStrongBinder());
+        mSupportedAnimators = new int[in.readInt()];
+        in.readIntArray(mSupportedAnimators);
     }
 
     public IBackAnimationRunner getRunner() {
         return mRunner;
+    }
+
+    /** Update the latest animators in the system. */
+    public void updateSupportedAnimators(@NonNull ArrayList<Integer> animators) {
+        final int size = animators.size();
+        mSupportedAnimators = new int[size];
+        for (int i = size - 1; i >= 0; --i) {
+            mSupportedAnimators[i] = animators.get(i);
+        }
     }
 
     @Override
@@ -47,6 +62,8 @@ public class BackAnimationAdapter implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeStrongInterface(mRunner);
+        dest.writeInt(mSupportedAnimators.length);
+        dest.writeIntArray(mSupportedAnimators);
     }
 
     public static final @android.annotation.NonNull Creator<BackAnimationAdapter> CREATOR =
@@ -59,4 +76,19 @@ public class BackAnimationAdapter implements Parcelable {
             return new BackAnimationAdapter[size];
         }
     };
+
+    /**
+     * Check if the back type is animatable.
+     */
+    public boolean isAnimatable(@BackNavigationInfo.BackTargetType int backType) {
+        if (mSupportedAnimators == null) {
+            return false;
+        }
+        for (int i = mSupportedAnimators.length - 1; i >= 0; --i) {
+            if (backType == mSupportedAnimators[i]) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

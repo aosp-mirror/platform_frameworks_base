@@ -318,16 +318,13 @@ final class DisplayDeviceInfo {
      */
     public Display.HdrCapabilities hdrCapabilities;
 
-    /** When true, all HDR capabilities are hidden from public APIs */
-    public boolean isForceSdr;
-
     /**
      * Indicates whether this display supports Auto Low Latency Mode.
      */
     public boolean allmSupported;
 
     /**
-     * Indicates whether this display supports Game content type.
+     * Indicates whether this display suppors Game content type.
      */
     public boolean gameContentTypeSupported;
 
@@ -519,7 +516,6 @@ final class DisplayDeviceInfo {
                 || !Arrays.equals(supportedModes, other.supportedModes)
                 || !Arrays.equals(supportedColorModes, other.supportedColorModes)
                 || !Objects.equals(hdrCapabilities, other.hdrCapabilities)
-                || isForceSdr != other.isForceSdr
                 || allmSupported != other.allmSupported
                 || gameContentTypeSupported != other.gameContentTypeSupported
                 || densityDpi != other.densityDpi
@@ -564,7 +560,6 @@ final class DisplayDeviceInfo {
         colorMode = other.colorMode;
         supportedColorModes = other.supportedColorModes;
         hdrCapabilities = other.hdrCapabilities;
-        isForceSdr = other.isForceSdr;
         allmSupported = other.allmSupported;
         gameContentTypeSupported = other.gameContentTypeSupported;
         densityDpi = other.densityDpi;
@@ -608,7 +603,6 @@ final class DisplayDeviceInfo {
         sb.append(", colorMode ").append(colorMode);
         sb.append(", supportedColorModes ").append(Arrays.toString(supportedColorModes));
         sb.append(", hdrCapabilities ").append(hdrCapabilities);
-        sb.append(", isForceSdr ").append(isForceSdr);
         sb.append(", allmSupported ").append(allmSupported);
         sb.append(", gameContentTypeSupported ").append(gameContentTypeSupported);
         sb.append(", density ").append(densityDpi);

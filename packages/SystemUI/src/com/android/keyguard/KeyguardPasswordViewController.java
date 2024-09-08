@@ -138,10 +138,12 @@ public class KeyguardPasswordViewController
             FeatureFlags featureFlags,
             SelectedUserInteractor selectedUserInteractor,
             KeyguardKeyboardInteractor keyguardKeyboardInteractor,
-            @Nullable MSDLPlayer msdlPlayer) {
+            @Nullable MSDLPlayer msdlPlayer,
+            UserActivityNotifier userActivityNotifier) {
         super(view, keyguardUpdateMonitor, securityMode, lockPatternUtils, keyguardSecurityCallback,
                 messageAreaControllerFactory, latencyTracker, falsingCollector,
-                emergencyButtonController, featureFlags, selectedUserInteractor, msdlPlayer);
+                emergencyButtonController, featureFlags, selectedUserInteractor, msdlPlayer,
+                userActivityNotifier);
         mKeyguardSecurityCallback = keyguardSecurityCallback;
         mInputMethodManager = inputMethodManager;
         mPostureController = postureController;

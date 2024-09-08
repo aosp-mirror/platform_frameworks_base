@@ -54,11 +54,11 @@ import kotlinx.coroutines.flow.collectLatest
  * containers.
  *
  * @param viewModel The UI state holder for this container.
- * @param sceneByKey Mapping of [ComposableScene] by [SceneKey], ordered by z-order such that the
- *   last scene is rendered on top of all other scenes. It's critical that this map contains exactly
- *   and only the scenes on this container. In other words: (a) there should be no scene in this map
- *   that is not in the configuration for this container and (b) all scenes in the configuration
- *   must have entries in this map.
+ * @param sceneByKey Mapping of [Scene] by [SceneKey], ordered by z-order such that the last scene
+ *   is rendered on top of all other scenes. It's critical that this map contains exactly and only
+ *   the scenes on this container. In other words: (a) there should be no scene in this map that is
+ *   not in the configuration for this container and (b) all scenes in the configuration must have
+ *   entries in this map.
  * @param overlayByKey Mapping of [Overlay] by [OverlayKey], ordered by z-order such that the last
  *   overlay is rendered on top of all other overlays. It's critical that this map contains exactly
  *   and only the overlays on this container. In other words: (a) there should be no overlay in this
@@ -69,7 +69,7 @@ import kotlinx.coroutines.flow.collectLatest
 @Composable
 fun SceneContainer(
     viewModel: SceneContainerViewModel,
-    sceneByKey: Map<SceneKey, ComposableScene>,
+    sceneByKey: Map<SceneKey, Scene>,
     overlayByKey: Map<OverlayKey, Overlay>,
     initialSceneKey: SceneKey,
     dataSourceDelegator: SceneDataSourceDelegator,
@@ -84,7 +84,6 @@ fun SceneContainer(
             enableInterruptions = false,
         )
     }
-    val currentSceneKey = state.transitionState.currentScene
 
     DisposableEffect(state) {
         val dataSource = SceneTransitionLayoutDataSource(state, coroutineScope)
@@ -97,19 +96,26 @@ fun SceneContainer(
         onDispose { viewModel.setTransitionState(null) }
     }
 
+    val actionableContentKey =
+        viewModel.getActionableContentKey(state.currentScene, state.currentOverlays, overlayByKey)
     val userActionsByContentKey: MutableMap<ContentKey, Map<UserAction, UserActionResult>> =
         remember {
             mutableStateMapOf()
         }
-    // TODO(b/359173565): Add overlay user actions when the API is final.
-    LaunchedEffect(currentSceneKey) {
+    LaunchedEffect(actionableContentKey) {
         try {
-            sceneByKey[currentSceneKey]?.destinationScenes?.collectLatest { userActions ->
-                userActionsByContentKey[currentSceneKey] =
+            val actionableContent: ActionableContent =
+                checkNotNull(
+                    overlayByKey[actionableContentKey] ?: sceneByKey[actionableContentKey]
+                ) {
+                    "invalid ContentKey: $actionableContentKey"
+                }
+            actionableContent.userActions.collectLatest { userActions ->
+                userActionsByContentKey[actionableContentKey] =
                     viewModel.resolveSceneFamilies(userActions)
             }
         } finally {
-            userActionsByContentKey[currentSceneKey] = emptyMap()
+            userActionsByContentKey[actionableContentKey] = emptyMap()
         }
     }
 
@@ -123,29 +129,32 @@ fun SceneContainer(
             },
     ) {
         SceneTransitionLayout(state = state, modifier = modifier.fillMaxSize()) {
-            sceneByKey.forEach { (sceneKey, composableScene) ->
+            sceneByKey.forEach { (sceneKey, scene) ->
                 scene(
                     key = sceneKey,
                     userActions = userActionsByContentKey.getOrDefault(sceneKey, emptyMap())
                 ) {
                     // Activate the scene.
-                    LaunchedEffect(composableScene) { composableScene.activate() }
+                    LaunchedEffect(scene) { scene.activate() }
 
                     // Render the scene.
-                    with(composableScene) {
+                    with(scene) {
                         this@scene.Content(
                             modifier = Modifier.element(sceneKey.rootElementKey).fillMaxSize(),
                         )
                     }
                 }
             }
-            overlayByKey.forEach { (overlayKey, composableOverlay) ->
+            overlayByKey.forEach { (overlayKey, overlay) ->
                 overlay(
                     key = overlayKey,
                     userActions = userActionsByContentKey.getOrDefault(overlayKey, emptyMap())
                 ) {
+                    // Activate the overlay.
+                    LaunchedEffect(overlay) { overlay.activate() }
+
                     // Render the overlay.
-                    with(composableOverlay) { this@overlay.Content(Modifier) }
+                    with(overlay) { this@overlay.Content(Modifier) }
                 }
             }
         }

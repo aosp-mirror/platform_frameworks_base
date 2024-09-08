@@ -637,10 +637,13 @@ flag {
 }
 
 flag {
-   name: "smartspace_remoteviews_rendering"
+   name: "smartspace_remoteviews_rendering_fix"
    namespace: "systemui"
    description: "Indicate Smartspace RemoteViews rendering"
    bug: "326292691"
+   metadata {
+     purpose: PURPOSE_BUGFIX
+   }
 }
 
 flag {
@@ -648,6 +651,13 @@ flag {
    namespace: "systemui"
    description: "Indicate Smartspace lockscreen viewmodel"
    bug: "331451011"
+}
+
+flag {
+    name: "smartspace_viewpager2"
+    namespace: "systemui"
+    description: "Use viewpager2 in Smartspace"
+    bug: "259566300"
 }
 
 flag {
@@ -1330,15 +1340,6 @@ flag {
 }
 
 flag {
-   name: "lockscreen_preview_renderer_create_on_main_thread"
-   namespace: "systemui"
-   description: "Force preview renderer to be created on the main thread"
-   bug: "343732179"
-   metadata {
-        purpose: PURPOSE_BUGFIX
-   }
-}
-flag {
    name: "classic_flags_multi_user"
    namespace: "systemui"
    description: "Make the classic feature flag loading multi user aware."
@@ -1356,13 +1357,6 @@ flag {
 }
 
 flag {
-    name: "new_picker_ui"
-    namespace: "systemui"
-    description: "Enables the BC25 design of the customization picker UI."
-    bug: "339081035"
-}
-
-flag {
   namespace: "systemui"
   name: "settings_ext_register_content_observer_on_bg_thread"
   description: "Register content observer in callback flow APIs on background thread in SettingsProxyExt."
@@ -1370,6 +1364,16 @@ flag {
   metadata {
     purpose: PURPOSE_BUGFIX
   }
+}
+
+flag {
+    name: "notify_password_text_view_user_activity_in_background"
+    namespace: "systemui"
+    description: "Decide whether to notify the user activity in password text view, to power manager in the background thread."
+    bug: "346882515"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {
@@ -1392,3 +1396,9 @@ flag {
     }
 }
 
+flag {
+   name: "non_touchscreen_devices_bypass_falsing"
+   namespace: "systemui"
+   description: "Allow non-touchscreen devices to bypass falsing"
+   bug: "319809270"
+}

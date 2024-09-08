@@ -269,8 +269,12 @@
     <string name="screenshot_detected_multiple_template"><xliff:g id="appName" example="Google Chrome">%1$s</xliff:g> and other open apps detected this screenshot.</string>
     <!-- Add to note button used in App Clips flow to return the saved screenshot image to notes app. [CHAR LIMIT=NONE] -->
     <string name="app_clips_save_add_to_note">Add to note</string>
+    <!-- A check box used in App Clips flow to return the captured backlink of the screenshotted app to notes app. [CHAR LIMIT=NONE] -->
     <string name="backlinks_include_link">Include link</string>
+    <!-- A label for backlinks app that is used if there are multiple backlinks with same app name. [CHAR LIMIT=NONE] -->
     <string name="backlinks_duplicate_label_format"><xliff:g id="appName" example="Google Chrome">%1$s</xliff:g> <xliff:g id="frequencyCount" example="(1)">(%2$d)</xliff:g></string>
+    <!-- An error message to inform user that capturing backlink from cross profile apps is not possible. [CHAR LIMIT=NONE] -->
+    <string name="backlinks_cross_profile_error">Links can\'t be added from other profiles</string>
 
     <!-- Notification title displayed for screen recording [CHAR LIMIT=50]-->
     <string name="screenrecord_title">Screen Recorder</string>
@@ -721,8 +725,8 @@
     <!-- QuickSettings: Do not disturb - Priority only [CHAR LIMIT=NONE] -->
     <!-- QuickSettings: Do not disturb - Alarms only [CHAR LIMIT=NONE] -->
     <!-- QuickSettings: Do not disturb - Total silence [CHAR LIMIT=NONE] -->
-    <!-- QuickSettings: Priority modes [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_modes_label">Priority modes</string>
+    <!-- QuickSettings: Modes [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_modes_label">Modes</string>
     <!-- QuickSettings: Bluetooth [CHAR LIMIT=NONE] -->
     <string name="quick_settings_bluetooth_label">Bluetooth</string>
     <!-- QuickSettings: Bluetooth (Multiple) [CHAR LIMIT=NONE] -->
@@ -1097,28 +1101,28 @@
     <!-- QuickStep: Accessibility to toggle overview [CHAR LIMIT=40] -->
     <string name="quick_step_accessibility_toggle_overview">Toggle Overview</string>
 
-    <!-- Priority modes dialog title [CHAR LIMIT=35] -->
-    <string name="zen_modes_dialog_title">Priority modes</string>
+    <!-- Modes dialog title [CHAR LIMIT=35] -->
+    <string name="zen_modes_dialog_title">Modes</string>
 
-    <!-- Priority modes dialog confirmation button [CHAR LIMIT=15] -->
+    <!-- Modes dialog confirmation button [CHAR LIMIT=15] -->
     <string name="zen_modes_dialog_done">Done</string>
 
-    <!-- Priority modes dialog settings shortcut button [CHAR LIMIT=15] -->
+    <!-- Modes dialog settings shortcut button [CHAR LIMIT=15] -->
     <string name="zen_modes_dialog_settings">Settings</string>
 
-    <!-- Priority modes: label for an active mode [CHAR LIMIT=35] -->
+    <!-- Modes: label for an active mode [CHAR LIMIT=35] -->
     <string name="zen_mode_on">On</string>
 
-    <!-- Priority modes: label for an active mode, with details [CHAR LIMIT=10] -->
+    <!-- Modes: label for an active mode, with details [CHAR LIMIT=10] -->
     <string name="zen_mode_on_with_details">On • <xliff:g id="trigger_description" example="Mon-Fri, 23:00-7:00">%1$s</xliff:g></string>
 
-    <!-- Priority modes: label for an inactive mode [CHAR LIMIT=35] -->
+    <!-- Modes: label for an inactive mode [CHAR LIMIT=35] -->
     <string name="zen_mode_off">Off</string>
 
-    <!-- Priority modes: label for a mode that needs to be set up [CHAR LIMIT=35] -->
+    <!-- Modes: label for a mode that needs to be set up [CHAR LIMIT=35] -->
     <string name="zen_mode_set_up">Set up</string>
 
-    <!-- Priority modes: label for a mode that cannot be manually turned on [CHAR LIMIT=35] -->
+    <!-- Modes: label for a mode that cannot be manually turned on [CHAR LIMIT=35] -->
     <string name="zen_mode_no_manual_invocation">Manage in settings</string>
 
     <string name="zen_mode_active_modes">
@@ -3698,6 +3702,22 @@
          [CHAR LIMIT=NONE]
           -->
     <string name="shortcut_helper_key_combinations_or_separator">or</string>
+
+    <!-- Keyboard touchpad tutorial scheduler-->
+    <!-- Notification title for launching keyboard tutorial [CHAR_LIMIT=100] -->
+    <string name="launch_keyboard_tutorial_notification_title">Navigate using your keyboard</string>
+    <!-- Notification text for launching keyboard tutorial [CHAR_LIMIT=100] -->
+    <string name="launch_keyboard_tutorial_notification_content">Learn keyboards shortcuts</string>
+
+    <!-- Notification title for launching touchpad tutorial [CHAR_LIMIT=100] -->
+    <string name="launch_touchpad_tutorial_notification_title">Navigate using your touchpad</string>
+    <!-- Notification text for launching keyboard tutorial [CHAR_LIMIT=100] -->
+    <string name="launch_touchpad_tutorial_notification_content">Learn touchpad gestures</string>
+
+    <!-- Notification title for launching keyboard tutorial [CHAR_LIMIT=100] -->
+    <string name="launch_keyboard_touchpad_tutorial_notification_title">Navigate using your keyboard and touchpad</string>
+    <!-- Notification text for launching keyboard tutorial [CHAR_LIMIT=100] -->
+    <string name="launch_keyboard_touchpad_tutorial_notification_content">Learn touchpad gestures, keyboards shortcuts, and more</string>
 
     <!-- TOUCHPAD TUTORIAL-->
     <!-- Label for button opening tutorial for back gesture on touchpad [CHAR LIMIT=NONE] -->

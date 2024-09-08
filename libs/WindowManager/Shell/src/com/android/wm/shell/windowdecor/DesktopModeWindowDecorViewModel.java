@@ -90,6 +90,7 @@ import com.android.wm.shell.R;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.apptoweb.AppToWebGenericLinksParser;
+import com.android.wm.shell.apptoweb.AssistContentRequester;
 import com.android.wm.shell.common.DisplayChangeController;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayInsetsController;
@@ -182,6 +183,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     private final Region mExclusionRegion = Region.obtain();
     private boolean mInImmersiveMode;
     private final String mSysUIPackageName;
+    private final AssistContentRequester mAssistContentRequester;
 
     private final DisplayChangeController.OnDisplayChangingListener mOnDisplayChangingListener;
     private final ISystemGestureExclusionListener mGestureExclusionListener =
@@ -217,6 +219,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
             InteractionJankMonitor interactionJankMonitor,
             AppToWebGenericLinksParser genericLinksParser,
+            AssistContentRequester assistContentRequester,
             MultiInstanceHelper multiInstanceHelper,
             Optional<DesktopTasksLimiter> desktopTasksLimiter,
             Optional<DesktopActivityOrientationChangeHandler> activityOrientationChangeHandler
@@ -238,6 +241,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 transitions,
                 desktopTasksController,
                 genericLinksParser,
+                assistContentRequester,
                 multiInstanceHelper,
                 new DesktopModeWindowDecoration.Factory(),
                 new InputMonitorFactory(),
@@ -267,6 +271,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             Transitions transitions,
             Optional<DesktopTasksController> desktopTasksController,
             AppToWebGenericLinksParser genericLinksParser,
+            AssistContentRequester assistContentRequester,
             MultiInstanceHelper multiInstanceHelper,
             DesktopModeWindowDecoration.Factory desktopModeWindowDecorFactory,
             InputMonitorFactory inputMonitorFactory,
@@ -304,6 +309,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         mInteractionJankMonitor = interactionJankMonitor;
         mDesktopTasksLimiter = desktopTasksLimiter;
         mActivityOrientationChangeHandler = activityOrientationChangeHandler;
+        mAssistContentRequester = assistContentRequester;
         mOnDisplayChangingListener = (displayId, fromRotation, toRotation, displayAreaInfo, t) -> {
             DesktopModeWindowDecoration decoration;
             RunningTaskInfo taskInfo;
@@ -626,7 +632,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             } else if (id == R.id.caption_handle || id == R.id.open_menu_button) {
                 if (!decoration.isHandleMenuActive()) {
                     moveTaskToFront(decoration.mTaskInfo);
-                    decoration.createHandleMenu(mSplitScreenController);
+                    decoration.createHandleMenu();
                 }
             } else if (id == R.id.maximize_window) {
                 // TODO(b/346441962): move click detection logic into the decor's
@@ -1270,6 +1276,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                         mSyncQueue,
                         mRootTaskDisplayAreaOrganizer,
                         mGenericLinksParser,
+                        mAssistContentRequester,
                         mMultiInstanceHelper);
         mWindowDecorByTaskId.put(taskInfo.taskId, windowDecoration);
 

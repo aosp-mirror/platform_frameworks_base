@@ -87,6 +87,8 @@ public class KeyguardPinBasedInputViewControllerTest extends SysuiTestCase {
     private View mOkButton;
     @Mock
     private SelectedUserInteractor mSelectedUserInteractor;
+    @Mock
+    private UserActivityNotifier mUserActivityNotifier;
     private NumPadKey[] mButtons = new NumPadKey[]{};
 
     private KeyguardPinBasedInputViewController mKeyguardPinViewController;
@@ -117,7 +119,7 @@ public class KeyguardPinBasedInputViewControllerTest extends SysuiTestCase {
                 mKeyguardUpdateMonitor, mSecurityMode, mLockPatternUtils, mKeyguardSecurityCallback,
                 mKeyguardMessageAreaControllerFactory, mLatencyTracker, mLiftToactivateListener,
                 mEmergencyButtonController, mFalsingCollector, featureFlags,
-                mSelectedUserInteractor, keyguardKeyboardInteractor, null) {
+                mSelectedUserInteractor, keyguardKeyboardInteractor, null, mUserActivityNotifier) {
             @Override
             public void onResume(int reason) {
                 super.onResume(reason);

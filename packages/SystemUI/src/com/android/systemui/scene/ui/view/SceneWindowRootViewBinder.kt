@@ -44,11 +44,10 @@ import com.android.systemui.lifecycle.setSnapshotBinding
 import com.android.systemui.lifecycle.viewModel
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
-import com.android.systemui.scene.shared.model.Scene
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.SceneDataSourceDelegator
-import com.android.systemui.scene.ui.composable.ComposableScene
 import com.android.systemui.scene.ui.composable.Overlay
+import com.android.systemui.scene.ui.composable.Scene
 import com.android.systemui.scene.ui.composable.SceneContainer
 import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
@@ -78,29 +77,31 @@ object SceneWindowRootViewBinder {
         alternateBouncerDependencies: AlternateBouncerDependencies,
     ) {
         val unsortedSceneByKey: Map<SceneKey, Scene> = scenes.associateBy { scene -> scene.key }
-        val sortedSceneByKey: Map<SceneKey, Scene> = buildMap {
-            containerConfig.sceneKeys.forEach { sceneKey ->
-                val scene =
-                    checkNotNull(unsortedSceneByKey[sceneKey]) {
-                        "Scene not found for key \"$sceneKey\"!"
-                    }
+        val sortedSceneByKey: Map<SceneKey, Scene> =
+            LinkedHashMap<SceneKey, Scene>(containerConfig.sceneKeys.size).apply {
+                containerConfig.sceneKeys.forEach { sceneKey ->
+                    val scene =
+                        checkNotNull(unsortedSceneByKey[sceneKey]) {
+                            "Scene not found for key \"$sceneKey\"!"
+                        }
 
-                put(sceneKey, scene)
+                    put(sceneKey, scene)
+                }
             }
-        }
 
         val unsortedOverlayByKey: Map<OverlayKey, Overlay> =
             overlays.associateBy { overlay -> overlay.key }
-        val sortedOverlayByKey: Map<OverlayKey, Overlay> = buildMap {
-            containerConfig.overlayKeys.forEach { overlayKey ->
-                val overlay =
-                    checkNotNull(unsortedOverlayByKey[overlayKey]) {
-                        "Overlay not found for key \"$overlayKey\"!"
-                    }
+        val sortedOverlayByKey: Map<OverlayKey, Overlay> =
+            LinkedHashMap<OverlayKey, Overlay>(containerConfig.overlayKeys.size).apply {
+                containerConfig.overlayKeys.forEach { overlayKey ->
+                    val overlay =
+                        checkNotNull(unsortedOverlayByKey[overlayKey]) {
+                            "Overlay not found for key \"$overlayKey\"!"
+                        }
 
-                put(overlayKey, overlay)
+                    put(overlayKey, overlay)
+                }
             }
-        }
 
         view.repeatWhenAttached {
             view.viewModel(
@@ -149,7 +150,7 @@ object SceneWindowRootViewBinder {
                         )
                         view.addView(sharedNotificationContainer)
 
-                        // TODO (b/358354906): use an overlay for the alternate bouncer
+                        // TODO(b/358354906): use an overlay for the alternate bouncer
                         view.addView(
                             createAlternateBouncerView(
                                 context = view.context,
@@ -187,8 +188,7 @@ object SceneWindowRootViewBinder {
                     ) {
                         SceneContainer(
                             viewModel = viewModel,
-                            sceneByKey =
-                                sceneByKey.mapValues { (_, scene) -> scene as ComposableScene },
+                            sceneByKey = sceneByKey,
                             overlayByKey = overlayByKey,
                             initialSceneKey = containerConfig.initialSceneKey,
                             dataSourceDelegator = dataSourceDelegator,

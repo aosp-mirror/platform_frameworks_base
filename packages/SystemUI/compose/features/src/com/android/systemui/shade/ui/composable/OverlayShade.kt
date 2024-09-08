@@ -40,56 +40,30 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.LowestZIndexContentPicker
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.windowsizeclass.LocalWindowSizeClass
-import com.android.systemui.keyguard.ui.composable.LockscreenContent
-import com.android.systemui.lifecycle.rememberViewModel
-import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.shade.shared.model.ShadeAlignment
-import com.android.systemui.shade.ui.viewmodel.OverlayShadeViewModel
-import com.android.systemui.util.kotlin.getOrNull
-import dagger.Lazy
-import java.util.Optional
 
-/** The overlay shade renders a lightweight shade UI container on top of a background scene. */
+/** Renders a lightweight shade UI container, as an overlay. */
 @Composable
 fun SceneScope.OverlayShade(
-    viewModelFactory: OverlayShadeViewModel.Factory,
-    lockscreenContent: Lazy<Optional<LockscreenContent>>,
+    onScrimClicked: () -> Unit,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
-    val viewModel = rememberViewModel("OverlayShade") { viewModelFactory.create() }
-    val backgroundScene by viewModel.backgroundScene.collectAsStateWithLifecycle()
-
     Box(modifier) {
-        if (backgroundScene == Scenes.Lockscreen) {
-            // Lockscreen content is optionally injected, because variants of System UI without a
-            // lockscreen cannot provide it.
-            val lockscreenContentOrNull = lockscreenContent.get().getOrNull()
-            lockscreenContentOrNull?.apply { Content(Modifier.fillMaxSize()) }
-        }
-
-        Scrim(onClicked = viewModel::onScrimClicked)
+        Scrim(onClicked = onScrimClicked)
 
         Box(
             modifier = Modifier.fillMaxSize().panelPadding(),
-            contentAlignment =
-                if (viewModel.panelAlignment == ShadeAlignment.Top) {
-                    Alignment.TopEnd
-                } else {
-                    Alignment.BottomEnd
-                },
+            contentAlignment = Alignment.TopEnd,
         ) {
             Panel(
                 modifier = Modifier.element(OverlayShade.Elements.Panel).panelSize(),

@@ -116,8 +116,8 @@ public class SplitTransitionTests extends ShellTestCase {
     @Mock private SplitScreen.SplitInvocationListener mInvocationListener;
     private final TestShellExecutor mTestShellExecutor = new TestShellExecutor();
     private SplitLayout mSplitLayout;
-    private MainStage mMainStage;
-    private SideStage mSideStage;
+    private StageTaskListener mMainStage;
+    private StageTaskListener mSideStage;
     private StageCoordinator mStageCoordinator;
     private SplitScreenTransitions mSplitScreenTransitions;
 
@@ -133,11 +133,11 @@ public class SplitTransitionTests extends ShellTestCase {
         doReturn(mockExecutor).when(mTransitions).getAnimExecutor();
         doReturn(mock(SurfaceControl.Transaction.class)).when(mTransactionPool).acquire();
         mSplitLayout = SplitTestUtils.createMockSplitLayout();
-        mMainStage = spy(new MainStage(mContext, mTaskOrganizer, DEFAULT_DISPLAY, mock(
+        mMainStage = spy(new StageTaskListener(mContext, mTaskOrganizer, DEFAULT_DISPLAY, mock(
                 StageTaskListener.StageListenerCallbacks.class), mSyncQueue, mSurfaceSession,
                 mIconProvider, Optional.of(mWindowDecorViewModel)));
         mMainStage.onTaskAppeared(new TestRunningTaskInfoBuilder().build(), createMockSurface());
-        mSideStage = spy(new SideStage(mContext, mTaskOrganizer, DEFAULT_DISPLAY, mock(
+        mSideStage = spy(new StageTaskListener(mContext, mTaskOrganizer, DEFAULT_DISPLAY, mock(
                 StageTaskListener.StageListenerCallbacks.class), mSyncQueue, mSurfaceSession,
                 mIconProvider, Optional.of(mWindowDecorViewModel)));
         mSideStage.onTaskAppeared(new TestRunningTaskInfoBuilder().build(), createMockSurface());

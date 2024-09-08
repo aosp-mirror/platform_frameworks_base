@@ -33,6 +33,7 @@ import static org.mockito.Mockito.when;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.hardware.power.stats.EnergyConsumerResult;
 import android.hardware.power.stats.EnergyConsumerType;
 import android.net.NetworkStats;
 import android.os.BatteryConsumer;
@@ -51,6 +52,7 @@ import android.util.IndentingPrintWriter;
 
 import com.android.internal.os.Clock;
 import com.android.internal.os.PowerStats;
+import com.android.server.power.stats.format.MobileRadioPowerStatsLayout;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -63,7 +65,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.IntSupplier;
 import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 
@@ -139,11 +140,6 @@ public class MobileRadioPowerStatsCollectorTest {
         }
 
         @Override
-        public IntSupplier getVoltageSupplier() {
-            return () -> 3500;
-        }
-
-        @Override
         public Supplier<NetworkStats> getMobileNetworkStatsSupplier() {
             return mNetworkStatsSupplier;
         }
@@ -178,6 +174,7 @@ public class MobileRadioPowerStatsCollectorTest {
                 return uid;
             }
         });
+        when(mConsumedEnergyRetriever.getVoltageMv()).thenReturn(3500);
         mBatteryStats = mStatsRule.getBatteryStats();
     }
 
@@ -242,8 +239,7 @@ public class MobileRadioPowerStatsCollectorTest {
         assertThat(powerStats.durationMs).isEqualTo(100);
 
         PowerStats.Descriptor descriptor = powerStats.descriptor;
-        MobileRadioPowerStatsLayout layout =
-                new MobileRadioPowerStatsLayout(descriptor);
+        MobileRadioPowerStatsLayout layout = new MobileRadioPowerStatsLayout(descriptor);
         assertThat(layout.getDeviceSleepTime(powerStats.stats)).isEqualTo(200);
         assertThat(layout.getDeviceIdleTime(powerStats.stats)).isEqualTo(300);
         assertThat(layout.getDeviceCallTime(powerStats.stats)).isEqualTo(40000);
@@ -252,7 +248,7 @@ public class MobileRadioPowerStatsCollectorTest {
                 .isEqualTo((64321 - 10000) * 1000 / 3500);
 
         assertThat(powerStats.stateStats.size()).isEqualTo(2);
-        long[] state1 = powerStats.stateStats.get(MobileRadioPowerStatsCollector.makeStateKey(
+        long[] state1 = powerStats.stateStats.get(MobileRadioPowerStatsLayout.makeStateKey(
                 BatteryStats.RADIO_ACCESS_TECHNOLOGY_NR,
                 ServiceState.FREQUENCY_RANGE_MMWAVE
         ));
@@ -263,7 +259,7 @@ public class MobileRadioPowerStatsCollectorTest {
         assertThat(layout.getStateTxTime(state1, 3)).isEqualTo(4000);
         assertThat(layout.getStateTxTime(state1, 4)).isEqualTo(5000);
 
-        long[] state2 = powerStats.stateStats.get(MobileRadioPowerStatsCollector.makeStateKey(
+        long[] state2 = powerStats.stateStats.get(MobileRadioPowerStatsLayout.makeStateKey(
                 BatteryStats.RADIO_ACCESS_TECHNOLOGY_LTE,
                 ServiceState.FREQUENCY_RANGE_LOW
         ));
@@ -298,15 +294,14 @@ public class MobileRadioPowerStatsCollectorTest {
         assertThat(powerStats.durationMs).isEqualTo(100);
 
         PowerStats.Descriptor descriptor = powerStats.descriptor;
-        MobileRadioPowerStatsLayout layout =
-                new MobileRadioPowerStatsLayout(descriptor);
+        MobileRadioPowerStatsLayout layout = new MobileRadioPowerStatsLayout(descriptor);
         assertThat(layout.getDeviceSleepTime(powerStats.stats)).isEqualTo(200);
         assertThat(layout.getDeviceIdleTime(powerStats.stats)).isEqualTo(300);
         assertThat(layout.getConsumedEnergy(powerStats.stats, 0))
                 .isEqualTo((64321 - 10000) * 1000 / 3500);
 
         assertThat(powerStats.stateStats.size()).isEqualTo(1);
-        long[] stateStats = powerStats.stateStats.get(MobileRadioPowerStatsCollector.makeStateKey(
+        long[] stateStats = powerStats.stateStats.get(MobileRadioPowerStatsLayout.makeStateKey(
                 AccessNetworkConstants.AccessNetworkType.UNKNOWN,
                 ServiceState.FREQUENCY_RANGE_UNKNOWN
         ));
@@ -416,8 +411,8 @@ public class MobileRadioPowerStatsCollectorTest {
                 4321, 321, 1234, 23,
                 4000, 40, 2000, 20);
 
-        when(mConsumedEnergyRetriever.getConsumedEnergyUws(eq(new int[]{777})))
-                .thenReturn(new long[]{10000});
+        when(mConsumedEnergyRetriever.getConsumedEnergy(eq(new int[]{777})))
+                .thenReturn(new EnergyConsumerResult[]{mockEnergyConsumer(10000)});
 
         when(mCallDurationSupplier.getAsLong()).thenReturn(10000L);
         when(mScanDurationSupplier.getAsLong()).thenReturn(20000L);
@@ -439,13 +434,19 @@ public class MobileRadioPowerStatsCollectorTest {
                 5321, 421, 3234, 223,
                 8000, 80, 4000, 40);
 
-        when(mConsumedEnergyRetriever.getConsumedEnergyUws(eq(new int[]{777})))
-                .thenReturn(new long[]{64321});
+        when(mConsumedEnergyRetriever.getConsumedEnergy(eq(new int[]{777})))
+                .thenReturn(new EnergyConsumerResult[]{mockEnergyConsumer(64321)});
         when(mCallDurationSupplier.getAsLong()).thenReturn(50000L);
         when(mScanDurationSupplier.getAsLong()).thenReturn(80000L);
 
         mStatsRule.setTime(20000, 20000);
         return collector.collectStats();
+    }
+
+    private EnergyConsumerResult mockEnergyConsumer(long energyUWs) {
+        EnergyConsumerResult ecr = new EnergyConsumerResult();
+        ecr.energyUWs = energyUWs;
+        return ecr;
     }
 
     private void mockModemActivityInfo(long timestamp, int sleepTimeMs, int idleTimeMs,
