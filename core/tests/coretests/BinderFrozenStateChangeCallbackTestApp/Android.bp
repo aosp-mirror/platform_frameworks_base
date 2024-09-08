@@ -21,46 +21,14 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
-android_test {
-    name: "RollbackPackageHealthObserverTests",
+android_test_helper_app {
+    name: "BinderFrozenStateChangeCallbackTestApp",
 
-    srcs: [
-        "*.java",
-    ],
+    static_libs: ["coretests-aidl"],
+    srcs: ["**/*.java"],
 
-    static_libs: [
-        "androidx.test.runner",
-        "mockito-target-extended-minus-junit4",
-        "services.core",
-        "truth",
-        "flag-junit",
-    ],
-
-    libs: [
-        "android.test.mock",
-        "android.test.base",
-        "android.test.runner",
-    ],
-
-    jni_libs: [
-        "libdexmakerjvmtiagent",
-        "libstaticjvmtiagent",
-    ],
-
-    certificate: "platform",
     platform_apis: true,
-    test_suites: [
-        "device-tests",
-        "automotive-tests",
-    ],
-}
+    certificate: "platform",
 
-test_module_config {
-    name: "RollbackPackageHealthObserverTests_server_rollback",
-    base: "RollbackPackageHealthObserverTests",
-    test_suites: [
-        "automotive-tests",
-        "device-tests",
-    ],
-    include_filters: ["com.android.server.rollback"],
+    test_suites: ["device-tests"],
 }
