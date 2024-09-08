@@ -138,3 +138,17 @@ android_test {
         enabled: false,
     },
 }
+
+test_module_config {
+    name: "FrameworksInputMethodSystemServerTests_server_inputmethod",
+    base: "FrameworksInputMethodSystemServerTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.inputmethod"],
+}
+
+test_module_config {
+    name: "FrameworksImeTests_android_inputmethodservice",
+    base: "FrameworksImeTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.inputmethodservice"],
+}

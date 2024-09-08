@@ -40,3 +40,10 @@ android_test {
     platform_apis: true,
     certificate: "platform",
 }
+
+test_module_config {
+    name: "TrustTests_trust_test",
+    base: "TrustTests",
+    test_suites: ["device-tests"],
+    include_filters: ["android.trust.test"],
+}
