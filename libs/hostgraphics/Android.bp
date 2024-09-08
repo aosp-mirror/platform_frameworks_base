@@ -7,6 +7,17 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
+cc_library_headers {
+    name: "libhostgraphics_headers",
+    host_supported: true,
+    export_include_dirs: ["include"],
+    target: {
+        windows: {
+            enabled: true,
+        },
+    },
+}
+
 cc_library_host_static {
     name: "libhostgraphics",
 
@@ -30,12 +41,13 @@ cc_library_host_static {
     ],
 
     header_libs: [
+        "libhostgraphics_headers",
         "libnativebase_headers",
         "libnativedisplay_headers",
         "libnativewindow_headers",
     ],
 
-    export_include_dirs: ["."],
+    export_include_dirs: ["include"],
 
     target: {
         windows: {

@@ -126,13 +126,13 @@ private fun ObservableTransitionState.isNotOnCommunal(): Boolean {
 /** Whether currently transitioning from another scene to communal. */
 private fun ObservableTransitionState.isSwipingToCommunal(): Boolean {
     return this is ObservableTransitionState.Transition &&
-        toScene == CommunalScenes.Communal &&
+        toContent == CommunalScenes.Communal &&
         isInitiatedByUserInput
 }
 
 /** Whether currently transitioning from communal to another scene. */
 private fun ObservableTransitionState.isSwipingFromCommunal(): Boolean {
     return this is ObservableTransitionState.Transition &&
-        fromScene == CommunalScenes.Communal &&
+        fromContent == CommunalScenes.Communal &&
         isInitiatedByUserInput
 }

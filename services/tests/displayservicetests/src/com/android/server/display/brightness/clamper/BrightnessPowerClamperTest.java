@@ -21,6 +21,7 @@ import static com.android.server.display.brightness.clamper.BrightnessPowerClamp
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
+import android.os.IThermalService;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.Temperature;
@@ -58,12 +59,18 @@ public class BrightnessPowerClamperTest {
     private final FakeDeviceConfigInterface mFakeDeviceConfigInterface =
             new FakeDeviceConfigInterface();
     private final TestHandler mTestHandler = new TestHandler(null);
+    private final TestInjector mTestInjector = new TestInjector();
     private BrightnessPowerClamper mClamper;
+    private final float mCurrentBrightness = 0.6f;
+    private PowerChangeListener mPowerChangeListener;
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mClamper = new BrightnessPowerClamper(new TestInjector(), mTestHandler,
-                mMockClamperChangeListener, new TestPowerData());
+        mClamper = new BrightnessPowerClamper(mTestInjector, mTestHandler,
+                mMockClamperChangeListener, new TestPowerData(), mCurrentBrightness);
+        mPowerChangeListener = mClamper.getPowerChangeListener();
+        mPmicMonitor = mTestInjector.getPmicMonitor(mPowerChangeListener, null, 5, 10);
+        mPmicMonitor.setPowerChangeListener(mPowerChangeListener);
         mTestHandler.flush();
     }
 
@@ -79,36 +86,27 @@ public class BrightnessPowerClamperTest {
     }
 
     @Test
-    public void testPowerThrottlingNoOngoingAnimation() throws RemoteException {
-        mPmicMonitor.setThermalStatus(Temperature.THROTTLING_SEVERE);
+    public void testPowerThrottlingWithThermalLevelLight() throws RemoteException {
+        mPmicMonitor.setThermalStatus(Temperature.THROTTLING_LIGHT);
         mTestHandler.flush();
         assertFalse(mClamper.isActive());
         assertEquals(PowerManager.BRIGHTNESS_MAX, mClamper.getBrightnessCap(), FLOAT_TOLERANCE);
 
         // update a new device config for power-throttling.
         mClamper.onDisplayChanged(new TestPowerData(
-                List.of(new ThrottlingLevel(PowerManager.THERMAL_STATUS_SEVERE, 100f))));
+                List.of(new ThrottlingLevel(PowerManager.THERMAL_STATUS_LIGHT, 100f))));
 
         mPmicMonitor.setAvgPowerConsumed(200f);
         float expectedBrightness = 0.5f;
-        expectedBrightness = expectedBrightness * PowerManager.BRIGHTNESS_MAX;
+        expectedBrightness = expectedBrightness * mCurrentBrightness;
 
         mTestHandler.flush();
         // Assume current brightness as max, as there is no throttling.
         assertEquals(expectedBrightness, mClamper.getBrightnessCap(), FLOAT_TOLERANCE);
-        mPmicMonitor.setThermalStatus(Temperature.THROTTLING_CRITICAL);
-        // update a new device config for power-throttling.
-        mClamper.onDisplayChanged(new TestPowerData(
-                List.of(new ThrottlingLevel(PowerManager.THERMAL_STATUS_CRITICAL, 50f))));
-
-        mPmicMonitor.setAvgPowerConsumed(100f);
-        expectedBrightness = 0.5f * PowerManager.BRIGHTNESS_MAX;
-        mTestHandler.flush();
-        assertEquals(expectedBrightness, mClamper.getBrightnessCap(), FLOAT_TOLERANCE);
     }
 
     @Test
-    public void testPowerThrottlingWithOngoingAnimation() throws RemoteException {
+    public void testPowerThrottlingWithThermalLevelSevere() throws RemoteException {
         mPmicMonitor.setThermalStatus(Temperature.THROTTLING_SEVERE);
         mTestHandler.flush();
         assertEquals(PowerManager.BRIGHTNESS_MAX, mClamper.getBrightnessCap(), FLOAT_TOLERANCE);
@@ -119,19 +117,9 @@ public class BrightnessPowerClamperTest {
 
         mPmicMonitor.setAvgPowerConsumed(200f);
         float expectedBrightness = 0.5f;
-        expectedBrightness = expectedBrightness * PowerManager.BRIGHTNESS_MAX;
-
+        expectedBrightness = expectedBrightness * mCurrentBrightness;
         mTestHandler.flush();
         // Assume current brightness as max, as there is no throttling.
-        assertEquals(expectedBrightness, mClamper.getBrightnessCap(), FLOAT_TOLERANCE);
-        mPmicMonitor.setThermalStatus(Temperature.THROTTLING_CRITICAL);
-        // update a new device config for power-throttling.
-        mClamper.onDisplayChanged(new TestPowerData(
-                List.of(new ThrottlingLevel(PowerManager.THERMAL_STATUS_CRITICAL, 50f))));
-
-        mPmicMonitor.setAvgPowerConsumed(100f);
-        expectedBrightness = 0.5f * PowerManager.BRIGHTNESS_MAX;
-        mTestHandler.flush();
         assertEquals(expectedBrightness, mClamper.getBrightnessCap(), FLOAT_TOLERANCE);
     }
 
@@ -148,8 +136,7 @@ public class BrightnessPowerClamperTest {
 
         mPmicMonitor.setAvgPowerConsumed(200f);
         float expectedBrightness = 0.5f;
-        expectedBrightness = expectedBrightness * PowerManager.BRIGHTNESS_MAX;
-
+        expectedBrightness = expectedBrightness * mCurrentBrightness;
         mTestHandler.flush();
 
         assertEquals(expectedBrightness, mClamper.getBrightnessCap(), FLOAT_TOLERANCE);
@@ -169,10 +156,11 @@ public class BrightnessPowerClamperTest {
 
     private static class TestPmicMonitor extends PmicMonitor {
         private Temperature mCurrentTemperature;
-        private final PowerChangeListener mListener;
-        TestPmicMonitor(PowerChangeListener listener, int pollingTime) {
-            super(listener, pollingTime);
-            mListener = listener;
+        private PowerChangeListener mListener;
+        TestPmicMonitor(PowerChangeListener listener,
+                        IThermalService thermalService,
+                        int pollingTimeMax, int pollingTimeMin) {
+            super(listener, thermalService, pollingTimeMax, pollingTimeMin);
         }
         public void setAvgPowerConsumed(float power) {
             int status = mCurrentTemperature.getStatus();
@@ -181,13 +169,18 @@ public class BrightnessPowerClamperTest {
         public void setThermalStatus(@Temperature.ThrottlingStatus int status) {
             mCurrentTemperature = new Temperature(100, Temperature.TYPE_SKIN, "test_temp", status);
         }
+        public void setPowerChangeListener(PowerChangeListener listener) {
+            mListener = listener;
+        }
     }
 
     private class TestInjector extends BrightnessPowerClamper.Injector {
         @Override
         TestPmicMonitor getPmicMonitor(PowerChangeListener listener,
-                int pollingTime) {
-            mPmicMonitor = new TestPmicMonitor(listener, pollingTime);
+                                       IThermalService thermalService,
+                                       int minPollingTimeMillis, int maxPollingTimeMillis) {
+            mPmicMonitor = new TestPmicMonitor(listener, thermalService, maxPollingTimeMillis,
+                    minPollingTimeMillis);
             return mPmicMonitor;
         }
 
@@ -216,7 +209,7 @@ public class BrightnessPowerClamperTest {
             mUniqueDisplayId = uniqueDisplayId;
             mDataId = dataId;
             mData = PowerThrottlingData.create(data);
-            mConfigData = new PowerThrottlingConfigData(0.1f, 10);
+            mConfigData = new PowerThrottlingConfigData(0.1f, 10, 20, 10);
         }
 
         @NonNull

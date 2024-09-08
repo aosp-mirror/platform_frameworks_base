@@ -56,16 +56,13 @@ public final class GenericDocumentWrapper implements Parcelable {
                     return new GenericDocumentWrapper[size];
                 }
             };
-    @NonNull
-    private final GenericDocument mGenericDocument;
+    @NonNull private final GenericDocument mGenericDocument;
 
     public GenericDocumentWrapper(@NonNull GenericDocument genericDocument) {
         mGenericDocument = Objects.requireNonNull(genericDocument);
     }
 
-    /**
-     * Returns the wrapped {@link android.app.appsearch.GenericDocument}
-     */
+    /** Returns the wrapped {@link android.app.appsearch.GenericDocument} */
     @NonNull
     public GenericDocument getValue() {
         return mGenericDocument;
@@ -86,6 +83,5 @@ public final class GenericDocumentWrapper implements Parcelable {
         } finally {
             parcel.recycle();
         }
-
     }
 }

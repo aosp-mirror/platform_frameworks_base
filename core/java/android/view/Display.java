@@ -1339,7 +1339,7 @@ public final class Display {
     public HdrCapabilities getHdrCapabilities() {
         synchronized (mLock) {
             updateDisplayInfoLocked();
-            if (mDisplayInfo.hdrCapabilities == null || mDisplayInfo.isForceSdr) {
+            if (mDisplayInfo.hdrCapabilities == null) {
                 return null;
             }
             int[] supportedHdrTypes;
@@ -1361,7 +1361,6 @@ public final class Display {
                     supportedHdrTypes[index++] = enabledType;
                 }
             }
-
             return new HdrCapabilities(supportedHdrTypes,
                     mDisplayInfo.hdrCapabilities.mMaxLuminance,
                     mDisplayInfo.hdrCapabilities.mMaxAverageLuminance,

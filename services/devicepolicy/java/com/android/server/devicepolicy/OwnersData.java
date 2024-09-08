@@ -361,9 +361,7 @@ class OwnersData {
 
         @Override
         boolean shouldWrite() {
-            return Flags.alwaysPersistDo()
-                    || (mDeviceOwner != null) || (mSystemUpdatePolicy != null)
-                    || (mSystemUpdateInfo != null);
+            return true;
         }
 
         @Override

@@ -89,6 +89,7 @@ import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.Watchdog;
 import com.android.server.grammaticalinflection.GrammaticalInflectionManagerInternal;
 import com.android.server.wm.ActivityTaskManagerService.HotPath;
+import com.android.server.wm.BackgroundLaunchProcessController.BalCheckConfiguration;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -357,7 +358,6 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         mUseFifoUiScheduling = com.android.window.flags.Flags.fifoPriorityForMajorUiProcesses()
                 && (isSysUiPackage || mAtm.isCallerRecents(uid));
 
-        onConfigurationChanged(atm.getGlobalConfiguration());
         mAtm.mPackageConfigPersister.updateConfigIfNeeded(this, mUserId, mInfo.packageName);
     }
 
@@ -695,20 +695,13 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     public boolean areBackgroundFgsStartsAllowed() {
         return areBackgroundActivityStartsAllowed(
                 mAtm.getBalAppSwitchesState(),
-                true /* isCheckingForFgsStart */).allows();
+                BackgroundLaunchProcessController.CHECK_FOR_FGS_START).allows();
     }
 
     BackgroundActivityStartController.BalVerdict areBackgroundActivityStartsAllowed(
-            int appSwitchState) {
-        return areBackgroundActivityStartsAllowed(
-                appSwitchState,
-                false /* isCheckingForFgsStart */);
-    }
-
-    private BackgroundActivityStartController.BalVerdict areBackgroundActivityStartsAllowed(
-            int appSwitchState, boolean isCheckingForFgsStart) {
+            int appSwitchState, BalCheckConfiguration checkConfiguration) {
         return mBgLaunchController.areBackgroundActivityStartsAllowed(mPid, mUid,
-                mInfo.packageName, appSwitchState, isCheckingForFgsStart,
+                mInfo.packageName, appSwitchState, checkConfiguration,
                 hasActivityInVisibleTask(), mInstrumentingWithBackgroundActivityStartPrivileges,
                 mAtm.getLastStopAppSwitchesTime(),
                 mLastActivityLaunchTime, mLastActivityFinishTime);
@@ -1932,7 +1925,12 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                 // showing.
                 // If the configuration has been overridden by previous activity, empty it.
                 mIsActivityConfigOverrideAllowed = false;
-                unregisterActivityConfigurationListener();
+                // The call to `onServiceStarted` is not guarded with WM lock.
+                mAtm.mH.post(() -> {
+                    synchronized (mAtm.mGlobalLock) {
+                        unregisterActivityConfigurationListener();
+                    }
+                });
                 break;
             default:
                 break;

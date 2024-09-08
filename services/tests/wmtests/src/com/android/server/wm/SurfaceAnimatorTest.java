@@ -36,7 +36,6 @@ import android.util.proto.ProtoOutputStream;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Builder;
 import android.view.SurfaceControl.Transaction;
-import android.view.SurfaceSession;
 
 import androidx.test.filters.SmallTest;
 
@@ -69,7 +68,6 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
     @Mock AnimationAdapter mSpec2;
     @Mock Transaction mTransaction;
 
-    private SurfaceSession mSession = new SurfaceSession();
     private MyAnimatable mAnimatable;
     private MyAnimatable mAnimatable2;
     private DeferFinishAnimatable mDeferFinishAnimatable;
@@ -78,9 +76,9 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        mAnimatable = new MyAnimatable(mWm, mSession, mTransaction);
-        mAnimatable2 = new MyAnimatable(mWm, mSession, mTransaction);
-        mDeferFinishAnimatable = new DeferFinishAnimatable(mWm, mSession, mTransaction);
+        mAnimatable = new MyAnimatable(mWm, mTransaction);
+        mAnimatable2 = new MyAnimatable(mWm, mTransaction);
+        mDeferFinishAnimatable = new DeferFinishAnimatable(mWm, mTransaction);
     }
 
     @After
@@ -88,8 +86,6 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
         mAnimatable = null;
         mAnimatable2 = null;
         mDeferFinishAnimatable = null;
-        mSession.kill();
-        mSession = null;
     }
 
     @Test
@@ -313,7 +309,6 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
 
     private static class MyAnimatable implements Animatable {
 
-        private final SurfaceSession mSession;
         private final Transaction mTransaction;
         final SurfaceControl mParent;
         final SurfaceControl mSurface;
@@ -322,13 +317,12 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
         boolean mFinishedCallbackCalled;
         @AnimationType int mFinishedAnimationType;
 
-        MyAnimatable(WindowManagerService wm, SurfaceSession session, Transaction transaction) {
-            mSession = session;
+        MyAnimatable(WindowManagerService wm, Transaction transaction) {
             mTransaction = transaction;
-            mParent = wm.makeSurfaceBuilder(mSession)
+            mParent = wm.makeSurfaceBuilder()
                     .setName("test surface parent")
                     .build();
-            mSurface = wm.makeSurfaceBuilder(mSession)
+            mSurface = wm.makeSurfaceBuilder()
                     .setName("test surface")
                     .build();
             mFinishedCallbackCalled = false;
@@ -360,7 +354,7 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
 
         @Override
         public Builder makeAnimationLeash() {
-            return new Builder(mSession) {
+            return new Builder() {
 
                 @Override
                 public SurfaceControl build() {
@@ -406,9 +400,8 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
 
         Runnable mEndDeferFinishCallback;
 
-        DeferFinishAnimatable(WindowManagerService wm, SurfaceSession session,
-                Transaction transaction) {
-            super(wm, session, transaction);
+        DeferFinishAnimatable(WindowManagerService wm, Transaction transaction) {
+            super(wm, transaction);
         }
 
         @Override

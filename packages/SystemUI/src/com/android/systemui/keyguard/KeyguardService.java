@@ -76,10 +76,12 @@ import com.android.keyguard.mediator.ScreenOnCoordinator;
 import com.android.systemui.SystemUIApplication;
 import com.android.systemui.dagger.qualifiers.Application;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.domain.interactor.KeyguardDismissInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardEnabledInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
+import com.android.systemui.keyguard.domain.interactor.KeyguardStateCallbackInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardWakeDirectlyToGoneInteractor;
 import com.android.systemui.keyguard.ui.binder.KeyguardSurfaceBehindParamsApplier;
 import com.android.systemui.keyguard.ui.binder.KeyguardSurfaceBehindViewBinder;
@@ -122,8 +124,10 @@ public class KeyguardService extends Service {
     private final PowerInteractor mPowerInteractor;
     private final KeyguardInteractor mKeyguardInteractor;
     private final Lazy<SceneInteractor> mSceneInteractorLazy;
+    private final Lazy<DeviceEntryInteractor> mDeviceEntryInteractorLazy;
     private final Executor mMainExecutor;
     private final Lazy<KeyguardStateCallbackStartable> mKeyguardStateCallbackStartableLazy;
+    private final KeyguardStateCallbackInteractor mKeyguardStateCallbackInteractor;
 
     private static RemoteAnimationTarget[] wrap(TransitionInfo info, boolean wallpapers,
             SurfaceControl.Transaction t, ArrayMap<SurfaceControl, SurfaceControl> leashMap,
@@ -347,7 +351,9 @@ public class KeyguardService extends Service {
             KeyguardEnabledInteractor keyguardEnabledInteractor,
             Lazy<KeyguardStateCallbackStartable> keyguardStateCallbackStartableLazy,
             KeyguardWakeDirectlyToGoneInteractor keyguardWakeDirectlyToGoneInteractor,
-            KeyguardDismissInteractor keyguardDismissInteractor) {
+            KeyguardDismissInteractor keyguardDismissInteractor,
+            Lazy<DeviceEntryInteractor> deviceEntryInteractorLazy,
+            KeyguardStateCallbackInteractor keyguardStateCallbackInteractor) {
         super();
         mKeyguardViewMediator = keyguardViewMediator;
         mKeyguardLifecyclesDispatcher = keyguardLifecyclesDispatcher;
@@ -360,6 +366,8 @@ public class KeyguardService extends Service {
         mSceneInteractorLazy = sceneInteractorLazy;
         mMainExecutor = mainExecutor;
         mKeyguardStateCallbackStartableLazy = keyguardStateCallbackStartableLazy;
+        mKeyguardStateCallbackInteractor = keyguardStateCallbackInteractor;
+        mDeviceEntryInteractorLazy = deviceEntryInteractorLazy;
 
         if (KeyguardWmStateRefactor.isEnabled()) {
             WindowManagerLockscreenVisibilityViewBinder.bind(
@@ -451,6 +459,8 @@ public class KeyguardService extends Service {
             checkPermission();
             if (SceneContainerFlag.isEnabled()) {
                 mKeyguardStateCallbackStartableLazy.get().addCallback(callback);
+            } else if (KeyguardWmStateRefactor.isEnabled()) {
+                mKeyguardStateCallbackInteractor.addCallback(callback);
             } else {
                 mKeyguardViewMediator.addStateMonitorCallback(callback);
             }
@@ -484,7 +494,9 @@ public class KeyguardService extends Service {
         public void dismiss(IKeyguardDismissCallback callback, CharSequence message) {
             trace("dismiss message=" + message);
             checkPermission();
-            if (KeyguardWmStateRefactor.isEnabled()) {
+            if (SceneContainerFlag.isEnabled()) {
+                mDeviceEntryInteractorLazy.get().attemptDeviceEntry(callback);
+            } else if (KeyguardWmStateRefactor.isEnabled()) {
                 mKeyguardDismissInteractor.dismissKeyguardWithCallback(callback);
             } else {
                 mKeyguardViewMediator.dismiss(callback, message);

@@ -15,19 +15,23 @@
  */
 package com.android.hoststubgen.test.tinyframework;
 
-import android.hosttest.annotation.HostSideTestNativeSubstitutionClass;
+import android.hosttest.annotation.HostSideTestRedirect;
+import android.hosttest.annotation.HostSideTestRedirectionClass;
 import android.hosttest.annotation.HostSideTestThrow;
-import android.hosttest.annotation.HostSideTestWholeClassStub;
+import android.hosttest.annotation.HostSideTestWholeClassKeep;
 
-@HostSideTestWholeClassStub
-@HostSideTestNativeSubstitutionClass("TinyFrameworkNative_host")
+@HostSideTestWholeClassKeep
+@HostSideTestRedirectionClass("TinyFrameworkNative_host")
 public class TinyFrameworkNative {
+
+    @HostSideTestRedirect
     public static native int nativeAddTwo(int arg);
 
     public static int nativeAddTwo_should_be_like_this(int arg) {
         return TinyFrameworkNative_host.nativeAddTwo(arg);
     }
 
+    @HostSideTestRedirect
     public static native long nativeLongPlus(long arg1, long arg2);
 
     public static long nativeLongPlus_should_be_like_this(long arg1, long arg2) {
@@ -40,6 +44,7 @@ public class TinyFrameworkNative {
         this.value = v;
     }
 
+    @HostSideTestRedirect
     public native int nativeNonStaticAddToValue(int arg);
 
     public int nativeNonStaticAddToValue_should_be_like_this(int arg) {
@@ -49,9 +54,22 @@ public class TinyFrameworkNative {
     @HostSideTestThrow
     public static native void nativeStillNotSupported();
 
+    public static native void nativeStillKeep();
+
     public static void nativeStillNotSupported_should_be_like_this() {
         throw new RuntimeException();
     }
 
+    @HostSideTestRedirect
     public static native byte nativeBytePlus(byte arg1, byte arg2);
+
+    @HostSideTestRedirect
+    public void notNativeRedirected() {
+        throw new RuntimeException();
+    }
+
+    @HostSideTestRedirect
+    public static void notNativeStaticRedirected() {
+        throw new RuntimeException();
+    }
 }

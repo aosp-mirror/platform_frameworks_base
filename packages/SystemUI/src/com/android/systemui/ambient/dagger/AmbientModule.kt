@@ -32,5 +32,6 @@ import dagger.Module
 interface AmbientModule {
     companion object {
         const val TOUCH_HANDLERS = "touch_handlers"
+        const val LOGGING_NAME = "logging_name"
     }
 }

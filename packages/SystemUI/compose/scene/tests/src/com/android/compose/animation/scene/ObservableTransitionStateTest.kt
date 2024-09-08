@@ -29,6 +29,7 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.compose.animation.scene.TestScenes.SceneA
 import com.android.compose.animation.scene.TestScenes.SceneB
+import com.android.compose.test.transition
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
@@ -89,16 +90,16 @@ class ObservableTransitionStateTest {
             at(0) {
                 val state = observableState()
                 assertThat(state).isInstanceOf(ObservableTransitionState.Transition::class.java)
-                assertThat((state as ObservableTransitionState.Transition).fromScene)
+                assertThat((state as ObservableTransitionState.Transition).fromContent)
                     .isEqualTo(SceneA)
-                assertThat(state.toScene).isEqualTo(SceneB)
+                assertThat(state.toContent).isEqualTo(SceneB)
                 assertThat(state.progress()).isEqualTo(0f)
             }
             at(TestTransitionDuration / 2) {
                 val state = observableState()
-                assertThat((state as ObservableTransitionState.Transition).fromScene)
+                assertThat((state as ObservableTransitionState.Transition).fromContent)
                     .isEqualTo(SceneA)
-                assertThat(state.toScene).isEqualTo(SceneB)
+                assertThat(state.toContent).isEqualTo(SceneB)
                 assertThat(state.progress()).isEqualTo(0.5f)
             }
             after {
@@ -139,7 +140,7 @@ class ObservableTransitionStateTest {
         var transitionCurrentScene by mutableStateOf(SceneA)
         val transition =
             transition(from = SceneA, to = SceneB, current = { transitionCurrentScene })
-        state.startTransition(transition)
+        state.startTransitionImmediately(animationScope = backgroundScope, transition)
         assertThat(currentScene.value).isEqualTo(SceneA)
 
         // Change the transition current scene.
@@ -199,7 +200,7 @@ class ObservableTransitionStateTest {
 
         var state = observableState()
         assertThat(state).isInstanceOf(ObservableTransitionState.Transition::class.java)
-        assertThat((state as ObservableTransitionState.Transition).fromScene).isEqualTo(SceneA)
+        assertThat((state as ObservableTransitionState.Transition).fromContent).isEqualTo(SceneA)
         assertThat(state.previewProgress()).isEqualTo(0.4f)
         assertThat(state.isInPreviewStage()).isEqualTo(true)
 
@@ -217,7 +218,7 @@ class ObservableTransitionStateTest {
         }
         state = observableState()
         assertThat(state).isInstanceOf(ObservableTransitionState.Transition::class.java)
-        assertThat((state as ObservableTransitionState.Transition).fromScene).isEqualTo(SceneA)
+        assertThat((state as ObservableTransitionState.Transition).fromContent).isEqualTo(SceneA)
         assertThat(state.previewProgress()).isEqualTo(0.4f)
         assertThat(state.isInPreviewStage()).isEqualTo(false)
 

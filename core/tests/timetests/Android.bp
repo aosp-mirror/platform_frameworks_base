@@ -23,3 +23,17 @@ android_test {
     certificate: "platform",
     test_suites: ["device-tests"],
 }
+
+test_module_config {
+    name: "FrameworksTimeCoreTests_android_app",
+    base: "FrameworksTimeCoreTests",
+    test_suites: ["device-tests"],
+    include_filters: ["android.app."],
+}
+
+test_module_config {
+    name: "FrameworksTimeCoreTests_android_service",
+    base: "FrameworksTimeCoreTests",
+    test_suites: ["device-tests"],
+    include_filters: ["android.service."],
+}
