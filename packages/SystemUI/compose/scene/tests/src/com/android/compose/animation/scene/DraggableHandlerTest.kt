@@ -1111,7 +1111,7 @@ class DraggableHandlerTest {
         assertTransition(fromScene = SceneA, toScene = SceneB, progress = 1f)
 
         // Release the finger.
-        dragController.onDragStopped(velocity = -velocityThreshold)
+        dragController.onDragStopped(velocity = -velocityThreshold, expectedConsumed = false)
 
         // Exhaust all coroutines *without advancing the clock*. Given that we are at progress >=
         // 100% and that the overscroll on scene B is doing nothing, we are already idle.

@@ -395,14 +395,8 @@ private class DragControllerImpl(
             return 0f
         }
 
-        fun animateTo(targetContent: T) {
-            swipeAnimation.animateOffset(
-                initialVelocity = velocity,
-                targetContent = targetContent,
-            )
-        }
-
         val fromContent = swipeAnimation.fromContent
+        val consumedVelocity: Float
         if (canChangeContent) {
             // If we are halfway between two contents, we check what the target will be based on the
             // velocity and offset of the transition, then we launch the animation.
@@ -427,18 +421,16 @@ private class DragControllerImpl(
                 } else {
                     fromContent
                 }
-
-            animateTo(targetContent = targetContent)
+            consumedVelocity = swipeAnimation.animateOffset(velocity, targetContent = targetContent)
         } else {
             // We are doing an overscroll preview animation between scenes.
             check(fromContent == swipeAnimation.currentContent) {
                 "canChangeContent is false but currentContent != fromContent"
             }
-            animateTo(targetContent = fromContent)
+            consumedVelocity = swipeAnimation.animateOffset(velocity, targetContent = fromContent)
         }
 
-        // The onStop animation consumes any remaining velocity.
-        return velocity
+        return consumedVelocity
     }
 
     /**

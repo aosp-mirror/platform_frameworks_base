@@ -16,15 +16,15 @@
 
 package com.android.server.appfunctions;
 
-import static android.app.appfunctions.flags.Flags.FLAG_ENABLE_APP_FUNCTION_MANAGER;
-
-import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.app.appsearch.AppSearchBatchResult;
 import android.app.appsearch.AppSearchManager;
 import android.app.appsearch.AppSearchManager.SearchContext;
 import android.app.appsearch.AppSearchResult;
 import android.app.appsearch.AppSearchSession;
+import android.app.appsearch.BatchResultCallback;
+import android.app.appsearch.GenericDocument;
+import android.app.appsearch.GetByDocumentIdRequest;
 import android.app.appsearch.GetSchemaResponse;
 import android.app.appsearch.PutDocumentsRequest;
 import android.app.appsearch.SearchResult;
@@ -42,10 +42,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 
-/**
- * A future API wrapper of {@link AppSearchSession} APIs.
- */
-@FlaggedApi(FLAG_ENABLE_APP_FUNCTION_MANAGER)
+/** A future API wrapper of {@link AppSearchSession} APIs. */
 public class FutureAppSearchSession implements Closeable {
     private static final String TAG = FutureAppSearchSession.class.getSimpleName();
     private final Executor mExecutor;
@@ -67,14 +64,14 @@ public class FutureAppSearchSession implements Closeable {
 
     /** Converts a failed app search result codes into an exception. */
     @NonNull
-    private static Exception failedResultToException(@NonNull AppSearchResult<?> appSearchResult) {
+    public static Exception failedResultToException(@NonNull AppSearchResult<?> appSearchResult) {
         return switch (appSearchResult.getResultCode()) {
-            case AppSearchResult.RESULT_INVALID_ARGUMENT -> new IllegalArgumentException(
-                    appSearchResult.getErrorMessage());
-            case AppSearchResult.RESULT_IO_ERROR -> new IOException(
-                    appSearchResult.getErrorMessage());
-            case AppSearchResult.RESULT_SECURITY_ERROR -> new SecurityException(
-                    appSearchResult.getErrorMessage());
+            case AppSearchResult.RESULT_INVALID_ARGUMENT ->
+                    new IllegalArgumentException(appSearchResult.getErrorMessage());
+            case AppSearchResult.RESULT_IO_ERROR ->
+                    new IOException(appSearchResult.getErrorMessage());
+            case AppSearchResult.RESULT_SECURITY_ERROR ->
+                    new SecurityException(appSearchResult.getErrorMessage());
             default -> new IllegalStateException(appSearchResult.getErrorMessage());
         };
     }
@@ -137,14 +134,16 @@ public class FutureAppSearchSession implements Closeable {
     /** Indexes documents into the AppSearchSession database. */
     public AndroidFuture<AppSearchBatchResult<String, Void>> put(
             @NonNull PutDocumentsRequest putDocumentsRequest) {
-        return getSessionAsync().thenCompose(
-                session -> {
-                    AndroidFuture<AppSearchBatchResult<String, Void>> batchResultFuture =
-                            new AndroidFuture<>();
+        return getSessionAsync()
+                .thenCompose(
+                        session -> {
+                            AndroidFuture<AppSearchBatchResult<String, Void>> batchResultFuture =
+                                    new AndroidFuture<>();
 
-                    session.put(putDocumentsRequest, mExecutor, batchResultFuture::complete);
-                    return batchResultFuture;
-                });
+                            session.put(
+                                    putDocumentsRequest, mExecutor, batchResultFuture::complete);
+                            return batchResultFuture;
+                        });
     }
 
     /**
@@ -152,10 +151,9 @@ public class FutureAppSearchSession implements Closeable {
      * of search provided.
      */
     public AndroidFuture<FutureSearchResults> search(
-            @NonNull String queryExpression,
-            @NonNull SearchSpec searchSpec) {
-        return getSessionAsync().thenApply(
-                        session -> session.search(queryExpression, searchSpec))
+            @NonNull String queryExpression, @NonNull SearchSpec searchSpec) {
+        return getSessionAsync()
+                .thenApply(session -> session.search(queryExpression, searchSpec))
                 .thenApply(result -> new FutureSearchResults(result, mExecutor));
     }
 
@@ -173,8 +171,8 @@ public class FutureAppSearchSession implements Closeable {
         private final SearchResults mSearchResults;
         private final Executor mExecutor;
 
-        public FutureSearchResults(@NonNull SearchResults searchResults,
-                @NonNull Executor executor) {
+        public FutureSearchResults(
+                @NonNull SearchResults searchResults, @NonNull Executor executor) {
             mSearchResults = Objects.requireNonNull(searchResults);
             mExecutor = Objects.requireNonNull(executor);
         }
@@ -184,15 +182,68 @@ public class FutureAppSearchSession implements Closeable {
                     new AndroidFuture<>();
 
             mSearchResults.getNextPage(mExecutor, nextPageFuture::complete);
-            return nextPageFuture.thenApply(result -> {
-                if (result.isSuccess()) {
-                    return result.getResultValue();
-                } else {
-                    throw new RuntimeException(
-                            failedResultToException(result));
-                }
-            });
+            return nextPageFuture.thenApply(
+                    result -> {
+                        if (result.isSuccess()) {
+                            return result.getResultValue();
+                        } else {
+                            throw new RuntimeException(failedResultToException(result));
+                        }
+                    });
+        }
+    }
+
+    /** A future API to retrieve a document by its id from the local AppSearch session. */
+    public AndroidFuture<GenericDocument> getByDocumentId(
+            @NonNull String documentId, @NonNull String namespace) {
+        Objects.requireNonNull(documentId);
+        Objects.requireNonNull(namespace);
+
+        GetByDocumentIdRequest request =
+                new GetByDocumentIdRequest.Builder(namespace)
+                        .addIds(documentId)
+                        .build();
+        return getSessionAsync()
+                .thenCompose(
+                        session -> {
+                            AndroidFuture<AppSearchBatchResult<String, GenericDocument>>
+                                    batchResultFuture = new AndroidFuture<>();
+                            session.getByDocumentId(
+                                    request,
+                                    mExecutor,
+                                    new BatchResultCallbackAdapter<>(batchResultFuture));
+
+                            return batchResultFuture.thenApply(
+                                    batchResult ->
+                                            getGenericDocumentFromBatchResult(
+                                                    batchResult, documentId));
+                        });
+    }
+
+    private static GenericDocument getGenericDocumentFromBatchResult(
+            AppSearchBatchResult<String, GenericDocument> result, String documentId) {
+        if (result.isSuccess()) {
+            return result.getSuccesses().get(documentId);
+        }
+        throw new IllegalArgumentException("No document in the result for id: " + documentId);
+    }
+
+    private static final class BatchResultCallbackAdapter<K, V>
+            implements BatchResultCallback<K, V> {
+        private final AndroidFuture<AppSearchBatchResult<K, V>> mFuture;
+
+        BatchResultCallbackAdapter(AndroidFuture<AppSearchBatchResult<K, V>> future) {
+            mFuture = future;
         }
 
+        @Override
+        public void onResult(@NonNull AppSearchBatchResult<K, V> result) {
+            mFuture.complete(result);
+        }
+
+        @Override
+        public void onSystemError(Throwable t) {
+            mFuture.completeExceptionally(t);
+        }
     }
 }

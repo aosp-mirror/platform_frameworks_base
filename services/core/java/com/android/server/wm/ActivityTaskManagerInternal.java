@@ -130,35 +130,6 @@ public abstract class ActivityTaskManagerInternal {
     }
 
     /**
-     * Sleep tokens cause the activity manager to put the top activity to sleep.
-     * They are used by components such as dreams that may hide and block interaction
-     * with underlying activities.
-     * The Acquirer provides an interface that encapsulates the underlying work, so the user does
-     * not need to handle the token by him/herself.
-     */
-    public interface SleepTokenAcquirer {
-
-        /**
-         * Acquires a sleep token.
-         * @param displayId The display to apply to.
-         */
-        void acquire(int displayId);
-
-        /**
-         * Releases the sleep token.
-         * @param displayId The display to apply to.
-         */
-        void release(int displayId);
-    }
-
-    /**
-     * Creates a sleep token acquirer for the specified display with the specified tag.
-     *
-     * @param tag A string identifying the purpose (eg. "Dream").
-     */
-    public abstract SleepTokenAcquirer createSleepTokenAcquirer(@NonNull String tag);
-
-    /**
      * Returns home activity for the specified user.
      *
      * @param userId ID of the user or {@link android.os.UserHandle#USER_ALL}

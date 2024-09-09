@@ -925,6 +925,18 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
         return PackageArchiver.isArchived(readUserState(userId));
     }
 
+    /**
+     * @return if the package is archived in any of the users
+     */
+    boolean isArchivedOnAnyUser(int[] userIds) {
+        for (int user : userIds) {
+            if (isArchived(user)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     int getInstallReason(int userId) {
         return readUserState(userId).getInstallReason();
     }
