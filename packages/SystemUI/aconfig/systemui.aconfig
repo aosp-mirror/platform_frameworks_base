@@ -288,6 +288,16 @@ flag {
 }
 
 flag {
+  name: "qs_quick_rebind_active_tiles"
+  namespace: "systemui"
+  description: "Rebind active custom tiles quickly."
+  bug: "362526228"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
     name: "coroutine_tracing"
     namespace: "systemui"
     description: "Adds thread-local data to System UI's global coroutine scopes to "
