@@ -19,6 +19,7 @@ package com.android.systemui.qs.tiles.impl.irecording
 import android.app.AlertDialog
 import android.app.BroadcastOptions
 import android.app.PendingIntent
+import android.content.Intent
 import android.util.Log
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.animation.DialogCuj
@@ -27,12 +28,16 @@ import com.android.systemui.animation.Expandable
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor
+import com.android.systemui.qs.tiles.DELAY_MS
+import com.android.systemui.qs.tiles.INTERVAL_MS
 import com.android.systemui.qs.tiles.base.interactor.QSTileInput
 import com.android.systemui.qs.tiles.base.interactor.QSTileUserActionInteractor
 import com.android.systemui.qs.tiles.viewmodel.QSTileUserAction
-import com.android.systemui.recordissue.IssueRecordingService
+import com.android.systemui.recordissue.IssueRecordingService.Companion.getStartIntent
+import com.android.systemui.recordissue.IssueRecordingService.Companion.getStopIntent
 import com.android.systemui.recordissue.RecordIssueDialogDelegate
 import com.android.systemui.recordissue.RecordIssueModule.Companion.TILE_SPEC
+import com.android.systemui.screenrecord.RecordingController
 import com.android.systemui.screenrecord.RecordingService
 import com.android.systemui.settings.UserContextProvider
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil
@@ -53,6 +58,7 @@ constructor(
     private val panelInteractor: PanelInteractor,
     private val userContextProvider: UserContextProvider,
     private val delegateFactory: RecordIssueDialogDelegate.Factory,
+    private val recordingController: RecordingController,
 ) : QSTileUserActionInteractor<IssueRecordingModel> {
 
     override suspend fun handleInput(input: QSTileInput<IssueRecordingModel>) {
@@ -95,20 +101,22 @@ constructor(
     }
 
     private fun startIssueRecordingService() =
-        PendingIntent.getForegroundService(
-                userContextProvider.userContext,
-                RecordingService.REQUEST_CODE,
-                IssueRecordingService.getStartIntent(userContextProvider.userContext),
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-            .send(BroadcastOptions.makeBasic().apply { isInteractive = true }.toBundle())
+        recordingController.startCountdown(
+            DELAY_MS,
+            INTERVAL_MS,
+            pendingServiceIntent(getStartIntent(userContextProvider.userContext)),
+            pendingServiceIntent(getStopIntent(userContextProvider.userContext))
+        )
 
     private fun stopIssueRecordingService() =
-        PendingIntent.getService(
-                userContextProvider.userContext,
-                RecordingService.REQUEST_CODE,
-                IssueRecordingService.getStopIntent(userContextProvider.userContext),
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
+        pendingServiceIntent(getStopIntent(userContextProvider.userContext))
             .send(BroadcastOptions.makeBasic().apply { isInteractive = true }.toBundle())
+
+    private fun pendingServiceIntent(action: Intent) =
+        PendingIntent.getService(
+            userContextProvider.userContext,
+            RecordingService.REQUEST_CODE,
+            action,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
 }

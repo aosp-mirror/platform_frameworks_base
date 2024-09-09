@@ -97,9 +97,9 @@ public class StageCoordinatorTests extends ShellTestCase {
     @Mock
     private SyncTransactionQueue mSyncQueue;
     @Mock
-    private MainStage mMainStage;
+    private StageTaskListener mMainStage;
     @Mock
-    private SideStage mSideStage;
+    private StageTaskListener mSideStage;
     @Mock
     private SplitLayout mSplitLayout;
     @Mock

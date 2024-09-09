@@ -4804,9 +4804,9 @@
     </string>
 
     <!-- Title for accessibility edit shortcut selection menu dialog, and dialog is triggered
-    from volume key shortcut. [CHAR LIMIT=100] -->
+    from volume keys shortcut. [CHAR LIMIT=100] -->
     <string name="accessibility_edit_shortcut_menu_volume_title">Choose features to use with the
-        volume key shortcut
+        volume keys shortcut
     </string>
 
     <!-- Text for showing the warning to user when uncheck the legacy app item in the accessibility

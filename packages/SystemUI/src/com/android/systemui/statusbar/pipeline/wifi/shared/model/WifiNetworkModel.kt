@@ -24,6 +24,7 @@ import com.android.systemui.log.table.Diffable
 import com.android.systemui.log.table.TableRowLogger
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
 import com.android.wifitrackerlib.HotspotNetworkEntry.DeviceType
+import com.android.wifitrackerlib.WifiEntry
 
 /** Provides information about the current wifi network. */
 sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
@@ -38,6 +39,7 @@ sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
      */
     object Unavailable : WifiNetworkModel() {
         override fun toString() = "WifiNetwork.Unavailable"
+
         override fun logDiffs(prevVal: WifiNetworkModel, row: TableRowLogger) {
             if (prevVal is Unavailable) {
                 return
@@ -48,16 +50,12 @@ sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
 
         override fun logFull(row: TableRowLogger) {
             row.logChange(COL_NETWORK_TYPE, TYPE_UNAVAILABLE)
-            row.logChange(COL_NETWORK_ID, NETWORK_ID_DEFAULT)
             row.logChange(COL_SUB_ID, SUB_ID_DEFAULT)
             row.logChange(COL_VALIDATED, false)
             row.logChange(COL_LEVEL, LEVEL_DEFAULT)
             row.logChange(COL_NUM_LEVELS, NUM_LEVELS_DEFAULT)
             row.logChange(COL_SSID, null)
             row.logChange(COL_HOTSPOT, null)
-            row.logChange(COL_PASSPOINT_ACCESS_POINT, false)
-            row.logChange(COL_ONLINE_SIGN_UP, false)
-            row.logChange(COL_PASSPOINT_NAME, null)
         }
     }
 
@@ -67,6 +65,7 @@ sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
         val invalidReason: String,
     ) : WifiNetworkModel() {
         override fun toString() = "WifiNetwork.Invalid[$invalidReason]"
+
         override fun logDiffs(prevVal: WifiNetworkModel, row: TableRowLogger) {
             if (prevVal !is Invalid) {
                 logFull(row)
@@ -80,16 +79,12 @@ sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
 
         override fun logFull(row: TableRowLogger) {
             row.logChange(COL_NETWORK_TYPE, "$TYPE_UNAVAILABLE $invalidReason")
-            row.logChange(COL_NETWORK_ID, NETWORK_ID_DEFAULT)
             row.logChange(COL_SUB_ID, SUB_ID_DEFAULT)
             row.logChange(COL_VALIDATED, false)
             row.logChange(COL_LEVEL, LEVEL_DEFAULT)
             row.logChange(COL_NUM_LEVELS, NUM_LEVELS_DEFAULT)
             row.logChange(COL_SSID, null)
             row.logChange(COL_HOTSPOT, null)
-            row.logChange(COL_PASSPOINT_ACCESS_POINT, false)
-            row.logChange(COL_ONLINE_SIGN_UP, false)
-            row.logChange(COL_PASSPOINT_NAME, null)
         }
     }
 
@@ -108,16 +103,12 @@ sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
 
         override fun logFull(row: TableRowLogger) {
             row.logChange(COL_NETWORK_TYPE, TYPE_INACTIVE)
-            row.logChange(COL_NETWORK_ID, NETWORK_ID_DEFAULT)
             row.logChange(COL_SUB_ID, SUB_ID_DEFAULT)
             row.logChange(COL_VALIDATED, false)
             row.logChange(COL_LEVEL, LEVEL_DEFAULT)
             row.logChange(COL_NUM_LEVELS, NUM_LEVELS_DEFAULT)
             row.logChange(COL_SSID, null)
             row.logChange(COL_HOTSPOT, null)
-            row.logChange(COL_PASSPOINT_ACCESS_POINT, false)
-            row.logChange(COL_ONLINE_SIGN_UP, false)
-            row.logChange(COL_PASSPOINT_NAME, null)
         }
     }
 
@@ -128,14 +119,6 @@ sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
      * See [android.net.wifi.WifiInfo.isCarrierMerged] for more information.
      */
     data class CarrierMerged(
-        /**
-         * The [android.net.Network.netId] we received from
-         * [android.net.ConnectivityManager.NetworkCallback] in association with this wifi network.
-         *
-         * Importantly, **not** [android.net.wifi.WifiInfo.getNetworkId].
-         */
-        val networkId: Int,
-
         /**
          * The subscription ID that this connection represents.
          *
@@ -154,7 +137,8 @@ sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
     ) : WifiNetworkModel() {
         init {
             require(level in MIN_VALID_LEVEL..numberOfLevels) {
-                "0 <= wifi level <= $numberOfLevels required; level was $level"
+                "CarrierMerged: $MIN_VALID_LEVEL <= wifi level <= $numberOfLevels required; " +
+                    "level was $level"
             }
             require(subscriptionId != SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
                 "subscription ID cannot be invalid"
@@ -167,9 +151,6 @@ sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
                 return
             }
 
-            if (prevVal.networkId != networkId) {
-                row.logChange(COL_NETWORK_ID, networkId)
-            }
             if (prevVal.subscriptionId != subscriptionId) {
                 row.logChange(COL_SUB_ID, subscriptionId)
             }
@@ -183,29 +164,17 @@ sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
 
         override fun logFull(row: TableRowLogger) {
             row.logChange(COL_NETWORK_TYPE, TYPE_CARRIER_MERGED)
-            row.logChange(COL_NETWORK_ID, networkId)
             row.logChange(COL_SUB_ID, subscriptionId)
             row.logChange(COL_VALIDATED, true)
             row.logChange(COL_LEVEL, level)
             row.logChange(COL_NUM_LEVELS, numberOfLevels)
             row.logChange(COL_SSID, null)
             row.logChange(COL_HOTSPOT, null)
-            row.logChange(COL_PASSPOINT_ACCESS_POINT, false)
-            row.logChange(COL_ONLINE_SIGN_UP, false)
-            row.logChange(COL_PASSPOINT_NAME, null)
         }
     }
 
     /** Provides information about an active wifi network. */
     data class Active(
-        /**
-         * The [android.net.Network.netId] we received from
-         * [android.net.ConnectivityManager.NetworkCallback] in association with this wifi network.
-         *
-         * Importantly, **not** [android.net.wifi.WifiInfo.getNetworkId].
-         */
-        val networkId: Int,
-
         /** See [android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED]. */
         val isValidated: Boolean = false,
 
@@ -220,19 +189,11 @@ sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
          * isn't a hotspot connection.
          */
         val hotspotDeviceType: HotspotDeviceType = WifiNetworkModel.HotspotDeviceType.NONE,
-
-        /** See [android.net.wifi.WifiInfo.isPasspointAp]. */
-        val isPasspointAccessPoint: Boolean = false,
-
-        /** See [android.net.wifi.WifiInfo.isOsuAp]. */
-        val isOnlineSignUpForPasspointAccessPoint: Boolean = false,
-
-        /** See [android.net.wifi.WifiInfo.passpointProviderFriendlyName]. */
-        val passpointProviderFriendlyName: String? = null,
     ) : WifiNetworkModel() {
         init {
             require(level in MIN_VALID_LEVEL..MAX_VALID_LEVEL) {
-                "0 <= wifi level <= 4 required; level was $level"
+                "Active: $MIN_VALID_LEVEL <= wifi level <= $MAX_VALID_LEVEL required; " +
+                    "level was $level"
             }
         }
 
@@ -247,9 +208,6 @@ sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
                 return
             }
 
-            if (prevVal.networkId != networkId) {
-                row.logChange(COL_NETWORK_ID, networkId)
-            }
             if (prevVal.isValidated != isValidated) {
                 row.logChange(COL_VALIDATED, isValidated)
             }
@@ -262,68 +220,25 @@ sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
             if (prevVal.hotspotDeviceType != hotspotDeviceType) {
                 row.logChange(COL_HOTSPOT, hotspotDeviceType.name)
             }
-
-            // TODO(b/238425913): The passpoint-related values are frequently never used, so it
-            //   would be great to not log them when they're not used.
-            if (prevVal.isPasspointAccessPoint != isPasspointAccessPoint) {
-                row.logChange(COL_PASSPOINT_ACCESS_POINT, isPasspointAccessPoint)
-            }
-            if (
-                prevVal.isOnlineSignUpForPasspointAccessPoint !=
-                    isOnlineSignUpForPasspointAccessPoint
-            ) {
-                row.logChange(COL_ONLINE_SIGN_UP, isOnlineSignUpForPasspointAccessPoint)
-            }
-            if (prevVal.passpointProviderFriendlyName != passpointProviderFriendlyName) {
-                row.logChange(COL_PASSPOINT_NAME, passpointProviderFriendlyName)
-            }
         }
 
         override fun logFull(row: TableRowLogger) {
             row.logChange(COL_NETWORK_TYPE, TYPE_ACTIVE)
-            row.logChange(COL_NETWORK_ID, networkId)
             row.logChange(COL_SUB_ID, null)
             row.logChange(COL_VALIDATED, isValidated)
             row.logChange(COL_LEVEL, level)
             row.logChange(COL_NUM_LEVELS, null)
             row.logChange(COL_SSID, ssid)
             row.logChange(COL_HOTSPOT, hotspotDeviceType.name)
-            row.logChange(COL_PASSPOINT_ACCESS_POINT, isPasspointAccessPoint)
-            row.logChange(COL_ONLINE_SIGN_UP, isOnlineSignUpForPasspointAccessPoint)
-            row.logChange(COL_PASSPOINT_NAME, passpointProviderFriendlyName)
-        }
-
-        override fun toString(): String {
-            // Only include the passpoint-related values in the string if we have them. (Most
-            // networks won't have them so they'll be mostly clutter.)
-            val passpointString =
-                if (
-                    isPasspointAccessPoint ||
-                        isOnlineSignUpForPasspointAccessPoint ||
-                        passpointProviderFriendlyName != null
-                ) {
-                    ", isPasspointAp=$isPasspointAccessPoint, " +
-                        "isOnlineSignUpForPasspointAp=$isOnlineSignUpForPasspointAccessPoint, " +
-                        "passpointName=$passpointProviderFriendlyName"
-                } else {
-                    ""
-                }
-
-            return "WifiNetworkModel.Active(networkId=$networkId, isValidated=$isValidated, " +
-                "level=$level, ssid=$ssid$passpointString)"
         }
 
         companion object {
-            // TODO(b/292534484): Use [com.android.wifitrackerlib.WifiEntry.WIFI_LEVEL_MAX] instead
-            // once the migration to WifiTrackerLib is complete.
-            @VisibleForTesting internal const val MAX_VALID_LEVEL = 4
+            @VisibleForTesting internal const val MAX_VALID_LEVEL = WifiEntry.WIFI_LEVEL_MAX
         }
     }
 
     companion object {
-        // TODO(b/292534484): Use [com.android.wifitrackerlib.WifiEntry.WIFI_LEVEL_MIN] instead
-        // once the migration to WifiTrackerLib is complete.
-        @VisibleForTesting internal const val MIN_VALID_LEVEL = 0
+        @VisibleForTesting internal const val MIN_VALID_LEVEL = WifiEntry.WIFI_LEVEL_MIN
     }
 
     /**
@@ -367,18 +282,13 @@ const val TYPE_INACTIVE = "Inactive"
 const val TYPE_ACTIVE = "Active"
 
 const val COL_NETWORK_TYPE = "type"
-const val COL_NETWORK_ID = "networkId"
 const val COL_SUB_ID = "subscriptionId"
 const val COL_VALIDATED = "isValidated"
 const val COL_LEVEL = "level"
 const val COL_NUM_LEVELS = "maxLevel"
 const val COL_SSID = "ssid"
 const val COL_HOTSPOT = "hotspot"
-const val COL_PASSPOINT_ACCESS_POINT = "isPasspointAccessPoint"
-const val COL_ONLINE_SIGN_UP = "isOnlineSignUpForPasspointAccessPoint"
-const val COL_PASSPOINT_NAME = "passpointProviderFriendlyName"
 
 val LEVEL_DEFAULT: String? = null
 val NUM_LEVELS_DEFAULT: String? = null
-val NETWORK_ID_DEFAULT: String? = null
 val SUB_ID_DEFAULT: String? = null

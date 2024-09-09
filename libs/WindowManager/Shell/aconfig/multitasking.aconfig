@@ -25,11 +25,10 @@ flag {
 }
 
 flag {
-    name: "enable_pip2_implementation"
+    name: "enable_pip2"
     namespace: "multitasking"
     description: "Enables the new implementation of PiP (PiP2)"
-    bug: "290220798"
-    is_fixed_read_only: true
+    bug: "311462191"
 }
 
 flag {

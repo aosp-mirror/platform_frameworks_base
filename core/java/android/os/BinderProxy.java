@@ -646,6 +646,37 @@ public final class BinderProxy implements IBinder {
     private native boolean unlinkToDeathNative(DeathRecipient recipient, int flags);
 
     /**
+     * This list is to hold strong reference to the frozen state callbacks. The callbacks are only
+     * weakly referenced by JNI so the strong references here are needed to keep the callbacks
+     * around until the proxy is GC'ed.
+     */
+    private List<IFrozenStateChangeCallback> mFrozenStateChangeCallbacks =
+            Collections.synchronizedList(new ArrayList<>());
+
+    /**
+     * See {@link IBinder#addFrozenStateChangeCallback(IFrozenStateChangeCallback)}
+     */
+    public void addFrozenStateChangeCallback(IFrozenStateChangeCallback callback)
+            throws RemoteException {
+        addFrozenStateChangeCallbackNative(callback);
+        mFrozenStateChangeCallbacks.add(callback);
+    }
+
+    /**
+     * See {@link IBinder#removeFrozenStateChangeCallback}
+     */
+    public boolean removeFrozenStateChangeCallback(IFrozenStateChangeCallback callback) {
+        mFrozenStateChangeCallbacks.remove(callback);
+        return removeFrozenStateChangeCallbackNative(callback);
+    }
+
+    private native void addFrozenStateChangeCallbackNative(IFrozenStateChangeCallback callback)
+            throws RemoteException;
+
+    private native boolean removeFrozenStateChangeCallbackNative(
+            IFrozenStateChangeCallback callback);
+
+    /**
      * Perform a dump on the remote object
      *
      * @param fd The raw file descriptor that the dump is being sent to.
@@ -726,6 +757,17 @@ public final class BinderProxy implements IBinder {
             recipient.binderDied(binderProxy);
         } catch (RuntimeException exc) {
             Log.w("BinderNative", "Uncaught exception from death notification",
+                    exc);
+        }
+    }
+
+    private static void invokeFrozenStateChangeCallback(
+            IFrozenStateChangeCallback callback, IBinder binderProxy, int stateIndex) {
+        try {
+            callback.onFrozenStateChanged(binderProxy,
+                    IFrozenStateChangeCallback.State.values()[stateIndex]);
+        } catch (RuntimeException exc) {
+            Log.w("BinderNative", "Uncaught exception from frozen state change callback",
                     exc);
         }
     }

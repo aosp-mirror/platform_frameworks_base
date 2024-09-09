@@ -24,8 +24,9 @@ import com.android.hoststubgen.filters.DefaultHookInjectingFilter
 import com.android.hoststubgen.filters.FilterPolicy
 import com.android.hoststubgen.filters.FilterRemapper
 import com.android.hoststubgen.filters.ImplicitOutputFilter
-import com.android.hoststubgen.filters.NativeFilter
+import com.android.hoststubgen.filters.KeepNativeFilter
 import com.android.hoststubgen.filters.OutputFilter
+import com.android.hoststubgen.filters.SanitizationFilter
 import com.android.hoststubgen.filters.createFilterFromTextPolicyFile
 import com.android.hoststubgen.filters.printAsTextPolicy
 import com.android.hoststubgen.utils.ClassFilter
@@ -134,7 +135,7 @@ class HostStubGen(val options: HostStubGenOptions) {
         var filter: OutputFilter = ConstantFilter(options.defaultPolicy.get, "default-by-options")
 
         // Next, we build a filter that preserves all native methods by default
-        filter = NativeFilter(allClasses, filter)
+        filter = KeepNativeFilter(allClasses, filter)
 
         // Next, we need a filter that resolves "class-wide" policies.
         // This is used when a member (methods, fields, nested classes) don't get any polices
@@ -166,11 +167,12 @@ class HostStubGen(val options: HostStubGenOptions) {
             options.throwAnnotations,
             options.removeAnnotations,
             options.substituteAnnotations,
-            options.nativeSubstituteAnnotations,
+            options.redirectAnnotations,
+            options.redirectionClassAnnotations,
             options.classLoadHookAnnotations,
             options.keepStaticInitializerAnnotations,
             annotationAllowedClassesFilter,
-            filter,
+            filter
         )
 
         // Next, "text based" filter, which allows to override polices without touching
@@ -181,6 +183,9 @@ class HostStubGen(val options: HostStubGenOptions) {
 
         // Apply the implicit filter.
         filter = ImplicitOutputFilter(errors, allClasses, filter)
+
+        // Add a final sanitization step.
+        filter = SanitizationFilter(errors, allClasses, filter)
 
         return filter
     }

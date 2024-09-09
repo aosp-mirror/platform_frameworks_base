@@ -84,7 +84,6 @@ fun SceneContainer(
             enableInterruptions = false,
         )
     }
-    val currentSceneKey = state.transitionState.currentScene
 
     DisposableEffect(state) {
         val dataSource = SceneTransitionLayoutDataSource(state, coroutineScope)
@@ -97,19 +96,26 @@ fun SceneContainer(
         onDispose { viewModel.setTransitionState(null) }
     }
 
+    val actionableContentKey =
+        viewModel.getActionableContentKey(state.currentScene, state.currentOverlays, overlayByKey)
     val userActionsByContentKey: MutableMap<ContentKey, Map<UserAction, UserActionResult>> =
         remember {
             mutableStateMapOf()
         }
-    // TODO(b/359173565): Add overlay user actions when the API is final.
-    LaunchedEffect(currentSceneKey) {
+    LaunchedEffect(actionableContentKey) {
         try {
-            sceneByKey[currentSceneKey]?.destinationScenes?.collectLatest { userActions ->
-                userActionsByContentKey[currentSceneKey] =
+            val actionableContent: ActionableContent =
+                checkNotNull(
+                    overlayByKey[actionableContentKey] ?: sceneByKey[actionableContentKey]
+                ) {
+                    "invalid ContentKey: $actionableContentKey"
+                }
+            actionableContent.userActions.collectLatest { userActions ->
+                userActionsByContentKey[actionableContentKey] =
                     viewModel.resolveSceneFamilies(userActions)
             }
         } finally {
-            userActionsByContentKey[currentSceneKey] = emptyMap()
+            userActionsByContentKey[actionableContentKey] = emptyMap()
         }
     }
 
@@ -139,13 +145,16 @@ fun SceneContainer(
                     }
                 }
             }
-            overlayByKey.forEach { (overlayKey, composableOverlay) ->
+            overlayByKey.forEach { (overlayKey, overlay) ->
                 overlay(
                     key = overlayKey,
                     userActions = userActionsByContentKey.getOrDefault(overlayKey, emptyMap())
                 ) {
+                    // Activate the overlay.
+                    LaunchedEffect(overlay) { overlay.activate() }
+
                     // Render the overlay.
-                    with(composableOverlay) { this@overlay.Content(Modifier) }
+                    with(overlay) { this@overlay.Content(Modifier) }
                 }
             }
         }

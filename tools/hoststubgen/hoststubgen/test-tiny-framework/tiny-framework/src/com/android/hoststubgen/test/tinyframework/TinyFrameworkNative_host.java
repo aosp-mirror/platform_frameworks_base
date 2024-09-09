@@ -17,8 +17,6 @@ package com.android.hoststubgen.test.tinyframework;
 
 import android.hosttest.annotation.HostSideTestWholeClassKeep;
 
-// TODO: This annotation shouldn't be needed.
-// We should infer it from HostSideTestNativeSubstitutionClass.
 @HostSideTestWholeClassKeep
 public class TinyFrameworkNative_host {
     public static int nativeAddTwo(int arg) {
@@ -37,5 +35,11 @@ public class TinyFrameworkNative_host {
 
     public static byte nativeBytePlus(byte arg1, byte arg2) {
         return (byte) (arg1 + arg2);
+    }
+
+    public static void notNativeRedirected(TinyFrameworkNative source) {
+    }
+
+    public static void notNativeStaticRedirected() {
     }
 }

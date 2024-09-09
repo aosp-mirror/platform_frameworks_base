@@ -44,13 +44,13 @@ public interface SplitScreen {
     int STAGE_TYPE_UNDEFINED = -1;
     /**
      * The main stage type.
-     * @see MainStage
+     * @see StageTaskListener
      */
     int STAGE_TYPE_MAIN = 0;
 
     /**
      * The side stage type.
-     * @see SideStage
+     * @see StageTaskListener
      */
     int STAGE_TYPE_SIDE = 1;
 

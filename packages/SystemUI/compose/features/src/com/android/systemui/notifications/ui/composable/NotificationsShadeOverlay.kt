@@ -23,6 +23,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.ContentScope
+import com.android.compose.animation.scene.UserAction
+import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.lifecycle.rememberViewModel
@@ -39,6 +41,7 @@ import com.android.systemui.statusbar.phone.ui.StatusBarIconController
 import com.android.systemui.statusbar.phone.ui.TintedIconManager
 import dagger.Lazy
 import javax.inject.Inject
+import kotlinx.coroutines.flow.Flow
 
 @SysUISingleton
 class NotificationsShadeOverlay
@@ -58,6 +61,8 @@ constructor(
     private val actionsViewModel: NotificationsShadeOverlayActionsViewModel by lazy {
         actionsViewModelFactory.create()
     }
+
+    override val userActions: Flow<Map<UserAction, UserActionResult>> = actionsViewModel.actions
 
     override suspend fun activate(): Nothing {
         actionsViewModel.activate()

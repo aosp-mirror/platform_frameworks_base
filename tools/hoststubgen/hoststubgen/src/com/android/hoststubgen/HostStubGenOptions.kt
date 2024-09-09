@@ -85,9 +85,10 @@ class HostStubGenOptions(
         var throwAnnotations: MutableSet<String> = mutableSetOf(),
         var removeAnnotations: MutableSet<String> = mutableSetOf(),
         var keepClassAnnotations: MutableSet<String> = mutableSetOf(),
+        var redirectAnnotations: MutableSet<String> = mutableSetOf(),
 
         var substituteAnnotations: MutableSet<String> = mutableSetOf(),
-        var nativeSubstituteAnnotations: MutableSet<String> = mutableSetOf(),
+        var redirectionClassAnnotations: MutableSet<String> = mutableSetOf(),
         var classLoadHookAnnotations: MutableSet<String> = mutableSetOf(),
         var keepStaticInitializerAnnotations: MutableSet<String> = mutableSetOf(),
 
@@ -186,8 +187,11 @@ class HostStubGenOptions(
                         "--substitute-annotation" ->
                             ret.substituteAnnotations.addUniqueAnnotationArg()
 
-                        "--native-substitute-annotation" ->
-                            ret.nativeSubstituteAnnotations.addUniqueAnnotationArg()
+                        "--redirect-annotation" ->
+                            ret.redirectAnnotations.addUniqueAnnotationArg()
+
+                        "--redirection-class-annotation" ->
+                            ret.redirectionClassAnnotations.addUniqueAnnotationArg()
 
                         "--class-load-hook-annotation" ->
                             ret.classLoadHookAnnotations.addUniqueAnnotationArg()
@@ -275,7 +279,7 @@ class HostStubGenOptions(
               removeAnnotations=$removeAnnotations,
               keepClassAnnotations=$keepClassAnnotations,
               substituteAnnotations=$substituteAnnotations,
-              nativeSubstituteAnnotations=$nativeSubstituteAnnotations,
+              nativeSubstituteAnnotations=$redirectionClassAnnotations,
               classLoadHookAnnotations=$classLoadHookAnnotations,
               keepStaticInitializerAnnotations=$keepStaticInitializerAnnotations,
               packageRedirects=$packageRedirects,

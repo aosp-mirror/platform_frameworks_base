@@ -779,6 +779,26 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
 
     @Test
     @DisableSceneContainer
+    public void testResetDoesNotHideBouncerWhenNotShowing() {
+        reset(mDismissCallbackRegistry);
+        reset(mPrimaryBouncerInteractor);
+
+        // GIVEN the keyguard is showing
+        reset(mAlternateBouncerInteractor);
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
+        when(mPrimaryBouncerInteractor.isFullyShowing()).thenReturn(false);
+
+        // WHEN SBKV is reset with hideBouncerWhenShowing=true
+        mStatusBarKeyguardViewManager.reset(true);
+
+        // THEN no calls to hide should be made
+        verify(mAlternateBouncerInteractor, never()).hide();
+        verify(mDismissCallbackRegistry, never()).notifyDismissCancelled();
+        verify(mPrimaryBouncerInteractor, never()).setDismissAction(eq(null), eq(null));
+    }
+
+    @Test
+    @DisableSceneContainer
     public void testResetHideBouncerWhenShowing_alternateBouncerHides() {
         reset(mDismissCallbackRegistry);
         reset(mPrimaryBouncerInteractor);
@@ -786,6 +806,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
         // GIVEN the keyguard is showing
         reset(mAlternateBouncerInteractor);
         when(mKeyguardStateController.isShowing()).thenReturn(true);
+        when(mPrimaryBouncerInteractor.isFullyShowing()).thenReturn(true);
 
         // WHEN SBKV is reset with hideBouncerWhenShowing=true
         mStatusBarKeyguardViewManager.reset(true);

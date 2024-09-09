@@ -2288,6 +2288,10 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
     }
 
     private void updateInputRestrictedLocked() {
+        if (KeyguardWmStateRefactor.isEnabled()) {
+            return;
+        }
+
         boolean inputRestricted = isInputRestricted();
         if (mInputRestricted != inputRestricted) {
             mInputRestricted = inputRestricted;

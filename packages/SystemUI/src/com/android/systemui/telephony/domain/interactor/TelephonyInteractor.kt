@@ -29,11 +29,12 @@ import kotlinx.coroutines.flow.StateFlow
 class TelephonyInteractor
 @Inject
 constructor(
-    repository: TelephonyRepository,
+    private val repository: TelephonyRepository,
 ) {
     @Annotation.CallState val callState: Flow<Int> = repository.callState
 
     val isInCall: StateFlow<Boolean> = repository.isInCall
 
-    val hasTelephonyRadio: Boolean = repository.hasTelephonyRadio
+    val hasTelephonyRadio: Boolean
+        get() = repository.hasTelephonyRadio
 }

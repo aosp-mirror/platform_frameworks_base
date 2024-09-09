@@ -66,6 +66,7 @@ import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.IpcDataCache;
 import android.os.LocaleList;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -87,6 +88,7 @@ import android.util.Size;
 import android.view.WindowInsetsController.Appearance;
 import android.window.TaskSnapshot;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.LocalePicker;
 import com.android.internal.app.procstats.ProcessStats;
 import com.android.internal.os.RoSystemProperties;
@@ -236,6 +238,52 @@ public class ActivityManager {
     /** Rate-Limiting Cache that allows no more than 200 calls to the service per second. */
     private static final RateLimitingCache<List<ProcessErrorStateInfo>> mErrorProcessesCache =
             new RateLimitingCache<>(10, 2);
+
+    /** Rate-Limiting cache that allows no more than 100 calls to the service per second. */
+    @GuardedBy("mMemoryInfoCache")
+    private static final RateLimitingCache<MemoryInfo> mMemoryInfoCache =
+            new RateLimitingCache<>(10);
+    /** Used to store cached results for rate-limited calls to getMemoryInfo(). */
+    @GuardedBy("mMemoryInfoCache")
+    private static final MemoryInfo mRateLimitedMemInfo = new MemoryInfo();
+
+    /**
+     * Query handler for mGetCurrentUserIdCache - returns a cached value of the current foreground
+     * user id if the backstage_power/android.app.cache_get_current_user_id flag is enabled.
+     */
+    private static final IpcDataCache.QueryHandler<Void, Integer> mGetCurrentUserIdQuery =
+            new IpcDataCache.QueryHandler<>() {
+                @Override
+                public Integer apply(Void query) {
+                    try {
+                        return getService().getCurrentUserId();
+                    } catch (RemoteException e) {
+                        throw e.rethrowFromSystemServer();
+                    }
+                }
+
+                @Override
+                public boolean shouldBypassCache(Void query) {
+                    // If the flag to enable the new caching behavior is off, bypass the cache.
+                    return !Flags.cacheGetCurrentUserId();
+                }
+            };
+
+    /** A cache which maintains the current foreground user id. */
+    private static final IpcDataCache<Void, Integer> mGetCurrentUserIdCache =
+            new IpcDataCache<>(1, IpcDataCache.MODULE_SYSTEM,
+                    /* api= */ "getCurrentUserId", /* cacheName= */ "CurrentUserIdCache",
+                    mGetCurrentUserIdQuery);
+
+    /**
+     * The current foreground user has changed - invalidate the cache. Currently only called from
+     * UserController when a user switch occurs.
+     * @hide
+     */
+    public static void invalidateGetCurrentUserIdCache() {
+        IpcDataCache.invalidateCache(
+                IpcDataCache.MODULE_SYSTEM, /* api= */ "getCurrentUserId");
+    }
 
     /**
      * Map of callbacks that have registered for {@link UidFrozenStateChanged} events.
@@ -3471,6 +3519,19 @@ public class ActivityManager {
             foregroundAppThreshold = source.readLong();
         }
 
+        /** @hide */
+        public void copyTo(MemoryInfo other) {
+            other.advertisedMem = advertisedMem;
+            other.availMem = availMem;
+            other.totalMem = totalMem;
+            other.threshold = threshold;
+            other.lowMemory = lowMemory;
+            other.hiddenAppThreshold = hiddenAppThreshold;
+            other.secondaryServerThreshold = secondaryServerThreshold;
+            other.visibleAppThreshold = visibleAppThreshold;
+            other.foregroundAppThreshold = foregroundAppThreshold;
+        }
+
         public static final @android.annotation.NonNull Creator<MemoryInfo> CREATOR
                 = new Creator<MemoryInfo>() {
             public MemoryInfo createFromParcel(Parcel source) {
@@ -3497,6 +3558,20 @@ public class ActivityManager {
      * manage its memory.
      */
     public void getMemoryInfo(MemoryInfo outInfo) {
+        if (Flags.rateLimitGetMemoryInfo()) {
+            synchronized (mMemoryInfoCache) {
+                mMemoryInfoCache.get(() -> {
+                    getMemoryInfoInternal(mRateLimitedMemInfo);
+                    return mRateLimitedMemInfo;
+                });
+                mRateLimitedMemInfo.copyTo(outInfo);
+            }
+        } else {
+            getMemoryInfoInternal(outInfo);
+        }
+    }
+
+    private void getMemoryInfoInternal(MemoryInfo outInfo) {
         try {
             getService().getMemoryInfo(outInfo);
         } catch (RemoteException e) {
@@ -5244,11 +5319,7 @@ public class ActivityManager {
     })
     @android.ravenwood.annotation.RavenwoodReplace
     public static int getCurrentUser() {
-        try {
-            return getService().getCurrentUserId();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return mGetCurrentUserIdCache.query(null);
     }
 
     /** @hide */

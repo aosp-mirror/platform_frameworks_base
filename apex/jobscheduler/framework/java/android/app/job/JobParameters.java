@@ -34,15 +34,21 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
+import android.system.SystemCleaner;
+import android.util.Log;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.ref.Cleaner;
 
 /**
  * Contains the parameters used to configure/identify your job. You do not create this object
  * yourself, instead it is handed in to your application by the System.
  */
 public class JobParameters implements Parcelable {
+    private static final String TAG = "JobParameters";
 
     /** @hide */
     public static final int INTERNAL_STOP_REASON_UNKNOWN = -1;
@@ -306,6 +312,10 @@ public class JobParameters implements Parcelable {
     private int mStopReason = STOP_REASON_UNDEFINED;
     private int mInternalStopReason = INTERNAL_STOP_REASON_UNKNOWN;
     private String debugStopReason; // Human readable stop reason for debugging.
+    @Nullable
+    private JobCleanupCallback mJobCleanupCallback;
+    @Nullable
+    private Cleaner.Cleanable mCleanable;
 
     /** @hide */
     public JobParameters(IBinder callback, String namespace, int jobId, PersistableBundle extras,
@@ -326,6 +336,8 @@ public class JobParameters implements Parcelable {
         this.mTriggeredContentAuthorities = triggeredContentAuthorities;
         this.mNetwork = network;
         this.mJobNamespace = namespace;
+        this.mJobCleanupCallback = null;
+        this.mCleanable = null;
     }
 
     /**
@@ -597,6 +609,8 @@ public class JobParameters implements Parcelable {
         mStopReason = in.readInt();
         mInternalStopReason = in.readInt();
         debugStopReason = in.readString();
+        mJobCleanupCallback = null;
+        mCleanable = null;
     }
 
     /** @hide */
@@ -610,6 +624,54 @@ public class JobParameters implements Parcelable {
         mStopReason = reason;
         mInternalStopReason = internalStopReason;
         this.debugStopReason = debugStopReason;
+    }
+
+    /** @hide */
+    public void initCleaner(JobCleanupCallback jobCleanupCallback) {
+        mJobCleanupCallback = jobCleanupCallback;
+        mCleanable = SystemCleaner.cleaner().register(this, mJobCleanupCallback);
+    }
+
+    /**
+     * Lazy initialize the cleaner and enable it
+     *
+     * @hide
+     */
+    public void enableCleaner() {
+        if (mJobCleanupCallback == null) {
+            initCleaner(new JobCleanupCallback(IJobCallback.Stub.asInterface(callback), jobId));
+        }
+        mJobCleanupCallback.enableCleaner();
+    }
+
+    /**
+     * Disable the cleaner from running and unregister it
+     *
+     * @hide
+     */
+    public void disableCleaner() {
+        if (mJobCleanupCallback != null) {
+            mJobCleanupCallback.disableCleaner();
+            if (mCleanable != null) {
+                mCleanable.clean();
+                mCleanable = null;
+            }
+            mJobCleanupCallback = null;
+        }
+    }
+
+    /** @hide */
+    @VisibleForTesting
+    @Nullable
+    public Cleaner.Cleanable getCleanable() {
+        return mCleanable;
+    }
+
+    /** @hide */
+    @VisibleForTesting
+    @Nullable
+    public JobCleanupCallback getJobCleanupCallback() {
+        return mJobCleanupCallback;
     }
 
     @Override
@@ -645,6 +707,67 @@ public class JobParameters implements Parcelable {
         dest.writeInt(mStopReason);
         dest.writeInt(mInternalStopReason);
         dest.writeString(debugStopReason);
+    }
+
+    /**
+     * JobCleanupCallback is used track JobParameters leak. If the job is started
+     * and jobFinish is not called at the time of garbage collection of JobParameters
+     * instance, it is considered a job leak. Force finish the job.
+     *
+     * @hide
+     */
+    public static class JobCleanupCallback implements Runnable {
+        private final IJobCallback mCallback;
+        private final int mJobId;
+        private boolean mIsCleanerEnabled;
+
+        public JobCleanupCallback(
+                IJobCallback callback,
+                int jobId) {
+            mCallback = callback;
+            mJobId = jobId;
+            mIsCleanerEnabled = false;
+        }
+
+        /**
+         * Check if the cleaner is enabled
+         *
+         * @hide
+         */
+        public boolean isCleanerEnabled() {
+            return mIsCleanerEnabled;
+        }
+
+        /**
+         * Enable the cleaner to detect JobParameter leak
+         *
+         * @hide
+         */
+        public void enableCleaner() {
+            mIsCleanerEnabled = true;
+        }
+
+        /**
+         * Disable the cleaner from running.
+         *
+         * @hide
+         */
+        public void disableCleaner() {
+            mIsCleanerEnabled = false;
+        }
+
+        /** @hide */
+        @Override
+        public void run() {
+            if (!isCleanerEnabled()) {
+                return;
+            }
+            try {
+                mCallback.forceJobFinished(mJobId);
+            } catch (Exception e) {
+                Log.wtf(TAG, "Could not destroy running job", e);
+            }
+        }
     }
 
     public static final @android.annotation.NonNull Creator<JobParameters> CREATOR = new Creator<JobParameters>() {
