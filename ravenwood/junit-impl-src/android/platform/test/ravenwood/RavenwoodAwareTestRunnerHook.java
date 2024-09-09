@@ -31,13 +31,16 @@ import com.android.internal.os.RuntimeInit;
 import com.android.ravenwood.common.RavenwoodCommonUtils;
 
 import org.junit.runner.Description;
-import org.junit.runner.Runner;
 import org.junit.runners.model.TestClass;
-
-import java.util.Stack;
 
 /**
  * Provide hook points created by {@link RavenwoodAwareTestRunner}.
+ *
+ * States are associated with each {@link RavenwoodAwareTestRunner} are stored in
+ * {@link RavenwoodRunnerState}, rather than as members of {@link RavenwoodAwareTestRunner}.
+ * See its javadoc for the reasons.
+ *
+ * All methods in this class must be called from the test main thread.
  */
 public class RavenwoodAwareTestRunnerHook {
     private static final String TAG = RavenwoodAwareTestRunner.TAG;
@@ -45,27 +48,10 @@ public class RavenwoodAwareTestRunnerHook {
     private RavenwoodAwareTestRunnerHook() {
     }
 
-    private static RavenwoodTestStats sStats; // lazy initialization.
-
-    // Keep track of the current class description.
-
-    // Test classes can be nested because of "Suite", so we need a stack to keep track.
-    private static final Stack<Description> sClassDescriptions = new Stack<>();
-    private static Description sCurrentClassDescription;
-
-    private static RavenwoodTestStats getStats() {
-        if (sStats == null) {
-            // We don't want to throw in the static initializer, because tradefed may not report
-            // it properly, so we initialize it here.
-            sStats = new RavenwoodTestStats();
-        }
-        return sStats;
-    }
-
     /**
      * Called when a runner starts, before the inner runner gets a chance to run.
      */
-    public static void onRunnerInitializing(Runner runner, TestClass testClass) {
+    public static void onRunnerInitializing(RavenwoodAwareTestRunner runner, TestClass testClass) {
         // TODO: Move the initialization code to a better place.
 
         initOnce();
@@ -103,7 +89,29 @@ public class RavenwoodAwareTestRunnerHook {
      */
     public static void onClassSkipped(Description description) {
         Log.i(TAG, "onClassSkipped: description=" + description);
-        getStats().onClassSkipped(description);
+        RavenwoodTestStats.getInstance().onClassSkipped(description);
+    }
+
+    /**
+     * Called before the inner runner starts.
+     */
+    public static void onBeforeInnerRunnerStart(
+            RavenwoodAwareTestRunner runner, Description description) throws Throwable {
+        Log.v(TAG, "onBeforeInnerRunnerStart: description=" + description);
+
+        // Prepare the environment before the inner runner starts.
+        RavenwoodRunnerState.forRunner(runner).enterTestClass(description);
+    }
+
+    /**
+     * Called after the inner runner finished.
+     */
+    public static void onAfterInnerRunnerFinished(
+            RavenwoodAwareTestRunner runner, Description description) throws Throwable {
+        Log.v(TAG, "onAfterInnerRunnerFinished: description=" + description);
+
+        RavenwoodTestStats.getInstance().onClassFinished(description);
+        RavenwoodRunnerState.forRunner(runner).exitTestClass();
     }
 
     /**
@@ -112,21 +120,23 @@ public class RavenwoodAwareTestRunnerHook {
      * Return false if it should be skipped.
      */
     public static boolean onBefore(RavenwoodAwareTestRunner runner, Description description,
-            Scope scope, Order order) {
+            Scope scope, Order order) throws Throwable {
         Log.v(TAG, "onBefore: description=" + description + ", " + scope + ", " + order);
 
-        if (scope == Scope.Class && order == Order.Outer) {
-            // Keep track of the current class.
-            sCurrentClassDescription = description;
-            sClassDescriptions.push(description);
+        if (scope == Scope.Instance && order == Order.Outer) {
+            // Start of a test method.
+            RavenwoodRunnerState.forRunner(runner).enterTestMethod(description);
         }
+
+        final var classDescription = RavenwoodRunnerState.forRunner(runner).getClassDescription();
 
         // Class-level annotations are checked by the runner already, so we only check
         // method-level annotations here.
         if (scope == Scope.Instance && order == Order.Outer) {
             if (!RavenwoodEnablementChecker.shouldEnableOnRavenwood(
                     description, true)) {
-                getStats().onTestFinished(sCurrentClassDescription, description, Result.Skipped);
+                RavenwoodTestStats.getInstance().onTestFinished(
+                        classDescription, description, Result.Skipped);
                 return false;
             }
         }
@@ -142,15 +152,13 @@ public class RavenwoodAwareTestRunnerHook {
             Scope scope, Order order, Throwable th) {
         Log.v(TAG, "onAfter: description=" + description + ", " + scope + ", " + order + ", " + th);
 
-        if (scope == Scope.Instance && order == Order.Outer) {
-            getStats().onTestFinished(sCurrentClassDescription, description,
-                    th == null ? Result.Passed : Result.Failed);
+        final var classDescription = RavenwoodRunnerState.forRunner(runner).getClassDescription();
 
-        } else if (scope == Scope.Class && order == Order.Outer) {
-            getStats().onClassFinished(sCurrentClassDescription);
-            sClassDescriptions.pop();
-            sCurrentClassDescription =
-                    sClassDescriptions.size() == 0 ? null : sClassDescriptions.peek();
+        if (scope == Scope.Instance && order == Order.Outer) {
+            // End of a test method.
+            RavenwoodRunnerState.forRunner(runner).exitTestMethod();
+            RavenwoodTestStats.getInstance().onTestFinished(classDescription, description,
+                    th == null ? Result.Passed : Result.Failed);
         }
 
         // If RUN_DISABLED_TESTS is set, and the method did _not_ throw, make it an error.
@@ -189,5 +197,26 @@ public class RavenwoodAwareTestRunnerHook {
      */
     public static boolean shouldRunClassOnRavenwood(Class<?> clazz) {
         return RavenwoodEnablementChecker.shouldRunClassOnRavenwood(clazz, true);
+    }
+
+    /**
+     * Called by RavenwoodRule.
+     */
+    public static void onRavenwoodRuleEnter(RavenwoodAwareTestRunner runner,
+            Description description, RavenwoodRule rule) throws Throwable {
+        Log.v(TAG, "onRavenwoodRuleEnter: description=" + description);
+
+        RavenwoodRunnerState.forRunner(runner).enterRavenwoodRule(rule);
+    }
+
+
+    /**
+     * Called by RavenwoodRule.
+     */
+    public static void onRavenwoodRuleExit(RavenwoodAwareTestRunner runner,
+            Description description, RavenwoodRule rule) throws Throwable {
+        Log.v(TAG, "onRavenwoodRuleExit: description=" + description);
+
+        RavenwoodRunnerState.forRunner(runner).exitRavenwoodRule(rule);
     }
 }
