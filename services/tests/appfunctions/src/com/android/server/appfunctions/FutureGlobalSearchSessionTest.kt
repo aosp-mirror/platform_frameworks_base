@@ -18,7 +18,6 @@ package com.android.server.appfunctions
 import android.app.appfunctions.AppFunctionRuntimeMetadata
 import android.app.appfunctions.AppFunctionRuntimeMetadata.createAppFunctionRuntimeSchema
 import android.app.appfunctions.AppFunctionRuntimeMetadata.createParentAppFunctionRuntimeSchema
-import android.app.appfunctions.AppFunctionStaticMetadataHelper
 import android.app.appsearch.AppSearchManager
 import android.app.appsearch.AppSearchManager.SearchContext
 import android.app.appsearch.PutDocumentsRequest
@@ -55,10 +54,6 @@ class FutureGlobalSearchSessionTest {
 
     @Test
     fun registerDocumentChangeObserverCallback() {
-        val baseObserverSpec: ObserverSpec =
-            ObserverSpec.Builder()
-                .addFilterSchemas(AppFunctionStaticMetadataHelper.STATIC_SCHEMA_TYPE)
-                .build()
         val packageObserverSpec: ObserverSpec =
             ObserverSpec.Builder()
                 .addFilterSchemas(
@@ -76,15 +71,6 @@ class FutureGlobalSearchSessionTest {
             }
         val futureGlobalSearchSession = FutureGlobalSearchSession(appSearchManager, testExecutor)
 
-        val registerBaseObserver: Void? =
-            futureGlobalSearchSession
-                .registerObserverCallbackAsync(
-                    TEST_TARGET_PKG_NAME,
-                    baseObserverSpec,
-                    testExecutor,
-                    observer,
-                )
-                .get()
         val registerPackageObserver: Void? =
             futureGlobalSearchSession
                 .registerObserverCallbackAsync(
@@ -94,8 +80,6 @@ class FutureGlobalSearchSessionTest {
                     observer,
                 )
                 .get()
-
-        assertThat(registerBaseObserver).isNull()
         assertThat(registerPackageObserver).isNull()
         // Trigger document change
         val searchContext = SearchContext.Builder(TEST_DB).build()
