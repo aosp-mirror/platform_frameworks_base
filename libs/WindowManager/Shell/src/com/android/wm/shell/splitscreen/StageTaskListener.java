@@ -72,6 +72,10 @@ import java.util.function.Predicate;
 public class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     private static final String TAG = StageTaskListener.class.getSimpleName();
 
+    // No current way to enforce this but if enableFlexibleSplit() is enabled, then only 1 of the
+    // stages should have this be set/being used
+    private boolean mIsActive;
+
     /** Callback interface for listening to changes in a split-screen stage. */
     public interface StageListenerCallbacks {
         void onRootTaskAppeared();
@@ -473,6 +477,68 @@ public class StageTaskListener implements ShellTaskOrganizer.TaskListener {
                 t.show(leash);
             }
         });
+    }
+
+    // ---------
+    // Previously only used in MainStage
+    boolean isActive() {
+        return mIsActive;
+    }
+
+    void activate(WindowContainerTransaction wct, boolean includingTopTask) {
+        if (mIsActive) return;
+        ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "activate: includingTopTask=%b",
+                includingTopTask);
+
+        if (includingTopTask) {
+            reparentTopTask(wct);
+        }
+
+        mIsActive = true;
+    }
+
+    void deactivate(WindowContainerTransaction wct) {
+        deactivate(wct, false /* toTop */);
+    }
+
+    void deactivate(WindowContainerTransaction wct, boolean toTop) {
+        if (!mIsActive) return;
+        ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "deactivate: toTop=%b rootTaskInfo=%s",
+                toTop, mRootTaskInfo);
+        mIsActive = false;
+
+        if (mRootTaskInfo == null) return;
+        final WindowContainerToken rootToken = mRootTaskInfo.token;
+        wct.reparentTasks(
+                rootToken,
+                null /* newParent */,
+                null /* windowingModes */,
+                null /* activityTypes */,
+                toTop);
+    }
+
+    // --------
+    // Previously only used in SideStage
+    boolean removeAllTasks(WindowContainerTransaction wct, boolean toTop) {
+        ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "remove all side stage tasks: childCount=%d toTop=%b",
+                mChildrenTaskInfo.size(), toTop);
+        if (mChildrenTaskInfo.size() == 0) return false;
+        wct.reparentTasks(
+                mRootTaskInfo.token,
+                null /* newParent */,
+                null /* windowingModes */,
+                null /* activityTypes */,
+                toTop);
+        return true;
+    }
+
+    boolean removeTask(int taskId, WindowContainerToken newParent, WindowContainerTransaction wct) {
+        final ActivityManager.RunningTaskInfo task = mChildrenTaskInfo.get(taskId);
+        ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "remove side stage task: task=%d exists=%b", taskId,
+                task != null);
+        if (task == null) return false;
+        wct.reparent(task.token, newParent, false /* onTop */);
+        return true;
     }
 
     private void sendStatusChanged() {

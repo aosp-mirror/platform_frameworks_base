@@ -382,16 +382,6 @@ public class LogModule {
         return factory.create("MediaLog", 20);
     }
 
-    /**
-     * Provides a buffer for media device changes
-     */
-    @Provides
-    @SysUISingleton
-    @MediaDeviceLog
-    public static LogBuffer providesMediaDeviceLogBuffer(LogBufferFactory factory) {
-        return factory.create("MediaDeviceLog", 50);
-    }
-
     /** Allows logging buffers to be tweaked via adb on debug builds but not on prod builds. */
     @Provides
     @SysUISingleton
@@ -584,7 +574,7 @@ public class LogModule {
     @SysUISingleton
     @KeyguardQuickAffordancesLog
     public static LogBuffer provideKeyguardQuickAffordancesLogBuffer(LogBufferFactory factory) {
-        return factory.create("KeyguardQuickAffordancesLog", 25);
+        return factory.create("KeyguardQuickAffordancesLog", 100);
     }
 
     /**
@@ -726,5 +716,13 @@ public class LogModule {
     @VolumeLog
     public static LogBuffer provideVolumeLogBuffer(LogBufferFactory factory) {
         return factory.create("VolumeLog", 50);
+    }
+
+    /** Provides a {@link LogBuffer} for use by long touch event handlers. */
+    @Provides
+    @SysUISingleton
+    @LongPressTouchLog
+    public static LogBuffer providesLongPressTouchLog(LogBufferFactory factory) {
+        return factory.create("LongPressViewLog", 200);
     }
 }

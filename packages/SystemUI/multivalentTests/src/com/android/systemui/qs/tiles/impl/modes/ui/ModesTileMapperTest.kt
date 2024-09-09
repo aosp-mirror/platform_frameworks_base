@@ -18,7 +18,6 @@ package com.android.systemui.qs.tiles.impl.modes.ui
 
 import android.app.Flags
 import android.graphics.drawable.TestStubDrawable
-import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -109,26 +108,7 @@ class ModesTileMapperTest : SysuiTestCase() {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_MODES_UI_ICONS)
-    fun state_withEnabledFlag_noIconResId() {
-        val icon = TestStubDrawable("res123").asIcon()
-        val model =
-            ModesTileModel(
-                isActivated = false,
-                activeModes = emptyList(),
-                icon = icon,
-                iconResId = 123 // Should not be populated, but is ignored even if present
-            )
-
-        val state = underTest.map(config, model)
-
-        assertThat(state.icon()).isEqualTo(icon)
-        assertThat(state.iconRes).isNull()
-    }
-
-    @Test
-    @DisableFlags(Flags.FLAG_MODES_UI_ICONS)
-    fun state_withDisabledFlag_includesIconResId() {
+    fun state_modelHasIconResId_includesIconResId() {
         val icon = TestStubDrawable("res123").asIcon()
         val model =
             ModesTileModel(

@@ -16,9 +16,9 @@
 
 #pragma once
 
-#include <GrDirectContext.h>
 #include <SkString.h>
 #include <SkTraceMemoryDump.h>
+#include <include/gpu/ganesh/GrDirectContext.h>
 
 #include <string>
 #include <unordered_map>

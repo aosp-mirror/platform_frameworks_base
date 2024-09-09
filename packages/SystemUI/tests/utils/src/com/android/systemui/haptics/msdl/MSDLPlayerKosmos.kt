@@ -17,5 +17,7 @@
 package com.android.systemui.haptics.msdl
 
 import com.android.systemui.kosmos.Kosmos
+import com.google.android.msdl.domain.MSDLPlayer
 
-val Kosmos.msdlPlayer by Kosmos.Fixture { FakeMSDLPlayer() }
+var Kosmos.msdlPlayer: MSDLPlayer by Kosmos.Fixture { fakeMSDLPlayer }
+val Kosmos.fakeMSDLPlayer by Kosmos.Fixture { FakeMSDLPlayer() }

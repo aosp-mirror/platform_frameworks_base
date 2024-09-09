@@ -34,6 +34,7 @@ import com.android.systemui.keyguard.ui.viewmodel.alternateBouncerViewModel
 import com.android.systemui.keyguard.ui.viewmodel.alternateBouncerWindowViewModel
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.statusbar.gesture.TapGestureDetector
 import com.android.systemui.util.mockito.mock
@@ -64,6 +65,7 @@ private val Kosmos.alternateBouncerDependencies by
             },
             messageAreaViewModel = mock<AlternateBouncerMessageAreaViewModel>(),
             powerInteractor = powerInteractor,
+            touchLogBuffer = logcatLogBuffer(),
         )
     }
 

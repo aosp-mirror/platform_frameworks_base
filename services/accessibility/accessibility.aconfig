@@ -216,6 +216,16 @@ flag {
 }
 
 flag {
+    name: "reset_input_dispatcher_before_first_touch_exploration"
+    namespace: "accessibility"
+    description: "Resets InputDispatcher state by sending ACTION_CANCEL before the first TouchExploration hover events"
+    bug: "364408887"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "scan_packages_without_lock"
     namespace: "accessibility"
     description: "Scans packages for accessibility service/activity info without holding the A11yMS lock"
@@ -228,6 +238,7 @@ flag {
     description: "Sends accessibility events in TouchExplorer#onAccessibilityEvent based on internal state to keep it consistent. This reduces test flakiness."
     bug: "295575684"
 }
+
 flag {
     name: "send_hover_events_based_on_event_stream"
     namespace: "accessibility"

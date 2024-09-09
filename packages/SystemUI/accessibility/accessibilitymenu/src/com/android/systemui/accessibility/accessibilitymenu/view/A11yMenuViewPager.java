@@ -306,6 +306,10 @@ public class A11yMenuViewPager {
                     (viewPagerHeight - topMargin - defaultMargin
                             - (rowsInGridView * gridItemHeight))
                             / (rowsInGridView + 1);
+            // The interval is negative number when the viewPagerHeight is not able to fit
+            // the grid items, which result in text overlapping.
+            // Adjust the interval to 0 could solve the issue.
+            interval = Math.max(interval, 0);
             mViewPagerAdapter.setVerticalSpacing(interval);
 
             // Sets padding to view pager.

@@ -2222,6 +2222,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 unblockScreenOn();
             }
             mWindowManagerPolicy.screenTurningOn(mDisplayId, mPendingScreenOnUnblocker);
+            Slog.i(TAG, "Window Manager Policy screenTurningOn complete");
         }
 
         // Return true if the screen isn't blocked.

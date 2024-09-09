@@ -2002,10 +2002,10 @@
     <!-- Shadow for dream overlay status bar complications -->
     <dimen name="dream_overlay_status_bar_key_text_shadow_dx">0.5dp</dimen>
     <dimen name="dream_overlay_status_bar_key_text_shadow_dy">0.5dp</dimen>
-    <dimen name="dream_overlay_status_bar_key_text_shadow_radius">1dp</dimen>
+    <dimen name="dream_overlay_status_bar_key_text_shadow_radius">3dp</dimen>
     <dimen name="dream_overlay_status_bar_ambient_text_shadow_dx">0.5dp</dimen>
     <dimen name="dream_overlay_status_bar_ambient_text_shadow_dy">0.5dp</dimen>
-    <dimen name="dream_overlay_status_bar_ambient_text_shadow_radius">2dp</dimen>
+    <dimen name="dream_overlay_status_bar_ambient_text_shadow_radius">3dp</dimen>
     <dimen name="dream_overlay_icon_inset_dimen">0dp</dimen>
 
     <!-- Default device corner radius, used for assist UI -->

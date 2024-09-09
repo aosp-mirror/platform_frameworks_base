@@ -134,6 +134,7 @@ import android.util.ArraySet;
 import android.util.EventLog;
 import android.util.IndentingPrintWriter;
 import android.util.IntArray;
+import android.util.MathUtils;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -269,6 +270,7 @@ public final class DisplayManagerService extends SystemService {
 
     private final Context mContext;
     private final DisplayManagerHandler mHandler;
+    private final HandlerExecutor mHandlerExecutor;
     private final Handler mUiHandler;
     private final DisplayModeDirector mDisplayModeDirector;
     private final ExternalDisplayPolicy mExternalDisplayPolicy;
@@ -315,6 +317,7 @@ public final class DisplayManagerService extends SystemService {
     public boolean mSafeMode;
 
     // All callback records indexed by calling process id.
+    @GuardedBy("mSyncRoot")
     private final SparseArray<CallbackRecord> mCallbacks = new SparseArray<>();
 
     /**
@@ -602,6 +605,7 @@ public final class DisplayManagerService extends SystemService {
         mContext = context;
         mFlags = injector.getFlags();
         mHandler = new DisplayManagerHandler(displayThreadLooper);
+        mHandlerExecutor = new HandlerExecutor(mHandler);
         mUiHandler = UiThread.getHandler();
         mDisplayDeviceRepo = new DisplayDeviceRepository(mSyncRoot, mPersistentDataStore);
         mLogicalDisplayMapper = new LogicalDisplayMapper(mContext,
@@ -760,12 +764,13 @@ public final class DisplayManagerService extends SystemService {
             mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
             mInputManagerInternal = LocalServices.getService(InputManagerInternal.class);
             mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
+
             ActivityManager activityManager = mContext.getSystemService(ActivityManager.class);
             activityManager.addOnUidImportanceListener(mUidImportanceListener, IMPORTANCE_CACHED);
 
             mDeviceStateManager = LocalServices.getService(DeviceStateManagerInternal.class);
             mContext.getSystemService(DeviceStateManager.class).registerCallback(
-                    new HandlerExecutor(mHandler), new DeviceStateListener());
+                    mHandlerExecutor, new DeviceStateListener());
 
             mLogicalDisplayMapper.onWindowManagerReady();
             scheduleTraversalLocked(false);
@@ -1019,6 +1024,10 @@ public final class DisplayManagerService extends SystemService {
     private class UidImportanceListener implements ActivityManager.OnUidImportanceListener {
         @Override
         public void onUidImportance(int uid, int importance) {
+          onUidImportanceInternal(uid, importance);
+        }
+
+        private void onUidImportanceInternal(int uid, int importance) {
             synchronized (mPendingCallbackSelfLocked) {
                 if (importance >= IMPORTANCE_GONE) {
                     // Clean up as the app is already gone
@@ -1267,6 +1276,9 @@ public final class DisplayManagerService extends SystemService {
                         || isUidPresentOnDisplayInternal(callingUid, displayId)) {
                     return info;
                 }
+            } else if (displayId == Display.DEFAULT_DISPLAY) {
+                Slog.e(TAG, "Default display is null for info request from uid "
+                        + callingUid);
             }
             return null;
         }
@@ -2215,10 +2227,11 @@ public final class DisplayManagerService extends SystemService {
             if (display.isValidLocked()) {
                 applyDisplayChangedLocked(display);
             }
-            return;
+        } else {
+            releaseDisplayAndEmitEvent(display, DisplayManagerGlobal.EVENT_DISPLAY_REMOVED);
         }
 
-        releaseDisplayAndEmitEvent(display, DisplayManagerGlobal.EVENT_DISPLAY_REMOVED);
+        Slog.i(TAG, "Logical display removed: " + display.getDisplayIdLocked());
     }
 
     private void releaseDisplayAndEmitEvent(LogicalDisplay display, int event) {
@@ -3090,6 +3103,7 @@ public final class DisplayManagerService extends SystemService {
 
     /**
      * Get internal or external viewport. Create it if does not currently exist.
+     *
      * @param viewportType - either INTERNAL or EXTERNAL
      * @return the viewport with the requested type
      */
@@ -3232,34 +3246,38 @@ public final class DisplayManagerService extends SystemService {
         // After releasing the lock, send the notifications out.
         for (int i = 0; i < mTempCallbacks.size(); i++) {
             CallbackRecord callbackRecord = mTempCallbacks.get(i);
-            final int uid = callbackRecord.mUid;
-            final int pid = callbackRecord.mPid;
-            if (isUidCached(uid)) {
-                // For cached apps, save the pending event until it becomes non-cached
-                synchronized (mPendingCallbackSelfLocked) {
-                    SparseArray<PendingCallback> pendingCallbacks = mPendingCallbackSelfLocked.get(
-                            uid);
-                    if (extraLogging(callbackRecord.mPackageName)) {
-                        Slog.i(TAG, "Uid is cached: " + uid
-                                + ", pendingCallbacks: " + pendingCallbacks);
-                    }
-                    if (pendingCallbacks == null) {
-                        pendingCallbacks = new SparseArray<>();
-                        mPendingCallbackSelfLocked.put(uid, pendingCallbacks);
-                    }
-                    PendingCallback pendingCallback = pendingCallbacks.get(pid);
-                    if (pendingCallback == null) {
-                        pendingCallbacks.put(pid,
-                                new PendingCallback(callbackRecord, displayId, event));
-                    } else {
-                        pendingCallback.addDisplayEvent(displayId, event);
-                    }
-                }
-            } else {
-                callbackRecord.notifyDisplayEventAsync(displayId, event);
-            }
+            deliverEventInternal(callbackRecord, displayId, event);
         }
         mTempCallbacks.clear();
+    }
+
+    private void deliverEventInternal(CallbackRecord callbackRecord, int displayId, int event) {
+        final int uid = callbackRecord.mUid;
+        final int pid = callbackRecord.mPid;
+        if (isUidCached(uid)) {
+            // For cached apps, save the pending event until it becomes non-cached
+            synchronized (mPendingCallbackSelfLocked) {
+                SparseArray<PendingCallback> pendingCallbacks = mPendingCallbackSelfLocked.get(
+                    uid);
+                if (extraLogging(callbackRecord.mPackageName)) {
+                    Slog.i(TAG, "Uid is cached: " + uid
+                            + ", pendingCallbacks: " + pendingCallbacks);
+                }
+                if (pendingCallbacks == null) {
+                    pendingCallbacks = new SparseArray<>();
+                    mPendingCallbackSelfLocked.put(uid, pendingCallbacks);
+                }
+                PendingCallback pendingCallback = pendingCallbacks.get(pid);
+                if (pendingCallback == null) {
+                    pendingCallbacks.put(pid,
+                            new PendingCallback(callbackRecord, displayId, event));
+                } else {
+                    pendingCallback.addDisplayEvent(displayId, event);
+                }
+            }
+        } else {
+            callbackRecord.notifyDisplayEventAsync(displayId, event);
+        }
     }
 
     private boolean extraLogging(String packageName) {
@@ -3764,7 +3782,7 @@ public final class DisplayManagerService extends SystemService {
 
         public boolean mWifiDisplayScanRequested;
 
-        CallbackRecord(int pid, int uid, IDisplayManagerCallback callback,
+        CallbackRecord(int pid, int uid, @NonNull IDisplayManagerCallback callback,
                 @EventsMask long eventsMask) {
             mPid = pid;
             mUid = uid;
@@ -3792,7 +3810,9 @@ public final class DisplayManagerService extends SystemService {
         }
 
         /**
-         * @return {@code false} if RemoteException happens; otherwise {@code true} for success.
+         * @return {@code false} if RemoteException happens; otherwise {@code true} for
+         * success.  This returns true even if the event was deferred because the remote client is
+         * cached.
          */
         public boolean notifyDisplayEventAsync(int displayId, @DisplayEvent int event) {
             if (!shouldSendEvent(event)) {
@@ -3805,9 +3825,19 @@ public final class DisplayManagerService extends SystemService {
                             "notifyDisplayEventAsync#notSendingEvent=" + event + ",mEventsMask="
                                     + mEventsMask);
                 }
+                // The client is not interested in this event, so do nothing.
                 return true;
             }
 
+            return transmitDisplayEvent(displayId, event);
+        }
+
+        /**
+         * Transmit a single display event.  The client is presumed ready.  Return true on success
+         * and false if the client died.
+         */
+        private boolean transmitDisplayEvent(int displayId, @DisplayEvent int event) {
+            // The client is ready to receive the event.
             try {
                 mCallback.onDisplayEvent(displayId, event);
                 return true;
@@ -3819,6 +3849,9 @@ public final class DisplayManagerService extends SystemService {
             }
         }
 
+        /**
+         * Return true if the client is interested in this event.
+         */
         private boolean shouldSendEvent(@DisplayEvent int event) {
             final long mask = mEventsMask.get();
             switch (event) {
@@ -4386,7 +4419,6 @@ public final class DisplayManagerService extends SystemService {
         }
 
 
-
         @Override // Binder call
         public BrightnessConfiguration getBrightnessConfigurationForUser(int userId) {
             final String uniqueId;
@@ -4465,10 +4497,12 @@ public final class DisplayManagerService extends SystemService {
         @Override // Binder call
         public void setBrightness(int displayId, float brightness) {
             setBrightness_enforcePermission();
-            if (!isValidBrightness(brightness)) {
-                Slog.w(TAG, "Attempted to set invalid brightness" + brightness);
+            if (Float.isNaN(brightness)) {
+                Slog.w(TAG, "Attempted to set invalid brightness: " + brightness);
                 return;
             }
+            MathUtils.constrain(brightness, PowerManager.BRIGHTNESS_MIN,
+                    PowerManager.BRIGHTNESS_MAX);
             final long token = Binder.clearCallingIdentity();
             try {
                 synchronized (mSyncRoot) {
@@ -4762,12 +4796,6 @@ public final class DisplayManagerService extends SystemService {
             }
             return ddc.getDefaultDozeBrightness();
         }
-    }
-
-    private static boolean isValidBrightness(float brightness) {
-        return !Float.isNaN(brightness)
-                && (brightness >= PowerManager.BRIGHTNESS_MIN)
-                && (brightness <= PowerManager.BRIGHTNESS_MAX);
     }
 
     @VisibleForTesting

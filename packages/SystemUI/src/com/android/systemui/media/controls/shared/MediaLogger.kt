@@ -114,6 +114,15 @@ class MediaLogger @Inject constructor(@MediaLog private val buffer: LogBuffer) {
         )
     }
 
+    fun logDuplicateMediaNotification(key: String) {
+        buffer.log(
+            TAG,
+            LogLevel.DEBUG,
+            { str1 = key },
+            { "duplicate media notification $str1 posted" }
+        )
+    }
+
     companion object {
         private const val TAG = "MediaLog"
     }

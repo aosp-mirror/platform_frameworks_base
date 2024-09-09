@@ -100,8 +100,10 @@ run_hoststubgen() {
           android.hosttest.annotation.HostSideTestRemove \
       --substitute-annotation \
           android.hosttest.annotation.HostSideTestSubstitute \
-      --native-substitute-annotation \
-          android.hosttest.annotation.HostSideTestNativeSubstitutionClass \
+      --redirect-annotation \
+          android.hosttest.annotation.HostSideTestRedirect \
+      --redirection-class-annotation \
+          android.hosttest.annotation.HostSideTestRedirectionClass \
       --class-load-hook-annotation \
           android.hosttest.annotation.HostSideTestClassLoadHook \
       --keep-static-initializer-annotation \

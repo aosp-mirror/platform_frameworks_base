@@ -967,7 +967,8 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
         assertThat(data.resumption).isTrue()
         assertThat(data.song).isEqualTo(SESSION_TITLE)
         assertThat(data.app).isEqualTo(APP_NAME)
-        assertThat(data.actions).hasSize(1)
+        // resume button is a semantic action.
+        assertThat(data.actions).hasSize(0)
         assertThat(data.semanticActions!!.playOrPause).isNotNull()
         assertThat(data.lastActive).isAtLeast(currentTime)
         verify(logger).logResumeMediaAdded(anyInt(), eq(PACKAGE_NAME), eq(data.instanceId))
@@ -994,7 +995,8 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
         assertThat(data.resumption).isTrue()
         assertThat(data.song).isEqualTo(SESSION_TITLE)
         assertThat(data.app).isEqualTo(APP_NAME)
-        assertThat(data.actions).hasSize(1)
+        // resume button is a semantic action.
+        assertThat(data.actions).hasSize(0)
         assertThat(data.semanticActions!!.playOrPause).isNotNull()
         assertThat(data.lastActive).isAtLeast(currentTime)
         assertThat(data.isExplicit).isTrue()

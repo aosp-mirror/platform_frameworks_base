@@ -16,7 +16,12 @@
 
 package com.android.systemui.accessibility.accessibilitymenu.view;
 
+import android.content.res.Resources;
 import android.graphics.Rect;
+import android.graphics.drawable.AdaptiveIconDrawable;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.InsetDrawable;
 import android.view.LayoutInflater;
 import android.view.TouchDelegate;
 import android.view.View;
@@ -26,11 +31,12 @@ import android.widget.BaseAdapter;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+
 import com.android.systemui.accessibility.accessibilitymenu.AccessibilityMenuService;
 import com.android.systemui.accessibility.accessibilitymenu.R;
 import com.android.systemui.accessibility.accessibilitymenu.activity.A11yMenuSettingsActivity.A11yMenuPreferenceFragment;
 import com.android.systemui.accessibility.accessibilitymenu.model.A11yMenuShortcut;
-import com.android.systemui.accessibility.accessibilitymenu.utils.ShortcutDrawableUtils;
 
 import java.util.List;
 
@@ -43,16 +49,12 @@ public class A11yMenuAdapter extends BaseAdapter {
 
     private final AccessibilityMenuService mService;
     private final List<A11yMenuShortcut> mShortcutDataList;
-    private final ShortcutDrawableUtils mShortcutDrawableUtils;
 
     public A11yMenuAdapter(
             AccessibilityMenuService service,
             List<A11yMenuShortcut> shortcutDataList) {
         this.mService = service;
         this.mShortcutDataList = shortcutDataList;
-
-        mShortcutDrawableUtils = new ShortcutDrawableUtils(service);
-
         mLargeTextSize =
                 service.getResources().getDimensionPixelOffset(R.dimen.large_label_text_size);
     }
@@ -152,10 +154,10 @@ public class A11yMenuAdapter extends BaseAdapter {
             shortcutIconButton.setContentDescription(
                     mService.getString(shortcutItem.imgContentDescription));
             shortcutLabel.setText(shortcutItem.labelText);
-            shortcutIconButton.setImageResource(shortcutItem.imageSrc);
 
-            shortcutIconButton.setBackground(
-                    mShortcutDrawableUtils.createAdaptiveIconDrawable(shortcutItem.imageColor));
+            AdaptiveIconDrawable iconDrawable = getAdaptiveIconDrawable(convertView,
+                    shortcutItem);
+            shortcutIconButton.setImageDrawable(iconDrawable);
 
             shortcutIconButton.setAccessibilityDelegate(new View.AccessibilityDelegate() {
                 @Override
@@ -166,5 +168,19 @@ public class A11yMenuAdapter extends BaseAdapter {
                 }
             });
         }
+    }
+
+    @NonNull
+    private static AdaptiveIconDrawable getAdaptiveIconDrawable(@NonNull View convertView,
+            @NonNull A11yMenuShortcut shortcutItem) {
+        Resources resources = convertView.getResources();
+        // Note: from the official guide, the foreground image of the adaptive icon should be
+        // sized at 108 x 108 dp
+        Drawable icon = resources.getDrawable(shortcutItem.imageSrc);
+        float inset = AdaptiveIconDrawable.getExtraInsetFraction();
+        AdaptiveIconDrawable iconDrawable = new AdaptiveIconDrawable(
+                new ColorDrawable(resources.getColor(shortcutItem.imageColor)),
+                new InsetDrawable(icon, inset));
+        return iconDrawable;
     }
 }
