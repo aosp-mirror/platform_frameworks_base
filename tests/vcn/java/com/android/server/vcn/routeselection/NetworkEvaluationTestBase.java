@@ -123,7 +123,6 @@ public abstract class NetworkEvaluationTestBase {
         mSetFlagsRule.enableFlags(Flags.FLAG_VALIDATE_NETWORK_ON_IPSEC_LOSS);
         mSetFlagsRule.enableFlags(Flags.FLAG_EVALUATE_IPSEC_LOSS_ON_LP_NC_CHANGE);
         mSetFlagsRule.enableFlags(Flags.FLAG_HANDLE_SEQ_NUM_LEAP);
-        mSetFlagsRule.enableFlags(Flags.FLAG_ALLOW_DISABLE_IPSEC_LOSS_DETECTOR);
 
         when(mNetwork.getNetId()).thenReturn(-1);
 
