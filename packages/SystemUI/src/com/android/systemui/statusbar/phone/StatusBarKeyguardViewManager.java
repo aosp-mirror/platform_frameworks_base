@@ -182,6 +182,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private boolean mBouncerShowingOverDream;
     private int mAttemptsToShowBouncer = 0;
     private DelayableExecutor mExecutor;
+    private boolean mIsSleeping = false;
 
     private final PrimaryBouncerExpansionCallback mExpansionCallback =
             new PrimaryBouncerExpansionCallback() {
@@ -713,7 +714,11 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
      * {@link #needsFullscreenBouncer()}.
      */
     protected void showBouncerOrKeyguard(boolean hideBouncerWhenShowing, boolean isFalsingReset) {
-        if (needsFullscreenBouncer() && !mDozing) {
+        boolean showBouncer = needsFullscreenBouncer() && !mDozing;
+        if (Flags.simPinRaceConditionOnRestart()) {
+            showBouncer = showBouncer && !mIsSleeping;
+        }
+        if (showBouncer) {
             // The keyguard might be showing (already). So we need to hide it.
             if (!primaryBouncerIsShowing()) {
                 if (SceneContainerFlag.isEnabled()) {
@@ -1041,6 +1046,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     @Override
     public void onStartedWakingUp() {
+        mIsSleeping = false;
         setRootViewAnimationDisabled(false);
         NavigationBarView navBarView = mCentralSurfaces.getNavigationBarView();
         if (navBarView != null) {
@@ -1054,6 +1060,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     @Override
     public void onStartedGoingToSleep() {
+        mIsSleeping = true;
         setRootViewAnimationDisabled(true);
         NavigationBarView navBarView = mCentralSurfaces.getNavigationBarView();
         if (navBarView != null) {
