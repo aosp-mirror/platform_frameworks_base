@@ -60,8 +60,7 @@ import libcore.util.NativeAllocationRegistry;
  * @hide
  */
 @RavenwoodKeepWholeClass
-@RavenwoodRedirectionClass(
-        "com.android.platform.test.ravenwood.nativesubstitution.LongMultiStateCounter_host")
+@RavenwoodRedirectionClass("LongMultiStateCounter_host")
 public final class LongMultiStateCounter implements Parcelable {
 
     private static NativeAllocationRegistry sRegistry;

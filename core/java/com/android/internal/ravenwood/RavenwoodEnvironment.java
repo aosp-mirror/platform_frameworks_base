@@ -24,8 +24,7 @@ import android.ravenwood.annotation.RavenwoodReplace;
  * Class to interact with the Ravenwood environment.
  */
 @RavenwoodKeepWholeClass
-@RavenwoodRedirectionClass(
-        "com.android.platform.test.ravenwood.nativesubstitution.RavenwoodEnvironment_host")
+@RavenwoodRedirectionClass("RavenwoodEnvironment_host")
 public final class RavenwoodEnvironment {
     public static final String TAG = "RavenwoodEnvironment";
 

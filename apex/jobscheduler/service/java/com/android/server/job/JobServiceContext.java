@@ -129,6 +129,8 @@ public final class JobServiceContext implements ServiceConnection {
     private static final String[] VERB_STRINGS = {
             "VERB_BINDING", "VERB_STARTING", "VERB_EXECUTING", "VERB_STOPPING", "VERB_FINISHED"
     };
+    private static final String TRACE_JOB_FORCE_FINISHED_PREFIX = "forceJobFinished:";
+    private static final String TRACE_JOB_FORCE_FINISHED_DELIMITER = "#";
 
     // States that a job occupies while interacting with the client.
     static final int VERB_BINDING = 0;
@@ -289,6 +291,11 @@ public final class JobServiceContext implements ServiceConnection {
         @Override
         public void jobFinished(int jobId, boolean reschedule) {
             doJobFinished(this, jobId, reschedule);
+        }
+
+        @Override
+        public void forceJobFinished(int jobId) {
+            doForceJobFinished(this, jobId);
         }
 
         @Override
@@ -756,6 +763,35 @@ public final class JobServiceContext implements ServiceConnection {
                         JobParameters.INTERNAL_STOP_REASON_SUCCESSFUL_FINISH,
                         "app called jobFinished");
                 doCallbackLocked(reschedule, "app called jobFinished");
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    /**
+     * This method just adds traces to evaluate jobs that leak jobparameters at the client.
+     * It does not stop the job.
+     */
+    void doForceJobFinished(JobCallback cb, int jobId) {
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            final JobStatus executing;
+            synchronized (mLock) {
+                // not the current job, presumably it has finished in some way already
+                if (!verifyCallerLocked(cb)) {
+                    return;
+                }
+
+                executing = getRunningJobLocked();
+            }
+            if (executing != null && jobId == executing.getJobId()) {
+                final StringBuilder stateSuffix = new StringBuilder();
+                stateSuffix.append(TRACE_JOB_FORCE_FINISHED_PREFIX);
+                stateSuffix.append(executing.getBatteryName());
+                stateSuffix.append(TRACE_JOB_FORCE_FINISHED_DELIMITER);
+                stateSuffix.append(executing.getJobId());
+                Trace.instant(Trace.TRACE_TAG_POWER, stateSuffix.toString());
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
