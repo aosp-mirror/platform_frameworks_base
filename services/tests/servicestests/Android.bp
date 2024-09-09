@@ -36,6 +36,7 @@ android_test {
         "-Werror",
     ],
     static_libs: [
+        "a11ychecker",
         "aatf",
         "accessibility_protos_lite",
         "cts-input-lib",
