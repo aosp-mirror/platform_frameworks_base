@@ -384,6 +384,7 @@ cc_defaults {
         "jni/ScopedParcel.cpp",
         "jni/Shader.cpp",
         "jni/RenderEffect.cpp",
+        "jni/RuntimeEffectUtils.cpp",
         "jni/Typeface.cpp",
         "jni/Utils.cpp",
         "jni/YuvToJpegEncoder.cpp",
