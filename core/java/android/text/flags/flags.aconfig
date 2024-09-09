@@ -12,14 +12,6 @@ flag {
 }
 
 flag {
-  name: "fix_line_height_for_locale"
-  is_exported: true
-  namespace: "text"
-  description: "Feature flag that preserve the line height of the TextView and EditText even if the the locale is different from Latin"
-  bug: "303326708"
-}
-
-flag {
   name: "no_break_no_hyphenation_span"
   is_exported: true
   namespace: "text"
