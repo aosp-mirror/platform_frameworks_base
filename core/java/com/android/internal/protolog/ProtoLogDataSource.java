@@ -25,6 +25,7 @@ import static android.internal.perfetto.protos.ProtologConfig.ProtoLogGroup.COLL
 import static android.internal.perfetto.protos.ProtologConfig.ProtoLogGroup.GROUP_NAME;
 import static android.internal.perfetto.protos.ProtologConfig.ProtoLogGroup.LOG_FROM;
 
+import android.annotation.NonNull;
 import android.internal.perfetto.protos.DataSourceConfigOuterClass.DataSourceConfig;
 import android.internal.perfetto.protos.ProtologCommon;
 import android.tracing.perfetto.CreateIncrementalStateArgs;
@@ -51,18 +52,26 @@ public class ProtoLogDataSource extends DataSource<ProtoLogDataSource.Instance,
         ProtoLogDataSource.IncrementalState> {
     private static final String DATASOURCE_NAME = "android.protolog";
 
+    @NonNull
     private final Instance.TracingInstanceStartCallback mOnStart;
+    @NonNull
     private final Runnable mOnFlush;
+    @NonNull
     private final Instance.TracingInstanceStopCallback mOnStop;
 
-    public ProtoLogDataSource(Instance.TracingInstanceStartCallback onStart, Runnable onFlush,
-            Instance.TracingInstanceStopCallback onStop) {
+    public ProtoLogDataSource(
+            @NonNull Instance.TracingInstanceStartCallback onStart,
+            @NonNull Runnable onFlush,
+            @NonNull Instance.TracingInstanceStopCallback onStop) {
         this(onStart, onFlush, onStop, DATASOURCE_NAME);
     }
 
     @VisibleForTesting
-    public ProtoLogDataSource(Instance.TracingInstanceStartCallback onStart, Runnable onFlush,
-            Instance.TracingInstanceStopCallback onStop, String dataSourceName) {
+    public ProtoLogDataSource(
+            @NonNull Instance.TracingInstanceStartCallback onStart,
+            @NonNull Runnable onFlush,
+            @NonNull Instance.TracingInstanceStopCallback onStop,
+            @NonNull String dataSourceName) {
         super(dataSourceName);
         this.mOnStart = onStart;
         this.mOnFlush = onFlush;
@@ -70,7 +79,8 @@ public class ProtoLogDataSource extends DataSource<ProtoLogDataSource.Instance,
     }
 
     @Override
-    public Instance createInstance(ProtoInputStream configStream, int instanceIndex) {
+    @NonNull
+    public Instance createInstance(@NonNull ProtoInputStream configStream, int instanceIndex) {
         ProtoLogConfig config = null;
 
         try {
@@ -100,7 +110,8 @@ public class ProtoLogDataSource extends DataSource<ProtoLogDataSource.Instance,
     }
 
     @Override
-    public TlsState createTlsState(CreateTlsStateArgs<Instance> args) {
+    @NonNull
+    public TlsState createTlsState(@NonNull CreateTlsStateArgs<Instance> args) {
         try (Instance dsInstance = args.getDataSourceInstanceLocked()) {
             if (dsInstance == null) {
                 // Datasource instance has been removed
@@ -111,14 +122,17 @@ public class ProtoLogDataSource extends DataSource<ProtoLogDataSource.Instance,
     }
 
     @Override
-    public IncrementalState createIncrementalState(CreateIncrementalStateArgs<Instance> args) {
+    @NonNull
+    public IncrementalState createIncrementalState(
+            @NonNull CreateIncrementalStateArgs<Instance> args) {
         return new IncrementalState();
     }
 
     public static class TlsState {
+        @NonNull
         private final ProtoLogConfig mConfig;
 
-        private TlsState(ProtoLogConfig config) {
+        private TlsState(@NonNull ProtoLogConfig config) {
             this.mConfig = config;
         }
 
@@ -269,26 +283,44 @@ public class ProtoLogDataSource extends DataSource<ProtoLogDataSource.Instance,
     public static class Instance extends DataSourceInstance {
 
         public interface TracingInstanceStartCallback {
-            void run(int instanceIdx, ProtoLogConfig config);
+            /**
+             * Execute the tracing instance's onStart callback.
+             * @param instanceIdx The index of the tracing instance we are executing the callback
+             *                    for.
+             * @param config The protolog configuration for the tracing instance we are executing
+             *               the callback for.
+             */
+            void run(int instanceIdx, @NonNull ProtoLogConfig config);
         }
 
         public interface TracingInstanceStopCallback {
-            void run(int instanceIdx, ProtoLogConfig config);
+            /**
+             * Execute the tracing instance's onStop callback.
+             * @param instanceIdx The index of the tracing instance we are executing the callback
+             *                    for.
+             * @param config The protolog configuration for the tracing instance we are executing
+             *               the callback for.
+             */
+            void run(int instanceIdx, @NonNull ProtoLogConfig config);
         }
 
+        @NonNull
         private final TracingInstanceStartCallback mOnStart;
+        @NonNull
         private final Runnable mOnFlush;
+        @NonNull
         private final TracingInstanceStopCallback mOnStop;
+        @NonNull
         private final ProtoLogConfig mConfig;
         private final int mInstanceIndex;
 
         public Instance(
-                DataSource<Instance, TlsState, IncrementalState> dataSource,
+                @NonNull DataSource<Instance, TlsState, IncrementalState> dataSource,
                 int instanceIdx,
-                ProtoLogConfig config,
-                TracingInstanceStartCallback onStart,
-                Runnable onFlush,
-                TracingInstanceStopCallback onStop
+                @NonNull ProtoLogConfig config,
+                @NonNull TracingInstanceStartCallback onStart,
+                @NonNull Runnable onFlush,
+                @NonNull TracingInstanceStopCallback onStop
         ) {
             super(dataSource, instanceIdx);
             this.mInstanceIndex = instanceIdx;

@@ -90,9 +90,11 @@ fun ModeTile(viewModel: ModeTileViewModel) {
                         viewModel.subtext,
                         fontWeight = FontWeight.W400,
                         modifier =
-                            Modifier.tileMarquee().testTag("state").clearAndSetSemantics {
-                                contentDescription = viewModel.subtextDescription
-                            }
+                            Modifier.tileMarquee()
+                                .testTag(if (viewModel.enabled) "stateOn" else "stateOff")
+                                .clearAndSetSemantics {
+                                    contentDescription = viewModel.subtextDescription
+                                }
                     )
                 }
             }

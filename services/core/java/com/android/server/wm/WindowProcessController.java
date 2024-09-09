@@ -358,7 +358,6 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         mUseFifoUiScheduling = com.android.window.flags.Flags.fifoPriorityForMajorUiProcesses()
                 && (isSysUiPackage || mAtm.isCallerRecents(uid));
 
-        onConfigurationChanged(atm.getGlobalConfiguration());
         mAtm.mPackageConfigPersister.updateConfigIfNeeded(this, mUserId, mInfo.packageName);
     }
 
@@ -1926,7 +1925,12 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                 // showing.
                 // If the configuration has been overridden by previous activity, empty it.
                 mIsActivityConfigOverrideAllowed = false;
-                unregisterActivityConfigurationListener();
+                // The call to `onServiceStarted` is not guarded with WM lock.
+                mAtm.mH.post(() -> {
+                    synchronized (mAtm.mGlobalLock) {
+                        unregisterActivityConfigurationListener();
+                    }
+                });
                 break;
             default:
                 break;

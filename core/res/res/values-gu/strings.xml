@@ -266,7 +266,7 @@
     <string name="global_action_logout" msgid="6093581310002476511">"સત્ર સમાપ્ત કરો"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"સ્ક્રીનશૉટ"</string>
     <string name="bugreport_title" msgid="8549990811777373050">"બગ રિપોર્ટ"</string>
-    <string name="bugreport_message" msgid="5212529146119624326">"આ, એક ઇ-મેઇલ સંદેશ તરીકે મોકલવા માટે, તમારા વર્તમાન ઉપકરણ સ્થિતિ વિશેની માહિતી એકત્રિત કરશે. એક બગ રિપોર્ટ પ્રારંભ કરીને તે મોકલવા માટે તૈયાર ન થઈ જાય ત્યાં સુધી તેમાં થોડો સમય લાગશે; કૃપા કરીને ધીરજ રાખો."</string>
+    <string name="bugreport_message" msgid="5212529146119624326">"આ, એક ઇ-મેઇલ મેસેજ તરીકે મોકલવા માટે, તમારા વર્તમાન ડિવાઇસના સ્ટેટસ વિશે માહિતી એકત્રિત કરશે. એક બગ રિપોર્ટના શરુ થવાથી લઈને મોકલવા માટે તૈયાર થવા સુધીની પ્રક્રિયામાં થોડો સમય લાગશે; કૃપા કરીને ધીરજ રાખો."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"ક્રિયાપ્રતિક્રિયાત્મક રિપોર્ટ"</string>
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"મોટાભાગના સંજોગોમાં આનો ઉપયોગ કરો. તે રિપોર્ટની પ્રગતિને ટ્રૅક કરવા, સમસ્યા વિશે વધુ વિગતો દાખલ કરવાની અને સ્ક્રીનશૉટ્સ લેવાની મંજૂરી આપે છે. તે કેટલાક ઓછા ઉપયોગમાં આવતાં વિભાગો કે જે જાણ કરવામાં વધુ સમય લેતાં હોય તેને છોડી દઈ શકે છે."</string>
     <string name="bugreport_option_full_title" msgid="7681035745950045690">"પૂર્ણ રિપોર્ટ"</string>
@@ -291,7 +291,7 @@
     <string name="notification_channel_security" msgid="8516754650348238057">"સુરક્ષા"</string>
     <string name="notification_channel_car_mode" msgid="2123919247040988436">"કાર મોડ"</string>
     <string name="notification_channel_account" msgid="6436294521740148173">"એકાઉન્ટ સ્થિતિ"</string>
-    <string name="notification_channel_developer" msgid="1691059964407549150">"વિકાસકર્તા માટેના સંદેશા"</string>
+    <string name="notification_channel_developer" msgid="1691059964407549150">"ડેવલપર માટેના મેસેજ"</string>
     <string name="notification_channel_developer_important" msgid="7197281908918789589">"ડેવલપર માટેના મહત્ત્વપૂર્ણ મેસેજ"</string>
     <string name="notification_channel_updates" msgid="7907863984825495278">"અપડેટ્સ"</string>
     <string name="notification_channel_network_status" msgid="2127687368725272809">"નેટવર્ક સ્થિતિ"</string>
@@ -324,7 +324,7 @@
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"કૅલેન્ડર"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"તમારા કેલેન્ડરને ઍક્સેસ કરવાની"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS મેસેજ મોકલવાની અને જોવાની"</string>
+    <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS મેસેજ મોકલો અને જુઓ"</string>
     <string name="permgrouplab_storage" msgid="17339216290379241">"ફાઇલો"</string>
     <string name="permgroupdesc_storage" msgid="5378659041354582769">"તમારા ડિવાઇસ પરની ફાઇલો ઍક્સેસ કરો"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"મ્યુઝિક અને ઑડિયો"</string>
@@ -400,7 +400,7 @@
     <string name="permdesc_readSms" product="tv" msgid="3054753345758011986">"આ ઍપ, તમારા Android TV ડિવાઇસ પર સંગ્રહિત તમામ SMS (ટેક્સ્ટ) મેસેજ વાંચી શકે છે."</string>
     <string name="permdesc_readSms" product="default" msgid="774753371111699782">"આ ઍપ, તમારા ફોન પર સંગ્રહિત તમામ SMS (ટેક્સ્ટ) મેસેજ વાંચી શકે છે."</string>
     <string name="permlab_receiveWapPush" msgid="4223747702856929056">"ટેક્સ્ટ મેસેજ  (WAP) મેળવો"</string>
-    <string name="permdesc_receiveWapPush" msgid="1638677888301778457">"એપ્લિકેશનને WAP સંદેશા પ્રાપ્ત કરવાની અને તેના પર પ્રક્રિયા કરવાની મંજૂરી આપે છે. આ પરવાનગીમાં તમને દર્શાવ્યા વિના તમને મોકલેલ સંદેશાઓનું નિરીક્ષણ કરવાની અને કાઢી નાખવાની ક્ષમતાનો સમાવેશ થાય છે."</string>
+    <string name="permdesc_receiveWapPush" msgid="1638677888301778457">"ઍપને WAP મેસેજ મેળવવાની અને તેના પર પ્રક્રિયા કરવાની મંજૂરી આપે છે. આ પરવાનગીમાં તમને દર્શાવ્યા વિના તમને મોકલેલા મેસેજનું નિરીક્ષણ કરવાની અને ડિલીટ કરવાની ક્ષમતાનો સમાવેશ થાય છે."</string>
     <string name="permlab_getTasks" msgid="7460048811831750262">"ચાલુ ઍપ્લિકેશનો પુનઃપ્રાપ્ત કરો"</string>
     <string name="permdesc_getTasks" msgid="7388138607018233726">"એપ્લિકેશનને વર્તમાનમાં અને તાજેતરમાં ચાલી રહેલ Tasks વિશેની વિગતવાર માહિતી પુનઃપ્રાપ્ત કરવાની મંજૂરી આપે છે. આ એપ્લિકેશનને ઉપકરણ પર કઈ એપ્લિકેશન્સનો ઉપયોગ થાય છે તેના વિશેની માહિતી શોધવાની મંજૂરી આપી શકે છે."</string>
     <string name="permlab_manageProfileAndDeviceOwners" msgid="639849495253987493">"પ્રોફાઇલ અને ડિવાઇસ માલિકોને મેનેજ કરો"</string>
@@ -1363,7 +1363,7 @@
     <string name="sms_control_message" msgid="6574313876316388239">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; મોટા પ્રમાણમાં SMS મેસેજ મોકલી રહ્યું છે. શું તમે મેસેજ મોકલવાનું ચાલુ રાખવા માટે આ એપને મંજૂરી આપવા માગો છો?"</string>
     <string name="sms_control_yes" msgid="4858845109269524622">"મંજૂરી આપો"</string>
     <string name="sms_control_no" msgid="4845717880040355570">"નકારો"</string>
-    <string name="sms_short_code_confirm_message" msgid="1385416688897538724">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; તમને &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; પર સંદેશ મોકલવા માગે છે."</string>
+    <string name="sms_short_code_confirm_message" msgid="1385416688897538724">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;, &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; પર મેસેજ મોકલવા માગે છે."</string>
     <string name="sms_short_code_details" msgid="2723725738333388351">"આનાથી તમારા મોબાઇલ એકાઉન્ટ પર "<b>"શુલ્ક લાગી શકે છે"</b>"."</string>
     <string name="sms_premium_short_code_details" msgid="1400296309866638111"><b>"આનાથી તમારા મોબાઇલ એકાઉન્ટ પર શુલ્ક લાગશે."</b></string>
     <string name="sms_short_code_confirm_allow" msgid="920477594325526691">"મોકલો"</string>
@@ -1746,7 +1746,8 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"કોઈ ઍપ પરવાનગીની વિનંતીને ઢાંકી રહી છે, તેથી તમારા પ્રતિસાદની ચકાસણી કરી શકાતી નથી."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"સુવિધાનો ઉપયોગ શરૂ કરવા તેના પર ટૅપ કરો:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"ઍક્સેસિબિલિટી બટન વડે તમે ઉપયોગમાં લેવા માગો છો તે સુવિધાઓ પસંદ કરો"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"વૉલ્યૂમ કી શૉર્ટકટ વડે તમે ઉપયોગમાં લેવા માગો છો તે સુવિધાઓ પસંદ કરો"</string>
+    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
+    <skip />
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> બંધ કરવામાં આવ્યું છે"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"શૉર્ટકટમાં ફેરફાર કરો"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"થઈ ગયું"</string>

@@ -72,6 +72,8 @@ public class BrightnessClamperController {
     private final List<DisplayDeviceDataListener> mDisplayDeviceDataListeners = new ArrayList<>();
     private final List<StatefulModifier> mStatefulModifiers = new ArrayList<>();
     private final List<UserSwitchListener> mUserSwitchListeners = new ArrayList<>();
+    private final List<DeviceConfigListener> mDeviceConfigListeners = new ArrayList<>();
+
     private ModifiersAggregatedState mModifiersAggregatedState = new ModifiersAggregatedState();
 
     private final DeviceConfig.OnPropertiesChangedListener mOnPropertiesChangedListener;
@@ -144,9 +146,14 @@ public class BrightnessClamperController {
             if (m instanceof UserSwitchListener l) {
                 mUserSwitchListeners.add(l);
             }
+            if (m instanceof DeviceConfigListener l) {
+                mDeviceConfigListeners.add(l);
+            }
         });
-        mOnPropertiesChangedListener =
-                properties -> mClampers.forEach(BrightnessClamper::onDeviceConfigChanged);
+        mOnPropertiesChangedListener = properties -> {
+            mClampers.forEach(BrightnessClamper::onDeviceConfigChanged);
+            mDeviceConfigListeners.forEach(DeviceConfigListener::onDeviceConfigChanged);
+        };
         mLightSensorController.configure(data.getAmbientLightSensor(), data.getDisplayId());
         start();
     }
@@ -209,8 +216,6 @@ public class BrightnessClamperController {
     private int getBrightnessMaxReason() {
         if (mClamperType == null) {
             return BrightnessInfo.BRIGHTNESS_MAX_REASON_NONE;
-        } else if (mClamperType == Type.THERMAL) {
-            return BrightnessInfo.BRIGHTNESS_MAX_REASON_THERMAL;
         } else if (mClamperType == Type.POWER) {
             return BrightnessInfo.BRIGHTNESS_MAX_REASON_POWER_IC;
         } else if (mClamperType == Type.WEAR_BEDTIME_MODE) {
@@ -225,7 +230,7 @@ public class BrightnessClamperController {
      * Called when the user switches.
      */
     public void onUserSwitch() {
-        mUserSwitchListeners.forEach(listener -> listener.onSwitchUser());
+        mUserSwitchListeners.forEach(UserSwitchListener::onSwitchUser);
     }
 
     /**
@@ -294,11 +299,14 @@ public class BrightnessClamperController {
                 state2.mMaxDesiredHdrRatio)
                 || !BrightnessSynchronizer.floatEquals(state1.mMaxHdrBrightness,
                 state2.mMaxHdrBrightness)
-                || state1.mSdrHdrRatioSpline != state2.mSdrHdrRatioSpline;
+                || state1.mSdrHdrRatioSpline != state2.mSdrHdrRatioSpline
+                || state1.mMaxBrightnessReason != state2.mMaxBrightnessReason
+                || !BrightnessSynchronizer.floatEquals(state1.mMaxBrightness,
+                state2.mMaxBrightness);
     }
 
     private void start() {
-        if (!mClampers.isEmpty()) {
+        if (!mClampers.isEmpty() || !mDeviceConfigListeners.isEmpty()) {
             mDeviceConfigParameterProvider.addOnPropertiesChangedListener(
                     mExecutor, mOnPropertiesChangedListener);
         }
@@ -333,8 +341,7 @@ public class BrightnessClamperController {
                 ClamperChangeListener clamperChangeListener, DisplayDeviceData data,
                 DisplayManagerFlags flags, Context context, float currentBrightness) {
             List<BrightnessClamper<? super DisplayDeviceData>> clampers = new ArrayList<>();
-            clampers.add(
-                    new BrightnessThermalClamper(handler, clamperChangeListener, data));
+
             if (flags.isPowerThrottlingClamperEnabled()) {
                 // Check if power-throttling config is present.
                 PowerThrottlingConfigData configData = data.getPowerThrottlingConfigData();
@@ -354,6 +361,8 @@ public class BrightnessClamperController {
                 Handler handler, ClamperChangeListener listener,
                 DisplayDeviceData data) {
             List<BrightnessStateModifier> modifiers = new ArrayList<>();
+            modifiers.add(new BrightnessThermalModifier(handler, listener, data));
+
             modifiers.add(new DisplayDimModifier(context));
             modifiers.add(new BrightnessLowPowerModeModifier());
             if (flags.isEvenDimmerEnabled() && data.mDisplayDeviceConfig.isEvenDimmerAvailable()) {
@@ -384,7 +393,7 @@ public class BrightnessClamperController {
     /**
      * Config Data for clampers/modifiers
      */
-    public static class DisplayDeviceData implements BrightnessThermalClamper.ThermalData,
+    public static class DisplayDeviceData implements BrightnessThermalModifier.ThermalData,
             BrightnessPowerClamper.PowerData,
             BrightnessWearBedtimeModeClamper.WearBedtimeModeData {
         @NonNull
@@ -498,13 +507,23 @@ public class BrightnessClamperController {
     }
 
     /**
+     * Modifier should implement this interface in order to receive device config updates
+     */
+    interface DeviceConfigListener {
+        void onDeviceConfigChanged();
+    }
+
+    /**
      * StatefulModifiers contribute to AggregatedState, that is used to decide if brightness
-     * adjustement is needed
+     * adjustment is needed
      */
     public static class ModifiersAggregatedState {
         float mMaxDesiredHdrRatio = HdrBrightnessModifier.DEFAULT_MAX_HDR_SDR_RATIO;
         float mMaxHdrBrightness = PowerManager.BRIGHTNESS_MAX;
         @Nullable
         Spline mSdrHdrRatioSpline = null;
+        @BrightnessInfo.BrightnessMaxReason
+        int mMaxBrightnessReason = BrightnessInfo.BRIGHTNESS_MAX_REASON_NONE;
+        float mMaxBrightness = PowerManager.BRIGHTNESS_MAX;
     }
 }

@@ -22,7 +22,9 @@ import android.app.StatusBarManager
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
 import com.android.internal.logging.UiEventLogger
+import com.android.keyguard.AuthInteractionProperties
 import com.android.systemui.CoreStartable
+import com.android.systemui.Flags
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
@@ -36,6 +38,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.DisplayId
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryHapticsInteractor
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.deviceentry.domain.interactor.DeviceUnlockedInteractor
 import com.android.systemui.deviceentry.shared.model.DeviceUnlockSource
@@ -62,6 +65,7 @@ import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.SysuiStatusBarStateController
+import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNotificationInteractor
 import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.policy.domain.interactor.DeviceProvisioningInteractor
@@ -71,6 +75,8 @@ import com.android.systemui.util.kotlin.pairwise
 import com.android.systemui.util.kotlin.sample
 import com.android.systemui.util.printSection
 import com.android.systemui.util.println
+import com.google.android.msdl.data.model.MSDLToken
+import com.google.android.msdl.domain.MSDLPlayer
 import dagger.Lazy
 import java.io.PrintWriter
 import java.util.Optional
@@ -78,6 +84,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
@@ -107,6 +114,7 @@ constructor(
     @Application private val applicationScope: CoroutineScope,
     private val sceneInteractor: SceneInteractor,
     private val deviceEntryInteractor: DeviceEntryInteractor,
+    private val deviceEntryHapticsInteractor: DeviceEntryHapticsInteractor,
     private val deviceUnlockedInteractor: DeviceUnlockedInteractor,
     private val bouncerInteractor: BouncerInteractor,
     private val keyguardInteractor: KeyguardInteractor,
@@ -134,9 +142,13 @@ constructor(
     private val dismissCallbackRegistry: DismissCallbackRegistry,
     private val statusBarStateController: SysuiStatusBarStateController,
     private val alternateBouncerInteractor: AlternateBouncerInteractor,
+    private val vibratorHelper: VibratorHelper,
+    private val msdlPlayer: MSDLPlayer,
 ) : CoreStartable {
     private val centralSurfaces: CentralSurfaces?
         get() = centralSurfacesOptLazy.get().getOrNull()
+
+    private val authInteractionProperties = AuthInteractionProperties()
 
     override fun start() {
         if (SceneContainerFlag.isEnabled) {
@@ -148,6 +160,7 @@ constructor(
             respondToFalsingDetections()
             hydrateInteractionState()
             handleBouncerOverscroll()
+            handleDeviceEntryHapticsWhileDeviceLocked()
             hydrateWindowController()
             hydrateBackStack()
             resetShadeSessions()
@@ -525,6 +538,51 @@ constructor(
         }
     }
 
+    private fun handleDeviceEntryHapticsWhileDeviceLocked() {
+        applicationScope.launch {
+            deviceEntryInteractor.isDeviceEntered.collectLatest { isDeviceEntered ->
+                // Only check for haptics signals before device is entered
+                if (!isDeviceEntered) {
+                    coroutineScope {
+                        launch {
+                            deviceEntryHapticsInteractor.playSuccessHaptic
+                                .sample(sceneInteractor.currentScene)
+                                .collect { currentScene ->
+                                    if (Flags.msdlFeedback()) {
+                                        msdlPlayer.playToken(
+                                            MSDLToken.UNLOCK,
+                                            authInteractionProperties,
+                                        )
+                                    } else {
+                                        vibratorHelper.vibrateAuthSuccess(
+                                            "$TAG, $currentScene device-entry::success"
+                                        )
+                                    }
+                                }
+                        }
+
+                        launch {
+                            deviceEntryHapticsInteractor.playErrorHaptic
+                                .sample(sceneInteractor.currentScene)
+                                .collect { currentScene ->
+                                    if (Flags.msdlFeedback()) {
+                                        msdlPlayer.playToken(
+                                            MSDLToken.FAILURE,
+                                            authInteractionProperties,
+                                        )
+                                    } else {
+                                        vibratorHelper.vibrateAuthError(
+                                            "$TAG, $currentScene device-entry::error"
+                                        )
+                                    }
+                                }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     /** Keeps [SysUiState] up-to-date */
     private fun hydrateSystemUiState() {
         applicationScope.launch {
@@ -568,15 +626,6 @@ constructor(
             deviceEntryInteractor.isDeviceEntered.collect { isDeviceEntered ->
                 windowController.setKeyguardShowing(!isDeviceEntered)
             }
-        }
-
-        applicationScope.launch {
-            sceneInteractor.currentScene
-                .map { it == Scenes.Bouncer }
-                .distinctUntilChanged()
-                .collect { isBouncerShowing ->
-                    windowController.setBouncerShowing(isBouncerShowing)
-                }
         }
 
         applicationScope.launch {
@@ -816,5 +865,9 @@ constructor(
                 .filter { it }
                 .collectLatest { deviceEntryInteractor.refreshLockscreenEnabled() }
         }
+    }
+
+    companion object {
+        private const val TAG = "SceneContainerStartable"
     }
 }

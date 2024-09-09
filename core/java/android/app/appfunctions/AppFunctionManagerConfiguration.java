@@ -23,8 +23,8 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 
 /**
- * Represents the system configuration of support for the {@code AppFunctionManager} and
- * associated systems.
+ * Represents the system configuration of support for the {@code AppFunctionManager} and associated
+ * systems.
  *
  * @hide
  */
@@ -33,6 +33,7 @@ public class AppFunctionManagerConfiguration {
 
     /**
      * Constructs a new instance of {@code AppFunctionManagerConfiguration}.
+     *
      * @param context context
      */
     public AppFunctionManagerConfiguration(@NonNull final Context context) {
@@ -41,15 +42,16 @@ public class AppFunctionManagerConfiguration {
 
     /**
      * Indicates whether the current target is intended to support {@code AppFunctionManager}.
+     *
      * @return {@code true} if supported; otherwise {@code false}
      */
     public boolean isSupported() {
         return enableAppFunctionManager() && !isWatch();
-
     }
 
     /**
      * Indicates whether the current target is intended to support {@code AppFunctionManager}.
+     *
      * @param context context
      * @return {@code true} if supported; otherwise {@code false}
      */

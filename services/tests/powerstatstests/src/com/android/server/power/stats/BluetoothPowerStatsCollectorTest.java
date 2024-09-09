@@ -27,6 +27,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.UidTraffic;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.hardware.power.stats.EnergyConsumerResult;
 import android.hardware.power.stats.EnergyConsumerType;
 import android.os.BatteryConsumer;
 import android.os.Handler;
@@ -49,7 +50,6 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
-import java.util.function.IntSupplier;
 
 public class BluetoothPowerStatsCollectorTest {
     private static final int APP_UID1 = 42;
@@ -130,11 +130,6 @@ public class BluetoothPowerStatsCollectorTest {
                 @Override
                 public PowerStatsCollector.ConsumedEnergyRetriever getConsumedEnergyRetriever() {
                     return mConsumedEnergyRetriever;
-                }
-
-                @Override
-                public IntSupplier getVoltageSupplier() {
-                    return () -> 3500;
                 }
 
                 @Override
@@ -233,6 +228,7 @@ public class BluetoothPowerStatsCollectorTest {
         BluetoothPowerStatsCollector collector = new BluetoothPowerStatsCollector(mInjector);
         collector.setEnabled(true);
 
+        when(mConsumedEnergyRetriever.getVoltageMv()).thenReturn(3500);
         when(mConsumedEnergyRetriever.getEnergyConsumerIds(EnergyConsumerType.BLUETOOTH))
                 .thenReturn(new int[]{777});
 
@@ -243,8 +239,7 @@ public class BluetoothPowerStatsCollectorTest {
 
         mUidScanTimes.put(APP_UID1, 100);
 
-        when(mConsumedEnergyRetriever.getConsumedEnergyUws(eq(new int[]{777})))
-                .thenReturn(new long[]{10000});
+        mockConsumedEnergy(777, 10000);
 
         // Establish a baseline
         collector.collectStats();
@@ -259,11 +254,17 @@ public class BluetoothPowerStatsCollectorTest {
         mUidScanTimes.put(APP_UID2, 300);
         mUidScanTimes.put(ISOLATED_UID, 400);
 
-        when(mConsumedEnergyRetriever.getConsumedEnergyUws(eq(new int[]{777})))
-                .thenReturn(new long[]{64321});
+        mockConsumedEnergy(777, 64321);
 
         mStatsRule.setTime(20000, 20000);
         return collector.collectStats();
+    }
+
+    private void mockConsumedEnergy(int consumerId, long energyUWs) {
+        EnergyConsumerResult ecr = new EnergyConsumerResult();
+        ecr.energyUWs = energyUWs;
+        when(mConsumedEnergyRetriever.getConsumedEnergy(eq(new int[]{consumerId})))
+                .thenReturn(new EnergyConsumerResult[]{ecr});
     }
 
     private BluetoothActivityEnergyInfo mockBluetoothActivityEnergyInfo(long timestamp,

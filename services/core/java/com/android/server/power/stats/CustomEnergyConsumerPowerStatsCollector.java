@@ -49,7 +49,8 @@ public class CustomEnergyConsumerPowerStatsCollector extends PowerStatsCollector
         for (int i = 0; i < energyConsumerIds.length; i++) {
             String name = retriever.getEnergyConsumerName(energyConsumerIds[i]);
             EnergyConsumerPowerStatsCollector collector = new EnergyConsumerPowerStatsCollector(
-                    mInjector, powerComponentId++, name, energyConsumerIds[i], sLayout);
+                    mInjector, powerComponentId++, name, EnergyConsumerType.OTHER,
+                    energyConsumerIds[i], sLayout);
             collector.setEnabled(true);
             collector.addConsumer(this::deliverStats);
             mCollectors.add(collector);

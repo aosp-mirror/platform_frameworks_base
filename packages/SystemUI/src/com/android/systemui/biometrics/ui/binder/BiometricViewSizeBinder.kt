@@ -18,13 +18,11 @@ package com.android.systemui.biometrics.ui.binder
 
 import android.animation.Animator
 import android.animation.AnimatorSet
-import android.animation.ValueAnimator
 import android.graphics.Outline
 import android.graphics.Rect
 import android.transition.AutoTransition
 import android.transition.TransitionManager
 import android.util.TypedValue
-import android.view.Surface
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewOutlineProvider
@@ -413,13 +411,12 @@ object BiometricViewSizeBinder {
                                     ANIMATE_SMALL_TO_MEDIUM_DURATION_MS.toLong()
                                 )
 
-                                TransitionManager.beginDelayedTransition(view, autoTransition)
-
                                 if (position.isLeft) {
                                     flipConstraintSet.applyTo(view)
                                 } else {
                                     mediumConstraintSet.applyTo(view)
                                 }
+                                TransitionManager.beginDelayedTransition(view, autoTransition)
                             }
                             size.isMedium -> {
                                 if (position.isLeft) {
@@ -428,14 +425,18 @@ object BiometricViewSizeBinder {
                                     mediumConstraintSet.applyTo(view)
                                 }
                             }
-                            size.isLarge && currentSize.isMedium -> {
+                            size.isLarge -> {
                                 val autoTransition = AutoTransition()
                                 autoTransition.setDuration(
-                                    ANIMATE_MEDIUM_TO_LARGE_DURATION_MS.toLong()
+                                    if (currentSize.isSmall) {
+                                        ANIMATE_SMALL_TO_MEDIUM_DURATION_MS.toLong()
+                                    } else {
+                                        ANIMATE_MEDIUM_TO_LARGE_DURATION_MS.toLong()
+                                    }
                                 )
 
-                                TransitionManager.beginDelayedTransition(view, autoTransition)
                                 largeConstraintSet.applyTo(view)
+                                TransitionManager.beginDelayedTransition(view, autoTransition)
                             }
                         }
 

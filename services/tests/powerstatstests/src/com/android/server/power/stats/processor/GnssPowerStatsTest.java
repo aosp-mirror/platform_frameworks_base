@@ -30,7 +30,6 @@ import static com.android.server.power.stats.processor.AggregatedPowerStatsConfi
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -60,7 +59,6 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
 public class GnssPowerStatsTest {
@@ -112,11 +110,6 @@ public class GnssPowerStatsTest {
                 public PowerStatsCollector.ConsumedEnergyRetriever getConsumedEnergyRetriever() {
                     return mConsumedEnergyRetriever;
                 }
-
-                @Override
-                public IntSupplier getVoltageSupplier() {
-                    return () -> VOLTAGE_MV;
-                }
             };
 
     private MonotonicClock mMonotonicClock;
@@ -133,7 +126,7 @@ public class GnssPowerStatsTest {
     public void powerProfileModel() {
         // ODPM unsupported
         when(mConsumedEnergyRetriever
-                .getEnergyConsumerIds(eq((int) EnergyConsumerType.GNSS), any()))
+                .getEnergyConsumerIds(eq((int) EnergyConsumerType.GNSS)))
                 .thenReturn(new int[0]);
 
         PowerComponentAggregatedPowerStats stats = createAggregatedPowerStats(
@@ -223,7 +216,7 @@ public class GnssPowerStatsTest {
     public void initialStateGnssOn() {
         // ODPM unsupported
         when(mConsumedEnergyRetriever
-                .getEnergyConsumerIds(eq((int) EnergyConsumerType.GNSS), any()))
+                .getEnergyConsumerIds(eq((int) EnergyConsumerType.GNSS)))
                 .thenReturn(new int[0]);
 
         PowerComponentAggregatedPowerStats stats = createAggregatedPowerStats(
@@ -300,8 +293,9 @@ public class GnssPowerStatsTest {
 
     @Test
     public void energyConsumerModel() {
+        when(mConsumedEnergyRetriever.getVoltageMv()).thenReturn(VOLTAGE_MV);
         when(mConsumedEnergyRetriever
-                .getEnergyConsumerIds(eq((int) EnergyConsumerType.GNSS), any()))
+                .getEnergyConsumerIds(eq((int) EnergyConsumerType.GNSS)))
                 .thenReturn(new int[]{ENERGY_CONSUMER_ID});
 
         PowerComponentAggregatedPowerStats stats = createAggregatedPowerStats(

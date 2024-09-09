@@ -37,3 +37,10 @@ android_test {
     certificate: "platform",
     test_suites: ["device-tests"],
 }
+
+test_module_config {
+    name: "FrameworksCoreGameManagerTests_android_app",
+    base: "FrameworksCoreGameManagerTests",
+    test_suites: ["device-tests"],
+    include_filters: ["android.app"],
+}

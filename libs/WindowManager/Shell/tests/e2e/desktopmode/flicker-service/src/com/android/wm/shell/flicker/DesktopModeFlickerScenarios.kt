@@ -16,12 +16,15 @@
 
 package com.android.wm.shell.flicker
 
+import android.tools.PlatformConsts.DESKTOP_MODE_MINIMUM_WINDOW_HEIGHT
+import android.tools.PlatformConsts.DESKTOP_MODE_MINIMUM_WINDOW_WIDTH
 import android.tools.flicker.AssertionInvocationGroup
 import android.tools.flicker.assertors.assertions.AppLayerIncreasesInSize
 import android.tools.flicker.assertors.assertions.AppLayerIsInvisibleAtEnd
 import android.tools.flicker.assertors.assertions.AppLayerIsVisibleAlways
 import android.tools.flicker.assertors.assertions.AppLayerIsVisibleAtStart
 import android.tools.flicker.assertors.assertions.AppWindowBecomesVisible
+import android.tools.flicker.assertors.assertions.AppWindowAlignsWithOnlyOneDisplayCornerAtEnd
 import android.tools.flicker.assertors.assertions.AppWindowCoversLeftHalfScreenAtEnd
 import android.tools.flicker.assertors.assertions.AppWindowCoversRightHalfScreenAtEnd
 import android.tools.flicker.assertors.assertions.AppWindowHasDesktopModeInitialBoundsAtTheEnd
@@ -29,6 +32,7 @@ import android.tools.flicker.assertors.assertions.AppWindowHasMaxBoundsInOnlyOne
 import android.tools.flicker.assertors.assertions.AppWindowHasMaxDisplayHeight
 import android.tools.flicker.assertors.assertions.AppWindowHasMaxDisplayWidth
 import android.tools.flicker.assertors.assertions.AppWindowHasSizeOfAtLeast
+import android.tools.flicker.assertors.assertions.AppWindowInsideDisplayBoundsAtEnd
 import android.tools.flicker.assertors.assertions.AppWindowIsInvisibleAtEnd
 import android.tools.flicker.assertors.assertions.AppWindowIsVisibleAlways
 import android.tools.flicker.assertors.assertions.AppWindowMaintainsAspectRatioAlways
@@ -181,8 +185,33 @@ class DesktopModeFlickerScenarios {
                     .build(),
                 assertions =
                 AssertionTemplates.DESKTOP_MODE_APP_VISIBILITY_ASSERTIONS +
-                        listOf(AppWindowHasSizeOfAtLeast(DESKTOP_MODE_APP, 770, 700))
+                        listOf(
+                            AppWindowHasSizeOfAtLeast(
+                                DESKTOP_MODE_APP,
+                                DESKTOP_MODE_MINIMUM_WINDOW_WIDTH,
+                                DESKTOP_MODE_MINIMUM_WINDOW_HEIGHT
+                            )
+                        )
                             .associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
+            )
+
+        val CORNER_RESIZE_TO_MAXIMUM_SIZE =
+            FlickerConfigEntry(
+                scenarioId = ScenarioId("CORNER_RESIZE_TO_MAXIMUM_SIZE"),
+                extractor =
+                TaggedScenarioExtractorBuilder()
+                    .setTargetTag(CujType.CUJ_DESKTOP_MODE_RESIZE_WINDOW)
+                    .setTransitionMatcher(
+                        TaggedCujTransitionMatcher(associatedTransitionRequired = false)
+                    )
+                    .build(),
+                assertions =
+                AssertionTemplates.DESKTOP_MODE_APP_VISIBILITY_ASSERTIONS +
+                        listOf(
+                            AppLayerIncreasesInSize(DESKTOP_MODE_APP),
+                            AppWindowHasMaxDisplayHeight(DESKTOP_MODE_APP),
+                            AppWindowHasMaxDisplayWidth(DESKTOP_MODE_APP)
+                        ).associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
             )
 
         val SNAP_RESIZE_LEFT_WITH_BUTTON =
@@ -298,6 +327,29 @@ class DesktopModeFlickerScenarios {
                             AppLayerIncreasesInSize(DESKTOP_MODE_APP),
                             AppWindowMaintainsAspectRatioAlways(DESKTOP_MODE_APP),
                             AppWindowHasMaxBoundsInOnlyOneDimension(DESKTOP_MODE_APP)
+                        ).associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
+            )
+
+        val CASCADE_APP =
+            FlickerConfigEntry(
+                scenarioId = ScenarioId("CASCADE_APP"),
+                extractor =
+                ShellTransitionScenarioExtractor(
+                    transitionMatcher =
+                    object : ITransitionMatcher {
+                        override fun findAll(
+                            transitions: Collection<Transition>
+                        ): Collection<Transition> {
+                                return transitions.filter { it.type == TransitionType.OPEN }
+                        }
+                    }
+                ),
+                assertions =
+                        listOf(
+                            AppWindowInsideDisplayBoundsAtEnd(DESKTOP_MODE_APP),
+                            AppWindowOnTopAtEnd(DESKTOP_MODE_APP),
+                            AppWindowBecomesVisible(DESKTOP_MODE_APP),
+                            AppWindowAlignsWithOnlyOneDisplayCornerAtEnd(DESKTOP_MODE_APP)
                         ).associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
             )
     }

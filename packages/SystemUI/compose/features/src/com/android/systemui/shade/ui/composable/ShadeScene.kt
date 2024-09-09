@@ -108,8 +108,8 @@ import com.android.systemui.scene.session.ui.composable.SaveableSession
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.composable.Scene
 import com.android.systemui.shade.shared.model.ShadeMode
-import com.android.systemui.shade.ui.viewmodel.ShadeSceneActionsViewModel
 import com.android.systemui.shade.ui.viewmodel.ShadeSceneContentViewModel
+import com.android.systemui.shade.ui.viewmodel.ShadeUserActionsViewModel
 import com.android.systemui.statusbar.notification.stack.ui.view.NotificationScrollView
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
 import com.android.systemui.statusbar.phone.StatusBarLocation
@@ -154,7 +154,7 @@ class ShadeScene
 constructor(
     private val shadeSession: SaveableSession,
     private val notificationStackScrollView: Lazy<NotificationScrollView>,
-    private val actionsViewModelFactory: ShadeSceneActionsViewModel.Factory,
+    private val actionsViewModelFactory: ShadeUserActionsViewModel.Factory,
     private val contentViewModelFactory: ShadeSceneContentViewModel.Factory,
     private val notificationsPlaceholderViewModelFactory: NotificationsPlaceholderViewModel.Factory,
     private val tintedIconManagerFactory: TintedIconManager.Factory,
@@ -167,7 +167,7 @@ constructor(
 
     override val key = Scenes.Shade
 
-    private val actionsViewModel: ShadeSceneActionsViewModel by lazy {
+    private val actionsViewModel: ShadeUserActionsViewModel by lazy {
         actionsViewModelFactory.create()
     }
 
@@ -175,8 +175,7 @@ constructor(
         actionsViewModel.activate()
     }
 
-    override val destinationScenes: Flow<Map<UserAction, UserActionResult>> =
-        actionsViewModel.actions
+    override val userActions: Flow<Map<UserAction, UserActionResult>> = actionsViewModel.actions
 
     @Composable
     override fun SceneScope.Content(
@@ -304,6 +303,8 @@ private fun SceneScope.SingleShade(
             viewModel.qsSceneAdapter,
         )
     }
+    val shadeHorizontalPadding =
+        dimensionResource(id = R.dimen.notification_panel_margin_horizontal)
     val shadeMeasurePolicy =
         remember(mediaInRow) {
             SingleShadeMeasurePolicy(
@@ -355,6 +356,7 @@ private fun SceneScope.SingleShade(
                 Box(
                     Modifier.element(QuickSettings.Elements.QuickQuickSettings)
                         .layoutId(SingleShadeMeasurePolicy.LayoutId.QuickSettings)
+                        .padding(horizontal = shadeHorizontalPadding)
                 ) {
                     QuickSettings(
                         viewModel.qsSceneAdapter,
@@ -382,7 +384,9 @@ private fun SceneScope.SingleShade(
                     shouldPunchHoleBehindScrim = shouldPunchHoleBehindScrim,
                     onEmptySpaceClick =
                         viewModel::onEmptySpaceClicked.takeIf { isEmptySpaceClickable },
-                    modifier = Modifier.layoutId(SingleShadeMeasurePolicy.LayoutId.Notifications),
+                    modifier =
+                        Modifier.layoutId(SingleShadeMeasurePolicy.LayoutId.Notifications)
+                            .padding(horizontal = shadeHorizontalPadding),
                 )
             },
             measurePolicy = shadeMeasurePolicy,

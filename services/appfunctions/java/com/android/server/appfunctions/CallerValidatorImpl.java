@@ -34,7 +34,6 @@ import java.util.Objects;
 class CallerValidatorImpl implements CallerValidator {
     private final Context mContext;
 
-
     CallerValidatorImpl(@NonNull Context context) {
         mContext = Objects.requireNonNull(context);
     }
@@ -56,14 +55,14 @@ class CallerValidatorImpl implements CallerValidator {
     @Override
     @NonNull
     @BinderThread
-    public UserHandle verifyTargetUserHandle(@NonNull UserHandle targetUserHandle,
-                                             @NonNull String claimedCallingPackage) {
+    public UserHandle verifyTargetUserHandle(
+            @NonNull UserHandle targetUserHandle, @NonNull String claimedCallingPackage) {
         int callingPid = Binder.getCallingPid();
         int callingUid = Binder.getCallingUid();
         final long callingIdentityToken = Binder.clearCallingIdentity();
         try {
-            return handleIncomingUser(claimedCallingPackage, targetUserHandle,
-                    callingPid, callingUid);
+            return handleIncomingUser(
+                    claimedCallingPackage, targetUserHandle, callingPid, callingUid);
         } finally {
             Binder.restoreCallingIdentity(callingIdentityToken);
         }
@@ -71,19 +70,24 @@ class CallerValidatorImpl implements CallerValidator {
 
     @Override
     @BinderThread
-    @RequiresPermission(anyOf = {Manifest.permission.EXECUTE_APP_FUNCTIONS_TRUSTED,
-            Manifest.permission.EXECUTE_APP_FUNCTIONS}, conditional = true)
+    @RequiresPermission(
+            anyOf = {
+                Manifest.permission.EXECUTE_APP_FUNCTIONS_TRUSTED,
+                Manifest.permission.EXECUTE_APP_FUNCTIONS
+            },
+            conditional = true)
     // TODO(b/360864791): Add and honor apps that opt-out from EXECUTE_APP_FUNCTIONS caller.
     public boolean verifyCallerCanExecuteAppFunction(
             @NonNull String callerPackageName, @NonNull String targetPackageName) {
         int pid = Binder.getCallingPid();
         int uid = Binder.getCallingUid();
-        boolean hasExecutionPermission = mContext.checkPermission(
-                Manifest.permission.EXECUTE_APP_FUNCTIONS_TRUSTED, pid, uid)
-                == PackageManager.PERMISSION_GRANTED;
-        boolean hasTrustedExecutionPermission = mContext.checkPermission(
-                Manifest.permission.EXECUTE_APP_FUNCTIONS, pid, uid)
-                == PackageManager.PERMISSION_GRANTED;
+        boolean hasExecutionPermission =
+                mContext.checkPermission(
+                                Manifest.permission.EXECUTE_APP_FUNCTIONS_TRUSTED, pid, uid)
+                        == PackageManager.PERMISSION_GRANTED;
+        boolean hasTrustedExecutionPermission =
+                mContext.checkPermission(Manifest.permission.EXECUTE_APP_FUNCTIONS, pid, uid)
+                        == PackageManager.PERMISSION_GRANTED;
         boolean isSamePackage = callerPackageName.equals(targetPackageName);
         return hasExecutionPermission || hasTrustedExecutionPermission || isSamePackage;
     }
@@ -111,13 +115,13 @@ class CallerValidatorImpl implements CallerValidator {
      * simply throw.
      *
      * @param callingPackageName The package name of the caller.
-     * @param targetUserHandle   The user which the caller is requesting to execute as.
-     * @param callingPid         The actual pid of the caller as determined by Binder.
-     * @param callingUid         The actual uid of the caller as determined by Binder.
+     * @param targetUserHandle The user which the caller is requesting to execute as.
+     * @param callingPid The actual pid of the caller as determined by Binder.
+     * @param callingUid The actual uid of the caller as determined by Binder.
      * @return the user handle that the call should run as. Will always be a concrete user.
      * @throws IllegalArgumentException if the target user is a special user.
-     * @throws SecurityException        if caller trying to interact across user without {@link
-     *                                  Manifest.permission#INTERACT_ACROSS_USERS_FULL}
+     * @throws SecurityException if caller trying to interact across user without {@link
+     *     Manifest.permission#INTERACT_ACROSS_USERS_FULL}
      */
     @NonNull
     private UserHandle handleIncomingUser(
@@ -137,7 +141,7 @@ class CallerValidatorImpl implements CallerValidator {
         }
 
         if (mContext.checkPermission(
-                Manifest.permission.INTERACT_ACROSS_USERS_FULL, callingPid, callingUid)
+                        Manifest.permission.INTERACT_ACROSS_USERS_FULL, callingPid, callingUid)
                 == PackageManager.PERMISSION_GRANTED) {
             try {
                 mContext.createPackageContextAsUser(
@@ -168,10 +172,9 @@ class CallerValidatorImpl implements CallerValidator {
     private void validateCallingPackageInternal(
             int actualCallingUid, @NonNull String claimedCallingPackage) {
         UserHandle callingUserHandle = UserHandle.getUserHandleForUid(actualCallingUid);
-        Context actualCallingUserContext = mContext.createContextAsUser(
-                callingUserHandle, /* flags= */ 0);
-        int claimedCallingUid =
-                getPackageUid(actualCallingUserContext, claimedCallingPackage);
+        Context actualCallingUserContext =
+                mContext.createContextAsUser(callingUserHandle, /* flags= */ 0);
+        int claimedCallingUid = getPackageUid(actualCallingUserContext, claimedCallingPackage);
         if (claimedCallingUid != actualCallingUid) {
             throw new SecurityException(
                     "Specified calling package ["
