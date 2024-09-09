@@ -323,6 +323,16 @@ flag {
 }
 
 flag {
+    name: "dont_write_policy_definition"
+    namespace: "enterprise"
+    description: "Don't write redundant policy-definition-entry tags"
+    bug: "335663055"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
   name: "user_provisioning_same_state"
   namespace: "enterprise"
   description: "Handle exceptions while setting same provisioning state."
