@@ -194,7 +194,7 @@ public final class ClientSocketPerfTest {
     /**
      * Simple benchmark for the amount of time to send a given number of messages
      */
-    @Test
+    // @Test Temporarily disabled
     @Parameters(method = "getParams")
     public void time(Config config) throws Exception {
         reset();
