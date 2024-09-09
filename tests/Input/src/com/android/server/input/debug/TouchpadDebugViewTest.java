@@ -300,19 +300,26 @@ public class TouchpadDebugViewTest {
 
         mTouchpadDebugView.updateHardwareState(
                 new TouchpadHardwareState(0, 1 /* buttonsDown */, 0, 0,
-                        new TouchpadFingerState[0]));
+                        new TouchpadFingerState[0]), TOUCHPAD_DEVICE_ID);
 
         assertEquals(((ColorDrawable) child.getBackground()).getColor(), Color.BLUE);
 
         mTouchpadDebugView.updateHardwareState(
                 new TouchpadHardwareState(0, 0 /* buttonsDown */, 0, 0,
-                        new TouchpadFingerState[0]));
+                        new TouchpadFingerState[0]), TOUCHPAD_DEVICE_ID);
 
         assertEquals(((ColorDrawable) child.getBackground()).getColor(), Color.RED);
 
         mTouchpadDebugView.updateHardwareState(
                 new TouchpadHardwareState(0, 1 /* buttonsDown */, 0, 0,
-                        new TouchpadFingerState[0]));
+                        new TouchpadFingerState[0]), TOUCHPAD_DEVICE_ID);
+
+        assertEquals(((ColorDrawable) child.getBackground()).getColor(), Color.BLUE);
+
+        // Color should not change because hardware state of a different touchpad
+        mTouchpadDebugView.updateHardwareState(
+                new TouchpadHardwareState(0, 0 /* buttonsDown */, 0, 0,
+                        new TouchpadFingerState[0]), TOUCHPAD_DEVICE_ID + 1);
 
         assertEquals(((ColorDrawable) child.getBackground()).getColor(), Color.BLUE);
     }

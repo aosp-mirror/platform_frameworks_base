@@ -213,7 +213,15 @@ public class TouchpadDebugView extends LinearLayout {
         return mWindowLayoutParams;
     }
 
-    public void updateHardwareState(TouchpadHardwareState touchpadHardwareState) {
+    /**
+     * Notify the view of a change in TouchpadHardwareState and changing the
+     * color of the view based on the status of the button click.
+     */
+    public void updateHardwareState(TouchpadHardwareState touchpadHardwareState, int deviceId) {
+        if (deviceId != mTouchpadId) {
+            return;
+        }
+
         if (mLastTouchpadState.getButtonsDown() == 0) {
             if (touchpadHardwareState.getButtonsDown() > 0) {
                 onTouchpadButtonPress();
