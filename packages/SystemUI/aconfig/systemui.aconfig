@@ -616,16 +616,6 @@ flag {
 }
 
 flag {
-    name: "screenshot_save_image_exporter"
-    namespace: "systemui"
-    description: "Save all screenshots using ImageExporter"
-    bug: "352308052"
-    metadata {
-        purpose: PURPOSE_BUGFIX
-    }
-}
-
-flag {
     name: "screenshot_ui_controller_refactor"
     namespace: "systemui"
     description: "Simplify and refactor ScreenshotController"
