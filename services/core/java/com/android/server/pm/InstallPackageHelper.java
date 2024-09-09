@@ -1019,9 +1019,7 @@ final class InstallPackageHelper {
                     && scanInstallPackages(requests, createdAppId, versionInfos)) {
                 List<ReconciledPackage> reconciledPackages =
                         reconcileInstallPackages(requests, versionInfos);
-                if (reconciledPackages != null
-                        && renameAndUpdatePaths(requests)
-                        && commitInstallPackages(reconciledPackages)) {
+                if (reconciledPackages != null && commitInstallPackages(reconciledPackages)) {
                     success = true;
                 }
             }
@@ -1031,49 +1029,24 @@ final class InstallPackageHelper {
         }
     }
 
-    private boolean renameAndUpdatePaths(List<InstallRequest> requests) {
+    private boolean prepareInstallPackages(List<InstallRequest> requests) {
+        // TODO: will remove the locking after doRename is moved out of prepare
         try (PackageManagerTracedLock installLock = mPm.mInstallLock.acquireLock()) {
             for (InstallRequest request : requests) {
-                ParsedPackage parsedPackage = request.getParsedPackage();
-                final boolean isApex = (request.getScanFlags() & SCAN_AS_APEX) != 0;
-                if (isApex) {
-                    continue;
-                }
                 try {
-                    doRenameLI(request, parsedPackage);
-                    setUpFsVerity(parsedPackage);
-                } catch (Installer.InstallerException | IOException | DigestException
-                         | NoSuchAlgorithmException | PrepareFailure e) {
-                    request.setError(PackageManagerException.INTERNAL_ERROR_VERITY_SETUP,
-                            "Failed to set up verity: " + e);
+                    Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "preparePackage");
+                    request.onPrepareStarted();
+                    preparePackageLI(request);
+                } catch (PrepareFailure prepareFailure) {
+                    request.setError(prepareFailure.error,
+                            prepareFailure.getMessage());
+                    request.setOriginPackage(prepareFailure.mConflictingPackage);
+                    request.setOriginPermission(prepareFailure.mConflictingPermission);
                     return false;
+                } finally {
+                    request.onPrepareFinished();
+                    Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
                 }
-
-                // update paths that are set before renaming
-                PackageSetting scannedPackageSetting = request.getScannedPackageSetting();
-                scannedPackageSetting.setPath(new File(parsedPackage.getPath()));
-                scannedPackageSetting.setLegacyNativeLibraryPath(
-                        parsedPackage.getNativeLibraryRootDir());
-            }
-            return true;
-        }
-    }
-
-    private boolean prepareInstallPackages(List<InstallRequest> requests) {
-        for (InstallRequest request : requests) {
-            try {
-                Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "preparePackage");
-                request.onPrepareStarted();
-                preparePackage(request);
-            } catch (PrepareFailure prepareFailure) {
-                request.setError(prepareFailure.error,
-                        prepareFailure.getMessage());
-                request.setOriginPackage(prepareFailure.mConflictingPackage);
-                request.setOriginPermission(prepareFailure.mConflictingPermission);
-                return false;
-            } finally {
-                request.onPrepareFinished();
-                Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
             }
         }
         return true;
@@ -1258,7 +1231,8 @@ final class InstallPackageHelper {
         return newProp != null && newProp.getBoolean();
     }
 
-    private void preparePackage(InstallRequest request) throws PrepareFailure {
+    @GuardedBy("mPm.mInstallLock")
+    private void preparePackageLI(InstallRequest request) throws PrepareFailure {
         final int[] allUsers =  mPm.mUserManager.getUserIds();
         final int installFlags = request.getInstallFlags();
         final boolean onExternal = request.getVolumeUuid() != null;
@@ -1765,7 +1739,18 @@ final class InstallPackageHelper {
             }
         }
 
-        if (isApex) {
+        if (!isApex) {
+            doRenameLI(request, parsedPackage);
+
+            try {
+                setUpFsVerity(parsedPackage);
+            } catch (Installer.InstallerException | IOException | DigestException
+                    | NoSuchAlgorithmException e) {
+                throw PrepareFailure.ofInternalError(
+                        "Failed to set up verity: " + e,
+                        PackageManagerException.INTERNAL_ERROR_VERITY_SETUP);
+            }
+        } else {
             // Use the path returned by apexd
             parsedPackage.setPath(request.getApexInfo().modulePath);
             parsedPackage.setBaseApkPath(request.getApexInfo().modulePath);
@@ -2101,21 +2086,7 @@ final class InstallPackageHelper {
 
         // Reflect the rename in scanned details
         try {
-            String afterCanonicalPath = afterCodeFile.getCanonicalPath();
-            String beforeCanonicalPath = beforeCodeFile.getCanonicalPath();
-            parsedPackage.setPath(afterCanonicalPath);
-
-            parsedPackage.setNativeLibraryDir(
-                    parsedPackage.getNativeLibraryDir()
-                            .replace(beforeCanonicalPath, afterCanonicalPath));
-            parsedPackage.setNativeLibraryRootDir(
-                    parsedPackage.getNativeLibraryRootDir()
-                            .replace(beforeCanonicalPath, afterCanonicalPath));
-            String secondaryNativeLibraryDir = parsedPackage.getSecondaryNativeLibraryDir();
-            if (secondaryNativeLibraryDir != null) {
-                parsedPackage.setSecondaryNativeLibraryDir(
-                        secondaryNativeLibraryDir.replace(beforeCanonicalPath, afterCanonicalPath));
-            }
+            parsedPackage.setPath(afterCodeFile.getCanonicalPath());
         } catch (IOException e) {
             Slog.e(TAG, "Failed to get path: " + afterCodeFile, e);
             throw new PrepareFailure(PackageManager.INSTALL_FAILED_MEDIA_UNAVAILABLE,
