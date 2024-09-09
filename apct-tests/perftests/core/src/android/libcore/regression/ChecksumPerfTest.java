@@ -16,8 +16,8 @@
 
 package android.libcore.regression;
 
-import androidx.benchmark.BenchmarkState;
-import androidx.benchmark.junit4.BenchmarkRule;
+import android.perftests.utils.BenchmarkState;
+import android.perftests.utils.PerfStatusReporter;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -32,13 +32,13 @@ import java.util.zip.CRC32;
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class ChecksumPerfTest {
-    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
+    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
     @Test
     public void timeAdler_block() throws Exception {
         byte[] bytes = new byte[10000];
         Adler32 adler = new Adler32();
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             adler.update(bytes);
         }
@@ -47,7 +47,7 @@ public class ChecksumPerfTest {
     @Test
     public void timeAdler_byte() throws Exception {
         Adler32 adler = new Adler32();
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             adler.update(1);
         }
@@ -57,7 +57,7 @@ public class ChecksumPerfTest {
     public void timeCrc_block() throws Exception {
         byte[] bytes = new byte[10000];
         CRC32 crc = new CRC32();
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             crc.update(bytes);
         }
@@ -66,7 +66,7 @@ public class ChecksumPerfTest {
     @Test
     public void timeCrc_byte() throws Exception {
         CRC32 crc = new CRC32();
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             crc.update(1);
         }
