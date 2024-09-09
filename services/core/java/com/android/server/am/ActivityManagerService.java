@@ -5536,7 +5536,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     public int sendIntentSender(IApplicationThread caller, IIntentSender target,
             IBinder allowlistToken, int code, Intent intent, String resolvedType,
             IIntentReceiver finishedReceiver, String requiredPermission, Bundle options) {
-        addCreatorToken(intent);
         if (target instanceof PendingIntentRecord) {
             final PendingIntentRecord originalRecord = (PendingIntentRecord) target;
 
@@ -5578,19 +5577,23 @@ public class ActivityManagerService extends IActivityManager.Stub
                 intent = new Intent(Intent.ACTION_MAIN);
             }
             try {
+                final int callingUid = Binder.getCallingUid();
+                final String packageName;
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    packageName = AppGlobals.getPackageManager().getNameForUid(callingUid);
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
+
                 if (allowlistToken != null) {
-                    final int callingUid = Binder.getCallingUid();
-                    final String packageName;
-                    final long token = Binder.clearCallingIdentity();
-                    try {
-                        packageName = AppGlobals.getPackageManager().getNameForUid(callingUid);
-                    } finally {
-                        Binder.restoreCallingIdentity(token);
-                    }
                     Slog.wtf(TAG, "Send a non-null allowlistToken to a non-PI target."
                             + " Calling package: " + packageName + "; intent: " + intent
                             + "; options: " + options);
                 }
+
+                addCreatorToken(intent, packageName);
+
                 target.send(code, intent, resolvedType, null, null,
                         requiredPermission, options);
             } catch (RemoteException e) {
@@ -13615,7 +13618,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             throws TransactionTooLargeException {
         enforceNotIsolatedCaller("startService");
         enforceAllowedToStartOrBindServiceIfSdkSandbox(service);
-        addCreatorToken(service);
+        addCreatorToken(service, callingPackage);
         if (service != null) {
             // Refuse possible leaked file descriptors
             if (service.hasFileDescriptors()) {
@@ -13877,7 +13880,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         validateServiceInstanceName(instanceName);
 
-        addCreatorToken(service);
+        addCreatorToken(service, callingPackage);
         try {
             if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
                 final ComponentName cn = service.getComponent();
@@ -17155,7 +17158,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 Slog.v(TAG_SERVICE,
                         "startServiceInPackage: " + service + " type=" + resolvedType);
             }
-            addCreatorToken(service);
+            addCreatorToken(service, callingPackage);
             final long origId = Binder.clearCallingIdentity();
             ComponentName res;
             try {
@@ -17983,8 +17986,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public void addCreatorToken(Intent intent) {
-            ActivityManagerService.this.addCreatorToken(intent);
+        public void addCreatorToken(Intent intent, String creatorPackage) {
+            ActivityManagerService.this.addCreatorToken(intent, creatorPackage);
         }
     }
 
@@ -19141,9 +19144,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         private final Key mKeyFields;
         private final WeakReference<IntentCreatorToken> mRef;
 
-        public IntentCreatorToken(int creatorUid, Intent intent) {
+        public IntentCreatorToken(int creatorUid, String creatorPackage, Intent intent) {
             super();
-            this.mKeyFields = new Key(creatorUid, intent);
+            this.mKeyFields = new Key(creatorUid, creatorPackage, intent);
             mRef = new WeakReference<>(this);
         }
 
@@ -19151,7 +19154,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             return mKeyFields.mCreatorUid;
         }
 
-        /** {@hide} */
+        public String getCreatorPackage() {
+            return mKeyFields.mCreatorPackage;
+        }
+
         public static boolean isValid(@NonNull Intent intent) {
             IBinder binder = intent.getCreatorToken();
             IntentCreatorToken token = null;
@@ -19159,7 +19165,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 token = (IntentCreatorToken) binder;
             }
             return token != null && token.mKeyFields.equals(
-                    new Key(token.mKeyFields.mCreatorUid, intent));
+                    new Key(token.mKeyFields.mCreatorUid, token.mKeyFields.mCreatorPackage,
+                            intent));
         }
 
         @Override
@@ -19183,8 +19190,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         private static class Key {
-            private Key(int creatorUid, Intent intent) {
+            private Key(int creatorUid, String creatorPackage, Intent intent) {
                 this.mCreatorUid = creatorUid;
+                this.mCreatorPackage = creatorPackage;
                 this.mAction = intent.getAction();
                 this.mData = intent.getData();
                 this.mType = intent.getType();
@@ -19201,6 +19209,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             private final int mCreatorUid;
+            private final String mCreatorPackage;
             private final String mAction;
             private final Uri mData;
             private final String mType;
@@ -19214,17 +19223,20 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (this == o) return true;
                 if (o == null || getClass() != o.getClass()) return false;
                 Key key = (Key) o;
-                return mCreatorUid == key.mCreatorUid && mFlags == key.mFlags && Objects.equals(
-                        mAction, key.mAction) && Objects.equals(mData, key.mData)
-                        && Objects.equals(mType, key.mType) && Objects.equals(mPackage,
-                        key.mPackage) && Objects.equals(mComponent, key.mComponent)
+                return mCreatorUid == key.mCreatorUid && mFlags == key.mFlags
+                        && Objects.equals(mCreatorPackage, key.mCreatorPackage)
+                        && Objects.equals(mAction, key.mAction)
+                        && Objects.equals(mData, key.mData)
+                        && Objects.equals(mType, key.mType)
+                        && Objects.equals(mPackage, key.mPackage)
+                        && Objects.equals(mComponent, key.mComponent)
                         && Objects.equals(mClipDataUris, key.mClipDataUris);
             }
 
             @Override
             public int hashCode() {
-                return Objects.hash(mCreatorUid, mAction, mData, mType, mPackage, mComponent,
-                        mFlags, mClipDataUris);
+                return Objects.hash(mCreatorUid, mCreatorPackage, mAction, mData, mType, mPackage,
+                        mComponent, mFlags, mClipDataUris);
             }
         }
     }
@@ -19235,7 +19247,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      * @param intent The given intent
      * @hide
      */
-    public void addCreatorToken(@Nullable Intent intent) {
+    public void addCreatorToken(@Nullable Intent intent, String creatorPackage) {
         if (!preventIntentRedirect()) return;
 
         if (intent == null || intent.getExtraIntentKeys() == null) return;
@@ -19248,7 +19260,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     continue;
                 }
                 Slog.wtf(TAG, "A creator token is added to an intent.");
-                IBinder creatorToken = createIntentCreatorToken(extraIntent);
+                IBinder creatorToken = createIntentCreatorToken(extraIntent, creatorPackage);
                 if (creatorToken != null) {
                     extraIntent.setCreatorToken(creatorToken);
                 }
@@ -19261,15 +19273,15 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    private IBinder createIntentCreatorToken(Intent intent) {
+    private IBinder createIntentCreatorToken(Intent intent, String creatorPackage) {
         if (IntentCreatorToken.isValid(intent)) return null;
         int creatorUid = getCallingUid();
-        IntentCreatorToken.Key key = new IntentCreatorToken.Key(creatorUid, intent);
+        IntentCreatorToken.Key key = new IntentCreatorToken.Key(creatorUid, creatorPackage, intent);
         IntentCreatorToken token;
         synchronized (sIntentCreatorTokenCache) {
             WeakReference<IntentCreatorToken> ref = sIntentCreatorTokenCache.get(key);
             if (ref == null || ref.get() == null) {
-                token = new IntentCreatorToken(creatorUid, intent);
+                token = new IntentCreatorToken(creatorUid, creatorPackage, intent);
                 sIntentCreatorTokenCache.put(key, token.mRef);
             } else {
                 token = ref.get();

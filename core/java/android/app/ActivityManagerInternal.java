@@ -1328,7 +1328,8 @@ public abstract class ActivityManagerInternal {
      * Add a creator token for all embedded intents (stored as extra) of the given intent.
      *
      * @param intent The given intent
+     * @param creatorPackage the package name of the creator app.
      * @hide
      */
-    public abstract void addCreatorToken(Intent intent);
+    public abstract void addCreatorToken(Intent intent, String creatorPackage);
 }
