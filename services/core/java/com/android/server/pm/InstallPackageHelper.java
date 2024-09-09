@@ -1897,10 +1897,16 @@ final class InstallPackageHelper {
                     }
 
                     if (!oldSharedUid.equals(newSharedUid)) {
-                        throw new PrepareFailure(INSTALL_FAILED_UID_CHANGED,
-                                "Package " + parsedPackage.getPackageName()
-                                        + " shared user changed from "
-                                        + oldSharedUid + " to " + newSharedUid);
+                        if (!(oldSharedUid.equals("<nothing>") && ps.getPkg() == null
+                                && ps.isArchivedOnAnyUser(allUsers))) {
+                            // Only allow changing sharedUserId if unarchiving
+                            // TODO(b/361558423): remove this check after pre-archiving installs
+                            // accept a sharedUserId param in the API
+                            throw new PrepareFailure(INSTALL_FAILED_UID_CHANGED,
+                                    "Package " + parsedPackage.getPackageName()
+                                            + " shared user changed from "
+                                            + oldSharedUid + " to " + newSharedUid);
+                        }
                     }
 
                     // APK should not re-join shared UID
