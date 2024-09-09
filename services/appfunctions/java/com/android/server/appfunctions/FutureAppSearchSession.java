@@ -22,6 +22,9 @@ import android.app.appsearch.AppSearchManager;
 import android.app.appsearch.AppSearchManager.SearchContext;
 import android.app.appsearch.AppSearchResult;
 import android.app.appsearch.AppSearchSession;
+import android.app.appsearch.BatchResultCallback;
+import android.app.appsearch.GenericDocument;
+import android.app.appsearch.GetByDocumentIdRequest;
 import android.app.appsearch.GetSchemaResponse;
 import android.app.appsearch.PutDocumentsRequest;
 import android.app.appsearch.SearchResult;
@@ -187,6 +190,60 @@ public class FutureAppSearchSession implements Closeable {
                             throw new RuntimeException(failedResultToException(result));
                         }
                     });
+        }
+    }
+
+    /** A future API to retrieve a document by its id from the local AppSearch session. */
+    public AndroidFuture<GenericDocument> getByDocumentId(
+            @NonNull String documentId, @NonNull String namespace) {
+        Objects.requireNonNull(documentId);
+        Objects.requireNonNull(namespace);
+
+        GetByDocumentIdRequest request =
+                new GetByDocumentIdRequest.Builder(namespace)
+                        .addIds(documentId)
+                        .build();
+        return getSessionAsync()
+                .thenCompose(
+                        session -> {
+                            AndroidFuture<AppSearchBatchResult<String, GenericDocument>>
+                                    batchResultFuture = new AndroidFuture<>();
+                            session.getByDocumentId(
+                                    request,
+                                    mExecutor,
+                                    new BatchResultCallbackAdapter<>(batchResultFuture));
+
+                            return batchResultFuture.thenApply(
+                                    batchResult ->
+                                            getGenericDocumentFromBatchResult(
+                                                    batchResult, documentId));
+                        });
+    }
+
+    private static GenericDocument getGenericDocumentFromBatchResult(
+            AppSearchBatchResult<String, GenericDocument> result, String documentId) {
+        if (result.isSuccess()) {
+            return result.getSuccesses().get(documentId);
+        }
+        throw new IllegalArgumentException("No document in the result for id: " + documentId);
+    }
+
+    private static final class BatchResultCallbackAdapter<K, V>
+            implements BatchResultCallback<K, V> {
+        private final AndroidFuture<AppSearchBatchResult<K, V>> mFuture;
+
+        BatchResultCallbackAdapter(AndroidFuture<AppSearchBatchResult<K, V>> future) {
+            mFuture = future;
+        }
+
+        @Override
+        public void onResult(@NonNull AppSearchBatchResult<K, V> result) {
+            mFuture.complete(result);
+        }
+
+        @Override
+        public void onSystemError(Throwable t) {
+            mFuture.completeExceptionally(t);
         }
     }
 }
