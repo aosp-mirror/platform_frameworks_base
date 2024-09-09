@@ -18,6 +18,7 @@ android_library {
         "SettingsLibMetadata",
         "androidx.annotation_annotation",
         "androidx.preference_preference",
+        "guava",
     ],
     kotlincflags: ["-Xjvm-default=all"],
 }
