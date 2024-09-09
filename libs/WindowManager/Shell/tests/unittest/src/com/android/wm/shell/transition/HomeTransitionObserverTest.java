@@ -20,6 +20,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_OPEN;
+import static android.view.WindowManager.TRANSIT_PREPARE_BACK_NAVIGATION;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.window.TransitionInfo.FLAG_BACK_GESTURE_ANIMATED;
 
@@ -39,6 +40,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.platform.test.annotations.RequiresFlagsDisabled;
+import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.view.SurfaceControl;
@@ -210,6 +212,35 @@ public class HomeTransitionObserverTest extends ShellTestCase {
                 mock(SurfaceControl.Transaction.class),
                 mock(SurfaceControl.Transaction.class));
 
+        verify(mListener, times(1)).onHomeVisibilityChanged(true);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_MIGRATE_PREDICTIVE_BACK_TRANSITION)
+    public void testHomeActivityWithBackGestureNotifiesHomeIsVisibleAfterClose()
+            throws RemoteException {
+        TransitionInfo info = mock(TransitionInfo.class);
+        TransitionInfo.Change change = mock(TransitionInfo.Change.class);
+        ActivityManager.RunningTaskInfo taskInfo = mock(ActivityManager.RunningTaskInfo.class);
+        when(change.getTaskInfo()).thenReturn(taskInfo);
+        when(info.getChanges()).thenReturn(new ArrayList<>(List.of(change)));
+        when(info.getType()).thenReturn(TRANSIT_PREPARE_BACK_NAVIGATION);
+
+        when(change.hasFlags(FLAG_BACK_GESTURE_ANIMATED)).thenReturn(true);
+        setupTransitionInfo(taskInfo, change, ACTIVITY_TYPE_HOME, TRANSIT_OPEN, true);
+
+        mHomeTransitionObserver.onTransitionReady(mock(IBinder.class),
+                info,
+                mock(SurfaceControl.Transaction.class),
+                mock(SurfaceControl.Transaction.class));
+        verify(mListener, times(0)).onHomeVisibilityChanged(anyBoolean());
+
+        when(info.getType()).thenReturn(TRANSIT_TO_BACK);
+        setupTransitionInfo(taskInfo, change, ACTIVITY_TYPE_HOME, TRANSIT_CHANGE, true);
+        mHomeTransitionObserver.onTransitionReady(mock(IBinder.class),
+                info,
+                mock(SurfaceControl.Transaction.class),
+                mock(SurfaceControl.Transaction.class));
         verify(mListener, times(1)).onHomeVisibilityChanged(true);
     }
 
