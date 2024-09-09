@@ -60,6 +60,7 @@ public class SetScreenLockDialogActivity extends AlertActivity
             LAUNCH_REASON_PRIVATE_SPACE_SETTINGS_ACCESS,
             LAUNCH_REASON_DISABLE_QUIET_MODE,
             LAUNCH_REASON_UNKNOWN,
+            LAUNCH_REASON_RESET_PRIVATE_SPACE_SETTINGS_ACCESS,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface LaunchReason {
@@ -67,6 +68,7 @@ public class SetScreenLockDialogActivity extends AlertActivity
     public static final int LAUNCH_REASON_UNKNOWN = -1;
     public static final int LAUNCH_REASON_DISABLE_QUIET_MODE = 1;
     public static final int LAUNCH_REASON_PRIVATE_SPACE_SETTINGS_ACCESS = 2;
+    public static final int LAUNCH_REASON_RESET_PRIVATE_SPACE_SETTINGS_ACCESS = 3;
     private @LaunchReason int mReason;
     private int mOriginUserId;
 
@@ -139,7 +141,11 @@ public class SetScreenLockDialogActivity extends AlertActivity
             // Always set private space message if launch reason is specific to private space
             builder.setMessage(R.string.private_space_set_up_screen_lock_message);
             return;
+        } else if (mReason == LAUNCH_REASON_RESET_PRIVATE_SPACE_SETTINGS_ACCESS) {
+            builder.setMessage(R.string.private_space_set_up_screen_lock_for_reset);
+            return;
         }
+
         final UserManager userManager = getApplicationContext().getSystemService(UserManager.class);
         if (userManager != null) {
             UserInfo userInfo = userManager.getUserInfo(mOriginUserId);
