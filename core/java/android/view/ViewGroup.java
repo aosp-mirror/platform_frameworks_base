@@ -4490,6 +4490,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final View[] children = mChildren;
         for (int i = 0; i < count; i++) {
             final View child = children[i];
+            if (child == null) {
+                throw new IllegalStateException(getClass().getSimpleName() + " contains null " +
+                        "child at index " + i + " when traversal in dispatchGetDisplayList," +
+                        " the view may have been removed.");
+            }
             if (((child.mViewFlags & VISIBILITY_MASK) == VISIBLE || child.getAnimation() != null)) {
                 recreateChildDisplayList(child);
             }
