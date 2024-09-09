@@ -420,6 +420,14 @@ public final class SatelliteManager {
     @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int SATELLITE_RESULT_DISABLE_IN_PROGRESS = 28;
 
+    /**
+     * Enabling satellite is in progress.
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    public static final int SATELLITE_RESULT_ENABLE_IN_PROGRESS = 29;
+
     /** @hide */
     @IntDef(prefix = {"SATELLITE_RESULT_"}, value = {
             SATELLITE_RESULT_SUCCESS,
@@ -450,7 +458,8 @@ public final class SatelliteManager {
             SATELLITE_RESULT_LOCATION_DISABLED,
             SATELLITE_RESULT_LOCATION_NOT_AVAILABLE,
             SATELLITE_RESULT_EMERGENCY_CALL_IN_PROGRESS,
-            SATELLITE_RESULT_DISABLE_IN_PROGRESS
+            SATELLITE_RESULT_DISABLE_IN_PROGRESS,
+            SATELLITE_RESULT_ENABLE_IN_PROGRESS
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface SatelliteResult {}

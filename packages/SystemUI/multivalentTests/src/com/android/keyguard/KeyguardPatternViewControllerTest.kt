@@ -30,10 +30,12 @@ import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.classifier.FalsingCollectorFake
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.haptics.msdl.msdlPlayer
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.DevicePostureController
 import com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POSTURE_HALF_OPENED
 import com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POSTURE_OPENED
+import com.android.systemui.testKosmos
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.whenever
@@ -89,6 +91,9 @@ class KeyguardPatternViewControllerTest : SysuiTestCase() {
 
     @Captor lateinit var postureCallbackCaptor: ArgumentCaptor<DevicePostureController.Callback>
 
+    private val kosmos = testKosmos()
+    private val msdlPlayer = kosmos.msdlPlayer
+
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
@@ -112,7 +117,8 @@ class KeyguardPatternViewControllerTest : SysuiTestCase() {
                 mKeyguardMessageAreaControllerFactory,
                 mPostureController,
                 fakeFeatureFlags,
-                mSelectedUserInteractor
+                mSelectedUserInteractor,
+                msdlPlayer,
             )
         mKeyguardPatternView.onAttachedToWindow()
     }

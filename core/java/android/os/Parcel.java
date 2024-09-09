@@ -234,8 +234,7 @@ import java.util.function.IntFunction;
  * {@link #readSparseArray(ClassLoader, Class)}.
  */
 @RavenwoodKeepWholeClass
-@RavenwoodRedirectionClass(
-        "com.android.platform.test.ravenwood.nativesubstitution.Parcel_host")
+@RavenwoodRedirectionClass("Parcel_host")
 public final class Parcel {
 
     private static final boolean DEBUG_RECYCLE = false;

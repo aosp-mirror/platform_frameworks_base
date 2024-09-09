@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.platform.test.ravenwood.nativesubstitution;
+package com.android.internal.os;
 
 import android.os.BadParcelableException;
 import android.os.Parcel;
@@ -28,7 +28,7 @@ import java.util.HashMap;
 public class LongArrayMultiStateCounter_host {
 
     /**
-     * A reimplementation of {@link com.android.internal.os.LongArrayMultiStateCounter}, only in
+     * A reimplementation of {@link LongArrayMultiStateCounter}, only in
      * Java instead of native.  The majority of the code (in C++) can be found in
      * /frameworks/native/libs/battery/MultiStateCounter.h
      */
@@ -254,50 +254,6 @@ public class LongArrayMultiStateCounter_host {
                     counter[i] += delta[i];
                 }
             }
-        }
-    }
-
-    public static class LongArrayContainer_host {
-        private static final HashMap<Long, long[]> sInstances = new HashMap<>();
-        private static long sNextId = 1;
-
-        public static long native_init(int arrayLength) {
-            long[] array = new long[arrayLength];
-            long instanceId = sNextId++;
-            sInstances.put(instanceId, array);
-            return instanceId;
-        }
-
-        static long[] getInstance(long instanceId) {
-            return sInstances.get(instanceId);
-        }
-
-        public static void native_setValues(long instanceId, long[] values) {
-            System.arraycopy(values, 0, getInstance(instanceId), 0, values.length);
-        }
-
-        public static void native_getValues(long instanceId, long[] values) {
-            System.arraycopy(getInstance(instanceId), 0, values, 0, values.length);
-        }
-
-        public static boolean native_combineValues(long instanceId, long[] array, int[] indexMap) {
-            long[] values = getInstance(instanceId);
-
-            boolean nonZero = false;
-            Arrays.fill(array, 0);
-
-            for (int i = 0; i < values.length; i++) {
-                int index = indexMap[i];
-                if (index < 0 || index >= array.length) {
-                    throw new IndexOutOfBoundsException("Index " + index + " is out of bounds: [0, "
-                                                        + (array.length - 1) + "]");
-                }
-                if (values[i] != 0) {
-                    array[index] += values[i];
-                    nonZero = true;
-                }
-            }
-            return nonZero;
         }
     }
 

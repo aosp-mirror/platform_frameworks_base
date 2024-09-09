@@ -13,12 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.platform.test.ravenwood.nativesubstitution;
+package android.util;
 
 import com.android.internal.os.RuntimeInit;
 
 import java.io.PrintStream;
-import java.util.Collection;
 
 public class EventLog_host {
     public static int writeEvent(int tag, int value) {
@@ -56,15 +55,6 @@ public class EventLog_host {
         sb.append(']');
         getRealOut().println(sb.toString());
         return sb.length();
-    }
-
-    public static void readEvents(int[] tags, Collection<android.util.EventLog.Event> output) {
-        throw new UnsupportedOperationException();
-    }
-
-    public static void readEventsOnWrapping(int[] tags, long timestamp,
-            Collection<android.util.EventLog.Event> output) {
-        throw new UnsupportedOperationException();
     }
 
     /**
