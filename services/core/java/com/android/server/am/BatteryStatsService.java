@@ -662,6 +662,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             } else if (nc.hasTransport(TRANSPORT_CELLULAR)) {
                 return CPU_WAKEUP_SUBSYSTEM_CELLULAR_DATA;
             }
+            // For TRANSPORT_BLUETOOTH, we have a separate channel to catch Bluetooth wakeups.
+            // See noteCpuWakingSysproxyPacket method.
             return CPU_WAKEUP_SUBSYSTEM_UNKNOWN;
         }
 
@@ -681,6 +683,15 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 return;
             }
             noteCpuWakingActivity(subsystem, elapsedMillis, uid);
+        }
+
+        @Override
+        public void noteCpuWakingBluetoothProxyPacket(int uid, long elapsedMillis) {
+            if (uid < 0) {
+                Slog.e(TAG, "Invalid uid for waking bluetooth proxy packet: " + uid);
+                return;
+            }
+            noteCpuWakingActivity(CPU_WAKEUP_SUBSYSTEM_BLUETOOTH, elapsedMillis, uid);
         }
 
         @Override
