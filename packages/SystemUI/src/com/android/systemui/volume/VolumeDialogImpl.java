@@ -1993,7 +1993,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
                                             : R.drawable.ic_volume_media_bt;
             }
         } else if (isStreamMuted(ss)) {
-            iconRes = (ss.muted && isTv()) ? R.drawable.ic_volume_media_off : row.iconMuteRes;
+            iconRes = row.iconMuteRes;
         } else {
             iconRes = mShowLowMediaVolumeIcon && ss.level * 2 < (ss.levelMax + ss.levelMin)
                       ? R.drawable.ic_volume_media_low : row.iconRes;
