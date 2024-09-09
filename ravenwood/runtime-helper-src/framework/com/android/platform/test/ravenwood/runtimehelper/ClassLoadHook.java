@@ -166,6 +166,7 @@ public class ClassLoadHook {
     private static final Class<?>[] sLibandroidClasses = {
             android.util.Log.class,
             android.os.Parcel.class,
+            android.os.Binder.class,
             android.content.res.ApkAssets.class,
             android.content.res.AssetManager.class,
             android.content.res.StringBlock.class,
