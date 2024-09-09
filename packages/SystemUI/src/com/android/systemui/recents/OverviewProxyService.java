@@ -101,10 +101,10 @@ import com.android.systemui.navigationbar.views.buttons.KeyButtonView;
 import com.android.systemui.recents.OverviewProxyService.OverviewProxyListener;
 import com.android.systemui.scene.domain.interactor.SceneInteractor;
 import com.android.systemui.scene.shared.flag.SceneContainerFlag;
-import com.android.systemui.scene.shared.model.SceneFamilies;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.ShadeViewController;
+import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.shared.recents.IOverviewProxy;
 import com.android.systemui.shared.recents.ISystemUiProxy;
 import com.android.systemui.shared.system.QuickStepContract;
@@ -158,6 +158,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private final ScreenPinningRequest mScreenPinningRequest;
     private final NotificationShadeWindowController mStatusBarWinController;
     private final Provider<SceneInteractor> mSceneInteractor;
+    private final Provider<ShadeInteractor> mShadeInteractor;
 
     private final KeyboardTouchpadEduStatsInteractor mKeyboardTouchpadEduStatsInteractor;
 
@@ -246,11 +247,8 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                             }
                         } else if (action == ACTION_UP) {
                             // Gesture was too short to be picked up by scene container touch
-                            // handling; programmatically start the transition to shade scene.
-                            mSceneInteractor.get().changeScene(
-                                    SceneFamilies.NotifShade,
-                                    "short launcher swipe"
-                            );
+                            // handling; programmatically start the transition to the shade.
+                            mShadeInteractor.get().expandNotificationShade("short launcher swipe");
                         }
                     }
                     event.recycle();
@@ -267,10 +265,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                         mSceneInteractor.get().onRemoteUserInputStarted(
                                 "trackpad swipe");
                     } else if (action == ACTION_UP) {
-                        mSceneInteractor.get().changeScene(
-                                SceneFamilies.NotifShade,
-                                "short trackpad swipe"
-                        );
+                        mShadeInteractor.get().expandNotificationShade("short trackpad swipe");
                     }
                     mStatusBarWinController.getWindowRootView().dispatchTouchEvent(event);
                 } else {
@@ -652,6 +647,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             NotificationShadeWindowController statusBarWinController,
             SysUiState sysUiState,
             Provider<SceneInteractor> sceneInteractor,
+            Provider<ShadeInteractor> shadeInteractor,
             UserTracker userTracker,
             UserManager userManager,
             WakefulnessLifecycle wakefulnessLifecycle,
@@ -688,6 +684,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         mScreenPinningRequest = screenPinningRequest;
         mStatusBarWinController = statusBarWinController;
         mSceneInteractor = sceneInteractor;
+        mShadeInteractor = shadeInteractor;
         mUserTracker = userTracker;
         mConnectionBackoffAttempts = 0;
         mRecentsComponentName = ComponentName.unflattenFromString(context.getString(

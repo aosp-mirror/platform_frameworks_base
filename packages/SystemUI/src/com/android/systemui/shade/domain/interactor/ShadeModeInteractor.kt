@@ -51,6 +51,10 @@ interface ShadeModeInteractor {
      */
     val isShadeLayoutWide: StateFlow<Boolean>
 
+    /** Convenience shortcut for querying whether the current [shadeMode] is [ShadeMode.Dual]. */
+    val isDualShade: Boolean
+        get() = shadeMode.value is ShadeMode.Dual
+
     /**
      * The fraction between [0..1] (i.e., percentage) of screen width to consider the threshold
      * between "top-left" and "top-right" for the purposes of dual-shade invocation.

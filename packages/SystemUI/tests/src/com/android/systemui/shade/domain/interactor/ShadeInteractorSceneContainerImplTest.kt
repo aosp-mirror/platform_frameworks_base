@@ -16,6 +16,8 @@
 
 package com.android.systemui.shade.domain.interactor
 
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
@@ -27,16 +29,18 @@ import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.domain.interactor.sceneInteractor
+import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.shadeTestUtil
+import com.android.systemui.shade.shared.flag.DualShade
 import com.android.systemui.testKosmos
-import com.google.common.truth.Truth
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -53,7 +57,12 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
     private val sceneInteractor = kosmos.sceneInteractor
     private val shadeTestUtil = kosmos.shadeTestUtil
 
-    private val underTest = kosmos.shadeInteractorSceneContainerImpl
+    private lateinit var underTest: ShadeInteractorSceneContainerImpl
+
+    @Before
+    fun setUp() {
+        underTest = kosmos.shadeInteractorSceneContainerImpl
+    }
 
     @Test
     fun qsExpansionWhenInSplitShadeAndQsExpanded() =
@@ -80,7 +89,7 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
             keyguardRepository.setStatusBarState(StatusBarState.SHADE)
 
             // THEN legacy shade expansion is passed through
-            Truth.assertThat(actual).isEqualTo(.3f)
+            assertThat(actual).isEqualTo(.3f)
         }
 
     @Test
@@ -109,7 +118,7 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
             runCurrent()
 
             // THEN shade expansion is zero
-            Truth.assertThat(actual).isEqualTo(.7f)
+            assertThat(actual).isEqualTo(.7f)
         }
 
     @Test
@@ -134,7 +143,7 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
             runCurrent()
 
             // THEN QS is not fullscreen
-            Truth.assertThat(actual).isFalse()
+            assertThat(actual).isFalse()
         }
 
     @Test
@@ -152,7 +161,7 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
             runCurrent()
 
             // THEN QS is not fullscreen
-            Truth.assertThat(actual).isFalse()
+            assertThat(actual).isFalse()
         }
 
     @Test
@@ -171,7 +180,7 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
             runCurrent()
 
             // THEN QS is not fullscreen
-            Truth.assertThat(actual).isFalse()
+            assertThat(actual).isFalse()
         }
 
     @Test
@@ -189,7 +198,7 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
             runCurrent()
 
             // THEN QS is fullscreen
-            Truth.assertThat(actual).isTrue()
+            assertThat(actual).isTrue()
         }
 
     @Test
@@ -206,7 +215,7 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
             sceneInteractor.setTransitionState(transitionState)
 
             // THEN expansion is 1
-            Truth.assertThat(expansionAmount).isEqualTo(1f)
+            assertThat(expansionAmount).isEqualTo(1f)
         }
 
     @Test
@@ -224,7 +233,7 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
             sceneInteractor.setTransitionState(transitionState)
 
             // THEN expansion is 0
-            Truth.assertThat(expansionAmount).isEqualTo(0f)
+            assertThat(expansionAmount).isEqualTo(0f)
         }
 
     @Test
@@ -251,19 +260,19 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
             sceneInteractor.setTransitionState(transitionState)
 
             // THEN expansion is 0
-            Truth.assertThat(expansionAmount).isEqualTo(0f)
+            assertThat(expansionAmount).isEqualTo(0f)
 
             // WHEN transition state is partially to the scene
             progress.value = .4f
 
             // THEN expansion matches the progress
-            Truth.assertThat(expansionAmount).isEqualTo(.4f)
+            assertThat(expansionAmount).isEqualTo(.4f)
 
             // WHEN transition completes
             progress.value = 1f
 
             // THEN expansion is 1
-            Truth.assertThat(expansionAmount).isEqualTo(1f)
+            assertThat(expansionAmount).isEqualTo(1f)
         }
 
     @Test
@@ -290,19 +299,19 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
             sceneInteractor.setTransitionState(transitionState)
 
             // THEN expansion is 1
-            Truth.assertThat(expansionAmount).isEqualTo(1f)
+            assertThat(expansionAmount).isEqualTo(1f)
 
             // WHEN transition state is partially to the scene
             progress.value = .4f
 
             // THEN expansion reflects the progress
-            Truth.assertThat(expansionAmount).isEqualTo(.6f)
+            assertThat(expansionAmount).isEqualTo(.6f)
 
             // WHEN transition completes
             progress.value = 1f
 
             // THEN expansion is 0
-            Truth.assertThat(expansionAmount).isEqualTo(0f)
+            assertThat(expansionAmount).isEqualTo(0f)
         }
 
     fun isQsBypassingShade_goneToQs() =
@@ -326,7 +335,7 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
             runCurrent()
 
             // THEN qs is bypassing shade
-            Truth.assertThat(actual).isTrue()
+            assertThat(actual).isTrue()
         }
 
     fun isQsBypassingShade_shadeToQs() =
@@ -350,7 +359,7 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
             runCurrent()
 
             // THEN qs is not bypassing shade
-            Truth.assertThat(actual).isFalse()
+            assertThat(actual).isFalse()
         }
 
     @Test
@@ -376,19 +385,19 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
             sceneInteractor.setTransitionState(transitionState)
 
             // THEN expansion is 0
-            Truth.assertThat(expansionAmount).isEqualTo(0f)
+            assertThat(expansionAmount).isEqualTo(0f)
 
             // WHEN transition state is partially complete
             progress.value = .4f
 
             // THEN expansion is still 0
-            Truth.assertThat(expansionAmount).isEqualTo(0f)
+            assertThat(expansionAmount).isEqualTo(0f)
 
             // WHEN transition completes
             progress.value = 1f
 
             // THEN expansion is still 0
-            Truth.assertThat(expansionAmount).isEqualTo(0f)
+            assertThat(expansionAmount).isEqualTo(0f)
         }
 
     @Test
@@ -405,7 +414,7 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
             sceneInteractor.setTransitionState(transitionState)
 
             // THEN interacting is false
-            Truth.assertThat(interacting).isFalse()
+            assertThat(interacting).isFalse()
         }
 
     @Test
@@ -432,19 +441,19 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
             sceneInteractor.setTransitionState(transitionState)
 
             // THEN interacting is false
-            Truth.assertThat(interacting).isFalse()
+            assertThat(interacting).isFalse()
 
             // WHEN transition state is partially to the scene
             progress.value = .4f
 
             // THEN interacting is false
-            Truth.assertThat(interacting).isFalse()
+            assertThat(interacting).isFalse()
 
             // WHEN transition completes
             progress.value = 1f
 
             // THEN interacting is false
-            Truth.assertThat(interacting).isFalse()
+            assertThat(interacting).isFalse()
         }
 
     @Test
@@ -471,19 +480,19 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
             sceneInteractor.setTransitionState(transitionState)
 
             // THEN interacting is true
-            Truth.assertThat(interacting).isTrue()
+            assertThat(interacting).isTrue()
 
             // WHEN transition state is partially to the scene
             progress.value = .4f
 
             // THEN interacting is true
-            Truth.assertThat(interacting).isTrue()
+            assertThat(interacting).isTrue()
 
             // WHEN transition completes
             progress.value = 1f
 
             // THEN interacting is true
-            Truth.assertThat(interacting).isTrue()
+            assertThat(interacting).isTrue()
         }
 
     @Test
@@ -510,19 +519,19 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
             sceneInteractor.setTransitionState(transitionState)
 
             // THEN interacting is false
-            Truth.assertThat(interacting).isFalse()
+            assertThat(interacting).isFalse()
 
             // WHEN transition state is partially to the scene
             progress.value = .4f
 
             // THEN interacting is false
-            Truth.assertThat(interacting).isFalse()
+            assertThat(interacting).isFalse()
 
             // WHEN transition completes
             progress.value = 1f
 
             // THEN interacting is false
-            Truth.assertThat(interacting).isFalse()
+            assertThat(interacting).isFalse()
         }
 
     @Test
@@ -549,19 +558,19 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
             sceneInteractor.setTransitionState(transitionState)
 
             // THEN interacting is true
-            Truth.assertThat(interacting).isTrue()
+            assertThat(interacting).isTrue()
 
             // WHEN transition state is partially to the scene
             progress.value = .4f
 
             // THEN interacting is true
-            Truth.assertThat(interacting).isTrue()
+            assertThat(interacting).isTrue()
 
             // WHEN transition completes
             progress.value = 1f
 
             // THEN interacting is true
-            Truth.assertThat(interacting).isTrue()
+            assertThat(interacting).isTrue()
         }
 
     @Test
@@ -572,7 +581,6 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
             val interacting by collectLastValue(interactingFlow)
 
             // WHEN transition state is starting to between different scenes
-            val progress = MutableStateFlow(0f)
             val transitionState =
                 MutableStateFlow<ObservableTransitionState>(
                     ObservableTransitionState.Transition(
@@ -588,5 +596,95 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
 
             // THEN interacting is false
             assertThat(interacting).isFalse()
+        }
+
+    @Test
+    @EnableFlags(DualShade.FLAG_NAME)
+    fun expandNotificationShade_dualShadeEnabled_opensOverlay() =
+        testScope.runTest {
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
+            val currentOverlays by collectLastValue(sceneInteractor.currentOverlays)
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+            assertThat(currentOverlays).isEmpty()
+
+            underTest.expandNotificationShade("reason")
+
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+            assertThat(currentOverlays).containsExactly(Overlays.NotificationsShade)
+        }
+
+    @Test
+    @DisableFlags(DualShade.FLAG_NAME)
+    fun expandNotificationShade_dualShadeDisabled_switchesToShadeScene() =
+        testScope.runTest {
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
+            val currentOverlays by collectLastValue(sceneInteractor.currentOverlays)
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+            assertThat(currentOverlays).isEmpty()
+
+            underTest.expandNotificationShade("reason")
+
+            assertThat(currentScene).isEqualTo(Scenes.Shade)
+            assertThat(currentOverlays).isEmpty()
+        }
+
+    @Test
+    @EnableFlags(DualShade.FLAG_NAME)
+    fun expandNotificationShade_dualShadeEnabledAndQuickSettingsOpen_replacesOverlay() =
+        testScope.runTest {
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
+            val currentOverlays by collectLastValue(sceneInteractor.currentOverlays)
+            underTest.expandQuickSettingsShade("reason")
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+            assertThat(currentOverlays).containsExactly(Overlays.QuickSettingsShade)
+
+            underTest.expandNotificationShade("reason")
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+            assertThat(currentOverlays).containsExactly(Overlays.NotificationsShade)
+        }
+
+    @Test
+    @EnableFlags(DualShade.FLAG_NAME)
+    fun expandQuickSettingsShade_dualShadeEnabled_opensOverlay() =
+        testScope.runTest {
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
+            val currentOverlays by collectLastValue(sceneInteractor.currentOverlays)
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+            assertThat(currentOverlays).isEmpty()
+
+            underTest.expandQuickSettingsShade("reason")
+
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+            assertThat(currentOverlays).containsExactly(Overlays.QuickSettingsShade)
+        }
+
+    @Test
+    @DisableFlags(DualShade.FLAG_NAME)
+    fun expandQuickSettingsShade_dualShadeDisabled_switchesToQuickSettingsScene() =
+        testScope.runTest {
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
+            val currentOverlays by collectLastValue(sceneInteractor.currentOverlays)
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+            assertThat(currentOverlays).isEmpty()
+
+            underTest.expandQuickSettingsShade("reason")
+
+            assertThat(currentScene).isEqualTo(Scenes.QuickSettings)
+            assertThat(currentOverlays).isEmpty()
+        }
+
+    @Test
+    @EnableFlags(DualShade.FLAG_NAME)
+    fun expandQuickSettingsShade_dualShadeEnabledAndNotificationsOpen_replacesOverlay() =
+        testScope.runTest {
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
+            val currentOverlays by collectLastValue(sceneInteractor.currentOverlays)
+            underTest.expandNotificationShade("reason")
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+            assertThat(currentOverlays).containsExactly(Overlays.NotificationsShade)
+
+            underTest.expandQuickSettingsShade("reason")
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+            assertThat(currentOverlays).containsExactly(Overlays.QuickSettingsShade)
         }
 }
