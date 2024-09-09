@@ -418,7 +418,6 @@ import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.MemInfoReader;
 import com.android.internal.util.Preconditions;
-import com.android.server.crashrecovery.CrashRecoveryHelper;
 import com.android.server.AlarmManagerInternal;
 import com.android.server.BootReceiver;
 import com.android.server.DeviceIdleInternal;
@@ -438,6 +437,7 @@ import com.android.server.am.LowMemDetector.MemFactor;
 import com.android.server.appop.AppOpsService;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.contentcapture.ContentCaptureManagerInternal;
+import com.android.server.crashrecovery.CrashRecoveryHelper;
 import com.android.server.criticalevents.CriticalEventLog;
 import com.android.server.firewall.IntentFirewall;
 import com.android.server.graphics.fonts.FontManagerInternal;
@@ -18376,25 +18376,34 @@ public class ActivityManagerService extends IActivityManager.Stub
                     "Cannot kill the dependents of a package without its name.");
         }
 
+        userId = mUserController.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
+                userId, true, ALLOW_FULL_ONLY, "killPackageDependents", null);
+        final int[] userIds = mUserController.expandUserId(userId);
+
         final long callingId = Binder.clearCallingIdentity();
         IPackageManager pm = AppGlobals.getPackageManager();
-        int pkgUid = -1;
         try {
-            pkgUid = pm.getPackageUid(packageName, MATCH_DEBUG_TRIAGED_MISSING, userId);
-        } catch (RemoteException e) {
-        }
-        if (userId != UserHandle.USER_ALL && pkgUid == -1) {
-            throw new IllegalArgumentException(
-                    "Cannot kill dependents of non-existing package " + packageName);
-        }
-        try {
-            synchronized(this) {
-                synchronized (mProcLock) {
-                    mProcessList.killPackageProcessesLSP(packageName, UserHandle.getAppId(pkgUid),
-                            userId, ProcessList.FOREGROUND_APP_ADJ,
-                            ApplicationExitInfo.REASON_DEPENDENCY_DIED,
-                            ApplicationExitInfo.SUBREASON_UNKNOWN,
-                            "dep: " + packageName);
+            for (int targetUserId : userIds) {
+                int pkgUid = -1;
+                try {
+                    pkgUid = pm.getPackageUid(packageName, MATCH_DEBUG_TRIAGED_MISSING,
+                            targetUserId);
+                } catch (RemoteException e) {
+                }
+                if (userId != UserHandle.USER_ALL && pkgUid == -1) {
+                    throw new IllegalArgumentException(
+                            "Cannot kill dependents of non-existing package " + packageName);
+                }
+                synchronized (this) {
+                    synchronized (mProcLock) {
+                        mProcessList.killPackageProcessesLSP(packageName,
+                                UserHandle.getAppId(pkgUid),
+                                targetUserId,
+                                ProcessList.FOREGROUND_APP_ADJ,
+                                ApplicationExitInfo.REASON_DEPENDENCY_DIED,
+                                ApplicationExitInfo.SUBREASON_UNKNOWN,
+                                "dep: " + packageName);
+                    }
                 }
             }
         } finally {
