@@ -16,16 +16,26 @@
 
 package androidx.window.extensions.embedding;
 
+import static android.window.TaskFragmentOrganizer.KEY_RESTORE_TASK_FRAGMENTS_INFO;
+import static android.window.TaskFragmentOrganizer.KEY_RESTORE_TASK_FRAGMENT_PARENT_INFO;
+
 import android.os.Build;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.MessageQueue;
+import android.util.ArrayMap;
 import android.util.Log;
+import android.util.SparseArray;
+import android.window.TaskFragmentInfo;
+import android.window.TaskFragmentParentInfo;
+import android.window.WindowContainerTransaction;
 
 import androidx.annotation.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Helper class to back up and restore the TaskFragmentOrganizer state, in order to resume
@@ -40,11 +50,21 @@ class BackupHelper {
     @NonNull
     private final SplitController mController;
     @NonNull
+    private final SplitPresenter mPresenter;
+    @NonNull
     private final BackupIdler mBackupIdler = new BackupIdler();
     private boolean mBackupIdlerScheduled;
 
-    BackupHelper(@NonNull SplitController splitController, @NonNull Bundle savedState) {
+    private final List<ParcelableTaskContainerData> mParcelableTaskContainerDataList =
+            new ArrayList<>();
+    private final ArrayMap<IBinder, TaskFragmentInfo> mTaskFragmentInfos = new ArrayMap<>();
+    private final SparseArray<TaskFragmentParentInfo> mTaskFragmentParentInfos =
+            new SparseArray<>();
+
+    BackupHelper(@NonNull SplitController splitController, @NonNull SplitPresenter splitPresenter,
+            @NonNull Bundle savedState) {
         mController = splitController;
+        mPresenter = splitPresenter;
 
         if (!savedState.isEmpty()) {
             restoreState(savedState);
@@ -67,13 +87,13 @@ class BackupHelper {
         public boolean queueIdle() {
             synchronized (mController.mLock) {
                 mBackupIdlerScheduled = false;
-                startBackup();
+                saveState();
             }
             return false;
         }
     }
 
-    private void startBackup() {
+    private void saveState() {
         final List<TaskContainer> taskContainers = mController.getTaskContainers();
         if (taskContainers.isEmpty()) {
             Log.w(TAG, "No task-container to back up");
@@ -97,13 +117,92 @@ class BackupHelper {
             return;
         }
 
-        final List<ParcelableTaskContainerData> parcelableTaskContainerDataList =
-                savedState.getParcelableArrayList(KEY_TASK_CONTAINERS,
-                        ParcelableTaskContainerData.class);
-        for (ParcelableTaskContainerData data : parcelableTaskContainerDataList) {
-            final TaskContainer taskContainer = new TaskContainer(data, mController);
-            if (DEBUG) Log.d(TAG, "Restoring task " + taskContainer.getTaskId());
-            // TODO(b/289875940): implement the TaskContainer restoration.
+        if (DEBUG) Log.d(TAG, "Start restoring saved-state");
+        mParcelableTaskContainerDataList.addAll(savedState.getParcelableArrayList(
+                KEY_TASK_CONTAINERS, ParcelableTaskContainerData.class));
+        if (DEBUG) Log.d(TAG, "Retrieved tasks : " + mParcelableTaskContainerDataList.size());
+        if (mParcelableTaskContainerDataList.isEmpty()) {
+            return;
         }
+
+        final List<TaskFragmentInfo> infos = savedState.getParcelableArrayList(
+                KEY_RESTORE_TASK_FRAGMENTS_INFO, TaskFragmentInfo.class);
+        for (TaskFragmentInfo info : infos) {
+            if (DEBUG) Log.d(TAG, "Retrieved: " + info);
+            mTaskFragmentInfos.put(info.getFragmentToken(), info);
+            mPresenter.updateTaskFragmentInfo(info);
+        }
+
+        final List<TaskFragmentParentInfo> parentInfos = savedState.getParcelableArrayList(
+                KEY_RESTORE_TASK_FRAGMENT_PARENT_INFO,
+                TaskFragmentParentInfo.class);
+        for (TaskFragmentParentInfo info : parentInfos) {
+            if (DEBUG) Log.d(TAG, "Retrieved: " + info);
+            mTaskFragmentParentInfos.put(info.getTaskId(), info);
+        }
+    }
+
+    boolean hasPendingStateToRestore() {
+        return !mParcelableTaskContainerDataList.isEmpty();
+    }
+
+    /**
+     * Returns {@code true} if any of the {@link TaskContainer} is restored.
+     * Otherwise, returns {@code false}.
+     */
+    boolean rebuildTaskContainers(@NonNull WindowContainerTransaction wct,
+            @NonNull Set<EmbeddingRule> rules) {
+        if (mParcelableTaskContainerDataList.isEmpty()) {
+            return false;
+        }
+
+        if (DEBUG) Log.d(TAG, "Rebuilding TaskContainers.");
+        final ArrayMap<String, EmbeddingRule> embeddingRuleMap = new ArrayMap<>();
+        for (EmbeddingRule rule : rules) {
+            embeddingRuleMap.put(rule.getTag(), rule);
+        }
+
+        boolean restoredAny = false;
+        for (int i = mParcelableTaskContainerDataList.size() - 1; i >= 0; i--) {
+            final ParcelableTaskContainerData parcelableTaskContainerData =
+                    mParcelableTaskContainerDataList.get(i);
+            final List<String> tags = parcelableTaskContainerData.getSplitRuleTags();
+            if (!embeddingRuleMap.containsAll(tags)) {
+                // has unknown tag, unable to restore.
+                if (DEBUG) {
+                    Log.d(TAG, "Rebuilding TaskContainer abort! Unknown Tag. Task#"
+                            + parcelableTaskContainerData.mTaskId);
+                }
+                continue;
+            }
+
+            mParcelableTaskContainerDataList.remove(parcelableTaskContainerData);
+            final TaskContainer taskContainer = new TaskContainer(parcelableTaskContainerData,
+                    mController, mTaskFragmentInfos);
+            if (DEBUG) Log.d(TAG, "Created TaskContainer " + taskContainer);
+            mController.addTaskContainer(taskContainer.getTaskId(), taskContainer);
+
+            for (ParcelableSplitContainerData splitData :
+                    parcelableTaskContainerData.getParcelableSplitContainerDataList()) {
+                final SplitRule rule = (SplitRule) embeddingRuleMap.get(splitData.mSplitRuleTag);
+                assert rule != null;
+                if (mController.getContainer(splitData.getPrimaryContainerToken()) != null
+                        && mController.getContainer(splitData.getSecondaryContainerToken())
+                        != null) {
+                    taskContainer.addSplitContainer(
+                            new SplitContainer(splitData, mController, rule));
+                }
+            }
+
+            mController.onTaskFragmentParentRestored(wct, taskContainer.getTaskId(),
+                    mTaskFragmentParentInfos.get(taskContainer.getTaskId()));
+            restoredAny = true;
+        }
+
+        if (mParcelableTaskContainerDataList.isEmpty()) {
+            mTaskFragmentParentInfos.clear();
+            mTaskFragmentInfos.clear();
+        }
+        return restoredAny;
     }
 }
