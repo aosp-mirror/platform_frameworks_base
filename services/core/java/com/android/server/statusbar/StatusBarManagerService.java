@@ -119,6 +119,7 @@ import com.android.server.LocalServices;
 import com.android.server.UiThread;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.notification.NotificationDelegate;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.UserManagerService;
 import com.android.server.policy.GlobalActionsProvider;
 import com.android.server.power.ShutdownCheckPoints;
@@ -185,6 +186,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     private final ActivityManagerInternal mActivityManagerInternal;
     private final ActivityTaskManagerInternal mActivityTaskManager;
     private final PackageManagerInternal mPackageManagerInternal;
+    private final UserManagerInternal mUserManagerInternal;
     private final SessionMonitor mSessionMonitor;
     private int mCurrentUserId;
     private boolean mTracingEnabled;
@@ -304,6 +306,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         mActivityTaskManager = LocalServices.getService(ActivityTaskManagerInternal.class);
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
+        mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
 
         mTileRequestTracker = new TileRequestTracker(mContext);
         mSessionMonitor = new SessionMonitor(mContext);
@@ -360,7 +363,14 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         }
 
         @Override
-        public void showScreenPinningRequest(int taskId) {
+        public void showScreenPinningRequest(int taskId, int userId) {
+            if (isVisibleBackgroundUser(userId)) {
+                if (SPEW) {
+                    Slog.d(TAG, "Skipping showScreenPinningRequest for visible background user "
+                            + userId);
+                }
+                return;
+            }
             IStatusBar bar = mBar;
             if (bar != null) {
                 try {
@@ -439,6 +449,13 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
 
         @Override
         public void appTransitionFinished(int displayId) {
+            if (isVisibleBackgroundUserOnDisplay(displayId)) {
+                if (SPEW) {
+                    Slog.d(TAG, "Skipping appTransitionFinished for visible background user "
+                            + mUserManagerInternal.getUserAssignedToDisplay(displayId));
+                }
+                return;
+            }
             enforceStatusBarService();
             IStatusBar bar = mBar;
             if (bar != null) {
@@ -588,6 +605,13 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
 
         @Override
         public void setWindowState(int displayId, int window, int state) {
+            if (isVisibleBackgroundUserOnDisplay(displayId)) {
+                if (SPEW) {
+                    Slog.d(TAG, "Skipping setWindowState for visible background user "
+                            + mUserManagerInternal.getUserAssignedToDisplay(displayId));
+                }
+                return;
+            }
             IStatusBar bar = mBar;
             if (bar != null) {
                 try {
@@ -598,6 +622,13 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
 
         @Override
         public void appTransitionPending(int displayId) {
+            if (isVisibleBackgroundUserOnDisplay(displayId)) {
+                if (SPEW) {
+                    Slog.d(TAG, "Skipping appTransitionPending for visible background user "
+                            + mUserManagerInternal.getUserAssignedToDisplay(displayId));
+                }
+                return;
+            }
             IStatusBar bar = mBar;
             if (bar != null) {
                 try {
@@ -608,6 +639,13 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
 
         @Override
         public void appTransitionCancelled(int displayId) {
+            if (isVisibleBackgroundUserOnDisplay(displayId)) {
+                if (SPEW) {
+                    Slog.d(TAG, "Skipping appTransitionCancelled for visible background user "
+                            + mUserManagerInternal.getUserAssignedToDisplay(displayId));
+                }
+                return;
+            }
             IStatusBar bar = mBar;
             if (bar != null) {
                 try {
@@ -619,6 +657,13 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         @Override
         public void appTransitionStarting(int displayId, long statusBarAnimationsStartTime,
                 long statusBarAnimationsDuration) {
+            if (isVisibleBackgroundUserOnDisplay(displayId)) {
+                if (SPEW) {
+                    Slog.d(TAG, "Skipping appTransitionStarting for visible background user "
+                            + mUserManagerInternal.getUserAssignedToDisplay(displayId));
+                }
+                return;
+            }
             IStatusBar bar = mBar;
             if (bar != null) {
                 try {
@@ -629,7 +674,14 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         }
 
         @Override
-        public void setTopAppHidesStatusBar(boolean hidesStatusBar) {
+        public void setTopAppHidesStatusBar(int displayId, boolean hidesStatusBar) {
+            if (isVisibleBackgroundUserOnDisplay(displayId)) {
+                if (SPEW) {
+                    Slog.d(TAG, "Skipping setTopAppHidesStatusBar for visible background user "
+                            + mUserManagerInternal.getUserAssignedToDisplay(displayId));
+                }
+                return;
+            }
             IStatusBar bar = mBar;
             if (bar != null) {
                 try {
@@ -665,8 +717,16 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         }
 
         @Override
-        public void immersiveModeChanged(int rootDisplayAreaId, boolean isImmersiveMode) {
+        public void immersiveModeChanged(int displayId, int rootDisplayAreaId,
+                boolean isImmersiveMode) {
             if (mBar == null) {
+                return;
+            }
+            if (isVisibleBackgroundUserOnDisplay(displayId)) {
+                if (SPEW) {
+                    Slog.d(TAG, "Skipping immersiveModeChanged for visible background user "
+                            + mUserManagerInternal.getUserAssignedToDisplay(displayId));
+                }
                 return;
             }
             if (!CLIENT_TRANSIENT) {
@@ -680,7 +740,14 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
 
         // TODO(b/118592525): support it per display if necessary.
         @Override
-        public void onProposedRotationChanged(int rotation, boolean isValid) {
+        public void onProposedRotationChanged(int displayId, int rotation, boolean isValid) {
+            if (isVisibleBackgroundUserOnDisplay(displayId)) {
+                if (SPEW) {
+                    Slog.d(TAG, "Skipping onProposedRotationChanged for visible background user "
+                            + mUserManagerInternal.getUserAssignedToDisplay(displayId));
+                }
+                return;
+            }
             if (mBar != null){
                 try {
                     mBar.onProposedRotationChanged(rotation, isValid);
@@ -690,6 +757,13 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
 
         @Override
         public void onDisplayReady(int displayId) {
+            if (isVisibleBackgroundUserOnDisplay(displayId)) {
+                if (SPEW) {
+                    Slog.d(TAG, "Skipping onDisplayReady for visible background user "
+                            + mUserManagerInternal.getUserAssignedToDisplay(displayId));
+                }
+                return;
+            }
             IStatusBar bar = mBar;
             if (bar != null) {
                 try {
@@ -703,6 +777,13 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
                 AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme,
                 @Behavior int behavior, @InsetsType int requestedVisibleTypes,
                 String packageName, LetterboxDetails[] letterboxDetails) {
+            if (isVisibleBackgroundUserOnDisplay(displayId)) {
+                if (SPEW) {
+                    Slog.d(TAG, "Skipping onSystemBarAttributesChanged for visible background user "
+                            + mUserManagerInternal.getUserAssignedToDisplay(displayId));
+                }
+                return;
+            }
             getUiState(displayId).setBarAttributes(appearance, appearanceRegions,
                     navbarColorManagedByIme, behavior, requestedVisibleTypes, packageName,
                     letterboxDetails);
@@ -719,6 +800,13 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         @Override
         public void showTransient(int displayId, @InsetsType int types,
                 boolean isGestureOnSystemBar) {
+            if (isVisibleBackgroundUserOnDisplay(displayId)) {
+                if (SPEW) {
+                    Slog.d(TAG, "Skipping showTransient for visible background user "
+                            + mUserManagerInternal.getUserAssignedToDisplay(displayId));
+                }
+                return;
+            }
             getUiState(displayId).showTransient(types);
             IStatusBar bar = mBar;
             if (bar != null) {
@@ -730,6 +818,13 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
 
         @Override
         public void abortTransient(int displayId, @InsetsType int types) {
+            if (isVisibleBackgroundUserOnDisplay(displayId)) {
+                if (SPEW) {
+                    Slog.d(TAG, "Skipping abortTransient for visible background user "
+                            + mUserManagerInternal.getUserAssignedToDisplay(displayId));
+                }
+                return;
+            }
             getUiState(displayId).clearTransient(types);
             IStatusBar bar = mBar;
             if (bar != null) {
@@ -776,6 +871,15 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
 
         @Override
         public void setNavigationBarLumaSamplingEnabled(int displayId, boolean enable) {
+            if (isVisibleBackgroundUserOnDisplay(displayId)) {
+                if (SPEW) {
+                    Slog.d(TAG,
+                            "Skipping setNavigationBarLumaSamplingEnabled for visible background "
+                                    + "user "
+                                    + mUserManagerInternal.getUserAssignedToDisplay(displayId));
+                }
+                return;
+            }
             IStatusBar bar = mBar;
             if (bar != null) {
                 try {
@@ -1416,6 +1520,13 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     }
 
     private void setDisableFlags(int displayId, int flags, String cause) {
+        if (isVisibleBackgroundUserOnDisplay(displayId)) {
+            if (SPEW) {
+                Slog.d(TAG, "Skipping setDisableFlags for visible background user "
+                        + mUserManagerInternal.getUserAssignedToDisplay(displayId));
+            }
+            return;
+        }
         // also allows calls from window manager which is in this process.
         enforceStatusBarService();
 
@@ -2713,16 +2824,30 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         if (callingUserId == USER_SYSTEM || callingUserId == mCurrentUserId) {
             return;
         }
-        final long ident = Binder.clearCallingIdentity();
-        try {
-            if (mUserManager.isSameProfileGroup(callingUserId, mCurrentUserId)) {
-                return;
-            }
-        } finally {
-            Binder.restoreCallingIdentity(ident);
+        if (!isVisibleBackgroundUser(callingUserId)) {
+            return;
         }
 
         throw new SecurityException("User " + callingUserId
                 + " is not permitted to use this method");
+    }
+
+    private boolean isVisibleBackgroundUser(int userId) {
+        if (!mVisibleBackgroundUsersEnabled) {
+            return false;
+        }
+        // The main use case for visible background users is the Automotive multi-display
+        // configuration where a passenger can use a secondary display while the driver is
+        // using the main display.
+        // TODO(b/341604160) - Support visible background users properly and remove carve outs
+        return mUserManagerInternal.isVisibleBackgroundFullUser(userId);
+    }
+
+    private boolean isVisibleBackgroundUserOnDisplay(int displayId) {
+        if (!mVisibleBackgroundUsersEnabled) {
+            return false;
+        }
+        int userId = mUserManagerInternal.getUserAssignedToDisplay(displayId);
+        return isVisibleBackgroundUser(userId);
     }
 }

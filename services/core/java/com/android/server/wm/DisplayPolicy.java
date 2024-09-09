@@ -2517,7 +2517,7 @@ public class DisplayPolicy {
         if (getStatusBar() != null) {
             final StatusBarManagerInternal statusBar = getStatusBarManagerInternal();
             if (statusBar != null) {
-                statusBar.setTopAppHidesStatusBar(topAppHidesStatusBar);
+                statusBar.setTopAppHidesStatusBar(getDisplayId(), topAppHidesStatusBar);
             }
         }
 
@@ -2544,9 +2544,9 @@ public class DisplayPolicy {
                         mService.mPolicy.isUserSetupComplete(),
                         isNavBarEmpty(disableFlags));
             } else {
-                // TODO (b/277290737): Move this to the client side, instead of using a proxy.
-                callStatusBarSafely(statusBar -> statusBar.immersiveModeChanged(rootDisplayAreaId,
-                        isImmersiveMode));
+                // TODO(b/277290737): Move this to the client side, instead of using a proxy.
+                callStatusBarSafely(statusBar -> statusBar.immersiveModeChanged(getDisplayId(),
+                        rootDisplayAreaId, isImmersiveMode));
             }
         }
 
