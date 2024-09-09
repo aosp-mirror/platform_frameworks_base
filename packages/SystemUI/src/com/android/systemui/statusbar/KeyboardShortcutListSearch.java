@@ -429,6 +429,7 @@ public final class KeyboardShortcutListSearch {
             if (result.isEmpty()) {
                 mKeySearchResultMap.put(SHORTCUT_SPECIFICAPP_INDEX, false);
             } else {
+                KeyboardShortcuts.sanitiseShortcuts(result);
                 mSpecificAppGroup.addAll(reMapToKeyboardShortcutMultiMappingGroup(result));
                 mKeySearchResultMap.put(SHORTCUT_SPECIFICAPP_INDEX, true);
             }
@@ -440,6 +441,7 @@ public final class KeyboardShortcutListSearch {
         mWindowManager.requestImeKeyboardShortcuts(result -> {
             // Add specific Ime shortcuts
             if (!result.isEmpty()) {
+                KeyboardShortcuts.sanitiseShortcuts(result);
                 mInputGroup.addAll(reMapToKeyboardShortcutMultiMappingGroup(result));
             }
             mImeShortcutsReceived = true;
