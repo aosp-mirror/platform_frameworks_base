@@ -99,8 +99,8 @@ private fun SceneScope.BouncerScene(
         BouncerContent(
             viewModel,
             dialogFactory,
-            Modifier.element(Bouncer.Elements.Content)
-                .sysuiResTag(Bouncer.TestTags.Root)
+            Modifier.sysuiResTag(Bouncer.TestTags.Root)
+                .element(Bouncer.Elements.Content)
                 .fillMaxSize()
         )
     }
