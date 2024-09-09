@@ -5400,7 +5400,9 @@ public class NotificationStackScrollLayout
             println(pw, "intrinsicContentHeight", mIntrinsicContentHeight);
             println(pw, "contentHeight", mContentHeight);
             println(pw, "intrinsicPadding", mIntrinsicPadding);
-            println(pw, "topPadding", getTopPadding());
+            if (!SceneContainerFlag.isEnabled()) {
+                println(pw, "topPadding", getTopPadding());
+            }
             println(pw, "bottomPadding", mBottomPadding);
             dumpRoundedRectClipping(pw);
             println(pw, "requestedClipBounds", mRequestedClipBounds);
