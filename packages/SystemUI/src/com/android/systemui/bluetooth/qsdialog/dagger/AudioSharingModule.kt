@@ -18,12 +18,16 @@ package com.android.systemui.bluetooth.qsdialog.dagger
 
 import com.android.settingslib.bluetooth.BluetoothUtils
 import com.android.settingslib.bluetooth.LocalBluetoothManager
+import com.android.settingslib.flags.Flags
 import com.android.systemui.bluetooth.qsdialog.ActiveMediaDeviceItemFactory
 import com.android.systemui.bluetooth.qsdialog.AudioSharingDeviceItemActionInteractorImpl
 import com.android.systemui.bluetooth.qsdialog.AudioSharingInteractor
 import com.android.systemui.bluetooth.qsdialog.AudioSharingInteractorEmptyImpl
 import com.android.systemui.bluetooth.qsdialog.AudioSharingInteractorImpl
 import com.android.systemui.bluetooth.qsdialog.AudioSharingMediaDeviceItemFactory
+import com.android.systemui.bluetooth.qsdialog.AudioSharingRepository
+import com.android.systemui.bluetooth.qsdialog.AudioSharingRepositoryEmptyImpl
+import com.android.systemui.bluetooth.qsdialog.AudioSharingRepositoryImpl
 import com.android.systemui.bluetooth.qsdialog.AvailableAudioSharingMediaDeviceItemFactory
 import com.android.systemui.bluetooth.qsdialog.AvailableMediaDeviceItemFactory
 import com.android.systemui.bluetooth.qsdialog.ConnectedDeviceItemFactory
@@ -33,15 +37,33 @@ import com.android.systemui.bluetooth.qsdialog.DeviceItemFactory
 import com.android.systemui.bluetooth.qsdialog.DeviceItemType
 import com.android.systemui.bluetooth.qsdialog.SavedDeviceItemFactory
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Background
 import dagger.Lazy
 import dagger.Module
 import dagger.Provides
+import kotlinx.coroutines.CoroutineDispatcher
 
 /** Dagger module for audio sharing code for BT QS dialog */
 @Module
 interface AudioSharingModule {
 
     companion object {
+        @Provides
+        @SysUISingleton
+        fun provideAudioSharingRepository(
+            localBluetoothManager: LocalBluetoothManager?,
+            @Background backgroundDispatcher: CoroutineDispatcher,
+        ): AudioSharingRepository =
+            if (
+                Flags.enableLeAudioSharing() &&
+                    Flags.audioSharingQsDialogImprovement() &&
+                    localBluetoothManager != null
+            ) {
+                AudioSharingRepositoryImpl(localBluetoothManager, backgroundDispatcher)
+            } else {
+                AudioSharingRepositoryEmptyImpl()
+            }
+
         @Provides
         @SysUISingleton
         fun provideAudioSharingInteractor(

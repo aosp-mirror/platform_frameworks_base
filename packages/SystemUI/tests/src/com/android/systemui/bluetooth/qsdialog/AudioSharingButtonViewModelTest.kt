@@ -28,7 +28,9 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.lifecycle.activateIn
 import com.android.systemui.res.R
+import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.whenever
+import com.android.systemui.volume.data.repository.audioSharingRepository as SettingsLibAudioSharingRepository
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -48,6 +50,7 @@ import org.mockito.Mock
 @RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 class AudioSharingButtonViewModelTest : SysuiTestCase() {
+    private val kosmos = testKosmos()
     private val testDispatcher = UnconfinedTestDispatcher()
     private val testScope = TestScope(testDispatcher)
     private val bluetoothState = MutableStateFlow(false)
@@ -69,6 +72,7 @@ class AudioSharingButtonViewModelTest : SysuiTestCase() {
         audioSharingButtonViewModel =
             AudioSharingButtonViewModel(
                 localBluetoothManager,
+                kosmos.audioSharingInteractor,
                 bluetoothStateInteractor,
                 deviceItemInteractor,
             )
@@ -105,12 +109,12 @@ class AudioSharingButtonViewModelTest : SysuiTestCase() {
     @Test
     fun testButtonStateUpdate_isBroadcasting_returnSharingAudio() {
         testScope.runTest {
-            whenever(BluetoothUtils.isBroadcasting(localBluetoothManager)).thenReturn(true)
-
             val actual by
                 collectLastValue(audioSharingButtonViewModel.audioSharingButtonStateUpdate)
             bluetoothState.value = true
             deviceItemUpdate.emit(listOf())
+            kosmos.SettingsLibAudioSharingRepository.setInAudioSharing(true)
+
             runCurrent()
 
             assertThat(actual)
@@ -126,7 +130,6 @@ class AudioSharingButtonViewModelTest : SysuiTestCase() {
     @Test
     fun testButtonStateUpdate_hasSource_returnGone() {
         testScope.runTest {
-            whenever(BluetoothUtils.isBroadcasting(localBluetoothManager)).thenReturn(false)
             whenever(deviceItem.cachedBluetoothDevice).thenReturn(cachedBluetoothDevice)
             whenever(
                     BluetoothUtils.hasConnectedBroadcastSource(
@@ -149,7 +152,6 @@ class AudioSharingButtonViewModelTest : SysuiTestCase() {
     @Test
     fun testButtonStateUpdate_hasActiveDevice_returnAudioSharing() {
         testScope.runTest {
-            whenever(BluetoothUtils.isBroadcasting(localBluetoothManager)).thenReturn(false)
             whenever(deviceItem.cachedBluetoothDevice).thenReturn(cachedBluetoothDevice)
             whenever(
                     BluetoothUtils.hasConnectedBroadcastSource(

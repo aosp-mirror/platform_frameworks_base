@@ -19,6 +19,7 @@ package com.android.systemui.bluetooth.qsdialog
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
+import com.android.internal.logging.UiEventLogger
 import com.android.settingslib.bluetooth.CachedBluetoothDevice
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.res.R
@@ -36,6 +37,7 @@ constructor(
     @Application private val coroutineScope: CoroutineScope,
     private val viewModelFactory: AudioSharingDialogViewModel.Factory,
     private val sysuiDialogFactory: SystemUIDialog.Factory,
+    private val uiEventLogger: UiEventLogger,
 ) : SystemUIDialog.Delegate {
 
     override fun createDialog(): SystemUIDialog = sysuiDialogFactory.create(this)
@@ -44,15 +46,33 @@ constructor(
         with(dialog.layoutInflater.inflate(R.layout.audio_sharing_dialog, null)) {
             dialog.setView(this)
             val subtitleTextView = requireViewById<TextView>(R.id.subtitle)
+            val shareAudioButton = requireViewById<TextView>(R.id.share_audio_button)
             val switchActiveButton = requireViewById<Button>(R.id.switch_active_button)
             val job =
                 coroutineScope.launch {
-                    viewModelFactory.create(cachedBluetoothDevice).dialogState.collect {
+                    val viewModel = viewModelFactory.create(cachedBluetoothDevice, this)
+                    viewModel.dialogState.collect {
                         when (it) {
                             is AudioSharingDialogState.Hide -> dialog.dismiss()
                             is AudioSharingDialogState.Show -> {
                                 subtitleTextView.text = it.subtitle
                                 switchActiveButton.text = it.switchButtonText
+                                switchActiveButton.setOnClickListener {
+                                    viewModel.switchActiveClicked()
+                                    uiEventLogger.log(
+                                        BluetoothTileDialogUiEvent
+                                            .AUDIO_SHARING_DIALOG_SWITCH_ACTIVE_CLICKED
+                                    )
+                                    dialog.dismiss()
+                                }
+                                shareAudioButton.setOnClickListener {
+                                    viewModel.shareAudioClicked()
+                                    uiEventLogger.log(
+                                        BluetoothTileDialogUiEvent
+                                            .AUDIO_SHARING_DIALOG_SHARE_AUDIO_CLICKED
+                                    )
+                                    dialog.dismiss()
+                                }
                             }
                         }
                     }

@@ -19,17 +19,26 @@ package com.android.systemui.bluetooth.qsdialog
 import com.android.settingslib.bluetooth.BluetoothUtils
 import com.android.settingslib.bluetooth.CachedBluetoothDevice
 import com.android.settingslib.bluetooth.LocalBluetoothManager
+import com.android.settingslib.volume.data.repository.AudioSharingRepository as SettingsLibAudioSharingRepository
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.withContext
 
 /** Holds business logic for the audio sharing state. */
 interface AudioSharingInteractor {
+    val isAudioSharingOn: Flow<Boolean>
+
     suspend fun isAvailableAudioSharingMediaBluetoothDevice(
         cachedBluetoothDevice: CachedBluetoothDevice
     ): Boolean
+
+    suspend fun switchActive(cachedBluetoothDevice: CachedBluetoothDevice)
+
+    suspend fun startAudioSharing()
 }
 
 @SysUISingleton
@@ -37,8 +46,12 @@ class AudioSharingInteractorImpl
 @Inject
 constructor(
     private val localBluetoothManager: LocalBluetoothManager?,
+    private val audioSharingRepository: AudioSharingRepository,
+    settingsLibAudioSharingRepository: SettingsLibAudioSharingRepository,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
 ) : AudioSharingInteractor {
+
+    override val isAudioSharingOn = settingsLibAudioSharingRepository.inAudioSharing
 
     override suspend fun isAvailableAudioSharingMediaBluetoothDevice(
         cachedBluetoothDevice: CachedBluetoothDevice
@@ -50,11 +63,25 @@ constructor(
             )
         }
     }
+
+    override suspend fun switchActive(cachedBluetoothDevice: CachedBluetoothDevice) {
+        audioSharingRepository.setActive(cachedBluetoothDevice)
+    }
+
+    override suspend fun startAudioSharing() {
+        audioSharingRepository.startAudioSharing()
+    }
 }
 
 @SysUISingleton
 class AudioSharingInteractorEmptyImpl @Inject constructor() : AudioSharingInteractor {
+    override val isAudioSharingOn: Flow<Boolean> = flowOf(false)
+
     override suspend fun isAvailableAudioSharingMediaBluetoothDevice(
         cachedBluetoothDevice: CachedBluetoothDevice
     ) = false
+
+    override suspend fun switchActive(cachedBluetoothDevice: CachedBluetoothDevice) {}
+
+    override suspend fun startAudioSharing() {}
 }

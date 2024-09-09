@@ -40,6 +40,7 @@ class AudioSharingButtonViewModel
 @AssistedInject
 constructor(
     private val localBluetoothManager: LocalBluetoothManager?,
+    private val audioSharingInteractor: AudioSharingInteractor,
     private val bluetoothStateInteractor: BluetoothStateInteractor,
     private val deviceItemInteractor: DeviceItemInteractor,
 ) : ExclusiveActivatable() {
@@ -53,9 +54,10 @@ constructor(
     override suspend fun onActivated(): Nothing {
         combine(
                 bluetoothStateInteractor.bluetoothStateUpdate,
-                deviceItemInteractor.deviceItemUpdate
-            ) { bluetoothState, deviceItem ->
-                getButtonState(bluetoothState, deviceItem)
+                deviceItemInteractor.deviceItemUpdate,
+                audioSharingInteractor.isAudioSharingOn
+            ) { bluetoothState, deviceItem, audioSharingOn ->
+                getButtonState(bluetoothState, deviceItem, audioSharingOn)
             }
             .collect { mutableButtonState.value = it }
         awaitCancellation()
@@ -63,13 +65,14 @@ constructor(
 
     private fun getButtonState(
         bluetoothState: Boolean,
-        deviceItem: List<DeviceItem>
+        deviceItem: List<DeviceItem>,
+        audioSharingOn: Boolean
     ): AudioSharingButtonState {
         return when {
             // Don't show button when bluetooth is off
             !bluetoothState -> AudioSharingButtonState.Gone
             // Show sharing audio when broadcasting
-            BluetoothUtils.isBroadcasting(localBluetoothManager) ->
+            audioSharingOn ->
                 AudioSharingButtonState.Visible(
                     R.string.quick_settings_bluetooth_audio_sharing_button_sharing,
                     isActive = true

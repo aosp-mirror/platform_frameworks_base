@@ -76,11 +76,12 @@ class AudioSharingDialogDelegateTest : SysuiTestCase() {
             testScope.runTest {
                 val availableDeviceName = "name"
                 whenever(cachedBluetoothDevice.name).thenReturn(availableDeviceName)
-                val dialog = underTest.createDialog()
+                val dialog = spy(underTest.createDialog())
                 dialog.show()
                 runCurrent()
                 val subtitleTextView = dialog.findViewById<TextView>(R.id.subtitle)
                 val switchActiveButton = dialog.findViewById<Button>(R.id.switch_active_button)
+                val shareAudioButton = dialog.findViewById<Button>(R.id.share_audio_button)
                 val subtitle =
                     context.getString(
                         R.string.quick_settings_bluetooth_audio_sharing_dialog_subtitle,
@@ -94,7 +95,11 @@ class AudioSharingDialogDelegateTest : SysuiTestCase() {
                     )
                 assertThat(subtitleTextView.text).isEqualTo(subtitle)
                 assertThat(switchActiveButton.text).isEqualTo(switchButtonText)
-                dialog.dismiss()
+                assertThat(switchActiveButton.hasOnClickListeners()).isTrue()
+                assertThat(shareAudioButton.hasOnClickListeners()).isTrue()
+
+                switchActiveButton.performClick()
+                verify(dialog).dismiss()
             }
         }
 

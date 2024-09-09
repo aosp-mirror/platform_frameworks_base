@@ -16,13 +16,11 @@
 
 package com.android.systemui.bluetooth.qsdialog
 
-import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.testDispatcher
+import com.android.settingslib.bluetooth.CachedBluetoothDevice
 
-val Kosmos.audioSharingInteractor: AudioSharingInteractor by
-    Kosmos.Fixture {
-        AudioSharingInteractorImpl(
-            localBluetoothManager,
-            testDispatcher,
-        )
-    }
+class FakeAudioSharingRepository : AudioSharingRepository {
+
+    override suspend fun setActive(cachedBluetoothDevice: CachedBluetoothDevice) {}
+
+    override suspend fun startAudioSharing() {}
+}

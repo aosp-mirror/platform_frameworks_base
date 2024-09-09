@@ -17,21 +17,15 @@
 package com.android.systemui.bluetooth.qsdialog
 
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.volume.data.repository.audioSharingRepository as settingsLibAudioSharingRepository
 
-val Kosmos.audioSharingButtonViewModel: AudioSharingButtonViewModel by
+val Kosmos.audioSharingInteractor: AudioSharingInteractor by
     Kosmos.Fixture {
-        AudioSharingButtonViewModel(
+        AudioSharingInteractorImpl(
             localBluetoothManager,
-            bluetoothStateInteractor,
-            deviceItemInteractor,
+            bluetoothTileDialogAudioSharingRepository,
+            settingsLibAudioSharingRepository,
+            testDispatcher,
         )
-    }
-
-val Kosmos.audioSharingButtonViewModelFactory: AudioSharingButtonViewModel.Factory by
-    Kosmos.Fixture {
-        object : AudioSharingButtonViewModel.Factory {
-            override fun create(): AudioSharingButtonViewModel {
-                return audioSharingButtonViewModel
-            }
-        }
     }

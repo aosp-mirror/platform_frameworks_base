@@ -25,11 +25,13 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.launch
 
 sealed class AudioSharingDialogState {
     data object Hide : AudioSharingDialogState()
@@ -41,10 +43,11 @@ class AudioSharingDialogViewModel
 @AssistedInject
 constructor(
     deviceItemInteractor: DeviceItemInteractor,
-    audioSharingInteractor: AudioSharingInteractor,
+    private val audioSharingInteractor: AudioSharingInteractor,
     private val context: Context,
     private val localBluetoothManager: LocalBluetoothManager?,
     @Assisted private val cachedBluetoothDevice: CachedBluetoothDevice,
+    @Assisted private val coroutineScope: CoroutineScope,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
 ) {
     val dialogState: Flow<AudioSharingDialogState> =
@@ -63,6 +66,14 @@ constructor(
             .onStart { emit(createShowState(cachedBluetoothDevice)) }
             .flowOn(backgroundDispatcher)
             .distinctUntilChanged()
+
+    fun switchActiveClicked() {
+        coroutineScope.launch { audioSharingInteractor.switchActive(cachedBluetoothDevice) }
+    }
+
+    fun shareAudioClicked() {
+        coroutineScope.launch { audioSharingInteractor.startAudioSharing() }
+    }
 
     private fun createShowState(
         cachedBluetoothDevice: CachedBluetoothDevice
@@ -92,6 +103,7 @@ constructor(
     interface Factory {
         fun create(
             cachedBluetoothDevice: CachedBluetoothDevice,
+            coroutineScope: CoroutineScope
         ): AudioSharingDialogViewModel
     }
 }
