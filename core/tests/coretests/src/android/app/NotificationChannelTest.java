@@ -47,12 +47,13 @@ import android.os.RemoteException;
 import android.os.VibrationEffect;
 import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.UsesFlags;
+import android.platform.test.flag.junit.FlagsParameterization;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.MediaStore.Audio.AudioColumns;
 import android.test.mock.MockContentResolver;
 import android.util.Xml;
 
-import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.modules.utils.TypedXmlPullParser;
@@ -61,6 +62,7 @@ import com.android.modules.utils.TypedXmlSerializer;
 import com.google.common.base.Strings;
 
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -71,20 +73,38 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Field;
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.Consumer;
 
-@RunWith(AndroidJUnit4.class)
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
+import platform.test.runner.parameterized.Parameters;
+
+@RunWith(ParameterizedAndroidJunit4.class)
+@UsesFlags(android.app.Flags.class)
 @SmallTest
 @Presubmit
 public class NotificationChannelTest {
+    @ClassRule
+    public static final SetFlagsRule.ClassRule mSetFlagsClassRule = new SetFlagsRule.ClassRule();
+
+    @Parameters(name = "{0}")
+    public static List<FlagsParameterization> getParams() {
+        return FlagsParameterization.allCombinationsOf(
+                Flags.FLAG_NOTIF_CHANNEL_CROP_VIBRATION_EFFECTS);
+    }
+
     @Rule
-    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+    public final SetFlagsRule mSetFlagsRule;
 
     private final String CLASS = "android.app.NotificationChannel";
 
     Context mContext;
     ContentProvider mContentProvider;
     IContentProvider mIContentProvider;
+
+    public NotificationChannelTest(FlagsParameterization flags) {
+        mSetFlagsRule = mSetFlagsClassRule.createSetFlagsRule(flags);
+    }
 
     @Before
     public void setUp() throws Exception {
