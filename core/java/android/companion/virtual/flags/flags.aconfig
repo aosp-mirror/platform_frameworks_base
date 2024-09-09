@@ -43,6 +43,7 @@ flag {
     name: "virtual_display_insets"
     description: "APIs for specifying virtual display insets (via cutout)"
     bug: "350007135"
+    is_exported: true
 }
 
 flag {
@@ -88,6 +89,7 @@ flag {
     name: "virtual_display_rotation_api"
     description: "API for on-demand rotation of virtual displays"
     bug: "291748430"
+    is_exported: true
 }
 
 flag {
@@ -110,6 +112,7 @@ flag {
     name: "device_aware_display_power"
     description: "Device awareness in power and display APIs"
     bug: "285020111"
+    is_exported: true
 }
 
 flag {
@@ -118,6 +121,7 @@ flag {
     description: "Make relevant PowerManager APIs display aware by default"
     bug: "365042486"
     is_fixed_read_only: true
+    is_exported: true
 }
 
 flag {
@@ -125,4 +129,5 @@ flag {
     namespace: "virtual_devices"
     description: "Allow for status bar and insets on virtual devices"
     bug: "350007866"
+    is_exported: true
 }
