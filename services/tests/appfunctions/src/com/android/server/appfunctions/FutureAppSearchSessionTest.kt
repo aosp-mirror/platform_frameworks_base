@@ -42,7 +42,7 @@ class FutureAppSearchSessionTest {
     fun clearData() {
         val searchContext = AppSearchManager.SearchContext.Builder(TEST_DB).build()
         FutureAppSearchSession(appSearchManager, testExecutor, searchContext).use {
-            val setSchemaRequest = SetSchemaRequest.Builder().build()
+            val setSchemaRequest = SetSchemaRequest.Builder().setForceOverride(true).build()
             it.setSchema(setSchemaRequest)
         }
     }
