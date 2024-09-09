@@ -6317,7 +6317,14 @@ public class AudioManager {
     /**
      * @hide
      * Get the audio devices that would be used for the routing of the given audio attributes.
-     * @param attributes the {@link AudioAttributes} for which the routing is being queried
+     * @param attributes the {@link AudioAttributes} for which the routing is being queried.
+     *   For queries about output devices (playback use cases), a valid usage must be specified in
+     *   the audio attributes via AudioAttributes.Builder.setUsage(). The capture preset MUST NOT
+     *   be changed from default.
+     *   For queries about input devices (capture use case), a valid capture preset MUST be
+     *   specified in the audio attributes via AudioAttributes.Builder.setCapturePreset(). If a
+     *   capture preset is present, then this has precedence over any usage or content type also
+     *   present in the audio attrirutes.
      * @return an empty list if there was an issue with the request, a list of audio devices
      *   otherwise (typically one device, except for duplicated paths).
      */
