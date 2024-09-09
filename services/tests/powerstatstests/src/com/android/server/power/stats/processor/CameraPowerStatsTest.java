@@ -30,7 +30,6 @@ import static com.android.server.power.stats.processor.AggregatedPowerStatsConfi
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -59,7 +58,6 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
 public class CameraPowerStatsTest {
@@ -109,11 +107,6 @@ public class CameraPowerStatsTest {
                 public PowerStatsCollector.ConsumedEnergyRetriever getConsumedEnergyRetriever() {
                     return mConsumedEnergyRetriever;
                 }
-
-                @Override
-                public IntSupplier getVoltageSupplier() {
-                    return () -> VOLTAGE_MV;
-                }
             };
 
     private MonotonicClock mMonotonicClock;
@@ -126,8 +119,9 @@ public class CameraPowerStatsTest {
 
     @Test
     public void energyConsumerModel() {
+        when(mConsumedEnergyRetriever.getVoltageMv()).thenReturn(VOLTAGE_MV);
         when(mConsumedEnergyRetriever
-                .getEnergyConsumerIds(eq((int) EnergyConsumerType.CAMERA), any()))
+                .getEnergyConsumerIds(eq((int) EnergyConsumerType.CAMERA)))
                 .thenReturn(new int[]{ENERGY_CONSUMER_ID});
 
         PowerComponentAggregatedPowerStats stats = createAggregatedPowerStats(

@@ -38,6 +38,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.UidTraffic;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.hardware.power.stats.EnergyConsumerResult;
 import android.hardware.power.stats.EnergyConsumerType;
 import android.os.BatteryConsumer;
 import android.os.Handler;
@@ -63,7 +64,6 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.List;
 import java.util.concurrent.Executor;
-import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
 public class BluetoothPowerStatsProcessorTest {
@@ -145,11 +145,6 @@ public class BluetoothPowerStatsProcessorTest {
                 @Override
                 public PowerStatsCollector.ConsumedEnergyRetriever getConsumedEnergyRetriever() {
                     return mConsumedEnergyRetriever;
-                }
-
-                @Override
-                public IntSupplier getVoltageSupplier() {
-                    return () -> VOLTAGE_MV;
                 }
 
                 @Override
@@ -368,7 +363,8 @@ public class BluetoothPowerStatsProcessorTest {
 
     @Test
     public void consumedEnergyModel() {
-        // No power monitoring hardware
+        when(mConsumedEnergyRetriever.getVoltageMv()).thenReturn(VOLTAGE_MV);
+        // Power monitoring hardware exists
         when(mConsumedEnergyRetriever.getEnergyConsumerIds(EnergyConsumerType.BLUETOOTH))
                 .thenReturn(new int[]{BLUETOOTH_ENERGY_CONSUMER_ID});
 
@@ -383,8 +379,8 @@ public class BluetoothPowerStatsProcessorTest {
 
         mUidScanTimes.put(APP_UID1, 100);
 
-        when(mConsumedEnergyRetriever.getConsumedEnergyUws(
-                new int[]{BLUETOOTH_ENERGY_CONSUMER_ID})).thenReturn(new long[]{0});
+        when(mConsumedEnergyRetriever.getConsumedEnergy(new int[]{BLUETOOTH_ENERGY_CONSUMER_ID}))
+                .thenReturn(new EnergyConsumerResult[]{mockEnergyConsumer(0)});
 
         aggregatedStats.start(0);
 
@@ -409,8 +405,8 @@ public class BluetoothPowerStatsProcessorTest {
 
         // 10 mAh represented as microWattSeconds
         long energyUws = 10 * 3600 * VOLTAGE_MV;
-        when(mConsumedEnergyRetriever.getConsumedEnergyUws(
-                new int[]{BLUETOOTH_ENERGY_CONSUMER_ID})).thenReturn(new long[]{energyUws});
+        when(mConsumedEnergyRetriever.getConsumedEnergy(new int[]{BLUETOOTH_ENERGY_CONSUMER_ID}))
+                .thenReturn(new EnergyConsumerResult[]{mockEnergyConsumer(energyUws)});
 
         aggregatedStats.addPowerStats(collector.collectStats(), 10_000);
 
@@ -493,6 +489,12 @@ public class BluetoothPowerStatsProcessorTest {
 
     private int[] states(int... states) {
         return states;
+    }
+
+    private EnergyConsumerResult mockEnergyConsumer(long energyUWs) {
+        EnergyConsumerResult ecr = new EnergyConsumerResult();
+        ecr.energyUWs = energyUWs;
+        return ecr;
     }
 
     private BluetoothActivityEnergyInfo mockBluetoothActivityEnergyInfo(long timestamp,

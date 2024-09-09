@@ -142,7 +142,7 @@ hoststubgen_common_options = "$(location hoststubgen) " +
     // "--policy-override-file $(location framework-policy-override.txt) " +
     "@$(location :hoststubgen-standard-options) " +
 
-    "--out-impl-jar $(location host.jar) " +
+    "--out-jar $(location host.jar) " +
 
     // "--keep-all-classes " + // Used it for an experiment. See KeepAllClassesFilter.
     "--gen-keep-all-file $(location hoststubgen_keep_all.txt) " +

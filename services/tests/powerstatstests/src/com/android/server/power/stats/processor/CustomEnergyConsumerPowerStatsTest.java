@@ -60,7 +60,6 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
-import java.util.function.IntSupplier;
 
 public class CustomEnergyConsumerPowerStatsTest {
     @Rule(order = 0)
@@ -110,11 +109,6 @@ public class CustomEnergyConsumerPowerStatsTest {
                 @Override
                 public PowerStatsCollector.ConsumedEnergyRetriever getConsumedEnergyRetriever() {
                     return mConsumedEnergyRetriever;
-                }
-
-                @Override
-                public IntSupplier getVoltageSupplier() {
-                    return () -> VOLTAGE_MV;
                 }
             };
 
@@ -243,6 +237,7 @@ public class CustomEnergyConsumerPowerStatsTest {
 
     private List<PowerStats> collectPowerStats(long timestamp, int chargeUc1, int chargeUc2,
             EnergyConsumerAttribution... attributions2) throws Exception {
+        when(mConsumedEnergyRetriever.getVoltageMv()).thenReturn(VOLTAGE_MV);
         when(mConsumedEnergyRetriever.getEnergyConsumerIds(EnergyConsumerType.OTHER))
                 .thenReturn(new int[]{ENERGY_CONSUMER_ID1, ENERGY_CONSUMER_ID2});
         when(mConsumedEnergyRetriever.getEnergyConsumerName(ENERGY_CONSUMER_ID1))

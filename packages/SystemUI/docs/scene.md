@@ -124,8 +124,8 @@ Each scene is defined as an implementation of the
 [`Scene`](https://cs.android.com/android/platform/superproject/main/+/main:frameworks/base/packages/SystemUI/compose/features/src/com/android/systemui/scene/ui/composable/Scene.kt)
 interface, which has three parts: 1. The `key` property returns the
 [`SceneKey`](https://cs.android.com/android/platform/superproject/main/+/main:frameworks/base/packages/SystemUI/src/com/android/systemui/scene/shared/model/SceneKey.kt)
-that uniquely identifies that scene 2. The `destinationScenes` `Flow` returns
-the (potentially ever-changing) set of navigation edges to other scenes, based
+that uniquely identifies that scene 2. The `userActions` `Flow` returns
+the (potentially ever-changing) set of navigation edges to other content, based
 on user-actions, which is how the navigation graph is defined (see
 [the Scene navigation](#Scene-navigation) section for more) 3. The `Content`
 function which uses
@@ -141,7 +141,7 @@ For example:
 @SysUISingleton class YourScene @Inject constructor( /* your dependencies here */ ) : Scene {
     override val key = SceneKey.YourScene
 
-    override val destinationScenes: StateFlow<Map<UserAction, SceneModel>> =
+    override val userActions: StateFlow<Map<UserAction, SceneModel>> =
         MutableStateFlow<Map<UserAction, SceneModel>>(
             mapOf(
                 // This is where scene navigation is defined, more on that below.

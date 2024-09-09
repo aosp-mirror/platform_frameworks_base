@@ -27,9 +27,9 @@ import java.util.Objects;
 /**
  * Contains constants and helper related to static metadata represented with {@code
  * com.android.server.appsearch.appsindexer.appsearchtypes.AppFunctionStaticMetadata}.
- * <p>
- * The constants listed here **must not change** and be kept consistent with the canonical
- * static metadata class.
+ *
+ * <p>The constants listed here **must not change** and be kept consistent with the canonical static
+ * metadata class.
  *
  * @hide
  */
@@ -45,9 +45,7 @@ public class AppFunctionStaticMetadataHelper {
     public static final String APP_FUNCTION_STATIC_METADATA_DB = "apps-db";
     public static final String APP_FUNCTION_INDEXER_PACKAGE = "android";
 
-    /**
-     * Returns a per-app static metadata schema name, to store all functions for that package.
-     */
+    /** Returns a per-app static metadata schema name, to store all functions for that package. */
     public static String getStaticSchemaNameForPackage(@NonNull String pkg) {
         return STATIC_SCHEMA_TYPE + "-" + Objects.requireNonNull(pkg);
     }
@@ -59,8 +57,8 @@ public class AppFunctionStaticMetadataHelper {
     }
 
     /**
-     * Returns the fully qualified Id used in AppSearch for the given package and function id
-     * app function static metadata.
+     * Returns the fully qualified Id used in AppSearch for the given package and function id app
+     * function static metadata.
      */
     public static String getStaticMetadataQualifiedId(String packageName, String functionId) {
         return DocumentIdUtil.createQualifiedId(

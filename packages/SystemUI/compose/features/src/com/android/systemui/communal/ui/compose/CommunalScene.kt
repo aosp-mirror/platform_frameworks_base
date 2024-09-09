@@ -17,20 +17,21 @@
 package com.android.systemui.communal.ui.compose
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.Swipe
 import com.android.compose.animation.scene.SwipeDirection
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
-import com.android.systemui.communal.ui.view.layout.sections.CommunalAppWidgetSection
+import com.android.systemui.communal.shared.model.CommunalBackgroundType
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
-import com.android.systemui.communal.widgets.WidgetInteractionHandler
+import com.android.systemui.communal.util.CommunalColors
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.composable.Scene
-import com.android.systemui.statusbar.phone.SystemUIDialogFactory
 import javax.inject.Inject
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.Flow
@@ -43,16 +44,15 @@ class CommunalScene
 @Inject
 constructor(
     private val viewModel: CommunalViewModel,
-    private val dialogFactory: SystemUIDialogFactory,
-    private val interactionHandler: WidgetInteractionHandler,
-    private val widgetSection: CommunalAppWidgetSection,
+    private val communalColors: CommunalColors,
+    private val communalContent: CommunalContent,
 ) : ExclusiveActivatable(), Scene {
     override val key = Scenes.Communal
 
-    override val destinationScenes: Flow<Map<UserAction, UserActionResult>> =
-        MutableStateFlow<Map<UserAction, UserActionResult>>(
+    override val userActions: Flow<Map<UserAction, UserActionResult>> =
+        MutableStateFlow(
                 mapOf(
-                    Swipe(SwipeDirection.End) to UserActionResult(Scenes.Lockscreen),
+                    Swipe(SwipeDirection.End) to Scenes.Lockscreen,
                 )
             )
             .asStateFlow()
@@ -63,12 +63,17 @@ constructor(
 
     @Composable
     override fun SceneScope.Content(modifier: Modifier) {
-        CommunalHub(
-            modifier = modifier,
+        val backgroundType by
+            viewModel.communalBackground.collectAsStateWithLifecycle(
+                initialValue = CommunalBackgroundType.ANIMATED
+            )
+
+        CommunalScene(
+            backgroundType = backgroundType,
+            colors = communalColors,
+            content = communalContent,
             viewModel = viewModel,
-            interactionHandler = interactionHandler,
-            widgetSection = widgetSection,
-            dialogFactory = dialogFactory,
+            modifier = modifier.horizontalNestedScrollToScene(),
         )
     }
 }

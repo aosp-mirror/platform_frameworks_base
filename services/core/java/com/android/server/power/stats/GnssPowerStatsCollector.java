@@ -26,7 +26,6 @@ public class GnssPowerStatsCollector extends EnergyConsumerPowerStatsCollector {
     public GnssPowerStatsCollector(Injector injector) {
         super(injector, BatteryConsumer.POWER_COMPONENT_GNSS,
                 BatteryConsumer.powerComponentIdToString(BatteryConsumer.POWER_COMPONENT_GNSS),
-                EnergyConsumerType.GNSS, /* energy consumer name */ null,
-                new GnssPowerStatsLayout());
+                EnergyConsumerType.GNSS, new GnssPowerStatsLayout());
     }
 }

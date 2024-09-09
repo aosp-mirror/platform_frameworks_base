@@ -22,7 +22,6 @@ import android.os.UserHandle;
 
 import com.android.internal.annotations.VisibleForTesting;
 
-
 /**
  * Interface for validating that the caller has the correct privilege to call an AppFunctionManager
  * API.
@@ -33,8 +32,8 @@ public interface CallerValidator {
     // TODO(b/357551503): Verify that user have been unlocked.
 
     /**
-     * This method is used to validate that the calling package reported in the request is the
-     * same as the binder calling identity.
+     * This method is used to validate that the calling package reported in the request is the same
+     * as the binder calling identity.
      *
      * @param claimedCallingPackage The package name of the caller.
      * @return The package name of the caller.
@@ -43,29 +42,29 @@ public interface CallerValidator {
     String validateCallingPackage(@NonNull String claimedCallingPackage);
 
     /**
-     * Validates that the caller can invoke an AppFunctionManager API in the provided
-     * target user space.
+     * Validates that the caller can invoke an AppFunctionManager API in the provided target user
+     * space.
      *
-     * @param targetUserHandle      The user which the caller is requesting to execute as.
+     * @param targetUserHandle The user which the caller is requesting to execute as.
      * @param claimedCallingPackage The package name of the caller.
      * @return The user handle that the call should run as. Will always be a concrete user.
      * @throws IllegalArgumentException if the target user is a special user.
-     * @throws SecurityException        if caller trying to interact across users without {@link
-     *                                  Manifest.permission#INTERACT_ACROSS_USERS_FULL}
+     * @throws SecurityException if caller trying to interact across users without {@link
+     *     Manifest.permission#INTERACT_ACROSS_USERS_FULL}
      */
-    UserHandle verifyTargetUserHandle(@NonNull UserHandle targetUserHandle,
-                                      @NonNull String claimedCallingPackage);
+    UserHandle verifyTargetUserHandle(
+            @NonNull UserHandle targetUserHandle, @NonNull String claimedCallingPackage);
 
     /**
      * Validates that the caller can execute the specified app function.
-     * <p>
-     * The caller can execute if the app function's package name is the same as the caller's package
-     * or the caller has either {@link Manifest.permission.EXECUTE_APP_FUNCTIONS_TRUSTED} or
-     * {@link Manifest.permission.EXECUTE_APP_FUNCTIONS} granted. In some cases, app functions
-     * can still opt-out of caller having {@link Manifest.permission.EXECUTE_APP_FUNCTIONS}.
      *
-     * @param callerPackageName     The calling package (as previously validated).
-     * @param targetPackageName     The package that owns the app function to execute.
+     * <p>The caller can execute if the app function's package name is the same as the caller's
+     * package or the caller has either {@link Manifest.permission.EXECUTE_APP_FUNCTIONS_TRUSTED} or
+     * {@link Manifest.permission.EXECUTE_APP_FUNCTIONS} granted. In some cases, app functions can
+     * still opt-out of caller having {@link Manifest.permission.EXECUTE_APP_FUNCTIONS}.
+     *
+     * @param callerPackageName The calling package (as previously validated).
+     * @param targetPackageName The package that owns the app function to execute.
      * @return Whether the caller can execute the specified app function.
      */
     boolean verifyCallerCanExecuteAppFunction(

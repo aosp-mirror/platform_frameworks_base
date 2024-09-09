@@ -41,6 +41,7 @@ import static org.mockito.Mockito.when;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.hardware.power.stats.EnergyConsumerResult;
 import android.hardware.power.stats.EnergyConsumerType;
 import android.net.NetworkStats;
 import android.os.BatteryConsumer;
@@ -66,7 +67,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.List;
-import java.util.function.IntSupplier;
 import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 
@@ -131,11 +131,6 @@ public class MobileRadioPowerStatsProcessorTest {
                 @Override
                 public PowerStatsCollector.ConsumedEnergyRetriever getConsumedEnergyRetriever() {
                     return mConsumedEnergyRetriever;
-                }
-
-                @Override
-                public IntSupplier getVoltageSupplier() {
-                    return () -> VOLTAGE_MV;
                 }
 
                 @Override
@@ -407,6 +402,7 @@ public class MobileRadioPowerStatsProcessorTest {
 
     private PowerComponentAggregatedPowerStats prepareAggregatedStats_energyConsumerModel() {
         // PowerStats hardware is available
+        when(mConsumedEnergyRetriever.getVoltageMv()).thenReturn(VOLTAGE_MV);
         when(mConsumedEnergyRetriever.getEnergyConsumerIds(EnergyConsumerType.MOBILE_RADIO))
                 .thenReturn(new int[] {MOBILE_RADIO_ENERGY_CONSUMER_ID});
 
@@ -435,9 +431,9 @@ public class MobileRadioPowerStatsProcessorTest {
         // Initial empty ModemActivityInfo.
         mockModemActivityInfo(new ModemActivityInfo(0L, 0L, 0L, new int[5], 0L));
 
-        when(mConsumedEnergyRetriever.getConsumedEnergyUws(
+        when(mConsumedEnergyRetriever.getConsumedEnergy(
                 new int[]{MOBILE_RADIO_ENERGY_CONSUMER_ID}))
-                .thenReturn(new long[]{0});
+                .thenReturn(new EnergyConsumerResult[]{mockEnergyConsumer(0)});
 
         aggregatedStats.start(0);
 
@@ -466,8 +462,8 @@ public class MobileRadioPowerStatsProcessorTest {
         mStatsRule.setTime(10_000, 10_000);
 
         long energyUws = 10_000_000L * VOLTAGE_MV / 1000L;
-        when(mConsumedEnergyRetriever.getConsumedEnergyUws(
-                new int[]{MOBILE_RADIO_ENERGY_CONSUMER_ID})).thenReturn(new long[]{energyUws});
+        when(mConsumedEnergyRetriever.getConsumedEnergy(new int[]{MOBILE_RADIO_ENERGY_CONSUMER_ID}))
+                .thenReturn(new EnergyConsumerResult[]{mockEnergyConsumer(energyUws)});
 
         when(mCallDurationSupplier.getAsLong()).thenReturn(200L);
         when(mScanDurationSupplier.getAsLong()).thenReturn(5555L);
@@ -482,6 +478,12 @@ public class MobileRadioPowerStatsProcessorTest {
 
     private int[] states(int... states) {
         return states;
+    }
+
+    private EnergyConsumerResult mockEnergyConsumer(long energyUWs) {
+        EnergyConsumerResult ecr = new EnergyConsumerResult();
+        ecr.energyUWs = energyUWs;
+        return ecr;
     }
 
     private void mockModemActivityInfo(ModemActivityInfo emptyMai) {

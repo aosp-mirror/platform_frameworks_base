@@ -23,6 +23,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 
+import android.hardware.power.stats.EnergyConsumerResult;
 import android.hardware.power.stats.EnergyConsumerType;
 import android.os.BatteryConsumer;
 import android.os.BatteryStats;
@@ -39,8 +40,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import java.util.function.IntSupplier;
 
 public class ScreenPowerStatsCollectorTest {
     private static final int APP_UID1 = 42;
@@ -90,11 +89,6 @@ public class ScreenPowerStatsCollectorTest {
         }
 
         @Override
-        public IntSupplier getVoltageSupplier() {
-            return () -> 3500;
-        }
-
-        @Override
         public int getDisplayCount() {
             return 2;
         }
@@ -116,6 +110,7 @@ public class ScreenPowerStatsCollectorTest {
                 return uid;
             }
         });
+        when(mConsumedEnergyRetriever.getVoltageMv()).thenReturn(3500);
     }
 
     @Test
@@ -126,8 +121,8 @@ public class ScreenPowerStatsCollectorTest {
         // Establish a baseline
         when(mConsumedEnergyRetriever.getEnergyConsumerIds(EnergyConsumerType.DISPLAY))
                 .thenReturn(new int[]{77});
-        when(mConsumedEnergyRetriever.getConsumedEnergyUws(new int[]{77}))
-                .thenReturn(new long[]{10_000});
+        when(mConsumedEnergyRetriever.getConsumedEnergy(new int[]{77}))
+                .thenReturn(new EnergyConsumerResult[]{mockEnergyConsumer(10_000)});
 
         doAnswer(inv -> {
             ScreenPowerStatsCollector.ScreenUsageTimeRetriever.Callback callback =
@@ -140,8 +135,8 @@ public class ScreenPowerStatsCollectorTest {
 
         collector.collectStats();
 
-        when(mConsumedEnergyRetriever.getConsumedEnergyUws(new int[]{77}))
-                .thenReturn(new long[]{45_000});
+        when(mConsumedEnergyRetriever.getConsumedEnergy(new int[]{77}))
+                .thenReturn(new EnergyConsumerResult[]{mockEnergyConsumer(45_000)});
         when(mScreenUsageTimeRetriever.getScreenOnTimeMs(0))
                 .thenReturn(60_000L);
         when(mScreenUsageTimeRetriever.getBrightnessLevelTimeMs(0,
@@ -203,5 +198,11 @@ public class ScreenPowerStatsCollectorTest {
         // (5000 - 2000) + 7000
         assertThat(layout.getUidTopActivityDuration(powerStats.uidStats.get(APP_UID2)))
                 .isEqualTo(10000);
+    }
+
+    private EnergyConsumerResult mockEnergyConsumer(long energyUWs) {
+        EnergyConsumerResult ecr = new EnergyConsumerResult();
+        ecr.energyUWs = energyUWs;
+        return ecr;
     }
 }

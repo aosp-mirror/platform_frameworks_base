@@ -1097,7 +1097,7 @@
     <string name="js_dialog_before_unload_positive_button" msgid="4274257182303565509">"यस पृष्ठलाई छोड्नुहोस्"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="3873765747622415310">"यही पृष्ठमा रहनुहोस्"</string>
     <string name="js_dialog_before_unload" msgid="7213364985774778744">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nके तपाईं यो पेजबाट नेभिगेट गर्न चाहनु हुन्छ भन्ने निश्चत छ?"</string>
-    <string name="autofill_window_title" msgid="4379134104008111961">"<xliff:g id="SERVICENAME">%1$s</xliff:g> मार्फत स्वतः भरण गर्नुहोस्‌"</string>
+    <string name="autofill_window_title" msgid="4379134104008111961">"<xliff:g id="SERVICENAME">%1$s</xliff:g> मार्फत अटोफिल गर्नुहोस्‌"</string>
     <string name="permlab_setAlarm" msgid="1158001610254173567">"एउटा आलर्म सेट गर्नुहोस्"</string>
     <string name="permdesc_setAlarm" msgid="2185033720060109640">"स्थापना गरिएको सङ्केत घडी एपमा सङ्केत समय मिलाउन एपलाई अनुमति दिन्छ। केही सङ्केत घडी एपहरूले यो सुविधा कार्यान्वयन नगर्न सक्छन्।"</string>
     <string name="permlab_addVoicemail" msgid="4770245808840814471">"भ्वाइसमेल थप गर्नुहोस्"</string>
@@ -1184,7 +1184,7 @@
     <string name="selectTextMode" msgid="3225108910999318778">"पाठ चयन गर्नुहोस्"</string>
     <string name="undo" msgid="3175318090002654673">"अन्डू गर्नुहोस्"</string>
     <string name="redo" msgid="7231448494008532233">"रिडू गर्नुहोस्"</string>
-    <string name="autofill" msgid="511224882647795296">"स्वतः भरण"</string>
+    <string name="autofill" msgid="511224882647795296">"अटोफिल"</string>
     <string name="textSelectionCABTitle" msgid="5151441579532476940">"पाठ चयनता"</string>
     <string name="addToDictionary" msgid="8041821113480950096">"शब्दकोशमा थप्नुहोस्"</string>
     <string name="deleteText" msgid="4200807474529938112">"मेट्नुहोस्"</string>
@@ -1746,7 +1746,8 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"कुनै एपका कारण अनुमतिसम्बन्धी अनुरोध बुझ्न कठिनाइ भइरहेकाले तपाईंको जवाफको पुष्टि गर्न सकिएन।"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"कुनै सुविधा प्रयोग गर्न थाल्न उक्त सुविधामा ट्याप गर्नुहोस्:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"पहुँचको बटनमार्फत प्रयोग गर्न चाहेका सुविधाहरू छनौट गर्नुहोस्"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"भोल्युम कुञ्जीको सर्टकटमार्फत प्रयोग गर्न चाहेका सुविधाहरू छनौट गर्नुहोस्"</string>
+    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
+    <skip />
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> निष्क्रिय पारिएको छ"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"सर्टकटहरू सम्पादन गर्नुहोस्"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"सम्पन्न भयो"</string>

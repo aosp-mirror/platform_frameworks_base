@@ -103,11 +103,8 @@ internal constructor(
     override val userContentResolver: ContentResolver
         get() = userContext.contentResolver
 
-    override val userInfo: UserInfo
-        get() {
-            val user = userId
-            return userProfiles.first { it.id == user }
-        }
+    override var userInfo: UserInfo by SynchronizedDelegate(UserInfo(context.userId, "", 0))
+        protected set
 
     /**
      * Returns a [List<UserInfo>] of all profiles associated with the current user.
@@ -187,6 +184,7 @@ internal constructor(
             userHandle = handle
             userContext = ctx
             userProfiles = profiles.map { UserInfo(it) }
+            userInfo = profiles.first { it.id == user }
         }
         return ctx to profiles
     }

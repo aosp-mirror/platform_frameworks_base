@@ -104,6 +104,7 @@
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> och andra öppna appar identifierade skärmbilden."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Lägg till i anteckning"</string>
     <string name="backlinks_include_link" msgid="4562093591148248158">"Inkludera länk"</string>
+    <string name="backlinks_duplicate_label_format" msgid="558445128952827926">"<xliff:g id="APPNAME">%1$s</xliff:g> <xliff:g id="FREQUENCYCOUNT">(%2$d)</xliff:g>"</string>
     <string name="screenrecord_title" msgid="4257171601439507792">"Skärminspelare"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Behandlar skärminspelning"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Avisering om att skärminspelning pågår"</string>
@@ -291,7 +292,8 @@
     <string name="start_dreams" msgid="9131802557946276718">"Skärmsläckare"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Stör ej"</string>
-    <string name="quick_settings_modes_label" msgid="5407025818652750501">"Prioriterade lägen"</string>
+    <!-- no translation found for quick_settings_modes_label (879156359479504244) -->
+    <skip />
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Det finns inga kopplade enheter tillgängliga"</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"Tryck för att ansluta eller koppla från en enhet"</string>
@@ -300,6 +302,7 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Använd Bluetooth"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Ansluten"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"Ljuddelning"</string>
+    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="3227408556754456024">"Tryck för att byta eller dela ljud"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Sparad"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"koppla från"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"aktivera"</string>
@@ -431,7 +434,8 @@
     <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"Öppna Inställningar"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Annan enhet"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Aktivera och inaktivera översikten"</string>
-    <string name="zen_modes_dialog_title" msgid="4159138230418567383">"Prioriterade lägen"</string>
+    <!-- no translation found for zen_modes_dialog_title (8854640808100096934) -->
+    <skip />
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"Klar"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"Inställningar"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"På"</string>
@@ -532,8 +536,12 @@
     <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"Den tjänst som tillhandahåller funktionen får åtkomst till all information som visas på skärmen eller spelas upp från enheten när du spelar in eller castar. Detta omfattar till exempel lösenord, betalningsuppgifter, foton, meddelanden och ljud som du spelar upp."</string>
     <string name="screen_share_generic_app_selector_title" msgid="8331515850599218288">"Dela eller spela in en app"</string>
     <string name="media_projection_entry_app_permission_dialog_title" msgid="4613857256721708062">"Vill du dela skärmen med <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
-    <string name="media_projection_entry_app_permission_dialog_option_text_single_app" msgid="6314402084788062644">"Dela en app"</string>
-    <string name="media_projection_entry_app_permission_dialog_option_text_entire_screen" msgid="7381488112332599632">"Dela hela skärmen"</string>
+    <string name="screen_share_permission_dialog_option_single_app" msgid="2974054871681567314">"Dela en app"</string>
+    <!-- no translation found for media_projection_entry_app_permission_dialog_option_text_single_app (2308901434964846084) -->
+    <skip />
+    <string name="screen_share_permission_dialog_option_entire_screen" msgid="4493174362775038997">"Dela hela skärmen"</string>
+    <!-- no translation found for media_projection_entry_app_permission_dialog_option_text_entire_screen (5100078808078139706) -->
+    <skip />
     <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="5504288438067851086">"När du delar hela skärmen är allt på skärmen synligt för <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>. Var försiktig med sådant som lösenord, betalningsuppgifter, meddelanden, foton, ljud och video."</string>
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="7094417930857938876">"När du delar en app är allt som visas eller spelas upp i appen synligt för <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>. Var försiktig med sådant som lösenord, betalningsuppgifter, meddelanden, foton, ljud och video."</string>
     <string name="media_projection_entry_app_permission_dialog_continue_entire_screen" msgid="1850848182344377579">"Dela skärmen"</string>
@@ -718,8 +726,7 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Satellit, bra anslutning"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Satellit, anslutning tillgänglig"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"SOS-larm via satellit"</string>
-    <!-- no translation found for satellite_emergency_only_carrier_text (828510231597991206) -->
-    <skip />
+    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"Nödsamtal eller SOS"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Jobbprofil"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Kul för vissa, inte för alla"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Du kan använda inställningarna för systemgränssnitt för att justera användargränssnittet i Android. Dessa experimentfunktioner kan när som helst ändras, sluta fungera eller försvinna. Använd med försiktighet."</string>
@@ -1386,6 +1393,18 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Ikonen Komprimera"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Ikonen Utöka"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"eller"</string>
+    <!-- no translation found for launch_keyboard_tutorial_notification_title (8849933155160522519) -->
+    <skip />
+    <!-- no translation found for launch_keyboard_tutorial_notification_content (2880339951512757918) -->
+    <skip />
+    <!-- no translation found for launch_touchpad_tutorial_notification_title (2243780062772196901) -->
+    <skip />
+    <!-- no translation found for launch_touchpad_tutorial_notification_content (7931085031240753226) -->
+    <skip />
+    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_title (1940023776496198762) -->
+    <skip />
+    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_content (1780725168171929365) -->
+    <skip />
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Tillbaka-rörelse"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Rörelse för att öppna startskärmen"</string>
     <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"Åtgärdstangent"</string>

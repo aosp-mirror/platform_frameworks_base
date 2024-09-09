@@ -25,7 +25,10 @@ import com.android.hoststubgen.HostStubGenInternalException
  *
  * @param policy the policy. Cannot be a "substitute" policy.
  */
-class ConstantFilter(policy: FilterPolicy, private val reason: String) : OutputFilter() {
+class ConstantFilter(
+    policy: FilterPolicy,
+    private val reason: String
+) : OutputFilter() {
 
     private val classPolicy: FilterPolicy
     private val fieldPolicy: FilterPolicy

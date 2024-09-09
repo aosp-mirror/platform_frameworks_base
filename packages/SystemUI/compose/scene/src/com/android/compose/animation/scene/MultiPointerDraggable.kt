@@ -221,19 +221,59 @@ internal class MultiPointerDraggableNode(
     private suspend fun PointerInputScope.pointerTracker() {
         val currentContext = currentCoroutineContext()
         awaitPointerEventScope {
+            var velocityPointerId: PointerId? = null
             // Intercepts pointer inputs and exposes [PointersInfo], via
             // [requireAncestorPointersInfoOwner], to our descendants.
             while (currentContext.isActive) {
                 // During the Initial pass, we receive the event after our ancestors.
-                val pointers = awaitPointerEvent(PointerEventPass.Initial).changes
-                pointersDown = pointers.countDown()
-                if (pointersDown == 0) {
-                    // There are no more pointers down
-                    startedPosition = null
-                } else if (startedPosition == null) {
-                    startedPosition = pointers.first().position
-                    if (enabled()) {
-                        onFirstPointerDown()
+                val changes = awaitPointerEvent(PointerEventPass.Initial).changes
+                pointersDown = changes.countDown()
+
+                when {
+                    // There are no more pointers down.
+                    pointersDown == 0 -> {
+                        startedPosition = null
+
+                        // This is the last pointer up
+                        velocityTracker.addPointerInputChange(changes.single())
+                    }
+
+                    // The first pointer down, startedPosition was not set.
+                    startedPosition == null -> {
+                        val firstPointerDown = changes.single()
+                        velocityPointerId = firstPointerDown.id
+                        velocityTracker.resetTracking()
+                        velocityTracker.addPointerInputChange(firstPointerDown)
+                        startedPosition = firstPointerDown.position
+                        if (enabled()) {
+                            onFirstPointerDown()
+                        }
+                    }
+
+                    // Changes with at least one pointer
+                    else -> {
+                        val pointerChange = changes.first()
+
+                        // Assuming that the list of changes doesn't have two changes with the same
+                        // id (PointerId), we can check:
+                        // - If the first change has `id` equals to `velocityPointerId` (this should
+                        //   always be true unless the pointer has been removed).
+                        // - If it does, we've found our change event (assuming there aren't any
+                        //   others changes with the same id in this PointerEvent - not checked).
+                        // - If it doesn't, we can check that the change with that id isn't in first
+                        //   place (which should never happen - this will crash).
+                        check(
+                            pointerChange.id == velocityPointerId ||
+                                !changes.fastAny { it.id == velocityPointerId }
+                        ) {
+                            "$velocityPointerId is present, but not the first: $changes"
+                        }
+
+                        // If the previous pointer has been removed, we use the first available
+                        // change to keep tracking the velocity.
+                        velocityPointerId = pointerChange.id
+
+                        velocityTracker.addPointerInputChange(pointerChange)
                     }
                 }
             }
@@ -253,11 +293,9 @@ internal class MultiPointerDraggableNode(
                         orientation = orientation,
                         startDragImmediately = startDragImmediately,
                         onDragStart = { startedPosition, overSlop, pointersDown ->
-                            velocityTracker.resetTracking()
                             onDragStarted(startedPosition, overSlop, pointersDown)
                         },
-                        onDrag = { controller, change, amount ->
-                            velocityTracker.addPointerInputChange(change)
+                        onDrag = { controller, amount ->
                             dispatchScrollEvents(
                                 availableOnPreScroll = amount,
                                 onScroll = { controller.onDrag(it) },
@@ -403,7 +441,7 @@ internal class MultiPointerDraggableNode(
         startDragImmediately: (startedPosition: Offset) -> Boolean,
         onDragStart:
             (startedPosition: Offset, overSlop: Float, pointersDown: Int) -> DragController,
-        onDrag: (controller: DragController, change: PointerInputChange, dragAmount: Float) -> Unit,
+        onDrag: (controller: DragController, dragAmount: Float) -> Unit,
         onDragEnd: (controller: DragController) -> Unit,
         onDragCancel: (controller: DragController) -> Unit,
         swipeDetector: SwipeDetector,
@@ -482,14 +520,14 @@ internal class MultiPointerDraggableNode(
 
             val successful: Boolean
             try {
-                onDrag(controller, drag, overSlop)
+                onDrag(controller, overSlop)
 
                 successful =
                     drag(
                         initialPointerId = drag.id,
                         hasDragged = { it.positionChangeIgnoreConsumed().toFloat() != 0f },
                         onDrag = {
-                            onDrag(controller, it, it.positionChange().toFloat())
+                            onDrag(controller, it.positionChange().toFloat())
                             it.consume()
                         },
                         onIgnoredEvent = {

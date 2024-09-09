@@ -22,7 +22,7 @@ import dagger.assisted.AssistedInject
 /**
  * Models UI state used to render the content of the quick settings shade scene.
  *
- * Different from [QuickSettingsShadeSceneActionsViewModel], which only models user actions that can
+ * Different from [QuickSettingsShadeUserActionsViewModel], which only models user actions that can
  * be performed to navigate to other scenes.
  */
 class QuickSettingsShadeSceneContentViewModel

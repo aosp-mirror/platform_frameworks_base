@@ -32,6 +32,7 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.hardware.power.stats.EnergyConsumerResult;
 import android.hardware.power.stats.EnergyConsumerType;
 import android.net.NetworkStats;
 import android.net.wifi.WifiManager;
@@ -58,7 +59,6 @@ import org.mockito.MockitoAnnotations;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
 public class WifiPowerStatsCollectorTest {
@@ -152,11 +152,6 @@ public class WifiPowerStatsCollectorTest {
         @Override
         public PowerStatsCollector.ConsumedEnergyRetriever getConsumedEnergyRetriever() {
             return mConsumedEnergyRetriever;
-        }
-
-        @Override
-        public IntSupplier getVoltageSupplier() {
-            return () -> 3500;
         }
 
         @Override
@@ -369,6 +364,7 @@ public class WifiPowerStatsCollectorTest {
         WifiPowerStatsCollector collector = new WifiPowerStatsCollector(mInjector, null);
         collector.setEnabled(true);
 
+        when(mConsumedEnergyRetriever.getVoltageMv()).thenReturn(3500);
         when(mConsumedEnergyRetriever.getEnergyConsumerIds(EnergyConsumerType.WIFI))
                 .thenReturn(new int[]{777});
 
@@ -386,8 +382,8 @@ public class WifiPowerStatsCollectorTest {
         mockWifiScanTimes(APP_UID2, 3000, 4000);
         mockWifiScanTimes(ISOLATED_UID, 5000, 6000);
 
-        when(mConsumedEnergyRetriever.getConsumedEnergyUws(eq(new int[]{777})))
-                .thenReturn(new long[]{10000});
+        when(mConsumedEnergyRetriever.getConsumedEnergy(eq(new int[]{777})))
+                .thenReturn(new EnergyConsumerResult[]{mockEnergyConsumer(10_000)});
 
         collector.collectStats();
 
@@ -405,11 +401,17 @@ public class WifiPowerStatsCollectorTest {
         mockWifiScanTimes(APP_UID2, 3100, 4200);
         mockWifiScanTimes(ISOLATED_UID, 5300, 6400);
 
-        when(mConsumedEnergyRetriever.getConsumedEnergyUws(eq(new int[]{777})))
-                .thenReturn(new long[]{64321});
+        when(mConsumedEnergyRetriever.getConsumedEnergy(eq(new int[]{777})))
+                .thenReturn(new EnergyConsumerResult[]{mockEnergyConsumer(64_321)});
 
         mStatsRule.setTime(20000, 20000);
         return collector.collectStats();
+    }
+
+    private EnergyConsumerResult mockEnergyConsumer(long energyUWs) {
+        EnergyConsumerResult ecr = new EnergyConsumerResult();
+        ecr.energyUWs = energyUWs;
+        return ecr;
     }
 
     private void mockWifiActivityInfo(long timestamp, long rxTimeMs, long txTimeMs, int scanTimeMs,

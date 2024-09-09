@@ -3379,44 +3379,39 @@ class JavaSystemPropertyListener {
   public:
     JavaSystemPropertyListener(JNIEnv* env, jobject javaCallback, std::string sysPropName) :
             mCallback {javaCallback, env},
-            mPi {__system_property_find(sysPropName.c_str())},
+            mSysPropName(sysPropName),
+            mCachedProperty(android::base::CachedProperty{std::move(sysPropName)}),
             mListenerThread([this](mediautils::stop_token stok) mutable {
-                static const struct timespec close_delay = { .tv_sec = 1 };
                 while (!stok.stop_requested()) {
-                    uint32_t old_serial = mSerial.load();
-                    uint32_t new_serial;
-                    if (__system_property_wait(mPi, old_serial, &new_serial, &close_delay)) {
-                        while (new_serial > old_serial) {
-                            if (mSerial.compare_exchange_weak(old_serial, new_serial)) {
-                                fireUpdate();
-                                break;
-                            }
-                        }
-                    }
+                    using namespace std::chrono_literals;
+                    // 1s timeout so this thread can eventually respond to the stop token
+                    std::string newVal = mCachedProperty.WaitForChange(1000ms) ?: "";
+                    updateValue(newVal);
                 }
             }) {}
 
     void triggerUpdateIfChanged() {
-        uint32_t old_serial = mSerial.load();
-        uint32_t new_serial = __system_property_serial(mPi);
-        while (new_serial > old_serial) {
-            if (mSerial.compare_exchange_weak(old_serial, new_serial)) {
-                fireUpdate();
-                break;
-            }
-        }
+        // We must check the property without using the cached property due to thread safety issues
+        std::string newVal = base::GetProperty(mSysPropName, "");
+        updateValue(newVal);
     }
 
   private:
-    void fireUpdate() {
+    void updateValue(std::string newVal) {
+        if (newVal == "") return;
+        std::lock_guard l{mLock};
+        if (mLastVal == newVal) return;
         const auto threadEnv = GetOrAttachJNIEnvironment(gVm);
         threadEnv->CallVoidMethod(mCallback.get(), gRunnableClassInfo.run);
+        mLastVal = std::move(newVal);
     }
 
     // Should outlive thread object
     const GlobalRef mCallback;
-    const prop_info * const mPi;
-    std::atomic<uint32_t> mSerial = 0;
+    const std::string mSysPropName;
+    android::base::CachedProperty mCachedProperty;
+    std::string mLastVal = "";
+    std::mutex mLock;
     const mediautils::jthread mListenerThread;
 };
 

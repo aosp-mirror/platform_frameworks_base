@@ -19,7 +19,10 @@
 package com.android.systemui.scene.domain.startable
 
 import android.app.StatusBarManager
+import android.hardware.face.FaceManager
 import android.os.PowerManager
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import android.view.Display
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -27,9 +30,14 @@ import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
 import com.android.internal.logging.uiEventLoggerFake
 import com.android.internal.policy.IKeyguardDismissCallback
+import com.android.keyguard.AuthInteractionProperties
+import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.repository.fakeAuthenticationRepository
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
+import com.android.systemui.biometrics.data.repository.fingerprintPropertyRepository
+import com.android.systemui.biometrics.shared.model.FingerprintSensorType
+import com.android.systemui.biometrics.shared.model.SensorStrength
 import com.android.systemui.bouncer.data.repository.fakeKeyguardBouncerRepository
 import com.android.systemui.bouncer.domain.interactor.bouncerInteractor
 import com.android.systemui.bouncer.shared.logging.BouncerUiEvent
@@ -39,8 +47,15 @@ import com.android.systemui.classifier.falsingManager
 import com.android.systemui.concurrency.fakeExecutor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
+import com.android.systemui.deviceentry.domain.interactor.deviceEntryHapticsInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
+import com.android.systemui.deviceentry.shared.model.FailedFaceAuthenticationStatus
+import com.android.systemui.deviceentry.shared.model.SuccessFaceAuthenticationStatus
 import com.android.systemui.flags.EnableSceneContainer
+import com.android.systemui.haptics.msdl.fakeMSDLPlayer
+import com.android.systemui.haptics.vibratorHelper
+import com.android.systemui.keyevent.data.repository.fakeKeyEventRepository
+import com.android.systemui.keyguard.data.repository.biometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.deviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.fakeBiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFaceAuthRepository
@@ -53,11 +68,15 @@ import com.android.systemui.keyguard.dismissCallbackRegistry
 import com.android.systemui.keyguard.domain.interactor.keyguardEnabledInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.scenetransition.lockscreenSceneTransitionInteractor
+import com.android.systemui.keyguard.shared.model.BiometricUnlockMode
+import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
+import com.android.systemui.keyguard.shared.model.FailFingerprintAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.model.sysUiState
 import com.android.systemui.power.data.repository.fakePowerRepository
+import com.android.systemui.power.data.repository.powerRepository
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
 import com.android.systemui.power.domain.interactor.powerInteractor
@@ -69,6 +88,7 @@ import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.shared.system.QuickStepContract
+import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.domain.interactor.keyguardOcclusionInteractor
 import com.android.systemui.statusbar.notification.data.repository.FakeHeadsUpRowRepository
 import com.android.systemui.statusbar.notification.data.repository.HeadsUpRowRepository
@@ -80,11 +100,13 @@ import com.android.systemui.statusbar.policy.data.repository.fakeDeviceProvision
 import com.android.systemui.statusbar.sysuiStatusBarStateController
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.mock
+import com.google.android.msdl.data.model.MSDLToken
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -92,6 +114,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyInt
+import org.mockito.ArgumentMatchers.anyString
+import org.mockito.Mockito
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.never
 import org.mockito.Mockito.times
@@ -105,18 +129,22 @@ class SceneContainerStartableTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
+    private val deviceEntryHapticsInteractor by lazy { kosmos.deviceEntryHapticsInteractor }
     private val sceneInteractor by lazy { kosmos.sceneInteractor }
     private val bouncerInteractor by lazy { kosmos.bouncerInteractor }
     private val faceAuthRepository by lazy { kosmos.fakeDeviceEntryFaceAuthRepository }
     private val bouncerRepository by lazy { kosmos.fakeKeyguardBouncerRepository }
     private val sysUiState = kosmos.sysUiState
     private val falsingCollector = mock<FalsingCollector>().also { kosmos.falsingCollector = it }
+    private val vibratorHelper = mock<VibratorHelper>().also { kosmos.vibratorHelper = it }
     private val fakeSceneDataSource = kosmos.fakeSceneDataSource
     private val windowController = kosmos.notificationShadeWindowController
     private val centralSurfaces = kosmos.centralSurfaces
     private val powerInteractor = kosmos.powerInteractor
     private val fakeTrustRepository = kosmos.fakeTrustRepository
     private val uiEventLoggerFake = kosmos.uiEventLoggerFake
+    private val msdlPlayer = kosmos.fakeMSDLPlayer
+    private val authInteractionProperties = AuthInteractionProperties()
 
     private lateinit var underTest: SceneContainerStartable
 
@@ -631,6 +659,382 @@ class SceneContainerStartableTest : SysuiTestCase() {
                 powerButtonLaunchGestureTriggered = true,
             )
             assertThat(currentSceneKey).isEqualTo(Scenes.Gone)
+        }
+
+    @Test
+    @DisableFlags(Flags.FLAG_MSDL_FEEDBACK)
+    fun playSuccessHaptics_onSuccessfulLockscreenAuth_udfps() =
+        testScope.runTest {
+            val currentSceneKey by collectLastValue(sceneInteractor.currentScene)
+            val playSuccessHaptic by
+                collectLastValue(deviceEntryHapticsInteractor.playSuccessHaptic)
+
+            setupBiometricAuth(hasUdfps = true)
+            assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
+            assertThat(kosmos.deviceEntryInteractor.isDeviceEntered.value).isFalse()
+
+            underTest.start()
+            unlockWithFingerprintAuth()
+
+            assertThat(playSuccessHaptic).isNotNull()
+            assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
+            verify(vibratorHelper)
+                .vibrateAuthSuccess(
+                    "SceneContainerStartable, $currentSceneKey device-entry::success"
+                )
+            verify(vibratorHelper, never()).vibrateAuthError(anyString())
+
+            updateFingerprintAuthStatus(isSuccess = true)
+            assertThat(currentSceneKey).isEqualTo(Scenes.Gone)
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MSDL_FEEDBACK)
+    fun playSuccessMSDLHaptics_onSuccessfulLockscreenAuth_udfps() =
+        testScope.runTest {
+            val currentSceneKey by collectLastValue(sceneInteractor.currentScene)
+            val playSuccessHaptic by
+                collectLastValue(deviceEntryHapticsInteractor.playSuccessHaptic)
+
+            setupBiometricAuth(hasUdfps = true)
+            assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
+            assertThat(kosmos.deviceEntryInteractor.isDeviceEntered.value).isFalse()
+
+            underTest.start()
+            unlockWithFingerprintAuth()
+
+            assertThat(playSuccessHaptic).isNotNull()
+            assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
+            assertThat(msdlPlayer.latestTokenPlayed).isEqualTo(MSDLToken.UNLOCK)
+            assertThat(msdlPlayer.latestPropertiesPlayed).isEqualTo(authInteractionProperties)
+
+            updateFingerprintAuthStatus(isSuccess = true)
+            assertThat(currentSceneKey).isEqualTo(Scenes.Gone)
+        }
+
+    @Test
+    @DisableFlags(Flags.FLAG_MSDL_FEEDBACK)
+    fun playSuccessHaptics_onSuccessfulLockscreenAuth_sfps() =
+        testScope.runTest {
+            val currentSceneKey by collectLastValue(sceneInteractor.currentScene)
+            val playSuccessHaptic by
+                collectLastValue(deviceEntryHapticsInteractor.playSuccessHaptic)
+
+            setupBiometricAuth(hasSfps = true)
+            assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
+            assertThat(kosmos.deviceEntryInteractor.isDeviceEntered.value).isFalse()
+
+            underTest.start()
+            allowHapticsOnSfps()
+            unlockWithFingerprintAuth()
+
+            assertThat(playSuccessHaptic).isNotNull()
+            assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
+            verify(vibratorHelper)
+                .vibrateAuthSuccess(
+                    "SceneContainerStartable, $currentSceneKey device-entry::success"
+                )
+            verify(vibratorHelper, never()).vibrateAuthError(anyString())
+
+            updateFingerprintAuthStatus(isSuccess = true)
+            assertThat(currentSceneKey).isEqualTo(Scenes.Gone)
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MSDL_FEEDBACK)
+    fun playSuccessMSDLHaptics_onSuccessfulLockscreenAuth_sfps() =
+        testScope.runTest {
+            val currentSceneKey by collectLastValue(sceneInteractor.currentScene)
+            val playSuccessHaptic by
+                collectLastValue(deviceEntryHapticsInteractor.playSuccessHaptic)
+
+            setupBiometricAuth(hasSfps = true)
+            assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
+            assertThat(kosmos.deviceEntryInteractor.isDeviceEntered.value).isFalse()
+
+            underTest.start()
+            allowHapticsOnSfps()
+            unlockWithFingerprintAuth()
+
+            assertThat(playSuccessHaptic).isNotNull()
+            assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
+            assertThat(msdlPlayer.latestTokenPlayed).isEqualTo(MSDLToken.UNLOCK)
+            assertThat(msdlPlayer.latestPropertiesPlayed).isEqualTo(authInteractionProperties)
+
+            updateFingerprintAuthStatus(isSuccess = true)
+            assertThat(currentSceneKey).isEqualTo(Scenes.Gone)
+        }
+
+    @Test
+    @DisableFlags(Flags.FLAG_MSDL_FEEDBACK)
+    fun playErrorHaptics_onFailedLockscreenAuth_udfps() =
+        testScope.runTest {
+            val currentSceneKey by collectLastValue(sceneInteractor.currentScene)
+            val playErrorHaptic by collectLastValue(deviceEntryHapticsInteractor.playErrorHaptic)
+
+            setupBiometricAuth(hasUdfps = true)
+            assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
+            assertThat(kosmos.deviceEntryInteractor.isDeviceEntered.value).isFalse()
+
+            underTest.start()
+            updateFingerprintAuthStatus(isSuccess = false)
+
+            assertThat(playErrorHaptic).isNotNull()
+            assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
+            verify(vibratorHelper)
+                .vibrateAuthError("SceneContainerStartable, $currentSceneKey device-entry::error")
+            verify(vibratorHelper, never()).vibrateAuthSuccess(anyString())
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MSDL_FEEDBACK)
+    fun playMSDLErrorHaptics_onFailedLockscreenAuth_udfps() =
+        testScope.runTest {
+            val currentSceneKey by collectLastValue(sceneInteractor.currentScene)
+            val playErrorHaptic by collectLastValue(deviceEntryHapticsInteractor.playErrorHaptic)
+
+            setupBiometricAuth(hasUdfps = true)
+            assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
+            assertThat(kosmos.deviceEntryInteractor.isDeviceEntered.value).isFalse()
+
+            underTest.start()
+            updateFingerprintAuthStatus(isSuccess = false)
+
+            assertThat(playErrorHaptic).isNotNull()
+            assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
+            assertThat(msdlPlayer.latestTokenPlayed).isEqualTo(MSDLToken.FAILURE)
+            assertThat(msdlPlayer.latestPropertiesPlayed).isEqualTo(authInteractionProperties)
+        }
+
+    @Test
+    @DisableFlags(Flags.FLAG_MSDL_FEEDBACK)
+    fun playErrorHaptics_onFailedLockscreenAuth_sfps() =
+        testScope.runTest {
+            val currentSceneKey by collectLastValue(sceneInteractor.currentScene)
+            val playErrorHaptic by collectLastValue(deviceEntryHapticsInteractor.playErrorHaptic)
+
+            setupBiometricAuth(hasSfps = true)
+            assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
+            assertThat(kosmos.deviceEntryInteractor.isDeviceEntered.value).isFalse()
+
+            underTest.start()
+            updateFingerprintAuthStatus(isSuccess = false)
+
+            assertThat(playErrorHaptic).isNotNull()
+            assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
+            verify(vibratorHelper)
+                .vibrateAuthError("SceneContainerStartable, $currentSceneKey device-entry::error")
+            verify(vibratorHelper, never()).vibrateAuthSuccess(anyString())
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MSDL_FEEDBACK)
+    fun playMSDLErrorHaptics_onFailedLockscreenAuth_sfps() =
+        testScope.runTest {
+            val currentSceneKey by collectLastValue(sceneInteractor.currentScene)
+            val playErrorHaptic by collectLastValue(deviceEntryHapticsInteractor.playErrorHaptic)
+
+            setupBiometricAuth(hasSfps = true)
+            assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
+            assertThat(kosmos.deviceEntryInteractor.isDeviceEntered.value).isFalse()
+
+            underTest.start()
+            updateFingerprintAuthStatus(isSuccess = false)
+
+            assertThat(playErrorHaptic).isNotNull()
+            assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
+            assertThat(msdlPlayer.latestTokenPlayed).isEqualTo(MSDLToken.FAILURE)
+            assertThat(msdlPlayer.latestPropertiesPlayed).isEqualTo(authInteractionProperties)
+        }
+
+    @Test
+    @DisableFlags(Flags.FLAG_MSDL_FEEDBACK)
+    fun skipsSuccessHaptics_whenPowerButtonDown_sfps() =
+        testScope.runTest {
+            val currentSceneKey by collectLastValue(sceneInteractor.currentScene)
+            val playSuccessHaptic by
+                collectLastValue(deviceEntryHapticsInteractor.playSuccessHaptic)
+
+            setupBiometricAuth(hasSfps = true)
+            assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
+            assertThat(kosmos.deviceEntryInteractor.isDeviceEntered.value).isFalse()
+
+            underTest.start()
+            allowHapticsOnSfps(isPowerButtonDown = true)
+            unlockWithFingerprintAuth()
+
+            assertThat(playSuccessHaptic).isNull()
+            assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
+            verify(vibratorHelper, never())
+                .vibrateAuthSuccess(
+                    "SceneContainerStartable, $currentSceneKey device-entry::success"
+                )
+            verify(vibratorHelper, never()).vibrateAuthError(anyString())
+
+            updateFingerprintAuthStatus(isSuccess = true)
+            assertThat(currentSceneKey).isEqualTo(Scenes.Gone)
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MSDL_FEEDBACK)
+    fun skipsMSDLSuccessHaptics_whenPowerButtonDown_sfps() =
+        testScope.runTest {
+            val currentSceneKey by collectLastValue(sceneInteractor.currentScene)
+            val playSuccessHaptic by
+                collectLastValue(deviceEntryHapticsInteractor.playSuccessHaptic)
+
+            setupBiometricAuth(hasSfps = true)
+            assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
+            assertThat(kosmos.deviceEntryInteractor.isDeviceEntered.value).isFalse()
+
+            underTest.start()
+            allowHapticsOnSfps(isPowerButtonDown = true)
+            unlockWithFingerprintAuth()
+
+            assertThat(playSuccessHaptic).isNull()
+            assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
+            assertThat(msdlPlayer.latestTokenPlayed).isNull()
+            assertThat(msdlPlayer.latestPropertiesPlayed).isNull()
+
+            updateFingerprintAuthStatus(isSuccess = true)
+            assertThat(currentSceneKey).isEqualTo(Scenes.Gone)
+        }
+
+    @Test
+    @DisableFlags(Flags.FLAG_MSDL_FEEDBACK)
+    fun skipsSuccessHaptics_whenPowerButtonRecentlyPressed_sfps() =
+        testScope.runTest {
+            val currentSceneKey by collectLastValue(sceneInteractor.currentScene)
+            val playSuccessHaptic by
+                collectLastValue(deviceEntryHapticsInteractor.playSuccessHaptic)
+
+            setupBiometricAuth(hasSfps = true)
+            assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
+            assertThat(kosmos.deviceEntryInteractor.isDeviceEntered.value).isFalse()
+
+            underTest.start()
+            allowHapticsOnSfps(lastPowerPress = 50)
+            unlockWithFingerprintAuth()
+
+            assertThat(playSuccessHaptic).isNull()
+            assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
+            verify(vibratorHelper, never())
+                .vibrateAuthSuccess(
+                    "SceneContainerStartable, $currentSceneKey device-entry::success"
+                )
+            verify(vibratorHelper, never()).vibrateAuthError(anyString())
+
+            updateFingerprintAuthStatus(isSuccess = true)
+            assertThat(currentSceneKey).isEqualTo(Scenes.Gone)
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MSDL_FEEDBACK)
+    fun skipsMSDLSuccessHaptics_whenPowerButtonRecentlyPressed_sfps() =
+        testScope.runTest {
+            val currentSceneKey by collectLastValue(sceneInteractor.currentScene)
+            val playSuccessHaptic by
+                collectLastValue(deviceEntryHapticsInteractor.playSuccessHaptic)
+
+            setupBiometricAuth(hasSfps = true)
+            assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
+            assertThat(kosmos.deviceEntryInteractor.isDeviceEntered.value).isFalse()
+
+            underTest.start()
+            allowHapticsOnSfps(lastPowerPress = 50)
+            unlockWithFingerprintAuth()
+
+            assertThat(playSuccessHaptic).isNull()
+            assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
+            assertThat(msdlPlayer.latestTokenPlayed).isNull()
+            assertThat(msdlPlayer.latestPropertiesPlayed).isNull()
+
+            updateFingerprintAuthStatus(isSuccess = true)
+            assertThat(currentSceneKey).isEqualTo(Scenes.Gone)
+        }
+
+    @Test
+    @DisableFlags(Flags.FLAG_MSDL_FEEDBACK)
+    fun skipsErrorHaptics_whenPowerButtonDown_sfps() =
+        testScope.runTest {
+            val currentSceneKey by collectLastValue(sceneInteractor.currentScene)
+            val playErrorHaptic by collectLastValue(deviceEntryHapticsInteractor.playErrorHaptic)
+
+            setupBiometricAuth(hasSfps = true)
+            assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
+            assertThat(kosmos.deviceEntryInteractor.isDeviceEntered.value).isFalse()
+
+            underTest.start()
+            kosmos.fakeKeyEventRepository.setPowerButtonDown(true)
+            updateFingerprintAuthStatus(isSuccess = false)
+
+            assertThat(playErrorHaptic).isNull()
+            assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
+            verify(vibratorHelper, never())
+                .vibrateAuthError("SceneContainerStartable, $currentSceneKey device-entry::error")
+            verify(vibratorHelper, never()).vibrateAuthSuccess(anyString())
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MSDL_FEEDBACK)
+    fun skipsMSDLErrorHaptics_whenPowerButtonDown_sfps() =
+        testScope.runTest {
+            val currentSceneKey by collectLastValue(sceneInteractor.currentScene)
+            val playErrorHaptic by collectLastValue(deviceEntryHapticsInteractor.playErrorHaptic)
+
+            setupBiometricAuth(hasSfps = true)
+            assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
+            assertThat(kosmos.deviceEntryInteractor.isDeviceEntered.value).isFalse()
+
+            underTest.start()
+            kosmos.fakeKeyEventRepository.setPowerButtonDown(true)
+            updateFingerprintAuthStatus(isSuccess = false)
+
+            assertThat(playErrorHaptic).isNull()
+            assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
+            assertThat(msdlPlayer.latestTokenPlayed).isNull()
+            assertThat(msdlPlayer.latestPropertiesPlayed).isNull()
+        }
+
+    @Test
+    @DisableFlags(Flags.FLAG_MSDL_FEEDBACK)
+    fun skipsFaceErrorHaptics_nonSfps_coEx() =
+        testScope.runTest {
+            val currentSceneKey by collectLastValue(sceneInteractor.currentScene)
+            val playErrorHaptic by collectLastValue(deviceEntryHapticsInteractor.playErrorHaptic)
+
+            setupBiometricAuth(hasUdfps = true, hasFace = true)
+            assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
+            assertThat(kosmos.deviceEntryInteractor.isDeviceEntered.value).isFalse()
+
+            underTest.start()
+            updateFaceAuthStatus(isSuccess = false)
+
+            assertThat(playErrorHaptic).isNull()
+            assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
+            verify(vibratorHelper, never())
+                .vibrateAuthError("SceneContainerStartable, $currentSceneKey device-entry::error")
+            verify(vibratorHelper, never()).vibrateAuthSuccess(anyString())
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MSDL_FEEDBACK)
+    fun skipsMSDLFaceErrorHaptics_nonSfps_coEx() =
+        testScope.runTest {
+            val currentSceneKey by collectLastValue(sceneInteractor.currentScene)
+            val playErrorHaptic by collectLastValue(deviceEntryHapticsInteractor.playErrorHaptic)
+
+            setupBiometricAuth(hasUdfps = true, hasFace = true)
+            assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
+            assertThat(kosmos.deviceEntryInteractor.isDeviceEntered.value).isFalse()
+
+            underTest.start()
+            updateFaceAuthStatus(isSuccess = false)
+
+            assertThat(playErrorHaptic).isNull()
+            assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
+            assertThat(msdlPlayer.latestTokenPlayed).isNull()
+            assertThat(msdlPlayer.latestPropertiesPlayed).isNull()
         }
 
     @Test
@@ -1189,41 +1593,6 @@ class SceneContainerStartableTest : SysuiTestCase() {
 
             emulateSceneTransition(transitionStateFlow, Scenes.Lockscreen)
             verify(notificationShadeWindowController, times(1)).setKeyguardShowing(true)
-        }
-
-    @Test
-    fun hydrateWindowController_setBouncerShowing() =
-        testScope.runTest {
-            underTest.start()
-            val notificationShadeWindowController = kosmos.notificationShadeWindowController
-            val transitionStateFlow = prepareState(initialSceneKey = Scenes.Lockscreen)
-            val currentScene by collectLastValue(sceneInteractor.currentScene)
-            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
-            verify(notificationShadeWindowController, never()).setBouncerShowing(true)
-            verify(notificationShadeWindowController, times(1)).setBouncerShowing(false)
-
-            emulateSceneTransition(transitionStateFlow, Scenes.Bouncer)
-            verify(notificationShadeWindowController, times(1)).setBouncerShowing(true)
-            verify(notificationShadeWindowController, times(1)).setBouncerShowing(false)
-
-            emulateSceneTransition(transitionStateFlow, Scenes.Lockscreen)
-            verify(notificationShadeWindowController, times(1)).setBouncerShowing(true)
-            verify(notificationShadeWindowController, times(2)).setBouncerShowing(false)
-
-            kosmos.deviceEntryFingerprintAuthRepository.setAuthenticationStatus(
-                SuccessFingerprintAuthenticationStatus(0, true)
-            )
-            assertThat(currentScene).isEqualTo(Scenes.Gone)
-            verify(notificationShadeWindowController, times(1)).setBouncerShowing(true)
-            verify(notificationShadeWindowController, times(2)).setBouncerShowing(false)
-
-            emulateSceneTransition(transitionStateFlow, Scenes.Lockscreen)
-            verify(notificationShadeWindowController, times(1)).setBouncerShowing(true)
-            verify(notificationShadeWindowController, times(2)).setBouncerShowing(false)
-
-            emulateSceneTransition(transitionStateFlow, Scenes.Bouncer)
-            verify(notificationShadeWindowController, times(2)).setBouncerShowing(true)
-            verify(notificationShadeWindowController, times(2)).setBouncerShowing(false)
         }
 
     @Test
@@ -1876,4 +2245,92 @@ class SceneContainerStartableTest : SysuiTestCase() {
         FakeHeadsUpRowRepository(key = key, elementKey = Any()).apply {
             this.isPinned.value = isPinned
         }
+
+    private fun setFingerprintSensorType(fingerprintSensorType: FingerprintSensorType) {
+        kosmos.fingerprintPropertyRepository.setProperties(
+            sensorId = 0,
+            strength = SensorStrength.STRONG,
+            sensorType = fingerprintSensorType,
+            sensorLocations = mapOf(),
+        )
+        kosmos.biometricSettingsRepository.setIsFingerprintAuthEnrolledAndEnabled(true)
+    }
+
+    private fun setFaceEnrolled() {
+        kosmos.biometricSettingsRepository.setIsFaceAuthEnrolledAndEnabled(true)
+    }
+
+    private fun TestScope.allowHapticsOnSfps(
+        isPowerButtonDown: Boolean = false,
+        lastPowerPress: Long = 10000
+    ) {
+        kosmos.fakeKeyEventRepository.setPowerButtonDown(isPowerButtonDown)
+
+        kosmos.powerRepository.updateWakefulness(
+            WakefulnessState.AWAKE,
+            WakeSleepReason.POWER_BUTTON,
+            WakeSleepReason.POWER_BUTTON,
+            powerButtonLaunchGestureTriggered = false,
+        )
+
+        advanceTimeBy(lastPowerPress)
+        runCurrent()
+    }
+
+    private fun unlockWithFingerprintAuth() {
+        kosmos.fakeKeyguardRepository.setBiometricUnlockSource(
+            BiometricUnlockSource.FINGERPRINT_SENSOR
+        )
+        kosmos.fakeKeyguardRepository.setBiometricUnlockState(BiometricUnlockMode.UNLOCK_COLLAPSING)
+    }
+
+    private fun TestScope.setupBiometricAuth(
+        hasSfps: Boolean = false,
+        hasUdfps: Boolean = false,
+        hasFace: Boolean = false
+    ) {
+        if (hasSfps) {
+            setFingerprintSensorType(FingerprintSensorType.POWER_BUTTON)
+        }
+
+        if (hasUdfps) {
+            setFingerprintSensorType(FingerprintSensorType.UDFPS_ULTRASONIC)
+        }
+
+        if (hasFace) {
+            setFaceEnrolled()
+        }
+
+        prepareState(
+            authenticationMethod = AuthenticationMethodModel.Pin,
+            isDeviceUnlocked = false,
+            initialSceneKey = Scenes.Lockscreen,
+        )
+    }
+
+    private fun updateFingerprintAuthStatus(isSuccess: Boolean) {
+        if (isSuccess) {
+            kosmos.fakeDeviceEntryFingerprintAuthRepository.setAuthenticationStatus(
+                SuccessFingerprintAuthenticationStatus(0, true)
+            )
+        } else {
+            kosmos.fakeDeviceEntryFingerprintAuthRepository.setAuthenticationStatus(
+                FailFingerprintAuthenticationStatus
+            )
+        }
+    }
+
+    private fun updateFaceAuthStatus(isSuccess: Boolean) {
+        if (isSuccess) {
+            kosmos.fakeDeviceEntryFaceAuthRepository.setAuthenticationStatus(
+                SuccessFaceAuthenticationStatus(
+                    successResult = Mockito.mock(FaceManager.AuthenticationResult::class.java)
+                )
+            )
+        } else {
+            kosmos.fakeDeviceEntryFaceAuthRepository.setAuthenticationStatus(
+                FailedFaceAuthenticationStatus()
+            )
+        }
+    }
 }

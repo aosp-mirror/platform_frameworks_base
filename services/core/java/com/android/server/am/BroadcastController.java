@@ -1808,7 +1808,12 @@ class BroadcastController {
 
     final Intent verifyBroadcastLocked(Intent intent) {
         if (intent != null) {
-            intent.prepareToEnterSystemServer();
+            // Refuse possible leaked file descriptors
+            if (intent.hasFileDescriptors()) {
+                throw new IllegalArgumentException("File descriptors passed in Intent");
+            }
+            // Remove existing mismatch flag so it can be properly updated later
+            intent.removeExtendedFlags(Intent.EXTENDED_FLAG_FILTER_MISMATCH);
         }
 
         int flags = intent.getFlags();

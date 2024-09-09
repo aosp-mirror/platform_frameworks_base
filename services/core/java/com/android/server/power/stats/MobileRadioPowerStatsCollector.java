@@ -41,7 +41,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.function.IntSupplier;
 import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 
@@ -56,8 +55,6 @@ public class MobileRadioPowerStatsCollector extends PowerStatsCollector {
     protected static final long MOBILE_RADIO_POWER_STATE_UPDATE_FREQ_MS = 1000 * 60 * 10;
 
     private static final long MODEM_ACTIVITY_REQUEST_TIMEOUT = 20000;
-
-    private static final long ENERGY_UNSPECIFIED = -1;
 
     @VisibleForTesting
     @AccessNetworkConstants.RadioAccessNetworkType
@@ -85,7 +82,6 @@ public class MobileRadioPowerStatsCollector extends PowerStatsCollector {
         long getPowerStatsCollectionThrottlePeriod(String powerComponentName);
         PackageManager getPackageManager();
         ConsumedEnergyRetriever getConsumedEnergyRetriever();
-        IntSupplier getVoltageSupplier();
         Supplier<NetworkStats> getMobileNetworkStatsSupplier();
         TelephonyManager getTelephonyManager();
         LongSupplier getCallDurationSupplier();
@@ -104,14 +100,10 @@ public class MobileRadioPowerStatsCollector extends PowerStatsCollector {
     private LongSupplier mCallDurationSupplier;
     private LongSupplier mScanDurationSupplier;
     private volatile Supplier<NetworkStats> mNetworkStatsSupplier;
-    private ConsumedEnergyRetriever mConsumedEnergyRetriever;
-    private IntSupplier mVoltageSupplier;
-    private int[] mEnergyConsumerIds = new int[0];
+    private ConsumedEnergyHelper mConsumedEnergyHelper;
     private long mLastUpdateTimestampMillis;
     private ModemActivityInfo mLastModemActivityInfo;
     private NetworkStats mLastNetworkStats;
-    private long[] mLastConsumedEnergyUws;
-    private int mLastVoltageMv;
     private long mLastCallDuration;
     private long mLastScanDuration;
 
@@ -145,20 +137,15 @@ public class MobileRadioPowerStatsCollector extends PowerStatsCollector {
             return false;
         }
 
-        mConsumedEnergyRetriever = mInjector.getConsumedEnergyRetriever();
-        mVoltageSupplier = mInjector.getVoltageSupplier();
-
         mTelephonyManager = mInjector.getTelephonyManager();
         mNetworkStatsSupplier = mInjector.getMobileNetworkStatsSupplier();
         mCallDurationSupplier = mInjector.getCallDurationSupplier();
         mScanDurationSupplier = mInjector.getPhoneSignalScanDurationSupplier();
 
-        mEnergyConsumerIds = mConsumedEnergyRetriever.getEnergyConsumerIds(
+        mConsumedEnergyHelper = new ConsumedEnergyHelper(mInjector.getConsumedEnergyRetriever(),
                 EnergyConsumerType.MOBILE_RADIO);
-        mLastConsumedEnergyUws = new long[mEnergyConsumerIds.length];
-        Arrays.fill(mLastConsumedEnergyUws, ENERGY_UNSPECIFIED);
 
-        mLayout = new MobileRadioPowerStatsLayout(mEnergyConsumerIds.length);
+        mLayout = new MobileRadioPowerStatsLayout(mConsumedEnergyHelper.getEnergyConsumerCount());
 
         SparseArray<String> stateLabels = new SparseArray<>();
         for (int rat = 0; rat < BatteryStats.RADIO_ACCESS_TECHNOLOGY_COUNT; rat++) {
@@ -204,9 +191,8 @@ public class MobileRadioPowerStatsCollector extends PowerStatsCollector {
 
         ModemActivityInfo modemActivityDelta = collectModemActivityInfo();
         List<BatteryStatsImpl.NetworkStatsDelta> networkStatsDeltas = collectNetworkStats();
-        if (mEnergyConsumerIds.length != 0) {
-            collectEnergyConsumers();
-        }
+
+        mConsumedEnergyHelper.collectConsumedEnergy(mPowerStats, mLayout);
 
         if (mPowerStats.durationMs == 0) {
             setTimestamp(mClock.elapsedRealtime());
@@ -338,34 +324,6 @@ public class MobileRadioPowerStatsCollector extends PowerStatsCollector {
             }
         }
         return delta;
-    }
-
-    private void collectEnergyConsumers() {
-        int voltageMv = mVoltageSupplier.getAsInt();
-        if (voltageMv <= 0) {
-            Slog.wtf(TAG, "Unexpected battery voltage (" + voltageMv
-                    + " mV) when querying energy consumers");
-            return;
-        }
-
-        int averageVoltage = mLastVoltageMv != 0 ? (mLastVoltageMv + voltageMv) / 2 : voltageMv;
-        mLastVoltageMv = voltageMv;
-
-        long[] energyUws = mConsumedEnergyRetriever.getConsumedEnergyUws(mEnergyConsumerIds);
-        if (energyUws == null) {
-            return;
-        }
-
-        for (int i = energyUws.length - 1; i >= 0; i--) {
-            long energyDelta = mLastConsumedEnergyUws[i] != ENERGY_UNSPECIFIED
-                    ? energyUws[i] - mLastConsumedEnergyUws[i] : 0;
-            if (energyDelta < 0) {
-                // Likely, restart of powerstats HAL
-                energyDelta = 0;
-            }
-            mLayout.setConsumedEnergy(mPowerStats.stats, i, uJtoUc(energyDelta, averageVoltage));
-            mLastConsumedEnergyUws[i] = energyUws[i];
-        }
     }
 
     private void setTimestamp(long timestamp) {

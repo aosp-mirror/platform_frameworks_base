@@ -194,11 +194,13 @@ private fun shouldComposeMovableElement(
         is TransitionState.Transition -> {
             // During transitions, always compose movable elements in the scene picked by their
             // content picker.
+            val contents = element.contentPicker.contents
             shouldPlaceOrComposeSharedElement(
                 layoutImpl,
                 content,
                 element,
                 elementState,
+                isInContent = { contents.contains(it) }
             )
         }
     }
@@ -208,8 +210,8 @@ private fun movableElementState(
     element: MovableElementKey,
     transitionStates: List<TransitionState>,
 ): TransitionState? {
-    val content = element.contentPicker.contents
-    return elementState(transitionStates, isInContent = { content.contains(it) })
+    val contents = element.contentPicker.contents
+    return elementState(transitionStates, isInContent = { contents.contains(it) })
 }
 
 private fun movableElementContentWhenIdle(
