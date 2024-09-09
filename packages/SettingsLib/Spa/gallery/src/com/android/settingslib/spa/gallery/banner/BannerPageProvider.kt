@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.spa.gallery.card
+package com.android.settingslib.spa.gallery.banner
 
 import android.os.Bundle
 import androidx.compose.foundation.clickable
@@ -46,39 +46,39 @@ import com.android.settingslib.spa.framework.compose.navigator
 import com.android.settingslib.spa.framework.theme.SettingsDimension
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.gallery.R
-import com.android.settingslib.spa.widget.card.CardButton
-import com.android.settingslib.spa.widget.card.CardModel
-import com.android.settingslib.spa.widget.card.SettingsCard
-import com.android.settingslib.spa.widget.card.SettingsCardContent
-import com.android.settingslib.spa.widget.card.SettingsCollapsibleCard
+import com.android.settingslib.spa.widget.banner.BannerButton
+import com.android.settingslib.spa.widget.banner.BannerModel
+import com.android.settingslib.spa.widget.banner.SettingsBanner
+import com.android.settingslib.spa.widget.banner.SettingsBannerContent
+import com.android.settingslib.spa.widget.banner.SettingsCollapsibleBanner
 import com.android.settingslib.spa.widget.preference.Preference
 import com.android.settingslib.spa.widget.preference.PreferenceModel
 import com.android.settingslib.spa.widget.scaffold.RegularScaffold
 
-object CardPageProvider : SettingsPageProvider {
-    override val name = "Card"
+object BannerPageProvider : SettingsPageProvider {
+    override val name = "Banner"
 
     override fun getTitle(arguments: Bundle?) = TITLE
 
     @Composable
     override fun Page(arguments: Bundle?) {
         RegularScaffold(title = TITLE) {
-            SettingsCardWithIcon()
-            SettingsCardWithoutIcon()
-            SampleSettingsCollapsibleCard()
-            SampleSettingsCardContent()
+            SettingsBannerWithIcon()
+            SettingsBannerWithoutIcon()
+            SampleSettingsCollapsibleBanner()
+            SampleSettingsBannerContent()
         }
     }
 
     @Composable
-    private fun SettingsCardWithIcon() {
-        SettingsCard(
-            CardModel(
+    private fun SettingsBannerWithIcon() {
+        SettingsBanner(
+            BannerModel(
                 title = stringResource(R.string.sample_title),
                 text = stringResource(R.string.sample_text),
                 imageVector = Icons.Outlined.WarningAmber,
                 buttons = listOf(
-                    CardButton(text = "Action") {},
+                    BannerButton(text = "Action") {},
                 ),
                 tintColor = MaterialTheme.colorScheme.error,
                 containerColor = MaterialTheme.colorScheme.errorContainer,
@@ -87,11 +87,11 @@ object CardPageProvider : SettingsPageProvider {
     }
 
     @Composable
-    private fun SettingsCardWithoutIcon() {
+    private fun SettingsBannerWithoutIcon() {
         val sampleTitle = stringResource(R.string.sample_title)
         var title by remember { mutableStateOf(sampleTitle) }
-        SettingsCard(
-            CardModel(
+        SettingsBanner(
+            BannerModel(
                 title = title,
                 text = stringResource(R.string.sample_text),
             ) { title = "Clicked" }
@@ -99,46 +99,46 @@ object CardPageProvider : SettingsPageProvider {
     }
 
     @Composable
-    fun SampleSettingsCollapsibleCard() {
+    fun SampleSettingsCollapsibleBanner() {
         val context = LocalContext.current
         var isVisible0 by rememberSaveable { mutableStateOf(true) }
         var isVisible1 by rememberSaveable { mutableStateOf(true) }
-        val cards = remember {
+        val banners = remember {
             mutableStateListOf(
-                CardModel(
+                BannerModel(
                     title = context.getString(R.string.sample_title),
                     text = context.getString(R.string.sample_text),
                     imageVector = Icons.Outlined.PowerOff,
                     isVisible = { isVisible0 },
                     onDismiss = { isVisible0 = false },
                     buttons = listOf(
-                        CardButton(text = "Override") {},
-                        CardButton(text = "Learn more") {},
+                        BannerButton(text = "Override") {},
+                        BannerButton(text = "Learn more") {},
                     ),
                 ),
-                CardModel(
+                BannerModel(
                     title = context.getString(R.string.sample_title),
                     text = context.getString(R.string.sample_text),
                     imageVector = Icons.Outlined.Shield,
                     isVisible = { isVisible1 },
                     onDismiss = { isVisible1 = false },
                     buttons = listOf(
-                        CardButton(text = "Action") {},
+                        BannerButton(text = "Action") {},
                     ),
                 )
             )
         }
-        SettingsCollapsibleCard(
+        SettingsCollapsibleBanner(
             title = "More alerts",
             imageVector = Icons.Outlined.Error,
-            models = cards.toList()
+            models = banners.toList()
         )
     }
 
     @Composable
-    fun SampleSettingsCardContent() {
-        SettingsCard {
-            SettingsCardContent {
+    fun SampleSettingsBannerContent() {
+        SettingsBanner {
+            SettingsBannerContent {
                 Box(
                     Modifier
                         .fillMaxWidth()
@@ -148,7 +148,7 @@ object CardPageProvider : SettingsPageProvider {
                     Text(text = "Abc")
                 }
             }
-            SettingsCardContent {
+            SettingsBannerContent {
                 Box(
                     Modifier
                         .fillMaxWidth()
@@ -171,13 +171,13 @@ object CardPageProvider : SettingsPageProvider {
             }
     }
 
-    private const val TITLE = "Sample Card"
+    private const val TITLE = "Sample Banner"
 }
 
 @Preview
 @Composable
-private fun CardPagePreview() {
+private fun BannerPagePreview() {
     SettingsTheme {
-        CardPageProvider.Page(null)
+        BannerPageProvider.Page(null)
     }
 }

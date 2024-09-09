@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.spa.widget.card
+package com.android.settingslib.spa.widget.banner
 
 import android.content.Context
 import androidx.compose.material.icons.Icons
@@ -36,44 +36,44 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-class SettingsCollapsibleCardTest {
+class SettingsCollapsibleBannerTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
     private val context: Context = ApplicationProvider.getApplicationContext()
 
     @Test
-    fun settingsCollapsibleCard_titleDisplayed() {
+    fun settingsCollapsibleBanner_titleDisplayed() {
         setContent()
 
         composeTestRule.onNodeWithText(TITLE).assertIsDisplayed()
     }
 
     @Test
-    fun settingsCollapsibleCard_cardCountDisplayed() {
+    fun settingsCollapsibleBanner_BannerCountDisplayed() {
         setContent()
 
         composeTestRule.onNodeWithText("1").assertIsDisplayed()
     }
 
     @Test
-    fun settingsCollapsibleCard_initial_cardTextNotExists() {
+    fun settingsCollapsibleBanner_initial_BannerTextNotExists() {
         setContent()
 
-        composeTestRule.onNodeWithText(CARD_TEXT).assertDoesNotExist()
+        composeTestRule.onNodeWithText(Banner_TEXT).assertDoesNotExist()
     }
 
     @Test
-    fun settingsCollapsibleCard_afterExpand_cardTextDisplayed() {
+    fun settingsCollapsibleBanner_afterExpand_BannerTextDisplayed() {
         setContent()
 
         composeTestRule.onNodeWithText(TITLE).performClick()
 
-        composeTestRule.onNodeWithText(CARD_TEXT).assertIsDisplayed()
+        composeTestRule.onNodeWithText(Banner_TEXT).assertIsDisplayed()
     }
 
     @Test
-    fun settingsCollapsibleCard_dismiss() {
+    fun settingsCollapsibleBanner_dismiss() {
         setContent()
         composeTestRule.onNodeWithText(TITLE).performClick()
 
@@ -81,20 +81,20 @@ class SettingsCollapsibleCardTest {
             context.getString(androidx.compose.material3.R.string.m3c_snackbar_dismiss)
         ).performClick()
 
-        composeTestRule.onNodeWithText(CARD_TEXT).isNotDisplayed()
+        composeTestRule.onNodeWithText(Banner_TEXT).isNotDisplayed()
         composeTestRule.onNodeWithText("0").assertIsDisplayed()
     }
 
     private fun setContent() {
         composeTestRule.setContent {
             var isVisible by rememberSaveable { mutableStateOf(true) }
-            SettingsCollapsibleCard(
+            SettingsCollapsibleBanner(
                 title = TITLE,
                 imageVector = Icons.Outlined.Error,
                 models = listOf(
-                    CardModel(
+                    BannerModel(
                         title = "",
-                        text = CARD_TEXT,
+                        text = Banner_TEXT,
                         isVisible = { isVisible },
                         onDismiss = { isVisible = false },
                     )
@@ -105,6 +105,6 @@ class SettingsCollapsibleCardTest {
 
     private companion object {
         const val TITLE = "Title"
-        const val CARD_TEXT = "Card Text"
+        const val Banner_TEXT = "Banner Text"
     }
 }
