@@ -78,6 +78,8 @@ import com.android.systemui.res.R;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
+import com.google.android.msdl.domain.MSDLPlayer;
+
 import kotlin.Lazy;
 
 import kotlinx.coroutines.CoroutineScope;
@@ -156,6 +158,8 @@ public class AuthContainerView extends LinearLayout
     private final OnBackInvokedCallback mBackCallback = this::onBackInvoked;
 
     private final @Background DelayableExecutor mBackgroundExecutor;
+
+    private final MSDLPlayer mMSDLPlayer;
 
     // Non-null only if the dialog is in the act of dismissing and has not sent the reason yet.
     @Nullable @AuthDialogCallback.DismissedReason private Integer mPendingCallbackReason;
@@ -292,7 +296,8 @@ public class AuthContainerView extends LinearLayout
             @NonNull Provider<CredentialViewModel> credentialViewModelProvider,
             @NonNull @Background DelayableExecutor bgExecutor,
             @NonNull VibratorHelper vibratorHelper,
-            Lazy<ViewCapture> lazyViewCapture) {
+            Lazy<ViewCapture> lazyViewCapture,
+            @NonNull MSDLPlayer msdlPlayer) {
         super(config.mContext);
 
         mConfig = config;
@@ -309,6 +314,7 @@ public class AuthContainerView extends LinearLayout
                 .getDimension(R.dimen.biometric_dialog_animation_translation_offset);
         mLinearOutSlowIn = Interpolators.LINEAR_OUT_SLOW_IN;
         mBiometricCallback = new BiometricCallback();
+        mMSDLPlayer = msdlPlayer;
 
         final BiometricModalities biometricModalities = new BiometricModalities(
                 Utils.findFirstSensorProperties(fpProps, mConfig.mSensorIds),
@@ -379,7 +385,7 @@ public class AuthContainerView extends LinearLayout
                 getJankListener(mLayout, TRANSIT,
                         BiometricViewSizeBinder.ANIMATE_MEDIUM_TO_LARGE_DURATION_MS),
                 mBackgroundView, mBiometricCallback, mApplicationCoroutineScope,
-                vibratorHelper);
+                vibratorHelper, mMSDLPlayer);
     }
 
     @VisibleForTesting

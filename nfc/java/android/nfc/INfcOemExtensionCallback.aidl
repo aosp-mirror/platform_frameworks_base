@@ -37,6 +37,7 @@ interface INfcOemExtensionCallback {
    void onTagDispatch(in ResultReceiver isSkipped);
    void onRoutingChanged();
    void onHceEventReceived(int action);
+   void onReaderOptionChanged(boolean enabled);
    void onCardEmulationActivated(boolean isActivated);
    void onRfFieldActivated(boolean isActivated);
    void onRfDiscoveryStarted(boolean isDiscoveryStarted);

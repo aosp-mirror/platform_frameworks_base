@@ -27,6 +27,9 @@ import android.util.Log;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.internal.os.RuntimeInit;
+import com.android.ravenwood.common.RavenwoodCommonUtils;
+
 import org.junit.runner.Description;
 import org.junit.runner.Runner;
 import org.junit.runners.model.TestClass;
@@ -35,7 +38,7 @@ import org.junit.runners.model.TestClass;
  * Provide hook points created by {@link RavenwoodAwareTestRunner}.
  */
 public class RavenwoodAwareTestRunnerHook {
-    private static final String TAG = "RavenwoodAwareTestRunnerHook";
+    private static final String TAG = RavenwoodAwareTestRunner.TAG;
 
     private RavenwoodAwareTestRunnerHook() {
     }
@@ -56,20 +59,36 @@ public class RavenwoodAwareTestRunnerHook {
      * Called when a runner starts, before the inner runner gets a chance to run.
      */
     public static void onRunnerInitializing(Runner runner, TestClass testClass) {
+        // TODO: Move the initialization code to a better place.
+
+        initOnce();
+
         // This log call also ensures the framework JNI is loaded.
         Log.i(TAG, "onRunnerInitializing: testClass=" + testClass.getJavaClass()
                 + " runner=" + runner);
 
-        // TODO: Move the initialization code to a better place.
+        // This is needed to make AndroidJUnit4ClassRunner happy.
+        InstrumentationRegistry.registerInstance(null, Bundle.EMPTY);
+    }
+
+    private static boolean sInitialized = false;
+
+    private static void initOnce() {
+        if (sInitialized) {
+            return;
+        }
+        sInitialized = true;
+
+        // We haven't initialized liblog yet, so directly write to System.out here.
+        RavenwoodCommonUtils.log(TAG, "initOnce()");
+
+        // Redirect stdout/stdin to liblog.
+        RuntimeInit.redirectLogStreams();
 
         // This will let AndroidJUnit4 use the original runner.
         System.setProperty("android.junit.runner",
                 "androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner");
         System.setProperty(RAVENWOOD_VERSION_JAVA_SYSPROP, "1");
-
-
-        // This is needed to make AndroidJUnit4ClassRunner happy.
-        InstrumentationRegistry.registerInstance(null, Bundle.EMPTY);
     }
 
     /**
@@ -87,7 +106,7 @@ public class RavenwoodAwareTestRunnerHook {
      */
     public static boolean onBefore(RavenwoodAwareTestRunner runner, Description description,
             Scope scope, Order order) {
-        Log.i(TAG, "onBefore: description=" + description + ", " + scope + ", " + order);
+        Log.v(TAG, "onBefore: description=" + description + ", " + scope + ", " + order);
 
         if (scope == Scope.Class && order == Order.First) {
             // Keep track of the current class.
@@ -113,7 +132,7 @@ public class RavenwoodAwareTestRunnerHook {
      */
     public static boolean onAfter(RavenwoodAwareTestRunner runner, Description description,
             Scope scope, Order order, Throwable th) {
-        Log.i(TAG, "onAfter: description=" + description + ", " + scope + ", " + order + ", " + th);
+        Log.v(TAG, "onAfter: description=" + description + ", " + scope + ", " + order + ", " + th);
 
         if (scope == Scope.Instance && order == Order.First) {
             getStats().onTestFinished(sCurrentClassDescription, description,

@@ -57,6 +57,7 @@ import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.ambient.touch.dagger.InputSessionComponent;
 import com.android.systemui.kosmos.KosmosJavaAdapter;
+import com.android.systemui.log.LogBufferHelperKt;
 import com.android.systemui.shared.system.InputChannelCompat;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.display.DisplayHelper;
@@ -153,7 +154,8 @@ public class TouchMonitorTest extends SysuiTestCase {
             when(mWindowManager.getMaximumWindowMetrics()).thenReturn(mWindowMetrics);
             mMonitor = new TouchMonitor(mExecutor, mBackgroundExecutor, mLifecycleRegistry,
                     mInputFactory, mDisplayHelper, mKosmos.getConfigurationInteractor(),
-                    handlers, mIWindowManager,  0);
+                    handlers, mIWindowManager, 0, "TouchMonitorTest",
+                    LogBufferHelperKt.logcatLogBuffer("TouchMonitorTest"));
             clearInvocations(mLifecycleRegistry);
             mMonitor.init();
 

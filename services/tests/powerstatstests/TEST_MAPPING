@@ -14,8 +14,7 @@
       "name": "PowerStatsTestsRavenwood",
       "host": true,
       "options": [
-        {"include-filter": "com.android.server.power.stats"},
-        {"exclude-annotation": "android.platform.test.annotations.DisabledOnRavenwood"}
+        {"include-filter": "com.android.server.power.stats"}
       ]
     }
   ],

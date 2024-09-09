@@ -29,33 +29,24 @@ import org.objectweb.asm.tree.MethodNode
 
 
 /** Name of the class initializer method. */
-val CLASS_INITIALIZER_NAME = "<clinit>"
+const val CLASS_INITIALIZER_NAME = "<clinit>"
 
 /** Descriptor of the class initializer method. */
-val CLASS_INITIALIZER_DESC = "()V"
+const val CLASS_INITIALIZER_DESC = "()V"
 
 /** Name of constructors. */
-val CTOR_NAME = "<init>"
+const val CTOR_NAME = "<init>"
 
 /**
- * Find any of [anyAnnotations] from the list of visible / invisible annotations.
+ * Find any of [set] from the list of visible / invisible annotations.
  */
 fun findAnyAnnotation(
-        anyAnnotations: Set<String>,
-        visibleAnnotations: List<AnnotationNode>?,
-        invisibleAnnotations: List<AnnotationNode>?,
-    ): AnnotationNode? {
-    for (an in visibleAnnotations ?: emptyList()) {
-        if (anyAnnotations.contains(an.desc)) {
-            return an
-        }
-    }
-    for (an in invisibleAnnotations ?: emptyList()) {
-        if (anyAnnotations.contains(an.desc)) {
-            return an
-        }
-    }
-    return null
+    set: Set<String>,
+    visibleAnnotations: List<AnnotationNode>?,
+    invisibleAnnotations: List<AnnotationNode>?,
+): AnnotationNode? {
+    return visibleAnnotations?.find { it.desc in set }
+        ?: invisibleAnnotations?.find { it.desc in set }
 }
 
 fun ClassNode.findAnyAnnotation(set: Set<String>): AnnotationNode? {
@@ -68,6 +59,27 @@ fun MethodNode.findAnyAnnotation(set: Set<String>): AnnotationNode? {
 
 fun FieldNode.findAnyAnnotation(set: Set<String>): AnnotationNode? {
     return findAnyAnnotation(set, this.visibleAnnotations, this.invisibleAnnotations)
+}
+
+fun findAllAnnotations(
+    set: Set<String>,
+    visibleAnnotations: List<AnnotationNode>?,
+    invisibleAnnotations: List<AnnotationNode>?
+): List<AnnotationNode> {
+    return (visibleAnnotations ?: emptyList()).filter { it.desc in set } +
+            (invisibleAnnotations ?: emptyList()).filter { it.desc in set }
+}
+
+fun ClassNode.findAllAnnotations(set: Set<String>): List<AnnotationNode> {
+    return findAllAnnotations(set, this.visibleAnnotations, this.invisibleAnnotations)
+}
+
+fun MethodNode.findAllAnnotations(set: Set<String>): List<AnnotationNode> {
+    return findAllAnnotations(set, this.visibleAnnotations, this.invisibleAnnotations)
+}
+
+fun FieldNode.findAllAnnotations(set: Set<String>): List<AnnotationNode> {
+    return findAllAnnotations(set, this.visibleAnnotations, this.invisibleAnnotations)
 }
 
 fun <T> findAnnotationValueAsObject(

@@ -1,5 +1,6 @@
 package com.android.systemui.scene.ui.composable.transitions
 
+import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.TransitionBuilder
@@ -16,5 +17,11 @@ fun TransitionBuilder.lockscreenToBouncerTransition() {
     }
     fractionRange(start = FROM_LOCK_SCREEN_TO_BOUNCER_FADE_FRACTION) {
         fade(Bouncer.Elements.Content)
+    }
+}
+
+fun TransitionBuilder.bouncerToLockscreenPreview() {
+    fractionRange(easing = CubicBezierEasing(0.1f, 0.1f, 0f, 1f)) {
+        scaleDraw(Bouncer.Elements.Content, scaleY = 0.8f, scaleX = 0.8f)
     }
 }

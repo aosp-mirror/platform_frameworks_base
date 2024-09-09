@@ -93,4 +93,8 @@ public final class Os {
             throw new ErrnoException("pread", OsConstants.EIO, e);
         }
     }
+
+    public static void setenv(String name, String value, boolean overwrite) throws ErrnoException {
+        RavenwoodRuntimeNative.setenv(name, value, overwrite);
+    }
 }

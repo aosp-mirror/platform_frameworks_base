@@ -142,9 +142,9 @@ fun createFilterFromTextPolicyFile(
                                     throw ParseException(
                                             "Special class can't have a substitution")
                                 }
-                                // It's a native-substitution.
+                                // It's a redirection class.
                                 val toClass = fields[2].substring(1)
-                                imf.setNativeSubstitutionClass(className, toClass)
+                                imf.setRedirectionClass(className, toClass)
                             } else if (fields[2].startsWith("~")) {
                                 if (classType != SpecialClass.NotSpecial) {
                                     // We could support it, but not needed at least for now.
@@ -350,6 +350,7 @@ private fun parsePolicy(s: String): FilterPolicy {
         "r", "remove" -> FilterPolicy.Remove
         "kc", "keepclass" -> FilterPolicy.KeepClass
         "i", "ignore" -> FilterPolicy.Ignore
+        "rdr", "redirect" -> FilterPolicy.Redirect
         else -> {
             if (s.startsWith("@")) {
                 FilterPolicy.Substitute
