@@ -200,7 +200,7 @@ internal class MultiPointerDraggableNode(
     override fun onPointerEvent(
         pointerEvent: PointerEvent,
         pass: PointerEventPass,
-        bounds: IntSize
+        bounds: IntSize,
     ) {
         // The order is important here: the tracker is always called first.
         pointerTracker.onPointerEvent(pointerEvent, pass, bounds)
@@ -312,13 +312,13 @@ internal class MultiPointerDraggableNode(
                                             velocityTracker.calculateVelocity(maxVelocity)
                                         }
                                         .toFloat(),
-                                onFling = { controller.onStop(it, canChangeContent = true) }
+                                onFling = { controller.onStop(it, canChangeContent = true) },
                             )
                         },
                         onDragCancel = { controller ->
                             startFlingGesture(
                                 initialVelocity = 0f,
-                                onFling = { controller.onStop(it, canChangeContent = true) }
+                                onFling = { controller.onStop(it, canChangeContent = true) },
                             )
                         },
                         swipeDetector = swipeDetector,
@@ -369,10 +369,7 @@ internal class MultiPointerDraggableNode(
         // PreScroll phase
         val consumedByPreScroll =
             dispatcher
-                .dispatchPreScroll(
-                    available = availableOnPreScroll.toOffset(),
-                    source = source,
-                )
+                .dispatchPreScroll(available = availableOnPreScroll.toOffset(), source = source)
                 .toFloat()
 
         // Scroll phase
@@ -484,12 +481,12 @@ internal class MultiPointerDraggableNode(
                         Orientation.Horizontal ->
                             awaitHorizontalTouchSlopOrCancellation(
                                 consumablePointer.id,
-                                onSlopReached
+                                onSlopReached,
                             )
                         Orientation.Vertical ->
                             awaitVerticalTouchSlopOrCancellation(
                                 consumablePointer.id,
-                                onSlopReached
+                                onSlopReached,
                             )
                     }
 
@@ -553,7 +550,7 @@ internal class MultiPointerDraggableNode(
     }
 
     private suspend fun AwaitPointerEventScope.awaitConsumableEvent(
-        pass: () -> PointerEventPass,
+        pass: () -> PointerEventPass
     ): PointerEvent {
         fun canBeConsumed(changes: List<PointerInputChange>): Boolean {
             // At least one pointer down AND
@@ -661,7 +658,4 @@ internal fun interface PointersInfoOwner {
     fun pointersInfo(): PointersInfo
 }
 
-internal data class PointersInfo(
-    val startedPosition: Offset?,
-    val pointersDown: Int,
-)
+internal data class PointersInfo(val startedPosition: Offset?, val pointersDown: Int)
