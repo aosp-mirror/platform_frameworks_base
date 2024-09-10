@@ -445,7 +445,9 @@ public class SettingsToPropertiesMapper {
       proto.write(StorageRequestMessage.FlagOverrideMessage.PACKAGE_NAME, packageName);
       proto.write(StorageRequestMessage.FlagOverrideMessage.FLAG_NAME, flagName);
       proto.write(StorageRequestMessage.FlagOverrideMessage.FLAG_VALUE, flagValue);
-      proto.write(StorageRequestMessage.FlagOverrideMessage.IS_LOCAL, isLocal);
+      proto.write(StorageRequestMessage.FlagOverrideMessage.OVERRIDE_TYPE, isLocal
+                ? StorageRequestMessage.LOCAL_ON_REBOOT
+                : StorageRequestMessage.SERVER_ON_REBOOT);
       proto.end(msgToken);
       proto.end(msgsToken);
     }
