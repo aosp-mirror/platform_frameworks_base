@@ -234,8 +234,8 @@ internal class MultiPointerDraggableNode(
                     pointersDown == 0 -> {
                         startedPosition = null
 
-                        // This is the last pointer up
-                        velocityTracker.addPointerInputChange(changes.single())
+                        val lastPointerUp = changes.single { it.id == velocityPointerId }
+                        velocityTracker.addPointerInputChange(lastPointerUp)
                     }
 
                     // The first pointer down, startedPosition was not set.
@@ -271,7 +271,12 @@ internal class MultiPointerDraggableNode(
 
                         // If the previous pointer has been removed, we use the first available
                         // change to keep tracking the velocity.
-                        velocityPointerId = pointerChange.id
+                        velocityPointerId =
+                            if (pointerChange.pressed) {
+                                pointerChange.id
+                            } else {
+                                changes.first { it.pressed }.id
+                            }
 
                         velocityTracker.addPointerInputChange(pointerChange)
                     }
