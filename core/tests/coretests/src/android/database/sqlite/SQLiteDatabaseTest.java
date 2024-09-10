@@ -538,4 +538,58 @@ public class SQLiteDatabaseTest {
 
         assertEquals(1, db.mConnection.size());
     }
+
+    // Create and open the database, allowing or disallowing double-quoted strings.
+    private void createDatabase(boolean noDoubleQuotedStrs) throws Exception {
+        // The open-flags that do not change in this test.
+        int flags = SQLiteDatabase.CREATE_IF_NECESSARY | SQLiteDatabase.OPEN_READWRITE;
+
+        // The flag to be tested.
+        int flagUnderTest = SQLiteDatabase.NO_DOUBLE_QUOTED_STRS;
+
+        if (noDoubleQuotedStrs) {
+            flags |= flagUnderTest;
+        } else {
+            flags &= ~flagUnderTest;
+        }
+        mDatabase = SQLiteDatabase.openDatabase(mDatabaseFile.getPath(), null, flags, null);
+    }
+
+    /**
+     * This test verifies that the NO_DOUBLE_QUOTED_STRS flag works as expected when opening a
+     * database.  This does not test that the flag is initialized as expected from the system
+     * properties.
+     */
+    @Test
+    public void testNoDoubleQuotedStrings() throws Exception {
+        closeAndDeleteDatabase();
+        createDatabase(/* noDoubleQuotedStrs */ false);
+
+        mDatabase.beginTransaction();
+        try {
+            mDatabase.execSQL("CREATE TABLE t1 (t text);");
+            // Insert a value in double-quotes.  This is invalid but accepted.
+            mDatabase.execSQL("INSERT INTO t1 (t) VALUES (\"foo\")");
+        } finally {
+            mDatabase.endTransaction();
+        }
+
+        closeAndDeleteDatabase();
+        createDatabase(/* noDoubleQuotedStrs */ true);
+
+        mDatabase.beginTransaction();
+        try {
+            mDatabase.execSQL("CREATE TABLE t1 (t text);");
+            try {
+                // Insert a value in double-quotes.  This is invalid and must throw.
+                mDatabase.execSQL("INSERT INTO t1 (t) VALUES (\"foo\")");
+                fail("expected an exception");
+            } catch (SQLiteException e) {
+                assertTrue(e.toString().contains("no such column"));
+            }
+        } finally {
+            mDatabase.endTransaction();
+        }
+        closeAndDeleteDatabase();
+    }
 }
