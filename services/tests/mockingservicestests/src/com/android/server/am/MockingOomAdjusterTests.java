@@ -1182,6 +1182,25 @@ public class MockingOomAdjusterTests {
 
     @SuppressWarnings("GuardedBy")
     @Test
+    public void testUpdateOomAdj_DoOne_BoundFgService_Sleeping() {
+        ProcessRecord app = spy(makeDefaultProcessRecord(MOCKAPP_PID, MOCKAPP_UID,
+                MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, false));
+        ProcessRecord client = spy(makeDefaultProcessRecord(MOCKAPP2_PID, MOCKAPP2_UID,
+                MOCKAPP2_PROCESSNAME, MOCKAPP2_PACKAGENAME, false));
+        bindService(app, client, null, null, Context.BIND_FOREGROUND_SERVICE, mock(IBinder.class));
+        client.mState.setMaxAdj(PERSISTENT_PROC_ADJ);
+        mService.mWakefulness.set(PowerManagerInternal.WAKEFULNESS_ASLEEP);
+        updateOomAdj(client, app);
+        mService.mWakefulness.set(PowerManagerInternal.WAKEFULNESS_AWAKE);
+
+        assertProcStates(app, PROCESS_STATE_BOUND_FOREGROUND_SERVICE, VISIBLE_APP_ADJ,
+                SCHED_GROUP_RESTRICTED);
+        assertProcStates(client, PROCESS_STATE_PERSISTENT, PERSISTENT_PROC_ADJ,
+                SCHED_GROUP_DEFAULT);
+    }
+
+    @SuppressWarnings("GuardedBy")
+    @Test
     public void testUpdateOomAdj_DoOne_Service_BoundNotForeground() {
         ProcessRecord app = spy(makeDefaultProcessRecord(MOCKAPP_PID, MOCKAPP_UID,
                 MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, false));
@@ -2762,6 +2781,30 @@ public class MockingOomAdjusterTests {
                 SCHED_GROUP_BACKGROUND, "cch-started-services", true);
         assertProcStates(app2, PROCESS_STATE_SERVICE, SERVICE_ADJ, SCHED_GROUP_BACKGROUND,
                 "started-services", false);
+    }
+
+    @SuppressWarnings("GuardedBy")
+    @Test
+    public void testUpdateOomAdj_DoOne_AboveClient() {
+        ProcessRecord app = spy(makeDefaultProcessRecord(MOCKAPP_PID, MOCKAPP_UID,
+                MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, true));
+        ProcessRecord service = spy(makeDefaultProcessRecord(MOCKAPP2_PID, MOCKAPP2_UID,
+                MOCKAPP2_PROCESSNAME, MOCKAPP2_PACKAGENAME, true));
+        doReturn(PROCESS_STATE_TOP).when(mService.mAtmInternal).getTopProcessState();
+        doReturn(app).when(mService).getTopApp();
+        mService.mWakefulness.set(PowerManagerInternal.WAKEFULNESS_AWAKE);
+        updateOomAdj(app);
+
+        assertEquals(FOREGROUND_APP_ADJ, app.mState.getSetAdj());
+
+        // Simulate binding to a service in the same process using BIND_ABOVE_CLIENT and
+        // verify that its OOM adjustment level is unaffected.
+        bindService(service, app, null, null, Context.BIND_ABOVE_CLIENT, mock(IBinder.class));
+        app.mServices.updateHasAboveClientLocked();
+        assertTrue(app.mServices.hasAboveClient());
+
+        updateOomAdj(app);
+        assertEquals(VISIBLE_APP_ADJ, app.mState.getSetAdj());
     }
 
     @SuppressWarnings("GuardedBy")
