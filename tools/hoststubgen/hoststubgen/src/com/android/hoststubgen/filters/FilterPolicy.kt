@@ -33,9 +33,9 @@ enum class FilterPolicy {
     Substitute,
 
     /**
-     * Only usable with methods. Replace a native method with a "substitution" method,
+     * Only usable with methods. Redirect a method to a method in the substitution class.
      */
-    NativeSubstitute,
+    Redirect,
 
     /**
      * Only usable with methods. The item will be kept in the impl jar file, but when called,
@@ -102,8 +102,7 @@ enum class FilterPolicy {
     val isSupported: Boolean
         get() {
             return when (this) {
-                // TODO: handle native method with no substitution as being unsupported
-                Keep, KeepClass, Substitute, NativeSubstitute -> true
+                Keep, KeepClass, Substitute, Redirect -> true
                 else -> false
             }
         }
@@ -111,7 +110,7 @@ enum class FilterPolicy {
     val isMethodRewriteBody: Boolean
         get() {
             return when (this) {
-                NativeSubstitute, Throw, Ignore -> true
+                Redirect, Throw, Ignore -> true
                 else -> false
             }
         }

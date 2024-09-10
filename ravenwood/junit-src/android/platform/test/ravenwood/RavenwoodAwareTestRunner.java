@@ -15,21 +15,23 @@
  */
 package android.platform.test.ravenwood;
 
+import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_VERBOSE_LOGGING;
 import static com.android.ravenwood.common.RavenwoodCommonUtils.ensureIsPublicVoidMethod;
 import static com.android.ravenwood.common.RavenwoodCommonUtils.isOnRavenwood;
 
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.util.Log;
 
-import com.android.ravenwood.common.RavenwoodCommonUtils;
-import com.android.ravenwood.common.SneakyThrow;
-
 import org.junit.Assume;
+import org.junit.AssumptionViolatedException;
 import org.junit.internal.builders.AllDefaultPossibilitiesBuilder;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
+import org.junit.runner.Result;
 import org.junit.runner.Runner;
 import org.junit.runner.manipulation.Filter;
 import org.junit.runner.manipulation.Filterable;
@@ -40,8 +42,11 @@ import org.junit.runner.manipulation.Orderer;
 import org.junit.runner.manipulation.Sortable;
 import org.junit.runner.manipulation.Sorter;
 import org.junit.runner.notification.Failure;
+import org.junit.runner.notification.RunListener;
 import org.junit.runner.notification.RunNotifier;
+import org.junit.runner.notification.StoppedByUserException;
 import org.junit.runners.BlockJUnit4ClassRunner;
+import org.junit.runners.model.MultipleFailureException;
 import org.junit.runners.model.RunnerBuilder;
 import org.junit.runners.model.Statement;
 import org.junit.runners.model.TestClass;
@@ -52,6 +57,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Stack;
+import java.util.function.BiConsumer;
 
 /**
  * A test runner used for Ravenwood.
@@ -62,7 +70,7 @@ import java.lang.reflect.InvocationTargetException;
  *   the inner runner gets a chance to run. This can be used to initialize stuff used by the
  *   inner runner.
  * - Add hook points, which are handed by RavenwoodAwareTestRunnerHook, with help from
- *   the four test rules such as {@link #sImplicitClassMinRule}, which are also injected by
+ *   the four test rules such as {@link #sImplicitClassOuterRule}, which are also injected by
  *   the ravenizer tool.
  *
  * We use this runner to:
@@ -74,8 +82,8 @@ import java.lang.reflect.InvocationTargetException;
  * it will basically just delegate to the inner wrapper, and won't do anything special.
  * (no hooks, etc.)
  */
-public class RavenwoodAwareTestRunner extends Runner implements Filterable, Orderable {
-    private static final String TAG = "RavenwoodAwareTestRunner";
+public final class RavenwoodAwareTestRunner extends Runner implements Filterable, Orderable {
+    public static final String TAG = "Ravenwood";
 
     @Inherited
     @Target({TYPE})
@@ -96,40 +104,61 @@ public class RavenwoodAwareTestRunner extends Runner implements Filterable, Orde
 
     /** Scope of a hook. */
     public enum Scope {
-        Runner,
         Class,
         Instance,
     }
 
     /** Order of a hook. */
     public enum Order {
-        First,
-        Last,
+        Outer,
+        Inner,
     }
 
     // The following four rule instances will be injected to tests by the Ravenizer tool.
+    private static class RavenwoodClassOuterRule implements TestRule {
+        @Override
+        public Statement apply(Statement base, Description description) {
+            return getCurrentRunner().wrapWithHooks(base, description, Scope.Class, Order.Outer);
+        }
+    }
 
-    public static final TestRule sImplicitClassMinRule = (base, description) ->
-            getCurrentRunner().updateStatement(base, description, Scope.Class, Order.First);
+    private static class RavenwoodClassInnerRule implements TestRule {
+        @Override
+        public Statement apply(Statement base, Description description) {
+            return getCurrentRunner().wrapWithHooks(base, description, Scope.Class, Order.Inner);
+        }
+    }
 
-    public static final TestRule sImplicitClassMaxRule = (base, description) ->
-            getCurrentRunner().updateStatement(base, description, Scope.Class, Order.Last);
+    private static class RavenwoodInstanceOuterRule implements TestRule {
+        @Override
+        public Statement apply(Statement base, Description description) {
+            return getCurrentRunner().wrapWithHooks(
+                    base, description, Scope.Instance, Order.Outer);
+        }
+    }
 
-    public static final TestRule sImplicitInstMinRule = (base, description) ->
-            getCurrentRunner().updateStatement(base, description, Scope.Instance, Order.First);
+    private static class RavenwoodInstanceInnerRule implements TestRule {
+        @Override
+        public Statement apply(Statement base, Description description) {
+            return getCurrentRunner().wrapWithHooks(
+                    base, description, Scope.Instance, Order.Inner);
+        }
+    }
 
-    public static final TestRule sImplicitInstMaxRule = (base, description) ->
-            getCurrentRunner().updateStatement(base, description, Scope.Instance, Order.Last);
+    public static final TestRule sImplicitClassOuterRule = new RavenwoodClassOuterRule();
+    public static final TestRule sImplicitClassInnerRule = new RavenwoodClassInnerRule();
+    public static final TestRule sImplicitInstOuterRule = new RavenwoodInstanceOuterRule();
+    public static final TestRule sImplicitInstInnerRule = new RavenwoodInstanceOuterRule();
 
-    public static final String IMPLICIT_CLASS_MIN_RULE_NAME = "sImplicitClassMinRule";
-    public static final String IMPLICIT_CLASS_MAX_RULE_NAME = "sImplicitClassMaxRule";
-    public static final String IMPLICIT_INST_MIN_RULE_NAME = "sImplicitInstMinRule";
-    public static final String IMPLICIT_INST_MAX_RULE_NAME = "sImplicitInstMaxRule";
+    public static final String IMPLICIT_CLASS_OUTER_RULE_NAME = "sImplicitClassOuterRule";
+    public static final String IMPLICIT_CLASS_INNER_RULE_NAME = "sImplicitClassInnerRule";
+    public static final String IMPLICIT_INST_OUTER_RULE_NAME = "sImplicitInstOuterRule";
+    public static final String IMPLICIT_INST_INNER_RULE_NAME = "sImplicitInstInnerRule";
 
     /** Keeps track of the runner on the current thread. */
     private static final ThreadLocal<RavenwoodAwareTestRunner> sCurrentRunner = new ThreadLocal<>();
 
-    private static RavenwoodAwareTestRunner getCurrentRunner() {
+    static RavenwoodAwareTestRunner getCurrentRunner() {
         var runner = sCurrentRunner.get();
         if (runner == null) {
             throw new RuntimeException("Current test runner not set!");
@@ -142,16 +171,9 @@ public class RavenwoodAwareTestRunner extends Runner implements Filterable, Orde
     private Description mDescription = null;
     private Throwable mExceptionInConstructor = null;
 
-    /** Simple logging method. */
-    private void log(String message) {
-        RavenwoodCommonUtils.log(TAG, "[" + getTestClass().getJavaClass() + "  @" + this + "] "
-                + message);
-    }
-
-    private Error logAndFail(String message, Throwable innerException) {
-        log(message);
-        log("    Exception=" + innerException);
-        throw new AssertionError(message, innerException);
+    private Error logAndFail(String message, Throwable exception) {
+        Log.e(TAG, message, exception);
+        throw new AssertionError(message, exception);
     }
 
     public TestClass getTestClass() {
@@ -164,6 +186,10 @@ public class RavenwoodAwareTestRunner extends Runner implements Filterable, Orde
     public RavenwoodAwareTestRunner(Class<?> testClass) {
         try {
             mTestClass = new TestClass(testClass);
+
+            Log.v(TAG, "RavenwoodAwareTestRunner starting for " + testClass.getCanonicalName());
+
+            onRunnerInitializing();
 
             /*
              * If the class has @DisabledOnRavenwood, then we'll delegate to
@@ -186,10 +212,8 @@ public class RavenwoodAwareTestRunner extends Runner implements Filterable, Orde
                 realRunnerClass = BlockJUnit4ClassRunner.class;
             }
 
-            onRunnerInitializing();
-
             try {
-                log("Initializing the inner runner: " + realRunnerClass);
+                Log.i(TAG, "Initializing the inner runner: " + realRunnerClass);
 
                 mRealRunner = instantiateRealRunner(realRunnerClass, testClass);
                 mDescription = mRealRunner.getDescription();
@@ -201,8 +225,7 @@ public class RavenwoodAwareTestRunner extends Runner implements Filterable, Orde
         } catch (Throwable th) {
             // If we throw in the constructor, Tradefed may not report it and just ignore the class,
             // so record it and throw it when the test actually started.
-            log("Fatal: Exception detected in constructor: " + th.getMessage() + "\n"
-                    + Log.getStackTraceString(th));
+            Log.e(TAG, "Fatal: Exception detected in constructor", th);
             mExceptionInConstructor = new RuntimeException("Exception detected in constructor",
                     th);
             mDescription = Description.createTestDescription(testClass, "Constructor");
@@ -236,8 +259,7 @@ public class RavenwoodAwareTestRunner extends Runner implements Filterable, Orde
         if (!isOnRavenwood()) {
             return;
         }
-
-        log("onRunnerInitializing");
+        // DO NOT USE android.util.Log before calling onRunnerInitializing().
 
         RavenwoodAwareTestRunnerHook.onRunnerInitializing(this, mTestClass);
 
@@ -250,7 +272,7 @@ public class RavenwoodAwareTestRunner extends Runner implements Filterable, Orde
         if (!isOnRavenwood()) {
             return;
         }
-        log("runAnnotatedMethodsOnRavenwood() " + annotationClass.getName());
+        Log.v(TAG, "runAnnotatedMethodsOnRavenwood() " + annotationClass.getName());
 
         for (var method : getTestClass().getAnnotatedMethods(annotationClass)) {
             ensureIsPublicVoidMethod(method.getMethod(), /* isStatic=*/ instance == null);
@@ -271,11 +293,18 @@ public class RavenwoodAwareTestRunner extends Runner implements Filterable, Orde
     }
 
     @Override
-    public void run(RunNotifier notifier) {
+    public void run(RunNotifier realNotifier) {
+        final RavenwoodRunNotifier notifier = new RavenwoodRunNotifier(realNotifier);
+
         if (mRealRunner instanceof ClassSkippingTestRunner) {
             mRealRunner.run(notifier);
             RavenwoodAwareTestRunnerHook.onClassSkipped(getDescription());
             return;
+        }
+
+        Log.v(TAG, "Starting " + mTestClass.getJavaClass().getCanonicalName());
+        if (RAVENWOOD_VERBOSE_LOGGING) {
+            dumpDescription(getDescription());
         }
 
         if (maybeReportExceptionFromConstructor(notifier)) {
@@ -284,10 +313,26 @@ public class RavenwoodAwareTestRunner extends Runner implements Filterable, Orde
 
         sCurrentRunner.set(this);
         try {
-            runWithHooks(getDescription(), Scope.Runner, Order.First,
-                    () -> mRealRunner.run(notifier));
+            try {
+                RavenwoodAwareTestRunnerHook.onBeforeInnerRunnerStart(
+                        this, getDescription());
+            } catch (Throwable th) {
+                notifier.reportBeforeTestFailure(getDescription(), th);
+                return;
+            }
+
+            // Delegate to the inner runner.
+            mRealRunner.run(notifier);
         } finally {
             sCurrentRunner.remove();
+
+            try {
+                RavenwoodAwareTestRunnerHook.onAfterInnerRunnerFinished(
+                        this, getDescription());
+            } catch (Throwable th) {
+                notifier.reportAfterTestFailure(th);
+                return;
+            }
         }
     }
 
@@ -324,7 +369,7 @@ public class RavenwoodAwareTestRunner extends Runner implements Filterable, Orde
         }
     }
 
-    private Statement updateStatement(Statement base, Description description, Scope scope,
+    private Statement wrapWithHooks(Statement base, Description description, Scope scope,
             Order order) {
         if (!isOnRavenwood()) {
             return base;
@@ -337,7 +382,8 @@ public class RavenwoodAwareTestRunner extends Runner implements Filterable, Orde
         };
     }
 
-    private void runWithHooks(Description description, Scope scope, Order order, Runnable r) {
+    private void runWithHooks(Description description, Scope scope, Order order, Runnable r)
+            throws Throwable {
         runWithHooks(description, scope, order, new Statement() {
             @Override
             public void evaluate() throws Throwable {
@@ -346,7 +392,8 @@ public class RavenwoodAwareTestRunner extends Runner implements Filterable, Orde
         });
     }
 
-    private void runWithHooks(Description description, Scope scope, Order order, Statement s) {
+    private void runWithHooks(Description description, Scope scope, Order order, Statement s)
+            throws Throwable {
         if (isOnRavenwood()) {
             Assume.assumeTrue(
                     RavenwoodAwareTestRunnerHook.onBefore(this, description, scope, order));
@@ -363,7 +410,7 @@ public class RavenwoodAwareTestRunner extends Runner implements Filterable, Orde
                         this, description, scope, order, t);
             }
             if (shouldThrow) {
-                SneakyThrow.sneakyThrow(t);
+                throw t;
             }
         }
     }
@@ -408,5 +455,255 @@ public class RavenwoodAwareTestRunner extends Runner implements Filterable, Orde
                 throw new NoTestsRemainException();
             }
         }
+    }
+
+    private void dumpDescription(Description desc) {
+        dumpDescription(desc, "[TestDescription]=", "  ");
+    }
+
+    private void dumpDescription(Description desc, String header, String indent) {
+        Log.v(TAG, indent + header + desc);
+
+        var children = desc.getChildren();
+        var childrenIndent = "  " + indent;
+        for (int i = 0; i < children.size(); i++) {
+            dumpDescription(children.get(i), "#" + i + ": ", childrenIndent);
+        }
+    }
+
+    /**
+     * A run notifier that wraps another notifier and provides the following features:
+     * - Handle a failure that happened before testStarted and testEnded (typically that means
+     *   it's from @BeforeClass or @AfterClass, or a @ClassRule) and deliver it as if
+     *   individual tests in the class reported it. This is for b/364395552.
+     *
+     * - Logging.
+     */
+    private class RavenwoodRunNotifier extends RunNotifier {
+        private final RunNotifier mRealNotifier;
+
+        private final Stack<Description> mSuiteStack = new Stack<>();
+        private Description mCurrentSuite = null;
+        private final ArrayList<Throwable> mOutOfTestFailures = new ArrayList<>();
+
+        private boolean mBeforeTest = true;
+        private boolean mAfterTest = false;
+
+        private RavenwoodRunNotifier(RunNotifier realNotifier) {
+            mRealNotifier = realNotifier;
+        }
+
+        private boolean isInTest() {
+            return !mBeforeTest && !mAfterTest;
+        }
+
+        @Override
+        public void addListener(RunListener listener) {
+            mRealNotifier.addListener(listener);
+        }
+
+        @Override
+        public void removeListener(RunListener listener) {
+            mRealNotifier.removeListener(listener);
+        }
+
+        @Override
+        public void addFirstListener(RunListener listener) {
+            mRealNotifier.addFirstListener(listener);
+        }
+
+        @Override
+        public void fireTestRunStarted(Description description) {
+            Log.i(TAG, "testRunStarted: " + description);
+            mRealNotifier.fireTestRunStarted(description);
+        }
+
+        @Override
+        public void fireTestRunFinished(Result result) {
+            Log.i(TAG, "testRunFinished: "
+                    + result.getRunCount() + ","
+                    + result.getFailureCount() + ","
+                    + result.getAssumptionFailureCount() + ","
+                    + result.getIgnoreCount());
+            mRealNotifier.fireTestRunFinished(result);
+        }
+
+        @Override
+        public void fireTestSuiteStarted(Description description) {
+            Log.i(TAG, "testSuiteStarted: " + description);
+            mRealNotifier.fireTestSuiteStarted(description);
+
+            mBeforeTest = true;
+            mAfterTest = false;
+
+            // Keep track of the current suite, needed if the outer test is a Suite,
+            // in which case its children are test classes. (not test methods)
+            mCurrentSuite = description;
+            mSuiteStack.push(description);
+
+            mOutOfTestFailures.clear();
+        }
+
+        @Override
+        public void fireTestSuiteFinished(Description description) {
+            Log.i(TAG, "testSuiteFinished: " + description);
+            mRealNotifier.fireTestSuiteFinished(description);
+
+            maybeHandleOutOfTestFailures();
+
+            mBeforeTest = true;
+            mAfterTest = false;
+
+            // Restore the upper suite.
+            mSuiteStack.pop();
+            mCurrentSuite = mSuiteStack.size() == 0 ? null : mSuiteStack.peek();
+        }
+
+        @Override
+        public void fireTestStarted(Description description) throws StoppedByUserException {
+            Log.i(TAG, "testStarted: " + description);
+            mRealNotifier.fireTestStarted(description);
+
+            mAfterTest = false;
+            mBeforeTest = false;
+        }
+
+        @Override
+        public void fireTestFailure(Failure failure) {
+            Log.i(TAG, "testFailure: " + failure);
+
+            if (isInTest()) {
+                mRealNotifier.fireTestFailure(failure);
+            } else {
+                mOutOfTestFailures.add(failure.getException());
+            }
+        }
+
+        @Override
+        public void fireTestAssumptionFailed(Failure failure) {
+            Log.i(TAG, "testAssumptionFailed: " + failure);
+
+            if (isInTest()) {
+                mRealNotifier.fireTestAssumptionFailed(failure);
+            } else {
+                mOutOfTestFailures.add(failure.getException());
+            }
+        }
+
+        @Override
+        public void fireTestIgnored(Description description) {
+            Log.i(TAG, "testIgnored: " + description);
+            mRealNotifier.fireTestIgnored(description);
+        }
+
+        @Override
+        public void fireTestFinished(Description description) {
+            Log.i(TAG, "testFinished: " + description);
+            mRealNotifier.fireTestFinished(description);
+
+            mAfterTest = true;
+        }
+
+        @Override
+        public void pleaseStop() {
+            Log.w(TAG, "pleaseStop:");
+            mRealNotifier.pleaseStop();
+        }
+
+        /**
+         * At the end of each Suite, we handle failures happened out of test methods.
+         * (typically in @BeforeClass or @AfterClasses)
+         *
+         * This is to work around b/364395552.
+         */
+        private boolean maybeHandleOutOfTestFailures() {
+            if (mOutOfTestFailures.size() == 0) {
+                return false;
+            }
+            Throwable th;
+            if (mOutOfTestFailures.size() == 1) {
+                th = mOutOfTestFailures.get(0);
+            } else {
+                th = new MultipleFailureException(mOutOfTestFailures);
+            }
+            if (mBeforeTest) {
+                reportBeforeTestFailure(mCurrentSuite, th);
+                return true;
+            }
+            if (mAfterTest) {
+                reportAfterTestFailure(th);
+                return true;
+            }
+            return false;
+        }
+
+        public void reportBeforeTestFailure(Description suiteDesc, Throwable th) {
+            // If a failure happens befere running any tests, we'll need to pretend
+            // as if each test in the suite reported the failure, to work around b/364395552.
+            for (var child : suiteDesc.getChildren()) {
+                if (child.isSuite()) {
+                    // If the chiil is still a "parent" -- a test class or a test suite
+                    // -- propagate to its children.
+                    mRealNotifier.fireTestSuiteStarted(child);
+                    reportBeforeTestFailure(child, th);
+                    mRealNotifier.fireTestSuiteFinished(child);
+                } else {
+                    mRealNotifier.fireTestStarted(child);
+                    Failure f = new Failure(child, th);
+                    if (th instanceof AssumptionViolatedException) {
+                        mRealNotifier.fireTestAssumptionFailed(f);
+                    } else {
+                        mRealNotifier.fireTestFailure(f);
+                    }
+                    mRealNotifier.fireTestFinished(child);
+                }
+            }
+        }
+
+        public void reportAfterTestFailure(Throwable th) {
+            // Unfortunately, there's no good way to report it, so kill the own process.
+            onCriticalError(
+                    "Failures detected in @AfterClass, which would be swallowed by tradefed",
+                    th);
+        }
+    }
+
+    private static volatile BiConsumer<String, Throwable> sCriticalErrorHanler;
+
+    private void onCriticalError(@NonNull String message, @Nullable Throwable th) {
+        Log.e(TAG, "Critical error! " + message, th);
+        var handler = sCriticalErrorHanler;
+        if (handler == null) {
+            handler = sDefaultCriticalErrorHandler;
+        }
+        handler.accept(message, th);
+    }
+
+    private static BiConsumer<String, Throwable> sDefaultCriticalErrorHandler = (message, th) -> {
+        Log.e(TAG, "Ravenwood cannot continue. Killing self process.", th);
+        System.exit(1);
+    };
+
+    /**
+     * Contains Ravenwood private APIs.
+     */
+    public static class RavenwoodPrivate {
+        private RavenwoodPrivate() {
+        }
+
+        /**
+         * Set a listener for onCriticalError(), for testing. If a listener is set, we won't call
+         * System.exit().
+         */
+        public void setCriticalErrorHandler(
+                @Nullable BiConsumer<String, Throwable> handler) {
+            sCriticalErrorHanler = handler;
+        }
+    }
+
+    private static final RavenwoodPrivate sRavenwoodPrivate = new RavenwoodPrivate();
+
+    public static RavenwoodPrivate private$ravenwood() {
+        return sRavenwoodPrivate;
     }
 }

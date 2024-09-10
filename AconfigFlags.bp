@@ -20,6 +20,7 @@ aconfig_declarations_group {
     java_aconfig_libraries: [
         // !!! KEEP THIS LIST ALPHABETICAL !!!
         "aconfig_mediacodec_flags_java_lib",
+        "android-sdk-flags-java",
         "android.adaptiveauth.flags-aconfig-java",
         "android.app.appfunctions.flags-aconfig-java",
         "android.app.contextualsearch.flags-aconfig-java",

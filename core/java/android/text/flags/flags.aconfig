@@ -2,14 +2,6 @@ package: "com.android.text.flags"
 container: "system"
 
 flag {
-  name: "vendor_custom_locale_fallback"
-  namespace: "text"
-  description: "A feature flag that adds custom locale fallback to the vendor customization XML. This enables vendors to add their locale specific fonts, e.g. Japanese font."
-  is_fixed_read_only: true
-  bug: "278768958"
-}
-
-flag {
   name: "new_fonts_fallback_xml"
   is_exported: true
   namespace: "text"
@@ -17,13 +9,6 @@ flag {
   # Make read only, as it could be used before the Settings provider is initialized.
   is_fixed_read_only: true
   bug: "281769620"
-}
-
-flag {
-  name: "fix_double_underline"
-  namespace: "text"
-  description: "Feature flag for fixing double underline because of the multiple font used in the single line."
-  bug: "297336724"
 }
 
 flag {
@@ -66,25 +51,11 @@ flag {
 }
 
 flag {
-  name: "phrase_strict_fallback"
-  namespace: "text"
-  description: "Feature flag for automatic fallback from phrase based line break to strict line break."
-  bug: "281970875"
-}
-
-flag {
   name: "use_bounds_for_width"
   is_exported: true
   namespace: "text"
   description: "Feature flag for preventing horizontal clipping."
   bug: "63938206"
-}
-
-flag {
-  name: "deprecate_ui_fonts"
-  namespace: "text"
-  description: "Feature flag for deprecating UI fonts. By setting true for this feature flag, the elegant text height of will be turned on by default unless explicitly setting it to false by attribute or Java API call."
-  bug: "279646685"
 }
 
 flag {
@@ -139,13 +110,6 @@ flag {
   metadata {
     purpose: PURPOSE_BUGFIX
   }
-}
-
-flag {
-  name: "icu_bidi_migration"
-  namespace: "text"
-  description: "A flag for replacing AndroidBidi with android.icu.text.Bidi."
-  bug: "317144801"
 }
 
 flag {

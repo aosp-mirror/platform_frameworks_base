@@ -20,6 +20,7 @@ import static android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_FEATURES_NO
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
 import static android.hardware.biometrics.BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE;
+import static android.hardware.biometrics.BiometricManager.BIOMETRIC_ERROR_NOT_ENABLED_FOR_APPS;
 
 import static com.android.server.biometrics.sensors.LockoutTracker.LOCKOUT_NONE;
 
@@ -262,6 +263,29 @@ public class PreAuthInfoTest {
         assertThat(preAuthInfo.getCanAuthenticateResult()).isEqualTo(
                 BiometricManager.BIOMETRIC_ERROR_MANDATORY_NOT_ACTIVE);
         assertThat(preAuthInfo.eligibleSensors).hasSize(0);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_MANDATORY_BIOMETRICS)
+    public void testCalculateByPriority()
+            throws Exception {
+        when(mFaceAuthenticator.hasEnrolledTemplates(anyInt(), any())).thenReturn(false);
+        when(mSettingObserver.getEnabledForApps(anyInt())).thenReturn(false);
+
+        BiometricSensor faceSensor = getFaceSensor();
+        BiometricSensor fingerprintSensor = getFingerprintSensor();
+        PromptInfo promptInfo = new PromptInfo();
+        promptInfo.setConfirmationRequested(false /* requireConfirmation */);
+        promptInfo.setAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG);
+        promptInfo.setDisallowBiometricsIfPolicyExists(false /* checkDevicePolicy */);
+        PreAuthInfo preAuthInfo = PreAuthInfo.create(mTrustManager, mDevicePolicyManager,
+                mSettingObserver, List.of(faceSensor, fingerprintSensor),
+                0 /* userId */, promptInfo, TEST_PACKAGE_NAME,
+                false /* checkDevicePolicyManager */, mContext, mBiometricCameraManager);
+
+        assertThat(preAuthInfo.eligibleSensors).hasSize(0);
+        assertThat(preAuthInfo.getCanAuthenticateResult()).isEqualTo(
+                BIOMETRIC_ERROR_NOT_ENABLED_FOR_APPS);
     }
 
     @Test

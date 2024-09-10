@@ -889,8 +889,14 @@ public class LockSettingsService extends ILockSettings.Stub {
                 // Hide notification first, as tie profile lock takes time
                 hideEncryptionNotification(new UserHandle(userId));
 
-                if (isCredentialSharableWithParent(userId)) {
-                    tieProfileLockIfNecessary(userId, LockscreenCredential.createNone());
+                if (android.app.admin.flags.Flags.fixRaceConditionInTieProfileLock()) {
+                    synchronized (mSpManager) {
+                        tieProfileLockIfNecessary(userId, LockscreenCredential.createNone());
+                    }
+                } else {
+                    if (isCredentialSharableWithParent(userId)) {
+                        tieProfileLockIfNecessary(userId, LockscreenCredential.createNone());
+                    }
                 }
             }
         });
@@ -1287,7 +1293,13 @@ public class LockSettingsService extends ILockSettings.Stub {
                 mStorage.removeChildProfileLock(userId);
                 removeKeystoreProfileKey(userId);
             } else {
-                tieProfileLockIfNecessary(userId, profileUserPassword);
+                if (android.app.admin.flags.Flags.fixRaceConditionInTieProfileLock()) {
+                    synchronized (mSpManager) {
+                        tieProfileLockIfNecessary(userId, profileUserPassword);
+                    }
+                } else {
+                    tieProfileLockIfNecessary(userId, profileUserPassword);
+                }
             }
         } catch (IllegalStateException e) {
             setBoolean(SEPARATE_PROFILE_CHALLENGE_KEY, old, userId);
@@ -3403,8 +3415,13 @@ public class LockSettingsService extends ILockSettings.Stub {
             // It's OK to dump the credential type since anyone with physical access can just
             // observe it from the keyguard directly.
             pw.println("Quality: " + getKeyguardStoredQuality(userId));
-            pw.println("CredentialType: " + LockPatternUtils.credentialTypeToString(
-                    getCredentialTypeInternal(userId)));
+            final int credentialType = getCredentialTypeInternal(userId);
+            pw.println("CredentialType: "
+                    + LockPatternUtils.credentialTypeToString(credentialType));
+            if (credentialType == CREDENTIAL_TYPE_NONE) {
+                pw.println("IsLockScreenDisabled: "
+                        + getBoolean(LockPatternUtils.DISABLE_LOCKSCREEN_KEY, false, userId));
+            }
             pw.println("SeparateChallenge: " + getSeparateProfileChallengeEnabledInternal(userId));
             pw.println(TextUtils.formatSimple("Metrics: %s",
                     getUserPasswordMetrics(userId) != null ? "known" : "unknown"));

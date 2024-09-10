@@ -24,7 +24,6 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.view.SurfaceControl;
-import android.view.SurfaceSession;
 
 import com.android.dx.mockito.inline.extended.ExtendedMockito;
 import com.android.wm.shell.ShellTaskOrganizer;
@@ -74,10 +73,10 @@ public class SplitTestUtils {
         final SurfaceControl mRootLeash;
 
         TestStageCoordinator(Context context, int displayId, SyncTransactionQueue syncQueue,
-                ShellTaskOrganizer taskOrganizer, MainStage mainStage, StageTaskListener sideStage,
-                DisplayController displayController, DisplayImeController imeController,
-                DisplayInsetsController insetsController, SplitLayout splitLayout,
-                Transitions transitions, TransactionPool transactionPool,
+                ShellTaskOrganizer taskOrganizer, StageTaskListener mainStage,
+                StageTaskListener sideStage, DisplayController displayController,
+                DisplayImeController imeController, DisplayInsetsController insetsController,
+                SplitLayout splitLayout, Transitions transitions, TransactionPool transactionPool,
                 ShellExecutor mainExecutor, Handler mainHandler,
                 Optional<RecentTasksController> recentTasks,
                 LaunchAdjacentController launchAdjacentController,
@@ -89,7 +88,7 @@ public class SplitTestUtils {
 
             // Prepare root task for testing.
             mRootTask = new TestRunningTaskInfoBuilder().build();
-            mRootLeash = new SurfaceControl.Builder(new SurfaceSession()).setName("test").build();
+            mRootLeash = new SurfaceControl.Builder().setName("test").build();
             onTaskAppeared(mRootTask, mRootLeash);
         }
     }

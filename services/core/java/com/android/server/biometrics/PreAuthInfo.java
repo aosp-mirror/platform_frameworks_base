@@ -316,6 +316,7 @@ class PreAuthInfo {
         Pair<BiometricSensor, Integer> sensorNotEnrolled = null;
         Pair<BiometricSensor, Integer> sensorLockout = null;
         Pair<BiometricSensor, Integer> hardwareNotDetected = null;
+        Pair<BiometricSensor, Integer> biometricAppNotAllowed = null;
         for (Pair<BiometricSensor, Integer> pair : ineligibleSensors) {
             final int status = pair.second;
             if (status == BIOMETRIC_LOCKOUT_TIMED || status == BIOMETRIC_LOCKOUT_PERMANENT) {
@@ -327,6 +328,9 @@ class PreAuthInfo {
             if (status == BIOMETRIC_HARDWARE_NOT_DETECTED) {
                 hardwareNotDetected = pair;
             }
+            if (status == BIOMETRIC_NOT_ENABLED_FOR_APPS) {
+                biometricAppNotAllowed = pair;
+            }
         }
 
         // If there is a sensor locked out, prioritize lockout over other sensor's error.
@@ -337,6 +341,10 @@ class PreAuthInfo {
 
         if (hardwareNotDetected != null) {
             return hardwareNotDetected;
+        }
+
+        if (Flags.mandatoryBiometrics() && biometricAppNotAllowed != null) {
+            return biometricAppNotAllowed;
         }
 
         // If the caller requested STRONG, and the device contains both STRONG and non-STRONG

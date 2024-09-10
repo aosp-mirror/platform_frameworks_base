@@ -102,6 +102,15 @@ constructor(@NotificationInterruptLog val buffer: LogBuffer) {
             { "AvalancheSuppressor: $str1" }
         )
     }
+
+    fun logCooldownSetting(isEnabled: Boolean) {
+        buffer.log(
+            TAG,
+            INFO,
+            { bool1 = isEnabled },
+            { "Cooldown enabled: $bool1" }
+        )
+    }
 }
 
 private const val TAG = "VisualInterruptionDecisionProvider"

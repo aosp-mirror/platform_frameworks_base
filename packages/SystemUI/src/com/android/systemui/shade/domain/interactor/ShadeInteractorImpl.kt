@@ -24,9 +24,6 @@ import com.android.systemui.keyguard.shared.model.DozeStateModel
 import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.power.domain.interactor.PowerInteractor
-import com.android.systemui.shade.data.repository.ShadeRepository
-import com.android.systemui.shade.shared.flag.DualShade
-import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.statusbar.disableflags.data.repository.DisableFlagsRepository
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.policy.data.repository.UserSetupRepository
@@ -54,11 +51,14 @@ constructor(
     keyguardRepository: KeyguardRepository,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
     powerInteractor: PowerInteractor,
-    private val shadeRepository: ShadeRepository,
     userSetupRepository: UserSetupRepository,
     userSwitcherInteractor: UserSwitcherInteractor,
     private val baseShadeInteractor: BaseShadeInteractor,
-) : ShadeInteractor, BaseShadeInteractor by baseShadeInteractor {
+    shadeModeInteractor: ShadeModeInteractor,
+) :
+    ShadeInteractor,
+    BaseShadeInteractor by baseShadeInteractor,
+    ShadeModeInteractor by shadeModeInteractor {
     override val isShadeEnabled: StateFlow<Boolean> =
         disableFlagsRepository.disableFlags
             .map { it.isShadeEnabled() }
@@ -102,17 +102,6 @@ constructor(
             }
         }
 
-    override val isShadeLayoutWide: StateFlow<Boolean> = shadeRepository.isShadeLayoutWide
-
-    override val shadeMode: StateFlow<ShadeMode> =
-        isShadeLayoutWide
-            .map(this::determineShadeMode)
-            .stateIn(
-                scope,
-                SharingStarted.Eagerly,
-                initialValue = determineShadeMode(isShadeLayoutWide.value)
-            )
-
     override val isExpandToQsEnabled: Flow<Boolean> =
         combine(
             disableFlagsRepository.disableFlags,
@@ -129,12 +118,4 @@ constructor(
                 disableFlags.isQuickSettingsEnabled() &&
                 !isDozing
         }
-
-    private fun determineShadeMode(isShadeLayoutWide: Boolean): ShadeMode {
-        return when {
-            DualShade.isEnabled -> ShadeMode.Dual
-            isShadeLayoutWide -> ShadeMode.Split
-            else -> ShadeMode.Single
-        }
-    }
 }

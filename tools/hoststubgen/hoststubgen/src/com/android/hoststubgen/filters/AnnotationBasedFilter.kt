@@ -18,12 +18,15 @@ package com.android.hoststubgen.filters
 import com.android.hoststubgen.ClassParseException
 import com.android.hoststubgen.HostStubGenErrors
 import com.android.hoststubgen.InvalidAnnotationException
-import com.android.hoststubgen.addNonNullElement
+import com.android.hoststubgen.addLists
 import com.android.hoststubgen.asm.CLASS_INITIALIZER_DESC
 import com.android.hoststubgen.asm.CLASS_INITIALIZER_NAME
 import com.android.hoststubgen.asm.ClassNodes
+import com.android.hoststubgen.asm.findAllAnnotations
 import com.android.hoststubgen.asm.findAnnotationValueAsString
 import com.android.hoststubgen.asm.findAnyAnnotation
+import com.android.hoststubgen.asm.getPackageNameFromFullClassName
+import com.android.hoststubgen.asm.resolveClassNameWithDefaultPackage
 import com.android.hoststubgen.asm.toHumanReadableClassName
 import com.android.hoststubgen.asm.toHumanReadableMethodName
 import com.android.hoststubgen.asm.toJvmClassName
@@ -46,7 +49,8 @@ class AnnotationBasedFilter(
     throwAnnotations_: Set<String>,
     removeAnnotations_: Set<String>,
     substituteAnnotations_: Set<String>,
-    nativeSubstituteAnnotations_: Set<String>,
+    redirectAnnotations_: Set<String>,
+    redirectionClassAnnotations_: Set<String>,
     classLoadHookAnnotations_: Set<String>,
     keepStaticInitializerAnnotations_: Set<String>,
     private val annotationAllowedClassesFilter: ClassFilter,
@@ -56,8 +60,10 @@ class AnnotationBasedFilter(
     private val keepClassAnnotations = convertToInternalNames(keepClassAnnotations_)
     private val throwAnnotations = convertToInternalNames(throwAnnotations_)
     private val removeAnnotations = convertToInternalNames(removeAnnotations_)
+    private val redirectAnnotations = convertToInternalNames(redirectAnnotations_)
     private val substituteAnnotations = convertToInternalNames(substituteAnnotations_)
-    private val nativeSubstituteAnnotations = convertToInternalNames(nativeSubstituteAnnotations_)
+    private val redirectionClassAnnotations =
+        convertToInternalNames(redirectionClassAnnotations_)
     private val classLoadHookAnnotations = convertToInternalNames(classLoadHookAnnotations_)
     private val keepStaticInitializerAnnotations =
         convertToInternalNames(keepStaticInitializerAnnotations_)
@@ -67,11 +73,12 @@ class AnnotationBasedFilter(
             keepClassAnnotations +
             throwAnnotations +
             removeAnnotations +
+            redirectAnnotations +
             substituteAnnotations
 
     /** All the annotations we use. */
     private val allAnnotations = visibilityAnnotations +
-            nativeSubstituteAnnotations +
+            redirectionClassAnnotations +
             classLoadHookAnnotations +
             keepStaticInitializerAnnotations
 
@@ -84,8 +91,9 @@ class AnnotationBasedFilter(
                 keepClassAnnotations_ +
                 throwAnnotations_ +
                 removeAnnotations_ +
+                redirectAnnotations_ +
                 substituteAnnotations_ +
-                nativeSubstituteAnnotations_ +
+                redirectionClassAnnotations_ +
                 classLoadHookAnnotations_ +
                 keepStaticInitializerAnnotations_
     )
@@ -99,6 +107,7 @@ class AnnotationBasedFilter(
             in substituteAnnotations -> FilterPolicy.Substitute.withReason(REASON_ANNOTATION)
             in throwAnnotations -> FilterPolicy.Throw.withReason(REASON_ANNOTATION)
             in removeAnnotations -> FilterPolicy.Remove.withReason(REASON_ANNOTATION)
+            in redirectAnnotations -> FilterPolicy.Redirect.withReason(REASON_ANNOTATION)
             else -> null
         }
     }
@@ -129,13 +138,6 @@ class AnnotationBasedFilter(
         descriptor: String
     ): FilterPolicyWithReason {
         val cn = classes.getClass(className)
-
-        if (methodName == CLASS_INITIALIZER_NAME && descriptor == CLASS_INITIALIZER_DESC) {
-            if (cn.findAnyAnnotation(keepStaticInitializerAnnotations) != null) {
-                return FilterPolicy.Keep.withReason(REASON_ANNOTATION)
-            }
-        }
-
         return getAnnotationPolicy(cn).methodPolicies[MethodKey(methodName, descriptor)]
             ?: super.getPolicyForMethod(className, methodName, descriptor)
     }
@@ -150,22 +152,14 @@ class AnnotationBasedFilter(
             ?: super.getRenameTo(className, methodName, descriptor)
     }
 
-    override fun getNativeSubstitutionClass(className: String): String? {
-        classes.getClass(className).let { cn ->
-            cn.findAnyAnnotation(nativeSubstituteAnnotations)?.let { an ->
-                return getAnnotationField(an, "value")?.toJvmClassName()
-            }
-        }
-        return null
+    override fun getRedirectionClass(className: String): String? {
+        val cn = classes.getClass(className)
+        return getAnnotationPolicy(cn).redirectionClass
     }
 
     override fun getClassLoadHooks(className: String): List<String> {
-        val e = classes.getClass(className).let { cn ->
-            cn.findAnyAnnotation(classLoadHookAnnotations)?.let { an ->
-                getAnnotationField(an, "value")?.toHumanReadableMethodName()
-            }
-        }
-        return addNonNullElement(super.getClassLoadHooks(className), e)
+        val cn = classes.getClass(className)
+        return addLists(super.getClassLoadHooks(className), getAnnotationPolicy(cn).classLoadHooks)
     }
 
     private data class MethodKey(val name: String, val desc: String)
@@ -195,6 +189,8 @@ class AnnotationBasedFilter(
         val fieldPolicies = mutableMapOf<String, FilterPolicyWithReason>()
         val methodPolicies = mutableMapOf<MethodKey, FilterPolicyWithReason>()
         val renamedMethods = mutableMapOf<MethodKey, String>()
+        val redirectionClass: String?
+        val classLoadHooks: List<String>
 
         init {
             val allowAnnotation = annotationAllowedClassesFilter.matches(cn.name)
@@ -204,6 +200,16 @@ class AnnotationBasedFilter(
                 "class", cn.name
             )
             classPolicy = cn.findAnyAnnotation(visibilityAnnotations)?.policy
+            redirectionClass = cn.findAnyAnnotation(redirectionClassAnnotations)?.let { an ->
+                getAnnotationField(an, "value")?.let { resolveRelativeClass(cn, it) }
+            }
+            classLoadHooks = cn.findAllAnnotations(classLoadHookAnnotations).mapNotNull { an ->
+                getAnnotationField(an, "value")?.toHumanReadableMethodName()
+            }
+            if (cn.findAnyAnnotation(keepStaticInitializerAnnotations) != null) {
+                methodPolicies[MethodKey(CLASS_INITIALIZER_NAME, CLASS_INITIALIZER_DESC)] =
+                    FilterPolicy.Keep.withReason(REASON_ANNOTATION)
+            }
 
             for (fn in cn.fields ?: emptyList()) {
                 detectInvalidAnnotations(
@@ -297,25 +303,36 @@ class AnnotationBasedFilter(
                 )
             }
         }
-    }
 
-    /**
-     * Return the (String) value of 'value' parameter from an annotation.
-     */
-    private fun getAnnotationField(
-        an: AnnotationNode,
-        name: String,
-        required: Boolean = true
-    ): String? {
-        try {
-            val suffix = findAnnotationValueAsString(an, name)
-            if (suffix == null && required) {
-                errors.onErrorFound("Annotation \"${an.desc}\" must have field $name")
+        /**
+         * Return the (String) value of 'value' parameter from an annotation.
+         */
+        private fun getAnnotationField(
+            an: AnnotationNode,
+            name: String,
+            required: Boolean = true
+        ): String? {
+            try {
+                val suffix = findAnnotationValueAsString(an, name)
+                if (suffix == null && required) {
+                    errors.onErrorFound("Annotation \"${an.desc}\" must have field $name")
+                }
+                return suffix
+            } catch (e: ClassParseException) {
+                errors.onErrorFound(e.message!!)
+                return null
             }
-            return suffix
-        } catch (e: ClassParseException) {
-            errors.onErrorFound(e.message!!)
-            return null
+        }
+
+        /**
+         * Resolve the full class name if the class is relative
+         */
+        private fun resolveRelativeClass(
+            cn: ClassNode,
+            name: String
+        ): String {
+            val packageName = getPackageNameFromFullClassName(cn.name)
+            return resolveClassNameWithDefaultPackage(name, packageName).toJvmClassName()
         }
     }
 

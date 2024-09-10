@@ -283,10 +283,24 @@ public class ProtoLogDataSource extends DataSource<ProtoLogDataSource.Instance,
     public static class Instance extends DataSourceInstance {
 
         public interface TracingInstanceStartCallback {
+            /**
+             * Execute the tracing instance's onStart callback.
+             * @param instanceIdx The index of the tracing instance we are executing the callback
+             *                    for.
+             * @param config The protolog configuration for the tracing instance we are executing
+             *               the callback for.
+             */
             void run(int instanceIdx, @NonNull ProtoLogConfig config);
         }
 
         public interface TracingInstanceStopCallback {
+            /**
+             * Execute the tracing instance's onStop callback.
+             * @param instanceIdx The index of the tracing instance we are executing the callback
+             *                    for.
+             * @param config The protolog configuration for the tracing instance we are executing
+             *               the callback for.
+             */
             void run(int instanceIdx, @NonNull ProtoLogConfig config);
         }
 

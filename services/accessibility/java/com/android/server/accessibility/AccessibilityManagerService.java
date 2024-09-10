@@ -58,6 +58,7 @@ import static com.android.internal.accessibility.common.ShortcutConstants.UserSh
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.SOFTWARE;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.TRIPLETAP;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.TWOFINGER_DOUBLETAP;
+import static com.android.internal.accessibility.dialog.AccessibilityButtonChooserActivity.EXTRA_TYPE_TO_CHOOSE;
 import static com.android.internal.accessibility.util.AccessibilityStatsLogUtils.logAccessibilityShortcutActivated;
 import static com.android.internal.accessibility.util.AccessibilityUtils.isUserSetupCompleted;
 import static com.android.internal.util.FunctionalUtils.ignoreRemoteException;
@@ -1616,7 +1617,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     /**
      * Invoked remotely over AIDL by SysUi when the accessibility button within the system's
-     * navigation area has been clicked.
+     * navigation area has been clicked, or a gesture shortcut input has been performed.
      *
      * @param displayId The logical display id.
      * @param targetName The flattened {@link ComponentName} string or the class name of a system
@@ -1646,7 +1647,26 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
         mMainHandler.sendMessage(obtainMessage(
                 AccessibilityManagerService::performAccessibilityShortcutInternal, this,
-                displayId, SOFTWARE, targetName));
+                displayId, getShortcutTypeForGenericShortcutCalls(currentUserId), targetName));
+    }
+
+    /**
+     * AIDL-exposed method to show the dialog
+     * for choosing the target for the gesture or button shortcuts.
+     * The shortcut is determined by the current navigation mode.
+     *
+     * @param displayId The id for the display to show the dialog on.
+     */
+    @Override
+    @EnforcePermission(STATUS_BAR_SERVICE)
+    public void notifyAccessibilityButtonLongClicked(int displayId) {
+        notifyAccessibilityButtonLongClicked_enforcePermission();
+        int userId;
+        synchronized (mLock) {
+            userId = mCurrentUserId;
+        }
+        showAccessibilityTargetsSelection(displayId,
+                getShortcutTypeForGenericShortcutCalls(userId), userId);
     }
 
     /**
@@ -2344,16 +2364,18 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
     }
 
-    private void showAccessibilityTargetsSelection(int displayId,
-            @UserShortcutType int shortcutType) {
+    private void showAccessibilityTargetsSelection(int displayId, int shortcutType,
+            int userId) {
         final Intent intent = new Intent(AccessibilityManager.ACTION_CHOOSE_ACCESSIBILITY_BUTTON);
         final String chooserClassName = (shortcutType == HARDWARE)
                 ? AccessibilityShortcutChooserActivity.class.getName()
                 : AccessibilityButtonChooserActivity.class.getName();
         intent.setClassName(CHOOSER_PACKAGE_NAME, chooserClassName);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        intent.putExtra(EXTRA_TYPE_TO_CHOOSE, shortcutType);
         final Bundle bundle = ActivityOptions.makeBasic().setLaunchDisplayId(displayId).toBundle();
-        mContext.startActivityAsUser(intent, bundle, UserHandle.of(mCurrentUserId));
+        mMainHandler.post(() ->
+                mContext.startActivityAsUser(intent, bundle, UserHandle.of(userId)));
     }
 
     private void launchShortcutTargetActivity(int displayId, ComponentName name) {
@@ -4011,7 +4033,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      * Perform the accessibility shortcut action.
      *
      * @param shortcutType The shortcut type.
-     * @param displayId The display id of the accessibility button.
+     * @param displayId The display id the shortcut is being performed from.
      * @param targetName The flattened {@link ComponentName} string or the class name of a system
      *        class implementing a supported accessibility feature, or {@code null} if there's no
      *        specified target.
@@ -4031,7 +4053,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         if (targetName == null) {
             // In case there are many targets assigned to the given shortcut.
             if (shortcutTargets.size() > 1) {
-                showAccessibilityTargetsSelection(displayId, shortcutType);
+                showAccessibilityTargetsSelection(
+                        displayId, shortcutType, getCurrentUserState().mUserId);
                 return;
             }
             targetName = shortcutTargets.get(0);
@@ -6561,6 +6584,18 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                         displayId,
                         sc,
                         callback));
+    }
+
+    @VisibleForTesting
+    int getShortcutTypeForGenericShortcutCalls(int userId) {
+        int navigationMode = Settings.Secure.getIntForUser(
+                mContext.getContentResolver(),
+                Settings.Secure.NAVIGATION_MODE, -1, userId);
+        if (android.provider.Flags.a11yStandaloneGestureEnabled()) {
+            return (navigationMode == NAV_BAR_MODE_GESTURAL) ? GESTURE : SOFTWARE;
+        } else {
+            return SOFTWARE;
+        }
     }
 
     void attachAccessibilityOverlayToDisplayInternal(

@@ -34,31 +34,30 @@ class WifiNetworkModelTest : SysuiTestCase() {
     @Test
     fun active_levelsInValidRange_noException() {
         (MIN_VALID_LEVEL..MAX_VALID_LEVEL).forEach { level ->
-            WifiNetworkModel.Active(NETWORK_ID, level = level)
+            WifiNetworkModel.Active(level = level)
             // No assert, just need no crash
         }
     }
 
     @Test(expected = IllegalArgumentException::class)
     fun active_levelNegative_exceptionThrown() {
-        WifiNetworkModel.Active(NETWORK_ID, level = MIN_VALID_LEVEL - 1)
+        WifiNetworkModel.Active(level = MIN_VALID_LEVEL - 1)
     }
 
     @Test(expected = IllegalArgumentException::class)
     fun active_levelTooHigh_exceptionThrown() {
-        WifiNetworkModel.Active(NETWORK_ID, level = MAX_VALID_LEVEL + 1)
+        WifiNetworkModel.Active(level = MAX_VALID_LEVEL + 1)
     }
 
     @Test(expected = IllegalArgumentException::class)
     fun carrierMerged_invalidSubId_exceptionThrown() {
-        WifiNetworkModel.CarrierMerged(NETWORK_ID, INVALID_SUBSCRIPTION_ID, 1)
+        WifiNetworkModel.CarrierMerged(INVALID_SUBSCRIPTION_ID, 1)
     }
 
     @Test
     fun active_hasValidSsid_nullSsid_false() {
         val network =
             WifiNetworkModel.Active(
-                NETWORK_ID,
                 level = MAX_VALID_LEVEL,
                 ssid = null,
             )
@@ -70,7 +69,6 @@ class WifiNetworkModelTest : SysuiTestCase() {
     fun active_hasValidSsid_unknownSsid_false() {
         val network =
             WifiNetworkModel.Active(
-                NETWORK_ID,
                 level = MAX_VALID_LEVEL,
                 ssid = UNKNOWN_SSID,
             )
@@ -82,7 +80,6 @@ class WifiNetworkModelTest : SysuiTestCase() {
     fun active_hasValidSsid_validSsid_true() {
         val network =
             WifiNetworkModel.Active(
-                NETWORK_ID,
                 level = MAX_VALID_LEVEL,
                 ssid = "FakeSsid",
             )
@@ -97,7 +94,6 @@ class WifiNetworkModelTest : SysuiTestCase() {
         val logger = TestLogger()
         val prevVal =
             WifiNetworkModel.CarrierMerged(
-                networkId = 5,
                 subscriptionId = 3,
                 level = 1,
             )
@@ -105,7 +101,6 @@ class WifiNetworkModelTest : SysuiTestCase() {
         WifiNetworkModel.Inactive.logDiffs(prevVal, logger)
 
         assertThat(logger.changes).contains(Pair(COL_NETWORK_TYPE, TYPE_INACTIVE))
-        assertThat(logger.changes).contains(Pair(COL_NETWORK_ID, NETWORK_ID_DEFAULT.toString()))
         assertThat(logger.changes).contains(Pair(COL_VALIDATED, "false"))
         assertThat(logger.changes).contains(Pair(COL_LEVEL, LEVEL_DEFAULT.toString()))
         assertThat(logger.changes).contains(Pair(COL_SSID, "null"))
@@ -116,7 +111,6 @@ class WifiNetworkModelTest : SysuiTestCase() {
         val logger = TestLogger()
         val carrierMerged =
             WifiNetworkModel.CarrierMerged(
-                networkId = 6,
                 subscriptionId = 3,
                 level = 2,
             )
@@ -124,7 +118,6 @@ class WifiNetworkModelTest : SysuiTestCase() {
         carrierMerged.logDiffs(prevVal = WifiNetworkModel.Inactive, logger)
 
         assertThat(logger.changes).contains(Pair(COL_NETWORK_TYPE, TYPE_CARRIER_MERGED))
-        assertThat(logger.changes).contains(Pair(COL_NETWORK_ID, "6"))
         assertThat(logger.changes).contains(Pair(COL_SUB_ID, "3"))
         assertThat(logger.changes).contains(Pair(COL_VALIDATED, "true"))
         assertThat(logger.changes).contains(Pair(COL_LEVEL, "2"))
@@ -136,7 +129,6 @@ class WifiNetworkModelTest : SysuiTestCase() {
         val logger = TestLogger()
         val activeNetwork =
             WifiNetworkModel.Active(
-                networkId = 5,
                 isValidated = true,
                 level = 3,
                 ssid = "Test SSID",
@@ -146,27 +138,21 @@ class WifiNetworkModelTest : SysuiTestCase() {
         activeNetwork.logDiffs(prevVal = WifiNetworkModel.Inactive, logger)
 
         assertThat(logger.changes).contains(Pair(COL_NETWORK_TYPE, TYPE_ACTIVE))
-        assertThat(logger.changes).contains(Pair(COL_NETWORK_ID, "5"))
         assertThat(logger.changes).contains(Pair(COL_VALIDATED, "true"))
         assertThat(logger.changes).contains(Pair(COL_LEVEL, "3"))
         assertThat(logger.changes).contains(Pair(COL_SSID, "Test SSID"))
         assertThat(logger.changes).contains(Pair(COL_HOTSPOT, "LAPTOP"))
     }
+
     @Test
     fun logDiffs_activeToInactive_resetsAllActiveFields() {
         val logger = TestLogger()
         val activeNetwork =
-            WifiNetworkModel.Active(
-                networkId = 5,
-                isValidated = true,
-                level = 3,
-                ssid = "Test SSID"
-            )
+            WifiNetworkModel.Active(isValidated = true, level = 3, ssid = "Test SSID")
 
         WifiNetworkModel.Inactive.logDiffs(prevVal = activeNetwork, logger)
 
         assertThat(logger.changes).contains(Pair(COL_NETWORK_TYPE, TYPE_INACTIVE))
-        assertThat(logger.changes).contains(Pair(COL_NETWORK_ID, NETWORK_ID_DEFAULT.toString()))
         assertThat(logger.changes).contains(Pair(COL_VALIDATED, "false"))
         assertThat(logger.changes).contains(Pair(COL_LEVEL, LEVEL_DEFAULT.toString()))
         assertThat(logger.changes).contains(Pair(COL_SSID, "null"))
@@ -178,7 +164,6 @@ class WifiNetworkModelTest : SysuiTestCase() {
         val logger = TestLogger()
         val activeNetwork =
             WifiNetworkModel.Active(
-                networkId = 5,
                 isValidated = true,
                 level = 3,
                 ssid = "Test SSID",
@@ -186,7 +171,6 @@ class WifiNetworkModelTest : SysuiTestCase() {
             )
         val prevVal =
             WifiNetworkModel.CarrierMerged(
-                networkId = 5,
                 subscriptionId = 3,
                 level = 1,
             )
@@ -194,25 +178,19 @@ class WifiNetworkModelTest : SysuiTestCase() {
         activeNetwork.logDiffs(prevVal, logger)
 
         assertThat(logger.changes).contains(Pair(COL_NETWORK_TYPE, TYPE_ACTIVE))
-        assertThat(logger.changes).contains(Pair(COL_NETWORK_ID, "5"))
         assertThat(logger.changes).contains(Pair(COL_VALIDATED, "true"))
         assertThat(logger.changes).contains(Pair(COL_LEVEL, "3"))
         assertThat(logger.changes).contains(Pair(COL_SSID, "Test SSID"))
         assertThat(logger.changes).contains(Pair(COL_HOTSPOT, "AUTO"))
     }
+
     @Test
     fun logDiffs_activeToCarrierMerged_logsAllFields() {
         val logger = TestLogger()
         val activeNetwork =
-            WifiNetworkModel.Active(
-                networkId = 5,
-                isValidated = true,
-                level = 3,
-                ssid = "Test SSID"
-            )
+            WifiNetworkModel.Active(isValidated = true, level = 3, ssid = "Test SSID")
         val carrierMerged =
             WifiNetworkModel.CarrierMerged(
-                networkId = 6,
                 subscriptionId = 3,
                 level = 2,
             )
@@ -220,7 +198,6 @@ class WifiNetworkModelTest : SysuiTestCase() {
         carrierMerged.logDiffs(prevVal = activeNetwork, logger)
 
         assertThat(logger.changes).contains(Pair(COL_NETWORK_TYPE, TYPE_CARRIER_MERGED))
-        assertThat(logger.changes).contains(Pair(COL_NETWORK_ID, "6"))
         assertThat(logger.changes).contains(Pair(COL_SUB_ID, "3"))
         assertThat(logger.changes).contains(Pair(COL_VALIDATED, "true"))
         assertThat(logger.changes).contains(Pair(COL_LEVEL, "2"))
@@ -231,19 +208,9 @@ class WifiNetworkModelTest : SysuiTestCase() {
     fun logDiffs_activeChangesLevel_onlyLevelLogged() {
         val logger = TestLogger()
         val prevActiveNetwork =
-            WifiNetworkModel.Active(
-                networkId = 5,
-                isValidated = true,
-                level = 3,
-                ssid = "Test SSID"
-            )
+            WifiNetworkModel.Active(isValidated = true, level = 3, ssid = "Test SSID")
         val newActiveNetwork =
-            WifiNetworkModel.Active(
-                networkId = 5,
-                isValidated = true,
-                level = 2,
-                ssid = "Test SSID"
-            )
+            WifiNetworkModel.Active(isValidated = true, level = 2, ssid = "Test SSID")
 
         newActiveNetwork.logDiffs(prevActiveNetwork, logger)
 
@@ -264,9 +231,5 @@ class WifiNetworkModelTest : SysuiTestCase() {
         override fun logChange(columnName: String, value: Boolean) {
             changes.add(Pair(columnName, value.toString()))
         }
-    }
-
-    companion object {
-        private const val NETWORK_ID = 2
     }
 }

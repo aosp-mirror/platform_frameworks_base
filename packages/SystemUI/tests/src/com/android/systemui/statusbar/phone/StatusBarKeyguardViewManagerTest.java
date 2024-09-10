@@ -779,6 +779,26 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
 
     @Test
     @DisableSceneContainer
+    public void testResetDoesNotHideBouncerWhenNotShowing() {
+        reset(mDismissCallbackRegistry);
+        reset(mPrimaryBouncerInteractor);
+
+        // GIVEN the keyguard is showing
+        reset(mAlternateBouncerInteractor);
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
+        when(mPrimaryBouncerInteractor.isFullyShowing()).thenReturn(false);
+
+        // WHEN SBKV is reset with hideBouncerWhenShowing=true
+        mStatusBarKeyguardViewManager.reset(true);
+
+        // THEN no calls to hide should be made
+        verify(mAlternateBouncerInteractor, never()).hide();
+        verify(mDismissCallbackRegistry, never()).notifyDismissCancelled();
+        verify(mPrimaryBouncerInteractor, never()).setDismissAction(eq(null), eq(null));
+    }
+
+    @Test
+    @DisableSceneContainer
     public void testResetHideBouncerWhenShowing_alternateBouncerHides() {
         reset(mDismissCallbackRegistry);
         reset(mPrimaryBouncerInteractor);
@@ -786,6 +806,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
         // GIVEN the keyguard is showing
         reset(mAlternateBouncerInteractor);
         when(mKeyguardStateController.isShowing()).thenReturn(true);
+        when(mPrimaryBouncerInteractor.isFullyShowing()).thenReturn(true);
 
         // WHEN SBKV is reset with hideBouncerWhenShowing=true
         mStatusBarKeyguardViewManager.reset(true);
@@ -1091,9 +1112,11 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     public void testShowBouncerOrKeyguard_showsKeyguardIfShowBouncerReturnsFalse() {
         when(mKeyguardSecurityModel.getSecurityMode(anyInt())).thenReturn(
                 KeyguardSecurityModel.SecurityMode.SimPin);
+        // Returning false means unable to show the bouncer
         when(mPrimaryBouncerInteractor.show(true)).thenReturn(false);
         when(mKeyguardTransitionInteractor.getTransitionState().getValue().getTo())
                 .thenReturn(KeyguardState.LOCKSCREEN);
+        mStatusBarKeyguardViewManager.onStartedWakingUp();
 
         reset(mCentralSurfaces);
         // Advance past reattempts
@@ -1103,6 +1126,23 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
         verify(mPrimaryBouncerInteractor).show(true);
         verify(mCentralSurfaces).showKeyguard();
     }
+
+    @Test
+    @DisableSceneContainer
+    @EnableFlags(Flags.FLAG_SIM_PIN_RACE_CONDITION_ON_RESTART)
+    public void testShowBouncerOrKeyguard_showsKeyguardIfSleeping() {
+        when(mKeyguardTransitionInteractor.getTransitionState().getValue().getTo())
+                .thenReturn(KeyguardState.LOCKSCREEN);
+        mStatusBarKeyguardViewManager.onStartedGoingToSleep();
+
+        reset(mCentralSurfaces);
+        reset(mPrimaryBouncerInteractor);
+        mStatusBarKeyguardViewManager.showBouncerOrKeyguard(
+                /* hideBouncerWhenShowing= */true, false);
+        verify(mCentralSurfaces).showKeyguard();
+        verify(mPrimaryBouncerInteractor).hide();
+    }
+
 
     @Test
     @DisableSceneContainer

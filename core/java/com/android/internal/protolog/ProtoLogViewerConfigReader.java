@@ -43,6 +43,13 @@ public class ProtoLogViewerConfigReader {
         return mLogMessageMap.get(messageHash);
     }
 
+    /**
+     * Load the viewer configs for the target groups into memory.
+     * Only viewer configs loaded into memory can be required. So this must be called for all groups
+     * we want to query before we query their viewer config.
+     *
+     * @param groups Groups to load the viewer configs from file into memory.
+     */
     public synchronized void loadViewerConfig(@NonNull String[] groups) {
         loadViewerConfig(groups, (message) -> {});
     }

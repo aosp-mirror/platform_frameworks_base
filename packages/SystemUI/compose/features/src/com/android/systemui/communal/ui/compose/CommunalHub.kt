@@ -65,6 +65,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
@@ -136,6 +137,7 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.style.TextAlign
@@ -240,10 +242,15 @@ fun CommunalHub(
         }
     }
 
+    val paneTitle = stringResource(R.string.accessibility_content_description_for_communal_hub)
+
     Box(
         modifier =
             modifier
-                .semantics { testTagsAsResourceId = true }
+                .semantics {
+                    testTagsAsResourceId = true
+                    this.paneTitle = paneTitle
+                }
                 .testTag(COMMUNAL_HUB_TEST_TAG)
                 .fillMaxSize()
                 // Observe taps for selecting items
@@ -690,21 +697,20 @@ private fun BoxScope.CommunalHubLazyGrid(
         horizontalArrangement = Arrangement.spacedBy(Dimensions.ItemSpacing),
         verticalArrangement = Arrangement.spacedBy(Dimensions.ItemSpacing),
     ) {
-        items(
-            count = list.size,
-            key = { index -> list[index].key },
-            contentType = { index -> list[index].key },
-            span = { index -> GridItemSpan(list[index].size.span) },
-        ) { index ->
+        itemsIndexed(
+            items = list,
+            key = { _, item -> item.key },
+            contentType = { _, item -> item.key },
+            span = { _, item -> GridItemSpan(item.size.span) },
+        ) { index, item ->
             val size =
                 SizeF(
                     Dimensions.CardWidth.value,
-                    list[index].size.dp().value,
+                    item.size.dp().value,
                 )
             val cardModifier = Modifier.requiredSize(width = size.width.dp, height = size.height.dp)
             if (viewModel.isEditMode && dragDropState != null) {
-                val selected by
-                    remember(index) { derivedStateOf { list[index].key == selectedKey.value } }
+                val selected = item.key == selectedKey.value
                 DraggableItem(
                     modifier =
                         if (dragDropState.draggingItemIndex == index) {
@@ -716,12 +722,12 @@ private fun BoxScope.CommunalHubLazyGrid(
                         },
                     dragDropState = dragDropState,
                     selected = selected,
-                    enabled = list[index].isWidgetContent(),
+                    enabled = item.isWidgetContent(),
                     index = index,
                 ) { isDragging ->
                     CommunalContent(
                         modifier = cardModifier,
-                        model = list[index],
+                        model = item,
                         viewModel = viewModel,
                         size = size,
                         selected = selected && !isDragging,
@@ -734,7 +740,7 @@ private fun BoxScope.CommunalHubLazyGrid(
                 }
             } else {
                 CommunalContent(
-                    model = list[index],
+                    model = item,
                     viewModel = viewModel,
                     size = size,
                     selected = false,

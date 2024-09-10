@@ -535,7 +535,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     volatile boolean mRequestedOrSleepingDefaultDisplay;
 
     /**
-     * This is used to check whether to invoke {@link #updateScreenOffSleepToken} when screen is
+     * This is used to check whether to acquire screen-off sleep token when screen is
      * turned off. E.g. if it is false when screen is turned off and the display is swapping, it
      * is expected that the screen will be on in a short time. Then it is unnecessary to acquire
      * screen-off-sleep-token, so it can avoid intermediate visibility or lifecycle changes.
@@ -610,7 +610,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private boolean mPendingKeyguardOccluded;
     private boolean mKeyguardOccludedChanged;
 
-    private ActivityTaskManagerInternal.SleepTokenAcquirer mScreenOffSleepTokenAcquirer;
     Intent mHomeIntent;
     Intent mCarDockIntent;
     Intent mDeskDockIntent;
@@ -810,7 +809,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     event.recycle();
                     break;
                 case MSG_HANDLE_ALL_APPS:
-                    launchAllAppsAction();
+                    launchAllAppsAction((KeyEvent) msg.obj);
                     break;
                 case MSG_RINGER_TOGGLE_CHORD:
                     handleRingerChordGesture();
@@ -1879,26 +1878,31 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    private void launchAllAppsAction() {
-        Intent intent = new Intent(Intent.ACTION_ALL_APPS);
-        if (mHasFeatureLeanback) {
-            Intent intentLauncher = new Intent(Intent.ACTION_MAIN);
-            intentLauncher.addCategory(Intent.CATEGORY_HOME);
-            ResolveInfo resolveInfo = mPackageManager.resolveActivityAsUser(intentLauncher,
-                    PackageManager.MATCH_SYSTEM_ONLY,
-                    mCurrentUserId);
-            if (resolveInfo != null) {
-                intent.setPackage(resolveInfo.activityInfo.packageName);
+    private void launchAllAppsAction(KeyEvent event) {
+        if (mHasFeatureLeanback || mHasFeatureWatch) {
+            // TV and watch support the all apps intent
+            notifyKeyGestureCompleted(event,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_ALL_APPS);
+            Intent intent = new Intent(Intent.ACTION_ALL_APPS);
+            if (mHasFeatureLeanback) {
+                Intent intentLauncher = new Intent(Intent.ACTION_MAIN);
+                intentLauncher.addCategory(Intent.CATEGORY_HOME);
+                ResolveInfo resolveInfo = mPackageManager.resolveActivityAsUser(intentLauncher,
+                        PackageManager.MATCH_SYSTEM_ONLY,
+                        mCurrentUserId);
+                if (resolveInfo != null) {
+                    intent.setPackage(resolveInfo.activityInfo.packageName);
+                }
             }
-        }
-        startActivityAsUser(intent, UserHandle.CURRENT);
-    }
-
-    private void launchAllAppsViaA11y() {
-        AccessibilityManagerInternal accessibilityManager = getAccessibilityManagerInternal();
-        if (accessibilityManager != null) {
-            accessibilityManager.performSystemAction(
-                    AccessibilityService.GLOBAL_ACTION_ACCESSIBILITY_ALL_APPS);
+            startActivityAsUser(intent, UserHandle.CURRENT);
+        } else {
+            notifyKeyGestureCompleted(event,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_ACCESSIBILITY_ALL_APPS);
+            AccessibilityManagerInternal accessibilityManager = getAccessibilityManagerInternal();
+            if (accessibilityManager != null) {
+                accessibilityManager.performSystemAction(
+                        AccessibilityService.GLOBAL_ACTION_ACCESSIBILITY_ALL_APPS);
+            }
         }
         dismissKeyboardShortcutsMenu();
     }
@@ -2076,15 +2080,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             performHapticFeedback(HapticFeedbackConstants.LONG_PRESS, "Home - Long Press");
             switch (mLongPressOnHomeBehavior) {
                 case LONG_PRESS_HOME_ALL_APPS:
-                    if (mHasFeatureLeanback) {
-                        launchAllAppsAction();
-                        notifyKeyGestureCompleted(event,
-                                KeyGestureEvent.KEY_GESTURE_TYPE_ALL_APPS);
-                    } else {
-                        launchAllAppsViaA11y();
-                        notifyKeyGestureCompleted(event,
-                                KeyGestureEvent.KEY_GESTURE_TYPE_ACCESSIBILITY_ALL_APPS);
-                    }
+                    launchAllAppsAction(event);
                     break;
                 case LONG_PRESS_HOME_ASSIST:
                     notifyKeyGestureCompleted(event,
@@ -2222,9 +2218,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mGlobalActionsFactory = injector.getGlobalActionsFactory();
         mLockPatternUtils = new LockPatternUtils(mContext);
         mLogger = new MetricsLogger();
-
-        mScreenOffSleepTokenAcquirer = mActivityTaskManagerInternal
-                .createSleepTokenAcquirer("ScreenOff");
 
         Resources res = mContext.getResources();
         mWakeOnDpadKeyPress =
@@ -3695,18 +3688,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 break;
             case KeyEvent.KEYCODE_ALL_APPS:
                 if (firstDown) {
-                    if (mHasFeatureLeanback) {
-                        mHandler.removeMessages(MSG_HANDLE_ALL_APPS);
-                        Message msg = mHandler.obtainMessage(MSG_HANDLE_ALL_APPS);
-                        msg.setAsynchronous(true);
-                        msg.sendToTarget();
-                        notifyKeyGestureCompleted(event,
-                                KeyGestureEvent.KEY_GESTURE_TYPE_ALL_APPS);
-                    } else {
-                        launchAllAppsViaA11y();
-                        notifyKeyGestureCompleted(event,
-                                KeyGestureEvent.KEY_GESTURE_TYPE_ACCESSIBILITY_ALL_APPS);
-                    }
+                    mHandler.removeMessages(MSG_HANDLE_ALL_APPS);
+
+                    Message msg = mHandler.obtainMessage(MSG_HANDLE_ALL_APPS, new KeyEvent(event));
+                    msg.setAsynchronous(true);
+                    msg.sendToTarget();
                 }
                 return true;
             case KeyEvent.KEYCODE_NOTIFICATION:
@@ -3759,9 +3745,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                                 KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_CAPS_LOCK);
                     } else if (mPendingMetaAction) {
                         if (!canceled) {
-                            launchAllAppsViaA11y();
-                            notifyKeyGestureCompleted(event,
-                                    KeyGestureEvent.KEY_GESTURE_TYPE_ACCESSIBILITY_ALL_APPS);
+                            launchAllAppsAction(event);
                         }
                         mPendingMetaAction = false;
                     }
@@ -5533,13 +5517,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mRequestedOrSleepingDefaultDisplay = true;
         mIsGoingToSleepDefaultDisplay = true;
 
-        // In case startedGoingToSleep is called after screenTurnedOff (the source caller is in
-        // order but the methods run on different threads) and updateScreenOffSleepToken was
-        // skipped. Then acquire sleep token if screen was off.
-        if (!mDefaultDisplayPolicy.isScreenOnFully() && !mDefaultDisplayPolicy.isScreenOnEarly()) {
-            updateScreenOffSleepToken(true /* acquire */);
-        }
-
         if (mKeyguardDelegate != null) {
             mKeyguardDelegate.onStartedGoingToSleep(pmSleepReason);
         }
@@ -5700,11 +5677,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (DEBUG_WAKEUP) Slog.i(TAG, "Display" + displayId + " turned off...");
 
         if (displayId == DEFAULT_DISPLAY) {
-            if (!isSwappingDisplay || mIsGoingToSleepDefaultDisplay) {
-                updateScreenOffSleepToken(true /* acquire */);
-            }
+            final boolean acquireSleepToken = !isSwappingDisplay || mIsGoingToSleepDefaultDisplay;
             mRequestedOrSleepingDefaultDisplay = false;
-            mDefaultDisplayPolicy.screenTurnedOff();
+            mDefaultDisplayPolicy.screenTurnedOff(acquireSleepToken);
             synchronized (mLock) {
                 if (mKeyguardDelegate != null) {
                     mKeyguardDelegate.onScreenTurnedOff();
@@ -5760,7 +5735,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (displayId == DEFAULT_DISPLAY) {
             Trace.asyncTraceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "screenTurningOn",
                     0 /* cookie */);
-            updateScreenOffSleepToken(false /* acquire */);
             mDefaultDisplayPolicy.screenTurningOn(screenOnListener);
             mBootAnimationDismissable = false;
 
@@ -6264,15 +6238,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
                 mLockScreenTimerActive = enable;
             }
-        }
-    }
-
-    // TODO (multidisplay): Support multiple displays in WindowManagerPolicy.
-    private void updateScreenOffSleepToken(boolean acquire) {
-        if (acquire) {
-            mScreenOffSleepTokenAcquirer.acquire(DEFAULT_DISPLAY);
-        } else {
-            mScreenOffSleepTokenAcquirer.release(DEFAULT_DISPLAY);
         }
     }
 

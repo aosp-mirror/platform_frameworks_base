@@ -23,6 +23,13 @@ flag {
 }
 
 flag {
+    name: "enable_windowing_scaled_resizing"
+    namespace: "lse_desktop_experience"
+    description: "Enables the resizing of non-resizable apps through scaling their bounds up/down"
+    bug: "319844447"
+}
+
+flag {
     name: "disable_non_resizable_app_snap_resizing"
     namespace: "lse_desktop_experience"
     description: "Stops non-resizable app desktop windows from being snap resized"
@@ -243,4 +250,11 @@ flag {
     namespace: "lse_desktop_experience"
     description: "Persists the desktop windowing session across reboots."
     bug: "350456942"
+}
+
+flag {
+    name: "enable_display_focus_in_shell_transitions"
+    namespace: "lse_desktop_experience"
+    description: "Creates a shell transition when display focus switches."
+    bug: "356109871"
 }

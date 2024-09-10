@@ -3691,6 +3691,10 @@ public class NotificationStackScrollLayout
         if ((event.getSource() & InputDevice.SOURCE_CLASS_POINTER) != 0) {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_SCROLL: {
+                    // If scene container is active, NSSL should not control its own scrolling.
+                    if (SceneContainerFlag.isEnabled()) {
+                        return false;
+                    }
                     if (!mIsBeingDragged) {
                         final float vscroll = event.getAxisValue(MotionEvent.AXIS_VSCROLL);
                         if (vscroll != 0) {
@@ -5400,7 +5404,9 @@ public class NotificationStackScrollLayout
             println(pw, "intrinsicContentHeight", mIntrinsicContentHeight);
             println(pw, "contentHeight", mContentHeight);
             println(pw, "intrinsicPadding", mIntrinsicPadding);
-            println(pw, "topPadding", getTopPadding());
+            if (!SceneContainerFlag.isEnabled()) {
+                println(pw, "topPadding", getTopPadding());
+            }
             println(pw, "bottomPadding", mBottomPadding);
             dumpRoundedRectClipping(pw);
             println(pw, "requestedClipBounds", mRequestedClipBounds);

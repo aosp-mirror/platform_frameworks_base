@@ -41,7 +41,6 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.media.controls.shared.model.MediaData
 import com.android.systemui.media.controls.util.fakeMediaControllerFactory
 import com.android.systemui.media.controls.util.mediaFlags
-import com.android.systemui.plugins.activityStarter
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.SbnBuilder
 import com.android.systemui.testKosmos
@@ -86,7 +85,6 @@ class MediaDataLoaderTest : SysuiTestCase() {
             context,
             testDispatcher,
             testScope,
-            kosmos.activityStarter,
             mediaControllerFactory,
             mediaFlags,
             kosmos.imageLoader,

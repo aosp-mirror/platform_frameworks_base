@@ -569,7 +569,7 @@
     <!-- The thickness in dp for all desktop drag transition regions. -->
     <dimen name="desktop_mode_transition_region_thickness">44dp</dimen>
 
-    <item type="dimen" format="float" name="desktop_mode_fullscreen_region_scale">0.4</item>
+    <item type="dimen" format="float" name="desktop_mode_fullscreen_region_scale">0.2</item>
 
     <!-- The height on the screen where drag to the left or right edge will result in a
     desktop task snapping to split size. The empty space between this and the top is to allow

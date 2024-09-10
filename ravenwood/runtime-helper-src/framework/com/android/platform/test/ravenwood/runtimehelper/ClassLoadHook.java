@@ -15,6 +15,11 @@
  */
 package com.android.platform.test.ravenwood.runtimehelper;
 
+import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_VERBOSE_LOGGING;
+
+import android.system.ErrnoException;
+import android.system.Os;
+
 import com.android.ravenwood.common.RavenwoodCommonUtils;
 
 import java.io.File;
@@ -123,6 +128,15 @@ public class ClassLoadHook {
             return;
         }
 
+        if (RAVENWOOD_VERBOSE_LOGGING) {
+            log("Force enabling verbose logging");
+            try {
+                Os.setenv("ANDROID_LOG_TAGS", "*:v", true);
+            } catch (ErrnoException e) {
+                // Shouldn't happen.
+            }
+        }
+
         // Make sure these properties are not set.
         ensurePropertyNotSet(CORE_NATIVE_CLASSES);
         ensurePropertyNotSet(ICU_DATA_PATH);
@@ -152,6 +166,7 @@ public class ClassLoadHook {
     private static final Class<?>[] sLibandroidClasses = {
             android.util.Log.class,
             android.os.Parcel.class,
+            android.os.Binder.class,
             android.content.res.ApkAssets.class,
             android.content.res.AssetManager.class,
             android.content.res.StringBlock.class,

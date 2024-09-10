@@ -92,7 +92,6 @@ import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.view.Choreographer;
 import android.view.SurfaceControl;
-import android.view.SurfaceSession;
 import android.view.WindowManager;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
@@ -133,8 +132,6 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
     private final ShellExecutor mAnimExecutor;
     private final TransitionAnimation mTransitionAnimation;
     private final DevicePolicyManager mDevicePolicyManager;
-
-    private final SurfaceSession mSurfaceSession = new SurfaceSession();
 
     /** Keeps track of the currently-running animations associated with each transition. */
     private final ArrayMap<IBinder, ArrayList<Animator>> mAnimations = new ArrayMap<>();
@@ -705,7 +702,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             TransitionInfo.Change change, TransitionInfo info, int animHint,
             ArrayList<Animator> animations, Runnable onAnimFinish) {
         final int rootIdx = TransitionUtil.rootIndexFor(change, info);
-        final ScreenRotationAnimation anim = new ScreenRotationAnimation(mContext, mSurfaceSession,
+        final ScreenRotationAnimation anim = new ScreenRotationAnimation(mContext,
                 mTransactionPool, startTransaction, change, info.getRoot(rootIdx).getLeash(),
                 animHint);
         // The rotation animation may consist of 3 animations: fade-out screenshot, fade-in real
@@ -918,7 +915,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         }
 
         final SurfaceControl.Transaction transaction = mTransactionPool.acquire();
-        final WindowThumbnail wt = WindowThumbnail.createAndAttach(mSurfaceSession,
+        final WindowThumbnail wt = WindowThumbnail.createAndAttach(
                 change.getLeash(), thumbnail, transaction);
         final Animation a =
                 mTransitionAnimation.createCrossProfileAppsThumbnailAnimationLocked(bounds);
@@ -943,7 +940,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             @NonNull Runnable finishCallback, TransitionInfo.Change change,
             TransitionInfo.AnimationOptions options, float cornerRadius) {
         final SurfaceControl.Transaction transaction = mTransactionPool.acquire();
-        final WindowThumbnail wt = WindowThumbnail.createAndAttach(mSurfaceSession,
+        final WindowThumbnail wt = WindowThumbnail.createAndAttach(
                 change.getLeash(), options.getThumbnail(), transaction);
         final Rect bounds = change.getEndAbsBounds();
         final int orientation = mContext.getResources().getConfiguration().orientation;

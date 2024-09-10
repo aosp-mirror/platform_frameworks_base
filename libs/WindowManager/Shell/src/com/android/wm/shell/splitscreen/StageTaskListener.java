@@ -39,7 +39,6 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
-import android.view.SurfaceSession;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
@@ -72,6 +71,10 @@ import java.util.function.Predicate;
 public class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     private static final String TAG = StageTaskListener.class.getSimpleName();
 
+    // No current way to enforce this but if enableFlexibleSplit() is enabled, then only 1 of the
+    // stages should have this be set/being used
+    private boolean mIsActive;
+
     /** Callback interface for listening to changes in a split-screen stage. */
     public interface StageListenerCallbacks {
         void onRootTaskAppeared();
@@ -89,7 +92,6 @@ public class StageTaskListener implements ShellTaskOrganizer.TaskListener {
 
     private final Context mContext;
     private final StageListenerCallbacks mCallbacks;
-    private final SurfaceSession mSurfaceSession;
     private final SyncTransactionQueue mSyncQueue;
     private final IconProvider mIconProvider;
     private final Optional<WindowDecorViewModel> mWindowDecorViewModel;
@@ -104,12 +106,11 @@ public class StageTaskListener implements ShellTaskOrganizer.TaskListener {
 
     StageTaskListener(Context context, ShellTaskOrganizer taskOrganizer, int displayId,
             StageListenerCallbacks callbacks, SyncTransactionQueue syncQueue,
-            SurfaceSession surfaceSession, IconProvider iconProvider,
+            IconProvider iconProvider,
             Optional<WindowDecorViewModel> windowDecorViewModel) {
         mContext = context;
         mCallbacks = callbacks;
         mSyncQueue = syncQueue;
-        mSurfaceSession = surfaceSession;
         mIconProvider = iconProvider;
         mWindowDecorViewModel = windowDecorViewModel;
         taskOrganizer.createRootTask(displayId, WINDOWING_MODE_MULTI_WINDOW, this);
@@ -199,12 +200,11 @@ public class StageTaskListener implements ShellTaskOrganizer.TaskListener {
             mRootTaskInfo = taskInfo;
             mSplitDecorManager = new SplitDecorManager(
                     mRootTaskInfo.configuration,
-                    mIconProvider,
-                    mSurfaceSession);
+                    mIconProvider);
             mCallbacks.onRootTaskAppeared();
             sendStatusChanged();
             mSyncQueue.runInSync(t -> mDimLayer =
-                    SurfaceUtils.makeDimLayer(t, mRootLeash, "Dim layer", mSurfaceSession));
+                    SurfaceUtils.makeDimLayer(t, mRootLeash, "Dim layer"));
         } else if (taskInfo.parentTaskId == mRootTaskInfo.taskId) {
             final int taskId = taskInfo.taskId;
             mChildrenLeashes.put(taskId, leash);
@@ -473,6 +473,44 @@ public class StageTaskListener implements ShellTaskOrganizer.TaskListener {
                 t.show(leash);
             }
         });
+    }
+
+    // ---------
+    // Previously only used in MainStage
+    boolean isActive() {
+        return mIsActive;
+    }
+
+    void activate(WindowContainerTransaction wct, boolean includingTopTask) {
+        if (mIsActive) return;
+        ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "activate: includingTopTask=%b",
+                includingTopTask);
+
+        if (includingTopTask) {
+            reparentTopTask(wct);
+        }
+
+        mIsActive = true;
+    }
+
+    void deactivate(WindowContainerTransaction wct) {
+        deactivate(wct, false /* toTop */);
+    }
+
+    void deactivate(WindowContainerTransaction wct, boolean toTop) {
+        if (!mIsActive) return;
+        ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "deactivate: toTop=%b rootTaskInfo=%s",
+                toTop, mRootTaskInfo);
+        mIsActive = false;
+
+        if (mRootTaskInfo == null) return;
+        final WindowContainerToken rootToken = mRootTaskInfo.token;
+        wct.reparentTasks(
+                rootToken,
+                null /* newParent */,
+                null /* windowingModes */,
+                null /* activityTypes */,
+                toTop);
     }
 
     // --------

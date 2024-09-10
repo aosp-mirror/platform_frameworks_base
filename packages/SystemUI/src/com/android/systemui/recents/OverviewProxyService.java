@@ -25,7 +25,6 @@ import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_UP;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 
-import static com.android.internal.accessibility.common.ShortcutConstants.CHOOSER_PACKAGE_NAME;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SYSUI_PROXY;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_UNFOLD_ANIMATION_FORWARDER;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_UNLOCK_ANIMATION_CONTROLLER;
@@ -76,7 +75,6 @@ import android.view.inputmethod.InputMethodManager;
 
 import androidx.annotation.NonNull;
 
-import com.android.internal.accessibility.dialog.AccessibilityButtonChooserActivity;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.AssistUtils;
 import com.android.internal.app.IVoiceInteractionSessionListener;
@@ -404,23 +402,16 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         @Override
         public void notifyAccessibilityButtonClicked(int displayId) {
             verifyCallerAndClearCallingIdentity("notifyAccessibilityButtonClicked", () ->
-                    AccessibilityManager.getInstance(mContext)
-                            .notifyAccessibilityButtonClicked(displayId));
+                    AccessibilityManager.getInstance(mContext).notifyAccessibilityButtonClicked(
+                            displayId));
         }
 
         @Override
         public void notifyAccessibilityButtonLongClicked() {
-            verifyCallerAndClearCallingIdentity("notifyAccessibilityButtonLongClicked",
-                    () -> {
-                        final Intent intent =
-                                new Intent(AccessibilityManager.ACTION_CHOOSE_ACCESSIBILITY_BUTTON);
-                        final String chooserClassName = AccessibilityButtonChooserActivity
-                                .class.getName();
-                        intent.setClassName(CHOOSER_PACKAGE_NAME, chooserClassName);
-                        intent.addFlags(
-                                Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        mContext.startActivityAsUser(intent, mUserTracker.getUserHandle());
-                    });
+            verifyCallerAndClearCallingIdentity("notifyAccessibilityButtonLongClicked", () ->
+                    AccessibilityManager.getInstance(mContext)
+                            .notifyAccessibilityButtonLongClicked(
+                                    mDisplayTracker.getDefaultDisplayId()));
         }
 
         @Override

@@ -61,6 +61,7 @@ import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerCallbackInteractor;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerCallbackInteractor.PrimaryBouncerExpansionCallback;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
+import com.android.systemui.bouncer.shared.flag.ComposeBouncerFlags;
 import com.android.systemui.bouncer.ui.BouncerView;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -70,8 +71,8 @@ import com.android.systemui.dock.DockManager;
 import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.keyguard.KeyguardWmStateRefactor;
-import com.android.systemui.keyguard.domain.interactor.KeyguardDismissTransitionInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardDismissActionInteractor;
+import com.android.systemui.keyguard.domain.interactor.KeyguardDismissTransitionInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.keyguard.shared.model.DismissAction;
 import com.android.systemui.keyguard.shared.model.Edge;
@@ -182,6 +183,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private boolean mBouncerShowingOverDream;
     private int mAttemptsToShowBouncer = 0;
     private DelayableExecutor mExecutor;
+    private boolean mIsSleeping = false;
 
     private final PrimaryBouncerExpansionCallback mExpansionCallback =
             new PrimaryBouncerExpansionCallback() {
@@ -713,7 +715,11 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
      * {@link #needsFullscreenBouncer()}.
      */
     protected void showBouncerOrKeyguard(boolean hideBouncerWhenShowing, boolean isFalsingReset) {
-        if (needsFullscreenBouncer() && !mDozing) {
+        boolean showBouncer = needsFullscreenBouncer() && !mDozing;
+        if (Flags.simPinRaceConditionOnRestart()) {
+            showBouncer = showBouncer && !mIsSleeping;
+        }
+        if (showBouncer) {
             // The keyguard might be showing (already). So we need to hide it.
             if (!primaryBouncerIsShowing()) {
                 if (SceneContainerFlag.isEnabled()) {
@@ -834,7 +840,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     public void dismissWithAction(OnDismissAction r, Runnable cancelAction,
             boolean afterKeyguardGone, String message) {
-        if (SceneContainerFlag.isEnabled()) {
+        if (ComposeBouncerFlags.INSTANCE.isEnabled()) {
             if (r == null) {
                 return;
             }
@@ -886,7 +892,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                     return;
                 }
 
-                if (!SceneContainerFlag.isEnabled()) {
+                if (!ComposeBouncerFlags.INSTANCE.isEnabled()) {
                     mAfterKeyguardGoneAction = r;
                     mKeyguardGoneCancelAction = cancelAction;
                     mDismissActionWillAnimateOnKeyguard = r != null
@@ -960,7 +966,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
      * Adds a {@param runnable} to be executed after Keyguard is gone.
      */
     public void addAfterKeyguardGoneRunnable(Runnable runnable) {
-        if (SceneContainerFlag.isEnabled()) {
+        if (ComposeBouncerFlags.INSTANCE.isEnabled()) {
             if (runnable != null) {
                 mKeyguardDismissActionInteractor.get().runAfterKeyguardGone(runnable);
             }
@@ -992,7 +998,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             } else {
                 showBouncerOrKeyguard(hideBouncerWhenShowing, isFalsingReset);
             }
-            if (!SceneContainerFlag.isEnabled() && hideBouncerWhenShowing) {
+            if (!SceneContainerFlag.isEnabled() && hideBouncerWhenShowing && isBouncerShowing()) {
                 hideAlternateBouncer(true);
                 mDismissCallbackRegistry.notifyDismissCancelled();
                 mPrimaryBouncerInteractor.setDismissAction(null, null);
@@ -1041,6 +1047,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     @Override
     public void onStartedWakingUp() {
+        mIsSleeping = false;
         setRootViewAnimationDisabled(false);
         NavigationBarView navBarView = mCentralSurfaces.getNavigationBarView();
         if (navBarView != null) {
@@ -1054,6 +1061,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     @Override
     public void onStartedGoingToSleep() {
+        mIsSleeping = true;
         setRootViewAnimationDisabled(true);
         NavigationBarView navBarView = mCentralSurfaces.getNavigationBarView();
         if (navBarView != null) {
@@ -1173,7 +1181,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             // We update the state (which will show the keyguard) only if an animation will run on
             // the keyguard. If there is no animation, we wait before updating the state so that we
             // go directly from bouncer to launcher/app.
-            if (SceneContainerFlag.isEnabled()) {
+            if (ComposeBouncerFlags.INSTANCE.isEnabled()) {
                 if (mKeyguardDismissActionInteractor.get().runDismissAnimationOnKeyguard()) {
                     updateStates();
                 }
@@ -1300,7 +1308,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     private void executeAfterKeyguardGoneAction() {
-        if (SceneContainerFlag.isEnabled()) {
+        if (ComposeBouncerFlags.INSTANCE.isEnabled()) {
             return;
         }
         if (mAfterKeyguardGoneAction != null) {
@@ -1696,6 +1704,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         pw.println("  Registered KeyguardViewManagerCallbacks:");
         pw.println(" SceneContainerFlag enabled:"
                 + SceneContainerFlag.isEnabled());
+        pw.println(" ComposeBouncerFlags enabled:"
+                + ComposeBouncerFlags.INSTANCE.isEnabled());
         for (KeyguardViewManagerCallback callback : mCallbacks) {
             pw.println("      " + callback);
         }

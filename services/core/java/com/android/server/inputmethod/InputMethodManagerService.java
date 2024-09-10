@@ -4678,6 +4678,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         }
     }
 
+    // TODO(b/356239178): Make dump proto multi-user aware.
     private void dumpDebug(ProtoOutputStream proto, long fieldId) {
         synchronized (ImfLock.class) {
             final int userId = mCurrentImeUserId;
@@ -6103,17 +6104,40 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     @BinderThread
     private void dumpAsStringNoCheck(FileDescriptor fd, PrintWriter pw, String[] args,
             boolean isCritical) {
+        final int argUserId = parseUserIdFromDumpArgs(args);
+        final Printer p = new PrintWriterPrinter(pw);
+        p.println("Current Input Method Manager state:");
+        p.println("  concurrentMultiUserModeEnabled=" + mConcurrentMultiUserModeEnabled);
+        if (mConcurrentMultiUserModeEnabled && argUserId == UserHandle.USER_NULL) {
+            mUserDataRepository.forAllUserData(
+                    u -> dumpAsStringNoCheckForUser(u, fd, pw, args, isCritical));
+        } else {
+            final int userId = argUserId != UserHandle.USER_NULL ? argUserId : mCurrentImeUserId;
+            final var userData = getUserData(userId);
+            dumpAsStringNoCheckForUser(userData, fd, pw, args, isCritical);
+        }
+    }
+
+    @UserIdInt
+    private static int parseUserIdFromDumpArgs(String[] args) {
+        final int userIdx = Arrays.binarySearch(args, "--user");
+        if (userIdx == -1 || userIdx == args.length - 1) {
+            return UserHandle.USER_NULL;
+        }
+        return Integer.parseInt(args[userIdx + 1]);
+    }
+
+    // TODO(b/356239178): Update dump format output to better group per-user info.
+    @BinderThread
+    private void dumpAsStringNoCheckForUser(UserData userData, FileDescriptor fd, PrintWriter pw,
+            String[] args, boolean isCritical) {
+        final Printer p = new PrintWriterPrinter(pw);
         IInputMethodInvoker method;
         ClientState client;
-
-        final Printer p = new PrintWriterPrinter(pw);
-
+        p.println("  UserId=" + userData.mUserId);
         synchronized (ImfLock.class) {
-            final int userId = mCurrentImeUserId;
-            final InputMethodSettings settings = InputMethodSettingsRepository.get(userId);
-            final var userData = getUserData(userId);
-            p.println("Current Input Method Manager state:");
-            p.println("  concurrentMultiUserModeEnabled" + mConcurrentMultiUserModeEnabled);
+            final InputMethodSettings settings = InputMethodSettingsRepository.get(
+                    userData.mUserId);
             final List<InputMethodInfo> methodList = settings.getMethodList();
             int numImes = methodList.size();
             p.println("  Input Methods:");
@@ -6133,7 +6157,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 p.println("    sessionRequested="
                         + c.mSessionRequested);
                 p.println("    sessionRequestedForAccessibility="
-                                + c.mSessionRequestedForAccessibility);
+                        + c.mSessionRequestedForAccessibility);
                 p.println("    curSession=" + c.mCurSession);
                 p.println("    selfReportedDisplayId=" + c.mSelfReportedDisplayId);
                 p.println("    uid=" + c.mUid);
@@ -6141,7 +6165,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             };
             mClientController.forAllClients(clientControllerDump);
             final var bindingController = userData.mBindingController;
-            p.println("  mCurrentImeUserId=" + userData.mUserId);
             p.println("  mCurMethodId=" + bindingController.getSelectedMethodId());
             client = userData.mCurClient;
             p.println("  mCurClient=" + client + " mCurSeq="
@@ -6234,8 +6257,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             p.println("No input method client.");
         }
         synchronized (ImfLock.class) {
-            final int userId = mCurrentImeUserId;
-            final var userData = getUserData(userId);
             if (userData.mImeBindingState.mFocusedWindowClient != null
                     && client != userData.mImeBindingState.mFocusedWindowClient) {
                 p.println(" ");

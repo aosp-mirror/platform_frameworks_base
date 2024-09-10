@@ -19,7 +19,6 @@ import android.platform.test.ravenwood.RavenwoodAwareTestRunner.Order;
 import android.platform.test.ravenwood.RavenwoodAwareTestRunner.Scope;
 
 import org.junit.runner.Description;
-import org.junit.runner.Runner;
 import org.junit.runners.model.TestClass;
 
 /**
@@ -38,7 +37,7 @@ public class RavenwoodAwareTestRunnerHook {
     /**
      * Called when a runner starts, before the inner runner gets a chance to run.
      */
-    public static void onRunnerInitializing(Runner runner, TestClass testClass) {
+    public static void onRunnerInitializing(RavenwoodAwareTestRunner runner, TestClass testClass) {
     }
 
     /**
@@ -48,14 +47,37 @@ public class RavenwoodAwareTestRunnerHook {
     }
 
     /**
+     * Called before the inner runner starts.
+     */
+    public static void onBeforeInnerRunnerStart(
+            RavenwoodAwareTestRunner runner, Description description) throws Throwable {
+    }
+
+    /**
+     * Called after the inner runner finished.
+     */
+    public static void onAfterInnerRunnerFinished(
+            RavenwoodAwareTestRunner runner, Description description) throws Throwable {
+    }
+
+    /**
      * Called before a test / class.
      *
      * Return false if it should be skipped.
      */
     public static boolean onBefore(RavenwoodAwareTestRunner runner, Description description,
-            Scope scope, Order order) {
+            Scope scope, Order order) throws Throwable {
         return true;
     }
+
+    public static void onRavenwoodRuleEnter(RavenwoodAwareTestRunner runner,
+            Description description, RavenwoodRule rule) throws Throwable {
+    }
+
+    public static void onRavenwoodRuleExit(RavenwoodAwareTestRunner runner,
+            Description description, RavenwoodRule rule) throws Throwable {
+    }
+
 
     /**
      * Called after a test / class.

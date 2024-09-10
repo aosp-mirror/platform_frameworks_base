@@ -487,10 +487,8 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
             val job = underTest.primaryLevel.launchIn(this)
 
             // WHEN we set up carrier merged info
-            val networkId = 2
             wifiRepository.setWifiNetwork(
                 WifiNetworkModel.CarrierMerged(
-                    networkId,
                     SUB_ID,
                     level = 3,
                 )
@@ -502,7 +500,6 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
             // WHEN we update the info
             wifiRepository.setWifiNetwork(
                 WifiNetworkModel.CarrierMerged(
-                    networkId,
                     SUB_ID,
                     level = 1,
                 )
@@ -540,10 +537,8 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
             assertThat(dumpBuffer()).contains("$COL_PRIMARY_LEVEL${BUFFER_SEPARATOR}1")
 
             // WHEN isCarrierMerged is set to true
-            val networkId = 2
             wifiRepository.setWifiNetwork(
                 WifiNetworkModel.CarrierMerged(
-                    networkId,
                     SUB_ID,
                     level = 3,
                 )
@@ -556,7 +551,6 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
             // WHEN the carrier merge network is updated
             wifiRepository.setWifiNetwork(
                 WifiNetworkModel.CarrierMerged(
-                    networkId,
                     SUB_ID,
                     level = 4,
                 )
@@ -607,10 +601,8 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
                 .onSignalStrengthsChanged(signalStrength)
 
             // THEN updates to the carrier merged level aren't logged
-            val networkId = 2
             wifiRepository.setWifiNetwork(
                 WifiNetworkModel.CarrierMerged(
-                    networkId,
                     SUB_ID,
                     level = 4,
                 )
@@ -619,7 +611,6 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
 
             wifiRepository.setWifiNetwork(
                 WifiNetworkModel.CarrierMerged(
-                    networkId,
                     SUB_ID,
                     level = 3,
                 )

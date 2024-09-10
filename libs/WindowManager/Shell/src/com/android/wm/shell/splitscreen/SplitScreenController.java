@@ -61,7 +61,6 @@ import android.view.IRemoteAnimationRunner;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
-import android.view.SurfaceSession;
 import android.view.WindowManager;
 import android.widget.Toast;
 import android.window.RemoteTransition;
@@ -897,7 +896,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
 
     private SurfaceControl reparentSplitTasksForAnimation(RemoteAnimationTarget[] apps,
             SurfaceControl.Transaction t, String callsite) {
-        final SurfaceControl.Builder builder = new SurfaceControl.Builder(new SurfaceSession())
+        final SurfaceControl.Builder builder = new SurfaceControl.Builder()
                 .setContainerLayer()
                 .setName("RecentsAnimationSplitTasks")
                 .setHidden(false)

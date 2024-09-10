@@ -21,8 +21,6 @@ import com.android.hoststubgen.LogLevel
 import com.android.hoststubgen.asm.ClassNodes
 import com.android.hoststubgen.asm.UnifiedVisitor
 import com.android.hoststubgen.asm.getPackageNameFromFullClassName
-import com.android.hoststubgen.asm.resolveClassNameWithDefaultPackage
-import com.android.hoststubgen.asm.toJvmClassName
 import com.android.hoststubgen.filters.FilterPolicy
 import com.android.hoststubgen.filters.FilterPolicyWithReason
 import com.android.hoststubgen.filters.OutputFilter
@@ -57,7 +55,7 @@ abstract class BaseAdapter(
 
     protected lateinit var currentPackageName: String
     protected lateinit var currentClassName: String
-    protected var nativeSubstitutionClass: String? = null
+    protected var redirectionClass: String? = null
     protected lateinit var classPolicy: FilterPolicyWithReason
 
     override fun visit(
@@ -72,33 +70,12 @@ abstract class BaseAdapter(
         currentClassName = name
         currentPackageName = getPackageNameFromFullClassName(name)
         classPolicy = filter.getPolicyForClass(currentClassName)
+        redirectionClass = filter.getRedirectionClass(currentClassName)
 
         log.d("[%s] visit: %s (package: %s)", this.javaClass.simpleName, name, currentPackageName)
         log.indent()
         log.v("Emitting class: %s", name)
         log.indent()
-
-        filter.getNativeSubstitutionClass(currentClassName)?.let { className ->
-            val fullClassName = resolveClassNameWithDefaultPackage(className, currentPackageName)
-                .toJvmClassName()
-            log.d("  NativeSubstitutionClass: $fullClassName")
-            if (classes.findClass(fullClassName) == null) {
-                log.w(
-                    "Native substitution class $fullClassName not found. Class must be " +
-                            "available at runtime."
-                )
-            } else {
-                // If the class exists, it must have a KeepClass policy.
-                if (filter.getPolicyForClass(fullClassName).policy != FilterPolicy.KeepClass) {
-                    // TODO: Use real annotation name.
-                    options.errors.onErrorFound(
-                        "Native substitution class $fullClassName should have @Keep."
-                    )
-                }
-            }
-
-            nativeSubstitutionClass = fullClassName
-        }
 
         // Inject annotations to generated classes.
         UnifiedVisitor.on(this).visitAnnotation(HostStubGenProcessedAsKeep.CLASS_DESCRIPTOR, true)
