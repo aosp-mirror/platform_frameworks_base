@@ -887,7 +887,7 @@ public class ZenModeHelper {
                 return Condition.STATE_UNKNOWN;
             }
             if (Flags.modesApi() && Flags.modesUi()) {
-                return rule.isAutomaticActive() ? STATE_TRUE : STATE_FALSE;
+                return rule.isActive() ? STATE_TRUE : STATE_FALSE;
             } else {
                 // Buggy, does not consider snoozing!
                 return rule.condition != null ? rule.condition.state : STATE_FALSE;
@@ -967,12 +967,12 @@ public class ZenModeHelper {
                 // snoozing-unsnoozing or activating-stopping.
                 if (condition.state == STATE_TRUE) {
                     rule.resetConditionOverride();
-                    if (!rule.isAutomaticActive()) {
+                    if (!rule.isActive()) {
                         rule.setConditionOverride(OVERRIDE_ACTIVATE);
                     }
                 } else if (condition.state == STATE_FALSE) {
                     rule.resetConditionOverride();
-                    if (rule.isAutomaticActive()) {
+                    if (rule.isActive()) {
                         rule.setConditionOverride(OVERRIDE_DEACTIVATE);
                     }
                 }
@@ -1609,7 +1609,7 @@ public class ZenModeHelper {
                     // User deactivation of DND means just turning off the manual DND rule.
                     // For API calls (different origin) keep old behavior of snoozing all rules.
                     for (ZenRule automaticRule : newConfig.automaticRules.values()) {
-                        if (automaticRule.isAutomaticActive()) {
+                        if (automaticRule.isActive()) {
                             automaticRule.setConditionOverride(OVERRIDE_DEACTIVATE);
                         }
                     }
@@ -1618,7 +1618,7 @@ public class ZenModeHelper {
                 if (zenMode == Global.ZEN_MODE_OFF) {
                     newConfig.manualRule = null;
                     for (ZenRule automaticRule : newConfig.automaticRules.values()) {
-                        if (automaticRule.isAutomaticActive()) {
+                        if (automaticRule.isActive()) {
                             automaticRule.setConditionOverride(OVERRIDE_DEACTIVATE);
                         }
                     }
@@ -1665,7 +1665,7 @@ public class ZenModeHelper {
                 mConfig.manualRule.dumpDebug(proto, ZenModeProto.ENABLED_ACTIVE_CONDITIONS);
             }
             for (ZenRule rule : mConfig.automaticRules.values()) {
-                if (rule.isAutomaticActive()) {
+                if (rule.isActive()) {
                     rule.dumpDebug(proto, ZenModeProto.ENABLED_ACTIVE_CONDITIONS);
                 }
             }
@@ -2020,9 +2020,9 @@ public class ZenModeHelper {
                             scheduleEnabledBroadcast(
                                     rule.getPkg(), config.user, rule.id, rule.enabled);
                         }
-                        if (original.isAutomaticActive() != rule.isAutomaticActive()) {
+                        if (original.isActive() != rule.isActive()) {
                             scheduleActivationBroadcast(
-                                    rule.getPkg(), config.user, rule.id, rule.isAutomaticActive());
+                                    rule.getPkg(), config.user, rule.id, rule.isActive());
                         }
                     }
                 }
@@ -2106,7 +2106,7 @@ public class ZenModeHelper {
             if (mConfig.isManualActive()) return mConfig.manualRule.zenMode;
             int zen = Global.ZEN_MODE_OFF;
             for (ZenRule automaticRule : mConfig.automaticRules.values()) {
-                if (automaticRule.isAutomaticActive()) {
+                if (automaticRule.isActive()) {
                     if (zenSeverity(automaticRule.zenMode) > zenSeverity(zen)) {
                         // automatic rule triggered dnd and user hasn't seen update dnd dialog
                         if (Settings.Secure.getInt(mContext.getContentResolver(),
@@ -2182,7 +2182,7 @@ public class ZenModeHelper {
             }
 
             for (ZenRule automaticRule : mConfig.automaticRules.values()) {
-                if (automaticRule.isAutomaticActive()) {
+                if (automaticRule.isActive()) {
                     // Active rules with INTERRUPTION_FILTER_ALL are not included in consolidated
                     // policy. This is relevant in case some other active rule has a more
                     // restrictive INTERRUPTION_FILTER but a more lenient ZenPolicy!

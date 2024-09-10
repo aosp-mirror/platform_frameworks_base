@@ -495,8 +495,8 @@ public class ZenModeDiff {
 
             // Even if added or removed, there may be a change in whether or not it was active.
             // This only applies to automatic rules.
-            boolean fromActive = from != null ? from.isAutomaticActive() : false;
-            boolean toActive = to != null ? to.isAutomaticActive() : false;
+            boolean fromActive = from != null ? from.isActive() : false;
+            boolean toActive = to != null ? to.isActive() : false;
             if (fromActive != toActive) {
                 mActiveDiff = new FieldDiff<>(fromActive, toActive);
             }

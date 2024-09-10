@@ -140,7 +140,7 @@ public class ZenMode implements Parcelable {
 
     private static Status computeStatus(@NonNull ZenModeConfig.ZenRule zenRuleExtraData) {
         if (zenRuleExtraData.enabled) {
-            if (zenRuleExtraData.isAutomaticActive()) {
+            if (zenRuleExtraData.isActive()) {
                 return Status.ENABLED_AND_ACTIVE;
             } else {
                 return Status.ENABLED;
