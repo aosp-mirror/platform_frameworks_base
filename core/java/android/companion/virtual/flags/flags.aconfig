@@ -131,3 +131,10 @@ flag {
     bug: "350007866"
     is_exported: true
 }
+
+flag {
+  namespace: "virtual_devices"
+  name: "camera_timestamp_from_surface"
+  description: "Pass the surface timestamp to the capture result"
+  bug: "351341245"
+}
