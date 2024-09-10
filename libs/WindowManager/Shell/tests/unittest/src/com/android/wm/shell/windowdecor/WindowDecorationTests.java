@@ -901,8 +901,9 @@ public class WindowDecorationTests extends ShellTestCase {
     }
 
     @Test
-    public void onStatusBarVisibilityChange_shownToHidden_hidesCaption() {
+    public void onStatusBarVisibilityChange_fullscreen_shownToHidden_hidesCaption() {
         final ActivityManager.RunningTaskInfo task = createTaskInfo();
+        task.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
         when(mMockDisplayController.getInsetsState(task.displayId))
                 .thenReturn(createInsetsState(statusBars(), true /* visible */));
         final TestWindowDecoration decor = createWindowDecoration(task);
@@ -915,8 +916,9 @@ public class WindowDecorationTests extends ShellTestCase {
     }
 
     @Test
-    public void onStatusBarVisibilityChange_hiddenToShown_showsCaption() {
+    public void onStatusBarVisibilityChange_fullscreen_hiddenToShown_showsCaption() {
         final ActivityManager.RunningTaskInfo task = createTaskInfo();
+        task.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
         when(mMockDisplayController.getInsetsState(task.displayId))
                 .thenReturn(createInsetsState(statusBars(), false /* visible */));
         final TestWindowDecoration decor = createWindowDecoration(task);
@@ -924,6 +926,21 @@ public class WindowDecorationTests extends ShellTestCase {
         assertFalse(decor.mIsCaptionVisible);
 
         decor.onInsetsStateChanged(createInsetsState(statusBars(), true /* visible */));
+
+        assertTrue(decor.mIsCaptionVisible);
+    }
+
+    @Test
+    public void onStatusBarVisibilityChange_freeform_shownToHidden_keepsCaption() {
+        final ActivityManager.RunningTaskInfo task = createTaskInfo();
+        task.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        when(mMockDisplayController.getInsetsState(task.displayId))
+                .thenReturn(createInsetsState(statusBars(), true /* visible */));
+        final TestWindowDecoration decor = createWindowDecoration(task);
+        decor.relayout(task);
+        assertTrue(decor.mIsCaptionVisible);
+
+        decor.onInsetsStateChanged(createInsetsState(statusBars(), false /* visible */));
 
         assertTrue(decor.mIsCaptionVisible);
     }
