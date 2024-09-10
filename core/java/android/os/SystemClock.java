@@ -109,6 +109,7 @@ public final class SystemClock {
     private static final String TAG = "SystemClock";
 
     private static volatile IAlarmManager sIAlarmManager;
+    private static volatile ITimeDetectorService sITimeDetectorService;
 
     /**
      * Since {@code nanoTime()} is arbitrary, anchor our Ravenwood clocks against it.
@@ -186,6 +187,14 @@ public final class SystemClock {
                     .asInterface(ServiceManager.getService(Context.ALARM_SERVICE));
         }
         return sIAlarmManager;
+    }
+
+    private static ITimeDetectorService getITimeDetectorService() {
+        if (sITimeDetectorService == null) {
+            sITimeDetectorService = ITimeDetectorService.Stub
+                    .asInterface(ServiceManager.getService(Context.TIME_DETECTOR_SERVICE));
+        }
+        return sITimeDetectorService;
     }
 
     /**
@@ -314,15 +323,6 @@ public final class SystemClock {
     }
 
     /**
-     * @see #currentNetworkTimeMillis(ITimeDetectorService)
-     * @hide
-     */
-    public static long currentNetworkTimeMillis() {
-        return currentNetworkTimeMillis(ITimeDetectorService.Stub
-                .asInterface(ServiceManager.getService(Context.TIME_DETECTOR_SERVICE)));
-    }
-
-    /**
      * Returns milliseconds since January 1, 1970 00:00:00.0 UTC, synchronized
      * using a remote network source outside the device.
      * <p>
@@ -346,29 +346,29 @@ public final class SystemClock {
      * @throws DateTimeException when no network time can be provided.
      * @hide
      */
-    public static long currentNetworkTimeMillis(
-            ITimeDetectorService timeDetectorService) {
-        if (timeDetectorService != null) {
-            UnixEpochTime time;
-            try {
-                time = timeDetectorService.latestNetworkTime();
-            } catch (ParcelableException e) {
-                e.maybeRethrow(DateTimeException.class);
-                throw new RuntimeException(e);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-
-            if (time == null) {
-                // This is not expected.
-                throw new DateTimeException("Network based time is not available.");
-            }
-            long currentMillis = elapsedRealtime();
-            long deltaMs = currentMillis - time.getElapsedRealtimeMillis();
-            return time.getUnixEpochTimeMillis() + deltaMs;
-        } else {
+    public static long currentNetworkTimeMillis() {
+        ITimeDetectorService timeDetectorService = getITimeDetectorService();
+        if (timeDetectorService == null) {
             throw new RuntimeException(new DeadSystemException());
         }
+
+        UnixEpochTime time;
+        try {
+            time = timeDetectorService.latestNetworkTime();
+        } catch (ParcelableException e) {
+            e.maybeRethrow(DateTimeException.class);
+            throw new RuntimeException(e);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        if (time == null) {
+            // This is not expected.
+            throw new DateTimeException("Network based time is not available.");
+        }
+
+        long currentMillis = elapsedRealtime();
+        long deltaMs = currentMillis - time.getElapsedRealtimeMillis();
+        return time.getUnixEpochTimeMillis() + deltaMs;
     }
 
    /**
@@ -396,14 +396,9 @@ public final class SystemClock {
      */
     public static @NonNull Clock currentNetworkTimeClock() {
         return new SimpleClock(ZoneOffset.UTC) {
-            private ITimeDetectorService mSvc;
             @Override
             public long millis() {
-                if (mSvc == null) {
-                    mSvc = ITimeDetectorService.Stub
-                            .asInterface(ServiceManager.getService(Context.TIME_DETECTOR_SERVICE));
-                }
-                return SystemClock.currentNetworkTimeMillis(mSvc);
+                return SystemClock.currentNetworkTimeMillis();
             }
         };
     }

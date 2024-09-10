@@ -90,6 +90,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManager.REMOVE_CONTENT_MODE_UNDEFINED;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_OPEN;
+import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.view.WindowManager.fixScale;
 import static android.view.WindowManagerGlobal.ADD_OKAY;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_CANCEL_AND_REDRAW;
@@ -158,6 +159,7 @@ import static com.android.server.wm.WindowManagerServiceDumpProto.ROOT_WINDOW_CO
 import static com.android.server.wm.WindowManagerServiceDumpProto.WINDOW_FRAMES_VALID;
 import static com.android.window.flags.Flags.multiCrop;
 import static com.android.window.flags.Flags.setScPropertiesInClient;
+import static com.android.window.flags.Flags.enableDisplayFocusInShellTransitions;
 
 import android.Manifest;
 import android.Manifest.permission;
@@ -3238,9 +3240,28 @@ public class WindowManagerService extends IWindowManager.Stub
                     return;
                 }
 
+                Transition transition = null;
+                boolean transitionNewlyCreated = false;
+                if (enableDisplayFocusInShellTransitions()) {
+                    transition = mAtmService.getTransitionController().requestTransitionIfNeeded(
+                                    TRANSIT_TO_FRONT, 0 /* flags */, null /* trigger */,
+                                    displayContent);
+                    if (transition != null) {
+                        transitionNewlyCreated = true;
+                    } else {
+                        transition =
+                                mAtmService.getTransitionController().getCollectingTransition();
+                    }
+                    if (transition != null) {
+                        transition.recordTaskOrder(displayContent);
+                    }
+                }
                 // Nothing prevented us from moving the display to the top. Let's do it!
                 displayContent.getParent().positionChildAt(WindowContainer.POSITION_TOP,
                         displayContent, true /* includingParents */);
+                if (transitionNewlyCreated) {
+                    transition.setReady(displayContent, true /* ready */);
+                }
             }
         }
     }

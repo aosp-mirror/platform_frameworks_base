@@ -107,6 +107,8 @@ constructor(
                 }
             }
 
+    // TODO(b/365182034): move to interactor, add as dependency of SideFpsOverlayInteractor when
+    //  rest to unlock feature is implemented
     val isVisible: Flow<Boolean> = _visible.asStateFlow()
 
     val progress: Flow<Float> = _progress.asStateFlow()

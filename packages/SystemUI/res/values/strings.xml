@@ -3812,4 +3812,33 @@ Action + ESC for this.</string>
     <!-- Toast message for notifying users to use regular brightness bar to lower the brightness. [CHAR LIMIT=NONE] -->
     <string name="accessibility_deprecate_extra_dim_dialog_toast">
         Extra dim shortcut removed. To lower your brightness, use the regular brightness bar.</string>
+
+    <!-- Label for category in QS Edit mode list of tiles, for tiles that are related to connectivity, e.g. Internet. [CHAR LIMIT=NONE] -->
+    <string name="qs_edit_mode_category_connectivity">
+        Connectivity
+    </string>
+    <!-- Label for category in QS Edit mode list of tiles, for tiles that are related to accessibility functions, e.g. Hearing devices. [CHAR LIMIT=NONE] -->
+    <string name="qs_edit_mode_category_accessibility">
+        Accessibility
+    </string>
+    <!-- Label for category in QS Edit mode list of tiles, for tiles that are related to general utilities, e.g. Flashlight. [CHAR LIMIT=NONE] -->
+    <string name="qs_edit_mode_category_utilities">
+        Utilities
+    </string>
+    <!-- Label for category in QS Edit mode list of tiles, for tiles that are related to privacy, e.g. Mic access. [CHAR LIMIT=NONE] -->
+    <string name="qs_edit_mode_category_privacy">
+        Privacy
+    </string>
+    <!-- Label for category in QS Edit mode list of tiles, for tiles that are provided by an app, e.g. Calculator. [CHAR LIMIT=NONE] -->
+    <string name="qs_edit_mode_category_providedByApps">
+        Provided by apps
+    </string>
+    <!-- Label for category in QS Edit mode list of tiles, for tiles that are related to the display, e.g. Dark theme. [CHAR LIMIT=NONE] -->
+    <string name="qs_edit_mode_category_display">
+        Display
+    </string>
+    <!-- Label for category in QS Edit mode list of tiles, for tiles with an unknown category. [CHAR LIMIT=NONE] -->
+    <string name="qs_edit_mode_category_unknown">
+        Unknown
+    </string>
 </resources>

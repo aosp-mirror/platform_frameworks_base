@@ -2,6 +2,9 @@
   "postsubmit": [
     {
       "name": "FrameworksAppFunctionsTests"
+    },
+    {
+      "name": "CtsAppFunctionTestCases"
     }
   ]
 }

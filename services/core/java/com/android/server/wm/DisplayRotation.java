@@ -81,7 +81,6 @@ import android.window.WindowContainerTransaction;
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.ProtoLog;
-import com.android.server.LocalServices;
 import com.android.server.UiThread;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.statusbar.StatusBarManagerInternal;
@@ -136,7 +135,6 @@ public class DisplayRotation {
     private final RotationLockHistory mRotationLockHistory = new RotationLockHistory();
 
     private OrientationListener mOrientationListener;
-    private StatusBarManagerInternal mStatusBarManagerInternal;
     private SettingsObserver mSettingsObserver;
     @NonNull
     private final DeviceStateController mDeviceStateController;
@@ -1559,11 +1557,9 @@ public class DisplayRotation {
 
     /** Notify the StatusBar that system rotation suggestion has changed. */
     private void sendProposedRotationChangeToStatusBarInternal(int rotation, boolean isValid) {
-        if (mStatusBarManagerInternal == null) {
-            mStatusBarManagerInternal = LocalServices.getService(StatusBarManagerInternal.class);
-        }
-        if (mStatusBarManagerInternal != null) {
-            mStatusBarManagerInternal.onProposedRotationChanged(rotation, isValid);
+        final StatusBarManagerInternal bar = mDisplayPolicy.getStatusBarManagerInternal();
+        if (bar != null) {
+            bar.onProposedRotationChanged(mDisplayContent.getDisplayId(), rotation, isValid);
         }
     }
 

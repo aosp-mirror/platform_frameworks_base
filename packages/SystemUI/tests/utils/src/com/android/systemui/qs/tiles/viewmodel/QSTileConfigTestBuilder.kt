@@ -18,6 +18,7 @@ package com.android.systemui.qs.tiles.viewmodel
 
 import com.android.internal.logging.InstanceId
 import com.android.systemui.qs.pipeline.shared.TileSpec
+import com.android.systemui.qs.shared.model.TileCategory
 
 object QSTileConfigTestBuilder {
 
@@ -30,12 +31,14 @@ object QSTileConfigTestBuilder {
         var instanceId: InstanceId = InstanceId.fakeInstanceId(0)
         var metricsSpec: String = tileSpec.spec
         var policy: QSTilePolicy = QSTilePolicy.NoRestrictions
+        var category: TileCategory = TileCategory.UNKNOWN
 
         fun build() =
             QSTileConfig(
                 tileSpec,
                 uiConfig,
                 instanceId,
+                category,
                 metricsSpec,
                 policy,
             )
