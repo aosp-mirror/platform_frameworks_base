@@ -28,6 +28,7 @@ import android.util.Log;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.internal.os.RuntimeInit;
+import com.android.platform.test.ravenwood.runtimehelper.ClassLoadHook;
 import com.android.ravenwood.common.RavenwoodCommonUtils;
 
 import org.junit.runner.Description;
@@ -75,6 +76,9 @@ public class RavenwoodAwareTestRunnerHook {
         // We haven't initialized liblog yet, so directly write to System.out here.
         RavenwoodCommonUtils.log(TAG, "initOnce()");
 
+        // Make sure libandroid_runtime is loaded.
+        ClassLoadHook.onClassLoaded(Log.class);
+
         // Redirect stdout/stdin to liblog.
         RuntimeInit.redirectLogStreams();
 
@@ -82,6 +86,10 @@ public class RavenwoodAwareTestRunnerHook {
         System.setProperty("android.junit.runner",
                 "androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner");
         System.setProperty(RAVENWOOD_VERSION_JAVA_SYSPROP, "1");
+
+        // Do the basic set up for the android sysprops.
+        RavenwoodRuntimeEnvironmentController.setSystemProperties(
+                RavenwoodSystemProperties.DEFAULT_VALUES);
     }
 
     /**
