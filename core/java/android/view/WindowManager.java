@@ -2371,7 +2371,7 @@ public interface WindowManager extends ViewManager {
         public static final int TYPE_SECURE_SYSTEM_OVERLAY = FIRST_SYSTEM_WINDOW+15;
 
         /**
-         * Window type: the drag-and-drop pseudowindow.  There is only one
+         * Window type: the drag-and-drop pseudowindow. There is only one
          * drag layer (at most), and it is placed on top of all other windows.
          * In multiuser systems shows only on the owning user's window.
          * @hide
@@ -2381,7 +2381,7 @@ public interface WindowManager extends ViewManager {
         /**
          * Window type: panel that slides out from over the status bar
          * In multiuser systems shows on all users' windows. These windows
-         * are displayed on top of the stauts bar and any {@link #TYPE_STATUS_BAR_PANEL}
+         * are displayed on top of the status bar and any {@link #TYPE_STATUS_BAR_PANEL}
          * windows.
          * @hide
          */
