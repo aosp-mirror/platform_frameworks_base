@@ -35,13 +35,6 @@ public class ClientFlags {
     }
 
     /**
-     * @see Flags#fixLineHeightForLocale()
-     */
-    public static boolean fixLineHeightForLocale() {
-        return TextFlags.isFeatureEnabled(Flags.FLAG_FIX_LINE_HEIGHT_FOR_LOCALE);
-    }
-
-    /**
      * @see Flags#fixMisalignedContextMenu()
      */
     public static boolean fixMisalignedContextMenu() {
