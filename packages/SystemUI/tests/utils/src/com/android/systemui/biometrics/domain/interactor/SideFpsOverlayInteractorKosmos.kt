@@ -14,24 +14,19 @@
  * limitations under the License.
  */
 
-package com.android.systemui.biometrics.ui.binder
+package com.android.systemui.biometrics.domain.interactor
 
-import android.content.applicationContext
-import android.view.layoutInflater
-import android.view.windowManager
-import com.android.systemui.biometrics.domain.interactor.sideFpsOverlayInteractor
-import com.android.systemui.biometrics.ui.viewmodel.sideFpsOverlayViewModel
+import com.android.systemui.keyguard.domain.interactor.deviceEntrySideFpsOverlayInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
-import com.android.systemui.kosmos.applicationCoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-val Kosmos.sideFpsOverlayViewBinder by Fixture {
-    SideFpsOverlayViewBinder(
-        applicationCoroutineScope,
-        applicationContext,
-        { layoutInflater },
-        { sideFpsOverlayInteractor },
-        { sideFpsOverlayViewModel },
-        { windowManager }
+@OptIn(ExperimentalCoroutinesApi::class)
+val Kosmos.sideFpsOverlayInteractor by Fixture {
+    SideFpsOverlayInteractorImpl(
+        biometricStatusInteractor,
+        displayStateInteractor,
+        deviceEntrySideFpsOverlayInteractor,
+        sideFpsSensorInteractor,
     )
 }
