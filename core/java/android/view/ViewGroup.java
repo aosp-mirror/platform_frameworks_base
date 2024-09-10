@@ -1500,6 +1500,19 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return null;
     }
 
+    /** @hide */
+    @Override
+    public void findAutofillableViewsByTraversal(@NonNull List<View> autofillableViews) {
+        super.findAutofillableViewsByTraversal(autofillableViews);
+
+        final int childrenCount = mChildrenCount;
+        final View[] children = mChildren;
+        for (int i = 0; i < childrenCount; i++) {
+            View child = children[i];
+            child.findAutofillableViewsByTraversal(autofillableViews);
+        }
+    }
+
     @Override
     public void dispatchWindowFocusChanged(boolean hasFocus) {
         super.dispatchWindowFocusChanged(hasFocus);
@@ -2798,9 +2811,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     if (alreadyDispatchedToNewTouchTarget && target == newTouchTarget) {
                         handled = true;
                     } else {
-                        final boolean cancelChild = resetCancelNextUpFlag(target.child)
-                                || intercepted;
-                        if (dispatchTransformedTouchEvent(ev, cancelChild,
+                        final boolean cancelChild =
+                                (target.child != null && resetCancelNextUpFlag(target.child))
+                                        || intercepted;
+                        if (target.child != null && dispatchTransformedTouchEvent(ev, cancelChild,
                                 target.child, target.pointerIdBits)) {
                             handled = true;
                         }
@@ -3079,74 +3093,74 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     private boolean dispatchTransformedTouchEvent(MotionEvent event, boolean cancel,
             View child, int desiredPointerIdBits) {
-        final boolean handled;
-
-        // Canceling motions is a special case.  We don't need to perform any transformations
-        // or filtering.  The important part is the action, not the contents.
         final int oldAction = event.getAction();
-        if (cancel || oldAction == MotionEvent.ACTION_CANCEL) {
-            event.setAction(MotionEvent.ACTION_CANCEL);
-            if (child == null) {
-                handled = super.dispatchTouchEvent(event);
-            } else {
-                handled = child.dispatchTouchEvent(event);
+        try {
+            final boolean handled;
+            if (cancel) {
+                event.setAction(MotionEvent.ACTION_CANCEL);
             }
-            event.setAction(oldAction);
-            return handled;
-        }
 
-        // Calculate the number of pointers to deliver.
-        final int oldPointerIdBits = event.getPointerIdBits();
-        final int newPointerIdBits = oldPointerIdBits & desiredPointerIdBits;
+            // Calculate the number of pointers to deliver.
+            final int oldPointerIdBits = event.getPointerIdBits();
+            int newPointerIdBits = oldPointerIdBits & desiredPointerIdBits;
 
-        // If for some reason we ended up in an inconsistent state where it looks like we
-        // might produce a motion event with no pointers in it, then drop the event.
-        if (newPointerIdBits == 0) {
-            return false;
-        }
-
-        // If the number of pointers is the same and we don't need to perform any fancy
-        // irreversible transformations, then we can reuse the motion event for this
-        // dispatch as long as we are careful to revert any changes we make.
-        // Otherwise we need to make a copy.
-        final MotionEvent transformedEvent;
-        if (newPointerIdBits == oldPointerIdBits) {
-            if (child == null || child.hasIdentityMatrix()) {
-                if (child == null) {
-                    handled = super.dispatchTouchEvent(event);
+            // If for some reason we ended up in an inconsistent state where it looks like we
+            // might produce a non-cancel motion event with no pointers in it, then drop the event.
+            // Make sure that we don't drop any cancel events.
+            if (newPointerIdBits == 0) {
+                if (event.getAction() != MotionEvent.ACTION_CANCEL) {
+                    return false;
                 } else {
-                    final float offsetX = mScrollX - child.mLeft;
-                    final float offsetY = mScrollY - child.mTop;
-                    event.offsetLocation(offsetX, offsetY);
-
-                    handled = child.dispatchTouchEvent(event);
-
-                    event.offsetLocation(-offsetX, -offsetY);
+                    newPointerIdBits = oldPointerIdBits;
                 }
-                return handled;
-            }
-            transformedEvent = MotionEvent.obtain(event);
-        } else {
-            transformedEvent = event.split(newPointerIdBits);
-        }
-
-        // Perform any necessary transformations and dispatch.
-        if (child == null) {
-            handled = super.dispatchTouchEvent(transformedEvent);
-        } else {
-            final float offsetX = mScrollX - child.mLeft;
-            final float offsetY = mScrollY - child.mTop;
-            transformedEvent.offsetLocation(offsetX, offsetY);
-            if (! child.hasIdentityMatrix()) {
-                transformedEvent.transform(child.getInverseMatrix());
             }
 
-            handled = child.dispatchTouchEvent(transformedEvent);
-        }
+            // If the number of pointers is the same and we don't need to perform any fancy
+            // irreversible transformations, then we can reuse the motion event for this
+            // dispatch as long as we are careful to revert any changes we make.
+            // Otherwise we need to make a copy.
+            final MotionEvent transformedEvent;
+            if (newPointerIdBits == oldPointerIdBits) {
+                if (child == null || child.hasIdentityMatrix()) {
+                    if (child == null) {
+                        handled = super.dispatchTouchEvent(event);
+                    } else {
+                        final float offsetX = mScrollX - child.mLeft;
+                        final float offsetY = mScrollY - child.mTop;
+                        event.offsetLocation(offsetX, offsetY);
 
-        // Done.
-        transformedEvent.recycle();
-        return handled;
+                        handled = child.dispatchTouchEvent(event);
+
+                        event.offsetLocation(-offsetX, -offsetY);
+                    }
+                    return handled;
+                }
+                transformedEvent = MotionEvent.obtain(event);
+            } else {
+                transformedEvent = event.split(newPointerIdBits);
+            }
+
+            // Perform any necessary transformations and dispatch.
+            if (child == null) {
+                handled = super.dispatchTouchEvent(transformedEvent);
+            } else {
+                final float offsetX = mScrollX - child.mLeft;
+                final float offsetY = mScrollY - child.mTop;
+                transformedEvent.offsetLocation(offsetX, offsetY);
+                if (!child.hasIdentityMatrix()) {
+                    transformedEvent.transform(child.getInverseMatrix());
+                }
+
+                handled = child.dispatchTouchEvent(transformedEvent);
+            }
+
+            // Done.
+            transformedEvent.recycle();
+            return handled;
+
+        } finally {
+            event.setAction(oldAction);
+        }
     }
 
     /**
@@ -4490,6 +4504,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final View[] children = mChildren;
         for (int i = 0; i < count; i++) {
             final View child = children[i];
+            if (child == null) {
+                throw new IllegalStateException(getClass().getSimpleName() + " contains null " +
+                        "child at index " + i + " when traversal in dispatchGetDisplayList," +
+                        " the view may have been removed.");
+            }
             if (((child.mViewFlags & VISIBILITY_MASK) == VISIBLE || child.getAnimation() != null)) {
                 recreateChildDisplayList(child);
             }

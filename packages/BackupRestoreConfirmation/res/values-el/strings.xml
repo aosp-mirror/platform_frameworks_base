@@ -16,7 +16,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="backup_confirm_title" msgid="827563724209303345">"Πλήρης δημιουργία αντιγράφων ασφαλείας"</string>
+    <string name="backup_confirm_title" msgid="827563724209303345">"Πλήρης δημιουργία αντιγράφου ασφαλείας"</string>
     <string name="restore_confirm_title" msgid="5469365809567486602">"Πλήρης επαναφορά"</string>
     <string name="backup_confirm_text" msgid="1878021282758896593">"Έχει ζητηθεί ένα πλήρες αντίγραφο ασφαλείας όλων των δεδομένων σε έναν συνδεδεμένο επιτραπέζιο υπολογιστή. Θέλετε να επιτραπεί αυτή η ενέργεια;\n\nΑν δεν έχετε ζητήσει οι ίδιοι αυτό το αντίγραφο ασφαλείας, μην επιτρέψετε την ενέργεια."</string>
     <string name="allow_backup_button_label" msgid="4217228747769644068">"Δημιουργία αντιγράφων ασφαλείας για τα δεδομένα μου"</string>

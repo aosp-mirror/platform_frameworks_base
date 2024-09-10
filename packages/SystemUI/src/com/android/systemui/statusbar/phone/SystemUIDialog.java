@@ -341,6 +341,7 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
         mSysUiState.setFlag(QuickStepContract.SYSUI_STATE_DIALOG_SHOWING, true)
                 .commitUpdate(mContext.getDisplayId());
 
+        mDelegate.onStart(this);
         start();
     }
 
@@ -349,7 +350,8 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
      * should override this method instead.
      */
     protected void start() {
-        mDelegate.onStart(this);
+        // IMPORTANT: Please do not add anything here, since subclasses are likely to override this.
+        // Instead, add things to onStop above.
     }
 
     @Override
@@ -365,6 +367,7 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
         mSysUiState.setFlag(QuickStepContract.SYSUI_STATE_DIALOG_SHOWING, false)
                 .commitUpdate(mContext.getDisplayId());
 
+        mDelegate.onStop(this);
         stop();
     }
 
@@ -373,7 +376,8 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
      * should override this method instead.
      */
     protected void stop() {
-        mDelegate.onStop(this);
+        // IMPORTANT: Please do not add anything here, since subclasses are likely to override this.
+        // Instead, add things to onStop above.
     }
 
     @Override
@@ -476,10 +480,16 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
     }
 
     public static AlertDialog applyFlags(AlertDialog dialog) {
+        return applyFlags(dialog, true);
+    }
+
+    public static AlertDialog applyFlags(AlertDialog dialog, boolean showWhenLocked) {
         final Window window = dialog.getWindow();
         window.setType(WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL);
-        window.addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
-                | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
+        window.addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
+        if (showWhenLocked) {
+            window.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
+        }
         window.getAttributes().setFitInsetsTypes(
                 window.getAttributes().getFitInsetsTypes() & ~Type.statusBars());
         return dialog;

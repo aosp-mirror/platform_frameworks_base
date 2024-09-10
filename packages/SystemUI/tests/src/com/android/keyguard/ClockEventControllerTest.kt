@@ -16,6 +16,7 @@
 package com.android.keyguard
 
 import android.content.BroadcastReceiver
+import android.platform.test.annotations.DisableFlags
 import android.view.View
 import android.view.ViewTreeObserver
 import android.widget.FrameLayout
@@ -263,9 +264,9 @@ class ClockEventControllerTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     fun keyguardCallback_visibilityChanged_clockDozeCalled() =
         runBlocking(IMMEDIATE) {
-            mSetFlagsRule.disableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
             val captor = argumentCaptor<KeyguardUpdateMonitorCallback>()
             verify(keyguardUpdateMonitor).registerCallback(capture(captor))
 

@@ -1636,7 +1636,8 @@ public class AudioSystem
     /** @hide */ public static final int FORCE_ENCODED_SURROUND_NEVER = 13;
     /** @hide */ public static final int FORCE_ENCODED_SURROUND_ALWAYS = 14;
     /** @hide */ public static final int FORCE_ENCODED_SURROUND_MANUAL = 15;
-    /** @hide */ public static final int NUM_FORCE_CONFIG = 16;
+    /** @hide */ public static final int FORCE_BT_BLE = 16;
+    /** @hide */ public static final int NUM_FORCE_CONFIG = 17;
     /** @hide */ public static final int FORCE_DEFAULT = FORCE_NONE;
 
     /** @hide */
@@ -1658,6 +1659,7 @@ public class AudioSystem
             case FORCE_ENCODED_SURROUND_NEVER: return "FORCE_ENCODED_SURROUND_NEVER";
             case FORCE_ENCODED_SURROUND_ALWAYS: return "FORCE_ENCODED_SURROUND_ALWAYS";
             case FORCE_ENCODED_SURROUND_MANUAL: return "FORCE_ENCODED_SURROUND_MANUAL";
+            case FORCE_BT_BLE: return "FORCE_BT_BLE";
             default: return "unknown config (" + config + ")" ;
         }
     }
@@ -2649,4 +2651,20 @@ public class AudioSystem
      * @hide
      */
     public static native boolean isBluetoothVariableLatencyEnabled();
+
+    /**
+     * Register a native listener for system property sysprop
+     * @param callback the listener which fires when the property changes
+     * @return a native handle for use in subsequent methods
+     * @hide
+     */
+    public static native long listenForSystemPropertyChange(String sysprop, Runnable callback);
+
+    /**
+     * Trigger a sysprop listener update, if the property has been updated: synchronously validating
+     * there are no pending sysprop changes.
+     * @param handle the handle returned by {@link listenForSystemPropertyChange}
+     * @hide
+     */
+    public static native void triggerSystemPropertyUpdate(long handle);
 }

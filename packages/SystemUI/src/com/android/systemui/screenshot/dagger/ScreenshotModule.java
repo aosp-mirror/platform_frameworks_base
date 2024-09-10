@@ -16,7 +16,7 @@
 
 package com.android.systemui.screenshot.dagger;
 
-import static com.android.systemui.Flags.screenshotShelfUi2;
+import static com.android.systemui.Flags.screenshotUiControllerRefactor;
 
 import android.app.Service;
 import android.view.accessibility.AccessibilityManager;
@@ -24,15 +24,15 @@ import android.view.accessibility.AccessibilityManager;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.screenshot.ImageCapture;
 import com.android.systemui.screenshot.ImageCaptureImpl;
-import com.android.systemui.screenshot.LegacyScreenshotViewProxy;
+import com.android.systemui.screenshot.InteractiveScreenshotHandler;
+import com.android.systemui.screenshot.LegacyScreenshotController;
+import com.android.systemui.screenshot.ScreenshotController;
 import com.android.systemui.screenshot.ScreenshotPolicy;
 import com.android.systemui.screenshot.ScreenshotPolicyImpl;
-import com.android.systemui.screenshot.ScreenshotShelfViewProxy;
 import com.android.systemui.screenshot.ScreenshotSoundController;
 import com.android.systemui.screenshot.ScreenshotSoundControllerImpl;
 import com.android.systemui.screenshot.ScreenshotSoundProvider;
 import com.android.systemui.screenshot.ScreenshotSoundProviderImpl;
-import com.android.systemui.screenshot.ScreenshotViewProxy;
 import com.android.systemui.screenshot.TakeScreenshotExecutor;
 import com.android.systemui.screenshot.TakeScreenshotExecutorImpl;
 import com.android.systemui.screenshot.TakeScreenshotService;
@@ -97,13 +97,13 @@ public abstract class ScreenshotModule {
     }
 
     @Provides
-    static ScreenshotViewProxy.Factory providesScreenshotViewProxyFactory(
-            ScreenshotShelfViewProxy.Factory shelfScreenshotViewProxyFactory,
-            LegacyScreenshotViewProxy.Factory legacyScreenshotViewProxyFactory) {
-        if (screenshotShelfUi2()) {
-            return shelfScreenshotViewProxyFactory;
+    static InteractiveScreenshotHandler.Factory providesScreenshotController(
+            LegacyScreenshotController.Factory legacyScreenshotController,
+            ScreenshotController.Factory screenshotController) {
+        if (screenshotUiControllerRefactor()) {
+            return screenshotController;
         } else {
-            return legacyScreenshotViewProxyFactory;
+            return legacyScreenshotController;
         }
     }
 }

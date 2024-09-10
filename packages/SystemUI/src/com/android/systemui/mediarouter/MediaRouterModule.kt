@@ -16,12 +16,25 @@
 
 package com.android.systemui.mediarouter
 
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.LogBufferFactory
 import com.android.systemui.mediarouter.data.repository.MediaRouterRepository
 import com.android.systemui.mediarouter.data.repository.MediaRouterRepositoryImpl
 import dagger.Binds
 import dagger.Module
+import dagger.Provides
 
 @Module
 interface MediaRouterModule {
     @Binds fun mediaRouterRepository(impl: MediaRouterRepositoryImpl): MediaRouterRepository
+
+    companion object {
+        @Provides
+        @SysUISingleton
+        @MediaRouterLog
+        fun provideMediaRouterLogBuffer(factory: LogBufferFactory): LogBuffer {
+            return factory.create("MediaRouter", 50)
+        }
+    }
 }

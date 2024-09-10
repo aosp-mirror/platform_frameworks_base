@@ -175,7 +175,7 @@ class DragState {
      */
     private CompletableFuture<Void> showInputSurface() {
         if (mInputSurface == null) {
-            mInputSurface = mService.makeSurfaceBuilder(mDisplayContent.getSession())
+            mInputSurface = mService.makeSurfaceBuilder()
                     .setContainerLayer()
                     .setName("Drag and Drop Input Consumer")
                     .setCallsite("DragState.showInputSurface")
@@ -454,10 +454,6 @@ class DragState {
                 dc.getDisplayRotation().resume();
             });
         }
-    }
-
-    InputChannel getInputChannel() {
-        return mInputInterceptor == null ? null : mInputInterceptor.mClientChannel;
     }
 
     InputWindowHandle getInputWindowHandle() {

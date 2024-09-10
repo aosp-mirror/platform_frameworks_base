@@ -147,17 +147,32 @@ public class SystemVibratorManager extends VibratorManager {
     }
 
     @Override
-    public void performHapticFeedback(int constant, boolean always, String reason,
-            boolean fromIme) {
+    public void performHapticFeedback(int constant, String reason, int flags, int privFlags) {
         if (mService == null) {
             Log.w(TAG, "Failed to perform haptic feedback; no vibrator manager service.");
             return;
         }
         try {
-            mService.performHapticFeedback(
-                    mUid, mContext.getDeviceId(), mPackageName, constant, always, reason, fromIme);
+            mService.performHapticFeedback(mUid, mContext.getDeviceId(), mPackageName, constant,
+                    reason, flags, privFlags);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to perform haptic feedback.", e);
+        }
+    }
+
+    @Override
+    public void performHapticFeedbackForInputDevice(int constant, int inputDeviceId,
+            int inputSource, String reason, int flags, int privFlags) {
+        if (mService == null) {
+            Log.w(TAG, "Failed to perform haptic feedback for input device;"
+                            + " no vibrator manager service.");
+            return;
+        }
+        try {
+            mService.performHapticFeedbackForInputDevice(mUid, mContext.getDeviceId(), mPackageName,
+                    constant, inputDeviceId, inputSource, reason, flags, privFlags);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed to perform haptic feedback for input device.", e);
         }
     }
 
@@ -245,9 +260,8 @@ public class SystemVibratorManager extends VibratorManager {
         }
 
         @Override
-        public void performHapticFeedback(int effectId, boolean always, String reason,
-                boolean fromIme) {
-            SystemVibratorManager.this.performHapticFeedback(effectId, always, reason, fromIme);
+        public void performHapticFeedback(int effectId, String reason, int flags, int privFlags) {
+            SystemVibratorManager.this.performHapticFeedback(effectId, reason, flags, privFlags);
         }
 
         @Override

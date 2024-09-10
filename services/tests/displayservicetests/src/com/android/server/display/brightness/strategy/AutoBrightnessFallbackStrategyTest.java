@@ -16,15 +16,22 @@
 
 package com.android.server.display.brightness.strategy;
 
+import static android.hardware.display.DisplayManagerInternal.DisplayPowerRequest.POLICY_BRIGHT;
+import static android.hardware.display.DisplayManagerInternal.DisplayPowerRequest.POLICY_DOZE;
+import static android.hardware.display.DisplayManagerInternal.DisplayPowerRequest.POLICY_OFF;
+
+import static com.android.server.display.layout.Layout.NO_LEAD_DISPLAY;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.hardware.display.DisplayManagerInternal;
 import android.os.Handler;
+import android.os.PowerManager;
+import android.view.Display;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -35,6 +42,7 @@ import com.android.server.display.DisplayDeviceConfig;
 import com.android.server.display.ScreenOffBrightnessSensorController;
 import com.android.server.display.brightness.BrightnessReason;
 import com.android.server.display.brightness.StrategyExecutionRequest;
+import com.android.server.display.brightness.StrategySelectionNotifyRequest;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -53,9 +61,24 @@ public class AutoBrightnessFallbackStrategyTest {
     @Mock
     private ScreenOffBrightnessSensorController mScreenOffBrightnessSensorController;
 
+    @Mock
+    private SensorManager mSensorManager;
+
+    @Mock
+    private DisplayDeviceConfig mDisplayDeviceConfig;
+
+    @Mock
+    private Handler mHandler;
+
+    @Mock
+    private BrightnessMappingStrategy mBrightnessMappingStrategy;
+
     @Before
     public void before() {
         MockitoAnnotations.initMocks(this);
+        int[] sensorValueToLux = new int[]{50, 100};
+        when(mDisplayDeviceConfig.getScreenOffBrightnessSensorValueToLux())
+                .thenReturn(sensorValueToLux);
         mAutoBrightnessFallbackStrategy = new AutoBrightnessFallbackStrategy(
                 new AutoBrightnessFallbackStrategy.Injector() {
                     @Override
@@ -78,20 +101,11 @@ public class AutoBrightnessFallbackStrategyTest {
 
     @Test
     public void testUpdateBrightnessWhenScreenDozeStateIsRequested() {
-        // Setup the argument mocks
-        SensorManager sensorManager = mock(SensorManager.class);
-        DisplayDeviceConfig displayDeviceConfig = mock(DisplayDeviceConfig.class);
-        Handler handler = mock(Handler.class);
-        BrightnessMappingStrategy brightnessMappingStrategy = mock(BrightnessMappingStrategy.class);
-        boolean isEnabled = true;
+        boolean isDisplayEnabled = true;
         int leadDisplayId = 2;
-
-        int[] sensorValueToLux = new int[]{50, 100};
-        when(displayDeviceConfig.getScreenOffBrightnessSensorValueToLux()).thenReturn(
-                sensorValueToLux);
-
-        mAutoBrightnessFallbackStrategy.setupAutoBrightnessFallbackSensor(sensorManager,
-                displayDeviceConfig, handler, brightnessMappingStrategy, isEnabled, leadDisplayId);
+        mAutoBrightnessFallbackStrategy.setupAutoBrightnessFallbackSensor(mSensorManager,
+                mDisplayDeviceConfig,
+                mHandler, mBrightnessMappingStrategy, isDisplayEnabled, leadDisplayId);
 
         assertEquals(mScreenOffBrightnessSensor,
                 mAutoBrightnessFallbackStrategy.mScreenOffBrightnessSensor);
@@ -110,7 +124,6 @@ public class AutoBrightnessFallbackStrategyTest {
                 new DisplayBrightnessState.Builder()
                         .setBrightness(fallbackBrightness)
                         .setBrightnessReason(brightnessReason)
-                        .setSdrBrightness(fallbackBrightness)
                         .setDisplayBrightnessStrategyName(mAutoBrightnessFallbackStrategy.getName())
                         .build();
         DisplayBrightnessState updatedDisplayBrightnessState =
@@ -120,4 +133,157 @@ public class AutoBrightnessFallbackStrategyTest {
         assertEquals(updatedDisplayBrightnessState, expectedDisplayBrightnessState);
     }
 
+    @Test
+    public void testPostProcess_EnableSensor_PolicyOff() {
+        boolean isDisplayEnabled = true;
+        int leadDisplayId = NO_LEAD_DISPLAY;
+        mAutoBrightnessFallbackStrategy.setupAutoBrightnessFallbackSensor(mSensorManager,
+                mDisplayDeviceConfig,
+                mHandler, mBrightnessMappingStrategy, isDisplayEnabled, leadDisplayId);
+
+        DisplayManagerInternal.DisplayPowerRequest dpr =
+                new DisplayManagerInternal.DisplayPowerRequest();
+        dpr.policy = POLICY_OFF;
+        StrategySelectionNotifyRequest ssnr = new StrategySelectionNotifyRequest(dpr,
+                Display.STATE_OFF, mAutoBrightnessFallbackStrategy,
+                /* lastUserSetScreenBrightness= */ PowerManager.BRIGHTNESS_INVALID_FLOAT,
+                /* userSetBrightnessChanged= */ false,
+                /* allowAutoBrightnessWhileDozingConfig= */ false,
+                /* isAutoBrightnessEnabled= */ true);
+        mAutoBrightnessFallbackStrategy.strategySelectionPostProcessor(ssnr);
+
+        verify(mScreenOffBrightnessSensorController).setLightSensorEnabled(true);
+    }
+
+    @Test
+    public void testPostProcess_EnableSensor_PolicyDoze() {
+        boolean isDisplayEnabled = true;
+        int leadDisplayId = NO_LEAD_DISPLAY;
+        mAutoBrightnessFallbackStrategy.setupAutoBrightnessFallbackSensor(mSensorManager,
+                mDisplayDeviceConfig,
+                mHandler, mBrightnessMappingStrategy, isDisplayEnabled, leadDisplayId);
+
+        DisplayManagerInternal.DisplayPowerRequest dpr =
+                new DisplayManagerInternal.DisplayPowerRequest();
+        dpr.policy = POLICY_DOZE;
+        StrategySelectionNotifyRequest ssnr = new StrategySelectionNotifyRequest(dpr,
+                Display.STATE_DOZE, mAutoBrightnessFallbackStrategy,
+                /* lastUserSetScreenBrightness= */ PowerManager.BRIGHTNESS_INVALID_FLOAT,
+                /* userSetBrightnessChanged= */ false,
+                /* allowAutoBrightnessWhileDozingConfig= */ false,
+                /* isAutoBrightnessEnabled= */ true);
+        mAutoBrightnessFallbackStrategy.strategySelectionPostProcessor(ssnr);
+
+        verify(mScreenOffBrightnessSensorController).setLightSensorEnabled(true);
+    }
+
+    @Test
+    public void testPostProcess_DisableSensor_AutoBrightnessDisabled() {
+        boolean isDisplayEnabled = true;
+        int leadDisplayId = NO_LEAD_DISPLAY;
+        mAutoBrightnessFallbackStrategy.setupAutoBrightnessFallbackSensor(mSensorManager,
+                mDisplayDeviceConfig,
+                mHandler, mBrightnessMappingStrategy, isDisplayEnabled, leadDisplayId);
+
+        DisplayManagerInternal.DisplayPowerRequest dpr =
+                new DisplayManagerInternal.DisplayPowerRequest();
+        dpr.policy = POLICY_OFF;
+        StrategySelectionNotifyRequest ssnr = new StrategySelectionNotifyRequest(dpr,
+                Display.STATE_OFF, mAutoBrightnessFallbackStrategy,
+                /* lastUserSetScreenBrightness= */ PowerManager.BRIGHTNESS_INVALID_FLOAT,
+                /* userSetBrightnessChanged= */ false,
+                /* allowAutoBrightnessWhileDozingConfig= */ false,
+                /* isAutoBrightnessEnabled= */ false);
+        mAutoBrightnessFallbackStrategy.strategySelectionPostProcessor(ssnr);
+
+        verify(mScreenOffBrightnessSensorController).setLightSensorEnabled(false);
+    }
+
+    @Test
+    public void testPostProcess_DisableSensor_DisplayDisabled() {
+        boolean isDisplayEnabled = false;
+        int leadDisplayId = NO_LEAD_DISPLAY;
+        mAutoBrightnessFallbackStrategy.setupAutoBrightnessFallbackSensor(mSensorManager,
+                mDisplayDeviceConfig,
+                mHandler, mBrightnessMappingStrategy, isDisplayEnabled, leadDisplayId);
+
+        DisplayManagerInternal.DisplayPowerRequest dpr =
+                new DisplayManagerInternal.DisplayPowerRequest();
+        dpr.policy = POLICY_OFF;
+        StrategySelectionNotifyRequest ssnr = new StrategySelectionNotifyRequest(dpr,
+                Display.STATE_OFF, mAutoBrightnessFallbackStrategy,
+                /* lastUserSetScreenBrightness= */ PowerManager.BRIGHTNESS_INVALID_FLOAT,
+                /* userSetBrightnessChanged= */ false,
+                /* allowAutoBrightnessWhileDozingConfig= */ false,
+                /* isAutoBrightnessEnabled= */ true);
+        mAutoBrightnessFallbackStrategy.strategySelectionPostProcessor(ssnr);
+
+        verify(mScreenOffBrightnessSensorController).setLightSensorEnabled(false);
+    }
+
+    @Test
+    public void testPostProcess_DisableSensor_PolicyBright() {
+        boolean isDisplayEnabled = true;
+        int leadDisplayId = NO_LEAD_DISPLAY;
+        mAutoBrightnessFallbackStrategy.setupAutoBrightnessFallbackSensor(mSensorManager,
+                mDisplayDeviceConfig,
+                mHandler, mBrightnessMappingStrategy, isDisplayEnabled, leadDisplayId);
+
+        DisplayManagerInternal.DisplayPowerRequest dpr =
+                new DisplayManagerInternal.DisplayPowerRequest();
+        dpr.policy = POLICY_BRIGHT;
+        StrategySelectionNotifyRequest ssnr = new StrategySelectionNotifyRequest(dpr,
+                Display.STATE_ON, mAutoBrightnessFallbackStrategy,
+                /* lastUserSetScreenBrightness= */ PowerManager.BRIGHTNESS_INVALID_FLOAT,
+                /* userSetBrightnessChanged= */ false,
+                /* allowAutoBrightnessWhileDozingConfig= */ false,
+                /* isAutoBrightnessEnabled= */ true);
+        mAutoBrightnessFallbackStrategy.strategySelectionPostProcessor(ssnr);
+
+        verify(mScreenOffBrightnessSensorController).setLightSensorEnabled(false);
+    }
+
+    @Test
+    public void testPostProcess_DisableSensor_AutoBrightnessInDoze() {
+        boolean isDisplayEnabled = true;
+        int leadDisplayId = NO_LEAD_DISPLAY;
+        mAutoBrightnessFallbackStrategy.setupAutoBrightnessFallbackSensor(mSensorManager,
+                mDisplayDeviceConfig,
+                mHandler, mBrightnessMappingStrategy, isDisplayEnabled, leadDisplayId);
+
+        DisplayManagerInternal.DisplayPowerRequest dpr =
+                new DisplayManagerInternal.DisplayPowerRequest();
+        dpr.policy = POLICY_DOZE;
+        StrategySelectionNotifyRequest ssnr = new StrategySelectionNotifyRequest(dpr,
+                Display.STATE_DOZE, mAutoBrightnessFallbackStrategy,
+                /* lastUserSetScreenBrightness= */ PowerManager.BRIGHTNESS_INVALID_FLOAT,
+                /* userSetBrightnessChanged= */ false,
+                /* allowAutoBrightnessWhileDozingConfig= */ true,
+                /* isAutoBrightnessEnabled= */ true);
+        mAutoBrightnessFallbackStrategy.strategySelectionPostProcessor(ssnr);
+
+        verify(mScreenOffBrightnessSensorController).setLightSensorEnabled(false);
+    }
+
+    @Test
+    public void testPostProcess_DisableSensor_DisplayIsFollower() {
+        boolean isDisplayEnabled = true;
+        int leadDisplayId = 3;
+        mAutoBrightnessFallbackStrategy.setupAutoBrightnessFallbackSensor(mSensorManager,
+                mDisplayDeviceConfig,
+                mHandler, mBrightnessMappingStrategy, isDisplayEnabled, leadDisplayId);
+
+        DisplayManagerInternal.DisplayPowerRequest dpr =
+                new DisplayManagerInternal.DisplayPowerRequest();
+        dpr.policy = POLICY_OFF;
+        StrategySelectionNotifyRequest ssnr = new StrategySelectionNotifyRequest(dpr,
+                Display.STATE_OFF, mAutoBrightnessFallbackStrategy,
+                /* lastUserSetScreenBrightness= */ PowerManager.BRIGHTNESS_INVALID_FLOAT,
+                /* userSetBrightnessChanged= */ false,
+                /* allowAutoBrightnessWhileDozingConfig= */ false,
+                /* isAutoBrightnessEnabled= */ true);
+        mAutoBrightnessFallbackStrategy.strategySelectionPostProcessor(ssnr);
+
+        verify(mScreenOffBrightnessSensorController).setLightSensorEnabled(false);
+    }
 }

@@ -23,13 +23,12 @@ import static android.content.pm.ActivityInfo.CONFIG_UI_MODE;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION;
 
-import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
-import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
-import static com.android.wm.shell.common.split.SplitScreenUtils.getResizingBackgroundColor;
 import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPLIT_BOTTOM;
 import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPLIT_LEFT;
 import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPLIT_RIGHT;
 import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPLIT_TOP;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -40,6 +39,7 @@ import android.app.StatusBarManager;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.graphics.Insets;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -60,9 +60,9 @@ import com.android.internal.logging.InstanceId;
 import com.android.internal.protolog.ProtoLog;
 import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.R;
-import com.android.wm.shell.animation.Interpolators;
 import com.android.wm.shell.common.split.SplitScreenUtils;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
+import com.android.wm.shell.shared.animation.Interpolators;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 
 import java.io.PrintWriter;
@@ -290,9 +290,11 @@ public class DragLayout extends LinearLayout
                 final int activityType = taskInfo1.getActivityType();
                 if (activityType == ACTIVITY_TYPE_STANDARD) {
                     Drawable icon1 = mIconProvider.getIcon(taskInfo1.topActivityInfo);
-                    int bgColor1 = getResizingBackgroundColor(taskInfo1).toArgb();
+                    int bgColor1 = getResizingBackgroundColor(taskInfo1);
                     mDropZoneView1.setAppInfo(bgColor1, icon1);
                     mDropZoneView2.setAppInfo(bgColor1, icon1);
+                    mDropZoneView1.setForceIgnoreBottomMargin(false);
+                    mDropZoneView2.setForceIgnoreBottomMargin(false);
                     updateDropZoneSizes(null, null); // passing null splits the views evenly
                 } else {
                     // We use the first drop zone to show the fullscreen highlight, and don't need
@@ -310,10 +312,10 @@ public class DragLayout extends LinearLayout
                     mSplitScreenController.getTaskInfo(SPLIT_POSITION_BOTTOM_OR_RIGHT);
             if (topOrLeftTask != null && bottomOrRightTask != null) {
                 Drawable topOrLeftIcon = mIconProvider.getIcon(topOrLeftTask.topActivityInfo);
-                int topOrLeftColor = getResizingBackgroundColor(topOrLeftTask).toArgb();
+                int topOrLeftColor = getResizingBackgroundColor(topOrLeftTask);
                 Drawable bottomOrRightIcon = mIconProvider.getIcon(
                         bottomOrRightTask.topActivityInfo);
-                int bottomOrRightColor = getResizingBackgroundColor(bottomOrRightTask).toArgb();
+                int bottomOrRightColor = getResizingBackgroundColor(bottomOrRightTask);
                 mDropZoneView1.setAppInfo(topOrLeftColor, topOrLeftIcon);
                 mDropZoneView2.setAppInfo(bottomOrRightColor, bottomOrRightIcon);
             }
@@ -582,6 +584,11 @@ public class DragLayout extends LinearLayout
             mDropZoneView1.setShowingHighlight(false);
             mDropZoneView2.setShowingHighlight(true);
         }
+    }
+
+    private static int getResizingBackgroundColor(ActivityManager.RunningTaskInfo taskInfo) {
+        final int taskBgColor = taskInfo.taskDescription.getBackgroundColor();
+        return Color.valueOf(taskBgColor == -1 ? Color.WHITE : taskBgColor).toArgb();
     }
 
     /**

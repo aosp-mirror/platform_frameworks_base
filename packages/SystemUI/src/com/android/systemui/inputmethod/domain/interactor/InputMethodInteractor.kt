@@ -16,6 +16,7 @@
 
 package com.android.systemui.inputmethod.domain.interactor
 
+import android.os.UserHandle
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.inputmethod.data.repository.InputMethodRepository
 import javax.inject.Inject
@@ -36,14 +37,16 @@ constructor(
      * Method adapted from `com.android.inputmethod.latin.Utils`.
      */
     suspend fun hasMultipleEnabledImesOrSubtypes(userId: Int): Boolean {
+        val user = UserHandle.of(userId)
         // Count IMEs that either have no subtypes, or have at least one non-auxiliary subtype.
         val matchingInputMethods =
             repository
-                .enabledInputMethods(userId, fetchSubtypes = true)
+                .enabledInputMethods(user, fetchSubtypes = true)
                 .filter { ime -> ime.subtypes.isEmpty() || ime.subtypes.any { !it.isAuxiliary } }
                 .take(2) // Short-circuit if we find at least 2 matching IMEs.
 
-        return matchingInputMethods.count() > 1 || repository.selectedInputMethodSubtypes().size > 1
+        return matchingInputMethods.count() > 1 ||
+            repository.selectedInputMethodSubtypes(user).size > 1
     }
 
     /** Shows the system's input method picker dialog. */

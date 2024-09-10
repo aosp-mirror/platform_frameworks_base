@@ -265,8 +265,6 @@
     <string name="global_action_bug_report" msgid="5127867163044170003">"Laporan pepijat"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Tamatkan sesi"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"Tangkapan skrin"</string>
-    <!-- no translation found for identity_check_biometric_prompt_description (5810195983015866727) -->
-    <skip />
     <string name="bugreport_title" msgid="8549990811777373050">"Laporan pepijat"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"Ini akan mengumpul maklumat tentang keadaan peranti semasa anda untuk dihantarkan sebagai mesej e-mel. Harap bersabar, mungkin perlu sedikit masa untuk memulakan laporan sehingga siap untuk dihantar."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"Laporan interaktif"</string>
@@ -644,7 +642,7 @@
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Membenarkan apl membaca lokasi daripada koleksi media anda."</string>
     <string name="biometric_app_setting_name" msgid="3339209978734534457">"Gunakan biometrik"</string>
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Gunakan biometrik atau kunci skrin"</string>
-    <string name="biometric_dialog_default_title" msgid="55026799173208210">"Sahkan itu anda"</string>
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"Sahkan diri anda"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Gunakan biometrik anda untuk meneruskan"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"Gunakan biometrik atau kunci skrin anda untuk meneruskan pengesahan"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Perkakasan biometrik tidak tersedia"</string>
@@ -1196,6 +1194,8 @@
     <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"Tulisan tangan tidak disokong dalam medan kata laluan"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Kembali"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Tukar kaedah masukan"</string>
+    <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"Buka pemilih kaedah input"</string>
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"Tetapan"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Ruang storan semakin berkurangan"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Beberapa fungsi sistem mungkin tidak berfungsi"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Tidak cukup storan untuk sistem. Pastikan anda mempunyai 250MB ruang kosong dan mulakan semula."</string>
@@ -1413,10 +1413,8 @@
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"Pilih untuk melumpuhkan penyahpepijatan wayarles."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Mod Abah-abah Ujian didayakan"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Laksanakan tetapan semula kilang untuk melumpuhkan Mod Abah-abah Ujian."</string>
-    <!-- no translation found for wrong_hsum_configuration_notification_title (7212758829332714385) -->
-    <skip />
-    <!-- no translation found for wrong_hsum_configuration_notification_message (5353475441480684381) -->
-    <skip />
+    <string name="wrong_hsum_configuration_notification_title" msgid="7212758829332714385">"Konfigurasi binaan HSUM salah"</string>
+    <string name="wrong_hsum_configuration_notification_message" msgid="5353475441480684381">"Keadaan Mod Pengguna Sistem Tanpa Kepala peranti ini berbeza daripada konfigurasi binaan peranti. Tetapkan semula peranti kepada tetapan kilang."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"Konsol bersiri didayakan"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"Prestasi terjejas. Untuk melumpuhkan, semak pemuat but."</string>
     <string name="mte_override_notification_title" msgid="4731115381962792944">"Percubaan MTE didayakan"</string>
@@ -1432,6 +1430,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"KONGSI"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"TOLAK"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Pilih kaedah input"</string>
+    <string name="input_method_language_settings" msgid="8069089418056819437">"Tetapan Bahasa"</string>
     <string name="show_ime" msgid="6406112007347443383">"Pastikannya pada skrin, semasa papan kekunci fizikal aktif"</string>
     <string name="hardware" msgid="3611039921284836033">"Guna papan kekunci pada skrin"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Konfigurasikan <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
@@ -1442,7 +1441,7 @@
     <string name="alert_windows_notification_channel_group_name" msgid="6063891141815714246">"Paparkan di atas apl lain"</string>
     <string name="alert_windows_notification_channel_name" msgid="3437528564303192620">"<xliff:g id="NAME">%s</xliff:g> dipaparkan di atas apl lain"</string>
     <string name="alert_windows_notification_title" msgid="6331662751095228536">"<xliff:g id="NAME">%s</xliff:g> dipaparkan di atas apl lain"</string>
-    <string name="alert_windows_notification_message" msgid="6538171456970725333">"Jika anda tidak mahu <xliff:g id="NAME">%s</xliff:g> menggunakan ciri ini, ketik untuk membuka tetapan dan matikannya."</string>
+    <string name="alert_windows_notification_message" msgid="6538171456970725333">"Jika anda tidak mahu <xliff:g id="NAME">%s</xliff:g> menggunakan ciri ini, ketik untuk membuka tetapan dan matikan ciri tersebut."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="7805857234839123780">"Matikan"</string>
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"Menyemak <xliff:g id="NAME">%s</xliff:g>…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"Menyemak kandungan semasa"</string>
@@ -1747,7 +1746,8 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"Apl menghalang permintaan kebenaran, maka jawapan anda tidak dapat disahkan."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Ketik ciri untuk mula menggunakan ciri itu:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Pilih ciri untuk digunakan dengan butang kebolehaksesan"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Pilih ciri untuk digunakan dengan pintasan kekunci kelantangan"</string>
+    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
+    <skip />
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> telah dimatikan"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Edit pintasan"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Selesai"</string>
@@ -1761,12 +1761,9 @@
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Kekunci kelantangan ditahan. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> dihidupkan."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Kekunci kelantangan ditahan. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> dimatikan."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Lepaskan kekunci kelantangan. Untuk menghidupkan <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, sila tekan dan tahan kedua-dua kekunci kelantangan sekali lagi selama 3 saat."</string>
-    <!-- no translation found for accessibility_button_prompt_text (6105393217162198616) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_prompt_text (6452246951969541792) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_3finger_prompt_text (77745752309056152) -->
-    <skip />
+    <string name="accessibility_button_prompt_text" msgid="6105393217162198616">"Pilih ciri"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="6452246951969541792">"Pilih ciri"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="77745752309056152">"Pilih ciri"</string>
     <string name="accessibility_button_instructional_text" msgid="6831154884557881996">"Ciri ini akan dibuka pada kali seterusnya anda mengetik butang kebolehaksesan"</string>
     <string name="accessibility_gesture_instructional_text" msgid="4133877896011098550">"Ciri ini akan dibuka pada kali seterusnya anda menggunakan pintasan ini. Leret ke atas menggunakan 2 jari dari bahagian bawah skrin anda dan lepaskan dengan cepat."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="1124458279366968154">"Ciri ini akan dibuka pada kali seterusnya anda menggunakan pintasan ini. Leret ke atas menggunakan 3 jari dari bahagian bawah skrin anda dan lepaskan dengan cepat."</string>
@@ -1892,8 +1889,7 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN terlalu pendek. Mesti sekurang-kurangnya 4 angka."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Cuba sebentar lagi"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Melihat skrin penuh"</string>
-    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
-    <skip />
+    <string name="immersive_cling_description" msgid="2896205051090870978">"Untuk keluar, leret ke bawah daripada bahagian atas skrin anda"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Faham"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Putar untuk mendapatkan paparan yang lebih baik"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Buka <xliff:g id="NAME">%s</xliff:g> dalam skrin penuh untuk mendapatkan paparan yang lebih baik"</string>
@@ -2242,7 +2238,7 @@
     <string name="miniresolver_private_space_messages_information" msgid="111285656327622118">"Anda hanya boleh menghantar mesej SMS daripada apl Messages peribadi anda."</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Gunakan penyemak imbas peribadi"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Gunakan penyemak imbas kerja"</string>
-    <string name="miniresolver_call" msgid="6386870060423480765">"Panggil"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"Telefon"</string>
     <string name="miniresolver_switch" msgid="8011924662117617451">"Beralih"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN buka kunci rangkaian SIM"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"PIN buka kunci subset rangkaian SIM"</string>
@@ -2429,25 +2425,32 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Kandungan apl disembunyikan daripada perkongsian skrin untuk keselamatan"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Disambungkan secara automatik kepada satelit"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Anda boleh menghantar dan menerima mesej tanpa rangkaian mudah alih atau Wi-Fi"</string>
+    <string name="satellite_notification_manual_title" msgid="1097504441849466279">"Gunakan pemesejan satelit?"</string>
+    <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Hantar dan terima mesej tanpa rangkaian mudah alih atau Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Buka Messages"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Cara ciri ini berfungsi"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Belum selesai..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Sediakan Buka Kunci Cap Jari sekali lagi"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (5851784577768803510) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7925203589860744456) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (1824812666549916586) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (5974657382960155099) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> tidak dapat dicam lagi."</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> dan <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> tidak dapat dicam lagi."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="1824812666549916586">"<xliff:g id="FINGERPRINT">%s</xliff:g> tidak dapat dicam lagi. Sediakan semula Buka Kunci Cap Jari."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="5974657382960155099">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> dan <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> tidak dapat dicam lagi. Sediakan semula Buka Kunci Cap Jari."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Sediakan semula Buka Kunci Wajah"</string>
-    <!-- no translation found for face_dangling_notification_msg (746235263598985384) -->
-    <skip />
+    <string name="face_dangling_notification_msg" msgid="746235263598985384">"Model wajah anda tidak dapat dicam lagi. Sediakan semula Buka Kunci Wajah."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Sediakan"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Bukan sekarang"</string>
     <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"Penggera untuk <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"Tukar pengguna"</string>
     <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"Redam"</string>
     <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"Ketik untuk meredamkan bunyi"</string>
+    <string name="keyboard_shortcut_group_applications_browser" msgid="6535007304687100909">"Penyemak Imbas"</string>
+    <string name="keyboard_shortcut_group_applications_contacts" msgid="2750702518068326356">"Kenalan"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="4229037666415353683">"E-mel"</string>
+    <string name="keyboard_shortcut_group_applications_sms" msgid="3523799286376321137">"SMS"</string>
+    <string name="keyboard_shortcut_group_applications_music" msgid="2051507523525651067">"Muzik"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="3571770335653387606">"Kalendar"</string>
+    <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"Kalkulator"</string>
+    <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"Maps"</string>
+    <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"Aplikasi"</string>
+    <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"Cap jari anda tidak dapat dicam lagi. Sediakan semula Buka Kunci Cap Jari."</string>
 </resources>

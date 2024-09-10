@@ -72,6 +72,7 @@ class MediaProjectionChipInteractorTest : SysuiTestCase() {
             mediaProjectionRepo.mediaProjectionState.value =
                 MediaProjectionState.Projecting.SingleTask(
                     CAST_TO_OTHER_DEVICES_PACKAGE,
+                    hostDeviceName = null,
                     createTask(taskId = 1)
                 )
 
@@ -101,7 +102,11 @@ class MediaProjectionChipInteractorTest : SysuiTestCase() {
             val latest by collectLastValue(underTest.projection)
 
             mediaProjectionRepo.mediaProjectionState.value =
-                MediaProjectionState.Projecting.SingleTask(NORMAL_PACKAGE, createTask(taskId = 1))
+                MediaProjectionState.Projecting.SingleTask(
+                    NORMAL_PACKAGE,
+                    hostDeviceName = null,
+                    createTask(taskId = 1),
+                )
 
             assertThat(latest).isInstanceOf(ProjectionChipModel.Projecting::class.java)
             assertThat((latest as ProjectionChipModel.Projecting).type)

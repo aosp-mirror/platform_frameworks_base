@@ -44,9 +44,11 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.scan
 import kotlinx.coroutines.flow.shareIn
@@ -137,6 +139,7 @@ constructor(
     override val displayAdditionEvent: Flow<Display?> =
         allDisplayEvents.filterIsInstance<DisplayEvent.Added>().map { getDisplay(it.displayId) }
 
+    // TODO: b/345472038 - Delete after the flag is ramped up.
     private val oldEnabledDisplays: Flow<Set<Display>> =
         allDisplayEvents
             .map { getDisplays() }
@@ -158,7 +161,10 @@ constructor(
                     .stateIn(
                         bgApplicationScope,
                         SharingStarted.WhileSubscribed(),
-                        emptySet(),
+                        // This is necessary because there might be multiple displays, and we could
+                        // have missed events for those added before this process or flow started.
+                        // Note it causes a binder call from the main thread (it's traced).
+                        getDisplays().map { display -> display.displayId }.toSet(),
                     )
             } else {
                 oldEnabledDisplays.map { enabledDisplaysSet ->
@@ -167,6 +173,9 @@ constructor(
             }
             .debugLog("enabledDisplayIds")
 
+    private val defaultDisplay by lazy {
+        getDisplay(Display.DEFAULT_DISPLAY) ?: error("Unable to get default display.")
+    }
     /**
      * Represents displays that went though the [DisplayListener.onDisplayAdded] callback.
      *
@@ -176,16 +185,20 @@ constructor(
         if (Flags.enableEfficientDisplayRepository()) {
             enabledDisplayIds
                 .mapElementsLazily { displayId -> getDisplay(displayId) }
+                .onEach {
+                    if (it.isEmpty()) Log.wtf(TAG, "No enabled displays. This should never happen.")
+                }
                 .flowOn(backgroundCoroutineDispatcher)
                 .debugLog("enabledDisplays")
                 .stateIn(
                     bgApplicationScope,
                     started = SharingStarted.WhileSubscribed(),
-                    initialValue =
-                        setOf(
-                            getDisplay(Display.DEFAULT_DISPLAY)
-                                ?: error("Unable to get default display.")
-                        )
+                    // This triggers a single binder call on the UI thread per process. The
+                    // alternative would be to use sharedFlows, but they are prohibited due to
+                    // performance concerns.
+                    // Ultimately, this is a trade-off between a one-time UI thread binder call and
+                    // the constant overhead of sharedFlows.
+                    initialValue = getDisplays()
                 )
         } else {
             oldEnabledDisplays
@@ -344,9 +357,10 @@ constructor(
             .debugLog("pendingDisplay")
 
     override val defaultDisplayOff: Flow<Boolean> =
-        displays
-            .map { displays -> displays.firstOrNull { it.displayId == Display.DEFAULT_DISPLAY } }
-            .map { it?.state == Display.STATE_OFF }
+        displayChangeEvent
+            .filter { it == Display.DEFAULT_DISPLAY }
+            .map { defaultDisplay.state == Display.STATE_OFF }
+            .distinctUntilChanged()
 
     private fun <T> Flow<T>.debugLog(flowName: String): Flow<T> {
         return if (DEBUG) {
@@ -371,9 +385,8 @@ constructor(
             val resultSet: Set<V>
         )
 
-        val initialState = State(emptySet<T>(), emptyMap(), emptySet<V>())
-
-        return this.scan(initialState) { state, currentSet ->
+        val emptyInitialState = State(emptySet<T>(), emptyMap(), emptySet<V>())
+        return this.scan(emptyInitialState) { state, currentSet ->
                 if (currentSet == state.previousSet) {
                     state
                 } else {
@@ -388,6 +401,7 @@ constructor(
                     State(currentSet, newMap, resultSet)
                 }
             }
+            .filter { it != emptyInitialState }
             .map { it.resultSet }
     }
 

@@ -43,9 +43,11 @@ public class LauncherActivityInfo {
     private final PackageManager mPm;
     private final LauncherActivityInfoInternal mInternal;
 
-    private static final UnicodeSet TRIMMABLE_CHARACTERS =
+    private static final UnicodeSet INVISIBLE_CHARACTERS =
             new UnicodeSet("[[:White_Space:][:Default_Ignorable_Code_Point:][:gc=Cc:]]",
                     /* ignoreWhitespace= */ false).freeze();
+    // Only allow 3 consecutive invisible characters in the prefix of the string.
+    private static final int PREFIX_CONSECUTIVE_INVISIBLE_CHARACTERS_MAXIMUM = 3;
 
     /**
      * Create a launchable activity object for a given ResolveInfo and user.
@@ -93,17 +95,21 @@ public class LauncherActivityInfo {
             return getActivityInfo().loadLabel(mPm);
         }
 
-        CharSequence label = trim(getActivityInfo().loadLabel(mPm));
-        // If the trimmed label is empty, use application's label instead
-        if (TextUtils.isEmpty(label)) {
-            label = trim(getApplicationInfo().loadLabel(mPm));
-            // If the trimmed label is still empty, use package name instead
-            if (TextUtils.isEmpty(label)) {
-                label = getComponentName().getPackageName();
-            }
+        CharSequence label = getActivityInfo().loadLabel(mPm).toString().trim();
+        // If the activity label is visible to the user, return the original activity label
+        if (isVisible(label)) {
+            return label;
         }
-        // TODO: Go through LauncherAppsService
-        return label;
+
+        // Use application label instead
+        label = getApplicationInfo().loadLabel(mPm).toString().trim();
+        // If the application label is visible to the user, return the original application label
+        if (isVisible(label)) {
+            return label;
+        }
+
+        // Use package name instead
+        return getComponentName().getPackageName();
     }
 
     /**
@@ -207,147 +213,75 @@ public class LauncherActivityInfo {
     }
 
     /**
-     * If the {@code ch} is trimmable, return {@code true}. Otherwise, return
-     * {@code false}. If the count of the code points of {@code ch} doesn't
-     * equal 1, return {@code false}.
+     * Check whether the {@code sequence} is visible to the user or not.
      * <p>
-     * There are two types of the trimmable characters.
-     * 1. The character is one of the Default_Ignorable_Code_Point in
+     * Return {@code false} when one of these conditions are satisfied:
+     * 1. The {@code sequence} starts with at least consecutive three invisible characters.
+     * 2. The sequence is composed of the invisible characters and non-glyph characters.
+     * <p>
+     * Invisible character is one of the Default_Ignorable_Code_Point in
      * <a href="
      * https://www.unicode.org/Public/UCD/latest/ucd/DerivedCoreProperties.txt">
      * DerivedCoreProperties.txt</a>, the White_Space in <a href=
      * "https://www.unicode.org/Public/UCD/latest/ucd/PropList.txt">PropList.txt
      * </a> or category Cc.
      * <p>
-     * 2. The character is not supported in the current system font.
+     * Non-glyph character means the character is not supported in the current system font.
      * {@link android.graphics.Paint#hasGlyph(String)}
      * <p>
      *
+     * @hide
      */
-    private static boolean isTrimmable(@NonNull Paint paint, @NonNull CharSequence ch) {
-        Objects.requireNonNull(paint);
-        Objects.requireNonNull(ch);
-
-        // if ch is empty or it is not a character (i,e, the count of code
-        // point doesn't equal one), return false
-        if (TextUtils.isEmpty(ch)
-                || Character.codePointCount(ch, /* beginIndex= */ 0, ch.length()) != 1) {
+    @VisibleForTesting
+    public static boolean isVisible(@NonNull CharSequence sequence) {
+        Objects.requireNonNull(sequence);
+        if (TextUtils.isEmpty(sequence)) {
             return false;
         }
 
-        // Return true for the cases as below:
-        // 1. The character is in the TRIMMABLE_CHARACTERS set
-        // 2. The character is not supported in the system font
-        return TRIMMABLE_CHARACTERS.contains(ch) || !paint.hasGlyph(ch.toString());
-    }
-
-    /**
-     * If the {@code sequence} has some leading trimmable characters, creates a new copy
-     * and removes the trimmable characters from the copy. Otherwise the given
-     * {@code sequence} is returned as it is. Use {@link #isTrimmable(Paint, CharSequence)}
-     * to determine whether the character is trimmable or not.
-     *
-     * @return the trimmed string or the original string that has no
-     *         leading trimmable characters.
-     * @see    #isTrimmable(Paint, CharSequence)
-     * @see    #trim(CharSequence)
-     * @see    #trimEnd(CharSequence)
-     *
-     * @hide
-     */
-    @VisibleForTesting
-    @NonNull
-    public static CharSequence trimStart(@NonNull CharSequence sequence) {
-        Objects.requireNonNull(sequence);
-
-        if (TextUtils.isEmpty(sequence)) {
-            return sequence;
-        }
-
         final Paint paint = new Paint();
-        int trimCount = 0;
+        int invisibleCharCount = 0;
+        int notSupportedCharCount = 0;
         final int[] codePoints = sequence.codePoints().toArray();
         for (int i = 0, length = codePoints.length; i < length; i++) {
             String ch = new String(new int[]{codePoints[i]}, /* offset= */ 0, /* count= */ 1);
-            if (!isTrimmable(paint, ch)) {
-                break;
+
+            // The check steps:
+            // 1. If the character is contained in INVISIBLE_CHARACTERS, invisibleCharCount++.
+            //    1.1 Check whether the invisibleCharCount is larger or equal to
+            //        PREFIX_INVISIBLE_CHARACTERS_MAXIMUM when notSupportedCharCount is zero.
+            //        It means that there are three consecutive invisible characters at the
+            //        start of the string, return false.
+            //    Otherwise, continue.
+            // 2. If the character is not supported on the system:
+            //    notSupportedCharCount++, continue
+            // 3. If it does not continue or return on the above two cases, it means the
+            //    character is visible and supported on the system, break.
+            // After going through the whole string, if the sum of invisibleCharCount
+            // and notSupportedCharCount is smaller than the length of the string, it
+            // means the string has the other visible characters, return true.
+            // Otherwise, return false.
+            if (INVISIBLE_CHARACTERS.contains(ch)) {
+                invisibleCharCount++;
+                // If there are three successive invisible characters at the start of the
+                // string, it is hard to visible to the user.
+                if (notSupportedCharCount == 0
+                        && invisibleCharCount >= PREFIX_CONSECUTIVE_INVISIBLE_CHARACTERS_MAXIMUM) {
+                    return false;
+                }
+                continue;
             }
-            trimCount += ch.length();
-        }
-        if (trimCount == 0) {
-            return sequence;
-        }
-        return sequence.subSequence(trimCount, sequence.length());
-    }
 
-    /**
-     * If the {@code sequence} has some trailing trimmable characters, creates a new copy
-     * and removes the trimmable characters from the copy. Otherwise the given
-     * {@code sequence} is returned as it is. Use {@link #isTrimmable(Paint, CharSequence)}
-     * to determine whether the character is trimmable or not.
-     *
-     * @return the trimmed sequence or the original sequence that has no
-     *         trailing trimmable characters.
-     * @see    #isTrimmable(Paint, CharSequence)
-     * @see    #trimStart(CharSequence)
-     * @see    #trim(CharSequence)
-     *
-     * @hide
-     */
-    @VisibleForTesting
-    @NonNull
-    public static CharSequence trimEnd(@NonNull CharSequence sequence) {
-        Objects.requireNonNull(sequence);
-
-        if (TextUtils.isEmpty(sequence)) {
-            return sequence;
-        }
-
-        final Paint paint = new Paint();
-        int trimCount = 0;
-        final int[] codePoints = sequence.codePoints().toArray();
-        for (int i = codePoints.length - 1; i >= 0; i--) {
-            String ch = new String(new int[]{codePoints[i]}, /* offset= */ 0, /* count= */ 1);
-            if (!isTrimmable(paint, ch)) {
-                break;
+            // The character is not supported on the system, but it may not be an invisible
+            // character. E.g. tofu (a rectangle).
+            if (!paint.hasGlyph(ch)) {
+                notSupportedCharCount++;
+                continue;
             }
-            trimCount += ch.length();
+            // The character is visible and supported on the system, break the for loop
+            break;
         }
 
-        if (trimCount == 0) {
-            return sequence;
-        }
-        return sequence.subSequence(0, sequence.length() - trimCount);
-    }
-
-    /**
-     * If the {@code sequence} has some leading or trailing trimmable characters, creates
-     * a new copy and removes the trimmable characters from the copy. Otherwise the given
-     * {@code sequence} is returned as it is. Use {@link #isTrimmable(Paint, CharSequence)}
-     * to determine whether the character is trimmable or not.
-     *
-     * @return the trimmed sequence or the original sequence that has no leading or
-     *         trailing trimmable characters.
-     * @see    #isTrimmable(Paint, CharSequence)
-     * @see    #trimStart(CharSequence)
-     * @see    #trimEnd(CharSequence)
-     *
-     * @hide
-     */
-    @VisibleForTesting
-    @NonNull
-    public static CharSequence trim(@NonNull CharSequence sequence) {
-        Objects.requireNonNull(sequence);
-
-        if (TextUtils.isEmpty(sequence)) {
-            return sequence;
-        }
-
-        CharSequence result = trimStart(sequence);
-        if (TextUtils.isEmpty(result)) {
-            return result;
-        }
-
-        return trimEnd(result);
+        return (invisibleCharCount + notSupportedCharCount < codePoints.length);
     }
 }

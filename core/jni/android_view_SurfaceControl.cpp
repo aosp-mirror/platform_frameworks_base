@@ -22,6 +22,7 @@
 #include <android/graphics/properties.h>
 #include <android/graphics/region.h>
 #include <android/gui/BnWindowInfosReportedListener.h>
+#include <android/gui/EdgeExtensionParameters.h>
 #include <android/gui/JankData.h>
 #include <android/hardware/display/IDeviceProductInfoConstants.h>
 #include <android/os/IInputConstants.h>
@@ -797,6 +798,20 @@ static void nativeSetStretchEffect(JNIEnv* env, jclass clazz, jlong transactionO
           childRelativeLeft, childRelativeTop, childRelativeRight, childRelativeBottom)
     };
     transaction->setStretchEffect(ctrl, stretch);
+}
+
+static void nativeSetEdgeExtensionEffect(JNIEnv* env, jclass clazz, jlong transactionObj,
+                                         jlong nativeObj, jboolean leftEdge, jboolean rightEdge,
+                                         jboolean topEdge, jboolean bottomEdge) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+    auto* const ctrl = reinterpret_cast<SurfaceControl*>(nativeObj);
+
+    auto effect = gui::EdgeExtensionParameters();
+    effect.extendLeft = leftEdge;
+    effect.extendRight = rightEdge;
+    effect.extendTop = topEdge;
+    effect.extendBottom = bottomEdge;
+    transaction->setEdgeExtensionEffect(ctrl, effect);
 }
 
 static void nativeSetFlags(JNIEnv* env, jclass clazz, jlong transactionObj,
@@ -2074,9 +2089,11 @@ public:
         jobjectArray jJankDataArray = env->NewObjectArray(jankData.size(),
                 gJankDataClassInfo.clazz, nullptr);
         for (size_t i = 0; i < jankData.size(); i++) {
-            jobject jJankData = env->NewObject(gJankDataClassInfo.clazz, gJankDataClassInfo.ctor,
-                                               jankData[i].frameVsyncId, jankData[i].jankType,
-                                               jankData[i].frameIntervalNs);
+            jobject jJankData =
+                    env->NewObject(gJankDataClassInfo.clazz, gJankDataClassInfo.ctor,
+                                   jankData[i].frameVsyncId, jankData[i].jankType,
+                                   jankData[i].frameIntervalNs, jankData[i].scheduledAppFrameTimeNs,
+                                   jankData[i].actualAppFrameTimeNs);
             env->SetObjectArrayElement(jJankDataArray, i, jJankData);
             env->DeleteLocalRef(jJankData);
         }
@@ -2340,6 +2357,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetBlurRegions },
     {"nativeSetStretchEffect", "(JJFFFFFFFFFF)V",
             (void*) nativeSetStretchEffect },
+    {"nativeSetEdgeExtensionEffect", "(JJZZZZ)V",
+            (void*) nativeSetEdgeExtensionEffect },
     {"nativeSetShadowRadius", "(JJF)V",
             (void*)nativeSetShadowRadius },
     {"nativeSetFrameRate", "(JJFII)V",
@@ -2710,7 +2729,7 @@ int register_android_view_SurfaceControl(JNIEnv* env)
     jclass jankDataClazz =
                 FindClassOrDie(env, "android/view/SurfaceControl$JankData");
     gJankDataClassInfo.clazz = MakeGlobalRefOrDie(env, jankDataClazz);
-    gJankDataClassInfo.ctor = GetMethodIDOrDie(env, gJankDataClassInfo.clazz, "<init>", "(JIJ)V");
+    gJankDataClassInfo.ctor = GetMethodIDOrDie(env, gJankDataClassInfo.clazz, "<init>", "(JIJJJ)V");
     jclass onJankDataListenerClazz =
             FindClassOrDie(env, "android/view/SurfaceControl$OnJankDataListener");
     gJankDataListenerClassInfo.clazz = MakeGlobalRefOrDie(env, onJankDataListenerClazz);

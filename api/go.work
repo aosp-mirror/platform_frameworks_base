@@ -1,17 +1,17 @@
-go 1.18
+go 1.22
 
 use (
 	.
-	../../../build/soong
 	../../../build/blueprint
+	../../../build/soong
 	../../../external/go-cmp
 	../../../external/golang-protobuf
 )
 
 replace (
 	android/soong v0.0.0 => ../../../build/soong
-	google.golang.org/protobuf v0.0.0 => ../../../external/golang-protobuf
 	github.com/google/blueprint v0.0.0 => ../../../build/blueprint
 	github.com/google/go-cmp v0.0.0 => ../../../external/go-cmp
 	go.starlark.net v0.0.0 => ../../../external/starlark-go
+	google.golang.org/protobuf v0.0.0 => ../../../external/golang-protobuf
 )

@@ -21,7 +21,6 @@ import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepositor
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.keyguard.data.repository.FakeCommandQueue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionStep
@@ -49,13 +48,13 @@ object KeyguardInteractorFactory {
     fun create(
         featureFlags: FakeFeatureFlags = FakeFeatureFlags(),
         repository: FakeKeyguardRepository = FakeKeyguardRepository(),
-        commandQueue: FakeCommandQueue = FakeCommandQueue(),
         bouncerRepository: FakeKeyguardBouncerRepository = FakeKeyguardBouncerRepository(),
         configurationRepository: FakeConfigurationRepository = FakeConfigurationRepository(),
         shadeRepository: FakeShadeRepository = FakeShadeRepository(),
         sceneInteractor: SceneInteractor = mock(),
         fromGoneTransitionInteractor: FromGoneTransitionInteractor = mock(),
         fromLockscreenTransitionInteractor: FromLockscreenTransitionInteractor = mock(),
+        fromOccludedTransitionInteractor: FromOccludedTransitionInteractor = mock(),
         sharedNotificationContainerInteractor: SharedNotificationContainerInteractor? = null,
         powerInteractor: PowerInteractor = PowerInteractorFactory.create().powerInteractor,
         testScope: CoroutineScope = TestScope(),
@@ -87,7 +86,6 @@ object KeyguardInteractorFactory {
                 }
         return WithDependencies(
             repository = repository,
-            commandQueue = commandQueue,
             featureFlags = featureFlags,
             bouncerRepository = bouncerRepository,
             configurationRepository = configurationRepository,
@@ -95,7 +93,6 @@ object KeyguardInteractorFactory {
             powerInteractor = powerInteractor,
             KeyguardInteractor(
                 repository = repository,
-                commandQueue = commandQueue,
                 powerInteractor = powerInteractor,
                 bouncerRepository = bouncerRepository,
                 configurationInteractor = ConfigurationInteractor(configurationRepository),
@@ -104,6 +101,7 @@ object KeyguardInteractorFactory {
                 sceneInteractorProvider = { sceneInteractor },
                 fromGoneTransitionInteractor = { fromGoneTransitionInteractor },
                 fromLockscreenTransitionInteractor = { fromLockscreenTransitionInteractor },
+                fromOccludedTransitionInteractor = { fromOccludedTransitionInteractor },
                 sharedNotificationContainerInteractor = { sncInteractor },
                 applicationScope = testScope,
             ),
@@ -112,7 +110,6 @@ object KeyguardInteractorFactory {
 
     data class WithDependencies(
         val repository: FakeKeyguardRepository,
-        val commandQueue: FakeCommandQueue,
         val featureFlags: FakeFeatureFlags,
         val bouncerRepository: FakeKeyguardBouncerRepository,
         val configurationRepository: FakeConfigurationRepository,

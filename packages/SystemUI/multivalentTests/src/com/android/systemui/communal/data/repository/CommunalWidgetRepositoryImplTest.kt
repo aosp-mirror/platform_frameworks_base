@@ -24,6 +24,7 @@ import android.content.ComponentName
 import android.content.applicationContext
 import android.graphics.Bitmap
 import android.os.UserHandle
+import android.os.userManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -33,6 +34,7 @@ import com.android.systemui.communal.data.backup.CommunalBackupUtils
 import com.android.systemui.communal.data.db.CommunalItemRank
 import com.android.systemui.communal.data.db.CommunalWidgetDao
 import com.android.systemui.communal.data.db.CommunalWidgetItem
+import com.android.systemui.communal.data.db.defaultWidgetPopulation
 import com.android.systemui.communal.nano.CommunalHubState
 import com.android.systemui.communal.proto.toByteArray
 import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
@@ -47,10 +49,6 @@ import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.res.R
 import com.android.systemui.testKosmos
-import com.android.systemui.util.mockito.any
-import com.android.systemui.util.mockito.mock
-import com.android.systemui.util.mockito.whenever
-import com.android.systemui.util.mockito.withArgCaptor
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -59,11 +57,16 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
 import org.mockito.Mockito.eq
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -77,6 +80,9 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
     @Mock private lateinit var communalWidgetDao: CommunalWidgetDao
     @Mock private lateinit var backupManager: BackupManager
 
+    private val communalHubStateCaptor = argumentCaptor<CommunalHubState>()
+    private val componentNameCaptor = argumentCaptor<ComponentName>()
+
     private lateinit var backupUtils: CommunalBackupUtils
     private lateinit var logBuffer: LogBuffer
     private lateinit var fakeWidgets: MutableStateFlow<Map<CommunalItemRank, CommunalWidgetItem>>
@@ -85,6 +91,10 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
     private val packageChangeRepository = kosmos.fakePackageChangeRepository
+    private val userManager = kosmos.userManager
+
+    private val mainUser = UserHandle(0)
+    private val workProfile = UserHandle(10)
 
     private val fakeAllowlist =
         listOf(
@@ -109,6 +119,9 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
 
         whenever(communalWidgetDao.getWidgets()).thenReturn(fakeWidgets)
         whenever(communalWidgetHost.appWidgetProviders).thenReturn(fakeProviders)
+        whenever(userManager.mainUser).thenReturn(mainUser)
+
+        restoreUser(mainUser)
 
         underTest =
             CommunalWidgetRepositoryImpl(
@@ -121,6 +134,8 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                 backupManager,
                 backupUtils,
                 packageChangeRepository,
+                userManager,
+                kosmos.defaultWidgetPopulation,
             )
     }
 
@@ -128,7 +143,7 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
     fun communalWidgets_queryWidgetsFromDb() =
         testScope.runTest {
             val communalItemRankEntry = CommunalItemRank(uid = 1L, rank = 1)
-            val communalWidgetItemEntry = CommunalWidgetItem(uid = 1L, 1, "pk_name/cls_name", 1L)
+            val communalWidgetItemEntry = CommunalWidgetItem(uid = 1L, 1, "pk_name/cls_name", 1L, 0)
             fakeWidgets.value = mapOf(communalItemRankEntry to communalWidgetItemEntry)
             fakeProviders.value = mapOf(1 to providerInfoA)
 
@@ -139,7 +154,7 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                     CommunalWidgetContentModel.Available(
                         appWidgetId = communalWidgetItemEntry.widgetId,
                         providerInfo = providerInfoA,
-                        priority = communalItemRankEntry.rank,
+                        rank = communalItemRankEntry.rank,
                     )
                 )
 
@@ -154,13 +169,13 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
             fakeWidgets.value =
                 mapOf(
                     CommunalItemRank(uid = 1L, rank = 1) to
-                        CommunalWidgetItem(uid = 1L, 1, "pk_1/cls_1", 1L),
+                        CommunalWidgetItem(uid = 1L, 1, "pk_1/cls_1", 1L, 0),
                     CommunalItemRank(uid = 2L, rank = 2) to
-                        CommunalWidgetItem(uid = 2L, 2, "pk_2/cls_2", 2L),
+                        CommunalWidgetItem(uid = 2L, 2, "pk_2/cls_2", 2L, 0),
                     CommunalItemRank(uid = 3L, rank = 3) to
-                        CommunalWidgetItem(uid = 3L, 3, "pk_3/cls_3", 3L),
+                        CommunalWidgetItem(uid = 3L, 3, "pk_3/cls_3", 3L, 0),
                     CommunalItemRank(uid = 4L, rank = 4) to
-                        CommunalWidgetItem(uid = 4L, 4, "pk_4/cls_4", 4L),
+                        CommunalWidgetItem(uid = 4L, 4, "pk_4/cls_4", 4L, 0),
                 )
             fakeProviders.value =
                 mapOf(
@@ -175,12 +190,12 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                     CommunalWidgetContentModel.Available(
                         appWidgetId = 1,
                         providerInfo = providerInfoA,
-                        priority = 1,
+                        rank = 1,
                     ),
                     CommunalWidgetContentModel.Available(
                         appWidgetId = 2,
                         providerInfo = providerInfoB,
-                        priority = 2,
+                        rank = 2,
                     ),
                 )
         }
@@ -192,9 +207,9 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
             fakeWidgets.value =
                 mapOf(
                     CommunalItemRank(uid = 1L, rank = 1) to
-                        CommunalWidgetItem(uid = 1L, 1, "pk_1/cls_1", 1L),
+                        CommunalWidgetItem(uid = 1L, 1, "pk_1/cls_1", 1L, 0),
                     CommunalItemRank(uid = 2L, rank = 2) to
-                        CommunalWidgetItem(uid = 2L, 2, "pk_2/cls_2", 2L),
+                        CommunalWidgetItem(uid = 2L, 2, "pk_2/cls_2", 2L, 0),
                 )
             fakeProviders.value =
                 mapOf(
@@ -210,12 +225,12 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                     CommunalWidgetContentModel.Available(
                         appWidgetId = 1,
                         providerInfo = providerInfoA,
-                        priority = 1,
+                        rank = 1,
                     ),
                     CommunalWidgetContentModel.Available(
                         appWidgetId = 2,
                         providerInfo = providerInfoB,
-                        priority = 2,
+                        rank = 2,
                     ),
                 )
 
@@ -233,12 +248,12 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                         appWidgetId = 1,
                         // Verify that provider info updated
                         providerInfo = providerInfoC,
-                        priority = 1,
+                        rank = 1,
                     ),
                     CommunalWidgetContentModel.Available(
                         appWidgetId = 2,
                         providerInfo = providerInfoB,
-                        priority = 2,
+                        rank = 2,
                     ),
                 )
         }
@@ -248,8 +263,7 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
         testScope.runTest {
             val provider = ComponentName("pkg_name", "cls_name")
             val id = 1
-            val priority = 1
-            val user = UserHandle(0)
+            val rank = 1
             whenever(communalWidgetHost.getAppWidgetInfo(id))
                 .thenReturn(PROVIDER_INFO_REQUIRES_CONFIGURATION)
             whenever(
@@ -259,11 +273,11 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                     )
                 )
                 .thenReturn(id)
-            underTest.addWidget(provider, user, priority, kosmos.widgetConfiguratorSuccess)
+            underTest.addWidget(provider, mainUser, rank, kosmos.widgetConfiguratorSuccess)
             runCurrent()
 
-            verify(communalWidgetHost).allocateIdAndBindWidget(provider, user)
-            verify(communalWidgetDao).addWidget(id, provider, priority)
+            verify(communalWidgetHost).allocateIdAndBindWidget(provider, mainUser)
+            verify(communalWidgetDao).addWidget(id, provider, rank, testUserSerialNumber(mainUser))
 
             // Verify backup requested
             verify(backupManager).dataChanged()
@@ -274,8 +288,7 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
         testScope.runTest {
             val provider = ComponentName("pkg_name", "cls_name")
             val id = 1
-            val priority = 1
-            val user = UserHandle(0)
+            val rank = 1
             whenever(communalWidgetHost.getAppWidgetInfo(id))
                 .thenReturn(PROVIDER_INFO_REQUIRES_CONFIGURATION)
             whenever(
@@ -285,11 +298,12 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                     )
                 )
                 .thenReturn(id)
-            underTest.addWidget(provider, user, priority, kosmos.widgetConfiguratorFail)
+            underTest.addWidget(provider, mainUser, rank, kosmos.widgetConfiguratorFail)
             runCurrent()
 
-            verify(communalWidgetHost).allocateIdAndBindWidget(provider, user)
-            verify(communalWidgetDao, never()).addWidget(id, provider, priority)
+            verify(communalWidgetHost).allocateIdAndBindWidget(provider, mainUser)
+            verify(communalWidgetDao, never())
+                .addWidget(anyInt(), any<ComponentName>(), anyInt(), anyInt())
             verify(appWidgetHost).deleteAppWidgetId(id)
 
             // Verify backup not requested
@@ -301,8 +315,7 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
         testScope.runTest {
             val provider = ComponentName("pkg_name", "cls_name")
             val id = 1
-            val priority = 1
-            val user = UserHandle(0)
+            val rank = 1
             whenever(communalWidgetHost.getAppWidgetInfo(id))
                 .thenReturn(PROVIDER_INFO_REQUIRES_CONFIGURATION)
             whenever(
@@ -312,13 +325,14 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                     )
                 )
                 .thenReturn(id)
-            underTest.addWidget(provider, user, priority) {
+            underTest.addWidget(provider, mainUser, rank) {
                 throw IllegalStateException("some error")
             }
             runCurrent()
 
-            verify(communalWidgetHost).allocateIdAndBindWidget(provider, user)
-            verify(communalWidgetDao, never()).addWidget(id, provider, priority)
+            verify(communalWidgetHost).allocateIdAndBindWidget(provider, mainUser)
+            verify(communalWidgetDao, never())
+                .addWidget(anyInt(), any<ComponentName>(), anyInt(), anyInt())
             verify(appWidgetHost).deleteAppWidgetId(id)
 
             // Verify backup not requested
@@ -330,8 +344,7 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
         testScope.runTest {
             val provider = ComponentName("pkg_name", "cls_name")
             val id = 1
-            val priority = 1
-            val user = UserHandle(0)
+            val rank = 1
             whenever(communalWidgetHost.getAppWidgetInfo(id))
                 .thenReturn(PROVIDER_INFO_CONFIGURATION_OPTIONAL)
             whenever(
@@ -341,11 +354,11 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                     )
                 )
                 .thenReturn(id)
-            underTest.addWidget(provider, user, priority, kosmos.widgetConfiguratorFail)
+            underTest.addWidget(provider, mainUser, rank, kosmos.widgetConfiguratorFail)
             runCurrent()
 
-            verify(communalWidgetHost).allocateIdAndBindWidget(provider, user)
-            verify(communalWidgetDao).addWidget(id, provider, priority)
+            verify(communalWidgetHost).allocateIdAndBindWidget(provider, mainUser)
+            verify(communalWidgetDao).addWidget(id, provider, rank, testUserSerialNumber(mainUser))
 
             // Verify backup requested
             verify(backupManager).dataChanged()
@@ -384,11 +397,11 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
     @Test
     fun reorderWidgets_queryDb() =
         testScope.runTest {
-            val widgetIdToPriorityMap = mapOf(104 to 1, 103 to 2, 101 to 3)
-            underTest.updateWidgetOrder(widgetIdToPriorityMap)
+            val widgetIdToRankMap = mapOf(104 to 1, 103 to 2, 101 to 3)
+            underTest.updateWidgetOrder(widgetIdToRankMap)
             runCurrent()
 
-            verify(communalWidgetDao).updateWidgetOrder(widgetIdToPriorityMap)
+            verify(communalWidgetDao).updateWidgetOrder(widgetIdToRankMap)
 
             // Verify backup requested
             verify(backupManager).dataChanged()
@@ -444,11 +457,8 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
             runCurrent()
 
             // Verify state restored, and widget 2 skipped
-            val restoredState =
-                withArgCaptor<CommunalHubState> {
-                    verify(communalWidgetDao).restoreCommunalHubState(capture())
-                }
-            val restoredWidgets = restoredState.widgets.toList()
+            verify(communalWidgetDao).restoreCommunalHubState(communalHubStateCaptor.capture())
+            val restoredWidgets = communalHubStateCaptor.firstValue.widgets.toList()
             assertThat(restoredWidgets).hasSize(1)
 
             val restoredWidget = restoredWidgets.first()
@@ -474,11 +484,8 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
             runCurrent()
 
             // Verify widget 1 and 2 are restored, and are now 11 and 12.
-            val restoredState =
-                withArgCaptor<CommunalHubState> {
-                    verify(communalWidgetDao).restoreCommunalHubState(capture())
-                }
-            val restoredWidgets = restoredState.widgets.toList()
+            verify(communalWidgetDao).restoreCommunalHubState(communalHubStateCaptor.capture())
+            val restoredWidgets = communalHubStateCaptor.firstValue.widgets.toList()
             assertThat(restoredWidgets).hasSize(2)
 
             val restoredWidget1 = restoredWidgets[0]
@@ -512,11 +519,8 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
             runCurrent()
 
             // Verify widget 1 and 2 are restored, and are now 1 and 12.
-            val restoredState =
-                withArgCaptor<CommunalHubState> {
-                    verify(communalWidgetDao).restoreCommunalHubState(capture())
-                }
-            val restoredWidgets = restoredState.widgets.toList()
+            verify(communalWidgetDao).restoreCommunalHubState(communalHubStateCaptor.capture())
+            val restoredWidgets = communalHubStateCaptor.firstValue.widgets.toList()
             assertThat(restoredWidgets).hasSize(2)
 
             val restoredWidget1 = restoredWidgets[0]
@@ -533,14 +537,134 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
+    fun restoreWidgets_undefinedUser_restoredAsMain() =
+        testScope.runTest {
+            // Write two widgets to file, both of which have user serial number undefined.
+            val fakeState =
+                CommunalHubState().apply {
+                    widgets =
+                        listOf(
+                                CommunalHubState.CommunalWidgetItem().apply {
+                                    widgetId = 1
+                                    componentName = "pk_name/fake_widget_1"
+                                    rank = 1
+                                    userSerialNumber =
+                                        CommunalWidgetItem.USER_SERIAL_NUMBER_UNDEFINED
+                                },
+                                CommunalHubState.CommunalWidgetItem().apply {
+                                    widgetId = 2
+                                    componentName = "pk_name/fake_widget_2"
+                                    rank = 2
+                                    userSerialNumber =
+                                        CommunalWidgetItem.USER_SERIAL_NUMBER_UNDEFINED
+                                },
+                            )
+                            .toTypedArray()
+                }
+            backupUtils.writeBytesToDisk(fakeState.toByteArray())
+
+            // Set up app widget host with widget ids.
+            setAppWidgetIds(listOf(11, 12))
+
+            // Restore widgets.
+            underTest.restoreWidgets(mapOf(Pair(1, 11), Pair(2, 12)))
+            runCurrent()
+
+            // Verify widget 1 and 2 are restored with the main user.
+            verify(communalWidgetDao).restoreCommunalHubState(communalHubStateCaptor.capture())
+            val restoredWidgets = communalHubStateCaptor.firstValue.widgets.toList()
+            assertThat(restoredWidgets).hasSize(2)
+
+            val restoredWidget1 = restoredWidgets[0]
+            assertThat(restoredWidget1.widgetId).isEqualTo(11)
+            assertThat(restoredWidget1.userSerialNumber).isEqualTo(testUserSerialNumber(mainUser))
+
+            val restoredWidget2 = restoredWidgets[1]
+            assertThat(restoredWidget2.widgetId).isEqualTo(12)
+            assertThat(restoredWidget2.userSerialNumber).isEqualTo(testUserSerialNumber(mainUser))
+        }
+
+    @Test
+    fun restoreWidgets_workProfileNotRestored_widgetSkipped() =
+        testScope.runTest {
+            // Write fake state to file
+            backupUtils.writeBytesToDisk(fakeStateWithWorkProfile.toByteArray())
+
+            // Set up app widget host with widget ids.
+            // (b/349852237) It's possible that the platform restores widgets even though their user
+            // is not restored.
+            setAppWidgetIds(listOf(11, 12))
+
+            // Restore widgets.
+            underTest.restoreWidgets(mapOf(Pair(1, 11), Pair(2, 12)))
+            runCurrent()
+
+            // Verify only widget 1 is restored. Widget 2 is skipped because it belongs to a work
+            // profile, which is not restored.
+            verify(communalWidgetDao).restoreCommunalHubState(communalHubStateCaptor.capture())
+            val restoredWidgets = communalHubStateCaptor.firstValue.widgets.toList()
+            assertThat(restoredWidgets).hasSize(1)
+
+            val restoredWidget = restoredWidgets[0]
+            assertThat(restoredWidget.widgetId).isEqualTo(11)
+            assertThat(restoredWidget.userSerialNumber).isEqualTo(testUserSerialNumber(mainUser))
+        }
+
+    @Test
+    fun restoreWidgets_workProfileRestored_manuallyBindWidget() =
+        testScope.runTest {
+            // Write fake state to file
+            backupUtils.writeBytesToDisk(fakeStateWithWorkProfile.toByteArray())
+
+            // Set up app widget host with widget ids.
+            // (b/349852237) It's possible that the platform restores widgets even though their user
+            // is not restored.
+            setAppWidgetIds(listOf(11, 12))
+
+            // Restore work profile.
+            restoreUser(workProfile)
+
+            val newWidgetId = 13
+            whenever(communalWidgetHost.allocateIdAndBindWidget(any(), any()))
+                .thenReturn(newWidgetId)
+
+            // Restore widgets.
+            underTest.restoreWidgets(mapOf(Pair(1, 11), Pair(2, 12)))
+            runCurrent()
+
+            // Verify widget 1 is restored.
+            verify(communalWidgetDao).restoreCommunalHubState(communalHubStateCaptor.capture())
+            val restoredWidgets = communalHubStateCaptor.firstValue.widgets.toList()
+            assertThat(restoredWidgets).hasSize(1)
+
+            val restoredWidget = restoredWidgets[0]
+            assertThat(restoredWidget.widgetId).isEqualTo(11)
+            assertThat(restoredWidget.userSerialNumber).isEqualTo(testUserSerialNumber(mainUser))
+
+            // Verify widget 2 (now 12) is removed from platform
+            verify(appWidgetHost).deleteAppWidgetId(12)
+
+            // Verify work profile widget is manually bound
+            verify(communalWidgetDao)
+                .addWidget(
+                    eq(newWidgetId),
+                    componentNameCaptor.capture(),
+                    eq(2),
+                    eq(testUserSerialNumber(workProfile))
+                )
+            assertThat(componentNameCaptor.firstValue)
+                .isEqualTo(ComponentName("pk_name", "fake_widget_2"))
+        }
+
+    @Test
     fun pendingWidgets() =
         testScope.runTest {
             fakeWidgets.value =
                 mapOf(
                     CommunalItemRank(uid = 1L, rank = 1) to
-                        CommunalWidgetItem(uid = 1L, 1, "pk_1/cls_1", 1L),
+                        CommunalWidgetItem(uid = 1L, 1, "pk_1/cls_1", 1L, 0),
                     CommunalItemRank(uid = 2L, rank = 2) to
-                        CommunalWidgetItem(uid = 2L, 2, "pk_2/cls_2", 2L),
+                        CommunalWidgetItem(uid = 2L, 2, "pk_2/cls_2", 2L, 0),
                 )
 
             // Widget 1 is installed
@@ -554,7 +678,7 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                         sessionId = 1,
                         packageName = "pk_2",
                         icon = fakeIcon,
-                        user = UserHandle.CURRENT,
+                        user = mainUser,
                     )
                 )
             )
@@ -565,14 +689,14 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                     CommunalWidgetContentModel.Available(
                         appWidgetId = 1,
                         providerInfo = providerInfoA,
-                        priority = 1,
+                        rank = 1,
                     ),
                     CommunalWidgetContentModel.Pending(
                         appWidgetId = 2,
-                        priority = 2,
-                        packageName = "pk_2",
+                        rank = 2,
+                        componentName = ComponentName("pk_2", "cls_2"),
                         icon = fakeIcon,
-                        user = UserHandle.CURRENT,
+                        user = mainUser,
                     ),
                 )
         }
@@ -583,7 +707,7 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
             fakeWidgets.value =
                 mapOf(
                     CommunalItemRank(uid = 1L, rank = 1) to
-                        CommunalWidgetItem(uid = 1L, 1, "pk_1/cls_1", 1L),
+                        CommunalWidgetItem(uid = 1L, 1, "pk_1/cls_1", 1L, 0),
                 )
 
             // Widget 1 is pending install
@@ -594,7 +718,7 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                         sessionId = 1,
                         packageName = "pk_1",
                         icon = fakeIcon,
-                        user = UserHandle.CURRENT,
+                        user = mainUser,
                     )
                 )
             )
@@ -604,10 +728,10 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                 .containsExactly(
                     CommunalWidgetContentModel.Pending(
                         appWidgetId = 1,
-                        priority = 1,
-                        packageName = "pk_1",
+                        rank = 1,
+                        componentName = ComponentName("pk_1", "cls_1"),
                         icon = fakeIcon,
-                        user = UserHandle.CURRENT,
+                        user = mainUser,
                     ),
                 )
 
@@ -624,13 +748,27 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                     CommunalWidgetContentModel.Available(
                         appWidgetId = 1,
                         providerInfo = providerInfoA,
-                        priority = 1,
+                        rank = 1,
                     ),
                 )
         }
 
     private fun setAppWidgetIds(ids: List<Int>) {
         whenever(appWidgetHost.appWidgetIds).thenReturn(ids.toIntArray())
+    }
+
+    // Commonly the user id and user serial number are the same, but for testing purposes use a
+    // simple algorithm to map a user id to a different user serial number to make sure the correct
+    // value is used.
+    private fun testUserSerialNumber(user: UserHandle): Int {
+        return user.identifier + 100
+    }
+
+    private fun restoreUser(user: UserHandle) {
+        whenever(backupManager.getUserForAncestralSerialNumber(user.identifier.toLong()))
+            .thenReturn(user)
+        whenever(userManager.getUserSerialNumber(user.identifier))
+            .thenReturn(testUserSerialNumber(user))
     }
 
     private companion object {
@@ -650,11 +788,32 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                                 widgetId = 1
                                 componentName = "pk_name/fake_widget_1"
                                 rank = 1
+                                userSerialNumber = 0
                             },
                             CommunalHubState.CommunalWidgetItem().apply {
                                 widgetId = 2
                                 componentName = "pk_name/fake_widget_2"
                                 rank = 2
+                                userSerialNumber = 0
+                            },
+                        )
+                        .toTypedArray()
+            }
+        val fakeStateWithWorkProfile =
+            CommunalHubState().apply {
+                widgets =
+                    listOf(
+                            CommunalHubState.CommunalWidgetItem().apply {
+                                widgetId = 1
+                                componentName = "pk_name/fake_widget_1"
+                                rank = 1
+                                userSerialNumber = 0
+                            },
+                            CommunalHubState.CommunalWidgetItem().apply {
+                                widgetId = 2
+                                componentName = "pk_name/fake_widget_2"
+                                rank = 2
+                                userSerialNumber = 10
                             },
                         )
                         .toTypedArray()

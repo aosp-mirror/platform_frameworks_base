@@ -265,8 +265,6 @@
     <string name="global_action_bug_report" msgid="5127867163044170003">"Вирус туралы хабарлау"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Сеансты аяқтау"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"Скриншот"</string>
-    <!-- no translation found for identity_check_biometric_prompt_description (5810195983015866727) -->
-    <skip />
     <string name="bugreport_title" msgid="8549990811777373050">"Қате туралы есеп"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"Құрылғының қазіргі күйі туралы ақпаратты жинап, электрондық хабармен жібереді. Есеп әзір болғанша біраз уақыт кетеді, шыдай тұрыңыз."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"Интерактивті есеп"</string>
@@ -1196,6 +1194,8 @@
     <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"Құпия сөз өрістерінде қолмен жазу мүмкін емес."</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Артқа"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Енгізу әдісін ауыстыру"</string>
+    <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"Енгізу әдісін таңдау құралын ашу"</string>
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"Параметрлер"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Жадта орын азайып барады"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Жүйенің кейбір функциялары жұмыс істемеуі мүмкін"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Жүйе үшін жад жеткіліксіз. 250 МБ бос орын бар екенін тексеріп, қайта іске қосыңыз."</string>
@@ -1413,10 +1413,8 @@
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"Сымсыз түзетуді өшіру үшін басыңыз."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Сынақ бағдарламасы режимі қосылды"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Сынақ бағдарламасы режимін өшіру үшін зауыттық күйіне қайтарыңыз."</string>
-    <!-- no translation found for wrong_hsum_configuration_notification_title (7212758829332714385) -->
-    <skip />
-    <!-- no translation found for wrong_hsum_configuration_notification_message (5353475441480684381) -->
-    <skip />
+    <string name="wrong_hsum_configuration_notification_title" msgid="7212758829332714385">"HSUM құрастыру конфигурациясы дұрыс емес"</string>
+    <string name="wrong_hsum_configuration_notification_message" msgid="5353475441480684381">"Бұл құрылғының Headless System User Mode күйі құрастыру кезіндегі конфигурациясынан ерекшеленеді. Құрылғыны зауыттық параметрлеріне қайтарыңыз."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"Сериялық консоль қосылды"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"Өнімділікке әсер етеді. Өшіру үшін жүктегішті тексеріңіз."</string>
     <string name="mte_override_notification_title" msgid="4731115381962792944">"Эксперименттік MTE қосылды"</string>
@@ -1432,6 +1430,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"БӨЛІСУ"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"ҚАБЫЛДАМАУ"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Енгізу әдісін таңдау"</string>
+    <string name="input_method_language_settings" msgid="8069089418056819437">"Тіл параметрлері"</string>
     <string name="show_ime" msgid="6406112007347443383">"Физикалық пернетақта қосулы кезде оны экранға шығару"</string>
     <string name="hardware" msgid="3611039921284836033">"Экрандағы пернетақтаны пайдалану"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"<xliff:g id="DEVICE_NAME">%s</xliff:g> конфигурациялау"</string>
@@ -1747,7 +1746,8 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"Қолданба рұқсат сұрауын жасырып тұрғандықтан, жауабыңыз расталмайды."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Функцияны пайдалана бастау үшін түртіңіз:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"\"Арнайы мүмкіндіктер\" түймесімен қолданылатын функцияларды таңдаңыз"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Дыбыс деңгейі пернелері тіркесімімен қолданылатын функцияларды таңдаңыз"</string>
+    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
+    <skip />
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> қызметі өшірулі."</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Жылдам пәрмендерді өзгерту"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Дайын"</string>
@@ -1761,18 +1761,12 @@
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Пайдаланушы дыбыс деңгейі пернелерін басып ұстап тұрды. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> қосулы."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Дыбыс деңгейі пернелерін басып тұрған соң, <xliff:g id="SERVICE_NAME">%1$s</xliff:g> өшірілді."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Дыбыс деңгейі пернелерін жіберіңіз. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> қызметін қосу үшін дыбыс деңгейі пернесінің екеуін де қайтадан 3 секундқа басып тұрыңыз."</string>
-    <!-- no translation found for accessibility_button_prompt_text (6105393217162198616) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_prompt_text (6452246951969541792) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_3finger_prompt_text (77745752309056152) -->
-    <skip />
-    <!-- no translation found for accessibility_button_instructional_text (6831154884557881996) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_instructional_text (4133877896011098550) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_3finger_instructional_text (1124458279366968154) -->
-    <skip />
+    <string name="accessibility_button_prompt_text" msgid="6105393217162198616">"Функция таңдау"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="6452246951969541792">"Функция таңдау"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="77745752309056152">"Функция таңдау"</string>
+    <string name="accessibility_button_instructional_text" msgid="6831154884557881996">"Келесіде арнайы мүмкіндіктер түймесін түрткенде, функция ашылады."</string>
+    <string name="accessibility_gesture_instructional_text" msgid="4133877896011098550">"Келесіде осы жылдам пәрменді қолданғанда, функция ашылады. 2 саусақпен экранның төменгі жағынан жоғары қарай сырғытып, жылдам жіберіп қалыңыз."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="1124458279366968154">"Келесіде осы жылдам пәрменді қолданғанда, функция ашылады. 3 саусақпен экранның төменгі жағынан жоғары қарай сырғытып, жылдам жіберіп қалыңыз."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Ұлғайту"</string>
     <string name="user_switched" msgid="7249833311585228097">"Ағымдағы пайдаланушы <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> профиліне ауысу…"</string>
@@ -1895,8 +1889,7 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN тым қысқа. Кем дегенде 4 бірлік болуы тиіс."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Кейінірек қайта әрекеттеніңіз."</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Толық экранда көру"</string>
-    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
-    <skip />
+    <string name="immersive_cling_description" msgid="2896205051090870978">"Шығу үшін экранның жоғарғы жағынан төмен қарай сырғытыңыз."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Түсінікті"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Жақсырақ көру үшін бұрыңыз."</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Жақсырақ көру үшін <xliff:g id="NAME">%s</xliff:g> қолданбасын толық экранда ашыңыз."</string>
@@ -2432,25 +2425,32 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Қауіпсіздік мақсатында қолданба контенті экранды көрсету кезінде жасырылды."</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Жерсерік қызметіне автоматты түрде қосылды"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Мобильдік не Wi-Fi желісіне қосылмастан хабар жібере аласыз және ала аласыз."</string>
+    <string name="satellite_notification_manual_title" msgid="1097504441849466279">"Жерсерік арқылы хабар алмасасыз ба?"</string>
+    <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Хабарландыруларды мобильдік желіге немесе Wi-Fi желісіне қосылмай жіберіңіз және алыңыз."</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages қолданбасын ашу"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Бұл қалай орындалады?"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Дайын емес…"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Саусақ ізімен ашу функциясын қайта реттеу"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (5851784577768803510) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7925203589860744456) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (1824812666549916586) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (5974657382960155099) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> бұдан былай танылмайды."</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> және <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> бұдан былай танылмайды."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="1824812666549916586">"<xliff:g id="FINGERPRINT">%s</xliff:g> бұдан былай танылмайды. Саусақ ізімен ашу функциясын қайта реттеңіз."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="5974657382960155099">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> және <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> бұдан былай танылмайды. Саусақ ізімен ашу функциясын қайта реттеңіз."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Бет тану функциясын қайта реттеу"</string>
-    <!-- no translation found for face_dangling_notification_msg (746235263598985384) -->
-    <skip />
+    <string name="face_dangling_notification_msg" msgid="746235263598985384">"Бет үлгіңіз бұдан былай танылмайды. Бет тану функциясын қайта реттеңіз."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Реттеу"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Қазір емес"</string>
-    <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"<xliff:g id="USER_NAME">%s</xliff:g> атына қойылған дабыл"</string>
+    <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"<xliff:g id="USER_NAME">%s</xliff:g> оятқышы"</string>
     <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"Пайдаланушыны ауыстыру"</string>
     <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"Дыбысын өшіру"</string>
     <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"Дыбысын өшіру үшін түртіңіз."</string>
+    <string name="keyboard_shortcut_group_applications_browser" msgid="6535007304687100909">"Браузер"</string>
+    <string name="keyboard_shortcut_group_applications_contacts" msgid="2750702518068326356">"Контактілер"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="4229037666415353683">"Электрондық пошта"</string>
+    <string name="keyboard_shortcut_group_applications_sms" msgid="3523799286376321137">"SMS"</string>
+    <string name="keyboard_shortcut_group_applications_music" msgid="2051507523525651067">"Музыка"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="3571770335653387606">"Күнтізбе"</string>
+    <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"Калькулятор"</string>
+    <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"Maps"</string>
+    <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"Қолданбалар"</string>
+    <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"Саусағыңыздың іздері бұдан былай танылмайды. Саусақ ізімен ашу функциясын қайта реттеу"</string>
 </resources>

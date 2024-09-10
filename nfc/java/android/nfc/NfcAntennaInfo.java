@@ -64,9 +64,9 @@ public final class NfcAntennaInfo implements Parcelable {
 
     /**
      * Whether the device is foldable. When the device is foldable,
-     * the 0, 0 is considered to be bottom-left when the device is unfolded and
+     * the 0, 0 is considered to be top-left when the device is unfolded and
      * the screens are facing the user. For non-foldable devices 0, 0
-     * is bottom-left when the user is facing the screen.
+     * is top-left when the user is facing the screen.
      */
     public boolean isDeviceFoldable() {
         return mDeviceFoldable;

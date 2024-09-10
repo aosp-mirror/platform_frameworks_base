@@ -41,6 +41,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
+import android.os.vibrator.Flags;
 import android.util.IndentingPrintWriter;
 import android.util.IntArray;
 import android.util.Slog;
@@ -68,7 +69,7 @@ final class VibratorControlService extends IVibratorControlService.Stub {
     private static final int NO_SCALE = -1;
 
     private static final DateTimeFormatter DEBUG_DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern(
-            "MM-dd HH:mm:ss.SSS").withZone(ZoneId.systemDefault());
+            "MM-dd HH:mm:ss.SSS");
 
     private final VibrationParamsRecords mVibrationParamsRecords;
     private final VibratorControllerHolder mVibratorControllerHolder;
@@ -265,9 +266,15 @@ final class VibratorControlService extends IVibratorControlService.Stub {
                 return null;
             }
 
+            if (Flags.throttleVibrationParamsRequests() && mVibrationParamRequest != null
+                    && mVibrationParamRequest.usage == usage) {
+                // Reuse existing future for ongoing request with same usage.
+                return mVibrationParamRequest.future;
+            }
+
             try {
                 endOngoingRequestVibrationParamsLocked(/* wasCancelled= */ true);
-                mVibrationParamRequest = new VibrationParamRequest(uid);
+                mVibrationParamRequest = new VibrationParamRequest(uid, usage);
                 vibratorController.requestVibrationParams(vibrationType, timeoutInMillis,
                         mVibrationParamRequest.token);
                 return mVibrationParamRequest.future;
@@ -533,10 +540,12 @@ final class VibratorControlService extends IVibratorControlService.Stub {
         public final CompletableFuture<Void> future = new CompletableFuture<>();
         public final IBinder token = new Binder();
         public final int uid;
+        public final @VibrationAttributes.Usage int usage;
         public final long uptimeMs;
 
-        VibrationParamRequest(int uid) {
+        VibrationParamRequest(int uid, @VibrationAttributes.Usage int usage) {
             this.uid = uid;
+            this.usage = usage;
             uptimeMs = SystemClock.uptimeMillis();
         }
 
@@ -550,8 +559,8 @@ final class VibratorControlService extends IVibratorControlService.Stub {
     }
 
     /**
-     * Record for a single {@link Vibration.DebugInfo}, that can be grouped by usage and aggregated
-     * by UID, {@link VibrationAttributes} and {@link VibrationEffect}.
+     * Record for a single {@link VibrationSession.DebugInfo}, that can be grouped by usage and
+     * aggregated by UID, {@link VibrationAttributes} and {@link VibrationEffect}.
      */
     private static final class VibrationScaleParamRecord
             implements GroupedAggregatedLogRecords.SingleLogRecord {
@@ -591,7 +600,8 @@ final class VibratorControlService extends IVibratorControlService.Stub {
         public void dump(IndentingPrintWriter pw) {
             String line = String.format(Locale.ROOT,
                     "%s | %6s | scale: %5s | typesMask: %6s | usages: %s",
-                    DEBUG_DATE_TIME_FORMATTER.format(Instant.ofEpochMilli(mCreateTime)),
+                    DEBUG_DATE_TIME_FORMATTER.withZone(ZoneId.systemDefault()).format(
+                            Instant.ofEpochMilli(mCreateTime)),
                     mOperation.name().toLowerCase(Locale.ROOT),
                     (mScale == NO_SCALE) ? "" : String.format(Locale.ROOT, "%.2f", mScale),
                     Long.toBinaryString(mTypesMask), createVibrationUsagesString());

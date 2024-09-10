@@ -26,8 +26,8 @@ import android.util.IndentingPrintWriter;
 import android.util.SparseArray;
 import android.util.Xml;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;

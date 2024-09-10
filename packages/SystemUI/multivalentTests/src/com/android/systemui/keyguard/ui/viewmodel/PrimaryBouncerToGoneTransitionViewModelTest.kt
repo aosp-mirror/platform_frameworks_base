@@ -159,8 +159,9 @@ class PrimaryBouncerToGoneTransitionViewModelTest : SysuiTestCase() {
             )
 
             assertThat(values[0]).isEqualTo(1f)
-            // Should fade to zero between here
             assertThat(values[1]).isEqualTo(0f)
+            // Should always finish with 1f to show HUNs
+            assertThat(values[2]).isEqualTo(1f)
         }
 
     @Test
@@ -177,7 +178,7 @@ class PrimaryBouncerToGoneTransitionViewModelTest : SysuiTestCase() {
                 testScope,
             )
 
-            assertThat(values.size).isEqualTo(2)
+            assertThat(values.size).isEqualTo(3)
             // Shade stays open, and alpha should remain visible
             values.forEach { assertThat(it).isEqualTo(1f) }
         }

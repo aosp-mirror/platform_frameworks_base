@@ -45,7 +45,7 @@
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> ಅನ್ನು ನಿಯಂತ್ರಿಸಲು <xliff:g id="APPLICATION">%1$s</xliff:g> ಅನ್ನು ತೆರೆಯುವುದೇ?\nಈ ಆ್ಯಪ್‌ಗೆ ರೆಕಾರ್ಡ್ ಅನುಮತಿಯನ್ನು ನೀಡಲಾಗಿಲ್ಲ, ಆದರೆ ಈ USB ಸಾಧನದ ಮೂಲಕ ಆಡಿಯೊವನ್ನು ಸೆರೆಹಿಡಿಯಬಹುದು."</string>
     <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g> ಅನ್ನು ನಿರ್ವಹಿಸಲು <xliff:g id="APPLICATION">%1$s</xliff:g> ಅನ್ನು ತೆರೆಯುವುದೇ?"</string>
     <string name="usb_accessory_uri_prompt" msgid="6756649383432542382">"ಆಪ್‌ಗಳು USB ಪರಿಕರದಲ್ಲಿ ಕಾರ್ಯನಿರ್ವಹಿಸುವುದಿಲ್ಲ. ಆ ಬಗ್ಗೆ <xliff:g id="URL">%1$s</xliff:g> ನಲ್ಲಿ ಇನ್ನಷ್ಟು ತಿಳಿಯಿರಿ"</string>
-    <string name="title_usb_accessory" msgid="1236358027511638648">"USB ಪರಿಕರ"</string>
+    <string name="title_usb_accessory" msgid="1236358027511638648">"USB ಆ್ಯಕ್ಸೆಸರಿ"</string>
     <string name="label_view" msgid="6815442985276363364">"ವೀಕ್ಷಿಸು"</string>
     <string name="always_use_device" msgid="210535878779644679">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> ಸಂಪರ್ಕಗೊಂಡಾಗ ಯಾವಾಗಲೂ <xliff:g id="APPLICATION">%1$s</xliff:g> ಅನ್ನು ತೆರೆಯಿರಿ"</string>
     <string name="always_use_accessory" msgid="1977225429341838444">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g> ಸಂಪರ್ಕಗೊಂಡಾಗ ಯಾವಾಗಲೂ <xliff:g id="APPLICATION">%1$s</xliff:g> ಅನ್ನು ತೆರೆಯಿರಿ"</string>
@@ -104,13 +104,17 @@
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> ಹಾಗೂ ತೆರೆದಿರುವ ಇತರ ಆ್ಯಪ್‌ಗಳು ಈ ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಅನ್ನು ಪತ್ತೆಹಚ್ಚಿವೆ."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"ಟಿಪ್ಪಣಿಗೆ ಸೇರಿಸಿ"</string>
     <string name="backlinks_include_link" msgid="4562093591148248158">"ಲಿಂಕ್ ಅನ್ನು ಸೇರಿಸಿ"</string>
+    <string name="backlinks_duplicate_label_format" msgid="558445128952827926">"<xliff:g id="APPNAME">%1$s</xliff:g> <xliff:g id="FREQUENCYCOUNT">(%2$d)</xliff:g>⁠"</string>
     <string name="screenrecord_title" msgid="4257171601439507792">"ಸ್ಕ್ರೀನ್ ರೆಕಾರ್ಡರ್"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"ಸ್ಕ್ರೀನ್ ರೆಕಾರ್ಡಿಂಗ್ ಆಗುತ್ತಿದೆ"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ಸ್ಕ್ರೀನ್ ರೆಕಾರ್ಡಿಂಗ್ ಸೆಶನ್‌ಗಾಗಿ ಚಾಲ್ತಿಯಲ್ಲಿರುವ ನೋಟಿಫಿಕೇಶನ್"</string>
-    <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"ರೆಕಾರ್ಡಿಂಗ್ ಪ್ರಾರಂಭಿಸಬೇಕೇ?"</string>
-    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"ನೀವು ರೆಕಾರ್ಡಿಂಗ್ ಮಾಡುತ್ತಿರುವಾಗ, ನಿಮ್ಮ ಸ್ಕ್ರೀನ್ ಮೇಲೆ ಕಾಣಿಸುವ ಅಥವಾ ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಪ್ಲೇ ಮಾಡುವ ಯಾವುದೇ ವಿಷಯಕ್ಕೆ Android ಆ್ಯಕ್ಸೆಸ್ ಅನ್ನು ಹೊಂದಿರುತ್ತದೆ. ಆದ್ದರಿಂದ ಪಾಸ್‌ವರ್ಡ್‌ಗಳು, ಪಾವತಿ ವಿವರಗಳು, ಸಂದೇಶಗಳು, ಫೋಟೋಗಳು ಹಾಗೂ ಆಡಿಯೊ ಮತ್ತು ವೀಡಿಯೊದಂತಹ ವಿಷಯಗಳ ಕುರಿತು ಜಾಗರೂಕರಾಗಿರಿ."</string>
-    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"ನೀವು ಆ್ಯಪ್ ಅನ್ನು ರೆಕಾರ್ಡಿಂಗ್ ಮಾಡುತ್ತಿರುವಾಗ, ಆ ಆ್ಯಪ್‌ನಲ್ಲಿ ತೋರಿಸುವ ಅಥವಾ ಪ್ಲೇ ಮಾಡುವ ಯಾವುದೇ ವಿಷಯಕ್ಕೆ Android ಆ್ಯಕ್ಸೆಸ್ ಅನ್ನು ಹೊಂದಿರುತ್ತದೆ. ಆದ್ದರಿಂದ ಪಾಸ್‌ವರ್ಡ್‌ಗಳು, ಪಾವತಿ ವಿವರಗಳು, ಸಂದೇಶಗಳು, ಫೋಟೋಗಳು ಹಾಗೂ ಆಡಿಯೊ ಮತ್ತು ವೀಡಿಯೊದಂತಹ ವಿಷಯಗಳ ಕುರಿತು ಜಾಗರೂಕರಾಗಿರಿ."</string>
-    <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"ರೆಕಾರ್ಡಿಂಗ್ ಪ್ರಾರಂಭಿಸಿ"</string>
+    <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"ನಿಮ್ಮ ಸ್ಕ್ರೀನ್‌ ಅನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಬೇಕೇ?"</string>
+    <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"ಒಂದು ಆ್ಯಪ್ ಅನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಿ"</string>
+    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"ಸಂಪೂರ್ಣ ಸ್ಕ್ರೀನ್ ಅನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಿ"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"ನಿಮ್ಮ ಸಂಪೂರ್ಣ ಸ್ಕ್ರೀನ್‌ ಅನ್ನು ನೀವು ರೆಕಾರ್ಡ್ ಮಾಡುತ್ತಿರುವಾಗ, ನಿಮ್ಮ ಸ್ಕ್ರೀನ್‌ ಮೇಲೆ ಗೋಚರಿಸುವ ಎಲ್ಲವನ್ನೂ ರೆಕಾರ್ಡ್ ಮಾಡಲಾಗುತ್ತದೆ. ಆದ್ದರಿಂದ ಪಾಸ್‌ವರ್ಡ್‌ಗಳು, ಪಾವತಿ ವಿವರಗಳು, ಸಂದೇಶಗಳು, ಫೋಟೋಗಳು ಮತ್ತು ಆಡಿಯೋ ಮತ್ತು ವೀಡಿಯೊದಂತಹ ವಿಷಯಗಳ ಬಗ್ಗೆ ಜಾಗರೂಕರಾಗಿರಿ."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"ನೀವು ಆ್ಯಪ್ ಅನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡುವಾಗ, ಆ ಆ್ಯಪ್‌ನಲ್ಲಿ ತೋರಿಸಿರುವ ಅಥವಾ ಪ್ಲೇ ಮಾಡಿದ ಎಲ್ಲವನ್ನೂ ರೆಕಾರ್ಡ್ ಮಾಡಲಾಗುತ್ತದೆ. ಆದ್ದರಿಂದ ಪಾಸ್‌ವರ್ಡ್‌ಗಳು, ಪಾವತಿ ವಿವರಗಳು, ಸಂದೇಶಗಳು, ಫೋಟೋಗಳು ಮತ್ತು ಆಡಿಯೋ ಮತ್ತು ವೀಡಿಯೊದಂತಹ ವಿಷಯಗಳ ಬಗ್ಗೆ ಜಾಗರೂಕರಾಗಿರಿ."</string>
+    <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"ಸ್ಕ್ರೀನ್ ರೆಕಾರ್ಡ್ ಮಾಡಿ"</string>
+    <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"ರೆಕಾರ್ಡ್ ಮಾಡಲು ಆ್ಯಪ್‌ ಅನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"ಆಡಿಯೋ ರೆಕಾರ್ಡ್‌ ಮಾಡಿ"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"ಸಾಧನದ ಆಡಿಯೋ"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"ನಿಮ್ಮ ಸಾಧನದ ಧ್ವನಿ ಉದಾ: ಸಂಗೀತ, ಕರೆಗಳು ಮತ್ತು ರಿಂಗ್‌ಟೋನ್‌ಗಳು"</string>
@@ -126,31 +130,27 @@
     <string name="screenrecord_save_text" msgid="3008973099800840163">"ವೀಕ್ಷಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"ಸ್ಕ್ರೀನ್ ರೆಕಾರ್ಡಿಂಗ್ ಸೇವ್‌ ಮಾಡುವಾಗ ದೋಷ ಎದುರಾಗಿದೆ"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"ಸ್ಕ್ರೀನ್ ರೆಕಾರ್ಡಿಂಗ್ ಪ್ರಾರಂಭಿಸುವಾಗ ದೋಷ ಕಂಡುಬಂದಿದೆ"</string>
-    <!-- no translation found for screenrecord_stop_dialog_title (2685522129492260887) -->
-    <skip />
-    <!-- no translation found for screenrecord_stop_dialog_message (1926783607059442889) -->
-    <skip />
-    <string name="screenrecord_stop_dialog_message_specific_app" msgid="5285148796772616326">"ಇದರಿಂದ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ನ ಕಂಟೆಂಟ್ ಅನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡುವುದು ನಿಂತುಹೋಗುತ್ತದೆ"</string>
-    <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
-    <skip />
+    <string name="screenrecord_stop_dialog_title" msgid="8716193661764511095">"ರೆಕಾರ್ಡ್ ಮಾಡುವುದನ್ನು ನಿಲ್ಲಿಸಬೇಕೇ?"</string>
+    <string name="screenrecord_stop_dialog_message" msgid="6262768207331626817">"ನೀವು ಪ್ರಸ್ತುತ ನಿಮ್ಮ ಸಂಪೂರ್ಣ ಸ್ಕ್ರೀನ್ ಅನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡುತ್ತಿದ್ದೀರಿ"</string>
+    <string name="screenrecord_stop_dialog_message_specific_app" msgid="5995770227684523244">"ನೀವು ಪ್ರಸ್ತುತ <xliff:g id="APP_NAME">%1$s</xliff:g> ಅನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡುತ್ತಿದ್ದೀರಿ"</string>
+    <string name="screenrecord_stop_dialog_button" msgid="2883812564938194350">"ರೆಕಾರ್ಡಿಂಗ್ ನಿಲ್ಲಿಸಿ"</string>
     <string name="share_to_app_chip_accessibility_label" msgid="4210256229976947065">"ಪರದೆಯನ್ನು ಹಂಚಿಕೊಳ್ಳಲಾಗುತ್ತಿದೆ"</string>
-    <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
-    <skip />
-    <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
-    <skip />
-    <string name="share_to_app_stop_dialog_message_specific_app" msgid="124371406810544777">"ಇದರಿಂದ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ನ ಕಂಟೆಂಟ್ ಅನ್ನು ಹಂಚಿಕೊಳ್ಳುವುದು ನಿಂತುಹೋಗುತ್ತದೆ"</string>
-    <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
-    <skip />
-    <string name="cast_to_other_device_chip_accessibility_label" msgid="1680650146639059938">"ಪರದೆಯನ್ನು ಬಿತ್ತರಿಸಲಾಗುತ್ತಿದೆ"</string>
-    <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
-    <skip />
-    <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
-    <skip />
-    <string name="cast_to_other_device_stop_dialog_message_specific_app" msgid="4891536209254041850">"ಇದರಿಂದ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ನ ಕಂಟೆಂಟ್ ಅನ್ನು ಬಿತ್ತರಿಸುವುದು ನಿಂತುಹೋಗುತ್ತದೆ"</string>
-    <!-- no translation found for cast_to_other_device_stop_dialog_button (6420183747435521834) -->
-    <skip />
-    <!-- no translation found for close_dialog_button (4749497706540104133) -->
-    <skip />
+    <string name="share_to_app_stop_dialog_title" msgid="9212915050910250438">"ಸ್ಕ್ರೀನ್ ಹಂಚಿಕೊಳ್ಳುವಿಕೆಯನ್ನು ನಿಲ್ಲಿಸಬೇಕೆ?"</string>
+    <string name="share_to_app_stop_dialog_message_entire_screen_with_host_app" msgid="522823522115375414">"ನೀವು ಪ್ರಸ್ತುತ ನಿಮ್ಮ ಸಂಪೂರ್ಣ ಸ್ಕ್ರೀನ್ ಅನ್ನು <xliff:g id="HOST_APP_NAME">%1$s</xliff:g> ನೊಂದಿಗೆ ಹಂಚಿಕೊಳ್ಳುತ್ತಿದ್ದೀರಿ"</string>
+    <string name="share_to_app_stop_dialog_message_entire_screen" msgid="5090115386271179270">"ನೀವು ಪ್ರಸ್ತುತ ನಿಮ್ಮ ಸಂಪೂರ್ಣ ಸ್ಕ್ರೀನ್ ಅನ್ನು ಆ್ಯಪ್‌ನೊಂದಿಗೆ ಹಂಚಿಕೊಳ್ಳುತ್ತಿದ್ದೀರಿ"</string>
+    <string name="share_to_app_stop_dialog_message_single_app_specific" msgid="5923772039347985172">"ನೀವು ಪ್ರಸ್ತುತ <xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g> ಅನ್ನು ಹಂಚಿಕೊಳ್ಳುತ್ತಿದ್ದೀರಿ"</string>
+    <string name="share_to_app_stop_dialog_message_single_app_generic" msgid="6681016774654578261">"ನೀವು ಪ್ರಸ್ತುತ ಆ್ಯಪ್ ಅನ್ನು ಹಂಚಿಕೊಳ್ಳುತ್ತಿದ್ದೀರಿ"</string>
+    <string name="share_to_app_stop_dialog_button" msgid="6334056916284230217">"ಹಂಚಿಕೊಳ್ಳುವಿಕೆಯನ್ನು ನಿಲ್ಲಿಸಿ"</string>
+    <string name="cast_screen_to_other_device_chip_accessibility_label" msgid="4687917476203009885">"ಸ್ಕ್ರೀನ್ ಅನ್ನು ಬಿತ್ತರಿಸಲಾಗುತ್ತಿದೆ"</string>
+    <string name="cast_to_other_device_stop_dialog_title" msgid="7836517190930357326">"ಬಿತ್ತರಿಸುವುದನ್ನು ನಿಲ್ಲಿಸಬೇಕೆ?"</string>
+    <string name="cast_to_other_device_stop_dialog_message_entire_screen_with_device" msgid="1474703115926205251">"ನೀವು ಪ್ರಸ್ತುತ ನಿಮ್ಮ ಸಂಪೂರ್ಣ ಸ್ಕ್ರೀನ್ ಅನ್ನು <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ಗೆ ಬಿತ್ತರಿಸುತ್ತಿದ್ದೀರಿ"</string>
+    <string name="cast_to_other_device_stop_dialog_message_entire_screen" msgid="8419219169553867625">"ನೀವು ಪ್ರಸ್ತುತ ನಿಮ್ಮ ಸಂಪೂರ್ಣ ಸ್ಕ್ರೀನ್ ಅನ್ನು ಸಮೀಪದಲ್ಲಿರುವ ಸಾಧನಕ್ಕೆ ಬಿತ್ತರಿಸುತ್ತಿದ್ದೀರಿ"</string>
+    <string name="cast_to_other_device_stop_dialog_message_specific_app_with_device" msgid="2715934698604085519">"ನೀವು ಪ್ರಸ್ತುತ <xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g> ಅನ್ನು <xliff:g id="DEVICE_NAME">%2$s</xliff:g> ಗೆ ಬಿತ್ತರಿಸುತ್ತಿದ್ದೀರಿ"</string>
+    <string name="cast_to_other_device_stop_dialog_message_specific_app" msgid="8616103075630934513">"ನೀವು ಪ್ರಸ್ತುತ <xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g> ಅನ್ನು ಸಮೀಪದ ಸಾಧನಕ್ಕೆ ಬಿತ್ತರಿಸುತ್ತಿದ್ದೀರಿ"</string>
+    <string name="cast_to_other_device_stop_dialog_message_generic_with_device" msgid="9213582497852420203">"ನೀವು ಪ್ರಸ್ತುತ <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ಗೆ ಬಿತ್ತರಿಸುತ್ತಿದ್ದೀರಿ"</string>
+    <string name="cast_to_other_device_stop_dialog_message_generic" msgid="4100272100480415076">"ನೀವು ಪ್ರಸ್ತುತ ಸಮೀಪದ ಸಾಧನಕ್ಕೆ ಬಿತ್ತರಿಸುತ್ತಿದ್ದೀರಿ"</string>
+    <string name="cast_to_other_device_stop_dialog_button" msgid="6420183747435521834">"ಬಿತ್ತರಿಸುವುದನ್ನು ನಿಲ್ಲಿಸಿ"</string>
+    <string name="close_dialog_button" msgid="4749497706540104133">"ಮುಚ್ಚಿರಿ"</string>
     <string name="issuerecord_title" msgid="286627115110121849">"ಸಮಸ್ಯೆ ರೆಕಾರ್ಡರ್"</string>
     <string name="issuerecord_background_processing_label" msgid="1666840264959336876">"ಸಮಸ್ಯೆ ರೆಕಾರ್ಡಿಂಗ್ ಪ್ರಕ್ರಿಯೆ…"</string>
     <string name="issuerecord_channel_description" msgid="6142326363431474632">"ಸಮಸ್ಯೆ ಸಂಗ್ರಹಣೆಯ ಸೆಶನ್‌ಗಾಗಿ ಜರುಗುತ್ತಿರುವ ನೋಟಿಫಿಕೇಶನ್"</string>
@@ -161,8 +161,7 @@
     <string name="issuerecord_save_error" msgid="6913040083446722726">"ಸಮಸ್ಯೆಯ ರೆಕಾರ್ಡಿಂಗ್ ಅನ್ನು ಸೇವ್‌ ಮಾಡುವಾಗ ದೋಷ ಎದುರಾಗಿದೆ"</string>
     <string name="issuerecord_start_error" msgid="3402782952722871190">"ಸಮಸ್ಯೆಯ ರೆಕಾರ್ಡಿಂಗ್ ಅನ್ನು ಪ್ರಾರಂಭಿಸುವಲ್ಲಿ ದೋಷ ಎದುರಾಗಿದೆ"</string>
     <string name="immersive_cling_title" msgid="8372056499315585941">"ಪೂರ್ಣ ಸ್ಕ್ರೀನ್‌ನಲ್ಲಿ ವೀಕ್ಷಿಸಲಾಗುತ್ತಿದೆ"</string>
-    <!-- no translation found for immersive_cling_description (2717426731830851921) -->
-    <skip />
+    <string name="immersive_cling_description" msgid="2717426731830851921">"ನಿರ್ಗಮಿಸಲು, ನಿಮ್ಮ ಸ್ಕ್ರೀನ್‌ನ ಮೇಲಿನಿಂದ ಕೆಳಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ"</string>
     <string name="immersive_cling_positive" msgid="3076681691468978568">"ಅರ್ಥವಾಯಿತು"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"ಹಿಂದೆ"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"ಮುಖಪುಟ"</string>
@@ -181,8 +180,6 @@
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"ಕಳುಹಿಸಿ"</string>
     <string name="cancel" msgid="1089011503403416730">"ರದ್ದುಮಾಡಿ"</string>
     <string name="biometric_dialog_logo" msgid="7681107853070774595">"ಆ್ಯಪ್ ಲೋಗೋ"</string>
-  <string-array name="biometric_dialog_package_names_for_logo_with_overrides">
-  </string-array>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"ದೃಢೀಕರಿಸಿ"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"ದೃಢೀಕರಣವನ್ನು ರದ್ದುಗೊಳಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
@@ -295,6 +292,8 @@
     <string name="start_dreams" msgid="9131802557946276718">"ಸ್ಕ್ರೀನ್ ಸೇವರ್"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"ಇಥರ್ನೆಟ್"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"ಅಡಚಣೆ ಮಾಡಬೇಡಿ"</string>
+    <!-- no translation found for quick_settings_modes_label (879156359479504244) -->
+    <skip />
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"ಬ್ಲೂಟೂತ್‌"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"ಯಾವುದೇ ಜೋಡಿಸಲಾದ ಸಾಧನಗಳು ಲಭ್ಯವಿಲ್ಲ"</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"ಸಾಧನವನ್ನು ಕನೆಕ್ಟ್ ಅಥವಾ ಡಿಸ್‌ಕನೆಕ್ಟ್ ಮಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
@@ -303,15 +302,16 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"ಬ್ಲೂಟೂತ್ ಬಳಸಿ"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"ಕನೆಕ್ಟ್ ಆಗಿದೆ"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"ಆಡಿಯೋ ಹಂಚಿಕೊಳ್ಳುವಿಕೆ"</string>
+    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="3227408556754456024">"ಆಡಿಯೊವನ್ನು ಬದಲಾಯಿಸಲು ಅಥವಾ ಹಂಚಿಕೊಳ್ಳಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"ಸೇವ್ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"ಡಿಸ್‌ಕನೆಕ್ಟ್ ಮಾಡಿ"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
-    <!-- no translation found for turn_on_bluetooth_auto_tomorrow (3345758139235739006) -->
-    <skip />
+    <string name="turn_on_bluetooth_auto_tomorrow" msgid="3345758139235739006">"ನಾಳೆ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಆನ್ ಆಗಲಿ"</string>
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"ಕ್ವಿಕ್ ಶೇರ್ ಮತ್ತು Find My Device ನಂತಹ ಫೀಚರ್‌ಗಳು ಬ್ಲೂಟೂತ್ ಅನ್ನು ಬಳಸುತ್ತವೆ"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"ಬ್ಲೂಟೂತ್ ನಾಳೆ ಬೆಳಗ್ಗೆ ಆನ್ ಆಗುತ್ತದೆ"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"ಆಡಿಯೋ ಹಂಚಿಕೊಳ್ಳಿ"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"ಆಡಿಯೋವನ್ನು ಹಂಚಿಕೊಳ್ಳಲಾಗುತ್ತಿದೆ"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"ಆಡಿಯೋ ಹಂಚಿಕೊಳ್ಳುವಿಕೆ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ನಮೂದಿಸಿ"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> ಬ್ಯಾಟರಿ"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"ಆಡಿಯೋ"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"ಹೆಡ್‌ಸೆಟ್"</string>
@@ -393,6 +393,9 @@
     <string name="performance" msgid="6552785217174378320">"ಪರ್ಫಾರ್ಮೆನ್ಸ್"</string>
     <string name="user_interface" msgid="3712869377953950887">"ಬಳಕೆದಾರ ಇಂಟರ್‌ಫೇಸ್"</string>
     <string name="thermal" msgid="6758074791325414831">"ಥರ್ಮಲ್"</string>
+    <string name="custom" msgid="3337456985275158299">"ಕಸ್ಟಮ್"</string>
+    <string name="custom_trace_settings_dialog_title" msgid="2608570500144830554">"ಕಸ್ಟಮ್ ಜಾಡಿನ ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
+    <string name="restore_default" msgid="5259420807486239755">"ಡೀಫಾಲ್ಟ್ ಅನ್ನು ಮರುಸ್ಥಾಪಿಸಿ"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"ಒಂದು ಕೈ ಮೋಡ್"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"ಶ್ರವಣ ಸಾಧನಗಳು"</string>
     <string name="quick_settings_hearing_devices_connected" msgid="6519069502397037781">"ಸಕ್ರಿಯವಾಗಿದೆ"</string>
@@ -402,7 +405,7 @@
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"ಹೊಸ ಸಾಧನವನ್ನು ಜೋಡಿಸಲು ಕ್ಲಿಕ್ ಮಾಡಿ"</string>
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"ಪ್ರಿಸೆಟ್ ಅನ್ನು ಅಪ್‌ಡೇಟ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"ಪ್ರಿಸೆಟ್‌"</string>
-    <string name="live_caption_title" msgid="8916875614623730005">"ಲೈವ್ ಕ್ಯಾಪ್ಶನ್"</string>
+    <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"ಲೈವ್ ಕ್ಯಾಪ್ಶನ್"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"ಸಾಧನದ ಮೈಕ್ರೋಫೋನ್ ನಿರ್ಬಂಧವನ್ನು ತೆಗೆಯಬೇಕೆ?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"ಸಾಧನದ ಕ್ಯಾಮರಾ ನಿರ್ಬಂಧವನ್ನು ತೆಗೆಯಬೇಕೆ?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"ಸಾಧನದ ಕ್ಯಾಮರಾ ಮತ್ತು ಮೈಕ್ರೋಫೋನ್ ಅನ್ನು ಅನ್‍ಬ್ಲಾಕ್ ಮಾಡಬೇಕೇ?"</string>
@@ -431,6 +434,16 @@
     <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ತೆರೆಯಿರಿ"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"ಅನ್ಯ ಸಾಧನ"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"ಟಾಗಲ್ ನ ಅವಲೋಕನ"</string>
+    <!-- no translation found for zen_modes_dialog_title (8854640808100096934) -->
+    <skip />
+    <string name="zen_modes_dialog_done" msgid="6654130880256438950">"ಮುಗಿದಿದೆ"</string>
+    <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
+    <string name="zen_mode_on" msgid="9085304934016242591">"ಆನ್ ಆಗಿದೆ"</string>
+    <string name="zen_mode_on_with_details" msgid="7416143430557895497">"<xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g> • ನಲ್ಲಿ"</string>
+    <string name="zen_mode_off" msgid="1736604456618147306">"ಆಫ್ ಆಗಿದೆ"</string>
+    <string name="zen_mode_set_up" msgid="7457957033034460064">"ಸೆಟಪ್ ಮಾಡಿ"</string>
+    <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"ಸೆಟ್ಟಿಂಗ್‌ಗಳಲ್ಲಿ ನಿರ್ವಹಿಸಿ"</string>
+    <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{ಯಾವುದೇ ಸಕ್ರಿಯ ಮೋಡ್‌ಗಳಿಲ್ಲ}=1{{mode} ಸಕ್ರಿಯವಾಗಿದೆ}one{# ಮೋಡ್‌ಗಳು ಸಕ್ರಿಯವಾಗಿವೆ}other{# ಮೋಡ್‌ಗಳು ಸಕ್ರಿಯವಾಗಿವೆ}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"ಅಲಾರಾಂಗಳು, ಜ್ಞಾಪನೆಗಳು, ಈವೆಂಟ್‌ಗಳು ಹಾಗೂ ನೀವು ಸೂಚಿಸಿರುವ ಕರೆದಾರರನ್ನು ಹೊರತುಪಡಿಸಿ ಬೇರಾವುದೇ ಸದ್ದುಗಳು ಅಥವಾ ವೈಬ್ರೇಶನ್‌ಗಳು ನಿಮಗೆ ತೊಂದರೆ ನೀಡುವುದಿಲ್ಲ. ಹಾಗಿದ್ದರೂ, ನೀವು ಪ್ಲೇ ಮಾಡುವ ಸಂಗೀತ, ವೀಡಿಯೊಗಳು ಮತ್ತು ಆಟಗಳ ಆಡಿಯೊವನ್ನು ನೀವು ಕೇಳಿಸಿಕೊಳ್ಳುತ್ತೀರಿ."</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"ಅಲಾರಾಂಗಳನ್ನು ಹೊರತುಪಡಿಸಿ, ಬೇರಾವುದೇ ಸದ್ದುಗಳು ಅಥವಾ ವೈಬ್ರೇಶನ್‌ಗಳು ನಿಮಗೆ ತೊಂದರೆ ನೀಡುವುದಿಲ್ಲ. ಹಾಗಿದ್ದರೂ, ನೀವು ಪ್ಲೇ ಮಾಡುವ ಸಂಗೀತ, ವೀಡಿಯೊಗಳು ಮತ್ತು ಆಟಗಳ ಆಡಿಯೊವನ್ನು ಕೇಳಿಸಿಕೊಳ್ಳುತ್ತೀರಿ."</string>
     <string name="zen_priority_customize_button" msgid="4119213187257195047">"ಕಸ್ಟಮೈಸ್ ಮಾಡು"</string>
@@ -456,7 +469,7 @@
     <string name="phone_hint" msgid="6682125338461375925">"ಫೋನ್‌ಗಾಗಿ ಐಕಾನ್‌ನಿಂದ ಸ್ವೈಪ್ ಮಾಡಿ"</string>
     <string name="voice_hint" msgid="7476017460191291417">"ಧ್ವನಿ ಸಹಾಯಕ್ಕಾಗಿ ಐಕಾನ್‌ನಿಂದ ಸ್ವೈಪ್ ಮಾಡಿ"</string>
     <string name="camera_hint" msgid="4519495795000658637">"ಕ್ಯಾಮರಾಗಾಗಿ ಐಕಾನ್‌ನಿಂದ ಸ್ವೈಪ್ ಮಾಡಿ"</string>
-    <string name="interruption_level_none_with_warning" msgid="8394434073508145437">"ಒಟ್ಟು ಮೌನ. ಇದು ಪರದೆ ರೀಡರ್ ಅನ್ನು ಮೌನವಾಗಿರಿಸುತ್ತದೆ."</string>
+    <string name="interruption_level_none_with_warning" msgid="8394434073508145437">"ಒಟ್ಟು ಮೌನ. ಇದು ಸ್ಕ್ರೀನ್ ರೀಡರ್ ಅನ್ನು ಮೌನವಾಗಿರಿಸುತ್ತದೆ."</string>
     <string name="interruption_level_none" msgid="219484038314193379">"ಸಂಪೂರ್ಣ ನಿಶ್ಯಬ್ಧ"</string>
     <string name="interruption_level_priority" msgid="661294280016622209">"ಆದ್ಯತೆ ಮಾತ್ರ"</string>
     <string name="interruption_level_alarms" msgid="2457850481335846959">"ಅಲಾರಮ್‌ಗಳು ಮಾತ್ರ"</string>
@@ -469,6 +482,7 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ನಿಧಾನವಾಗಿ ಚಾರ್ಜ್ ಆಗುತ್ತಿದೆ • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> ಸಮಯದಲ್ಲಿ ಪೂರ್ಣಗೊಳ್ಳುತ್ತದೆ"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ಚಾರ್ಜ್ ಆಗುತ್ತಿದೆ • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> ದಲ್ಲಿ ಪೂರ್ಣಗೊಳ್ಳುತ್ತದೆ"</string>
     <string name="accessibility_action_open_communal_hub" msgid="3081702792413787849">"ಲಾಕ್ ಸ್ಕ್ರೀನ್‌ನಲ್ಲಿ ವಿಜೆಟ್‌ಗಳು"</string>
+    <string name="accessibility_announcement_communal_widget_added" msgid="6911593106099328271">"ಲಾಕ್ ಸ್ಕ್ರೀನ್‌ಗೆ <xliff:g id="WIDGET_NAME">%1$s</xliff:g> ವಿಜೆಟ್ ಅನ್ನು ಸೇರಿಸಲಾಗಿದೆ"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"ಸಮುದಾಯದ ಟ್ಯುಟೋರಿಯಲ್ ಅನ್ನು ಪ್ರಾರಂಭಿಸಲು ಎಡಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ"</string>
     <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"ಕಸ್ಟಮೈಸ್ ಮಾಡಿ"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"ವಜಾಗೊಳಿಸಿ"</string>
@@ -476,8 +490,7 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"ಹೆಚ್ಚಿನ ವಿಜೆಟ್‌ಗಳನ್ನು ಸೇರಿಸಿ"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"ವಿಜೆಟ್‌ಗಳನ್ನು ಕಸ್ಟಮೈಸ್ ಮಾಡಲು ದೀರ್ಘಕಾಲ ಒತ್ತಿರಿ"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"ವಿಜೆಟ್‌ಗಳನ್ನು ಕಸ್ಟಮೈಸ್ ಮಾಡಿ"</string>
-    <!-- no translation found for unlock_reason_to_customize_widgets (5011909432460546033) -->
-    <skip />
+    <string name="unlock_reason_to_customize_widgets" msgid="5011909432460546033">"ವಿಜೆಟ್‌ಗಳನ್ನು ಕಸ್ಟಮೈಸ್ ಮಾಡಲು ಅನ್‌ಲಾಕ್ ಮಾಡಿ"</string>
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾದ ವಿಜೆಟ್‌ಗಾಗಿ ಆ್ಯಪ್ ಐಕಾನ್"</string>
     <string name="icon_description_for_pending_widget" msgid="8413816401868001755">"ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಲಾದ ವಿಜೆಟ್‌ಗಾಗಿ ಆ್ಯಪ್ ಐಕಾನ್"</string>
     <string name="edit_widget" msgid="9030848101135393954">"ವಿಜೆಟ್ ಅನ್ನು ಎಡಿಟ್ ಮಾಡಿ"</string>
@@ -496,12 +509,12 @@
     <string name="accessibility_action_label_select_widget" msgid="8897281501387398191">"ವಿಜೆಟ್ ಅನ್ನು ಆಯ್ಕೆ ಮಾಡಿ"</string>
     <string name="accessibility_action_label_remove_widget" msgid="3373779447448758070">"ವಿಜೆಟ್ ಅನ್ನು ತೆಗೆದುಹಾಕಿ"</string>
     <string name="accessibility_action_label_place_widget" msgid="1914197458644168978">"ಆಯ್ಕೆಮಾಡಿದ ವಿಜೆಟ್ ಅನ್ನು ಇರಿಸಿ"</string>
-    <!-- no translation found for communal_widgets_disclaimer_title (1150954395585308868) -->
-    <skip />
-    <!-- no translation found for communal_widgets_disclaimer_text (1423545475160506349) -->
-    <skip />
-    <!-- no translation found for communal_widgets_disclaimer_button (4423059765740780753) -->
-    <skip />
+    <string name="communal_widget_picker_title" msgid="1953369090475731663">"ಲಾಕ್ ಸ್ಕ್ರೀನ್ ವಿಜೆಟ್‌ಗಳು"</string>
+    <string name="communal_widget_picker_description" msgid="490515450110487871">"ನಿಮ್ಮ ಟ್ಯಾಬ್ಲೆಟ್ ಲಾಕ್ ಆಗಿದ್ದರೂ ಸಹ ಯಾರಾದರೂ ನಿಮ್ಮ ಲಾಕ್ ಸ್ಕ್ರೀನ್‌ನಲ್ಲಿ ವಿಜೆಟ್‌ಗಳನ್ನು ವೀಕ್ಷಿಸಬಹುದು."</string>
+    <string name="accessibility_action_label_unselect_widget" msgid="1041811747619468698">"ವಿಜೆಟ್ ಅನ್ನು ಆಯ್ಕೆ ಮಾಡಬೇಡಿ"</string>
+    <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"ಲಾಕ್ ಸ್ಕ್ರೀನ್ ವಿಜೆಟ್‌ಗಳು"</string>
+    <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"ವಿಜೆಟ್ ಅನ್ನು ಬಳಸಿಕೊಂಡು ಆ್ಯಪ್ ತೆರೆಯಲು, ಇದು ನೀವೇ ಎಂದು ನೀವು ದೃಢೀಕರಿಸಬೇಕಾಗುತ್ತದೆ. ಅಲ್ಲದೆ, ನಿಮ್ಮ ಟ್ಯಾಬ್ಲೆಟ್ ಲಾಕ್ ಆಗಿದ್ದರೂ ಸಹ ಯಾರಾದರೂ ಅವುಗಳನ್ನು ವೀಕ್ಷಿಸಬಹುದು ಎಂಬುದನ್ನು ನೆನಪಿನಲ್ಲಿಡಿ. ಕೆಲವು ವಿಜೆಟ್‌ಗಳು ನಿಮ್ಮ ಲಾಕ್ ಸ್ಕ್ರೀನ್‌ಗಾಗಿ ಉದ್ದೇಶಿಸದೇ ಇರಬಹುದು ಮತ್ತು ಇಲ್ಲಿ ಸೇರಿಸುವುದು ಸುರಕ್ಷಿತವಲ್ಲದಿರಬಹುದು."</string>
+    <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"ಅರ್ಥವಾಯಿತು"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"ಬಳಕೆದಾರರನ್ನು ಬದಲಿಸಿ"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"ಪುಲ್‌ಡೌನ್ ಮೆನು"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ಈ ಸೆಶನ್‌ನಲ್ಲಿನ ಎಲ್ಲಾ ಆ್ಯಪ್‌ಗಳು ಮತ್ತು ಡೇಟಾವನ್ನು ಅಳಿಸಲಾಗುತ್ತದೆ."</string>
@@ -521,22 +534,31 @@
     <string name="media_projection_dialog_warning" msgid="1303664408388363598">"ರೆಕಾರ್ಡಿಂಗ್ ಅಥವಾ ಕ್ಯಾಸ್ಟ್ ಮಾಡುವಾಗ ಸ್ಕ್ರೀನ್‌ ಮೇಲೆ ಕಾಣಿಸುವ ಎಲ್ಲಾ ಮಾಹಿತಿಗೂ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ಆ್ಯಕ್ಸೆಸ್ ಹೊಂದಿರುತ್ತದೆ. ಇದು ಪಾಸ್‌ವರ್ಡ್‌ಗಳು, ಪಾವತಿ ವಿವರಗಳು, ಫೋಟೋಗಳು, ಸಂದೇಶಗಳು ಮತ್ತು ನೀವು ಪ್ಲೇ ಮಾಡುವ ಆಡಿಯೊದಂತಹ ಮಾಹಿತಿಯನ್ನೂ ಒಳಗೊಂಡಿರುತ್ತದೆ."</string>
     <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"ರೆಕಾರ್ಡಿಂಗ್ ಅಥವಾ ಕ್ಯಾಸ್ಟ್ ಮಾಡುವುದನ್ನು ಪ್ರಾರಂಭಿಸಬೇಕೇ?"</string>
     <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"ಈ ಕಾರ್ಯವನ್ನು ಒದಗಿಸುವ ಸೇವೆಗಳು, ನಿಮ್ಮ ಸ್ಕ್ರೀನ್ ಮೇಲೆ ಗೋಚರಿಸುವ ಅಥವಾ ರೆಕಾರ್ಡಿಂಗ್ ಮಾಡುವಾಗ ಅಥವಾ ಕ್ಯಾಸ್ಟ್ ಮಾಡುವಾಗ ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಪ್ಲೇ ಮಾಡುವ ಎಲ್ಲಾ ಮಾಹಿತಿಗಳಿಗೆ ಆ್ಯಕ್ಸೆಸ್ ಅನ್ನು ಹೊಂದಿರುತ್ತವೆ. ಇದು ಪಾಸ್‌ವರ್ಡ್‌ಗಳು, ಪಾವತಿ ವಿವರಗಳು, ಫೋಟೋಗಳು, ಸಂದೇಶಗಳು ಮತ್ತು ನೀವು ಪ್ಲೇ ಮಾಡುವ ಆಡಿಯೊದಂತಹ ಮಾಹಿತಿಯನ್ನು ಒಳಗೊಂಡಿರುತ್ತದೆ."</string>
-    <string name="screen_share_permission_dialog_option_entire_screen" msgid="3131200488455089620">"ಸಂಪೂರ್ಣ ಸ್ಕ್ರೀನ್"</string>
-    <string name="screen_share_permission_dialog_option_single_app" msgid="4350961814397220929">"ಒಂದೇ ಆ್ಯಪ್"</string>
-    <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"ಆ್ಯಪ್ ಅನ್ನು ಹಂಚಿಕೊಳ್ಳಿ ಅಥವಾ ರೆಕಾರ್ಡ್ ಮಾಡಿ"</string>
-    <string name="media_projection_entry_app_permission_dialog_title" msgid="9155535851866407199">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ಮೂಲಕ ರೆಕಾರ್ಡಿಂಗ್, ಕ್ಯಾಸ್ಟ್ ಮಾಡುವುದನ್ನು ಪ್ರಾರಂಭಿಸಬೇಕೇ?"</string>
-    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"ನೀವು ಹಂಚಿಕೊಳ್ಳುತ್ತಿರುವಾಗ, ರೆಕಾರ್ಡಿಂಗ್ ಮಾಡುತ್ತಿರುವಾಗ ಅಥವಾ ಕ್ಯಾಸ್ಟ್ ಮಾಡುತ್ತಿರುವಾಗ, ನಿಮ್ಮ ಸ್ಕ್ರೀನ್ ಮೇಲೆ ಕಾಣಿಸುವ ಅಥವಾ ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಪ್ಲೇ ಮಾಡುವ ಯಾವುದೇ ವಿಷಯಕ್ಕೆ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ಆ್ಯಕ್ಸೆಸ್ ಅನ್ನು ಹೊಂದಿರುತ್ತದೆ. ಆದ್ದರಿಂದ ಪಾಸ್‌ವರ್ಡ್‌ಗಳು, ಪಾವತಿ ವಿವರಗಳು, ಸಂದೇಶಗಳು, ಫೋಟೋಗಳು ಹಾಗೂ ಆಡಿಯೊ ಮತ್ತು ವೀಡಿಯೊದಂತಹ ವಿಷಯಗಳ ಕುರಿತು ಜಾಗರೂಕರಾಗಿರಿ."</string>
-    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"ನೀವು ಆ್ಯಪ್ ಅನ್ನು ಹಂಚಿಕೊಳ್ಳುತ್ತಿರುವಾಗ, ರೆಕಾರ್ಡಿಂಗ್ ಮಾಡುತ್ತಿರುವಾಗ ಅಥವಾ ಕ್ಯಾಸ್ಟ್ ಮಾಡುತ್ತಿರುವಾಗ, ಆ ಆ್ಯಪ್‌ನಲ್ಲಿ ತೋರಿಸುವ ಅಥವಾ ಪ್ಲೇ ಮಾಡುವ ಯಾವುದೇ ವಿಷಯಕ್ಕೆ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ಆ್ಯಕ್ಸೆಸ್ ಅನ್ನು ಹೊಂದಿರುತ್ತದೆ. ಆದ್ದರಿಂದ ಪಾಸ್‌ವರ್ಡ್‌ಗಳು, ಪಾವತಿ ವಿವರಗಳು, ಸಂದೇಶಗಳು, ಫೋಟೋಗಳು ಹಾಗೂ ಆಡಿಯೊ ಮತ್ತು ವೀಡಿಯೊದಂತಹ ವಿಷಯಗಳ ಕುರಿತು ಜಾಗರೂಕರಾಗಿರಿ."</string>
-    <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"ಪ್ರಾರಂಭಿಸಿ"</string>
+    <string name="screen_share_generic_app_selector_title" msgid="8331515850599218288">"ಆ್ಯಪ್ ಅನ್ನು ಹಂಚಿಕೊಳ್ಳಿ ಅಥವಾ ರೆಕಾರ್ಡ್ ಮಾಡಿ"</string>
+    <string name="media_projection_entry_app_permission_dialog_title" msgid="4613857256721708062">"ನಿಮ್ಮ ಸ್ಕ್ರೀನ್‌ ಅನ್ನು <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ನೊಂದಿಗೆ ಹಂಚಿಕೊಳ್ಳಬೇಕೇ?"</string>
+    <string name="screen_share_permission_dialog_option_single_app" msgid="2974054871681567314">"ಒಂದು ಆ್ಯಪ್‌ ಅನ್ನು ಹಂಚಿಕೊಳ್ಳಿ"</string>
+    <!-- no translation found for media_projection_entry_app_permission_dialog_option_text_single_app (2308901434964846084) -->
+    <skip />
+    <string name="screen_share_permission_dialog_option_entire_screen" msgid="4493174362775038997">"ಸಂಪೂರ್ಣ ಸ್ಕ್ರೀನ್ ಅನ್ನು ಹಂಚಿಕೊಳ್ಳಿ"</string>
+    <!-- no translation found for media_projection_entry_app_permission_dialog_option_text_entire_screen (5100078808078139706) -->
+    <skip />
+    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="5504288438067851086">"ನಿಮ್ಮ ಸಂಪೂರ್ಣ ಸ್ಕ್ರೀನ್‌ ಅನ್ನು ನೀವು ಹಂಚಿಕೊಳ್ಳುತ್ತಿರುವಾಗ, ನಿಮ್ಮ ಸ್ಕ್ರೀನ್‌ನಲ್ಲಿರುವ ಏನಾದರೂ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ಗೆ ಗೋಚರಿಸುತ್ತದೆ. ಆದ್ದರಿಂದ ಪಾಸ್‌ವರ್ಡ್‌ಗಳು, ಪಾವತಿ ವಿವರಗಳು, ಸಂದೇಶಗಳು, ಫೋಟೋಗಳು ಮತ್ತು ಆಡಿಯೋ ಮತ್ತು ವೀಡಿಯೊದಂತಹ ವಿಷಯಗಳ ಬಗ್ಗೆ ಜಾಗರೂಕರಾಗಿರಿ."</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="7094417930857938876">"ನೀವು ಆ್ಯಪ್ ಅನ್ನು ಹಂಚಿಕೊಳ್ಳುತ್ತಿರುವಾಗ, ಆ ಆ್ಯಪ್‌ನಲ್ಲಿ ತೋರಿಸಿರುವ ಅಥವಾ ಪ್ಲೇ ಮಾಡಿದ ಏನಾದರೂ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ಗೆ ಗೋಚರಿಸುತ್ತದೆ. ಆದ್ದರಿಂದ ಪಾಸ್‌ವರ್ಡ್‌ಗಳು, ಪಾವತಿ ವಿವರಗಳು, ಸಂದೇಶಗಳು, ಫೋಟೋಗಳು ಮತ್ತು ಆಡಿಯೋ ಮತ್ತು ವೀಡಿಯೊದಂತಹ ವಿಷಯಗಳ ಬಗ್ಗೆ ಜಾಗರೂಕರಾಗಿರಿ."</string>
+    <string name="media_projection_entry_app_permission_dialog_continue_entire_screen" msgid="1850848182344377579">"ಸ್ಕ್ರೀನ್‌ ಹಂಚಿಕೊಳ್ಳಿ"</string>
     <string name="media_projection_entry_app_permission_dialog_single_app_disabled" msgid="8999903044874669995">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಈ ಆಯ್ಕೆಯನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿದೆ"</string>
-    <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"ಕ್ಯಾಸ್ಟ್ ಮಾಡಲು ಪ್ರಾರಂಭಿಸಬೇಕೆ?"</string>
-    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"ನೀವು ಕ್ಯಾಸ್ಟ್ ಮಾಡುತ್ತಿರುವಾಗ, ನಿಮ್ಮ ಸ್ಕ್ರೀನ್ ಮೇಲೆ ಕಾಣಿಸುವ ಅಥವಾ ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಪ್ಲೇ ಮಾಡುವ ಯಾವುದೇ ವಿಷಯಕ್ಕೆ Android ಆ್ಯಕ್ಸೆಸ್ ಅನ್ನು ಹೊಂದಿರುತ್ತದೆ. ಆದ್ದರಿಂದ ಪಾಸ್‌ವರ್ಡ್‌ಗಳು, ಪಾವತಿ ವಿವರಗಳು, ಸಂದೇಶಗಳು, ಫೋಟೋಗಳು ಹಾಗೂ ಆಡಿಯೊ ಮತ್ತು ವೀಡಿಯೊದಂತಹ ವಿಷಯಗಳ ಕುರಿತು ಜಾಗರೂಕರಾಗಿರಿ."</string>
-    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"ನೀವು ಆ್ಯಪ್ ಅನ್ನು ಕ್ಯಾಸ್ಟ್ ಮಾಡುತ್ತಿರುವಾಗ, ಆ ಆ್ಯಪ್‌ನಲ್ಲಿ ತೋರಿಸುವ ಅಥವಾ ಪ್ಲೇ ಮಾಡುವ ಯಾವುದೇ ವಿಷಯಕ್ಕೆ Android ಆ್ಯಕ್ಸೆಸ್ ಅನ್ನು ಹೊಂದಿರುತ್ತದೆ. ಆದ್ದರಿಂದ ಪಾಸ್‌ವರ್ಡ್‌ಗಳು, ಪಾವತಿ ವಿವರಗಳು, ಸಂದೇಶಗಳು, ಫೋಟೋಗಳು ಹಾಗೂ ಆಡಿಯೊ ಮತ್ತು ವೀಡಿಯೊದಂತಹ ವಿಷಯಗಳ ಕುರಿತು ಜಾಗರೂಕರಾಗಿರಿ."</string>
-    <string name="media_projection_entry_cast_permission_dialog_continue" msgid="7209890669948870042">"ಕ್ಯಾಸ್ಟ್ ಮಾಡಲು ಪ್ರಾರಂಭಿಸಿ"</string>
+    <string name="media_projection_entry_share_app_selector_title" msgid="1419515119767501822">"ಹಂಚಿಕೊಳ್ಳಲು ಆ್ಯಪ್ ಅನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
+    <string name="media_projection_entry_cast_permission_dialog_title" msgid="752756942658159416">"ನಿಮ್ಮ ಸ್ಕ್ರೀನ್ ಅನ್ನು ಕ್ಯಾಸ್ಟ್ ಮಾಡಬೇಕೆ?"</string>
+    <string name="media_projection_entry_cast_permission_dialog_option_text_single_app" msgid="6073353940838561981">"ಒಂದು ಆ್ಯಪ್ ಅನ್ನು ಕ್ಯಾಸ್ಟ್ ಮಾಡಿ"</string>
+    <string name="media_projection_entry_cast_permission_dialog_option_text_entire_screen" msgid="8389508187954155307">"ಸಂಪೂರ್ಣ ಸ್ಕ್ರೀನ್ ಅನ್ನು ಕ್ಯಾಸ್ಟ್ ಮಾಡಿ"</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="4040447861037324017">"ನಿಮ್ಮ ಸಂಪೂರ್ಣ ಸ್ಕ್ರೀನ್ ಅನ್ನು ನೀವು ಕ್ಯಾಸ್ಟ್ ಮಾಡುವಾಗ, ನಿಮ್ಮ ಸ್ಕ್ರೀನ್ ಮೇಲೆ ಏನಾದರೂ ಗೋಚರಿಸುತ್ತದೆ. ಆದ್ದರಿಂದ ಪಾಸ್‌ವರ್ಡ್‌ಗಳು, ಪಾವತಿ ವಿವರಗಳು, ಸಂದೇಶಗಳು, ಫೋಟೋಗಳು ಹಾಗೂ ಆಡಿಯೊ ಮತ್ತು ವೀಡಿಯೊದಂತಹ ವಿಷಯಗಳ ಕುರಿತು ಜಾಗರೂಕರಾಗಿರಿ."</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="7487834861348460736">"ನೀವು ಆ್ಯಪ್ ಅನ್ನು ಕ್ಯಾಸ್ಟ್ ಮಾಡುತ್ತಿರುವಾಗ, ಆ ಆ್ಯಪ್‌ನಲ್ಲಿ ತೋರಿಸಿರುವ ಅಥವಾ ಪ್ಲೇ ಮಾಡಿರುವುದು ಗೋಚರಿಸುತ್ತದೆ. ಆದ್ದರಿಂದ ಪಾಸ್‌ವರ್ಡ್‌ಗಳು, ಪಾವತಿ ವಿವರಗಳು, ಸಂದೇಶಗಳು, ಫೋಟೋಗಳು ಹಾಗೂ ಆಡಿಯೊ ಮತ್ತು ವೀಡಿಯೊದಂತಹ ವಿಷಯಗಳ ಕುರಿತು ಜಾಗರೂಕರಾಗಿರಿ."</string>
+    <string name="media_projection_entry_cast_permission_dialog_continue_entire_screen" msgid="3261124185304676483">"ಸ್ಕ್ರೀನ್‌ ಅನ್ನು ಬಿತ್ತರಿಸಿ"</string>
+    <string name="media_projection_entry_cast_app_selector_title" msgid="6323062146661922387">"ಬಿತ್ತರಿಸಲು ಆ್ಯಪ್‌ ಅನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
     <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"ಹಂಚಿಕೊಳ್ಳಲು ಪ್ರಾರಂಭಿಸಬೇಕೇ?"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"ನೀವು ಹಂಚಿಕೊಳ್ಳುತ್ತಿರುವಾಗ, ರೆಕಾರ್ಡಿಂಗ್ ಮಾಡುತ್ತಿರುವಾಗ ಅಥವಾ ಕ್ಯಾಸ್ಟ್ ಮಾಡುತ್ತಿರುವಾಗ, ನಿಮ್ಮ ಸ್ಕ್ರೀನ್ ಮೇಲೆ ಕಾಣಿಸುವ ಅಥವಾ ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಪ್ಲೇ ಮಾಡುವ ಯಾವುದೇ ವಿಷಯಕ್ಕೆ Android ಆ್ಯಕ್ಸೆಸ್ ಅನ್ನು ಹೊಂದಿರುತ್ತದೆ. ಆದ್ದರಿಂದ ಪಾಸ್‌ವರ್ಡ್‌ಗಳು, ಪಾವತಿ ವಿವರಗಳು, ಸಂದೇಶಗಳು, ಫೋಟೋಗಳು ಹಾಗೂ ಆಡಿಯೊ ಮತ್ತು ವೀಡಿಯೊದಂತಹ ವಿಷಯಗಳ ಕುರಿತು ಜಾಗರೂಕರಾಗಿರಿ."</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"ನೀವು ಆ್ಯಪ್ ಅನ್ನು ಹಂಚಿಕೊಳ್ಳುತ್ತಿರುವಾಗ, ರೆಕಾರ್ಡಿಂಗ್ ಮಾಡುತ್ತಿರುವಾಗ ಅಥವಾ ಕ್ಯಾಸ್ಟ್ ಮಾಡುತ್ತಿರುವಾಗ, ಆ ಆ್ಯಪ್‌ನಲ್ಲಿ ತೋರಿಸುವ ಅಥವಾ ಪ್ಲೇ ಮಾಡುವ ಯಾವುದೇ ವಿಷಯಕ್ಕೆ Android ಆ್ಯಕ್ಸೆಸ್ ಅನ್ನು ಹೊಂದಿರುತ್ತದೆ. ಆದ್ದರಿಂದ ಪಾಸ್‌ವರ್ಡ್‌ಗಳು, ಪಾವತಿ ವಿವರಗಳು, ಸಂದೇಶಗಳು, ಫೋಟೋಗಳು ಹಾಗೂ ಆಡಿಯೊ ಮತ್ತು ವೀಡಿಯೊದಂತಹ ವಿಷಯಗಳ ಕುರಿತು ಜಾಗರೂಕರಾಗಿರಿ."</string>
     <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"ಪ್ರಾರಂಭಿಸಿ"</string>
+    <string name="media_projection_entry_generic_permission_dialog_continue_single_app" msgid="5920814988611877051">"ಮುಂದಿನದು"</string>
     <string name="media_projection_task_switcher_text" msgid="590885489897412359">"ನೀವು ಆ್ಯಪ್‌ಗಳನ್ನು ಬದಲಾಯಿಸಿದಾಗ ಹಂಚಿಕೊಳ್ಳುವಿಕೆಯನ್ನು ವಿರಾಮಗೊಳಿಸಲಾಗುತ್ತದೆ"</string>
     <string name="media_projection_task_switcher_action_switch" msgid="8682258717291921123">"ಬದಲಿಗೆ ಈ ಆ್ಯಪ್ ಅನ್ನು ಹಂಚಿಕೊಳ್ಳಿ"</string>
     <string name="media_projection_task_switcher_action_back" msgid="5324164224147845282">"ಮರಳಿ ಬದಲಿಸಿ"</string>
@@ -555,8 +577,8 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"ಈಗ ಪ್ರಾರಂಭಿಸಿ"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"ಯಾವುದೇ ಅಧಿಸೂಚನೆಗಳಿಲ್ಲ"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"ಯಾವುದೇ ಹೊಸ ಅಧಿಸೂಚನೆಗಳಿಲ್ಲ"</string>
-    <string name="adaptive_notification_edu_hun_title" msgid="5720882373252389461">"ಅಡಾಪ್ಟಿವ್ ನೋಟಿಫಿಕೇಶನ್ ಆನ್ ಇದೆ"</string>
-    <string name="adaptive_notification_edu_hun_text" msgid="4260536236101821273">"ಅಲ್ಪಾವಧಿಯಲ್ಲಿ ಹಲವು ನೋಟಿಫಿಕೇಶನ್ ಬಂದಾಗ 2 ನಿಮಿಷದವರೆಗೆ ಸಾಧನವು ಈಗ ವಾಲ್ಯೂಮ್ ಕಡಿಮೆ ಮಾಡುತ್ತದೆ ಹಾಗೂ ಸ್ಕ್ರೀನ್ ಮೇಲಿನ ಪಾಪ್-ಅಪ್ ಕಡಿಮೆ ಮಾಡುತ್ತದೆ."</string>
+    <string name="adaptive_notification_edu_hun_title" msgid="7790738150177329960">"ನೋಟಿಫಿಕೇಶನ್ ಕೂಲ್‌ಡೌನ್ ಆನ್ ಆಗಿದೆ"</string>
+    <string name="adaptive_notification_edu_hun_text" msgid="7743367744129536610">"ನೀವು ಏಕಕಾಲದಲ್ಲಿ ತೀರಾ ಹೆಚ್ಚು ನೋಟಿಫಿಕೇಶನ್‌ಗಳನ್ನು ಪಡೆದಾಗ 2 ನಿಮಿಷಗಳವರೆಗೆ ನಿಮ್ಮ ಸಾಧನದ ವಾಲ್ಯೂಮ್ ಮತ್ತು ಅಲರ್ಟ್‌ಗಳನ್ನು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಕಡಿಮೆ ಮಾಡಲಾಗುತ್ತದೆ."</string>
     <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"ಆಫ್ ಮಾಡಿ"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"ಹಳೆಯ ಅಧಿಸೂಚನೆಗಳನ್ನು ನೋಡಲು ಅನ್‌ಲಾಕ್ ಮಾಡಿ"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"ಈ ಸಾಧನವನ್ನು ನಿಮ್ಮ ಪೋಷಕರು ನಿರ್ವಹಿಸುತ್ತಿದ್ದಾರೆ"</string>
@@ -704,6 +726,7 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"ಸ್ಯಾಟಲೈಟ್‌, ಕನೆಕ್ಷನ್ ಉತ್ತಮವಾಗಿದೆ"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"ಸ್ಯಾಟಲೈಟ್, ಕನೆಕ್ಷನ್ ಲಭ್ಯವಿದೆ"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"ಸ್ಯಾಟಲೈಟ್ SOS"</string>
+    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"ತುರ್ತು ಕರೆಗಳು ಅಥವಾ SOS"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"ಕೆಲಸದ ಪ್ರೊಫೈಲ್"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"ಕೆಲವರಿಗೆ ಮೋಜು ಆಗಿದೆ ಎಲ್ಲರಿಗೆ ಇಲ್ಲ"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"ಸಿಸ್ಟಂ UI ಟ್ಯೂನರ್ ನಿಮಗೆ Android ಬಳಕೆದಾರ ಅಂತರಸಂಪರ್ಕವನ್ನು ಸರಿಪಡಿಸಲು ಮತ್ತು ಕಸ್ಟಮೈಸ್ ಮಾಡಲು ಹೆಚ್ಚುವರಿ ಮಾರ್ಗಗಳನ್ನು ನೀಡುತ್ತದೆ. ಈ ಪ್ರಾಯೋಗಿಕ ವೈಶಿಷ್ಟ್ಯಗಳು ಭವಿಷ್ಯದ ಬಿಡುಗಡೆಗಳಲ್ಲಿ ಬದಲಾಗಬಹುದು, ವಿರಾಮವಾಗಬಹುದು ಅಥವಾ ಕಾಣಿಸಿಕೊಳ್ಳದಿರಬಹುದು. ಎಚ್ಚರಿಕೆಯಿಂದ ಮುಂದುವರಿಯಿರಿ."</string>
@@ -723,7 +746,7 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"ಡೀಫಾಲ್ಟ್"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"ಸ್ವಯಂಚಾಲಿತ"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"ಯಾವುದೇ ಧ್ವನಿ ಅಥವಾ ವೈಬ್ರೇಷನ್‌ ಆಗುವುದಿಲ್ಲ"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"ಯಾವುದೇ ಧ್ವನಿ ಅಥವಾ ವೈಬ್ರೇಷನ್‌ ಆಗುವುದಿಲ್ಲ, ಸಂಭಾಷಣೆ ವಿಭಾಗದ ಕೆಳಭಾಗದಲ್ಲಿ ಗೋಚರಿಸುತ್ತದೆ"</string>
+    <string name="notification_conversation_summary_low" msgid="3855696451919728790">"ಯಾವುದೇ ಸೌಂಡ್ ಅಥವಾ ವೈಬ್ರೇಷನ್‌ ಇಲ್ಲ, ಆದರೆ ಇದು ಇನ್ನೂ ಸಂಭಾಷಣೆಗಳ ವಿಭಾಗದಲ್ಲಿ ತೋರಿಸುತ್ತದೆ"</string>
     <string name="notification_channel_summary_default" msgid="777294388712200605">"ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಆಧರಿಸಿ ಸಾಧನ ರಿಂಗ್ ಅಥವಾ ವೈಬ್ರೇಟ್ ಆಗುತ್ತದೆ"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಆಧರಿಸಿ ಫೋನ್ ರಿಂಗ್ ಅಥವಾ ವೈಬ್ರೇಟ್ ಆಗುತ್ತದೆ. ಡಿಫಾಲ್ಟ್ ಆಗಿ, <xliff:g id="APP_NAME">%1$s</xliff:g> ಬಬಲ್ ಸಂಭಾಷಣೆಗಳು."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"ಈ ಅಧಿಸೂಚನೆಯು ಶಬ್ದ ಮಾಡಬೇಕೇ ಅಥವಾ ವೈಬ್ರೇಟ್ ಮಾಡಬೇಕೇ ಎಂಬುದನ್ನು ನಿರ್ಧರಿಸುವ ಅವಕಾಶವನ್ನು ಸಿಸ್ಟಂಗೆ ನೀಡಿ"</string>
@@ -780,6 +803,7 @@
     <string name="keyboard_key_page_up" msgid="173914303254199845">"Page Up"</string>
     <string name="keyboard_key_page_down" msgid="9035902490071829731">"Page Down"</string>
     <string name="keyboard_key_forward_del" msgid="5325501825762733459">"Delete"</string>
+    <string name="keyboard_key_esc" msgid="6230365950511411322">"Esc"</string>
     <string name="keyboard_key_move_home" msgid="3496502501803911971">"Home"</string>
     <string name="keyboard_key_move_end" msgid="99190401463834854">"End"</string>
     <string name="keyboard_key_insert" msgid="4621692715704410493">"Insert"</string>
@@ -1221,7 +1245,6 @@
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"ದೃಢೀಕರಣದ ಅವಶ್ಯಕತೆಯಿದೆ. ದೃಢೀಕರಿಸಲು ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಸೆನ್ಸರ್ ಅನ್ನು ಸ್ಪರ್ಶಿಸಿ."</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"ಚಾಲ್ತಿಯಲ್ಲಿರುವ ಫೋನ್ ಕರೆ"</string>
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"ಮೊಬೈಲ್ ಡೇಟಾ"</string>
-    <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"ಕನೆಕ್ಟ್ ಆಗಿದೆ"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"ತಾತ್ಕಾಲಿಕವಾಗಿ ಕನೆಕ್ಟ್ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="mobile_data_poor_connection" msgid="819617772268371434">"ಕಳಪೆ ಸಂಪರ್ಕ"</string>
@@ -1362,26 +1385,63 @@
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"ಸ್ಪ್ಲಿಟ್ ಸ್ಕ್ರೀನ್"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"ಇನ್‌ಪುಟ್"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"ಆ್ಯಪ್ ಶಾರ್ಟ್‌ಕಟ್‌ಗಳು"</string>
+    <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"ಪ್ರಸ್ತುತ ಆ್ಯಪ್"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"ಆ್ಯಕ್ಸೆಸಿಬಿಲಿಟಿ"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"ಕೀಬೋರ್ಡ್ ಶಾರ್ಟ್‌ಕಟ್‌ಗಳು"</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"ಹುಡುಕಾಟದ ಶಾರ್ಟ್‌ಕಟ್‌ಗಳು"</string>
+    <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"ಯಾವುದೇ ಹುಡುಕಾಟ ಫಲಿತಾಂಶಗಳಿಲ್ಲ"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"ಕುಗ್ಗಿಸುವ ಐಕಾನ್"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"ವಿಸ್ತೃತಗೊಳಿಸುವ ಐಕಾನ್"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"ಅಥವಾ"</string>
-    <!-- no translation found for touchpad_tutorial_back_gesture_button (2746834288077265946) -->
+    <!-- no translation found for launch_keyboard_tutorial_notification_title (8849933155160522519) -->
     <skip />
-    <!-- no translation found for touchpad_tutorial_home_gesture_button (7640544867625955304) -->
+    <!-- no translation found for launch_keyboard_tutorial_notification_content (2880339951512757918) -->
     <skip />
-    <!-- no translation found for touchpad_tutorial_action_key_button (3220074511852927267) -->
+    <!-- no translation found for launch_touchpad_tutorial_notification_title (2243780062772196901) -->
     <skip />
-    <!-- no translation found for touchpad_tutorial_done_button (176168488821755503) -->
+    <!-- no translation found for launch_touchpad_tutorial_notification_content (7931085031240753226) -->
     <skip />
+    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_title (1940023776496198762) -->
+    <skip />
+    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_content (1780725168171929365) -->
+    <skip />
+    <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"ಹಿಂಬದಿ ಗೆಸ್ಚರ್"</string>
+    <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"ಹೋಮ್ ಗೆಸ್ಚರ್"</string>
+    <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"ಆ್ಯಕ್ಷನ್‌ ಕೀ"</string>
+    <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"ಮುಗಿದಿದೆ"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"ಹಿಂತಿರುಗಿ"</string>
-    <string name="touchpad_back_gesture_guidance" msgid="4222430588599527272">"ಹಿಂತಿರುಗಲು, ಟಚ್‌ಪ್ಯಾಡ್‌ನಲ್ಲಿ ಎಲ್ಲಿಯಾದರೂ ಮೂರು ಬೆರಳುಗಳನ್ನು ಬಳಸಿ ಎಡ ಅಥವಾ ಬಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ."</string>
-    <string name="touchpad_back_gesture_animation_content_description" msgid="2646107450922379918">"ಮೂರು ಬೆರಳುಗಳು ಬಲಕ್ಕೆ ಮತ್ತು ಎಡಕ್ಕೆ ಚಲಿಸುತ್ತಿರುವುದನ್ನು ತೋರಿಸುತ್ತಿರುವ ಟಚ್‌ಪ್ಯಾಡ್"</string>
-    <string name="touchpad_back_gesture_screen_animation_content_description" msgid="4036267494237748710">"ಬ್ಯಾಕ್ ಗೆಸ್ಚರ್‌ಗೆ ಸಂಬಂಧಿಸಿದ ಆ್ಯನಿಮೇಶನ್ ಅನ್ನು ತೋರಿಸುತ್ತಿರುವ ಸಾಧನದ ಸ್ಕ್ರೀನ್"</string>
+    <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"ಹಿಂತಿರುಗಲು, ಟಚ್‌ಪ್ಯಾಡ್‌ನಲ್ಲಿ ಎಲ್ಲಿಯಾದರೂ ಮೂರು ಬೆರಳುಗಳನ್ನು ಬಳಸಿ ಎಡ ಅಥವಾ ಬಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ.\n\nಇದಕ್ಕಾಗಿ ನೀವು ಕೀಬೋರ್ಡ್ ಶಾರ್ಟ್‌ಕಟ್ Action + ESC ಅನ್ನು ಸಹ ಬಳಸಬಹುದು."</string>
+    <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"ಭೇಷ್!"</string>
+    <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"ನೀವು ಗೋ ಬ್ಯಾಕ್ ಗೆಸ್ಚರ್ ಅನ್ನು ಪೂರ್ಣಗೊಳಿಸಿದ್ದೀರಿ."</string>
+    <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"ಮುಖಪುಟಕ್ಕೆ ಹೋಗಿ"</string>
+    <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"ಯಾವುದೇ ಸಮಯದಲ್ಲಿ ನಿಮ್ಮ ಹೋಮ್ ಸ್ಕ್ರೀನ್‌ಗೆ ಹೋಗಲು, ನಿಮ್ಮ ಸ್ಕ್ರೀನ್ ಕೆಳಗಿನಿಂದ ಮೂರು ಬೆರಳುಗಳಿಂದ ಮೇಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ."</string>
+    <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"ಭೇಷ್!"</string>
+    <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"ನೀವು ಗೋ ಹೋಮ್ ಗೆಸ್ಚರ್ ಅನ್ನು ಪೂರ್ಣಗೊಳಿಸಿದ್ದೀರಿ."</string>
+    <string name="tutorial_action_key_title" msgid="2659466586996495447">"ಆ್ಯಕ್ಷನ್‌ ಕೀ"</string>
+    <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"ನಿಮ್ಮ ಆ್ಯಪ್‌ಗಳನ್ನು ಆ್ಯಕ್ಸೆಸ್ ಮಾಡಲು, ನಿಮ್ಮ ಕೀಬೋರ್ಡ್‌ನಲ್ಲಿರುವ ಆ್ಯಕ್ಷನ್‌ ಕೀಯನ್ನು ಒತ್ತಿರಿ."</string>
+    <string name="tutorial_action_key_success_title" msgid="466467860120112933">"ಅಭಿನಂದನೆಗಳು!"</string>
+    <string name="tutorial_action_key_success_body" msgid="7201991081652850430">"ನೀವು ಆ್ಯಕ್ಷನ್‌ ಕೀ ಗೆಸ್ಚರ್ ಅನ್ನು ಪೂರ್ಣಗೊಳಿಸಿದ್ದೀರಿ.\n\nನಿಮಗೆ ಲಭ್ಯವಿರುವ ಎಲ್ಲಾ ಶಾರ್ಟ್‌ಕಟ್‌ಗಳನ್ನು ಆ್ಯಕ್ಷನ್‌ + / ತೋರಿಸುತ್ತದೆ."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"ಕೀಬೋರ್ಡ್ ಬ್ಯಾಕ್‌ಲೈಟ್"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%2$d ರಲ್ಲಿ %1$d ಮಟ್ಟ"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"ಮನೆ ನಿಯಂತ್ರಣಗಳು"</string>
     <string name="home_controls_dream_description" msgid="4644150952104035789">"ಮನೆ ನಿಯಂತ್ರಣವನ್ನು ಸ್ಕ್ರೀನ್‌ಸೇವರ್‌ನಂತೆ ಬೇಗ ಆ್ಯಕ್ಸೆಸ್ ಮಾಡಿ"</string>
+    <string name="volume_undo_action" msgid="5815519725211877114">"ರದ್ದುಗೊಳಿಸಿ"</string>
+    <string name="back_edu_toast_content" msgid="4530314597378982956">"ಹಿಂತಿರುಗಲು, ಟಚ್‌ಪ್ಯಾಡ್‌ನಲ್ಲಿ ಮೂರು ಬೆರಳುಗಳಿಂದ ಎಡಕ್ಕೆ ಅಥವಾ ಬಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ"</string>
+    <string name="home_edu_toast_content" msgid="3381071147871955415">"ಹೋಮ್‌ಗೆ ಹೋಗಲು, ಟಚ್‌ಪ್ಯಾಡ್‌ನಲ್ಲಿ ಮೂರು ಬೆರಳುಗಳಿಂದ ಮೇಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ"</string>
+    <string name="overview_edu_toast_content" msgid="5797030644017804518">"ಇತ್ತೀಚಿನ ಆ್ಯಪ್‌ಗಳನ್ನು ನೋಡಲು, ಟಚ್‌ಪ್ಯಾಡ್‌ನಲ್ಲಿ ಮೂರು ಬೆರಳುಗಳಿಂದ ಮೇಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ ಹಾಗೂ ಹೋಲ್ಡ್ ಮಾಡಿ"</string>
+    <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"ನಿಮ್ಮ ಎಲ್ಲಾ ಆ್ಯಪ್‌ಗಳನ್ನು ವೀಕ್ಷಿಸಲು, ನಿಮ್ಮ ಕೀಬೋರ್ಡ್‌ನಲ್ಲಿರುವ ಆ್ಯಕ್ಷನ್‌ ಕೀಯನ್ನು ಒತ್ತಿರಿ"</string>
+    <string name="redacted_notification_single_line_title" msgid="212019960919261670">"ಅರ್ಥಬದ್ಧವಾಗಿಸಲಾಗಿದೆ"</string>
+    <string name="redacted_notification_single_line_text" msgid="8684166405005242945">"ನೋಡಲು ಅನ್‌ಲಾಕ್ ಮಾಡಿ"</string>
+    <string name="back_edu_notification_title" msgid="5624780717751357278">"ಹಿಂತಿರುಗಲು ನಿಮ್ಮ ಟಚ್‌ಪ್ಯಾಡ್ ಅನ್ನು ಬಳಸಿ"</string>
+    <string name="back_edu_notification_content" msgid="2497557451540954068">"ಮೂರು ಬೆರಳುಗಳಿಂದ ಎಡಕ್ಕೆ ಅಥವಾ ಬಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ. ಇನ್ನಷ್ಟು ಗೆಸ್ಚರ್‌ಗಳನ್ನು ತಿಳಿಯಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
+    <string name="home_edu_notification_title" msgid="6097902076909654045">"ಹೋಮ್‌ಗೆ ಹೋಗಲು ನಿಮ್ಮ ಟಚ್‌ಪ್ಯಾಡ್ ಅನ್ನು ಬಳಸಿ"</string>
+    <string name="home_edu_notification_content" msgid="6631697734535766588">"ಮೂರು ಬೆರಳುಗಳಿಂದ ಮೇಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ. ಇನ್ನಷ್ಟು ಗೆಸ್ಚರ್‌ಗಳನ್ನು ತಿಳಿಯಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
+    <string name="overview_edu_notification_title" msgid="1265824157319562406">"ಇತ್ತೀಚಿನ ಆ್ಯಪ್‌ಗಳನ್ನು ವೀಕ್ಷಿಸಲು ನಿಮ್ಮ ಟಚ್‌ಪ್ಯಾಡ್ ಅನ್ನು ಬಳಸಿ"</string>
+    <string name="overview_edu_notification_content" msgid="3578204677648432500">"ಮೂರು ಬೆರಳುಗಳಿಂದ ಮೇಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ ಹಾಗೂ ಹೋಲ್ಡ್ ಮಾಡಿ. ಇನ್ನಷ್ಟು ಗೆಸ್ಚರ್‌ಗಳನ್ನು ತಿಳಿಯಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
+    <string name="all_apps_edu_notification_title" msgid="372262997265569063">"ಎಲ್ಲಾ ಆ್ಯಪ್‌ಗಳನ್ನು ವೀಕ್ಷಿಸಲು ನಿಮ್ಮ ಕೀಬೋರ್ಡ್ ಅನ್ನು ಬಳಸಿ"</string>
+    <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"ಯಾವಾಗ ಬೇಕಾದರೂ ಆ್ಯಕ್ಷನ್‌ ಕೀಯನ್ನು ಒತ್ತಿರಿ. ಇನ್ನಷ್ಟು ಗೆಸ್ಚರ್‌ಗಳನ್ನು ತಿಳಿಯಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_title" msgid="4369307638184799742">"ಇನ್ನಷ್ಟು ಮಬ್ಬು ಈಗ ಬ್ರೈಟ್‌ನೆಸ್ ಬಾರ್‌ನ ಭಾಗವಾಗಿದೆ"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="7513137763024327538">"ನಿಮ್ಮ ಸ್ಕ್ರೀನ್ ಮೇಲ್ಭಾಗದಿಂದ ಬ್ರೈಟ್‌ನೆಸ್ ಮಟ್ಟವನ್ನು ಇನ್ನಷ್ಟು ಕಡಿಮೆ ಮಾಡುವ ಮೂಲಕ ನೀವು ಈಗ ಸ್ಕ್ರೀನ್ ಅನ್ನು ಇನ್ನಷ್ಟು ಮಬ್ಬುಗೊಳಿಸಬಹುದು.\n\nನೀವು ಕತ್ತಲೆಯ ವಾತಾವರಣದಲ್ಲಿರುವಾಗ ಇದು ಉತ್ತಮವಾಗಿ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತದೆ."</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_button" msgid="1782147201534669800">"ಇನ್ನಷ್ಟು ಮಬ್ಬು ಶಾರ್ಟ್‌ಕಟ್ ಅನ್ನು ತೆಗೆದುಹಾಕಿ"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="4070696910424515757">"ಇನ್ನಷ್ಟು ಮಬ್ಬು ಶಾರ್ಟ್‌ಕಟ್ ಅನ್ನು ತೆಗೆದುಹಾಕಲಾಗಿದೆ. ನಿಮ್ಮ ಬ್ರೈಟ್‌ನೆಸ್ ಅನ್ನು ಕಡಿಮೆ ಮಾಡಲು, ಸಾಮಾನ್ಯ ಬ್ರೈಟ್‌ನೆಸ್ ಬಾರ್ ಬಳಸಿ."</string>
 </resources>

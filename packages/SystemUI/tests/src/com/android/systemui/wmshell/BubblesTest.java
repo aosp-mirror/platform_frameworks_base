@@ -86,6 +86,7 @@ import android.service.dreams.IDreamManager;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.ZenModeConfig;
 import android.testing.TestableLooper;
+import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
 import android.view.Display;
@@ -97,8 +98,11 @@ import android.view.WindowManager;
 import androidx.annotation.Nullable;
 import androidx.test.filters.SmallTest;
 
+import com.android.app.viewcapture.ViewCapture;
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.internal.colorextraction.ColorExtractor;
 import com.android.internal.logging.UiEventLogger;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.launcher3.icons.BubbleIconFactory;
 import com.android.systemui.SysuiTestCase;
@@ -120,6 +124,8 @@ import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeWindowLogger;
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
+import com.android.systemui.shade.ui.viewmodel.NotificationShadeWindowModel;
+import com.android.systemui.shared.notifications.domain.interactor.NotificationSettingsInteractor;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.NotificationEntryHelper;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
@@ -163,7 +169,6 @@ import com.android.wm.shell.bubbles.BubbleData;
 import com.android.wm.shell.bubbles.BubbleDataRepository;
 import com.android.wm.shell.bubbles.BubbleEducationController;
 import com.android.wm.shell.bubbles.BubbleEntry;
-import com.android.wm.shell.bubbles.BubbleExpandedViewManager;
 import com.android.wm.shell.bubbles.BubbleLogger;
 import com.android.wm.shell.bubbles.BubbleOverflow;
 import com.android.wm.shell.bubbles.BubbleStackView;
@@ -179,10 +184,11 @@ import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TaskStackListenerImpl;
-import com.android.wm.shell.common.bubbles.BubbleBarLocation;
-import com.android.wm.shell.common.bubbles.BubbleBarUpdate;
 import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.onehanded.OneHandedController;
+import com.android.wm.shell.shared.animation.PhysicsAnimatorTestUtils;
+import com.android.wm.shell.shared.bubbles.BubbleBarLocation;
+import com.android.wm.shell.shared.bubbles.BubbleBarUpdate;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
@@ -208,6 +214,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Executor;
 
+import kotlin.Lazy;
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
 import platform.test.runner.parameterized.Parameters;
 
@@ -215,6 +222,9 @@ import platform.test.runner.parameterized.Parameters;
 @RunWith(ParameterizedAndroidJunit4.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class BubblesTest extends SysuiTestCase {
+
+    private static final String TAG = "BubblesTest";
+
     @Mock
     private CommonNotifCollection mCommonNotifCollection;
     @Mock
@@ -239,8 +249,6 @@ public class BubblesTest extends SysuiTestCase {
     private KeyguardViewMediator mKeyguardViewMediator;
     @Mock
     private KeyguardBypassController mKeyguardBypassController;
-    @Mock
-    private FloatingContentCoordinator mFloatingContentCoordinator;
     @Mock
     private BubbleDataRepository mDataRepository;
     @Mock
@@ -339,9 +347,12 @@ public class BubblesTest extends SysuiTestCase {
     private Icon mAppBubbleIcon;
     @Mock
     private Display mDefaultDisplay;
+    @Mock
+    private Lazy<ViewCapture> mLazyViewCapture;
 
     private final KosmosJavaAdapter mKosmos = new KosmosJavaAdapter(this);
     private ShadeInteractor mShadeInteractor;
+    private NotificationShadeWindowModel mNotificationShadeWindowModel;
     private ShellTaskOrganizer mShellTaskOrganizer;
     private TaskViewTransitions mTaskViewTransitions;
 
@@ -370,7 +381,11 @@ public class BubblesTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
+        // Make sure ProtoLog is initialized before any logging occurs.
+        ProtoLog.init();
+
         MockitoAnnotations.initMocks(this);
+        PhysicsAnimatorTestUtils.prepareForTest();
 
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             doReturn(true).when(mTransitions).isRegistered();
@@ -399,11 +414,13 @@ public class BubblesTest extends SysuiTestCase {
         when(deviceEntryUdfpsInteractor.isUdfpsSupported()).thenReturn(MutableStateFlow(false));
 
         mShadeInteractor = mKosmos.getShadeInteractor();
+        mNotificationShadeWindowModel = mKosmos.getNotificationShadeWindowModel();
 
         mNotificationShadeWindowController = new NotificationShadeWindowControllerImpl(
                 mContext,
                 new FakeWindowRootViewComponent.Factory(mNotificationShadeWindowView),
-                mWindowManager,
+                new ViewCaptureAwareWindowManager(mWindowManager, mLazyViewCapture,
+                        /* isViewCaptureEnabled= */ false),
                 mActivityManager,
                 mDozeParameters,
                 mStatusBarStateController,
@@ -420,6 +437,7 @@ public class BubblesTest extends SysuiTestCase {
                 mShadeWindowLogger,
                 () -> mSelectedUserInteractor,
                 mUserTracker,
+                mNotificationShadeWindowModel,
                 mKosmos::getCommunalInteractor
         );
         mNotificationShadeWindowController.fetchWindowRootView();
@@ -444,7 +462,7 @@ public class BubblesTest extends SysuiTestCase {
                 mContext.getSystemService(WindowManager.class));
         mPositioner.setMaxBubbles(5);
         mBubbleData = new BubbleData(mContext, mBubbleLogger, mPositioner, mEducationController,
-                syncExecutor);
+                syncExecutor, syncExecutor);
 
         when(mUserManager.getProfiles(ActivityManager.getCurrentUser())).thenReturn(
                 Collections.singletonList(mock(UserInfo.class)));
@@ -476,7 +494,8 @@ public class BubblesTest extends SysuiTestCase {
                         mock(PackageManager.class),
                         Optional.of(mock(Bubbles.class)),
                         mContext,
-                        mock(NotificationManager.class)
+                        mock(NotificationManager.class),
+                        mock(NotificationSettingsInteractor.class)
                         );
         interruptionDecisionProvider.start();
 
@@ -493,7 +512,7 @@ public class BubblesTest extends SysuiTestCase {
                 mShellCommandHandler,
                 mShellController,
                 mBubbleData,
-                mFloatingContentCoordinator,
+                new FloatingContentCoordinator(),
                 mDataRepository,
                 mStatusBarService,
                 mWindowManager,
@@ -570,11 +589,31 @@ public class BubblesTest extends SysuiTestCase {
     }
 
     @After
-    public void tearDown() {
+    public void tearDown() throws Exception {
         ArrayList<Bubble> bubbles = new ArrayList<>(mBubbleData.getBubbles());
         for (int i = 0; i < bubbles.size(); i++) {
             mBubbleController.removeBubble(bubbles.get(i).getKey(),
                     Bubbles.DISMISS_NO_LONGER_BUBBLE);
+        }
+        mTestableLooper.processAllMessages();
+
+        // check that no animations are running before finishing the test to make sure that the
+        // state gets cleaned up correctly between tests.
+        int retryCount = 0;
+        while (PhysicsAnimatorTestUtils.isAnyAnimationRunning() && retryCount <= 10) {
+            Log.d(
+                    TAG,
+                    String.format("waiting for animations to complete. attempt %d", retryCount));
+            // post a message to the looper and wait for it to be processed
+            mTestableLooper.runWithLooper(() -> {});
+            retryCount++;
+        }
+        mTestableLooper.processAllMessages();
+        if (PhysicsAnimatorTestUtils.isAnyAnimationRunning()) {
+            Log.d(TAG, "finished waiting for animations to complete but animations are still "
+                    + "running");
+        } else {
+            Log.d(TAG, "no animations are running");
         }
     }
 
@@ -1368,7 +1407,6 @@ public class BubblesTest extends SysuiTestCase {
                 .thenReturn(userContext);
 
         BubbleViewInfoTask.BubbleViewInfo info = BubbleViewInfoTask.BubbleViewInfo.populate(context,
-                BubbleExpandedViewManager.fromBubbleController(mBubbleController),
                 () -> new BubbleTaskView(mock(TaskView.class), mock(Executor.class)),
                 mPositioner,
                 mBubbleController.getStackView(),
@@ -2278,7 +2316,7 @@ public class BubblesTest extends SysuiTestCase {
         mBubbleController.expandStackAndSelectBubbleFromLauncher(mBubbleEntry.getKey(), 0);
         // Drag first bubble to dismiss
         mBubbleController.startBubbleDrag(mBubbleEntry.getKey());
-        mBubbleController.dragBubbleToDismiss(mBubbleEntry.getKey());
+        mBubbleController.dragBubbleToDismiss(mBubbleEntry.getKey(), System.currentTimeMillis());
         // Second bubble is selected and expanded
         assertThat(mBubbleData.getSelectedBubbleKey()).isEqualTo(mBubbleEntry2.getKey());
         assertThat(mBubbleController.getLayerView().isExpanded()).isTrue();
@@ -2302,7 +2340,7 @@ public class BubblesTest extends SysuiTestCase {
         mBubbleController.expandStackAndSelectBubbleFromLauncher(mBubbleEntry.getKey(), 0);
         // Drag second bubble to dismiss
         mBubbleController.startBubbleDrag(mBubbleEntry2.getKey());
-        mBubbleController.dragBubbleToDismiss(mBubbleEntry2.getKey());
+        mBubbleController.dragBubbleToDismiss(mBubbleEntry2.getKey(), System.currentTimeMillis());
         // First bubble remains selected and expanded
         assertThat(mBubbleData.getSelectedBubbleKey()).isEqualTo(mBubbleEntry.getKey());
         assertThat(mBubbleController.getLayerView().isExpanded()).isTrue();
@@ -2429,9 +2467,10 @@ public class BubblesTest extends SysuiTestCase {
         workEntry.setBubbleMetadata(getMetadata());
         workEntry.setFlagBubble(true);
 
+        SyncExecutor executor = new SyncExecutor();
         return new Bubble(mBubblesManager.notifToBubbleEntry(workEntry),
                 null,
-                mock(Bubbles.PendingIntentCanceledListener.class), new SyncExecutor());
+                mock(Bubbles.PendingIntentCanceledListener.class), executor, executor);
     }
 
     private BubbleEntry createBubbleEntry(boolean isConversation) {

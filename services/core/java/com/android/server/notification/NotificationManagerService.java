@@ -110,8 +110,8 @@ import static android.service.notification.Adjustment.TYPE_PROMOTION;
 import static android.service.notification.Adjustment.TYPE_SOCIAL_MEDIA;
 import static android.service.notification.Flags.callstyleCallbackApi;
 import static android.service.notification.Flags.notificationForceGrouping;
-import static android.service.notification.Flags.redactSensitiveNotificationsFromUntrustedListeners;
 import static android.service.notification.Flags.redactSensitiveNotificationsBigTextStyle;
+import static android.service.notification.Flags.redactSensitiveNotificationsFromUntrustedListeners;
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_ALERTING;
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_CONVERSATIONS;
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_ONGOING;
@@ -248,7 +248,6 @@ import android.content.pm.UserInfo;
 import android.content.pm.VersionedPackage;
 import android.content.res.Resources;
 import android.database.ContentObserver;
-import android.graphics.drawable.Icon;
 import android.metrics.LogMaker;
 import android.net.Uri;
 import android.os.Binder;
@@ -373,7 +372,6 @@ import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.BackgroundActivityStartCallback;
 import com.android.server.wm.WindowManagerInternal;
 
-import java.util.function.BiPredicate;
 import libcore.io.IoUtils;
 
 import org.json.JSONException;
@@ -1317,10 +1315,24 @@ public class NotificationManagerService extends SystemService {
                         nv.rank, nv.count);
 
                 StatusBarNotification sbn = r.getSbn();
-                cancelNotification(callingUid, callingPid, sbn.getPackageName(), sbn.getTag(),
-                        sbn.getId(), FLAG_AUTO_CANCEL,
-                        FLAG_FOREGROUND_SERVICE | FLAG_USER_INITIATED_JOB | FLAG_BUBBLE,
-                        false, r.getUserId(), REASON_CLICK, nv.rank, nv.count, null);
+                // Notifications should be cancelled on click if they have been lifetime extended,
+                // regardless of presence or absence of FLAG_AUTO_CANCEL.
+                if (lifetimeExtensionRefactor()
+                        && (sbn.getNotification().flags
+                        & FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY) != 0) {
+                    cancelNotification(callingUid, callingPid, sbn.getPackageName(), sbn.getTag(),
+                            sbn.getId(), FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY,
+                            FLAG_FOREGROUND_SERVICE | FLAG_USER_INITIATED_JOB
+                                    | FLAG_BUBBLE,
+                            false, r.getUserId(), REASON_CLICK, nv.rank, nv.count, null);
+
+                } else {
+                    // Otherwise, only FLAG_AUTO_CANCEL notifications should be canceled on click.
+                    cancelNotification(callingUid, callingPid, sbn.getPackageName(), sbn.getTag(),
+                            sbn.getId(), FLAG_AUTO_CANCEL,
+                            FLAG_FOREGROUND_SERVICE | FLAG_USER_INITIATED_JOB | FLAG_BUBBLE,
+                            false, r.getUserId(), REASON_CLICK, nv.rank, nv.count, null);
+                }
                 nv.recycle();
                 reportUserInteraction(r);
                 mAssistants.notifyAssistantNotificationClicked(r);
@@ -1571,6 +1583,8 @@ public class NotificationManagerService extends SystemService {
                     // respond to direct replies with updates. So we need to update System UI
                     // immediately.
                     if (lifetimeExtensionRefactor()) {
+                        // We need to reset this to allow the notif to be updated again.
+                        r.setCanceledAfterLifetimeExtension(false);
                         maybeNotifySystemUiListenerLifetimeExtendedLocked(r,
                                 r.getSbn().getPackageName(), packageImportance);
                     }
@@ -1627,9 +1641,12 @@ public class NotificationManagerService extends SystemService {
                     // respond to direct replies with updates. So we need to update System UI
                     // immediately.
                     if (lifetimeExtensionRefactor()) {
+                        // We need to reset this to allow the notif to be updated again.
+                        r.setCanceledAfterLifetimeExtension(false);
                         maybeNotifySystemUiListenerLifetimeExtendedLocked(r,
                                 r.getSbn().getPackageName(), packageImportance);
                     }
+
                     r.recordSmartReplied();
                     LogMaker logMaker = r.getLogMaker()
                             .setCategory(MetricsEvent.SMART_REPLY_ACTION)
@@ -2951,8 +2968,9 @@ public class NotificationManagerService extends SystemService {
                     };
                     cancelGroupChildrenLocked(userId, pkg, Binder.getCallingUid(),
                             Binder.getCallingPid(), null,
-                            false, childrenFlagChecker, groupKey,
-                            REASON_APP_CANCEL, SystemClock.elapsedRealtime());
+                            false, childrenFlagChecker,
+                            NotificationManagerService::wasChildOfForceRegroupedGroupChecker,
+                            groupKey, REASON_APP_CANCEL, SystemClock.elapsedRealtime());
                 }
             }
         });
@@ -4634,29 +4652,28 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public List<String> getPackagesBypassingDnd(int userId,
-                                                    boolean includeConversationChannels) {
+                boolean includeConversationChannels) {
             checkCallerIsSystem();
 
             final ArraySet<String> packageNames = new ArraySet<>();
 
-            for (int user : mUm.getProfileIds(userId, false)) {
-                List<PackageInfo> pkgs = mPackageManagerClient.getInstalledPackagesAsUser(0, user);
-                for (PackageInfo pi : pkgs) {
-                    String pkg = pi.packageName;
-                    // If any NotificationChannel for this package is bypassing, the
-                    // package is considered bypassing.
-                    for (NotificationChannel channel : getNotificationChannelsBypassingDnd(pkg,
-                            pi.applicationInfo.uid).getList()) {
-                        // Skips non-demoted conversation channels.
-                        if (!includeConversationChannels
-                                && !TextUtils.isEmpty(channel.getConversationId())
-                                && !channel.isDemoted()) {
-                            continue;
-                        }
-                        packageNames.add(pkg);
+            List<PackageInfo> pkgs = mPackageManagerClient.getInstalledPackagesAsUser(0, userId);
+            for (PackageInfo pi : pkgs) {
+                String pkg = pi.packageName;
+                // If any NotificationChannel for this package is bypassing, the
+                // package is considered bypassing.
+                for (NotificationChannel channel : getNotificationChannelsBypassingDnd(pkg,
+                        pi.applicationInfo.uid).getList()) {
+                    // Skips non-demoted conversation channels.
+                    if (!includeConversationChannels
+                            && !TextUtils.isEmpty(channel.getConversationId())
+                            && !channel.isDemoted()) {
+                        continue;
                     }
+                    packageNames.add(pkg);
                 }
             }
+
             return new ArrayList<String>(packageNames);
         }
 
@@ -5663,7 +5680,7 @@ public class NotificationManagerService extends SystemService {
             // a "normal" rule, it must provide a CP/ConfigActivity too.
             if (android.app.Flags.modesApi()) {
                 boolean isImplicitRuleUpdateFromSystem = updateId != null
-                        && ZenModeHelper.isImplicitRuleId(updateId)
+                        && ZenModeConfig.isImplicitRuleId(updateId)
                         && isCallerSystemOrSystemUi();
                 if (!isImplicitRuleUpdateFromSystem
                         && rule.getOwner() == null
@@ -5760,16 +5777,20 @@ public class NotificationManagerService extends SystemService {
                     Binder.getCallingUid());
         }
 
-        @ZenModeConfig.ConfigChangeOrigin
+        @ZenModeConfig.ConfigOrigin
         private int computeZenOrigin(boolean fromUser) {
             // "fromUser" is introduced with MODES_API, so only consider it in that case.
-            // (Non-MODES_API behavior should also not depend at all on UPDATE_ORIGIN_USER).
+            // (Non-MODES_API behavior should also not depend at all on ORIGIN_USER_IN_X).
             if (android.app.Flags.modesApi() && fromUser) {
-                return ZenModeConfig.UPDATE_ORIGIN_USER;
+                if (isCallerSystemOrSystemUi()) {
+                    return ZenModeConfig.ORIGIN_USER_IN_SYSTEMUI;
+                } else {
+                    return ZenModeConfig.ORIGIN_USER_IN_APP;
+                }
             } else if (isCallerSystemOrSystemUi()) {
-                return ZenModeConfig.UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI;
+                return ZenModeConfig.ORIGIN_SYSTEM;
             } else {
-                return ZenModeConfig.UPDATE_ORIGIN_APP;
+                return ZenModeConfig.ORIGIN_APP;
             }
         }
 
@@ -6126,7 +6147,7 @@ public class NotificationManagerService extends SystemService {
             enforcePolicyAccess(pkg, "setNotificationPolicy");
             enforceUserOriginOnlyFromSystem(fromUser, "setNotificationPolicy");
             int callingUid = Binder.getCallingUid();
-            @ZenModeConfig.ConfigChangeOrigin int origin = computeZenOrigin(fromUser);
+            @ZenModeConfig.ConfigOrigin int origin = computeZenOrigin(fromUser);
 
             boolean shouldApplyAsImplicitRule = android.app.Flags.modesApi()
                     && !canManageGlobalZenPolicy(pkg, callingUid);
@@ -7579,16 +7600,14 @@ public class NotificationManagerService extends SystemService {
                     + " trying to post for invalid pkg " + pkg + " in user " + incomingUserId);
         }
 
-        if (android.app.Flags.secureAllowlistToken()) {
-            IBinder allowlistToken = notification.getAllowlistToken();
-            if (allowlistToken != null && allowlistToken != ALLOWLIST_TOKEN) {
-                throw new SecurityException(
-                        "Unexpected allowlist token received from " + callingUid);
-            }
-            // allowlistToken is populated by unparceling, so it can be null if the notification was
-            // posted from inside system_server. Ensure it's the expected value.
-            notification.overrideAllowlistToken(ALLOWLIST_TOKEN);
+        IBinder allowlistToken = notification.getAllowlistToken();
+        if (allowlistToken != null && allowlistToken != ALLOWLIST_TOKEN) {
+            throw new SecurityException(
+                    "Unexpected allowlist token received from " + callingUid);
         }
+        // allowlistToken is populated by unparceling, so it can be null if the notification was
+        // posted from inside system_server. Ensure it's the expected value.
+        notification.overrideAllowlistToken(ALLOWLIST_TOKEN);
 
         checkRestrictedCategories(notification);
 
@@ -8652,14 +8671,13 @@ public class NotificationManagerService extends SystemService {
                     if (r.getNotification().isGroupSummary()) {
                         cancelGroupChildrenLocked(mUserId, mPkg, mCallingUid, mCallingPid,
                                 listenerName, mSendDelete, childrenFlagChecker,
-                                r.getNotification().getGroup(), mReason,
-                                mCancellationElapsedTimeMs);
+                                NotificationManagerService::isChildOfCurrentGroupChecker,
+                                r.getGroupKey(), mReason, mCancellationElapsedTimeMs);
                     }
                     mAttentionHelper.updateLightsLocked();
                     if (mShortcutHelper != null) {
                         mShortcutHelper.maybeListenForShortcutChangesForBubbles(r,
-                                true /* isRemoved */,
-                                mHandler);
+                                true /* isRemoved */);
                     }
                 } else {
                     if (notificationForceGrouping()) {
@@ -8754,12 +8772,10 @@ public class NotificationManagerService extends SystemService {
          */
         private boolean enqueueNotification() {
             synchronized (mNotificationLock) {
-                if (android.app.Flags.secureAllowlistToken()) {
-                    // allowlistToken is populated by unparceling, so it will be absent if the
-                    // EnqueueNotificationRunnable is created directly by NMS (as we do for group
-                    // summaries) instead of via notify(). Fix that.
-                    r.getNotification().overrideAllowlistToken(ALLOWLIST_TOKEN);
-                }
+                // allowlistToken is populated by unparceling, so it will be absent if the
+                // EnqueueNotificationRunnable is created directly by NMS (as we do for group
+                // summaries) instead of via notify(). Fix that.
+                r.getNotification().overrideAllowlistToken(ALLOWLIST_TOKEN);
 
                 final long snoozeAt =
                         mSnoozeHelper.getSnoozeTimeForUnpostedNotification(
@@ -9116,8 +9132,7 @@ public class NotificationManagerService extends SystemService {
 
                     if (mShortcutHelper != null) {
                         mShortcutHelper.maybeListenForShortcutChangesForBubbles(r,
-                                false /* isRemoved */,
-                                mHandler);
+                                false /* isRemoved */);
                     }
 
                     maybeRecordInterruptionLocked(r);
@@ -9377,8 +9392,8 @@ public class NotificationManagerService extends SystemService {
         if (oldIsSummary && (!isSummary || !oldGroup.equals(group))) {
             cancelGroupChildrenLocked(old.getUserId(), old.getSbn().getPackageName(), callingUid,
                     callingPid, null, false /* sendDelete */, childrenFlagChecker,
-                    old.getNotification().getGroup(), REASON_APP_CANCEL,
-                    SystemClock.elapsedRealtime());
+                    NotificationManagerService::isChildOfCurrentGroupChecker, old.getGroupKey(),
+                    REASON_APP_CANCEL, SystemClock.elapsedRealtime());
         }
     }
 
@@ -10359,13 +10374,45 @@ public class NotificationManagerService extends SystemService {
         public boolean apply(int flags);
     }
 
-    private static boolean isChildOfGroup(final NotificationRecord childRecord, int userId,
+    @FunctionalInterface
+    private interface GroupChildChecker {
+        // Returns true if the childRecord is a child of the group defined
+        // by the rest of the parameters
+        boolean apply(NotificationRecord childRecord, int userId, String pkg, String groupKey);
+    }
+
+    /**
+     * Checks that the notification is currently a child of the group
+     * @param childRecord the notification to check
+     * @param userId userId of the group
+     * @param pkg package name of the group
+     * @param groupKey group key for a current group
+     * @return true if the childRecord is currently a child of the group
+     */
+    private static boolean isChildOfCurrentGroupChecker(NotificationRecord childRecord, int userId,
             String pkg, String groupKey) {
         return (childRecord.getUser().getIdentifier() == userId
             && childRecord.getSbn().getPackageName().equals(pkg)
             && childRecord.getSbn().isGroup()
             && !childRecord.getNotification().isGroupSummary()
-            && TextUtils.equals(groupKey, childRecord.getNotification().getGroup()));
+            && TextUtils.equals(groupKey, childRecord.getGroupKey()));
+    }
+
+    /**
+     * Checks that the notification was originally a child of the group
+     * @param childRecord the notification to check
+     * @param userId userId of the group
+     * @param pkg package name of the group
+     * @param groupKey original/initial group key for a group that was force grouped
+     * @return true if the childRecord was originally a child of the group
+     */
+    private static boolean wasChildOfForceRegroupedGroupChecker(NotificationRecord childRecord,
+            int userId, String pkg, String groupKey) {
+        return (childRecord.getUser().getIdentifier() == userId
+            && childRecord.getSbn().getPackageName().equals(pkg)
+            && childRecord.getSbn().isGroup()
+            && !childRecord.getNotification().isGroupSummary()
+            && TextUtils.equals(groupKey, childRecord.getOriginalGroupKey()));
     }
 
     @GuardedBy("mNotificationLock")
@@ -10526,18 +10573,19 @@ public class NotificationManagerService extends SystemService {
     // Warning: The caller is responsible for invoking updateLightsLocked().
     @GuardedBy("mNotificationLock")
     private void cancelGroupChildrenLocked(int userId, String pkg, int callingUid, int callingPid,
-            String listenerName, boolean sendDelete, FlagChecker flagChecker, String groupKey,
-            int reason, @ElapsedRealtimeLong long cancellationElapsedTimeMs) {
+            String listenerName, boolean sendDelete, FlagChecker flagChecker,
+            GroupChildChecker groupChildChecker, String groupKey, int reason,
+            @ElapsedRealtimeLong long cancellationElapsedTimeMs) {
         if (pkg == null) {
             if (DBG) Slog.e(TAG, "No package for group summary");
             return;
         }
 
         cancelGroupChildrenByListLocked(mNotificationList, userId, pkg, callingUid, callingPid,
-                listenerName, sendDelete, true, flagChecker, groupKey,
+                listenerName, sendDelete, true, flagChecker, groupChildChecker, groupKey,
                 reason, cancellationElapsedTimeMs);
         cancelGroupChildrenByListLocked(mEnqueuedNotifications, userId, pkg, callingUid, callingPid,
-                listenerName, sendDelete, false, flagChecker, groupKey,
+                listenerName, sendDelete, false, flagChecker, groupChildChecker, groupKey,
                 reason, cancellationElapsedTimeMs);
     }
 
@@ -10545,12 +10593,13 @@ public class NotificationManagerService extends SystemService {
     private void cancelGroupChildrenByListLocked(ArrayList<NotificationRecord> notificationList,
             int userId, String pkg, int callingUid, int callingPid,
             String listenerName, boolean sendDelete, boolean wasPosted, FlagChecker flagChecker,
-            String groupKey, int reason, @ElapsedRealtimeLong long cancellationElapsedTimeMs) {
+            GroupChildChecker grouChildChecker, String groupKey, int reason,
+            @ElapsedRealtimeLong long cancellationElapsedTimeMs) {
         final int childReason = REASON_GROUP_SUMMARY_CANCELED;
         for (int i = notificationList.size() - 1; i >= 0; i--) {
             final NotificationRecord childR = notificationList.get(i);
             final StatusBarNotification childSbn = childR.getSbn();
-            if (isChildOfGroup(childR, userId, pkg, groupKey)
+            if (grouChildChecker.apply(childR, userId, pkg, groupKey)
                 && (flagChecker == null || flagChecker.apply(childR.getFlags()))
                 && (!childR.getChannel().isImportantConversation() || reason != REASON_CANCEL)) {
                 EventLogTags.writeNotificationCancel(callingUid, callingPid, pkg, childSbn.getId(),
@@ -11693,17 +11742,39 @@ public class NotificationManagerService extends SystemService {
     private void maybeNotifySystemUiListenerLifetimeExtendedLocked(NotificationRecord record,
             String pkg, int packageImportance) {
         if (record != null && (record.getSbn().getNotification().flags
-                & FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY) > 0) {
+                & FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY) > 0
+                && !record.isCanceledAfterLifetimeExtension()) {
             boolean isAppForeground = pkg != null && packageImportance == IMPORTANCE_FOREGROUND;
 
-            // Lifetime extended notifications don't need to alert on state change.
+            // Save the original Record's post silently value, so we can restore it after we send
+            // the SystemUI specific silent update.
+            boolean savedPostSilentlyState = record.shouldPostSilently();
+            boolean savedOnlyAlertOnceState = (record.getNotification().flags
+                    & FLAG_ONLY_ALERT_ONCE) > 0;
+            // Lifetime extended notifications don't need to alert on new state change.
             record.setPostSilently(true);
             // We also set FLAG_ONLY_ALERT_ONCE to avoid the notification from HUN-ing again.
             record.getNotification().flags |= FLAG_ONLY_ALERT_ONCE;
 
+            PostNotificationTracker tracker = mPostNotificationTrackerFactory.newTracker(null);
+            tracker.addCleanupRunnable(() -> {
+                synchronized (mNotificationLock) {
+                    // Mark that the notification has been updated due to cancelation, so it won't
+                    // be updated again if the app cancels multiple times.
+                    record.setCanceledAfterLifetimeExtension(true);
+                    // Set the post silently status to the record's previous value.
+                    record.setPostSilently(savedPostSilentlyState);
+                    // Remove FLAG_ONLY_ALERT_ONCE if the notification did not previously have it.
+                    if (!savedOnlyAlertOnceState) {
+                        record.getNotification().flags &= ~FLAG_ONLY_ALERT_ONCE;
+                    }
+                }
+            });
+
             mHandler.post(new EnqueueNotificationRunnable(record.getUser().getIdentifier(),
-                    record, isAppForeground, /* isAppProvided= */ false,
-                    mPostNotificationTrackerFactory.newTracker(null)));
+                    record, isAppForeground, /* isAppProvided= */ false, tracker));
+
+            EventLogTags.writeNotificationCancelPrevented(record.getKey());
         }
     }
 
@@ -13303,15 +13374,21 @@ public class NotificationManagerService extends SystemService {
         @ElapsedRealtimeLong private final long mStartTime;
         @Nullable private final WakeLock mWakeLock;
         private boolean mOngoing;
+        private final List<Runnable> mCleanupRunnables;
 
         @VisibleForTesting
         PostNotificationTracker(@Nullable WakeLock wakeLock) {
             mStartTime = SystemClock.elapsedRealtime();
             mWakeLock = wakeLock;
             mOngoing = true;
+            mCleanupRunnables = new ArrayList<Runnable>();
             if (DBG) {
                 Slog.d(TAG, "PostNotification: Started");
             }
+        }
+
+        void addCleanupRunnable(Runnable runnable) {
+            mCleanupRunnables.add(runnable);
         }
 
         @ElapsedRealtimeLong
@@ -13325,8 +13402,9 @@ public class NotificationManagerService extends SystemService {
         }
 
         /**
-         * Cancels the tracker (releasing the acquired WakeLock). Either {@link #finish} or
-         * {@link #cancel} (exclusively) should be called on this object before it's discarded.
+         * Cancels the tracker (releasing the acquired WakeLock) and runs any set cleanup runnables.
+         * Either {@link #finish} or {@link #cancel} (exclusively) should be called on this object
+         * before it's discarded.
          */
         void cancel() {
             if (!isOngoing()) {
@@ -13337,6 +13415,9 @@ public class NotificationManagerService extends SystemService {
             if (mWakeLock != null) {
                 Binder.withCleanCallingIdentity(() -> mWakeLock.release());
             }
+            for (Runnable r : mCleanupRunnables) {
+                r.run();
+            }
             if (DBG) {
                 long elapsedTime = SystemClock.elapsedRealtime() - mStartTime;
                 Slog.d(TAG, TextUtils.formatSimple("PostNotification: Abandoned after %d ms",
@@ -13345,9 +13426,10 @@ public class NotificationManagerService extends SystemService {
         }
 
         /**
-         * Finishes the tracker (releasing the acquired WakeLock) and returns the time elapsed since
-         * the operation started, in milliseconds. Either {@link #finish} or {@link #cancel}
-         * (exclusively) should be called on this object before it's discarded.
+         * Finishes the tracker (releasing the acquired WakeLock), runs any set cleanup runnables,
+         * and returns the time elapsed since the operation started, in milliseconds.
+         * Either {@link #finish} or {@link #cancel} (exclusively) should be called on this object
+         * before it's discarded.
          */
         @DurationMillisLong
         long finish() {
@@ -13359,6 +13441,9 @@ public class NotificationManagerService extends SystemService {
             mOngoing = false;
             if (mWakeLock != null) {
                 Binder.withCleanCallingIdentity(() -> mWakeLock.release());
+            }
+            for (Runnable r : mCleanupRunnables) {
+                r.run();
             }
             if (DBG) {
                 Slog.d(TAG,

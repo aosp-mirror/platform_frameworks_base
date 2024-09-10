@@ -23,7 +23,6 @@ import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertNull;
 import static junit.framework.TestCase.assertTrue;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -31,7 +30,6 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import android.annotation.FlaggedApi;
 import android.content.AttributionSource;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
@@ -54,8 +52,8 @@ import android.provider.MediaStore.Audio.AudioColumns;
 import android.test.mock.MockContentResolver;
 import android.util.Xml;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
@@ -232,6 +230,33 @@ public class NotificationChannelTest {
                 fromParcel.getVibrationPattern().length);
         assertEquals(NotificationChannel.MAX_TEXT_LENGTH,
                 fromParcel.getSound().toString().length());
+    }
+
+    @Test
+    @EnableFlags({Flags.FLAG_NOTIFICATION_CHANNEL_VIBRATION_EFFECT_API,
+            Flags.FLAG_NOTIF_CHANNEL_CROP_VIBRATION_EFFECTS})
+    public void testLongVibrationFields_canWriteToXml() throws Exception {
+        NotificationChannel channel = new NotificationChannel("id", "name", 3);
+        // populate pattern with contents
+        long[] pattern = new long[65550 / 2];
+        for (int i = 0; i < pattern.length; i++) {
+            pattern[i] = 100;
+        }
+        channel.setVibrationPattern(pattern);  // with flag on, also sets effect
+
+        // Send it through parceling & unparceling to simulate being passed through a binder call
+        NotificationChannel fromParcel = writeToAndReadFromParcel(channel);
+        assertThat(fromParcel.getVibrationPattern().length).isEqualTo(
+                NotificationChannel.MAX_VIBRATION_LENGTH);
+
+        // Confirm that this also survives writing to & restoring from XML
+        NotificationChannel result = backUpAndRestore(fromParcel);
+        assertThat(result.getVibrationPattern().length).isEqualTo(
+                NotificationChannel.MAX_VIBRATION_LENGTH);
+        assertThat(result.getVibrationEffect()).isNotNull();
+        assertThat(result.getVibrationEffect()
+                .computeCreateWaveformOffOnTimingsOrNull())
+                .isEqualTo(result.getVibrationPattern());
     }
 
     @Test

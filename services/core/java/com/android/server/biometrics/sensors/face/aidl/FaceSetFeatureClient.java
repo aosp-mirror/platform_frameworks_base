@@ -52,7 +52,7 @@ public class FaceSetFeatureClient extends HalClientMonitor<AidlSession> implemen
             @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
             int feature, boolean enabled, byte[] hardwareAuthToken) {
         super(context, lazyDaemon, token, listener, userId, owner, 0 /* cookie */, sensorId,
-                logger, biometricContext);
+                logger, biometricContext, false /* isMandatoryBiometrics */);
         mFeature = feature;
         mEnabled = enabled;
         mHardwareAuthToken = HardwareAuthTokenUtils.toHardwareAuthToken(hardwareAuthToken);

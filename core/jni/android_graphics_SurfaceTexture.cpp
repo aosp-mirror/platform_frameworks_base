@@ -256,9 +256,21 @@ static void SurfaceTexture_classInit(JNIEnv* env, jclass clazz)
     }
 }
 
-static void SurfaceTexture_init(JNIEnv* env, jobject thiz, jboolean isDetached,
-        jint texName, jboolean singleBufferMode, jobject weakThiz)
-{
+static void SurfaceTexture_init(JNIEnv* env, jobject thiz, jboolean isDetached, jint texName,
+                                jboolean singleBufferMode, jobject weakThiz) {
+#if COM_ANDROID_GRAPHICS_LIBGUI_FLAGS(WB_CONSUMER_BASE_OWNS_BQ)
+    sp<SurfaceTexture> surfaceTexture;
+    if (isDetached) {
+        surfaceTexture = new SurfaceTexture(GL_TEXTURE_EXTERNAL_OES, true, !singleBufferMode);
+    } else {
+        surfaceTexture =
+                new SurfaceTexture(texName, GL_TEXTURE_EXTERNAL_OES, true, !singleBufferMode);
+    }
+
+    if (singleBufferMode) {
+        surfaceTexture->setMaxBufferCount(1);
+    }
+#else
     sp<IGraphicBufferProducer> producer;
     sp<IGraphicBufferConsumer> consumer;
     BufferQueue::createBufferQueue(&producer, &consumer);
@@ -275,6 +287,7 @@ static void SurfaceTexture_init(JNIEnv* env, jobject thiz, jboolean isDetached,
         surfaceTexture = new SurfaceTexture(consumer, texName,
                 GL_TEXTURE_EXTERNAL_OES, true, !singleBufferMode);
     }
+#endif // COM_ANDROID_GRAPHICS_LIBGUI_FLAGS(WB_CONSUMER_BASE_OWNS_BQ)
 
     if (surfaceTexture == 0) {
         jniThrowException(env, OutOfResourcesException,
@@ -287,11 +300,27 @@ static void SurfaceTexture_init(JNIEnv* env, jobject thiz, jboolean isDetached,
             createProcessUniqueId()));
 
     // If the current context is protected, inform the producer.
+#if COM_ANDROID_GRAPHICS_LIBGUI_FLAGS(WB_CONSUMER_BASE_OWNS_BQ)
+    surfaceTexture->setConsumerIsProtected(isProtectedContext());
+
+    SurfaceTexture_setSurfaceTexture(env, thiz, surfaceTexture);
+    sp<Surface> surface = surfaceTexture->getSurface();
+    if (nullptr == surface) {
+        jniThrowException(env, IllegalStateException, "Unable to get surface from SurfaceTexture");
+        return;
+    }
+    sp<IGraphicBufferProducer> igbp = surface->getIGraphicBufferProducer();
+    if (nullptr == igbp) {
+        jniThrowException(env, IllegalStateException, "Unable to get IGBP from Surface");
+        return;
+    }
+    SurfaceTexture_setProducer(env, thiz, igbp);
+#else
     consumer->setConsumerIsProtected(isProtectedContext());
 
     SurfaceTexture_setSurfaceTexture(env, thiz, surfaceTexture);
     SurfaceTexture_setProducer(env, thiz, producer);
-
+#endif // COM_ANDROID_GRAPHICS_LIBGUI_FLAGS(WB_CONSUMER_BASE_OWNS_BQ)
     jclass clazz = env->GetObjectClass(thiz);
     if (clazz == NULL) {
         jniThrowRuntimeException(env,

@@ -95,16 +95,19 @@ abstract class BaseMediaProjectionPermissionDialogDelegate<T : AlertDialog>(
 
     private fun initScreenShareOptions() {
         selectedScreenShareOption = screenShareOptions.first { it.mode == defaultSelectedMode }
-        warning.text = warningText
+        setOptionSpecificFields()
         initScreenShareSpinner()
     }
 
     private val warningText: String
         get() = dialog.context.getString(selectedScreenShareOption.warningText, appName)
 
+    private val startButtonText: String
+        get() = dialog.context.getString(selectedScreenShareOption.startButtonText)
+
     private fun initScreenShareSpinner() {
         val adapter = OptionsAdapter(dialog.context.applicationContext, screenShareOptions)
-        screenShareModeSpinner = dialog.requireViewById(R.id.screen_share_mode_spinner)
+        screenShareModeSpinner = dialog.requireViewById(R.id.screen_share_mode_options)
         screenShareModeSpinner.adapter = adapter
         screenShareModeSpinner.onItemSelectedListener = this
 
@@ -126,7 +129,13 @@ abstract class BaseMediaProjectionPermissionDialogDelegate<T : AlertDialog>(
 
     override fun onItemSelected(adapterView: AdapterView<*>?, view: View, pos: Int, id: Long) {
         selectedScreenShareOption = screenShareOptions[pos]
+        setOptionSpecificFields()
+    }
+
+    /** Sets fields on the dialog that change based on which option is selected. */
+    private fun setOptionSpecificFields() {
         warning.text = warningText
+        startButton.text = startButtonText
     }
 
     override fun onNothingSelected(parent: AdapterView<*>?) {}
@@ -135,10 +144,6 @@ abstract class BaseMediaProjectionPermissionDialogDelegate<T : AlertDialog>(
     protected fun setDialogTitle(@StringRes stringId: Int) {
         val title = dialog.context.getString(stringId, appName)
         dialogTitle.text = title
-    }
-
-    protected fun setStartButtonText(@StringRes stringId: Int) {
-        startButton.setText(stringId)
     }
 
     protected fun setStartButtonOnClickListener(listener: View.OnClickListener?) {

@@ -66,7 +66,7 @@
             <FrameLayout
                 android:id="@+id/status_bar_start_side_content"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical|start"
                 android:clipChildren="false">
 
@@ -99,7 +99,10 @@
                         android:gravity="center_vertical|start"
                     />
 
-                    <include layout="@layout/ongoing_activity_chip" />
+                    <include layout="@layout/ongoing_activity_chip"
+                        android:id="@+id/ongoing_activity_chip_primary"/>
+
+                    <!-- TODO(b/364653005): Add a second activity chip. -->
 
                     <com.android.systemui.statusbar.AlphaOptimizedFrameLayout
                         android:id="@+id/notification_icon_area"

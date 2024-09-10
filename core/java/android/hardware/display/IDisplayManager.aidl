@@ -246,4 +246,12 @@ interface IDisplayManager {
     // Restricts display modes to specified modeIds.
     @EnforcePermission("RESTRICT_DISPLAY_MODES")
     void requestDisplayModes(in IBinder token, int displayId, in @nullable int[] modeIds);
+
+    // Get the mapping between the doze brightness sensor values and brightness values
+    @EnforcePermission("CONTROL_DISPLAY_BRIGHTNESS")
+    float[] getDozeBrightnessSensorValueToBrightness(int displayId);
+
+    // Get the default doze brightness
+    @EnforcePermission("CONTROL_DISPLAY_BRIGHTNESS")
+    float getDefaultDozeBrightness(int displayId);
 }

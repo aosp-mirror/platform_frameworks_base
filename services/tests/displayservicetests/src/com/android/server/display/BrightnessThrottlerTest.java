@@ -16,6 +16,8 @@
 
 package com.android.server.display;
 
+import static com.android.server.display.config.DisplayDeviceConfigTestUtilsKt.createSensorData;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -301,7 +303,7 @@ public class BrightnessThrottlerTest {
                     new ThrottlingLevel(PowerManager.THERMAL_STATUS_CRITICAL, 0.25f);
         List<ThrottlingLevel> levels = new ArrayList<>(List.of(level));
         final ThermalBrightnessThrottlingData data = ThermalBrightnessThrottlingData.create(levels);
-        final SensorData tempSensor = new SensorData("DISPLAY", "VIRTUAL-SKIN-DISPLAY");
+        final SensorData tempSensor = createSensorData("DISPLAY", "VIRTUAL-SKIN-DISPLAY");
         final BrightnessThrottler throttler =
                     createThrottlerSupportedWithTempSensor(data, tempSensor);
         assertTrue(throttler.deviceSupportsThrottling());

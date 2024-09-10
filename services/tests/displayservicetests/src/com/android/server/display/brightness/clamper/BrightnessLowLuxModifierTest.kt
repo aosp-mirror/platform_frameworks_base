@@ -225,5 +225,37 @@ class BrightnessLowLuxModifierTest {
         assertThat(modifier.brightnessReason).isEqualTo(BrightnessReason.MODIFIER_MIN_LUX)
         assertThat(modifier.brightnessLowerBound).isEqualTo(LOW_LUX_BRIGHTNESS)
     }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_EVEN_DIMMER)
+    fun testUserSwitch() {
+        // nits: 0.5 -> backlight 0.01 -> brightness -> 0.05
+        whenever(mockDisplayDeviceConfig.getBacklightFromNits(/* nits= */ 0.5f))
+            .thenReturn(0.01f)
+        whenever(mockDisplayDeviceConfig.getBrightnessFromBacklight(/* backlight = */ 0.01f))
+            .thenReturn(0.05f)
+
+        Settings.Secure.putIntForUser(context.contentResolver,
+            Settings.Secure.EVEN_DIMMER_ACTIVATED, 0, USER_ID) // off
+        Settings.Secure.putFloatForUser(context.contentResolver,
+            Settings.Secure.EVEN_DIMMER_MIN_NITS, 1.0f, USER_ID)
+
+        modifier.recalculateLowerBound()
+
+        assertThat(modifier.isActive).isFalse()
+        assertThat(modifier.brightnessLowerBound).isEqualTo(TRANSITION_POINT)
+        assertThat(modifier.brightnessReason).isEqualTo(0) // no reason - i.e. off
+
+        Settings.Secure.putIntForUser(context.contentResolver,
+            Settings.Secure.EVEN_DIMMER_ACTIVATED, 1, USER_ID) // on
+        Settings.Secure.putFloatForUser(context.contentResolver,
+            Settings.Secure.EVEN_DIMMER_MIN_NITS, 0.5f, USER_ID)
+        modifier.onSwitchUser()
+
+        assertThat(modifier.isActive).isTrue()
+        assertThat(modifier.brightnessReason).isEqualTo(
+            BrightnessReason.MODIFIER_MIN_USER_SET_LOWER_BOUND)
+        assertThat(modifier.brightnessLowerBound).isEqualTo(0.05f)
+    }
 }
 

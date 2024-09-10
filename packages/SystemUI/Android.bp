@@ -258,6 +258,7 @@ filegroup {
         "tests/src/**/systemui/statusbar/policy/LocationControllerImplTest.java",
         "tests/src/**/systemui/statusbar/policy/RemoteInputViewTest.java",
         "tests/src/**/systemui/statusbar/policy/SmartReplyViewTest.java",
+        "tests/src/**/systemui/statusbar/policy/ui/dialog/ModesDialogDelegateTest.kt",
         "tests/src/**/systemui/statusbar/StatusBarStateControllerImplTest.kt",
         "tests/src/**/systemui/theme/ThemeOverlayApplierTest.java",
         "tests/src/**/systemui/touch/TouchInsetManagerTest.java",
@@ -539,6 +540,7 @@ android_library {
         "androidx.preference_preference",
         "androidx.appcompat_appcompat",
         "androidx.concurrent_concurrent-futures",
+        "androidx.concurrent_concurrent-futures-ktx",
         "androidx.mediarouter_mediarouter",
         "androidx.palette_palette",
         "androidx.legacy_legacy-preference-v14",
@@ -569,9 +571,12 @@ android_library {
         "jsr305",
         "jsr330",
         "lottie",
+        "lottie_compose",
         "LowLightDreamLib",
         "TraceurCommon",
+        "Traceur-res",
         "//frameworks/libs/systemui:motion_tool_lib",
+        "//frameworks/libs/systemui:contextualeducationlib",
         "notification_flags_lib",
         "PlatformComposeCore",
         "PlatformComposeSceneTransitionLayout",
@@ -581,7 +586,6 @@ android_library {
         "androidx.activity_activity-compose",
         "androidx.compose.animation_animation-graphics",
         "androidx.lifecycle_lifecycle-viewmodel-compose",
-        "device_policy_aconfig_flags_lib",
     ],
     libs: [
         "keepanno-annotations",
@@ -641,6 +645,15 @@ filegroup {
 }
 
 filegroup {
+    name: "SystemUI-robotest-utils",
+    srcs: [
+        "tests/robolectric/src/com/android/systemui/testutils/**/*.kt",
+        "tests/robolectric/src/com/android/systemui/testutils/**/*.java",
+    ],
+    path: "tests/robolectric/src/com/android/systemui/testutils",
+}
+
+filegroup {
     name: "SystemUI-tests-multivalent",
     srcs: [
         "multivalentTests/src/**/*.kt",
@@ -669,6 +682,7 @@ android_library {
     ],
     asset_dirs: [
         "tests/goldens",
+        "schemas",
     ],
     static_libs: [
         "SystemUI-res",
@@ -708,6 +722,7 @@ android_library {
         "androidx-constraintlayout_constraintlayout",
         "androidx.exifinterface_exifinterface",
         "androidx.room_room-runtime",
+        "androidx.room_room-testing",
         "androidx.room_room-ktx",
         "androidx.datastore_datastore-preferences",
         "device_state_flags_lib",
@@ -725,12 +740,15 @@ android_library {
         "truth",
         "monet",
         "libmonet",
+        "lottie_compose",
         "dagger2",
         "jsr330",
         "WindowManager-Shell",
         "LowLightDreamLib",
         "//frameworks/libs/systemui:motion_tool_lib",
+        "//frameworks/libs/systemui:contextualeducationlib",
         "androidx.core_core-animation-testing",
+        "androidx.lifecycle_lifecycle-runtime-testing",
         "androidx.compose.ui_ui",
         "flag-junit",
         "ravenwood-junit",
@@ -738,6 +756,7 @@ android_library {
         "notification_flags_lib",
         "PlatformComposeCore",
         "PlatformComposeSceneTransitionLayout",
+        "PlatformComposeSceneTransitionLayoutTestsUtils",
         "androidx.compose.runtime_runtime",
         "androidx.compose.material3_material3",
         "androidx.compose.material_material-icons-extended",
@@ -745,6 +764,7 @@ android_library {
         "androidx.compose.animation_animation-graphics",
         "androidx.lifecycle_lifecycle-viewmodel-compose",
         "TraceurCommon",
+        "Traceur-res",
     ],
 }
 
@@ -771,6 +791,7 @@ android_library {
         "SystemUI-tests-base",
         "androidx.test.uiautomator_uiautomator",
         "androidx.core_core-animation-testing",
+        "androidx.lifecycle_lifecycle-runtime-testing",
         "mockito-target-extended-minus-junit4",
         "mockito-kotlin-nodeps",
         "androidx.test.ext.junit",
@@ -789,7 +810,11 @@ android_library {
         "android.test.mock",
         "keepanno-annotations",
     ],
-    kotlincflags: ["-Xjvm-default=all"],
+    kotlincflags: [
+        "-Xjvm-default=all",
+        // TODO(b/352363800): Why do we need this?
+        "-J-Xmx8192M",
+    ],
     aaptflags: [
         "--extra-packages",
         "com.android.systemui",
@@ -814,14 +839,6 @@ android_app {
     ],
     manifest: "tests/AndroidManifest-base.xml",
 
-    srcs: [
-        "src/**/*.kt",
-        "src/**/*.java",
-        "src/**/I*.aidl",
-        ":ReleaseJavaFiles",
-        "compose/features/src/**/*.kt",
-        "compose/facade/enabled/src/**/*.kt",
-    ],
     static_libs: [
         "//frameworks/libs/systemui:compilelib",
         "SystemUI-tests-base",
@@ -877,6 +894,7 @@ android_robolectric_test {
     ],
     static_libs: [
         "RoboTestLibraries",
+        "androidx.compose.runtime_runtime",
     ],
     libs: [
         "android.test.runner",
@@ -913,6 +931,7 @@ android_robolectric_test {
     ],
     static_libs: [
         "RoboTestLibraries",
+        "androidx.compose.runtime_runtime",
     ],
     libs: [
         "android.test.runner",
@@ -948,7 +967,9 @@ android_ravenwood_test {
         "androidx.core_core-animation-testing",
         "androidx.test.ext.junit",
         "kosmos",
+        "kotlin-test",
         "mockito-kotlin-nodeps",
+        "androidx.compose.runtime_runtime",
     ],
     libs: [
         "android.test.runner",
@@ -1020,7 +1041,5 @@ android_app {
     },
     required: [
         "privapp_whitelist_com.android.systemui",
-        "wmshell.protolog.json.gz",
-        "wmshell.protolog.pb",
     ],
 }

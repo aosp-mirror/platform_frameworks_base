@@ -340,6 +340,11 @@ class LockSettingsShellCommand extends ShellCommand {
                 getOutPrintWriter().println("Profile uses unified challenge");
                 return false;
             }
+            if (mOld.isEmpty()) {
+                getOutPrintWriter().println(
+                        "User has a lock credential, but old credential was not provided");
+                return false;
+            }
 
             try {
                 final boolean result = mLockPatternUtils.checkCredential(getOldCredential(),

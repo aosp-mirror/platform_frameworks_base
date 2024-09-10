@@ -24,6 +24,7 @@ import static com.android.window.flags.Flags.balImprovedMetrics;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -43,6 +44,7 @@ import androidx.test.filters.SmallTest;
 import com.android.compatibility.common.util.DeviceConfigStateHelper;
 import com.android.server.am.PendingIntentRecord;
 import com.android.server.wm.BackgroundActivityStartController.BalVerdict;
+import com.android.server.wm.BackgroundLaunchProcessController.BalCheckConfiguration;
 
 import org.junit.After;
 import org.junit.Before;
@@ -167,9 +169,9 @@ public class BackgroundActivityStartControllerTests {
         }
 
         @Override
-        BalVerdict checkBackgroundActivityStartAllowedBySender(BalState state) {
+        BalVerdict checkBackgroundActivityStartAllowedByRealCaller(BalState state) {
             return mRealCallerVerdict.orElseGet(
-                    () -> super.checkBackgroundActivityStartAllowedBySender(state));
+                    () -> super.checkBackgroundActivityStartAllowedByRealCaller(state));
         }
 
         public void setRealCallerVerdict(BalVerdict verdict) {
@@ -177,11 +179,12 @@ public class BackgroundActivityStartControllerTests {
         }
 
         @Override
-        BalVerdict checkProcessAllowsBal(WindowProcessController app, BalState state) {
+        BalVerdict checkProcessAllowsBal(WindowProcessController app, BalState state,
+                BalCheckConfiguration checkConfiguration) {
             if (mProcessVerdicts.containsKey(app)) {
                 return mProcessVerdicts.get(app);
             }
-            return super.checkProcessAllowsBal(app, state);
+            return super.checkProcessAllowsBal(app, state, checkConfiguration);
         }
     }
 
@@ -209,7 +212,7 @@ public class BackgroundActivityStartControllerTests {
         Mockito.when(mAppOpsManager.checkOpNoThrow(
                 eq(AppOpsManager.OP_SYSTEM_EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION),
                 anyInt(), anyString())).thenReturn(AppOpsManager.MODE_DEFAULT);
-        Mockito.when(mCallerApp.areBackgroundActivityStartsAllowed(anyInt())).thenReturn(
+        Mockito.when(mCallerApp.areBackgroundActivityStartsAllowed(anyInt(), any())).thenReturn(
                 BalVerdict.BLOCK);
     }
 
@@ -547,7 +550,7 @@ public class BackgroundActivityStartControllerTests {
         assertThat(balState.callerExplicitOptInOrOut()).isFalse();
         assertThat(balState.realCallerExplicitOptInOrAutoOptIn()).isTrue();
         assertThat(balState.realCallerExplicitOptInOrOut()).isFalse();
-        assertThat(balState.toString()).contains(
+        assertThat(balState.toString()).startsWith(
                 "[callingPackage: package.app1; "
                         + "callingPackageTargetSdk: -1; "
                         + "callingUid: 10001; "
@@ -563,6 +566,7 @@ public class BackgroundActivityStartControllerTests {
                         + "balAllowedByPiCreator: BSP.ALLOW_BAL; "
                         + "balAllowedByPiCreatorWithHardening: BSP.ALLOW_BAL; "
                         + "resultIfPiCreatorAllowsBal: null; "
+                        + "callerStartMode: MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED; "
                         + "hasRealCaller: true; "
                         + "isCallForResult: false; "
                         + "isPendingIntent: false; "
@@ -646,7 +650,7 @@ public class BackgroundActivityStartControllerTests {
         assertThat(balState.callerExplicitOptInOrOut()).isFalse();
         assertThat(balState.realCallerExplicitOptInOrAutoOptIn()).isFalse();
         assertThat(balState.realCallerExplicitOptInOrOut()).isFalse();
-        assertThat(balState.toString()).contains(
+        assertThat(balState.toString()).startsWith(
                 "[callingPackage: package.app1; "
                         + "callingPackageTargetSdk: -1; "
                         + "callingUid: 10001; "
@@ -662,6 +666,7 @@ public class BackgroundActivityStartControllerTests {
                         + "balAllowedByPiCreator: BSP.NONE; "
                         + "balAllowedByPiCreatorWithHardening: BSP.NONE; "
                         + "resultIfPiCreatorAllowsBal: null; "
+                        + "callerStartMode: MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED; "
                         + "hasRealCaller: true; "
                         + "isCallForResult: false; "
                         + "isPendingIntent: true; "

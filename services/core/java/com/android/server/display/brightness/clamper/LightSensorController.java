@@ -62,6 +62,9 @@ public class LightSensorController {
     private final SensorEventListener mLightSensorEventListener = new SensorEventListener() {
         @Override
         public void onSensorChanged(SensorEvent event) {
+            if (event.sensor != mRegisteredLightSensor) {
+                return;
+            }
             long now = mInjector.getTime();
             mAmbientFilter.addValue(TimeUnit.NANOSECONDS.toMillis(event.timestamp),
                     event.values[0]);
@@ -95,15 +98,13 @@ public class LightSensorController {
         if (mRegisteredLightSensor == mLightSensor) {
             return;
         }
+        if (mLightSensor != null) {
+            mSensorManager.registerListener(mLightSensorEventListener,
+                    mLightSensor, mLightSensorRate * 1000, mHandler);
+        }
         if (mRegisteredLightSensor != null) {
             stop();
         }
-        if (mLightSensor == null) {
-            return;
-        }
-
-        mSensorManager.registerListener(mLightSensorEventListener,
-                mLightSensor, mLightSensorRate * 1000, mHandler);
         mRegisteredLightSensor = mLightSensor;
 
         if (DEBUG) {
@@ -115,7 +116,7 @@ public class LightSensorController {
         if (mRegisteredLightSensor == null) {
             return;
         }
-        mSensorManager.unregisterListener(mLightSensorEventListener);
+        mSensorManager.unregisterListener(mLightSensorEventListener, mRegisteredLightSensor);
         mRegisteredLightSensor = null;
         mAmbientFilter.clear();
         mLightSensorListener.onAmbientLuxChange(INVALID_LUX);

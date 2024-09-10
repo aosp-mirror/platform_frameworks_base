@@ -26,14 +26,24 @@ import androidx.core.util.component2
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.communal.domain.interactor.communalSceneInteractor
+import com.android.systemui.communal.widgets.CommunalTransitionAnimatorController
 import com.android.systemui.communal.widgets.SmartspaceAppWidgetHostView
+import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.testKosmos
+import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.notNull
 import org.mockito.kotlin.refEq
 import org.mockito.kotlin.verify
 
@@ -41,39 +51,59 @@ import org.mockito.kotlin.verify
 @RunWith(AndroidJUnit4::class)
 class SmartspaceInteractionHandlerTest : SysuiTestCase() {
     private val activityStarter = mock<ActivityStarter>()
+    private val kosmos = testKosmos()
 
     private val testIntent =
         PendingIntent.getActivity(
             context,
-            /* requestCode = */ 0,
+            /* requestCode= */ 0,
             Intent("action"),
             PendingIntent.FLAG_IMMUTABLE
         )
     private val testResponse = RemoteResponse.fromPendingIntent(testIntent)
 
-    private val underTest: SmartspaceInteractionHandler by lazy {
-        SmartspaceInteractionHandler(activityStarter)
+    private lateinit var underTest: SmartspaceInteractionHandler
+
+    @Before
+    fun setUp() {
+        with(kosmos) {
+            underTest =
+                SmartspaceInteractionHandler(
+                    activityStarter = activityStarter,
+                    communalSceneInteractor = communalSceneInteractor,
+                    logBuffer = logcatLogBuffer(),
+                )
+        }
     }
 
     @Test
     fun launchAnimatorIsUsedForSmartspaceView() {
-        val parent = FrameLayout(context)
-        val view = SmartspaceAppWidgetHostView(context)
-        parent.addView(view)
-        val (fillInIntent, activityOptions) = testResponse.getLaunchOptions(view)
+        with(kosmos) {
+            testScope.runTest {
+                val launching by collectLastValue(communalSceneInteractor.isLaunchingWidget)
+                assertFalse(launching!!)
 
-        underTest.onInteraction(view, testIntent, testResponse)
+                val parent = FrameLayout(context)
+                val view = SmartspaceAppWidgetHostView(context)
+                parent.addView(view)
+                val (fillInIntent, activityOptions) = testResponse.getLaunchOptions(view)
 
-        // Verify that we pass in a non-null animation controller
-        verify(activityStarter)
-            .startPendingIntentWithoutDismissing(
-                /* intent = */ eq(testIntent),
-                /* dismissShade = */ eq(false),
-                /* intentSentUiThreadCallback = */ isNull(),
-                /* animationController = */ notNull(),
-                /* fillInIntent = */ refEq(fillInIntent),
-                /* extraOptions = */ refEq(activityOptions.toBundle()),
-            )
+                underTest.onInteraction(view, testIntent, testResponse)
+
+                // Verify that we set the state correctly
+                assertTrue(launching!!)
+                // Verify that we pass in a non-null Communal animation controller
+                verify(activityStarter)
+                    .startPendingIntentWithoutDismissing(
+                        /* intent = */ eq(testIntent),
+                        /* dismissShade = */ eq(false),
+                        /* intentSentUiThreadCallback = */ isNull(),
+                        /* animationController = */ any<CommunalTransitionAnimatorController>(),
+                        /* fillInIntent = */ refEq(fillInIntent),
+                        /* extraOptions = */ refEq(activityOptions.toBundle()),
+                    )
+            }
+        }
     }
 
     @Test

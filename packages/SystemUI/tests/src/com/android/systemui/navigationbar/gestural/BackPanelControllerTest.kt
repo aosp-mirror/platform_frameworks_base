@@ -27,6 +27,7 @@ import android.view.ViewConfiguration
 import android.view.WindowManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager
 import com.android.internal.jank.Cuj
 import com.android.internal.util.LatencyTracker
 import com.android.systemui.SysuiTestCase
@@ -63,7 +64,7 @@ class BackPanelControllerTest : SysuiTestCase() {
     private var triggerThreshold: Float = 0.0f
     private val touchSlop = ViewConfiguration.get(context).scaledEdgeSlop
     @Mock private lateinit var vibratorHelper: VibratorHelper
-    @Mock private lateinit var windowManager: WindowManager
+    @Mock private lateinit var viewCaptureAwareWindowManager: ViewCaptureAwareWindowManager
     @Mock private lateinit var configurationController: ConfigurationController
     @Mock private lateinit var latencyTracker: LatencyTracker
     private val interactionJankMonitor by lazy { kosmos.interactionJankMonitor }
@@ -78,7 +79,7 @@ class BackPanelControllerTest : SysuiTestCase() {
         mBackPanelController =
             BackPanelController(
                 context,
-                windowManager,
+                viewCaptureAwareWindowManager,
                 ViewConfiguration.get(context),
                 Handler.createAsync(testableLooper.looper),
                 systemClock,

@@ -16,42 +16,71 @@
 
 package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
-import com.android.systemui.dagger.SysUISingleton
+import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.flags.Flags
+import com.android.systemui.lifecycle.ExclusiveActivatable
+import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
-import com.android.systemui.shade.ui.viewmodel.ShadeSceneViewModel
 import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNotificationInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.NotificationStackAppearanceInteractor
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimBounds
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimRounding
-import com.android.systemui.util.kotlin.FlowDumperImpl
-import javax.inject.Inject
+import com.android.systemui.util.kotlin.ActivatableFlowDumper
+import com.android.systemui.util.kotlin.ActivatableFlowDumperImpl
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 
 /**
  * ViewModel used by the Notification placeholders inside the scene container to update the
  * [NotificationStackAppearanceInteractor], and by extension control the NSSL.
  */
-@SysUISingleton
 class NotificationsPlaceholderViewModel
-@Inject
+@AssistedInject
 constructor(
-    dumpManager: DumpManager,
     private val interactor: NotificationStackAppearanceInteractor,
-    shadeInteractor: ShadeInteractor,
-    private val shadeSceneViewModel: ShadeSceneViewModel,
+    private val sceneInteractor: SceneInteractor,
+    private val shadeInteractor: ShadeInteractor,
     private val headsUpNotificationInteractor: HeadsUpNotificationInteractor,
     featureFlags: FeatureFlagsClassic,
-) : FlowDumperImpl(dumpManager) {
+    dumpManager: DumpManager,
+) :
+    ExclusiveActivatable(),
+    ActivatableFlowDumper by ActivatableFlowDumperImpl(
+        dumpManager = dumpManager,
+        tag = "NotificationsPlaceholderViewModel",
+    ) {
+
     /** DEBUG: whether the placeholder should be made slightly visible for positional debugging. */
     val isVisualDebuggingEnabled: Boolean = featureFlags.isEnabled(Flags.NSSL_DEBUG_LINES)
 
     /** DEBUG: whether the debug logging should be output. */
     val isDebugLoggingEnabled: Boolean = SceneContainerFlag.isEnabled
+
+    override suspend fun onActivated(): Nothing {
+        coroutineScope {
+            launch {
+                shadeInteractor.isAnyExpanded
+                    .filter { it }
+                    .collect { headsUpNotificationInteractor.unpinAll(true) }
+            }
+
+            launch {
+                sceneInteractor.transitionState
+                    .map { state -> state is ObservableTransitionState.Idle }
+                    .filter { it }
+                    .collect { headsUpNotificationInteractor.onTransitionIdle() }
+            }
+        }
+        activateFlowDumper()
+    }
 
     /** Notifies that the bounds of the notification scrim have changed. */
     fun onScrimBoundsChanged(bounds: ShadeScrimBounds?) {
@@ -63,18 +92,10 @@ constructor(
         interactor.setConstrainedAvailableSpace(height)
     }
 
-    /** Notifies that empty space on the notification scrim has been clicked. */
-    fun onEmptySpaceClicked() {
-        shadeSceneViewModel.onContentClicked()
-    }
-
     /** Sets the content alpha for the current state of the brightness mirror */
     fun setAlphaForBrightnessMirror(alpha: Float) {
         interactor.setAlphaForBrightnessMirror(alpha)
     }
-
-    /** Whether or not the notification scrim should be clickable. */
-    val isClickable: StateFlow<Boolean> = shadeSceneViewModel.isClickable
 
     /** True when a HUN is pinned or animating away. */
     val isHeadsUpOrAnimatingAway: Flow<Boolean> =
@@ -89,6 +110,12 @@ constructor(
      * at 1, either the shade or quick settings is open.
      */
     val expandFraction: Flow<Float> = shadeInteractor.anyExpansion.dumpValue("expandFraction")
+
+    /**
+     * The amount [0-1] that quick settings has been opened. At 0, the shade may be open or closed;
+     * at 1, the quick settings are open.
+     */
+    val shadeToQsFraction: Flow<Float> = shadeInteractor.qsExpansion.dumpValue("shadeToQsFraction")
 
     /**
      * The amount in px that the notification stack should scroll due to internal expansion. This
@@ -110,9 +137,19 @@ constructor(
         interactor.setScrolledToTop(scrolledToTop)
     }
 
+    /** Sets whether the heads up notification is animating away. */
+    fun setHeadsUpAnimatingAway(animatingAway: Boolean) {
+        headsUpNotificationInteractor.setHeadsUpAnimatingAway(animatingAway)
+    }
+
     /** Snooze the currently pinned HUN. */
     fun snoozeHun() {
         headsUpNotificationInteractor.snooze()
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(): NotificationsPlaceholderViewModel
     }
 }
 

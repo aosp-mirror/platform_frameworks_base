@@ -216,8 +216,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
      */
     int mMinHeight;
 
-    Dimmer mDimmer = Dimmer.DIMMER_REFACTOR
-            ? new SmoothDimmer(this) : new LegacyDimmer(this);
+    Dimmer mDimmer = new Dimmer(this);
 
     /** Apply the dim layer on the embedded TaskFragment. */
     static final int EMBEDDED_DIM_AREA_TASK_FRAGMENT = 0;
@@ -477,6 +476,10 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         mTaskFragmentOrganizer = ITaskFragmentOrganizer.Stub.asInterface(organizer.asBinder());
         mTaskFragmentOrganizerUid = uid;
         mTaskFragmentOrganizerProcessName = processName;
+    }
+
+    void onTaskFragmentOrganizerRestarted(@NonNull ITaskFragmentOrganizer organizer) {
+        mTaskFragmentOrganizer = organizer;
     }
 
     void onTaskFragmentOrganizerRemoved() {
@@ -1611,18 +1614,15 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                         if (DEBUG_RESULTS) {
                             Slog.v(TAG_RESULTS, "Delivering results to " + next + ": " + a);
                         }
-                        final ActivityResultItem activityResultItem = ActivityResultItem.obtain(
-                                next.token, a);
-                        mAtmService.getLifecycleManager().scheduleTransactionItem(
-                                appThread, activityResultItem);
+                        final ActivityResultItem item = new ActivityResultItem(next.token, a);
+                        mAtmService.getLifecycleManager().scheduleTransactionItem(appThread, item);
                     }
                 }
 
                 if (next.newIntents != null) {
-                    final NewIntentItem newIntentItem = NewIntentItem.obtain(
-                            next.token, next.newIntents, true /* resume */);
-                    mAtmService.getLifecycleManager().scheduleTransactionItem(
-                            appThread, newIntentItem);
+                    final NewIntentItem item =
+                            new NewIntentItem(next.token, next.newIntents, true /* resume */);
+                    mAtmService.getLifecycleManager().scheduleTransactionItem(appThread, item);
                 }
 
                 // Well the app will no longer be stopped.
@@ -1636,7 +1636,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 final int topProcessState = mAtmService.mTopProcessState;
                 next.app.setPendingUiCleanAndForceProcessStateUpTo(topProcessState);
                 next.abortAndClearOptionsAnimation();
-                final ResumeActivityItem resumeActivityItem = ResumeActivityItem.obtain(
+                final ResumeActivityItem resumeActivityItem = new ResumeActivityItem(
                         next.token, topProcessState, dc.isNextTransitionForward(),
                         next.shouldSendCompatFakeFocus());
                 mAtmService.getLifecycleManager().scheduleTransactionItem(
@@ -1780,11 +1780,6 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         if (resuming != null) {
             // We do not want to trigger auto-PiP upon launch of a translucent activity.
             final boolean resumingOccludesParent = resuming.occludesParent();
-            // Resuming the new resume activity only if the previous activity can't go into Pip
-            // since we want to give Pip activities a chance to enter Pip before resuming the
-            // next activity.
-            final boolean lastResumedCanPip = prev.checkEnterPictureInPictureState(
-                    "shouldAutoPipWhilePausing", userLeaving);
 
             if (ActivityTaskManagerService.isPip2ExperimentEnabled()) {
                 // If a new task is being launched, then mark the existing top activity as
@@ -1794,6 +1789,12 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 Task.enableEnterPipOnTaskSwitch(prev, resuming.getTask(),
                         resuming, resuming.getOptions());
             }
+
+            // Resuming the new resume activity only if the previous activity can't go into Pip
+            // since we want to give Pip activities a chance to enter Pip before resuming the
+            // next activity.
+            final boolean lastResumedCanPip = prev.checkEnterPictureInPictureState(
+                    "shouldAutoPipWhilePausing", userLeaving);
             if (prev.supportsEnterPipOnTaskSwitch && userLeaving
                     && resumingOccludesParent && lastResumedCanPip
                     && prev.pictureInPictureArgs.isAutoEnterEnabled()) {
@@ -1882,9 +1883,9 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             EventLogTags.writeWmPauseActivity(prev.mUserId, System.identityHashCode(prev),
                     prev.shortComponentName, "userLeaving=" + userLeaving, reason);
 
-            mAtmService.getLifecycleManager().scheduleTransactionItem(prev.app.getThread(),
-                    PauseActivityItem.obtain(prev.token, prev.finishing, userLeaving,
-                            pauseImmediately, autoEnteringPip));
+            final PauseActivityItem item = new PauseActivityItem(prev.token, prev.finishing,
+                    userLeaving, pauseImmediately, autoEnteringPip);
+            mAtmService.getLifecycleManager().scheduleTransactionItem(prev.app.getThread(), item);
         } catch (Exception e) {
             // Ignore exception, if process died other code will cleanup.
             Slog.w(TAG, "Exception thrown during pause", e);
@@ -1927,7 +1928,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                     prev.setState(STOPPING, "completePausedLocked");
                 } else if (!prev.isVisibleRequested() || shouldSleepOrShutDownActivities()) {
                     // Clear out any deferred client hide we might currently have.
-                    prev.setDeferHidingClient(false);
+                    prev.clearDeferHidingClient();
                     // If we were visible then resumeTopActivities will release resources before
                     // stopping.
                     prev.addToStopping(true /* scheduleIdle */, false /* idleDelayed */,
@@ -1948,8 +1949,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         if (resumeNext) {
             final Task topRootTask = mRootWindowContainer.getTopDisplayFocusedRootTask();
             if (topRootTask != null && !topRootTask.shouldSleepOrShutDownActivities()) {
-                mRootWindowContainer.resumeFocusedTasksTopActivities(topRootTask, prev,
-                        null /* targetOptions */);
+                mRootWindowContainer.resumeFocusedTasksTopActivities(topRootTask, prev);
             } else {
                 // checkReadyForSleep();
                 final ActivityRecord top =
@@ -2145,8 +2145,22 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     }
 
     boolean shouldSleepActivities() {
-        final Task task = getRootTask();
-        return task != null && task.shouldSleepActivities();
+        final DisplayContent dc = mDisplayContent;
+        if (dc == null) {
+            return mAtmService.isSleepingLocked();
+        }
+        if (!dc.isSleeping()) {
+            return false;
+        }
+        // In case the unlocking order is keyguard-going-away -> screen-turning-on (display is
+        // sleeping by screen-off-token which may be notified to release from power manager's
+        // thread), keep the activities resume-able to avoid extra activity lifecycle when
+        // performing keyguard-going-away. This only applies to default display because currently
+        // the per-display keyguard-going-away state is assigned from a global signal.
+        if (!dc.isDefaultDisplay || !dc.isKeyguardGoingAway()) {
+            return true;
+        }
+        return !shouldBeVisible(null /* starting */);
     }
 
     @Override
@@ -2224,7 +2238,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
     static class ConfigOverrideHint {
         @Nullable DisplayInfo mTmpOverrideDisplayInfo;
-        @Nullable ActivityRecord.CompatDisplayInsets mTmpCompatInsets;
+        @Nullable AppCompatDisplayInsets mTmpCompatInsets;
         @Nullable Rect mParentAppBoundsOverride;
         int mTmpOverrideConfigOrientation;
         boolean mUseOverrideInsetsForConfig;
@@ -2294,7 +2308,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     void computeConfigResourceOverrides(@NonNull Configuration inOutConfig,
             @NonNull Configuration parentConfig, @Nullable ConfigOverrideHint overrideHint) {
         DisplayInfo overrideDisplayInfo = null;
-        ActivityRecord.CompatDisplayInsets compatInsets = null;
+        AppCompatDisplayInsets compatInsets = null;
         boolean useOverrideInsetsForConfig = false;
         if (overrideHint != null) {
             overrideDisplayInfo = overrideHint.mTmpOverrideDisplayInfo;
@@ -2436,7 +2450,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                     inOutConfig.smallestScreenWidthDp = (int) (0.5f
                             + Math.min(mTmpFullBounds.width(), mTmpFullBounds.height()) / density);
                 } else if (windowingMode == WINDOWING_MODE_MULTI_WINDOW && mIsEmbedded
-                        && insideParentBounds && !resolvedBounds.equals(parentBounds)) {
+                        && !resolvedBounds.equals(parentBounds)) {
                     // For embedded TFs, the smallest width should be updated. Otherwise, inherit
                     // from the parent task would result in applications loaded wrong resource.
                     inOutConfig.smallestScreenWidthDp =
@@ -2823,7 +2837,21 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 mClearedTaskForReuse,
                 mClearedTaskFragmentForPip,
                 mClearedForReorderActivityToFront,
-                calculateMinDimension());
+                calculateMinDimension(),
+                isTopNonFinishingChild());
+    }
+
+    private boolean isTopNonFinishingChild() {
+        final WindowContainer<?> parent = getParent();
+        if (parent == null) {
+            // Either the TaskFragment is not attached or is going to destroy. Return false.
+            return false;
+        }
+        final ActivityRecord topNonFishingActivity = parent.getActivity(ar -> !ar.finishing);
+        // If the parent's top non-finishing activity is this TaskFragment's, it means
+        // this TaskFragment is the top non-finishing container of its parent.
+        return topNonFishingActivity != null && topNonFishingActivity
+                .equals(getTopNonFinishingActivity());
     }
 
     /**
@@ -2950,7 +2978,13 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     }
 
     boolean shouldRemoveSelfOnLastChildRemoval() {
-        return !mCreatedByOrganizer || mIsRemovalRequested;
+        if (!mCreatedByOrganizer || mIsRemovalRequested) {
+            return true;
+        }
+        // The TaskFragmentOrganizer may be killed while the embedded TaskFragments remains in WM
+        // core. The embedded TaskFragment should still be removed when the child activities are
+        // all gone (like package force-stopped).
+        return mIsEmbedded && mTaskFragmentOrganizer == null;
     }
 
     /**
@@ -3106,6 +3140,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         return forAllWindows(getDimBehindWindow, true);
     }
 
+    @Deprecated
     @Override
     Dimmer getDimmer() {
         // If this is in an embedded TaskFragment and we want the dim applies on the TaskFragment.
@@ -3314,8 +3349,8 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
     @Override
     public void dumpDebug(ProtoOutputStream proto, long fieldId,
-            @WindowTraceLogLevel int logLevel) {
-        if (logLevel == WindowTraceLogLevel.CRITICAL && !isVisible()) {
+            @WindowTracingLogLevel int logLevel) {
+        if (logLevel == WindowTracingLogLevel.CRITICAL && !isVisible()) {
             return;
         }
 

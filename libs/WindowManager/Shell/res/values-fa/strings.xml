@@ -65,10 +65,16 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"انتقال به بالا سمت چپ"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"انتقال به پایین سمت راست"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"انتقال به پایین سمت چپ"</string>
+    <string name="bubble_accessibility_action_expand_menu" msgid="8637233525952938845">"ازهم بازکردن منو"</string>
+    <string name="bubble_accessibility_action_collapse_menu" msgid="2975310870146231463">"جمع کردن منو"</string>
+    <string name="bubble_accessibility_action_move_bar_left" msgid="4803535120353716759">"انتقال به‌چپ"</string>
+    <string name="bubble_accessibility_action_move_bar_right" msgid="7686542531917510421">"انتقال به‌راست"</string>
     <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"ازهم باز کردن <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"جمع کردن <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"تنظیمات <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"رد کردن حبابک"</string>
+    <!-- no translation found for bubble_fullscreen_text (1006758103218086231) -->
+    <skip />
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"مکالمه در حباب نشان داده نشود"</string>
     <string name="bubbles_user_education_title" msgid="2112319053732691899">"گپ بااستفاده از حبابک‌ها"</string>
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"مکالمه‌های جدید به‌صورت نمادهای شناور یا حبابک‌ها نشان داده می‌شوند. برای باز کردن حبابک‌ها تک‌ضرب بزنید. برای جابه‌جایی، آن را بکشید."</string>
@@ -84,10 +90,8 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"حباب"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"مدیریت"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"حبابک رد شد."</string>
-    <!-- no translation found for bubble_shortcut_label (666269077944378311) -->
-    <skip />
-    <!-- no translation found for bubble_shortcut_long_label (6088437544312894043) -->
-    <skip />
+    <string name="bubble_shortcut_label" msgid="666269077944378311">"حبابک"</string>
+    <string name="bubble_shortcut_long_label" msgid="6088437544312894043">"نمایش حبابک"</string>
     <string name="restart_button_description" msgid="4564728020654658478">"برای داشتن نمایی بهتر، تک‌ضرب بزنید تا این برنامه بازراه‌اندازی شود"</string>
     <string name="user_aspect_ratio_settings_button_hint" msgid="734835849600713016">"نسبت ابعادی این برنامه را در «تنظیمات» تغییر دهید"</string>
     <string name="user_aspect_ratio_settings_button_description" msgid="4315566801697411684">"تغییر نسبت ابعادی"</string>
@@ -96,7 +100,7 @@
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"دوربین مشکلی ندارد؟ برای بستن تک‌ضرب بزنید."</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"از چندین برنامه به‌طور هم‌زمان استفاده کنید"</string>
     <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"برای حالت صفحهٔ دونیمه، در برنامه‌ای دیگر بکشید"</string>
-    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"برای جابه‌جا کردن برنامه، بیرون از آن دوضربه بزنید"</string>
+    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"برای جابه‌جا کردن برنامه، بیرون از آن دو تک‌ضرب بزنید"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"متوجه‌ام"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"برای اطلاعات بیشتر، گسترده کنید."</string>
     <string name="letterbox_restart_dialog_title" msgid="8543049527871033505">"برای نمایش بهتر بازراه‌اندازی شود؟"</string>
@@ -104,12 +108,12 @@
     <string name="letterbox_restart_cancel" msgid="1342209132692537805">"لغو کردن"</string>
     <string name="letterbox_restart_restart" msgid="8529976234412442973">"بازراه‌اندازی"</string>
     <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"دوباره نشان داده نشود"</string>
-    <string name="letterbox_reachability_reposition_text" msgid="3522042240665748268">"برای جابه‌جا کردن این برنامه\nدوضربه بزنید"</string>
+    <string name="letterbox_reachability_reposition_text" msgid="3522042240665748268">"برای جابه‌جا کردن این برنامه\nدو تک‌ضرب بزنید"</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"بزرگ کردن"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"کوچک کردن"</string>
     <string name="close_button_text" msgid="2913281996024033299">"بستن"</string>
     <string name="back_button_text" msgid="1469718707134137085">"برگشتن"</string>
-    <string name="handle_text" msgid="1766582106752184456">"دستگیره"</string>
+    <string name="handle_text" msgid="4419667835599523257">"دستگیره برنامه"</string>
     <string name="app_icon_text" msgid="2823268023931811747">"نماد برنامه"</string>
     <string name="fullscreen_text" msgid="1162316685217676079">"تمام‌صفحه"</string>
     <string name="desktop_text" msgid="1077633567027630454">"حالت رایانه"</string>
@@ -118,9 +122,12 @@
     <string name="float_button_text" msgid="9221657008391364581">"شناور"</string>
     <string name="select_text" msgid="5139083974039906583">"انتخاب"</string>
     <string name="screenshot_text" msgid="1477704010087786671">"نماگرفت"</string>
+    <string name="open_in_browser_text" msgid="9181692926376072904">"باز کردن در مرورگر"</string>
+    <string name="new_window_text" msgid="6318648868380652280">"پنجره جدید"</string>
     <string name="close_text" msgid="4986518933445178928">"بستن"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"بستن منو"</string>
     <string name="expand_menu_text" msgid="3847736164494181168">"باز کردن منو"</string>
     <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"بزرگ کردن صفحه"</string>
     <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"بزرگ کردن صفحه"</string>
+    <string name="desktop_mode_non_resizable_snap_text" msgid="1049800446363800707">"اندازه این برنامه را نمی‌توان تغییر داد"</string>
 </resources>

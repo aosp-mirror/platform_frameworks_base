@@ -22,6 +22,10 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.communal.domain.interactor.communalSceneInteractor
+import com.android.systemui.communal.domain.interactor.communalSettingsInteractor
+import com.android.systemui.flags.Flags.COMMUNAL_SERVICE_ENABLED
+import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.keyguardRepository
@@ -61,12 +65,16 @@ class CommunalDreamStartableTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
+        kosmos.fakeFeatureFlagsClassic.set(COMMUNAL_SERVICE_ENABLED, true)
+
         underTest =
             CommunalDreamStartable(
                     powerInteractor = kosmos.powerInteractor,
+                    communalSettingsInteractor = kosmos.communalSettingsInteractor,
                     keyguardInteractor = kosmos.keyguardInteractor,
                     keyguardTransitionInteractor = kosmos.keyguardTransitionInteractor,
                     dreamManager = dreamManager,
+                    communalSceneInteractor = kosmos.communalSceneInteractor,
                     bgScope = kosmos.applicationCoroutineScope,
                 )
                 .apply { start() }
@@ -75,6 +83,7 @@ class CommunalDreamStartableTest : SysuiTestCase() {
     @Test
     fun startDreamWhenTransitioningToHub() =
         testScope.runTest {
+            keyguardRepository.setKeyguardShowing(true)
             keyguardRepository.setDreaming(false)
             powerRepository.setScreenPowerState(ScreenPowerState.SCREEN_ON)
             whenever(dreamManager.canStartDreaming(/* isScreenOn= */ true)).thenReturn(true)
@@ -149,6 +158,36 @@ class CommunalDreamStartableTest : SysuiTestCase() {
                 transition(from = KeyguardState.GLANCEABLE_HUB, to = state)
                 verify(dreamManager, never()).startDream()
             }
+        }
+
+    @Test
+    fun shouldNotStartDreamWhenLaunchingWidget() =
+        testScope.runTest {
+            keyguardRepository.setKeyguardShowing(true)
+            keyguardRepository.setDreaming(false)
+            powerRepository.setScreenPowerState(ScreenPowerState.SCREEN_ON)
+            kosmos.communalSceneInteractor.setIsLaunchingWidget(true)
+            whenever(dreamManager.canStartDreaming(/* isScreenOn= */ true)).thenReturn(true)
+            runCurrent()
+
+            transition(from = KeyguardState.DREAMING, to = KeyguardState.GLANCEABLE_HUB)
+
+            verify(dreamManager, never()).startDream()
+        }
+
+    @Test
+    fun shouldNotStartDreamWhenOccluded() =
+        testScope.runTest {
+            keyguardRepository.setKeyguardShowing(true)
+            keyguardRepository.setDreaming(false)
+            powerRepository.setScreenPowerState(ScreenPowerState.SCREEN_ON)
+            keyguardRepository.setKeyguardOccluded(true)
+            whenever(dreamManager.canStartDreaming(/* isScreenOn= */ true)).thenReturn(true)
+            runCurrent()
+
+            transition(from = KeyguardState.DREAMING, to = KeyguardState.GLANCEABLE_HUB)
+
+            verify(dreamManager, never()).startDream()
         }
 
     private suspend fun TestScope.transition(from: KeyguardState, to: KeyguardState) {

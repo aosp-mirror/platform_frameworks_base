@@ -18,6 +18,7 @@ package com.android.systemui.screenshot.policy
 
 import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
 import android.app.WindowConfiguration.WINDOWING_MODE_PINNED
+import android.content.Context
 import android.os.UserHandle
 import com.android.systemui.screenshot.data.model.DisplayContentModel
 import com.android.systemui.screenshot.data.model.ProfileType
@@ -25,7 +26,7 @@ import com.android.systemui.screenshot.data.repository.ProfileTypeRepository
 import com.android.systemui.screenshot.policy.CapturePolicy.PolicyResult
 import com.android.systemui.screenshot.policy.CapturePolicy.PolicyResult.NotMatched
 import com.android.systemui.screenshot.policy.CaptureType.IsolatedTask
-import com.android.window.flags.Flags
+import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import javax.inject.Inject
 import kotlinx.coroutines.flow.first
 
@@ -38,6 +39,7 @@ class WorkProfilePolicy
 @Inject
 constructor(
     private val profileTypes: ProfileTypeRepository,
+    private val context: Context,
 ) : CapturePolicy {
 
     override suspend fun check(content: DisplayContentModel): PolicyResult {
@@ -46,7 +48,7 @@ constructor(
             return NotMatched(policy = NAME, reason = SHADE_EXPANDED)
         }
 
-        if (Flags.enableDesktopWindowingMode()) {
+        if (DesktopModeStatus.canEnterDesktopMode(context)) {
             content.rootTasks.firstOrNull()?.also {
                 if (it.windowingMode == WINDOWING_MODE_FREEFORM) {
                     return NotMatched(policy = NAME, reason = DESKTOP_MODE_ENABLED)

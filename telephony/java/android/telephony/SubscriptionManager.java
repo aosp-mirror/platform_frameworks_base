@@ -1177,6 +1177,16 @@ public class SubscriptionManager {
      */
     public static final String SATELLITE_ESOS_SUPPORTED = SimInfo.COLUMN_SATELLITE_ESOS_SUPPORTED;
 
+    /**
+     * TelephonyProvider column name for satellite provisioned status. The value of this
+     * column is set based on whether carrier roaming NB-IOT satellite service is provisioned or
+     * not. By default, it's disabled.
+     *
+     * @hide
+     */
+    public static final String IS_SATELLITE_PROVISIONED_FOR_NON_IP_DATAGRAM =
+            SimInfo.COLUMN_IS_SATELLITE_PROVISIONED_FOR_NON_IP_DATAGRAM;
+
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"USAGE_SETTING_"},
@@ -1446,21 +1456,21 @@ public class SubscriptionManager {
     public static final int SERVICE_CAPABILITY_MAX = SERVICE_CAPABILITY_DATA;
 
     /**
-     * Bitmask for {@code SERVICE_CAPABILITY_VOICE}.
+     * Bitmask for {@link #SERVICE_CAPABILITY_VOICE}.
      * @hide
      */
     public static final int SERVICE_CAPABILITY_VOICE_BITMASK =
             serviceCapabilityToBitmask(SERVICE_CAPABILITY_VOICE);
 
     /**
-     * Bitmask for {@code SERVICE_CAPABILITY_SMS}.
+     * Bitmask for {@link #SERVICE_CAPABILITY_SMS}.
      * @hide
      */
     public static final int SERVICE_CAPABILITY_SMS_BITMASK =
             serviceCapabilityToBitmask(SERVICE_CAPABILITY_SMS);
 
     /**
-     * Bitmask for {@code SERVICE_CAPABILITY_DATA}.
+     * Bitmask for {@link #SERVICE_CAPABILITY_DATA}.
      * @hide
      */
     public static final int SERVICE_CAPABILITY_DATA_BITMASK =

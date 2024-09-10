@@ -76,6 +76,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
@@ -109,11 +110,30 @@ public final class HintManagerService extends SystemService {
     @GuardedBy("mChannelMapLock")
     private ArrayMap<Integer, TreeMap<Integer, ChannelItem>> mChannelMap;
 
+    /*
+     * Multi-level map storing the session statistics since last pull from StatsD.
+     * The first level is keyed by the UID of the process owning the session.
+     * The second level is keyed by the tag of the session. The point of separating different
+     * tags is that since different categories (e.g. HWUI vs APP) of the sessions may have different
+     * behaviors.
+     */
+    @GuardedBy("mSessionSnapshotMapLock")
+    private ArrayMap<Integer, ArrayMap<Integer, AppHintSessionSnapshot>> mSessionSnapshotMap;
+
     /** Lock to protect mActiveSessions and the UidObserver. */
     private final Object mLock = new Object();
 
     /** Lock to protect mChannelMap. */
     private final Object mChannelMapLock = new Object();
+
+    /*
+     * Lock to protect mSessionSnapshotMap.
+     * Nested acquisition of mSessionSnapshotMapLock and mLock should be avoided.
+     * We should grab these separately.
+     * When we need to have nested acquisitions, we should always follow the order of acquiring
+     * mSessionSnapshotMapLock first then mLock.
+     */
+    private final Object mSessionSnapshotMapLock = new Object();
 
     @GuardedBy("mNonIsolatedTidsLock")
     private final Map<Integer, Set<Long>> mNonIsolatedTids;
@@ -134,6 +154,8 @@ public final class HintManagerService extends SystemService {
     private final IPower mPowerHal;
     private int mPowerHalVersion;
     private final PackageManager mPackageManager;
+
+    private boolean mUsesFmq;
 
     private static final String PROPERTY_SF_ENABLE_CPU_HINT = "debug.sf.enable_adpf_cpu_hint";
     private static final String PROPERTY_HWUI_ENABLE_HINT_MANAGER = "debug.hwui.use_hint_manager";
@@ -162,6 +184,7 @@ public final class HintManagerService extends SystemService {
         }
         mActiveSessions = new ArrayMap<>();
         mChannelMap = new ArrayMap<>();
+        mSessionSnapshotMap = new ArrayMap<>();
         mNativeWrapper = injector.createNativeWrapper();
         mNativeWrapper.halInit();
         mHintSessionPreferredRate = mNativeWrapper.halGetHintSessionPreferredRate();
@@ -170,6 +193,7 @@ public final class HintManagerService extends SystemService {
                 LocalServices.getService(ActivityManagerInternal.class));
         mPowerHal = injector.createIPower();
         mPowerHalVersion = 0;
+        mUsesFmq = false;
         if (mPowerHal != null) {
             try {
                 mPowerHalVersion = mPowerHal.getInterfaceVersion();
@@ -197,6 +221,134 @@ public final class HintManagerService extends SystemService {
         }
     }
 
+    private class AppHintSessionSnapshot {
+        /*
+         * Per-Uid and Per-SessionTag snapshot that tracks metrics including
+         * number of created sessions, number of power efficienct sessions, and
+         * maximum number of threads in a session.
+         * Given that it's Per-SessionTag, each uid can have multiple snapshots.
+         */
+        int mCurrentSessionCount;
+        int mMaxConcurrentSession;
+        int mMaxThreadCount;
+        int mPowerEfficientSessionCount;
+
+        final int mTargetDurationNsCountPQSize = 100;
+        PriorityQueue<TargetDurationRecord> mTargetDurationNsCountPQ;
+
+        class TargetDurationRecord implements Comparable<TargetDurationRecord> {
+            long mTargetDurationNs;
+            long mTimestamp;
+            int mCount;
+            TargetDurationRecord(long targetDurationNs) {
+                mTargetDurationNs = targetDurationNs;
+                mTimestamp = System.currentTimeMillis();
+                mCount = 1;
+            }
+
+            @Override
+            public int compareTo(TargetDurationRecord t) {
+                int tCount = t.getCount();
+                int thisCount = this.getCount();
+                // Here we sort in the order of number of count in ascending order.
+                // i.e. the lowest count of target duration is at the head of the queue.
+                // Upon same count, the tiebreaker is the timestamp, the older item will be at the
+                // front of the queue.
+                if (tCount == thisCount) {
+                    return (t.getTimestamp() < this.getTimestamp()) ? 1 : -1;
+                }
+                return (tCount < thisCount) ? 1 : -1;
+            }
+            long getTargetDurationNs() {
+                return mTargetDurationNs;
+            }
+
+            int getCount() {
+                return mCount;
+            }
+
+            long getTimestamp() {
+                return mTimestamp;
+            }
+
+            void setCount(int count) {
+                mCount = count;
+            }
+
+            void setTimestamp() {
+                mTimestamp = System.currentTimeMillis();
+            }
+
+            void setTargetDurationNs(long targetDurationNs) {
+                mTargetDurationNs = targetDurationNs;
+            }
+        }
+
+        AppHintSessionSnapshot() {
+            mCurrentSessionCount = 0;
+            mMaxConcurrentSession = 0;
+            mMaxThreadCount = 0;
+            mPowerEfficientSessionCount = 0;
+            mTargetDurationNsCountPQ = new PriorityQueue<>(1);
+        }
+
+        void updateUponSessionCreation(int threadCount, long targetDuration) {
+            mCurrentSessionCount += 1;
+            mMaxConcurrentSession = Math.max(mMaxConcurrentSession, mCurrentSessionCount);
+            mMaxThreadCount = Math.max(mMaxThreadCount, threadCount);
+            updateTargetDurationNs(targetDuration);
+        }
+
+        void updateUponSessionClose() {
+            mCurrentSessionCount -= 1;
+        }
+
+        void logPowerEfficientSession() {
+            mPowerEfficientSessionCount += 1;
+        }
+
+        void updateThreadCount(int threadCount) {
+            mMaxThreadCount = Math.max(mMaxThreadCount, threadCount);
+        }
+
+        void updateTargetDurationNs(long targetDurationNs) {
+            for (TargetDurationRecord t : mTargetDurationNsCountPQ) {
+                if (t.getTargetDurationNs() == targetDurationNs) {
+                    t.setCount(t.getCount() + 1);
+                    t.setTimestamp();
+                    return;
+                }
+            }
+            if (mTargetDurationNsCountPQ.size() == mTargetDurationNsCountPQSize) {
+                mTargetDurationNsCountPQ.poll();
+            }
+            mTargetDurationNsCountPQ.add(new TargetDurationRecord(targetDurationNs));
+        }
+
+        int getMaxConcurrentSession() {
+            return mMaxConcurrentSession;
+        }
+
+        int getMaxThreadCount() {
+            return mMaxThreadCount;
+        }
+
+        int getPowerEfficientSessionCount() {
+            return mPowerEfficientSessionCount;
+        }
+
+        long[] targetDurationNsList() {
+            final int listSize = 5;
+            long[] targetDurations = new long[listSize];
+            while (mTargetDurationNsCountPQ.size() > listSize) {
+                mTargetDurationNsCountPQ.poll();
+            }
+            for (int i = 0; i < listSize && !mTargetDurationNsCountPQ.isEmpty(); ++i) {
+                targetDurations[i] = mTargetDurationNsCountPQ.poll().getTargetDurationNs();
+            }
+            return targetDurations;
+        }
+    }
     private boolean isHalSupported() {
         return mHintSessionPreferredRate != -1;
     }
@@ -235,6 +387,11 @@ public final class HintManagerService extends SystemService {
                 null, // use default PullAtomMetadata values
                 DIRECT_EXECUTOR,
                 this::onPullAtom);
+        statsManager.setPullAtomCallback(
+                FrameworkStatsLog.ADPF_SESSION_SNAPSHOT,
+                null, // use default PullAtomMetadata values
+                DIRECT_EXECUTOR,
+                this::onPullAtom);
     }
 
     private int onPullAtom(int atomTag, @NonNull List<StatsEvent> data) {
@@ -247,9 +404,80 @@ public final class HintManagerService extends SystemService {
             data.add(FrameworkStatsLog.buildStatsEvent(
                     FrameworkStatsLog.ADPF_SYSTEM_COMPONENT_INFO,
                     isSurfaceFlingerUsingCpuHint,
-                    isHwuiHintManagerEnabled));
+                    isHwuiHintManagerEnabled,
+                    getFmqUsage()));
+        }
+        if (atomTag == FrameworkStatsLog.ADPF_SESSION_SNAPSHOT) {
+            synchronized (mSessionSnapshotMapLock) {
+                for (int i = 0; i < mSessionSnapshotMap.size(); ++i) {
+                    final int uid = mSessionSnapshotMap.keyAt(i);
+                    final ArrayMap<Integer, AppHintSessionSnapshot> sessionSnapshots =
+                            mSessionSnapshotMap.valueAt(i);
+                    for (int j = 0; j < sessionSnapshots.size(); ++j) {
+                        final int sessionTag = sessionSnapshots.keyAt(j);
+                        final AppHintSessionSnapshot sessionSnapshot = sessionSnapshots.valueAt(j);
+                        data.add(FrameworkStatsLog.buildStatsEvent(
+                                FrameworkStatsLog.ADPF_SESSION_SNAPSHOT,
+                                uid,
+                                sessionTag,
+                                sessionSnapshot.getMaxConcurrentSession(),
+                                sessionSnapshot.getMaxThreadCount(),
+                                sessionSnapshot.getPowerEfficientSessionCount(),
+                                sessionSnapshot.targetDurationNsList()
+                        ));
+                    }
+                }
+            }
+            restoreSessionSnapshot();
         }
         return android.app.StatsManager.PULL_SUCCESS;
+    }
+
+    private int getFmqUsage() {
+        if (mUsesFmq) {
+            return FrameworkStatsLog.ADPFSYSTEM_COMPONENT_INFO__FMQ_SUPPORTED__SUPPORTED;
+        } else if (mPowerHalVersion < 5) {
+            return FrameworkStatsLog.ADPFSYSTEM_COMPONENT_INFO__FMQ_SUPPORTED__HAL_VERSION_NOT_MET;
+        } else {
+            return FrameworkStatsLog.ADPFSYSTEM_COMPONENT_INFO__FMQ_SUPPORTED__UNSUPPORTED;
+        }
+    }
+
+    private void restoreSessionSnapshot() {
+        // clean up snapshot map and rebuild with current active sessions
+        synchronized (mSessionSnapshotMapLock) {
+            mSessionSnapshotMap.clear();
+            synchronized (mLock) {
+                for (int i = 0; i < mActiveSessions.size(); i++) {
+                    ArrayMap<IBinder, ArraySet<AppHintSession>> tokenMap =
+                            mActiveSessions.valueAt(i);
+                    for (int j = 0; j < tokenMap.size(); j++) {
+                        ArraySet<AppHintSession> sessionSet = tokenMap.valueAt(j);
+                        for (int k = 0; k < sessionSet.size(); ++k) {
+                            AppHintSession appHintSession = sessionSet.valueAt(k);
+                            final int tag = appHintSession.getTag();
+                            final int uid = appHintSession.getUid();
+                            final long targetDuationNs =
+                                    appHintSession.getTargetDurationNs();
+                            final int threadCount = appHintSession.getThreadIds().length;
+                            ArrayMap<Integer, AppHintSessionSnapshot> snapshots =
+                                    mSessionSnapshotMap.get(uid);
+                            if (snapshots == null) {
+                                snapshots = new ArrayMap<>();
+                                mSessionSnapshotMap.put(uid, snapshots);
+                            }
+                            AppHintSessionSnapshot snapshot = snapshots.get(tag);
+                            if (snapshot == null) {
+                                snapshot = new AppHintSessionSnapshot();
+                                snapshots.put(tag, snapshot);
+                            }
+                            snapshot.updateUponSessionCreation(threadCount,
+                                    targetDuationNs);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -833,17 +1061,13 @@ public final class HintManagerService extends SystemService {
                     // we change the session tag to SessionTag.GAME
                     // as it was not previously classified
                     switch (getUidApplicationCategory(callingUid)) {
-                        case ApplicationInfo.CATEGORY_GAME:
-                            tag = SessionTag.GAME;
-                            break;
-                        case ApplicationInfo.CATEGORY_UNDEFINED:
+                        case ApplicationInfo.CATEGORY_GAME -> tag = SessionTag.GAME;
+                        case ApplicationInfo.CATEGORY_UNDEFINED ->
                             // We use CATEGORY_UNDEFINED to filter the case when
                             // PackageManager.NameNotFoundException is caught,
                             // which should not happen.
                             tag = SessionTag.APP;
-                            break;
-                        default:
-                            tag = SessionTag.APP;
+                        default -> tag = SessionTag.APP;
                     }
                 }
 
@@ -889,9 +1113,15 @@ public final class HintManagerService extends SystemService {
                 logPerformanceHintSessionAtom(
                         callingUid, sessionId, durationNanos, tids, tag);
 
+                synchronized (mSessionSnapshotMapLock) {
+                    // Update session snapshot upon session creation
+                    mSessionSnapshotMap.computeIfAbsent(callingUid, k -> new ArrayMap<>())
+                            .computeIfAbsent(tag, k -> new AppHintSessionSnapshot())
+                            .updateUponSessionCreation(tids.length, durationNanos);
+                }
                 synchronized (mLock) {
-                    AppHintSession hs = new AppHintSession(callingUid, callingTgid, tids, token,
-                            halSessionPtr, durationNanos);
+                    AppHintSession hs = new AppHintSession(callingUid, callingTgid, tag, tids,
+                            token, halSessionPtr, durationNanos);
                     ArrayMap<IBinder, ArraySet<AppHintSession>> tokenMap =
                             mActiveSessions.get(callingUid);
                     if (tokenMap == null) {
@@ -904,6 +1134,8 @@ public final class HintManagerService extends SystemService {
                         tokenMap.put(token, sessionSet);
                     }
                     sessionSet.add(hs);
+                    mUsesFmq = mUsesFmq || hasChannel(callingTgid, callingUid);
+
                     return hs;
                 }
             } finally {
@@ -996,6 +1228,7 @@ public final class HintManagerService extends SystemService {
     final class AppHintSession extends IHintSession.Stub implements IBinder.DeathRecipient {
         protected final int mUid;
         protected final int mPid;
+        protected final int mTag;
         protected int[] mThreadIds;
         protected final IBinder mToken;
         protected long mHalSessionPtr;
@@ -1003,6 +1236,7 @@ public final class HintManagerService extends SystemService {
         protected boolean mUpdateAllowedByProcState;
         protected int[] mNewThreadIds;
         protected boolean mPowerEfficient;
+        protected boolean mHasBeenPowerEfficient;
         protected boolean mShouldForcePause;
 
         private enum SessionModes {
@@ -1010,16 +1244,18 @@ public final class HintManagerService extends SystemService {
         };
 
         protected AppHintSession(
-                int uid, int pid, int[] threadIds, IBinder token,
+                int uid, int pid, int sessionTag, int[] threadIds, IBinder token,
                 long halSessionPtr, long durationNanos) {
             mUid = uid;
             mPid = pid;
+            mTag = sessionTag;
             mToken = token;
             mThreadIds = threadIds;
             mHalSessionPtr = halSessionPtr;
             mTargetDurationNanos = durationNanos;
             mUpdateAllowedByProcState = true;
             mPowerEfficient = false;
+            mHasBeenPowerEfficient = false;
             mShouldForcePause = false;
             final boolean allowed = mUidObserver.isUidForeground(mUid);
             updateHintAllowedByProcState(allowed);
@@ -1055,6 +1291,20 @@ public final class HintManagerService extends SystemService {
                         + " the target duration to be greater than 0.");
                 mNativeWrapper.halUpdateTargetWorkDuration(mHalSessionPtr, targetDurationNanos);
                 mTargetDurationNanos = targetDurationNanos;
+            }
+            synchronized (mSessionSnapshotMapLock) {
+                ArrayMap<Integer, AppHintSessionSnapshot> sessionSnapshots =
+                        mSessionSnapshotMap.get(mUid);
+                if (sessionSnapshots == null) {
+                    Slogf.w(TAG, "Session snapshot map is null for uid " + mUid);
+                    return;
+                }
+                AppHintSessionSnapshot sessionSnapshot = sessionSnapshots.get(mTag);
+                if (sessionSnapshot == null) {
+                    Slogf.w(TAG, "Session snapshot is null for uid " + mUid + " and tag " + mTag);
+                    return;
+                }
+                sessionSnapshot.updateTargetDurationNs(mTargetDurationNanos);
             }
         }
 
@@ -1107,6 +1357,20 @@ public final class HintManagerService extends SystemService {
                 sessionSet.remove(this);
                 if (sessionSet.isEmpty()) tokenMap.remove(mToken);
                 if (tokenMap.isEmpty()) mActiveSessions.remove(mUid);
+            }
+            synchronized (mSessionSnapshotMapLock) {
+                ArrayMap<Integer, AppHintSessionSnapshot> sessionSnapshots =
+                        mSessionSnapshotMap.get(mUid);
+                if (sessionSnapshots == null) {
+                    Slogf.w(TAG, "Session snapshot map is null for uid " + mUid);
+                    return;
+                }
+                AppHintSessionSnapshot sessionSnapshot = sessionSnapshots.get(mTag);
+                if (sessionSnapshot == null) {
+                    Slogf.w(TAG, "Session snapshot is null for uid " + mUid + " and tag " + mTag);
+                    return;
+                }
+                sessionSnapshot.updateUponSessionClose();
             }
             if (powerhintThreadCleanup()) {
                 synchronized (mNonIsolatedTidsLock) {
@@ -1191,6 +1455,21 @@ public final class HintManagerService extends SystemService {
                     mShouldForcePause = false;
                 }
             }
+            synchronized (mSessionSnapshotMapLock) {
+                ArrayMap<Integer, AppHintSessionSnapshot> sessionSnapshots =
+                        mSessionSnapshotMap.get(mUid);
+                if (sessionSnapshots == null) {
+                    Slogf.w(TAG, "Session snapshot map is null for uid " + mUid);
+                    return;
+                }
+                AppHintSessionSnapshot sessionSnapshot = sessionSnapshots.get(mTag);
+                if (sessionSnapshot == null) {
+                    Slogf.w(TAG, "Session snapshot is null for uid " + mUid + " and tag "
+                            + mTag);
+                    return;
+                }
+                sessionSnapshot.updateThreadCount(tids.length);
+            }
         }
 
         public int[] getThreadIds() {
@@ -1231,6 +1510,26 @@ public final class HintManagerService extends SystemService {
                 }
                 mNativeWrapper.halSetMode(mHalSessionPtr, mode, enabled);
             }
+            if (enabled && (mode == SessionModes.POWER_EFFICIENCY.ordinal())) {
+                if (!mHasBeenPowerEfficient) {
+                    mHasBeenPowerEfficient = true;
+                    synchronized (mSessionSnapshotMapLock) {
+                        ArrayMap<Integer, AppHintSessionSnapshot> sessionSnapshots =
+                                mSessionSnapshotMap.get(mUid);
+                        if (sessionSnapshots == null) {
+                            Slogf.w(TAG, "Session snapshot map is null for uid " + mUid);
+                            return;
+                        }
+                        AppHintSessionSnapshot sessionSnapshot = sessionSnapshots.get(mTag);
+                        if (sessionSnapshot == null) {
+                            Slogf.w(TAG, "Session snapshot is null for uid " + mUid
+                                    + " and tag " + mTag);
+                            return;
+                        }
+                        sessionSnapshot.logPowerEfficientSession();
+                    }
+                }
+            }
         }
 
         @Override
@@ -1251,6 +1550,20 @@ public final class HintManagerService extends SystemService {
         public boolean isPowerEfficient() {
             synchronized (this) {
                 return mPowerEfficient;
+            }
+        }
+
+        public int getUid() {
+            return mUid;
+        }
+
+        public int getTag() {
+            return mTag;
+        }
+
+        public long getTargetDurationNs() {
+            synchronized (this) {
+                return mTargetDurationNanos;
             }
         }
 

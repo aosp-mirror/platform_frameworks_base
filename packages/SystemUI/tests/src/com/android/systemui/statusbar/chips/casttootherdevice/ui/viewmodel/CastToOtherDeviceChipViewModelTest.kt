@@ -16,9 +16,12 @@
 
 package com.android.systemui.statusbar.chips.casttootherdevice.ui.viewmodel
 
+import android.content.DialogInterface
 import android.view.View
 import androidx.test.filters.SmallTest
+import com.android.internal.jank.Cuj
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.animation.DialogCuj
 import com.android.systemui.animation.mockDialogTransitionAnimator
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
@@ -39,6 +42,7 @@ import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.Me
 import com.android.systemui.statusbar.chips.ui.model.ColorsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.ui.view.ChipBackgroundContainer
+import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipsViewModelTest.Companion.getStopActionFromDialog
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.phone.mockSystemUIDialogFactory
 import com.android.systemui.statusbar.policy.CastDevice
@@ -47,8 +51,9 @@ import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
-import org.mockito.ArgumentMatchers
+import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
@@ -64,7 +69,6 @@ class CastToOtherDeviceChipViewModelTest : SysuiTestCase() {
 
     private val mockScreenCastDialog = mock<SystemUIDialog>()
     private val mockGenericCastDialog = mock<SystemUIDialog>()
-
     private val chipBackgroundView = mock<ChipBackgroundContainer>()
     private val chipView =
         mock<View>().apply {
@@ -116,12 +120,16 @@ class CastToOtherDeviceChipViewModelTest : SysuiTestCase() {
             mediaProjectionRepo.mediaProjectionState.value =
                 MediaProjectionState.Projecting.SingleTask(
                     CAST_TO_OTHER_DEVICES_PACKAGE,
+                    hostDeviceName = null,
                     createTask(taskId = 1),
                 )
 
             assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown.Timer::class.java)
-            val icon = (latest as OngoingActivityChipModel.Shown).icon
-            assertThat((icon as Icon.Resource).res).isEqualTo(R.drawable.ic_cast_connected)
+            val icon =
+                (((latest as OngoingActivityChipModel.Shown).icon)
+                        as OngoingActivityChipModel.ChipIcon.SingleColorIcon)
+                    .impl as Icon.Resource
+            assertThat(icon.res).isEqualTo(R.drawable.ic_cast_connected)
             assertThat((icon.contentDescription as ContentDescription.Resource).res)
                 .isEqualTo(R.string.cast_screen_to_other_device_chip_accessibility_label)
         }
@@ -136,8 +144,11 @@ class CastToOtherDeviceChipViewModelTest : SysuiTestCase() {
                 MediaProjectionState.Projecting.EntireScreen(CAST_TO_OTHER_DEVICES_PACKAGE)
 
             assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown.Timer::class.java)
-            val icon = (latest as OngoingActivityChipModel.Shown).icon
-            assertThat((icon as Icon.Resource).res).isEqualTo(R.drawable.ic_cast_connected)
+            val icon =
+                (((latest as OngoingActivityChipModel.Shown).icon)
+                        as OngoingActivityChipModel.ChipIcon.SingleColorIcon)
+                    .impl as Icon.Resource
+            assertThat(icon.res).isEqualTo(R.drawable.ic_cast_connected)
             assertThat((icon.contentDescription as ContentDescription.Resource).res)
                 .isEqualTo(R.string.cast_screen_to_other_device_chip_accessibility_label)
         }
@@ -171,8 +182,11 @@ class CastToOtherDeviceChipViewModelTest : SysuiTestCase() {
                 )
 
             assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown.IconOnly::class.java)
-            val icon = (latest as OngoingActivityChipModel.Shown).icon
-            assertThat((icon as Icon.Resource).res).isEqualTo(R.drawable.ic_cast_connected)
+            val icon =
+                (((latest as OngoingActivityChipModel.Shown).icon)
+                        as OngoingActivityChipModel.ChipIcon.SingleColorIcon)
+                    .impl as Icon.Resource
+            assertThat(icon.res).isEqualTo(R.drawable.ic_cast_connected)
             // This content description is just generic "Casting", not "Casting screen"
             assertThat((icon.contentDescription as ContentDescription.Resource).res)
                 .isEqualTo(R.string.accessibility_casting)
@@ -198,12 +212,72 @@ class CastToOtherDeviceChipViewModelTest : SysuiTestCase() {
 
             // Only the projection info will show a timer
             assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown.Timer::class.java)
-            val icon = (latest as OngoingActivityChipModel.Shown).icon
-            assertThat((icon as Icon.Resource).res).isEqualTo(R.drawable.ic_cast_connected)
+            val icon =
+                (((latest as OngoingActivityChipModel.Shown).icon)
+                        as OngoingActivityChipModel.ChipIcon.SingleColorIcon)
+                    .impl as Icon.Resource
+            assertThat(icon.res).isEqualTo(R.drawable.ic_cast_connected)
             // MediaProjection == screen casting, so this content description reflects that we're
             // using the MediaProjection information.
             assertThat((icon.contentDescription as ContentDescription.Resource).res)
                 .isEqualTo(R.string.cast_screen_to_other_device_chip_accessibility_label)
+        }
+
+    @Test
+    fun chip_projectionStoppedFromDialog_chipImmediatelyHidden() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.chip)
+
+            mediaProjectionRepo.mediaProjectionState.value =
+                MediaProjectionState.Projecting.EntireScreen(CAST_TO_OTHER_DEVICES_PACKAGE)
+
+            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
+
+            // WHEN the stop action on the dialog is clicked
+            val dialogStopAction =
+                getStopActionFromDialog(latest, chipView, mockScreenCastDialog, kosmos)
+            dialogStopAction.onClick(mock<DialogInterface>(), 0)
+
+            // THEN the chip is immediately hidden...
+            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Hidden::class.java)
+            // ...even though the repo still says it's projecting
+            assertThat(mediaProjectionRepo.mediaProjectionState.value)
+                .isInstanceOf(MediaProjectionState.Projecting::class.java)
+
+            // AND we specify no animation
+            assertThat((latest as OngoingActivityChipModel.Hidden).shouldAnimate).isFalse()
+        }
+
+    @Test
+    fun chip_routeStoppedFromDialog_chipImmediatelyHidden() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.chip)
+
+            mediaRouterRepo.castDevices.value =
+                listOf(
+                    CastDevice(
+                        state = CastDevice.CastState.Connected,
+                        id = "id",
+                        name = "name",
+                        description = "desc",
+                        origin = CastDevice.CastOrigin.MediaRouter,
+                    )
+                )
+
+            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
+
+            // WHEN the stop action on the dialog is clicked
+            val dialogStopAction =
+                getStopActionFromDialog(latest, chipView, mockGenericCastDialog, kosmos)
+            dialogStopAction.onClick(mock<DialogInterface>(), 0)
+
+            // THEN the chip is immediately hidden...
+            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Hidden::class.java)
+            // ...even though the repo still says it's projecting
+            assertThat(mediaRouterRepo.castDevices.value).isNotEmpty()
+
+            // AND we specify no animation
+            assertThat((latest as OngoingActivityChipModel.Hidden).shouldAnimate).isFalse()
         }
 
     @Test
@@ -223,7 +297,11 @@ class CastToOtherDeviceChipViewModelTest : SysuiTestCase() {
             val latest by collectLastValue(underTest.chip)
 
             mediaProjectionRepo.mediaProjectionState.value =
-                MediaProjectionState.Projecting.SingleTask(NORMAL_PACKAGE, createTask(taskId = 1))
+                MediaProjectionState.Projecting.SingleTask(
+                    NORMAL_PACKAGE,
+                    hostDeviceName = null,
+                    createTask(taskId = 1),
+                )
 
             assertThat(latest).isInstanceOf(OngoingActivityChipModel.Hidden::class.java)
         }
@@ -258,6 +336,7 @@ class CastToOtherDeviceChipViewModelTest : SysuiTestCase() {
             mediaProjectionRepo.mediaProjectionState.value =
                 MediaProjectionState.Projecting.SingleTask(
                     CAST_TO_OTHER_DEVICES_PACKAGE,
+                    hostDeviceName = null,
                     createTask(taskId = 1),
                 )
 
@@ -311,8 +390,8 @@ class CastToOtherDeviceChipViewModelTest : SysuiTestCase() {
                 .showFromView(
                     eq(mockScreenCastDialog),
                     eq(chipBackgroundView),
-                    eq(null),
-                    ArgumentMatchers.anyBoolean(),
+                    any(),
+                    anyBoolean(),
                 )
         }
 
@@ -324,6 +403,7 @@ class CastToOtherDeviceChipViewModelTest : SysuiTestCase() {
             mediaProjectionRepo.mediaProjectionState.value =
                 MediaProjectionState.Projecting.SingleTask(
                     CAST_TO_OTHER_DEVICES_PACKAGE,
+                    hostDeviceName = null,
                     createTask(taskId = 1),
                 )
 
@@ -335,8 +415,8 @@ class CastToOtherDeviceChipViewModelTest : SysuiTestCase() {
                 .showFromView(
                     eq(mockScreenCastDialog),
                     eq(chipBackgroundView),
-                    eq(null),
-                    ArgumentMatchers.anyBoolean(),
+                    any(),
+                    anyBoolean(),
                 )
         }
 
@@ -364,8 +444,65 @@ class CastToOtherDeviceChipViewModelTest : SysuiTestCase() {
                 .showFromView(
                     eq(mockGenericCastDialog),
                     eq(chipBackgroundView),
-                    eq(null),
-                    ArgumentMatchers.anyBoolean(),
+                    any(),
+                    anyBoolean(),
                 )
+        }
+
+    @Test
+    fun chip_projectionStateCasting_clickListenerHasCuj() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.chip)
+            mediaProjectionRepo.mediaProjectionState.value =
+                MediaProjectionState.Projecting.EntireScreen(CAST_TO_OTHER_DEVICES_PACKAGE)
+
+            val clickListener = ((latest as OngoingActivityChipModel.Shown).onClickListener)
+            clickListener!!.onClick(chipView)
+
+            val cujCaptor = argumentCaptor<DialogCuj>()
+            verify(kosmos.mockDialogTransitionAnimator)
+                .showFromView(
+                    any(),
+                    any(),
+                    cujCaptor.capture(),
+                    anyBoolean(),
+                )
+
+            assertThat(cujCaptor.firstValue.cujType)
+                .isEqualTo(Cuj.CUJ_STATUS_BAR_LAUNCH_DIALOG_FROM_CHIP)
+            assertThat(cujCaptor.firstValue.tag).contains("Cast")
+        }
+
+    @Test
+    fun chip_routerStateCasting_clickListenerHasCuj() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.chip)
+
+            mediaRouterRepo.castDevices.value =
+                listOf(
+                    CastDevice(
+                        state = CastDevice.CastState.Connected,
+                        id = "id",
+                        name = "name",
+                        description = "desc",
+                        origin = CastDevice.CastOrigin.MediaRouter,
+                    )
+                )
+
+            val clickListener = ((latest as OngoingActivityChipModel.Shown).onClickListener)
+            clickListener!!.onClick(chipView)
+
+            val cujCaptor = argumentCaptor<DialogCuj>()
+            verify(kosmos.mockDialogTransitionAnimator)
+                .showFromView(
+                    any(),
+                    any(),
+                    cujCaptor.capture(),
+                    anyBoolean(),
+                )
+
+            assertThat(cujCaptor.firstValue.cujType)
+                .isEqualTo(Cuj.CUJ_STATUS_BAR_LAUNCH_DIALOG_FROM_CHIP)
+            assertThat(cujCaptor.firstValue.tag).contains("Cast")
         }
 }

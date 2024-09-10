@@ -1484,6 +1484,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
         assertTrue(componentsToUnbind.get(0).contains(ComponentName.unflattenFromString("c/c")));
     }
 
+    @SuppressWarnings("GuardedBy")
     @Test
     public void populateComponentsToBind() {
         ManagedServices service = new TestManagedServices(getContext(), mLock, mUserProfiles, mIpm,
@@ -1507,7 +1508,8 @@ public class ManagedServicesTest extends UiServiceTestCase {
 
         SparseArray<Set<ComponentName>> componentsToBind = new SparseArray<>();
 
-        service.populateComponentsToBind(componentsToBind, users, approvedComponentsByUser);
+        service.populateComponentsToBind(componentsToBind, users, approvedComponentsByUser,
+                /* isVisibleBackgroundUser= */ false);
 
         assertEquals(2, componentsToBind.size());
         assertEquals(1, componentsToBind.get(0).size());
@@ -1515,6 +1517,33 @@ public class ManagedServicesTest extends UiServiceTestCase {
         assertEquals(2, componentsToBind.get(10).size());
         assertTrue(componentsToBind.get(10).contains(ComponentName.unflattenFromString("b/b")));
         assertTrue(componentsToBind.get(10).contains(ComponentName.unflattenFromString("c/c")));
+    }
+
+    @SuppressWarnings("GuardedBy")
+    @Test
+    public void populateComponentsToBind_isVisibleBackgroundUser_addComponentsToBindButNotAddToEnabledComponent() {
+        ManagedServices service = new TestManagedServices(getContext(), mLock, mUserProfiles, mIpm,
+                APPROVAL_BY_COMPONENT);
+
+        SparseArray<ArraySet<ComponentName>> approvedComponentsByUser = new SparseArray<>();
+        ArraySet<ComponentName> allowed = new ArraySet<>();
+        allowed.add(ComponentName.unflattenFromString("pkg1/cmp1"));
+        approvedComponentsByUser.put(11, allowed);
+        IntArray users = new IntArray();
+        users.add(11);
+
+        SparseArray<Set<ComponentName>> componentsToBind = new SparseArray<>();
+
+        service.populateComponentsToBind(componentsToBind, users, approvedComponentsByUser,
+                /* isVisibleBackgroundUser= */ true);
+
+        assertEquals(1, componentsToBind.size());
+        assertEquals(1, componentsToBind.get(11).size());
+        assertTrue(componentsToBind.get(11).contains(ComponentName.unflattenFromString(
+                "pkg1/cmp1")));
+        assertThat(service.isComponentEnabledForCurrentProfiles(
+                new ComponentName("pkg1", "cmp1"))).isFalse();
+        assertThat(service.isComponentEnabledForPackage("pkg1")).isFalse();
     }
 
     @Test

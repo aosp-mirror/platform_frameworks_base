@@ -164,6 +164,9 @@ public final class SurfaceControl implements Parcelable {
             float width, float height, float vecX, float vecY,
             float maxStretchAmountX, float maxStretchAmountY, float childRelativeLeft,
             float childRelativeTop, float childRelativeRight, float childRelativeBottom);
+    private static native void nativeSetEdgeExtensionEffect(long transactionObj, long nativeObj,
+                                                            boolean leftEdge, boolean rightEdge,
+                                                            boolean topEdge, boolean bottomEdge);
     private static native void nativeSetTrustedOverlay(long transactionObj, long nativeObject,
             int isTrustedOverlay);
     private static native void nativeSetDropInputMode(
@@ -442,16 +445,20 @@ public final class SurfaceControl implements Parcelable {
         // Jank due to unknown reasons.
         public static final int UNKNOWN = 0x80;
 
-        public JankData(long frameVsyncId, @JankType int jankType, long frameIntervalNs) {
+        public JankData(long frameVsyncId, @JankType int jankType, long frameIntervalNs,
+                long scheduledAppFrameTimeNs, long actualAppFrameTimeNs) {
             this.frameVsyncId = frameVsyncId;
             this.jankType = jankType;
             this.frameIntervalNs = frameIntervalNs;
-
+            this.scheduledAppFrameTimeNs = scheduledAppFrameTimeNs;
+            this.actualAppFrameTimeNs = actualAppFrameTimeNs;
         }
 
         public final long frameVsyncId;
         public final @JankType int jankType;
         public final long frameIntervalNs;
+        public final long scheduledAppFrameTimeNs;
+        public final long actualAppFrameTimeNs;
     }
 
     /**
@@ -3513,6 +3520,19 @@ public final class SurfaceControl implements Parcelable {
         /**
          * @hide
          */
+        public Transaction setEdgeExtensionEffect(SurfaceControl sc, int edge) {
+            checkPreconditions(sc);
+
+            nativeSetEdgeExtensionEffect(
+                    mNativeObject, sc.mNativeObject,
+                    (edge & WindowInsets.Side.LEFT) != 0, (edge & WindowInsets.Side.RIGHT) != 0,
+                    (edge & WindowInsets.Side.TOP) != 0, (edge & WindowInsets.Side.BOTTOM) != 0);
+            return this;
+        }
+
+        /**
+         * @hide
+         */
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.O)
         public Transaction setLayerStack(SurfaceControl sc, int layerStack) {
             checkPreconditions(sc);
@@ -3558,7 +3578,7 @@ public final class SurfaceControl implements Parcelable {
             checkPreconditions(sc);
             if (SurfaceControlRegistry.sCallStackDebuggingEnabled) {
                 SurfaceControlRegistry.getProcessInstance().checkCallStackDebugging(
-                        "reparent", this, sc,
+                        "setColor", this, sc,
                         "r=" + color[0] + " g=" + color[1] + " b=" + color[2]);
             }
             nativeSetColor(mNativeObject, sc.mNativeObject, color);

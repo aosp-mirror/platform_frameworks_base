@@ -22,8 +22,12 @@ import android.os.UserManager;
 
 import com.android.internal.R;
 import com.android.settingslib.devicestate.DeviceStateRotationLockSettingsManager;
+import com.android.settingslib.notification.modes.ZenIconLoader;
+import com.android.systemui.common.ui.GlobalConfig;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Application;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.log.LogBuffer;
 import com.android.systemui.log.LogBufferFactory;
 import com.android.systemui.settings.UserTracker;
@@ -79,6 +83,7 @@ import dagger.Module;
 import dagger.Provides;
 
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 
 import javax.inject.Named;
 
@@ -100,9 +105,12 @@ public interface StatusBarPolicyModule {
     @Binds
     CastController provideCastController(CastControllerImpl controllerImpl);
 
-    /** */
+    /**
+     * @deprecated: unscoped configuration controller shouldn't be injected as it might lead to
+     * wrong updates in case of secondary displays.
+     */
     @Binds
-    ConfigurationController bindConfigurationController(ConfigurationControllerImpl impl);
+    ConfigurationController bindConfigurationController(@GlobalConfig ConfigurationController impl);
 
     /** */
     @Binds
@@ -178,6 +186,15 @@ public interface StatusBarPolicyModule {
             DevicePostureControllerImpl devicePostureControllerImpl);
 
     /** */
+    @Provides
+    @SysUISingleton
+    @GlobalConfig
+    static ConfigurationController provideGlobalConfigurationController(
+            @Application Context context, ConfigurationControllerImpl.Factory factory) {
+        return factory.create(context);
+    }
+
+    /** */
     @SysUISingleton
     @Provides
     static AccessPointControllerImpl  provideAccessPointControllerImpl(
@@ -227,5 +244,21 @@ public interface StatusBarPolicyModule {
     @BatteryControllerLog
     static LogBuffer provideBatteryControllerLog(LogBufferFactory factory) {
         return factory.create(BatteryControllerLogger.TAG, 30);
+    }
+
+    /** Provides a log buffer for CastControllerImpl */
+    @Provides
+    @SysUISingleton
+    @CastControllerLog
+    static LogBuffer provideCastControllerLog(LogBufferFactory factory) {
+        return factory.create("CastControllerLog", 50);
+    }
+
+    /** Provides a {@link ZenIconLoader} that fetches icons in a background thread. */
+    @Provides
+    @SysUISingleton
+    static ZenIconLoader provideZenIconLoader(
+            @UiBackground ExecutorService backgroundExecutorService) {
+        return new ZenIconLoader(backgroundExecutorService);
     }
 }

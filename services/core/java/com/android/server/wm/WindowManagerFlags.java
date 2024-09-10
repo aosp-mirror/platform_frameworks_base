@@ -16,6 +16,9 @@
 
 package com.android.server.wm;
 
+import android.app.AppGlobals;
+import android.content.pm.PackageManager;
+
 import com.android.window.flags.Flags;
 
 /**
@@ -50,5 +53,29 @@ class WindowManagerFlags {
 
     final boolean mInsetsDecoupledConfiguration = Flags.insetsDecoupledConfiguration();
 
+    final boolean mRespectNonTopVisibleFixedOrientation =
+            Flags.respectNonTopVisibleFixedOrientation();
+
+    final boolean mEnsureWallpaperInTransitions;
+
     /* End Available Flags */
+
+    WindowManagerFlags() {
+        boolean isWatch;
+        try {
+            isWatch = AppGlobals.getPackageManager().hasSystemFeature(
+                        PackageManager.FEATURE_WATCH, 0 /* version */);
+        } catch (Throwable e) {
+            isWatch = false;
+        }
+        /*
+         * Wallpaper enablement is separated on Wear vs Phone as the latter appears to still exhibit
+         * regressions when enabled (for example b/353870983). These don't exist on Wear likely
+         * due to differences in SysUI/transition implementations. Wear enablement is required for
+         * 25Q2 while phone doesn't have as pressing a constraint and will wait to resolve any
+         * outstanding issues prior to roll-out.
+         */
+        mEnsureWallpaperInTransitions = (isWatch && Flags.ensureWallpaperInWearTransitions())
+                || Flags.ensureWallpaperInTransitions();
+    }
 }

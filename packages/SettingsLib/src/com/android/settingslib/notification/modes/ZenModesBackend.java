@@ -16,6 +16,11 @@
 
 package com.android.settingslib.notification.modes;
 
+import static android.app.NotificationManager.INTERRUPTION_FILTER_PRIORITY;
+import static android.app.NotificationManager.zenModeToInterruptionFilter;
+import static android.provider.Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+import static android.service.notification.SystemZenRules.PACKAGE_ANDROID;
+
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.AutomaticZenRule;
@@ -28,12 +33,12 @@ import android.service.notification.ZenModeConfig;
 import android.util.Log;
 
 import androidx.annotation.DrawableRes;
+import androidx.annotation.VisibleForTesting;
 
 import com.android.settingslib.R;
 
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -61,6 +66,12 @@ public class ZenModesBackend {
         return sInstance;
     }
 
+    /** Replaces the singleton instance of {@link ZenModesBackend} by the provided one. */
+    @VisibleForTesting(otherwise = VisibleForTesting.NONE)
+    public static void setInstance(@Nullable ZenModesBackend backend) {
+        sInstance = backend;
+    }
+
     ZenModesBackend(Context context) {
         mContext = context;
         mNotificationManager = context.getSystemService(NotificationManager.class);
@@ -85,10 +96,7 @@ public class ZenModesBackend {
             }
         }
 
-        // Manual DND first, then alphabetically.
-        modes.sort(Comparator.comparing(ZenMode::isManualDnd).reversed()
-                .thenComparing(ZenMode::getName));
-
+        modes.sort(ZenMode.PRIORITIZING_COMPARATOR);
         return modes;
     }
 
@@ -109,18 +117,25 @@ public class ZenModesBackend {
 
     private ZenMode getManualDndMode(ZenModeConfig config) {
         ZenModeConfig.ZenRule manualRule = config.manualRule;
-        // TODO: b/333682392 - Replace with final strings for name & trigger description
+
+        // If DND is currently on with an interruption filter other than PRIORITY, construct the
+        // rule with that. DND will be *non-editable* while in this state.
+        int dndInterruptionFilter = config.isManualActive()
+                ? zenModeToInterruptionFilter(manualRule.zenMode)
+                : INTERRUPTION_FILTER_PRIORITY;
+
         AutomaticZenRule manualDndRule = new AutomaticZenRule.Builder(
-                mContext.getString(R.string.zen_mode_settings_title), manualRule.conditionId)
-                .setType(manualRule.type)
+                mContext.getString(R.string.zen_mode_do_not_disturb_name), manualRule.conditionId)
+                .setPackage(PACKAGE_ANDROID)
+                .setType(AutomaticZenRule.TYPE_OTHER)
                 .setZenPolicy(manualRule.zenPolicy)
                 .setDeviceEffects(manualRule.zenDeviceEffects)
-                .setManualInvocationAllowed(manualRule.allowManualInvocation)
+                .setManualInvocationAllowed(true)
                 .setConfigurationActivity(null) // No further settings
-                .setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_PRIORITY)
+                .setInterruptionFilter(dndInterruptionFilter)
                 .build();
 
-        return ZenMode.manualDndMode(manualDndRule, config != null && config.isManualActive());
+        return ZenMode.manualDndMode(manualDndRule, config.isManualActive());
     }
 
     public void updateMode(ZenMode mode) {
@@ -148,7 +163,7 @@ public class ZenModesBackend {
                 durationConditionId = ZenModeConfig.toTimeCondition(mContext,
                         (int) forDuration.toMinutes(), ActivityManager.getCurrentUser(), true).id;
             }
-            mNotificationManager.setZenMode(Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS,
+            mNotificationManager.setZenMode(ZEN_MODE_IMPORTANT_INTERRUPTIONS,
                     durationConditionId, TAG, /* fromUser= */ true);
 
         } else {
@@ -168,7 +183,6 @@ public class ZenModesBackend {
             mNotificationManager.setZenMode(Settings.Global.ZEN_MODE_OFF, null, TAG,
                     /* fromUser= */ true);
         } else {
-            // TODO: b/333527800 - This should (potentially) snooze the rule if it was active.
             mNotificationManager.setAutomaticZenRuleState(mode.getId(),
                     new Condition(mode.getRule().getConditionId(), "", Condition.STATE_FALSE,
                             Condition.SOURCE_USER_ACTION));

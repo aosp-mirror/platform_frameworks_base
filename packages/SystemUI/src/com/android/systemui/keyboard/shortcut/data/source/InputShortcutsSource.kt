@@ -59,7 +59,7 @@ constructor(@Main private val resources: Resources, private val windowManager: W
     private suspend fun getImeShortcutGroup(deviceId: Int): List<KeyboardShortcutGroup> =
         suspendCancellableCoroutine { continuation ->
             val shortcutsReceiver = KeyboardShortcutsReceiver {
-                continuation.resumeWith(Result.success(it))
+                continuation.resumeWith(Result.success(it ?: emptyList()))
             }
             windowManager.requestImeKeyboardShortcuts(shortcutsReceiver, deviceId)
         }

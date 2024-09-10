@@ -19,7 +19,6 @@ package com.android.test.input
 import android.content.Context
 import android.content.res.Configuration
 import android.content.res.Resources
-import android.os.Environment
 import android.view.ContextThemeWrapper
 import android.view.PointerIcon
 import android.view.flags.Flags.enableVectorCursorA11ySettings
@@ -137,11 +136,20 @@ class PointerIconLoadingTest {
         assumeTrue(enableVectorCursors())
         assumeTrue(enableVectorCursorA11ySettings())
 
+        val theme: Resources.Theme = context.getResources().newTheme()
+        theme.setTo(context.getTheme())
+        theme.applyStyle(
+            PointerIcon.vectorFillStyleToResource(PointerIcon.POINTER_ICON_VECTOR_STYLE_FILL_BLACK),
+            /* force= */ true)
+        theme.applyStyle(
+            PointerIcon.vectorStrokeStyleToResource(
+                PointerIcon.POINTER_ICON_VECTOR_STYLE_STROKE_WHITE),
+            /* force= */ true)
         val pointerScale = 2f
 
         val pointerIcon =
             PointerIcon.getLoadedSystemIcon(
-                context,
+                ContextThemeWrapper(context, theme),
                 PointerIcon.TYPE_ARROW,
                 /* useLargeIcons= */ false,
                 pointerScale)
@@ -158,8 +166,7 @@ class PointerIconLoadingTest {
         const val SCREEN_WIDTH_DP = 480
         const val SCREEN_HEIGHT_DP = 800
         const val ASSETS_PATH = "tests/input/assets"
-        val TEST_OUTPUT_PATH = Environment.getExternalStorageDirectory().absolutePath +
-                "/InputTests/" +
-                PointerIconLoadingTest::class.java.simpleName
+        val TEST_OUTPUT_PATH =
+            "/sdcard/Download/InputTests/" + PointerIconLoadingTest::class.java.simpleName
     }
 }

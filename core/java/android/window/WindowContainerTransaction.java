@@ -25,6 +25,7 @@ import static android.window.TaskFragmentOperation.OP_TYPE_SET_ADJACENT_TASK_FRA
 import static android.window.TaskFragmentOperation.OP_TYPE_SET_COMPANION_TASK_FRAGMENT;
 import static android.window.TaskFragmentOperation.OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
@@ -41,8 +42,11 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArrayMap;
 import android.view.InsetsFrameProvider;
+import android.view.InsetsSource;
 import android.view.SurfaceControl;
 import android.view.WindowInsets.Type.InsetsType;
+
+import com.android.window.flags.Flags;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -696,6 +700,18 @@ public final class WindowContainerTransaction implements Parcelable {
     }
 
     /**
+     * Restore the back navigation target from visible to invisible for canceling gesture animation.
+     * @hide
+     */
+    @NonNull
+    public WindowContainerTransaction restoreBackNavi() {
+        final HierarchyOp hierarchyOp =
+                new HierarchyOp.Builder(HierarchyOp.HIERARCHY_OP_TYPE_RESTORE_BACK_NAVIGATION)
+                        .build();
+        mHierarchyOps.add(hierarchyOp);
+        return this;
+    }
+    /**
      * Adds a given {@code Rect} as an insets source frame on the {@code receiver}.
      *
      * @param receiver The window container that the insets source is added to.
@@ -711,14 +727,16 @@ public final class WindowContainerTransaction implements Parcelable {
     @NonNull
     public WindowContainerTransaction addInsetsSource(
             @NonNull WindowContainerToken receiver,
-            IBinder owner, int index, @InsetsType int type, Rect frame, Rect[] boundingRects) {
+            IBinder owner, int index, @InsetsType int type, Rect frame, Rect[] boundingRects,
+            @InsetsSource.Flags int flags) {
         final HierarchyOp hierarchyOp =
                 new HierarchyOp.Builder(HierarchyOp.HIERARCHY_OP_TYPE_ADD_INSETS_FRAME_PROVIDER)
                         .setContainer(receiver.asBinder())
                         .setInsetsFrameProvider(new InsetsFrameProvider(owner, index, type)
                                 .setSource(InsetsFrameProvider.SOURCE_ARBITRARY_RECTANGLE)
                                 .setArbitraryRectangle(frame)
-                                .setBoundingRects(boundingRects))
+                                .setBoundingRects(boundingRects)
+                                .setFlags(flags))
                         .setInsetsFrameOwner(owner)
                         .build();
         mHierarchyOps.add(hierarchyOp);
@@ -958,6 +976,23 @@ public final class WindowContainerTransaction implements Parcelable {
             @NonNull WindowContainerToken container) {
         final Change change = getOrCreateChange(container.asBinder());
         change.mConfigAtTransitionEnd = true;
+        return this;
+    }
+
+    /**
+     * Sets the task as trimmable or not. This can be used to prevent the task from being trimmed by
+     * recents. This attribute is set to true on task creation by default.
+     *
+     * @param isTrimmableFromRecents When {@code true}, task is set as trimmable from recents.
+     * @hide
+     */
+    @NonNull
+    public WindowContainerTransaction setTaskTrimmableFromRecents(
+            @NonNull WindowContainerToken container,
+            boolean isTrimmableFromRecents) {
+        mHierarchyOps.add(
+                HierarchyOp.createForSetTaskTrimmableFromRecents(container.asBinder(),
+                        isTrimmableFromRecents));
         return this;
     }
 
@@ -1412,6 +1447,8 @@ public final class WindowContainerTransaction implements Parcelable {
         public static final int HIERARCHY_OP_TYPE_SET_REPARENT_LEAF_TASK_IF_RELAUNCH = 16;
         public static final int HIERARCHY_OP_TYPE_ADD_TASK_FRAGMENT_OPERATION = 17;
         public static final int HIERARCHY_OP_TYPE_MOVE_PIP_ACTIVITY_TO_PINNED_TASK = 18;
+        public static final int HIERARCHY_OP_TYPE_SET_IS_TRIMMABLE = 19;
+        public static final int HIERARCHY_OP_TYPE_RESTORE_BACK_NAVIGATION = 20;
 
         // The following key(s) are for use with mLaunchOptions:
         // When launching a task (eg. from recents), this is the taskId to be launched.
@@ -1472,6 +1509,8 @@ public final class WindowContainerTransaction implements Parcelable {
         private boolean mAlwaysOnTop;
 
         private boolean mReparentLeafTaskIfRelaunch;
+
+        private boolean mIsTrimmableFromRecents;
 
         public static HierarchyOp createForReparent(
                 @NonNull IBinder container, @Nullable IBinder reparent, boolean toTop) {
@@ -1575,6 +1614,16 @@ public final class WindowContainerTransaction implements Parcelable {
                     .build();
         }
 
+        /** Create a hierarchy op for setting a task non-trimmable by recents. */
+        @FlaggedApi(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
+        public static HierarchyOp createForSetTaskTrimmableFromRecents(@NonNull IBinder container,
+                boolean isTrimmableFromRecents) {
+            return new HierarchyOp.Builder(HIERARCHY_OP_TYPE_SET_IS_TRIMMABLE)
+                    .setContainer(container)
+                    .setIsTrimmableFromRecents(isTrimmableFromRecents)
+                    .build();
+        }
+
         /** Only creates through {@link Builder}. */
         private HierarchyOp(int type) {
             mType = type;
@@ -1599,6 +1648,7 @@ public final class WindowContainerTransaction implements Parcelable {
             mShortcutInfo = copy.mShortcutInfo;
             mAlwaysOnTop = copy.mAlwaysOnTop;
             mReparentLeafTaskIfRelaunch = copy.mReparentLeafTaskIfRelaunch;
+            mIsTrimmableFromRecents = copy.mIsTrimmableFromRecents;
         }
 
         protected HierarchyOp(Parcel in) {
@@ -1620,6 +1670,7 @@ public final class WindowContainerTransaction implements Parcelable {
             mShortcutInfo = in.readTypedObject(ShortcutInfo.CREATOR);
             mAlwaysOnTop = in.readBoolean();
             mReparentLeafTaskIfRelaunch = in.readBoolean();
+            mIsTrimmableFromRecents = in.readBoolean();
         }
 
         public int getType() {
@@ -1713,6 +1764,12 @@ public final class WindowContainerTransaction implements Parcelable {
         @NonNull
         public boolean includingParents() {
             return mIncludingParents;
+        }
+
+        /** Set the task to be trimmable */
+        @NonNull
+        public boolean isTrimmableFromRecents() {
+            return mIsTrimmableFromRecents;
         }
 
         /** Gets a string representation of a hierarchy-op type. */
@@ -1811,6 +1868,10 @@ public final class WindowContainerTransaction implements Parcelable {
                     sb.append("fragmentToken= ").append(mContainer)
                             .append(" operation= ").append(mTaskFragmentOperation);
                     break;
+                case HIERARCHY_OP_TYPE_SET_IS_TRIMMABLE:
+                    sb.append("container= ").append(mContainer)
+                            .append(" isTrimmable= ")
+                            .append(mIsTrimmableFromRecents);
                 default:
                     sb.append("container=").append(mContainer)
                             .append(" reparent=").append(mReparent)
@@ -1841,6 +1902,7 @@ public final class WindowContainerTransaction implements Parcelable {
             dest.writeTypedObject(mShortcutInfo, flags);
             dest.writeBoolean(mAlwaysOnTop);
             dest.writeBoolean(mReparentLeafTaskIfRelaunch);
+            dest.writeBoolean(mIsTrimmableFromRecents);
         }
 
         @Override
@@ -1909,6 +1971,8 @@ public final class WindowContainerTransaction implements Parcelable {
             private boolean mAlwaysOnTop;
 
             private boolean mReparentLeafTaskIfRelaunch;
+
+            private boolean mIsTrimmableFromRecents;
 
             Builder(int type) {
                 mType = type;
@@ -2000,6 +2064,11 @@ public final class WindowContainerTransaction implements Parcelable {
                 return this;
             }
 
+            Builder setIsTrimmableFromRecents(boolean isTrimmableFromRecents) {
+                mIsTrimmableFromRecents = isTrimmableFromRecents;
+                return this;
+            }
+
             HierarchyOp build() {
                 final HierarchyOp hierarchyOp = new HierarchyOp(mType);
                 hierarchyOp.mContainer = mContainer;
@@ -2023,6 +2092,7 @@ public final class WindowContainerTransaction implements Parcelable {
                 hierarchyOp.mBounds = mBounds;
                 hierarchyOp.mIncludingParents = mIncludingParents;
                 hierarchyOp.mReparentLeafTaskIfRelaunch = mReparentLeafTaskIfRelaunch;
+                hierarchyOp.mIsTrimmableFromRecents = mIsTrimmableFromRecents;
 
                 return hierarchyOp;
             }

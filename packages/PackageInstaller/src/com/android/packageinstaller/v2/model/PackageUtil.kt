@@ -130,8 +130,8 @@ object PackageUtil {
      * @param context the [Context] object
      * @param callingUid the UID of the caller of Pia
      * @param isTrustedSource indicates whether install request is coming from a privileged app
-     * that has passed EXTRA_NOT_UNKNOWN_SOURCE as `true` in the installation intent, or that has
-     * the [INSTALL_PACKAGES][Manifest.permission.INSTALL_PACKAGES] permission granted.
+     * that has passed EXTRA_NOT_UNKNOWN_SOURCE as `true` in the installation intent, or an app that
+     * has the [INSTALL_PACKAGES][Manifest.permission.INSTALL_PACKAGES] permission granted.
      *
      * @return `true` if the package is either a system downloads provider, a document manager,
      * a trusted source, or has declared the

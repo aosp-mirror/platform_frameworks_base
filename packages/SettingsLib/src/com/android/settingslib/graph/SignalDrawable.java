@@ -100,9 +100,9 @@ public class SignalDrawable extends DrawableWrapper {
         mCutoutHeightFraction = context.getResources().getFloat(
                 com.android.internal.R.dimen.config_signalCutoutHeightFraction);
         mDarkModeFillColor = Utils.getColorStateListDefaultColor(context,
-                R.color.black);
+                R.color.dark_mode_icon_color_single_tone);
         mLightModeFillColor = Utils.getColorStateListDefaultColor(context,
-                R.color.white);
+                R.color.light_mode_icon_color_single_tone);
         mIntrinsicSize = context.getResources().getDimensionPixelSize(R.dimen.signal_icon_size);
         mTransparentPaint.setColor(context.getColor(android.R.color.transparent));
         mTransparentPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));

@@ -17,6 +17,7 @@
 package android.companion.virtual;
 
 import android.app.PendingIntent;
+import android.companion.virtual.ActivityPolicyExemption;
 import android.companion.virtual.IVirtualDeviceActivityListener;
 import android.companion.virtual.IVirtualDeviceIntentInterceptor;
 import android.companion.virtual.IVirtualDeviceSoundEffectListener;
@@ -103,13 +104,19 @@ interface IVirtualDevice {
      * Adds an exemption to the default activity launch policy.
      */
     @EnforcePermission("CREATE_VIRTUAL_DEVICE")
-    void addActivityPolicyExemption(in ComponentName exemption);
+    void addActivityPolicyExemption(in ActivityPolicyExemption exemption);
 
     /**
      * Removes an exemption to the default activity launch policy.
      */
     @EnforcePermission("CREATE_VIRTUAL_DEVICE")
-    void removeActivityPolicyExemption(in ComponentName exemption);
+    void removeActivityPolicyExemption(in ActivityPolicyExemption exemption);
+
+    /**
+     * Specifies a policy for this virtual device on the given display.
+     */
+    @EnforcePermission("CREATE_VIRTUAL_DEVICE")
+    void setDevicePolicyForDisplay(int displayId, int policyType, int devicePolicy);
 
     /**
      * Notifies that an audio session being started.

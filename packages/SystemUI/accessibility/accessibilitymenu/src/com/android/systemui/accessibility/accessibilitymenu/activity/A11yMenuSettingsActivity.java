@@ -26,6 +26,7 @@ import android.os.Bundle;
 import android.provider.Browser;
 import android.provider.Settings;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
 import android.window.OnBackInvokedCallback;
 
@@ -35,6 +36,7 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 
+import com.android.systemui.accessibility.accessibilitymenu.Flags;
 import com.android.systemui.accessibility.accessibilitymenu.R;
 
 /**
@@ -60,6 +62,18 @@ public class A11yMenuSettingsActivity extends FragmentActivity {
         ((TextView) findViewById(R.id.action_bar_title)).setText(
                 getResources().getString(R.string.accessibility_menu_settings_name)
         );
+        if (Flags.actionBarWrapContent()) {
+            setHeightWrapContent(findViewById(com.android.internal.R.id.action_bar));
+            setHeightWrapContent(findViewById(com.android.internal.R.id.action_bar_container));
+        }
+    }
+
+    private void setHeightWrapContent(View view) {
+        if (view != null) {
+            ViewGroup.LayoutParams params = view.getLayoutParams();
+            params.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+            view.setLayoutParams(params);
+        }
     }
 
     @Override

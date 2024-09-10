@@ -160,8 +160,13 @@ public class Cuj {
      */
     public static final int CUJ_DESKTOP_MODE_RESIZE_WINDOW = 106;
 
-    /** Track entering desktop mode interaction. */
-    public static final int CUJ_DESKTOP_MODE_ENTER_MODE = 107;
+    /**
+     * Track app handle drag and hold interaction.
+     *
+     * <p>Tracking starts when the app handle is dragged and
+     * finishes immediately after app handle release, before starting a new transition.
+     */
+    public static final int CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_HOLD = 107;
 
     /** Track exiting desktop mode interaction. */
     public static final int CUJ_DESKTOP_MODE_EXIT_MODE = 108;
@@ -175,9 +180,63 @@ public class Cuj {
     /** Track launching a dialog from a status bar chip. */
     public static final int CUJ_STATUS_BAR_LAUNCH_DIALOG_FROM_CHIP = 111;
 
+    /**
+     * Track entering desktop mode interaction via app handle menu.
+     *
+     * <p>Tracking starts after windowing mode option in the app handle menu is clicked and
+     * finishes when the window animation to desktop ends.
+     */
+    public static final int CUJ_DESKTOP_MODE_ENTER_MODE_APP_HANDLE_MENU = 112;
+
+    /** Track Launcher Keyboard Quick Switch View opening animation */
+    public static final int CUJ_LAUNCHER_KEYBOARD_QUICK_SWITCH_OPEN = 113;
+
+    /** Track Launcher Keyboard Quick Switch View closing animation */
+    public static final int CUJ_LAUNCHER_KEYBOARD_QUICK_SWITCH_CLOSE = 114;
+
+    /** Track launching an app through the Launcher Keyboard Quick Switch View */
+    public static final int CUJ_LAUNCHER_KEYBOARD_QUICK_SWITCH_APP_LAUNCH = 115;
+
+    /**
+     * Track entering desktop mode interaction via app handle drag release.
+     *
+     * <p>Tracking starts when the app handle is released and
+     * finishes when one of the three possible animations end:
+     * <ul>
+     *     <li>release to desktop</li>
+     *     <li>release to split-screen</li>
+     *     <li>release to back to full-screen</li>
+     * </ul>.
+     */
+    public static final int CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_RELEASE = 116;
+
+    /**
+     * Track interaction of exiting desktop mode on closing the last window.
+     *
+     * <p>Tracking starts when the last window is closed and finishes when the animation to exit
+     * desktop mode ends.
+     */
+    public static final int CUJ_DESKTOP_MODE_EXIT_MODE_ON_LAST_WINDOW_CLOSE = 117;
+
+    /**
+     * Track attempting to snap resize a desktop window via button or drag.
+     *
+     * <p>CUJ has 3 different tags:
+     * <ul>
+     *     <li>snap resizing resizable apps via maximize menu button: maximize_menu_resizable </li>
+     *     <li>snap resizing resizable via drag: drag_resizable </li>
+     *     <li>snap resizing non-resizable via drag: drag_non_resizable </li>
+     * </ul>
+     *
+     * <p>For non-resizable apps, the desktop window won't actually be resized, instead will return
+     * to its pre-dragged position. Attempting to snap resize a non-resizable app via the
+     * maximize menu will just result in no change, and a toast explaining the app can't be resized.
+     *
+     */
+    public static final int CUJ_DESKTOP_MODE_SNAP_RESIZE = 118;
 
     // When adding a CUJ, update this and make sure to also update CUJ_TO_STATSD_INTERACTION_TYPE.
-    @VisibleForTesting static final int LAST_CUJ = CUJ_STATUS_BAR_LAUNCH_DIALOG_FROM_CHIP;
+    @VisibleForTesting static final int LAST_CUJ = CUJ_DESKTOP_MODE_SNAP_RESIZE;
 
     /** @hide */
     @IntDef({
@@ -276,11 +335,18 @@ public class Cuj {
             CUJ_DESKTOP_MODE_MAXIMIZE_WINDOW,
             CUJ_FOLD_ANIM,
             CUJ_DESKTOP_MODE_RESIZE_WINDOW,
-            CUJ_DESKTOP_MODE_ENTER_MODE,
+            CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_HOLD,
+            CUJ_DESKTOP_MODE_ENTER_MODE_APP_HANDLE_MENU,
             CUJ_DESKTOP_MODE_EXIT_MODE,
             CUJ_DESKTOP_MODE_MINIMIZE_WINDOW,
             CUJ_DESKTOP_MODE_DRAG_WINDOW,
-            CUJ_STATUS_BAR_LAUNCH_DIALOG_FROM_CHIP
+            CUJ_STATUS_BAR_LAUNCH_DIALOG_FROM_CHIP,
+            CUJ_LAUNCHER_KEYBOARD_QUICK_SWITCH_OPEN,
+            CUJ_LAUNCHER_KEYBOARD_QUICK_SWITCH_CLOSE,
+            CUJ_LAUNCHER_KEYBOARD_QUICK_SWITCH_APP_LAUNCH,
+            CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_RELEASE,
+            CUJ_DESKTOP_MODE_EXIT_MODE_ON_LAST_WINDOW_CLOSE,
+            CUJ_DESKTOP_MODE_SNAP_RESIZE
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CujType {}
@@ -389,11 +455,18 @@ public class Cuj {
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_DESKTOP_MODE_MAXIMIZE_WINDOW] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__DESKTOP_MODE_MAXIMIZE_WINDOW;
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_FOLD_ANIM] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__FOLD_ANIM;
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_DESKTOP_MODE_RESIZE_WINDOW] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__DESKTOP_MODE_RESIZE_WINDOW;
-        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_DESKTOP_MODE_ENTER_MODE] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__DESKTOP_MODE_ENTER_MODE;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_HOLD] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_HOLD;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_DESKTOP_MODE_ENTER_MODE_APP_HANDLE_MENU] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__DESKTOP_MODE_ENTER_MODE_APP_HANDLE_MENU;
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_DESKTOP_MODE_EXIT_MODE] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__DESKTOP_MODE_EXIT_MODE;
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_DESKTOP_MODE_MINIMIZE_WINDOW] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__DESKTOP_MODE_MINIMIZE_WINDOW;
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_DESKTOP_MODE_DRAG_WINDOW] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__DESKTOP_MODE_DRAG_WINDOW;
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_STATUS_BAR_LAUNCH_DIALOG_FROM_CHIP] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__STATUS_BAR_LAUNCH_DIALOG_FROM_CHIP;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_LAUNCHER_KEYBOARD_QUICK_SWITCH_OPEN] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_KEYBOARD_QUICK_SWITCH_OPEN;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_LAUNCHER_KEYBOARD_QUICK_SWITCH_CLOSE] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_KEYBOARD_QUICK_SWITCH_CLOSE;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_LAUNCHER_KEYBOARD_QUICK_SWITCH_APP_LAUNCH] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_KEYBOARD_QUICK_SWITCH_APP_LAUNCH;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_RELEASE] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_RELEASE;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_DESKTOP_MODE_EXIT_MODE_ON_LAST_WINDOW_CLOSE] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__DESKTOP_MODE_EXIT_MODE_ON_LAST_WINDOW_CLOSE;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_DESKTOP_MODE_SNAP_RESIZE] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__DESKTOP_MODE_SNAP_RESIZE;
     }
 
     private Cuj() {
@@ -602,8 +675,10 @@ public class Cuj {
                 return "FOLD_ANIM";
             case CUJ_DESKTOP_MODE_RESIZE_WINDOW:
                 return "DESKTOP_MODE_RESIZE_WINDOW";
-            case CUJ_DESKTOP_MODE_ENTER_MODE:
-                return "DESKTOP_MODE_ENTER_MODE";
+            case CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_HOLD:
+                return "DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_HOLD";
+            case CUJ_DESKTOP_MODE_ENTER_MODE_APP_HANDLE_MENU:
+                return "DESKTOP_MODE_ENTER_MODE_APP_HANDLE_MENU";
             case CUJ_DESKTOP_MODE_EXIT_MODE:
                 return "DESKTOP_MODE_EXIT_MODE";
             case CUJ_DESKTOP_MODE_MINIMIZE_WINDOW:
@@ -612,6 +687,18 @@ public class Cuj {
                 return "DESKTOP_MODE_DRAG_WINDOW";
             case CUJ_STATUS_BAR_LAUNCH_DIALOG_FROM_CHIP:
                 return "STATUS_BAR_LAUNCH_DIALOG_FROM_CHIP";
+            case CUJ_LAUNCHER_KEYBOARD_QUICK_SWITCH_OPEN:
+                return "LAUNCHER_KEYBOARD_QUICK_SWITCH_OPEN";
+            case CUJ_LAUNCHER_KEYBOARD_QUICK_SWITCH_CLOSE:
+                return "LAUNCHER_KEYBOARD_QUICK_SWITCH_CLOSE";
+            case CUJ_LAUNCHER_KEYBOARD_QUICK_SWITCH_APP_LAUNCH:
+                return "LAUNCHER_KEYBOARD_QUICK_SWITCH_APP_LAUNCH";
+            case CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_RELEASE:
+                return "DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_RELEASE";
+            case CUJ_DESKTOP_MODE_EXIT_MODE_ON_LAST_WINDOW_CLOSE:
+                return "DESKTOP_MODE_EXIT_MODE_ON_LAST_WINDOW_CLOSE";
+            case CUJ_DESKTOP_MODE_SNAP_RESIZE:
+                return "DESKTOP_MODE_SNAP_RESIZE";
         }
         return "UNKNOWN";
     }

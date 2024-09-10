@@ -29,7 +29,7 @@
     <color name="status_bar_icons_hover_color_dark">#38000000</color> <!-- 22% black -->
 
     <!-- The dark background color behind the shade -->
-    <color name="shade_scrim_background_dark">@*android:color/black</color>
+    <color name="shade_scrim_background_dark">@androidprv:color/system_under_surface_light</color>
 
     <!-- The color of the background in the separated list of the Global Actions menu -->
     <color name="global_actions_separated_background">#F5F5F5</color>
@@ -100,8 +100,8 @@
     <!-- The color of the navigation bar icons. Need to be in sync with ic_sysbar_* -->
     <color name="navigation_bar_icon_color">#E5FFFFFF</color>
 
-    <color name="white">@*android:color/white</color>
-    <color name="black">@*android:color/black</color>
+    <color name="navigation_bar_home_handle_light_color">#EBffffff</color>
+    <color name="navigation_bar_home_handle_dark_color">#99000000</color>
 
     <!-- The shadow color for light navigation bar icons. -->
     <color name="nav_key_button_shadow_color">#30000000</color>
@@ -160,8 +160,8 @@
 
     <color name="GM2_red_300">#F28B82</color>
     <color name="GM2_red_500">#EA4335</color>
-    <color name="GM2_red_600">#B3261E</color>
     <color name="GM2_red_700">#C5221F</color>
+    <color name="GM2_red_800">#B3261E</color>
 
     <color name="GM2_blue_300">#8AB4F8</color>
 

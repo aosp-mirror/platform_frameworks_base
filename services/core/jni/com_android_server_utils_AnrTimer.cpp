@@ -934,7 +934,6 @@ void AnrTimerService::scrubExpiredLocked() {
 }
 
 // Hold the lock in order to manage the running list.
-// the listener.
 void AnrTimerService::expire(timer_id_t timerId) {
     // Save the timer attributes for the notification
     int pid = 0;
@@ -967,7 +966,6 @@ void AnrTimerService::expire(timer_id_t timerId) {
     // Deliver the notification outside of the lock.
     if (expired) {
         if (!notifier_(timerId, pid, uid, elapsed, notifierCookie_, notifierObject_)) {
-            AutoMutex _l(lock_);
             // Notification failed, which means the listener will never call accept() or
             // discard().  Do not reinsert the timer.
             discard(timerId);

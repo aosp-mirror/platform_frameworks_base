@@ -61,6 +61,7 @@ constructor(
     ) {
 
     override fun start() {
+        if (SceneContainerFlag.isEnabled) return
         listenForDreamingLockscreenHostedToLockscreen()
         listenForDreamingLockscreenHostedToGone()
         listenForDreamingLockscreenHostedToDozing()
@@ -96,8 +97,6 @@ constructor(
     }
 
     private fun listenForDreamingLockscreenHostedToPrimaryBouncer() {
-        // TODO(b/336576536): Check if adaptation for scene framework is needed
-        if (SceneContainerFlag.isEnabled) return
         scope.launch {
             keyguardInteractor.primaryBouncerShowing
                 .filterRelevantKeyguardStateAnd { isBouncerShowing -> isBouncerShowing }
@@ -106,8 +105,6 @@ constructor(
     }
 
     private fun listenForDreamingLockscreenHostedToGone() {
-        // TODO(b/336576536): Check if adaptation for scene framework is needed
-        if (SceneContainerFlag.isEnabled) return
         scope.launch {
             keyguardInteractor.biometricUnlockState
                 .filterRelevantKeyguardStateAnd { biometricUnlockState ->

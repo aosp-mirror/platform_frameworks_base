@@ -35,6 +35,7 @@ import com.android.systemui.scene.data.repository.Transition
 import com.android.systemui.scene.data.repository.sceneContainerRepository
 import com.android.systemui.scene.data.repository.setSceneTransition
 import com.android.systemui.scene.domain.resolver.homeSceneFamilyResolver
+import com.android.systemui.scene.overlayKeys
 import com.android.systemui.scene.sceneContainerConfig
 import com.android.systemui.scene.sceneKeys
 import com.android.systemui.scene.shared.model.SceneFamilies
@@ -49,6 +50,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -63,16 +65,19 @@ class SceneInteractorTest : SysuiTestCase() {
 
     private val underTest = kosmos.sceneInteractor
 
-    init {
+    @Before
+    fun setUp() {
         // Init lazy Fixtures. Accessing them once makes sure that the singletons are initialized
         // and therefore starts to collect StateFlows eagerly (when there are any).
         kosmos.deviceUnlockedInteractor
         kosmos.keyguardEnabledInteractor
     }
 
+    // TODO(b/356596436): Add tests for showing, hiding, and replacing overlays after we've defined
+    //  them.
     @Test
-    fun allSceneKeys() {
-        assertThat(underTest.allSceneKeys()).isEqualTo(kosmos.sceneKeys)
+    fun allContentKeys() {
+        assertThat(underTest.allContentKeys).isEqualTo(kosmos.sceneKeys + kosmos.overlayKeys)
     }
 
     @Test
@@ -399,10 +404,10 @@ class SceneInteractorTest : SysuiTestCase() {
             underTest.setVisible(false, "reason")
             val isVisible by collectLastValue(underTest.isVisible)
             assertThat(isVisible).isFalse()
-            underTest.onRemoteUserInteractionStarted("reason")
+            underTest.onRemoteUserInputStarted("reason")
             assertThat(isVisible).isTrue()
 
-            underTest.onUserInteractionFinished()
+            underTest.onUserInputFinished()
 
             assertThat(isVisible).isFalse()
         }

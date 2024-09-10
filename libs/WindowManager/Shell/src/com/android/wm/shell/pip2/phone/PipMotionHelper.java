@@ -42,7 +42,6 @@ import com.android.internal.util.Preconditions;
 import com.android.wm.shell.R;
 import com.android.wm.shell.animation.FloatProperties;
 import com.android.wm.shell.common.FloatingContentCoordinator;
-import com.android.wm.shell.common.magnetictarget.MagnetizedObject;
 import com.android.wm.shell.common.pip.PipAppOpsListener;
 import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.common.pip.PipBoundsState;
@@ -51,12 +50,12 @@ import com.android.wm.shell.common.pip.PipSnapAlgorithm;
 import com.android.wm.shell.pip2.animation.PipResizeAnimator;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.shared.animation.PhysicsAnimator;
+import com.android.wm.shell.shared.magnetictarget.MagnetizedObject;
 
 import kotlin.Unit;
 import kotlin.jvm.functions.Function0;
 
 import java.util.Optional;
-import java.util.function.Consumer;
 
 /**
  * A helper to animate and manipulate the PiP.
@@ -133,15 +132,6 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
     /** SpringConfig to use for springing PIP away from conflicting floating content. */
     private final PhysicsAnimator.SpringConfig mConflictResolutionSpringConfig =
             new PhysicsAnimator.SpringConfig(STIFFNESS_LOW, DAMPING_RATIO_NO_BOUNCY);
-
-    private final Consumer<Rect> mUpdateBoundsCallback = (Rect newBounds) -> {
-        if (mPipBoundsState.getBounds().equals(newBounds)) {
-            return;
-        }
-
-        mMenuController.updateMenuLayout(newBounds);
-        mPipBoundsState.setBounds(newBounds);
-    };
 
     /**
      * Whether we're springing to the touch event location (vs. moving it to that position
@@ -416,6 +406,17 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         // location now.
         mSpringingToTouch = false;
 
+        // Boost the velocityX if it's zero to forcefully push it towards the nearest edge.
+        // We don't simply change the xEndValue below since the PhysicsAnimator would rely on the
+        // same velocityX to find out which edge to snap to.
+        if (velocityX == 0) {
+            final int motionCenterX = mPipBoundsState
+                    .getMotionBoundsState().getBoundsInMotion().centerX();
+            final int displayCenterX = mPipBoundsState
+                    .getDisplayBounds().centerX();
+            velocityX = (motionCenterX < displayCenterX) ? -0.001f : 0.001f;
+        }
+
         mTemporaryBoundsPhysicsAnimator
                 .spring(FloatProperties.RECT_WIDTH, getBounds().width(), mSpringConfig)
                 .spring(FloatProperties.RECT_HEIGHT, getBounds().height(), mSpringConfig)
@@ -555,11 +556,20 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
                             + " callers=\n%s", TAG, originalBounds, offset,
                     Debug.getCallers(5, "    "));
         }
+        if (offset == 0) {
+            return;
+        }
+
         cancelPhysicsAnimation();
-        /*
-        mPipTaskOrganizer.scheduleOffsetPip(originalBounds, offset, SHIFT_DURATION,
-                mUpdateBoundsCallback);
-         */
+
+        Rect adjustedBounds = new Rect(originalBounds);
+        adjustedBounds.offset(0, offset);
+
+        setAnimatingToBounds(adjustedBounds);
+        Bundle extra = new Bundle();
+        extra.putBoolean(ANIMATING_BOUNDS_CHANGE, true);
+        extra.putInt(ANIMATING_BOUNDS_CHANGE_DURATION, SHIFT_DURATION);
+        mPipTransitionState.setState(PipTransitionState.SCHEDULED_BOUNDS_CHANGE, extra);
     }
 
     /**
@@ -574,11 +584,11 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
     /** Set new fling configs whose min/max values respect the given movement bounds. */
     private void rebuildFlingConfigs() {
         mFlingConfigX = new PhysicsAnimator.FlingConfig(DEFAULT_FRICTION,
-                mPipBoundsAlgorithm.getMovementBounds(getBounds()).left,
-                mPipBoundsAlgorithm.getMovementBounds(getBounds()).right);
+                mPipBoundsState.getMovementBounds().left,
+                mPipBoundsState.getMovementBounds().right);
         mFlingConfigY = new PhysicsAnimator.FlingConfig(DEFAULT_FRICTION,
-                mPipBoundsAlgorithm.getMovementBounds(getBounds()).top,
-                mPipBoundsAlgorithm.getMovementBounds(getBounds()).bottom);
+                mPipBoundsState.getMovementBounds().top,
+                mPipBoundsState.getMovementBounds().bottom);
         final Rect insetBounds = mPipBoundsState.getDisplayLayout().stableInsets();
         mStashConfigX = new PhysicsAnimator.FlingConfig(
                 DEFAULT_FRICTION,
@@ -687,7 +697,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
     /**
      * Directly resizes the PiP to the given {@param bounds}.
      */
-    private void resizeAndAnimatePipUnchecked(Rect toBounds, int duration) {
+    void resizeAndAnimatePipUnchecked(Rect toBounds, int duration) {
         if (mPipBoundsState.getMotionBoundsState().isInMotion()) {
             // Do not carry out any resizing if we are dragging or physics animator is running.
             return;
@@ -780,7 +790,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         cleanUpHighPerfSessionMaybe();
 
         // Signal that the transition is done - should update transition state by default.
-        mPipScheduler.scheduleFinishResizePip(false /* configAtEnd */);
+        mPipScheduler.scheduleFinishResizePip(destinationBounds, false /* configAtEnd */);
     }
 
     private void startResizeAnimation(SurfaceControl.Transaction startTx,
@@ -796,26 +806,49 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
                 startTx, finishTx, mPipBoundsState.getBounds(), mPipBoundsState.getBounds(),
                 destinationBounds, duration, 0f /* angle */);
         animator.setAnimationEndCallback(() -> {
-            mPipBoundsState.setBounds(destinationBounds);
-            // All motion operations have actually finished, so make bounds cache updates.
+            // In case an ongoing drag/fling was present before a deterministic resize transition
+            // kicked in, we need to update the update bounds properly before cleaning in-motion
+            // state.
+            mPipBoundsState.getMotionBoundsState().setBoundsInMotion(destinationBounds);
+            settlePipBoundsAfterPhysicsAnimation(false /* animatingAfter */);
+
             cleanUpHighPerfSessionMaybe();
             // Signal that we are done with resize transition
-            mPipScheduler.scheduleFinishResizePip(true /* configAtEnd */);
+            mPipScheduler.scheduleFinishResizePip(destinationBounds, true /* configAtEnd */);
         });
         animator.start();
     }
 
     private void settlePipBoundsAfterPhysicsAnimation(boolean animatingAfter) {
-        if (!animatingAfter) {
+        if (!animatingAfter && mPipBoundsState.getMotionBoundsState().isInMotion()) {
             // The physics animation ended, though we may not necessarily be done animating, such as
             // when we're still dragging after moving out of the magnetic target. Only set the final
             // bounds state and clear motion bounds completely if the whole animation is over.
-            mPipBoundsState.setBounds(mPipBoundsState.getMotionBoundsState().getBoundsInMotion());
             mPipBoundsState.getMotionBoundsState().onAllAnimationsEnded();
         }
         mPipBoundsState.getMotionBoundsState().onPhysicsAnimationEnded();
         mSpringingToTouch = false;
         mDismissalPending = false;
+
+        // Check whether new bounds after fling imply we need to update stash state too.
+        stashEndActionIfNeeded();
+    }
+
+    private void stashEndActionIfNeeded() {
+        boolean isStashing = mPipBoundsState.getBounds().right > mPipBoundsState
+                .getDisplayBounds().width() || mPipBoundsState.getBounds().left < 0;
+        if (!isStashing) {
+            return;
+        }
+
+        if (mPipBoundsState.getBounds().left < 0
+                && mPipBoundsState.getStashedState() != STASH_TYPE_LEFT) {
+            mPipBoundsState.setStashed(STASH_TYPE_LEFT);
+        } else if (mPipBoundsState.getBounds().left >= 0
+                && mPipBoundsState.getStashedState() != STASH_TYPE_RIGHT) {
+            mPipBoundsState.setStashed(STASH_TYPE_RIGHT);
+        }
+        mMenuController.hideMenu();
     }
 
     /**

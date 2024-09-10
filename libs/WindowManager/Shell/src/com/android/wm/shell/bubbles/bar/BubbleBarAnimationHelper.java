@@ -24,9 +24,9 @@ import static android.view.View.VISIBLE;
 import static android.view.View.X;
 import static android.view.View.Y;
 
-import static com.android.wm.shell.animation.Interpolators.EMPHASIZED;
-import static com.android.wm.shell.animation.Interpolators.EMPHASIZED_DECELERATE;
 import static com.android.wm.shell.bubbles.bar.BubbleBarExpandedView.CORNER_RADIUS;
+import static com.android.wm.shell.shared.animation.Interpolators.EMPHASIZED;
+import static com.android.wm.shell.shared.animation.Interpolators.EMPHASIZED_DECELERATE;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -42,13 +42,13 @@ import android.widget.FrameLayout;
 
 import androidx.annotation.Nullable;
 
-import com.android.wm.shell.animation.Interpolators;
 import com.android.wm.shell.bubbles.BubbleOverflow;
 import com.android.wm.shell.bubbles.BubblePositioner;
 import com.android.wm.shell.bubbles.BubbleViewProvider;
 import com.android.wm.shell.bubbles.animation.AnimatableScaleMatrix;
-import com.android.wm.shell.common.magnetictarget.MagnetizedObject.MagneticTarget;
+import com.android.wm.shell.shared.animation.Interpolators;
 import com.android.wm.shell.shared.animation.PhysicsAnimator;
+import com.android.wm.shell.shared.magnetictarget.MagnetizedObject.MagneticTarget;
 
 /**
  * Helper class to animate a {@link BubbleBarExpandedView} on a bubble.
@@ -253,6 +253,7 @@ public class BubbleBarAnimationHelper {
             return;
         }
         setDragPivot(bbev);
+        bbev.setDragging(true);
         // Corner radius gets scaled, apply the reverse scale to ensure we have the desired radius
         final float cornerRadius = bbev.getDraggedCornerRadius() / EXPANDED_VIEW_DRAG_SCALE;
 
@@ -329,6 +330,7 @@ public class BubbleBarAnimationHelper {
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
                 bbev.resetPivot();
+                bbev.setDragging(false);
             }
         });
         startNewDragAnimation(animatorSet);

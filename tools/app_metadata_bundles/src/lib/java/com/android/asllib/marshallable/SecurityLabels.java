@@ -21,8 +21,6 @@ import com.android.asllib.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import java.util.List;
-
 /** Security Labels representation */
 public class SecurityLabels implements AslMarshallable {
 
@@ -35,8 +33,7 @@ public class SecurityLabels implements AslMarshallable {
     }
 
     /** Creates an on-device DOM element from the {@link SecurityLabels}. */
-    @Override
-    public List<Element> toOdDomElements(Document doc) {
+    public Element toOdDomElement(Document doc) {
         Element ele = XmlUtils.createPbundleEleWithName(doc, XmlUtils.OD_NAME_SECURITY_LABELS);
         if (mIsDataDeletable != null) {
             ele.appendChild(
@@ -48,12 +45,11 @@ public class SecurityLabels implements AslMarshallable {
                     XmlUtils.createOdBooleanEle(
                             doc, XmlUtils.OD_NAME_IS_DATA_ENCRYPTED, mIsDataEncrypted));
         }
-        return XmlUtils.listOf(ele);
+        return ele;
     }
 
     /** Creates the human-readable DOM elements from the AslMarshallable Java Object. */
-    @Override
-    public List<Element> toHrDomElements(Document doc) {
+    public Element toHrDomElement(Document doc) {
         Element ele = doc.createElement(XmlUtils.HR_TAG_SECURITY_LABELS);
         if (mIsDataDeletable != null) {
             ele.setAttribute(XmlUtils.HR_ATTR_IS_DATA_DELETABLE, String.valueOf(mIsDataDeletable));
@@ -61,6 +57,6 @@ public class SecurityLabels implements AslMarshallable {
         if (mIsDataEncrypted != null) {
             ele.setAttribute(XmlUtils.HR_ATTR_IS_DATA_ENCRYPTED, String.valueOf(mIsDataEncrypted));
         }
-        return XmlUtils.listOf(ele);
+        return ele;
     }
 }

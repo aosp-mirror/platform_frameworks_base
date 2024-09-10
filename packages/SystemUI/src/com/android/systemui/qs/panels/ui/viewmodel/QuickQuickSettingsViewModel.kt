@@ -20,14 +20,15 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.qs.panels.domain.interactor.QuickQuickSettingsRowInteractor
 import com.android.systemui.qs.panels.shared.model.SizedTile
-import com.android.systemui.qs.panels.shared.model.TileRow
+import com.android.systemui.qs.panels.shared.model.SizedTileImpl
+import com.android.systemui.qs.panels.shared.model.splitInRowsSequence
 import com.android.systemui.qs.pipeline.domain.interactor.CurrentTilesInteractor
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.mapLatest
@@ -54,37 +55,35 @@ constructor(
             quickQuickSettingsRowInteractor.defaultRows
         )
 
-    val tileViewModels: Flow<List<SizedTile<TileViewModel>>> =
-        columns.flatMapLatest { columns ->
-            tilesInteractor.currentTiles.combine(rows, ::Pair).mapLatest { (tiles, rows) ->
-                tiles
-                    .map { SizedTile(TileViewModel(it.tile, it.spec), it.spec.width) }
-                    .let { splitInRowsSequence(it, columns).take(rows).toList().flatten() }
+    val tileViewModels: StateFlow<List<SizedTile<TileViewModel>>> =
+        columns
+            .flatMapLatest { columns ->
+                tilesInteractor.currentTiles.combine(rows, ::Pair).mapLatest { (tiles, rows) ->
+                    tiles
+                        .map {
+                            SizedTileImpl(
+                                TileViewModel(it.tile, it.spec),
+                                it.spec.width,
+                            )
+                        }
+                        .let { splitInRowsSequence(it, columns).take(rows).toList().flatten() }
+                }
             }
-        }
+            .stateIn(
+                applicationScope,
+                SharingStarted.WhileSubscribed(),
+                tilesInteractor.currentTiles.value
+                    .map {
+                        SizedTileImpl(
+                            TileViewModel(it.tile, it.spec),
+                            it.spec.width,
+                        )
+                    }
+                    .let {
+                        splitInRowsSequence(it, columns.value).take(rows.value).toList().flatten()
+                    }
+            )
 
     private val TileSpec.width: Int
         get() = if (iconTilesViewModel.isIconTile(this)) 1 else 2
-
-    companion object {
-        private fun splitInRowsSequence(
-            tiles: List<SizedTile<TileViewModel>>,
-            columns: Int,
-        ): Sequence<List<SizedTile<TileViewModel>>> = sequence {
-            val row = TileRow<TileViewModel>(columns)
-            for (tile in tiles) {
-                check(tile.width <= columns)
-                if (!row.maybeAddTile(tile)) {
-                    // Couldn't add tile to previous row, create a row with the current tiles
-                    // and start a new one
-                    yield(row.tiles)
-                    row.clear()
-                    row.maybeAddTile(tile)
-                }
-            }
-            if (row.tiles.isNotEmpty()) {
-                yield(row.tiles)
-            }
-        }
-    }
 }

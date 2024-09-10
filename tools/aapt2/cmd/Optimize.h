@@ -116,6 +116,10 @@ class OptimizeCommand : public Command {
                       "This decreases APK size at the cost of resource retrieval performance.\n"
                       "Applies sparse encoding to all resources regardless of minSdk.",
                       &options_.force_sparse_encoding);
+    AddOptionalSwitch(
+        "--enable-compact-entries",
+        "This decreases APK size by using compact resource entries for simple data types.",
+        &options_.table_flattener_options.use_compact_entries);
     AddOptionalSwitch("--collapse-resource-names",
         "Collapses resource names to a single value in the key string pool. Resources can \n"
             "be exempted using the \"no_collapse\" directive in a file specified by "

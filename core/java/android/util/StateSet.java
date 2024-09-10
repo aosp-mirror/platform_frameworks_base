@@ -16,6 +16,8 @@
 
 package android.util;
 
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
+
 import com.android.internal.R;
 
 /**
@@ -34,6 +36,7 @@ import com.android.internal.R;
  * and not have static methods here but there is some concern about
  * performance since these methods are called during view drawing.
  */
+@RavenwoodKeepWholeClass
 public class StateSet {
     /**
      * The order here is very important to
@@ -287,6 +290,9 @@ public class StateSet {
                 break;
             case R.attr.state_activated:
                 sb.append("A ");
+                break;
+            case R.attr.state_hovered:
+                sb.append("H ");
                 break;
             }
         }

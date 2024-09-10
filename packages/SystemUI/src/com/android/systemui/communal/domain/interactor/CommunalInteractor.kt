@@ -16,18 +16,20 @@
 
 package com.android.systemui.communal.domain.interactor
 
-import android.app.smartspace.SmartspaceTarget
 import android.content.ComponentName
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.UserInfo
 import android.os.UserHandle
 import android.os.UserManager
 import android.provider.Settings
+import com.android.app.tracing.coroutines.launch
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.TransitionKey
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.communal.data.repository.CommunalMediaRepository
+import com.android.systemui.communal.data.repository.CommunalSmartspaceRepository
 import com.android.systemui.communal.data.repository.CommunalWidgetRepository
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.domain.model.CommunalContentModel.WidgetContent
@@ -59,15 +61,17 @@ import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.settings.UserTracker
-import com.android.systemui.smartspace.data.repository.SmartspaceRepository
+import com.android.systemui.statusbar.phone.ManagedProfileController
 import com.android.systemui.util.kotlin.BooleanFlowOperators.allOf
 import com.android.systemui.util.kotlin.BooleanFlowOperators.not
 import com.android.systemui.util.kotlin.emitOnStart
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.minutes
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -81,7 +85,6 @@ import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -95,12 +98,13 @@ class CommunalInteractor
 @Inject
 constructor(
     @Application val applicationScope: CoroutineScope,
+    @Background private val bgScope: CoroutineScope,
     @Background val bgDispatcher: CoroutineDispatcher,
     broadcastDispatcher: BroadcastDispatcher,
     private val widgetRepository: CommunalWidgetRepository,
     private val communalPrefsInteractor: CommunalPrefsInteractor,
     private val mediaRepository: CommunalMediaRepository,
-    smartspaceRepository: SmartspaceRepository,
+    private val smartspaceRepository: CommunalSmartspaceRepository,
     keyguardInteractor: KeyguardInteractor,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
     communalSettingsInteractor: CommunalSettingsInteractor,
@@ -113,13 +117,34 @@ constructor(
     sceneInteractor: SceneInteractor,
     @CommunalLog logBuffer: LogBuffer,
     @CommunalTableLog tableLogBuffer: TableLogBuffer,
+    private val managedProfileController: ManagedProfileController
 ) {
     private val logger = Logger(logBuffer, "CommunalInteractor")
 
     private val _editModeOpen = MutableStateFlow(false)
 
-    /** Whether edit mode is currently open. */
+    /**
+     * Whether edit mode is currently open. This will be true from onCreate to onDestroy in
+     * [EditWidgetsActivity] and thus does not correspond to whether or not the activity is visible.
+     *
+     * Note that since this is called in onDestroy, it's not guaranteed to ever be set to false when
+     * edit mode is closed, such as in the case that a user exits edit mode manually with a back
+     * gesture or navigation gesture.
+     */
     val editModeOpen: StateFlow<Boolean> = _editModeOpen.asStateFlow()
+
+    private val _editActivityShowing = MutableStateFlow(false)
+
+    /**
+     * Whether the edit mode activity is currently showing. This is true from onStart to onStop in
+     * [EditWidgetsActivity] so may be false even when the user is in edit mode, such as when a
+     * widget's individual configuration activity has launched.
+     */
+    val editActivityShowing: StateFlow<Boolean> = _editActivityShowing.asStateFlow()
+
+    private val _selectedKey: MutableStateFlow<String?> = MutableStateFlow(null)
+
+    val selectedKey: StateFlow<String?> = _selectedKey.asStateFlow()
 
     /** Whether communal features are enabled. */
     val isCommunalEnabled: StateFlow<Boolean> = communalSettingsInteractor.isCommunalEnabled
@@ -149,12 +174,31 @@ constructor(
                 replay = 1,
             )
 
+    private val _isDisclaimerDismissed = MutableStateFlow(false)
+    val isDisclaimerDismissed: Flow<Boolean> = _isDisclaimerDismissed.asStateFlow()
+
+    fun setDisclaimerDismissed() {
+        bgScope.launch("$TAG#setDisclaimerDismissed") {
+            _isDisclaimerDismissed.value = true
+            delay(DISCLAIMER_RESET_MILLIS)
+            _isDisclaimerDismissed.value = false
+        }
+    }
+
+    fun setSelectedKey(key: String?) {
+        _selectedKey.value = key
+    }
+
     /** Whether to show communal when exiting the occluded state. */
     val showCommunalFromOccluded: Flow<Boolean> =
         keyguardTransitionInteractor.startedKeyguardTransitionStep
             .filter { step -> step.to == KeyguardState.OCCLUDED }
             .combine(isCommunalAvailable, ::Pair)
-            .map { (step, available) -> available && step.from == KeyguardState.GLANCEABLE_HUB }
+            .map { (step, available) ->
+                available &&
+                    (step.from == KeyguardState.GLANCEABLE_HUB ||
+                        step.from == KeyguardState.DREAMING)
+            }
             .flowOn(bgDispatcher)
             .stateIn(
                 scope = applicationScope,
@@ -295,20 +339,26 @@ constructor(
     @Deprecated(
         "Use com.android.systemui.communal.domain.interactor.CommunalSceneInteractor instead"
     )
-    fun changeScene(newScene: SceneKey, transitionKey: TransitionKey? = null) =
-        communalSceneInteractor.changeScene(newScene, transitionKey)
+    fun changeScene(
+        newScene: SceneKey,
+        loggingReason: String,
+        transitionKey: TransitionKey? = null
+    ) = communalSceneInteractor.changeScene(newScene, loggingReason, transitionKey)
 
     fun setEditModeOpen(isOpen: Boolean) {
         _editModeOpen.value = isOpen
     }
 
+    fun setEditActivityShowing(isOpen: Boolean) {
+        _editActivityShowing.value = isOpen
+    }
+
     /** Show the widget editor Activity. */
     fun showWidgetEditor(
-        preselectedKey: String? = null,
         shouldOpenWidgetPickerOnStart: Boolean = false,
     ) {
         communalSceneInteractor.setEditModeState(EditModeState.STARTING)
-        editWidgetsActivityStarter.startActivity(preselectedKey, shouldOpenWidgetPickerOnStart)
+        editWidgetsActivityStarter.startActivity(shouldOpenWidgetPickerOnStart)
     }
 
     /**
@@ -326,13 +376,16 @@ constructor(
     /** Dismiss the CTA tile from the hub in view mode. */
     suspend fun dismissCtaTile() = communalPrefsInteractor.setCtaDismissed()
 
-    /** Add a widget at the specified position. */
+    /**
+     * Add a widget at the specified rank. If rank is not provided, the widget will be added at the
+     * end.
+     */
     fun addWidget(
         componentName: ComponentName,
         user: UserHandle,
-        priority: Int,
+        rank: Int? = null,
         configurator: WidgetConfigurator?,
-    ) = widgetRepository.addWidget(componentName, user, priority, configurator)
+    ) = widgetRepository.addWidget(componentName, user, rank, configurator)
 
     /**
      * Delete a widget by id. Called when user deletes a widget from the hub or a widget is
@@ -343,19 +396,14 @@ constructor(
     /**
      * Reorder the widgets.
      *
-     * @param widgetIdToPriorityMap mapping of the widget ids to their new priorities.
+     * @param widgetIdToRankMap mapping of the widget ids to their new priorities.
      */
-    fun updateWidgetOrder(widgetIdToPriorityMap: Map<Int, Int>) =
-        widgetRepository.updateWidgetOrder(widgetIdToPriorityMap)
+    fun updateWidgetOrder(widgetIdToRankMap: Map<Int, Int>) =
+        widgetRepository.updateWidgetOrder(widgetIdToRankMap)
 
     /** Request to unpause work profile that is currently in quiet mode. */
     fun unpauseWorkProfile() {
-        userTracker.userProfiles
-            .find { it.isManagedProfile }
-            ?.userHandle
-            ?.let { userHandle ->
-                userManager.requestQuietModeEnabled(/* enableQuietMode */ false, userHandle)
-            }
+        managedProfileController.setWorkModeEnabled(true)
     }
 
     /** Returns true if work profile is in quiet mode (disabled) for user handle. */
@@ -386,11 +434,11 @@ constructor(
         combine(
             widgetRepository.communalWidgets
                 .map { filterWidgetsByExistingUsers(it) }
-                .combine(communalSettingsInteractor.allowedByDevicePolicyForWorkProfile) {
+                .combine(communalSettingsInteractor.workProfileUserDisallowedByDevicePolicy) {
                     // exclude widgets under work profile if not allowed by device policy
                     widgets,
-                    allowedForWorkProfile ->
-                    filterWidgetsAllowedByDevicePolicy(widgets, allowedForWorkProfile)
+                    disallowedByPolicyUser ->
+                    filterWidgetsAllowedByDevicePolicy(widgets, disallowedByPolicyUser)
                 },
             updateOnWorkProfileBroadcastReceived,
         ) { widgets, _ ->
@@ -399,6 +447,7 @@ constructor(
                     is CommunalWidgetContentModel.Available -> {
                         WidgetContent.Widget(
                             appWidgetId = widget.appWidgetId,
+                            rank = widget.rank,
                             providerInfo = widget.providerInfo,
                             appWidgetHost = appWidgetHost,
                             inQuietMode = isQuietModeEnabled(widget.providerInfo.profile)
@@ -407,7 +456,8 @@ constructor(
                     is CommunalWidgetContentModel.Pending -> {
                         WidgetContent.PendingWidget(
                             appWidgetId = widget.appWidgetId,
-                            packageName = widget.packageName,
+                            rank = widget.rank,
+                            componentName = widget.componentName,
                             icon = widget.icon,
                         )
                     }
@@ -418,13 +468,11 @@ constructor(
     /** Filter widgets based on whether their associated profile is allowed by device policy. */
     private fun filterWidgetsAllowedByDevicePolicy(
         list: List<CommunalWidgetContentModel>,
-        allowedByDevicePolicyForWorkProfile: Boolean
+        disallowedByDevicePolicyUser: UserInfo?
     ): List<CommunalWidgetContentModel> =
-        if (allowedByDevicePolicyForWorkProfile) {
+        if (disallowedByDevicePolicyUser == null) {
             list
         } else {
-            // Get associated work profile for the currently selected user.
-            val workProfile = userTracker.userProfiles.find { it.isManagedProfile }
             list.filter { model ->
                 val uid =
                     when (model) {
@@ -432,20 +480,7 @@ constructor(
                             model.providerInfo.profile.identifier
                         is CommunalWidgetContentModel.Pending -> model.user.identifier
                     }
-                uid != workProfile?.id
-            }
-        }
-
-    /** A flow of available smartspace targets. Currently only showing timers. */
-    private val smartspaceTargets: Flow<List<SmartspaceTarget>> =
-        if (!smartspaceRepository.isSmartspaceRemoteViewsEnabled) {
-            flowOf(emptyList())
-        } else {
-            smartspaceRepository.communalSmartspaceTargets.map { targets ->
-                targets.filter { target ->
-                    target.featureType == SmartspaceTarget.FEATURE_TIMER &&
-                        target.remoteViews != null
-                }
+                uid != disallowedByDevicePolicyUser.id
             }
         }
 
@@ -472,23 +507,23 @@ constructor(
      * A flow of ongoing content, including smartspace timers and umo, ordered by creation time and
      * sized dynamically.
      */
-    fun getOngoingContent(mediaHostVisible: Boolean): Flow<List<CommunalContentModel.Ongoing>> =
-        combine(smartspaceTargets, mediaRepository.mediaModel) { smartspace, media ->
+    val ongoingContent: Flow<List<CommunalContentModel.Ongoing>> =
+        combine(smartspaceRepository.timers, mediaRepository.mediaModel) { timers, media ->
                 val ongoingContent = mutableListOf<CommunalContentModel.Ongoing>()
 
-                // Add smartspace
+                // Add smartspace timers
                 ongoingContent.addAll(
-                    smartspace.map { target ->
+                    timers.map { timer ->
                         CommunalContentModel.Smartspace(
-                            smartspaceTargetId = target.smartspaceTargetId,
-                            remoteViews = target.remoteViews!!,
-                            createdTimestampMillis = target.creationTimeMillis,
+                            smartspaceTargetId = timer.smartspaceTargetId,
+                            remoteViews = timer.remoteViews,
+                            createdTimestampMillis = timer.createdTimestampMillis,
                         )
                     }
                 )
 
                 // Add UMO
-                if (mediaHostVisible && media.hasActiveMediaOrRecommendation) {
+                if (media.hasAnyMediaOrRecommendation) {
                     ongoingContent.add(
                         CommunalContentModel.Umo(
                             createdTimestampMillis = media.createdTimestampMillis,
@@ -526,6 +561,14 @@ constructor(
     }
 
     companion object {
+        const val TAG = "CommunalInteractor"
+
+        /**
+         * The amount of time between showing the widget disclaimer to the user as measured from the
+         * moment the disclaimer is dimsissed.
+         */
+        val DISCLAIMER_RESET_MILLIS = 30.minutes
+
         /**
          * The user activity timeout which should be used when the communal hub is opened. A value
          * of -1 means that the user's chosen screen timeout will be used instead.
@@ -557,4 +600,24 @@ constructor(
             )
         }
     }
+
+    /**
+     * {@link #setScrollPosition} persists the current communal grid scroll position (to volatile
+     * memory) so that the next presentation of the grid (either as glanceable hub or edit mode) can
+     * restore position.
+     */
+    fun setScrollPosition(firstVisibleItemIndex: Int, firstVisibleItemOffset: Int) {
+        _firstVisibleItemIndex = firstVisibleItemIndex
+        _firstVisibleItemOffset = firstVisibleItemOffset
+    }
+
+    val firstVisibleItemIndex: Int
+        get() = _firstVisibleItemIndex
+
+    private var _firstVisibleItemIndex: Int = 0
+
+    val firstVisibleItemOffset: Int
+        get() = _firstVisibleItemOffset
+
+    private var _firstVisibleItemOffset: Int = 0
 }

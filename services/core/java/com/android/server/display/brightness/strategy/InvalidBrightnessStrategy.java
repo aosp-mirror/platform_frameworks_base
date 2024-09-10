@@ -34,8 +34,7 @@ public class InvalidBrightnessStrategy implements DisplayBrightnessStrategy {
     public DisplayBrightnessState updateBrightness(
             StrategyExecutionRequest strategyExecutionRequest) {
         return BrightnessUtils.constructDisplayBrightnessState(BrightnessReason.REASON_UNKNOWN,
-                PowerManager.BRIGHTNESS_INVALID_FLOAT, PowerManager.BRIGHTNESS_INVALID_FLOAT,
-                getName());
+                PowerManager.BRIGHTNESS_INVALID_FLOAT, getName());
     }
 
     @Override

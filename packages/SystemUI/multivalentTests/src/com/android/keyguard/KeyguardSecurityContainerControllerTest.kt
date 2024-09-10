@@ -18,10 +18,8 @@
 package com.android.keyguard
 
 import android.app.admin.DevicePolicyManager
-import android.app.admin.flags.Flags as DevicePolicyFlags
 import android.content.res.Configuration
 import android.media.AudioManager
-import android.platform.test.annotations.EnableFlags
 import android.telephony.TelephonyManager
 import android.testing.TestableLooper.RunWithLooper
 import android.testing.TestableResources
@@ -56,6 +54,7 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.keyboard.data.repository.FakeKeyboardRepository
 import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.domain.interactor.keyguardDismissTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.kosmos.Kosmos
@@ -105,6 +104,7 @@ import org.mockito.Mockito.atLeastOnce
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
+import org.mockito.Mockito.reset
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
@@ -152,6 +152,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
     @Mock private lateinit var deviceProvisionedController: DeviceProvisionedController
     @Mock private lateinit var postureController: DevicePostureController
     @Mock private lateinit var devicePolicyManager: DevicePolicyManager
+    @Mock private lateinit var mUserActivityNotifier: UserActivityNotifier
 
     @Captor
     private lateinit var swipeListenerArgumentCaptor:
@@ -183,7 +184,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
         whenever(view.context).thenReturn(mContext)
         whenever(view.resources).thenReturn(testableResources.resources)
 
-        val lp = FrameLayout.LayoutParams(/* width=  */ 0, /* height= */ 0)
+        val lp = FrameLayout.LayoutParams(/* width= */ 0, /* height= */ 0)
         lp.gravity = 0
         whenever(view.layoutParams).thenReturn(lp)
 
@@ -237,6 +238,8 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                 featureFlags,
                 mSelectedUserInteractor,
                 keyguardKeyboardInteractor,
+                null,
+                mUserActivityNotifier
             )
 
         kosmos = testKosmos()
@@ -278,7 +281,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                 deviceProvisionedController,
                 faceAuthAccessibilityDelegate,
                 devicePolicyManager,
-                keyguardTransitionInteractor,
+                kosmos.keyguardDismissTransitionInteractor,
                 { primaryBouncerInteractor },
             ) {
                 deviceEntryInteractor
@@ -542,6 +545,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
         // THEN the next security method of None will dismiss keyguard.
         verify(viewMediatorCallback, never()).keyguardDone(anyInt())
     }
+
     @Test
     fun showNextSecurityScreenOrFinish_SimPin_Swipe_userNotSetup() {
         // GIVEN the current security method is SimPin
@@ -635,14 +639,6 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
         verify(configurationController).addCallback(configurationListenerArgumentCaptor.capture())
         clearInvocations(viewFlipperController)
         configurationListenerArgumentCaptor.value.onDensityOrFontScaleChanged()
-        verify(viewFlipperController).clearViews()
-        verify(viewFlipperController)
-            .asynchronouslyInflateView(
-                eq(SecurityMode.PIN),
-                any(),
-                onViewInflatedCallbackArgumentCaptor.capture()
-            )
-        onViewInflatedCallbackArgumentCaptor.value.onViewInflated(inputViewController)
         verify(view).onDensityOrFontScaleChanged()
     }
 
@@ -771,7 +767,9 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
         underTest.reinflateViewFlipper(onViewInflatedCallback)
         verify(viewFlipperController).clearViews()
         verify(viewFlipperController)
-            .asynchronouslyInflateView(any(), any(), eq(onViewInflatedCallback))
+            .asynchronouslyInflateView(any(), any(), onViewInflatedCallbackArgumentCaptor.capture())
+        onViewInflatedCallbackArgumentCaptor.value.onViewInflated(inputViewController)
+        verify(view).updateSecurityViewFlipper()
     }
 
     @Test
@@ -935,12 +933,13 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
         underTest.onViewAttached()
         verify(userSwitcherController)
             .addUserSwitchCallback(capture(userSwitchCallbackArgumentCaptor))
+        reset(primaryBouncerInteractor)
         userSwitchCallbackArgumentCaptor.value.onUserSwitched()
-        verify(viewFlipperController).asynchronouslyInflateView(any(), any(), any())
+
+        verify(primaryBouncerInteractor).setLastShownPrimarySecurityScreen(any())
     }
 
     @Test
-    @EnableFlags(DevicePolicyFlags.FLAG_HEADLESS_SINGLE_USER_FIXES)
     fun showAlmostAtWipeDialog_calledOnMainUser_setsCorrectUserType() {
         val mainUserId = 10
 
@@ -957,7 +956,6 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
     }
 
     @Test
-    @EnableFlags(DevicePolicyFlags.FLAG_HEADLESS_SINGLE_USER_FIXES)
     fun showAlmostAtWipeDialog_calledOnNonMainUser_setsCorrectUserType() {
         val secondaryUserId = 10
         val mainUserId = 0

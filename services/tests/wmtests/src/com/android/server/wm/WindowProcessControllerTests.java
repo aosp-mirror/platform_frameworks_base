@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.content.pm.ActivityInfo.INSETS_DECOUPLED_CONFIGURATION_ENFORCED;
 import static android.content.res.Configuration.GRAMMATICAL_GENDER_NOT_SPECIFIED;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
@@ -43,7 +44,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
 import android.Manifest;
@@ -86,6 +86,7 @@ public class WindowProcessControllerTests extends WindowTestsBase {
 
         ApplicationInfo info = mock(ApplicationInfo.class);
         info.packageName = "test.package.name";
+        doReturn(true).when(info).isChangeEnabled(INSETS_DECOUPLED_CONFIGURATION_ENFORCED);
         mWpc = new WindowProcessController(
                 mAtm, info, null, 0, -1, null, mMockListener);
         mWpc.setThread(mock(IApplicationThread.class));
@@ -192,21 +193,6 @@ public class WindowProcessControllerTests extends WindowTestsBase {
         InOrder orderVerifier = Mockito.inOrder(mMockListener);
         orderVerifier.verify(mMockListener).setRunningRemoteAnimation(eq(true));
         orderVerifier.verify(mMockListener).setRunningRemoteAnimation(eq(false));
-    }
-
-    @Test
-    public void testSetRunningBothAnimations() {
-        mWpc.setRunningRemoteAnimation(true);
-        mWpc.setRunningRecentsAnimation(true);
-
-        mWpc.setRunningRecentsAnimation(false);
-        mWpc.setRunningRemoteAnimation(false);
-        waitHandlerIdle(mAtm.mH);
-
-        InOrder orderVerifier = Mockito.inOrder(mMockListener);
-        orderVerifier.verify(mMockListener, times(1)).setRunningRemoteAnimation(eq(true));
-        orderVerifier.verify(mMockListener, times(1)).setRunningRemoteAnimation(eq(false));
-        orderVerifier.verifyNoMoreInteractions();
     }
 
     @Test

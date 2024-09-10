@@ -25,6 +25,7 @@ import android.hardware.input.IInputDeviceBatteryListener;
 import android.hardware.input.IInputDeviceBatteryState;
 import android.hardware.input.IKeyboardBacklightListener;
 import android.hardware.input.IKeyboardBacklightState;
+import android.hardware.input.IKeyGestureEventListener;
 import android.hardware.input.IStickyModifierStateListener;
 import android.hardware.input.ITabletModeChangedListener;
 import android.hardware.input.KeyboardLayoutSelectionResult;
@@ -239,4 +240,14 @@ interface IInputManager {
     void unregisterStickyModifierStateListener(IStickyModifierStateListener listener);
 
     KeyGlyphMap getKeyGlyphMap(int deviceId);
+
+    @PermissionManuallyEnforced
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
+            + "android.Manifest.permission.MANAGE_KEY_GESTURES)")
+    void registerKeyGestureEventListener(IKeyGestureEventListener listener);
+
+    @PermissionManuallyEnforced
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
+            + "android.Manifest.permission.MANAGE_KEY_GESTURES)")
+    void unregisterKeyGestureEventListener(IKeyGestureEventListener listener);
 }

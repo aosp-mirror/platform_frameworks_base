@@ -35,7 +35,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyInt
-import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.any
@@ -679,6 +678,7 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
             CTRL_TYPE_RIGHT or CTRL_TYPE_BOTTOM)
         val rectAfterDrag = Rect(STARTING_BOUNDS)
         rectAfterDrag.right += 2000
+        rectAfterDrag.bottom = STABLE_BOUNDS_LANDSCAPE.bottom
         // First drag; we should fetch stable bounds.
         verify(mockDisplayLayout, Mockito.times(1)).getStableBounds(any())
         verify(mockShellTaskOrganizer).applyTransaction(argThat { wct ->
@@ -706,8 +706,8 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
             STARTING_BOUNDS.right.toFloat(), STARTING_BOUNDS.bottom.toFloat(),
             STARTING_BOUNDS.right.toFloat() + 2000, STARTING_BOUNDS.bottom.toFloat() + 2000,
             CTRL_TYPE_RIGHT or CTRL_TYPE_BOTTOM)
-        rectAfterDrag.right -= 2000
-        rectAfterDrag.bottom += 2000
+        rectAfterDrag.right = STABLE_BOUNDS_PORTRAIT.right
+        rectAfterDrag.bottom = STARTING_BOUNDS.bottom + 2000
 
         verify(mockShellTaskOrganizer).applyTransaction(argThat { wct ->
             return@argThat wct.changes.any { (token, change) ->

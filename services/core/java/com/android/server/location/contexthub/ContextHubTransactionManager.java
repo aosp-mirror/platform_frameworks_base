@@ -56,6 +56,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
     public static final Duration RELIABLE_MESSAGE_TIMEOUT = Duration.ofSeconds(1);
 
+    public static final Duration RELIABLE_MESSAGE_DUPLICATE_DETECTION_TIMEOUT =
+            RELIABLE_MESSAGE_TIMEOUT.multipliedBy(3);
+
     private static final int MAX_PENDING_REQUESTS = 10000;
 
     private static final int RELIABLE_MESSAGE_MAX_NUM_RETRY = 3;
@@ -474,9 +477,8 @@ import java.util.concurrent.atomic.AtomicInteger;
                 return;
             }
 
-            Integer transactionMessageSequenceNumber = transaction.getMessageSequenceNumber();
+            int transactionMessageSequenceNumber = transaction.getMessageSequenceNumber();
             if (transaction.getTransactionType() != ContextHubTransaction.TYPE_RELIABLE_MESSAGE
-                    || transactionMessageSequenceNumber == null
                     || transactionMessageSequenceNumber != messageSequenceNumber) {
                 Log.w(TAG, "Received unexpected message transaction response (expected message "
                         + "sequence number = "
@@ -494,7 +496,8 @@ import java.util.concurrent.atomic.AtomicInteger;
         ContextHubServiceTransaction transaction =
                 mReliableMessageTransactionMap.get(messageSequenceNumber);
         if (transaction == null) {
-            Log.w(TAG, "Could not find reliable message transaction with message sequence number"
+            Log.w(TAG, "Could not find reliable message transaction with "
+                    + "message sequence number = "
                     + messageSequenceNumber);
             return;
         }
@@ -714,9 +717,13 @@ import java.util.concurrent.atomic.AtomicInteger;
         }
         mReliableMessageHostEndpointIdActiveSet.remove(transaction.getHostEndpointId());
 
-        Log.d(TAG, "Successfully completed reliable message transaction with "
-                + "message sequence number: " + transaction.getMessageSequenceNumber()
-                + " and result: " + result);
+    Log.d(
+        TAG,
+        "Successfully completed reliable message transaction with "
+            + "message sequence number = "
+            + transaction.getMessageSequenceNumber()
+            + " and result = "
+            + result);
     }
 
     /**
@@ -729,15 +736,20 @@ import java.util.concurrent.atomic.AtomicInteger;
         int numCompletedStartCalls = transaction.getNumCompletedStartCalls();
         @ContextHubTransaction.Result int result = transaction.onTransact();
         if (result == ContextHubTransaction.RESULT_SUCCESS) {
-            Log.d(TAG, "Successfully "
-                    + (numCompletedStartCalls == 0 ? "started" : "retried")
-                    + " reliable message transaction with message sequence number: "
-                    + transaction.getMessageSequenceNumber());
+      Log.d(
+          TAG,
+          "Successfully "
+              + (numCompletedStartCalls == 0 ? "started" : "retried")
+              + " reliable message transaction with message sequence number = "
+              + transaction.getMessageSequenceNumber());
         } else {
-            Log.w(TAG, "Could not start reliable message transaction with "
-                    + "message sequence number: "
-                    + transaction.getMessageSequenceNumber()
-                    + ", result: " + result);
+      Log.w(
+          TAG,
+          "Could not start reliable message transaction with "
+              + "message sequence number = "
+              + transaction.getMessageSequenceNumber()
+              + ", result = "
+              + result);
         }
 
         transaction.setNextRetryTime(now + RELIABLE_MESSAGE_RETRY_WAIT_TIME.toNanos());

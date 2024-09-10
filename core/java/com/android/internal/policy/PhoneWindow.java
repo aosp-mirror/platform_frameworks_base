@@ -418,6 +418,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             mElevation = preservedWindow.getElevation();
             mLoadElevation = false;
             mForceDecorInstall = true;
+            mDecorFitsSystemWindows = preservedWindow.decorFitsSystemWindows();
             setSystemBarAppearance(preservedWindow.getSystemBarAppearance());
             // If we're preserving window, carry over the app token from the preserved
             // window, as we'll be skipping the addView in handleResumeActivity(), and
@@ -2501,6 +2502,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if (mEdgeToEdgeEnforced) {
             getAttributes().privateFlags |= PRIVATE_FLAG_EDGE_TO_EDGE_ENFORCED;
             mDecorFitsSystemWindows = false;
+            mStatusBarColor = Color.TRANSPARENT;
+            mNavigationBarDividerColor = Color.TRANSPARENT;
+            // mNavigationBarColor is not reset here because it might be used to draw the scrim.
         }
         if (CompatChanges.isChangeEnabled(OVERRIDE_LAYOUT_IN_DISPLAY_CUTOUT_MODE)
                 && !a.getBoolean(R.styleable.Window_windowOptOutEdgeToEdgeEnforcement,
@@ -2509,9 +2513,16 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
 
         mIsFloating = a.getBoolean(R.styleable.Window_windowIsFloating, false);
+
+        // For floating windows that are *allowed* to fill the screen (like Wear) content
+        // should still be wrapped if they're not explicitly requested as fullscreen.
+        final boolean isFloatingAndFullscreen = mIsFloating
+                && mAllowFloatingWindowsFillScreen
+                && a.getBoolean(R.styleable.Window_windowFullscreen, false);
+
         int flagsToUpdate = (FLAG_LAYOUT_IN_SCREEN|FLAG_LAYOUT_INSET_DECOR)
                 & (~getForcedWindowFlags());
-        if (mIsFloating && !mAllowFloatingWindowsFillScreen) {
+        if (mIsFloating && !isFloatingAndFullscreen) {
             setLayout(WRAP_CONTENT, WRAP_CONTENT);
             setFlags(0, flagsToUpdate);
         } else {
@@ -3322,6 +3333,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             Bundle args = new Bundle();
             args.putInt(Intent.EXTRA_ASSIST_INPUT_DEVICE_ID, event.getDeviceId());
             args.putLong(Intent.EXTRA_TIME, event.getEventTime());
+            args.putBoolean(Intent.EXTRA_ASSIST_INPUT_HINT_KEYBOARD, true);
             ((SearchManager) getContext().getSystemService(Context.SEARCH_SERVICE))
                     .launchAssist(args);
             return true;

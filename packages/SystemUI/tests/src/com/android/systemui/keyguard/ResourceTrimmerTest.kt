@@ -18,7 +18,6 @@ import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.se
 import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.scene.data.repository.Idle
 import com.android.systemui.scene.data.repository.setSceneTransition
-import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.testKosmos
 import com.android.systemui.utils.GlobalWindowManager
@@ -64,7 +63,6 @@ class ResourceTrimmerTest : SysuiTestCase() {
                 globalWindowManager = globalWindowManager,
                 applicationScope = testScope.backgroundScope,
                 bgDispatcher = kosmos.testDispatcher,
-                sceneInteractor = kosmos.sceneInteractor,
             )
         resourceTrimmer.start()
     }

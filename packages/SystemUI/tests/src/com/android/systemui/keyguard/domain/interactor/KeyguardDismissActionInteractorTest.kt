@@ -20,22 +20,33 @@ package com.android.systemui.keyguard.domain.interactor
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.authentication.data.repository.fakeAuthenticationRepository
+import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
+import com.android.systemui.bouncer.data.repository.fakeKeyguardBouncerRepository
+import com.android.systemui.bouncer.domain.interactor.alternateBouncerInteractor
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.flags.DisableSceneContainer
+import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
-import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.DismissAction
 import com.android.systemui.keyguard.shared.model.KeyguardDone
-import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.power.data.repository.fakePowerRepository
+import com.android.systemui.power.domain.interactor.powerInteractor
+import com.android.systemui.power.shared.model.WakeSleepReason
+import com.android.systemui.power.shared.model.WakefulnessState
 import com.android.systemui.scene.data.repository.Idle
+import com.android.systemui.scene.data.repository.Transition
 import com.android.systemui.scene.data.repository.setSceneTransition
 import com.android.systemui.scene.domain.interactor.sceneInteractor
+import com.android.systemui.scene.domain.resolver.notifShadeSceneFamilyResolver
+import com.android.systemui.scene.domain.resolver.quickSettingsSceneFamilyResolver
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -45,37 +56,36 @@ import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
+@EnableSceneContainer
 @RunWith(AndroidJUnit4::class)
 class KeyguardDismissActionInteractorTest : SysuiTestCase() {
     val kosmos = testKosmos()
 
     private val keyguardRepository = kosmos.fakeKeyguardRepository
-    private val transitionRepository = kosmos.fakeKeyguardTransitionRepository
-
     private val testScope = kosmos.testScope
 
-    private lateinit var dismissInteractorWithDependencies:
-        KeyguardDismissInteractorFactory.WithDependencies
+    private lateinit var dismissInteractor: KeyguardDismissInteractor
     private lateinit var underTest: KeyguardDismissActionInteractor
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        dismissInteractorWithDependencies =
-            KeyguardDismissInteractorFactory.create(
-                context = context,
-                testScope = testScope,
-                keyguardRepository = keyguardRepository,
-            )
-
+        dismissInteractor = kosmos.keyguardDismissInteractor
         underTest =
             KeyguardDismissActionInteractor(
                 repository = keyguardRepository,
                 transitionInteractor = kosmos.keyguardTransitionInteractor,
-                dismissInteractor = dismissInteractorWithDependencies.interactor,
+                dismissInteractor = dismissInteractor,
                 applicationScope = testScope.backgroundScope,
-                sceneInteractor = kosmos.sceneInteractor,
+                sceneInteractor = { kosmos.sceneInteractor },
+                deviceEntryInteractor = { kosmos.deviceEntryInteractor },
+                quickSettingsSceneFamilyResolver = { kosmos.quickSettingsSceneFamilyResolver },
+                notifShadeSceneFamilyResolver = { kosmos.notifShadeSceneFamilyResolver },
+                powerInteractor = kosmos.powerInteractor,
+                alternateBouncerInteractor = kosmos.alternateBouncerInteractor,
+                keyguardInteractor = { kosmos.keyguardInteractor },
+                shadeInteractor = { kosmos.shadeInteractor },
             )
     }
 
@@ -153,42 +163,12 @@ class KeyguardDismissActionInteractorTest : SysuiTestCase() {
                     willAnimateOnLockscreen = true,
                 )
             )
-            dismissInteractorWithDependencies.bouncerRepository.setKeyguardAuthenticatedBiometrics(
-                true
-            )
+            kosmos.fakeKeyguardBouncerRepository.setKeyguardAuthenticatedBiometrics(true)
             assertThat(executeDismissAction).isEqualTo(onDismissAction)
         }
 
     @Test
-    @DisableSceneContainer
     fun executeDismissAction_dismissKeyguardRequestWithoutImmediateDismissAction() =
-        testScope.runTest {
-            val executeDismissAction by collectLastValue(underTest.executeDismissAction)
-
-            // WHEN a keyguard action will run after the keyguard is gone
-            val onDismissAction = {}
-            keyguardRepository.setDismissAction(
-                DismissAction.RunAfterKeyguardGone(
-                    dismissAction = onDismissAction,
-                    onCancelAction = {},
-                    message = "message",
-                    willAnimateOnLockscreen = true,
-                )
-            )
-            assertThat(executeDismissAction).isNull()
-
-            // WHEN the keyguard is GONE
-            transitionRepository.sendTransitionSteps(
-                from = KeyguardState.LOCKSCREEN,
-                to = KeyguardState.GONE,
-                testScope,
-            )
-            assertThat(executeDismissAction).isNotNull()
-        }
-
-    @Test
-    @EnableSceneContainer
-    fun executeDismissAction_dismissKeyguardRequestWithoutImmediateDismissAction_scene_container() =
         testScope.runTest {
             val executeDismissAction by collectLastValue(underTest.executeDismissAction)
 
@@ -212,8 +192,8 @@ class KeyguardDismissActionInteractorTest : SysuiTestCase() {
     @Test
     fun resetDismissAction() =
         testScope.runTest {
+            kosmos.setSceneTransition(Idle(Scenes.Bouncer))
             val resetDismissAction by collectLastValue(underTest.resetDismissAction)
-
             keyguardRepository.setDismissAction(
                 DismissAction.RunAfterKeyguardGone(
                     dismissAction = {},
@@ -222,10 +202,61 @@ class KeyguardDismissActionInteractorTest : SysuiTestCase() {
                     willAnimateOnLockscreen = true,
                 )
             )
-            transitionRepository.sendTransitionSteps(
-                from = KeyguardState.LOCKSCREEN,
-                to = KeyguardState.AOD,
-                testScope
+            assertThat(resetDismissAction).isNull()
+            kosmos.setSceneTransition(Idle(Scenes.Lockscreen))
+            assertThat(resetDismissAction).isEqualTo(Unit)
+        }
+
+    @Test
+    fun doNotResetDismissActionOnUnlockedShade() =
+        testScope.runTest {
+            kosmos.setSceneTransition(Idle(Scenes.Bouncer))
+            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.None
+            )
+            val resetDismissAction by collectLastValue(underTest.resetDismissAction)
+            keyguardRepository.setDismissAction(
+                DismissAction.RunAfterKeyguardGone(
+                    dismissAction = {},
+                    onCancelAction = {},
+                    message = "message",
+                    willAnimateOnLockscreen = true,
+                )
+            )
+            assertThat(resetDismissAction).isNull()
+
+            kosmos.setSceneTransition(
+                Transition(
+                    from = Scenes.Bouncer,
+                    to = Scenes.NotificationsShade,
+                    progress = flowOf(1f),
+                )
+            )
+            assertThat(resetDismissAction).isNull()
+        }
+
+    @Test
+    fun resetDismissAction_onBouncer_OnAsleep() =
+        testScope.runTest {
+            kosmos.setSceneTransition(Idle(Scenes.Bouncer))
+            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.None
+            )
+            val resetDismissAction by collectLastValue(underTest.resetDismissAction)
+            keyguardRepository.setDismissAction(
+                DismissAction.RunAfterKeyguardGone(
+                    dismissAction = {},
+                    onCancelAction = {},
+                    message = "message",
+                    willAnimateOnLockscreen = true,
+                )
+            )
+            assertThat(resetDismissAction).isNull()
+            kosmos.fakePowerRepository.updateWakefulness(
+                rawState = WakefulnessState.ASLEEP,
+                lastWakeReason = WakeSleepReason.POWER_BUTTON,
+                lastSleepReason = WakeSleepReason.TIMEOUT,
+                powerButtonLaunchGestureTriggered = false,
             )
             assertThat(resetDismissAction).isEqualTo(Unit)
         }
@@ -271,8 +302,7 @@ class KeyguardDismissActionInteractorTest : SysuiTestCase() {
     @Test
     fun setKeyguardDone() =
         testScope.runTest {
-            val keyguardDoneTiming by
-                collectLastValue(dismissInteractorWithDependencies.interactor.keyguardDone)
+            val keyguardDoneTiming by collectLastValue(dismissInteractor.keyguardDone)
             runCurrent()
 
             underTest.setKeyguardDone(KeyguardDone.LATER)

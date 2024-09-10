@@ -23,19 +23,19 @@ internal class ElementStateScopeImpl(
     private val layoutImpl: SceneTransitionLayoutImpl,
 ) : ElementStateScope {
     override fun ElementKey.targetSize(scene: SceneKey): IntSize? {
-        return layoutImpl.elements[this]?.sceneStates?.get(scene)?.targetSize.takeIf {
+        return layoutImpl.elements[this]?.stateByContent?.get(scene)?.targetSize.takeIf {
             it != Element.SizeUnspecified
         }
     }
 
     override fun ElementKey.targetOffset(scene: SceneKey): Offset? {
-        return layoutImpl.elements[this]?.sceneStates?.get(scene)?.targetOffset.takeIf {
+        return layoutImpl.elements[this]?.stateByContent?.get(scene)?.targetOffset.takeIf {
             it != Offset.Unspecified
         }
     }
 
     override fun SceneKey.targetSize(): IntSize? {
-        return layoutImpl.scenes[this]?.targetSize.takeIf { it != IntSize.Zero }
+        return layoutImpl.sceneOrNull(this)?.targetSize.takeIf { it != IntSize.Zero }
     }
 }
 

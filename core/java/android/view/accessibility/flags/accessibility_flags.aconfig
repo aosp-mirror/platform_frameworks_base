@@ -19,6 +19,13 @@ flag {
 }
 
 flag {
+    name: "a11y_selection_api"
+    namespace: "accessibility"
+    description: "Enables new APIs for an AccessibilityService to control selection across nodes."
+    bug: "362782866"
+}
+
+flag {
     namespace: "accessibility"
     name: "allow_shortcut_chooser_on_lockscreen"
     description: "Allows the a11y shortcut disambig dialog to appear on the lockscreen"
@@ -128,6 +135,13 @@ flag {
 }
 
 flag {
+    namespace: "accessibility"
+    name: "remove_child_hover_check_for_touch_exploration"
+    description: "Remove a check for a hovered child that prevents touch events from being delegated to non-direct descendants"
+    bug: "304770837"
+}
+
+flag {
     name: "skip_accessibility_warning_dialog_for_trusted_services"
     namespace: "accessibility"
     description: "Skips showing the accessibility warning dialog for trusted services."
@@ -174,6 +188,13 @@ flag {
     metadata {
         purpose: PURPOSE_BUGFIX
     }
+}
+
+flag {
+    name: "support_multiple_labeledby"
+    namespace: "accessibility"
+    description: "Feature flag for supporting multiple labels in AccessibilityNodeInfo labeledby api"
+    bug: "333780959"
 }
 
 flag {

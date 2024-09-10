@@ -123,6 +123,8 @@ import java.util.concurrent.TimeUnit;
  * <p> An app can check whether wallpapers are supported for the current user, by calling
  * {@link #isWallpaperSupported()}, and whether setting of wallpapers is allowed, by calling
  * {@link #isSetWallpaperAllowed()}.
+ * Any public APIs added to WallpaperManager should have a corresponding stub in
+ * {@link DisabledWallpaperManager}.
  */
 @SystemService(Context.WALLPAPER_SERVICE)
 public class WallpaperManager {
@@ -1569,9 +1571,26 @@ public class WallpaperManager {
      */
     @Nullable
     public Rect peekBitmapDimensions(@SetWallpaperFlags int which, boolean returnDefault) {
+        if (multiCrop()) {
+            return peekBitmapDimensionsAsUser(which, returnDefault, mContext.getUserId());
+        }
         checkExactlyOneWallpaperFlagSet(which);
         return sGlobals.peekWallpaperDimensions(mContext, returnDefault, which,
                 mContext.getUserId());
+    }
+
+    /**
+     * Overload of {@link #peekBitmapDimensions(int, boolean)} with a userId argument.
+     * TODO(b/360120606): remove the SuppressWarnings
+     * @hide
+     */
+    @SuppressWarnings("AndroidFrameworkContextUserId")
+    @FlaggedApi(FLAG_MULTI_CROP)
+    @Nullable
+    public Rect peekBitmapDimensionsAsUser(@SetWallpaperFlags int which, boolean returnDefault,
+            int userId) {
+        checkExactlyOneWallpaperFlagSet(which);
+        return sGlobals.peekWallpaperDimensions(mContext, returnDefault, which, userId);
     }
 
     /**

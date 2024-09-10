@@ -29,12 +29,14 @@ bootstrap_go_package {
     pkgPath: "android/soong/api",
     deps: [
         "blueprint",
+        "blueprint-proptools",
         "soong",
         "soong-android",
         "soong-genrule",
         "soong-java",
     ],
     srcs: ["api.go"],
+    testSrcs: ["api_test.go"],
     pluginFor: ["soong_build"],
 }
 
@@ -60,40 +62,8 @@ metalava_cmd = "$(location metalava)"
 metalava_cmd += " -J--add-opens=java.base/java.util=ALL-UNNAMED "
 metalava_cmd += " --quiet "
 
-soong_config_module_type {
-    name: "enable_crashrecovery_module",
-    module_type: "combined_apis_defaults",
-    config_namespace: "ANDROID",
-    bool_variables: ["release_crashrecovery_module"],
-    properties: [
-        "bootclasspath",
-        "system_server_classpath",
-    ],
-}
-
-soong_config_bool_variable {
-    name: "release_crashrecovery_module",
-}
-
-enable_crashrecovery_module {
-    name: "crashrecovery_module_defaults",
-    soong_config_variables: {
-        release_crashrecovery_module: {
-            bootclasspath: [
-                "framework-crashrecovery",
-            ],
-            system_server_classpath: [
-                "service-crashrecovery",
-            ],
-        },
-    },
-}
-
 combined_apis {
     name: "frameworks-base-api",
-    defaults: [
-        "crashrecovery_module_defaults",
-    ],
     bootclasspath: [
         "android.net.ipsec.ike",
         "art.module.public.api",
@@ -117,6 +87,7 @@ combined_apis {
         "framework-permission",
         "framework-permission-s",
         "framework-profiling",
+        "framework-photopicker",
         "framework-scheduling",
         "framework-sdkextensions",
         "framework-statsd",
@@ -126,7 +97,12 @@ combined_apis {
         "framework-virtualization",
         "framework-wifi",
         "i18n.module.public.api",
-    ],
+    ] + select(soong_config_variable("ANDROID", "release_crashrecovery_module"), {
+        "true": [
+            "framework-crashrecovery",
+        ],
+        default: [],
+    }),
     system_server_classpath: [
         "service-art",
         "service-configinfrastructure",
@@ -135,7 +111,12 @@ combined_apis {
         "service-permission",
         "service-rkp",
         "service-sdksandbox",
-    ],
+    ] + select(soong_config_variable("ANDROID", "release_crashrecovery_module"), {
+        "true": [
+            "service-crashrecovery",
+        ],
+        default: [],
+    }),
 }
 
 genrule {
@@ -304,7 +285,7 @@ packages_to_document = [
 // These are libs from framework-internal-utils that are required (i.e. being referenced)
 // from framework-non-updatable-sources. Add more here when there's a need.
 // DO NOT add the entire framework-internal-utils. It might cause unnecessary circular
-// dependencies gets bigger.
+// dependencies when the list gets bigger.
 android_non_updatable_stubs_libs = [
     "android.hardware.cas-V1.2-java",
     "android.hardware.health-V1.0-java-constants",
@@ -368,8 +349,6 @@ stubs_defaults {
         "--hide CallbackInterface",
         // Disable HiddenSuperclass, as Metalava handles this fine (it should be hidden by default)
         "--hide HiddenSuperclass",
-        "--hide-package android.audio.policy.configuration.V7_0",
-        "--hide-package com.android.server",
         "--manifest $(location :frameworks-base-core-AndroidManifest.xml)",
     ],
     filter_packages: packages_to_document,
@@ -405,6 +384,11 @@ non_updatable_api_deps_on_modules = [
     "sdk_module-lib_current_framework-connectivity-t",
     "sdk_system_current_android",
 ]
+
+java_defaults {
+    name: "module-classpath-java-defaults",
+    libs: non_updatable_api_deps_on_modules,
+}
 
 // Defaults with module APIs in the classpath (mostly from prebuilts).
 // Suitable for compiling android-non-updatable.

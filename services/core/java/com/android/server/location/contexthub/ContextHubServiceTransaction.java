@@ -33,11 +33,11 @@ abstract class ContextHubServiceTransaction {
     @ContextHubTransaction.Type
     private final int mTransactionType;
 
-    private final Long mNanoAppId;
+    private final long mNanoAppId;
 
     private final String mPackage;
 
-    private final Integer mMessageSequenceNumber;
+    private final int mMessageSequenceNumber;
 
     private long mNextRetryTime;
 
@@ -53,9 +53,9 @@ abstract class ContextHubServiceTransaction {
     ContextHubServiceTransaction(int id, int type, String packageName) {
         mTransactionId = id;
         mTransactionType = type;
-        mNanoAppId = null;
+        mNanoAppId = Long.MAX_VALUE;
         mPackage = packageName;
-        mMessageSequenceNumber = null;
+        mMessageSequenceNumber = Integer.MAX_VALUE;
         mNextRetryTime = Long.MAX_VALUE;
         mTimeoutTime = Long.MAX_VALUE;
         mNumCompletedStartCalls = 0;
@@ -68,7 +68,7 @@ abstract class ContextHubServiceTransaction {
         mTransactionType = type;
         mNanoAppId = nanoAppId;
         mPackage = packageName;
-        mMessageSequenceNumber = null;
+        mMessageSequenceNumber = Integer.MAX_VALUE;
         mNextRetryTime = Long.MAX_VALUE;
         mTimeoutTime = Long.MAX_VALUE;
         mNumCompletedStartCalls = 0;
@@ -79,7 +79,7 @@ abstract class ContextHubServiceTransaction {
             int messageSequenceNumber, short hostEndpointId) {
         mTransactionId = id;
         mTransactionType = type;
-        mNanoAppId = null;
+        mNanoAppId = Long.MAX_VALUE;
         mPackage = packageName;
         mMessageSequenceNumber = messageSequenceNumber;
         mNextRetryTime = Long.MAX_VALUE;
@@ -131,7 +131,7 @@ abstract class ContextHubServiceTransaction {
         return mTransactionType;
     }
 
-    Integer getMessageSequenceNumber() {
+    int getMessageSequenceNumber() {
         return mMessageSequenceNumber;
     }
 
@@ -204,14 +204,14 @@ abstract class ContextHubServiceTransaction {
         out.append(ContextHubTransaction.typeToString(mTransactionType,
                 /* upperCase= */ true));
         out.append(" (");
-        if (mNanoAppId != null) {
+        if (mNanoAppId != Long.MAX_VALUE) {
             out.append("appId = 0x");
             out.append(Long.toHexString(mNanoAppId));
             out.append(", ");
         }
         out.append("package = ");
         out.append(mPackage);
-        if (mMessageSequenceNumber != null) {
+        if (mMessageSequenceNumber != Integer.MAX_VALUE) {
             out.append(", messageSequenceNumber = ");
             out.append(mMessageSequenceNumber);
         }

@@ -110,7 +110,7 @@ class ManifestFixer : public IXmlResourceConsumer {
  private:
   DISALLOW_COPY_AND_ASSIGN(ManifestFixer);
 
-  bool BuildRules(xml::XmlActionExecutor* executor, android::IDiagnostics* diag);
+  bool BuildRules(xml::XmlActionExecutor* executor, IAaptContext* context);
 
   ManifestFixerOptions options_;
 };

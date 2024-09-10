@@ -17,10 +17,12 @@
 package com.android.server.location.contexthub;
 
 import android.chre.flags.Flags;
+import android.hardware.location.ContextHubTransaction;
 import android.hardware.location.NanoAppMessage;
 import android.util.Log;
 
-import java.util.Random;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.Callable;
 
 /**
  * A class to manage behaviors during test mode. This is used for testing.
@@ -29,30 +31,31 @@ import java.util.Random;
 public class ContextHubTestModeManager {
     private static final String TAG = "ContextHubTestModeManager";
 
-    /** Probability (in percent) of duplicating a message. */
-    private static final int MESSAGE_DROP_PROBABILITY_PERCENT = 20;
+    private static final int DROP_MESSAGE_TO_HOST_EVENT = 0;
+    private static final int DROP_MESSAGE_TO_CONTEXT_HUB_EVENT = 1;
+    private static final int DUPLICATE_MESSAGE_TO_HOST_EVENT = 2;
+    private static final int DUPLICATE_MESSAGE_TO_CONTEXT_HUB_EVENT = 3;
+    private static final int NUMBER_OF_EVENTS = 4;
 
-    /** Probability (in percent) of duplicating a message. */
-    private static final int MESSAGE_DUPLICATION_PROBABILITY_PERCENT = 20;
-
-    /** The number of total messages to send when the duplicate event happens. */
+    /** The number of total messages to send when the duplication event happens. */
     private static final int NUM_MESSAGES_TO_DUPLICATE = 3;
 
-    /** A probability percent for a certain event. */
-    private static final int MAX_PROBABILITY_PERCENT = 100;
-
-    private final Random mRandom = new Random();
+    /** The counter to track the number of interactions with the test mode manager. */
+    private final AtomicLong mCounter = new AtomicLong(0);
 
     /**
      * @return whether the message was handled
      * @see ContextHubServiceCallback#handleNanoappMessage
      */
     public boolean handleNanoappMessage(Runnable handleMessage, NanoAppMessage message) {
+        if (!message.isReliable()) {
+            return false;
+        }
+
+        long counterValue = mCounter.getAndIncrement();
         if (Flags.reliableMessageDuplicateDetectionService()
-                && message.isReliable()
-                && mRandom.nextInt(MAX_PROBABILITY_PERCENT)
-                        < MESSAGE_DUPLICATION_PROBABILITY_PERCENT) {
-            Log.i(TAG, "[TEST MODE] Duplicating message ("
+                && counterValue % NUMBER_OF_EVENTS == DUPLICATE_MESSAGE_TO_HOST_EVENT) {
+            Log.i(TAG, "[TEST MODE] Duplicating message to host ("
                     + NUM_MESSAGES_TO_DUPLICATE
                     + " sends) with message sequence number: "
                     + message.getMessageSequenceNumber());
@@ -61,6 +64,14 @@ public class ContextHubTestModeManager {
             }
             return true;
         }
+
+        if (counterValue % NUMBER_OF_EVENTS == DROP_MESSAGE_TO_HOST_EVENT) {
+            Log.i(TAG, "[TEST MODE] Dropping message to host with "
+                    + "message sequence number: "
+                    + message.getMessageSequenceNumber());
+            return true;
+        }
+
         return false;
     }
 
@@ -68,15 +79,39 @@ public class ContextHubTestModeManager {
      * @return whether the message was handled
      * @see IContextHubWrapper#sendMessageToContextHub
      */
-    public boolean sendMessageToContextHub(NanoAppMessage message) {
+    public boolean sendMessageToContextHub(Callable<Integer> sendMessage, NanoAppMessage message) {
+        if (!message.isReliable()) {
+            return false;
+        }
+
+        long counterValue = mCounter.getAndIncrement();
+        if (counterValue % NUMBER_OF_EVENTS == DUPLICATE_MESSAGE_TO_CONTEXT_HUB_EVENT) {
+            Log.i(TAG, "[TEST MODE] Duplicating message to the Context Hub ("
+                    + NUM_MESSAGES_TO_DUPLICATE
+                    + " sends) with message sequence number: "
+                    + message.getMessageSequenceNumber());
+            for (int i = 0; i < NUM_MESSAGES_TO_DUPLICATE; ++i) {
+                try {
+                    int result = sendMessage.call();
+                    if (result != ContextHubTransaction.RESULT_SUCCESS) {
+                        Log.e(TAG, "sendMessage returned an error: " + result);
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, "Exception in sendMessageToContextHub: "
+                            + e.getMessage());
+                }
+            }
+            return true;
+        }
+
         if (Flags.reliableMessageRetrySupportService()
-                && message.isReliable()
-                && mRandom.nextInt(MAX_PROBABILITY_PERCENT)
-                        < MESSAGE_DROP_PROBABILITY_PERCENT) {
-            Log.i(TAG, "[TEST MODE] Dropping message with message sequence number: "
+                && counterValue % NUMBER_OF_EVENTS == DROP_MESSAGE_TO_CONTEXT_HUB_EVENT) {
+            Log.i(TAG, "[TEST MODE] Dropping message to the Context Hub with "
+                    + "message sequence number: "
                     + message.getMessageSequenceNumber());
             return true;
         }
+
         return false;
     }
 }

@@ -152,11 +152,8 @@ class FluidResizeTaskPositioner implements DragPositioningCallback,
             }
             mDragResizeEndTransition = mTransitions.startTransition(TRANSIT_CHANGE, wct, this);
         } else if (mCtrlType == CTRL_TYPE_UNDEFINED) {
-            final WindowContainerTransaction wct = new WindowContainerTransaction();
             DragPositioningCallbackUtility.updateTaskBounds(mRepositionTaskBounds,
                     mTaskBoundsAtDragStart, mRepositionStartPoint, x, y);
-            wct.setBounds(mWindowDecoration.mTaskInfo.token, mRepositionTaskBounds);
-            mTransitions.startTransition(TRANSIT_CHANGE, wct, this);
         }
 
         mTaskBoundsAtDragStart.setEmpty();

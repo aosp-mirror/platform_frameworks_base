@@ -31,6 +31,7 @@ import static android.content.pm.PackageManager.MATCH_FACTORY_ONLY;
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.content.pm.PackageManager.USER_MIN_ASPECT_RATIO_UNSET;
+import static android.crashrecovery.flags.Flags.refactorCrashrecovery;
 import static android.os.Process.INVALID_UID;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 import static android.os.storage.StorageManager.FLAG_STORAGE_CE;
@@ -59,6 +60,7 @@ import android.app.ApplicationExitInfo;
 import android.app.ApplicationPackageManager;
 import android.app.BroadcastOptions;
 import android.app.IActivityManager;
+import android.app.admin.DevicePolicyManagerInternal;
 import android.app.admin.IDevicePolicyManager;
 import android.app.admin.SecurityLog;
 import android.app.backup.IBackupManager;
@@ -186,7 +188,6 @@ import com.android.internal.pm.pkg.component.ParsedInstrumentation;
 import com.android.internal.pm.pkg.component.ParsedMainComponent;
 import com.android.internal.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.internal.telephony.CarrierAppUtils;
-import com.android.internal.telephony.TelephonyPermissions;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.ConcurrentUtils;
@@ -2034,6 +2035,10 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         // CHECKSTYLE:ON IndentationCheck
         t.traceEnd();
 
+        t.traceBegin("get system config");
+        SystemConfig systemConfig = injector.getSystemConfig();
+        t.traceEnd();
+
         t.traceBegin("addSharedUsers");
         mSettings.addSharedUserLPw("android.uid.system", Process.SYSTEM_UID,
                 ApplicationInfo.FLAG_SYSTEM, ApplicationInfo.PRIVATE_FLAG_PRIVILEGED);
@@ -2053,6 +2058,13 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 ApplicationInfo.FLAG_SYSTEM, ApplicationInfo.PRIVATE_FLAG_PRIVILEGED);
         mSettings.addSharedUserLPw("android.uid.uwb", UWB_UID,
                 ApplicationInfo.FLAG_SYSTEM, ApplicationInfo.PRIVATE_FLAG_PRIVILEGED);
+        final ArrayMap<String, Integer> oemDefinedUids = systemConfig.getOemDefinedUids();
+        final int numOemDefinedUids = oemDefinedUids.size();
+        for (int i = 0; i < numOemDefinedUids; i++) {
+            mSettings.addOemSharedUserLPw(oemDefinedUids.keyAt(i), oemDefinedUids.valueAt(i),
+                    ApplicationInfo.FLAG_SYSTEM, ApplicationInfo.PRIVATE_FLAG_PRIVILEGED);
+        }
+
         t.traceEnd();
 
         String separateProcesses = SystemProperties.get("debug.separate_processes");
@@ -2084,10 +2096,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mContext.getSystemService(DisplayManager.class)
                 .getDisplay(Display.DEFAULT_DISPLAY).getMetrics(mMetrics);
 
-        t.traceBegin("get system config");
-        SystemConfig systemConfig = injector.getSystemConfig();
         mAvailableFeatures = systemConfig.getAvailableFeatures();
-        t.traceEnd();
 
         mProtectedPackages = new ProtectedPackages(mContext);
 
@@ -3038,7 +3047,9 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mCompilerStats.writeNow();
         mDexManager.writePackageDexUsageNow();
         mDynamicCodeLogger.writeNow();
-        PackageWatchdog.getInstance(mContext).writeNow();
+        if (!refactorCrashrecovery()) {
+            PackageWatchdog.getInstance(mContext).writeNow();
+        }
 
         synchronized (mLock) {
             mPackageUsage.writeNow(mSettings.getPackagesLocked());
@@ -3321,9 +3332,17 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     }
 
     public void deletePackageVersioned(VersionedPackage versionedPackage,
+            final IPackageDeleteObserver2 observer, final int userId, final int deleteFlags,
+            final int callingUid) {
+        mDeletePackageHelper.deletePackageVersionedInternal(
+                versionedPackage, observer, userId, deleteFlags, callingUid,
+                /* allowSilentUninstall= */ false);
+    }
+
+    public void deletePackageVersioned(VersionedPackage versionedPackage,
             final IPackageDeleteObserver2 observer, final int userId, final int deleteFlags) {
         mDeletePackageHelper.deletePackageVersionedInternal(
-                versionedPackage, observer, userId, deleteFlags, false);
+                versionedPackage, observer, userId, deleteFlags, /* allowSilentUninstall= */ false);
     }
 
     boolean isCallerVerifier(@NonNull Computer snapshot, int callingUid) {
@@ -3354,8 +3373,10 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     // TODO(b/261957226): centralise this logic in DPM
     boolean isPackageDeviceAdmin(String packageName, int userId) {
         final IDevicePolicyManager dpm = getDevicePolicyManager();
+        final DevicePolicyManagerInternal dpmi =
+                mInjector.getLocalService(DevicePolicyManagerInternal.class);
         try {
-            if (dpm != null) {
+            if (dpm != null && dpmi != null) {
                 final ComponentName deviceOwnerComponentName = dpm.getDeviceOwnerComponent(
                         /* callingUserOnly =*/ false);
                 final String deviceOwnerPackageName = deviceOwnerComponentName == null ? null
@@ -3378,7 +3399,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                     if (dpm.packageHasActiveAdmins(packageName, users[i])) {
                         return true;
                     }
-                    if (isDeviceManagementRoleHolder(packageName, users[i])) {
+                    if (isDeviceManagementRoleHolder(packageName, users[i])
+                            && dpmi.isUserOrganizationManaged(users[i])) {
                         return true;
                     }
                 }
@@ -4493,7 +4515,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     void setSystemAppHiddenUntilInstalled(@NonNull Computer snapshot, String packageName,
             boolean hidden) {
         final int callingUid = Binder.getCallingUid();
-        final boolean calledFromSystemOrPhone = TelephonyPermissions.isSystemOrPhone(callingUid);
+        final boolean calledFromSystemOrPhone = isSystemOrPhone(callingUid);
         if (!calledFromSystemOrPhone) {
             mContext.enforceCallingOrSelfPermission(Manifest.permission.SUSPEND_APPS,
                     "setSystemAppHiddenUntilInstalled");
@@ -4518,8 +4540,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     boolean setSystemAppInstallState(@NonNull Computer snapshot, String packageName,
             boolean installed, int userId) {
         final int callingUid = Binder.getCallingUid();
-        final boolean calledFromSystemOrPhone = callingUid == Process.PHONE_UID
-                || callingUid == Process.SYSTEM_UID;
+        final boolean calledFromSystemOrPhone = isSystemOrPhone(callingUid);
         if (!calledFromSystemOrPhone) {
             mContext.enforceCallingOrSelfPermission(Manifest.permission.SUSPEND_APPS,
                     "setSystemAppHiddenUntilInstalled");
@@ -5034,8 +5055,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                         final BroadcastOptions options = BroadcastOptions.makeBasic();
                         options.setPendingIntentBackgroundActivityLaunchAllowed(false);
                         pi.sendIntent(null, success ? 1 : 0, null /* intent */,
-                                null /* onFinished*/, null /* handler */,
-                                null /* requiredPermission */, options.toBundle());
+                                null /* requiredPermission */, options.toBundle(),
+                                null /* executor */, null /* onFinished*/);
                     } catch (SendIntentException e) {
                         Slog.w(TAG, e);
                     }
@@ -8122,5 +8143,10 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         return mDeletePackageHelper.deletePackageX(packageName,
                 PackageManager.VERSION_CODE_HIGHEST, UserHandle.USER_SYSTEM,
                 PackageManager.DELETE_ALL_USERS, true /*removedBySystem*/);
+    }
+
+    private static boolean isSystemOrPhone(int uid) {
+        return UserHandle.isSameApp(uid, Process.SYSTEM_UID)
+                || UserHandle.isSameApp(uid, Process.PHONE_UID);
     }
 }

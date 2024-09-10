@@ -1447,6 +1447,11 @@ public class RemoteViews implements Parcelable, Filter {
                         }
 
                         @Override
+                        public void onNullBinding(ComponentName name) {
+                            context.unbindService(this);
+                        }
+
+                        @Override
                         public void onServiceDisconnected(ComponentName componentName) { }
                     });
 
@@ -7438,8 +7443,7 @@ public class RemoteViews implements Parcelable, Filter {
             // If the user interacts with a visible element it is safe to assume they consent that
             // something is going to start.
             opts.setPendingIntentBackgroundActivityStartMode(
-                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
-            opts.setPendingIntentBackgroundActivityLaunchAllowedByPermission(true);
+                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS);
             return Pair.create(intent, opts);
         }
     }
@@ -8361,7 +8365,7 @@ public class RemoteViews implements Parcelable, Filter {
         }
     }
 
-    private interface PendingResources<T> {
+    interface PendingResources<T> {
         T create(Context context, Resources appResources, HierarchyRootData rootData, int depth)
                 throws Exception;
     }

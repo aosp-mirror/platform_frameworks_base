@@ -66,6 +66,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.security.auth.x500.X500Principal;
@@ -375,6 +376,8 @@ public final class KeyChain {
      * @hide
      */
     public static final int KEY_ATTESTATION_FAILURE = 4;
+
+    private static final int BIND_KEY_CHAIN_SERVICE_TIMEOUT_MS = 30 * 1000;
 
     /**
      * Used by DPC or delegated app in
@@ -1120,7 +1123,10 @@ public final class KeyChain {
             context.unbindService(keyChainServiceConnection);
             throw new AssertionError("could not bind to KeyChainService");
         }
-        countDownLatch.await();
+        if (!countDownLatch.await(BIND_KEY_CHAIN_SERVICE_TIMEOUT_MS, TimeUnit.MILLISECONDS)) {
+            context.unbindService(keyChainServiceConnection);
+            throw new AssertionError("binding to KeyChainService timeout");
+        }
         IKeyChainService service = keyChainService.get();
         if (service != null) {
             return new KeyChainConnection(context, keyChainServiceConnection, service);

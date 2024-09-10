@@ -64,6 +64,12 @@ static constexpr std::pair<uint16_t, ApiVersion> sAttrIdMap[] = {
     {0x0616, SDK_R},
     {0x064b, SDK_S},
     {0x064c, SDK_S_V2},
+    // TODO(zyy): add these when we need more rules for converting new attributes to the
+    // older ones, but don't bother for now as this would increase the array size for no
+    // real benefit
+    //    {0x0672, SDK_TIRAMISU},
+    //    {0x0687, SDK_UPSIDE_DOWN_CAKE},
+    //    {0x06a3, SDK_VANILLA_ICE_CREAM},
 };
 
 static_assert(std::is_sorted(std::begin(sAttrIdMap), std::end(sAttrIdMap),

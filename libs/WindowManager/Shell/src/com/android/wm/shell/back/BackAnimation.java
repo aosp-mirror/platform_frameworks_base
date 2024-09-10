@@ -107,4 +107,24 @@ public interface BackAnimation {
      * @param pilferCallback the callback to pilfer pointers.
      */
     void setPilferPointerCallback(Runnable pilferCallback);
+
+    /**
+     * Set a callback to requestTopUi.
+     * @param topUiRequest the callback to requestTopUi.
+     */
+    void setTopUiRequestCallback(TopUiRequest topUiRequest);
+
+    /**
+     * Callback to request SysUi to call
+     * {@link android.app.IActivityManager#setHasTopUi(boolean)}.
+     */
+    interface TopUiRequest {
+
+        /**
+         * Request {@link android.app.IActivityManager#setHasTopUi(boolean)} to be called.
+         * @param requestTopUi  whether topUi should be requested or not
+         * @param tag           tag of the request-source
+         */
+        void requestTopUi(boolean requestTopUi, String tag);
+    }
 }

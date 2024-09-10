@@ -305,22 +305,26 @@ public:
                 .onSync =
                         [](int functor, void* client_data, const WebViewSyncData& data) {
                             expectOnRenderThread("onSync");
+                            std::scoped_lock lock(sMutex);
                             sMockFunctorCounts[functor].sync++;
                         },
                 .onContextDestroyed =
                         [](int functor, void* client_data) {
                             expectOnRenderThread("onContextDestroyed");
+                            std::scoped_lock lock(sMutex);
                             sMockFunctorCounts[functor].contextDestroyed++;
                         },
                 .onDestroyed =
                         [](int functor, void* client_data) {
                             expectOnRenderThread("onDestroyed");
+                            std::scoped_lock lock(sMutex);
                             sMockFunctorCounts[functor].destroyed++;
                         },
                 .removeOverlays =
                         [](int functor, void* data,
                            void (*mergeTransaction)(ASurfaceTransaction*)) {
                             expectOnRenderThread("removeOverlays");
+                            std::scoped_lock lock(sMutex);
                             sMockFunctorCounts[functor].removeOverlays++;
                         },
         };
@@ -329,6 +333,7 @@ public:
                 callbacks.gles.draw = [](int functor, void* client_data, const DrawGlInfo& params,
                                          const WebViewOverlayData& overlay_params) {
                     expectOnRenderThread("draw");
+                    std::scoped_lock lock(sMutex);
                     sMockFunctorCounts[functor].glesDraw++;
                 };
                 break;
@@ -336,15 +341,18 @@ public:
                 callbacks.vk.initialize = [](int functor, void* data,
                                              const VkFunctorInitParams& params) {
                     expectOnRenderThread("initialize");
+                    std::scoped_lock lock(sMutex);
                     sMockFunctorCounts[functor].vkInitialize++;
                 };
                 callbacks.vk.draw = [](int functor, void* data, const VkFunctorDrawParams& params,
                                        const WebViewOverlayData& overlayParams) {
                     expectOnRenderThread("draw");
+                    std::scoped_lock lock(sMutex);
                     sMockFunctorCounts[functor].vkDraw++;
                 };
                 callbacks.vk.postDraw = [](int functor, void* data) {
                     expectOnRenderThread("postDraw");
+                    std::scoped_lock lock(sMutex);
                     sMockFunctorCounts[functor].vkPostDraw++;
                 };
                 break;
@@ -352,11 +360,16 @@ public:
         return callbacks;
     }
 
-    static CallCounts& countsForFunctor(int functor) { return sMockFunctorCounts[functor]; }
+    static CallCounts copyCountsForFunctor(int functor) {
+        std::scoped_lock lock(sMutex);
+        return sMockFunctorCounts[functor];
+    }
 
     static SkFont defaultFont();
 
 private:
+    // guards sMockFunctorCounts
+    static std::mutex sMutex;
     static std::unordered_map<int, CallCounts> sMockFunctorCounts;
 
     static void syncHierarchyPropertiesAndDisplayListImpl(RenderNode* node) {

@@ -18,6 +18,7 @@ package com.android.wm.shell.windowdecor;
 
 import static android.view.WindowManager.TRANSIT_CHANGE;
 
+import static com.android.internal.jank.Cuj.CUJ_DESKTOP_MODE_DRAG_WINDOW;
 import static com.android.internal.jank.Cuj.CUJ_DESKTOP_MODE_RESIZE_WINDOW;
 
 import android.graphics.Point;
@@ -129,6 +130,9 @@ public class VeiledResizeTaskPositioner implements DragPositioningCallback,
                 mDesktopWindowDecoration.updateResizeVeil(mRepositionTaskBounds);
             }
         } else if (mCtrlType == CTRL_TYPE_UNDEFINED) {
+            // Begin window drag CUJ instrumentation only when drag position moves.
+            mInteractionJankMonitor.begin(mDesktopWindowDecoration.mTaskSurface,
+                    mDesktopWindowDecoration.mContext, CUJ_DESKTOP_MODE_DRAG_WINDOW);
             final SurfaceControl.Transaction t = mTransactionSupplier.get();
             DragPositioningCallbackUtility.setPositionOnDrag(mDesktopWindowDecoration,
                     mRepositionTaskBounds, mTaskBoundsAtDragStart, mRepositionStartPoint, t, x, y);
@@ -157,11 +161,9 @@ public class VeiledResizeTaskPositioner implements DragPositioningCallback,
             }
             mInteractionJankMonitor.end(CUJ_DESKTOP_MODE_RESIZE_WINDOW);
         } else {
-            final WindowContainerTransaction wct = new WindowContainerTransaction();
             DragPositioningCallbackUtility.updateTaskBounds(mRepositionTaskBounds,
                     mTaskBoundsAtDragStart, mRepositionStartPoint, x, y);
-            wct.setBounds(mDesktopWindowDecoration.mTaskInfo.token, mRepositionTaskBounds);
-            mTransitions.startTransition(TRANSIT_CHANGE, wct, this);
+            mInteractionJankMonitor.end(CUJ_DESKTOP_MODE_DRAG_WINDOW);
         }
 
         mCtrlType = CTRL_TYPE_UNDEFINED;
@@ -202,6 +204,7 @@ public class VeiledResizeTaskPositioner implements DragPositioningCallback,
         mCtrlType = CTRL_TYPE_UNDEFINED;
         finishCallback.onTransitionFinished(null);
         mIsResizingOrAnimatingResize = false;
+        mInteractionJankMonitor.end(CUJ_DESKTOP_MODE_DRAG_WINDOW);
         return true;
     }
 

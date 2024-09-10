@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.chips.casttootherdevice.ui.view
 
+import android.content.Context
 import android.os.Bundle
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.chips.casttootherdevice.ui.viewmodel.CastToOtherDeviceChipViewModel.Companion.CAST_TO_OTHER_DEVICE_ICON
@@ -29,6 +30,8 @@ import com.android.systemui.statusbar.phone.SystemUIDialog
  */
 class EndGenericCastToOtherDeviceDialogDelegate(
     private val endMediaProjectionDialogHelper: EndMediaProjectionDialogHelper,
+    private val context: Context,
+    private val deviceName: String?,
     private val stopAction: () -> Unit,
 ) : SystemUIDialog.Delegate {
     override fun createDialog(): SystemUIDialog {
@@ -36,17 +39,26 @@ class EndGenericCastToOtherDeviceDialogDelegate(
     }
 
     override fun beforeCreate(dialog: SystemUIDialog, savedInstanceState: Bundle?) {
+        val message =
+            if (deviceName != null) {
+                context.getString(
+                    R.string.cast_to_other_device_stop_dialog_message_generic_with_device,
+                    deviceName,
+                )
+            } else {
+                context.getString(R.string.cast_to_other_device_stop_dialog_message_generic)
+            }
         with(dialog) {
             setIcon(CAST_TO_OTHER_DEVICE_ICON)
             setTitle(R.string.cast_to_other_device_stop_dialog_title)
-            // TODO(b/332662551): Include device name in this string.
-            setMessage(R.string.cast_to_other_device_stop_dialog_message)
+            setMessage(message)
             // No custom on-click, because the dialog will automatically be dismissed when the
             // button is clicked anyway.
             setNegativeButton(R.string.close_dialog_button, /* onClick= */ null)
-            setPositiveButton(R.string.cast_to_other_device_stop_dialog_button) { _, _ ->
-                stopAction.invoke()
-            }
+            setPositiveButton(
+                R.string.cast_to_other_device_stop_dialog_button,
+                endMediaProjectionDialogHelper.wrapStopAction(stopAction),
+            )
         }
     }
 }

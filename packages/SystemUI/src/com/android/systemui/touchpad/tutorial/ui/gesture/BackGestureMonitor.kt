@@ -16,49 +16,26 @@
 
 package com.android.systemui.touchpad.tutorial.ui.gesture
 
-import android.view.MotionEvent
 import kotlin.math.abs
 
-/**
- * Monitor for touchpad gestures that calls [gestureDoneCallback] when gesture was successfully
- * done. All tracked motion events should be passed to [processTouchpadEvent]
- */
-interface TouchpadGestureMonitor {
-
-    val gestureDistanceThresholdPx: Int
-    val gestureDoneCallback: () -> Unit
-
-    fun processTouchpadEvent(event: MotionEvent)
-}
-
+/** Monitors for touchpad back gesture, that is three fingers swiping left or right */
 class BackGestureMonitor(
     override val gestureDistanceThresholdPx: Int,
-    override val gestureDoneCallback: () -> Unit
-) : TouchpadGestureMonitor {
-
-    private var xStart = 0f
-
-    override fun processTouchpadEvent(event: MotionEvent) {
-        val action = event.actionMasked
-        when (action) {
-            MotionEvent.ACTION_DOWN -> {
-                if (isThreeFingerTouchpadSwipe(event)) {
-                    xStart = event.x
+    override val gestureStateChangedCallback: (GestureState) -> Unit
+) :
+    TouchpadGestureMonitor by ThreeFingerGestureMonitor(
+        gestureDistanceThresholdPx = gestureDistanceThresholdPx,
+        gestureStateChangedCallback = gestureStateChangedCallback,
+        donePredicate =
+            object : GestureDonePredicate {
+                override fun wasGestureDone(
+                    startX: Float,
+                    startY: Float,
+                    endX: Float,
+                    endY: Float
+                ): Boolean {
+                    val distance = abs(endX - startX)
+                    return distance >= gestureDistanceThresholdPx
                 }
             }
-            MotionEvent.ACTION_UP -> {
-                if (isThreeFingerTouchpadSwipe(event)) {
-                    val distance = abs(event.x - xStart)
-                    if (distance >= gestureDistanceThresholdPx) {
-                        gestureDoneCallback()
-                    }
-                }
-            }
-        }
-    }
-
-    private fun isThreeFingerTouchpadSwipe(event: MotionEvent): Boolean {
-        return event.classification == MotionEvent.CLASSIFICATION_MULTI_FINGER_SWIPE &&
-            event.getAxisValue(MotionEvent.AXIS_GESTURE_SWIPE_FINGER_COUNT) == 3f
-    }
-}
+    )

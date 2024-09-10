@@ -34,7 +34,7 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.Flags.NEW_NETWORK_SLICE_UI
-import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.log.table.logcatTableLogBuffer
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.connectivity.MobileIconCarrierIdOverridesFake
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
@@ -42,6 +42,7 @@ import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.Airpla
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.fakeMobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconInteractorImpl
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconsInteractorImpl
 import com.android.systemui.statusbar.pipeline.mobile.domain.model.SignalIconModel
@@ -51,6 +52,7 @@ import com.android.systemui.statusbar.pipeline.shared.data.model.ConnectivitySlo
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
 import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
 import com.android.systemui.statusbar.policy.data.repository.FakeUserSetupRepository
+import com.android.systemui.testKosmos
 import com.android.systemui.util.CarrierConfigTracker
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
@@ -74,6 +76,8 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class MobileIconViewModelTest : SysuiTestCase() {
+    private val kosmos = testKosmos()
+
     private var connectivityRepository = FakeConnectivityRepository()
 
     private lateinit var underTest: MobileIconViewModel
@@ -84,7 +88,7 @@ class MobileIconViewModelTest : SysuiTestCase() {
     private lateinit var airplaneModeRepository: FakeAirplaneModeRepository
     private lateinit var airplaneModeInteractor: AirplaneModeInteractor
     @Mock private lateinit var constants: ConnectivityConstants
-    @Mock private lateinit var tableLogBuffer: TableLogBuffer
+    private val tableLogBuffer = logcatTableLogBuffer(kosmos, "MobileIconViewModelTest")
     @Mock private lateinit var carrierConfigTracker: CarrierConfigTracker
 
     private val flags =
@@ -118,7 +122,7 @@ class MobileIconViewModelTest : SysuiTestCase() {
             AirplaneModeInteractor(
                 airplaneModeRepository,
                 connectivityRepository,
-                FakeMobileConnectionsRepository(),
+                kosmos.fakeMobileConnectionsRepository,
             )
 
         iconsInteractor =
@@ -837,6 +841,38 @@ class MobileIconViewModelTest : SysuiTestCase() {
     @Test
     fun nonTerrestrial_usesSatelliteIcon() =
         testScope.runTest {
+            repository.isNonTerrestrial.value = true
+            repository.setAllLevels(0)
+
+            val latest by
+                collectLastValue(underTest.icon.filterIsInstance(SignalIconModel.Satellite::class))
+
+            // Level 0 -> no connection
+            assertThat(latest).isNotNull()
+            assertThat(latest!!.icon.res).isEqualTo(R.drawable.ic_satellite_connected_0)
+
+            // 1-2 -> 1 bar
+            repository.setAllLevels(1)
+            assertThat(latest!!.icon.res).isEqualTo(R.drawable.ic_satellite_connected_1)
+
+            repository.setAllLevels(2)
+            assertThat(latest!!.icon.res).isEqualTo(R.drawable.ic_satellite_connected_1)
+
+            // 3-4 -> 2 bars
+            repository.setAllLevels(3)
+            assertThat(latest!!.icon.res).isEqualTo(R.drawable.ic_satellite_connected_2)
+
+            repository.setAllLevels(4)
+            assertThat(latest!!.icon.res).isEqualTo(R.drawable.ic_satellite_connected_2)
+        }
+
+    @EnableFlags(com.android.internal.telephony.flags.Flags.FLAG_CARRIER_ENABLED_SATELLITE_FLAG)
+    @Test
+    fun satelliteIcon_ignoresInflateSignalStrength() =
+        testScope.runTest {
+            // Note that this is the exact same test as above, but with inflateSignalStrength set to
+            // true we note that the level is unaffected by inflation
+            repository.inflateSignalStrength.value = true
             repository.isNonTerrestrial.value = true
             repository.setAllLevels(0)
 

@@ -205,7 +205,7 @@
     <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"Espaço privado removido"</string>
     <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"A sua organização não permite espaços privados neste dispositivo gerido."</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"O dispositivo é gerido"</string>
-    <string name="network_logging_notification_text" msgid="1327373071132562512">"A sua entidade gere este dispositivo e pode monitorizar o tráfego de rede. Toque para obter mais detalhes."</string>
+    <string name="network_logging_notification_text" msgid="1327373071132562512">"A sua entidade gere este dispositivo e pode monitorizar o tráfego de rede. Toque para ver mais detalhes."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"As apps podem aceder à sua localização"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"Contacte o administrador de TI para saber mais."</string>
     <string name="geofencing_service" msgid="3826902410740315456">"Serviço de geofencing"</string>
@@ -266,8 +266,6 @@
     <string name="global_action_bug_report" msgid="5127867163044170003">"Relatório de erros"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Terminar sessão"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"Capt. ecrã"</string>
-    <!-- no translation found for identity_check_biometric_prompt_description (5810195983015866727) -->
-    <skip />
     <string name="bugreport_title" msgid="8549990811777373050">"Relatório de erro"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"Será recolhida informação sobre o estado atual do seu dispositivo a enviar através de uma mensagem de email. Demorará algum tempo até que o relatório de erro esteja pronto para ser enviado. Aguarde um pouco."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"Relatório interativo"</string>
@@ -1197,6 +1195,8 @@
     <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"A escrita manual não é suportada nos campos de palavras-passe"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Voltar"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Alternar o método de introdução"</string>
+    <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"Abrir o selecionador do método de introdução"</string>
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"Definições"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Está quase sem espaço de armazenamento"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Algumas funções do sistema poderão não funcionar"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Não existe armazenamento suficiente para o sistema. Certifique-se de que tem 250 MB de espaço livre e reinicie."</string>
@@ -1414,10 +1414,8 @@
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"Selecione para desativar a depuração sem fios."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Modo de estrutura de teste ativado"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Efetue uma reposição de dados de fábrica para desativar o Modo de estrutura de teste."</string>
-    <!-- no translation found for wrong_hsum_configuration_notification_title (7212758829332714385) -->
-    <skip />
-    <!-- no translation found for wrong_hsum_configuration_notification_message (5353475441480684381) -->
-    <skip />
+    <string name="wrong_hsum_configuration_notification_title" msgid="7212758829332714385">"Configuração da compilação do modo de utilizador do sistema sem interface incorreta"</string>
+    <string name="wrong_hsum_configuration_notification_message" msgid="5353475441480684381">"O estado do modo de utilizador do sistema sem interface deste dispositivo difere da respetiva configuração da compilação. Faça uma reposição de fábrica do dispositivo."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"Consola de série ativada"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"O desempenho é afetado. Para desativar, selecione o carregador de arranque."</string>
     <string name="mte_override_notification_title" msgid="4731115381962792944">"MTE experimental ativada"</string>
@@ -1433,6 +1431,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"PARTILHAR"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"RECUSAR"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Escolher o método de entrada"</string>
+    <string name="input_method_language_settings" msgid="8069089418056819437">"Definições de idioma"</string>
     <string name="show_ime" msgid="6406112007347443383">"Mantê-lo no ecrã enquanto o teclado físico estiver ativo"</string>
     <string name="hardware" msgid="3611039921284836033">"Usar o teclado no ecrã"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Configure o dispositivo <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
@@ -1442,7 +1441,7 @@
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="alert_windows_notification_channel_group_name" msgid="6063891141815714246">"Sobreposição a outras apps"</string>
     <string name="alert_windows_notification_channel_name" msgid="3437528564303192620">"A app <xliff:g id="NAME">%s</xliff:g> sobrepõe-se a outras aplicações"</string>
-    <string name="alert_windows_notification_title" msgid="6331662751095228536">"O <xliff:g id="NAME">%s</xliff:g> sobrepõe-se a outras app"</string>
+    <string name="alert_windows_notification_title" msgid="6331662751095228536">"<xliff:g id="NAME">%s</xliff:g> sobrepõe-se a outras app"</string>
     <string name="alert_windows_notification_message" msgid="6538171456970725333">"Se não quer que a app <xliff:g id="NAME">%s</xliff:g> utilize esta funcionalidade, toque para abrir as definições e desative-a."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="7805857234839123780">"Desativar"</string>
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"A verificar o <xliff:g id="NAME">%s</xliff:g>…"</string>
@@ -1748,7 +1747,8 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"Uma app está a ocultar o pedido de autorização e, por isso, não é possível validar a sua resposta."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Toque numa funcionalidade para começar a utilizá-la:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Escolha funcionalidades para utilizar com o botão Acessibilidade"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Escolha funcionalidades para usar com o atalho das teclas de volume"</string>
+    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
+    <skip />
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"O serviço <xliff:g id="SERVICE_NAME">%s</xliff:g> foi desativado."</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Editar atalhos"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Concluído"</string>
@@ -1762,12 +1762,9 @@
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Teclas do volume premidas. Serviço <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ativado."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Teclas de volume premidas. Serviço <xliff:g id="SERVICE_NAME">%1$s</xliff:g> desativado."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Solte as teclas de volume. Para ativar o serviço <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, prima sem soltar ambas as teclas de volume novamente durante 3 segundos."</string>
-    <!-- no translation found for accessibility_button_prompt_text (6105393217162198616) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_prompt_text (6452246951969541792) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_3finger_prompt_text (77745752309056152) -->
-    <skip />
+    <string name="accessibility_button_prompt_text" msgid="6105393217162198616">"Escolha uma funcionalidade"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="6452246951969541792">"Escolha uma funcionalidade"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="77745752309056152">"Escolha uma funcionalidade"</string>
     <string name="accessibility_button_instructional_text" msgid="6831154884557881996">"A funcionalidade vai ser aberta da próxima vez que tocar no botão Acessibilidade"</string>
     <string name="accessibility_gesture_instructional_text" msgid="4133877896011098550">"A funcionalidade vai ser aberta da próxima vez que usar este atalho. Deslize com 2 dedos a partir da parte inferior do ecrã e solte rapidamente."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="1124458279366968154">"A funcionalidade vai ser aberta da próxima vez que usar este atalho. Deslize para cima com 3 dedos a partir da parte inferior do ecrã e solte rapidamente."</string>
@@ -1893,8 +1890,7 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"O PIN é demasiado pequeno. Deve ter, no mínimo, 4 dígitos."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Tente mais tarde"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Visualização de ecrã inteiro"</string>
-    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
-    <skip />
+    <string name="immersive_cling_description" msgid="2896205051090870978">"Para sair, deslize rapidamente para baixo a partir da parte superior do ecrã"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"OK"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Rode para uma melhor visualização"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Abra <xliff:g id="NAME">%s</xliff:g> em ecrã inteiro para uma melhor visualização"</string>
@@ -2190,7 +2186,7 @@
     <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"O Bluetooth continuará ativado durante o modo de avião."</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"A carregar…"</string>
     <string name="file_count" msgid="3220018595056126969">"{count,plural, =1{{file_name} + # ficheiro}many{{file_name} + # ficheiros}other{{file_name} + # ficheiros}}"</string>
-    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Não existem pessoas recomendadas com quem partilhar"</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Sem pessoas recomendadas com quem partilhar"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Lista de aplicações"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Esta app não recebeu autorização de gravação, mas pode capturar áudio através deste dispositivo USB."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Página inicial"</string>
@@ -2430,25 +2426,32 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Conteúdo da app ocultado da partilha de ecrã por motivos de segurança"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Ligação de satélite estabelecida automaticamente"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Pode enviar e receber mensagens sem uma rede móvel ou Wi-Fi"</string>
+    <string name="satellite_notification_manual_title" msgid="1097504441849466279">"Quer usar as mensagens por satélite?"</string>
+    <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Envie e receba mensagens sem uma rede móvel ou Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Abre a app Mensagens"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Como funciona"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Pendente…"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Configure o Desbloqueio por impressão digital novamente"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (5851784577768803510) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7925203589860744456) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (1824812666549916586) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (5974657382960155099) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"Já não é possível reconhecer <xliff:g id="FINGERPRINT">%s</xliff:g>."</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"Já não é possível reconhecer <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> e <xliff:g id="FINGERPRINT_1">%2$s</xliff:g>."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="1824812666549916586">"Já não é possível reconhecer <xliff:g id="FINGERPRINT">%s</xliff:g>. Configure o Desbloqueio por impressão digital novamente."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="5974657382960155099">"Já não é possível reconhecer <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> e <xliff:g id="FINGERPRINT_1">%2$s</xliff:g>. Configure o Desbloqueio por impressão digital novamente."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Configure o Desbloqueio facial novamente"</string>
-    <!-- no translation found for face_dangling_notification_msg (746235263598985384) -->
-    <skip />
+    <string name="face_dangling_notification_msg" msgid="746235263598985384">"Já não é possível reconhecer o seu modelo de rosto. Configure o Desbloqueio facial novamente."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Configurar"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Agora não"</string>
     <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"Alarme de <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"Mudar de utilizador"</string>
     <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"Desativar som"</string>
     <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"Toque para desativar o som"</string>
+    <string name="keyboard_shortcut_group_applications_browser" msgid="6535007304687100909">"Navegador"</string>
+    <string name="keyboard_shortcut_group_applications_contacts" msgid="2750702518068326356">"Contactos"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="4229037666415353683">"Email"</string>
+    <string name="keyboard_shortcut_group_applications_sms" msgid="3523799286376321137">"SMS"</string>
+    <string name="keyboard_shortcut_group_applications_music" msgid="2051507523525651067">"Música"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="3571770335653387606">"Calendário"</string>
+    <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"Calculadora"</string>
+    <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"Maps"</string>
+    <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"Aplicações"</string>
+    <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"Já não é possível reconhecer as suas impressões digitais. Configure o Desbloqueio por impressão digital novamente."</string>
 </resources>

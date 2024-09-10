@@ -56,13 +56,13 @@ import android.view.HapticFeedbackConstants;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.OptIn;
 
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.InstanceId;
@@ -147,7 +147,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
     private final Execution mExecution;
     private final FingerprintManager mFingerprintManager;
     @NonNull private final LayoutInflater mInflater;
-    private final WindowManager mWindowManager;
+    private final ViewCaptureAwareWindowManager mWindowManager;
     private final DelayableExecutor mFgExecutor;
     @NonNull private final Executor mBiometricExecutor;
     @NonNull private final StatusBarStateController mStatusBarStateController;
@@ -693,7 +693,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
             @NonNull Execution execution,
             @NonNull LayoutInflater inflater,
             @Nullable FingerprintManager fingerprintManager,
-            @NonNull WindowManager windowManager,
+            @NonNull ViewCaptureAwareWindowManager viewCaptureAwareWindowManager,
             @NonNull StatusBarStateController statusBarStateController,
             @Main DelayableExecutor fgExecutor,
             @NonNull StatusBarKeyguardViewManager statusBarKeyguardViewManager,
@@ -741,7 +741,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
         // The fingerprint manager is queried for UDFPS before this class is constructed, so the
         // fingerprint manager should never be null.
         mFingerprintManager = checkNotNull(fingerprintManager);
-        mWindowManager = windowManager;
+        mWindowManager = viewCaptureAwareWindowManager;
         mFgExecutor = fgExecutor;
         mStatusBarStateController = statusBarStateController;
         mKeyguardStateController = keyguardStateController;

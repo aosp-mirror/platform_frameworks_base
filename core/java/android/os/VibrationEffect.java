@@ -16,18 +16,25 @@
 
 package android.os;
 
+import static android.os.vibrator.Flags.FLAG_VENDOR_VIBRATION_EFFECTS;
+
+import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.hardware.vibrator.IVibrator;
 import android.hardware.vibrator.V1_0.EffectStrength;
 import android.hardware.vibrator.V1_3.Effect;
 import android.net.Uri;
+import android.os.vibrator.Flags;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.PrimitiveSegment;
 import android.os.vibrator.RampSegment;
@@ -46,6 +53,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.StringJoiner;
+import java.util.function.BiFunction;
 
 /**
  * A VibrationEffect describes a haptic effect to be performed by a {@link Vibrator}.
@@ -53,6 +61,9 @@ import java.util.StringJoiner;
  * <p>These effects may be any number of things, from single shot vibrations to complex waveforms.
  */
 public abstract class VibrationEffect implements Parcelable {
+    private static final int PARCEL_TOKEN_COMPOSED = 1;
+    private static final int PARCEL_TOKEN_VENDOR_EFFECT = 2;
+
     // Stevens' coefficient to scale the perceived vibration intensity.
     private static final float SCALE_GAMMA = 0.65f;
     // If a vibration is playing for longer than 1s, it's probably not haptic feedback
@@ -316,6 +327,31 @@ public abstract class VibrationEffect implements Parcelable {
     }
 
     /**
+     * Create a vendor-defined vibration effect.
+     *
+     * <p>Vendor effects offer more flexibility for accessing vendor-specific vibrator capabilities,
+     * enabling control over any vibration parameter and more generic vibration waveforms for apps
+     * provided by the device vendor.
+     *
+     * <p>This requires hardware-specific implementation of the effect and will not have any
+     * platform fallback support.
+     *
+     * @param effect An opaque representation of the vibration effect which can also be serialized.
+     * @return The desired effect.
+     * @hide
+     */
+    @NonNull
+    @SystemApi
+    @FlaggedApi(FLAG_VENDOR_VIBRATION_EFFECTS)
+    @RequiresPermission(android.Manifest.permission.VIBRATE_VENDOR_EFFECTS)
+    public static VibrationEffect createVendorEffect(@NonNull PersistableBundle effect) {
+        VibrationEffect vendorEffect = new VendorEffect(effect, VendorEffect.DEFAULT_STRENGTH,
+                VendorEffect.DEFAULT_SCALE, VendorEffect.DEFAULT_SCALE);
+        vendorEffect.validate();
+        return vendorEffect;
+    }
+
+    /**
      * Get a predefined vibration effect.
      *
      * <p>Predefined effects are a set of common vibration effects that should be identical,
@@ -504,11 +540,22 @@ public abstract class VibrationEffect implements Parcelable {
     /** @hide */
     public abstract void validate();
 
+
+    /**
+     * If supported, truncate the length of this vibration effect to the provided length and return
+     * the result. Will always return null for repeating effects.
+     *
+     * @return The desired effect, or {@code null} if truncation is not applicable.
+     * @hide
+     */
+    @Nullable
+    public abstract VibrationEffect cropToLengthOrNull(int length);
+
     /**
      * Gets the estimated duration of the vibration in milliseconds.
      *
      * <p>For effects without a defined end (e.g. a Waveform with a non-negative repeat index), this
-     * returns Long.MAX_VALUE. For effects with an unknown duration (e.g. Prebaked effects where
+     * returns Long.MAX_VALUE. For effects with an unknown duration (e.g. predefined effects where
      * the length is device and potentially run-time dependent), this returns -1.
      *
      * @hide
@@ -550,7 +597,19 @@ public abstract class VibrationEffect implements Parcelable {
      *
      * @hide
      */
-    public abstract <T extends VibrationEffect> T resolve(int defaultAmplitude);
+    @NonNull
+    public abstract VibrationEffect resolve(int defaultAmplitude);
+
+    /**
+     * Applies given effect strength to predefined and vendor-specific effects.
+     *
+     * @param effectStrength new effect strength to be applied, one of
+     *                       VibrationEffect.EFFECT_STRENGTH_*.
+     * @return this if there is no change, or a copy of this effect with new strength otherwise
+     * @hide
+     */
+    @NonNull
+    public abstract VibrationEffect applyEffectStrength(int effectStrength);
 
     /**
      * Scale the vibration effect intensity with the given constraints.
@@ -562,7 +621,20 @@ public abstract class VibrationEffect implements Parcelable {
      *
      * @hide
      */
-    public abstract <T extends VibrationEffect> T scale(float scaleFactor);
+    @NonNull
+    public abstract VibrationEffect scale(float scaleFactor);
+
+    /**
+     * Performs a linear scaling on the effect intensity with the given factor.
+     *
+     * @param scaleFactor scale factor to be applied to the intensity. Values within [0,1) will
+     *                    scale down the intensity, values larger than 1 will scale up
+     * @return this if there is no scaling to be done, or a copy of this effect with scaled
+     *         vibration intensity otherwise
+     * @hide
+     */
+    @NonNull
+    public abstract VibrationEffect applyAdaptiveScale(float scaleFactor);
 
     /**
      * Ensures that the effect is repeating indefinitely or not. This is a lossy operation and
@@ -602,6 +674,15 @@ public abstract class VibrationEffect implements Parcelable {
      * @hide
      */
     public static float scale(float intensity, float scaleFactor) {
+        if (Flags.hapticsScaleV2Enabled()) {
+            if (Float.compare(scaleFactor, 1) <= 0 || Float.compare(intensity, 0) == 0) {
+                // Scaling down or scaling zero intensity is straightforward.
+                return scaleFactor * intensity;
+            }
+            // Using S * x / (1 + (S - 1) * x^2) as the scale up function to converge to 1.0.
+            return (scaleFactor * intensity) / (1 + (scaleFactor - 1) * intensity * intensity);
+        }
+
         // Applying gamma correction to the scale factor, which is the same as encoding the input
         // value, scaling it, then decoding the scaled value.
         float scale = MathUtils.pow(scaleFactor, 1f / SCALE_GAMMA);
@@ -651,38 +732,26 @@ public abstract class VibrationEffect implements Parcelable {
 
     /** @hide */
     public static String effectIdToString(int effectId) {
-        switch (effectId) {
-            case EFFECT_CLICK:
-                return "CLICK";
-            case EFFECT_TICK:
-                return "TICK";
-            case EFFECT_HEAVY_CLICK:
-                return "HEAVY_CLICK";
-            case EFFECT_DOUBLE_CLICK:
-                return "DOUBLE_CLICK";
-            case EFFECT_POP:
-                return "POP";
-            case EFFECT_THUD:
-                return "THUD";
-            case EFFECT_TEXTURE_TICK:
-                return "TEXTURE_TICK";
-            default:
-                return Integer.toString(effectId);
-        }
+        return switch (effectId) {
+            case EFFECT_CLICK -> "CLICK";
+            case EFFECT_TICK -> "TICK";
+            case EFFECT_HEAVY_CLICK -> "HEAVY_CLICK";
+            case EFFECT_DOUBLE_CLICK -> "DOUBLE_CLICK";
+            case EFFECT_POP -> "POP";
+            case EFFECT_THUD -> "THUD";
+            case EFFECT_TEXTURE_TICK -> "TEXTURE_TICK";
+            default -> Integer.toString(effectId);
+        };
     }
 
     /** @hide */
     public static String effectStrengthToString(int effectStrength) {
-        switch (effectStrength) {
-            case EFFECT_STRENGTH_LIGHT:
-                return "LIGHT";
-            case EFFECT_STRENGTH_MEDIUM:
-                return "MEDIUM";
-            case EFFECT_STRENGTH_STRONG:
-                return "STRONG";
-            default:
-                return Integer.toString(effectStrength);
-        }
+        return switch (effectStrength) {
+            case EFFECT_STRENGTH_LIGHT -> "LIGHT";
+            case EFFECT_STRENGTH_MEDIUM -> "MEDIUM";
+            case EFFECT_STRENGTH_STRONG -> "STRONG";
+            default -> Integer.toString(effectStrength);
+        };
     }
 
     /**
@@ -712,12 +781,15 @@ public abstract class VibrationEffect implements Parcelable {
         private final ArrayList<VibrationEffectSegment> mSegments;
         private final int mRepeatIndex;
 
+        /** @hide */
         Composed(@NonNull Parcel in) {
-            this(in.readArrayList(
-                    VibrationEffectSegment.class.getClassLoader(), VibrationEffectSegment.class),
+            this(Objects.requireNonNull(in.readArrayList(
+                            VibrationEffectSegment.class.getClassLoader(),
+                            VibrationEffectSegment.class)),
                     in.readInt());
         }
 
+        /** @hide */
         Composed(@NonNull VibrationEffectSegment segment) {
             this(Arrays.asList(segment), /* repeatIndex= */ -1);
         }
@@ -805,6 +877,30 @@ public abstract class VibrationEffect implements Parcelable {
             }
         }
 
+        /** @hide */
+        @Override
+        @Nullable
+        public VibrationEffect cropToLengthOrNull(int length) {
+            // drop repeating effects
+            if (mRepeatIndex >= 0) {
+                return null;
+            }
+
+            int segmentCount = mSegments.size();
+            if (segmentCount <= length) {
+                return this;
+            }
+
+            ArrayList truncated = new ArrayList(mSegments.subList(0, length));
+            Composed updated = new Composed(truncated, mRepeatIndex);
+            try {
+                updated.validate();
+            } catch (IllegalArgumentException e) {
+                return null;
+            }
+            return updated;
+        }
+
         @Override
         public long getDuration() {
             if (mRepeatIndex >= 0) {
@@ -844,7 +940,7 @@ public abstract class VibrationEffect implements Parcelable {
             }
             int segmentCount = mSegments.size();
             if (segmentCount > MAX_HAPTIC_FEEDBACK_COMPOSITION_SIZE) {
-                // Vibration has some prebaked or primitive constants, it should be limited to the
+                // Vibration has some predefined or primitive constants, it should be limited to the
                 // max composition size used to classify haptic feedbacks.
                 return false;
             }
@@ -867,34 +963,28 @@ public abstract class VibrationEffect implements Parcelable {
         @NonNull
         @Override
         public Composed resolve(int defaultAmplitude) {
-            int segmentCount = mSegments.size();
-            ArrayList<VibrationEffectSegment> resolvedSegments = new ArrayList<>(segmentCount);
-            for (int i = 0; i < segmentCount; i++) {
-                resolvedSegments.add(mSegments.get(i).resolve(defaultAmplitude));
-            }
-            if (resolvedSegments.equals(mSegments)) {
-                return this;
-            }
-            Composed resolved = new Composed(resolvedSegments, mRepeatIndex);
-            resolved.validate();
-            return resolved;
+            return applyToSegments(VibrationEffectSegment::resolve, defaultAmplitude);
+        }
+
+        /** @hide */
+        @NonNull
+        @Override
+        public VibrationEffect applyEffectStrength(int effectStrength) {
+            return applyToSegments(VibrationEffectSegment::applyEffectStrength, effectStrength);
         }
 
         /** @hide */
         @NonNull
         @Override
         public Composed scale(float scaleFactor) {
-            int segmentCount = mSegments.size();
-            ArrayList<VibrationEffectSegment> scaledSegments = new ArrayList<>(segmentCount);
-            for (int i = 0; i < segmentCount; i++) {
-                scaledSegments.add(mSegments.get(i).scale(scaleFactor));
-            }
-            if (scaledSegments.equals(mSegments)) {
-                return this;
-            }
-            Composed scaled = new Composed(scaledSegments, mRepeatIndex);
-            scaled.validate();
-            return scaled;
+            return applyToSegments(VibrationEffectSegment::scale, scaleFactor);
+        }
+
+        /** @hide */
+        @NonNull
+        @Override
+        public Composed applyAdaptiveScale(float scaleFactor) {
+            return applyToSegments(VibrationEffectSegment::scaleLinearly, scaleFactor);
         }
 
         /** @hide */
@@ -926,10 +1016,9 @@ public abstract class VibrationEffect implements Parcelable {
             if (this == o) {
                 return true;
             }
-            if (!(o instanceof Composed)) {
+            if (!(o instanceof Composed other)) {
                 return false;
             }
-            Composed other = (Composed) o;
             return mSegments.equals(other.mSegments) && mRepeatIndex == other.mRepeatIndex;
         }
 
@@ -969,6 +1058,7 @@ public abstract class VibrationEffect implements Parcelable {
 
         @Override
         public void writeToParcel(@NonNull Parcel out, int flags) {
+            out.writeInt(PARCEL_TOKEN_COMPOSED);
             out.writeList(mSegments);
             out.writeInt(mRepeatIndex);
         }
@@ -978,6 +1068,7 @@ public abstract class VibrationEffect implements Parcelable {
                 new Creator<Composed>() {
                     @Override
                     public Composed createFromParcel(Parcel in) {
+                        in.readInt(); // Skip the parcel type token
                         return new Composed(in);
                     }
 
@@ -1011,6 +1102,279 @@ public abstract class VibrationEffect implements Parcelable {
 
             return stepSegment;
         }
+
+        private <T> Composed applyToSegments(
+                BiFunction<VibrationEffectSegment, T, VibrationEffectSegment> function, T param) {
+            int segmentCount = mSegments.size();
+            ArrayList<VibrationEffectSegment> updatedSegments = new ArrayList<>(segmentCount);
+            for (int i = 0; i < segmentCount; i++) {
+                updatedSegments.add(function.apply(mSegments.get(i), param));
+            }
+            if (mSegments.equals(updatedSegments)) {
+                return this;
+            }
+            Composed updated = new Composed(updatedSegments, mRepeatIndex);
+            updated.validate();
+            return updated;
+        }
+    }
+
+    /**
+     * Implementation of {@link VibrationEffect} described by a generic {@link PersistableBundle}
+     * defined by vendors.
+     *
+     * @hide
+     */
+    @TestApi
+    @FlaggedApi(FLAG_VENDOR_VIBRATION_EFFECTS)
+    public static final class VendorEffect extends VibrationEffect {
+        /** @hide */
+        public static final int DEFAULT_STRENGTH = VibrationEffect.EFFECT_STRENGTH_MEDIUM;
+        /** @hide */
+        public static final float DEFAULT_SCALE = 1.0f;
+
+        private final PersistableBundle mVendorData;
+        private final int mEffectStrength;
+        private final float mScale;
+        private final float mAdaptiveScale;
+
+        /** @hide */
+        VendorEffect(@NonNull Parcel in) {
+            this(Objects.requireNonNull(
+                    in.readPersistableBundle(VibrationEffect.class.getClassLoader())),
+                    in.readInt(), in.readFloat(), in.readFloat());
+        }
+
+        /** @hide */
+        public VendorEffect(@NonNull PersistableBundle vendorData, int effectStrength,
+                float scale, float adaptiveScale) {
+            mVendorData = vendorData;
+            mEffectStrength = effectStrength;
+            mScale = scale;
+            mAdaptiveScale = adaptiveScale;
+        }
+
+        @NonNull
+        public PersistableBundle getVendorData() {
+            return mVendorData;
+        }
+
+        public int getEffectStrength() {
+            return mEffectStrength;
+        }
+
+        public float getScale() {
+            return mScale;
+        }
+
+        public float getAdaptiveScale() {
+            return mAdaptiveScale;
+        }
+
+        /** @hide */
+        @Override
+        @Nullable
+        public long[] computeCreateWaveformOffOnTimingsOrNull() {
+            return null;
+        }
+
+        /** @hide */
+        @Override
+        public void validate() {
+            Preconditions.checkArgument(!mVendorData.isEmpty(),
+                    "Vendor effect bundle must be non-empty");
+        }
+
+        /** @hide */
+        @Override
+        @Nullable
+        public VibrationEffect cropToLengthOrNull(int length) {
+            return null;
+        }
+
+        @Override
+        public long getDuration() {
+            return -1; // UNKNOWN
+        }
+
+        /** @hide */
+        @Override
+        public boolean areVibrationFeaturesSupported(@NonNull VibratorInfo vibratorInfo) {
+            return vibratorInfo.hasCapability(IVibrator.CAP_PERFORM_VENDOR_EFFECTS);
+        }
+
+        /** @hide */
+        @Override
+        public boolean isHapticFeedbackCandidate() {
+            return false;
+        }
+
+        /** @hide */
+        @NonNull
+        @Override
+        public VendorEffect resolve(int defaultAmplitude) {
+            return this;
+        }
+
+        /** @hide */
+        @NonNull
+        @Override
+        public VibrationEffect applyEffectStrength(int effectStrength) {
+            if (mEffectStrength == effectStrength) {
+                return this;
+            }
+            VendorEffect updated = new VendorEffect(mVendorData, effectStrength, mScale,
+                    mAdaptiveScale);
+            updated.validate();
+            return updated;
+        }
+
+        /** @hide */
+        @NonNull
+        @Override
+        public VendorEffect scale(float scaleFactor) {
+            if (Float.compare(mScale, scaleFactor) == 0) {
+                return this;
+            }
+            VendorEffect updated = new VendorEffect(mVendorData, mEffectStrength, scaleFactor,
+                    mAdaptiveScale);
+            updated.validate();
+            return updated;
+        }
+
+        /** @hide */
+        @NonNull
+        @Override
+        public VibrationEffect applyAdaptiveScale(float scaleFactor) {
+            if (Float.compare(mAdaptiveScale, scaleFactor) == 0) {
+                return this;
+            }
+            VendorEffect updated = new VendorEffect(mVendorData, mEffectStrength, mScale,
+                    scaleFactor);
+            updated.validate();
+            return updated;
+        }
+
+        /** @hide */
+        @NonNull
+        @Override
+        public VendorEffect applyRepeatingIndefinitely(boolean wantRepeating, int loopDelayMs) {
+            return this;
+        }
+
+        @Override
+        public boolean equals(@Nullable Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (!(o instanceof VendorEffect other)) {
+                return false;
+            }
+            return mEffectStrength == other.mEffectStrength
+                    && (Float.compare(mScale, other.mScale) == 0)
+                    && (Float.compare(mAdaptiveScale, other.mAdaptiveScale) == 0)
+                    && isPersistableBundleEquals(mVendorData, other.mVendorData);
+        }
+
+        @Override
+        public int hashCode() {
+            // PersistableBundle does not implement hashCode, so use its size as a shortcut.
+            return Objects.hash(mVendorData.size(), mEffectStrength, mScale, mAdaptiveScale);
+        }
+
+        @Override
+        public String toString() {
+            return String.format(Locale.ROOT,
+                    "VendorEffect{vendorData=%s, strength=%s, scale=%.2f, adaptiveScale=%.2f}",
+                    mVendorData, effectStrengthToString(mEffectStrength), mScale, mAdaptiveScale);
+        }
+
+        /** @hide */
+        @Override
+        public String toDebugString() {
+            return String.format(Locale.ROOT,
+                    "vendorEffect=%s, strength=%s, scale=%.2f, adaptiveScale=%.2f",
+                    mVendorData.toShortString(), effectStrengthToString(mEffectStrength),
+                    mScale, mAdaptiveScale);
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(@NonNull Parcel out, int flags) {
+            out.writeInt(PARCEL_TOKEN_VENDOR_EFFECT);
+            out.writePersistableBundle(mVendorData);
+            out.writeInt(mEffectStrength);
+            out.writeFloat(mScale);
+            out.writeFloat(mAdaptiveScale);
+        }
+
+        /**
+         * Compares two {@link PersistableBundle} objects are equals.
+         */
+        private static boolean isPersistableBundleEquals(
+                PersistableBundle first, PersistableBundle second) {
+            if (first == second) {
+                return true;
+            }
+            if (first == null || second == null || first.size() != second.size()) {
+                return false;
+            }
+            for (String key : first.keySet()) {
+                if (!isPersistableBundleSupportedValueEquals(first.get(key), second.get(key))) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        /**
+         * Compares two values which type is supported by {@link PersistableBundle}.
+         *
+         * <p>If the type isn't supported. The equality is done by {@link Object#equals(Object)}.
+         */
+        private static boolean isPersistableBundleSupportedValueEquals(
+                Object first, Object second) {
+            if (first == second) {
+                return true;
+            } else if (first == null || second == null
+                    || !first.getClass().equals(second.getClass())) {
+                return false;
+            } else if (first instanceof PersistableBundle) {
+                return isPersistableBundleEquals(
+                        (PersistableBundle) first, (PersistableBundle) second);
+            } else if (first instanceof int[]) {
+                return Arrays.equals((int[]) first, (int[]) second);
+            } else if (first instanceof long[]) {
+                return Arrays.equals((long[]) first, (long[]) second);
+            } else if (first instanceof double[]) {
+                return Arrays.equals((double[]) first, (double[]) second);
+            } else if (first instanceof boolean[]) {
+                return Arrays.equals((boolean[]) first, (boolean[]) second);
+            } else if (first instanceof String[]) {
+                return Arrays.equals((String[]) first, (String[]) second);
+            } else {
+                return Objects.equals(first, second);
+            }
+        }
+
+        @NonNull
+        public static final Creator<VendorEffect> CREATOR =
+                new Creator<VendorEffect>() {
+                    @Override
+                    public VendorEffect createFromParcel(Parcel in) {
+                        in.readInt(); // Skip the parcel type token
+                        return new VendorEffect(in);
+                    }
+
+                    @Override
+                    public VendorEffect[] newArray(int size) {
+                        return new VendorEffect[size];
+                    }
+                };
     }
 
     /**
@@ -1249,7 +1613,9 @@ public abstract class VibrationEffect implements Parcelable {
             if (mRepeatIndex >= 0) {
                 throw new UnreachableAfterRepeatingIndefinitelyException();
             }
-            Composed composed = (Composed) effect;
+            if (!(effect instanceof Composed composed)) {
+                throw new IllegalArgumentException("Can't add vendor effects to composition.");
+            }
             if (composed.getRepeatIndex() >= 0) {
                 // Start repeating from the index relative to the composed waveform.
                 mRepeatIndex = mSegments.size() + composed.getRepeatIndex();
@@ -1285,28 +1651,18 @@ public abstract class VibrationEffect implements Parcelable {
          * @hide
          */
         public static String primitiveToString(@PrimitiveType int id) {
-            switch (id) {
-                case PRIMITIVE_NOOP:
-                    return "NOOP";
-                case PRIMITIVE_CLICK:
-                    return "CLICK";
-                case PRIMITIVE_THUD:
-                    return "THUD";
-                case PRIMITIVE_SPIN:
-                    return "SPIN";
-                case PRIMITIVE_QUICK_RISE:
-                    return "QUICK_RISE";
-                case PRIMITIVE_SLOW_RISE:
-                    return "SLOW_RISE";
-                case PRIMITIVE_QUICK_FALL:
-                    return "QUICK_FALL";
-                case PRIMITIVE_TICK:
-                    return "TICK";
-                case PRIMITIVE_LOW_TICK:
-                    return "LOW_TICK";
-                default:
-                    return Integer.toString(id);
-            }
+            return switch (id) {
+                case PRIMITIVE_NOOP -> "NOOP";
+                case PRIMITIVE_CLICK -> "CLICK";
+                case PRIMITIVE_THUD -> "THUD";
+                case PRIMITIVE_SPIN -> "SPIN";
+                case PRIMITIVE_QUICK_RISE -> "QUICK_RISE";
+                case PRIMITIVE_SLOW_RISE -> "SLOW_RISE";
+                case PRIMITIVE_QUICK_FALL -> "QUICK_FALL";
+                case PRIMITIVE_TICK -> "TICK";
+                case PRIMITIVE_LOW_TICK -> "LOW_TICK";
+                default -> Integer.toString(id);
+            };
         }
     }
 
@@ -1640,7 +1996,17 @@ public abstract class VibrationEffect implements Parcelable {
             new Parcelable.Creator<VibrationEffect>() {
                 @Override
                 public VibrationEffect createFromParcel(Parcel in) {
-                    return new Composed(in);
+                    switch (in.readInt()) {
+                        case PARCEL_TOKEN_COMPOSED:
+                            return new Composed(in);
+                        case PARCEL_TOKEN_VENDOR_EFFECT:
+                            if (Flags.vendorVibrationEffects()) {
+                                return new VendorEffect(in);
+                            } // else fall through
+                        default:
+                            throw new IllegalStateException(
+                                    "Unexpected vibration effect type token in parcel.");
+                    }
                 }
                 @Override
                 public VibrationEffect[] newArray(int size) {

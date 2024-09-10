@@ -44,7 +44,7 @@ sealed class BiometricPromptRequest(
         val logoDescription: String? = info.logoDescription
         val negativeButtonText: String = info.negativeButtonText?.toString() ?: ""
         val componentNameForConfirmDeviceCredentialActivity: ComponentName? =
-            info.componentNameForConfirmDeviceCredentialActivity
+            info.realCallerForConfirmDeviceCredentialActivity
         val allowBackgroundAuthentication = info.isAllowBackgroundAuthentication
     }
 

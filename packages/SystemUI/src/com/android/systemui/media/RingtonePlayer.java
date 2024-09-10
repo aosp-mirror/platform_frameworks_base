@@ -17,7 +17,6 @@
 package com.android.systemui.media;
 
 import android.annotation.Nullable;
-import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -124,13 +123,9 @@ public class RingtonePlayer implements CoreStartable {
                 boolean looping, @Nullable VolumeShaper.Configuration volumeShaperConfig)
                 throws RemoteException {
             if (LOGD) {
-                Log.d(TAG, "play(token=" + token + ", uri=" + uri
-                        + ", uid=" + Binder.getCallingUid()
-                        + ") uriUserId=" + ContentProvider.getUserIdFromUri(uri)
-                        + " callingUserId=" + Binder.getCallingUserHandle().getIdentifier());
+                Log.d(TAG, "play(token=" + token + ", uri=" + uri + ", uid="
+                        + Binder.getCallingUid() + ")");
             }
-            enforceUriUserId(uri);
-
             Client client;
             synchronized (mClients) {
                 client = mClients.get(token);
@@ -212,7 +207,6 @@ public class RingtonePlayer implements CoreStartable {
 
         @Override
         public String getTitle(Uri uri) {
-            enforceUriUserId(uri);
             final UserHandle user = Binder.getCallingUserHandle();
             return Ringtone.getTitle(getContextForUser(user), uri,
                     false /*followSettingsUri*/, false /*allowRemote*/);
@@ -245,25 +239,6 @@ public class RingtonePlayer implements CoreStartable {
             }
             throw new SecurityException("Uri is not ringtone, alarm, or notification: " + uri);
         }
-
-        /**
-         * Must be called from the Binder calling thread.
-         * Ensures caller is from the same userId as the content they're trying to access.
-         * @param uri the URI to check
-         * @throws SecurityException when non-system call or userId in uri differs from the
-         *                           caller's userId
-         */
-        private void enforceUriUserId(Uri uri) throws SecurityException {
-            final int uriUserId = ContentProvider.getUserIdFromUri(uri);
-            final int callerUserId = Binder.getCallingUserHandle().getIdentifier();
-            // for a non-system call, verify the URI to play belongs to the same user as the caller
-            if (UserHandle.isApp(Binder.getCallingUid()) && uriUserId != callerUserId) {
-                throw new SecurityException("Illegal access to uri=" + uri
-                        + " content associated with user=" + uriUserId
-                        + ", request originates from user=" + callerUserId);
-            }
-        }
-
     };
 
     private Context getContextForUser(UserHandle user) {

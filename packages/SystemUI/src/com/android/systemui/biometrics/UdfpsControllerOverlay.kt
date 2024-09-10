@@ -44,6 +44,7 @@ import android.view.accessibility.AccessibilityManager
 import android.view.accessibility.AccessibilityManager.TouchExplorationStateChangeListener
 import androidx.annotation.LayoutRes
 import androidx.annotation.VisibleForTesting
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor
@@ -94,7 +95,7 @@ class UdfpsControllerOverlay
 constructor(
     private val context: Context,
     private val inflater: LayoutInflater,
-    private val windowManager: WindowManager,
+    private val windowManager: ViewCaptureAwareWindowManager,
     private val accessibilityManager: AccessibilityManager,
     private val statusBarStateController: StatusBarStateController,
     private val statusBarKeyguardViewManager: StatusBarKeyguardViewManager,

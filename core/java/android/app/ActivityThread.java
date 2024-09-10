@@ -30,6 +30,7 @@ import static android.app.servertransaction.ActivityLifecycleItem.ON_STOP;
 import static android.app.servertransaction.ActivityLifecycleItem.PRE_ON_CREATE;
 import static android.content.ContentResolver.DEPRECATE_DATA_COLUMNS;
 import static android.content.ContentResolver.DEPRECATE_DATA_PREFIX;
+import static android.content.pm.ActivityInfo.CONFIG_RESOURCES_UNUSED;
 import static android.content.res.Configuration.UI_MODE_TYPE_DESK;
 import static android.content.res.Configuration.UI_MODE_TYPE_MASK;
 import static android.view.Display.DEFAULT_DISPLAY;
@@ -41,7 +42,6 @@ import static android.window.ConfigurationHelper.shouldUpdateResources;
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 import static com.android.internal.os.SafeZipPathValidatorCallback.VALIDATE_ZIP_PATH_FOR_PATH_TRAVERSAL;
 import static com.android.sdksandbox.flags.Flags.sandboxActivitySdkBasedContext;
-import static com.android.window.flags.Flags.activityWindowInfoFlag;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -232,6 +232,7 @@ import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.content.ReferrerIntent;
 import com.android.internal.os.BinderCallsStats;
 import com.android.internal.os.BinderInternal;
+import com.android.internal.os.DebugStore;
 import com.android.internal.os.RuntimeInit;
 import com.android.internal.os.SafeZipPathValidatorCallback;
 import com.android.internal.os.SomeArgs;
@@ -357,6 +358,15 @@ public final class ActivityThread extends ClientTransactionHandler
 
     private static final long BINDER_CALLBACK_THROTTLE = 10_100L;
     private long mBinderCallbackLast = -1;
+
+    private static final boolean DEBUG_STORE_ENABLED =
+            com.android.internal.os.Flags.debugStoreEnabled();
+
+    /**
+    * Threshold for identifying long-running looper messages (in milliseconds).
+    * Calculated as 2 seconds multiplied by the hardware timeout multiplier.
+    */
+    private static final long LONG_MESSAGE_THRESHOLD_MS = 2000 * Build.HW_TIMEOUT_MULTIPLIER;
 
     /**
      * Denotes the sequence number of the process state change for which the main thread needs
@@ -734,19 +744,6 @@ public final class ActivityThread extends ClientTransactionHandler
                             activityWindowInfo,
                             false /* alwaysReportChange */);
                 }
-
-                @Override
-                public void requestCompatCameraControl(boolean showControl,
-                        boolean transformationApplied, ICompatCameraControlCallback callback) {
-                    if (activity == null) {
-                        throw new IllegalStateException(
-                                "Received camera compat control update for non-existing activity");
-                    }
-                    ActivityClient.getInstance().requestCompatCameraControl(
-                            activity.getResources(), token, showControl, transformationApplied,
-                            callback);
-                }
-
             };
         }
 
@@ -2105,8 +2102,7 @@ public final class ActivityThread extends ClientTransactionHandler
         @Override
         public void scheduleTaskFragmentTransaction(@NonNull ITaskFragmentOrganizer organizer,
                 @NonNull TaskFragmentTransaction transaction) throws RemoteException {
-            // TODO(b/260873529): ITaskFragmentOrganizer can be cleanup to be a IBinder token
-            // after flag removal.
+            // TODO(b/352665082): ITaskFragmentOrganizer can be cleanup to be a IBinder token
             organizer.onTransactionReady(transaction);
         }
 
@@ -2409,6 +2405,12 @@ public final class ActivityThread extends ClientTransactionHandler
         }
         public void handleMessage(Message msg) {
             if (DEBUG_MESSAGES) Slog.v(TAG, ">>> handling: " + codeToString(msg.what));
+            long debugStoreId = -1;
+            // By default, log all long messages when the debug store is enabled,
+            // unless this is overridden for certain message types, for which we have
+            // more granular debug store logging.
+            boolean shouldLogLongMessage = DEBUG_STORE_ENABLED;
+            final long messageStartUptimeMs = SystemClock.uptimeMillis();
             switch (msg.what) {
                 case BIND_APPLICATION:
                     Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "bindApplication");
@@ -2433,24 +2435,61 @@ public final class ActivityThread extends ClientTransactionHandler
                                     "broadcastReceiveComp");
                         }
                     }
-                    handleReceiver((ReceiverData)msg.obj);
-                    Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+                    ReceiverData receiverData = (ReceiverData) msg.obj;
+                    if (DEBUG_STORE_ENABLED) {
+                        debugStoreId =
+                                DebugStore.recordBroadcastHandleReceiver(receiverData.intent);
+                    }
+
+                    try {
+                        handleReceiver(receiverData);
+                    } finally {
+                        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+                        if (DEBUG_STORE_ENABLED) {
+                            DebugStore.recordEventEnd(debugStoreId);
+                            shouldLogLongMessage = false;
+                        }
+                    }
                     break;
                 case CREATE_SERVICE:
                     if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
                         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
                                 ("serviceCreate: " + String.valueOf(msg.obj)));
                     }
-                    handleCreateService((CreateServiceData)msg.obj);
-                    Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+                    CreateServiceData createServiceData = (CreateServiceData) msg.obj;
+                    if (DEBUG_STORE_ENABLED) {
+                        debugStoreId = DebugStore.recordServiceCreate(createServiceData.info);
+                    }
+
+                    try {
+                        handleCreateService(createServiceData);
+                    } finally {
+                        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+                        if (DEBUG_STORE_ENABLED) {
+                            DebugStore.recordEventEnd(debugStoreId);
+                            shouldLogLongMessage = false;
+                        }
+                    }
                     break;
                 case BIND_SERVICE:
                     if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
                         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "serviceBind: "
                                 + String.valueOf(msg.obj));
                     }
-                    handleBindService((BindServiceData)msg.obj);
-                    Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+                    BindServiceData bindData = (BindServiceData) msg.obj;
+                    if (DEBUG_STORE_ENABLED) {
+                        debugStoreId =
+                                DebugStore.recordServiceBind(bindData.rebind, bindData.intent);
+                    }
+                    try {
+                        handleBindService(bindData);
+                    } finally {
+                        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+                        if (DEBUG_STORE_ENABLED) {
+                            DebugStore.recordEventEnd(debugStoreId);
+                            shouldLogLongMessage = false;
+                        }
+                    }
                     break;
                 case UNBIND_SERVICE:
                     if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
@@ -2466,8 +2505,21 @@ public final class ActivityThread extends ClientTransactionHandler
                         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
                                 ("serviceStart: " + String.valueOf(msg.obj)));
                     }
-                    handleServiceArgs((ServiceArgsData)msg.obj);
-                    Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+                    ServiceArgsData serviceData = (ServiceArgsData) msg.obj;
+                    if (DEBUG_STORE_ENABLED) {
+                        debugStoreId = DebugStore.recordServiceOnStart(serviceData.startId,
+                                serviceData.flags, serviceData.args);
+                    }
+
+                    try {
+                        handleServiceArgs(serviceData);
+                    } finally {
+                        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+                        if (DEBUG_STORE_ENABLED) {
+                            DebugStore.recordEventEnd(debugStoreId);
+                            shouldLogLongMessage = false;
+                        }
+                    }
                     break;
                 case STOP_SERVICE:
                     if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
@@ -2637,13 +2689,6 @@ public final class ActivityThread extends ClientTransactionHandler
                     } finally {
                         controller.onClientTransactionFinished();
                     }
-                    if (isSystem()) {
-                        // Client transactions inside system process are recycled on the client side
-                        // instead of ClientLifecycleManager to avoid being cleared before this
-                        // message is handled.
-                        transaction.recycle();
-                    }
-                    // TODO(lifecycler): Recycle locally scheduled transactions.
                     break;
                 case RELAUNCH_ACTIVITY:
                     handleRelaunchActivityLocally((IBinder) msg.obj);
@@ -2670,11 +2715,17 @@ public final class ActivityThread extends ClientTransactionHandler
                     handleFinishInstrumentationWithoutRestart();
                     break;
             }
+            long messageElapsedTimeMs = SystemClock.uptimeMillis() - messageStartUptimeMs;
             Object obj = msg.obj;
             if (obj instanceof SomeArgs) {
                 ((SomeArgs) obj).recycle();
             }
             if (DEBUG_MESSAGES) Slog.v(TAG, "<<< done: " + codeToString(msg.what));
+            if (shouldLogLongMessage
+                    && messageElapsedTimeMs > LONG_MESSAGE_THRESHOLD_MS) {
+                DebugStore.recordLongLooperMessage(msg.what, msg.getTarget().getClass().getName(),
+                        messageElapsedTimeMs);
+            }
         }
     }
 
@@ -3825,9 +3876,8 @@ public final class ActivityThread extends ClientTransactionHandler
                 + " req=" + requestCode + " res=" + resultCode + " data=" + data);
         final ArrayList<ResultInfo> list = new ArrayList<>();
         list.add(new ResultInfo(id, requestCode, resultCode, data, activityToken));
-        final ClientTransaction clientTransaction = ClientTransaction.obtain(mAppThread);
-        final ActivityResultItem activityResultItem = ActivityResultItem.obtain(
-                activityToken, list);
+        final ClientTransaction clientTransaction = new ClientTransaction(mAppThread);
+        final ActivityResultItem activityResultItem = new ActivityResultItem(activityToken, list);
         clientTransaction.addTransactionItem(activityResultItem);
         try {
             mAppThread.scheduleTransaction(clientTransaction);
@@ -4533,7 +4583,7 @@ public final class ActivityThread extends ClientTransactionHandler
     public void handleAttachSplashScreenView(@NonNull ActivityClientRecord r,
             @Nullable SplashScreenView.SplashScreenViewParcelable parcelable,
             @NonNull SurfaceControl startingWindowLeash) {
-        final DecorView decorView = (DecorView) r.window.peekDecorView();
+        final DecorView decorView = r.window != null ? (DecorView) r.window.peekDecorView() : null;
         if (parcelable != null && decorView != null) {
             createSplashScreen(r, decorView, parcelable, startingWindowLeash);
         } else {
@@ -4621,8 +4671,8 @@ public final class ActivityThread extends ClientTransactionHandler
     }
 
     private void schedulePauseWithUserLeavingHint(ActivityClientRecord r) {
-        final ClientTransaction transaction = ClientTransaction.obtain(mAppThread);
-        final PauseActivityItem pauseActivityItem = PauseActivityItem.obtain(r.token,
+        final ClientTransaction transaction = new ClientTransaction(mAppThread);
+        final PauseActivityItem pauseActivityItem = new PauseActivityItem(r.token,
                 r.activity.isFinishing(), /* userLeaving */ true,
                 /* dontReport */ false, /* autoEnteringPip */ false);
         transaction.addTransactionItem(pauseActivityItem);
@@ -4630,8 +4680,8 @@ public final class ActivityThread extends ClientTransactionHandler
     }
 
     private void scheduleResume(ActivityClientRecord r) {
-        final ClientTransaction transaction = ClientTransaction.obtain(mAppThread);
-        final ResumeActivityItem resumeActivityItem = ResumeActivityItem.obtain(r.token,
+        final ClientTransaction transaction = new ClientTransaction(mAppThread);
+        final ResumeActivityItem resumeActivityItem = new ResumeActivityItem(r.token,
                 /* isForward */ false, /* shouldSendCompatFakeFocus */ false);
         transaction.addTransactionItem(resumeActivityItem);
         executeTransaction(transaction);
@@ -6247,7 +6297,7 @@ public final class ActivityThread extends ClientTransactionHandler
                 r.createdConfig != null
                         ? r.createdConfig : mConfigurationController.getConfiguration(),
                 r.overrideConfig);
-        final ActivityRelaunchItem activityRelaunchItem = ActivityRelaunchItem.obtain(
+        final ActivityRelaunchItem activityRelaunchItem = new ActivityRelaunchItem(
                 r.token, null /* pendingResults */, null /* pendingIntents */,
                 0 /* configChanges */, mergedConfiguration, r.mPreserveWindow,
                 r.getActivityWindowInfo());
@@ -6255,7 +6305,7 @@ public final class ActivityThread extends ClientTransactionHandler
         final ActivityLifecycleItem lifecycleRequest =
                 TransactionExecutorHelper.getLifecycleRequestForCurrentState(r);
         // Schedule the transaction.
-        final ClientTransaction transaction = ClientTransaction.obtain(mAppThread);
+        final ClientTransaction transaction = new ClientTransaction(mAppThread);
         transaction.addTransactionItem(activityRelaunchItem);
         transaction.addTransactionItem(lifecycleRequest);
         executeTransaction(transaction);
@@ -6518,6 +6568,13 @@ public final class ActivityThread extends ClientTransactionHandler
         // Report the change regardless if the changes across size-config-buckets.
         if (alwaysReportChange) {
             return true;
+        }
+
+        if (android.content.res.Flags.handleAllConfigChanges()) {
+            if ((handledConfigChanges & CONFIG_RESOURCES_UNUSED) != 0) {
+                // Report the change if activities claim they do not use resources at all.
+                return true;
+            }
         }
 
         final int diffWithBucket = SizeConfigurationBuckets.filterDiff(publicDiff, currentConfig,
@@ -6846,9 +6903,6 @@ public final class ActivityThread extends ClientTransactionHandler
     }
 
     private void handleActivityWindowInfoChanged(@NonNull ActivityClientRecord r) {
-        if (!activityWindowInfoFlag()) {
-            return;
-        }
         if (r.mActivityWindowInfo.equals(r.mLastReportedActivityWindowInfo)) {
             return;
         }
@@ -7083,9 +7137,6 @@ public final class ActivityThread extends ClientTransactionHandler
                     && mLastProcessState <= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND
                     && level >= ComponentCallbacks2.TRIM_MEMORY_BACKGROUND) {
                 return;
-            }
-            if (level >= ComponentCallbacks2.TRIM_MEMORY_COMPLETE) {
-                PropertyInvalidatedCache.onTrimMemory();
             }
 
             final ArrayList<ComponentCallbacks2> callbacks =

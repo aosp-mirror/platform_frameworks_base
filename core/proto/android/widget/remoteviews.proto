@@ -21,6 +21,7 @@ option java_multiple_files = true;
 package android.widget;
 
 import "frameworks/base/core/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/content/res/color_state_list.proto";
 
 /**
  * An android.widget.RemoteViews object. This is used by RemoteViews.createPreviewFromProto
@@ -70,6 +71,222 @@ message RemoteViewsProto {
         optional bool has_stable_ids = 3;
         optional int32 view_type_count = 4;
         optional bool attached = 5;
+    }
+
+    /**
+     * An android.graphics.drawable Icon.
+     */
+    message Icon {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+        optional int32 blend_mode = 1;
+        optional android.content.res.ColorStateListProto tint_list = 2;
+        oneof icon {
+            bytes bitmap = 3;
+            string resource = 4;
+            bytes data = 5;
+            string uri = 6;
+            string uri_adaptive_bitmap = 7;
+            bytes adaptive_bitmap = 8;
+        };
+    }
+
+    /**
+     * Represents a CharSequence with Spans.
+     */
+    message CharSequence {
+        optional string text = 1;
+        repeated Span spans = 2;
+
+        message Span {
+            optional int32 start = 1;
+            optional int32 end = 2;
+            optional int32 flags = 3;
+            // We use `repeated` for the following fields so that ProtoOutputStream does not omit
+            // empty messages (e.g. EasyEdit, Superscript). In practice, only one of the following
+            // fields will be written per Span message. We cannot use `oneof` here because
+            // ProtoOutputStream will omit empty messages.
+            repeated AbsoluteSize absolute_size = 4;
+            repeated AccessibilityClickable accessibility_clickable = 5;
+            repeated AccessibilityReplacement accessibility_replacement = 6;
+            repeated AccessibilityUrl accessibility_url = 7;
+            repeated Alignment alignment = 8;
+            repeated Annotation annotation = 9;
+            repeated BackgroundColor background_color = 10;
+            repeated Bullet bullet = 11;
+            repeated EasyEdit easy_edit = 12;
+            repeated ForegroundColor foreground_color = 13;
+            repeated LeadingMargin leading_margin = 14;
+            repeated LineBackground line_background = 15;
+            repeated LineBreak line_break = 16;
+            repeated LineHeight line_height = 17;
+            repeated Locale locale = 18;
+            repeated Quote quote = 19;
+            repeated RelativeSize relative_size = 20;
+            repeated ScaleX scale_x = 21;
+            repeated SpellCheck spell_check = 22;
+            repeated Strikethrough strikethrough = 23;
+            repeated Style style = 24;
+            repeated Subscript subscript = 25;
+            repeated Suggestion suggestion = 26;
+            repeated SuggestionRange suggestion_range = 27;
+            repeated Superscript superscript = 28;
+            repeated TextAppearance text_appearance = 29;
+            repeated Tts tts = 30;
+            repeated Typeface typeface = 31;
+            repeated Underline underline = 32;
+            repeated Url url = 33;
+
+            message AbsoluteSize {
+                optional int32 size = 1;
+                optional bool dip = 2;
+            }
+
+            message AccessibilityClickable {
+                optional int32 original_clickable_span_id = 1;
+            }
+
+            message AccessibilityReplacement {
+                optional CharSequence content_description = 1;
+            }
+
+            message AccessibilityUrl {
+                optional string url = 1;
+            }
+
+            message Alignment {
+                optional string alignment = 1;
+            }
+
+            message Annotation {
+                optional string key = 1;
+                optional string value = 2;
+            }
+
+            message BackgroundColor {
+                optional int32 color = 1;
+            }
+
+            message Bullet {
+                optional int32 gap_width = 1;
+                optional int32 color = 2;
+                optional int32 bullet_radius = 3;
+                optional bool want_color = 4;
+            }
+
+            message EasyEdit {}
+
+            message ForegroundColor {
+                optional int32 color = 1;
+            }
+
+            message LeadingMargin {
+                optional int32 first = 1;
+                optional int32 rest = 2;
+            }
+
+            message LineBackground {
+                optional int32 color = 1;
+            }
+
+            message LineBreak {
+                optional int32 line_break_style = 1;
+                optional int32 line_break_word_style = 2;
+                optional int32 hyphenation = 3;
+            }
+
+            message LineHeight {
+                optional int32 height = 1;
+            }
+
+            message Locale {
+                optional string language_tags = 1;
+            }
+
+            message Quote {
+                optional int32 color = 1;
+                optional int32 stripe_width = 2;
+                optional int32 gap_width = 3;
+            }
+
+            message RelativeSize {
+                optional float proportion = 1;
+            }
+
+            message ScaleX {
+                optional float proportion = 1;
+            }
+
+            message SpellCheck {
+                optional bool in_progress = 1;
+            }
+
+            message Strikethrough {}
+
+            message Style {
+                optional int32 style = 1;
+                optional int32 font_weight_adjustment = 2;
+            }
+
+            message Subscript {}
+
+            message Suggestion {
+                repeated string suggestions = 1;
+                optional int32 flags = 2;
+                optional string locale_string_for_compatibility = 3;
+                optional string language_tag = 4;
+                optional int32 hash_code = 5;
+                optional int32 easy_correct_underline_color = 6;
+                optional float easy_correct_underline_thickness = 7;
+                optional int32 misspelled_underline_color = 8;
+                optional float misspelled_underline_thickness = 9;
+                optional int32 auto_correction_underline_color = 10;
+                optional float auto_correction_underline_thickness = 11;
+                optional int32 grammar_error_underline_color = 12;
+                optional float grammar_error_underline_thickness = 13;
+            }
+
+            message SuggestionRange {
+                optional int32 background_color = 1;
+            }
+
+            message Superscript {}
+
+            // Typeface is omitted
+            message TextAppearance {
+                optional string family_name = 1;
+                optional int32 style = 2;
+                optional int32 text_size = 3;
+                optional android.content.res.ColorStateListProto text_color = 4;
+                optional android.content.res.ColorStateListProto text_color_link = 5;
+                optional int32 text_font_weight = 7;
+                optional string text_locale = 8;
+                optional float shadow_radius = 9;
+                optional float shadow_dx = 10;
+                optional float shadow_dy = 11;
+                optional int32 shadow_color = 12;
+                optional bool has_elegant_text_height_field = 13;
+                optional bool elegant_text_height = 14;
+                optional bool has_letter_spacing_field = 15;
+                optional float letter_spacing = 16;
+                optional string font_feature_settings = 17;
+                optional string font_variation_settings = 18;
+            }
+
+            message Tts {
+                optional string type = 1;
+                optional string args = 2;
+            }
+
+            message Typeface {
+                optional string family = 1;
+            }
+
+            message Underline {}
+
+            message Url {
+                optional string url = 1;
+            }
+        }
     }
 }
 

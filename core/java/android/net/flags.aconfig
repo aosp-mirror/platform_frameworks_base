@@ -25,3 +25,13 @@ flag {
   description: "Flag for registerOffloadEngine API in NsdManager"
   bug: "294777050"
 }
+
+flag {
+  name: "deprecate_network_policy_callback"
+  namespace: "backstage_power"
+  description: "Flag for deprecating NetworkPolicyCallback and related APIs"
+  bug: "353342610"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}

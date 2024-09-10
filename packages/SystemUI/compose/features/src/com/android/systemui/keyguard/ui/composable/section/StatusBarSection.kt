@@ -28,7 +28,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.modifiers.height
 import com.android.keyguard.dagger.KeyguardStatusBarViewComponent
@@ -83,29 +82,20 @@ constructor(
                 componentFactory.build(view, provider).keyguardStatusBarViewController
             }
 
-        MovableElement(
-            key = StatusBarElementKey,
-            modifier = modifier,
-        ) {
-            content {
-                AndroidView(
-                    factory = {
-                        notificationPanelView.get().findViewById<View>(R.id.keyguard_header)?.let {
-                            (it.parent as ViewGroup).removeView(it)
-                        }
+        AndroidView(
+            factory = {
+                notificationPanelView.get().findViewById<View>(R.id.keyguard_header)?.let {
+                    (it.parent as ViewGroup).removeView(it)
+                }
 
-                        viewController.init()
-                        view
-                    },
-                    modifier =
-                        Modifier.fillMaxWidth().padding(horizontal = 16.dp).height {
-                            Utils.getStatusBarHeaderHeightKeyguard(context)
-                        },
-                    update = { viewController.setDisplayCutout(viewDisplayCutout) }
-                )
-            }
-        }
+                viewController.init()
+                view
+            },
+            modifier =
+                Modifier.fillMaxWidth().padding(horizontal = 16.dp).height {
+                    Utils.getStatusBarHeaderHeightKeyguard(context)
+                },
+            update = { viewController.setDisplayCutout(viewDisplayCutout) }
+        )
     }
 }
-
-private val StatusBarElementKey = ElementKey("StatusBar")

@@ -20,6 +20,7 @@ import static android.view.ContentInfo.SOURCE_DRAG_AND_DROP;
 import static android.widget.TextView.ACCESSIBILITY_ACTION_SMART_START_ID;
 
 import static com.android.graphics.hwui.flags.Flags.highContrastTextSmallTextRect;
+import static com.android.text.flags.Flags.contextMenuHideUnavailableItems;
 
 import android.R;
 import android.animation.ValueAnimator;
@@ -76,7 +77,6 @@ import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.SpannedString;
 import android.text.StaticLayout;
-import android.text.TextFlags;
 import android.text.TextUtils;
 import android.text.method.InsertModeTransformationMethod;
 import android.text.method.KeyListener;
@@ -471,12 +471,15 @@ public class Editor {
     private static final int LINE_CHANGE_SLOP_MIN_DP = 8;
     private int mLineChangeSlopMax;
     private int mLineChangeSlopMin;
-    private boolean mUseNewContextMenu;
 
     private final AccessibilitySmartActions mA11ySmartActions;
     private InsertModeController mInsertModeController;
 
-    Editor(TextView textView) {
+    /**
+     * @hide
+     */
+    @VisibleForTesting
+    public Editor(TextView textView) {
         mTextView = textView;
         // Synchronize the filter list, which places the undo input filter at the end.
         mTextView.setFilters(mTextView.getFilters());
@@ -502,9 +505,6 @@ public class Editor {
         mLineSlopRatio = AppGlobals.getFloatCoreSetting(
                 WidgetFlags.KEY_LINE_SLOP_RATIO,
                 WidgetFlags.LINE_SLOP_RATIO_DEFAULT);
-        mUseNewContextMenu = AppGlobals.getIntCoreSetting(
-                TextFlags.KEY_ENABLE_NEW_CONTEXT_MENU,
-                TextFlags.ENABLE_NEW_CONTEXT_MENU_DEFAULT ? 1 : 0) != 0;
         if (TextView.DEBUG_CURSOR) {
             logCursor("Editor", "Cursor drag from anywhere is %s.",
                     mFlagCursorDragFromAnywhereEnabled ? "enabled" : "disabled");
@@ -3211,36 +3211,26 @@ public class Editor {
             }
         }
 
-        final int menuItemOrderUndo = 2;
-        final int menuItemOrderRedo = 3;
-        final int menuItemOrderCut = 4;
-        final int menuItemOrderCopy = 5;
-        final int menuItemOrderPaste = 6;
-        final int menuItemOrderPasteAsPlainText;
-        final int menuItemOrderSelectAll;
-        final int menuItemOrderShare;
-        final int menuItemOrderAutofill;
-        if (mUseNewContextMenu) {
-            menuItemOrderPasteAsPlainText = 7;
-            menuItemOrderSelectAll = 8;
-            menuItemOrderShare = 9;
-            menuItemOrderAutofill = 10;
+        menu.setOptionalIconsVisible(true);
+        menu.setGroupDividerEnabled(true);
 
-            menu.setOptionalIconsVisible(true);
-            menu.setGroupDividerEnabled(true);
+        setAssistContextMenuItems(menu);
 
-            setAssistContextMenuItems(menu);
+        final int keyboard = mTextView.getResources().getConfiguration().keyboard;
+        menu.setQwertyMode(keyboard == Configuration.KEYBOARD_QWERTY);
 
-            final int keyboard = mTextView.getResources().getConfiguration().keyboard;
-            menu.setQwertyMode(keyboard == Configuration.KEYBOARD_QWERTY);
-        } else {
-            menuItemOrderShare = 7;
-            menuItemOrderSelectAll = 8;
-            menuItemOrderAutofill = 10;
-            menuItemOrderPasteAsPlainText = 11;
-        }
+        setTextContextMenuItems(menu);
 
-        final TypedArray a = mTextView.getContext().obtainStyledAttributes(new int[] {
+        mPreserveSelection = true;
+
+        // No-op for the old context menu because it doesn't have icons.
+        adjustIconSpacing(menu);
+    }
+
+    /** @hide */
+    @VisibleForTesting
+    public void setTextContextMenuItems(ContextMenu menu) {
+        final TypedArray a = mTextView.getContext().obtainStyledAttributes(new int[]{
                 // TODO: Make Undo/Redo be public attribute.
                 com.android.internal.R.attr.actionModeUndoDrawable,
                 com.android.internal.R.attr.actionModeRedoDrawable,
@@ -3251,66 +3241,146 @@ public class Editor {
                 android.R.attr.actionModeShareDrawable,
         });
 
-        menu.add(CONTEXT_MENU_GROUP_UNDO_REDO, TextView.ID_UNDO, menuItemOrderUndo,
-                com.android.internal.R.string.undo)
-                .setAlphabeticShortcut('z')
-                .setOnMenuItemClickListener(mOnContextMenuItemClickListener)
-                .setIcon(a.getDrawable(0))
-                .setEnabled(mTextView.canUndo());
-        menu.add(CONTEXT_MENU_GROUP_UNDO_REDO, TextView.ID_REDO, menuItemOrderRedo,
-                com.android.internal.R.string.redo)
-                .setAlphabeticShortcut('z', KeyEvent.META_CTRL_ON | KeyEvent.META_SHIFT_ON)
-                .setOnMenuItemClickListener(mOnContextMenuItemClickListener)
-                .setIcon(a.getDrawable(1))
-                .setEnabled(mTextView.canRedo());
+        final int menuItemOrderUndo = 2;
+        final int menuItemOrderRedo = 3;
+        final int menuItemOrderCut = 4;
+        final int menuItemOrderCopy = 5;
+        final int menuItemOrderPaste = 6;
+        final int menuItemOrderPasteAsPlainText = 7;
+        final int menuItemOrderSelectAll = 8;
+        final int menuItemOrderShare = 9;
+        final int menuItemOrderAutofill = 10;
 
-        menu.add(CONTEXT_MENU_GROUP_CLIPBOARD, TextView.ID_CUT, menuItemOrderCut,
-                com.android.internal.R.string.cut)
-                .setAlphabeticShortcut('x')
-                .setOnMenuItemClickListener(mOnContextMenuItemClickListener)
-                .setIcon(a.getDrawable(2))
-                .setEnabled(mTextView.canCut());
-        menu.add(CONTEXT_MENU_GROUP_CLIPBOARD, TextView.ID_COPY, menuItemOrderCopy,
-                com.android.internal.R.string.copy)
-                .setAlphabeticShortcut('c')
-                .setOnMenuItemClickListener(mOnContextMenuItemClickListener)
-                .setIcon(a.getDrawable(3))
-                .setEnabled(mTextView.canCopy());
-        menu.add(CONTEXT_MENU_GROUP_CLIPBOARD, TextView.ID_PASTE, menuItemOrderPaste,
-                com.android.internal.R.string.paste)
-                .setAlphabeticShortcut('v')
-                .setEnabled(mTextView.canPaste())
-                .setIcon(a.getDrawable(4))
-                .setOnMenuItemClickListener(mOnContextMenuItemClickListener);
-        menu.add(CONTEXT_MENU_GROUP_CLIPBOARD, TextView.ID_PASTE_AS_PLAIN_TEXT,
-                        menuItemOrderPasteAsPlainText,
-                com.android.internal.R.string.paste_as_plain_text)
-                .setAlphabeticShortcut('v', KeyEvent.META_CTRL_ON | KeyEvent.META_SHIFT_ON)
-                .setEnabled(mTextView.canPasteAsPlainText())
-                .setIcon(a.getDrawable(4))
-                .setOnMenuItemClickListener(mOnContextMenuItemClickListener);
-        menu.add(CONTEXT_MENU_GROUP_CLIPBOARD, TextView.ID_SELECT_ALL,
-                        menuItemOrderSelectAll, com.android.internal.R.string.selectAll)
-                .setAlphabeticShortcut('a')
-                .setEnabled(mTextView.canSelectAllText())
-                .setIcon(a.getDrawable(5))
-                .setOnMenuItemClickListener(mOnContextMenuItemClickListener);
+        if (contextMenuHideUnavailableItems()) {
+            if (mTextView.canUndo()) {
+                menu.add(CONTEXT_MENU_GROUP_UNDO_REDO, TextView.ID_UNDO, menuItemOrderUndo,
+                                com.android.internal.R.string.undo)
+                        .setAlphabeticShortcut('z')
+                        .setOnMenuItemClickListener(mOnContextMenuItemClickListener)
+                        .setIcon(a.getDrawable(0));
+            }
 
-        menu.add(CONTEXT_MENU_GROUP_MISC, TextView.ID_SHARE, menuItemOrderShare,
-                com.android.internal.R.string.share)
-                .setEnabled(mTextView.canShare())
-                .setIcon(a.getDrawable(6))
-                .setOnMenuItemClickListener(mOnContextMenuItemClickListener);
-        menu.add(CONTEXT_MENU_GROUP_MISC, TextView.ID_AUTOFILL, menuItemOrderAutofill,
-                android.R.string.autofill)
-                .setEnabled(mTextView.canRequestAutofill())
-                .setOnMenuItemClickListener(mOnContextMenuItemClickListener);
+            if (mTextView.canRedo()) {
+                menu.add(CONTEXT_MENU_GROUP_UNDO_REDO, TextView.ID_REDO, menuItemOrderRedo,
+                                com.android.internal.R.string.redo)
+                        .setAlphabeticShortcut('z', KeyEvent.META_CTRL_ON | KeyEvent.META_SHIFT_ON)
+                        .setOnMenuItemClickListener(mOnContextMenuItemClickListener)
+                        .setIcon(a.getDrawable(1));
+            }
 
-        mPreserveSelection = true;
+            if (mTextView.canCut()) {
+                menu.add(CONTEXT_MENU_GROUP_CLIPBOARD, TextView.ID_CUT, menuItemOrderCut,
+                                com.android.internal.R.string.cut)
+                        .setAlphabeticShortcut('x')
+                        .setOnMenuItemClickListener(mOnContextMenuItemClickListener)
+                        .setIcon(a.getDrawable(2));
+            }
+
+            if (mTextView.canCopy()) {
+                menu.add(CONTEXT_MENU_GROUP_CLIPBOARD, TextView.ID_COPY, menuItemOrderCopy,
+                                com.android.internal.R.string.copy)
+                        .setAlphabeticShortcut('c')
+                        .setOnMenuItemClickListener(mOnContextMenuItemClickListener)
+                        .setIcon(a.getDrawable(3));
+            }
+
+            if (mTextView.canPaste()) {
+                menu.add(CONTEXT_MENU_GROUP_CLIPBOARD, TextView.ID_PASTE, menuItemOrderPaste,
+                                com.android.internal.R.string.paste)
+                        .setAlphabeticShortcut('v')
+                        .setIcon(a.getDrawable(4))
+                        .setOnMenuItemClickListener(mOnContextMenuItemClickListener);
+            }
+
+            if (mTextView.canPasteAsPlainText()) {
+                menu.add(CONTEXT_MENU_GROUP_CLIPBOARD, TextView.ID_PASTE_AS_PLAIN_TEXT,
+                                menuItemOrderPasteAsPlainText,
+                                com.android.internal.R.string.paste_as_plain_text)
+                        .setAlphabeticShortcut('v', KeyEvent.META_CTRL_ON | KeyEvent.META_SHIFT_ON)
+                        .setIcon(a.getDrawable(4))
+                        .setOnMenuItemClickListener(mOnContextMenuItemClickListener);
+            }
+
+            if (mTextView.canSelectAllText()) {
+                menu.add(CONTEXT_MENU_GROUP_CLIPBOARD, TextView.ID_SELECT_ALL,
+                                menuItemOrderSelectAll, com.android.internal.R.string.selectAll)
+                        .setAlphabeticShortcut('a')
+                        .setIcon(a.getDrawable(5))
+                        .setOnMenuItemClickListener(mOnContextMenuItemClickListener);
+            }
+
+            if (mTextView.canShare()) {
+                menu.add(CONTEXT_MENU_GROUP_MISC, TextView.ID_SHARE, menuItemOrderShare,
+                                com.android.internal.R.string.share)
+                        .setIcon(a.getDrawable(6))
+                        .setOnMenuItemClickListener(mOnContextMenuItemClickListener);
+            }
+
+            final String selected = mTextView.getSelectedText();
+            if (mTextView.canRequestAutofill() && (selected == null || selected.isEmpty())) {
+                menu.add(CONTEXT_MENU_GROUP_MISC, TextView.ID_AUTOFILL, menuItemOrderAutofill,
+                                android.R.string.autofill)
+                        .setOnMenuItemClickListener(mOnContextMenuItemClickListener);
+            }
+        } else {
+            menu.add(CONTEXT_MENU_GROUP_UNDO_REDO, TextView.ID_UNDO, menuItemOrderUndo,
+                            com.android.internal.R.string.undo)
+                    .setAlphabeticShortcut('z')
+                    .setOnMenuItemClickListener(mOnContextMenuItemClickListener)
+                    .setIcon(a.getDrawable(0))
+                    .setEnabled(mTextView.canUndo());
+            menu.add(CONTEXT_MENU_GROUP_UNDO_REDO, TextView.ID_REDO, menuItemOrderRedo,
+                            com.android.internal.R.string.redo)
+                    .setAlphabeticShortcut('z', KeyEvent.META_CTRL_ON | KeyEvent.META_SHIFT_ON)
+                    .setOnMenuItemClickListener(mOnContextMenuItemClickListener)
+                    .setIcon(a.getDrawable(1))
+                    .setEnabled(mTextView.canRedo());
+
+            menu.add(CONTEXT_MENU_GROUP_CLIPBOARD, TextView.ID_CUT, menuItemOrderCut,
+                            com.android.internal.R.string.cut)
+                    .setAlphabeticShortcut('x')
+                    .setOnMenuItemClickListener(mOnContextMenuItemClickListener)
+                    .setIcon(a.getDrawable(2))
+                    .setEnabled(mTextView.canCut());
+            menu.add(CONTEXT_MENU_GROUP_CLIPBOARD, TextView.ID_COPY, menuItemOrderCopy,
+                            com.android.internal.R.string.copy)
+                    .setAlphabeticShortcut('c')
+                    .setOnMenuItemClickListener(mOnContextMenuItemClickListener)
+                    .setIcon(a.getDrawable(3))
+                    .setEnabled(mTextView.canCopy());
+            menu.add(CONTEXT_MENU_GROUP_CLIPBOARD, TextView.ID_PASTE, menuItemOrderPaste,
+                            com.android.internal.R.string.paste)
+                    .setAlphabeticShortcut('v')
+                    .setEnabled(mTextView.canPaste())
+                    .setIcon(a.getDrawable(4))
+                    .setOnMenuItemClickListener(mOnContextMenuItemClickListener);
+            menu.add(CONTEXT_MENU_GROUP_CLIPBOARD, TextView.ID_PASTE_AS_PLAIN_TEXT,
+                            menuItemOrderPasteAsPlainText,
+                            com.android.internal.R.string.paste_as_plain_text)
+                    .setAlphabeticShortcut('v', KeyEvent.META_CTRL_ON | KeyEvent.META_SHIFT_ON)
+                    .setEnabled(mTextView.canPasteAsPlainText())
+                    .setIcon(a.getDrawable(4))
+                    .setOnMenuItemClickListener(mOnContextMenuItemClickListener);
+            menu.add(CONTEXT_MENU_GROUP_CLIPBOARD, TextView.ID_SELECT_ALL,
+                            menuItemOrderSelectAll, com.android.internal.R.string.selectAll)
+                    .setAlphabeticShortcut('a')
+                    .setEnabled(mTextView.canSelectAllText())
+                    .setIcon(a.getDrawable(5))
+                    .setOnMenuItemClickListener(mOnContextMenuItemClickListener);
+
+            menu.add(CONTEXT_MENU_GROUP_MISC, TextView.ID_SHARE, menuItemOrderShare,
+                            com.android.internal.R.string.share)
+                    .setEnabled(mTextView.canShare())
+                    .setIcon(a.getDrawable(6))
+                    .setOnMenuItemClickListener(mOnContextMenuItemClickListener);
+            final String selected = mTextView.getSelectedText();
+            menu.add(CONTEXT_MENU_GROUP_MISC, TextView.ID_AUTOFILL, menuItemOrderAutofill,
+                            android.R.string.autofill)
+                    .setEnabled(mTextView.canRequestAutofill()
+                            && (selected == null || selected.isEmpty()))
+                    .setOnMenuItemClickListener(mOnContextMenuItemClickListener);
+        }
         a.recycle();
-
-        // No-op for the old context menu because it doesn't have icons.
-        adjustIconSpacing(menu);
     }
 
     /**

@@ -22,6 +22,10 @@
         <option name="shell-timeout" value="660s" />
         <option name="test-timeout" value="600s" />
         <option name="runner" value="androidx.test.runner.AndroidJUnitRunner" />
+        <option name="device-listeners" value="android.tools.collectors.DefaultUITraceListener"/>
+        <!-- DefaultUITraceListener args -->
+        <option name="instrumentation-arg" key="skip_test_success_metrics" value="true"/>
+        <option name="instrumentation-arg" key="per_class" value="true"/>
     </test>
     <object class="com.android.tradefed.testtype.suite.module.TestFailureModuleController"
             type="module_controller">
@@ -31,7 +35,9 @@
     <metrics_collector class="com.android.tradefed.device.metric.FilePullerLogCollector">
         <option name="pull-pattern-keys" value="input_.*" />
         <!-- Pull files created by tests, like the output of screenshot tests -->
-        <option name="directory-keys" value="/storage/emulated/0/InputTests" />
+        <option name="directory-keys" value="/sdcard/Download/InputTests" />
+        <!-- Pull perfetto traces from DefaultUITraceListener -->
+        <option name="pull-pattern-keys" value="perfetto_file_path*" />
         <option name="collect-on-run-ended-only" value="false" />
     </metrics_collector>
 </configuration>

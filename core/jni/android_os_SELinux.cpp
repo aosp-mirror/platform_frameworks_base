@@ -53,7 +53,7 @@ selabel_handle* GetSELabelHandle() {
 }
 
 struct SecurityContext_Delete {
-    void operator()(security_context_t p) const {
+    void operator()(char* p) const {
         freecon(p);
     }
 };
@@ -111,7 +111,7 @@ static jstring fileSelabelLookup(JNIEnv* env, jobject, jstring pathStr) {
         return NULL;
     }
 
-    security_context_t tmp = NULL;
+    char* tmp = NULL;
     if (selabel_lookup(selabel_handle, &tmp, path_c_str, S_IFREG) != 0) {
       ALOGE("fileSelabelLookup => selabel_lookup for %s failed: %d", path_c_str, errno);
       return NULL;
@@ -138,7 +138,7 @@ static jstring getFdConInner(JNIEnv *env, jobject fileDescriptor, bool isSocket)
         return NULL;
     }
 
-    security_context_t tmp = NULL;
+    char* tmp = NULL;
     int ret;
     if (isSocket) {
         ret = getpeercon(fd, &tmp);
@@ -184,7 +184,7 @@ static jstring getFdCon(JNIEnv *env, jobject, jobject fileDescriptor) {
  * Function: setFSCreateCon
  * Purpose: set security context used for creating a new file system object
  * Parameters:
- *       context: security_context_t representing the new context of a file system object,
+ *       context: char* representing the new context of a file system object,
  *                set to NULL to return to the default policy behavior
  * Returns: true on success, false on error
  * Exception: none
@@ -267,7 +267,7 @@ static jstring getFileCon(JNIEnv *env, jobject, jstring pathStr) {
         return NULL;
     }
 
-    security_context_t tmp = NULL;
+    char* tmp = NULL;
     int ret = getfilecon(path.c_str(), &tmp);
     Unique_SecurityContext context(tmp);
 
@@ -293,7 +293,7 @@ static jstring getCon(JNIEnv *env, jobject) {
         return NULL;
     }
 
-    security_context_t tmp = NULL;
+    char* tmp = NULL;
     int ret = getcon(&tmp);
     Unique_SecurityContext context(tmp);
 
@@ -320,7 +320,7 @@ static jstring getPidCon(JNIEnv *env, jobject, jint pid) {
         return NULL;
     }
 
-    security_context_t tmp = NULL;
+    char* tmp = NULL;
     int ret = getpidcon(static_cast<pid_t>(pid), &tmp);
     Unique_SecurityContext context(tmp);
 

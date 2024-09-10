@@ -103,7 +103,11 @@ class ScreenRecordChipInteractorTest : SysuiTestCase() {
             screenRecordRepo.screenRecordState.value = ScreenRecordModel.Recording
             val task = createTask(taskId = 1)
             mediaProjectionRepo.mediaProjectionState.value =
-                MediaProjectionState.Projecting.SingleTask("host.package", task)
+                MediaProjectionState.Projecting.SingleTask(
+                    "host.package",
+                    hostDeviceName = null,
+                    task,
+                )
 
             assertThat(latest).isEqualTo(ScreenRecordChipModel.Recording(recordedTask = task))
         }

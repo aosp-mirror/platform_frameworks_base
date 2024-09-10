@@ -16,6 +16,7 @@
 
 package com.android.server.display.brightness;
 
+import android.annotation.Nullable;
 import android.util.Slog;
 
 import java.util.Objects;
@@ -66,6 +67,16 @@ public final class BrightnessReason {
     // Any number of MODIFIER_*
     private int mModifier;
 
+    // Tag used to identify the source of the brightness (usually a specific activity/window).
+    private CharSequence mTag;
+
+    public BrightnessReason() {
+    }
+
+    public BrightnessReason(int reason) {
+        setReason(reason);
+    }
+
     /**
      * A utility to clone a BrightnessReason from another BrightnessReason event
      *
@@ -74,6 +85,7 @@ public final class BrightnessReason {
     public void set(BrightnessReason other) {
         setReason(other == null ? REASON_UNKNOWN : other.mReason);
         setModifier(other == null ? 0 : other.mModifier);
+        setTag(other == null ? null : other.mTag);
     }
 
     /**
@@ -85,19 +97,20 @@ public final class BrightnessReason {
         setModifier(modifier | this.mModifier);
     }
 
-
     @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof BrightnessReason)) {
             return false;
         }
         BrightnessReason other = (BrightnessReason) obj;
-        return other.mReason == mReason && other.mModifier == mModifier;
+        return other.mReason == mReason
+                && other.mModifier == mModifier
+                && Objects.equals(other.mTag != null ? other.mTag.toString() : null, mTag);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mReason, mModifier);
+        return Objects.hash(mReason, mModifier, mTag);
     }
 
     @Override
@@ -115,6 +128,11 @@ public final class BrightnessReason {
     public String toString(int adjustments) {
         final StringBuilder sb = new StringBuilder();
         sb.append(reasonToString(mReason));
+
+        if (mTag != null) {
+            sb.append("(").append(mTag).append(")");
+        }
+
         sb.append(" [");
         if ((adjustments & ADJUSTMENT_AUTO_TEMP) != 0) {
             sb.append(" temp_adj");
@@ -149,8 +167,23 @@ public final class BrightnessReason {
         return sb.toString();
     }
 
+    public void setTag(@Nullable CharSequence tag) {
+        mTag = tag;
+    }
+
     /**
-     * A utility to set the reason of the BrightnessReason object
+     * Gets the tag to identify who requested the brightness.
+     */
+    @Nullable public CharSequence getTag() {
+        return mTag;
+    }
+
+    public int getReason() {
+        return mReason;
+    }
+
+    /**
+     * Sets the reason of the BrightnessReason object
      *
      * @param reason The value to which the reason is to be updated.
      */
@@ -162,16 +195,12 @@ public final class BrightnessReason {
         }
     }
 
-    public int getReason() {
-        return mReason;
-    }
-
     public int getModifier() {
         return mModifier;
     }
 
     /**
-     * A utility to set the modified of the current BrightnessReason object
+     * Sets the modifier bitflags of the current BrightnessReason object
      *
      * @param modifier The value to which the modifier is to be updated
      */

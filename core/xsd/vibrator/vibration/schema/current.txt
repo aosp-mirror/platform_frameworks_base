@@ -41,9 +41,11 @@ package com.android.internal.vibrator.persistence {
     ctor public VibrationEffect();
     method public com.android.internal.vibrator.persistence.PredefinedEffect getPredefinedEffect_optional();
     method public com.android.internal.vibrator.persistence.PrimitiveEffect getPrimitiveEffect_optional();
+    method public byte[] getVendorEffect_optional();
     method public com.android.internal.vibrator.persistence.WaveformEffect getWaveformEffect_optional();
     method public void setPredefinedEffect_optional(com.android.internal.vibrator.persistence.PredefinedEffect);
     method public void setPrimitiveEffect_optional(com.android.internal.vibrator.persistence.PrimitiveEffect);
+    method public void setVendorEffect_optional(byte[]);
     method public void setWaveformEffect_optional(com.android.internal.vibrator.persistence.WaveformEffect);
   }
 

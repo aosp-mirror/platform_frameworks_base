@@ -21,6 +21,10 @@ sealed interface MediaRouterCastModel {
     /** MediaRouter isn't aware of any active cast. */
     data object DoingNothing : MediaRouterCastModel
 
-    /** MediaRouter has an active cast. */
-    data object Casting : MediaRouterCastModel
+    /**
+     * MediaRouter has an active cast.
+     *
+     * @property deviceName the name of the device receiving the cast.
+     */
+    data class Casting(val deviceName: String?) : MediaRouterCastModel
 }

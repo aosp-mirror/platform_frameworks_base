@@ -16,10 +16,8 @@
 
 package com.android.systemui.communal.view.viewmodel
 
-import android.app.smartspace.SmartspaceTarget
-import android.appwidget.AppWidgetProviderInfo
+import android.content.ComponentName
 import android.content.pm.UserInfo
-import android.os.UserHandle
 import android.platform.test.flag.junit.FlagsParameterization
 import android.provider.Settings
 import android.widget.RemoteViews
@@ -27,21 +25,25 @@ import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.communal.data.model.CommunalSmartspaceTimer
 import com.android.systemui.communal.data.repository.FakeCommunalMediaRepository
 import com.android.systemui.communal.data.repository.FakeCommunalSceneRepository
+import com.android.systemui.communal.data.repository.FakeCommunalSmartspaceRepository
 import com.android.systemui.communal.data.repository.FakeCommunalTutorialRepository
 import com.android.systemui.communal.data.repository.FakeCommunalWidgetRepository
 import com.android.systemui.communal.data.repository.fakeCommunalMediaRepository
 import com.android.systemui.communal.data.repository.fakeCommunalSceneRepository
+import com.android.systemui.communal.data.repository.fakeCommunalSmartspaceRepository
 import com.android.systemui.communal.data.repository.fakeCommunalTutorialRepository
 import com.android.systemui.communal.data.repository.fakeCommunalWidgetRepository
+import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.communal.domain.interactor.communalSceneInteractor
 import com.android.systemui.communal.domain.interactor.communalSettingsInteractor
 import com.android.systemui.communal.domain.interactor.communalTutorialInteractor
 import com.android.systemui.communal.domain.model.CommunalContentModel
+import com.android.systemui.communal.shared.log.CommunalMetricsLogger
 import com.android.systemui.communal.shared.model.CommunalScenes
-import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel.Companion.POPUP_AUTO_HIDE_TIMEOUT_MS
 import com.android.systemui.communal.ui.viewmodel.PopupType
@@ -78,8 +80,6 @@ import com.android.systemui.settings.fakeUserTracker
 import com.android.systemui.shade.ShadeTestUtil
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.shade.shadeTestUtil
-import com.android.systemui.smartspace.data.repository.FakeSmartspaceRepository
-import com.android.systemui.smartspace.data.repository.fakeSmartspaceRepository
 import com.android.systemui.statusbar.KeyguardIndicationController
 import com.android.systemui.testKosmos
 import com.android.systemui.user.data.repository.FakeUserRepository
@@ -97,7 +97,11 @@ import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.atLeastOnce
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.spy
 import org.mockito.kotlin.whenever
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4
 import platform.test.runner.parameterized.Parameters
@@ -107,7 +111,7 @@ import platform.test.runner.parameterized.Parameters
 @RunWith(ParameterizedAndroidJunit4::class)
 class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
     @Mock private lateinit var mediaHost: MediaHost
-    @Mock private lateinit var providerInfo: AppWidgetProviderInfo
+    @Mock private lateinit var metricsLogger: CommunalMetricsLogger
 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
@@ -115,12 +119,13 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
     private lateinit var keyguardRepository: FakeKeyguardRepository
     private lateinit var tutorialRepository: FakeCommunalTutorialRepository
     private lateinit var widgetRepository: FakeCommunalWidgetRepository
-    private lateinit var smartspaceRepository: FakeSmartspaceRepository
+    private lateinit var smartspaceRepository: FakeCommunalSmartspaceRepository
     private lateinit var mediaRepository: FakeCommunalMediaRepository
     private lateinit var userRepository: FakeUserRepository
     private lateinit var shadeTestUtil: ShadeTestUtil
     private lateinit var keyguardTransitionRepository: FakeKeyguardTransitionRepository
     private lateinit var communalRepository: FakeCommunalSceneRepository
+    private lateinit var communalInteractor: CommunalInteractor
 
     private lateinit var underTest: CommunalViewModel
 
@@ -136,7 +141,7 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
         keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
         tutorialRepository = kosmos.fakeCommunalTutorialRepository
         widgetRepository = kosmos.fakeCommunalWidgetRepository
-        smartspaceRepository = kosmos.fakeSmartspaceRepository
+        smartspaceRepository = kosmos.fakeCommunalSmartspaceRepository
         mediaRepository = kosmos.fakeCommunalMediaRepository
         userRepository = kosmos.fakeUserRepository
         shadeTestUtil = kosmos.shadeTestUtil
@@ -149,28 +154,33 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             userInfos = listOf(MAIN_USER_INFO),
             selectedUserIndex = 0,
         )
-        whenever(providerInfo.profile).thenReturn(UserHandle(MAIN_USER_INFO.id))
         whenever(mediaHost.visible).thenReturn(true)
 
         kosmos.powerInteractor.setAwakeForTest()
 
-        underTest =
-            CommunalViewModel(
-                kosmos.testDispatcher,
-                testScope,
-                kosmos.testScope.backgroundScope,
-                context.resources,
-                kosmos.keyguardTransitionInteractor,
-                kosmos.keyguardInteractor,
-                mock<KeyguardIndicationController>(),
-                kosmos.communalSceneInteractor,
-                kosmos.communalInteractor,
-                kosmos.communalSettingsInteractor,
-                kosmos.communalTutorialInteractor,
-                kosmos.shadeInteractor,
-                mediaHost,
-                logcatLogBuffer("CommunalViewModelTest")
-            )
+        communalInteractor = spy(kosmos.communalInteractor)
+
+        underTest = createViewModel()
+    }
+
+    private fun createViewModel(): CommunalViewModel {
+        return CommunalViewModel(
+            kosmos.testDispatcher,
+            testScope,
+            kosmos.testScope.backgroundScope,
+            context.resources,
+            kosmos.keyguardTransitionInteractor,
+            kosmos.keyguardInteractor,
+            mock<KeyguardIndicationController>(),
+            kosmos.communalSceneInteractor,
+            communalInteractor,
+            kosmos.communalSettingsInteractor,
+            kosmos.communalTutorialInteractor,
+            kosmos.shadeInteractor,
+            mediaHost,
+            logcatLogBuffer("CommunalViewModelTest"),
+            metricsLogger,
+        )
     }
 
     @Test
@@ -206,27 +216,19 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             tutorialRepository.setTutorialSettingState(Settings.Secure.HUB_MODE_TUTORIAL_COMPLETED)
 
             // Widgets available.
-            val widgets =
-                listOf(
-                    CommunalWidgetContentModel.Available(
-                        appWidgetId = 0,
-                        priority = 30,
-                        providerInfo = providerInfo,
-                    ),
-                    CommunalWidgetContentModel.Available(
-                        appWidgetId = 1,
-                        priority = 20,
-                        providerInfo = providerInfo,
-                    ),
-                )
-            widgetRepository.setCommunalWidgets(widgets)
+            widgetRepository.addWidget(appWidgetId = 0, rank = 30)
+            widgetRepository.addWidget(appWidgetId = 1, rank = 20)
 
             // Smartspace available.
-            val target = Mockito.mock(SmartspaceTarget::class.java)
-            whenever(target.smartspaceTargetId).thenReturn("target")
-            whenever(target.featureType).thenReturn(SmartspaceTarget.FEATURE_TIMER)
-            whenever(target.remoteViews).thenReturn(Mockito.mock(RemoteViews::class.java))
-            smartspaceRepository.setCommunalSmartspaceTargets(listOf(target))
+            smartspaceRepository.setTimers(
+                listOf(
+                    CommunalSmartspaceTimer(
+                        smartspaceTargetId = "target",
+                        createdTimestampMillis = 0L,
+                        remoteViews = Mockito.mock(RemoteViews::class.java),
+                    )
+                )
+            )
 
             // Media playing.
             mediaRepository.mediaActive()
@@ -293,7 +295,7 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             widgetRepository.setCommunalWidgets(emptyList())
             // UMO playing
             mediaRepository.mediaActive()
-            smartspaceRepository.setCommunalSmartspaceTargets(emptyList())
+            smartspaceRepository.setTimers(emptyList())
 
             val isEmptyState by collectLastValue(underTest.isEmptyState)
             assertThat(isEmptyState).isTrue()
@@ -304,17 +306,9 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
         testScope.runTest {
             tutorialRepository.setTutorialSettingState(Settings.Secure.HUB_MODE_TUTORIAL_COMPLETED)
 
-            widgetRepository.setCommunalWidgets(
-                listOf(
-                    CommunalWidgetContentModel.Available(
-                        appWidgetId = 1,
-                        priority = 1,
-                        providerInfo = providerInfo,
-                    )
-                ),
-            )
+            widgetRepository.addWidget(appWidgetId = 1, rank = 1)
             mediaRepository.mediaInactive()
-            smartspaceRepository.setCommunalSmartspaceTargets(emptyList())
+            smartspaceRepository.setTimers(emptyList())
 
             val isEmptyState by collectLastValue(underTest.isEmptyState)
             assertThat(isEmptyState).isFalse()
@@ -542,6 +536,8 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             keyguardRepository.setDozeTransitionModel(
                 DozeTransitionModel(from = DozeStateModel.DOZE, to = DozeStateModel.FINISH)
             )
+            advanceTimeBy(600L)
+
             keyguardRepository.setDreaming(true)
             keyguardRepository.setDreamingWithOverlay(true)
             advanceTimeBy(60L)
@@ -650,6 +646,7 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             keyguardRepository.setDozeTransitionModel(
                 DozeTransitionModel(from = DozeStateModel.DOZE, to = DozeStateModel.FINISH)
             )
+            advanceTimeBy(600L)
             keyguardRepository.setDreaming(true)
             keyguardRepository.setDreamingWithOverlay(true)
             advanceTimeBy(60L)
@@ -666,20 +663,8 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             )
 
             // Widgets available
-            val widgets =
-                listOf(
-                    CommunalWidgetContentModel.Available(
-                        appWidgetId = 0,
-                        priority = 30,
-                        providerInfo = providerInfo,
-                    ),
-                    CommunalWidgetContentModel.Available(
-                        appWidgetId = 1,
-                        priority = 20,
-                        providerInfo = providerInfo,
-                    ),
-                )
-            widgetRepository.setCommunalWidgets(widgets)
+            widgetRepository.addWidget(appWidgetId = 0, rank = 30)
+            widgetRepository.addWidget(appWidgetId = 1, rank = 20)
 
             // Then hub shows widgets and the CTA tile
             assertThat(communalContent).hasSize(3)
@@ -689,11 +674,15 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             advanceTimeBy(60L)
 
             // New timer available
-            val target = Mockito.mock(SmartspaceTarget::class.java)
-            whenever<String?>(target.smartspaceTargetId).thenReturn("target")
-            whenever(target.featureType).thenReturn(SmartspaceTarget.FEATURE_TIMER)
-            whenever(target.remoteViews).thenReturn(Mockito.mock(RemoteViews::class.java))
-            smartspaceRepository.setCommunalSmartspaceTargets(listOf(target))
+            smartspaceRepository.setTimers(
+                listOf(
+                    CommunalSmartspaceTimer(
+                        smartspaceTargetId = "target",
+                        createdTimestampMillis = 0L,
+                        remoteViews = Mockito.mock(RemoteViews::class.java),
+                    )
+                )
+            )
             runCurrent()
 
             // Still only emits widgets and the CTA tile
@@ -716,6 +705,7 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             keyguardRepository.setDozeTransitionModel(
                 DozeTransitionModel(from = DozeStateModel.DOZE, to = DozeStateModel.FINISH)
             )
+            advanceTimeBy(600L)
             keyguardRepository.setDreaming(true)
             keyguardRepository.setDreamingWithOverlay(true)
             advanceTimeBy(60L)
@@ -729,30 +719,22 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             )
 
             // And widgets available
-            val widgets =
-                listOf(
-                    CommunalWidgetContentModel.Available(
-                        appWidgetId = 0,
-                        priority = 30,
-                        providerInfo = providerInfo,
-                    ),
-                    CommunalWidgetContentModel.Available(
-                        appWidgetId = 1,
-                        priority = 20,
-                        providerInfo = providerInfo,
-                    ),
-                )
-            widgetRepository.setCommunalWidgets(widgets)
+            widgetRepository.addWidget(appWidgetId = 0, rank = 30)
+            widgetRepository.addWidget(appWidgetId = 1, rank = 20)
 
             // Then emits widgets and the CTA tile
             assertThat(communalContent).hasSize(3)
 
             // When new timer available
-            val target = Mockito.mock(SmartspaceTarget::class.java)
-            whenever(target.smartspaceTargetId).thenReturn("target")
-            whenever(target.featureType).thenReturn(SmartspaceTarget.FEATURE_TIMER)
-            whenever(target.remoteViews).thenReturn(Mockito.mock(RemoteViews::class.java))
-            smartspaceRepository.setCommunalSmartspaceTargets(listOf(target))
+            smartspaceRepository.setTimers(
+                listOf(
+                    CommunalSmartspaceTimer(
+                        smartspaceTargetId = "target",
+                        createdTimestampMillis = 0L,
+                        remoteViews = Mockito.mock(RemoteViews::class.java),
+                    )
+                )
+            )
             runCurrent()
 
             // Then emits timer, widgets and the CTA tile
@@ -765,6 +747,60 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
                 .isInstanceOf(CommunalContentModel.WidgetContent::class.java)
             assertThat(communalContent?.get(3))
                 .isInstanceOf(CommunalContentModel.CtaTileInViewMode::class.java)
+        }
+
+    @Test
+    fun communalContent_readTriggersUmoVisibilityUpdate() =
+        testScope.runTest {
+            verify(mediaHost, never()).updateViewVisibility()
+
+            val communalContent by collectLastValue(underTest.communalContent)
+
+            // updateViewVisibility is called when the flow is collected.
+            assertThat(communalContent).isNotNull()
+            verify(mediaHost, atLeastOnce()).updateViewVisibility()
+        }
+
+    @Test
+    fun scrollPosition_persistedOnEditEntry() {
+        val index = 2
+        val offset = 30
+        underTest.onScrollPositionUpdated(index, offset)
+        underTest.onOpenWidgetEditor(false)
+
+        verify(communalInteractor).setScrollPosition(eq(index), eq(offset))
+    }
+
+    @Test
+    fun onTapWidget_logEvent() {
+        underTest.onTapWidget(ComponentName("test_pkg", "test_cls"), rank = 10)
+        verify(metricsLogger).logTapWidget("test_pkg/test_cls", rank = 10)
+    }
+
+    @Test
+    fun glanceableTouchAvailable_availableWhenNestedScrollingWithoutConsumption() =
+        testScope.runTest {
+            val touchAvailable by collectLastValue(underTest.glanceableTouchAvailable)
+            assertThat(touchAvailable).isTrue()
+            underTest.onHubTouchConsumed()
+            assertThat(touchAvailable).isFalse()
+            underTest.onNestedScrolling()
+            assertThat(touchAvailable).isTrue()
+        }
+
+    @Test
+    fun selectedKey_changeAffectsAllInstances() =
+        testScope.runTest {
+            val model1 = createViewModel()
+            val selectedKey1 by collectLastValue(model1.selectedKey)
+            val model2 = createViewModel()
+            val selectedKey2 by collectLastValue(model2.selectedKey)
+
+            val key = "test"
+            model1.setSelectedKey(key)
+
+            assertThat(selectedKey1).isEqualTo(key)
+            assertThat(selectedKey2).isEqualTo(key)
         }
 
     private suspend fun setIsMainUser(isMainUser: Boolean) {

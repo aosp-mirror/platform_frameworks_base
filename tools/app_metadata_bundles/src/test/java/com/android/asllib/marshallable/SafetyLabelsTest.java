@@ -16,20 +16,30 @@
 
 package com.android.asllib.marshallable;
 
+import static org.junit.Assert.assertThrows;
+
 import com.android.asllib.testutils.TestUtils;
+import com.android.asllib.util.MalformedXmlException;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.w3c.dom.Element;
+
+import java.nio.file.Paths;
 
 @RunWith(JUnit4.class)
 public class SafetyLabelsTest {
+    private static final long DEFAULT_VERSION = 2L;
+
     private static final String SAFETY_LABELS_HR_PATH = "com/android/asllib/safetylabels/hr";
     private static final String SAFETY_LABELS_OD_PATH = "com/android/asllib/safetylabels/od";
 
     private static final String VALID_EMPTY_FILE_NAME = "valid-empty.xml";
     private static final String WITH_DATA_LABELS_FILE_NAME = "with-data-labels.xml";
+    private static final String VALID_V1_FILE_NAME = "valid-v1.xml";
+    private static final String UNRECOGNIZED_FIELD_V2_FILE_NAME = "unrecognized-field-v2.xml";
 
     @Before
     public void setUp() throws Exception {
@@ -40,41 +50,61 @@ public class SafetyLabelsTest {
     @Test
     public void testSafetyLabelsValidEmptyFile() throws Exception {
         System.out.println("starting testSafetyLabelsValidEmptyFile.");
-        testHrToOdSafetyLabels(VALID_EMPTY_FILE_NAME);
-        testOdToHrSafetyLabels(VALID_EMPTY_FILE_NAME);
+        testHrToOdSafetyLabels(VALID_EMPTY_FILE_NAME, DEFAULT_VERSION);
+        testOdToHrSafetyLabels(VALID_EMPTY_FILE_NAME, DEFAULT_VERSION);
     }
 
     /** Test for safety labels with data labels. */
     @Test
     public void testSafetyLabelsWithDataLabels() throws Exception {
         System.out.println("starting testSafetyLabelsWithDataLabels.");
-        testHrToOdSafetyLabels(WITH_DATA_LABELS_FILE_NAME);
-        testOdToHrSafetyLabels(WITH_DATA_LABELS_FILE_NAME);
+        testHrToOdSafetyLabels(WITH_DATA_LABELS_FILE_NAME, DEFAULT_VERSION);
+        testOdToHrSafetyLabels(WITH_DATA_LABELS_FILE_NAME, DEFAULT_VERSION);
     }
 
-    private void hrToOdExpectException(String fileName) {
-        TestUtils.hrToOdExpectException(new SafetyLabelsFactory(), SAFETY_LABELS_HR_PATH, fileName);
+    /** Tests valid fields v1. */
+    @Test
+    public void testValidFieldsV1() throws Exception {
+        var ele =
+                TestUtils.getElementFromResource(
+                        Paths.get(SAFETY_LABELS_OD_PATH, VALID_V1_FILE_NAME));
+        var unused = new SafetyLabelsFactory().createFromOdElement(ele, 1L);
     }
 
-    private void odToHrExpectException(String fileName) {
-        TestUtils.odToHrExpectException(new SafetyLabelsFactory(), SAFETY_LABELS_OD_PATH, fileName);
+    /** Tests unrecognized field v2. */
+    @Test
+    public void testUnrecognizedFieldV2() throws Exception {
+        var ele =
+                TestUtils.getElementFromResource(
+                        Paths.get(SAFETY_LABELS_OD_PATH, VALID_V1_FILE_NAME));
+        assertThrows(
+                MalformedXmlException.class,
+                () -> new SafetyLabelsFactory().createFromOdElement(ele, 2L));
     }
 
-    private void testHrToOdSafetyLabels(String fileName) throws Exception {
-        TestUtils.testHrToOd(
-                TestUtils.document(),
-                new SafetyLabelsFactory(),
-                SAFETY_LABELS_HR_PATH,
-                SAFETY_LABELS_OD_PATH,
-                fileName);
+    private void testHrToOdSafetyLabels(String fileName, long version) throws Exception {
+        var doc = TestUtils.document();
+        SafetyLabels safetyLabels =
+                new SafetyLabelsFactory()
+                        .createFromHrElement(
+                                TestUtils.getElementFromResource(
+                                        Paths.get(SAFETY_LABELS_HR_PATH, fileName)),
+                                version);
+        Element appInfoEle = safetyLabels.toOdDomElement(doc);
+        doc.appendChild(appInfoEle);
+        TestUtils.testFormatToFormat(doc, Paths.get(SAFETY_LABELS_OD_PATH, fileName));
     }
 
-    private void testOdToHrSafetyLabels(String fileName) throws Exception {
-        TestUtils.testOdToHr(
-                TestUtils.document(),
-                new SafetyLabelsFactory(),
-                SAFETY_LABELS_OD_PATH,
-                SAFETY_LABELS_HR_PATH,
-                fileName);
+    private void testOdToHrSafetyLabels(String fileName, long version) throws Exception {
+        var doc = TestUtils.document();
+        SafetyLabels safetyLabels =
+                new SafetyLabelsFactory()
+                        .createFromOdElement(
+                                TestUtils.getElementFromResource(
+                                        Paths.get(SAFETY_LABELS_OD_PATH, fileName)),
+                                version);
+        Element appInfoEle = safetyLabels.toHrDomElement(doc);
+        doc.appendChild(appInfoEle);
+        TestUtils.testFormatToFormat(doc, Paths.get(SAFETY_LABELS_HR_PATH, fileName));
     }
 }

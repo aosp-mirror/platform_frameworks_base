@@ -73,6 +73,10 @@ public final class BatteryUsageStatsQuery implements Parcelable {
 
     public static final int FLAG_BATTERY_USAGE_STATS_INCLUDE_VIRTUAL_UIDS = 0x0010;
 
+    public static final int FLAG_BATTERY_USAGE_STATS_INCLUDE_SCREEN_STATE = 0x0020;
+
+    public static final int FLAG_BATTERY_USAGE_STATS_INCLUDE_POWER_STATE = 0x0040;
+
     private static final long DEFAULT_MAX_STATS_AGE_MS = 5 * 60 * 1000;
 
     private final int mFlags;
@@ -82,7 +86,7 @@ public final class BatteryUsageStatsQuery implements Parcelable {
     private final long mFromTimestamp;
     private final long mToTimestamp;
     private final double mMinConsumedPowerThreshold;
-    private final @BatteryConsumer.PowerComponent int[] mPowerComponents;
+    private final @BatteryConsumer.PowerComponentId int[] mPowerComponents;
 
     private BatteryUsageStatsQuery(@NonNull Builder builder) {
         mFlags = builder.mFlags;
@@ -123,10 +127,19 @@ public final class BatteryUsageStatsQuery implements Parcelable {
         return (mFlags & FLAG_BATTERY_USAGE_STATS_INCLUDE_PROCESS_STATE_DATA) != 0;
     }
 
+    public boolean isScreenStateDataNeeded() {
+        return (mFlags & FLAG_BATTERY_USAGE_STATS_INCLUDE_SCREEN_STATE) != 0;
+    }
+
+    public boolean isPowerStateDataNeeded() {
+        return (mFlags & FLAG_BATTERY_USAGE_STATS_INCLUDE_POWER_STATE) != 0;
+    }
+
     /**
      * Returns the power components that should be estimated or null if all power components
      * are being requested.
      */
+    @BatteryConsumer.PowerComponentId
     public int[] getPowerComponents() {
         return mPowerComponents;
     }
@@ -216,7 +229,7 @@ public final class BatteryUsageStatsQuery implements Parcelable {
         private long mFromTimestamp;
         private long mToTimestamp;
         private double mMinConsumedPowerThreshold = 0;
-        private @BatteryConsumer.PowerComponent int[] mPowerComponents;
+        private @BatteryConsumer.PowerComponentId int[] mPowerComponents;
 
         /**
          * Builds a read-only BatteryUsageStatsQuery object.
@@ -282,7 +295,7 @@ public final class BatteryUsageStatsQuery implements Parcelable {
          * is all power components.
          */
         public Builder includePowerComponents(
-                @BatteryConsumer.PowerComponent int[] powerComponents) {
+                @BatteryConsumer.PowerComponentId int[] powerComponents) {
             mPowerComponents = powerComponents;
             return this;
         }
@@ -293,6 +306,24 @@ public final class BatteryUsageStatsQuery implements Parcelable {
          */
         public Builder includeVirtualUids() {
             mFlags |= BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_INCLUDE_VIRTUAL_UIDS;
+            return this;
+        }
+
+        /**
+         * Requests that screen state data (screen-on, screen-other) be included in the
+         * BatteryUsageStats, if available.
+         */
+        public Builder includeScreenStateData() {
+            mFlags |= BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_INCLUDE_SCREEN_STATE;
+            return this;
+        }
+
+        /**
+         * Requests that power state data (on-battery, power-other) be included in the
+         * BatteryUsageStats, if available.
+         */
+        public Builder includePowerStateData() {
+            mFlags |= BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_INCLUDE_POWER_STATE;
             return this;
         }
 

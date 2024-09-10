@@ -21,6 +21,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import java.util.Objects;
 
 /** A data class representing a multi-toggle preference state. */
 public class MultiTogglePreferenceState extends DeviceSettingPreferenceState implements Parcelable {
@@ -122,5 +125,16 @@ public class MultiTogglePreferenceState extends DeviceSettingPreferenceState imp
     @NonNull
     public Bundle getExtras() {
         return mExtras;
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        if (!(obj instanceof MultiTogglePreferenceState other)) return false;
+        return mState == other.mState;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mState);
     }
 }

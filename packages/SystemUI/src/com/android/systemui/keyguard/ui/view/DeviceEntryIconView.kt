@@ -23,6 +23,7 @@ import android.util.AttributeSet
 import android.util.StateSet
 import android.view.Gravity
 import android.view.View
+import android.view.ViewConfiguration
 import android.view.ViewGroup
 import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.FrameLayout
@@ -31,6 +32,7 @@ import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import com.airbnb.lottie.LottieCompositionFactory
 import com.airbnb.lottie.LottieDrawable
 import com.android.systemui.common.ui.view.LongPressHandlingView
+import com.android.systemui.log.LongPressHandlingViewLogger
 import com.android.systemui.res.R
 
 class DeviceEntryIconView
@@ -39,8 +41,17 @@ constructor(
     context: Context,
     attrs: AttributeSet?,
     defStyleAttrs: Int = 0,
+    logger: LongPressHandlingViewLogger? = null,
 ) : FrameLayout(context, attrs, defStyleAttrs) {
-    val longPressHandlingView: LongPressHandlingView = LongPressHandlingView(context, attrs)
+
+    val longPressHandlingView: LongPressHandlingView =
+        LongPressHandlingView(
+            context = context,
+            attrs = attrs,
+            longPressDuration = { ViewConfiguration.getLongPressTimeout().toLong() },
+            allowedTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop(),
+            logger = logger,
+        )
     val iconView: ImageView = ImageView(context, attrs).apply { id = R.id.device_entry_icon_fg }
     val bgView: ImageView = ImageView(context, attrs).apply { id = R.id.device_entry_icon_bg }
     val aodFpDrawable: LottieDrawable = LottieDrawable()
@@ -247,6 +258,7 @@ constructor(
         lp.height = ViewGroup.LayoutParams.MATCH_PARENT
         lp.width = ViewGroup.LayoutParams.MATCH_PARENT
         bgView.layoutParams = lp
+        bgView.alpha = 0f
     }
 
     fun getIconState(icon: IconType, aod: Boolean): IntArray {

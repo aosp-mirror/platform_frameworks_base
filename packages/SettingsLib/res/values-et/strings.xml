@@ -127,7 +127,7 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Failiedastus"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Sisendseade"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Juurdepääs internetile"</string>
-    <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"Luba juurdepääs kontakt-le ja kõneaj-le"</string>
+    <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"Luba juurdepääs kontaktidele ja kõneajale"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"Teavet kasutatakse kõne teadaannete ja muu jaoks"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Interneti-ühenduse jagamine"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"Tekstsõnumid"</string>
@@ -380,6 +380,8 @@
     <string name="show_touches_summary" msgid="3692861665994502193">"Kuvab puudutuste visuaalse tagasiside"</string>
     <string name="show_key_presses" msgid="6360141722735900214">"Kuva klahvivajutused"</string>
     <string name="show_key_presses_summary" msgid="725387457373015024">"Kuva visuaalset tagasisidet füüsiliste klahvivajutuste kohta"</string>
+    <string name="touchpad_visualizer" msgid="3707916068870825115">"Kuva puuteplaadi sisend"</string>
+    <string name="touchpad_visualizer_summary" msgid="4056080018119847449">"Ekraani ülekate, mis kuvab puuteplaadi sisendandmeid ja tuvastatud liigutusi"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"Näita pinna värskendusi"</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"Akna pinna värskendamiseks kirjuta kogu akna pind üle"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"Kuva ekraanikuva värskendusi"</string>
@@ -408,18 +410,12 @@
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"GPU silumise kihtide laadimise lubamine silumisrakendustele"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Luba paljusõnaline logimine"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Veaaruannetesse kaasatakse täiendavad seadmepõhised teenusepakkuja logid, mis võivad sisaldada privaatset teavet, kasutada rohkem akut ja/või salvestusruumi."</string>
-    <!-- no translation found for enable_verbose_vendor_logging_checkbox (3864578373293835530) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_title (6811217272559843592) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_summary (5226524769774370942) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_action (1190831050259046071) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_preference_summary_will_disable (6175431593394522553) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_preference_summary_on (9017757242481762036) -->
-    <skip />
+    <string name="enable_verbose_vendor_logging_checkbox" msgid="3864578373293835530">"Keela ühe päeva pärast"</string>
+    <string name="verbose_vendor_logging_notification_title" msgid="6811217272559843592">"Tootja paljusõnaline logimine on lõppenud"</string>
+    <string name="verbose_vendor_logging_notification_summary" msgid="5226524769774370942">"Lubatud üheks päevaks"</string>
+    <string name="verbose_vendor_logging_notification_action" msgid="1190831050259046071">"Luba veel üheks päevaks"</string>
+    <string name="verbose_vendor_logging_preference_summary_will_disable" msgid="6175431593394522553">"Keelatakse ühe päeva pärast"</string>
+    <string name="verbose_vendor_logging_preference_summary_on" msgid="9017757242481762036">"Lubatud määramata ajaks"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Akna animatsioonimastaap"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Ülemineku animatsioonimastaap"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Animaatori kestuse mastaap"</string>
@@ -437,7 +433,6 @@
     <string name="force_resizable_activities" msgid="7143612144399959606">"Muuda tegevuste suurused muudetavaks"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Muudetakse kõigi tegevuste suurused mitme aknaga vaates muudetavaks (manifesti väärtustest olenemata)."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Luba vabas vormis aknad"</string>
-    <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Lubatakse katseliste vabavormis akende tugi."</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Arvutivarunduse parool"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Täielikud arvutivarundused pole praegu kaitstud"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Puudutage täielike arvutivarunduste parooli muutmiseks või eemaldamiseks"</string>
@@ -502,7 +497,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"Täislaadimiseks kulub <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – täislaadimiseks kulub <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> – laadimine on optimeeritud"</string>
+    <string name="power_charging_limited" msgid="4144004473976005214">"<xliff:g id="LEVEL">%1$s</xliff:g> – laadimine on aku kaitsmiseks ootele pandud"</string>
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> – laadimine"</string>
     <string name="power_fast_charging_duration_v2" msgid="3797735998640359490">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATUS">%2$s</xliff:g> – täis kell <xliff:g id="TIME">%3$s</xliff:g>"</string>
     <string name="power_charging_duration_v2" msgid="2938998284074003248">"<xliff:g id="LEVEL">%1$s</xliff:g> – aku saab täis kell <xliff:g id="TIME">%2$s</xliff:g>"</string>
@@ -569,6 +564,8 @@
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmid ja meeldetuletused"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Lubage sellel rakendusel määrata alarme ja ajastada ajakriitilisi toiminguid. See võimaldab rakendusel töötada taustal, mistõttu võib akukasutus olla suurem.\n\nKui see luba on välja lülitatud, siis olemasolevad alarmid ja selle rakenduse ajastatud ajapõhised sündmused ei tööta."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"ajakava, äratus, meeldetuletus, kell"</string>
+    <!-- no translation found for zen_mode_do_not_disturb_name (6798711401734798283) -->
+    <skip />
     <string name="zen_mode_settings_title" msgid="7374070457626419755">"Mitte segada"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Lülita sisse"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Valiku Mitte segada sisselülitamine"</string>

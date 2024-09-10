@@ -33,13 +33,14 @@ import com.android.systemui.media.controls.domain.pipeline.MediaDataFilterImpl
 import com.android.systemui.media.controls.domain.pipeline.interactor.mediaCarouselInteractor
 import com.android.systemui.media.controls.domain.pipeline.interactor.mediaRecommendationsInteractor
 import com.android.systemui.media.controls.domain.pipeline.mediaDataFilter
+import com.android.systemui.media.controls.shared.mediaLogger
+import com.android.systemui.media.controls.shared.mockMediaLogger
 import com.android.systemui.media.controls.shared.model.MediaData
 import com.android.systemui.media.controls.shared.model.SmartspaceMediaData
 import com.android.systemui.statusbar.notification.collection.provider.visualStabilityProvider
 import com.android.systemui.statusbar.notificationLockscreenUserManager
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
-import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
@@ -48,12 +49,16 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.never
+import org.mockito.kotlin.reset
+import org.mockito.kotlin.verify
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class MediaCarouselViewModelTest : SysuiTestCase() {
 
-    private val kosmos = testKosmos()
+    private val kosmos = testKosmos().apply { mediaLogger = mockMediaLogger }
     private val testScope = kosmos.testScope
 
     private val mediaDataFilter: MediaDataFilterImpl = kosmos.mediaDataFilter
@@ -164,6 +169,64 @@ class MediaCarouselViewModelTest : SysuiTestCase() {
             assertThat(sortedMedia).hasSize(2)
             assertThat(mediaControl.instanceId).isEqualTo(instanceId)
             assertThat(mediaControl.isMediaFromRec).isTrue()
+        }
+
+    @Test
+    fun addMediaControlThenRemove_mediaEventsAreLogged() =
+        testScope.runTest {
+            val sortedMedia by collectLastValue(underTest.mediaItems)
+            val instanceId = InstanceId.fakeInstanceId(123)
+
+            loadMediaControl(KEY, instanceId)
+
+            val mediaControl = sortedMedia?.get(0) as MediaCommonViewModel.MediaControl
+            assertThat(mediaControl.instanceId).isEqualTo(instanceId)
+
+            // when media control is added to carousel
+            mediaControl.onAdded(mediaControl)
+
+            verify(kosmos.mediaLogger).logMediaCardAdded(eq(instanceId))
+
+            reset(kosmos.mediaLogger)
+
+            // when media control is updated.
+            mediaControl.onUpdated(mediaControl)
+
+            verify(kosmos.mediaLogger, never()).logMediaCardAdded(eq(instanceId))
+
+            mediaDataFilter.onMediaDataRemoved(KEY, true)
+            assertThat(sortedMedia).isEmpty()
+
+            // when media control is removed from carousel
+            mediaControl.onRemoved(true)
+
+            verify(kosmos.mediaLogger).logMediaCardRemoved(eq(instanceId))
+        }
+
+    @Test
+    fun addMediaRecommendationThenRemove_mediaEventsAreLogged() =
+        testScope.runTest {
+            val sortedMedia by collectLastValue(underTest.mediaItems)
+            kosmos.fakeFeatureFlagsClassic.set(Flags.MEDIA_RETAIN_RECOMMENDATIONS, false)
+
+            loadMediaRecommendations()
+
+            val mediaRecommendations =
+                sortedMedia?.get(0) as MediaCommonViewModel.MediaRecommendations
+            assertThat(mediaRecommendations.key).isEqualTo(KEY_MEDIA_SMARTSPACE)
+
+            // when media recommendation is added to carousel
+            mediaRecommendations.onAdded(mediaRecommendations)
+
+            verify(kosmos.mediaLogger).logMediaRecommendationCardAdded(eq(KEY_MEDIA_SMARTSPACE))
+
+            mediaDataFilter.onSmartspaceMediaDataRemoved(KEY, true)
+            assertThat(sortedMedia).isEmpty()
+
+            // when media recommendation is removed from carousel
+            mediaRecommendations.onRemoved(true)
+
+            verify(kosmos.mediaLogger).logMediaRecommendationCardRemoved(eq(KEY_MEDIA_SMARTSPACE))
         }
 
     private fun loadMediaControl(key: String, instanceId: InstanceId, isPlaying: Boolean = true) {

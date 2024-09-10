@@ -969,9 +969,7 @@ public class UserManager {
 
     /**
      * Specifies if a user is disallowed from adding new users. This can only be set by device
-     * owners or profile owners on the primary user. The default value is <code>false</code>.
-     * <p>This restriction has no effect on secondary users and managed profiles since only the
-     * primary user can add other users.
+     * owners or profile owners on the main user. The default value is <code>false</code>.
      * <p> When the device is an organization-owned device provisioned with a managed profile,
      * this restriction will be set as a base restriction which cannot be removed by any admin.
      *
@@ -1980,7 +1978,6 @@ public class UserManager {
      * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
      */
-    @FlaggedApi(android.app.admin.flags.Flags.FLAG_ESIM_MANAGEMENT_ENABLED)
     public static final String DISALLOW_SIM_GLOBALLY =
             "no_sim_globally";
 
@@ -2001,7 +1998,6 @@ public class UserManager {
      * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
      */
-    @FlaggedApi(android.app.admin.flags.Flags.FLAG_ASSIST_CONTENT_USER_RESTRICTION_ENABLED)
     public static final String DISALLOW_ASSIST_CONTENT = "no_assist_content";
 
     /**
@@ -2391,10 +2387,15 @@ public class UserManager {
      */
     public static final int USER_OPERATION_ERROR_DISABLED_USER = 8;
     /**
-     * Indicates user operation failed because user is disabled on the device.
+     * Indicates user operation failed because private space is disabled on the device.
      * @hide
      */
     public static final int USER_OPERATION_ERROR_PRIVATE_PROFILE = 9;
+    /**
+     * Indicates user operation failed because user is restricted on the device.
+     * @hide
+     */
+    public static final int USER_OPERATION_ERROR_USER_RESTRICTED = 10;
 
     /**
      * Result returned from various user operations.
@@ -2413,6 +2414,7 @@ public class UserManager {
             USER_OPERATION_ERROR_USER_ACCOUNT_ALREADY_EXISTS,
             USER_OPERATION_ERROR_DISABLED_USER,
             USER_OPERATION_ERROR_PRIVATE_PROFILE,
+            USER_OPERATION_ERROR_USER_RESTRICTED,
     })
     public @interface UserOperationResult {}
 
@@ -3927,7 +3929,12 @@ public class UserManager {
             android.Manifest.permission.QUERY_USERS,
             android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional = true)
     public @NonNull UserProperties getUserProperties(@NonNull UserHandle userHandle) {
-        return mUserPropertiesCache.query(userHandle.getIdentifier());
+        final int userId = userHandle.getIdentifier();
+        // Avoid calling into system server for invalid user ids.
+        if (android.multiuser.Flags.fixGetUserPropertyCache() && userId < 0) {
+            throw new IllegalArgumentException("Cannot access properties for user " + userId);
+        }
+        return mUserPropertiesCache.query(userId);
     }
 
     /**
@@ -4813,6 +4820,7 @@ public class UserManager {
      * <p>Note that this does not alter the user's pre-existing user restrictions.
      *
      * @param userId the id of the user to become admin
+     * @throws SecurityException if changing ADMIN status of the user is not allowed
      * @hide
      */
     @RequiresPermission(allOf = {
@@ -4833,6 +4841,7 @@ public class UserManager {
      * <p>Note that this does not alter the user's pre-existing user restrictions.
      *
      * @param userId the id of the user to revoke admin rights from
+     * @throws SecurityException if changing ADMIN status of the user is not allowed
      * @hide
      */
     @RequiresPermission(allOf = {
@@ -5663,6 +5672,33 @@ public class UserManager {
         }
     }
 
+    private static final String CACHE_KEY_QUIET_MODE_ENABLED_PROPERTY =
+        PropertyInvalidatedCache.createPropertyName(
+            PropertyInvalidatedCache.MODULE_SYSTEM, "quiet_mode_enabled");
+
+    private final PropertyInvalidatedCache<Integer, Boolean> mQuietModeEnabledCache =
+            new PropertyInvalidatedCache<Integer, Boolean>(
+                32, CACHE_KEY_QUIET_MODE_ENABLED_PROPERTY) {
+                @Override
+                public Boolean recompute(Integer query) {
+                    try {
+                        return mService.isQuietModeEnabled(query);
+                    } catch (RemoteException re) {
+                        throw re.rethrowFromSystemServer();
+                    }
+                }
+                @Override
+                public boolean bypass(Integer query) {
+                    return query < 0;
+                }
+            };
+
+
+    /** @hide */
+    public static final void invalidateQuietModeEnabledCache() {
+        PropertyInvalidatedCache.invalidateCache(CACHE_KEY_QUIET_MODE_ENABLED_PROPERTY);
+    }
+
     /**
      * Returns whether the given profile is in quiet mode or not.
      *
@@ -5670,6 +5706,13 @@ public class UserManager {
      * @return true if the profile is in quiet mode, false otherwise.
      */
     public boolean isQuietModeEnabled(UserHandle userHandle) {
+        if (android.multiuser.Flags.cacheQuietModeState()){
+            final int userId = userHandle.getIdentifier();
+            if (userId < 0) {
+                return false;
+            }
+            return mQuietModeEnabledCache.query(userId);
+        }
         try {
             return mService.isQuietModeEnabled(userHandle.getIdentifier());
         } catch (RemoteException re) {
@@ -6403,7 +6446,11 @@ public class UserManager {
      */
     @UnsupportedAppUsage
     public int getUserSerialNumber(@UserIdInt int userId) {
-        if (android.multiuser.Flags.cacheUserSerialNumber()) {
+        // Read only flag should is to fix early access to this API
+        // cacheUserSerialNumber to be removed after the
+        // cacheUserSerialNumberReadOnly is fully rolled out
+        if (android.multiuser.Flags.cacheUserSerialNumberReadOnly()
+                || android.multiuser.Flags.cacheUserSerialNumber()) {
             // System user serial number is always 0, and it always exists.
             // There is no need to call binder for that.
             if (userId == UserHandle.USER_SYSTEM) {

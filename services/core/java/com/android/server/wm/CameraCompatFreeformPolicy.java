@@ -26,13 +26,14 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.CameraCompatTaskInfo;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.protolog.ProtoLogGroup;
 import com.android.internal.protolog.ProtoLog;
+import com.android.internal.protolog.ProtoLogGroup;
 import com.android.window.flags.Flags;
 
 /**
@@ -56,6 +57,14 @@ final class CameraCompatFreeformPolicy implements CameraStateMonitor.CameraCompa
 
     private boolean mIsCameraCompatTreatmentPending = false;
 
+    @Nullable
+    private Task mCameraTask;
+
+    /**
+     * Value toggled on {@link #start()} to {@code true} and on {@link #dispose()} to {@code false}.
+     */
+    private boolean mIsRunning;
+
     CameraCompatFreeformPolicy(@NonNull DisplayContent displayContent,
             @NonNull CameraStateMonitor cameraStateMonitor,
             @NonNull ActivityRefresher activityRefresher) {
@@ -67,12 +76,19 @@ final class CameraCompatFreeformPolicy implements CameraStateMonitor.CameraCompa
     void start() {
         mCameraStateMonitor.addCameraStateListener(this);
         mActivityRefresher.addEvaluator(this);
+        mIsRunning = true;
     }
 
     /** Releases camera callback listener. */
     void dispose() {
         mCameraStateMonitor.removeCameraStateListener(this);
         mActivityRefresher.removeEvaluator(this);
+        mIsRunning = false;
+    }
+
+    @VisibleForTesting
+    boolean isRunning() {
+        return mIsRunning;
     }
 
     // Refreshing only when configuration changes after rotation or camera split screen aspect ratio
@@ -105,10 +121,10 @@ final class CameraCompatFreeformPolicy implements CameraStateMonitor.CameraCompa
     }
 
     @Override
-    public boolean onCameraOpened(@NonNull ActivityRecord cameraActivity,
+    public void onCameraOpened(@NonNull ActivityRecord cameraActivity,
             @NonNull String cameraId) {
         if (!isTreatmentEnabledForActivity(cameraActivity)) {
-            return false;
+            return;
         }
         final int existingCameraCompatMode = cameraActivity.mAppCompatController
                 .getAppCompatCameraOverrides()
@@ -116,29 +132,32 @@ final class CameraCompatFreeformPolicy implements CameraStateMonitor.CameraCompa
         final int newCameraCompatMode = getCameraCompatMode(cameraActivity);
         if (newCameraCompatMode != existingCameraCompatMode) {
             mIsCameraCompatTreatmentPending = true;
+            mCameraTask = cameraActivity.getTask();
             cameraActivity.mAppCompatController.getAppCompatCameraOverrides()
                     .setFreeformCameraCompatMode(newCameraCompatMode);
             forceUpdateActivityAndTask(cameraActivity);
-            return true;
         } else {
             mIsCameraCompatTreatmentPending = false;
         }
-        return false;
     }
 
     @Override
-    public boolean onCameraClosed(@NonNull ActivityRecord cameraActivity,
-            @NonNull String cameraId) {
-        if (isActivityForCameraIdRefreshing(cameraId)) {
-            ProtoLog.v(ProtoLogGroup.WM_DEBUG_STATES,
-                    "Display id=%d is notified that Camera %s is closed but activity is"
-                            + " still refreshing. Rescheduling an update.",
-                    mDisplayContent.mDisplayId, cameraId);
-            return false;
+    public boolean onCameraClosed(@NonNull String cameraId) {
+        // Top activity in the same task as the camera activity, or `null` if the task is
+        // closed.
+        final ActivityRecord topActivity = mCameraTask != null
+                ? mCameraTask.getTopActivity(/* isFinishing */ false, /* includeOverlays */ false)
+                : null;
+        if (topActivity != null) {
+            if (isActivityForCameraIdRefreshing(topActivity, cameraId)) {
+                ProtoLog.v(ProtoLogGroup.WM_DEBUG_STATES,
+                        "Display id=%d is notified that Camera %s is closed but activity is"
+                                + " still refreshing. Rescheduling an update.",
+                        mDisplayContent.mDisplayId, cameraId);
+                return false;
+            }
         }
-        cameraActivity.mAppCompatController.getAppCompatCameraOverrides()
-                .setFreeformCameraCompatMode(CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_NONE);
-        forceUpdateActivityAndTask(cameraActivity);
+        mCameraTask = null;
         mIsCameraCompatTreatmentPending = false;
         return true;
     }
@@ -186,10 +205,9 @@ final class CameraCompatFreeformPolicy implements CameraStateMonitor.CameraCompa
                 && !activity.isEmbedded();
     }
 
-    private boolean isActivityForCameraIdRefreshing(@NonNull String cameraId) {
-        final ActivityRecord topActivity = mDisplayContent.topRunningActivity(
-                /* considerKeyguardState= */ true);
-        if (topActivity == null || !isTreatmentEnabledForActivity(topActivity)
+    private boolean isActivityForCameraIdRefreshing(@NonNull ActivityRecord topActivity,
+            @NonNull String cameraId) {
+        if (!isTreatmentEnabledForActivity(topActivity)
                 || mCameraStateMonitor.isCameraWithIdRunningForActivity(topActivity, cameraId)) {
             return false;
         }

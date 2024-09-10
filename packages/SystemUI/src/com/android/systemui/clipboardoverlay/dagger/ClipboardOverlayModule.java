@@ -18,7 +18,8 @@ package com.android.systemui.clipboardoverlay.dagger;
 
 import static android.view.WindowManager.LayoutParams.TYPE_SCREENSHOT;
 
-import static com.android.systemui.Flags.screenshotShelfUi2;
+import static com.android.systemui.Flags.enableViewCaptureTracing;
+import static com.android.systemui.util.ConvenienceExtensionsKt.toKotlinLazy;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
@@ -26,11 +27,15 @@ import android.content.Context;
 import android.hardware.display.DisplayManager;
 import android.view.Display;
 import android.view.LayoutInflater;
+import android.view.WindowManager;
 
+import com.android.app.viewcapture.ViewCapture;
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.systemui.clipboardoverlay.ClipboardOverlayView;
 import com.android.systemui.res.R;
 import com.android.systemui.settings.DisplayTracker;
 
+import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
 
@@ -59,13 +64,30 @@ public interface ClipboardOverlayModule {
      */
     @Provides
     static ClipboardOverlayView provideClipboardOverlayView(@OverlayWindowContext Context context) {
-        if (screenshotShelfUi2()) {
-            return (ClipboardOverlayView) LayoutInflater.from(context).inflate(
-                    R.layout.clipboard_overlay2, null);
-        } else {
-            return (ClipboardOverlayView) LayoutInflater.from(context).inflate(
-                    R.layout.clipboard_overlay, null);
-        }
+        return (ClipboardOverlayView) LayoutInflater.from(context).inflate(
+                R.layout.clipboard_overlay, null);
+    }
+
+    /**
+     *
+     */
+    @Provides
+    @OverlayWindowContext
+    static WindowManager provideWindowManager(@OverlayWindowContext Context context) {
+        return context.getSystemService(WindowManager.class);
+    }
+
+    /**
+     *
+     */
+    @Provides
+    @OverlayWindowContext
+    static ViewCaptureAwareWindowManager provideViewCaptureAwareWindowManager(
+            @OverlayWindowContext WindowManager windowManager,
+            Lazy<ViewCapture> daggerLazyViewCapture) {
+        return new ViewCaptureAwareWindowManager(windowManager,
+                /* lazyViewCapture= */ toKotlinLazy(daggerLazyViewCapture),
+                /* isViewCaptureEnabled= */ enableViewCaptureTracing());
     }
 
     @Qualifier

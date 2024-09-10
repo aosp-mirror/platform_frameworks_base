@@ -265,8 +265,6 @@
     <string name="global_action_bug_report" msgid="5127867163044170003">"Raport i defektit në kod"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Jepi fund sesionit"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"Pamja e ekranit"</string>
-    <!-- no translation found for identity_check_biometric_prompt_description (5810195983015866727) -->
-    <skip />
     <string name="bugreport_title" msgid="8549990811777373050">"Raporti i defekteve në kod"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"Ky funksion mundëson mbledhjen e informacioneve mbi gjendjen aktuale të pajisjes për ta dërguar si mesazh mail-i. Do të duhet pak kohë nga nisja e raportit të defekteve në kod. Faleminderit për durimin."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"Raport interaktiv"</string>
@@ -1196,6 +1194,8 @@
     <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"Shkrimi i dorës nuk mbështetet në fushat e fjalëkalimeve"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Pas"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Ndërro metodën e hyrjes"</string>
+    <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"Hap zgjedhësin e metodës së hyrjes"</string>
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"Cilësimet"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Hapësira ruajtëse po mbaron"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Disa funksione të sistemit mund të mos punojnë"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Nuk ka hapësirë të mjaftueshme ruajtjeje për sistemin. Sigurohu që të kesh 250 MB hapësirë të lirë dhe pastaj të rifillosh."</string>
@@ -1413,10 +1413,8 @@
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"Zgjidh për të çaktivizuar korrigjimin përmes Wi-Fi."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Modaliteti i lidhjes së testimit është aktivizuar"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Kryej një rivendosje në cilësimet e fabrikës për të çaktivizuar \"Modalitetin e lidhjes së testimit\"."</string>
-    <!-- no translation found for wrong_hsum_configuration_notification_title (7212758829332714385) -->
-    <skip />
-    <!-- no translation found for wrong_hsum_configuration_notification_message (5353475441480684381) -->
-    <skip />
+    <string name="wrong_hsum_configuration_notification_title" msgid="7212758829332714385">"Konfigurim i gabuar i ndërtimit të modalitetit HSUM"</string>
+    <string name="wrong_hsum_configuration_notification_message" msgid="5353475441480684381">"Gjendja e \"Modalitetit të përdoruesit për sistemin pa kokë\" për këtë pajisje ndryshon nga konfigurimi i ndërtimit. Rivendose pajisjen në gjendje fabrike."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"Paneli komandues i serisë është aktivizuar"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"Ndikohet cilësia e funksionimit. Për ta çaktivizuar, kontrollo ngarkuesin e sistemit."</string>
     <string name="mte_override_notification_title" msgid="4731115381962792944">"MTE eksperimentale u aktivizua"</string>
@@ -1432,6 +1430,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"SHPËRNDAJ"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"REFUZO"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Zgjidh metodën e hyrjes"</string>
+    <string name="input_method_language_settings" msgid="8069089418056819437">"Cilësimet e gjuhës"</string>
     <string name="show_ime" msgid="6406112007347443383">"Mbaje në ekran ndërsa tastiera fizike është aktive"</string>
     <string name="hardware" msgid="3611039921284836033">"Përdor tastierën në ekran"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Konfiguro <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
@@ -1747,7 +1746,8 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"Një aplikacion po fsheh kërkesën për leje, prandaj përgjigja jote nuk mund të verifikohet."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Trokit te një veçori për të filluar ta përdorësh atë:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Zgjidh veçoritë që do të përdorësh me butonin e qasshmërisë"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Zgjidh veçoritë që do të përdorësh me shkurtoren e tastit të volumit"</string>
+    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
+    <skip />
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> është çaktivizuar"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Redakto shkurtoret"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"U krye"</string>
@@ -1761,18 +1761,12 @@
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Tastet e volumit të mbajtura shtypur. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> i aktivizuar."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Tastet e volumit të mbajtura shtypur. U çaktivizua \"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\"."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Lësho tastet e volumit. Për të aktivizuar <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, shtyp dhe mbaj shtypur të dy tastet e volumit sërish për 3 sekonda."</string>
-    <!-- no translation found for accessibility_button_prompt_text (6105393217162198616) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_prompt_text (6452246951969541792) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_3finger_prompt_text (77745752309056152) -->
-    <skip />
-    <!-- no translation found for accessibility_button_instructional_text (6831154884557881996) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_instructional_text (4133877896011098550) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_3finger_instructional_text (1124458279366968154) -->
-    <skip />
+    <string name="accessibility_button_prompt_text" msgid="6105393217162198616">"Zgjidh një veçori"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="6452246951969541792">"Zgjidh një veçori"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="77745752309056152">"Zgjidh një veçori"</string>
+    <string name="accessibility_button_instructional_text" msgid="6831154884557881996">"Veçoria do të hapet herën tjetër kur të trokasësh te butoni i qasshmërisë"</string>
+    <string name="accessibility_gesture_instructional_text" msgid="4133877896011098550">"Veçoria do të hapet herën tjetër kur të përdorësh këtë shkurtore. Rrëshqit shpejt lart me 2 gishta nga fundi i ekranit dhe lëshoje me shpejtësi."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="1124458279366968154">"Veçoria do të hapet herën tjetër kur të përdorësh këtë shkurtore. Rrëshqit shpejt lart me 3 gishta nga fundi i ekranit dhe lëshoje me shpejtësi."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Zmadhimi"</string>
     <string name="user_switched" msgid="7249833311585228097">"Emri i përdoruesit aktual: <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="user_switching_message" msgid="1912993630661332336">"Po kalon në \"<xliff:g id="NAME">%1$s</xliff:g>\"…"</string>
@@ -1895,8 +1889,7 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN-i është shumë i shkurtër. Duhet të jetë të paktën 4 shifra."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Provo sërish më vonë"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Po shikon ekranin e plotë"</string>
-    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
-    <skip />
+    <string name="immersive_cling_description" msgid="2896205051090870978">"Për të dalë, rrëshqit shpejt poshtë nga kreu i ekranit"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"E kuptova"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Rrotullo për një pamje më të mirë"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Hape <xliff:g id="NAME">%s</xliff:g> në ekran të plotë për pamje më të mirë"</string>
@@ -2432,25 +2425,32 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Përmbajtja e aplikacionit është fshehur nga ndarja e ekranit për arsye sigurie"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"U lidh automatikisht me satelitin"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Mund të dërgosh dhe të marrësh mesazhe pa një rrjet celular apo rrjet Wi-Fi"</string>
+    <string name="satellite_notification_manual_title" msgid="1097504441849466279">"Të përdoret shkëmbimi i mesazheve nëpërmjet satelitit?"</string>
+    <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Dërgo dhe merr mesazhe pa një rrjet celular ose Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Hap \"Mesazhet\""</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Si funksionon"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Në pritje..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Konfiguro përsëri \"Shkyçjen me gjurmën e gishtit\""</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (5851784577768803510) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7925203589860744456) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (1824812666549916586) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (5974657382960155099) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> nuk mund të njihet më."</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> dhe <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> nuk mund të njihen më."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="1824812666549916586">"<xliff:g id="FINGERPRINT">%s</xliff:g> nuk mund të njihet më. Konfiguro përsëri \"Shkyçjen me gjurmën e gishtit\"."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="5974657382960155099">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> dhe <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> nuk mund të njihen më. Konfiguro përsëri \"Shkyçjen me gjurmën e gishtit\"."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Konfiguro \"Shkyçjen me fytyrë\" përsëri"</string>
-    <!-- no translation found for face_dangling_notification_msg (746235263598985384) -->
-    <skip />
+    <string name="face_dangling_notification_msg" msgid="746235263598985384">"Modeli yt i fytyrës nuk mund të njihet më. Konfiguro \"Shkyçjen me fytyrë\" përsëri."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Konfiguro"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Jo tani"</string>
     <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"Alarmi për <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"Ndërro përdoruesin"</string>
     <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"Hiqi zërin"</string>
     <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"Trokit për t\'i hequr zërin"</string>
+    <string name="keyboard_shortcut_group_applications_browser" msgid="6535007304687100909">"Shfletuesi"</string>
+    <string name="keyboard_shortcut_group_applications_contacts" msgid="2750702518068326356">"Kontaktet"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="4229037666415353683">"Email-i"</string>
+    <string name="keyboard_shortcut_group_applications_sms" msgid="3523799286376321137">"SMS-të"</string>
+    <string name="keyboard_shortcut_group_applications_music" msgid="2051507523525651067">"Muzika"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="3571770335653387606">"Kalendari"</string>
+    <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"Makina llogaritëse"</string>
+    <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"Maps"</string>
+    <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"Aplikacionet"</string>
+    <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"Gjurmët e tua të gishtave nuk mund të njihen më. Konfiguro përsëri \"Shkyçjen me gjurmën e gishtit\"."</string>
 </resources>

@@ -18,8 +18,6 @@ package com.android.systemui.clipboardoverlay;
 
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 
-import static com.android.systemui.Flags.screenshotShelfUi2;
-
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
@@ -61,7 +59,6 @@ import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
 import com.android.systemui.res.R;
 import com.android.systemui.screenshot.DraggableConstraintLayout;
 import com.android.systemui.screenshot.FloatingWindowUtil;
-import com.android.systemui.screenshot.OverlayActionChip;
 import com.android.systemui.screenshot.ui.binder.ActionButtonViewBinder;
 import com.android.systemui.screenshot.ui.viewmodel.ActionButtonAppearance;
 import com.android.systemui.screenshot.ui.viewmodel.ActionButtonViewModel;
@@ -152,66 +149,47 @@ public class ClipboardOverlayView extends DraggableConstraintLayout {
     }
 
     private void bindDefaultActionChips() {
-        if (screenshotShelfUi2()) {
-            mActionButtonViewBinder.bind(mRemoteCopyChip,
-                    ActionButtonViewModel.Companion.withNextId(
-                            new ActionButtonAppearance(
-                                    Icon.createWithResource(mContext,
-                                            R.drawable.ic_baseline_devices_24).loadDrawable(
-                                            mContext),
-                                    null,
-                                    mContext.getString(R.string.clipboard_send_nearby_description),
-                                    true),
-                            new Function0<>() {
-                                @Override
-                                public Unit invoke() {
-                                    if (mClipboardCallbacks != null) {
-                                        mClipboardCallbacks.onRemoteCopyButtonTapped();
-                                    }
-                                    return null;
+        mActionButtonViewBinder.bind(mRemoteCopyChip,
+                ActionButtonViewModel.Companion.withNextId(
+                        new ActionButtonAppearance(
+                                Icon.createWithResource(mContext,
+                                        R.drawable.ic_baseline_devices_24).loadDrawable(
+                                        mContext),
+                                null,
+                                mContext.getString(R.string.clipboard_send_nearby_description),
+                                true),
+                        new Function0<>() {
+                            @Override
+                            public Unit invoke() {
+                                if (mClipboardCallbacks != null) {
+                                    mClipboardCallbacks.onRemoteCopyButtonTapped();
                                 }
-                            }));
-            mActionButtonViewBinder.bind(mShareChip,
-                    ActionButtonViewModel.Companion.withNextId(
-                            new ActionButtonAppearance(
-                                    Icon.createWithResource(mContext,
-                                            R.drawable.ic_screenshot_share).loadDrawable(mContext),
-                                    null,
-                                    mContext.getString(com.android.internal.R.string.share),
-                                    true),
-                            new Function0<>() {
-                                @Override
-                                public Unit invoke() {
-                                    if (mClipboardCallbacks != null) {
-                                        mClipboardCallbacks.onShareButtonTapped();
-                                    }
-                                    return null;
+                                return null;
+                            }
+                        }));
+        mActionButtonViewBinder.bind(mShareChip,
+                ActionButtonViewModel.Companion.withNextId(
+                        new ActionButtonAppearance(
+                                Icon.createWithResource(mContext,
+                                        R.drawable.ic_screenshot_share).loadDrawable(mContext),
+                                null,
+                                mContext.getString(com.android.internal.R.string.share),
+                                true),
+                        new Function0<>() {
+                            @Override
+                            public Unit invoke() {
+                                if (mClipboardCallbacks != null) {
+                                    mClipboardCallbacks.onShareButtonTapped();
                                 }
-                            }));
-        } else {
-            mShareChip.setAlpha(1);
-            mRemoteCopyChip.setAlpha(1);
-
-            ((ImageView) mRemoteCopyChip.findViewById(R.id.overlay_action_chip_icon)).setImageIcon(
-                    Icon.createWithResource(mContext, R.drawable.ic_baseline_devices_24));
-            ((ImageView) mShareChip.findViewById(R.id.overlay_action_chip_icon)).setImageIcon(
-                    Icon.createWithResource(mContext, R.drawable.ic_screenshot_share));
-
-            mShareChip.setContentDescription(
-                    mContext.getString(com.android.internal.R.string.share));
-            mRemoteCopyChip.setContentDescription(
-                    mContext.getString(R.string.clipboard_send_nearby_description));
-        }
+                                return null;
+                            }
+                        }));
     }
 
     @Override
     public void setCallbacks(SwipeDismissCallbacks callbacks) {
         super.setCallbacks(callbacks);
         ClipboardOverlayCallbacks clipboardCallbacks = (ClipboardOverlayCallbacks) callbacks;
-        if (!screenshotShelfUi2()) {
-            mShareChip.setOnClickListener(v -> clipboardCallbacks.onShareButtonTapped());
-            mRemoteCopyChip.setOnClickListener(v -> clipboardCallbacks.onRemoteCopyButtonTapped());
-        }
         mDismissButton.setOnClickListener(v -> clipboardCallbacks.onDismissButtonTapped());
         mClipboardPreview.setOnClickListener(v -> clipboardCallbacks.onPreviewTapped());
         mMinimizedPreview.setOnClickListener(v -> clipboardCallbacks.onMinimizedViewTapped());
@@ -495,12 +473,7 @@ public class ClipboardOverlayView extends DraggableConstraintLayout {
 
     void setActionChip(RemoteAction action, Runnable onFinish) {
         mActionContainerBackground.setVisibility(View.VISIBLE);
-        View chip;
-        if (screenshotShelfUi2()) {
-            chip = constructShelfActionChip(action, onFinish);
-        } else {
-            chip = constructActionChip(action, onFinish);
-        }
+        View chip = constructShelfActionChip(action, onFinish);
         mActionContainer.addView(chip);
         mActionChips.add(chip);
     }
@@ -531,17 +504,6 @@ public class ClipboardOverlayView extends DraggableConstraintLayout {
                     }
                 }));
 
-        return chip;
-    }
-
-    private OverlayActionChip constructActionChip(RemoteAction action, Runnable onFinish) {
-        OverlayActionChip chip = (OverlayActionChip) LayoutInflater.from(mContext).inflate(
-                R.layout.overlay_action_chip, mActionContainer, false);
-        chip.setText(action.getTitle());
-        chip.setContentDescription(action.getTitle());
-        chip.setIcon(action.getIcon(), false);
-        chip.setPendingIntent(action.getActionIntent(), onFinish);
-        chip.setAlpha(1);
         return chip;
     }
 

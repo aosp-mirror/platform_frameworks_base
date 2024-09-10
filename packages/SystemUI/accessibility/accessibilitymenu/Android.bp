@@ -36,10 +36,12 @@ android_app {
         "androidx.coordinatorlayout_coordinatorlayout",
         "androidx.core_core",
         "androidx.preference_preference",
-        "androidx.viewpager_viewpager",
+        "androidx.viewpager2_viewpager2",
+        "com_android_systemui_flags_lib",
         "SettingsLibDisplayUtils",
         "SettingsLibSettingsTheme",
         "com_android_a11y_menu_flags_lib",
+        "//frameworks/libs/systemui:view_capture",
     ],
 
     optimize: {

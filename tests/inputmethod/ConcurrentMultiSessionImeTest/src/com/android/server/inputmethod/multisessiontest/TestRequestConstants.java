@@ -21,9 +21,13 @@ final class TestRequestConstants {
     }
 
     public static final String KEY_REQUEST_CODE = "key_request_code";
-    public static final String KEY_RESULT_CODE = "key_result_code";
+    public static final String KEY_EDITTEXT_CENTER = "key_edittext_center";
+    public static final String KEY_DISPLAY_ID = "key_display_id";
+    public static final String KEY_IME_SHOWN = "key_ime_shown";
 
     public static final int REQUEST_IME_STATUS = 1;
-    public static final int REPLY_IME_SHOWN = 2;
-    public static final int REPLY_IME_HIDDEN = 3;
+    public static final int REQUEST_SHOW_IME = 2;
+    public static final int REQUEST_HIDE_IME = 3;
+    public static final int REQUEST_EDITTEXT_POSITION = 4;
+    public static final int REQUEST_DISPLAY_ID = 5;
 }

@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.annotation.VisibleForTesting
+import androidx.core.text.util.LocalePreferences
 
 typealias WeatherTouchAction = (View) -> Unit
 
@@ -54,12 +55,35 @@ data class WeatherData(
             }
         }
 
-        private fun readIntFromBundle(extras: Bundle, key: String): Int? =
+        private fun readIntFromBundle(extras: Bundle, key: String): Int? {
             try {
-                extras.getString(key)?.toInt()
+                return extras.getString(key)?.toInt()
             } catch (e: Exception) {
-                null
+                return null
             }
+        }
+
+        fun getPlaceholderWeatherData(): WeatherData {
+            return getPlaceholderWeatherData(
+                LocalePreferences.getTemperatureUnit() == LocalePreferences.TemperatureUnit.CELSIUS
+            )
+        }
+
+        private const val DESCRIPTION_PLACEHODLER = ""
+        private const val TEMPERATURE_FAHRENHEIT_PLACEHOLDER = 58
+        private const val TEMPERATURE_CELSIUS_PLACEHOLDER = 21
+        private val WEATHERICON_PLACEHOLDER = WeatherData.WeatherStateIcon.MOSTLY_SUNNY
+
+        fun getPlaceholderWeatherData(useCelsius: Boolean): WeatherData {
+            return WeatherData(
+                description = DESCRIPTION_PLACEHODLER,
+                state = WEATHERICON_PLACEHOLDER,
+                temperature =
+                    if (useCelsius) TEMPERATURE_CELSIUS_PLACEHOLDER
+                    else TEMPERATURE_FAHRENHEIT_PLACEHOLDER,
+                useCelsius = useCelsius,
+            )
+        }
     }
 
     // Values for WeatherStateIcon must stay in sync with go/g3-WeatherStateIcon

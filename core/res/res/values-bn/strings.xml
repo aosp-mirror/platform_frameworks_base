@@ -203,8 +203,8 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"ব্যক্তিগত কাজের জন্য অ্যাডমিন এই ডিভাইস ব্যবহার করার অনুমতি দেয়নি"</string>
     <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"প্রাইভেট স্পেস সরিয়ে দেওয়া হয়েছে"</string>
     <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"এই ম্যানেজ করা ডিভাইসে আপনার সংস্থা প্রাইভেট স্পেসের অনুমতি দেয় না।"</string>
-    <string name="network_logging_notification_title" msgid="554983187553845004">"ডিভাইসটি পরিচালনা করা হচ্ছে"</string>
-    <string name="network_logging_notification_text" msgid="1327373071132562512">"আপনার প্রতিষ্ঠান এই ডিভাইসটি পরিচালনা করে এবং এটির নেটওয়ার্ক ট্রাফিকের উপরে নজর রাখতে পারে। বিশদ বিবরণের জন্য ট্যাপ করুন।,"</string>
+    <string name="network_logging_notification_title" msgid="554983187553845004">"ডিভাইসটি ম্যানেজ করা হচ্ছে"</string>
+    <string name="network_logging_notification_text" msgid="1327373071132562512">"আপনার প্রতিষ্ঠান এই ডিভাইসটি ম্যানেজ করে এবং এটির নেটওয়ার্ক ট্রাফিকের উপরে নজর রাখতে পারে। বিশদ বিবরণের জন্য ট্যাপ করুন।"</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"অ্যাপগুলি আপনার লোকেশন অ্যাক্সেস করতে পারবে"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"আরও জানতে আইটি অ্যাডমিনের সাথে যোগাযোগ করুন"</string>
     <string name="geofencing_service" msgid="3826902410740315456">"জিওফেন্সিং সার্ভিস"</string>
@@ -265,8 +265,6 @@
     <string name="global_action_bug_report" msgid="5127867163044170003">"ত্রুটির প্রতিবেদন"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"সেশন শেষ করুন"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"স্ক্রিনশট নিন"</string>
-    <!-- no translation found for identity_check_biometric_prompt_description (5810195983015866727) -->
-    <skip />
     <string name="bugreport_title" msgid="8549990811777373050">"সমস্যার রিপোর্ট"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"এটি একটি ই-মেল মেসেজ পাঠানোর জন্য আপনার ডিভাইসের বর্তমান অবস্থা সম্পর্কে তথ্য সংগ্রহ করবে৷ ত্রুটির প্রতিবেদন শুরুর সময় থেকে এটি পাঠানোর জন্য প্রস্তুত হতে কিছুটা সময় নেবে; অনুগ্রহ করে ধৈর্য রাখুন৷"</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"ইন্টারেক্টিভ প্রতিবেদন"</string>
@@ -1196,6 +1194,8 @@
     <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"পাসওয়ার্ডের ফিল্ডে হাতের লেখা কাজ করে না"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"ফিরে যান"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"ইনপুট পদ্ধতি পাল্টান"</string>
+    <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"ইনপুট পদ্ধতির পিকার খুলুন"</string>
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"সেটিংস"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"স্টোরেজ পূর্ণ হতে চলেছে"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"কিছু কিছু সিস্টেম ক্রিয়াকলাপ কাজ নাও করতে পারে"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"সিস্টেমের জন্য যথেষ্ট স্টোরেজ নেই৷ আপনার কাছে ২৫০এমবি ফাঁকা স্থান রয়েছে কিনা সে বিষয়ে নিশ্চিত হন এবং সিস্টেম চালু করুন৷"</string>
@@ -1413,10 +1413,8 @@
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"ওয়্যারলেস ডিবাগিং বন্ধ করতে বেছে নিন।"</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"টেস্ট হারনেস মোড চালু আছে"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"টেস্ট হারনেস মোড বন্ধ করতে ফ্যাক্টরি রিসেট করুন।"</string>
-    <!-- no translation found for wrong_hsum_configuration_notification_title (7212758829332714385) -->
-    <skip />
-    <!-- no translation found for wrong_hsum_configuration_notification_message (5353475441480684381) -->
-    <skip />
+    <string name="wrong_hsum_configuration_notification_title" msgid="7212758829332714385">"HSUM বিল্ড কনফিগারেশন ভুল আছে"</string>
+    <string name="wrong_hsum_configuration_notification_message" msgid="5353475441480684381">"এই ডিভাইসের হেডলেস সিস্টেম ইউজার মোড স্ট্যাটাস, তার বিল্ড কনফিগারেশনের থেকে আলাদা। আপনার ডিভাইস ফ্যাক্টরি রিসেট করুন।"</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"সিরিয়াল কনসোল চালু করা হয়েছে"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"পারফর্ম্যান্সে এর প্রভাব পড়বে। চালানো বন্ধ করতে \'বুটলোডার\' প্রোগ্রামে এটিকে চেক করে দেখুন।"</string>
     <string name="mte_override_notification_title" msgid="4731115381962792944">"পরীক্ষামূলক MTE চালু আছে"</string>
@@ -1432,6 +1430,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"শেয়ার করুন"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"অস্বীকার করুন"</string>
     <string name="select_input_method" msgid="3971267998568587025">"ইনপুট পদ্ধতি বেছে নিন"</string>
+    <string name="input_method_language_settings" msgid="8069089418056819437">"ভাষা সেটিংস"</string>
     <string name="show_ime" msgid="6406112007347443383">"ফিজিক্যাল কীবোর্ড সক্রিয় থাকার সময় এটিকে স্ক্রীনে রাখুন"</string>
     <string name="hardware" msgid="3611039921284836033">"স্ক্রিনের কীবোর্ড ব্যবহার করুন"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"<xliff:g id="DEVICE_NAME">%s</xliff:g> কনফিগার করুন"</string>
@@ -1747,7 +1746,8 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"কোনও অ্যাপ অনুমতির অনুরোধ আড়াল করছে তাই আপনার উত্তর যাচাই করা যাবে না।"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"কোনও ফিচার ব্যবহার করা শুরু করতে, সেটিতে ট্যাপ করুন:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"অ্যাক্সেসিবিলিটি বোতামের সাহায্যে আপনি যেসব ফিচার ব্যবহার করতে চান সেগুলি বেছে নিন"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"ভলিউম কী শর্টকাটের সাহায্যে আপনি যেসব ফিচার ব্যবহার করতে চান সেগুলি বেছে নিন"</string>
+    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
+    <skip />
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> বন্ধ করে দেওয়া হয়েছে"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"শর্টকাট এডিট করুন"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"হয়ে গেছে"</string>
@@ -1761,18 +1761,12 @@
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"ভলিউম কী ধরে ছিলেন। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> চালু করা হয়েছে।"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"ভলিউম কী ধরে ছিলেন। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> বন্ধ করা হয়েছে।"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"ভলিউম \'কী\' রিলিজ করুন। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> চালু করুন, দু\'টি ভলিউম \'কী\' আবার প্রেস করে ৩ সেকেন্ড ধরে রাখুন।"</string>
-    <!-- no translation found for accessibility_button_prompt_text (6105393217162198616) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_prompt_text (6452246951969541792) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_3finger_prompt_text (77745752309056152) -->
-    <skip />
-    <!-- no translation found for accessibility_button_instructional_text (6831154884557881996) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_instructional_text (4133877896011098550) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_3finger_instructional_text (1124458279366968154) -->
-    <skip />
+    <string name="accessibility_button_prompt_text" msgid="6105393217162198616">"ফিচার বেছে নিন"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="6452246951969541792">"ফিচার বেছে নিন"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="77745752309056152">"ফিচার বেছে নিন"</string>
+    <string name="accessibility_button_instructional_text" msgid="6831154884557881996">"পরের বার অ্যাক্সেসিবিলিটি বোতামে ট্যাপ করলে, ফিচারটি চালু হয়ে যাবে"</string>
+    <string name="accessibility_gesture_instructional_text" msgid="4133877896011098550">"পরের বার এই শর্টকাট ব্যবহার করলে, ফিচারটি চালু হয়ে যাবে। ২টি আঙ্গুল দিয়ে স্ক্রিনের নিচ থেকে উপরের দিকে সোয়াইপ করে দ্রুত ছেড়ে দিন।"</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="1124458279366968154">"পরের বার এই শর্টকাট ব্যবহার করলে, ফিচারটি চালু হয়ে যাবে। ৩টি আঙ্গুল দিয়ে স্ক্রিনের নিচ থেকে উপরের দিকে সোয়াইপ করে দ্রুত ছেড়ে দিন।"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"বড় করে দেখা"</string>
     <string name="user_switched" msgid="7249833311585228097">"বর্তমান ব্যবহারকারী <xliff:g id="NAME">%1$s</xliff:g>৷"</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> প্রোফাইলে পাল্টানো হচ্ছে…"</string>
@@ -1895,8 +1889,7 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"পিন খুবই ছোট৷ এটিকে কমপক্ষে ৪ সংখ্যার হতে হবে৷"</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"পরে আবার চেষ্টা করুন"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"পূর্ণ স্ক্রিনে দেখা হচ্ছে"</string>
-    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
-    <skip />
+    <string name="immersive_cling_description" msgid="2896205051090870978">"বেরিয়ে আসতে, আপনার স্ক্রিনের একেবারে উপর থেকে নিচের দিকে সোয়াইপ করুন"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"বুঝেছি"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"আরও ভাল ক্যামেরা ভিউ পাওয়ার জন্য ঘোরান"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"আরও ভাল ভিউয়ের জন্য ফুল স্ক্রিনে <xliff:g id="NAME">%s</xliff:g> খুলুন"</string>
@@ -2432,25 +2425,32 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"নিরাপত্তার জন্য স্ক্রিন শেয়ার করা থেকে লুকানো অ্যাপের কন্টেন্ট"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"স্যাটেলাইটের সাথে অটোমেটিক কানেক্ট করা হয়েছে"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"আপনি কোনও মেবাইল বা ওয়াই-ফাই নেটওয়ার্ক ছাড়াই মেসেজ পাঠাতে ও পেতে পারবেন"</string>
+    <string name="satellite_notification_manual_title" msgid="1097504441849466279">"\'স্যাটেলাইট মেসেজিং\' ব্যবহার করবেন?"</string>
+    <string name="satellite_notification_manual_summary" msgid="901206289846283445">"কোনও মেবাইল বা ওয়াই-ফাই নেটওয়ার্ক ছাড়াই মেসেজ পাঠান ও রিসিভ করুন"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages খুলুন"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"এটি কীভাবে কাজ করে"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"বাকি আছে…"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"\'ফিঙ্গারপ্রিন্ট আনলক\' আবার সেট-আপ করুন"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (5851784577768803510) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7925203589860744456) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (1824812666549916586) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (5974657382960155099) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> আর শনাক্ত করা যাবে না।"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> ও <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> আর শনাক্ত করা যাবে না।"</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="1824812666549916586">"<xliff:g id="FINGERPRINT">%s</xliff:g> আর শনাক্ত করা যাবে না। ফিঙ্গারপ্রিন্ট আনলক আবার সেট-আপ করুন।"</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="5974657382960155099">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> ও <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> আর শনাক্ত করা যাবে না। ফিঙ্গারপ্রিন্ট আনলক আবার সেট-আপ করুন।"</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"\'ফেস আনলক\' আবার সেট-আপ করুন"</string>
-    <!-- no translation found for face_dangling_notification_msg (746235263598985384) -->
-    <skip />
+    <string name="face_dangling_notification_msg" msgid="746235263598985384">"আপনার ফেস মডেল আর শনাক্ত করা যাবে না। ফেস আনলক আবার সেট-আপ করুন।"</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"সেট-আপ করুন"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"এখন নয়"</string>
     <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"<xliff:g id="USER_NAME">%s</xliff:g>-এর জন্য অ্যালার্ম"</string>
     <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"ব্যবহারকারী পাল্টান"</string>
     <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"মিউট করুন"</string>
     <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"সাউন্ড মিউট করতে ট্যাপ করুন"</string>
+    <string name="keyboard_shortcut_group_applications_browser" msgid="6535007304687100909">"ব্রাউজার"</string>
+    <string name="keyboard_shortcut_group_applications_contacts" msgid="2750702518068326356">"পরিচিতি"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="4229037666415353683">"ইমেল"</string>
+    <string name="keyboard_shortcut_group_applications_sms" msgid="3523799286376321137">"এসএমএস"</string>
+    <string name="keyboard_shortcut_group_applications_music" msgid="2051507523525651067">"মিউজিক"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="3571770335653387606">"ক্যালেন্ডার"</string>
+    <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"ক্যালকুলেটর"</string>
+    <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"ম্যাপ"</string>
+    <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"অ্যাপ্লিকেশন"</string>
+    <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"আপনার ফিঙ্গারপ্রিন্ট আর শনাক্ত করা যাবে না। \'ফিঙ্গারপ্রিন্ট আনলক\' ফিচার আবার সেট-আপ করুন।"</string>
 </resources>

@@ -17,6 +17,8 @@
 package android.view;
 
 import static android.util.SequenceUtils.getInitSeq;
+import static android.view.HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING;
+import static android.view.InputDevice.SOURCE_ROTARY_ENCODER;
 import static android.view.Surface.FRAME_RATE_CATEGORY_DEFAULT;
 import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH;
 import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH_HINT;
@@ -494,10 +496,24 @@ public class ViewRootImplTest {
                 0, displayInfo, new DisplayAdjustments());
         ViewRootImpl viewRootImpl = new ViewRootImpl(sContext, display);
 
-        boolean result = viewRootImpl.performHapticFeedback(
-                HapticFeedbackConstants.CONTEXT_CLICK, true, false /* fromIme */);
+        boolean result = viewRootImpl.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK,
+                FLAG_IGNORE_GLOBAL_SETTING, 0 /* privFlags */);
 
         assertThat(result).isFalse();
+    }
+
+    @UiThreadTest
+    @Test
+    public void performHapticFeedbackForInputDevice_touchFeedbackDisabled_doNothing() {
+        DisplayInfo displayInfo = new DisplayInfo();
+        displayInfo.flags = Display.FLAG_TOUCH_FEEDBACK_DISABLED;
+        Display display = new Display(DisplayManagerGlobal.getInstance(), /* displayId= */
+                0, displayInfo, new DisplayAdjustments());
+        ViewRootImpl viewRootImpl = new ViewRootImpl(sContext, display);
+
+        viewRootImpl.performHapticFeedbackForInputDevice(HapticFeedbackConstants.CONTEXT_CLICK,
+                1 /* inputDeviceId */,  SOURCE_ROTARY_ENCODER /* inputSource */,
+                FLAG_IGNORE_GLOBAL_SETTING, 0 /* privFlags */);
     }
 
     /**
@@ -1418,8 +1434,47 @@ public class ViewRootImplTest {
     }
 
     @Test
+    @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_FUNCTION_ENABLING_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
+    public void votePreferredFrameRate_resetWhenDestroyingSurface()
+            throws Throwable {
+        if (!ViewProperties.vrr_enabled().orElse(true)) {
+            return;
+        }
+        mView = new View(sContext);
+        WindowManager.LayoutParams wmlp = new WindowManager.LayoutParams(TYPE_APPLICATION_OVERLAY);
+        wmlp.token = new Binder(); // Set a fake token to bypass 'is your activity running' check
+
+        sInstrumentation.runOnMainSync(() -> {
+            WindowManager wm = sContext.getSystemService(WindowManager.class);
+            wm.addView(mView, wmlp);
+        });
+        sInstrumentation.waitForIdleSync();
+
+        mViewRootImpl = mView.getViewRootImpl();
+
+        waitForFrameRateCategoryToSettle(mView);
+
+        sInstrumentation.runOnMainSync(() -> {
+            mViewRootImpl.getView().setVisibility(View.INVISIBLE);
+            mViewRootImpl.mSurface.release();
+            mView.invalidate();
+        });
+        sInstrumentation.waitForIdleSync();
+
+        assertEquals(false, mViewRootImpl.mSurface.isValid());
+        assertEquals(FRAME_RATE_CATEGORY_DEFAULT,
+                mViewRootImpl.getLastPreferredFrameRateCategory());
+        assertEquals(FRAME_RATE_CATEGORY_DEFAULT,
+                mViewRootImpl.getPreferredFrameRateCategory());
+        assertEquals(0, mViewRootImpl.getLastPreferredFrameRate(), 0.1);
+        assertEquals(0, mViewRootImpl.getPreferredFrameRate(), 0.1);
+    }
+
+    @Test
     @RequiresFlagsEnabled(FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY)
-    public void votePreferredFrameRate_velocityVotedAfterOnDraw() throws Throwable {
+    public void votePreferredFrameRate_reset() throws Throwable {
         if (!ViewProperties.vrr_enabled().orElse(true)) {
             return;
         }

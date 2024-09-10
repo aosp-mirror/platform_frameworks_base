@@ -23,6 +23,7 @@ import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.content.Context;
 import android.hardware.display.DisplayManager;
+import android.hardware.display.DisplayManager.VirtualDisplayFlag;
 import android.hardware.display.VirtualDisplay;
 import android.hardware.display.VirtualDisplayConfig;
 import android.os.Build;
@@ -89,23 +90,24 @@ public final class MediaProjection {
         mDisplayManager = displayManager;
     }
 
-    /**
-     * Register a listener to receive notifications about when the {@link MediaProjection} or
-     * captured content changes state.
-     *
-     * <p>The callback must be registered before invoking
-     * {@link #createVirtualDisplay(String, int, int, int, int, Surface, VirtualDisplay.Callback,
-     * Handler)} to ensure that any notifications on the callback are not missed. The client must
-     * implement {@link Callback#onStop()} and clean up any resources it is holding, e.g. the
-     * {@link VirtualDisplay} and {@link Surface}.
-     *
-     * @param callback The callback to call.
-     * @param handler  The handler on which the callback should be invoked, or
-     *                 null if the callback should be invoked on the calling thread's looper.
-     * @throws NullPointerException If the given callback is null.
-     * @see #unregisterCallback
-     */
-    public void registerCallback(@NonNull Callback callback, @Nullable Handler handler) {
+  /**
+   * Register a listener to receive notifications about when the {@link MediaProjection} or captured
+   * content changes state.
+   *
+   * <p>The callback must be registered before invoking {@link #createVirtualDisplay(String, int,
+   * int, int, int, Surface, VirtualDisplay.Callback, Handler)} to ensure that any notifications on
+   * the callback are not missed. The client must implement {@link Callback#onStop()} and clean up
+   * any resources it is holding, e.g. the {@link VirtualDisplay} and {@link Surface}. This should
+   * also update any application UI indicating the MediaProjection status as MediaProjection has
+   * stopped.
+   *
+   * @param callback The callback to call.
+   * @param handler The handler on which the callback should be invoked, or null if the callback
+   *     should be invoked on the calling thread's looper.
+   * @throws NullPointerException If the given callback is null.
+   * @see #unregisterCallback
+   */
+  public void registerCallback(@NonNull Callback callback, @Nullable Handler handler) {
         try {
             final Callback c = Objects.requireNonNull(callback);
             if (handler == null) {
@@ -140,6 +142,7 @@ public final class MediaProjection {
     /**
      * @hide
      */
+    @Nullable
     public VirtualDisplay createVirtualDisplay(@NonNull String name,
             int width, int height, int dpi, boolean isSecure, @Nullable Surface surface,
             @Nullable VirtualDisplay.Callback callback, @Nullable Handler handler) {
@@ -156,64 +159,67 @@ public final class MediaProjection {
         return createVirtualDisplay(builder, callback, handler);
     }
 
-    /**
-     * Creates a {@link android.hardware.display.VirtualDisplay} to capture the
-     * contents of the screen.
-     *
-     * <p>To correctly clean up resources associated with a capture, the application must register a
-     * {@link Callback} before invocation. The app must override {@link Callback#onStop()} to clean
-     * up (by invoking{@link VirtualDisplay#release()}, {@link Surface#release()} and related
-     * resources).
-     *
-     * @param name     The name of the virtual display, must be non-empty.
-     * @param width    The width of the virtual display in pixels. Must be greater than 0.
-     * @param height   The height of the virtual display in pixels. Must be greater than 0.
-     * @param dpi      The density of the virtual display in dpi. Must be greater than 0.
-     * @param surface  The surface to which the content of the virtual display should be rendered,
-     *                 or null if there is none initially.
-     * @param flags    A combination of virtual display flags. See {@link DisplayManager} for the
-     *                 full list of flags. Note that
-     *                 {@link DisplayManager#VIRTUAL_DISPLAY_FLAG_PRESENTATION}
-     *                 is always enabled. The following flags may be overridden, depending on how
-     *                 the component with {android.Manifest.permission.MANAGE_MEDIA_PROJECTION}
-     *                 handles the user's consent:
-     *                 {@link DisplayManager#VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY},
-     *                 {@link DisplayManager#VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR},
-     *                 {@link DisplayManager#VIRTUAL_DISPLAY_FLAG_PUBLIC}.
-     * @param callback Callback invoked when the virtual display's state changes, or null.
-     * @param handler  The {@link android.os.Handler} on which the callback should be invoked, or
-     *                 null if the callback should be invoked on the calling thread's main
-     *                 {@link android.os.Looper}.
-     * @throws IllegalStateException If the target SDK is {@link
-     *                               android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE U} and up, and
-     *                               if no {@link Callback} is registered.
-     * @throws SecurityException In any of the following scenarios:
-     *                               <ol>
-     *                                 <li>If attempting to create a new virtual display
-     *                                 associated with this MediaProjection instance after it has
-     *                                 been stopped by invoking {@link #stop()}.
-     *                                 <li>If the target SDK is {@link
-     *                                 android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE U} and up,
-     *                                 and if this instance has already taken a recording through
-     *                                 {@code #createVirtualDisplay}, but {@link #stop()} wasn't
-     *                                 invoked to end the recording.
-     *                                 <li>If the target SDK is {@link
-     *                                 android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE U} and up,
-     *                                 and if {@link MediaProjectionManager#getMediaProjection}
-     *                                 was invoked more than once to get this
-     *                                 {@code MediaProjection} instance.
-     *                               </ol>
-     *                               In cases 2 & 3, no exception is thrown if the target SDK is
-     *                               less than
-     *                               {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE U}.
-     *                               Instead, recording doesn't begin until the user re-grants
-     *                               consent in the dialog.
-     * @see VirtualDisplay
-     * @see VirtualDisplay.Callback
-     */
-    public VirtualDisplay createVirtualDisplay(@NonNull String name,
-            int width, int height, int dpi, int flags, @Nullable Surface surface,
-            @Nullable VirtualDisplay.Callback callback, @Nullable Handler handler) {
+  /**
+   * Creates a {@link android.hardware.display.VirtualDisplay} to capture the contents of the
+   * screen.
+   *
+   * <p>To correctly clean up resources associated with a capture, the application must register a
+   * {@link Callback} before invocation. The app must override {@link Callback#onStop()} to clean up
+   * resources (by invoking{@link VirtualDisplay#release()}, {@link Surface#release()} and related
+   * resources) and to update any available UI regarding the MediaProjection status.
+   *
+   * @param name The name of the virtual display, must be non-empty.
+   * @param width The width of the virtual display in pixels. Must be greater than 0.
+   * @param height The height of the virtual display in pixels. Must be greater than 0.
+   * @param dpi The density of the virtual display in dpi. Must be greater than 0.
+   * @param surface The surface to which the content of the virtual display should be rendered, or
+   *     null if there is none initially.
+   * @param flags A combination of virtual display flags. See {@link DisplayManager} for the full
+   *     list of flags. Note that {@link DisplayManager#VIRTUAL_DISPLAY_FLAG_PRESENTATION} is always
+   *     enabled. The following flags may be overridden, depending on how the component with
+   *     {android.Manifest.permission.MANAGE_MEDIA_PROJECTION} handles the user's consent: {@link
+   *     DisplayManager#VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY}, {@link
+   *     DisplayManager#VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR}, {@link
+   *     DisplayManager#VIRTUAL_DISPLAY_FLAG_PUBLIC}.
+   * @param callback Callback invoked when the virtual display's state changes, or null.
+   * @param handler The {@link android.os.Handler} on which the callback should be invoked, or null
+   *     if the callback should be invoked on the calling thread's main {@link android.os.Looper}.
+   * @throws IllegalStateException If the target SDK is {@link
+   *     android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE U} and up, and if no {@link Callback} is
+   *     registered.
+   * @throws SecurityException In any of the following scenarios:
+   *     <ol>
+   *       <li>If attempting to create a new virtual display associated with this MediaProjection
+   *           instance after it has been stopped by invoking {@link #stop()}.
+   *       <li>If attempting to create a new virtual display associated with this MediaProjection
+   *           instance after a {@link MediaProjection.Callback#onStop()} callback has been received
+   *           due to the user or the system stopping the MediaProjection session.
+   *       <li>If the target SDK is {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE U} and
+   *           up, and if this instance has already taken a recording through {@code
+   *           #createVirtualDisplay}, but {@link #stop()} wasn't invoked to end the recording.
+   *       <li>If the target SDK is {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE U} and
+   *           up, and if {@link MediaProjectionManager#getMediaProjection} was invoked more than
+   *           once to get this {@code MediaProjection} instance.
+   *     </ol>
+   *     In cases 2 & 3, no exception is thrown if the target SDK is less than {@link
+   *     android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE U}. Instead, recording doesn't begin until
+   *     the user re-grants consent in the dialog.
+   * @return The created {@link VirtualDisplay}, or {@code null} if no {@link VirtualDisplay} could
+   *     be created.
+   * @see VirtualDisplay
+   * @see VirtualDisplay.Callback
+   */
+  @SuppressWarnings("RequiresPermission")
+  @Nullable
+  public VirtualDisplay createVirtualDisplay(
+      @NonNull String name,
+      int width,
+      int height,
+      int dpi,
+      @VirtualDisplayFlag int flags,
+      @Nullable Surface surface,
+      @Nullable VirtualDisplay.Callback callback,
+      @Nullable Handler handler) {
         if (shouldMediaProjectionRequireCallback()) {
             if (mCallbacks.isEmpty()) {
                 final IllegalStateException e = new IllegalStateException(
@@ -310,10 +316,20 @@ public final class MediaProjection {
          * Called when the MediaProjection session is no longer valid.
          *
          * <p>Once a MediaProjection has been stopped, it's up to the application to release any
-         * resources it may be holding (e.g. releasing the {@link VirtualDisplay} and
-         * {@link Surface}).
+         * resources it may be holding (e.g. releasing the {@link VirtualDisplay} and {@link
+         * Surface}). If the application is displaying any UI indicating the MediaProjection state
+         * it should be updated to indicate that MediaProjection is no longer active.
+         *
+         * <p>MediaProjection stopping can be a result of the system stopping the ongoing
+         * MediaProjection due to various reasons, such as another MediaProjection session starting.
+         * MediaProjection may also stop due to the user explicitly stopping ongoing MediaProjection
+         * via any available system-level UI.
+         *
+         * <p>After this callback any call to {@link MediaProjection#createVirtualDisplay} will
+         * fail, even if no such {@link VirtualDisplay} was ever created for this MediaProjection
+         * session.
          */
-        public void onStop() { }
+        public void onStop() {}
 
         /**
          * Invoked immediately after capture begins or when the size of the captured region changes,

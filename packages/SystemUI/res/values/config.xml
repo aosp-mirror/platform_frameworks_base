@@ -56,7 +56,7 @@
          enabled for OLED devices to reduce/prevent burn in on the navigation bar (because of the
          black background and static button placements) and disabled for all other devices to
          prevent wasting cpu cycles on the dimming animation -->
-    <bool name="config_navigation_bar_enable_auto_dim_no_visible_wallpaper">false</bool>
+    <bool name="config_navigation_bar_enable_auto_dim_no_visible_wallpaper">true</bool>
 
     <!-- The maximum number of tiles in the QuickQSPanel -->
     <integer name="quick_qs_panel_max_tiles">4</integer>
@@ -287,7 +287,8 @@
     <integer name="doze_small_icon_alpha">222</integer><!-- 87% of 0xff -->
 
     <!-- Doze: Table that translates sensor values from the doze_brightness_sensor_type sensor
-               to brightness values; -1 means keeping the current brightness. -->
+               to brightness values in the integer scale [1, 255]; -1 means keeping the current
+               brightness. -->
     <integer-array name="config_doze_brightness_sensor_to_brightness">
         <item>-1</item> <!-- 0: OFF -->
         <item>2</item> <!-- 1: NIGHT -->
@@ -726,6 +727,10 @@
         .75
     </item>
 
+    <!-- The last x ms of face acquired info messages to analyze to determine
+         whether to show a deferred face auth help message. -->
+    <integer name="config_face_help_msgs_defer_analyze_timeframe">500</integer>
+
     <!-- Which face help messages to surface when fingerprint is also enrolled.
          Message ids correspond with the acquired ids in BiometricFaceConstants -->
     <integer-array name="config_face_help_msgs_when_fingerprint_enrolled">
@@ -1047,6 +1052,17 @@
     <!-- The width of the shortcut helper container, as a fraction of the screen's width. -->
     <item name="shortcut_helper_screen_width_fraction" format="float" type="dimen">1.0</item>
 
-    <!-- Only applicable for dual shade - Allow Notifications/QS shade to anchor to the bottom. -->
-    <bool name="config_dualShadeAlignedToBottom">false</bool>
+    <!-- List of packages for which we want to use activity info (instead of application info) for biometric prompt logo. Empty for AOSP. [DO NOT TRANSLATE] -->
+    <string-array name="config_useActivityLogoForBiometricPrompt" translatable="false"/>
+
+    <!--
+    Whether to enable the desktop specific feature set.
+
+    Refrain from using this from code that needs to make decisions
+    regarding the size or density of the display.
+
+    Variant owners and OEMs should override this to true when they want to
+    enable the desktop specific features.
+    -->
+    <bool name="config_enableDesktopFeatureSet">false</bool>
 </resources>

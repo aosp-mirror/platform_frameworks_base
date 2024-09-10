@@ -20,8 +20,10 @@ import android.os.UserManager.DISALLOW_CAMERA_TOGGLE
 import android.os.UserManager.DISALLOW_CONFIG_LOCATION
 import android.os.UserManager.DISALLOW_MICROPHONE_TOGGLE
 import android.os.UserManager.DISALLOW_SHARE_LOCATION
+import com.android.systemui.Flags
 import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.pipeline.shared.TileSpec
+import com.android.systemui.qs.shared.model.TileCategory
 import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.qs.tiles.AlarmTile
 import com.android.systemui.qs.tiles.CameraToggleTile
@@ -29,6 +31,7 @@ import com.android.systemui.qs.tiles.DndTile
 import com.android.systemui.qs.tiles.FlashlightTile
 import com.android.systemui.qs.tiles.LocationTile
 import com.android.systemui.qs.tiles.MicrophoneToggleTile
+import com.android.systemui.qs.tiles.ModesTile
 import com.android.systemui.qs.tiles.UiModeNightTile
 import com.android.systemui.qs.tiles.WorkModeTile
 import com.android.systemui.qs.tiles.base.interactor.QSTileAvailabilityInteractor
@@ -45,6 +48,10 @@ import com.android.systemui.qs.tiles.impl.location.domain.LocationTileMapper
 import com.android.systemui.qs.tiles.impl.location.domain.interactor.LocationTileDataInteractor
 import com.android.systemui.qs.tiles.impl.location.domain.interactor.LocationTileUserActionInteractor
 import com.android.systemui.qs.tiles.impl.location.domain.model.LocationTileModel
+import com.android.systemui.qs.tiles.impl.modes.domain.interactor.ModesTileDataInteractor
+import com.android.systemui.qs.tiles.impl.modes.domain.interactor.ModesTileUserActionInteractor
+import com.android.systemui.qs.tiles.impl.modes.domain.model.ModesTileModel
+import com.android.systemui.qs.tiles.impl.modes.ui.ModesTileMapper
 import com.android.systemui.qs.tiles.impl.sensorprivacy.SensorPrivacyToggleTileDataInteractor
 import com.android.systemui.qs.tiles.impl.sensorprivacy.domain.SensorPrivacyToggleTileUserActionInteractor
 import com.android.systemui.qs.tiles.impl.sensorprivacy.domain.model.SensorPrivacyToggleTileModel
@@ -62,18 +69,17 @@ import com.android.systemui.qs.tiles.viewmodel.QSTileConfig
 import com.android.systemui.qs.tiles.viewmodel.QSTilePolicy
 import com.android.systemui.qs.tiles.viewmodel.QSTileUIConfig
 import com.android.systemui.qs.tiles.viewmodel.QSTileViewModel
+import com.android.systemui.qs.tiles.viewmodel.StubQSTileViewModel
 import com.android.systemui.res.R
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.multibindings.IntoMap
 import dagger.multibindings.StringKey
+import javax.inject.Provider
 
 @Module
 interface PolicyModule {
-
-    /** Inject DndTile into tileMap in QSModule */
-    @Binds @IntoMap @StringKey(DndTile.TILE_SPEC) fun bindDndTile(dndTile: DndTile): QSTileImpl<*>
 
     /** Inject WorkModeTile into tileMap in QSModule */
     @Binds
@@ -85,35 +91,35 @@ interface PolicyModule {
     @IntoMap
     @StringKey(FLASHLIGHT_TILE_SPEC)
     fun provideAirplaneModeAvailabilityInteractor(
-            impl: FlashlightTileDataInteractor
+        impl: FlashlightTileDataInteractor
     ): QSTileAvailabilityInteractor
 
     @Binds
     @IntoMap
     @StringKey(LOCATION_TILE_SPEC)
     fun provideLocationAvailabilityInteractor(
-            impl: LocationTileDataInteractor
+        impl: LocationTileDataInteractor
     ): QSTileAvailabilityInteractor
 
     @Binds
     @IntoMap
     @StringKey(ALARM_TILE_SPEC)
     fun provideAlarmAvailabilityInteractor(
-            impl: AlarmTileDataInteractor
+        impl: AlarmTileDataInteractor
     ): QSTileAvailabilityInteractor
 
     @Binds
     @IntoMap
     @StringKey(UIMODENIGHT_TILE_SPEC)
     fun provideUiModeNightAvailabilityInteractor(
-            impl: UiModeNightTileDataInteractor
+        impl: UiModeNightTileDataInteractor
     ): QSTileAvailabilityInteractor
 
     @Binds
     @IntoMap
     @StringKey(WORK_MODE_TILE_SPEC)
     fun provideWorkModeAvailabilityInteractor(
-            impl: WorkModeTileDataInteractor
+        impl: WorkModeTileDataInteractor
     ): QSTileAvailabilityInteractor
 
     companion object {
@@ -125,6 +131,19 @@ interface PolicyModule {
         const val CAMERA_TOGGLE_TILE_SPEC = "cameratoggle"
         const val MIC_TOGGLE_TILE_SPEC = "mictoggle"
         const val DND_TILE_SPEC = "dnd"
+
+        /** Inject DndTile or ModesTile into tileMap in QSModule based on feature flag */
+        @Provides
+        @IntoMap
+        @StringKey(DND_TILE_SPEC)
+        fun bindDndOrModesTile(
+            // Using providers to make sure that the unused tile isn't initialised at all if the
+            // flag is off.
+            dndTile: Provider<DndTile>,
+            modesTile: Provider<ModesTile>,
+        ): QSTileImpl<*> {
+            return if (android.app.Flags.modesUi()) modesTile.get() else dndTile.get()
+        }
 
         /** Inject flashlight config */
         @Provides
@@ -139,6 +158,7 @@ interface PolicyModule {
                         labelRes = R.string.quick_settings_flashlight_label,
                     ),
                 instanceId = uiEventLogger.getNewInstanceId(),
+                category = TileCategory.UTILITIES,
             )
 
         /** Inject FlashlightTile into tileViewModelMap in QSModule */
@@ -174,7 +194,8 @@ interface PolicyModule {
                 policy =
                     QSTilePolicy.Restricted(
                         listOf(DISALLOW_SHARE_LOCATION, DISALLOW_CONFIG_LOCATION)
-                    )
+                    ),
+                category = TileCategory.PRIVACY,
             )
 
         /** Inject LocationTile into tileViewModelMap in QSModule */
@@ -207,6 +228,7 @@ interface PolicyModule {
                         labelRes = R.string.status_bar_alarm,
                     ),
                 instanceId = uiEventLogger.getNewInstanceId(),
+                category = TileCategory.UTILITIES,
             )
 
         /** Inject AlarmTile into tileViewModelMap in QSModule */
@@ -239,6 +261,7 @@ interface PolicyModule {
                         labelRes = R.string.quick_settings_ui_mode_night_label,
                     ),
                 instanceId = uiEventLogger.getNewInstanceId(),
+                category = TileCategory.DISPLAY,
             )
 
         /** Inject uimodenight into tileViewModelMap in QSModule */
@@ -271,6 +294,8 @@ interface PolicyModule {
                         labelRes = R.string.quick_settings_work_mode_label,
                     ),
                 instanceId = uiEventLogger.getNewInstanceId(),
+                autoRemoveOnUnavailable = false,
+                category = TileCategory.PRIVACY,
             )
 
         /** Inject work mode into tileViewModelMap in QSModule */
@@ -304,6 +329,7 @@ interface PolicyModule {
                     ),
                 instanceId = uiEventLogger.getNewInstanceId(),
                 policy = QSTilePolicy.Restricted(listOf(DISALLOW_CAMERA_TOGGLE)),
+                category = TileCategory.PRIVACY,
             )
 
         /** Inject camera toggle tile into tileViewModelMap in QSModule */
@@ -327,7 +353,7 @@ interface PolicyModule {
         @IntoMap
         @StringKey(CAMERA_TOGGLE_TILE_SPEC)
         fun provideCameraToggleAvailabilityInteractor(
-                factory: SensorPrivacyToggleTileDataInteractor.Factory
+            factory: SensorPrivacyToggleTileDataInteractor.Factory
         ): QSTileAvailabilityInteractor {
             return factory.create(CAMERA)
         }
@@ -346,6 +372,7 @@ interface PolicyModule {
                     ),
                 instanceId = uiEventLogger.getNewInstanceId(),
                 policy = QSTilePolicy.Restricted(listOf(DISALLOW_MICROPHONE_TOGGLE)),
+                category = TileCategory.PRIVACY,
             )
 
         /** Inject microphone toggle tile into tileViewModelMap in QSModule */
@@ -369,26 +396,58 @@ interface PolicyModule {
         @IntoMap
         @StringKey(MIC_TOGGLE_TILE_SPEC)
         fun provideMicToggleModeAvailabilityInteractor(
-                factory: SensorPrivacyToggleTileDataInteractor.Factory
+            factory: SensorPrivacyToggleTileDataInteractor.Factory
         ): QSTileAvailabilityInteractor {
             return factory.create(MICROPHONE)
         }
 
-
-        /** Inject microphone toggle config */
+        /** Inject DND tile or Modes tile config based on feature flag */
         @Provides
         @IntoMap
         @StringKey(DND_TILE_SPEC)
-        fun provideDndTileConfig(uiEventLogger: QsEventLogger): QSTileConfig =
-            QSTileConfig(
-                tileSpec = TileSpec.create(DND_TILE_SPEC),
-                uiConfig =
-                    QSTileUIConfig.Resource(
-                        iconRes = R.drawable.qs_dnd_icon_off,
-                        labelRes = R.string.quick_settings_dnd_label,
-                    ),
-                instanceId = uiEventLogger.getNewInstanceId(),
-            )
+        fun provideDndOrModesTileConfig(uiEventLogger: QsEventLogger): QSTileConfig =
+            if (android.app.Flags.modesUi()) {
+                QSTileConfig(
+                    tileSpec = TileSpec.create(DND_TILE_SPEC),
+                    uiConfig =
+                        QSTileUIConfig.Resource(
+                            iconRes = com.android.internal.R.drawable.ic_zen_priority_modes,
+                            labelRes = R.string.quick_settings_modes_label,
+                        ),
+                    instanceId = uiEventLogger.getNewInstanceId(),
+                    category = TileCategory.CONNECTIVITY,
+                )
+            } else {
+                QSTileConfig(
+                    tileSpec = TileSpec.create(DND_TILE_SPEC),
+                    uiConfig =
+                        QSTileUIConfig.Resource(
+                            iconRes = R.drawable.qs_dnd_icon_off,
+                            labelRes = R.string.quick_settings_dnd_label,
+                        ),
+                    instanceId = uiEventLogger.getNewInstanceId(),
+                    category = TileCategory.CONNECTIVITY,
+                )
+            }
+
+        /** Inject ModesTile into tileViewModelMap in QSModule */
+        @Provides
+        @IntoMap
+        @StringKey(DND_TILE_SPEC)
+        fun provideModesTileViewModel(
+            factory: QSTileViewModelFactory.Static<ModesTileModel>,
+            mapper: ModesTileMapper,
+            stateInteractor: ModesTileDataInteractor,
+            userActionInteractor: ModesTileUserActionInteractor
+        ): QSTileViewModel =
+            if (android.app.Flags.modesUi() && Flags.qsNewTilesFuture())
+                factory.create(
+                    TileSpec.create(DND_TILE_SPEC),
+                    userActionInteractor,
+                    stateInteractor,
+                    mapper,
+                )
+            else StubQSTileViewModel
     }
 
     /** Inject FlashlightTile into tileMap in QSModule */

@@ -40,7 +40,6 @@ import com.android.systemui.res.R;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.notification.Roundable;
 import com.android.systemui.statusbar.notification.RoundableState;
-import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor;
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.util.Compile;
@@ -394,14 +393,6 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable, Ro
     public abstract void performAddAnimation(long delay, long duration, boolean isHeadsUpAppear,
             Runnable onEndRunnable);
 
-    /**
-     * Set the notification appearance to be below the speed bump.
-     * @param below true if it is below.
-     */
-    public void setBelowSpeedBump(boolean below) {
-        NotificationIconContainerRefactor.assertInLegacyMode();
-    }
-
     public int getPinnedHeadsUpHeight() {
         return getIntrinsicHeight();
     }
@@ -637,7 +628,10 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable, Ro
         return false;
     }
 
-    public void setHeadsUpIsVisible() {
+    /**
+     * Called, when the notification has been seen by the user in the heads up state.
+     */
+    public void markHeadsUpSeen() {
     }
 
     public boolean showingPulsing() {

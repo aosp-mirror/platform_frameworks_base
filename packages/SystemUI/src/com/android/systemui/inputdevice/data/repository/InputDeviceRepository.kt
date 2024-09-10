@@ -45,7 +45,7 @@ constructor(
 
     data class DeviceAdded(val deviceId: Int) : DeviceChange
 
-    data object DeviceRemoved : DeviceChange
+    data class DeviceRemoved(val deviceId: Int) : DeviceChange
 
     data object FreshStart : DeviceChange
 
@@ -72,7 +72,7 @@ constructor(
 
                         override fun onInputDeviceRemoved(deviceId: Int) {
                             connectedDevices = connectedDevices - deviceId
-                            sendWithLogging(connectedDevices to DeviceRemoved)
+                            sendWithLogging(connectedDevices to DeviceRemoved(deviceId))
                         }
                     }
                 sendWithLogging(connectedDevices to FreshStart)

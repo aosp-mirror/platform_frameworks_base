@@ -267,8 +267,6 @@
     <string name="global_action_bug_report" msgid="5127867163044170003">"Отчет об ошибке"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Закончить сеанс"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"Скриншот"</string>
-    <!-- no translation found for identity_check_biometric_prompt_description (5810195983015866727) -->
-    <skip />
     <string name="bugreport_title" msgid="8549990811777373050">"Отчет об ошибке"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"Информация о текущем состоянии вашего устройства будет собрана и отправлена по электронной почте. Подготовка отчета займет некоторое время."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"Интерактивный отчет"</string>
@@ -1198,6 +1196,8 @@
     <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"Поля для указания пароля не поддерживают рукописный ввод"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Назад"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Сменить способ ввода"</string>
+    <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"Выбрать способ ввода"</string>
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"Настройки"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Недостаточно памяти"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Некоторые функции могут не работать"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Недостаточно свободного места для системы. Освободите не менее 250 МБ дискового пространства и перезапустите устройство."</string>
@@ -1415,10 +1415,8 @@
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"Нажмите, чтобы отключить отладку по Wi-Fi."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Тестовый режим включен"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Чтобы отключить тестовый режим, сбросьте настройки до заводских."</string>
-    <!-- no translation found for wrong_hsum_configuration_notification_title (7212758829332714385) -->
-    <skip />
-    <!-- no translation found for wrong_hsum_configuration_notification_message (5353475441480684381) -->
-    <skip />
+    <string name="wrong_hsum_configuration_notification_title" msgid="7212758829332714385">"Неверная конфигурация сборки РКСП"</string>
+    <string name="wrong_hsum_configuration_notification_message" msgid="5353475441480684381">"Состояние режима консольного системного пользователя для этого устройства отличается от его конфигурации сборки. Сбросьте настройки устройства до заводских."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"Консоль последовательного порта включена"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"Производительность устройства снижена. Чтобы отключить консоль, перейдите в загрузчик операционной системы."</string>
     <string name="mte_override_notification_title" msgid="4731115381962792944">"Включена экспериментальная функция MTE"</string>
@@ -1434,6 +1432,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"ПРЕДОСТАВИТЬ ДОСТУП"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"ОТКЛОНИТЬ"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Выберите способ ввода"</string>
+    <string name="input_method_language_settings" msgid="8069089418056819437">"Языковые настройки"</string>
     <string name="show_ime" msgid="6406112007347443383">"Не скрывать экранную клавиатуру, когда включена физическая"</string>
     <string name="hardware" msgid="3611039921284836033">"Использовать экранную клавиатуру"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Настройте устройство \"<xliff:g id="DEVICE_NAME">%s</xliff:g>\""</string>
@@ -1740,7 +1739,7 @@
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Предоставить сервису \"<xliff:g id="SERVICE">%1$s</xliff:g>\" полный контроль над устройством?"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Полный контроль нужен приложениям для реализации специальных возможностей и не нужен большинству остальных."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Просмотр и контроль экрана"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Сервис может просматривать весь контент на экране и отображать контент поверх других приложений"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Сервис может просматривать весь контент на экране и отображать контент поверх других приложений."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Просмотр и выполнение действий"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Сервис может отслеживать ваше взаимодействие с приложениями и датчиками устройства и давать приложениям команды от вашего имени."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Разрешить"</string>
@@ -1749,7 +1748,8 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"Невозможно принять ваш ответ, поскольку запрос разрешения скрыт другим приложением."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Выберите, какую функцию использовать:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Выберите функции, которые будут запускаться с помощью кнопки специальных возможностей"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Выберите функции, которые будут запускаться с помощью кнопки регулировки громкости"</string>
+    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
+    <skip />
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Сервис \"<xliff:g id="SERVICE_NAME">%s</xliff:g>\" отключен."</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Изменить ярлыки"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Готово"</string>
@@ -1763,18 +1763,12 @@
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Использован жест с кнопками регулировки громкости. Функция \"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\" включена."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Использован жест с кнопками регулировки громкости. Функция \"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\" отключена."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Отпустите кнопки громкости. Чтобы включить <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, нажмите и удерживайте обе кнопки регулировки громкости в течение трех секунд."</string>
-    <!-- no translation found for accessibility_button_prompt_text (6105393217162198616) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_prompt_text (6452246951969541792) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_3finger_prompt_text (77745752309056152) -->
-    <skip />
-    <!-- no translation found for accessibility_button_instructional_text (6831154884557881996) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_instructional_text (4133877896011098550) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_3finger_instructional_text (1124458279366968154) -->
-    <skip />
+    <string name="accessibility_button_prompt_text" msgid="6105393217162198616">"Выберите функцию"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="6452246951969541792">"Выберите функцию"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="77745752309056152">"Выберите функцию"</string>
+    <string name="accessibility_button_instructional_text" msgid="6831154884557881996">"Функция теперь будет включаться при нажатии кнопки специальных возможностей."</string>
+    <string name="accessibility_gesture_instructional_text" msgid="4133877896011098550">"Функция теперь будет включаться при выполнении действия быстрого запуска. Проведите двумя пальцами по экрану снизу вверх."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="1124458279366968154">"Функция теперь будет включаться при выполнении действия быстрого запуска. Проведите тремя пальцами по экрану снизу вверх."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Увеличение"</string>
     <string name="user_switched" msgid="7249833311585228097">"Выбран аккаунт пользователя <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"Смена профиля на \"<xliff:g id="NAME">%1$s</xliff:g>\"…"</string>
@@ -1897,8 +1891,7 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN-код должен содержать не менее 4 символов."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Повторите попытку позже."</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Полноэкранный режим"</string>
-    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
-    <skip />
+    <string name="immersive_cling_description" msgid="2896205051090870978">"Чтобы выйти, проведите вниз от верхнего края экрана"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"ОК"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Поверните, чтобы лучше видеть."</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Откройте приложение \"<xliff:g id="NAME">%s</xliff:g>\" в полноэкранном режиме, чтобы лучше видеть."</string>
@@ -2434,25 +2427,32 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Для безопасности содержимое приложения при демонстрации экрана скрыто."</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Автоматически подключено к системам спутниковой связи"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Вы можете отправлять и получать сообщения без доступа к мобильной сети или Wi-Fi."</string>
+    <string name="satellite_notification_manual_title" msgid="1097504441849466279">"Включить спутниковый обмен сообщениями?"</string>
+    <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Отправляйте и получайте сообщения без подключения к мобильной сети или Wi-Fi."</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Открыть Сообщения"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Узнать принцип работы"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Обработка…"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Настройте разблокировку по отпечатку пальца заново"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (5851784577768803510) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7925203589860744456) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (1824812666549916586) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (5974657382960155099) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"Отпечаток \"<xliff:g id="FINGERPRINT">%s</xliff:g>\" больше нельзя распознать."</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"Отпечатки \"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>\" и \"<xliff:g id="FINGERPRINT_1">%2$s</xliff:g>\" больше нельзя распознать."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="1824812666549916586">"Отпечаток \"<xliff:g id="FINGERPRINT">%s</xliff:g>\" больше нельзя распознать. Настройте разблокировку по отпечатку пальца снова."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="5974657382960155099">"Отпечатки \"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>\" и \"<xliff:g id="FINGERPRINT_1">%2$s</xliff:g>\" больше нельзя распознать. Настройте разблокировку по отпечатку пальца снова."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Настройте фейсконтроль заново"</string>
-    <!-- no translation found for face_dangling_notification_msg (746235263598985384) -->
-    <skip />
+    <string name="face_dangling_notification_msg" msgid="746235263598985384">"Вашу модель лица больше нельзя распознать. Настройте фейсконтроль снова."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Настроить"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Не сейчас"</string>
     <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"Будильник пользователя <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"Сменить пользователя"</string>
     <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"Отключить звук"</string>
     <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"Нажмите, чтобы отключить звук."</string>
+    <string name="keyboard_shortcut_group_applications_browser" msgid="6535007304687100909">"Браузер"</string>
+    <string name="keyboard_shortcut_group_applications_contacts" msgid="2750702518068326356">"Контакты"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="4229037666415353683">"Электронная почта"</string>
+    <string name="keyboard_shortcut_group_applications_sms" msgid="3523799286376321137">"SMS"</string>
+    <string name="keyboard_shortcut_group_applications_music" msgid="2051507523525651067">"Музыка"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="3571770335653387606">"Календарь"</string>
+    <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"Калькулятор"</string>
+    <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"Карты"</string>
+    <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"Приложения"</string>
+    <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"Ваши отпечатки больше не распознаются. Настройте разблокировку по отпечатку пальца снова."</string>
 </resources>

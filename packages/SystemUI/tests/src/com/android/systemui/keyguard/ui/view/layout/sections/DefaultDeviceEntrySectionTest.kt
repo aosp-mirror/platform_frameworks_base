@@ -18,6 +18,7 @@
 package com.android.systemui.keyguard.ui.view.layout.sections
 
 import android.graphics.Point
+import android.platform.test.annotations.DisableFlags
 import android.view.WindowManager
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
@@ -33,6 +34,7 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryBackgroundViewModel
 import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryForegroundViewModel
 import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryIconViewModel
+import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.res.R
 import com.android.systemui.shade.NotificationPanelView
@@ -85,6 +87,7 @@ class DefaultDeviceEntrySectionTest : SysuiTestCase() {
                 { mock(DeviceEntryBackgroundViewModel::class.java) },
                 { falsingManager },
                 { mock(VibratorHelper::class.java) },
+                logcatLogBuffer(),
             )
     }
 
@@ -106,8 +109,8 @@ class DefaultDeviceEntrySectionTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     fun addViewsConditionally_migrateFlagOff() {
-        mSetFlagsRule.disableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
         mSetFlagsRule.disableFlags(AConfigFlags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR)
         mSetFlagsRule.disableFlags(AConfigFlags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
         val constraintLayout = ConstraintLayout(context, null)

@@ -17,6 +17,18 @@
 package com.android.systemui.qs.panels.domain.interactor
 
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.qs.panels.data.repository.iconTilesRepository
+import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.log.core.FakeLogBuffer
+import com.android.systemui.qs.panels.data.repository.defaultLargeTilesRepository
+import com.android.systemui.qs.pipeline.domain.interactor.currentTilesInteractor
 
-val Kosmos.iconTilesInteractor by Kosmos.Fixture { IconTilesInteractor(iconTilesRepository) }
+val Kosmos.iconTilesInteractor by
+    Kosmos.Fixture {
+        IconTilesInteractor(
+            defaultLargeTilesRepository,
+            currentTilesInteractor,
+            qsPreferencesInteractor,
+            FakeLogBuffer.Factory.create(),
+            applicationCoroutineScope
+        )
+    }

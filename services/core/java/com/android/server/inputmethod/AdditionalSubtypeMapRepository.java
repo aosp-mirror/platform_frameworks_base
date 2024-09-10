@@ -18,20 +18,14 @@ package com.android.server.inputmethod;
 
 import android.annotation.AnyThread;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.annotation.WorkerThread;
-import android.content.Context;
-import android.content.pm.UserInfo;
-import android.os.Handler;
 import android.os.Process;
 import android.util.IntArray;
+import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.inputmethod.DirectBootAwareness;
-import com.android.server.LocalServices;
-import com.android.server.pm.UserManagerInternal;
 
 import java.util.ArrayList;
 import java.util.concurrent.locks.Condition;
@@ -42,9 +36,13 @@ import java.util.concurrent.locks.ReentrantLock;
  * persistent storages.
  */
 final class AdditionalSubtypeMapRepository {
-    @GuardedBy("ImfLock.class")
+    private static final String TAG = "AdditionalSubtypeMapRepository";
+
+    private static final Object sMutationLock = new Object();
+
     @NonNull
-    private static final SparseArray<AdditionalSubtypeMap> sPerUserMap = new SparseArray<>();
+    private static volatile ImmutableSparseArray<AdditionalSubtypeMap> sPerUserMap =
+            ImmutableSparseArray.empty();
 
     record WriteTask(@UserIdInt int userId, @NonNull AdditionalSubtypeMap subtypeMap,
                      @NonNull InputMethodMap inputMethodMap) {
@@ -198,77 +196,80 @@ final class AdditionalSubtypeMapRepository {
     private AdditionalSubtypeMapRepository() {
     }
 
+    /**
+     * Returns {@link AdditionalSubtypeMap} for the given user.
+     *
+     * <p>This method is expected be called after {@link #initializeIfNecessary(int)}. Otherwise
+     * {@link AdditionalSubtypeMap#EMPTY_MAP} will be returned.</p>
+     *
+     * @param userId the user to be queried about
+     * @return {@link AdditionalSubtypeMap} for the given user
+     */
+    @AnyThread
     @NonNull
-    @GuardedBy("ImfLock.class")
     static AdditionalSubtypeMap get(@UserIdInt int userId) {
         final AdditionalSubtypeMap map = sPerUserMap.get(userId);
-        if (map != null) {
-            return map;
+        if (map == null) {
+            Slog.e(TAG, "get(userId=" + userId + ") is called before loadInitialDataAndGet()."
+                    + " Returning an empty map");
+            return AdditionalSubtypeMap.EMPTY_MAP;
         }
-        final AdditionalSubtypeMap newMap = AdditionalSubtypeUtils.load(userId);
-        sPerUserMap.put(userId, newMap);
-        return newMap;
+        return map;
     }
 
-    @GuardedBy("ImfLock.class")
-    static void putAndSave(@UserIdInt int userId, @NonNull AdditionalSubtypeMap map,
-            @NonNull InputMethodMap inputMethodMap) {
-        final AdditionalSubtypeMap previous = sPerUserMap.get(userId);
-        if (previous == map) {
+    /**
+     * Ensures that {@link AdditionalSubtypeMap} is initialized for the given user.
+     *
+     * @param userId the user to be initialized
+     */
+    @AnyThread
+    @NonNull
+    static void initializeIfNecessary(@UserIdInt int userId) {
+        if (sPerUserMap.contains(userId)) {
+            // Fast-pass. If putAndSave() is already called, then do nothing.
             return;
         }
-        sPerUserMap.put(userId, map);
-        sWriter.scheduleWriteTask(userId, map, inputMethodMap);
+        final var map = AdditionalSubtypeUtils.load(userId);
+        synchronized (sMutationLock) {
+            // Check the condition again.
+            if (!sPerUserMap.contains(userId)) {
+                sPerUserMap = sPerUserMap.cloneWithPutOrSelf(userId, map);
+            }
+        }
     }
 
+    /**
+     * Puts {@link AdditionalSubtypeMap} for the given user then schedule an I/O task to save it
+     * to the storage.
+     *
+     * @param userId         the user for the given {@link AdditionalSubtypeMap} is to be saved
+     * @param map            {@link AdditionalSubtypeMap} to be saved
+     * @param inputMethodMap {@link InputMethodMap} to be used while saving the data
+     */
+    @AnyThread
+    static void putAndSave(@UserIdInt int userId, @NonNull AdditionalSubtypeMap map,
+            @NonNull InputMethodMap inputMethodMap) {
+        synchronized (sMutationLock) {
+            sPerUserMap = sPerUserMap.cloneWithPutOrSelf(userId, map);
+            sWriter.scheduleWriteTask(userId, map, inputMethodMap);
+        }
+    }
+
+    @AnyThread
     static void startWriterThread() {
         sWriter.startThread();
     }
 
-    static void initialize(@NonNull Handler handler, @NonNull Context context) {
-        final UserManagerInternal userManagerInternal =
-                LocalServices.getService(UserManagerInternal.class);
-        handler.post(() -> {
-            userManagerInternal.addUserLifecycleListener(
-                    new UserManagerInternal.UserLifecycleListener() {
-                        @Override
-                        public void onUserCreated(UserInfo user, @Nullable Object token) {
-                            final int userId = user.id;
-                            sWriter.onUserCreated(userId);
-                            handler.post(() -> {
-                                synchronized (ImfLock.class) {
-                                    if (!sPerUserMap.contains(userId)) {
-                                        final AdditionalSubtypeMap additionalSubtypeMap =
-                                                AdditionalSubtypeUtils.load(userId);
-                                        sPerUserMap.put(userId, additionalSubtypeMap);
-                                        final InputMethodSettings settings =
-                                                InputMethodManagerService
-                                                        .queryInputMethodServicesInternal(context,
-                                                                userId,
-                                                                additionalSubtypeMap,
-                                                                DirectBootAwareness.AUTO);
-                                        InputMethodSettingsRepository.put(userId, settings);
-                                    }
-                                }
-                            });
-                        }
+    @AnyThread
+    static void onUserCreated(@UserIdInt int userId) {
+        sWriter.onUserCreated(userId);
+    }
 
-                        @Override
-                        public void onUserRemoved(UserInfo user) {
-                            final int userId = user.id;
-                            sWriter.onUserRemoved(userId);
-                            handler.post(() -> {
-                                synchronized (ImfLock.class) {
-                                    sPerUserMap.remove(userId);
-                                }
-                            });
-                        }
-                    });
-            synchronized (ImfLock.class) {
-                for (int userId : userManagerInternal.getUserIds()) {
-                    sPerUserMap.put(userId, AdditionalSubtypeUtils.load(userId));
-                }
-            }
-        });
+    @AnyThread
+    static void remove(@UserIdInt int userId) {
+        synchronized (sMutationLock) {
+            sWriter.onUserRemoved(userId);
+            sPerUserMap = sPerUserMap.cloneWithRemoveOrSelf(userId);
+        }
     }
 }

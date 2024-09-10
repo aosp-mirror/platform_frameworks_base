@@ -22,6 +22,8 @@ import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_NUMERIC;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_SOMETHING;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
+import static android.security.Flags.reportPrimaryAuthAttempts;
+import static android.security.Flags.shouldTrustManagerListenForPrimaryAuth;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -414,7 +416,9 @@ public class LockPatternUtils {
             return;
         }
         getDevicePolicyManager().reportFailedPasswordAttempt(userId);
-        getTrustManager().reportUnlockAttempt(false /* authenticated */, userId);
+        if (!reportPrimaryAuthAttempts() || !shouldTrustManagerListenForPrimaryAuth()) {
+            getTrustManager().reportUnlockAttempt(/* authenticated= */ false, userId);
+        }
     }
 
     @UnsupportedAppUsage
@@ -423,7 +427,9 @@ public class LockPatternUtils {
             return;
         }
         getDevicePolicyManager().reportSuccessfulPasswordAttempt(userId);
-        getTrustManager().reportUnlockAttempt(true /* authenticated */, userId);
+        if (!reportPrimaryAuthAttempts() || !shouldTrustManagerListenForPrimaryAuth()) {
+            getTrustManager().reportUnlockAttempt(/* authenticated= */ true, userId);
+        }
     }
 
     public void reportPasswordLockout(int timeoutMs, int userId) {

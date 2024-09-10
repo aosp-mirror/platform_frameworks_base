@@ -25,6 +25,7 @@ import static android.view.KeyEvent.KEYCODE_DEL;
 import static android.view.KeyEvent.KEYCODE_E;
 import static android.view.KeyEvent.KEYCODE_ENTER;
 import static android.view.KeyEvent.KEYCODE_H;
+import static android.view.KeyEvent.KEYCODE_J;
 import static android.view.KeyEvent.KEYCODE_K;
 import static android.view.KeyEvent.KEYCODE_M;
 import static android.view.KeyEvent.KEYCODE_META_LEFT;
@@ -40,32 +41,29 @@ import static android.view.KeyEvent.KEYCODE_U;
 import static android.view.KeyEvent.KEYCODE_Z;
 
 import android.app.role.RoleManager;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.os.RemoteException;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
-import android.platform.test.annotations.RequiresFlagsDisabled;
-import android.platform.test.annotations.RequiresFlagsEnabled;
-import android.platform.test.flag.junit.CheckFlagsRule;
-import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.util.SparseArray;
 
 import androidx.test.filters.SmallTest;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 
 @Presubmit
 @SmallTest
+@EnableFlags(com.android.hardware.input.Flags.FLAG_MODIFIER_SHORTCUT_MANAGER_REFACTOR)
 public class ModifierShortcutTests extends ShortcutKeyTestBase {
-
-    @Rule
-    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
     private static final SparseArray<String> INTENT_SHORTCUTS =  new SparseArray<>();
     private static final SparseArray<String> ROLE_SHORTCUTS =  new SparseArray<>();
     static {
-        // These shortcuts should align with those defined in bookmarks.xml
+        // These shortcuts should align with those defined in
+        // services/tests/wmtests/res/xml/bookmarks.xml
         INTENT_SHORTCUTS.append(KEYCODE_U, Intent.CATEGORY_APP_CALCULATOR);
         INTENT_SHORTCUTS.append(KEYCODE_C, Intent.CATEGORY_APP_CONTACTS);
         INTENT_SHORTCUTS.append(KEYCODE_E, Intent.CATEGORY_APP_EMAIL);
@@ -96,6 +94,7 @@ public class ModifierShortcutTests extends ShortcutKeyTestBase {
             mPhoneWindowManager.assertLaunchCategory(category);
         }
 
+        mPhoneWindowManager.overrideRoleManager();
         for (int i = 0; i < ROLE_SHORTCUTS.size(); i++) {
             final int keyCode = ROLE_SHORTCUTS.keyAt(i);
             final String role = ROLE_SHORTCUTS.valueAt(i);
@@ -103,6 +102,17 @@ public class ModifierShortcutTests extends ShortcutKeyTestBase {
             sendKeyCombination(new int[]{KEYCODE_META_LEFT, keyCode}, 0);
             mPhoneWindowManager.assertLaunchRole(role);
         }
+
+        sendKeyCombination(new int[]{KEYCODE_META_LEFT, KEYCODE_SHIFT_LEFT, KEYCODE_B}, 0);
+        mPhoneWindowManager.assertLaunchRole(RoleManager.ROLE_BROWSER);
+
+        sendKeyCombination(new int[]{KEYCODE_META_LEFT, KEYCODE_SHIFT_LEFT, KEYCODE_C}, 0);
+        mPhoneWindowManager.assertLaunchCategory(Intent.CATEGORY_APP_CONTACTS);
+
+        sendKeyCombination(new int[]{KEYCODE_META_LEFT, KEYCODE_SHIFT_LEFT, KEYCODE_J}, 0);
+        mPhoneWindowManager.assertActivityTargetLaunched(
+                new ComponentName("com.test", "com.test.BookmarkTest"));
+
     }
 
     /**
@@ -243,7 +253,7 @@ public class ModifierShortcutTests extends ShortcutKeyTestBase {
      * META+CTRL+BACKSPACE for taking a bugreport when the flag is enabled.
      */
     @Test
-    @RequiresFlagsEnabled(com.android.server.flags.Flags.FLAG_NEW_BUGREPORT_KEYBOARD_SHORTCUT)
+    @EnableFlags(com.android.server.flags.Flags.FLAG_NEW_BUGREPORT_KEYBOARD_SHORTCUT)
     public void testTakeBugReport_flagEnabled() throws RemoteException {
         sendKeyCombination(new int[]{KEYCODE_META_LEFT, KEYCODE_CTRL_LEFT, KEYCODE_DEL}, 0);
         mPhoneWindowManager.assertTakeBugreport(true);
@@ -253,7 +263,7 @@ public class ModifierShortcutTests extends ShortcutKeyTestBase {
      * META+CTRL+BACKSPACE for taking a bugreport does nothing when the flag is disabledd.
      */
     @Test
-    @RequiresFlagsDisabled(com.android.server.flags.Flags.FLAG_NEW_BUGREPORT_KEYBOARD_SHORTCUT)
+    @DisableFlags(com.android.server.flags.Flags.FLAG_NEW_BUGREPORT_KEYBOARD_SHORTCUT)
     public void testTakeBugReport_flagDisabled() throws RemoteException {
         sendKeyCombination(new int[]{KEYCODE_META_LEFT, KEYCODE_CTRL_LEFT, KEYCODE_DEL}, 0);
         mPhoneWindowManager.assertTakeBugreport(false);

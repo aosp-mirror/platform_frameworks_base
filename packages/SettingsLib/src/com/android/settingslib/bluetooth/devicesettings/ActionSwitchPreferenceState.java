@@ -21,6 +21,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import java.util.Objects;
 
 /** A data class representing the state of an action/switch preference. */
 public class ActionSwitchPreferenceState extends DeviceSettingPreferenceState
@@ -132,5 +135,16 @@ public class ActionSwitchPreferenceState extends DeviceSettingPreferenceState
     @NonNull
     public Bundle getExtras() {
         return mExtras;
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        if (!(obj instanceof ActionSwitchPreferenceState other)) return false;
+        return mChecked == other.mChecked;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mChecked);
     }
 }

@@ -21,39 +21,39 @@ import com.android.asllib.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import java.util.List;
-
 /** TransparencyInfo representation containing {@link AppInfo} */
 public class TransparencyInfo implements AslMarshallable {
+
+    private final DeveloperInfo mDeveloperInfo;
     private final AppInfo mAppInfo;
 
-    public TransparencyInfo(AppInfo appInfo) {
+    public TransparencyInfo(DeveloperInfo developerInfo, AppInfo appInfo) {
+        this.mDeveloperInfo = developerInfo;
         this.mAppInfo = appInfo;
     }
 
-    /** Gets the {@link AppInfo} of the {@link TransparencyInfo}. */
-    public AppInfo getAppInfo() {
-        return mAppInfo;
-    }
-
     /** Creates an on-device DOM element from the {@link TransparencyInfo}. */
-    @Override
-    public List<Element> toOdDomElements(Document doc) {
+    public Element toOdDomElement(Document doc) {
         Element transparencyInfoEle =
                 XmlUtils.createPbundleEleWithName(doc, XmlUtils.OD_NAME_TRANSPARENCY_INFO);
-        if (mAppInfo != null) {
-            XmlUtils.appendChildren(transparencyInfoEle, mAppInfo.toOdDomElements(doc));
+        if (mDeveloperInfo != null) {
+            transparencyInfoEle.appendChild(mDeveloperInfo.toOdDomElement(doc));
         }
-        return XmlUtils.listOf(transparencyInfoEle);
+        if (mAppInfo != null) {
+            transparencyInfoEle.appendChild(mAppInfo.toOdDomElement(doc));
+        }
+        return transparencyInfoEle;
     }
 
     /** Creates the human-readable DOM elements from the AslMarshallable Java Object. */
-    @Override
-    public List<Element> toHrDomElements(Document doc) {
+    public Element toHrDomElement(Document doc) {
         Element transparencyInfoEle = doc.createElement(XmlUtils.HR_TAG_TRANSPARENCY_INFO);
-        if (mAppInfo != null) {
-            XmlUtils.appendChildren(transparencyInfoEle, mAppInfo.toHrDomElements(doc));
+        if (mDeveloperInfo != null) {
+            transparencyInfoEle.appendChild(mDeveloperInfo.toHrDomElement(doc));
         }
-        return XmlUtils.listOf(transparencyInfoEle);
+        if (mAppInfo != null) {
+            transparencyInfoEle.appendChild(mAppInfo.toHrDomElement(doc));
+        }
+        return transparencyInfoEle;
     }
 }

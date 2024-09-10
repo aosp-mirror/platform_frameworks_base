@@ -16,6 +16,9 @@
 
 package com.android.systemui.dagger;
 
+import static com.android.systemui.Flags.enableViewCaptureTracing;
+import static com.android.systemui.util.ConvenienceExtensionsKt.toKotlinLazy;
+
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
@@ -39,6 +42,8 @@ import android.app.job.JobScheduler;
 import android.app.role.RoleManager;
 import android.app.smartspace.SmartspaceManager;
 import android.app.trust.TrustManager;
+import android.app.usage.UsageStatsManager;
+import android.appwidget.AppWidgetManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.companion.virtual.VirtualDeviceManager;
@@ -111,6 +116,9 @@ import android.view.textclassifier.TextClassificationManager;
 import androidx.asynclayoutinflater.view.AsyncLayoutInflater;
 import androidx.core.app.NotificationManagerCompat;
 
+import com.android.app.viewcapture.ViewCapture;
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
+import com.android.app.viewcapture.ViewCaptureFactory;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.appwidget.IAppWidgetService;
 import com.android.internal.jank.InteractionJankMonitor;
@@ -125,6 +133,7 @@ import com.android.systemui.shared.system.PackageManagerWrapper;
 import com.android.systemui.user.utils.UserScopedService;
 import com.android.systemui.user.utils.UserScopedServiceImpl;
 
+import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
 
@@ -191,6 +200,13 @@ public class FrameworkServicesModule {
     @Singleton
     static CaptioningManager provideCaptioningManager(Context context) {
         return context.getSystemService(CaptioningManager.class);
+    }
+
+    @Provides
+    @Singleton
+    static UserScopedService<CaptioningManager> provideUserScopedCaptioningManager(
+            Context context) {
+        return new UserScopedServiceImpl<>(context, CaptioningManager.class);
     }
 
     /** */
@@ -367,6 +383,12 @@ public class FrameworkServicesModule {
 
     @Provides
     @Singleton
+    static Optional<AppWidgetManager> provideAppWidgetManager(@Application Context context) {
+        return Optional.ofNullable(AppWidgetManager.getInstance(context));
+    }
+
+    @Provides
+    @Singleton
     static IAppWidgetService provideIAppWidgetService() {
         return IAppWidgetService.Stub.asInterface(
                 ServiceManager.getService(Context.APPWIDGET_SERVICE));
@@ -530,6 +552,13 @@ public class FrameworkServicesModule {
         return context.getSystemService(UiModeManager.class);
     }
 
+    /** */
+    @Provides
+    @Singleton
+    static UsageStatsManager provideUsageStatsManager(Context context) {
+        return context.getSystemService(UsageStatsManager.class);
+    }
+
     @Provides
     @Main
     static Resources provideResources(Context context) {
@@ -680,6 +709,15 @@ public class FrameworkServicesModule {
 
     @Provides
     @Singleton
+    static ViewCaptureAwareWindowManager provideViewCaptureAwareWindowManager(
+            WindowManager windowManager, Lazy<ViewCapture> daggerLazyViewCapture) {
+        return new ViewCaptureAwareWindowManager(windowManager,
+                /* lazyViewCapture= */ toKotlinLazy(daggerLazyViewCapture),
+                /* isViewCaptureEnabled= */ enableViewCaptureTracing());
+    }
+
+    @Provides
+    @Singleton
     static PermissionManager providePermissionManager(Context context) {
         PermissionManager pm = context.getSystemService(PermissionManager.class);
         if (pm != null) {
@@ -763,5 +801,11 @@ public class FrameworkServicesModule {
     static IDeviceIdleController provideDeviceIdleController() {
         return IDeviceIdleController.Stub.asInterface(
                 ServiceManager.getService(Context.DEVICE_IDLE_CONTROLLER));
+    }
+
+    @Provides
+    @Singleton
+    static ViewCapture provideViewCapture(Context context) {
+        return ViewCaptureFactory.getInstance(context);
     }
 }

@@ -18,6 +18,8 @@ package android.window;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.Activity;
+import android.app.ActivityThread;
 import android.graphics.Rect;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -143,5 +145,16 @@ public final class ActivityWindowInfo implements Parcelable {
                 + ", taskBounds=" + mTaskBounds
                 + ", taskFragmentBounds=" + mTaskFragmentBounds
                 + "}";
+    }
+
+    /** Gets the {@link ActivityWindowInfo} of the given activity. */
+    @Nullable
+    public static ActivityWindowInfo getActivityWindowInfo(@NonNull Activity activity) {
+        if (activity.isFinishing()) {
+            return null;
+        }
+        final ActivityThread.ActivityClientRecord record = ActivityThread.currentActivityThread()
+                .getActivityClient(activity.getActivityToken());
+        return record != null ? record.getActivityWindowInfo() : null;
     }
 }

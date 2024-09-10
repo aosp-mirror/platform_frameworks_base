@@ -67,7 +67,7 @@ public class ProtologDataSourceTest {
 
     @Test
     public void allEnabledTraceMode() {
-        final ProtoLogDataSource ds = new ProtoLogDataSource((c) -> {}, () -> {}, (c) -> {});
+        final ProtoLogDataSource ds = new ProtoLogDataSource((idx, c) -> {}, () -> {}, (idx, c) -> {});
 
         final ProtoLogDataSource.TlsState tlsState = createTlsState(
                 DataSourceConfigOuterClass.DataSourceConfig.newBuilder().setProtologConfig(
@@ -154,7 +154,7 @@ public class ProtologDataSourceTest {
     private ProtoLogDataSource.TlsState createTlsState(
             DataSourceConfigOuterClass.DataSourceConfig config) {
         final ProtoLogDataSource ds =
-                Mockito.spy(new ProtoLogDataSource((c) -> {}, () -> {}, (c) -> {}));
+                Mockito.spy(new ProtoLogDataSource((idx, c) -> {}, () -> {}, (idx, c) -> {}));
 
         ProtoInputStream configStream = new ProtoInputStream(config.toByteArray());
         final ProtoLogDataSource.Instance dsInstance = Mockito.spy(

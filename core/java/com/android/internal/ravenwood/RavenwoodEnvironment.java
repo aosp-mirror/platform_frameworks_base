@@ -15,24 +15,33 @@
  */
 package com.android.internal.ravenwood;
 
-import android.ravenwood.annotation.RavenwoodNativeSubstitutionClass;
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
+import android.ravenwood.annotation.RavenwoodRedirect;
+import android.ravenwood.annotation.RavenwoodRedirectionClass;
+import android.ravenwood.annotation.RavenwoodReplace;
 
 /**
  * Class to interact with the Ravenwood environment.
  */
-@android.ravenwood.annotation.RavenwoodKeepWholeClass
-@RavenwoodNativeSubstitutionClass(
-        "com.android.platform.test.ravenwood.nativesubstitution.RavenwoodEnvironment_host")
+@RavenwoodKeepWholeClass
+@RavenwoodRedirectionClass("RavenwoodEnvironment_host")
 public final class RavenwoodEnvironment {
     public static final String TAG = "RavenwoodEnvironment";
 
-    private static RavenwoodEnvironment sInstance = new RavenwoodEnvironment();
-    private static Workaround sWorkaround = new Workaround();
+    private static final RavenwoodEnvironment sInstance;
+    private static final Workaround sWorkaround;
 
     private RavenwoodEnvironment() {
-        if (isRunningOnRavenwood()) {
-            ensureRavenwoodInitializedInternal();
-        }
+    }
+
+    static {
+        sInstance = new RavenwoodEnvironment();
+        sWorkaround = new Workaround();
+        ensureRavenwoodInitialized();
+    }
+
+    public static RuntimeException notSupportedOnDevice() {
+        return new UnsupportedOperationException("This method can only be used on Ravenwood");
     }
 
     /**
@@ -47,15 +56,9 @@ public final class RavenwoodEnvironment {
      *
      * No-op if called on the device side.
      */
+    @RavenwoodRedirect
     public static void ensureRavenwoodInitialized() {
     }
-
-    private static void ensureRavenwoodInitialized$ravenwood() {
-        getInstance(); // This is enough to initialize the environment.
-    }
-
-    /** Initialize the ravenwood environment */
-    private static native void ensureRavenwoodInitializedInternal();
 
     /**
      * USE IT SPARINGLY! Returns true if it's running on Ravenwood, hostside test environment.
@@ -69,7 +72,7 @@ public final class RavenwoodEnvironment {
      * <p>If someone needs it without having access to the SDK, the following hack would work too.
      * <code>System.getProperty("java.class.path").contains("ravenwood")</code>
      */
-    @android.ravenwood.annotation.RavenwoodReplace
+    @RavenwoodReplace
     public boolean isRunningOnRavenwood() {
         return false;
     }
@@ -79,13 +82,32 @@ public final class RavenwoodEnvironment {
     }
 
     /**
-     * See {@link Workaround}. It's only usablke on Ravenwood.
+     * Get the object back from the address obtained from
+     * {@link dalvik.system.VMRuntime#addressOf(Object)}.
      */
+    @RavenwoodRedirect
+    public <T> T fromAddress(long address) {
+        throw notSupportedOnDevice();
+    }
+
+    /**
+     * See {@link Workaround}. It's only usable on Ravenwood.
+     */
+    @RavenwoodReplace
     public static Workaround workaround() {
-        if (getInstance().isRunningOnRavenwood()) {
-            return sWorkaround;
-        }
-        throw new IllegalStateException("Workaround can only be used on Ravenwood");
+        throw notSupportedOnDevice();
+    }
+
+    private static Workaround workaround$ravenwood() {
+        return sWorkaround;
+    }
+
+    /**
+     * @return the "ravenwood-runtime" directory.
+     */
+    @RavenwoodRedirect
+    public String getRavenwoodRuntimePath() {
+        throw notSupportedOnDevice();
     }
 
     /**

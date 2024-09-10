@@ -25,32 +25,10 @@
       ]
     },
     {
-      "name": "FrameworksServicesTests",
-      "options": [
-        {
-          "include-filter": "com.android.server.accessibility"
-        },
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
+      "name": "FrameworksServicesTests_accessibility_Presubmit"
     },
     {
-      "name": "FrameworksCoreTests",
-      "options": [
-        {
-          "include-filter": "android.accessibilityservice"
-        },
-        {
-          "include-filter": "android.view.accessibility"
-        },
-        {
-          "include-filter": "com.android.internal.accessibility"
-        },
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
+      "name": "FrameworksCoreTests_accessibility_NO_FLAKES"
     }
   ],
   "postsubmit": [
@@ -75,18 +53,7 @@
       ]
     },
     {
-      "name": "FrameworksCoreTests",
-      "options": [
-        {
-          "include-filter": "android.accessibilityservice"
-        },
-        {
-          "include-filter": "android.view.accessibility"
-        },
-        {
-          "include-filter": "com.android.internal.accessibility"
-        }
-      ]
+      "name": "FrameworksCoreTests_accessibility"
     }
   ]
 }

@@ -16,8 +16,8 @@
 
 package com.android.wm.shell.bubbles.bar;
 
-import static com.android.wm.shell.animation.Interpolators.ALPHA_IN;
-import static com.android.wm.shell.animation.Interpolators.ALPHA_OUT;
+import static com.android.wm.shell.shared.animation.Interpolators.ALPHA_IN;
+import static com.android.wm.shell.shared.animation.Interpolators.ALPHA_OUT;
 import static com.android.wm.shell.bubbles.Bubbles.DISMISS_USER_GESTURE;
 
 import android.annotation.Nullable;
@@ -44,9 +44,9 @@ import com.android.wm.shell.bubbles.BubbleViewProvider;
 import com.android.wm.shell.bubbles.DeviceConfig;
 import com.android.wm.shell.bubbles.DismissViewUtils;
 import com.android.wm.shell.bubbles.bar.BubbleBarExpandedViewDragController.DragListener;
-import com.android.wm.shell.common.bubbles.BaseBubblePinController;
-import com.android.wm.shell.common.bubbles.BubbleBarLocation;
-import com.android.wm.shell.common.bubbles.DismissView;
+import com.android.wm.shell.shared.bubbles.BaseBubblePinController;
+import com.android.wm.shell.shared.bubbles.BubbleBarLocation;
+import com.android.wm.shell.shared.bubbles.DismissView;
 
 import kotlin.Unit;
 
@@ -173,6 +173,11 @@ public class BubbleBarLayerView extends FrameLayout
     /** Whether the stack of bubbles is expanded or not. */
     public boolean isExpanded() {
         return mIsExpanded;
+    }
+
+    /** Return whether the expanded view is being dragged */
+    public boolean isExpandedViewDragged() {
+        return mDragController != null && mDragController.isDragged();
     }
 
     /** Shows the expanded view of the provided bubble. */

@@ -33,7 +33,7 @@ import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.flags.Flags
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.log.table.logcatTableLogBuffer
 import com.android.systemui.qs.tiles.base.interactor.DataUpdateTrigger
 import com.android.systemui.qs.tiles.impl.internet.domain.model.InternetTileModel
 import com.android.systemui.res.R
@@ -86,7 +86,7 @@ class InternetTileDataInteractorTest : SysuiTestCase() {
     private val wifiInteractor =
         WifiInteractorImpl(connectivityRepository, wifiRepository, testScope.backgroundScope)
 
-    private val tableLogBuffer: TableLogBuffer = mock()
+    private val tableLogBuffer = logcatTableLogBuffer(kosmos, "InternetTileDataInteractorTest")
     private val carrierConfigTracker: CarrierConfigTracker = mock()
 
     private val mobileConnectionsRepository =
@@ -184,8 +184,7 @@ class InternetTileDataInteractorTest : SysuiTestCase() {
                 )
 
             val networkModel =
-                WifiNetworkModel.Active(
-                    networkId = 1,
+                WifiNetworkModel.Active.of(
                     level = 4,
                     ssid = "test ssid",
                 )
@@ -204,7 +203,7 @@ class InternetTileDataInteractorTest : SysuiTestCase() {
 
             val actualIcon = latest?.icon
             assertThat(actualIcon).isEqualTo(expectedIcon)
-            assertThat(latest?.iconId).isNull()
+            assertThat(latest?.iconId).isEqualTo(WifiIcons.WIFI_NO_INTERNET_ICONS[4])
             assertThat(latest?.contentDescription.loadContentDescription(context))
                 .isEqualTo("$internet,test ssid")
             val expectedSd = wifiIcon.contentDescription
@@ -220,8 +219,7 @@ class InternetTileDataInteractorTest : SysuiTestCase() {
                 )
 
             val networkModel =
-                WifiNetworkModel.Active(
-                    networkId = 1,
+                WifiNetworkModel.Active.of(
                     level = 4,
                     ssid = "test ssid",
                     hotspotDeviceType = WifiNetworkModel.HotspotDeviceType.NONE,
@@ -400,7 +398,7 @@ class InternetTileDataInteractorTest : SysuiTestCase() {
                 collectLastValue(
                     underTest.tileData(testUser, flowOf(DataUpdateTrigger.InitialRequest))
                 )
-            val networkModel = WifiNetworkModel.Inactive
+            val networkModel = WifiNetworkModel.Inactive()
 
             connectivityRepository.setWifiConnected(validated = false)
             wifiRepository.setIsWifiDefault(true)
@@ -418,7 +416,7 @@ class InternetTileDataInteractorTest : SysuiTestCase() {
                     underTest.tileData(testUser, flowOf(DataUpdateTrigger.InitialRequest))
                 )
 
-            val networkModel = WifiNetworkModel.Inactive
+            val networkModel = WifiNetworkModel.Inactive()
 
             connectivityRepository.setWifiConnected(validated = false)
             wifiRepository.setIsWifiDefault(true)
@@ -443,15 +441,15 @@ class InternetTileDataInteractorTest : SysuiTestCase() {
      * on the mentioned context. Since that context does not have a looper assigned to it, the
      * handler instantiation will throw a RuntimeException.
      *
-     * TODO(b/338068066): Robolectric behavior differs in that it does not throw the exception
-     * So either we should make Robolectric behvase similar to the device test, or change this
-     * test to look for a different signal than the exception, when run by Robolectric. For now
-     * we just assume the test is not Robolectric.
+     * TODO(b/338068066): Robolectric behavior differs in that it does not throw the exception So
+     *   either we should make Robolectric behave similar to the device test, or change this test to
+     *   look for a different signal than the exception, when run by Robolectric. For now we just
+     *   assume the test is not Robolectric.
      */
     @Test(expected = java.lang.RuntimeException::class)
     fun mobileDefault_usesNetworkNameAndIcon_throwsRunTimeException() =
         testScope.runTest {
-            assumeFalse(isRobolectricTest());
+            assumeFalse(isRobolectricTest())
 
             collectLastValue(underTest.tileData(testUser, flowOf(DataUpdateTrigger.InitialRequest)))
 
@@ -545,8 +543,7 @@ class InternetTileDataInteractorTest : SysuiTestCase() {
 
     private fun setWifiNetworkWithHotspot(hotspot: WifiNetworkModel.HotspotDeviceType) {
         val networkModel =
-            WifiNetworkModel.Active(
-                networkId = 1,
+            WifiNetworkModel.Active.of(
                 level = 4,
                 ssid = "test ssid",
                 hotspotDeviceType = hotspot,

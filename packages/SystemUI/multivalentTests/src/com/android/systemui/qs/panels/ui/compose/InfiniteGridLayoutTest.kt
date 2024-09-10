@@ -20,8 +20,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.qs.panels.data.repository.IconTilesRepository
-import com.android.systemui.qs.panels.data.repository.iconTilesRepository
+import com.android.systemui.qs.panels.data.repository.DefaultLargeTilesRepository
+import com.android.systemui.qs.panels.data.repository.defaultLargeTilesRepository
 import com.android.systemui.qs.panels.ui.viewmodel.MockTileViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.fixedColumnsSizeViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.iconTilesViewModel
@@ -37,11 +37,9 @@ import org.junit.runner.RunWith
 class InfiniteGridLayoutTest : SysuiTestCase() {
     private val kosmos =
         testKosmos().apply {
-            iconTilesRepository =
-                object : IconTilesRepository {
-                    override fun isIconTile(spec: TileSpec): Boolean {
-                        return spec.spec.startsWith("small")
-                    }
+            defaultLargeTilesRepository =
+                object : DefaultLargeTilesRepository {
+                    override val defaultLargeTiles: Set<TileSpec> = setOf(TileSpec.create("large"))
                 }
         }
 

@@ -196,16 +196,22 @@ final class IInputMethodManagerGlobalInvoker {
 
     /**
      * Invokes {@link IInputMethodManager#removeImeSurface()}
+     *
+     * @param displayId display ID from which this request originates
+     * @param exceptionHandler an optional {@link RemoteException} handler
      */
     @AnyThread
-    @RequiresPermission(Manifest.permission.INTERNAL_SYSTEM_WINDOW)
-    static void removeImeSurface(@Nullable Consumer<RemoteException> exceptionHandler) {
+    @RequiresPermission(allOf = {
+            Manifest.permission.INTERNAL_SYSTEM_WINDOW,
+            Manifest.permission.INTERACT_ACROSS_USERS_FULL})
+    static void removeImeSurface(int displayId,
+            @Nullable Consumer<RemoteException> exceptionHandler) {
         final IInputMethodManager service = getService();
         if (service == null) {
             return;
         }
         try {
-            service.removeImeSurface();
+            service.removeImeSurface(displayId);
         } catch (RemoteException e) {
             handleRemoteExceptionOrRethrow(e, exceptionHandler);
         }
@@ -317,14 +323,14 @@ final class IInputMethodManagerGlobalInvoker {
     static boolean showSoftInput(@NonNull IInputMethodClient client, @Nullable IBinder windowToken,
             @NonNull ImeTracker.Token statsToken, @InputMethodManager.ShowFlags int flags,
             int lastClickToolType, @Nullable ResultReceiver resultReceiver,
-            @SoftInputShowHideReason int reason) {
+            @SoftInputShowHideReason int reason, boolean async) {
         final IInputMethodManager service = getService();
         if (service == null) {
             return false;
         }
         try {
             return service.showSoftInput(client, windowToken, statsToken, flags, lastClickToolType,
-                    resultReceiver, reason);
+                    resultReceiver, reason, async);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -333,14 +339,15 @@ final class IInputMethodManagerGlobalInvoker {
     @AnyThread
     static boolean hideSoftInput(@NonNull IInputMethodClient client, @Nullable IBinder windowToken,
             @NonNull ImeTracker.Token statsToken, @InputMethodManager.HideFlags int flags,
-            @Nullable ResultReceiver resultReceiver, @SoftInputShowHideReason int reason) {
+            @Nullable ResultReceiver resultReceiver, @SoftInputShowHideReason int reason,
+            boolean async) {
         final IInputMethodManager service = getService();
         if (service == null) {
             return false;
         }
         try {
             return service.hideSoftInput(client, windowToken, statsToken, flags, resultReceiver,
-                    reason);
+                    reason, async);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -401,7 +408,7 @@ final class IInputMethodManagerGlobalInvoker {
             @Nullable IRemoteInputConnection remoteInputConnection,
             @Nullable IRemoteAccessibilityInputConnection remoteAccessibilityInputConnection,
             int unverifiedTargetSdkVersion, @UserIdInt int userId,
-            @NonNull ImeOnBackInvokedDispatcher imeDispatcher) {
+            @NonNull ImeOnBackInvokedDispatcher imeDispatcher, boolean useAsyncShowHideMethod) {
         final IInputMethodManager service = getService();
         if (service == null) {
             return -1;
@@ -410,7 +417,7 @@ final class IInputMethodManagerGlobalInvoker {
             service.startInputOrWindowGainedFocusAsync(startInputReason, client, windowToken,
                     startInputFlags, softInputMode, windowFlags, editorInfo, remoteInputConnection,
                     remoteAccessibilityInputConnection, unverifiedTargetSdkVersion, userId,
-                    imeDispatcher, advanceAngGetStartInputSequenceNumber());
+                    imeDispatcher, advanceAngGetStartInputSequenceNumber(), useAsyncShowHideMethod);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -437,7 +444,9 @@ final class IInputMethodManagerGlobalInvoker {
     }
 
     @AnyThread
-    @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+    @RequiresPermission(allOf = {
+            Manifest.permission.WRITE_SECURE_SETTINGS,
+            Manifest.permission.INTERACT_ACROSS_USERS_FULL})
     static void showInputMethodPickerFromSystem(int auxiliarySubtypeMode, int displayId) {
         final IInputMethodManager service = getService();
         if (service == null) {
@@ -459,6 +468,22 @@ final class IInputMethodManagerGlobalInvoker {
         }
         try {
             return service.isInputMethodPickerShownForTest();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @AnyThread
+    @RequiresPermission(allOf = {
+            Manifest.permission.WRITE_SECURE_SETTINGS,
+            Manifest.permission.INTERACT_ACROSS_USERS_FULL})
+    static void onImeSwitchButtonClickFromSystem(int displayId) {
+        final IInputMethodManager service = getService();
+        if (service == null) {
+            return;
+        }
+        try {
+            service.onImeSwitchButtonClickFromSystem(displayId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

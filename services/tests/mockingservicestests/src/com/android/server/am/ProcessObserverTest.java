@@ -56,6 +56,7 @@ import com.android.server.wm.ActivityTaskManagerService;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -193,7 +194,7 @@ public class ProcessObserverTest {
 
     private ProcessRecord makeActiveProcessRecord(ApplicationInfo ai)
             throws Exception {
-        final IApplicationThread thread = mock(IApplicationThread.class);
+        final ApplicationThreadDeferred thread = mock(ApplicationThreadDeferred.class);
         final IBinder threadBinder = new Binder();
         doReturn(threadBinder).when(thread).asBinder();
         doAnswer((invocation) -> {
@@ -238,6 +239,7 @@ public class ProcessObserverTest {
     /**
      * Verify that a process start event is dispatched to process observers.
      */
+    @Ignore("b/323959187")
     @Test
     public void testNormal() throws Exception {
         ProcessRecord app = startProcess();

@@ -189,6 +189,15 @@ object TestShortcuts {
             listOf(standardShortcutInfo1, standardShortcutInfo2, standardShortcutInfo3)
         )
 
+    private val standardPackageName1 = "standard.app.group1"
+
+    private val standardAppGroup1 =
+        KeyboardShortcutGroup(
+                "Standard app group 1",
+                listOf(standardShortcutInfo1, standardShortcutInfo2, standardShortcutInfo3)
+            )
+            .apply { packageName = standardPackageName1 }
+
     private val standardSubCategory1 =
         ShortcutSubCategory(
             standardGroup1.label!!.toString(),
@@ -220,7 +229,7 @@ object TestShortcuts {
     val imeGroups = listOf(standardGroup1, standardGroup2, standardGroup3)
     val imeCategory =
         ShortcutCategory(
-            type = ShortcutCategoryType.IME,
+            type = ShortcutCategoryType.InputMethodEditor,
             subCategories =
                 listOf(
                     subCategoryForInputLanguageSwitchShortcuts,
@@ -230,17 +239,20 @@ object TestShortcuts {
                 )
         )
 
+    val currentAppGroups = listOf(standardAppGroup1)
+    val currentAppPackageName = standardPackageName1
+
     val systemGroups = listOf(standardGroup3, standardGroup2, standardGroup1)
     val systemCategory =
         ShortcutCategory(
-            type = ShortcutCategoryType.SYSTEM,
+            type = ShortcutCategoryType.System,
             subCategories = listOf(standardSubCategory3, standardSubCategory2, standardSubCategory1)
         )
 
     val multitaskingGroups = listOf(standardGroup2, standardGroup1)
     val multitaskingCategory =
         ShortcutCategory(
-            type = ShortcutCategoryType.MULTI_TASKING,
+            type = ShortcutCategoryType.MultiTasking,
             subCategories = listOf(standardSubCategory2, standardSubCategory1)
         )
 

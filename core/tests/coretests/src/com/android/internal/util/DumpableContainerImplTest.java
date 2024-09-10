@@ -19,7 +19,7 @@ import static com.google.common.truth.Truth.assertWithMessage;
 
 import android.util.Dumpable;
 
-import androidx.test.runner.AndroidJUnit4;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.android.internal.util.dump.DumpableContainerImpl;
 

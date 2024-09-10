@@ -37,27 +37,30 @@ struct ManifestFixerTest : public ::testing::Test {
             .SetCompilationPackage("android")
             .SetPackageId(0x01)
             .SetNameManglerPolicy(NameManglerPolicy{"android"})
-            .AddSymbolSource(
-                test::StaticSymbolSourceBuilder()
-                    .AddSymbol(
-                        "android:attr/package", ResourceId(0x01010000),
-                        test::AttributeBuilder()
-                            .SetTypeMask(android::ResTable_map::TYPE_STRING)
-                            .Build())
-                    .AddSymbol(
-                        "android:attr/minSdkVersion", ResourceId(0x01010001),
-                        test::AttributeBuilder()
-                            .SetTypeMask(android::ResTable_map::TYPE_STRING |
-                                         android::ResTable_map::TYPE_INTEGER)
-                            .Build())
-                    .AddSymbol(
-                        "android:attr/targetSdkVersion", ResourceId(0x01010002),
-                        test::AttributeBuilder()
-                            .SetTypeMask(android::ResTable_map::TYPE_STRING |
-                                         android::ResTable_map::TYPE_INTEGER)
-                            .Build())
-                    .AddSymbol("android:string/str", ResourceId(0x01060000))
-                    .Build())
+            .AddSymbolSource(test::StaticSymbolSourceBuilder()
+                                 .AddSymbol("android:attr/package", ResourceId(0x01010000),
+                                            test::AttributeBuilder()
+                                                .SetTypeMask(android::ResTable_map::TYPE_STRING)
+                                                .Build())
+                                 .AddSymbol("android:attr/minSdkVersion", ResourceId(0x01010001),
+                                            test::AttributeBuilder()
+                                                .SetTypeMask(android::ResTable_map::TYPE_STRING |
+                                                             android::ResTable_map::TYPE_INTEGER)
+                                                .Build())
+                                 .AddSymbol("android:attr/targetSdkVersion", ResourceId(0x01010002),
+                                            test::AttributeBuilder()
+                                                .SetTypeMask(android::ResTable_map::TYPE_STRING |
+                                                             android::ResTable_map::TYPE_INTEGER)
+                                                .Build())
+                                 .AddSymbol("android:string/str", ResourceId(0x01060000))
+                                 .AddSymbol("android:attr/configChanges", ResourceId(0x01010003),
+                                            test::AttributeBuilder()
+                                                .AddItem("testConfigChange1", 1)
+                                                .AddItem("testConfigChange2", 2)
+                                                .AddItem("resourcesUnused", 4)
+                                                .SetTypeMask(android::ResTable_map::TYPE_STRING)
+                                                .Build())
+                                 .Build())
             .Build();
   }
 
@@ -1590,5 +1593,73 @@ TEST_F(ManifestFixerTest, IntentFilterPathMustStartWithLeadingSlashOnDeepLinks) 
       </application>
     </manifest>)";
   EXPECT_THAT(Verify(input), NotNull());
+}
+
+TEST_F(ManifestFixerTest, AllKnownNotDeclaredProperly) {
+  std::string input = R"(
+    <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        package="android">
+      <application>
+        <activity android:name=".MainActivity"
+                  android:configChanges="allKnown|testConfigChange1">
+        </activity>
+      </application>
+    </manifest>)";
+  auto doc = Verify(input);
+  EXPECT_THAT(doc, IsNull());
+}
+
+TEST_F(ManifestFixerTest, ModifyAttributeValueForAllKnown) {
+  std::string input = R"(
+    <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        package="android">
+      <application>
+        <activity android:name=".MainActivity"
+                  android:configChanges="allKnown">
+        </activity>
+      </application>
+    </manifest>)";
+  auto doc = Verify(input);
+  EXPECT_THAT(doc, NotNull());
+
+  xml::Element* el;
+  xml::Attribute* attr;
+
+  el = doc->root.get();
+  ASSERT_THAT(el, NotNull());
+  el = el->FindChild({}, "application");
+  ASSERT_THAT(el, NotNull());
+  el = el->FindChild({}, "activity");
+  ASSERT_THAT(el, NotNull());
+
+  attr = el->FindAttribute(xml::kSchemaAndroid, "configChanges");
+  ASSERT_THAT(attr->value, "testConfigChange1|testConfigChange2");
+}
+
+TEST_F(ManifestFixerTest, DoNothingForOtherConfigChanges) {
+  std::string input = R"(
+    <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        package="android">
+      <application>
+        <activity android:name=".MainActivity"
+                  android:configChanges="testConfigChange2">
+        </activity>
+      </application>
+    </manifest>)";
+  auto doc = Verify(input);
+  EXPECT_THAT(doc, NotNull());
+
+  xml::Element* el;
+  xml::Attribute* attr;
+
+  el = doc->root.get();
+  ASSERT_THAT(el, NotNull());
+  el = el->FindChild({}, "application");
+  ASSERT_THAT(el, NotNull());
+  el = el->FindChild({}, "activity");
+  ASSERT_THAT(el, NotNull());
+
+  attr = el->FindAttribute(xml::kSchemaAndroid, "configChanges");
+  ASSERT_THAT(attr->value, "testConfigChange2");
 }
 }  // namespace aapt

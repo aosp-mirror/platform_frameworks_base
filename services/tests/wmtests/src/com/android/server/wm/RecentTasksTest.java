@@ -653,6 +653,34 @@ public class RecentTasksTest extends WindowTestsBase {
     }
 
     @Test
+    public void testTrimNonTrimmableTask_isTrimmable_returnsFalse() {
+        Task nonTrimmableTask = createTaskBuilder(".NonTrimmableTask").setFlags(
+                FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS).build();
+        nonTrimmableTask.mIsTrimmableFromRecents = false;
+
+        // Move home to front so the task can satisfy the condition in RecentTasks#isTrimmable.
+        mRootWindowContainer.getDefaultTaskDisplayArea().getRootHomeTask().moveToFront("test");
+
+        assertThat(mRecentTasks.isTrimmable(nonTrimmableTask)).isFalse();
+    }
+
+    @Test
+    public void testTrimNonTrimmableTask_taskNotTrimmed() {
+        Task nonTrimmableTask = createTaskBuilder(".NonTrimmableTask").setFlags(
+                FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS).build();
+        nonTrimmableTask.mIsTrimmableFromRecents = false;
+
+        // Move home to front so the task can satisfy the condition in RecentTasks#isTrimmable.
+        mRootWindowContainer.getDefaultTaskDisplayArea().getRootHomeTask().moveToFront("test");
+
+        mRecentTasks.add(mTasks.get(0));
+        mRecentTasks.add(nonTrimmableTask);
+        mRecentTasks.add(mTasks.get(1));
+
+        triggerTrimAndAssertNoTasksTrimmed();
+    }
+
+    @Test
     public void testSessionDuration() {
         mRecentTasks.setOnlyTestVisibleRange();
         mRecentTasks.setParameters(-1 /* min */, -1 /* max */, 50 /* ms */);
@@ -1385,7 +1413,7 @@ public class RecentTasksTest extends WindowTestsBase {
                 Surface.ROTATION_0, taskSize, new Rect() /* contentInsets */,
                 new Rect() /* letterboxInsets*/, false /* isLowResolution */,
                 true /* isRealSnapshot */, WINDOWING_MODE_FULLSCREEN, 0 /* mSystemUiVisibility */,
-                false /* isTranslucent */, false /* hasImeSurface */);
+                false /* isTranslucent */, false /* hasImeSurface */, 0 /* uiMode */);
     }
 
     /**
@@ -1453,9 +1481,6 @@ public class RecentTasksTest extends WindowTestsBase {
         assertSecurityException(expectCallable,
                 () -> mAtm.unregisterTaskStackListener(null));
         assertSecurityException(expectCallable, () -> mAtm.cancelTaskWindowTransition(0));
-        assertSecurityException(expectCallable, () -> mAtm.startRecentsActivity(null, 0,
-                null));
-        assertSecurityException(expectCallable, () -> mAtm.cancelRecentsAnimation(true));
         assertSecurityException(expectCallable, () -> mAtm.stopAppSwitches());
         assertSecurityException(expectCallable, () -> mAtm.resumeAppSwitches());
     }

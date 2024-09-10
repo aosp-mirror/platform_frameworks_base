@@ -62,7 +62,7 @@ interface INfcAdapter
 
     void dispatch(in Tag tag);
 
-    void setReaderMode (IBinder b, IAppCallback callback, int flags, in Bundle extras);
+    void setReaderMode (IBinder b, IAppCallback callback, int flags, in Bundle extras, String pkg);
 
     void addNfcUnlockHandler(INfcUnlockHandler unlockHandler, in int[] techList);
     void removeNfcUnlockHandler(INfcUnlockHandler unlockHandler);
@@ -88,7 +88,7 @@ interface INfcAdapter
     boolean isReaderOptionEnabled();
     boolean isReaderOptionSupported();
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)")
-    boolean enableReaderOption(boolean enable);
+    boolean enableReaderOption(boolean enable, in String pkg);
     boolean isObserveModeSupported();
     boolean isObserveModeEnabled();
     boolean setObserveMode(boolean enabled, String pkg);
@@ -100,10 +100,11 @@ interface INfcAdapter
     void unregisterWlcStateListener(in INfcWlcStateListener listener);
     WlcListenerDeviceInfo getWlcListenerDeviceInfo();
 
-    void updateDiscoveryTechnology(IBinder b, int pollFlags, int listenFlags);
+    void updateDiscoveryTechnology(IBinder b, int pollFlags, int listenFlags, String pkg);
 
     void notifyPollingLoop(in PollingFrame frame);
     void notifyHceDeactivated();
+    void notifyTestHceData(in int technology, in byte[] data);
     int sendVendorNciMessage(int mt, int gid, int oid, in byte[] payload);
     void registerVendorExtensionCallback(in INfcVendorNciCallback callbacks);
     void unregisterVendorExtensionCallback(in INfcVendorNciCallback callbacks);
@@ -112,4 +113,5 @@ interface INfcAdapter
     void clearPreference();
     void setScreenState();
     void checkFirmware();
+    List<String> fetchActiveNfceeList();
 }

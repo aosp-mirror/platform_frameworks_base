@@ -361,7 +361,7 @@ public class InsetsPolicyTest extends WindowTestsBase {
 
         mAppWindow.setRequestedVisibleTypes(
                 navigationBars() | statusBars(), navigationBars() | statusBars());
-        policy.onRequestedVisibleTypesChanged(mAppWindow);
+        policy.onRequestedVisibleTypesChanged(mAppWindow, null /* statsToken */);
         waitUntilWindowAnimatorIdle();
 
         controls = mDisplayContent.getInsetsStateController().getControlsForDispatch(mAppWindow);

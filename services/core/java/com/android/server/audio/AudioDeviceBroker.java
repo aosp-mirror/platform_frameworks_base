@@ -834,6 +834,14 @@ public class AudioDeviceBroker {
         return isDeviceActiveForCommunication(AudioDeviceInfo.TYPE_BLUETOOTH_SCO);
     }
 
+    /*package*/ boolean isBluetoothBleHeadsetActive() {
+        return isDeviceActiveForCommunication(AudioDeviceInfo.TYPE_BLE_HEADSET);
+    }
+
+    /*package*/ boolean isBluetoothBleSpeakerActive() {
+        return isDeviceActiveForCommunication(AudioDeviceInfo.TYPE_BLE_SPEAKER);
+    }
+
     /*package*/ boolean isDeviceConnected(@NonNull AudioDeviceAttributes device) {
         synchronized (mDeviceStateLock) {
             return mDeviceInventory.isDeviceConnected(device);
@@ -1424,6 +1432,8 @@ public class AudioDeviceBroker {
         }
         mCurCommunicationPortId = portId;
 
+        mAudioService.postScoDeviceActive(isBluetoothScoActive());
+
         final int nbDispatchers = mCommDevDispatchers.beginBroadcast();
         for (int i = 0; i < nbDispatchers; i++) {
             try {
@@ -1704,6 +1714,10 @@ public class AudioDeviceBroker {
         sendIILMsg(MSG_IIL_BTLEAUDIO_TIMEOUT, SENDMSG_QUEUE, device, codec, address, delayMs);
     }
 
+    /*package*/ void setHearingAidTimeout(String address, int delayMs) {
+        sendLMsg(MSG_IL_BT_HEARING_AID_TIMEOUT, SENDMSG_QUEUE, address, delayMs);
+    }
+
     /*package*/ void setAvrcpAbsoluteVolumeSupported(boolean supported) {
         synchronized (mDeviceStateLock) {
             mBtHelper.setAvrcpAbsoluteVolumeSupported(supported);
@@ -1863,7 +1877,10 @@ public class AudioDeviceBroker {
                             synchronized (mBluetoothAudioStateLock) {
                                 reapplyAudioHalBluetoothState();
                             }
-                            mBtHelper.onAudioServerDiedRestoreA2dp();
+                            final int forceForMedia = getBluetoothA2dpEnabled()
+                                    ? AudioSystem.FORCE_NONE : AudioSystem.FORCE_NO_BT_A2DP;
+                            setForceUse_Async(
+                                    AudioSystem.FOR_MEDIA, forceForMedia, "MSG_RESTORE_DEVICES");
                             updateCommunicationRoute("MSG_RESTORE_DEVICES");
                         }
                     }
@@ -1944,6 +1961,13 @@ public class AudioDeviceBroker {
                     synchronized (mDeviceStateLock) {
                         mDeviceInventory.onMakeLeAudioDeviceUnavailableNow(
                                 (String) msg.obj, msg.arg1, msg.arg2);
+                    }
+                    break;
+                case MSG_IL_BT_HEARING_AID_TIMEOUT:
+                    // msg.obj  == address of Hearing Aid device
+                    synchronized (mDeviceStateLock) {
+                        mDeviceInventory.onMakeHearingAidDeviceUnavailableNow(
+                                (String) msg.obj);
                     }
                     break;
                 case MSG_L_BLUETOOTH_DEVICE_CONFIG_CHANGE: {
@@ -2221,6 +2245,7 @@ public class AudioDeviceBroker {
     private static final int MSG_L_SYNCHRONIZE_ADI_DEVICES_IN_INVENTORY = 58;
     private static final int MSG_IL_UPDATED_ADI_DEVICE_STATE = 59;
     private static final int MSG_L_SET_FORCE_BT_A2DP_USE_NO_MUTE = 60;
+    private static final int MSG_IL_BT_HEARING_AID_TIMEOUT = 61;
 
     private static boolean isMessageHandledUnderWakelock(int msgId) {
         switch(msgId) {
@@ -2233,6 +2258,7 @@ public class AudioDeviceBroker {
             case MSG_L_A2DP_DEVICE_CONNECTION_CHANGE_EXT:
             case MSG_L_HEARING_AID_DEVICE_CONNECTION_CHANGE_EXT:
             case MSG_CHECK_MUTE_MUSIC:
+            case MSG_IL_BT_HEARING_AID_TIMEOUT:
                 return true;
             default:
                 return false;
@@ -2317,6 +2343,7 @@ public class AudioDeviceBroker {
                 case MSG_IL_BTA2DP_TIMEOUT:
                 case MSG_IIL_BTLEAUDIO_TIMEOUT:
                 case MSG_L_BLUETOOTH_DEVICE_CONFIG_CHANGE:
+                case MSG_IL_BT_HEARING_AID_TIMEOUT:
                     if (sLastDeviceConnectMsgTime >= time) {
                         // add a little delay to make sure messages are ordered as expected
                         time = sLastDeviceConnectMsgTime + 30;
@@ -2786,6 +2813,10 @@ public class AudioDeviceBroker {
             return;
         }
         final SettingsAdapter settingsAdapter = mAudioService.getSettings();
+        if (settingsAdapter == null) {
+            Log.e(TAG, "No settings adapter when saving AdiDeviceState: " + deviceSettings);
+            return;
+        }
         try {
             boolean res = settingsAdapter.putSecureStringForUser(mAudioService.getContentResolver(),
                     Settings.Secure.AUDIO_DEVICE_INVENTORY,
@@ -2801,6 +2832,12 @@ public class AudioDeviceBroker {
     private String readDeviceSettings() {
         final SettingsAdapter settingsAdapter = mAudioService.getSettings();
         final ContentResolver contentResolver = mAudioService.getContentResolver();
+        if (settingsAdapter == null || contentResolver == null) {
+            // should not happen, throw Exception for stack trace
+            Log.e(TAG, "No settings adapter or content resolver to read device settings",
+                    new Exception("readDeviceSettings_NPE"));
+            return "";
+        }
         return settingsAdapter.getSecureStringForUser(contentResolver,
                 Settings.Secure.AUDIO_DEVICE_INVENTORY, UserHandle.USER_CURRENT);
     }

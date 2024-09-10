@@ -1,0 +1,19 @@
+{
+  "presubmit": [
+    {
+      "name": "PerformanceHintTests",
+      "options": [
+        {"exclude-annotation": "org.junit.Ignore"}
+      ]
+    }
+  ],
+  "ravenwood-postsubmit": [
+    {
+      "name": "PerformanceHintTestsRavenwood",
+      "host": true,
+      "options": [
+        {"exclude-annotation": "android.platform.test.annotations.DisabledOnRavenwood"}
+      ]
+    }
+  ]
+}

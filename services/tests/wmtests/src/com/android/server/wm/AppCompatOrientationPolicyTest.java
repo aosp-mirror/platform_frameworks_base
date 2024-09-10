@@ -514,7 +514,6 @@ public class AppCompatOrientationPolicyTest extends WindowTestsBase {
      */
     void runTestScenario(boolean withActivity,
                          @NonNull Consumer<OrientationPolicyRobotTest> consumer) {
-        spyOn(mWm.mLetterboxConfiguration);
         final OrientationPolicyRobotTest robot =
                 new OrientationPolicyRobotTest(mWm, mAtm, mSupervisor, withActivity);
         consumer.accept(robot);
@@ -533,6 +532,25 @@ public class AppCompatOrientationPolicyTest extends WindowTestsBase {
             spyOn(mWm);
             if (withActivity) {
                 activity().createActivityWithComponent();
+            }
+        }
+
+        @Override
+        void onPostActivityCreation(@NonNull ActivityRecord activity) {
+            super.onPostActivityCreation(activity);
+            spyOn(activity.mAppCompatController.getAppCompatAspectRatioOverrides());
+            spyOn(activity.mAppCompatController.getAppCompatAspectRatioPolicy());
+        }
+
+        @Override
+        void onPostDisplayContentCreation(@NonNull DisplayContent displayContent) {
+            super.onPostDisplayContentCreation(displayContent);
+            spyOn(displayContent.mAppCompatCameraPolicy);
+            if (displayContent.mAppCompatCameraPolicy.hasDisplayRotationCompatPolicy()) {
+                spyOn(displayContent.mAppCompatCameraPolicy.mDisplayRotationCompatPolicy);
+            }
+            if (displayContent.mAppCompatCameraPolicy.hasCameraCompatFreeformPolicy()) {
+                spyOn(displayContent.mAppCompatCameraPolicy.mCameraCompatFreeformPolicy);
             }
         }
 

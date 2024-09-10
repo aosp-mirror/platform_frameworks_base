@@ -26,7 +26,7 @@ import static org.mockito.Matchers.eq;
 import android.Manifest.permission;
 import android.content.Context;
 
-import androidx.test.runner.AndroidJUnit4;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;

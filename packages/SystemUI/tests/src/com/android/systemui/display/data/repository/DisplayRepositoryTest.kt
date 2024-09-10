@@ -28,6 +28,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.FlowValue
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.coroutines.collectValues
 import com.android.systemui.util.mockito.kotlinArgumentCaptor
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
@@ -59,12 +60,14 @@ class DisplayRepositoryTest : SysuiTestCase() {
 
     private val testHandler = FakeHandler(Looper.getMainLooper())
     private val testScope = TestScope(UnconfinedTestDispatcher())
+    private val defaultDisplay =
+        display(type = TYPE_INTERNAL, id = DEFAULT_DISPLAY, state = Display.STATE_ON)
 
     private lateinit var displayRepository: DisplayRepositoryImpl
 
     @Before
     fun setup() {
-        setDisplays(DEFAULT_DISPLAY)
+        setDisplays(listOf(defaultDisplay))
         setAllDisplaysIncludingDisabled(DEFAULT_DISPLAY)
         displayRepository =
             DisplayRepositoryImpl(
@@ -434,19 +437,12 @@ class DisplayRepositoryTest : SysuiTestCase() {
     fun defaultDisplayOff_changes() =
         testScope.runTest {
             val defaultDisplayOff by latestDefaultDisplayOffFlowValue()
-            setDisplays(
-                listOf(
-                    display(type = TYPE_INTERNAL, id = DEFAULT_DISPLAY, state = Display.STATE_OFF)
-                )
-            )
+
+            whenever(defaultDisplay.state).thenReturn(Display.STATE_OFF)
             displayListener.value.onDisplayChanged(DEFAULT_DISPLAY)
             assertThat(defaultDisplayOff).isTrue()
 
-            setDisplays(
-                listOf(
-                    display(type = TYPE_INTERNAL, id = DEFAULT_DISPLAY, state = Display.STATE_ON)
-                )
-            )
+            whenever(defaultDisplay.state).thenReturn(Display.STATE_ON)
             displayListener.value.onDisplayChanged(DEFAULT_DISPLAY)
             assertThat(defaultDisplayOff).isFalse()
         }
@@ -461,7 +457,29 @@ class DisplayRepositoryTest : SysuiTestCase() {
             assertThat(value?.ids()).containsExactly(DEFAULT_DISPLAY)
         }
 
+    @Test
+    fun displayFlow_emitsCorrectDisplaysAtFirst() =
+        testScope.runTest {
+            setDisplays(0, 1, 2)
+
+            val values: List<Set<Display>> by collectValues(displayRepository.displays)
+
+            assertThat(values.toIdSets()).containsExactly(setOf(0, 1, 2))
+        }
+
+    @Test
+    fun displayFlow_onlyDefaultDisplayAvailable_neverEmitsEmptySet() =
+        testScope.runTest {
+            setDisplays(0)
+
+            val values: List<Set<Display>> by collectValues(displayRepository.displays)
+
+            assertThat(values.toIdSets()).containsExactly(setOf(0))
+        }
+
     private fun Iterable<Display>.ids(): List<Int> = map { it.displayId }
+
+    private fun Iterable<Set<Display>>.toIdSets(): List<Set<Int>> = map { it.ids().toSet() }
 
     // Wrapper to capture the displayListener.
     private fun TestScope.latestDisplayFlowValue(): FlowValue<Set<Display>?> {
@@ -545,7 +563,10 @@ class DisplayRepositoryTest : SysuiTestCase() {
     }
 
     private fun setAllDisplaysIncludingDisabled(vararg ids: Int) {
-        val displays = ids.map { display(type = TYPE_EXTERNAL, id = it) }.toTypedArray()
+        val displays =
+            (ids.toSet() - DEFAULT_DISPLAY) // Default display always added.
+                .map { display(type = TYPE_EXTERNAL, id = it) }
+                .toTypedArray() + defaultDisplay
         whenever(
                 displayManager.getDisplays(
                     eq(DisplayManager.DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED)

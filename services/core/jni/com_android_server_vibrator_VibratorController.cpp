@@ -17,7 +17,10 @@
 #define LOG_TAG "VibratorController"
 
 #include <aidl/android/hardware/vibrator/IVibrator.h>
+#include <android/binder_parcel.h>
+#include <android/binder_parcel_jni.h>
 #include <android/hardware/vibrator/1.3/IVibrator.h>
+#include <android/persistable_bundle_aidl.h>
 #include <nativehelper/JNIHelp.h>
 #include <utils/Log.h>
 #include <utils/misc.h>
@@ -31,6 +34,8 @@
 namespace V1_0 = android::hardware::vibrator::V1_0;
 namespace V1_3 = android::hardware::vibrator::V1_3;
 namespace Aidl = aidl::android::hardware::vibrator;
+
+using aidl::android::os::PersistableBundle;
 
 namespace android {
 
@@ -95,7 +100,7 @@ static std::shared_ptr<vibrator::HalController> findVibrator(int32_t vibratorId)
         return nullptr;
     }
     auto result = manager->getVibrator(vibratorId);
-    return result.isOk() ? std::move(result.value()) : nullptr;
+    return result.isOk() ? result.value() : nullptr;
 }
 
 class VibratorControllerWrapper {
@@ -189,6 +194,31 @@ static Aidl::CompositeEffect effectFromJavaPrimitive(JNIEnv* env, jobject primit
             env->GetIntField(primitive, sPrimitiveClassInfo.id));
     effect.scale = static_cast<float>(env->GetFloatField(primitive, sPrimitiveClassInfo.scale));
     effect.delayMs = static_cast<int32_t>(env->GetIntField(primitive, sPrimitiveClassInfo.delay));
+    return effect;
+}
+
+static Aidl::VendorEffect vendorEffectFromJavaParcel(JNIEnv* env, jobject vendorData,
+                                                     jlong strength, jfloat scale,
+                                                     jfloat adaptiveScale) {
+    PersistableBundle bundle;
+    if (AParcel* parcel = AParcel_fromJavaParcel(env, vendorData); parcel != nullptr) {
+        if (binder_status_t status = bundle.readFromParcel(parcel); status == STATUS_OK) {
+            AParcel_delete(parcel);
+        } else {
+            jniThrowExceptionFmt(env, "android/os/BadParcelableException",
+                                 "Failed to readFromParcel, status %d (%s)", status,
+                                 strerror(-status));
+        }
+    } else {
+        jniThrowExceptionFmt(env, "android/os/BadParcelableException",
+                             "Failed to AParcel_fromJavaParcel, for nullptr");
+    }
+
+    Aidl::VendorEffect effect;
+    effect.vendorData = bundle;
+    effect.strength = static_cast<Aidl::EffectStrength>(strength);
+    effect.scale = static_cast<float>(scale);
+    effect.vendorScale = static_cast<float>(adaptiveScale);
     return effect;
 }
 
@@ -287,6 +317,24 @@ static jlong vibratorPerformEffect(JNIEnv* env, jclass /* clazz */, jlong ptr, j
     };
     auto result = wrapper->halCall<std::chrono::milliseconds>(performEffectFn, "performEffect");
     return result.isOk() ? result.value().count() : (result.isUnsupported() ? 0 : -1);
+}
+
+static jlong vibratorPerformVendorEffect(JNIEnv* env, jclass /* clazz */, jlong ptr,
+                                         jobject vendorData, jlong strength, jfloat scale,
+                                         jfloat adaptiveScale, jlong vibrationId) {
+    VibratorControllerWrapper* wrapper = reinterpret_cast<VibratorControllerWrapper*>(ptr);
+    if (wrapper == nullptr) {
+        ALOGE("vibratorPerformVendorEffect failed because native wrapper was not initialized");
+        return -1;
+    }
+    Aidl::VendorEffect effect =
+            vendorEffectFromJavaParcel(env, vendorData, strength, scale, adaptiveScale);
+    auto callback = wrapper->createCallback(vibrationId);
+    auto performVendorEffectFn = [&effect, &callback](vibrator::HalWrapper* hal) {
+        return hal->performVendorEffect(effect, callback);
+    };
+    auto result = wrapper->halCall<void>(performVendorEffectFn, "performVendorEffect");
+    return result.isOk() ? std::numeric_limits<int64_t>::max() : (result.isUnsupported() ? 0 : -1);
 }
 
 static jlong vibratorPerformComposedEffect(JNIEnv* env, jclass /* clazz */, jlong ptr,
@@ -466,6 +514,7 @@ static const JNINativeMethod method_table[] = {
         {"off", "(J)V", (void*)vibratorOff},
         {"setAmplitude", "(JF)V", (void*)vibratorSetAmplitude},
         {"performEffect", "(JJJJ)J", (void*)vibratorPerformEffect},
+        {"performVendorEffect", "(JLandroid/os/Parcel;JFFJ)J", (void*)vibratorPerformVendorEffect},
         {"performComposedEffect", "(J[Landroid/os/vibrator/PrimitiveSegment;J)J",
          (void*)vibratorPerformComposedEffect},
         {"performPwleEffect", "(J[Landroid/os/vibrator/RampSegment;IJ)J",

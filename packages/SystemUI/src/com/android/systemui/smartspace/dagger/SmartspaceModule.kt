@@ -18,51 +18,35 @@ package com.android.systemui.smartspace.dagger
 import com.android.systemui.plugins.BcSmartspaceDataPlugin
 import com.android.systemui.smartspace.SmartspacePrecondition
 import com.android.systemui.smartspace.SmartspaceTargetFilter
-import com.android.systemui.smartspace.data.repository.SmartspaceRepositoryModule
 import com.android.systemui.smartspace.preconditions.LockscreenPrecondition
 import dagger.Binds
 import dagger.BindsOptionalOf
 import dagger.Module
 import javax.inject.Named
 
-@Module(subcomponents = [SmartspaceViewComponent::class],
-    includes = [SmartspaceRepositoryModule::class])
+@Module(subcomponents = [SmartspaceViewComponent::class])
 abstract class SmartspaceModule {
     @Module
     companion object {
-        /**
-         * The BcSmartspaceDataProvider for dreams.
-         */
+        /** The BcSmartspaceDataProvider for dreams. */
         const val DREAM_SMARTSPACE_DATA_PLUGIN = "dreams_smartspace_data_plugin"
 
-        /**
-         * The BcSmartspaceDataPlugin for the standalone weather on dream.
-         */
+        /** The BcSmartspaceDataPlugin for the standalone weather on dream. */
         const val DREAM_WEATHER_SMARTSPACE_DATA_PLUGIN = "dream_weather_smartspace_data_plugin"
 
-        /**
-         * The target filter for smartspace over lockscreen.
-         */
+        /** The target filter for smartspace over lockscreen. */
         const val LOCKSCREEN_SMARTSPACE_TARGET_FILTER = "lockscreen_smartspace_target_filter"
 
-        /**
-         * The precondition for smartspace over lockscreen
-         */
+        /** The precondition for smartspace over lockscreen */
         const val LOCKSCREEN_SMARTSPACE_PRECONDITION = "lockscreen_smartspace_precondition"
 
-        /**
-         * The BcSmartspaceDataPlugin for the standalone date (+alarm+dnd).
-         */
+        /** The BcSmartspaceDataPlugin for the standalone date (+alarm+dnd). */
         const val DATE_SMARTSPACE_DATA_PLUGIN = "date_smartspace_data_plugin"
 
-        /**
-         * The BcSmartspaceDataPlugin for the standalone weather.
-         */
+        /** The BcSmartspaceDataPlugin for the standalone weather. */
         const val WEATHER_SMARTSPACE_DATA_PLUGIN = "weather_smartspace_data_plugin"
 
-        /**
-         * The BcSmartspaceDataProvider for the glanceable hub.
-         */
+        /** The BcSmartspaceDataProvider for the glanceable hub. */
         const val GLANCEABLE_HUB_SMARTSPACE_DATA_PLUGIN = "glanceable_hub_smartspace_data_plugin"
     }
 

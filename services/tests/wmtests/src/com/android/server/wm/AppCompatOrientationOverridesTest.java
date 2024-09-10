@@ -16,6 +16,10 @@
 package com.android.server.wm;
 
 import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_COMPAT_IGNORE_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED;
+import static android.content.pm.ActivityInfo.OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION;
+import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
+import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_DISPLAY_ORIENTATION_OVERRIDE;
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_IGNORING_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
@@ -158,11 +162,77 @@ public class AppCompatOrientationOverridesTest extends WindowTestsBase {
         });
     }
 
+    @Test
+    @EnableCompatChanges({OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION})
+    public void testShouldUseDisplayLandscapeNaturalOrientation_override_returnsTrue() {
+        runTestScenario((robot) -> {
+            robot.applyOnActivity((a) -> {
+                a.setDisplayNaturalOrientation(ORIENTATION_LANDSCAPE);
+                a.setIgnoreOrientationRequest(true);
+                a.createActivityWithComponent();
+            });
+            robot.checkShouldUseDisplayLandscapeNaturalOrientation(/* expected */ true);
+        });
+    }
+
+    @Test
+    @EnableCompatChanges({OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION})
+    public void testShouldUseDisplayLandscapeNaturalOrientation_falseProperty_returnsFalse() {
+        runTestScenario((robot) -> {
+            robot.prop().disable(PROPERTY_COMPAT_ALLOW_DISPLAY_ORIENTATION_OVERRIDE);
+            robot.applyOnActivity((a) -> {
+                a.setDisplayNaturalOrientation(ORIENTATION_LANDSCAPE);
+                a.setIgnoreOrientationRequest(true);
+                a.createActivityWithComponent();
+            });
+            robot.checkShouldUseDisplayLandscapeNaturalOrientation(/* expected */ false);
+        });
+    }
+
+    @Test
+    @EnableCompatChanges({OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION})
+    public void testShouldUseDisplayLandscapeNaturalOrientation_portrait_isFalse() {
+        runTestScenario((robot) -> {
+            robot.applyOnActivity((a) -> {
+                a.setDisplayNaturalOrientation(ORIENTATION_PORTRAIT);
+                a.setIgnoreOrientationRequest(true);
+                a.createActivityWithComponent();
+            });
+            robot.checkShouldUseDisplayLandscapeNaturalOrientation(/* expected */ false);
+        });
+    }
+    @Test
+    @EnableCompatChanges({OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION})
+    public void testShouldUseDisplayLandscapeNaturalOrientation_noIgnoreRequest_isFalse() {
+        runTestScenario((robot) -> {
+            robot.applyOnActivity((a) -> {
+                a.setDisplayNaturalOrientation(ORIENTATION_LANDSCAPE);
+                a.setIgnoreOrientationRequest(false);
+                a.createActivityWithComponent();
+            });
+            robot.checkShouldUseDisplayLandscapeNaturalOrientation(/* expected */ false);
+        });
+    }
+
+    @Test
+    @EnableCompatChanges({OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION})
+    public void testShouldUseDisplayLandscapeNaturalOrientation_inMultiWindowMode_returnsFalse() {
+        runTestScenario((robot) -> {
+            robot.applyOnActivity((a) -> {
+                a.setDisplayNaturalOrientation(ORIENTATION_LANDSCAPE);
+                a.setIgnoreOrientationRequest(true);
+                a.createActivityWithComponent();
+                a.setTopTaskInMultiWindowMode(/* inMultiWindowMode */ true);
+            });
+            robot.checkShouldUseDisplayLandscapeNaturalOrientation(/* expected */ false);
+        });
+    }
+
     /**
      * Runs a test scenario providing a Robot.
      */
     void runTestScenario(@NonNull Consumer<OrientationOverridesRobotTest> consumer) {
-        spyOn(mWm.mLetterboxConfiguration);
+        spyOn(mWm.mAppCompatConfiguration);
         final OrientationOverridesRobotTest robot =
                 new OrientationOverridesRobotTest(mWm, mAtm, mSupervisor);
         consumer.accept(robot);
@@ -178,6 +248,12 @@ public class AppCompatOrientationOverridesTest extends WindowTestsBase {
                 @NonNull ActivityTaskSupervisor supervisor) {
             super(wm, atm, supervisor);
             mTestCurrentTimeMillisSupplier = new CurrentTimeMillisSupplierFake();
+        }
+
+        @Override
+        void onPostActivityCreation(@NonNull ActivityRecord activity) {
+            super.onPostActivityCreation(activity);
+            spyOn(activity.mAppCompatController.getAppCompatAspectRatioPolicy());
         }
 
         // Useful to reduce timeout during tests
@@ -213,6 +289,11 @@ public class AppCompatOrientationOverridesTest extends WindowTestsBase {
             for (int i = 0; i <= MIN_COUNT_TO_IGNORE_REQUEST_IN_LOOP; i++) {
                 consumer.accept(i);
             }
+        }
+
+        void checkShouldUseDisplayLandscapeNaturalOrientation(boolean expected) {
+            assertEquals(expected,
+                    getTopOrientationOverrides().shouldUseDisplayLandscapeNaturalOrientation());
         }
 
         private AppCompatOrientationOverrides getTopOrientationOverrides() {

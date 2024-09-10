@@ -412,6 +412,19 @@ public class RequiresPermissionCheckerTest {
                         "      context.sendBroadcast(intent);",
                         "    }",
                         "  }",
+                        "  public void exampleWithChainedMethod(Context context) {",
+                        "    Intent intent = new Intent(FooManager.ACTION_RED)",
+                        "            .putExtra(\"foo\", 42);",
+                        "    context.sendBroadcast(intent, FooManager.PERMISSION_RED);",
+                        "    context.sendBroadcastWithMultiplePermissions(intent,",
+                        "        new String[] { FooManager.PERMISSION_RED });",
+                        "  }",
+                        "  public void exampleWithAsUser(Context context) {",
+                        "    Intent intent = new Intent(FooManager.ACTION_RED);",
+                        "    context.sendBroadcastAsUser(intent, 42, FooManager.PERMISSION_RED);",
+                        "    context.sendBroadcastAsUserMultiplePermissions(intent, 42,",
+                        "        new String[] { FooManager.PERMISSION_RED });",
+                        "  }",
                         "}")
                 .doTest();
     }

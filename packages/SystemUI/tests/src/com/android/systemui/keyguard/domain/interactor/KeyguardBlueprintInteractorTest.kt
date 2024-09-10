@@ -36,7 +36,6 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.clocks.ClockConfig
 import com.android.systemui.plugins.clocks.ClockController
 import com.android.systemui.shade.data.repository.shadeRepository
-import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.whenever
@@ -84,7 +83,7 @@ class KeyguardBlueprintInteractorTest : SysuiTestCase() {
     fun testAppliesDefaultBlueprint() {
         testScope.runTest {
             val blueprintId by collectLastValue(underTest.blueprintId)
-            kosmos.shadeRepository.setShadeMode(ShadeMode.Single)
+            kosmos.shadeRepository.setShadeLayoutWide(false)
             configurationRepository.onConfigurationChange()
 
             runCurrent()
@@ -98,7 +97,7 @@ class KeyguardBlueprintInteractorTest : SysuiTestCase() {
     fun testAppliesSplitShadeBlueprint() {
         testScope.runTest {
             val blueprintId by collectLastValue(underTest.blueprintId)
-            kosmos.shadeRepository.setShadeMode(ShadeMode.Split)
+            kosmos.shadeRepository.setShadeLayoutWide(true)
             configurationRepository.onConfigurationChange()
 
             runCurrent()
@@ -112,7 +111,7 @@ class KeyguardBlueprintInteractorTest : SysuiTestCase() {
     fun testDoesNotApplySplitShadeBlueprint() {
         testScope.runTest {
             val blueprintId by collectLastValue(underTest.blueprintId)
-            kosmos.shadeRepository.setShadeMode(ShadeMode.Split)
+            kosmos.shadeRepository.setShadeLayoutWide(true)
             clockRepository.setCurrentClock(clockController)
             configurationRepository.onConfigurationChange()
 

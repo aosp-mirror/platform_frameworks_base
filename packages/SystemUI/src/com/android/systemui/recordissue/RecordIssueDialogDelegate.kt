@@ -35,7 +35,6 @@ import androidx.annotation.WorkerThread
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlagsClassic
-import com.android.systemui.flags.Flags
 import com.android.systemui.flags.Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING_ENTERPRISE_POLICIES
 import com.android.systemui.mediaprojection.MediaProjectionMetricsLogger
 import com.android.systemui.mediaprojection.SessionCreationSource
@@ -43,7 +42,6 @@ import com.android.systemui.mediaprojection.devicepolicy.ScreenCaptureDevicePoli
 import com.android.systemui.mediaprojection.devicepolicy.ScreenCaptureDisabledDialogDelegate
 import com.android.systemui.recordissue.IssueRecordingState.Companion.ALL_ISSUE_TYPES
 import com.android.systemui.recordissue.IssueRecordingState.Companion.ISSUE_TYPE_NOT_SET
-import com.android.systemui.recordissue.IssueRecordingState.Companion.KEY_ISSUE_TYPE_RES
 import com.android.systemui.res.R
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.phone.SystemUIDialog
@@ -51,6 +49,8 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import java.util.concurrent.Executor
+
+private const val EXTRA_ISSUE_TYPE_RES = "extra_issueTypeRes"
 
 class RecordIssueDialogDelegate
 @AssistedInject
@@ -87,7 +87,10 @@ constructor(
             setNegativeButton(R.string.cancel) { _, _ -> }
             setPositiveButton(R.string.qs_record_issue_start) { _, _ -> onStarted.run() }
         }
-        bgExecutor.execute { traceurMessageSender.bindToTraceur(dialog.context) }
+        bgExecutor.execute {
+            traceurMessageSender.onBoundToTraceur.add { traceurMessageSender.getTags(state) }
+            traceurMessageSender.bindToTraceur(dialog.context)
+        }
     }
 
     override fun createDialog(): SystemUIDialog = factory.create(this)
@@ -151,10 +154,7 @@ constructor(
             SessionCreationSource.SYSTEM_UI_SCREEN_RECORDER
         )
 
-        if (
-            flags.isEnabled(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING) &&
-                !state.hasUserApprovedScreenRecording
-        ) {
+        if (!state.hasUserApprovedScreenRecording) {
             mainExecutor.execute {
                 ScreenCapturePermissionDialogDelegate(factory, state).createDialog().apply {
                     setOnCancelListener { screenRecordSwitch.isChecked = false }
@@ -167,25 +167,41 @@ constructor(
     @MainThread
     private fun onIssueTypeClicked(context: Context, onIssueTypeSelected: Runnable) {
         val popupMenu = PopupMenu(context, issueTypeButton)
-
+        val onMenuItemClickListener =
+            PopupMenu.OnMenuItemClickListener {
+                issueTypeButton.text = it.title
+                state.issueTypeRes =
+                    it.intent?.getIntExtra(EXTRA_ISSUE_TYPE_RES, ISSUE_TYPE_NOT_SET)
+                        ?: ISSUE_TYPE_NOT_SET
+                onIssueTypeSelected.run()
+                true
+            }
         ALL_ISSUE_TYPES.keys.forEach {
             popupMenu.menu.add(it).apply {
                 setIcon(R.drawable.arrow_pointing_down)
                 if (it != state.issueTypeRes) {
                     iconTintList = ColorStateList.valueOf(Color.TRANSPARENT)
                 }
-                intent = Intent().putExtra(KEY_ISSUE_TYPE_RES, it)
+                intent = Intent().putExtra(EXTRA_ISSUE_TYPE_RES, it)
+
+                if (it == R.string.custom) {
+                    setOnMenuItemClickListener {
+                        CustomTraceSettingsDialogDelegate(
+                                factory,
+                                state.customTraceState,
+                                state.tagTitles
+                            ) {
+                                onMenuItemClickListener.onMenuItemClick(it)
+                            }
+                            .createDialog()
+                            .show()
+                        true
+                    }
+                }
             }
         }
         popupMenu.apply {
-            setOnMenuItemClickListener {
-                issueTypeButton.text = it.title
-                state.issueTypeRes =
-                    it.intent?.getIntExtra(KEY_ISSUE_TYPE_RES, ISSUE_TYPE_NOT_SET)
-                        ?: ISSUE_TYPE_NOT_SET
-                onIssueTypeSelected.run()
-                true
-            }
+            setOnMenuItemClickListener(onMenuItemClickListener)
             setForceShowIcon(true)
             show()
         }

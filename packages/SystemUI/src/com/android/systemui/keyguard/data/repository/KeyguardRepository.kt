@@ -34,6 +34,7 @@ import com.android.systemui.dreams.DreamOverlayCallbackController
 import com.android.systemui.keyguard.shared.model.BiometricUnlockMode
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
 import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
+import com.android.systemui.keyguard.shared.model.CameraLaunchSourceModel
 import com.android.systemui.keyguard.shared.model.DismissAction
 import com.android.systemui.keyguard.shared.model.DozeStateModel
 import com.android.systemui.keyguard.shared.model.DozeTransitionModel
@@ -90,11 +91,11 @@ interface KeyguardRepository {
      * the z-order (which is not really above the system UI window, but rather - the lock-screen
      * becomes invisible to reveal the "occluding activity").
      */
-    val isKeyguardShowing: Flow<Boolean>
+    val isKeyguardShowing: StateFlow<Boolean>
 
     /** Is an activity showing over the keyguard? */
     @Deprecated("Use KeyguardTransitionInteractor + KeyguardState.OCCLUDED")
-    val isKeyguardOccluded: Flow<Boolean>
+    val isKeyguardOccluded: StateFlow<Boolean>
 
     /**
      * Whether the device is locked or unlocked right now. This is true when keyguard has been
@@ -126,6 +127,30 @@ interface KeyguardRepository {
      * locked when it was disabled.
      */
     val isKeyguardEnabled: StateFlow<Boolean>
+
+    /**
+     * Whether we can transition directly back to GONE from AOD/DOZING without any authentication
+     * events (such as a fingerprint wake and unlock), even though authentication would normally be
+     * required. This means that if you tap the screen or press the power button, you'll return
+     * directly to the unlocked app content without seeing the lockscreen, even if a secure
+     * authentication method (PIN/password/biometrics) is set.
+     *
+     * This is true in these cases:
+     * - The screen timed out, but the "lock after screen timeout" duration (default 5 seconds) has
+     *   not yet elapsed.
+     * - The power button was pressed, but "power button instantly locks" is not enabled, and the
+     *   "lock after screen timeout" duration has not elapsed.
+     *
+     * Note that this value specifically tells us if we can *ignore* authentication that would
+     * otherwise be required to transition from AOD/DOZING -> GONE. AOD/DOZING -> GONE is also
+     * possible if keyguard is disabled, either from an app request or because security is set to
+     * "none", but in that case, auth is not required so this boolean is not relevant.
+     *
+     * See [KeyguardWakeToGoneInteractor].
+     */
+    val canIgnoreAuthAndReturnToGone: StateFlow<Boolean>
+
+    fun setCanIgnoreAuthAndReturnToGone(canWake: Boolean)
 
     /** Is the always-on display available to be used? */
     val isAodAvailable: StateFlow<Boolean>
@@ -207,11 +232,17 @@ interface KeyguardRepository {
     /** Receive an event for doze time tick */
     val dozeTimeTick: Flow<Long>
 
+    /** Receive an event lockscreen being shown in a dismissible state */
+    val showDismissibleKeyguard: MutableStateFlow<Long>
+
     /** Observable for DismissAction */
     val dismissAction: StateFlow<DismissAction>
 
     /** Observable updated when keyguardDone should be called either now or soon. */
     val keyguardDone: Flow<KeyguardDone>
+
+    /** Last camera launch detection event */
+    val onCameraLaunchDetected: MutableStateFlow<CameraLaunchSourceModel>
 
     /**
      * Emits after the keyguard is done animating away.
@@ -276,6 +307,8 @@ interface KeyguardRepository {
     fun setIsActiveDreamLockscreenHosted(isLockscreenHosted: Boolean)
 
     fun dozeTimeTick()
+
+    fun showDismissibleKeyguard()
 
     fun setDismissAction(dismissAction: DismissAction)
 
@@ -356,6 +389,8 @@ constructor(
     private val _keyguardAlpha = MutableStateFlow(1f)
     override val keyguardAlpha = _keyguardAlpha.asStateFlow()
 
+    override val onCameraLaunchDetected = MutableStateFlow(CameraLaunchSourceModel())
+
     override val panelAlpha: MutableStateFlow<Float> = MutableStateFlow(1f)
 
     private val _clockShouldBeCentered = MutableStateFlow(true)
@@ -386,6 +421,13 @@ constructor(
         MutableStateFlow(!lockPatternUtils.isLockScreenDisabled(userTracker.userId))
     override val isKeyguardEnabled: StateFlow<Boolean> = _isKeyguardEnabled.asStateFlow()
 
+    private val _canIgnoreAuthAndReturnToGone = MutableStateFlow(false)
+    override val canIgnoreAuthAndReturnToGone = _canIgnoreAuthAndReturnToGone.asStateFlow()
+
+    override fun setCanIgnoreAuthAndReturnToGone(canWakeToGone: Boolean) {
+        _canIgnoreAuthAndReturnToGone.value = canWakeToGone
+    }
+
     private val _isDozing = MutableStateFlow(statusBarStateController.isDozing)
     override val isDozing: StateFlow<Boolean> = _isDozing.asStateFlow()
 
@@ -400,6 +442,12 @@ constructor(
 
     override fun dozeTimeTick() {
         _dozeTimeTick.value = systemClock.uptimeMillis()
+    }
+
+    override val showDismissibleKeyguard = MutableStateFlow<Long>(0L)
+
+    override fun showDismissibleKeyguard() {
+        showDismissibleKeyguard.value = systemClock.uptimeMillis()
     }
 
     private val _lastDozeTapToWakePosition = MutableStateFlow<Point?>(null)

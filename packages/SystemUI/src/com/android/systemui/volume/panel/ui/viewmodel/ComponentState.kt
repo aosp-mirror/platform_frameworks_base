@@ -32,3 +32,5 @@ data class ComponentState(
     val component: VolumePanelUiComponent,
     val isVisible: Boolean,
 )
+
+fun ComponentState.toLogString(): String = "$key:visible=$isVisible"

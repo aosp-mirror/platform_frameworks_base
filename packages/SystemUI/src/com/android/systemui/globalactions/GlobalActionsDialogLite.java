@@ -64,7 +64,6 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
-import android.service.dreams.IDreamManager;
 import android.sysprop.TelephonyProperties;
 import android.telecom.TelecomManager;
 import android.telephony.ServiceState;
@@ -197,7 +196,6 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
     private final Context mContext;
     private final GlobalActionsManager mWindowManagerFuncs;
     private final AudioManager mAudioManager;
-    private final IDreamManager mDreamManager;
     private final DevicePolicyManager mDevicePolicyManager;
     private final LockPatternUtils mLockPatternUtils;
     private final SelectedUserInteractor mSelectedUserInteractor;
@@ -345,7 +343,6 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             Context context,
             GlobalActionsManager windowManagerFuncs,
             AudioManager audioManager,
-            IDreamManager iDreamManager,
             DevicePolicyManager devicePolicyManager,
             LockPatternUtils lockPatternUtils,
             BroadcastDispatcher broadcastDispatcher,
@@ -382,7 +379,6 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         mContext = context;
         mWindowManagerFuncs = windowManagerFuncs;
         mAudioManager = audioManager;
-        mDreamManager = iDreamManager;
         mDevicePolicyManager = devicePolicyManager;
         mLockPatternUtils = lockPatternUtils;
         mTelephonyListenerManager = telephonyListenerManager;
@@ -510,20 +506,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         mHandler.sendEmptyMessage(MESSAGE_DISMISS);
     }
 
-    protected void awakenIfNecessary() {
-        if (mDreamManager != null) {
-            try {
-                if (mDreamManager.isDreaming()) {
-                    mDreamManager.awaken();
-                }
-            } catch (RemoteException e) {
-                // we tried
-            }
-        }
-    }
-
     protected void handleShow(@Nullable Expandable expandable) {
-        awakenIfNecessary();
         mDialog = createDialog();
         prepareDialog();
 

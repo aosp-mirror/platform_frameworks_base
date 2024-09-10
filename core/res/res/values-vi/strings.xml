@@ -265,8 +265,6 @@
     <string name="global_action_bug_report" msgid="5127867163044170003">"Báo cáo lỗi"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Kết thúc phiên"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"Chụp màn hình"</string>
-    <!-- no translation found for identity_check_biometric_prompt_description (5810195983015866727) -->
-    <skip />
     <string name="bugreport_title" msgid="8549990811777373050">"Báo cáo lỗi"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"Báo cáo này sẽ thu thập thông tin về tình trạng thiết bị hiện tại của bạn, để gửi dưới dạng thông báo qua email. Sẽ mất một chút thời gian kể từ khi bắt đầu báo cáo lỗi cho tới khi báo cáo sẵn sàng để gửi; xin vui lòng kiên nhẫn."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"Báo cáo tương tác"</string>
@@ -1196,6 +1194,8 @@
     <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"Các trường mật khẩu không hỗ trợ tính năng Viết tay"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Quay lại"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Chuyển phương thức nhập"</string>
+    <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"Mở bộ chọn phương thức nhập"</string>
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"Cài đặt"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Sắp hết dung lượng lưu trữ"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Một số chức năng hệ thống có thể không hoạt động"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Không đủ bộ nhớ cho hệ thống. Đảm bảo bạn có 250 MB dung lượng trống và khởi động lại."</string>
@@ -1413,10 +1413,8 @@
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"Chọn để tắt tính năng gỡ lỗi qua Wi-Fi."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Đã bật Chế độ khai thác kiểm thử"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Khôi phục cài đặt gốc để tắt Chế độ khai thác kiểm thử."</string>
-    <!-- no translation found for wrong_hsum_configuration_notification_title (7212758829332714385) -->
-    <skip />
-    <!-- no translation found for wrong_hsum_configuration_notification_message (5353475441480684381) -->
-    <skip />
+    <string name="wrong_hsum_configuration_notification_title" msgid="7212758829332714385">"Cấu hình bản dựng HSUM không chính xác"</string>
+    <string name="wrong_hsum_configuration_notification_message" msgid="5353475441480684381">"Trạng thái Chế độ người dùng hệ thống không có giao diện người dùng (HSUM) của thiết bị này khác với cấu hình bản dựng của thiết bị. Vui lòng đặt lại thiết bị về trạng thái ban đầu."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"Đã bật bảng điều khiển cổng nối tiếp"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"Hiệu suất sẽ bị ảnh hưởng. Để tắt, hãy chọn trình tải khởi động."</string>
     <string name="mte_override_notification_title" msgid="4731115381962792944">"Đã bật MTE thử nghiệm"</string>
@@ -1432,6 +1430,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"CHIA SẺ"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"TỪ CHỐI"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Chọn phương thức nhập"</string>
+    <string name="input_method_language_settings" msgid="8069089418056819437">"Cài đặt ngôn ngữ"</string>
     <string name="show_ime" msgid="6406112007347443383">"Hiện bàn phím ảo trên màn hình trong khi bàn phím vật lý đang hoạt động"</string>
     <string name="hardware" msgid="3611039921284836033">"Sử dụng bàn phím ảo"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Định cấu hình <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
@@ -1441,7 +1440,7 @@
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="alert_windows_notification_channel_group_name" msgid="6063891141815714246">"Hiển thị trên các ứng dụng khác"</string>
     <string name="alert_windows_notification_channel_name" msgid="3437528564303192620">"<xliff:g id="NAME">%s</xliff:g> hiển thị trên các ứng dụng khác"</string>
-    <string name="alert_windows_notification_title" msgid="6331662751095228536">"<xliff:g id="NAME">%s</xliff:g> hiển thị trên ứng dụng khác"</string>
+    <string name="alert_windows_notification_title" msgid="6331662751095228536">"<xliff:g id="NAME">%s</xliff:g> đang hiện trên các ứng dụng khác"</string>
     <string name="alert_windows_notification_message" msgid="6538171456970725333">"Nếu bạn không muốn <xliff:g id="NAME">%s</xliff:g> sử dụng tính năng này, hãy nhấn để mở cài đặt và tắt tính năng này."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="7805857234839123780">"Tắt"</string>
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"Đang kiểm tra <xliff:g id="NAME">%s</xliff:g>…"</string>
@@ -1747,7 +1746,8 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"Một ứng dụng đang che khuất yêu cầu quyền này nên chúng tôi không thể xác minh phản hồi của bạn."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Nhấn vào một tính năng để bắt đầu sử dụng:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Chọn các tính năng để dùng với nút hỗ trợ tiếp cận"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Chọn các tính năng để dùng với phím tắt là phím âm lượng"</string>
+    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
+    <skip />
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> đã bị tắt"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Chỉnh sửa phím tắt"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Xong"</string>
@@ -1761,18 +1761,12 @@
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Bạn đã giữ các phím âm lượng. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> đã bật."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Bạn đã giữ các phím âm lượng. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> đã tắt."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Thả phím âm lượng. Để bật <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, hãy nhấn và giữ cả 2 phím âm lượng trong 3 giây một lần nữa."</string>
-    <!-- no translation found for accessibility_button_prompt_text (6105393217162198616) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_prompt_text (6452246951969541792) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_3finger_prompt_text (77745752309056152) -->
-    <skip />
-    <!-- no translation found for accessibility_button_instructional_text (6831154884557881996) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_instructional_text (4133877896011098550) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_3finger_instructional_text (1124458279366968154) -->
-    <skip />
+    <string name="accessibility_button_prompt_text" msgid="6105393217162198616">"Chọn một tính năng"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="6452246951969541792">"Chọn một tính năng"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="77745752309056152">"Chọn một tính năng"</string>
+    <string name="accessibility_button_instructional_text" msgid="6831154884557881996">"Tính năng này sẽ được mở vào lần tới bạn nhấn nút hỗ trợ tiếp cận"</string>
+    <string name="accessibility_gesture_instructional_text" msgid="4133877896011098550">"Tính năng này sẽ được mở vào lần tới bạn dùng lối tắt này. Hãy dùng 2 ngón tay vuốt từ cuối màn hình lên rồi thả tay nhanh."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="1124458279366968154">"Tính năng này sẽ được mở vào lần tới bạn dùng lối tắt này. Hãy dùng 3 ngón tay vuốt từ cuối màn hình lên rồi thả tay nhanh."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Phóng to"</string>
     <string name="user_switched" msgid="7249833311585228097">"Người dùng hiện tại <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"Đang chuyển sang <xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -1895,8 +1889,7 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"Mã PIN quá ngắn. Phải có ít nhất 4 chữ số."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Hãy thử lại sau"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Xem toàn màn hình"</string>
-    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
-    <skip />
+    <string name="immersive_cling_description" msgid="2896205051090870978">"Để thoát, hãy vuốt xuống từ đầu màn hình"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"OK"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Xoay để xem dễ hơn"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Mở <xliff:g id="NAME">%s</xliff:g> ở chế độ toàn màn hình để xem dễ hơn"</string>
@@ -2432,25 +2425,32 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Nội dung ứng dụng bị ẩn khỏi tính năng chia sẻ màn hình vì lý do bảo mật"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Đã tự động kết nối với vệ tinh"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Bạn có thể gửi và nhận tin nhắn mà không cần có mạng di động hoặc mạng Wi-Fi"</string>
+    <string name="satellite_notification_manual_title" msgid="1097504441849466279">"Sử dụng tính năng nhắn tin qua vệ tinh?"</string>
+    <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Gửi và nhận tin nhắn mà không cần mạng di động hoặc Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Mở ứng dụng Tin nhắn"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Cách hoạt động"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Đang chờ xử lý..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Thiết lập lại tính năng Mở khoá bằng vân tay"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (5851784577768803510) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7925203589860744456) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (1824812666549916586) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (5974657382960155099) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"Không nhận dạng được <xliff:g id="FINGERPRINT">%s</xliff:g> nữa."</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"Không nhận dạng được <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> và <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> nữa."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="1824812666549916586">"Không nhận dạng được <xliff:g id="FINGERPRINT">%s</xliff:g> nữa. Hãy thiết lập lại tính năng Mở khoá bằng vân tay."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="5974657382960155099">"Không nhận dạng được <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> và <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> nữa. Hãy thiết lập lại tính năng Mở khoá bằng vân tay."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Thiết lập lại tính năng Mở khoá bằng khuôn mặt"</string>
-    <!-- no translation found for face_dangling_notification_msg (746235263598985384) -->
-    <skip />
+    <string name="face_dangling_notification_msg" msgid="746235263598985384">"Không nhận dạng được mẫu khuôn mặt của bạn nữa. Hãy thiết lập lại tính năng Mở khoá bằng khuôn mặt."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Thiết lập"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Để sau"</string>
     <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"Chuông báo cho <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"Chuyển đổi người dùng"</string>
     <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"Tắt tiếng"</string>
     <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"Nhấn để tắt tiếng"</string>
+    <string name="keyboard_shortcut_group_applications_browser" msgid="6535007304687100909">"Trình duyệt"</string>
+    <string name="keyboard_shortcut_group_applications_contacts" msgid="2750702518068326356">"Danh bạ"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="4229037666415353683">"Email"</string>
+    <string name="keyboard_shortcut_group_applications_sms" msgid="3523799286376321137">"SMS"</string>
+    <string name="keyboard_shortcut_group_applications_music" msgid="2051507523525651067">"Âm nhạc"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="3571770335653387606">"Lịch"</string>
+    <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"Máy tính"</string>
+    <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"Bản đồ"</string>
+    <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"Ứng dụng"</string>
+    <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"Hệ thống không nhận dạng được vân tay của bạn. Hãy thiết lập lại tính năng Mở khoá bằng vân tay."</string>
 </resources>

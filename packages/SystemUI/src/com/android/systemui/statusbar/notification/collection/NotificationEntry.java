@@ -698,7 +698,7 @@ public final class NotificationEntry extends ListEntry implements NotificationRo
     }
 
     public void setHeadsUpIsVisible() {
-        if (row != null) row.setHeadsUpIsVisible();
+        if (row != null) row.markHeadsUpSeen();
     }
 
     //TODO: i'm imagining a world where this isn't just the row, but I could be rwong
@@ -1003,6 +1003,16 @@ public final class NotificationEntry extends ListEntry implements NotificationRo
      */
     public void markForUserTriggeredMovement(boolean marked) {
         mIsMarkedForUserTriggeredMovement = marked;
+    }
+
+    private boolean mSeenInShade = false;
+
+    public void setSeenInShade(boolean seen) {
+        mSeenInShade = seen;
+    }
+
+    public boolean isSeenInShade() {
+        return mSeenInShade;
     }
 
     public void setIsHeadsUpEntry(boolean isHeadsUpEntry) {

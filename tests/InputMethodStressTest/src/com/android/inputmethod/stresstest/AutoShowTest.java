@@ -37,14 +37,14 @@ import android.content.res.Configuration;
 import android.os.SystemClock;
 import android.platform.test.annotations.RootPermissionTest;
 import android.platform.test.rule.UnlockScreenRule;
-import android.support.test.uiautomator.By;
-import android.support.test.uiautomator.UiDevice;
-import android.support.test.uiautomator.UiObject2;
-import android.support.test.uiautomator.Until;
 import android.view.WindowManager;
 import android.widget.EditText;
 
 import androidx.test.platform.app.InstrumentationRegistry;
+import androidx.test.uiautomator.By;
+import androidx.test.uiautomator.UiDevice;
+import androidx.test.uiautomator.UiObject2;
+import androidx.test.uiautomator.Until;
 
 import org.junit.Rule;
 import org.junit.Test;

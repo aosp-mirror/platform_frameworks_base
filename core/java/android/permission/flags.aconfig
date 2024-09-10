@@ -91,6 +91,8 @@ flag {
     bug: "283989236"
 }
 
+# This flag is enabled since V but not a MUST requirement in CDD yet, so it needs to stay around
+# for now and any code working with it should keep checking the flag.
 flag {
     name: "signature_permission_allowlist_enabled"
     is_fixed_read_only: true
@@ -215,9 +217,35 @@ flag {
 }
 
 flag {
+    name: "check_op_validate_package"
+    namespace: "permissions"
+    description: "Validate package/uid match in checkOp similar to noteOp"
+    bug: "294609684"
+}
+
+flag {
     name: "location_bypass_privacy_dashboard_enabled"
     is_exported: true
     namespace: "permissions"
     description: "Show access entry of location bypass permission in the Privacy Dashboard"
     bug: "325536053"
+}
+
+flag {
+    name: "dont_remove_existing_uid_states"
+    is_fixed_read_only: true
+    namespace: "permissions"
+    description: "Double check if the uid still exists before attempting to remove its appops state"
+    bug: "353474742"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "wallet_role_icon_property_enabled"
+    is_exported: true
+    namespace: "wallet_integration"
+    description: "This flag is used to enabled the Wallet Role s icon fetching from manifest property"
+    bug: "349942654"
 }

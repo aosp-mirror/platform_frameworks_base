@@ -30,9 +30,6 @@ java_sdk_library {
         "app-compat-annotations",
         "unsupportedappusage", // for android.compat.annotation.UnsupportedAppUsage
     ],
-    hidden_api_packages: [
-        "com.android.internal.location",
-    ],
     aidl: {
         include_dirs: [
             "frameworks/base/location/java",

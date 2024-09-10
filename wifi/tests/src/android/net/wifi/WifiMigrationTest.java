@@ -56,6 +56,7 @@ public class WifiMigrationTest {
         mSession = ExtendedMockito.mockitoSession()
                 .mockStatic(WifiBlobStore.class, withSettings().lenient())
                 .startMocking();
+        when(WifiBlobStore.supplicantCanAccessBlobstore()).thenReturn(true);
         when(WifiBlobStore.getLegacyKeystore()).thenReturn(mLegacyKeystore);
         when(WifiBlobStore.getInstance()).thenReturn(mWifiBlobStore);
         when(mLegacyKeystore.get(anyString(), anyInt())).thenReturn(TEST_VALUE);
@@ -67,6 +68,17 @@ public class WifiMigrationTest {
         if (mSession != null) {
             mSession.finishMocking();
         }
+    }
+
+    /**
+     * Verify that the Keystore migration is skipped if supplicant does not have
+     * access to the WifiBlobstore database.
+     */
+    @Test
+    public void testKeystoreMigrationAvoidedOnLegacyVendorPartition() {
+        when(WifiBlobStore.supplicantCanAccessBlobstore()).thenReturn(false);
+        WifiMigration.migrateLegacyKeystoreToWifiBlobstore();
+        verifyNoMoreInteractions(mLegacyKeystore, mWifiBlobStore);
     }
 
     /**

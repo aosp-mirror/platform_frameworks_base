@@ -24,13 +24,13 @@ import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.hardware.SensorManager;
-import android.hardware.display.BrightnessInfo;
 import android.hardware.display.DisplayManagerInternal;
 import android.os.Handler;
 import android.os.PowerManager;
@@ -41,8 +41,8 @@ import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.server.display.DisplayBrightnessState;
-import com.android.server.display.DisplayDeviceConfig;
 import com.android.server.display.brightness.BrightnessReason;
+import com.android.server.display.brightness.clamper.BrightnessClamperController.ModifiersAggregatedState;
 import com.android.server.display.config.SensorData;
 import com.android.server.display.feature.DeviceConfigParameterProvider;
 import com.android.server.display.feature.DisplayManagerFlags;
@@ -89,6 +89,10 @@ public class BrightnessClamperControllerTest {
     @Mock
     private BrightnessModifier mMockModifier;
     @Mock
+    private TestStatefulModifier mMockStatefulModifier;
+    @Mock
+    private TestDisplayListenerModifier mMockDisplayListenerModifier;
+    @Mock
     private DisplayManagerInternal.DisplayPowerRequest mMockRequest;
 
     @Mock
@@ -99,7 +103,8 @@ public class BrightnessClamperControllerTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mTestInjector = new TestInjector(List.of(mMockClamper), List.of(mMockModifier));
+        mTestInjector = new TestInjector(List.of(mMockClamper),
+                List.of(mMockModifier, mMockStatefulModifier, mMockDisplayListenerModifier));
         when(mMockDisplayDeviceData.getDisplayId()).thenReturn(DISPLAY_ID);
         when(mMockDisplayDeviceData.getAmbientLightSensor()).thenReturn(mMockSensorData);
 
@@ -155,16 +160,17 @@ public class BrightnessClamperControllerTest {
     }
 
     @Test
-    public void testMaxReasonIsNoneOnInit() {
-        assertEquals(BrightnessInfo.BRIGHTNESS_MAX_REASON_NONE,
-                mClamperController.getBrightnessMaxReason());
-    }
-
-    @Test
     public void testOnDisplayChanged_DelegatesToClamper() {
         mClamperController.onDisplayChanged(mMockDisplayDeviceData);
 
         verify(mMockClamper).onDisplayChanged(mMockDisplayDeviceData);
+    }
+
+    @Test
+    public void testOnDisplayChanged_DelegatesToDisplayListeners() {
+        mClamperController.onDisplayChanged(mMockDisplayDeviceData);
+
+        verify(mMockDisplayListenerModifier).onDisplayChanged(mMockDisplayDeviceData);
     }
 
     @Test
@@ -189,6 +195,8 @@ public class BrightnessClamperControllerTest {
         mClamperController.clamp(mMockRequest, initialBrightness, initialSlowChange, STATE_ON);
 
         verify(mMockModifier).apply(eq(mMockRequest), any());
+        verify(mMockDisplayListenerModifier).apply(eq(mMockRequest), any());
+        verify(mMockStatefulModifier).apply(eq(mMockRequest), any());
     }
 
     @Test
@@ -218,7 +226,7 @@ public class BrightnessClamperControllerTest {
         float clampedBrightness = 0.6f;
         float customAnimationRate = 0.01f;
         when(mMockClamper.getBrightnessCap()).thenReturn(clampedBrightness);
-        when(mMockClamper.getType()).thenReturn(BrightnessClamper.Type.THERMAL);
+        when(mMockClamper.getType()).thenReturn(BrightnessClamper.Type.POWER);
         when(mMockClamper.getCustomAnimationRate()).thenReturn(customAnimationRate);
         when(mMockClamper.isActive()).thenReturn(false);
         mTestInjector.mCapturedChangeListener.onChanged();
@@ -242,7 +250,7 @@ public class BrightnessClamperControllerTest {
         float clampedBrightness = 0.6f;
         float customAnimationRate = 0.01f;
         when(mMockClamper.getBrightnessCap()).thenReturn(clampedBrightness);
-        when(mMockClamper.getType()).thenReturn(BrightnessClamper.Type.THERMAL);
+        when(mMockClamper.getType()).thenReturn(BrightnessClamper.Type.POWER);
         when(mMockClamper.getCustomAnimationRate()).thenReturn(customAnimationRate);
         when(mMockClamper.isActive()).thenReturn(true);
         mTestInjector.mCapturedChangeListener.onChanged();
@@ -266,7 +274,7 @@ public class BrightnessClamperControllerTest {
         float clampedBrightness = 0.8f;
         float customAnimationRate = 0.01f;
         when(mMockClamper.getBrightnessCap()).thenReturn(clampedBrightness);
-        when(mMockClamper.getType()).thenReturn(BrightnessClamper.Type.THERMAL);
+        when(mMockClamper.getType()).thenReturn(BrightnessClamper.Type.POWER);
         when(mMockClamper.getCustomAnimationRate()).thenReturn(customAnimationRate);
         when(mMockClamper.isActive()).thenReturn(true);
         mTestInjector.mCapturedChangeListener.onChanged();
@@ -290,7 +298,7 @@ public class BrightnessClamperControllerTest {
         float clampedBrightness = 0.6f;
         float customAnimationRate = 0.01f;
         when(mMockClamper.getBrightnessCap()).thenReturn(clampedBrightness);
-        when(mMockClamper.getType()).thenReturn(BrightnessClamper.Type.THERMAL);
+        when(mMockClamper.getType()).thenReturn(BrightnessClamper.Type.POWER);
         when(mMockClamper.getCustomAnimationRate()).thenReturn(customAnimationRate);
         when(mMockClamper.isActive()).thenReturn(true);
         mTestInjector.mCapturedChangeListener.onChanged();
@@ -326,9 +334,39 @@ public class BrightnessClamperControllerTest {
         verify(mMockClamper).stop();
     }
 
+    @Test
+    public void test_doesNotNotifyExternalListener_aggregatedStateNotChanged() {
+        mTestInjector.mCapturedChangeListener.onChanged();
+        mTestHandler.flush();
+
+        verify(mMockExternalListener, never()).onChanged();
+    }
+
+    @Test
+    public void test_notifiesExternalListener_aggregatedStateChanged() {
+        doAnswer((invocation) -> {
+            ModifiersAggregatedState argument = invocation.getArgument(0);
+            // we need to do changes in AggregatedState to trigger onChange
+            argument.mMaxHdrBrightness = 0.5f;
+            return null;
+        }).when(mMockStatefulModifier).applyStateChange(any());
+        mTestInjector.mCapturedChangeListener.onChanged();
+        mTestHandler.flush();
+
+        verify(mMockExternalListener).onChanged();
+    }
+
     private BrightnessClamperController createBrightnessClamperController() {
         return new BrightnessClamperController(mTestInjector, mTestHandler, mMockExternalListener,
-                mMockDisplayDeviceData, mMockContext, mFlags, mSensorManager);
+                mMockDisplayDeviceData, mMockContext, mFlags, mSensorManager, 0);
+    }
+
+    interface TestDisplayListenerModifier extends BrightnessStateModifier,
+            BrightnessClamperController.DisplayDeviceDataListener {
+    }
+
+    interface TestStatefulModifier extends BrightnessStateModifier,
+            BrightnessClamperController.StatefulModifier {
     }
 
     private class TestInjector extends BrightnessClamperController.Injector {
@@ -358,7 +396,7 @@ public class BrightnessClamperControllerTest {
                 Handler handler,
                 BrightnessClamperController.ClamperChangeListener clamperChangeListener,
                 BrightnessClamperController.DisplayDeviceData data,
-                DisplayManagerFlags flags, Context context) {
+                DisplayManagerFlags flags, Context context, float currentBrightness) {
             mCapturedChangeListener = clamperChangeListener;
             return mClampers;
         }
@@ -366,7 +404,7 @@ public class BrightnessClamperControllerTest {
         @Override
         List<BrightnessStateModifier> getModifiers(DisplayManagerFlags flags, Context context,
                 Handler handler, BrightnessClamperController.ClamperChangeListener listener,
-                DisplayDeviceConfig displayDeviceConfig) {
+                BrightnessClamperController.DisplayDeviceData displayDeviceData) {
             return mModifiers;
         }
 

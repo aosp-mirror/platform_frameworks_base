@@ -32,7 +32,7 @@ import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTI
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_TO_PIP;
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_USER_RESIZE;
 import static com.android.wm.shell.pip.PipAnimationController.isOutPipDirection;
-import static com.android.wm.shell.sysui.ShellSharedConstants.KEY_EXTRA_SHELL_PIP;
+import static com.android.wm.shell.shared.ShellSharedConstants.KEY_EXTRA_SHELL_PIP;
 
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
@@ -240,6 +240,12 @@ public class PipController implements PipTransitionController.PipTransitionCallb
      */
     private final DisplayChangeController.OnDisplayChangingListener mRotationController = (
             displayId, fromRotation, toRotation, newDisplayAreaInfo, t) -> {
+        if (fromRotation == toRotation) {
+            // OnDisplayChangingListener also gets triggered upon Display size changes;
+            // in PiP1, those are handled separately by OnDisplaysChangedListener callbacks.
+            return;
+        }
+
         if (mPipTransitionController.handleRotateDisplay(fromRotation, toRotation, t)) {
             return;
         }
@@ -272,6 +278,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         final boolean changed = onDisplayRotationChanged(mContext, outBounds, currentBounds,
                 mTmpInsetBounds, displayId, fromRotation, toRotation, t);
         if (changed) {
+            mMenuController.hideMenu();
             // If the pip was in the offset zone earlier, adjust the new bounds to the bottom of the
             // movement bounds
             mTouchHandler.adjustBoundsForRotation(outBounds, mPipBoundsState.getBounds(),
@@ -374,7 +381,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
      * Instantiates {@link PipController}, returns {@code null} if the feature not supported.
      */
     @Nullable
-    public static Pip create(Context context,
+    public static PipImpl create(Context context,
             ShellInit shellInit,
             ShellCommandHandler shellCommandHandler,
             ShellController shellController,
@@ -631,6 +638,12 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                     public void insetsChanged(InsetsState insetsState) {
                         DisplayLayout pendingLayout = mDisplayController
                                 .getDisplayLayout(mPipDisplayLayoutState.getDisplayId());
+                        if (pendingLayout == null) {
+                            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                                    "insetsChanged: no display layout for displayId=%d",
+                                    mPipDisplayLayoutState.getDisplayId());
+                            return;
+                        }
                         if (mIsInFixedRotation
                                 || mIsKeyguardShowingOrAnimating
                                 || pendingLayout.rotation()
@@ -646,9 +659,9 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                 });
 
         mTabletopModeController.registerOnTabletopModeChangedListener((isInTabletopMode) -> {
-            final String tag = "tabletop-mode";
             if (!isInTabletopMode) {
-                mPipBoundsState.removeNamedUnrestrictedKeepClearArea(tag);
+                mPipBoundsState.setNamedUnrestrictedKeepClearArea(
+                        PipBoundsState.NAMED_KCA_TABLETOP_MODE, null);
                 return;
             }
 
@@ -657,14 +670,16 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             if (mTabletopModeController.getPreferredHalfInTabletopMode()
                     == TabletopModeController.PREFERRED_TABLETOP_HALF_TOP) {
                 // Prefer top, avoid the bottom half of the display.
-                mPipBoundsState.addNamedUnrestrictedKeepClearArea(tag, new Rect(
-                        displayBounds.left, displayBounds.centerY(),
-                        displayBounds.right, displayBounds.bottom));
+                mPipBoundsState.setNamedUnrestrictedKeepClearArea(
+                        PipBoundsState.NAMED_KCA_TABLETOP_MODE, new Rect(
+                                displayBounds.left, displayBounds.centerY(),
+                                displayBounds.right, displayBounds.bottom));
             } else {
                 // Prefer bottom, avoid the top half of the display.
-                mPipBoundsState.addNamedUnrestrictedKeepClearArea(tag, new Rect(
-                        displayBounds.left, displayBounds.top,
-                        displayBounds.right, displayBounds.centerY()));
+                mPipBoundsState.setNamedUnrestrictedKeepClearArea(
+                        PipBoundsState.NAMED_KCA_TABLETOP_MODE, new Rect(
+                                displayBounds.left, displayBounds.top,
+                                displayBounds.right, displayBounds.centerY()));
             }
 
             // Try to move the PiP window if we have entered PiP mode.
@@ -916,10 +931,12 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                     0, mPipBoundsState.getDisplayBounds().bottom - height,
                     mPipBoundsState.getDisplayBounds().right,
                     mPipBoundsState.getDisplayBounds().bottom);
-            mPipBoundsState.addNamedUnrestrictedKeepClearArea(LAUNCHER_KEEP_CLEAR_AREA_TAG, rect);
+            mPipBoundsState.setNamedUnrestrictedKeepClearArea(
+                    PipBoundsState.NAMED_KCA_LAUNCHER_SHELF, rect);
             updatePipPositionForKeepClearAreas();
         } else {
-            mPipBoundsState.removeNamedUnrestrictedKeepClearArea(LAUNCHER_KEEP_CLEAR_AREA_TAG);
+            mPipBoundsState.setNamedUnrestrictedKeepClearArea(
+                    PipBoundsState.NAMED_KCA_LAUNCHER_SHELF, null);
             // postpone moving in response to hide of Launcher in case there's another change
             mMainExecutor.removeCallbacks(mMovePipInResponseToKeepClearAreasChangeCallback);
             mMainExecutor.executeDelayed(
@@ -968,8 +985,8 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             int launcherRotation, Rect hotseatKeepClearArea) {
         // preemptively add the keep clear area for Hotseat, so that it is taken into account
         // when calculating the entry destination bounds of PiP window
-        mPipBoundsState.addNamedUnrestrictedKeepClearArea(LAUNCHER_KEEP_CLEAR_AREA_TAG,
-                hotseatKeepClearArea);
+        mPipBoundsState.setNamedUnrestrictedKeepClearArea(
+                PipBoundsState.NAMED_KCA_LAUNCHER_SHELF, hotseatKeepClearArea);
         onDisplayRotationChangedNotInPip(mContext, launcherRotation);
         // cache current min/max size
         Point minSize = mPipBoundsState.getMinSize();
@@ -1177,7 +1194,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     /**
      * The interface for calls from outside the Shell, within the host process.
      */
-    private class PipImpl implements Pip {
+    public class PipImpl implements Pip {
         @Override
         public void expandPip() {
             mMainExecutor.execute(() -> {

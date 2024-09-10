@@ -28,6 +28,9 @@ import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_M
 import static android.window.DisplayAreaOrganizer.FEATURE_UNDEFINED;
 import static android.window.DisplayAreaOrganizer.KEY_ROOT_DISPLAY_AREA_ID;
 
+import static com.android.systemui.Flags.enableViewCaptureTracing;
+import static com.android.systemui.util.ConvenienceExtensionsKt.toKotlinLazy;
+
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
@@ -73,11 +76,16 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
+import com.android.app.viewcapture.ViewCapture;
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.systemui.CoreStartable;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.res.R;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.TaskStackChangeListeners;
 import com.android.systemui.util.settings.SecureSettings;
+
+import kotlin.Lazy;
 
 import javax.inject.Inject;
 
@@ -100,17 +108,18 @@ public class ImmersiveModeConfirmation implements CoreStartable, CommandQueue.Ca
     private Context mDisplayContext;
     private final Context mSysUiContext;
     private final Handler mHandler = new H(Looper.getMainLooper());
+    private final Handler mBackgroundHandler;
     private long mShowDelayMs = 0L;
     private final IBinder mWindowToken = new Binder();
     private final CommandQueue mCommandQueue;
 
     private ClingWindowView mClingWindow;
-    /** The last {@link WindowManager} that is used to add the confirmation window. */
+    /** The wrapper on the last {@link WindowManager} used to add the confirmation window. */
     @Nullable
-    private WindowManager mWindowManager;
+    private ViewCaptureAwareWindowManager mViewCaptureAwareWindowManager;
     /**
-     * The WindowContext that is registered with {@link #mWindowManager} with options to specify the
-     * {@link RootDisplayArea} to attach the confirmation window.
+     * The WindowContext that is registered with {@link #mViewCaptureAwareWindowManager} with
+     * options to specify the {@link RootDisplayArea} to attach the confirmation window.
      */
     @Nullable
     private Context mWindowContext;
@@ -127,15 +136,21 @@ public class ImmersiveModeConfirmation implements CoreStartable, CommandQueue.Ca
 
     private ContentObserver mContentObserver;
 
+    private Lazy<ViewCapture> mLazyViewCapture;
+
     @Inject
     public ImmersiveModeConfirmation(Context context, CommandQueue commandQueue,
-                                     SecureSettings secureSettings) {
+                                     SecureSettings secureSettings,
+                                     dagger.Lazy<ViewCapture> daggerLazyViewCapture,
+                                     @Background Handler backgroundHandler) {
         mSysUiContext = context;
         final Display display = mSysUiContext.getDisplay();
         mDisplayContext = display.getDisplayId() == DEFAULT_DISPLAY
                 ? mSysUiContext : mSysUiContext.createDisplayContext(display);
         mCommandQueue = commandQueue;
         mSecureSettings = secureSettings;
+        mLazyViewCapture = toKotlinLazy(daggerLazyViewCapture);
+        mBackgroundHandler = backgroundHandler;
     }
 
     boolean loadSetting(int currentUserId) {
@@ -239,14 +254,14 @@ public class ImmersiveModeConfirmation implements CoreStartable, CommandQueue.Ca
     private void handleHide() {
         if (mClingWindow != null) {
             if (DEBUG) Log.d(TAG, "Hiding immersive mode confirmation");
-            if (mWindowManager != null) {
+            if (mViewCaptureAwareWindowManager != null) {
                 try {
-                    mWindowManager.removeView(mClingWindow);
+                    mViewCaptureAwareWindowManager.removeView(mClingWindow);
                 } catch (WindowManager.InvalidDisplayException e) {
                     Log.w(TAG, "Fail to hide the immersive confirmation window because of "
                             + e);
                 }
-                mWindowManager = null;
+                mViewCaptureAwareWindowManager = null;
                 mWindowContext = null;
             }
             mClingWindow = null;
@@ -318,7 +333,7 @@ public class ImmersiveModeConfirmation implements CoreStartable, CommandQueue.Ca
                 }
             }
             TaskStackChangeListeners.getInstance().registerTaskStackListener(this);
-            mContentObserver = new ContentObserver(mHandler) {
+            mContentObserver = new ContentObserver(mBackgroundHandler) {
                 @Override
                 public void onChange(boolean selfChange) {
                     onSettingChanged(mSysUiContext.getUserId());
@@ -332,6 +347,9 @@ public class ImmersiveModeConfirmation implements CoreStartable, CommandQueue.Ca
             mSecureSettings.registerContentObserverForUserSync(
                     Settings.Secure.USER_SETUP_COMPLETE, mContentObserver,
                     UserHandle.USER_CURRENT);
+            mBackgroundHandler.post(() -> {
+                loadSetting(UserHandle.USER_CURRENT);
+            });
         }
     }
 
@@ -485,9 +503,8 @@ public class ImmersiveModeConfirmation implements CoreStartable, CommandQueue.Ca
             final boolean intersectsTopCutout = topDisplayCutout.intersects(
                     width - (windowWidth / 2), 0,
                     width + (windowWidth / 2), topDisplayCutout.bottom);
-            if (mClingWindow != null &&
-                    (windowWidth < 0 || (width > 0 && intersectsTopCutout))) {
-                final View iconView = mClingWindow.findViewById(R.id.immersive_cling_icon);
+            if (windowWidth < 0 || (width > 0 && intersectsTopCutout)) {
+                final View iconView = findViewById(R.id.immersive_cling_icon);
                 RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams)
                         iconView.getLayoutParams();
                 lp.topMargin = topDisplayCutout.bottom;
@@ -506,8 +523,8 @@ public class ImmersiveModeConfirmation implements CoreStartable, CommandQueue.Ca
      *         confirmation window.
      */
     @NonNull
-    private WindowManager createWindowManager(int rootDisplayAreaId) {
-        if (mWindowManager != null) {
+    private ViewCaptureAwareWindowManager createWindowManager(int rootDisplayAreaId) {
+        if (mViewCaptureAwareWindowManager != null) {
             throw new IllegalStateException(
                     "Must not create a new WindowManager while there is an existing one");
         }
@@ -516,8 +533,10 @@ public class ImmersiveModeConfirmation implements CoreStartable, CommandQueue.Ca
         mWindowContextRootDisplayAreaId = rootDisplayAreaId;
         mWindowContext = mDisplayContext.createWindowContext(
                 IMMERSIVE_MODE_CONFIRMATION_WINDOW_TYPE, options);
-        mWindowManager = mWindowContext.getSystemService(WindowManager.class);
-        return mWindowManager;
+        WindowManager wm = mWindowContext.getSystemService(WindowManager.class);
+        mViewCaptureAwareWindowManager = new ViewCaptureAwareWindowManager(wm, mLazyViewCapture,
+                enableViewCaptureTracing());
+        return mViewCaptureAwareWindowManager;
     }
 
     /**

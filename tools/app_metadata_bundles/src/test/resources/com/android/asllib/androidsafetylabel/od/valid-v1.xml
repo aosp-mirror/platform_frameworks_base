@@ -1,0 +1,8 @@
+<bundle>
+    <long name="version" value="1"/>
+    <pbundle_as_map name="system_app_safety_label">
+        <string name="url" value="www.example.com"/>
+    </pbundle_as_map>
+    <pbundle_as_map name="transparency_info">
+    </pbundle_as_map>
+</bundle>

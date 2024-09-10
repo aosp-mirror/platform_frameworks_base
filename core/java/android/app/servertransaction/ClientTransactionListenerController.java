@@ -19,8 +19,6 @@ package android.app.servertransaction;
 import static android.app.WindowConfiguration.areConfigurationsEqualForDisplay;
 import static android.view.Display.INVALID_DISPLAY;
 
-import static com.android.window.flags.Flags.activityWindowInfoFlag;
-
 import static java.util.Objects.requireNonNull;
 
 import android.annotation.NonNull;
@@ -102,9 +100,6 @@ public class ClientTransactionListenerController {
      */
     public void registerActivityWindowInfoChangedListener(
             @NonNull BiConsumer<IBinder, ActivityWindowInfo> listener) {
-        if (!activityWindowInfoFlag()) {
-            return;
-        }
         synchronized (mLock) {
             mActivityWindowInfoChangedListeners.add(listener);
         }
@@ -116,9 +111,6 @@ public class ClientTransactionListenerController {
      */
     public void unregisterActivityWindowInfoChangedListener(
             @NonNull BiConsumer<IBinder, ActivityWindowInfo> listener) {
-        if (!activityWindowInfoFlag()) {
-            return;
-        }
         synchronized (mLock) {
             mActivityWindowInfoChangedListeners.remove(listener);
         }
@@ -130,9 +122,6 @@ public class ClientTransactionListenerController {
      */
     public void onActivityWindowInfoChanged(@NonNull IBinder activityToken,
             @NonNull ActivityWindowInfo activityWindowInfo) {
-        if (!activityWindowInfoFlag()) {
-            return;
-        }
         final Object[] activityWindowInfoChangedListeners;
         synchronized (mLock) {
             if (mActivityWindowInfoChangedListeners.isEmpty()) {

@@ -1051,6 +1051,52 @@ public final class AccessibilityManager {
     }
 
     /**
+     * Registers callback for when user initialization has completed.
+     * Does nothing if the same callback is already registered.
+     *
+     * @param callback The callback to be registered
+     * @hide
+     */
+    public void registerUserInitializationCompleteCallback(
+            @NonNull IUserInitializationCompleteCallback callback) {
+        IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return;
+            }
+        }
+        try {
+            service.registerUserInitializationCompleteCallback(callback);
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error while registering userInitializationCompleteCallback. ", re);
+        }
+    }
+
+    /**
+     * Unregisters callback for when user initialization has completed.
+     *
+     * @param callback The callback to be unregistered
+     * @hide
+     */
+    public void unregisterUserInitializationCompleteCallback(
+            @NonNull IUserInitializationCompleteCallback callback) {
+        IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return;
+            }
+        }
+        try {
+            service.unregisterUserInitializationCompleteCallback(callback);
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG,
+                    "Error while unregistering userInitializationCompleteCallback. ", re);
+        }
+    }
+
+    /**
      * Whether the current accessibility request comes from an
      * {@link AccessibilityService} with the {@link AccessibilityServiceInfo#isAccessibilityTool}
      * property set to true.
@@ -1728,7 +1774,8 @@ public final class AccessibilityManager {
     }
 
     /**
-     * Notifies that the accessibility button in the system's navigation area has been clicked
+     * Notifies that the accessibility button in the system's navigation area has been clicked,
+     * or a gesture shortcut input has been performed.
      *
      * @param displayId The logical display id.
      * @hide
@@ -1739,7 +1786,8 @@ public final class AccessibilityManager {
     }
 
     /**
-     * Perform the accessibility button for the given target which is assigned to the button.
+     * Perform the accessibility button or gesture
+     * for the given target which is assigned to the button.
      *
      * @param displayId displayId The logical display id.
      * @param targetName The flattened {@link ComponentName} string or the class name of a system
@@ -1760,6 +1808,31 @@ public final class AccessibilityManager {
             service.notifyAccessibilityButtonClicked(displayId, targetName);
         } catch (RemoteException re) {
             Log.e(LOG_TAG, "Error while dispatching accessibility button click", re);
+        }
+    }
+
+    /**
+     * Notifies that a shortcut was long-clicked.
+     * This displays the dialog used to select which target the given shortcut will use,
+     * from its list of targets.
+     * The current shortcut type is determined by the current navigation mode.
+     *
+     * @param displayId The id of the display to show the dialog on.
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.STATUS_BAR_SERVICE)
+    public void notifyAccessibilityButtonLongClicked(int displayId) {
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return;
+            }
+        }
+        try {
+            service.notifyAccessibilityButtonLongClicked(displayId);
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error while dispatching accessibility button long click. ", re);
         }
     }
 
@@ -2049,9 +2122,7 @@ public final class AccessibilityManager {
      * {@link android.view.Display#DEFAULT_DISPLAY}, is or lower than
      * {@link android.view.Display#INVALID_DISPLAY}, or is already being proxy-ed.
      *
-     * @throws SecurityException if the app does not hold the
-     * {@link Manifest.permission#MANAGE_ACCESSIBILITY} permission or the
-     * {@link Manifest.permission#CREATE_VIRTUAL_DEVICE} permission.
+     * @throws SecurityException if the app does not hold the required permissions.
      *
      * @hide
      */
@@ -2079,9 +2150,7 @@ public final class AccessibilityManager {
      *
      * @return {@code true} if the proxy is successfully unregistered.
      *
-     * @throws SecurityException if the app does not hold the
-     * {@link Manifest.permission#MANAGE_ACCESSIBILITY} permission or the
-     * {@link Manifest.permission#CREATE_VIRTUAL_DEVICE} permission.
+     * @throws SecurityException if the app does not hold the required permissions.
      *
      * @hide
      */
@@ -2134,8 +2203,8 @@ public final class AccessibilityManager {
         try {
             return service.startFlashNotificationSequence(context.getOpPackageName(),
                     reason, mBinder);
-        } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error while start flash notification sequence", re);
+        } catch (RemoteException | SecurityException e) {
+            Log.e(LOG_TAG, "Error while start flash notification sequence", e);
             return false;
         }
     }
@@ -2164,8 +2233,8 @@ public final class AccessibilityManager {
 
         try {
             return service.stopFlashNotificationSequence(context.getOpPackageName());
-        } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error while stop flash notification sequence", re);
+        } catch (RemoteException | SecurityException e) {
+            Log.e(LOG_TAG, "Error while stop flash notification sequence", e);
             return false;
         }
     }
@@ -2192,8 +2261,8 @@ public final class AccessibilityManager {
         try {
             return service.startFlashNotificationEvent(context.getOpPackageName(),
                     reason, reasonPkg);
-        } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error while start flash notification event", re);
+        } catch (RemoteException | SecurityException e) {
+            Log.e(LOG_TAG, "Error while start flash notification event", e);
             return false;
         }
     }

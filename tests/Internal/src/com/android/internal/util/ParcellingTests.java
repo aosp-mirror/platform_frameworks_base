@@ -18,6 +18,7 @@ package com.android.internal.util;
 
 import android.os.Parcel;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.ravenwood.RavenwoodRule;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -26,6 +27,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.util.Parcelling.BuiltIn.ForInstant;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -37,6 +39,9 @@ import java.time.Instant;
 @Presubmit
 @RunWith(JUnit4.class)
 public class ParcellingTests {
+
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
 
     private Parcel mParcel = Parcel.obtain();
 

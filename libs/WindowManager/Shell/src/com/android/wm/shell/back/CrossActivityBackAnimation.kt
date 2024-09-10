@@ -51,8 +51,8 @@ import com.android.internal.policy.SystemBarUtils
 import com.android.internal.protolog.ProtoLog
 import com.android.wm.shell.R
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
-import com.android.wm.shell.animation.Interpolators
 import com.android.wm.shell.protolog.ShellProtoLogGroup
+import com.android.wm.shell.shared.animation.Interpolators
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -61,8 +61,7 @@ abstract class CrossActivityBackAnimation(
     private val context: Context,
     private val background: BackAnimationBackground,
     private val rootTaskDisplayAreaOrganizer: RootTaskDisplayAreaOrganizer,
-    protected val transaction: SurfaceControl.Transaction,
-    private val choreographer: Choreographer
+    protected val transaction: SurfaceControl.Transaction
 ) : ShellBackAnimation() {
 
     protected val startClosingRect = RectF()
@@ -171,7 +170,7 @@ abstract class CrossActivityBackAnimation(
         initialTouchPos.set(backMotionEvent.touchX, backMotionEvent.touchY)
 
         transaction.setAnimationTransaction()
-        isLetterboxed = closingTarget!!.taskInfo.appCompatTaskInfo.topActivityBoundsLetterboxed
+        isLetterboxed = closingTarget!!.taskInfo.appCompatTaskInfo.isTopActivityLetterboxed
         enteringHasSameLetterbox =
             isLetterboxed && closingTarget!!.localBounds.equals(enteringTarget!!.localBounds)
 
@@ -190,10 +189,13 @@ abstract class CrossActivityBackAnimation(
         preparePreCommitEnteringRectMovement()
 
         background.ensureBackground(
-            closingTarget!!.windowConfiguration.bounds,
-            getBackgroundColor(),
-            transaction,
-            statusbarHeight
+                closingTarget!!.windowConfiguration.bounds,
+                getBackgroundColor(),
+                transaction,
+                statusbarHeight,
+                if (closingTarget!!.windowConfiguration.tasksAreFloating())
+                    closingTarget!!.localBounds else null,
+                cornerRadius
         )
         ensureScrimLayer()
         if (isLetterboxed && enteringHasSameLetterbox) {
@@ -269,7 +271,9 @@ abstract class CrossActivityBackAnimation(
             .setSpring(postCommitFlingSpring)
         flingAnimation.start()
         // do an animation-frame immediately to prevent idle frame
-        flingAnimation.doAnimationFrame(choreographer.lastFrameTimeNanos / TimeUtils.NANOS_PER_MS)
+        flingAnimation.doAnimationFrame(
+            Choreographer.getInstance().lastFrameTimeNanos / TimeUtils.NANOS_PER_MS
+        )
 
         val valueAnimator =
             ValueAnimator.ofFloat(1f, 0f).setDuration(getPostCommitAnimationDuration())
@@ -362,7 +366,7 @@ abstract class CrossActivityBackAnimation(
     }
 
     protected fun applyTransaction() {
-        transaction.setFrameTimelineVsync(choreographer.vsyncId)
+        transaction.setFrameTimelineVsync(Choreographer.getInstance().vsyncId)
         transaction.apply()
     }
 

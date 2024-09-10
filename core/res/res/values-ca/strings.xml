@@ -266,8 +266,6 @@
     <string name="global_action_bug_report" msgid="5127867163044170003">"Informe d\'error"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Finalitza la sessió"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"Captura de pantalla"</string>
-    <!-- no translation found for identity_check_biometric_prompt_description (5810195983015866727) -->
-    <skip />
     <string name="bugreport_title" msgid="8549990811777373050">"Informe d\'errors"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"Es recopilarà informació sobre l\'estat actual del dispositiu i se t\'enviarà per correu electrònic. Passaran uns quants minuts des de l\'inici de l\'informe d\'errors fins al seu enviament, per la qual cosa et recomanem que tinguis paciència."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"Informe interactiu"</string>
@@ -1197,6 +1195,8 @@
     <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"L\'escriptura a mà no s\'admet als camps de contrasenya"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Enrere"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Canvia el mètode d\'introducció de text"</string>
+    <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"Obre el selector de mètode d\'introducció"</string>
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"Configuració"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"L\'espai d\'emmagatzematge s\'està esgotant"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"És possible que algunes funcions del sistema no funcionin"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"No hi ha prou espai d\'emmagatzematge per al sistema. Comprova que tinguis 250 MB d\'espai lliure i reinicia."</string>
@@ -1414,10 +1414,8 @@
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"Selecciona per desactivar la depuració sense fil."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"S\'ha activat el mode Agent de prova"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Si vols desactivar el mode Agent de prova, restableix les dades de fàbrica."</string>
-    <!-- no translation found for wrong_hsum_configuration_notification_title (7212758829332714385) -->
-    <skip />
-    <!-- no translation found for wrong_hsum_configuration_notification_message (5353475441480684381) -->
-    <skip />
+    <string name="wrong_hsum_configuration_notification_title" msgid="7212758829332714385">"Configuració de la compilació HSUM incorrecta"</string>
+    <string name="wrong_hsum_configuration_notification_message" msgid="5353475441480684381">"L\'estat del mode d\'usuari del sistema sense interfície gràfica d\'aquest dispositiu és diferent de la configuració de la seva compilació. Restableix les dades de fàbrica del dispositiu."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"S\'ha activat la consola de sèrie"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"Afecta el rendiment. Per desactivar-la, comprova el bootloader."</string>
     <string name="mte_override_notification_title" msgid="4731115381962792944">"L\'MTE experimental s\'ha activat"</string>
@@ -1433,6 +1431,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"COMPARTEIX"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"REBUTJA"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Selecciona un mètode d\'introducció"</string>
+    <string name="input_method_language_settings" msgid="8069089418056819437">"Configuració d\'idioma"</string>
     <string name="show_ime" msgid="6406112007347443383">"Mantén-lo en pantalla mentre el teclat físic està actiu"</string>
     <string name="hardware" msgid="3611039921284836033">"Utilitza el teclat en pantalla"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Configura <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
@@ -1748,7 +1747,8 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"Una aplicació està ocultant la sol·licitud de permís, de manera que la teva resposta no es pot verificar"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Toca una funció per començar a utilitzar-la:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Tria les funcions que vols utilitzar amb el botó d\'accessibilitat"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Tria les funcions que vols utilitzar amb la drecera per a tecles de volum"</string>
+    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
+    <skip />
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> s\'ha desactivat"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Edita les dreceres"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Fet"</string>
@@ -1762,18 +1762,12 @@
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"S\'han mantingut premudes les tecles de volum. S\'ha activat <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"S\'han mantingut premudes les tecles de volum. S\'ha desactivat <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Deixa anar les tecles de volum. Per activar <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, torna a mantenir premudes totes dues tecles de volum durant 3 segons."</string>
-    <!-- no translation found for accessibility_button_prompt_text (6105393217162198616) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_prompt_text (6452246951969541792) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_3finger_prompt_text (77745752309056152) -->
-    <skip />
-    <!-- no translation found for accessibility_button_instructional_text (6831154884557881996) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_instructional_text (4133877896011098550) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_3finger_instructional_text (1124458279366968154) -->
-    <skip />
+    <string name="accessibility_button_prompt_text" msgid="6105393217162198616">"Tria una funció"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="6452246951969541792">"Tria una funció"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="77745752309056152">"Tria una funció"</string>
+    <string name="accessibility_button_instructional_text" msgid="6831154884557881996">"La funció s\'obrirà la pròxima vegada que toquis el botó d\'accessibilitat"</string>
+    <string name="accessibility_gesture_instructional_text" msgid="4133877896011098550">"La funció s\'obrirà la pròxima vegada que utilitzis aquesta drecera. Llisca cap amunt amb 2 dits des de la part inferior de la pantalla i aixeca\'ls ràpidament."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="1124458279366968154">"La funció s\'obrirà la pròxima vegada que utilitzis aquesta drecera. Llisca cap amunt amb 3 dits des de la part inferior de la pantalla i aixeca\'ls ràpidament."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Ampliació"</string>
     <string name="user_switched" msgid="7249833311585228097">"Usuari actual: <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"S\'està canviant a <xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -1896,8 +1890,7 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"El PIN és massa curt. Ha de tenir quatre dígits com a mínim."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Torna-ho a provar més tard"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Mode de pantalla completa"</string>
-    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
-    <skip />
+    <string name="immersive_cling_description" msgid="2896205051090870978">"Per sortir, llisca cap avall des de la part superior de la pantalla"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Entesos"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Gira per a una millor visualització"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Obre <xliff:g id="NAME">%s</xliff:g> en pantalla completa per a una millor visualització"</string>
@@ -2433,25 +2426,32 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Contingut de l\'aplicació amagat de la compartició de pantalla per seguretat"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"S\'ha connectat automàticament a un satèl·lit"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Pots enviar i rebre missatges sense una xarxa mòbil o Wi‑Fi"</string>
+    <string name="satellite_notification_manual_title" msgid="1097504441849466279">"Vols utilitzar els missatges per satèl·lit?"</string>
+    <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Envia i rep missatges sense una xarxa mòbil o Wi‑Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Obre Missatges"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Com funciona"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Pendent..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Torna a configurar Desbloqueig amb empremta digital"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (5851784577768803510) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7925203589860744456) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (1824812666549916586) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (5974657382960155099) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> ja no es pot reconèixer."</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> i <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> ja no es poden reconèixer."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="1824812666549916586">"<xliff:g id="FINGERPRINT">%s</xliff:g> ja no es pot reconèixer. Torna a configurar Desbloqueig amb empremta digital."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="5974657382960155099">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> i <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> ja no es poden reconèixer. Torna a configurar Desbloqueig amb empremta digital."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Torna a configurar Desbloqueig facial"</string>
-    <!-- no translation found for face_dangling_notification_msg (746235263598985384) -->
-    <skip />
+    <string name="face_dangling_notification_msg" msgid="746235263598985384">"El teu model facial ja no es pot reconèixer. Torna a configurar Desbloqueig facial."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Configura"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Ara no"</string>
     <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"Alarma per a <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"Canvia d\'usuari"</string>
     <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"Silencia"</string>
     <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"Toca per silenciar el so"</string>
+    <string name="keyboard_shortcut_group_applications_browser" msgid="6535007304687100909">"Navegador"</string>
+    <string name="keyboard_shortcut_group_applications_contacts" msgid="2750702518068326356">"Contactes"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="4229037666415353683">"Correu electrònic"</string>
+    <string name="keyboard_shortcut_group_applications_sms" msgid="3523799286376321137">"SMS"</string>
+    <string name="keyboard_shortcut_group_applications_music" msgid="2051507523525651067">"Música"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="3571770335653387606">"Calendar"</string>
+    <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"Calculadora"</string>
+    <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"Maps"</string>
+    <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"Aplicacions"</string>
+    <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"Les teves empremtes digitals ja no es poden reconèixer. Torna a configurar Desbloqueig amb empremta digital."</string>
 </resources>

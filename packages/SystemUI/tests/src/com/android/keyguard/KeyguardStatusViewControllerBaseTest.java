@@ -26,7 +26,6 @@ import android.widget.FrameLayout;
 
 import com.android.keyguard.logging.KeyguardLogger;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory;
 import com.android.systemui.kosmos.KosmosJavaAdapter;
@@ -59,7 +58,6 @@ public class KeyguardStatusViewControllerBaseTest extends SysuiTestCase {
     @Mock protected KeyguardLogger mKeyguardLogger;
     @Mock protected KeyguardStatusViewController mControllerMock;
     @Mock protected ViewTreeObserver mViewTreeObserver;
-    @Mock protected DumpManager mDumpManager;
     protected FakeKeyguardRepository mFakeKeyguardRepository;
     protected FakePowerRepository mFakePowerRepository;
 
@@ -90,7 +88,6 @@ public class KeyguardStatusViewControllerBaseTest extends SysuiTestCase {
                 mKeyguardLogger,
                 mKosmos.getInteractionJankMonitor(),
                 deps.getKeyguardInteractor(),
-                mDumpManager,
                 PowerInteractorFactory.create(
                         mFakePowerRepository
                 ).getPowerInteractor()) {

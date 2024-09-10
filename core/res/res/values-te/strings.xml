@@ -203,8 +203,8 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"వ్యక్తిగత వినియోగం కోసం నిర్వాహకులు పరికరాన్ని తీసి వేశారు"</string>
     <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"ప్రైవేట్ స్పేస్ తీసివేయబడింది"</string>
     <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"మీ సంస్థ ఈ మేనేజ్ చేసే పరికరంలో ప్రైవేట్ స్పేస్‌లను అనుమతించదు."</string>
-    <string name="network_logging_notification_title" msgid="554983187553845004">"పరికరం నిర్వహించబడింది"</string>
-    <string name="network_logging_notification_text" msgid="1327373071132562512">"మీ సంస్థ ఈ పరికరాన్ని నిర్వహిస్తుంది మరియు నెట్‌వర్క్ ట్రాఫిక్‌ని పర్యవేక్షించవచ్చు. వివరాల కోసం నొక్కండి."</string>
+    <string name="network_logging_notification_title" msgid="554983187553845004">"ఈ డివైజ్ మేనేజ్ చేయబడుతోంది"</string>
+    <string name="network_logging_notification_text" msgid="1327373071132562512">"మీ సంస్థ ఈ డివైజ్‌ను మేనేజ్ చేస్తోంది, నెట్‌వర్క్ ట్రాఫిక్‌ను మానిటర్ చేసే అవకాశం ఉంది. వివరాల కోసం ట్యాప్ చేయండి."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"యాప్‌లు మీ లొకేషన్‌ను యాక్సెస్ చేయగలవు"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"మరింత తెలుసుకోవడానికి మీ IT అడ్మిన్‌ను కాంటాక్ట్ చేయండి"</string>
     <string name="geofencing_service" msgid="3826902410740315456">"భౌగోళిక సరిహద్దుల సర్వీస్"</string>
@@ -265,8 +265,6 @@
     <string name="global_action_bug_report" msgid="5127867163044170003">"బగ్ రిపోర్ట్‌"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"సెషన్‌ను ముగించు"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"స్క్రీన్‌షాట్"</string>
-    <!-- no translation found for identity_check_biometric_prompt_description (5810195983015866727) -->
-    <skip />
     <string name="bugreport_title" msgid="8549990811777373050">"బగ్ రిపోర్ట్‌"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"ఇది ఈమెయిల్‌ మెసేజ్‌ రూపంలో పంపడానికి మీ ప్రస్తుత పరికర స్థితి గురించి సమాచారాన్ని సేకరిస్తుంది. బగ్ రిపోర్ట్‌ను ప్రారంభించడం మొదలుకొని పంపడానికి సిద్ధం చేసే వరకు ఇందుకు కొంత సమయం పడుతుంది; దయచేసి ఓపిక పట్టండి."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"ప్రభావశీల రిపోర్ట్‌"</string>
@@ -1196,6 +1194,8 @@
     <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"పాస్‌వర్డ్ ఫీల్డ్‌లలో చేతిరాతకు సపోర్ట్ లేదు"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"వెనుకకు"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"ఇన్‌పుట్ విధానాన్ని మార్చండి"</string>
+    <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"ఇన్‌పుట్ విధాన సెలెక్టర్‌ను తెరవండి"</string>
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"సెట్టింగ్‌లు"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"స్టోరేజ్‌ ఖాళీ అయిపోతోంది"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"కొన్ని సిస్టమ్ కార్యాచరణలు పని చేయకపోవచ్చు"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"సిస్టమ్ కోసం తగినంత స్టోరేజ్‌ లేదు. మీకు 250MB ఖాళీ స్థలం ఉందని నిర్ధారించుకుని, పునఃప్రారంభించండి."</string>
@@ -1413,10 +1413,8 @@
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"వైర్‌లెస్ డీబగ్గింగ్‌ను డిజేబుల్ చేయడానికి ఎంచుకోండి."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"పరీక్ష నియంత్రణ మోడ్ ప్రారంభించబడింది"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"పరీక్ష నియంత్రణ మోడ్‌ను నిలిపివేయడానికి ఫ్యాక్టరీ రీసెట్‍‌ను అమలు చేయండి."</string>
-    <!-- no translation found for wrong_hsum_configuration_notification_title (7212758829332714385) -->
-    <skip />
-    <!-- no translation found for wrong_hsum_configuration_notification_message (5353475441480684381) -->
-    <skip />
+    <string name="wrong_hsum_configuration_notification_title" msgid="7212758829332714385">"తప్పు HSUM బిల్డ్ కాన్ఫిగరేషన్"</string>
+    <string name="wrong_hsum_configuration_notification_message" msgid="5353475441480684381">"ఈ పరికరానికి సంబంధించిన హెడ్‌లెస్ సిస్టమ్ యూజర్ మోడ్ స్టేట్, దాని బిల్డ్ కాన్ఫిగరేషన్ కంటే భిన్నంగా ఉంటుంది. దయచేసి పరికరాన్ని ఫ్యాక్టరీ రీసెట్ చేయండి."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"సీరియల్ కన్సోల్ ప్రారంభించబడింది"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"పని తీరు ప్రభావితమైంది. నిలిపివేయడానికి, బూట్‌లోడర్‌ను చెక్ చేయండి."</string>
     <string name="mte_override_notification_title" msgid="4731115381962792944">"ప్రయోగాత్మక MTE ఎనేబుల్ చేయబడింది"</string>
@@ -1432,6 +1430,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"షేర్ చేయండి"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"తిరస్కరిస్తున్నాను"</string>
     <string name="select_input_method" msgid="3971267998568587025">"ఇన్‌పుట్ పద్ధతిని ఎంచుకోండి"</string>
+    <string name="input_method_language_settings" msgid="8069089418056819437">"భాషా సెట్టింగ్‌లు"</string>
     <string name="show_ime" msgid="6406112007347443383">"దీన్ని భౌతిక కీబోర్డ్ యాక్టివ్‌గా ఉన్నప్పుడు స్క్రీన్‌పై ఉంచుతుంది"</string>
     <string name="hardware" msgid="3611039921284836033">"స్క్రీన్‌పై కీబోర్డ్ ఉపయోగించు"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"<xliff:g id="DEVICE_NAME">%s</xliff:g>‌ను కాన్ఫిగర్ చేయండి"</string>
@@ -1747,7 +1746,8 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"ఒక యాప్ అనుమతి రిక్వెస్ట్‌కు అడ్డు తగులుతోంది కాబట్టి మీ సమాధానం వెరిఫై చేయడం సాధ్యం కాదు."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"ఫీచర్‌ని ఉపయోగించడం ప్రారంభించడానికి, దాన్ని ట్యాప్ చేయండి:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"యాక్సెసిబిలిటీ బటన్‌తో ఉపయోగించడానికి ఫీచర్లను ఎంచుకోండి"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"వాల్యూమ్ కీ షార్ట్‌కట్‌తో ఉపయోగించడానికి ఫీచర్లను ఎంచుకోండి"</string>
+    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
+    <skip />
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> ఆఫ్ చేయబడింది"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"షార్ట్‌కట్‌లను ఎడిట్ చేయండి"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"పూర్తయింది"</string>
@@ -1761,12 +1761,9 @@
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"వాల్యూమ్ కీలు నొక్కి ఉంచబడ్డాయి. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ఆన్ చేయబడింది"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"వాల్యూమ్ కీలు నొక్కి ఉంచబడ్డాయి. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ఆఫ్ చేయబడింది"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"వాల్యూమ్ కీలను రిలీజ్ చేయండి. <xliff:g id="SERVICE_NAME">%1$s</xliff:g>‌ను ఆన్ చేయడానికి, రెండు వాల్యూమ్ కీలను మళ్లీ 3 సెకన్ల పాటు నొక్కి పట్టుకోండి."</string>
-    <!-- no translation found for accessibility_button_prompt_text (6105393217162198616) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_prompt_text (6452246951969541792) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_3finger_prompt_text (77745752309056152) -->
-    <skip />
+    <string name="accessibility_button_prompt_text" msgid="6105393217162198616">"ఒక ఫీచర్‌ను ఎంచుకోండి"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="6452246951969541792">"ఒక ఫీచర్‌ను ఎంచుకోండి"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="77745752309056152">"ఒక ఫీచర్‌ను ఎంచుకోండి"</string>
     <string name="accessibility_button_instructional_text" msgid="6831154884557881996">"తర్వాతిసారి మీరు యాక్సెసిబిలిటీ బటన్‌ను ట్యాప్ చేసినప్పుడు ఈ ఫీచర్ తెరుచుకుంటుంది"</string>
     <string name="accessibility_gesture_instructional_text" msgid="4133877896011098550">"తర్వాతిసారి మీరు ఈ షార్ట్‌కట్‌ను ఉపయోగించినప్పుడు ఈ ఫీచర్ తెరుచుకుంటుంది. మీ స్క్రీన్ దిగువ నుండి 2 వేళ్లతో పైకి స్వైప్ చేసి, వెంటనే వదలండి."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="1124458279366968154">"తర్వాతిసారి మీరు ఈ షార్ట్‌కట్‌ను ఉపయోగించినప్పుడు ఈ ఫీచర్ తెరుచుకుంటుంది. మీ స్క్రీన్ దిగువ నుండి 3 వేళ్లతో పైకి స్వైప్ చేసి, వెంటనే వదలండి."</string>
@@ -1892,8 +1889,7 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"పిన్‌ చాలా చిన్నదిగా ఉంది. తప్పనిసరిగా కనీసం 4 అంకెలు ఉండాలి."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"తర్వాత మళ్లీ ట్రై చేయండి"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"ఫుల్-స్క్రీన్‌లో వీక్షిస్తున్నారు"</string>
-    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
-    <skip />
+    <string name="immersive_cling_description" msgid="2896205051090870978">"ఎగ్జిట్ అవ్వడానికి, మీ స్క్రీన్ పై నుండి కిందికి స్వైప్ చేయండి"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"అర్థమైంది"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"మెరుగైన వీక్షణ కోసం తిప్పండి"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"మెరుగైన వీక్షణ కోసం <xliff:g id="NAME">%s</xliff:g>‌ను ఫుల్ స్క్రీన్‌లో తెరవండి"</string>
@@ -2429,25 +2425,32 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"సెక్యూరిటీ కోసం స్క్రీన్ షేర్ నుండి యాప్ కంటెంట్ దాచబడింది"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"శాటిలైట్‌కు ఆటోమేటిక్‌గా కనెక్ట్ చేయబడింది"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"మీరు మొబైల్ లేదా Wi-Fi నెట్‌వర్క్ లేకుండా మెసేజ్‌లను పంపవచ్చు, స్వీకరించవచ్చు"</string>
+    <string name="satellite_notification_manual_title" msgid="1097504441849466279">"శాటిలైట్ మెసేజింగ్‌ను ఉపయోగించాలనుకుంటున్నారా?"</string>
+    <string name="satellite_notification_manual_summary" msgid="901206289846283445">"మొబైల్ లేదా Wi-Fi నెట్‌వర్క్ లేకుండా మెసేజ్‌లను పంపండి, స్వీకరించండి"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messagesను తెరవండి"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"ఇది ఎలా పని చేస్తుంది"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"పెండింగ్‌లో ఉంది..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"వేలిముద్ర అన్‌లాక్‌ను మళ్లీ సెటప్ చేయండి"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (5851784577768803510) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7925203589860744456) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (1824812666549916586) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (5974657382960155099) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g>‌ను ఇకపై గుర్తించడం సాధ్యం కాదు."</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>, <xliff:g id="FINGERPRINT_1">%2$s</xliff:g>‌లను ఇకపై గుర్తించడం సాధ్యం కాదు."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="1824812666549916586">"<xliff:g id="FINGERPRINT">%s</xliff:g>‌ను ఇకపై గుర్తించడం సాధ్యం కాదు. వేలిముద్ర అన్‌లాక్‌ను మళ్లీ సెటప్ చేయండి."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="5974657382960155099">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>, <xliff:g id="FINGERPRINT_1">%2$s</xliff:g>‌లను ఇకపై గుర్తించడం సాధ్యం కాదు. వేలిముద్ర అన్‌లాక్‌ను మళ్లీ సెటప్ చేయండి."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"ఫేస్ అన్‌లాక్‌ను మళ్లీ సెటప్ చేయండి"</string>
-    <!-- no translation found for face_dangling_notification_msg (746235263598985384) -->
-    <skip />
+    <string name="face_dangling_notification_msg" msgid="746235263598985384">"మీ ఫేస్ మోడల్‌ను ఇకపై గుర్తించడం సాధ్యం కాదు. ఫేస్ అన్‌లాక్‌ను మళ్లీ సెటప్ చేయండి."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"సెటప్ చేయండి"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"ఇప్పుడు కాదు"</string>
     <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"<xliff:g id="USER_NAME">%s</xliff:g> కోసం అలారం"</string>
     <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"యూజర్‌ను మార్చండి"</string>
     <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"మ్యూట్ చేయండి"</string>
     <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"సౌండ్‌ను మ్యూట్ చేయడానికి ట్యాప్ చేయండి"</string>
+    <string name="keyboard_shortcut_group_applications_browser" msgid="6535007304687100909">"బ్రౌజర్"</string>
+    <string name="keyboard_shortcut_group_applications_contacts" msgid="2750702518068326356">"కాంటాక్ట్‌లు"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="4229037666415353683">"ఈమెయిల్"</string>
+    <string name="keyboard_shortcut_group_applications_sms" msgid="3523799286376321137">"SMS"</string>
+    <string name="keyboard_shortcut_group_applications_music" msgid="2051507523525651067">"మ్యూజిక్"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="3571770335653387606">"క్యాలెండర్"</string>
+    <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"క్యాలిక్యులేటర్"</string>
+    <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"Maps"</string>
+    <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"అప్లికేషన్‌లు"</string>
+    <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"మీ వేలిముద్రలను ఇకపై గుర్తించడం సాధ్యం కాదు. వేలిముద్ర అన్‌లాక్‌ను మళ్లీ సెటప్ చేయండి."</string>
 </resources>

@@ -16,11 +16,11 @@
 
 package com.android.compose.animation.scene.transformation
 
+import com.android.compose.animation.scene.ContentKey
 import com.android.compose.animation.scene.Element
 import com.android.compose.animation.scene.ElementMatcher
-import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneTransitionLayoutImpl
-import com.android.compose.animation.scene.TransitionState
+import com.android.compose.animation.scene.content.state.TransitionState
 
 /** Fade an element in or out. */
 internal class Fade(
@@ -28,9 +28,9 @@ internal class Fade(
 ) : PropertyTransformation<Float> {
     override fun transform(
         layoutImpl: SceneTransitionLayoutImpl,
-        scene: SceneKey,
+        content: ContentKey,
         element: Element,
-        sceneState: Element.SceneState,
+        stateInContent: Element.State,
         transition: TransitionState.Transition,
         value: Float
     ): Float {

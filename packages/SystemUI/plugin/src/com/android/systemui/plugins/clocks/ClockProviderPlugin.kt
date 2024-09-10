@@ -50,8 +50,8 @@ interface ClockProvider {
     /** Initializes and returns the target clock design */
     fun createClock(settings: ClockSettings): ClockController
 
-    /** A static thumbnail for rendering in some examples */
-    fun getClockThumbnail(id: ClockId): Drawable?
+    /** Settings configuration parameters for the clock */
+    fun getClockPickerConfig(id: ClockId): ClockPickerConfig
 }
 
 /** Interface for controlling an active clock */
@@ -133,6 +133,7 @@ class DefaultClockFaceLayout(val view: View) : ClockFaceLayout {
     // both small and large clock should have a container (RelativeLayout in
     // SimpleClockFaceController)
     override val views = listOf(view)
+
     override fun applyConstraints(constraints: ConstraintSet): ConstraintSet {
         if (views.size != 1) {
             throw IllegalArgumentException(
@@ -267,6 +268,25 @@ data class ClockMetadata(
     val clockId: ClockId,
 )
 
+data class ClockPickerConfig(
+    val id: String,
+
+    /** Localized name of the clock */
+    val name: String,
+
+    /** Localized accessibility description for the clock */
+    val description: String,
+
+    /* Static & lightweight thumbnail version of the clock */
+    val thumbnail: Drawable,
+
+    /** True if the clock will react to tone changes in the seed color */
+    val isReactiveToTone: Boolean = true,
+
+    /** True if the clock is capable of chagning style in reaction to touches */
+    val isReactiveToTouch: Boolean = false,
+)
+
 /** Render configuration for the full clock. Modifies the way systemUI behaves with this clock. */
 data class ClockConfig(
     val id: String,
@@ -280,7 +300,7 @@ data class ClockConfig(
     /** Transition to AOD should move smartspace like large clock instead of small clock */
     val useAlternateSmartspaceAODTransition: Boolean = false,
 
-    /** True if the clock will react to tone changes in the seed color. */
+    @Deprecated("TODO(b/352049256): Remove")
     val isReactiveToTone: Boolean = true,
 
     /** True if the clock is large frame clock, which will use weather in compose. */

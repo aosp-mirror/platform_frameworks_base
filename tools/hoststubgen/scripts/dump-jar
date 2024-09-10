@@ -26,12 +26,12 @@ help() {
 
         Dump a *.class file
 
-      dump-jar [-v] [-s] [-o OUTPUT-FILENAME] JAR-FILE[: filename regex] [...]
+      dump-jar [-v] [-s] [-o OUTPUT-FILENAME] JAR-FILE[: class internal name regex] [...]
 
         Dump a jar file.
 
         If a filename contains a ':', then the following part
-        will be used to filter files in the jar file.
+        will be used to filter files in the jar file that matches against class internal names.
 
         For example, "file.jar:/MyClass$" will only dump "MyClass" in file.jar.
 
@@ -78,16 +78,6 @@ if (( $simple )) ; then
   JAVAP_OPTS="-p -c -v"
 fi
 
-
-# Normalize a java class name.
-# Convert '.' to '/'
-# Remove the *.class suffix.
-normalize() {
-  local name="$1"
-  name="${name%.class}" # Remove the .class suffix.
-  echo "$name" | tr '.' '/'
-}
-
 # Convert the output for `-s` as needed.
 filter_output() {
   if (( $simple )) ; then
@@ -97,6 +87,7 @@ filter_output() {
     # - Remove the constant pool
     # - Remove the line number table
     # - Some other transient lines
+    # - Sometimes the javap shows mysterious warnings, so remove them too.
     #
     # `/PATTERN-1/,/PATTERN-1/{//!d}` is a trick to delete lines between two patterns, without
     # the start and the end lines.
@@ -106,7 +97,8 @@ filter_output() {
         -e '/^ *line *[0-9][0-9]*: *[0-9][0-9]*$/d' \
         -e '/SHA-256 checksum/d' \
         -e '/Last modified/d' \
-        -e '/^Classfile jar/d'
+        -e '/^Classfile jar/d' \
+        -e '/\[warning\]/d'
   else
     cat # Print as-is.
   fi
@@ -122,6 +114,12 @@ write_to_out() {
   fi
 }
 
+# Read jar file names and remove the .class suffix.
+# Also remove non-class files.
+to_internal_names() {
+    sed -ne 's/\.class$//p'
+}
+
 for file in "${@}"; do
 
     # *.class?
@@ -134,7 +132,7 @@ for file in "${@}"; do
         # Take the regex. Remove everything up to : in $file
         regex=""
         if [[ "$file" =~ : ]] ; then
-            regex="$(normalize "${file##*:}")"
+            regex="${file##*:}"
         fi
 
         # Remove everything after ':', inclusively, in $file.
@@ -149,13 +147,9 @@ for file in "${@}"; do
           echo
         fi
 
-        jar tf "$file" | grep '\.class$' | sort | while read -r class ; do
-            if normalize "$class" | grep -q -- "$regex" ; then
-                echo "## Class: $class"
-                javap $dump_code_opt $JAVAP_OPTS -cp $file ${class%.class}
-            else
-                (( $verbose )) && echo "## Skipping class: $class"
-            fi
+        jar tf "$file" | sort | to_internal_names | grep -- "$regex" | while read -r class ; do
+            echo "## Class: $class.class"
+            javap $dump_code_opt $JAVAP_OPTS -cp "$file" "${class}"
         done
 
     else

@@ -1064,10 +1064,8 @@ public class UsageStatsService extends SystemService implements
         synchronized (mReportedEvents) {
             LinkedList<Event> events = mReportedEvents.get(userId);
             if (events == null) {
-                // TODO (b/347644400): callers of this API should verify that the userId passed to
-                // this method exists - there is currently a known case where USER_ALL is passed
-                // here and it would be added to the queue, never to be flushed correctly. The logic
-                // below should only remain as a last-resort catch-all fix.
+                // Callers of this API should verify that the userId passed to this method exists.
+                // The logic below should only remain as a last-resort catch-all fix.
                 final UserManagerInternal umi = LocalServices.getService(UserManagerInternal.class);
                 if (umi == null || (umi != null && !umi.exists(userId))) {
                     // The userId passed is a non-existent user so don't report the event.
@@ -3236,6 +3234,18 @@ public class UsageStatsService extends SystemService implements
             Event event = new Event(eventType, SystemClock.elapsedRealtime());
             event.mPackage = packageName;
             reportEventOrAddToQueue(userId, event);
+        }
+
+        @Override
+        public void reportEventForAllUsers(String packageName, int eventType) {
+            if (packageName == null) {
+                Slog.w(TAG, "Event reported without a package name, eventType:" + eventType);
+                return;
+            }
+
+            Event event = new Event(eventType, SystemClock.elapsedRealtime());
+            event.mPackage = packageName;
+            reportEventToAllUserId(event);
         }
 
         @Override

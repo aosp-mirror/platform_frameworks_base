@@ -16,8 +16,6 @@
 
 package com.android.compose.animation.scene
 
-import androidx.activity.BackEventCompat
-import androidx.activity.ComponentActivity
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
@@ -31,6 +29,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,7 +41,7 @@ import androidx.compose.ui.test.assertHeightIsEqualTo
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertPositionInRootIsEqualTo
 import androidx.compose.ui.test.assertWidthIsEqualTo
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onChild
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -55,9 +55,13 @@ import com.android.compose.animation.scene.TestScenes.SceneB
 import com.android.compose.animation.scene.TestScenes.SceneC
 import com.android.compose.animation.scene.subjects.assertThat
 import com.android.compose.test.assertSizeIsEqualTo
+import com.android.compose.test.setContentAndCreateMainScope
 import com.android.compose.test.subjects.DpOffsetSubject
 import com.android.compose.test.subjects.assertThat
+import com.android.compose.test.transition
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import org.junit.Assert.assertThrows
 import org.junit.Rule
 import org.junit.Test
@@ -69,23 +73,27 @@ class SceneTransitionLayoutTest {
         private val LayoutSize = 300.dp
     }
 
-    private var currentScene by mutableStateOf(SceneA)
-    private lateinit var layoutState: SceneTransitionLayoutState
+    private lateinit var coroutineScope: CoroutineScope
+    private lateinit var layoutState: MutableSceneTransitionLayoutState
+    private var currentScene: SceneKey
+        get() = layoutState.transitionState.currentScene
+        set(value) {
+            rule.runOnUiThread { layoutState.setTargetScene(value, coroutineScope) }
+        }
 
-    // We use createAndroidComposeRule() here and not createComposeRule() because we need an
-    // activity for testBack().
-    @get:Rule val rule = createAndroidComposeRule<ComponentActivity>()
+    @get:Rule val rule = createComposeRule()
 
     /** The content under test. */
     @Composable
     private fun TestContent(enableInterruptions: Boolean = true) {
-        layoutState =
-            updateSceneTransitionLayoutState(
-                currentScene,
-                { currentScene = it },
+        coroutineScope = rememberCoroutineScope()
+        layoutState = remember {
+            MutableSceneTransitionLayoutState(
+                SceneA,
                 EmptyTestTransitions,
                 enableInterruptions = enableInterruptions,
             )
+        }
 
         SceneTransitionLayout(
             state = layoutState,
@@ -124,7 +132,7 @@ class SceneTransitionLayoutTest {
     }
 
     @Composable
-    private fun SceneScope.SharedFoo(size: Dp, childOffset: Dp, modifier: Modifier = Modifier) {
+    private fun ContentScope.SharedFoo(size: Dp, childOffset: Dp, modifier: Modifier = Modifier) {
         Element(TestElements.Foo, modifier.size(size).background(Color.Red)) {
             // Offset the single child of Foo by some animated shared offset.
             val offset by animateElementDpAsState(childOffset, TestValues.Value1)
@@ -164,52 +172,6 @@ class SceneTransitionLayoutTest {
     }
 
     @Test
-    fun testBack() {
-        rule.setContent { TestContent() }
-
-        assertThat(layoutState.transitionState).hasCurrentScene(SceneA)
-
-        rule.runOnUiThread { rule.activity.onBackPressedDispatcher.onBackPressed() }
-        rule.waitForIdle()
-        assertThat(layoutState.transitionState).hasCurrentScene(SceneB)
-    }
-
-    @Test
-    fun testPredictiveBack() {
-        rule.setContent { TestContent() }
-
-        assertThat(layoutState.transitionState).hasCurrentScene(SceneA)
-
-        // Start back.
-        val dispatcher = rule.activity.onBackPressedDispatcher
-        rule.runOnUiThread {
-            dispatcher.dispatchOnBackStarted(backEvent())
-            dispatcher.dispatchOnBackProgressed(backEvent(progress = 0.4f))
-        }
-
-        val transition = assertThat(layoutState.transitionState).isTransition()
-        assertThat(transition).hasFromScene(SceneA)
-        assertThat(transition).hasToScene(SceneB)
-        assertThat(transition).hasProgress(0.4f)
-
-        // Cancel it.
-        rule.runOnUiThread { dispatcher.dispatchOnBackCancelled() }
-        rule.waitForIdle()
-        assertThat(layoutState.transitionState).hasCurrentScene(SceneA)
-        assertThat(layoutState.transitionState).isIdle()
-
-        // Start again and commit it.
-        rule.runOnUiThread {
-            dispatcher.dispatchOnBackStarted(backEvent())
-            dispatcher.dispatchOnBackProgressed(backEvent(progress = 0.4f))
-            dispatcher.onBackPressed()
-        }
-        rule.waitForIdle()
-        assertThat(layoutState.transitionState).hasCurrentScene(SceneB)
-        assertThat(layoutState.transitionState).isIdle()
-    }
-
-    @Test
     fun testTransitionState() {
         rule.setContent { TestContent() }
         assertThat(layoutState.transitionState).isIdle()
@@ -218,23 +180,15 @@ class SceneTransitionLayoutTest {
         // We will advance the clock manually.
         rule.mainClock.autoAdvance = false
 
-        // Change the current scene. Until composition is triggered, this won't change the layout
-        // state.
+        // Change the current scene.
         currentScene = SceneB
-        assertThat(layoutState.transitionState).isIdle()
-        assertThat(layoutState.transitionState).hasCurrentScene(SceneA)
-
-        // On the next frame, we will recompose because currentScene changed, which will start the
-        // transition (i.e. it will change the transitionState to be a Transition) in a
-        // LaunchedEffect.
-        rule.mainClock.advanceTimeByFrame()
-        val transition = assertThat(layoutState.transitionState).isTransition()
+        val transition = assertThat(layoutState.transitionState).isSceneTransition()
         assertThat(transition).hasFromScene(SceneA)
         assertThat(transition).hasToScene(SceneB)
         assertThat(transition).hasProgress(0f)
 
         // Then, on the next frame, the animator we started gets its initial value and clock
-        // starting time. We are now at progress = 0f.
+        // starting time. We are still at progress = 0f.
         rule.mainClock.advanceTimeByFrame()
         assertThat(transition).hasProgress(0f)
 
@@ -275,11 +229,8 @@ class SceneTransitionLayoutTest {
         // Pause animations to test the state mid-transition.
         rule.mainClock.autoAdvance = false
 
-        // Go to scene B and let the animation start. See [testLayoutState()] and
-        // [androidx.compose.ui.test.MainTestClock] to understand why we need to advance the clock
-        // by 2 frames to be at the start of the animation.
+        // Go to scene B and let the animation start.
         currentScene = SceneB
-        rule.mainClock.advanceTimeByFrame()
         rule.mainClock.advanceTimeByFrame()
 
         // Advance to the middle of the animation.
@@ -293,7 +244,7 @@ class SceneTransitionLayoutTest {
         // 100.dp. We pause at the middle of the transition, so it should now be 75.dp given that we
         // use a linear interpolator. Foo was at (x = layoutSize - 50dp, y = 0) in SceneA and is
         // going to (x = 0, y = 0), so the offset should now be half what it was.
-        var transition = assertThat(layoutState.transitionState).isTransition()
+        var transition = assertThat(layoutState.transitionState).isSceneTransition()
         assertThat(transition).hasProgress(0.5f)
         sharedFoo.assertWidthIsEqualTo(75.dp)
         sharedFoo.assertHeightIsEqualTo(75.dp)
@@ -311,7 +262,6 @@ class SceneTransitionLayoutTest {
         // Animate to scene C, let the animation start then go to the middle of the transition.
         currentScene = SceneC
         rule.mainClock.advanceTimeByFrame()
-        rule.mainClock.advanceTimeByFrame()
         rule.mainClock.advanceTimeBy(TestTransitionDuration / 2)
 
         // In Scene C, foo is at the bottom start of the layout and has a size of 150.dp. The
@@ -322,7 +272,7 @@ class SceneTransitionLayoutTest {
         val expectedSize = 100.dp + (150.dp - 100.dp) * interpolatedProgress
 
         sharedFoo = rule.onNode(isElement(TestElements.Foo, SceneC))
-        transition = assertThat(layoutState.transitionState).isTransition()
+        transition = assertThat(layoutState.transitionState).isSceneTransition()
         assertThat(transition).hasProgress(interpolatedProgress)
         sharedFoo.assertWidthIsEqualTo(expectedSize)
         sharedFoo.assertHeightIsEqualTo(expectedSize)
@@ -375,22 +325,23 @@ class SceneTransitionLayoutTest {
             rule.runOnUiThread {
                 MutableSceneTransitionLayoutStateImpl(
                     SceneA,
-                    transitions { overscroll(SceneB, Orientation.Horizontal) }
+                    transitions { overscrollDisabled(SceneB, Orientation.Horizontal) }
                 )
             }
 
         val layoutTag = "layout"
-        rule.setContent {
-            SceneTransitionLayout(state, Modifier.testTag(layoutTag)) {
-                scene(SceneA) { Box(Modifier.size(50.dp)) }
-                scene(SceneB) { Box(Modifier.size(70.dp)) }
+        val scope =
+            rule.setContentAndCreateMainScope {
+                SceneTransitionLayout(state, Modifier.testTag(layoutTag)) {
+                    scene(SceneA) { Box(Modifier.size(50.dp)) }
+                    scene(SceneB) { Box(Modifier.size(70.dp)) }
+                }
             }
-        }
 
         // Overscroll on A at -100%: size should be interpolated given that there is no overscroll
         // defined for scene A.
         var progress by mutableStateOf(-1f)
-        rule.runOnIdle {
+        scope.launch {
             state.startTransition(transition(from = SceneA, to = SceneB, progress = { progress }))
         }
         rule.onNodeWithTag(layoutTag).assertSizeIsEqualTo(30.dp)
@@ -409,24 +360,24 @@ class SceneTransitionLayoutTest {
     fun multipleTransitionsWillComposeMultipleScenes() {
         val duration = 10 * 16L
 
-        var currentScene: SceneKey by mutableStateOf(SceneA)
-        lateinit var state: SceneTransitionLayoutState
-        rule.setContent {
-            state =
-                updateSceneTransitionLayoutState(
-                    currentScene = currentScene,
-                    onChangeScene = { currentScene = it },
-                    transitions =
-                        transitions {
-                            from(SceneA, to = SceneB) {
-                                spec = tween(duration.toInt(), easing = LinearEasing)
-                            }
-                            from(SceneB, to = SceneC) {
-                                spec = tween(duration.toInt(), easing = LinearEasing)
-                            }
+        val state =
+            rule.runOnUiThread {
+                MutableSceneTransitionLayoutState(
+                    SceneA,
+                    transitions {
+                        from(SceneA, to = SceneB) {
+                            spec = tween(duration.toInt(), easing = LinearEasing)
                         }
+                        from(SceneB, to = SceneC) {
+                            spec = tween(duration.toInt(), easing = LinearEasing)
+                        }
+                    }
                 )
+            }
 
+        lateinit var coroutineScope: CoroutineScope
+        rule.setContent {
+            coroutineScope = rememberCoroutineScope()
             SceneTransitionLayout(state) {
                 scene(SceneA) { Box(Modifier.testTag("aRoot").fillMaxSize()) }
                 scene(SceneB) { Box(Modifier.testTag("bRoot").fillMaxSize()) }
@@ -444,16 +395,15 @@ class SceneTransitionLayoutTest {
         rule.mainClock.autoAdvance = false
 
         // Start A => B and go to the middle of the transition.
-        currentScene = SceneB
+        rule.runOnUiThread { state.setTargetScene(SceneB, coroutineScope) }
 
-        // We need to tick 2 frames after changing [currentScene] before the animation actually
+        // We need to tick 1 frames after changing [currentScene] before the animation actually
         // starts.
-        rule.mainClock.advanceTimeByFrame()
         rule.mainClock.advanceTimeByFrame()
         rule.mainClock.advanceTimeBy(duration / 2)
         rule.waitForIdle()
 
-        var transition = assertThat(state.transitionState).isTransition()
+        var transition = assertThat(state.transitionState).isSceneTransition()
         assertThat(transition).hasProgress(0.5f)
 
         // A and B are composed.
@@ -462,12 +412,11 @@ class SceneTransitionLayoutTest {
         rule.onNodeWithTag("cRoot").assertDoesNotExist()
 
         // Start B => C.
-        currentScene = SceneC
-        rule.mainClock.advanceTimeByFrame()
+        rule.runOnUiThread { state.setTargetScene(SceneC, coroutineScope) }
         rule.mainClock.advanceTimeByFrame()
         rule.waitForIdle()
 
-        transition = assertThat(state.transitionState).isTransition()
+        transition = assertThat(state.transitionState).isSceneTransition()
         assertThat(transition).hasProgress(0f)
 
         // A, B and C are composed.
@@ -517,12 +466,7 @@ class SceneTransitionLayoutTest {
             assertThrows(IllegalStateException::class.java) {
                 rule.setContent {
                     SceneTransitionLayout(
-                        state =
-                            updateSceneTransitionLayoutState(
-                                currentScene = currentScene,
-                                onChangeScene = { currentScene = it },
-                                transitions = EmptyTestTransitions
-                            ),
+                        state = remember { MutableSceneTransitionLayoutState(SceneA) },
                         modifier = Modifier.size(LayoutSize),
                     ) {
                         // from SceneA to SceneA
@@ -539,14 +483,14 @@ class SceneTransitionLayoutTest {
     fun sceneKeyInScope() {
         val state = rule.runOnUiThread { MutableSceneTransitionLayoutState(SceneA) }
 
-        var keyInA: SceneKey? = null
-        var keyInB: SceneKey? = null
-        var keyInC: SceneKey? = null
+        var keyInA: ContentKey? = null
+        var keyInB: ContentKey? = null
+        var keyInC: ContentKey? = null
         rule.setContent {
             SceneTransitionLayout(state) {
-                scene(SceneA) { keyInA = sceneKey }
-                scene(SceneB) { keyInB = sceneKey }
-                scene(SceneC) { keyInC = sceneKey }
+                scene(SceneA) { keyInA = contentKey }
+                scene(SceneB) { keyInB = contentKey }
+                scene(SceneC) { keyInC = contentKey }
             }
         }
 
@@ -561,12 +505,18 @@ class SceneTransitionLayoutTest {
         assertThat(keyInC).isEqualTo(SceneC)
     }
 
-    private fun backEvent(progress: Float = 0f): BackEventCompat {
-        return BackEventCompat(
-            touchX = 0f,
-            touchY = 0f,
-            progress = progress,
-            swipeEdge = BackEventCompat.EDGE_LEFT,
-        )
+    @Test
+    fun overlaysMapIsNotAllocatedWhenNoOverlayIsDefined() {
+        lateinit var layoutImpl: SceneTransitionLayoutImpl
+        rule.setContent {
+            SceneTransitionLayoutForTesting(
+                remember { MutableSceneTransitionLayoutState(SceneA) },
+                onLayoutImpl = { layoutImpl = it },
+            ) {
+                scene(SceneA) { Box(Modifier.fillMaxSize()) }
+            }
+        }
+
+        assertThat(layoutImpl.overlaysOrNullForTest()).isNull()
     }
 }

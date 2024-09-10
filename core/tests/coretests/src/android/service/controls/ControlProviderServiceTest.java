@@ -45,9 +45,9 @@ import android.service.controls.actions.ControlAction;
 import android.service.controls.actions.ControlActionWrapper;
 import android.service.controls.templates.ThumbnailTemplate;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
-import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.R;
 

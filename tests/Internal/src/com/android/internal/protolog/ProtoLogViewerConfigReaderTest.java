@@ -20,75 +20,77 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 import android.platform.test.annotations.Presubmit;
+import android.util.proto.ProtoInputStream;
 
-import androidx.test.filters.SmallTest;
-
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.util.zip.GZIPOutputStream;
+import perfetto.protos.Protolog;
+import perfetto.protos.ProtologCommon;
 
-@SmallTest
 @Presubmit
 @RunWith(JUnit4.class)
 public class ProtoLogViewerConfigReaderTest {
-    private static final String TEST_VIEWER_CONFIG = "{\n"
-            + "  \"version\": \"1.0.0\",\n"
-            + "  \"messages\": {\n"
-            + "    \"70933285\": {\n"
-            + "      \"message\": \"Test completed successfully: %b\",\n"
-            + "      \"level\": \"ERROR\",\n"
-            + "      \"group\": \"GENERIC_WM\"\n"
-            + "    },\n"
-            + "    \"1792430067\": {\n"
-            + "      \"message\": \"Attempted to add window to a display that does not exist: %d."
-            + "  Aborting.\",\n"
-            + "      \"level\": \"WARN\",\n"
-            + "      \"group\": \"GENERIC_WM\"\n"
-            + "    },\n"
-            + "    \"1352021864\": {\n"
-            + "      \"message\": \"Test 2\",\n"
-            + "      \"level\": \"WARN\",\n"
-            + "      \"group\": \"GENERIC_WM\"\n"
-            + "    },\n"
-            + "    \"409412266\": {\n"
-            + "      \"message\": \"Window %s is already added\",\n"
-            + "      \"level\": \"WARN\",\n"
-            + "      \"group\": \"GENERIC_WM\"\n"
-            + "    }\n"
-            + "  },\n"
-            + "  \"groups\": {\n"
-            + "    \"GENERIC_WM\": {\n"
-            + "      \"tag\": \"WindowManager\"\n"
-            + "    }\n"
-            + "  }\n"
-            + "}\n";
+    private static final String TEST_GROUP_NAME = "MY_TEST_GROUP";
+    private static final String TEST_GROUP_TAG = "TEST";
 
+    private static final String OTHER_TEST_GROUP_NAME = "MY_OTHER_TEST_GROUP";
+    private static final String OTHER_TEST_GROUP_TAG = "OTHER_TEST";
 
-    private LegacyProtoLogViewerConfigReader
-            mConfig = new LegacyProtoLogViewerConfigReader();
-    private File mTestViewerConfig;
+    private static final byte[] TEST_VIEWER_CONFIG =
+            perfetto.protos.Protolog.ProtoLogViewerConfig.newBuilder()
+                .addGroups(
+                        perfetto.protos.Protolog.ProtoLogViewerConfig.Group.newBuilder()
+                                .setId(1)
+                                .setName(TEST_GROUP_NAME)
+                                .setTag(TEST_GROUP_TAG)
+                ).addGroups(
+                        perfetto.protos.Protolog.ProtoLogViewerConfig.Group.newBuilder()
+                                .setId(1)
+                                .setName(OTHER_TEST_GROUP_NAME)
+                                .setTag(OTHER_TEST_GROUP_TAG)
+                ).addMessages(
+                        perfetto.protos.Protolog.ProtoLogViewerConfig.MessageData.newBuilder()
+                                .setMessageId(1)
+                                .setMessage("My Test Log Message 1 %b")
+                                .setLevel(ProtologCommon.ProtoLogLevel.PROTOLOG_LEVEL_DEBUG)
+                                .setGroupId(1)
+                ).addMessages(
+                        perfetto.protos.Protolog.ProtoLogViewerConfig.MessageData.newBuilder()
+                                .setMessageId(2)
+                                .setMessage("My Test Log Message 2 %b")
+                                .setLevel(ProtologCommon.ProtoLogLevel.PROTOLOG_LEVEL_VERBOSE)
+                                .setGroupId(1)
+                ).addMessages(
+                        perfetto.protos.Protolog.ProtoLogViewerConfig.MessageData.newBuilder()
+                                .setMessageId(3)
+                                .setMessage("My Test Log Message 3 %b")
+                                .setLevel(ProtologCommon.ProtoLogLevel.PROTOLOG_LEVEL_WARN)
+                                .setGroupId(1)
+                ).addMessages(
+                        perfetto.protos.Protolog.ProtoLogViewerConfig.MessageData.newBuilder()
+                                .setMessageId(4)
+                                .setMessage("My Test Log Message 4 %b")
+                                .setLevel(ProtologCommon.ProtoLogLevel.PROTOLOG_LEVEL_ERROR)
+                                .setGroupId(2)
+                ).addMessages(
+                        perfetto.protos.Protolog.ProtoLogViewerConfig.MessageData.newBuilder()
+                                .setMessageId(5)
+                                .setMessage("My Test Log Message 5 %b")
+                                .setLevel(ProtologCommon.ProtoLogLevel.PROTOLOG_LEVEL_WTF)
+                                .setGroupId(2)
+                ).build().toByteArray();
+
+    private final ViewerConfigInputStreamProvider mViewerConfigInputStreamProvider =
+            () -> new ProtoInputStream(TEST_VIEWER_CONFIG);
+
+    private ProtoLogViewerConfigReader mConfig;
 
     @Before
-    public void setUp() throws IOException {
-        mTestViewerConfig = File.createTempFile("testConfig", ".json.gz");
-        OutputStreamWriter writer = new OutputStreamWriter(
-                new GZIPOutputStream(new FileOutputStream(mTestViewerConfig)));
-        writer.write(TEST_VIEWER_CONFIG);
-        writer.close();
-    }
-
-    @After
-    public void tearDown() {
-        //noinspection ResultOfMethodCallIgnored
-        mTestViewerConfig.delete();
+    public void before() {
+        mConfig = new ProtoLogViewerConfigReader(mViewerConfigInputStreamProvider);
     }
 
     @Test
@@ -98,17 +100,26 @@ public class ProtoLogViewerConfigReaderTest {
 
     @Test
     public void loadViewerConfig() {
-        mConfig.loadViewerConfig(msg -> {}, mTestViewerConfig.getAbsolutePath());
-        assertEquals("Test completed successfully: %b", mConfig.getViewerString(70933285));
-        assertEquals("Test 2", mConfig.getViewerString(1352021864));
-        assertEquals("Window %s is already added", mConfig.getViewerString(409412266));
-        assertNull(mConfig.getViewerString(1));
+        mConfig.loadViewerConfig(new String[] { TEST_GROUP_NAME });
+        assertEquals("My Test Log Message 1 %b", mConfig.getViewerString(1));
+        assertEquals("My Test Log Message 2 %b", mConfig.getViewerString(2));
+        assertEquals("My Test Log Message 3 %b", mConfig.getViewerString(3));
+        assertNull(mConfig.getViewerString(4));
+        assertNull(mConfig.getViewerString(5));
     }
 
     @Test
-    public void loadViewerConfig_invalidFile() {
-        mConfig.loadViewerConfig(msg -> {}, "/tmp/unknown/file/does/not/exist");
-        // No exception is thrown.
+    public void unloadViewerConfig() {
+        mConfig.loadViewerConfig(new String[] { TEST_GROUP_NAME, OTHER_TEST_GROUP_NAME });
+        mConfig.unloadViewerConfig(new String[] { TEST_GROUP_NAME });
         assertNull(mConfig.getViewerString(1));
+        assertNull(mConfig.getViewerString(2));
+        assertNull(mConfig.getViewerString(3));
+        assertEquals("My Test Log Message 4 %b", mConfig.getViewerString(4));
+        assertEquals("My Test Log Message 5 %b", mConfig.getViewerString(5));
+
+        mConfig.unloadViewerConfig(new String[] { OTHER_TEST_GROUP_NAME });
+        assertNull(mConfig.getViewerString(4));
+        assertNull(mConfig.getViewerString(5));
     }
 }

@@ -12,11 +12,19 @@ flag {
 
 flag {
     name: "use_transaction_codes_for_unknown_methods"
-    namespace: "dropbox"
+    namespace: "stability"
     description: "Use transaction codes when the method names is unknown"
     bug: "350041302"
     is_fixed_read_only: true
     metadata {
         purpose: PURPOSE_BUGFIX
     }
+}
+
+flag {
+    name: "debug_store_enabled"
+    namespace: "stability"
+    description: "If the debug store is enabled."
+    bug: "314735374"
+    is_fixed_read_only: true
 }

@@ -32,6 +32,7 @@ import com.android.systemui.animation.Expandable
 import com.android.systemui.bluetooth.BroadcastDialogController
 import com.android.systemui.media.controls.data.repository.MediaFilterRepository
 import com.android.systemui.media.controls.domain.pipeline.MediaDataProcessor
+import com.android.systemui.media.controls.domain.pipeline.getNotificationActions
 import com.android.systemui.media.controls.shared.model.MediaControlModel
 import com.android.systemui.media.controls.shared.model.MediaData
 import com.android.systemui.media.controls.util.MediaSmartspaceLogger
@@ -102,7 +103,7 @@ constructor(
                 artwork = artwork,
                 deviceData = device,
                 semanticActionButtons = semanticActions,
-                notificationActionButtons = actions,
+                notificationActionButtons = getNotificationActions(data.actions, activityStarter),
                 actionsToShowInCollapsed = actionsToShowInCompact,
                 isDismissible = isClearable,
                 isResume = resumption,

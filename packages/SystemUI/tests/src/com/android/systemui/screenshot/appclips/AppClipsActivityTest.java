@@ -17,6 +17,7 @@
 package com.android.systemui.screenshot.appclips;
 
 import static android.app.Activity.RESULT_OK;
+import static android.app.ActivityManager.RunningTaskInfo;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 
 import static com.android.systemui.screenshot.appclips.AppClipsEvent.SCREENSHOT_FOR_NOTE_ACCEPTED;
@@ -29,13 +30,15 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.app.ActivityTaskManager.RootTaskInfo;
+import android.app.ActivityManager;
 import android.app.IActivityTaskManager;
 import android.app.assist.AssistContent;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
@@ -51,6 +54,7 @@ import android.os.Parcel;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
+import android.os.UserHandle;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
 import android.testing.AndroidTestingRunner;
@@ -103,7 +107,7 @@ public final class AppClipsActivityTest extends SysuiTestCase {
     private static final String BACKLINKS_TASK_APP_NAME = "Backlinks app";
     private static final String BACKLINKS_TASK_PACKAGE_NAME = "backlinksTaskPackageName";
 
-    private static final RootTaskInfo TASK_THAT_SUPPORTS_BACKLINKS =
+    private static final RunningTaskInfo TASK_THAT_SUPPORTS_BACKLINKS =
             createTaskInfoForBacklinksTask();
     private static final AssistContent ASSIST_CONTENT_FOR_BACKLINKS_TASK =
             createAssistContentForBacklinksTask();
@@ -120,6 +124,8 @@ public final class AppClipsActivityTest extends SysuiTestCase {
     @Mock
     private AssistContentRequester mAssistContentRequester;
     @Mock
+    private Context mMockedContext;
+    @Mock
     private PackageManager mPackageManager;
     @Mock
     private UserTracker mUserTracker;
@@ -127,6 +133,9 @@ public final class AppClipsActivityTest extends SysuiTestCase {
     private UiEventLogger mUiEventLogger;
 
     private AppClipsActivity mActivity;
+    private TextView mBacklinksDataTextView;
+    private CheckBox mBacklinksIncludeDataCheckBox;
+    private TextView mBacklinksCrossProfileErrorTextView;
 
     // Using the deprecated ActivityTestRule and SingleActivityFactory to help with injecting mocks.
     private final SingleActivityFactory<AppClipsActivityTestable> mFactory =
@@ -136,7 +145,7 @@ public final class AppClipsActivityTest extends SysuiTestCase {
                     return new AppClipsActivityTestable(
                             new AppClipsViewModel.Factory(mAppClipsCrossProcessHelper,
                                     mImageExporter, mAtmService, mAssistContentRequester,
-                                    mPackageManager, getContext().getMainExecutor(),
+                                    mMockedContext, getContext().getMainExecutor(),
                                     directExecutor()),
                             mPackageManager, mUserTracker, mUiEventLogger);
                 }
@@ -162,6 +171,9 @@ public final class AppClipsActivityTest extends SysuiTestCase {
         when(mImageExporter.export(any(Executor.class), any(UUID.class), any(Bitmap.class),
                 eq(Process.myUserHandle()), eq(Display.DEFAULT_DISPLAY)))
                 .thenReturn(Futures.immediateFuture(result));
+
+        when(mMockedContext.getPackageManager()).thenReturn(mPackageManager);
+        when(mMockedContext.createContextAsUser(any(), anyInt())).thenReturn(mMockedContext);
     }
 
     @After
@@ -175,10 +187,9 @@ public final class AppClipsActivityTest extends SysuiTestCase {
         launchActivity();
 
         assertThat(((ImageView) mActivity.findViewById(R.id.preview)).getDrawable()).isNotNull();
-        assertThat(mActivity.findViewById(R.id.backlinks_data).getVisibility())
-                .isEqualTo(View.GONE);
-        assertThat(mActivity.findViewById(R.id.backlinks_include_data).getVisibility())
-                .isEqualTo(View.GONE);
+        assertThat(mBacklinksDataTextView.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mBacklinksIncludeDataCheckBox.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mBacklinksCrossProfileErrorTextView.getVisibility()).isEqualTo(View.GONE);
     }
 
     @Test
@@ -228,16 +239,23 @@ public final class AppClipsActivityTest extends SysuiTestCase {
         waitForIdleSync();
 
         assertThat(mDisplayIdCaptor.getValue()).isEqualTo(mActivity.getDisplayId());
-        TextView backlinksData = mActivity.findViewById(R.id.backlinks_data);
-        assertThat(backlinksData.getVisibility()).isEqualTo(View.VISIBLE);
-        assertThat(backlinksData.getText().toString()).isEqualTo(BACKLINKS_TASK_APP_NAME);
-        assertThat(backlinksData.getCompoundDrawablesRelative()[0]).isEqualTo(FAKE_DRAWABLE);
+        assertThat(mBacklinksDataTextView.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mBacklinksDataTextView.getText().toString()).isEqualTo(BACKLINKS_TASK_APP_NAME);
+        assertThat(mBacklinksDataTextView.getCompoundDrawablesRelative()[0])
+                .isEqualTo(FAKE_DRAWABLE);
 
-        CheckBox backlinksIncludeData = mActivity.findViewById(R.id.backlinks_include_data);
-        assertThat(backlinksIncludeData.getVisibility()).isEqualTo(View.VISIBLE);
-        assertThat(backlinksIncludeData.getText().toString())
+        // Verify dropdown icon is not shown and there are no click listeners on text view.
+        assertThat(mBacklinksDataTextView.getCompoundDrawablesRelative()[2]).isNull();
+        assertThat(mBacklinksDataTextView.hasOnClickListeners()).isFalse();
+
+        assertThat(mBacklinksIncludeDataCheckBox.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mBacklinksIncludeDataCheckBox.getText().toString())
                 .isEqualTo(mActivity.getString(R.string.backlinks_include_link));
-        assertThat(backlinksIncludeData.isChecked()).isTrue();
+        assertThat(mBacklinksIncludeDataCheckBox.isChecked()).isTrue();
+
+        assertThat(mBacklinksIncludeDataCheckBox.getAlpha()).isEqualTo(1.0f);
+        assertThat(mBacklinksIncludeDataCheckBox.isEnabled()).isTrue();
+        assertThat(mBacklinksCrossProfileErrorTextView.getVisibility()).isEqualTo(View.GONE);
     }
 
     @Test
@@ -254,22 +272,128 @@ public final class AppClipsActivityTest extends SysuiTestCase {
         assertThat(backlinksIncludeData.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(backlinksIncludeData.isChecked()).isFalse();
 
-        TextView backlinksData = mActivity.findViewById(R.id.backlinks_data);
-        assertThat(backlinksData.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mBacklinksDataTextView.getVisibility()).isEqualTo(View.GONE);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_APP_CLIPS_BACKLINKS)
+    public void appClipsLaunched_backlinks_multipleBacklinksAvailable_defaultShown()
+            throws RemoteException {
+        // Set up mocking for multiple backlinks.
+        ResolveInfo resolveInfo1 = createBacklinksTaskResolveInfo();
+
+        int taskId2 = BACKLINKS_TASK_ID + 2;
+        String package2 = BACKLINKS_TASK_PACKAGE_NAME + 2;
+        String appName2 = BACKLINKS_TASK_APP_NAME + 2;
+
+        ResolveInfo resolveInfo2 = createBacklinksTaskResolveInfo();
+        ActivityInfo activityInfo2 = resolveInfo2.activityInfo;
+        activityInfo2.name = appName2;
+        activityInfo2.packageName = package2;
+        activityInfo2.applicationInfo.packageName = package2;
+        RunningTaskInfo runningTaskInfo2 = createTaskInfoForBacklinksTask();
+        runningTaskInfo2.taskId = taskId2;
+        runningTaskInfo2.topActivity = new ComponentName(package2, "backlinksClass");
+        runningTaskInfo2.topActivityInfo = resolveInfo2.activityInfo;
+        runningTaskInfo2.baseIntent = new Intent().setComponent(runningTaskInfo2.topActivity);
+
+        when(mAtmService.getTasks(eq(Integer.MAX_VALUE), eq(false), eq(false),
+                mDisplayIdCaptor.capture()))
+                .thenReturn(List.of(TASK_THAT_SUPPORTS_BACKLINKS, runningTaskInfo2));
+        when(mPackageManager.resolveActivity(any(Intent.class), anyInt())).thenReturn(resolveInfo1,
+                resolveInfo1, resolveInfo1, resolveInfo2, resolveInfo2, resolveInfo2);
+        when(mPackageManager.loadItemIcon(any(), any())).thenReturn(FAKE_DRAWABLE);
+
+        // Using same AssistContent data for both tasks.
+        mockForAssistContent(ASSIST_CONTENT_FOR_BACKLINKS_TASK, BACKLINKS_TASK_ID);
+        mockForAssistContent(ASSIST_CONTENT_FOR_BACKLINKS_TASK, taskId2);
+
+        // Mocking complete, trigger backlinks.
+        launchActivity();
+        waitForIdleSync();
+
+        // Verify default backlink shown to user and text view has on click listener.
+        assertThat(mBacklinksDataTextView.getText().toString()).isEqualTo(BACKLINKS_TASK_APP_NAME);
+        assertThat(mBacklinksDataTextView.hasOnClickListeners()).isTrue();
+
+        // Verify dropdown icon is not null.
+        assertThat(mBacklinksDataTextView.getCompoundDrawablesRelative()[2]).isNotNull();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_APP_CLIPS_BACKLINKS)
+    public void appClipsLaunched_backlinks_multipleBacklinksAvailable_duplicateName()
+            throws RemoteException {
+        // Set up mocking for multiple backlinks.
+        ResolveInfo resolveInfo1 = createBacklinksTaskResolveInfo();
+
+        ResolveInfo resolveInfo2 = createBacklinksTaskResolveInfo();
+        RunningTaskInfo runningTaskInfo2 = createTaskInfoForBacklinksTask();
+        int taskId2 = BACKLINKS_TASK_ID + 2;
+        runningTaskInfo2.taskId = taskId2;
+
+        when(mAtmService.getTasks(eq(Integer.MAX_VALUE), eq(false), eq(false),
+                mDisplayIdCaptor.capture()))
+                .thenReturn(List.of(TASK_THAT_SUPPORTS_BACKLINKS, runningTaskInfo2));
+        when(mPackageManager.resolveActivity(any(Intent.class), anyInt())).thenReturn(resolveInfo1,
+                resolveInfo1, resolveInfo1, resolveInfo2, resolveInfo2, resolveInfo2);
+        when(mPackageManager.loadItemIcon(any(), any())).thenReturn(FAKE_DRAWABLE);
+
+        // Using same AssistContent data for both tasks.
+        mockForAssistContent(ASSIST_CONTENT_FOR_BACKLINKS_TASK, BACKLINKS_TASK_ID);
+        mockForAssistContent(ASSIST_CONTENT_FOR_BACKLINKS_TASK, taskId2);
+
+        // Mocking complete, trigger backlinks.
+        launchActivity();
+        waitForIdleSync();
+
+        // Verify default backlink shown to user has the numerical suffix.
+        assertThat(mBacklinksDataTextView.getText().toString()).isEqualTo(
+                getContext().getString(R.string.backlinks_duplicate_label_format,
+                        BACKLINKS_TASK_APP_NAME, 1));
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_APP_CLIPS_BACKLINKS)
+    public void appClipsLaunched_backlinks_singleBacklink_crossProfileError()
+            throws RemoteException {
+        // Set up mocking for cross profile backlink.
+        setUpMocksForBacklinks();
+        ActivityManager.RunningTaskInfo crossProfileTaskInfo = createTaskInfoForBacklinksTask();
+        crossProfileTaskInfo.userId = UserHandle.myUserId() + 1;
+        reset(mAtmService);
+        when(mAtmService.getTasks(eq(Integer.MAX_VALUE), eq(false), eq(false),
+                mDisplayIdCaptor.capture())).thenReturn(List.of(crossProfileTaskInfo));
+
+        // Trigger backlinks.
+        launchActivity();
+        waitForIdleSync();
+
+        // Verify views for cross profile backlinks error.
+        assertThat(mBacklinksIncludeDataCheckBox.getAlpha()).isLessThan(1.0f);
+        assertThat(mBacklinksIncludeDataCheckBox.isEnabled()).isFalse();
+        assertThat(mBacklinksIncludeDataCheckBox.isChecked()).isFalse();
+
+        assertThat(mBacklinksCrossProfileErrorTextView.getVisibility()).isEqualTo(View.VISIBLE);
     }
 
     private void setUpMocksForBacklinks() throws RemoteException {
-        when(mAtmService.getAllRootTaskInfosOnDisplay(mDisplayIdCaptor.capture()))
+        when(mAtmService.getTasks(eq(Integer.MAX_VALUE), eq(false), eq(false),
+                mDisplayIdCaptor.capture()))
                 .thenReturn(List.of(TASK_THAT_SUPPORTS_BACKLINKS));
-        doAnswer(invocation -> {
-            AssistContentRequester.Callback callback = invocation.getArgument(1);
-            callback.onAssistContentAvailable(ASSIST_CONTENT_FOR_BACKLINKS_TASK);
-            return null;
-        }).when(mAssistContentRequester).requestAssistContent(eq(BACKLINKS_TASK_ID), any());
+        mockForAssistContent(ASSIST_CONTENT_FOR_BACKLINKS_TASK, BACKLINKS_TASK_ID);
         when(mPackageManager
                 .resolveActivity(any(Intent.class), anyInt()))
                 .thenReturn(createBacklinksTaskResolveInfo());
         when(mPackageManager.loadItemIcon(any(), any())).thenReturn(FAKE_DRAWABLE);
+    }
+
+    private void mockForAssistContent(AssistContent expected, int taskId) {
+        doAnswer(invocation -> {
+            AssistContentRequester.Callback callback = invocation.getArgument(1);
+            callback.onAssistContentAvailable(expected);
+            return null;
+        }).when(mAssistContentRequester).requestAssistContent(eq(taskId), any());
     }
 
     private void launchActivity() {
@@ -284,11 +408,15 @@ public final class AppClipsActivityTest extends SysuiTestCase {
 
         mActivity = mActivityRule.launchActivity(intent);
         waitForIdleSync();
+        mBacklinksDataTextView = mActivity.findViewById(R.id.backlinks_data);
+        mBacklinksIncludeDataCheckBox = mActivity.findViewById(R.id.backlinks_include_data);
+        mBacklinksCrossProfileErrorTextView = mActivity.findViewById(
+                R.id.backlinks_cross_profile_error);
     }
 
     private ResultReceiver createResultReceiver(
             BiConsumer<Integer, Bundle> resultReceiverConsumer) {
-        ResultReceiver testReceiver = new ResultReceiver(mContext.getMainThreadHandler()) {
+        ResultReceiver testReceiver = new ResultReceiver(getContext().getMainThreadHandler()) {
             @Override
             protected void onReceiveResult(int resultCode, Bundle resultData) {
                 resultReceiverConsumer.accept(resultCode, resultData);
@@ -305,7 +433,7 @@ public final class AppClipsActivityTest extends SysuiTestCase {
     }
 
     private void runOnMainThread(Runnable runnable) {
-        mContext.getMainExecutor().execute(runnable);
+        getContext().getMainExecutor().execute(runnable);
     }
 
     private static ResolveInfo createBacklinksTaskResolveInfo() {
@@ -319,8 +447,8 @@ public final class AppClipsActivityTest extends SysuiTestCase {
         return resolveInfo;
     }
 
-    private static RootTaskInfo createTaskInfoForBacklinksTask() {
-        RootTaskInfo taskInfo = new RootTaskInfo();
+    private static RunningTaskInfo createTaskInfoForBacklinksTask() {
+        RunningTaskInfo taskInfo = new RunningTaskInfo();
         taskInfo.taskId = BACKLINKS_TASK_ID;
         taskInfo.isVisible = true;
         taskInfo.isRunning = true;
@@ -328,8 +456,8 @@ public final class AppClipsActivityTest extends SysuiTestCase {
         taskInfo.topActivity = new ComponentName(BACKLINKS_TASK_PACKAGE_NAME, "backlinksClass");
         taskInfo.topActivityInfo = createBacklinksTaskResolveInfo().activityInfo;
         taskInfo.baseIntent = new Intent().setComponent(taskInfo.topActivity);
-        taskInfo.childTaskIds = new int[]{BACKLINKS_TASK_ID + 1};
         taskInfo.configuration.windowConfiguration.setActivityType(ACTIVITY_TYPE_STANDARD);
+        taskInfo.userId = UserHandle.myUserId();
         return taskInfo;
     }
 

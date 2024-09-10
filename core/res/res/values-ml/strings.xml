@@ -204,7 +204,7 @@
     <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"സ്വകാര്യ സ്പേസ് നീക്കം ചെയ്തു"</string>
     <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"മാനേജ് ചെയ്യപ്പെടുന്ന ഈ ഉപകരണത്തിൽ നിങ്ങളുടെ സ്ഥാപനം സ്വകാര്യ സ്പേസുകൾ അനുവദിക്കുന്നില്ല."</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"ഉപകരണം മാനേജുചെയ്യുന്നുണ്ട്"</string>
-    <string name="network_logging_notification_text" msgid="1327373071132562512">"നിങ്ങളുടെ സ്ഥാപനമാണ് ഈ ഉപകരണം മാനേജുചെയ്യുന്നത്, നെറ്റ്‌വർക്ക് ട്രാഫിക്ക് നിരീക്ഷിക്കുകയും ചെയ്തേക്കാം, വിശദാംശങ്ങൾ അറിയാൻ ടാപ്പുചെയ്യുക."</string>
+    <string name="network_logging_notification_text" msgid="1327373071132562512">"നിങ്ങളുടെ സ്ഥാപനം ഈ ഉപകരണം മാനേജ് ചെയ്യുകയും നെറ്റ്‌വർക്ക് ട്രാഫിക്ക് നിരീക്ഷിക്കുകയും ചെയ്തേക്കാം, വിശദാംശങ്ങൾ അറിയാൻ ടാപ്പുചെയ്യുക."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"ആപ്പുകൾക്ക് നിങ്ങളുടെ ലൊക്കേഷൻ ആക്‌സസ് ചെയ്യാനാകും"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"കൂടുതലറിയാൻ നിങ്ങളുടെ ഐടി അഡ്‌മിനെ ബന്ധപ്പെടുക"</string>
     <string name="geofencing_service" msgid="3826902410740315456">"ജിയോഫെൻസിംഗ് സേവനം"</string>
@@ -265,8 +265,6 @@
     <string name="global_action_bug_report" msgid="5127867163044170003">"ബഗ് റിപ്പോർട്ട്"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"സെഷൻ അവസാനിപ്പിക്കുക"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"സ്‌ക്രീൻഷോട്ട്"</string>
-    <!-- no translation found for identity_check_biometric_prompt_description (5810195983015866727) -->
-    <skip />
     <string name="bugreport_title" msgid="8549990811777373050">"ബഗ് റിപ്പോർട്ട്"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"ഒരു ഇമെയിൽ സന്ദേശമായി അയയ്‌ക്കുന്നതിന്, ഇത് നിങ്ങളുടെ നിലവിലെ ഉപകരണ നിലയെക്കുറിച്ചുള്ള വിവരങ്ങൾ ശേഖരിക്കും. ബഗ് റിപ്പോർട്ട് ആരംഭിക്കുന്നതിൽ നിന്ന് ഇത് അയയ്‌ക്കാനായി തയ്യാറാകുന്നതുവരെ അൽപ്പസമയമെടുക്കും; ക്ഷമയോടെ കാത്തിരിക്കുക."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"ഇന്റരാക്റ്റീവ് റിപ്പോർട്ട്"</string>
@@ -1196,6 +1194,8 @@
     <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"പാസ്‍വേഡ് ഫീൽഡുകളിൽ കയ്യെഴുത്ത് പിന്തുണയ്ക്കുന്നില്ല"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"മടങ്ങുക"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"ഇൻപുട്ട് രീതി മാറുക"</string>
+    <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"ഇൻപുട്ട് രീതി പിക്കർ തുറക്കുക"</string>
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"ക്രമീകരണം"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"സംഭരണയിടം കഴിഞ്ഞു"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"ചില സിസ്റ്റം പ്രവർത്തനങ്ങൾ പ്രവർത്തിക്കണമെന്നില്ല."</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"സിസ്‌റ്റത്തിനായി മതിയായ സംഭരണമില്ല. 250MB സൗജന്യ സംഭരണമുണ്ടെന്ന് ഉറപ്പുവരുത്തി പുനരാരംഭിക്കുക."</string>
@@ -1413,10 +1413,8 @@
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"വയർലെസ് ഡീബഗ്ഗിംഗ് പ്രവർത്തനരഹിതമാക്കാൻ തിരഞ്ഞെടുക്കുക."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"പരിശോധനാ സംവിധാനങ്ങൾ മോഡ് പ്രവർത്തനക്ഷമമാക്കി"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"പരിശോധനാ സംവിധാന മോഡ് പ്രവർത്തനരഹിതമാക്കാൻ ഫാക്‌ടറി പുനഃക്രമീകരണം നിർവഹിക്കുക."</string>
-    <!-- no translation found for wrong_hsum_configuration_notification_title (7212758829332714385) -->
-    <skip />
-    <!-- no translation found for wrong_hsum_configuration_notification_message (5353475441480684381) -->
-    <skip />
+    <string name="wrong_hsum_configuration_notification_title" msgid="7212758829332714385">"HSUM ബിൽഡ് കോൺഫിഗറേഷൻ തെറ്റാണ്"</string>
+    <string name="wrong_hsum_configuration_notification_message" msgid="5353475441480684381">"ഈ ഉപകരണത്തിന്റെ ഹെഡ്‌ലെസ് സിസ്റ്റം യൂസർ മോഡ് നില ഇതിന്റെ ബിൽഡ് കോൺഫിഗറേഷനിൽ നിന്ന് വ്യത്യസ്തമാണ്. ഉപകരണം ഫാക്‌ടറി റീസെറ്റ് ചെയ്യുക."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"സീരിയൽ കൺസോൾ പ്രവർത്തനക്ഷമമാക്കി"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"പ്രകടനത്തെ ബാധിച്ചു. പ്രവർത്തനരഹിതമാക്കാൻ, ബൂട്ട് ലോഡർ പരിശോധിക്കുക."</string>
     <string name="mte_override_notification_title" msgid="4731115381962792944">"പരീക്ഷണാത്മക MTE പ്രവർത്തനക്ഷമമാക്കി"</string>
@@ -1432,6 +1430,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"പങ്കിടുക"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"നിരസിക്കുക"</string>
     <string name="select_input_method" msgid="3971267998568587025">"ഇൻപുട്ട് രീതി തിരഞ്ഞെടുക്കുക"</string>
+    <string name="input_method_language_settings" msgid="8069089418056819437">"ഭാഷാ ക്രമീകരണം"</string>
     <string name="show_ime" msgid="6406112007347443383">"ഫിസിക്കൽ കീബോർഡ് സജീവമായിരിക്കുമ്പോൾ സ്ക്രീനിൽ നിലനിർത്തുക"</string>
     <string name="hardware" msgid="3611039921284836033">"ഓൺ-സ്ക്രീൻ കീബോർഡ് ഉപയോഗിക്കൂ"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"<xliff:g id="DEVICE_NAME">%s</xliff:g> കോൺഫിഗർ ചെയ്യുക"</string>
@@ -1747,7 +1746,8 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"ഒരു ആപ്പ്, അനുമതി അഭ്യർത്ഥന മറയ്‌ക്കുന്നതിനാൽ നിങ്ങളുടെ പ്രതികരണം പരിശോധിച്ചുറപ്പിക്കാനാകില്ല."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"ഉപയോഗിച്ച് തുടങ്ങാൻ ഫീച്ചർ ടാപ്പ് ചെയ്യുക:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"ഉപയോഗസഹായി ബട്ടണിന്റെ സഹായത്തോടെ, ഉപയോഗിക്കാൻ ഫീച്ചറുകൾ തിരഞ്ഞെടുക്കുക"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"വോളിയം കീ കുറുക്കുവഴിയിലൂടെ ഉപയോഗിക്കാൻ ഫീച്ചറുകൾ തിരഞ്ഞെടുക്കുക"</string>
+    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
+    <skip />
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> ഓഫാക്കിയിരിക്കുന്നു"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"കുറുക്കുവഴികൾ തിരുത്തുക"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"പൂർത്തിയാക്കി"</string>
@@ -1761,18 +1761,12 @@
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"വോളിയം കീകൾ പിടിച്ചു. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ഓണാക്കി."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"വോളിയം കീകൾ അമർത്തിപ്പിടിച്ചു. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ഓഫാക്കി."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"വോളിയം കീകൾ വിടുക. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ഓണാക്കാൻ, രണ്ട് വോളിയം കീകളും വീണ്ടും മൂന്ന് സെക്കൻഡ് അമർത്തിപ്പിടിക്കുക."</string>
-    <!-- no translation found for accessibility_button_prompt_text (6105393217162198616) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_prompt_text (6452246951969541792) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_3finger_prompt_text (77745752309056152) -->
-    <skip />
-    <!-- no translation found for accessibility_button_instructional_text (6831154884557881996) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_instructional_text (4133877896011098550) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_3finger_instructional_text (1124458279366968154) -->
-    <skip />
+    <string name="accessibility_button_prompt_text" msgid="6105393217162198616">"ഒരു ഫീച്ചർ തിരഞ്ഞെടുക്കുക"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="6452246951969541792">"ഒരു ഫീച്ചർ തിരഞ്ഞെടുക്കുക"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="77745752309056152">"ഒരു ഫീച്ചർ തിരഞ്ഞെടുക്കുക"</string>
+    <string name="accessibility_button_instructional_text" msgid="6831154884557881996">"അടുത്ത തവണ നിങ്ങൾ ഉപയോഗസഹായി ബട്ടൺ ടാപ്പ് ചെയ്യുമ്പോൾ ഫീച്ചർ തുറക്കും"</string>
+    <string name="accessibility_gesture_instructional_text" msgid="4133877896011098550">"അടുത്ത തവണ നിങ്ങൾ ഈ കുറുക്കുവഴി ഉപയോഗിക്കുമ്പോൾ ഫീച്ചർ തുറക്കും. നിങ്ങളുടെ സ്ക്രീനിന്റെ താഴെ നിന്ന് 2 വിരലുകൾ ഉപയോഗിച്ച് മുകളിലേക്ക് സ്വൈപ്പ് ചെയ്‌ത് പെട്ടെന്ന് വിടുക."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="1124458279366968154">"അടുത്ത തവണ നിങ്ങൾ ഈ കുറുക്കുവഴി ഉപയോഗിക്കുമ്പോൾ ഫീച്ചർ തുറക്കും. നിങ്ങളുടെ സ്ക്രീനിന്റെ താഴെ നിന്ന് 3 വിരലുകൾ ഉപയോഗിച്ച് മുകളിലേക്ക് സ്വൈപ്പ് ചെയ്‌ത് പെട്ടെന്ന് വിടുക."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"മാഗ്നിഫിക്കേഷൻ"</string>
     <string name="user_switched" msgid="7249833311585228097">"നിലവിലെ ഉപയോക്താവ് <xliff:g id="NAME">%1$s</xliff:g> ആണ്."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> എന്ന ഉപയോക്താവിലേക്ക് മാറുന്നു…"</string>
@@ -1895,8 +1889,7 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"പിൻ തീരെ ചെറുതാണ്. 4 അക്കമെങ്കിലും ഉണ്ടായിരിക്കണം."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"പിന്നീട് വീണ്ടും ശ്രമിക്കുക"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"പൂർണ്ണ സ്‌ക്രീനിൽ കാണുന്നു"</string>
-    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
-    <skip />
+    <string name="immersive_cling_description" msgid="2896205051090870978">"പുറത്ത് കടക്കാൻ, സ്‌ക്രീനിന്റെ മുകളിൽ നിന്ന് താഴോട്ട് സ്വൈപ്പ് ചെയ്യുക"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"മനസ്സിലായി"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"മികച്ച കാഴ്‌ചയ്‌ക്കായി റൊട്ടേറ്റ് ചെയ്യുക"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"മികച്ച കാഴ്‌‌ചയ്ക്ക് പൂർണ്ണ സ്‌ക്രീനിൽ <xliff:g id="NAME">%s</xliff:g> തുറക്കുക"</string>
@@ -2432,25 +2425,32 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"സുരക്ഷയ്ക്കായി സ്ക്രീൻ പങ്കിടലിൽ നിന്ന് ആപ്പ് ഉള്ളടക്കം മറച്ചിരിക്കുന്നു"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"സാറ്റലൈറ്റിലേക്ക് സ്വയമേവ കണക്റ്റ് ചെയ്തു"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"മൊബൈലോ വൈഫൈ നെറ്റ്‌വർക്കോ ഇല്ലാതെ തന്നെ സന്ദേശങ്ങൾ അയയ്‌ക്കാനും സ്വീകരിക്കാനും നിങ്ങൾക്ക് കഴിയും"</string>
+    <string name="satellite_notification_manual_title" msgid="1097504441849466279">"സാറ്റലൈറ്റ് സന്ദേശമയയ്ക്കൽ ഉപയോഗിക്കണോ?"</string>
+    <string name="satellite_notification_manual_summary" msgid="901206289846283445">"മൊബൈൽ അല്ലെങ്കിൽ വൈഫൈ നെറ്റ്‌വർക്ക് ഇല്ലാതെ സന്ദേശങ്ങൾ അയയ്ക്കുകയും സ്വീകരിക്കുകയും ചെയ്യുക"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages തുറക്കുക"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"ഇത് പ്രവർത്തിക്കുന്നത് എങ്ങനെയാണ്"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"തീർപ്പാക്കിയിട്ടില്ല..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"ഫിംഗർപ്രിന്റ് അൺലോക്ക് വീണ്ടും സജ്ജീകരിക്കുക"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (5851784577768803510) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7925203589860744456) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (1824812666549916586) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (5974657382960155099) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> ഇനി തിരിച്ചറിയാനാകില്ല."</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>, <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> എന്നിവ ഇനി തിരിച്ചറിയാനാകില്ല."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="1824812666549916586">"<xliff:g id="FINGERPRINT">%s</xliff:g> ഇനി തിരിച്ചറിയാനാകില്ല. ഫിംഗർപ്രിന്റ് അൺലോക്ക് വീണ്ടും സജ്ജീകരിക്കുക."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="5974657382960155099">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>, <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> എന്നിവ ഇനി തിരിച്ചറിയാനാകില്ല. ഫിംഗർപ്രിന്റ് അൺലോക്ക് വീണ്ടും സജ്ജീകരിക്കുക."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"ഫെയ്‌സ് അൺലോക്ക് വീണ്ടും സജ്ജീകരിക്കുക"</string>
-    <!-- no translation found for face_dangling_notification_msg (746235263598985384) -->
-    <skip />
+    <string name="face_dangling_notification_msg" msgid="746235263598985384">"നിങ്ങളുടെ മുഖ മോഡൽ ഇനി തിരിച്ചറിയാനാകില്ല. ഫെയ്‌സ് അൺലോക്ക് വീണ്ടും സജ്ജീകരിക്കുക."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"സജ്ജീകരിക്കുക"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"ഇപ്പോൾ വേണ്ട"</string>
     <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"<xliff:g id="USER_NAME">%s</xliff:g> എന്നയാൾക്കുള്ള അലാറം"</string>
     <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"ഉപയോക്താവിനെ മാറുക"</string>
     <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"മ്യൂട്ടുചെയ്യുക"</string>
     <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"ശബ്ദം മ്യൂട്ട് ചെയ്യാൻ ടാപ്പ് ചെയ്യുക"</string>
+    <string name="keyboard_shortcut_group_applications_browser" msgid="6535007304687100909">"ബ്രൗസർ"</string>
+    <string name="keyboard_shortcut_group_applications_contacts" msgid="2750702518068326356">"കോൺടാക്റ്റുകൾ"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="4229037666415353683">"ഇമെയിൽ"</string>
+    <string name="keyboard_shortcut_group_applications_sms" msgid="3523799286376321137">"SMS"</string>
+    <string name="keyboard_shortcut_group_applications_music" msgid="2051507523525651067">"സംഗീതം"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="3571770335653387606">"കലണ്ടർ"</string>
+    <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"കാൽക്കുലേറ്റർ"</string>
+    <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"മാപ്പുകൾ"</string>
+    <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"ആപ്പുകൾ"</string>
+    <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"നിങ്ങളുടെ ഫിംഗർപ്രിന്റുകൾ ഇനി തിരിച്ചറിയാനാകില്ല. ഫിംഗർപ്രിന്റ് അൺലോക്ക് വീണ്ടും സജ്ജീകരിക്കുക."</string>
 </resources>

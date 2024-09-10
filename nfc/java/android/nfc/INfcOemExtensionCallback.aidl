@@ -16,10 +16,29 @@
 package android.nfc;
 
 import android.nfc.Tag;
+import android.os.ResultReceiver;
 
 /**
  * @hide
  */
 interface INfcOemExtensionCallback {
    void onTagConnected(boolean connected, in Tag tag);
+   void onStateUpdated(int state);
+   void onApplyRouting(in ResultReceiver isSkipped);
+   void onNdefRead(in ResultReceiver isSkipped);
+   void onEnable(in ResultReceiver isAllowed);
+   void onDisable(in ResultReceiver isAllowed);
+   void onBootStarted();
+   void onEnableStarted();
+   void onDisableStarted();
+   void onBootFinished(int status);
+   void onEnableFinished(int status);
+   void onDisableFinished(int status);
+   void onTagDispatch(in ResultReceiver isSkipped);
+   void onRoutingChanged();
+   void onHceEventReceived(int action);
+   void onReaderOptionChanged(boolean enabled);
+   void onCardEmulationActivated(boolean isActivated);
+   void onRfFieldActivated(boolean isActivated);
+   void onRfDiscoveryStarted(boolean isDiscoveryStarted);
 }

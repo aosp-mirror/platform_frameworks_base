@@ -248,6 +248,25 @@ public class PlatformCompat extends IPlatformCompat.Stub {
         return enabled;
     }
 
+    /**
+     * Internal version of {@link #isChangeEnabledByUid(long, int)}.
+     *
+     * <p>Does not perform costly permission check and logging.
+     */
+    public boolean isChangeEnabledByUidInternalNoLogging(long changeId, int uid) {
+        String[] packages = mContext.getPackageManager().getPackagesForUid(uid);
+        if (packages == null || packages.length == 0) {
+            return mCompatConfig.defaultChangeIdValue(changeId);
+        }
+        boolean enabled = true;
+        final int userId = UserHandle.getUserId(uid);
+        for (String packageName : packages) {
+            final var appInfo = getApplicationInfo(packageName, userId);
+            enabled &= isChangeEnabledInternalNoLogging(changeId, appInfo);
+        }
+        return enabled;
+    }
+
     @Override
     @EnforcePermission(OVERRIDE_COMPAT_CHANGE_CONFIG)
     public void setOverrides(CompatibilityChangeConfig overrides, String packageName) {

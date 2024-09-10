@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
@@ -50,7 +51,6 @@ import static com.android.server.wm.IdentifierProto.TITLE;
 import static com.android.server.wm.IdentifierProto.USER_ID;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_ALL;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
-import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
@@ -100,23 +100,22 @@ import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Builder;
 import android.view.SurfaceControlViewHost;
-import android.view.SurfaceSession;
 import android.view.WindowManager;
 import android.view.WindowManager.TransitionOldType;
 import android.view.animation.Animation;
 import android.window.IWindowContainerToken;
 import android.window.WindowContainerToken;
 
-import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.ColorUtils;
-import com.android.internal.protolog.common.LogLevel;
 import com.android.internal.protolog.ProtoLog;
+import com.android.internal.protolog.common.LogLevel;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.server.wm.SurfaceAnimator.Animatable;
 import com.android.server.wm.SurfaceAnimator.AnimationType;
 import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
 import com.android.server.wm.utils.AlwaysTruePredicate;
+import com.android.window.flags.Flags;
 
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
@@ -458,6 +457,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         source.setFrame(provider.getArbitraryRectangle())
                 .updateSideHint(getBounds())
                 .setBoundingRects(provider.getBoundingRects());
+        if (Flags.enableCaptionCompatInsetForceConsumption()) {
+            source.setFlags(provider.getFlags());
+        }
         mLocalInsetsSources.put(id, source);
         mDisplayContent.getInsetsStateController().updateAboveInsetsState(true);
     }
@@ -703,7 +705,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         mLastSurfacePosition.set(0, 0);
         mLastDeltaRotation = Surface.ROTATION_0;
 
-        final Builder b = mWmService.makeSurfaceBuilder(null)
+        final Builder b = mWmService.makeSurfaceBuilder()
                 .setContainerLayer()
                 .setName(getName());
 
@@ -1238,8 +1240,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      */
     boolean inTransitionSelfOrParent() {
         if (!mTransitionController.isShellTransitionsEnabled()) {
-            return isAnimating(PARENTS | TRANSITION,
-                    ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_RECENTS);
+            return isAnimating(PARENTS | TRANSITION, ANIMATION_TYPE_APP_TRANSITION);
         }
         return inTransition();
     }
@@ -1608,8 +1609,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      *
      * @param orientation the specified orientation.
      */
-    void setOrientation(@ScreenOrientation int orientation) {
-        setOrientation(orientation, null /* requestingContainer */);
+    protected void setOrientation(@ScreenOrientation int orientation) {
+        setOrientation(orientation, null /* requesting */);
     }
 
     /**
@@ -1729,13 +1730,13 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      *         last time {@link #getOrientation(int) was called.
      */
     @Nullable
-    WindowContainer getLastOrientationSource() {
-        final WindowContainer source = mLastOrientationSource;
-        if (source != null && source != this) {
-            final WindowContainer nextSource = source.getLastOrientationSource();
-            if (nextSource != null) {
-                return nextSource;
-            }
+    final WindowContainer<?> getLastOrientationSource() {
+        if (mLastOrientationSource == null) {
+            return null;
+        }
+        WindowContainer<?> source = this;
+        while (source != source.mLastOrientationSource && source.mLastOrientationSource != null) {
+            source = source.mLastOrientationSource;
         }
         return source;
     }
@@ -2579,8 +2580,12 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
             // Containers don't belong to the same hierarchy???
             if (commonAncestor == null) {
-                throw new IllegalArgumentException("No in the same hierarchy this="
-                        + thisParentChain + " other=" + otherParentChain);
+                final int thisZ = getPrefixOrderIndex();
+                final int otherZ = other.getPrefixOrderIndex();
+                Slog.w(TAG, "Compare not in the same hierarchy this="
+                        + thisParentChain + " thisZ=" + thisZ + " other="
+                        + otherParentChain + " otherZ=" + otherZ);
+                return Integer.compare(thisZ, otherZ);
             }
 
             // Children are always considered greater than their parents, so if one of the containers
@@ -2654,13 +2659,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             }
         }
         return true;
-    }
-
-    SurfaceSession getSession() {
-        if (getParent() != null) {
-            return getParent().getSession();
-        }
-        return null;
     }
 
     void assignLayer(Transaction t, int layer) {
@@ -2777,9 +2775,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     @CallSuper
     @Override
     public void dumpDebug(ProtoOutputStream proto, long fieldId,
-            @WindowTraceLogLevel int logLevel) {
+            @WindowTracingLogLevel int logLevel) {
         boolean isVisible = isVisible();
-        if (logLevel == WindowTraceLogLevel.CRITICAL && !isVisible) {
+        if (logLevel == WindowTracingLogLevel.CRITICAL && !isVisible) {
             return;
         }
 
@@ -2990,12 +2988,18 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         // Make sure display isn't a part of the transition already - needed for legacy transitions.
         if (mDisplayContent.inTransition()) return false;
 
-        if (!ActivityTaskManagerService.isPip2ExperimentEnabled()) {
-            // Screenshots are turned off when PiP is undergoing changes.
-            return !inPinnedWindowingMode() && getParent() != null
-                    && !getParent().inPinnedWindowingMode();
-        }
-        return true;
+        // Screenshots are turned off when PiP is undergoing changes.
+        return ActivityTaskManagerService.isPip2ExperimentEnabled() || !isPipChange();
+    }
+
+    /** Returns true if WC is pinned and undergoing changes. */
+    private boolean isPipChange() {
+        final boolean isExitingPip = this.asTaskFragment() != null
+                && mTransitionController.getWindowingModeAtStart(this) == WINDOWING_MODE_PINNED
+                && !inPinnedWindowingMode();
+
+        return isExitingPip || inPinnedWindowingMode()
+                || (getParent() != null && getParent().inPinnedWindowingMode());
     }
 
     /**
@@ -3757,6 +3761,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         }, true /* traverseTopToBottom */);
     }
 
+    @Deprecated
     Dimmer getDimmer() {
         if (mParent == null) {
             return null;

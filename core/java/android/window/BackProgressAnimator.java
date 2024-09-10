@@ -16,12 +16,15 @@
 
 package android.window;
 
+import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.util.FloatProperty;
 import android.util.TimeUtils;
 import android.view.Choreographer;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.dynamicanimation.animation.DynamicAnimation;
 import com.android.internal.dynamicanimation.animation.FlingAnimation;
 import com.android.internal.dynamicanimation.animation.FloatValueHolder;
@@ -210,7 +213,8 @@ public class BackProgressAnimator implements DynamicAnimation.OnAnimationUpdateL
     }
 
     /** Returns true if the back animation is in progress. */
-    boolean isBackAnimationInProgress() {
+    @VisibleForTesting(visibility = PACKAGE)
+    public boolean isBackAnimationInProgress() {
         return mBackAnimationInProgress;
     }
 

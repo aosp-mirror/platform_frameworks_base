@@ -18,6 +18,7 @@ package com.android.systemui.mediarouter.data.repository
 
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.statusbar.policy.fakeCastController
 
 val Kosmos.realMediaRouterRepository by
@@ -25,6 +26,7 @@ val Kosmos.realMediaRouterRepository by
         MediaRouterRepositoryImpl(
             scope = applicationCoroutineScope,
             castController = fakeCastController,
+            logger = logcatLogBuffer("MediaRouter"),
         )
     }
 

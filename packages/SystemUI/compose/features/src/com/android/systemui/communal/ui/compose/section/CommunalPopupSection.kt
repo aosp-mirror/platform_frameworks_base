@@ -23,6 +23,8 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.focusable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -39,9 +41,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
@@ -54,6 +60,7 @@ import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.communal.ui.viewmodel.PopupType
 import com.android.systemui.res.R
 import javax.inject.Inject
+import kotlinx.coroutines.delay
 
 class CommunalPopupSection
 @Inject
@@ -91,6 +98,15 @@ constructor(
         onClick: () -> Unit,
         onDismissRequest: () -> Unit,
     ) {
+        val interactionSource = remember { MutableInteractionSource() }
+        val focusRequester = remember { FocusRequester() }
+
+        LaunchedEffect(Unit) {
+            // Adding a delay to ensure the animation completes before requesting focus
+            delay(250)
+            focusRequester.requestFocus()
+        }
+
         Popup(
             alignment = Alignment.TopCenter,
             offset = IntOffset(0, 40),
@@ -100,6 +116,8 @@ constructor(
             Button(
                 modifier =
                     Modifier.height(56.dp)
+                        .focusRequester(focusRequester)
+                        .focusable(interactionSource = interactionSource)
                         .graphicsLayer { transformOrigin = TransformOrigin(0f, 0f) }
                         .animateEnterExit(
                             enter =
@@ -142,8 +160,7 @@ constructor(
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.Widgets,
-                        contentDescription =
-                            stringResource(R.string.button_to_configure_widgets_text),
+                        contentDescription = null,
                         tint = colors.onSecondary,
                         modifier = Modifier.size(20.dp)
                     )

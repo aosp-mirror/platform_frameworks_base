@@ -18,7 +18,7 @@ package com.android.systemui.statusbar.notification.logging;
 
 /**
  * NotificationList proto from atoms.proto, duplicated here so that it's accessible in the build.
- * Must be kept in sync with the version in atoms.proto.
+ * Must be kept in sync with the version in stats/atoms/sysui/sysui_atoms.proto.
  */
 
 message Notification {

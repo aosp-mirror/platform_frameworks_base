@@ -24,6 +24,8 @@ import android.graphics.Point
 import android.graphics.Rect
 import android.util.Log
 import android.view.HapticFeedbackConstants
+import android.view.InputDevice
+import android.view.MotionEvent
 import android.view.View
 import android.view.View.OnLayoutChangeListener
 import android.view.View.VISIBLE
@@ -37,8 +39,12 @@ import androidx.activity.setViewTreeOnBackPressedDispatcherOwner
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.app.animation.Interpolators
+import com.android.app.tracing.coroutines.launch
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.jank.InteractionJankMonitor.CUJ_SCREEN_OFF_SHOW_AOD
+import com.android.keyguard.AuthInteractionProperties
+import com.android.systemui.Flags
+import com.android.systemui.Flags.msdlFeedback
 import com.android.systemui.Flags.newAodTransition
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.Text
@@ -69,8 +75,8 @@ import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.CrossFadeHelper
 import com.android.systemui.statusbar.VibratorHelper
-import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.temporarydisplay.ViewPriority
 import com.android.systemui.temporarydisplay.chipbar.ChipbarCoordinator
 import com.android.systemui.temporarydisplay.chipbar.ChipbarInfo
@@ -79,7 +85,10 @@ import com.android.systemui.util.ui.AnimatedValue
 import com.android.systemui.util.ui.isAnimating
 import com.android.systemui.util.ui.stopAnimating
 import com.android.systemui.util.ui.value
+import com.google.android.msdl.data.model.MSDLToken
+import com.google.android.msdl.domain.MSDLPlayer
 import kotlin.math.min
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.coroutineScope
@@ -110,6 +119,9 @@ object KeyguardRootViewBinder {
         vibratorHelper: VibratorHelper?,
         falsingManager: FalsingManager?,
         keyguardViewMediator: KeyguardViewMediator?,
+        statusBarKeyguardViewManager: StatusBarKeyguardViewManager?,
+        mainImmediateDispatcher: CoroutineDispatcher,
+        msdlPlayer: MSDLPlayer?,
     ): DisposableHandle {
         val disposables = DisposableHandles()
         val childViews = mutableMapOf<Int, View>()
@@ -117,17 +129,115 @@ object KeyguardRootViewBinder {
         if (KeyguardBottomAreaRefactor.isEnabled) {
             disposables +=
                 view.onTouchListener { _, event ->
+                    var consumed = false
                     if (falsingManager?.isFalseTap(FalsingManager.LOW_PENALTY) == false) {
+                        // signifies a primary button click down has reached keyguardrootview
+                        // we need to return true here otherwise an ACTION_UP will never arrive
+                        if (Flags.nonTouchscreenDevicesBypassFalsing()) {
+                            if (
+                                event.action == MotionEvent.ACTION_DOWN &&
+                                    event.buttonState == MotionEvent.BUTTON_PRIMARY &&
+                                    !event.isTouchscreenSource()
+                            ) {
+                                consumed = true
+                            } else if (
+                                event.action == MotionEvent.ACTION_UP &&
+                                    !event.isTouchscreenSource()
+                            ) {
+                                statusBarKeyguardViewManager?.showBouncer(true)
+                                consumed = true
+                            }
+                        }
                         viewModel.setRootViewLastTapPosition(
                             Point(event.x.toInt(), event.y.toInt())
                         )
                     }
-                    false
+                    consumed
                 }
         }
 
         val burnInParams = MutableStateFlow(BurnInParameters())
         val viewState = ViewStateAccessor(alpha = { view.alpha })
+
+        disposables +=
+            view.repeatWhenAttached(mainImmediateDispatcher) {
+                repeatOnLifecycle(Lifecycle.State.CREATED) {
+                    if (MigrateClocksToBlueprint.isEnabled) {
+                        launch("$TAG#topClippingBounds") {
+                            val clipBounds = Rect()
+                            viewModel.topClippingBounds.collect { clipTop ->
+                                if (clipTop == null) {
+                                    view.setClipBounds(null)
+                                } else {
+                                    clipBounds.apply {
+                                        top = clipTop
+                                        left = view.getLeft()
+                                        right = view.getRight()
+                                        bottom = view.getBottom()
+                                    }
+                                    view.setClipBounds(clipBounds)
+                                }
+                            }
+                        }
+                    }
+
+                    if (
+                        KeyguardBottomAreaRefactor.isEnabled || DeviceEntryUdfpsRefactor.isEnabled
+                    ) {
+                        launch("$TAG#alpha") {
+                            viewModel.alpha(viewState).collect { alpha ->
+                                view.alpha = alpha
+                                if (KeyguardBottomAreaRefactor.isEnabled) {
+                                    childViews[statusViewId]?.alpha = alpha
+                                    childViews[burnInLayerId]?.alpha = alpha
+                                }
+                            }
+                        }
+                    }
+
+                    if (MigrateClocksToBlueprint.isEnabled) {
+                        launch("$TAG#translationY") {
+                            // When translation happens in burnInLayer, it won't be weather clock
+                            // large clock isn't added to burnInLayer due to its scale transition
+                            // so we also need to add translation to it here
+                            // same as translationX
+                            viewModel.translationY.collect { y ->
+                                childViews[burnInLayerId]?.translationY = y
+                                childViews[largeClockId]?.translationY = y
+                                childViews[aodNotificationIconContainerId]?.translationY = y
+                            }
+                        }
+
+                        launch("$TAG#translationX") {
+                            viewModel.translationX.collect { state ->
+                                val px = state.value ?: return@collect
+                                when {
+                                    state.isToOrFrom(KeyguardState.AOD) -> {
+                                        // Large Clock is not translated in the x direction
+                                        childViews[burnInLayerId]?.translationX = px
+                                        childViews[aodNotificationIconContainerId]?.translationX =
+                                            px
+                                    }
+                                    state.isToOrFrom(KeyguardState.GLANCEABLE_HUB) -> {
+                                        for ((key, childView) in childViews.entries) {
+                                            when (key) {
+                                                indicationArea,
+                                                startButton,
+                                                endButton,
+                                                lockIcon,
+                                                deviceEntryIcon -> {
+                                                    // Do not move these views
+                                                }
+                                                else -> childView.translationX = px
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         disposables +=
             view.repeatWhenAttached {
                 repeatOnLifecycle(Lifecycle.State.CREATED) {
@@ -162,95 +272,22 @@ object KeyguardRootViewBinder {
                         }
                     }
 
-                    if (
-                        KeyguardBottomAreaRefactor.isEnabled || DeviceEntryUdfpsRefactor.isEnabled
-                    ) {
-                        launch {
-                            viewModel.alpha(viewState).collect { alpha ->
-                                view.alpha = alpha
-                                if (KeyguardBottomAreaRefactor.isEnabled) {
-                                    childViews[statusViewId]?.alpha = alpha
-                                    childViews[burnInLayerId]?.alpha = alpha
-                                }
-                            }
-                        }
-                    }
-
                     if (MigrateClocksToBlueprint.isEnabled) {
                         launch {
                             viewModel.burnInLayerVisibility.collect { visibility ->
                                 childViews[burnInLayerId]?.visibility = visibility
-                                childViews[aodNotificationIconContainerId]?.visibility = visibility
                             }
                         }
 
                         launch {
                             viewModel.burnInLayerAlpha.collect { alpha ->
                                 childViews[statusViewId]?.alpha = alpha
-                                childViews[aodNotificationIconContainerId]?.alpha = alpha
-                            }
-                        }
-
-                        launch {
-                            val clipBounds = Rect()
-                            viewModel.topClippingBounds.collect { clipTop ->
-                                if (clipTop == null) {
-                                    view.setClipBounds(null)
-                                } else {
-                                    clipBounds.apply {
-                                        top = clipTop
-                                        left = view.getLeft()
-                                        right = view.getRight()
-                                        bottom = view.getBottom()
-                                    }
-                                    view.setClipBounds(clipBounds)
-                                }
                             }
                         }
 
                         launch {
                             viewModel.lockscreenStateAlpha(viewState).collect { alpha ->
                                 childViews[statusViewId]?.alpha = alpha
-                            }
-                        }
-
-                        launch {
-                            // When translation happens in burnInLayer, it won't be weather clock
-                            // large clock isn't added to burnInLayer due to its scale transition
-                            // so we also need to add translation to it here
-                            // same as translationX
-                            viewModel.translationY.collect { y ->
-                                childViews[burnInLayerId]?.translationY = y
-                                childViews[largeClockId]?.translationY = y
-                                childViews[aodNotificationIconContainerId]?.translationY = y
-                            }
-                        }
-
-                        launch {
-                            viewModel.translationX.collect { state ->
-                                val px = state.value ?: return@collect
-                                when {
-                                    state.isToOrFrom(KeyguardState.AOD) -> {
-                                        // Large Clock is not translated in the x direction
-                                        childViews[burnInLayerId]?.translationX = px
-                                        childViews[aodNotificationIconContainerId]?.translationX =
-                                            px
-                                    }
-                                    state.isToOrFrom(KeyguardState.GLANCEABLE_HUB) -> {
-                                        for ((key, childView) in childViews.entries) {
-                                            when (key) {
-                                                indicationArea,
-                                                startButton,
-                                                endButton,
-                                                lockIcon,
-                                                deviceEntryIcon -> {
-                                                    // Do not move these views
-                                                }
-                                                else -> childView.translationX = px
-                                            }
-                                        }
-                                    }
-                                }
                             }
                         }
 
@@ -284,20 +321,18 @@ object KeyguardRootViewBinder {
                             }
                         }
 
-                        if (NotificationIconContainerRefactor.isEnabled) {
-                            launch {
-                                val iconsAppearTranslationPx =
-                                    configuration
-                                        .getDimensionPixelSize(R.dimen.shelf_appear_translation)
-                                        .stateIn(this)
-                                viewModel.isNotifIconContainerVisible.collect { isVisible ->
-                                    childViews[aodNotificationIconContainerId]
-                                        ?.setAodNotifIconContainerIsVisible(
-                                            isVisible,
-                                            iconsAppearTranslationPx.value,
-                                            screenOffAnimationController,
-                                        )
-                                }
+                        launch {
+                            val iconsAppearTranslationPx =
+                                configuration
+                                    .getDimensionPixelSize(R.dimen.shelf_appear_translation)
+                                    .stateIn(this)
+                            viewModel.isNotifIconContainerVisible.collect { isVisible ->
+                                childViews[aodNotificationIconContainerId]
+                                    ?.setAodNotifIconContainerIsVisible(
+                                        isVisible,
+                                        iconsAppearTranslationPx.value,
+                                        screenOffAnimationController,
+                                    )
                             }
                         }
 
@@ -344,21 +379,33 @@ object KeyguardRootViewBinder {
                     if (deviceEntryHapticsInteractor != null && vibratorHelper != null) {
                         launch {
                             deviceEntryHapticsInteractor.playSuccessHaptic.collect {
-                                vibratorHelper.performHapticFeedback(
-                                    view,
-                                    HapticFeedbackConstants.CONFIRM,
-                                    HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING,
-                                )
+                                if (msdlFeedback()) {
+                                    msdlPlayer?.playToken(
+                                        MSDLToken.UNLOCK,
+                                        authInteractionProperties
+                                    )
+                                } else {
+                                    vibratorHelper.performHapticFeedback(
+                                        view,
+                                        HapticFeedbackConstants.BIOMETRIC_CONFIRM,
+                                    )
+                                }
                             }
                         }
 
                         launch {
                             deviceEntryHapticsInteractor.playErrorHaptic.collect {
-                                vibratorHelper.performHapticFeedback(
-                                    view,
-                                    HapticFeedbackConstants.REJECT,
-                                    HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING,
-                                )
+                                if (msdlFeedback()) {
+                                    msdlPlayer?.playToken(
+                                        MSDLToken.FAILURE,
+                                        authInteractionProperties
+                                    )
+                                } else {
+                                    vibratorHelper.performHapticFeedback(
+                                        view,
+                                        HapticFeedbackConstants.BIOMETRIC_REJECT,
+                                    )
+                                }
                             }
                         }
                     }
@@ -511,7 +558,6 @@ object KeyguardRootViewBinder {
         if (MigrateClocksToBlueprint.isEnabled) {
             throw IllegalStateException("should only be called in legacy code paths")
         }
-        if (NotificationIconContainerRefactor.isUnexpectedlyInLegacyMode()) return
         coroutineScope {
             val iconAppearTranslationPx =
                 configuration.getDimensionPixelSize(R.dimen.shelf_appear_translation).stateIn(this)
@@ -614,6 +660,10 @@ object KeyguardRootViewBinder {
         }
     }
 
+    private fun MotionEvent.isTouchscreenSource(): Boolean {
+        return device?.supportsSource(InputDevice.SOURCE_TOUCHSCREEN) == true
+    }
+
     private fun ViewPropertyAnimator.animateInIconTranslation(): ViewPropertyAnimator =
         setInterpolator(Interpolators.DECELERATE_QUINT).translationY(0f)
 
@@ -628,6 +678,7 @@ object KeyguardRootViewBinder {
     private val lockIcon = R.id.lock_icon_view
     private val deviceEntryIcon = R.id.device_entry_icon_view
     private val nsslPlaceholderId = R.id.nssl_placeholder
+    private val authInteractionProperties = AuthInteractionProperties()
 
     private const val ID = "occluding_app_device_entry_unlock_msg"
     private const val AOD_ICONS_APPEAR_DURATION: Long = 200

@@ -61,6 +61,7 @@ import com.android.systemui.log.LogcatEchoTracker
 import com.android.systemui.log.core.LogLevel
 import com.android.systemui.res.R
 import com.android.systemui.settings.FakeUserTracker
+import com.android.systemui.shared.notifications.domain.interactor.NotificationSettingsInteractor
 import com.android.systemui.statusbar.FakeStatusBarStateController
 import com.android.systemui.statusbar.NotificationEntryHelper.modifyRanking
 import com.android.systemui.statusbar.StatusBarState.KEYGUARD
@@ -88,6 +89,7 @@ import com.android.systemui.utils.os.FakeHandler
 import com.android.wm.shell.bubbles.Bubbles
 import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertTrue
+import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -134,8 +136,10 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
     protected val avalancheProvider: AvalancheProvider = mock()
     protected val bubbles: Bubbles = mock()
     lateinit var systemSettings: SystemSettings
+    protected val settingsInteractor: NotificationSettingsInteractor = mock()
     protected val packageManager: PackageManager = mock()
     protected val notificationManager: NotificationManager = mock()
+    protected val logger: VisualInterruptionDecisionLogger = mock()
     protected abstract val provider: VisualInterruptionDecisionProvider
 
     private val neverSuppresses = object : NotificationInterruptSuppressor {}
@@ -164,7 +168,7 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
         userTracker.set(listOf(user), /* currentUserIndex = */ 0)
         systemSettings = FakeSettings()
         whenever(bubbles.canShowBubbleNotification()).thenReturn(true)
-
+        whenever(settingsInteractor.isCooldownEnabled).thenReturn(MutableStateFlow(true))
         provider.start()
     }
 

@@ -20,6 +20,7 @@ import android.content.packageManager
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.mediaprojection.data.repository.fakeMediaProjectionRepository
+import com.android.systemui.statusbar.chips.statusBarChipsLogger
 
 val Kosmos.mediaProjectionChipInteractor: MediaProjectionChipInteractor by
     Kosmos.Fixture {
@@ -27,5 +28,6 @@ val Kosmos.mediaProjectionChipInteractor: MediaProjectionChipInteractor by
             scope = applicationCoroutineScope,
             mediaProjectionRepository = fakeMediaProjectionRepository,
             packageManager = packageManager,
+            logger = statusBarChipsLogger,
         )
     }

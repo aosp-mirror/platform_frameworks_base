@@ -31,13 +31,14 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import androidx.lifecycle.LifecycleOwner;
-import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceScreen;
 
+import com.android.settingslib.preference.PreferenceFragment;
+
 /**
- * {@link PreferenceFragmentCompat} that has hooks to observe fragment lifecycle events.
+ * Preference fragment that has hooks to observe fragment lifecycle events.
  */
-public abstract class ObservablePreferenceFragment extends PreferenceFragmentCompat
+public abstract class ObservablePreferenceFragment extends PreferenceFragment
         implements LifecycleOwner {
 
     private final Lifecycle mLifecycle = new Lifecycle(this);

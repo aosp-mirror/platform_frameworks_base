@@ -53,7 +53,7 @@ import org.junit.runner.RunWith;
 @RunWith(WindowTestRunner.class)
 public class ActivityRefresherTests extends WindowTestsBase {
     private Handler mMockHandler;
-    private LetterboxConfiguration mLetterboxConfiguration;
+    private AppCompatConfiguration mAppCompatConfiguration;
 
     private ActivityRecord mActivity;
     private ActivityRefresher mActivityRefresher;
@@ -69,13 +69,13 @@ public class ActivityRefresherTests extends WindowTestsBase {
 
     @Before
     public void setUp() throws Exception {
-        mLetterboxConfiguration = mDisplayContent.mWmService.mLetterboxConfiguration;
-        spyOn(mLetterboxConfiguration);
-        when(mLetterboxConfiguration.isCameraCompatTreatmentEnabled())
+        mAppCompatConfiguration = mDisplayContent.mWmService.mAppCompatConfiguration;
+        spyOn(mAppCompatConfiguration);
+        when(mAppCompatConfiguration.isCameraCompatTreatmentEnabled())
                 .thenReturn(true);
-        when(mLetterboxConfiguration.isCameraCompatRefreshEnabled())
+        when(mAppCompatConfiguration.isCameraCompatRefreshEnabled())
                 .thenReturn(true);
-        when(mLetterboxConfiguration.isCameraCompatRefreshCycleThroughStopEnabled())
+        when(mAppCompatConfiguration.isCameraCompatRefreshCycleThroughStopEnabled())
                 .thenReturn(true);
 
         mMockHandler = mock(Handler.class);
@@ -90,7 +90,7 @@ public class ActivityRefresherTests extends WindowTestsBase {
 
     @Test
     public void testShouldRefreshActivity_refreshDisabled() throws Exception {
-        when(mLetterboxConfiguration.isCameraCompatRefreshEnabled())
+        when(mAppCompatConfiguration.isCameraCompatRefreshEnabled())
                 .thenReturn(false);
         configureActivityAndDisplay();
         mActivityRefresher.addEvaluator(mEvaluatorTrue);
@@ -146,7 +146,7 @@ public class ActivityRefresherTests extends WindowTestsBase {
     public void testOnActivityConfigurationChanging_cycleThroughStopDisabled()
             throws Exception {
         mActivityRefresher.addEvaluator(mEvaluatorTrue);
-        when(mLetterboxConfiguration.isCameraCompatRefreshCycleThroughStopEnabled())
+        when(mAppCompatConfiguration.isCameraCompatRefreshCycleThroughStopEnabled())
                 .thenReturn(false);
         configureActivityAndDisplay();
 
@@ -191,9 +191,9 @@ public class ActivityRefresherTests extends WindowTestsBase {
         verify(mActivity.mAppCompatController.getAppCompatCameraOverrides(),
                 times(refreshRequested ? 1 : 0)).setIsRefreshRequested(true);
 
-        final RefreshCallbackItem refreshCallbackItem = RefreshCallbackItem.obtain(mActivity.token,
-                cycleThroughStop ? ON_STOP : ON_PAUSE);
-        final ResumeActivityItem resumeActivityItem = ResumeActivityItem.obtain(mActivity.token,
+        final RefreshCallbackItem refreshCallbackItem =
+                new RefreshCallbackItem(mActivity.token, cycleThroughStop ? ON_STOP : ON_PAUSE);
+        final ResumeActivityItem resumeActivityItem = new ResumeActivityItem(mActivity.token,
                 /* isForward */ false, /* shouldSendCompatFakeFocus */ false);
 
         verify(mActivity.mAtmService.getLifecycleManager(), times(refreshRequested ? 1 : 0))
@@ -212,7 +212,6 @@ public class ActivityRefresherTests extends WindowTestsBase {
                 .build()
                 .getTopMostActivity();
 
-        spyOn(mActivity.mLetterboxUiController);
         spyOn(mActivity.mAppCompatController.getAppCompatCameraOverrides());
         doReturn(true).when(mActivity).inFreeformWindowingMode();
         doReturn(true).when(mActivity.mAppCompatController

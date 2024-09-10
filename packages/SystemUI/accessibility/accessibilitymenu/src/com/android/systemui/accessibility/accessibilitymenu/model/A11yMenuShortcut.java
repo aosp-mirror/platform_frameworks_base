@@ -19,7 +19,6 @@ import android.util.Log;
 
 import com.android.systemui.accessibility.accessibilitymenu.R;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -52,80 +51,80 @@ public class A11yMenuShortcut {
     private static final int LABEL_TEXT_INDEX = 3;
 
     /** Map stores all shortcut resource IDs that is in matching order of defined shortcut. */
-    private static final Map<ShortcutId, int[]> sShortcutResource = new HashMap<>() {{
-            put(ShortcutId.ID_ASSISTANT_VALUE, new int[] {
-                    R.drawable.ic_logo_a11y_assistant_24dp,
+    private static final Map<ShortcutId, int[]> sShortcutResource = Map.ofEntries(
+            Map.entry(ShortcutId.ID_ASSISTANT_VALUE, new int[] {
+                    R.drawable.ic_logo_a11y_assistant,
                     R.color.assistant_color,
                     R.string.assistant_utterance,
                     R.string.assistant_label,
-            });
-            put(ShortcutId.ID_A11YSETTING_VALUE, new int[] {
-                    R.drawable.ic_logo_a11y_settings_24dp,
+            }),
+            Map.entry(ShortcutId.ID_A11YSETTING_VALUE, new int[] {
+                    R.drawable.ic_logo_a11y_settings,
                     R.color.a11y_settings_color,
                     R.string.a11y_settings_label,
                     R.string.a11y_settings_label,
-            });
-            put(ShortcutId.ID_POWER_VALUE, new int[] {
-                    R.drawable.ic_logo_a11y_power_24dp,
+            }),
+            Map.entry(ShortcutId.ID_POWER_VALUE, new int[] {
+                    R.drawable.ic_logo_a11y_power,
                     R.color.power_color,
                     R.string.power_utterance,
                     R.string.power_label,
-            });
-            put(ShortcutId.ID_RECENT_VALUE, new int[] {
-                    R.drawable.ic_logo_a11y_recent_apps_24dp,
+            }),
+            Map.entry(ShortcutId.ID_RECENT_VALUE, new int[] {
+                    R.drawable.ic_logo_a11y_recent_apps,
                     R.color.recent_apps_color,
                     R.string.recent_apps_label,
                     R.string.recent_apps_label,
-            });
-            put(ShortcutId.ID_LOCKSCREEN_VALUE, new int[] {
-                    R.drawable.ic_logo_a11y_lock_24dp,
+            }),
+            Map.entry(ShortcutId.ID_LOCKSCREEN_VALUE, new int[] {
+                    R.drawable.ic_logo_a11y_lock,
                     R.color.lockscreen_color,
                     R.string.lockscreen_label,
                     R.string.lockscreen_label,
-            });
-            put(ShortcutId.ID_QUICKSETTING_VALUE, new int[] {
-                    R.drawable.ic_logo_a11y_quick_settings_24dp,
+            }),
+            Map.entry(ShortcutId.ID_QUICKSETTING_VALUE, new int[] {
+                    R.drawable.ic_logo_a11y_quick_settings,
                     R.color.quick_settings_color,
                     R.string.quick_settings_label,
                     R.string.quick_settings_label,
-            });
-            put(ShortcutId.ID_NOTIFICATION_VALUE, new int[] {
-                    R.drawable.ic_logo_a11y_notifications_24dp,
+            }),
+            Map.entry(ShortcutId.ID_NOTIFICATION_VALUE, new int[] {
+                    R.drawable.ic_logo_a11y_notifications,
                     R.color.notifications_color,
                     R.string.notifications_label,
                     R.string.notifications_label,
-            });
-            put(ShortcutId.ID_SCREENSHOT_VALUE, new int[] {
-                    R.drawable.ic_logo_a11y_screenshot_24dp,
+            }),
+            Map.entry(ShortcutId.ID_SCREENSHOT_VALUE, new int[] {
+                    R.drawable.ic_logo_a11y_screenshot,
                     R.color.screenshot_color,
                     R.string.screenshot_utterance,
                     R.string.screenshot_label,
-            });
-            put(ShortcutId.ID_BRIGHTNESS_UP_VALUE, new int[] {
-                    R.drawable.ic_logo_a11y_brightness_up_24dp,
+            }),
+            Map.entry(ShortcutId.ID_BRIGHTNESS_UP_VALUE, new int[] {
+                    R.drawable.ic_logo_a11y_brightness_up,
                     R.color.brightness_color,
                     R.string.brightness_up_label,
                     R.string.brightness_up_label,
-            });
-            put(ShortcutId.ID_BRIGHTNESS_DOWN_VALUE, new int[] {
-                    R.drawable.ic_logo_a11y_brightness_down_24dp,
+            }),
+            Map.entry(ShortcutId.ID_BRIGHTNESS_DOWN_VALUE, new int[] {
+                    R.drawable.ic_logo_a11y_brightness_down,
                     R.color.brightness_color,
                     R.string.brightness_down_label,
                     R.string.brightness_down_label,
-            });
-            put(ShortcutId.ID_VOLUME_UP_VALUE, new int[] {
-                    R.drawable.ic_logo_a11y_volume_up_24dp,
+            }),
+            Map.entry(ShortcutId.ID_VOLUME_UP_VALUE, new int[] {
+                    R.drawable.ic_logo_a11y_volume_up,
                     R.color.volume_color,
                     R.string.volume_up_label,
                     R.string.volume_up_label,
-            });
-            put(ShortcutId.ID_VOLUME_DOWN_VALUE, new int[] {
-                    R.drawable.ic_logo_a11y_volume_down_24dp,
+            }),
+            Map.entry(ShortcutId.ID_VOLUME_DOWN_VALUE, new int[] {
+                    R.drawable.ic_logo_a11y_volume_down,
                     R.color.volume_color,
                     R.string.volume_down_label,
                     R.string.volume_down_label,
-            });
-        }};
+            })
+    );
 
     /** Shortcut id used to identify. */
     private int mShortcutId = ShortcutId.UNSPECIFIED_ID_VALUE.ordinal();

@@ -58,7 +58,8 @@ key 5 {
     label:                              '5'
     base:                               '\u0665'
     capslock:                           '5'
-    shift:                              '%'
+    shift:                              '\u066a'
+    shift+capslock:                     '%'
 }
 
 key 6 {

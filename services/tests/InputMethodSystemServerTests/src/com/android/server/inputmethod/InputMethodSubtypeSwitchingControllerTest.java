@@ -16,15 +16,27 @@
 
 package com.android.server.inputmethod;
 
+import static com.android.server.inputmethod.InputMethodSubtypeSwitchingController.MODE_AUTO;
+import static com.android.server.inputmethod.InputMethodSubtypeSwitchingController.MODE_RECENT;
+import static com.android.server.inputmethod.InputMethodSubtypeSwitchingController.MODE_STATIC;
+import static com.android.server.inputmethod.InputMethodSubtypeSwitchingController.SwitchMode;
+import static com.android.server.inputmethod.InputMethodUtils.NOT_A_SUBTYPE_INDEX;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import android.content.ComponentName;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.platform.test.annotations.RequiresFlagsDisabled;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
+import android.view.inputmethod.Flags;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
 import android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder;
@@ -32,9 +44,9 @@ import android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.android.server.inputmethod.InputMethodSubtypeSwitchingController.ControllerImpl;
 import com.android.server.inputmethod.InputMethodSubtypeSwitchingController.ImeSubtypeListItem;
 
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -49,7 +61,9 @@ public final class InputMethodSubtypeSwitchingControllerTest {
     private static final boolean TEST_IS_VR_IME = false;
     private static final int TEST_IS_DEFAULT_RES_ID = 0;
     private static final String SYSTEM_LOCALE = "en_US";
-    private static final int NOT_A_SUBTYPE_ID = InputMethodUtils.NOT_A_SUBTYPE_ID;
+
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
     @NonNull
     private static InputMethodSubtype createTestSubtype(@NonNull String locale) {
@@ -88,7 +102,7 @@ public final class InputMethodSubtypeSwitchingControllerTest {
                 TEST_FORCE_DEFAULT, supportsSwitchingToNextInputMethod, TEST_IS_VR_IME);
         if (subtypes == null) {
             items.add(new ImeSubtypeListItem(imeName, null /* variableName */, imi,
-                    NOT_A_SUBTYPE_ID, null, SYSTEM_LOCALE));
+                    NOT_A_SUBTYPE_INDEX, null, SYSTEM_LOCALE));
         } else {
             for (int i = 0; i < subtypes.size(); ++i) {
                 final String subtypeLocale = subtypeLocales.get(i);
@@ -163,19 +177,20 @@ public final class InputMethodSubtypeSwitchingControllerTest {
         return items;
     }
 
-    private void assertNextInputMethod(@NonNull ControllerImpl controller, boolean onlyCurrentIme,
-            @NonNull ImeSubtypeListItem currentItem, @Nullable ImeSubtypeListItem nextItem) {
+    private void assertNextInputMethod(@NonNull InputMethodSubtypeSwitchingController controller,
+            boolean onlyCurrentIme, @NonNull ImeSubtypeListItem currentItem,
+            @Nullable ImeSubtypeListItem nextItem) {
         InputMethodSubtype subtype = null;
         if (currentItem.mSubtypeName != null) {
             subtype = createTestSubtype(currentItem.mSubtypeName.toString());
         }
-        final ImeSubtypeListItem nextIme = controller.getNextInputMethod(onlyCurrentIme,
-                currentItem.mImi, subtype);
+        final ImeSubtypeListItem nextIme = controller.getNextInputMethodLocked(onlyCurrentIme,
+                currentItem.mImi, subtype, MODE_STATIC, true /* forward */);
         assertEquals(nextItem, nextIme);
     }
 
-    private void assertRotationOrder(@NonNull ControllerImpl controller, boolean onlyCurrentIme,
-            ImeSubtypeListItem... expectedRotationOrderOfImeSubtypeList) {
+    private void assertRotationOrder(@NonNull InputMethodSubtypeSwitchingController controller,
+            boolean onlyCurrentIme, ImeSubtypeListItem... expectedRotationOrderOfImeSubtypeList) {
         final int numItems = expectedRotationOrderOfImeSubtypeList.length;
         for (int i = 0; i < numItems; i++) {
             final int nextIndex = (i + 1) % numItems;
@@ -185,15 +200,16 @@ public final class InputMethodSubtypeSwitchingControllerTest {
         }
     }
 
-    private void onUserAction(@NonNull ControllerImpl controller,
+    private boolean onUserAction(@NonNull InputMethodSubtypeSwitchingController controller,
             @NonNull ImeSubtypeListItem subtypeListItem) {
         InputMethodSubtype subtype = null;
         if (subtypeListItem.mSubtypeName != null) {
             subtype = createTestSubtype(subtypeListItem.mSubtypeName.toString());
         }
-        controller.onUserActionLocked(subtypeListItem.mImi, subtype);
+        return controller.onUserActionLocked(subtypeListItem.mImi, subtype);
     }
 
+    @RequiresFlagsDisabled(Flags.FLAG_IME_SWITCHER_REVAMP)
     @Test
     public void testControllerImpl() {
         final List<ImeSubtypeListItem> disabledItems = createDisabledImeSubtypes();
@@ -212,8 +228,8 @@ public final class InputMethodSubtypeSwitchingControllerTest {
         final ImeSubtypeListItem japaneseIme_ja_jp = enabledItems.get(6);
         final ImeSubtypeListItem switchUnawareJapaneseIme_ja_jp = enabledItems.get(7);
 
-        final ControllerImpl controller = ControllerImpl.createFrom(
-                null /* currentInstance */, enabledItems);
+        final var controller = new InputMethodSubtypeSwitchingController();
+        controller.update(enabledItems, new ArrayList<>());
 
         // switching-aware loop
         assertRotationOrder(controller, false /* onlyCurrentIme */,
@@ -257,6 +273,7 @@ public final class InputMethodSubtypeSwitchingControllerTest {
                 disabledSubtypeUnawareIme, null);
     }
 
+    @RequiresFlagsDisabled(Flags.FLAG_IME_SWITCHER_REVAMP)
     @Test
     public void testControllerImplWithUserAction() {
         final List<ImeSubtypeListItem> enabledItems = createEnabledImeSubtypes();
@@ -269,8 +286,8 @@ public final class InputMethodSubtypeSwitchingControllerTest {
         final ImeSubtypeListItem japaneseIme_ja_jp = enabledItems.get(6);
         final ImeSubtypeListItem switchUnawareJapaneseIme_ja_jp = enabledItems.get(7);
 
-        final ControllerImpl controller = ControllerImpl.createFrom(
-                null /* currentInstance */, enabledItems);
+        final var controller = new InputMethodSubtypeSwitchingController();
+        controller.update(enabledItems, new ArrayList<>());
 
         // === switching-aware loop ===
         assertRotationOrder(controller, false /* onlyCurrentIme */,
@@ -319,11 +336,10 @@ public final class InputMethodSubtypeSwitchingControllerTest {
 
         // Rotation order should be preserved when created with the same subtype list.
         final List<ImeSubtypeListItem> sameEnabledItems = createEnabledImeSubtypes();
-        final ControllerImpl newController = ControllerImpl.createFrom(controller,
-                sameEnabledItems);
-        assertRotationOrder(newController, false /* onlyCurrentIme */,
+        controller.update(sameEnabledItems, new ArrayList<>());
+        assertRotationOrder(controller, false /* onlyCurrentIme */,
                 subtypeAwareIme, latinIme_fr, latinIme_en_us, japaneseIme_ja_jp);
-        assertRotationOrder(newController, false /* onlyCurrentIme */,
+        assertRotationOrder(controller, false /* onlyCurrentIme */,
                 switchingUnawareLatinIme_en_uk, switchingUnawareLatinIme_hi, subtypeUnawareIme,
                 switchUnawareJapaneseIme_ja_jp);
 
@@ -331,11 +347,10 @@ public final class InputMethodSubtypeSwitchingControllerTest {
         final List<ImeSubtypeListItem> differentEnabledItems = List.of(
                 latinIme_en_us, latinIme_fr, subtypeAwareIme, switchingUnawareLatinIme_en_uk,
                 switchUnawareJapaneseIme_ja_jp, subtypeUnawareIme);
-        final ControllerImpl anotherController = ControllerImpl.createFrom(controller,
-                differentEnabledItems);
-        assertRotationOrder(anotherController, false /* onlyCurrentIme */,
+        controller.update(differentEnabledItems, new ArrayList<>());
+        assertRotationOrder(controller, false /* onlyCurrentIme */,
                 latinIme_en_us, latinIme_fr, subtypeAwareIme);
-        assertRotationOrder(anotherController, false /* onlyCurrentIme */,
+        assertRotationOrder(controller, false /* onlyCurrentIme */,
                 switchingUnawareLatinIme_en_uk, switchUnawareJapaneseIme_ja_jp, subtypeUnawareIme);
     }
 
@@ -370,6 +385,7 @@ public final class InputMethodSubtypeSwitchingControllerTest {
         assertFalse(item_en_us_allcaps.mIsSystemLanguage);
     }
 
+    @RequiresFlagsDisabled(Flags.FLAG_IME_SWITCHER_REVAMP)
     @SuppressWarnings("SelfComparison")
     @Test
     public void testImeSubtypeListComparator() {
@@ -469,6 +485,773 @@ public final class InputMethodSubtypeSwitchingControllerTest {
             // But those aren't equal to each other.
             assertNotEquals(ime1, ime2);
             assertNotEquals(ime2, ime1);
+        }
+    }
+
+    /** Verifies the static mode. */
+    @RequiresFlagsEnabled(Flags.FLAG_IME_SWITCHER_REVAMP)
+    @Test
+    public void testModeStatic() {
+        final var items = new ArrayList<ImeSubtypeListItem>();
+        addTestImeSubtypeListItems(items, "LatinIme", "LatinIme",
+                List.of("en", "fr", "it"), true /* supportsSwitchingToNextInputMethod */);
+        addTestImeSubtypeListItems(items, "SimpleIme", "SimpleIme",
+                null, true /* supportsSwitchingToNextInputMethod */);
+
+        final var english = items.get(0);
+        final var french = items.get(1);
+        final var italian = items.get(2);
+        final var simple = items.get(3);
+        final var latinIme = List.of(english, french, italian);
+        final var simpleIme = List.of(simple);
+
+        final var hardwareItems = new ArrayList<ImeSubtypeListItem>();
+        addTestImeSubtypeListItems(hardwareItems, "HardwareLatinIme", "HardwareLatinIme",
+                List.of("en", "fr", "it"), true /* supportsSwitchingToNextInputMethod */);
+        addTestImeSubtypeListItems(hardwareItems, "HardwareSimpleIme", "HardwareSimpleIme",
+                null, true /* supportsSwitchingToNextInputMethod */);
+
+        final var hardwareEnglish = hardwareItems.get(0);
+        final var hardwareFrench = hardwareItems.get(1);
+        final var hardwareItalian = hardwareItems.get(2);
+        final var hardwareSimple = hardwareItems.get(3);
+        final var hardwareLatinIme = List.of(hardwareEnglish, hardwareFrench, hardwareItalian);
+        final var hardwareSimpleIme = List.of(hardwareSimple);
+
+        final var controller = new InputMethodSubtypeSwitchingController();
+        controller.update(items, hardwareItems);
+
+        final int mode = MODE_STATIC;
+
+        // Static mode matches the given items order.
+        assertNextOrder(controller, false /* forHardware */, mode,
+                items, List.of(latinIme, simpleIme));
+
+        assertNextOrder(controller, true /* forHardware */, mode,
+                hardwareItems, List.of(hardwareLatinIme, hardwareSimpleIme));
+
+        // Set french IME as most recent.
+        assertTrue("Recency updated for french IME", onUserAction(controller, french));
+
+        // Static mode is not influenced by recency updates on non-hardware item.
+        assertNextOrder(controller, false /* forHardware */, mode,
+                items, List.of(latinIme, simpleIme));
+
+        assertNextOrder(controller, true /* forHardware */, mode,
+                hardwareItems, List.of(hardwareLatinIme, hardwareSimpleIme));
+
+        assertTrue("Recency updated for french hardware IME",
+                onUserAction(controller, hardwareFrench));
+
+        // Static mode is not influenced by recency updates on hardware item.
+        assertNextOrder(controller, false /* forHardware */, mode,
+                items, List.of(latinIme, simpleIme));
+
+        assertNextOrder(controller, true /* forHardware */, mode,
+                hardwareItems, List.of(hardwareLatinIme, hardwareSimpleIme));
+    }
+
+    /** Verifies the recency mode. */
+    @RequiresFlagsEnabled(Flags.FLAG_IME_SWITCHER_REVAMP)
+    @Test
+    public void testModeRecent() {
+        final var items = new ArrayList<ImeSubtypeListItem>();
+        addTestImeSubtypeListItems(items, "LatinIme", "LatinIme",
+                List.of("en", "fr", "it"), true /* supportsSwitchingToNextInputMethod */);
+        addTestImeSubtypeListItems(items, "SimpleIme", "SimpleIme",
+                null, true /* supportsSwitchingToNextInputMethod */);
+
+        final var english = items.get(0);
+        final var french = items.get(1);
+        final var italian = items.get(2);
+        final var simple = items.get(3);
+        final var latinIme = List.of(english, french, italian);
+        final var simpleIme = List.of(simple);
+
+        final var hardwareItems = new ArrayList<ImeSubtypeListItem>();
+        addTestImeSubtypeListItems(hardwareItems, "HardwareLatinIme", "HardwareLatinIme",
+                List.of("en", "fr", "it"), true /* supportsSwitchingToNextInputMethod */);
+        addTestImeSubtypeListItems(hardwareItems, "HardwareSimpleIme", "HardwareSimpleIme",
+                null, true /* supportsSwitchingToNextInputMethod */);
+
+        final var hardwareEnglish = hardwareItems.get(0);
+        final var hardwareFrench = hardwareItems.get(1);
+        final var hardwareItalian = hardwareItems.get(2);
+        final var hardwareSimple = hardwareItems.get(3);
+        final var hardwareLatinIme = List.of(hardwareEnglish, hardwareFrench, hardwareItalian);
+        final var hardwareSimpleIme = List.of(hardwareSimple);
+
+        final var controller = new InputMethodSubtypeSwitchingController();
+        controller.update(items, hardwareItems);
+
+        final int mode = MODE_RECENT;
+
+        // Recency order is initialized to static order.
+        assertNextOrder(controller, false /* forHardware */, mode,
+                items, List.of(latinIme, simpleIme));
+
+        assertNextOrder(controller, true /* forHardware */, mode,
+                hardwareItems, List.of(hardwareLatinIme, hardwareSimpleIme));
+
+        assertTrue("Recency updated for french IME", onUserAction(controller, french));
+        final var recencyItems = List.of(french, english, italian, simple);
+        final var recencyLatinIme = List.of(french, english, italian);
+        final var recencySimpleIme = List.of(simple);
+
+        // The order of non-hardware items is updated.
+        assertNextOrder(controller, false /* forHardware */, mode,
+                recencyItems, List.of(recencyLatinIme, recencySimpleIme));
+
+        // The order of hardware items remains unchanged for an action on a non-hardware item.
+        assertNextOrder(controller, true /* forHardware */, mode,
+                hardwareItems, List.of(hardwareLatinIme, hardwareSimpleIme));
+
+        assertFalse("Recency not updated again for same IME", onUserAction(controller, french));
+
+        // The order of non-hardware items remains unchanged.
+        assertNextOrder(controller, false /* forHardware */, mode,
+                recencyItems, List.of(recencyLatinIme, recencySimpleIme));
+
+        // The order of hardware items remains unchanged.
+        assertNextOrder(controller, true /* forHardware */, mode,
+                hardwareItems, List.of(hardwareLatinIme, hardwareSimpleIme));
+
+        assertTrue("Recency updated for french hardware IME",
+                onUserAction(controller, hardwareFrench));
+
+        final var recencyHardwareItems =
+                List.of(hardwareFrench, hardwareEnglish, hardwareItalian, hardwareSimple);
+        final var recencyHardwareLatinIme =
+                List.of(hardwareFrench, hardwareEnglish, hardwareItalian);
+        final var recencyHardwareSimpleIme = List.of(hardwareSimple);
+
+        // The order of non-hardware items is unchanged.
+        assertNextOrder(controller, false /* forHardware */, mode,
+                recencyItems, List.of(recencyLatinIme, recencySimpleIme));
+
+        // The order of hardware items is updated.
+        assertNextOrder(controller, true /* forHardware */, mode,
+                recencyHardwareItems, List.of(recencyHardwareLatinIme, recencyHardwareSimpleIme));
+    }
+
+    /** Verifies the auto mode. */
+    @RequiresFlagsEnabled(Flags.FLAG_IME_SWITCHER_REVAMP)
+    @Test
+    public void testModeAuto() {
+        final var items = new ArrayList<ImeSubtypeListItem>();
+        addTestImeSubtypeListItems(items, "LatinIme", "LatinIme",
+                List.of("en", "fr", "it"), true /* supportsSwitchingToNextInputMethod */);
+        addTestImeSubtypeListItems(items, "SimpleIme", "SimpleIme",
+                null, true /* supportsSwitchingToNextInputMethod */);
+
+        final var english = items.get(0);
+        final var french = items.get(1);
+        final var italian = items.get(2);
+        final var simple = items.get(3);
+        final var latinIme = List.of(english, french, italian);
+        final var simpleIme = List.of(simple);
+
+        final var hardwareItems = new ArrayList<ImeSubtypeListItem>();
+        addTestImeSubtypeListItems(hardwareItems, "HardwareLatinIme", "HardwareLatinIme",
+                List.of("en", "fr", "it"), true /* supportsSwitchingToNextInputMethod */);
+        addTestImeSubtypeListItems(hardwareItems, "HardwareSimpleIme", "HardwareSimpleIme",
+                null, true /* supportsSwitchingToNextInputMethod */);
+
+        final var hardwareEnglish = hardwareItems.get(0);
+        final var hardwareFrench = hardwareItems.get(1);
+        final var hardwareItalian = hardwareItems.get(2);
+        final var hardwareSimple = hardwareItems.get(3);
+        final var hardwareLatinIme = List.of(hardwareEnglish, hardwareFrench, hardwareItalian);
+        final var hardwareSimpleIme = List.of(hardwareSimple);
+
+        final var controller = new InputMethodSubtypeSwitchingController();
+        controller.update(items, hardwareItems);
+
+        final int mode = MODE_AUTO;
+
+        // Auto mode resolves to static order initially.
+        assertNextOrder(controller, false /* forHardware */, mode,
+                items, List.of(latinIme, simpleIme));
+
+        assertNextOrder(controller, true /* forHardware */, mode,
+                hardwareItems, List.of(hardwareLatinIme, hardwareSimpleIme));
+
+        // User action on french IME.
+        assertTrue("Recency updated for french IME", onUserAction(controller, french));
+
+        final var recencyItems = List.of(french, english, italian, simple);
+        final var recencyLatinIme = List.of(french, english, italian);
+        final var recencySimpleIme = List.of(simple);
+
+        // Auto mode resolves to recency order for the first forward after user action, and to
+        // static order for the backwards direction.
+        assertNextOrder(controller, false /* forHardware */, mode, true /* forward */,
+                recencyItems, List.of(recencyLatinIme, recencySimpleIme));
+        assertNextOrder(controller, false /* forHardware */, mode, false /* forward */,
+                items.reversed(), List.of(latinIme.reversed(), simpleIme.reversed()));
+
+        // Auto mode resolves to recency order for the first forward after user action,
+        // but the recency was not updated for hardware items, so it's equivalent to static order.
+        assertNextOrder(controller, true /* forHardware */, mode,
+                hardwareItems, List.of(hardwareLatinIme, hardwareSimpleIme));
+
+        // Change IME, reset user action having happened.
+        controller.onInputMethodSubtypeChanged();
+
+        // Auto mode resolves to static order as there was no user action since changing IMEs.
+        assertNextOrder(controller, false /* forHardware */, mode,
+                items, List.of(latinIme, simpleIme));
+
+        assertNextOrder(controller, true /* forHardware */, mode,
+                hardwareItems, List.of(hardwareLatinIme, hardwareSimpleIme));
+
+        // User action on french IME again.
+        assertFalse("Recency not updated again for same IME", onUserAction(controller, french));
+
+        // Auto mode still resolves to static order, as a user action on the currently most
+        // recent IME has no effect.
+        assertNextOrder(controller, false /* forHardware */, mode,
+                items, List.of(latinIme, simpleIme));
+
+        assertNextOrder(controller, true /* forHardware */, mode,
+                hardwareItems, List.of(hardwareLatinIme, hardwareSimpleIme));
+
+        // User action on hardware french IME.
+        assertTrue("Recency updated for french hardware IME",
+                onUserAction(controller, hardwareFrench));
+
+        final var recencyHardware =
+                List.of(hardwareFrench, hardwareEnglish, hardwareItalian, hardwareSimple);
+        final var recencyHardwareLatin =
+                List.of(hardwareFrench, hardwareEnglish, hardwareItalian);
+        final var recencyHardwareSimple = List.of(hardwareSimple);
+
+        // Auto mode resolves to recency order for the first forward direction after a user action
+        // on a hardware IME, and to static order for the backwards direction.
+        assertNextOrder(controller, false /* forHardware */, mode, true /* forward */,
+                recencyItems, List.of(recencyLatinIme, recencySimpleIme));
+        assertNextOrder(controller, false /* forHardware */, mode, false /* forward */,
+                items.reversed(), List.of(latinIme.reversed(), simpleIme.reversed()));
+
+        assertNextOrder(controller, true /* forHardware */, mode, true /* forward */,
+                recencyHardware, List.of(recencyHardwareLatin, recencyHardwareSimple));
+
+        assertNextOrder(controller, true /* forHardware */, mode, false /* forward */,
+                hardwareItems.reversed(),
+                List.of(hardwareLatinIme.reversed(), hardwareSimpleIme.reversed()));
+    }
+
+    /**
+     * Verifies that the recency order is preserved only when updating with an equal list of items.
+     */
+    @RequiresFlagsEnabled(Flags.FLAG_IME_SWITCHER_REVAMP)
+    @Test
+    public void testUpdateList() {
+        final var items = new ArrayList<ImeSubtypeListItem>();
+        addTestImeSubtypeListItems(items, "LatinIme", "LatinIme",
+                List.of("en", "fr", "it"), true /* supportsSwitchingToNextInputMethod */);
+        addTestImeSubtypeListItems(items, "SimpleIme", "SimpleIme",
+                null, true /* supportsSwitchingToNextInputMethod */);
+
+        final var english = items.get(0);
+        final var french = items.get(1);
+        final var italian = items.get(2);
+        final var simple = items.get(3);
+
+        final var latinIme = List.of(english, french, italian);
+        final var simpleIme = List.of(simple);
+
+        final var hardwareItems = new ArrayList<ImeSubtypeListItem>();
+        addTestImeSubtypeListItems(hardwareItems, "HardwareLatinIme", "HardwareLatinIme",
+                List.of("en", "fr", "it"), true /* supportsSwitchingToNextInputMethod */);
+        addTestImeSubtypeListItems(hardwareItems, "HardwareSimpleIme", "HardwareSimpleIme",
+                null, true /* supportsSwitchingToNextInputMethod */);
+
+        final var hardwareEnglish = hardwareItems.get(0);
+        final var hardwareFrench = hardwareItems.get(1);
+        final var hardwareItalian = hardwareItems.get(2);
+        final var hardwareSimple = hardwareItems.get(3);
+
+        final var hardwareLatinIme = List.of(hardwareEnglish, hardwareFrench, hardwareItalian);
+        final var hardwareSimpleIme = List.of(hardwareSimple);
+
+        final var controller = new InputMethodSubtypeSwitchingController();
+        controller.update(items, hardwareItems);
+
+        final int mode = MODE_RECENT;
+
+        // Recency order is initialized to static order.
+        assertNextOrder(controller, false /* forHardware */, mode,
+                items, List.of(latinIme, simpleIme));
+        assertNextOrder(controller, true /* forHardware */, mode,
+                hardwareItems, List.of(hardwareLatinIme, hardwareSimpleIme));
+
+        // User action on french IME.
+        assertTrue("Recency updated for french IME", onUserAction(controller, french));
+
+        final var recencyItems = List.of(french, english, italian, simple);
+        final var recencyLatinIme = List.of(french, english, italian);
+        final var recencySimpleIme = List.of(simple);
+
+        final var equalItems = new ArrayList<>(items);
+        controller.update(equalItems, hardwareItems);
+
+        // The order of non-hardware items remains unchanged when updated with equal items.
+        assertNextOrder(controller, false /* forHardware */, mode,
+                recencyItems, List.of(recencyLatinIme, recencySimpleIme));
+        // The order of hardware items remains unchanged when only non-hardware items are updated.
+        assertNextOrder(controller, true /* forHardware */, mode,
+                hardwareItems, List.of(hardwareLatinIme, hardwareSimpleIme));
+
+        final var otherItems = new ArrayList<>(items);
+        otherItems.remove(simple);
+        controller.update(otherItems, hardwareItems);
+
+        // The order of non-hardware items is reset when updated with other items.
+        assertNextOrder(controller, false /* forHardware */, mode,
+                latinIme, List.of(latinIme));
+        // The order of hardware items remains unchanged when only non-hardware items are updated.
+        assertNextOrder(controller, true /* forHardware */, mode,
+                hardwareItems, List.of(hardwareLatinIme, hardwareSimpleIme));
+
+        assertTrue("Recency updated for french hardware IME",
+                onUserAction(controller, hardwareFrench));
+
+        final var recencyHardwareItems =
+                List.of(hardwareFrench, hardwareEnglish, hardwareItalian, hardwareSimple);
+        final var recencyHardwareLatinIme =
+                List.of(hardwareFrench, hardwareEnglish, hardwareItalian);
+        final var recencyHardwareSimpleIme = List.of(hardwareSimple);
+
+        final var equalHardwareItems = new ArrayList<>(hardwareItems);
+        controller.update(otherItems, equalHardwareItems);
+
+        // The order of non-hardware items remains unchanged when only hardware items are updated.
+        assertNextOrder(controller, false /* forHardware */, mode,
+                latinIme, List.of(latinIme));
+        // The order of hardware items remains unchanged when updated with equal items.
+        assertNextOrder(controller, true /* forHardware */, mode,
+                recencyHardwareItems, List.of(recencyHardwareLatinIme, recencyHardwareSimpleIme));
+
+        final var otherHardwareItems = new ArrayList<>(hardwareItems);
+        otherHardwareItems.remove(hardwareSimple);
+        controller.update(otherItems, otherHardwareItems);
+
+        // The order of non-hardware items remains unchanged when only hardware items are updated.
+        assertNextOrder(controller, false /* forHardware */, mode,
+                latinIme, List.of(latinIme));
+        // The order of hardware items is reset when updated with other items.
+        assertNextOrder(controller, true /* forHardware */, mode,
+                hardwareLatinIme, List.of(hardwareLatinIme));
+    }
+
+    /** Verifies that switch aware and switch unaware IMEs are combined together. */
+    @RequiresFlagsEnabled(Flags.FLAG_IME_SWITCHER_REVAMP)
+    @Test
+    public void testSwitchAwareAndUnawareCombined() {
+        final var items = new ArrayList<ImeSubtypeListItem>();
+        addTestImeSubtypeListItems(items, "switchAware", "switchAware",
+                null, true /* supportsSwitchingToNextInputMethod*/);
+        addTestImeSubtypeListItems(items, "switchUnaware", "switchUnaware",
+                null, false /* supportsSwitchingToNextInputMethod*/);
+
+        final var hardwareItems = new ArrayList<ImeSubtypeListItem>();
+        addTestImeSubtypeListItems(hardwareItems, "hardwareSwitchAware", "hardwareSwitchAware",
+                null, true /* supportsSwitchingToNextInputMethod*/);
+        addTestImeSubtypeListItems(hardwareItems, "hardwareSwitchUnaware", "hardwareSwitchUnaware",
+                null, false /* supportsSwitchingToNextInputMethod*/);
+
+        final var controller = new InputMethodSubtypeSwitchingController();
+        controller.update(items, hardwareItems);
+
+        for (int mode = MODE_STATIC; mode <= MODE_AUTO; mode++) {
+            assertNextOrder(controller, false /* forHardware */, false /* onlyCurrentIme */,
+                    mode, true /* forward */, items);
+            assertNextOrder(controller, false /* forHardware */, false /* onlyCurrentIme */,
+                    mode, false /* forward */, items.reversed());
+
+            assertNextOrder(controller, true /* forHardware */, false /* onlyCurrentIme */,
+                    mode, true /* forward */, hardwareItems);
+            assertNextOrder(controller, true /* forHardware */, false /* onlyCurrentIme */,
+                    mode, false /* forward */, hardwareItems.reversed());
+        }
+    }
+
+    /** Verifies that an empty controller can't take any actions. */
+    @RequiresFlagsEnabled(Flags.FLAG_IME_SWITCHER_REVAMP)
+    @Test
+    public void testEmptyList() {
+        final var items = new ArrayList<ImeSubtypeListItem>();
+        addTestImeSubtypeListItems(items, "LatinIme", "LatinIme",
+                List.of("en", "fr"), true /* supportsSwitchingToNextInputMethod */);
+
+        final var hardwareItems = new ArrayList<ImeSubtypeListItem>();
+        addTestImeSubtypeListItems(hardwareItems, "HardwareIme", "HardwareIme",
+                List.of("en", "fr"), true /* supportsSwitchingToNextInputMethod */);
+
+        final var controller = new InputMethodSubtypeSwitchingController();
+
+        assertNextItemNoAction(controller, false /* forHardware */, items,
+                null /* expectedNext */);
+        assertNextItemNoAction(controller, true /* forHardware */, hardwareItems,
+                null /* expectedNext */);
+    }
+
+    /**
+     * Verifies that a controller with a single item can't update the recency, and cannot switch
+     * away from the item, but allows switching from unknown items to the single item.
+     */
+    @RequiresFlagsEnabled(Flags.FLAG_IME_SWITCHER_REVAMP)
+    @Test
+    public void testSingleItemList() {
+        final var items = new ArrayList<ImeSubtypeListItem>();
+        addTestImeSubtypeListItems(items, "LatinIme", "LatinIme",
+                null, true /* supportsSwitchingToNextInputMethod */);
+        final var unknownItems = new ArrayList<ImeSubtypeListItem>();
+        addTestImeSubtypeListItems(unknownItems, "UnknownIme", "UnknownIme",
+                List.of("en", "fr", "it"), true /* supportsSwitchingToNextInputMethod */);
+
+        final var hardwareItems = new ArrayList<ImeSubtypeListItem>();
+        addTestImeSubtypeListItems(hardwareItems, "HardwareIme", "HardwareIme",
+                null, true /* supportsSwitchingToNextInputMethod */);
+        final var unknownHardwareItems = new ArrayList<ImeSubtypeListItem>();
+        addTestImeSubtypeListItems(unknownHardwareItems, "HardwareUnknownIme", "HardwareUnknownIme",
+                List.of("en", "fr", "it"), true /* supportsSwitchingToNextInputMethod */);
+
+        final var controller = new InputMethodSubtypeSwitchingController();
+        controller.update(items, hardwareItems);
+
+        assertNextItemNoAction(controller, false /* forHardware */, items,
+                null /* expectedNext */);
+        assertNextItemNoAction(controller, false /* forHardware */, unknownItems,
+                items.get(0));
+        assertNextItemNoAction(controller, true /* forHardware */, hardwareItems,
+                null /* expectedNext */);
+        assertNextItemNoAction(controller, true /* forHardware */, unknownHardwareItems,
+                hardwareItems.get(0));
+    }
+
+    /**
+     * Verifies that the recency cannot be updated for unknown items, but switching from unknown
+     * items reaches the most recent known item.
+     */
+    @RequiresFlagsEnabled(Flags.FLAG_IME_SWITCHER_REVAMP)
+    @Test
+    public void testUnknownItems() {
+        final var items = new ArrayList<ImeSubtypeListItem>();
+        addTestImeSubtypeListItems(items, "LatinIme", "LatinIme",
+                List.of("en", "fr", "it"), true /* supportsSwitchingToNextInputMethod */);
+
+        final var english = items.get(0);
+        final var french = items.get(1);
+        final var italian = items.get(2);
+
+        final var unknownItems = new ArrayList<ImeSubtypeListItem>();
+        addTestImeSubtypeListItems(unknownItems, "UnknownIme", "UnknownIme",
+                List.of("en", "fr", "it"), true /* supportsSwitchingToNextInputMethod */);
+
+        final var hardwareItems = new ArrayList<ImeSubtypeListItem>();
+        addTestImeSubtypeListItems(hardwareItems, "HardwareIme", "HardwareIme",
+                List.of("en", "fr", "it"), true /* supportsSwitchingToNextInputMethod */);
+        final var unknownHardwareItems = new ArrayList<ImeSubtypeListItem>();
+        addTestImeSubtypeListItems(unknownHardwareItems, "HardwareUnknownIme", "HardwareUnknownIme",
+                List.of("en", "fr", "it"), true /* supportsSwitchingToNextInputMethod */);
+
+        final var controller = new InputMethodSubtypeSwitchingController();
+        controller.update(items, hardwareItems);
+
+        assertTrue("Recency updated for french IME", onUserAction(controller, french));
+
+        final var recencyItems = List.of(french, english, italian);
+
+        assertNextItemNoAction(controller, false /* forHardware */, unknownItems,
+                french);
+        assertNextItemNoAction(controller, true /* forHardware */, unknownHardwareItems,
+                hardwareItems.get(0));
+
+        // Known items must not be able to switch to unknown items.
+        assertNextOrder(controller, false /* forHardware */, MODE_STATIC, items,
+                List.of(items));
+        assertNextOrder(controller, false /* forHardware */, MODE_RECENT, recencyItems,
+                List.of(recencyItems));
+        assertNextOrder(controller, false /* forHardware */, MODE_AUTO, true /* forward */,
+                recencyItems, List.of(recencyItems));
+        assertNextOrder(controller, false /* forHardware */, MODE_AUTO, false /* forward */,
+                items.reversed(), List.of(items.reversed()));
+
+        assertNextOrder(controller, true /* forHardware */, MODE_STATIC, hardwareItems,
+                List.of(hardwareItems));
+        assertNextOrder(controller, true /* forHardware */, MODE_RECENT, hardwareItems,
+                List.of(hardwareItems));
+        assertNextOrder(controller, true /* forHardware */, MODE_AUTO, hardwareItems,
+                List.of(hardwareItems));
+    }
+
+    /** Verifies that the IME name does influence the comparison order. */
+    @RequiresFlagsEnabled(Flags.FLAG_IME_SWITCHER_REVAMP)
+    @Test
+    public void testCompareImeName() {
+        final var component = new ComponentName("com.example.ime", "Ime");
+        final var imeX = createTestItem(component, "ImeX", "A", "en_US", 0);
+        final var imeY = createTestItem(component, "ImeY", "A", "en_US", 0);
+
+        assertTrue("Smaller IME name should be smaller.", imeX.compareTo(imeY) < 0);
+        assertTrue("Larger IME name should be larger.", imeY.compareTo(imeX) > 0);
+    }
+
+    /** Verifies that the IME ID does influence the comparison order. */
+    @RequiresFlagsEnabled(Flags.FLAG_IME_SWITCHER_REVAMP)
+    @Test
+    public void testCompareImeId() {
+        final var component1 = new ComponentName("com.example.ime1", "Ime");
+        final var component2 = new ComponentName("com.example.ime2", "Ime");
+        final var ime1 = createTestItem(component1, "Ime", "A", "en_US", 0);
+        final var ime2 = createTestItem(component2, "Ime", "A", "en_US", 0);
+
+        assertTrue("Smaller IME ID should be smaller.", ime1.compareTo(ime2) < 0);
+        assertTrue("Larger IME ID should be larger.", ime2.compareTo(ime1) > 0);
+    }
+
+    /** Verifies that comparison on self returns an equal order. */
+    @SuppressWarnings("SelfComparison")
+    @RequiresFlagsEnabled(Flags.FLAG_IME_SWITCHER_REVAMP)
+    @Test
+    public void testCompareSelf() {
+        final var component = new ComponentName("com.example.ime", "Ime");
+        final var item = createTestItem(component, "Ime", "A", "en_US", 0);
+
+        assertEquals("Item should have the same order to itself.", 0, item.compareTo(item));
+    }
+
+    /** Verifies that comparison on an equivalent item returns an equal order. */
+    @RequiresFlagsEnabled(Flags.FLAG_IME_SWITCHER_REVAMP)
+    @Test
+    public void testCompareEquivalent() {
+        final var component = new ComponentName("com.example.ime", "Ime");
+        final var item = createTestItem(component, "Ime", "A", "en_US", 0);
+        final var equivalent = createTestItem(component, "Ime", "A", "en_US", 0);
+
+        assertEquals("Equivalent items should have the same order.", 0, item.compareTo(equivalent));
+    }
+
+    /**
+     * Verifies that the system locale and system language do not the influence comparison order.
+     */
+    @RequiresFlagsEnabled(Flags.FLAG_IME_SWITCHER_REVAMP)
+    @Test
+    public void testCompareSystemLocaleSystemLanguage() {
+        final var component = new ComponentName("com.example.ime", "Ime");
+        final var japanese = createTestItem(component, "Ime", "A", "ja_JP", 0);
+        final var systemLanguage = createTestItem(component, "Ime", "A", "en_GB", 0);
+        final var systemLocale = createTestItem(component, "Ime", "A", "en_US", 0);
+
+        assertFalse(japanese.mIsSystemLanguage);
+        assertFalse(japanese.mIsSystemLocale);
+        assertTrue(systemLanguage.mIsSystemLanguage);
+        assertFalse(systemLanguage.mIsSystemLocale);
+        assertTrue(systemLocale.mIsSystemLanguage);
+        assertTrue(systemLocale.mIsSystemLocale);
+
+        assertEquals("System language shouldn't influence comparison over non-system language.",
+                0, japanese.compareTo(systemLanguage));
+        assertEquals("System locale shouldn't influence comparison over non-system locale.",
+                0, japanese.compareTo(systemLocale));
+        assertEquals("System locale shouldn't influence comparison over system language.",
+                0, systemLanguage.compareTo(systemLocale));
+    }
+
+    /** Verifies that the subtype name does not influence the comparison order. */
+    @RequiresFlagsEnabled(Flags.FLAG_IME_SWITCHER_REVAMP)
+    @Test
+    public void testCompareSubtypeName() {
+        final var component = new ComponentName("com.example.ime", "Ime");
+        final var subtypeA = createTestItem(component, "Ime", "A", "en_US", 0);
+        final var subtypeB = createTestItem(component, "Ime", "B", "en_US", 0);
+
+        assertEquals("Subtype name shouldn't influence comparison.",
+                0, subtypeA.compareTo(subtypeB));
+    }
+
+    /** Verifies that the subtype index does not influence the comparison order. */
+    @RequiresFlagsEnabled(Flags.FLAG_IME_SWITCHER_REVAMP)
+    @Test
+    public void testCompareSubtypeIndex() {
+        final var component = new ComponentName("com.example.ime", "Ime");
+        final var subtype0 = createTestItem(component, "Ime1", "A", "en_US", 0);
+        final var subtype1 = createTestItem(component, "Ime1", "A", "en_US", 1);
+
+        assertEquals("Subtype index shouldn't influence comparison.",
+                0, subtype0.compareTo(subtype1));
+    }
+
+    /**
+     * Verifies that the controller's next item order matches the given one, and cycles back at
+     * the end, both across all IMEs, and also per each IME. If a single item is given, verifies
+     * that no next item is returned.
+     *
+     * @param controller  the controller to use for finding the next items.
+     * @param forHardware whether to find the next hardware item, or software item.
+     * @param mode        the switching mode.
+     * @param forward     whether to search forwards or backwards in the list.
+     * @param allItems    the list of items across all IMEs.
+     * @param perImeItems the list of lists of items per IME.
+     */
+    private static void assertNextOrder(@NonNull InputMethodSubtypeSwitchingController controller,
+            boolean forHardware, @SwitchMode int mode, boolean forward,
+            @NonNull List<ImeSubtypeListItem> allItems,
+            @NonNull List<List<ImeSubtypeListItem>> perImeItems) {
+        assertNextOrder(controller, forHardware, false /* onlyCurrentIme */, mode,
+                forward, allItems);
+
+        for (var imeItems : perImeItems) {
+            assertNextOrder(controller, forHardware, true /* onlyCurrentIme */, mode,
+                    forward, imeItems);
+        }
+    }
+
+    /**
+     * Verifies that the controller's next item order matches the given one, and cycles back at
+     * the end, both across all IMEs, and also per each IME. This checks the forward direction
+     * with the given items, and the backwards order with the items reversed. If a single item is
+     * given, verifies that no next item is returned.
+     *
+     * @param controller  the controller to use for finding the next items.
+     * @param forHardware whether to find the next hardware item, or software item.
+     * @param mode        the switching mode.
+     * @param allItems    the list of items across all IMEs.
+     * @param perImeItems the list of lists of items per IME.
+     */
+    private static void assertNextOrder(@NonNull InputMethodSubtypeSwitchingController controller,
+            boolean forHardware, @SwitchMode int mode, @NonNull List<ImeSubtypeListItem> allItems,
+            @NonNull List<List<ImeSubtypeListItem>> perImeItems) {
+        assertNextOrder(controller, forHardware, false /* onlyCurrentIme */, mode,
+                true /* forward */, allItems);
+        assertNextOrder(controller, forHardware, false /* onlyCurrentIme */, mode,
+                false /* forward */, allItems.reversed());
+
+        for (var imeItems : perImeItems) {
+            assertNextOrder(controller, forHardware, true /* onlyCurrentIme */, mode,
+                    true /* forward */, imeItems);
+            assertNextOrder(controller, forHardware, true /* onlyCurrentIme */, mode,
+                    false /* forward */, imeItems.reversed());
+        }
+    }
+
+    /**
+     * Verifies that the controller's next item order (starting from the first one in {@code items}
+     * matches the given on, and cycles back at the end. If a single item is given, verifies that
+     * no next item is returned.
+     *
+     * @param controller     the controller to use for finding the next items.
+     * @param forHardware    whether to find the next hardware item, or software item.
+     * @param onlyCurrentIme whether to consider only subtypes of the current input method.
+     * @param mode           the switching mode.
+     * @param forward        whether to search forwards or backwards in the list.
+     * @param items          the list of items to verify, in the expected order.
+     */
+    private static void assertNextOrder(@NonNull InputMethodSubtypeSwitchingController controller,
+            boolean forHardware, boolean onlyCurrentIme, @SwitchMode int mode, boolean forward,
+            @NonNull List<ImeSubtypeListItem> items) {
+        final int numItems = items.size();
+        if (numItems == 0) {
+            return;
+        } else if (numItems == 1) {
+            // Single item controllers should never return a next item.
+            assertNextItem(controller, forHardware, onlyCurrentIme, mode, forward, items.get(0),
+                    null /* expectedNext*/);
+            return;
+        }
+
+        var item = items.get(0);
+
+        final var expectedNextItems = new ArrayList<>(items);
+        // Add first item in the last position of expected order, to ensure the order is cyclic.
+        expectedNextItems.add(item);
+
+        final var nextItems = new ArrayList<>();
+        // Add first item in the first position of actual order, to ensure the order is cyclic.
+        nextItems.add(item);
+
+        // Compute the nextItems starting from the first given item, and compare the order.
+        for (int i = 0; i < numItems; i++) {
+            item = getNextItem(controller, forHardware, onlyCurrentIme, mode, forward, item);
+            assertNotNull("Next item shouldn't be null.", item);
+            nextItems.add(item);
+        }
+
+        assertEquals("Rotation order doesn't match.", expectedNextItems, nextItems);
+    }
+
+    /**
+     * Verifies that the controller gets the expected next value from the given item.
+     *
+     * @param controller     the controller to sue for finding the next value.
+     * @param forHardware    whether to find the next hardware item, or software item.
+     * @param onlyCurrentIme whether to consider only subtypes of the current input method.
+     * @param mode           the switching mode.
+     * @param forward        whether to search forwards or backwards in the list.
+     * @param item           the item to find the next value from.
+     * @param expectedNext   the expected next value.
+     */
+    private static void assertNextItem(@NonNull InputMethodSubtypeSwitchingController controller,
+            boolean forHardware, boolean onlyCurrentIme, @SwitchMode int mode, boolean forward,
+            @NonNull ImeSubtypeListItem item, @Nullable ImeSubtypeListItem expectedNext) {
+        final var nextItem = getNextItem(controller, forHardware, onlyCurrentIme, mode, forward,
+                item);
+        assertEquals("Next item doesn't match.", expectedNext, nextItem);
+    }
+
+    /**
+     * Gets the next value from the given item.
+     *
+     * @param controller     the controller to use for finding the next value.
+     * @param forHardware    whether to find the next hardware item, or software item.
+     * @param onlyCurrentIme whether to consider only subtypes of the current input method.
+     * @param mode           the switching mode.
+     * @param forward        whether to search forwards or backwards in the list.
+     * @param item           the item to find the next value from.
+     * @return the next item found, otherwise {@code null}.
+     */
+    @Nullable
+    private static ImeSubtypeListItem getNextItem(
+            @NonNull InputMethodSubtypeSwitchingController controller, boolean forHardware,
+            boolean onlyCurrentIme, @SwitchMode int mode, boolean forward,
+            @NonNull ImeSubtypeListItem item) {
+        final var subtype = item.mSubtypeName != null
+                ? createTestSubtype(item.mSubtypeName.toString()) : null;
+        return forHardware
+                ? controller.getNextInputMethodForHardware(
+                        onlyCurrentIme, item.mImi, subtype, mode, forward)
+                : controller.getNextInputMethodLocked(
+                        onlyCurrentIme, item.mImi, subtype, mode, forward);
+    }
+
+    /**
+     * Verifies that the expected next item is returned, and the recency cannot be updated for the
+     * given items.
+     *
+     * @param controller   the controller to verify the items on.
+     * @param forHardware  whether to try finding the next hardware item, or software item.
+     * @param items        the list of items to verify.
+     * @param expectedNext the expected next item.
+     */
+    private void assertNextItemNoAction(@NonNull InputMethodSubtypeSwitchingController controller,
+            boolean forHardware, @NonNull List<ImeSubtypeListItem> items,
+            @Nullable ImeSubtypeListItem expectedNext) {
+        for (var item : items) {
+            for (int mode = MODE_STATIC; mode <= MODE_AUTO; mode++) {
+                assertNextItem(controller, forHardware, false /* onlyCurrentIme */, mode,
+                        false /* forward */, item, expectedNext);
+                assertNextItem(controller, forHardware, false /* onlyCurrentIme */, mode,
+                        true /* forward */, item, expectedNext);
+                assertNextItem(controller, forHardware, true /* onlyCurrentIme */, mode,
+                        false /* forward */, item, expectedNext);
+                assertNextItem(controller, forHardware, true /* onlyCurrentIme */, mode,
+                        true /* forward */, item, expectedNext);
+            }
+
+            assertFalse("User action shouldn't have updated the recency.",
+                    onUserAction(controller, item));
         }
     }
 }

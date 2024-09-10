@@ -23,7 +23,6 @@ import static android.hardware.display.BrightnessInfo.HIGH_BRIGHTNESS_MODE_SUNLI
 import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_DISABLED;
 import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_ENABLED;
 import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_OFF_DUE_TO_DISPLAY_STATE;
-import static com.android.server.display.DisplayDeviceConfig.HDR_PERCENT_OF_SCREEN_REQUIRED_DEFAULT;
 import static com.android.server.display.HighBrightnessModeController.HBM_TRANSITION_POINT_INVALID;
 
 import static org.junit.Assert.assertEquals;
@@ -56,8 +55,8 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.internal.util.test.FakeSettingsProviderRule;
-import com.android.server.display.DisplayDeviceConfig.HighBrightnessModeData;
 import com.android.server.display.HighBrightnessModeController.Injector;
+import com.android.server.display.config.HighBrightnessModeData;
 import com.android.server.testutils.OffsettableClock;
 
 import org.junit.Before;
@@ -77,6 +76,7 @@ public class HighBrightnessModeControllerTest {
     private static final long TIME_ALLOWED_IN_WINDOW_MILLIS = 12 * 1000;
     private static final long TIME_MINIMUM_AVAILABLE_TO_ENABLE_MILLIS = 5 * 1000;
     private static final boolean ALLOW_IN_LOW_POWER_MODE = false;
+    private static final float HDR_PERCENT_OF_SCREEN_REQUIRED_DEFAULT = 0.5f;
 
     private static final float DEFAULT_MIN = 0.01f;
     private static final float DEFAULT_MAX = 0.80f;
@@ -103,7 +103,8 @@ public class HighBrightnessModeControllerTest {
     private static final HighBrightnessModeData DEFAULT_HBM_DATA =
             new HighBrightnessModeData(MINIMUM_LUX, TRANSITION_POINT, TIME_WINDOW_MILLIS,
                     TIME_ALLOWED_IN_WINDOW_MILLIS, TIME_MINIMUM_AVAILABLE_TO_ENABLE_MILLIS,
-                    ALLOW_IN_LOW_POWER_MODE, HDR_PERCENT_OF_SCREEN_REQUIRED_DEFAULT);
+                    ALLOW_IN_LOW_POWER_MODE, HDR_PERCENT_OF_SCREEN_REQUIRED_DEFAULT,
+                    null, null, true);
 
     @Before
     public void setUp() {

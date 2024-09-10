@@ -21,7 +21,6 @@ import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_B
 import static com.google.common.truth.Truth.assertThat;
 
 import android.graphics.Rect;
-import android.os.Binder;
 import android.os.Parcel;
 import android.os.UserHandle;
 import android.util.ArrayMap;
@@ -63,7 +62,6 @@ public class RegisterStatusBarResultTest {
                 0x10 /* imeBackDisposition */,
                 false /* showImeSwitcher */,
                 0x20 /* disabledFlags2 */,
-                new Binder() /* imeToken */,
                 true /* navbarColorManagedByIme */,
                 BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE,
                 WindowInsets.Type.defaultVisible(),
@@ -85,7 +83,6 @@ public class RegisterStatusBarResultTest {
         assertThat(copy.mImeBackDisposition).isEqualTo(original.mImeBackDisposition);
         assertThat(copy.mShowImeSwitcher).isEqualTo(original.mShowImeSwitcher);
         assertThat(copy.mDisabledFlags2).isEqualTo(original.mDisabledFlags2);
-        assertThat(copy.mImeToken).isSameInstanceAs(original.mImeToken);
         assertThat(copy.mNavbarColorManagedByIme).isEqualTo(original.mNavbarColorManagedByIme);
         assertThat(copy.mBehavior).isEqualTo(original.mBehavior);
         assertThat(copy.mRequestedVisibleTypes).isEqualTo(original.mRequestedVisibleTypes);

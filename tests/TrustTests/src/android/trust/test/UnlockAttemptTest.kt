@@ -17,6 +17,7 @@ package android.trust.test
 
 import android.app.trust.TrustManager
 import android.content.Context
+import android.security.Flags.shouldTrustManagerListenForPrimaryAuth
 import android.trust.BaseTrustAgentService
 import android.trust.TrustTestActivity
 import android.trust.test.lib.LockStateTrackingRule
@@ -154,13 +155,17 @@ class UnlockAttemptTest {
 
     private fun triggerSuccessfulUnlock() {
         screenLockRule.successfulScreenLockAttempt()
-        trustAgentRule.reportSuccessfulUnlock()
+        if (!shouldTrustManagerListenForPrimaryAuth()) {
+            trustAgentRule.reportSuccessfulUnlock()
+        }
         await()
     }
 
     private fun triggerFailedUnlock() {
         screenLockRule.failedScreenLockAttempt()
-        trustAgentRule.reportFailedUnlock()
+        if (!shouldTrustManagerListenForPrimaryAuth()) {
+            trustAgentRule.reportFailedUnlock()
+        }
         await()
     }
 

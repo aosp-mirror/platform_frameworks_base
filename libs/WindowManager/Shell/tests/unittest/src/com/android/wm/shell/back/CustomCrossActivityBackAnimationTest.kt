@@ -25,7 +25,6 @@ import android.graphics.Rect
 import android.os.RemoteException
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
-import android.view.Choreographer
 import android.view.RemoteAnimationTarget
 import android.view.SurfaceControl
 import android.view.SurfaceControl.Transaction
@@ -37,8 +36,6 @@ import androidx.test.filters.SmallTest
 import com.android.internal.policy.TransitionAnimation
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.ShellTestCase
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
 import junit.framework.TestCase.assertEquals
 import org.junit.Assert
 import org.junit.Before
@@ -50,12 +47,13 @@ import org.mockito.ArgumentMatchers.anyFloat
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
-import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.times
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 @SmallTest
 @TestableLooper.RunWithLooper
@@ -82,7 +80,6 @@ class CustomCrossActivityBackAnimationTest : ShellTestCase() {
                 backAnimationBackground,
                 rootTaskDisplayAreaOrganizer,
                 transaction,
-                mock(Choreographer::class.java),
                 customAnimationLoader
             )
 

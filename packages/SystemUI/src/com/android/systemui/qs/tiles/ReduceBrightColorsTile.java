@@ -48,12 +48,13 @@ import javax.inject.Named;
 
 /** Quick settings tile: Reduce Bright Colors **/
 public class ReduceBrightColorsTile extends QSTileImpl<QSTile.BooleanState>
-        implements ReduceBrightColorsController.Listener{
+        implements ReduceBrightColorsController.Listener {
 
     public static final String TILE_SPEC = "reduce_brightness";
-    private final boolean mIsAvailable;
+    private boolean mIsAvailable;
     private final ReduceBrightColorsController mReduceBrightColorsController;
     private boolean mIsListening;
+    private final boolean mInUpgradeMode;
 
     @Inject
     public ReduceBrightColorsTile(
@@ -73,9 +74,11 @@ public class ReduceBrightColorsTile extends QSTileImpl<QSTile.BooleanState>
                 statusBarStateController, activityStarter, qsLogger);
         mReduceBrightColorsController = reduceBrightColorsController;
         mReduceBrightColorsController.observe(getLifecycle(), this);
-        mIsAvailable = isAvailable;
 
+        mInUpgradeMode = reduceBrightColorsController.isInUpgradeMode(mContext.getResources());
+        mIsAvailable = isAvailable || mInUpgradeMode;
     }
+
     @Override
     public boolean isAvailable() {
         return mIsAvailable;
@@ -93,12 +96,28 @@ public class ReduceBrightColorsTile extends QSTileImpl<QSTile.BooleanState>
 
     @Override
     public Intent getLongClickIntent() {
-        return new Intent(Settings.ACTION_REDUCE_BRIGHT_COLORS_SETTINGS);
+        return goToEvenDimmer() ? new Intent(Settings.ACTION_DISPLAY_SETTINGS) : new Intent(
+                Settings.ACTION_REDUCE_BRIGHT_COLORS_SETTINGS);
+    }
+
+    private boolean goToEvenDimmer() {
+        if (mInUpgradeMode) {
+            mHost.removeTile(getTileSpec());
+            mIsAvailable = false;
+            return true;
+        }
+        return false;
     }
 
     @Override
     protected void handleClick(@Nullable Expandable expandable) {
-        mReduceBrightColorsController.setReduceBrightColorsActivated(!mState.value);
+
+        if (goToEvenDimmer()) {
+            mActivityStarter.postStartActivityDismissingKeyguard(
+                    new Intent(Settings.ACTION_DISPLAY_SETTINGS), 0);
+        } else {
+            mReduceBrightColorsController.setReduceBrightColorsActivated(!mState.value);
+        }
     }
 
     @Override
@@ -125,6 +144,11 @@ public class ReduceBrightColorsTile extends QSTileImpl<QSTile.BooleanState>
 
     @Override
     public void onActivated(boolean activated) {
+        refreshState();
+    }
+
+    @Override
+    public void onFeatureEnabledChanged(boolean enabled) {
         refreshState();
     }
 }

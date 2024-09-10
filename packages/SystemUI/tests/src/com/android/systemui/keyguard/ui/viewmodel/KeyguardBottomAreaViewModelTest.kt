@@ -23,12 +23,14 @@ import android.platform.test.flag.junit.FlagsParameterization
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.internal.widget.LockPatternUtils
+import com.android.keyguard.logging.KeyguardQuickAffordancesLogger
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.animation.Expandable
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.deviceentry.domain.interactor.deviceEntryFaceAuthInteractor
 import com.android.systemui.dock.DockManagerFake
 import com.android.systemui.doze.util.BurnInHelperWrapper
 import com.android.systemui.flags.FakeFeatureFlags
@@ -52,6 +54,8 @@ import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInterac
 import com.android.systemui.keyguard.shared.quickaffordance.ActivationState
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancePosition
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancesMetricsLogger
+import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.sceneInteractor
@@ -67,13 +71,11 @@ import com.android.systemui.util.FakeSharedPreferences
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
-import com.android.systemui.util.settings.FakeSettings
+import com.android.systemui.util.settings.fakeSettings
 import com.google.common.truth.Truth.assertThat
 import kotlin.math.max
 import kotlin.math.min
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -91,6 +93,11 @@ import platform.test.runner.parameterized.Parameters
 @RunWith(ParameterizedAndroidJunit4::class)
 class KeyguardBottomAreaViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
 
+    private val kosmos = testKosmos()
+    private val testDispatcher = kosmos.testDispatcher
+    private val testScope = kosmos.testScope
+    private val settings = kosmos.fakeSettings
+
     @Mock private lateinit var expandable: Expandable
     @Mock private lateinit var burnInHelperWrapper: BurnInHelperWrapper
     @Mock private lateinit var lockPatternUtils: LockPatternUtils
@@ -99,21 +106,19 @@ class KeyguardBottomAreaViewModelTest(flags: FlagsParameterization) : SysuiTestC
     @Mock private lateinit var activityStarter: ActivityStarter
     @Mock private lateinit var launchAnimator: DialogTransitionAnimator
     @Mock private lateinit var devicePolicyManager: DevicePolicyManager
-    @Mock private lateinit var logger: KeyguardQuickAffordancesMetricsLogger
+    @Mock private lateinit var logger: KeyguardQuickAffordancesLogger
+    @Mock private lateinit var metricsLogger: KeyguardQuickAffordancesMetricsLogger
     @Mock private lateinit var broadcastDispatcher: BroadcastDispatcher
     @Mock private lateinit var accessibilityManager: AccessibilityManagerWrapper
 
     private lateinit var underTest: KeyguardBottomAreaViewModel
 
-    private lateinit var testScope: TestScope
     private lateinit var repository: FakeKeyguardRepository
     private lateinit var homeControlsQuickAffordanceConfig: FakeKeyguardQuickAffordanceConfig
     private lateinit var quickAccessWalletAffordanceConfig: FakeKeyguardQuickAffordanceConfig
     private lateinit var qrCodeScannerAffordanceConfig: FakeKeyguardQuickAffordanceConfig
     private lateinit var dockManager: DockManagerFake
     private lateinit var biometricSettingsRepository: FakeBiometricSettingsRepository
-
-    private val kosmos = testKosmos()
 
     init {
         mSetFlagsRule.setFlagsParameterization(flags)
@@ -150,10 +155,7 @@ class KeyguardBottomAreaViewModelTest(flags: FlagsParameterization) : SysuiTestC
         dockManager = DockManagerFake()
         biometricSettingsRepository = FakeBiometricSettingsRepository()
         val featureFlags =
-            FakeFeatureFlags().apply {
-                set(Flags.LOCK_SCREEN_LONG_PRESS_ENABLED, false)
-                set(Flags.LOCK_SCREEN_LONG_PRESS_DIRECT_TO_WPP, false)
-            }
+            FakeFeatureFlags().apply { set(Flags.LOCK_SCREEN_LONG_PRESS_ENABLED, false) }
 
         val withDeps = KeyguardInteractorFactory.create(featureFlags = featureFlags)
         val keyguardInteractor = withDeps.keyguardInteractor
@@ -162,8 +164,6 @@ class KeyguardBottomAreaViewModelTest(flags: FlagsParameterization) : SysuiTestC
         whenever(userTracker.userHandle).thenReturn(mock())
         whenever(lockPatternUtils.getStrongAuthForUser(anyInt()))
             .thenReturn(LockPatternUtils.StrongAuthTracker.STRONG_AUTH_NOT_REQUIRED)
-        val testDispatcher = StandardTestDispatcher()
-        testScope = TestScope(testDispatcher)
         val localUserSelectionManager =
             KeyguardQuickAffordanceLocalUserSelectionManager(
                 context = context,
@@ -199,7 +199,7 @@ class KeyguardBottomAreaViewModelTest(flags: FlagsParameterization) : SysuiTestC
                     KeyguardQuickAffordanceLegacySettingSyncer(
                         scope = testScope.backgroundScope,
                         backgroundDispatcher = testDispatcher,
-                        secureSettings = FakeSettings(),
+                        secureSettings = settings,
                         selectionsManager = localUserSelectionManager,
                     ),
                 configs =
@@ -222,6 +222,7 @@ class KeyguardBottomAreaViewModelTest(flags: FlagsParameterization) : SysuiTestC
                 broadcastDispatcher = broadcastDispatcher,
                 accessibilityManager = accessibilityManager,
                 pulsingGestureListener = kosmos.pulsingGestureListener,
+                faceAuthInteractor = kosmos.deviceEntryFaceAuthInteractor,
             )
         underTest =
             KeyguardBottomAreaViewModel(
@@ -238,6 +239,7 @@ class KeyguardBottomAreaViewModelTest(flags: FlagsParameterization) : SysuiTestC
                         repository = { quickAffordanceRepository },
                         launchAnimator = launchAnimator,
                         logger = logger,
+                        metricsLogger = metricsLogger,
                         devicePolicyManager = devicePolicyManager,
                         dockManager = dockManager,
                         biometricSettingsRepository = biometricSettingsRepository,

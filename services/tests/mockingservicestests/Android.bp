@@ -53,6 +53,7 @@ android_test {
         "mockingservicestests-utils-mockito",
         "mockito-target-extended-minus-junit4",
         "platform-compat-test-rules",
+        "platform-parametric-runner-lib",
         "platform-test-annotations",
         "PlatformProperties",
         "service-blobstore",
@@ -135,4 +136,270 @@ android_ravenwood_test {
         "src/com/android/server/am/BroadcastRecordTest.java",
     ],
     auto_gen_config: true,
+}
+
+FLAKY = ["androidx.test.filters.FlakyTest"]
+
+test_module_config {
+    name: "FrameworksMockingServicesTests_blob",
+    base: "FrameworksMockingServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.blob"],
+}
+
+test_module_config {
+    name: "FrameworksMockingServicesTests_IdleController",
+    base: "FrameworksMockingServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.DeviceIdleControllerTest"],
+    exclude_annotations: FLAKY,
+}
+
+test_module_config {
+    name: "FrameworksMockingServicesTests_AppStateTracker",
+    base: "FrameworksMockingServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.AppStateTrackerTest"],
+    include_annotations: ["android.platform.test.annotations.Presubmit"],
+    exclude_annotations: FLAKY,
+}
+
+test_module_config {
+    name: "FrameworksMockingServicesTests_com_android_server",
+    base: "FrameworksMockingServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server"],
+}
+
+test_module_config {
+    name: "FrameworksMockingServicesTests_com_android_server_alarm",
+    base: "FrameworksMockingServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.alarm"],
+    include_annotations: ["android.platform.test.annotations.Presubmit"],
+    exclude_annotations: FLAKY,
+}
+
+test_module_config {
+    name: "FrameworksMockingServicesTests_com_android_server_job_Presubmit",
+    base: "FrameworksMockingServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.job"],
+    exclude_annotations: FLAKY + ["androidx.test.filters.LargeTest"],
+}
+
+test_module_config {
+    name: "FrameworksMockingServicesTests_com_android_server_job",
+    base: "FrameworksMockingServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.job"],
+}
+
+test_module_config {
+    name: "FrameworksMockingServicesTests_com_android_server_tare_Presubmit",
+    base: "FrameworksMockingServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.tare"],
+    exclude_annotations: FLAKY,
+}
+
+test_module_config {
+    name: "FrameworksMockingServicesTests_com_android_server_tare",
+    base: "FrameworksMockingServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.tare"],
+}
+
+test_module_config {
+    name: "FrameworksMockingServicesTests_games_Presubmit",
+    base: "FrameworksMockingServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["android.service.games"],
+    exclude_annotations: FLAKY,
+}
+
+test_module_config {
+    name: "FrameworksMockingServicesTests_location",
+    base: "FrameworksMockingServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.location"],
+}
+
+test_module_config {
+    name: "FrameworksMockingServicesTests_backup",
+    base: "FrameworksMockingServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.backup"],
+}
+
+test_module_config {
+    name: "FrameworksMockingServicesTests_sensorprivacy",
+    base: "FrameworksMockingServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.sensorprivacy"],
+}
+
+test_module_config {
+    name: "FrameworksMockingServicesTests_android_server_am_Presubmit",
+    base: "FrameworksMockingServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.am."],
+    include_annotations: ["android.platform.test.annotations.Presubmit"],
+    exclude_annotations: FLAKY,
+}
+
+test_module_config {
+    name: "FrameworksMockingServicesTests_android_server_am_broadcast",
+    base: "FrameworksMockingServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: [
+        "com.android.server.am.BroadcastQueueTest",
+        "com.android.server.am.BroadcastRecordTest",
+        "com.android.server.am.BroadcastQueueModernImplTest",
+    ],
+}
+
+test_module_config {
+    name: "FrameworksMockingServicesTests_android_server_app",
+    base: "FrameworksMockingServicesTests",
+    test_suites: ["device-tests"],
+    // Matches appop too
+    include_filters: ["com.android.server.app"],
+    exclude_annotations: FLAKY,
+}
+
+test_module_config {
+    name: "FrameworksMockingServicesTests_android_server_appop",
+    base: "FrameworksMockingServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.appop"],
+}
+
+test_module_config {
+    name: "FrameworksMockingServicesTests_android_server_compat_overrides",
+    base: "FrameworksMockingServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.compat.overrides"],
+}
+
+test_module_config {
+    name: "FrameworksMockingServicesTests_android_server_crashrecovery",
+    base: "FrameworksMockingServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.RescuePartyTest"],
+}
+
+test_module_config {
+    name: "FrameworksMockingServicesTests_android_server_pm",
+    base: "FrameworksMockingServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.pm."],
+}
+
+test_module_config {
+    name: "FrameworksMockingServicesTests_com_android_server_pm_Presubmit",
+    base: "FrameworksMockingServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.pm"],
+    exclude_annotations: FLAKY + ["org.junit.Ignore"],
+}
+
+test_module_config {
+    name: "FrameworksMockingServicesTests_android_server_power_Presubmit",
+    base: "FrameworksMockingServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.power"],
+    exclude_annotations: FLAKY,
+}
+
+test_module_config {
+    name: "FrameworksMockingServicesTests_android_server_power",
+    base: "FrameworksMockingServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.power"],
+}
+
+test_module_config {
+    name: "FrameworksMockingServicesTests_android_server_trust",
+    base: "FrameworksMockingServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.trust"],
+    exclude_annotations: FLAKY,
+}
+
+test_module_config {
+    name: "FrameworksMockingServicesTests_android_server_utils",
+    base: "FrameworksMockingServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.utils"],
+}
+
+test_module_config {
+    name: "FrameworksMockingServicesTests_android_server",
+    base: "FrameworksMockingServicesTests",
+    test_suites: [
+        "automotive-tests",
+        "device-tests",
+    ],
+    include_filters: ["com.android.server"],
+}
+
+test_module_config {
+    name: "FrameworksMockingServicesTests_server_job",
+    base: "FrameworksMockingServicesTests",
+    test_suites: [
+        "automotive-tests",
+        "device-tests",
+    ],
+    include_filters: ["com.android.server.job"],
+}
+
+test_module_config {
+    name: "FrameworksMockingServicesTests_server_tare",
+    base: "FrameworksMockingServicesTests",
+    test_suites: [
+        "automotive-tests",
+        "device-tests",
+    ],
+    include_filters: ["com.android.server.tare"],
+}
+
+test_module_config {
+    name: "FrameworksMockingServicesTests_server_backup",
+    base: "FrameworksMockingServicesTests",
+    test_suites: [
+        "automotive-tests",
+        "device-tests",
+    ],
+    include_filters: ["com.android.server.backup"],
+}
+
+test_module_config {
+    name: "FrameworksMockingServicesTests_server_rescuepartytest",
+    base: "FrameworksMockingServicesTests",
+    test_suites: [
+        "automotive-tests",
+        "device-tests",
+    ],
+    include_filters: ["com.android.server.RescuePartyTest"],
+}
+
+test_module_config {
+    name: "FrameworksMockingServicesTests_server_power",
+    base: "FrameworksMockingServicesTests",
+    test_suites: [
+        "automotive-tests",
+        "device-tests",
+    ],
+    include_filters: ["com.android.server.power"],
+}
+
+test_module_config {
+    name: "FrameworksMockingServicesTests_server_trust",
+    base: "FrameworksMockingServicesTests",
+    test_suites: [
+        "automotive-tests",
+        "device-tests",
+    ],
+    include_filters: ["com.android.server.trust"],
 }

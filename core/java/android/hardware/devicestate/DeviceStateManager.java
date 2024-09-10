@@ -67,6 +67,14 @@ public final class DeviceStateManager {
     public static final int MAXIMUM_DEVICE_STATE_IDENTIFIER = 10000;
 
     /**
+     * {@link DeviceState} to represent an invalid device state.
+     * @hide
+     */
+    public static final DeviceState INVALID_DEVICE_STATE = new DeviceState(
+            new DeviceState.Configuration.Builder(INVALID_DEVICE_STATE_IDENTIFIER,
+                    "INVALID").build());
+
+    /**
      * Intent needed to launch the rear display overlay activity from SysUI
      *
      * @hide

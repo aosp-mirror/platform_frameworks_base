@@ -204,7 +204,7 @@
     <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"ਪ੍ਰਾਈਵੇਟ ਸਪੇਸ ਨੂੰ ਹਟਾਇਆ ਗਿਆ"</string>
     <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"ਤੁਹਾਡੀ ਸੰਸਥਾ ਇਸ ਪ੍ਰਬੰਧਿਤ ਕੀਤੇ ਡੀਵਾਈਸ \'ਤੇ ਪ੍ਰਾਈਵੇਟ ਸਪੇਸਾਂ ਦੀ ਆਗਿਆ ਨਹੀਂ ਦਿੰਦੀ।"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"ਡੀਵਾਈਸ ਪ੍ਰਬੰਧਨ ਅਧੀਨ ਹੈ"</string>
-    <string name="network_logging_notification_text" msgid="1327373071132562512">"ਤੁਹਾਡਾ ਸੰਗਠਨ ਇਸ ਡੀਵਾਈਸ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰਦਾ ਹੈ ਅਤੇ ਨੈੱਟਵਰਕ ਟਰੈਫਿਕ ਦੀ ਨਿਗਰਾਨੀ ਕਰ ਸਕਦਾ ਹੈ। ਵੇਰਵਿਆਂ ਲਈ ਟੈਪ ਕਰੋ।"</string>
+    <string name="network_logging_notification_text" msgid="1327373071132562512">"ਤੁਹਾਡੀ ਸੰਸਥਾ ਇਸ ਡੀਵਾਈਸ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰਦੀ ਹੈ ਅਤੇ ਨੈੱਟਵਰਕ ਟਰੈਫਿਕ ਦੀ ਨਿਗਰਾਨੀ ਕਰ ਸਕਦੀ ਹੈ। ਵੇਰਵਿਆਂ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"ਐਪਾਂ ਤੁਹਾਡੇ ਟਿਕਾਣੇ ਤੱਕ ਪਹੁੰਚ ਕਰ ਸਕਦੀਆਂ ਹਨ"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"ਹੋਰ ਜਾਣਨ ਲਈ ਆਪਣੇ ਆਈ.ਟੀ. ਪ੍ਰਸ਼ਾਸਕ ਨਾਲ ਸੰਪਰਕ ਕਰੋ"</string>
     <string name="geofencing_service" msgid="3826902410740315456">"ਭੂਗੋਲਿਕ-ਘੇਰੇ ਸੰਬੰਧੀ ਸੇਵਾ"</string>
@@ -265,8 +265,6 @@
     <string name="global_action_bug_report" msgid="5127867163044170003">"ਬਗ ਰਿਪੋਰਟ"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"ਸੈਸ਼ਨ ਸਮਾਪਤ ਕਰੋ"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਲਵੋ"</string>
-    <!-- no translation found for identity_check_biometric_prompt_description (5810195983015866727) -->
-    <skip />
     <string name="bugreport_title" msgid="8549990811777373050">"ਬੱਗ ਰਿਪੋਰਟ"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"ਇਹ ਇੱਕ ਈਮੇਲ ਸੁਨੇਹਾ ਭੇਜਣ ਲਈ, ਤੁਹਾਡੇ ਵਰਤਮਾਨ ਡੀਵਾਈਸ ਬਾਰੇ ਜਾਣਕਾਰੀ ਇਕੱਠੀ ਕਰੇਗਾ। ਬੱਗ ਰਿਪੋਰਟ ਸ਼ੁਰੂ ਕਰਨ ਵਿੱਚ ਥੋੜ੍ਹਾ ਸਮਾਂ ਲੱਗੇਗਾ ਜਦੋਂ ਤੱਕ ਇਹ ਭੇਜੇ ਜਾਣ ਲਈ ਤਿਆਰ ਨਾ ਹੋਵੇ, ਕਿਰਪਾ ਕਰਕੇ ਧੀਰਜ ਰੱਖੋ।"</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"ਅੰਤਰਕਿਰਿਆਤਮਕ ਰਿਪੋਰਟ"</string>
@@ -1196,6 +1194,8 @@
     <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"ਪਾਸਵਰਡ ਖੇਤਰਾਂ ਵਿੱਚ ਲਿਖਾਈ ਸਮਰਥਿਤ ਨਹੀਂ ਹੈ"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"ਪਿੱਛੇ"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"ਇਨਪੁੱਟ ਵਿਧੀ ਨੂੰ ਸਵਿੱਚ ਕਰੋ"</string>
+    <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"ਇਨਪੁੱਟ ਵਿਧੀ ਚੋਣਕਾਰ ਨੂੰ ਖੋਲ੍ਹੋ"</string>
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"ਸੈਟਿੰਗਾਂ"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"ਸਟੋਰੇਜ ਦੀ ਜਗ੍ਹਾ ਖਤਮ ਹੋ ਰਹੀ ਹੈ"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"ਕੁਝ ਸਿਸਟਮ ਫੰਕਸ਼ਨ ਕੰਮ ਨਹੀਂ ਵੀ ਕਰ ਸਕਦੇ"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"ਸਿਸਟਮ ਲਈ ਲੋੜੀਂਦੀ ਸਟੋਰੇਜ ਨਹੀਂ ਹੈ। ਯਕੀਨੀ ਬਣਾਓ ਕਿ ਤੁਹਾਡੇ ਕੋਲ 250MB ਖਾਲੀ ਜਗ੍ਹਾ ਹੈ ਅਤੇ ਮੁੜ-ਚਾਲੂ ਕਰੋ।"</string>
@@ -1413,10 +1413,8 @@
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"ਵਾਇਰਲੈੱਸ ਡੀਬੱਗਿੰਗ ਨੂੰ ਬੰਦ ਕਰਨ ਲਈ ਚੁਣੋ।"</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"ਟੈਸਟ ਹਾਰਨੈੱਸ ਮੋਡ ਚਾਲੂ ਹੈ"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"ਟੈਸਟ ਹਾਰਨੈੱਸ ਮੋਡ ਬੰਦ ਕਰਨ ਲਈ ਫੈਕਟਰੀ ਰੀਸੈੱਟ ਕਰੋ।"</string>
-    <!-- no translation found for wrong_hsum_configuration_notification_title (7212758829332714385) -->
-    <skip />
-    <!-- no translation found for wrong_hsum_configuration_notification_message (5353475441480684381) -->
-    <skip />
+    <string name="wrong_hsum_configuration_notification_title" msgid="7212758829332714385">"ਗਲਤ HSUM ਬਿਲਡ ਸੰਰੂਪਣ"</string>
+    <string name="wrong_hsum_configuration_notification_message" msgid="5353475441480684381">"ਇਸ ਡੀਵਾਈਸ ਦੀ ਹੈੱਡਲੈੱਸ ਸਿਸਟਮ ਯੂਜ਼ਰ ਮੋਡ ਸਥਿਤੀ ਇਸਦੇ ਬਿਲਡ ਸੰਰੂਪਣ ਤੋਂ ਵੱਖਰੀ ਹੈ। ਕਿਰਪਾ ਕਰਕੇ ਡੀਵਾਈਸ ਨੂੰ ਫੈਕਟਰੀ ਰੀਸੈੱਟ ਕਰੋ।"</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"ਸੀਰੀਅਲ ਕੰਸੋਲ ਚਾਲੂ ਕੀਤਾ ਗਿਆ"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"ਕਾਰਗੁਜ਼ਾਰੀ ਪ੍ਰਭਾਵਿਤ ਹੋਈ ਹੈ। ਬੰਦ ਕਰਨ ਲਈ, ਬੂਟਲੋਡਰ ਦੇਖੋ।"</string>
     <string name="mte_override_notification_title" msgid="4731115381962792944">"ਪ੍ਰਯੋਗਮਈ MTE ਨੂੰ ਚਾਲੂ ਕੀਤਾ ਗਿਆ"</string>
@@ -1432,6 +1430,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"ਸਾਂਝਾ ਕਰੋ"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"ਅਸਵੀਕਾਰ ਕਰੋ"</string>
     <string name="select_input_method" msgid="3971267998568587025">"ਇਨਪੁਟ ਵਿਧੀ ਚੁਣੋ"</string>
+    <string name="input_method_language_settings" msgid="8069089418056819437">"ਭਾਸ਼ਾ ਸੈਟਿੰਗਾਂ"</string>
     <string name="show_ime" msgid="6406112007347443383">"ਭੌਤਿਕ ਕੀ-ਬੋਰਡ ਸਰਗਰਮ ਹੋਣ ਦੌਰਾਨ ਇਸ ਨੂੰ ਸਕ੍ਰੀਨ \'ਤੇ ਬਣਾਈ ਰੱਖੋ"</string>
     <string name="hardware" msgid="3611039921284836033">"ਆਨ-ਸਕ੍ਰੀਨ ਕੀ-ਬੋਰਡ ਨੂੰ ਵਰਤੋ"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"<xliff:g id="DEVICE_NAME">%s</xliff:g> ਦਾ ਸੰਰੂਪਣ ਕਰੋ"</string>
@@ -1747,7 +1746,8 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"ਕੋਈ ਐਪ ਇਜਾਜ਼ਤ ਸੰਬੰਧੀ ਬੇਨਤੀ ਨੂੰ ਅਸਪਸ਼ਟ ਕਰ ਰਹੀ ਹੈ, ਇਸ ਲਈ ਤੁਹਾਡੇ ਜਵਾਬ ਦੀ ਪੁਸ਼ਟੀ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ।"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"ਕਿਸੇ ਵਿਸ਼ੇਸ਼ਤਾ ਨੂੰ ਵਰਤਣਾ ਸ਼ੁਰੂ ਕਰਨ ਲਈ ਉਸ \'ਤੇ ਟੈਪ ਕਰੋ:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"ਪਹੁੰਚਯੋਗਤਾ ਬਟਨ ਨਾਲ ਵਰਤਣ ਲਈ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਚੁਣੋ"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"ਅਵਾਜ਼ ਕੁੰਜੀ ਸ਼ਾਰਟਕੱਟ ਨਾਲ ਵਰਤਣ ਲਈ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਚੁਣੋ"</string>
+    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
+    <skip />
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> ਨੂੰ ਬੰਦ ਕਰ ਦਿੱਤਾ ਗਿਆ ਹੈ"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"ਸ਼ਾਰਟਕੱਟਾਂ ਦਾ ਸੰਪਾਦਨ ਕਰੋ"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"ਹੋ ਗਿਆ"</string>
@@ -1761,18 +1761,12 @@
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"ਅਵਾਜ਼ੀ ਕੁੰਜੀਆਂ ਦਬਾ ਕੇ ਰੱਖੀਆਂ ਗਈਆਂ। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ਨੂੰ ਚਾਲੂ ਕੀਤਾ ਗਿਆ।"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"ਅਵਾਜ਼ੀ ਕੁੰਜੀਆਂ ਦਬਾ ਕੇ ਰੱਖੀਆਂ ਗਈਆਂ। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ਨੂੰ ਬੰਦ ਕੀਤਾ ਗਿਆ।"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"ਅਵਾਜ਼ ਕੁੰਜੀਆਂ ਨੂੰ ਛੱਡੋ। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ਨੂੰ ਚਾਲੂ ਕਰਨ ਲਈ, ਦੋਵੇਂ ਅਵਾਜ਼ ਕੁੰਜੀਆਂ ਨੂੰ 3 ਸਕਿੰਟਾਂ ਲਈ ਦੁਬਾਰਾ ਦਬਾਈ ਰੱਖੋ।"</string>
-    <!-- no translation found for accessibility_button_prompt_text (6105393217162198616) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_prompt_text (6452246951969541792) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_3finger_prompt_text (77745752309056152) -->
-    <skip />
-    <!-- no translation found for accessibility_button_instructional_text (6831154884557881996) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_instructional_text (4133877896011098550) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_3finger_instructional_text (1124458279366968154) -->
-    <skip />
+    <string name="accessibility_button_prompt_text" msgid="6105393217162198616">"ਕੋਈ ਵਿਸ਼ੇਸ਼ਤਾ ਚੁਣੋ"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="6452246951969541792">"ਕੋਈ ਵਿਸ਼ੇਸ਼ਤਾ ਚੁਣੋ"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="77745752309056152">"ਕੋਈ ਵਿਸ਼ੇਸ਼ਤਾ ਚੁਣੋ"</string>
+    <string name="accessibility_button_instructional_text" msgid="6831154884557881996">"ਅਗਲੀ ਵਾਰ ਜਦੋਂ ਤੁਸੀਂ ਪਹੁੰਚਯੋਗਤਾ ਬਟਨ ਨੂੰ ਟੈਪ ਕਰੋਗੇ, ਤਾਂ ਇਹ ਵਿਸ਼ੇਸ਼ਤਾ ਖੁੱਲ੍ਹ ਜਾਵੇਗੀ"</string>
+    <string name="accessibility_gesture_instructional_text" msgid="4133877896011098550">"ਅਗਲੀ ਵਾਰ ਜਦੋਂ ਤੁਸੀਂ ਇਸ ਸ਼ਾਰਟਕੱਟ ਦੀ ਵਰਤੋਂ ਕਰੋਗੇ, ਤਾਂ ਇਹ ਵਿਸ਼ੇਸ਼ਤਾ ਖੁੱਲ੍ਹ ਜਾਵੇਗੀ। 2 ਉਂਗਲਾਂ ਨਾਲ ਆਪਣੀ ਸਕ੍ਰੀਨ ਦੇ ਹੇਠਾਂ ਤੋਂ ਉੱਪਰ ਵੱਲ ਸਵਾਈਪ ਕਰ ਕੇ ਤੁਰੰਤ ਛੱਡੋ।"</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="1124458279366968154">"ਅਗਲੀ ਵਾਰ ਜਦੋਂ ਤੁਸੀਂ ਇਸ ਸ਼ਾਰਟਕੱਟ ਦੀ ਵਰਤੋਂ ਕਰੋਗੇ, ਤਾਂ ਇਹ ਵਿਸ਼ੇਸ਼ਤਾ ਖੁੱਲ੍ਹ ਜਾਵੇਗੀ। 3 ਉਂਗਲਾਂ ਨਾਲ ਆਪਣੀ ਸਕ੍ਰੀਨ ਦੇ ਹੇਠਾਂ ਤੋਂ ਉੱਪਰ ਵੱਲ ਸਵਾਈਪ ਕਰ ਕੇ ਤੁਰੰਤ ਛੱਡੋ।"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"ਵੱਡਦਰਸ਼ੀਕਰਨ"</string>
     <string name="user_switched" msgid="7249833311585228097">"ਮੌਜੂਦਾ ਉਪਭੋਗਤਾ <xliff:g id="NAME">%1$s</xliff:g>।"</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> \'ਤੇ ਸਵਿੱਚ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ…"</string>
@@ -1895,8 +1889,7 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"ਪਿੰਨ ਬਹੁਤ ਜ਼ਿਆਦਾ ਛੋਟਾ ਹੈ। ਘੱਟੋ-ਘੱਟ 4 ਅੰਕ ਹੋਣੇ ਚਾਹੀਦੇ ਹਨ।"</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"ਬਾਅਦ ਵਿੱਚ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"ਪੂਰੀ ਸਕ੍ਰੀਨ \'ਤੇ ਦੇਖੋ"</string>
-    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
-    <skip />
+    <string name="immersive_cling_description" msgid="2896205051090870978">"ਬਾਹਰ ਜਾਣ ਲਈ, ਆਪਣੀ ਸਕ੍ਰੀਨ ਦੇ ਸਿਖਰ ਤੋਂ ਹੇਠਾਂ ਵੱਲ ਸਵਾਈਪ ਕਰੋ"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"ਸਮਝ ਲਿਆ"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"ਬਿਹਤਰ ਦ੍ਰਿਸ਼ ਅਨੁਭਵ ਲਈ ਘੁਮਾਓ"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"ਬਿਹਤਰ ਦ੍ਰਿਸ਼ ਅਨੁਭਵ ਲਈ <xliff:g id="NAME">%s</xliff:g> ਨੂੰ ਪੂਰੀ-ਸਕ੍ਰੀਨ ਵਿੱਚ ਖੋਲ੍ਹੋ"</string>
@@ -2432,25 +2425,32 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"ਐਪ ਸਮੱਗਰੀ ਨੂੰ ਸੁਰੱਖਿਆ ਲਈ ਸਕ੍ਰੀਨ ਸਾਂਝਾਕਰਨ ਤੋਂ ਲੁਕਾਇਆ ਗਿਆ ਹੈ"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"ਸੈਟੇਲਾਈਟ ਨਾਲ ਸਵੈ-ਕਨੈਕਟ ਹੋਇਆ"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"ਤੁਸੀਂ ਮੋਬਾਈਲ ਜਾਂ ਵਾਈ-ਫਾਈ ਨੈੱਟਵਰਕ ਤੋਂ ਬਿਨਾਂ ਸੁਨੇਹੇ ਭੇਜ ਅਤੇ ਪ੍ਰਾਪਤ ਕਰ ਸਕਦੇ ਹੋ"</string>
+    <string name="satellite_notification_manual_title" msgid="1097504441849466279">"ਕੀ ਸੈਟੇਲਾਈਟ ਸੁਨੇਹੇ ਦੀ ਵਰਤੋਂ ਕਰਨੀ ਹੈ?"</string>
+    <string name="satellite_notification_manual_summary" msgid="901206289846283445">"ਮੋਬਾਈਲ ਜਾਂ ਵਾਈ-ਫਾਈ ਨੈੱਟਵਰਕ ਤੋਂ ਬਿਨਾਂ ਸੁਨੇਹੇ ਭੇਜੋ ਅਤੇ ਪ੍ਰਾਪਤ ਕਰੋ"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages ਐਪ ਖੋਲ੍ਹੋ"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"ਇਹ ਕਿਵੇਂ ਕੰਮ ਕਰਦਾ ਹੈ"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"ਵਿਚਾਰ-ਅਧੀਨ..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਅਣਲਾਕ ਦਾ ਦੁਬਾਰਾ ਸੈੱਟਅੱਪ ਕਰੋ"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (5851784577768803510) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7925203589860744456) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (1824812666549916586) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (5974657382960155099) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> ਦੀ ਹੁਣ ਪਛਾਣ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ।"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> ਅਤੇ <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> ਦੀ ਹੁਣ ਪਛਾਣ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ।"</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="1824812666549916586">"<xliff:g id="FINGERPRINT">%s</xliff:g> ਦੀ ਹੁਣ ਪਛਾਣ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ। ਫਿੰਗਰਪ੍ਰਿੰਟ ਅਣਲਾਕ ਦਾ ਦੁਬਾਰਾ ਸੈੱਟਅੱਪ ਕਰੋ।"</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="5974657382960155099">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> ਅਤੇ <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> ਦੀ ਹੁਣ ਪਛਾਣ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ। ਫਿੰਗਰਪ੍ਰਿੰਟ ਅਣਲਾਕ ਦਾ ਦੁਬਾਰਾ ਸੈੱਟਅੱਪ ਕਰੋ।"</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"ਫ਼ੇਸ ਅਣਲਾਕ ਦਾ ਦੁਬਾਰਾ ਸੈੱਟਅੱਪ ਕਰੋ"</string>
-    <!-- no translation found for face_dangling_notification_msg (746235263598985384) -->
-    <skip />
+    <string name="face_dangling_notification_msg" msgid="746235263598985384">"ਤੁਹਾਡੇ ਚਿਹਰੇ ਦੇ ਮਾਡਲ ਦੀ ਹੁਣ ਪਛਾਣ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ। ਫ਼ੇਸ ਅਣਲਾਕ ਦਾ ਦੁਬਾਰਾ ਸੈੱਟਅੱਪ ਕਰੋ।"</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"ਸੈੱਟਅੱਪ ਕਰੋ"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"ਹੁਣੇ ਨਹੀਂ"</string>
     <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"<xliff:g id="USER_NAME">%s</xliff:g> ਲਈ ਅਲਾਰਮ"</string>
     <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"ਵਰਤੋਂਕਾਰ ਬਦਲੋ"</string>
     <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"ਮਿਊਟ ਕਰੋ"</string>
     <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"ਧੁਨੀ ਮਿਊਟ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ"</string>
+    <string name="keyboard_shortcut_group_applications_browser" msgid="6535007304687100909">"ਬ੍ਰਾਊਜ਼ਰ"</string>
+    <string name="keyboard_shortcut_group_applications_contacts" msgid="2750702518068326356">"Contacts"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="4229037666415353683">"Email"</string>
+    <string name="keyboard_shortcut_group_applications_sms" msgid="3523799286376321137">"SMS"</string>
+    <string name="keyboard_shortcut_group_applications_music" msgid="2051507523525651067">"Music"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="3571770335653387606">"Calendar"</string>
+    <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"Calculator"</string>
+    <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"Maps"</string>
+    <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"ਐਪਲੀਕੇਸ਼ਨਾਂ"</string>
+    <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"ਤੁਹਾਡੇ ਫਿੰਗਰਪ੍ਰਿੰਟਾਂ ਦੀ ਹੁਣ ਪਛਾਣ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ। ਫਿੰਗਰਪ੍ਰਿੰਟ ਅਣਲਾਕ ਦਾ ਦੁਬਾਰਾ ਸੈੱਟਅੱਪ ਕਰੋ।"</string>
 </resources>

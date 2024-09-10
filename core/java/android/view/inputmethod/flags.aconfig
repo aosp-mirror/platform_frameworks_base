@@ -82,6 +82,15 @@ flag {
 }
 
 flag {
+    name: "ime_switcher_revamp_api"
+    is_exported: true
+    namespace: "input_method"
+    description: "Feature flag for APIs for revamping the Input Method Switcher menu"
+    bug: "311791923"
+    is_fixed_read_only: true
+}
+
+flag {
     name: "initiation_without_input_connection"
     namespace: "input_method"
     description: "Feature flag for initiating handwriting without InputConnection"
@@ -122,6 +131,17 @@ flag {
   namespace: "input_method"
   description: "Defers showSoftInput until the IME session has been created."
   bug: "337766845"
+  is_fixed_read_only: true
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "compatchange_for_zerojankproxy"
+  namespace: "input_method"
+  description: "Version-gate the sync/async nature of IMM#show/hideSoftInput() when using zeroJankProxy."
+  bug: "352594277"
   is_fixed_read_only: true
   metadata {
     purpose: PURPOSE_BUGFIX

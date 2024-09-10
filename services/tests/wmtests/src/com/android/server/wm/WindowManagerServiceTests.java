@@ -47,10 +47,10 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
-import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND;
-import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING;
-import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_SOLID_COLOR;
-import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_WALLPAPER;
+import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND;
+import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING;
+import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_BACKGROUND_SOLID_COLOR;
+import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_BACKGROUND_WALLPAPER;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -253,22 +253,18 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         final Session session = createTestSession(mAtm, wpc.getPid(), wpc.mUid);
         spyOn(session);
         assertTrue(session.mCanAddInternalSystemWindow);
-        final WindowSurfaceController winSurface = mock(WindowSurfaceController.class);
-        session.onWindowSurfaceVisibilityChanged(winSurface, true /* visible */,
-                LayoutParams.TYPE_PHONE);
+        final WindowState window = createWindow(null, LayoutParams.TYPE_PHONE, "win");
+        session.onWindowSurfaceVisibilityChanged(window, true /* visible */);
         verify(session).setHasOverlayUi(true);
-        session.onWindowSurfaceVisibilityChanged(winSurface, false /* visible */,
-                LayoutParams.TYPE_PHONE);
+        session.onWindowSurfaceVisibilityChanged(window, false /* visible */);
         verify(session).setHasOverlayUi(false);
     }
 
     @Test
     public void testRelayoutExitingWindow() {
         final WindowState win = createWindow(null, TYPE_BASE_APPLICATION, "appWin");
-        final WindowSurfaceController surfaceController = mock(WindowSurfaceController.class);
-        win.mWinAnimator.mSurfaceController = surfaceController;
         win.mWinAnimator.mDrawState = WindowStateAnimator.HAS_DRAWN;
-        doReturn(true).when(surfaceController).hasSurface();
+        win.mWinAnimator.mSurfaceControl = mock(SurfaceControl.class);
         spyOn(win.mTransitionController);
         doReturn(true).when(win.mTransitionController).isShellTransitionsEnabled();
         doReturn(true).when(win.mTransitionController).inTransition(
@@ -306,7 +302,7 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         // and WMS#tryStartExitingAnimation() will destroy the surface directly.
         assertFalse(win.mAnimatingExit);
         assertFalse(win.mHasSurface);
-        assertNull(win.mWinAnimator.mSurfaceController);
+        assertNull(win.mWinAnimator.mSurfaceControl);
 
         // Invisible requested activity should not get the last config even if its view is visible.
         mWm.relayoutWindow(win.mSession, win.mClient, win.mAttrs, w, h, View.VISIBLE, 0, 0, 0,
@@ -1193,7 +1189,7 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         final int displayId = mDisplayContent.mDisplayId;
         // Use real surface, so ViewportWindow's BlastBufferQueue can be created.
         final ArrayList<SurfaceControl> surfaceControls = new ArrayList<>();
-        mWm.mSurfaceControlFactory = s -> new SurfaceControl.Builder() {
+        mWm.mSurfaceControlFactory = () -> new SurfaceControl.Builder() {
             @Override
             public SurfaceControl build() {
                 final SurfaceControl sc = super.build();
@@ -1294,8 +1290,6 @@ public class WindowManagerServiceTests extends WindowTestsBase {
 
     @Test
     public void testRelayout_appWindowSendActivityWindowInfo() {
-        mSetFlagsRule.enableFlags(Flags.FLAG_ACTIVITY_WINDOW_INFO_FLAG);
-
         // Skip unnecessary operations of relayout.
         spyOn(mWm.mWindowPlacerLocked);
         doNothing().when(mWm.mWindowPlacerLocked).performSurfacePlacement(anyBoolean());
@@ -1396,8 +1390,8 @@ public class WindowManagerServiceTests extends WindowTestsBase {
     }
 
     private boolean setupLetterboxConfigurationWithBackgroundType(
-            @LetterboxConfiguration.LetterboxBackgroundType int letterboxBackgroundType) {
-        mWm.mLetterboxConfiguration.setLetterboxBackgroundTypeOverride(letterboxBackgroundType);
+            @AppCompatConfiguration.LetterboxBackgroundType int letterboxBackgroundType) {
+        mWm.mAppCompatConfiguration.setLetterboxBackgroundTypeOverride(letterboxBackgroundType);
         return mWm.isLetterboxBackgroundMultiColored();
     }
 }

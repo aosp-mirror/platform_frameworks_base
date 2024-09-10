@@ -126,20 +126,18 @@ import java.util.function.Consumer;
  * method:
  *
  * <pre>
- * public void onCreate() {
- *     StrictMode.setThreadPolicy(new {@link ThreadPolicy.Builder StrictMode.ThreadPolicy.Builder}()
- *             .detectDiskReads()
- *             .detectDiskWrites()
- *             .detectNetwork()   // or .detectAll() for all detectable problems
- *             .penaltyLog()
- *             .build());
- *     StrictMode.setVmPolicy(new {@link VmPolicy.Builder StrictMode.VmPolicy.Builder}()
- *             .detectLeakedSqlLiteObjects()
- *             .detectLeakedClosableObjects()
- *             .penaltyLog()
- *             .penaltyDeath()
- *             .build());
- *     super.onCreate();
+ * override fun onCreate(savedInstanceState: Bundle?) {
+ *     super.onCreate(savedInstanceState)
+ *     StrictMode.setThreadPolicy(
+ *         StrictMode.ThreadPolicy.Builder()
+ *         .detectAll()
+ *         .build()
+ *     )
+ *     StrictMode.setVmPolicy(
+ *         StrictMode.VmPolicy.Builder()
+ *         .detectAll()
+ *         .build()
+ *     )
  * }
  * </pre>
  *
@@ -354,7 +352,7 @@ public final class StrictMode {
     public static final int NETWORK_POLICY_LOG = 1;
     /** {@hide} */
     public static final int NETWORK_POLICY_REJECT = 2;
-  
+
     /**
      * Detect explicit calls to {@link Runtime#gc()}.
      */
@@ -2607,8 +2605,13 @@ public final class StrictMode {
      * (Java) thread-local policy value.
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @android.ravenwood.annotation.RavenwoodReplace
     private static void onBinderStrictModePolicyChange(@ThreadPolicyMask int newPolicy) {
         setBlockGuardPolicy(newPolicy);
+    }
+
+    private static void onBinderStrictModePolicyChange$ravenwood(@ThreadPolicyMask int newPolicy) {
+        /* no-op */
     }
 
     /**

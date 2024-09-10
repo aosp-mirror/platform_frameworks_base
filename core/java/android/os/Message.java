@@ -41,6 +41,9 @@ public final class Message implements Parcelable {
      * what this message is about. Each {@link Handler} has its own name-space
      * for message codes, so you do not need to worry about yours conflicting
      * with other handlers.
+     *
+     * If not specified, this value is 0.
+     * Use values other than 0 to indicate custom message codes.
      */
     public int what;
 
@@ -125,6 +128,10 @@ public final class Message implements Parcelable {
     @UnsupportedAppUsage
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     public long when;
+
+    /** @hide */
+    @SuppressWarnings("unused")
+    public long mInsertSeq;
 
     /*package*/ Bundle data;
 

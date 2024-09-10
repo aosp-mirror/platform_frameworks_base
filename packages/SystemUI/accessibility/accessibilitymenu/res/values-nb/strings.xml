@@ -12,7 +12,7 @@
     <string name="lockscreen_label" msgid="648347953557887087">"Låseskjerm"</string>
     <string name="quick_settings_label" msgid="2999117381487601865">"Hurtiginnstillinger"</string>
     <string name="notifications_label" msgid="6829741046963013567">"Varsler"</string>
-    <string name="screenshot_label" msgid="863978141223970162">"Skjermdump"</string>
+    <string name="screenshot_label" msgid="863978141223970162">"Skjermbilde"</string>
     <string name="screenshot_utterance" msgid="1430760563401895074">"Ta skjermbilde"</string>
     <string name="volume_up_label" msgid="8592766918780362870">"Volum opp"</string>
     <string name="volume_down_label" msgid="8574981863656447346">"Volum ned"</string>

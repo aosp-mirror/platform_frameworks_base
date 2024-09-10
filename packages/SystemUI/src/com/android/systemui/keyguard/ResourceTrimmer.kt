@@ -24,11 +24,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
-import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
-import com.android.systemui.keyguard.shared.model.TransitionState
-import com.android.systemui.scene.domain.interactor.SceneInteractor
-import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.utils.GlobalWindowManager
 import javax.inject.Inject
@@ -52,24 +48,15 @@ constructor(
     private val globalWindowManager: GlobalWindowManager,
     @Application private val applicationScope: CoroutineScope,
     @Background private val bgDispatcher: CoroutineDispatcher,
-    private val sceneInteractor: SceneInteractor,
 ) : CoreStartable {
 
     override fun start() {
         Log.d(LOG_TAG, "Resource trimmer registered.")
         applicationScope.launch(bgDispatcher) {
-            // We drop 1 to avoid triggering on initial collect().
-            if (SceneContainerFlag.isEnabled) {
-                sceneInteractor.transitionState
-                    .filter { it.isIdle(Scenes.Gone) }
-                    .collect { onKeyguardGone() }
-            } else {
-                keyguardTransitionInteractor.transition(Edge.create(to = GONE)).collect {
-                    if (it.transitionState == TransitionState.FINISHED) {
-                        onKeyguardGone()
-                    }
-                }
-            }
+            keyguardTransitionInteractor
+                .isFinishedIn(scene = Scenes.Gone, stateWithoutSceneContainer = GONE)
+                .filter { isOnGone -> isOnGone }
+                .collect { onKeyguardGone() }
         }
     }
 

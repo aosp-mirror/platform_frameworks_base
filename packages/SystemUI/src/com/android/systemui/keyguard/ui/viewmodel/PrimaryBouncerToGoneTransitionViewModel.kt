@@ -17,6 +17,7 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
+import com.android.systemui.bouncer.shared.flag.ComposeBouncerFlags
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.FromPrimaryBouncerTransitionInteractor.Companion.TO_GONE_DURATION
 import com.android.systemui.keyguard.domain.interactor.KeyguardDismissActionInteractor
@@ -25,8 +26,6 @@ import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.keyguard.shared.model.ScrimAlpha
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
-import com.android.systemui.scene.shared.flag.SceneContainerFlag
-import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import dagger.Lazy
 import javax.inject.Inject
@@ -54,7 +53,7 @@ constructor(
         animationFlow
             .setup(
                 duration = TO_GONE_DURATION,
-                edge = Edge.create(from = PRIMARY_BOUNCER, to = Scenes.Gone),
+                edge = Edge.INVALID,
             )
             .setupWithoutSceneContainer(
                 edge = Edge.create(from = PRIMARY_BOUNCER, to = GONE),
@@ -81,11 +80,12 @@ constructor(
                     1f - it
                 }
             },
+            onFinish = { 1f },
         )
 
     /** Bouncer container alpha */
     val bouncerAlpha: Flow<Float> =
-        if (SceneContainerFlag.isEnabled) {
+        if (ComposeBouncerFlags.isEnabled) {
             keyguardDismissActionInteractor
                 .get()
                 .willAnimateDismissActionOnLockscreen
@@ -110,7 +110,7 @@ constructor(
 
     /** Lockscreen alpha */
     val lockscreenAlpha: Flow<Float> =
-        if (SceneContainerFlag.isEnabled) {
+        if (ComposeBouncerFlags.isEnabled) {
             keyguardDismissActionInteractor
                 .get()
                 .willAnimateDismissActionOnLockscreen

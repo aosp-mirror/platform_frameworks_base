@@ -31,7 +31,6 @@ public enum Transformation {
     AES_CBC_PKCS5("AES", "CBC", "PKCS5Padding", new AesKeyGen()),
     AES_ECB_PKCS5("AES", "ECB", "PKCS5Padding", new AesKeyGen()),
     AES_GCM_NO("AES", "GCM", "NoPadding", new AesKeyGen()),
-    AES_GCM_SIV("AES", "GCM_SIV", "NoPadding", new AesKeyGen()),
     RSA_ECB_PKCS1("RSA", "ECB", "PKCS1Padding", new RsaKeyGen());
 
     Transformation(String algorithm, String mode, String padding, KeyGen keyGen) {

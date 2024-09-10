@@ -16,10 +16,9 @@
 
 package com.android.wm.shell.draganddrop;
 
-import static com.android.wm.shell.animation.Interpolators.FAST_OUT_SLOW_IN;
+import static com.android.wm.shell.shared.animation.Interpolators.FAST_OUT_SLOW_IN;
 
 import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
@@ -151,6 +150,10 @@ public class DropZoneView extends FrameLayout {
 
     /** Ignores the bottom margin provided by the insets. */
     public void setForceIgnoreBottomMargin(boolean ignoreBottomMargin) {
+        if (DEBUG_LAYOUT) {
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DRAG_AND_DROP,
+                    "setForceIgnoreBottomMargin: ignore=%b", ignoreBottomMargin);
+        }
         mIgnoreBottomMargin = ignoreBottomMargin;
         if (mMarginPercent > 0) {
             mMarginView.invalidate();
@@ -159,8 +162,14 @@ public class DropZoneView extends FrameLayout {
 
     /** Sets the bottom inset so the drop zones are above bottom navigation. */
     public void setBottomInset(float bottom) {
+        if (DEBUG_LAYOUT) {
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DRAG_AND_DROP, "setBottomInset: inset=%f",
+                    bottom);
+        }
         mBottomInset = bottom;
-        ((LayoutParams) mSplashScreenView.getLayoutParams()).bottomMargin = (int) bottom;
+        final LayoutParams lp = (LayoutParams) mSplashScreenView.getLayoutParams();
+        lp.bottomMargin = (int) bottom;
+        mSplashScreenView.setLayoutParams(lp);
         if (mMarginPercent > 0) {
             mMarginView.invalidate();
         }

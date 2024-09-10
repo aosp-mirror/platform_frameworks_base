@@ -27,10 +27,13 @@ building to check the log state (is enabled) before printing the print format st
   traces in Winscope)
 
 ### Kotlin
+Kotlin protologging is supported but not as optimized as in Java.
 
-Protolog tool does not yet have support for Kotlin code (see [b/168581922](https://b.corp.google.com/issues/168581922)).
-For logging in Kotlin, use the [KtProtoLog](/libs/WindowManager/Shell/src/com/android/wm/shell/util/KtProtoLog.kt)
-class which has a similar API to the Java ProtoLog class.
+The Protolog tool does not yet have support for Kotlin code ([b/168581922](https://b.corp.google.com/issues/168581922)).
+
+What this implies is that ProtoLogs are not pre-processed to extract the static strings out when used in Kotlin. So,
+there is no memory gain when using ProtoLogging in Kotlin. The logs will still be traced to Perfetto, but with a subtly
+worse performance due to the additional string interning that needs to be done at run time instead of at build time.
 
 ### Enabling ProtoLog command line logging
 Run these commands to enable protologs (in logcat) for WM Core ([list of all core tags](/core/java/com/android/internal/protolog/ProtoLogGroup.java)):
@@ -68,7 +71,7 @@ adb shell dumpsys SurfaceFlinger
 ## Tracing global SurfaceControl transaction updates
 
 While Winscope traces are very useful, it sometimes doesn't give you enough information about which
-part of the code is initiating the transaction updates.  In such cases, it can be helpful to get
+part of the code is initiating the transaction updates. In such cases, it can be helpful to get
 stack traces when specific surface transaction calls are made, which is possible by enabling the
 following system properties for example:
 ```shell
@@ -81,8 +84,10 @@ adb logcat -s "SurfaceControlRegistry"
 # Disabling logging
 adb shell setprop persist.wm.debug.sc.tx.log_match_call \"\"
 adb shell setprop persist.wm.debug.sc.tx.log_match_name \"\"
-adb reboot
 ```
+
+A reboot is required to enable the logging. Once enabled, reboot is not needed to update the
+properties.
 
 It is not necessary to set both `log_match_call` and `log_match_name`, but note logs can be quite
 noisy if unfiltered.

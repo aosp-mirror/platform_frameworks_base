@@ -16,6 +16,7 @@
 
 package com.android.systemui.shade
 
+import android.content.testableContext
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.domain.interactor.sceneInteractor
@@ -26,9 +27,14 @@ var Kosmos.shadeTestUtil: ShadeTestUtil by
     Kosmos.Fixture {
         ShadeTestUtil(
             if (SceneContainerFlag.isEnabled) {
-                ShadeTestUtilSceneImpl(testScope, sceneInteractor)
+                ShadeTestUtilSceneImpl(
+                    testScope,
+                    sceneInteractor,
+                    fakeShadeRepository,
+                    testableContext
+                )
             } else {
-                ShadeTestUtilLegacyImpl(testScope, fakeShadeRepository)
+                ShadeTestUtilLegacyImpl(testScope, fakeShadeRepository, testableContext)
             }
         )
     }

@@ -41,6 +41,18 @@ public class AslgenTests {
     /** Logic for setting up tests (empty if not yet needed). */
     public static void main(String[] params) throws Exception {}
 
+    @Test
+    public void testValidOd() throws Exception {
+        System.out.println("start testing valid od.");
+        Path odPath = Paths.get(VALID_MAPPINGS_PATH, "general-v1", OD_XML_FILENAME);
+        InputStream odStream = getClass().getClassLoader().getResourceAsStream(odPath.toString());
+        String odContents =
+                TestUtils.getFormattedXml(
+                        new String(odStream.readAllBytes(), StandardCharsets.UTF_8), false);
+        AndroidSafetyLabel unusedAsl =
+                AslConverter.readFromString(odContents, AslConverter.Format.ON_DEVICE);
+    }
+
     /** Tests valid mappings between HR and OD. */
     @Test
     public void testValidMappings() throws Exception {

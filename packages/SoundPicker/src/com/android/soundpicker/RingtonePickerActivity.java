@@ -255,8 +255,8 @@ public final class RingtonePickerActivity extends AlertActivity implements
                 p.mTitle = getString(com.android.internal.R.string.ringtone_picker_title);
             }
         } else {
-            // Make sure intents don't inject HTML elements.
-            p.mTitle = Html.escapeHtml(p.mTitle.toString());
+            // Make sure intents don't inject spannable elements.
+            p.mTitle = p.mTitle.toString();
         }
 
         setupAlert();

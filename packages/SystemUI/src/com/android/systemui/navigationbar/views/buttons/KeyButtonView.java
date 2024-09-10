@@ -21,6 +21,7 @@ import static android.view.KeyEvent.KEYCODE_UNKNOWN;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_LONG_CLICK;
 
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -49,6 +50,7 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.inputmethod.Flags;
 import android.widget.ImageView;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -111,6 +113,9 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
 
         @UiEvent(doc = "The overview button was long-pressed in the navigation bar.")
         NAVBAR_OVERVIEW_BUTTON_LONGPRESS(538),
+
+        @UiEvent(doc = "The ime switcher button was long-pressed in the navigation bar.")
+        NAVBAR_IME_SWITCHER_BUTTON_LONGPRESS(1799),
 
         NONE(0);  // an event we should not log
 
@@ -228,13 +233,26 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
     @Override
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(info);
-        if (mCode != KEYCODE_UNKNOWN) {
+        if (isClickable()) {
             info.addAction(new AccessibilityNodeInfo.AccessibilityAction(ACTION_CLICK, null));
             if (isLongClickable()) {
                 info.addAction(
-                        new AccessibilityNodeInfo.AccessibilityAction(ACTION_LONG_CLICK, null));
+                        new AccessibilityNodeInfo.AccessibilityAction(ACTION_LONG_CLICK,
+                                getAccessibilityLongClickActionLabel()));
             }
         }
+    }
+
+    /**
+     * Gets the accessibility long click action label for the button, or {@code null} for no label.
+     */
+    @Nullable
+    private CharSequence getAccessibilityLongClickActionLabel() {
+        if (Flags.imeSwitcherRevamp() && getId() == R.id.ime_switcher) {
+            return getContext().getText(
+                    com.android.internal.R.string.input_method_ime_switch_long_click_action_desc);
+        }
+        return null;
     }
 
     @Override

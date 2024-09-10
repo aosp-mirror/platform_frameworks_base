@@ -40,6 +40,9 @@ import android.os.IBinder;
 import android.os.LocaleList;
 import android.os.Process;
 import android.os.Trace;
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
+import android.ravenwood.annotation.RavenwoodReplace;
+import android.ravenwood.annotation.RavenwoodThrow;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
@@ -70,6 +73,7 @@ import java.util.WeakHashMap;
 import java.util.function.Function;
 
 /** @hide */
+@RavenwoodKeepWholeClass
 public class ResourcesManager {
     static final String TAG = "ResourcesManager";
     private static final boolean DEBUG = false;
@@ -149,6 +153,7 @@ public class ResourcesManager {
      * This will collect the package resources' paths from its ApplicationInfo and add them to all
      * existing and future contexts while the application is running.
      */
+    @RavenwoodThrow(reason = "FLAG_REGISTER_RESOURCE_PATHS is unsupported")
     public void registerResourcePaths(@NonNull String uniqueId, @NonNull ApplicationInfo appInfo) {
         if (!Flags.registerResourcePaths()) {
             return;
@@ -1405,6 +1410,7 @@ public class ResourcesManager {
         return newKey;
     }
 
+    @RavenwoodThrow(reason = "AppInfo update not supported")
     public void appendPendingAppInfoUpdate(@NonNull String[] oldSourceDirs,
             @NonNull ApplicationInfo appInfo) {
         synchronized (mLock) {
@@ -1423,6 +1429,7 @@ public class ResourcesManager {
         }
     }
 
+    @RavenwoodReplace(reason = "AppInfo update not supported")
     public final void applyAllPendingAppInfoUpdates() {
         synchronized (mLock) {
             if (mPendingAppInfoUpdates != null) {
@@ -1433,6 +1440,10 @@ public class ResourcesManager {
                 mPendingAppInfoUpdates = null;
             }
         }
+    }
+
+    private void applyAllPendingAppInfoUpdates$ravenwood() {
+        /* no-op */
     }
 
     public final boolean applyConfigurationToResources(@NonNull Configuration config,
@@ -1836,9 +1847,10 @@ public class ResourcesManager {
                     // have shared library asset paths appended if there are any.
                     if (r.getImpl() != null) {
                         final ResourcesImpl oldImpl = r.getImpl();
+                        final AssetManager oldAssets = oldImpl.getAssets();
                         // ResourcesImpl constructor will help to append shared library asset paths.
-                        if (oldImpl.getAssets().isUpToDate()) {
-                            final ResourcesImpl newImpl = new ResourcesImpl(oldImpl.getAssets(),
+                        if (oldAssets != AssetManager.getSystem() && oldAssets.isUpToDate()) {
+                            final ResourcesImpl newImpl = new ResourcesImpl(oldAssets,
                                     oldImpl.getMetrics(), oldImpl.getConfiguration(),
                                     oldImpl.getDisplayAdjustments());
                             r.setImpl(newImpl);
@@ -1876,6 +1888,7 @@ public class ResourcesManager {
          * instance uses.
          */
         @Override
+        @RavenwoodThrow(blockedBy = ResourcesLoader.class)
         public void onLoadersChanged(@NonNull Resources resources,
                 @NonNull List<ResourcesLoader> newLoader) {
             synchronized (mLock) {
@@ -1905,6 +1918,7 @@ public class ResourcesManager {
          * {@code loader} to apply any changes of the set of {@link ApkAssets}.
          **/
         @Override
+        @RavenwoodThrow(blockedBy = ResourcesLoader.class)
         public void onLoaderUpdated(@NonNull ResourcesLoader loader) {
             synchronized (mLock) {
                 final ArrayMap<ResourcesImpl, ResourcesKey> updatedResourceImplKeys =

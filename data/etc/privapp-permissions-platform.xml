@@ -505,6 +505,7 @@ applications that come with the platform
         <permission name="android.permission.RENOUNCE_PERMISSIONS" />
         <permission name="android.permission.WRITE_EMBEDDED_SUBSCRIPTIONS" />
         <permission name="android.permission.GET_PROCESS_STATE_AND_OOM_SCORE" />
+        <permission name="android.permission.READ_DROPBOX_DATA" />
         <permission name="android.permission.READ_LOGS" />
         <permission name="android.permission.BRIGHTNESS_SLIDER_USAGE" />
         <permission name="android.permission.ACCESS_AMBIENT_LIGHT_STATS" />
@@ -579,6 +580,11 @@ applications that come with the platform
         <permission name="android.permission.PREPARE_FACTORY_RESET" />
         <!-- Permission required for CTS test - FileIntegrityManagerTest -->
         <permission name="android.permission.SETUP_FSVERITY" />
+        <!-- Permissions required for CTS test - AppFunctionManagerTest -->
+        <permission name="android.permission.EXECUTE_APP_FUNCTIONS_TRUSTED" />
+        <permission name="android.permission.EXECUTE_APP_FUNCTIONS" />
+        <!-- Permission required for CTS test - CtsNfcTestCases -->
+        <permission name="android.permission.NFC_SET_CONTROLLER_ALWAYS_ON" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">
@@ -589,6 +595,10 @@ applications that come with the platform
 
     <privapp-permissions package="com.android.soundpicker">
         <permission name="android.permission.INTERACT_ACROSS_USERS" />
+    </privapp-permissions>
+
+    <privapp-permissions package="com.android.providers.tv">
+        <permission name="android.permission.INTERACT_ACROSS_USERS"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.tv">

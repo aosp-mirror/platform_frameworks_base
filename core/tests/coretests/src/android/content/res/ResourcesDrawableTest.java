@@ -24,21 +24,28 @@ import android.content.Context;
 import android.graphics.drawable.ColorStateListDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
+import android.platform.test.annotations.DisabledOnRavenwood;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.ravenwood.RavenwoodRule;
 
-import androidx.test.InstrumentationRegistry;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.frameworks.coretests.R;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @Presubmit
 @SmallTest
+@DisabledOnRavenwood(blockedBy = Drawable.class)
 @RunWith(AndroidJUnit4.class)
 public class ResourcesDrawableTest {
+
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule.Builder().build();
 
     @Test
     public void testLoadColorAsDrawable() {

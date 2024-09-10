@@ -24,7 +24,6 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Rect
 import android.os.RemoteException
-import android.os.SystemProperties
 import android.util.DisplayMetrics
 import android.util.Log
 import android.util.Pair
@@ -178,9 +177,7 @@ object PipUtils {
                 "org.chromium.arc", 0)
             val isTv = AppGlobals.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_LEANBACK, 0)
-            isPip2ExperimentEnabled = SystemProperties.getBoolean(
-                    "persist.wm_shell.pip2", false) ||
-                    (Flags.enablePip2Implementation() && !isArc && !isTv)
+            isPip2ExperimentEnabled = Flags.enablePip2() && !isArc && !isTv
         }
         return isPip2ExperimentEnabled as Boolean
     }

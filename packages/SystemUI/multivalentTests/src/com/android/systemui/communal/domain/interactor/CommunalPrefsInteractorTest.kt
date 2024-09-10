@@ -74,40 +74,6 @@ class CommunalPrefsInteractorTest : SysuiTestCase() {
             assertThat(isCtaDismissed).isFalse()
         }
 
-    @Test
-    fun setDisclaimerDismissed_currentUser() =
-        testScope.runTest {
-            setSelectedUser(MAIN_USER)
-            val isDisclaimerDismissed by collectLastValue(underTest.isDisclaimerDismissed)
-
-            assertThat(isDisclaimerDismissed).isFalse()
-            underTest.setDisclaimerDismissed(MAIN_USER)
-            assertThat(isDisclaimerDismissed).isTrue()
-        }
-
-    @Test
-    fun setDisclaimerDismissed_anotherUser() =
-        testScope.runTest {
-            setSelectedUser(MAIN_USER)
-            val isDisclaimerDismissed by collectLastValue(underTest.isDisclaimerDismissed)
-
-            assertThat(isDisclaimerDismissed).isFalse()
-            underTest.setDisclaimerDismissed(SECONDARY_USER)
-            assertThat(isDisclaimerDismissed).isFalse()
-        }
-
-    @Test
-    fun isDisclaimerDismissed_userSwitch() =
-        testScope.runTest {
-            setSelectedUser(MAIN_USER)
-            underTest.setDisclaimerDismissed(MAIN_USER)
-            val isDisclaimerDismissed by collectLastValue(underTest.isDisclaimerDismissed)
-
-            assertThat(isDisclaimerDismissed).isTrue()
-            setSelectedUser(SECONDARY_USER)
-            assertThat(isDisclaimerDismissed).isFalse()
-        }
-
     private suspend fun setSelectedUser(user: UserInfo) {
         with(kosmos.fakeUserRepository) {
             setUserInfos(listOf(user))

@@ -21,11 +21,13 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.SysuiTestableContext
+import com.android.systemui.contextualeducation.GestureType.BACK
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.education.data.model.EduDeviceConnectionTime
+import com.android.systemui.education.data.model.GestureEduModel
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.shared.education.GestureType.BACK_GESTURE
 import com.google.common.truth.Truth.assertThat
 import java.io.File
 import javax.inject.Provider
@@ -42,13 +44,15 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class ContextualEducationRepositoryTest : SysuiTestCase() {
 
-    private lateinit var underTest: ContextualEducationRepository
+    private lateinit var underTest: UserContextualEducationRepository
     private val kosmos = Kosmos()
     private val testScope = kosmos.testScope
     private val dsScopeProvider: Provider<CoroutineScope> = Provider {
         TestScope(kosmos.testDispatcher).backgroundScope
     }
+
     private val testUserId = 1111
+    private val secondTestUserId = 1112
 
     // For deleting any test files created after the test
     @get:Rule val tmpFolder: TemporaryFolder = TemporaryFolder.builder().assureDeletion().build()
@@ -58,8 +62,7 @@ class ContextualEducationRepositoryTest : SysuiTestCase() {
         // Create TestContext here because TemporaryFolder.create() is called in @Before. It is
         // needed before calling TemporaryFolder.newFolder().
         val testContext = TestContext(context, tmpFolder.newFolder())
-        val userRepository = UserContextualEducationRepository(testContext, dsScopeProvider)
-        underTest = ContextualEducationRepository(userRepository)
+        underTest = UserContextualEducationRepository(testContext, dsScopeProvider)
         underTest.setUser(testUserId)
     }
 
@@ -67,22 +70,53 @@ class ContextualEducationRepositoryTest : SysuiTestCase() {
     fun changeRetrievedValueForNewUser() =
         testScope.runTest {
             // Update data for old user.
-            underTest.incrementSignalCount(BACK_GESTURE)
-            val model by collectLastValue(underTest.readGestureEduModelFlow(BACK_GESTURE))
+            underTest.updateGestureEduModel(BACK) { it.copy(signalCount = 1) }
+            val model by collectLastValue(underTest.readGestureEduModelFlow(BACK))
             assertThat(model?.signalCount).isEqualTo(1)
 
             // User is changed.
-            underTest.setUser(1112)
+            underTest.setUser(secondTestUserId)
             // Assert count is 0 after user is changed.
             assertThat(model?.signalCount).isEqualTo(0)
         }
 
     @Test
-    fun incrementSignalCount() =
+    fun changeUserIdForNewUser() =
         testScope.runTest {
-            underTest.incrementSignalCount(BACK_GESTURE)
-            val model by collectLastValue(underTest.readGestureEduModelFlow(BACK_GESTURE))
-            assertThat(model?.signalCount).isEqualTo(1)
+            val model by collectLastValue(underTest.readGestureEduModelFlow(BACK))
+            assertThat(model?.userId).isEqualTo(testUserId)
+            underTest.setUser(secondTestUserId)
+            assertThat(model?.userId).isEqualTo(secondTestUserId)
+        }
+
+    @Test
+    fun dataChangedOnUpdate() =
+        testScope.runTest {
+            val newModel =
+                GestureEduModel(
+                    signalCount = 2,
+                    educationShownCount = 1,
+                    lastShortcutTriggeredTime = kosmos.fakeEduClock.instant(),
+                    lastEducationTime = kosmos.fakeEduClock.instant(),
+                    usageSessionStartTime = kosmos.fakeEduClock.instant(),
+                    userId = testUserId
+                )
+            underTest.updateGestureEduModel(BACK) { newModel }
+            val model by collectLastValue(underTest.readGestureEduModelFlow(BACK))
+            assertThat(model).isEqualTo(newModel)
+        }
+
+    @Test
+    fun eduDeviceConnectionTimeDataChangedOnUpdate() =
+        testScope.runTest {
+            val newModel =
+                EduDeviceConnectionTime(
+                    keyboardFirstConnectionTime = kosmos.fakeEduClock.instant(),
+                    touchpadFirstConnectionTime = kosmos.fakeEduClock.instant(),
+                )
+            underTest.updateEduDeviceConnectionTime { newModel }
+            val model by collectLastValue(underTest.readEduDeviceConnectionTime())
+            assertThat(model).isEqualTo(newModel)
         }
 
     /** Test context which allows overriding getFilesDir path */

@@ -26,6 +26,8 @@ import android.content.res.Configuration;
 import android.util.Range;
 import android.view.WindowManager;
 
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
+import com.android.internal.accessibility.common.MagnificationConstants;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.systemui.util.settings.SecureSettings;
@@ -40,7 +42,8 @@ import com.android.systemui.util.settings.SecureSettings;
 public class MagnificationSettingsController implements ComponentCallbacks {
 
     // It should be consistent with the value defined in WindowMagnificationGestureHandler.
-    private static final Range<Float> A11Y_ACTION_SCALE_RANGE = new Range<>(1.0f, 8.0f);
+    private static final Range<Float> A11Y_ACTION_SCALE_RANGE =
+        new Range<>(1.0f, MagnificationConstants.SCALE_MAX_VALUE);
 
     private final Context mContext;
 
@@ -58,8 +61,10 @@ public class MagnificationSettingsController implements ComponentCallbacks {
             @UiContext Context context,
             SfVsyncFrameCallbackProvider sfVsyncFrameProvider,
             @NonNull Callback settingsControllerCallback,
-            SecureSettings secureSettings) {
-        this(context, sfVsyncFrameProvider, settingsControllerCallback,  secureSettings, null);
+            SecureSettings secureSettings,
+            ViewCaptureAwareWindowManager viewCaptureAwareWindowManager) {
+        this(context, sfVsyncFrameProvider, settingsControllerCallback,  secureSettings, null,
+                viewCaptureAwareWindowManager);
     }
 
     @VisibleForTesting
@@ -68,7 +73,8 @@ public class MagnificationSettingsController implements ComponentCallbacks {
             SfVsyncFrameCallbackProvider sfVsyncFrameProvider,
             @NonNull Callback settingsControllerCallback,
             SecureSettings secureSettings,
-            WindowMagnificationSettings windowMagnificationSettings) {
+            WindowMagnificationSettings windowMagnificationSettings,
+            ViewCaptureAwareWindowManager viewCaptureAwareWindowManager) {
         mContext = context.createWindowContext(
                 context.getDisplay(),
                 WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL,
@@ -82,7 +88,7 @@ public class MagnificationSettingsController implements ComponentCallbacks {
         } else {
             mWindowMagnificationSettings = new WindowMagnificationSettings(mContext,
                     mWindowMagnificationSettingsCallback,
-                    sfVsyncFrameProvider, secureSettings);
+                    sfVsyncFrameProvider, secureSettings, viewCaptureAwareWindowManager);
         }
     }
 
@@ -96,6 +102,10 @@ public class MagnificationSettingsController implements ComponentCallbacks {
             mContext.registerComponentCallbacks(this);
         }
         mWindowMagnificationSettings.toggleSettingsPanelVisibility();
+    }
+
+    void updateSettingsButtonStatusOnRestore(@MagnificationSize int index) {
+        mWindowMagnificationSettings.updateSelectedButton(index);
     }
 
     void closeMagnificationSettings() {

@@ -325,13 +325,13 @@ public class BroadcastQueueTest extends BaseBroadcastQueueTest {
         ProcessRecord.updateProcessRecordNodes(r);
         mActiveProcesses.add(r);
 
-        final IApplicationThread thread;
+        final ApplicationThreadDeferred thread;
         if (dead) {
-            thread = mock(IApplicationThread.class, (invocation) -> {
+            thread = mock(ApplicationThreadDeferred.class, (invocation) -> {
                 throw new DeadObjectException();
             });
         } else {
-            thread = mock(IApplicationThread.class);
+            thread = mock(ApplicationThreadDeferred.class);
         }
         final IBinder threadBinder = new Binder();
         doReturn(threadBinder).when(thread).asBinder();

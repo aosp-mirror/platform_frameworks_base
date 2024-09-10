@@ -60,7 +60,13 @@ public class AconfigFlags {
             "/product/etc/aconfig_flags.pb",
             "/vendor/etc/aconfig_flags.pb");
 
+    public enum Permission {
+        READ_WRITE,
+        READ_ONLY
+    }
+
     private final ArrayMap<String, Boolean> mFlagValues = new ArrayMap<>();
+    private final ArrayMap<String, Permission> mFlagPermissions = new ArrayMap<>();
 
     public AconfigFlags() {
         if (!Flags.manifestFlagging()) {
@@ -184,6 +190,12 @@ public class AconfigFlags {
             Slog.v(LOG_TAG, "Read Aconfig default flag value "
                     + flagPackageAndName + " = " + flagValue);
             mFlagValues.put(flagPackageAndName, flagValue);
+
+            Permission permission = flag.permission == Aconfig.READ_ONLY
+                    ? Permission.READ_ONLY
+                    : Permission.READ_WRITE;
+
+            mFlagPermissions.put(flagPackageAndName, permission);
         }
     }
 
@@ -197,6 +209,17 @@ public class AconfigFlags {
         Boolean value = mFlagValues.get(flagPackageAndName);
         Slog.d(LOG_TAG, "Aconfig flag value for " + flagPackageAndName + " = " + value);
         return value;
+    }
+
+    /**
+     * Get the flag permission, or null if the flag doesn't exist.
+     * @param flagPackageAndName Full flag name formatted as 'package.flag'
+     * @return the current permission of the given Aconfig flag, or null if there is no such flag
+     */
+    @Nullable
+    public Permission getFlagPermission(@NonNull String flagPackageAndName) {
+        Permission permission = mFlagPermissions.get(flagPackageAndName);
+        return permission;
     }
 
     /**

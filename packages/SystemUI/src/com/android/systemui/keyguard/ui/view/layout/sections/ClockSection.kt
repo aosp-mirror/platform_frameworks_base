@@ -25,7 +25,6 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.constraintlayout.widget.ConstraintSet.BOTTOM
 import androidx.constraintlayout.widget.ConstraintSet.END
 import androidx.constraintlayout.widget.ConstraintSet.GONE
-import androidx.constraintlayout.widget.ConstraintSet.MATCH_CONSTRAINT
 import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
@@ -59,6 +58,16 @@ internal fun ConstraintSet.setAlpha(
     views: Iterable<View>,
     alpha: Float,
 ) = views.forEach { view -> this.setAlpha(view.id, alpha) }
+
+internal fun ConstraintSet.setScaleX(
+    views: Iterable<View>,
+    alpha: Float,
+) = views.forEach { view -> this.setScaleX(view.id, alpha) }
+
+internal fun ConstraintSet.setScaleY(
+    views: Iterable<View>,
+    alpha: Float,
+) = views.forEach { view -> this.setScaleY(view.id, alpha) }
 
 @SysUISingleton
 class ClockSection
@@ -126,6 +135,9 @@ constructor(
             setAlpha(getNonTargetClockFace(clock).views, 0F)
             if (!keyguardClockViewModel.isLargeClockVisible.value) {
                 connect(sharedR.id.bc_smartspace_view, TOP, sharedR.id.date_smartspace_view, BOTTOM)
+            } else {
+                setScaleX(getTargetClockFace(clock).views, rootViewModel.burnInModel.value.scale)
+                setScaleY(getTargetClockFace(clock).views, rootViewModel.burnInModel.value.scale)
             }
         }
     }
@@ -184,7 +196,11 @@ constructor(
                     getDimen(ENHANCED_SMARTSPACE_HEIGHT)
             connect(R.id.lockscreen_clock_view_large, TOP, PARENT_ID, TOP, largeClockTopMargin)
             constrainWidth(R.id.lockscreen_clock_view_large, WRAP_CONTENT)
-            constrainHeight(R.id.lockscreen_clock_view_large, MATCH_CONSTRAINT)
+
+            // The following two lines make lockscreen_clock_view_large is constrained to available
+            // height when it goes beyond constraints; otherwise, it use WRAP_CONTENT
+            constrainHeight(R.id.lockscreen_clock_view_large, WRAP_CONTENT)
+            constrainMaxHeight(R.id.lockscreen_clock_view_large, 0)
             constrainWidth(R.id.lockscreen_clock_view, WRAP_CONTENT)
             constrainHeight(
                 R.id.lockscreen_clock_view,
@@ -202,6 +218,9 @@ constructor(
             create(R.id.small_clock_guideline_top, ConstraintSet.HORIZONTAL_GUIDELINE)
             setGuidelineBegin(R.id.small_clock_guideline_top, smallClockTopMargin)
             connect(R.id.lockscreen_clock_view, TOP, R.id.small_clock_guideline_top, BOTTOM)
+
+            // Explicitly clear pivot to force recalculate pivot instead of using legacy value
+            setTransformPivot(R.id.lockscreen_clock_view_large, Float.NaN, Float.NaN)
         }
 
         constrainWeatherClockDateIconsBarrier(constraints)

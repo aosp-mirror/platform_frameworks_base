@@ -529,7 +529,7 @@ public final class ServiceBindingOomAdjPolicyTest {
     @SuppressWarnings("GuardedBy")
     private ProcessRecord addProcessRecord(int pid, int uid, int procState, int adj, int cap,
                 String packageName) {
-        final IApplicationThread appThread = mock(IApplicationThread.class);
+        final ApplicationThreadDeferred appThread = mock(ApplicationThreadDeferred.class);
         final IBinder threadBinder = mock(IBinder.class);
         final ProcessRecord app = makeProcessRecord(pid, uid, uid, null, 0,
                 procState, adj, cap, 0L, 0L, packageName, packageName, mAms);

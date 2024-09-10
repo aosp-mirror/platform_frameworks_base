@@ -51,8 +51,7 @@ import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.internal.policy.SystemBarUtils;
 import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.R;
-import com.android.wm.shell.animation.Interpolators;
-import com.android.wm.shell.shared.annotations.ShellMainThread;
+import com.android.wm.shell.shared.animation.Interpolators;
 
 import javax.inject.Inject;
 
@@ -69,7 +68,6 @@ import javax.inject.Inject;
  * IOnBackInvokedCallback} with WM Shell and receives back dispatches when a back navigation to
  * launcher starts.
  */
-@ShellMainThread
 public class CrossTaskBackAnimation extends ShellBackAnimation {
     private static final int BACKGROUNDCOLOR = 0x43433A;
 

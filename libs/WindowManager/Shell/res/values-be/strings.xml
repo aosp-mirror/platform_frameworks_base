@@ -57,7 +57,7 @@
     <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"Запусціць рэжым кіравання адной рукой"</string>
     <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"Выйсці з рэжыму кіравання адной рукой"</string>
     <string name="bubbles_settings_button_description" msgid="1301286017420516912">"Налады ўсплывальных чатаў у праграме \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
-    <string name="bubble_overflow_button_content_description" msgid="8160974472718594382">"Дадатковае меню"</string>
+    <string name="bubble_overflow_button_content_description" msgid="8160974472718594382">"Меню з пашырэннем"</string>
     <string name="bubble_accessibility_action_add_back" msgid="1830101076853540953">"Зноў дадаць у стос"</string>
     <string name="bubble_content_description_single" msgid="8495748092720065813">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> ад праграмы \"<xliff:g id="APP_NAME">%2$s</xliff:g>\""</string>
     <string name="bubble_content_description_stack" msgid="8071515017164630429">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> ад праграмы \"<xliff:g id="APP_NAME">%2$s</xliff:g>\" і яшчэ <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g>"</string>
@@ -65,10 +65,16 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"Перамясціце правей і вышэй"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"Перамясціць лявей і ніжэй"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"Перамясціць правей і ніжэй"</string>
+    <string name="bubble_accessibility_action_expand_menu" msgid="8637233525952938845">"разгарнуць меню"</string>
+    <string name="bubble_accessibility_action_collapse_menu" msgid="2975310870146231463">"згарнуць меню"</string>
+    <string name="bubble_accessibility_action_move_bar_left" msgid="4803535120353716759">"Перамясціць улева"</string>
+    <string name="bubble_accessibility_action_move_bar_right" msgid="7686542531917510421">"Перамясціць управа"</string>
     <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>: разгарнуць"</string>
     <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>: згарнуць"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"Налады \"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>\""</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"Адхіліць апавяшчэнне"</string>
+    <!-- no translation found for bubble_fullscreen_text (1006758103218086231) -->
+    <skip />
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"Не паказваць размову ў выглядзе ўсплывальных апавяшчэнняў"</string>
     <string name="bubbles_user_education_title" msgid="2112319053732691899">"Усплывальныя чаты"</string>
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"Новыя размовы будуць паказвацца як рухомыя значкі ці ўсплывальныя чаты. Націсніце, каб адкрыць усплывальны чат. Перацягніце яго, каб перамясціць."</string>
@@ -84,10 +90,8 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"Усплывальнае апавяшчэнне"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Кіраваць"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Усплывальнае апавяшчэнне адхілена."</string>
-    <!-- no translation found for bubble_shortcut_label (666269077944378311) -->
-    <skip />
-    <!-- no translation found for bubble_shortcut_long_label (6088437544312894043) -->
-    <skip />
+    <string name="bubble_shortcut_label" msgid="666269077944378311">"Успл. чаты"</string>
+    <string name="bubble_shortcut_long_label" msgid="6088437544312894043">"Паказ усплывальных чатаў"</string>
     <string name="restart_button_description" msgid="4564728020654658478">"Націсніце, каб перазапусціць гэту праграму для зручнейшага прагляду"</string>
     <string name="user_aspect_ratio_settings_button_hint" msgid="734835849600713016">"Змяніць суадносіны бакоў для гэтай праграмы ў наладах"</string>
     <string name="user_aspect_ratio_settings_button_description" msgid="4315566801697411684">"Змяніць суадносіны бакоў"</string>
@@ -109,7 +113,7 @@
     <string name="minimize_button_text" msgid="271592547935841753">"Згарнуць"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Закрыць"</string>
     <string name="back_button_text" msgid="1469718707134137085">"Назад"</string>
-    <string name="handle_text" msgid="1766582106752184456">"Маркер"</string>
+    <string name="handle_text" msgid="4419667835599523257">"Маркер праграмы"</string>
     <string name="app_icon_text" msgid="2823268023931811747">"Значок праграмы"</string>
     <string name="fullscreen_text" msgid="1162316685217676079">"На ўвесь экран"</string>
     <string name="desktop_text" msgid="1077633567027630454">"Рэжым працоўнага стала"</string>
@@ -118,9 +122,12 @@
     <string name="float_button_text" msgid="9221657008391364581">"Зрабіць рухомым акном"</string>
     <string name="select_text" msgid="5139083974039906583">"Выбраць"</string>
     <string name="screenshot_text" msgid="1477704010087786671">"Здымак экрана"</string>
+    <string name="open_in_browser_text" msgid="9181692926376072904">"Адкрыць у браўзеры"</string>
+    <string name="new_window_text" msgid="6318648868380652280">"Новае акно"</string>
     <string name="close_text" msgid="4986518933445178928">"Закрыць"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"Закрыць меню"</string>
     <string name="expand_menu_text" msgid="3847736164494181168">"Адкрыць меню"</string>
     <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"Разгарнуць на ўвесь экран"</string>
     <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"Размясціць на палавіне экрана"</string>
+    <string name="desktop_mode_non_resizable_snap_text" msgid="1049800446363800707">"Немагчыма змяніць памер праграмы"</string>
 </resources>

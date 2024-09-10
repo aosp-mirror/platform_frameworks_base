@@ -21,6 +21,7 @@ import static android.app.ActivityManager.PROCESS_STATE_UNKNOWN;
 import static android.app.ActivityManager.procStateToString;
 import static android.content.pm.PackageManager.GET_SIGNATURES;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -36,6 +37,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.Signature;
+import android.net.platform.flags.Flags;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.os.Build;
@@ -954,11 +956,24 @@ public class NetworkPolicyManager {
      * @param executor The {@link Executor} to run the callback on.
      * @param callback The {@link NetworkPolicyCallback} to be registered.
      * @hide
+     *
+     * @deprecated This API is only supported up to Android version
+     * {@link Build.VERSION_CODES#VANILLA_ICE_CREAM}. On later versions,
+     * {@link android.net.ConnectivityManager.NetworkCallback} should be used wherever possible.
+     *
+     * @throws UnsupportedOperationException when called on Android versions after
+     *                                       {@link Build.VERSION_CODES#VANILLA_ICE_CREAM}.
      */
+    @Deprecated
+    @FlaggedApi(Flags.FLAG_DEPRECATE_NETWORK_POLICY_CALLBACK)
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     @RequiresPermission(android.Manifest.permission.OBSERVE_NETWORK_POLICY)
     public void registerNetworkPolicyCallback(@Nullable Executor executor,
             @NonNull NetworkPolicyCallback callback) {
+        if (Flags.deprecateNetworkPolicyCallback()) {
+            throw new UnsupportedOperationException("NetworkPolicyCallback is no longer supported."
+                    + " Please use ConnectivityManager APIs instead");
+        }
         if (callback == null) {
             throw new NullPointerException("Callback cannot be null.");
         }
@@ -974,10 +989,23 @@ public class NetworkPolicyManager {
      *
      * @param callback The {@link NetworkPolicyCallback} to be unregistered.
      * @hide
+     *
+     * @deprecated This API is only supported up to Android version
+     * {@link Build.VERSION_CODES#VANILLA_ICE_CREAM}. On later versions,
+     * {@link android.net.ConnectivityManager.NetworkCallback} should be used wherever possible.
+     *
+     * @throws UnsupportedOperationException when called on Android versions after
+     *                                       {@link Build.VERSION_CODES#VANILLA_ICE_CREAM}.
      */
+    @Deprecated
+    @FlaggedApi(Flags.FLAG_DEPRECATE_NETWORK_POLICY_CALLBACK)
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     @RequiresPermission(android.Manifest.permission.OBSERVE_NETWORK_POLICY)
     public void unregisterNetworkPolicyCallback(@NonNull NetworkPolicyCallback callback) {
+        if (Flags.deprecateNetworkPolicyCallback()) {
+            throw new UnsupportedOperationException("NetworkPolicyCallback is no longer supported."
+                    + " Please use ConnectivityManager APIs instead");
+        }
         if (callback == null) {
             throw new NullPointerException("Callback cannot be null.");
         }
@@ -990,8 +1018,18 @@ public class NetworkPolicyManager {
     /**
      * Interface for the callback to listen for changes to network blocked status of apps.
      *
+     * @deprecated This API is only supported up to Android version
+     * {@link Build.VERSION_CODES#VANILLA_ICE_CREAM}. On later versions, this callback will
+     * <b>not</b> be called when the network blocked status of an app changes. Instead,
+     * {@link android.net.ConnectivityManager.NetworkCallback} should be used wherever possible.
+     *
+     * @see #registerNetworkPolicyCallback(Executor, NetworkPolicyCallback)
+     * @see #unregisterNetworkPolicyCallback(NetworkPolicyCallback)
+     *
      * @hide
      */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_NETWORK_POLICY_CALLBACK)
+    @Deprecated
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public interface NetworkPolicyCallback {
         /**

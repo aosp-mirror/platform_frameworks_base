@@ -16,18 +16,15 @@
 
 package com.android.internal.os;
 
-import android.app.ApplicationLoaders;
 import android.app.LoadedApk;
 import android.content.pm.ApplicationInfo;
 import android.net.LocalSocket;
-import android.text.TextUtils;
 import android.util.Log;
 import android.webkit.WebViewFactory;
 import android.webkit.WebViewFactoryProvider;
 import android.webkit.WebViewLibraryLoader;
 
 import java.io.DataOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
 
@@ -81,28 +78,6 @@ class WebViewZygoteInit {
             Zygote.allowAppFilesAcrossFork(appInfo);
 
             Log.i(TAG, "Application preload done");
-        }
-
-        @Override
-        protected void handlePreloadPackage(String packagePath, String libsPath, String libFileName,
-                String cacheKey) {
-            Log.i(TAG, "Beginning package preload");
-            // Ask ApplicationLoaders to create and cache a classloader for the WebView APK so that
-            // our children will reuse the same classloader instead of creating their own.
-            // This enables us to preload Java and native code in the webview zygote process and
-            // have the preloaded versions actually be used post-fork.
-            ClassLoader loader = ApplicationLoaders.getDefault().createAndCacheWebViewClassLoader(
-                    packagePath, libsPath, cacheKey);
-
-            // Add the APK to the Zygote's list of allowed files for children.
-            String[] packageList = TextUtils.split(packagePath, File.pathSeparator);
-            for (String packageEntry : packageList) {
-                Zygote.nativeAllowFileAcrossFork(packageEntry);
-            }
-
-            doPreload(loader, libFileName);
-
-            Log.i(TAG, "Package preload done");
         }
 
         private void doPreload(ClassLoader loader, String libFileName) {

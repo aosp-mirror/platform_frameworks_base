@@ -2214,6 +2214,9 @@ public class Activity extends ContextThemeWrapper
         notifyVoiceInteractionManagerServiceActivityEvent(
                 VoiceInteractionSession.VOICE_INTERACTION_ACTIVITY_EVENT_RESUME);
 
+        // Notify autofill
+        getAutofillClientController().onActivityPostResumed();
+
         mCalled = true;
     }
 
@@ -3702,7 +3705,9 @@ public class Activity extends ContextThemeWrapper
      * @see View#findViewById(int)
      * @see Activity#requireViewById(int)
      */
-    /* TODO(b/347672184): Re-add @Nullable */
+    // Strictly speaking this should be marked as @Nullable but the nullability of the return value
+    // is deliberately left unspecified as idiomatically correct code can make assumptions either
+    // way based on local context, e.g. layout specification.
     public <T extends View> T findViewById(@IdRes int id) {
         return getWindow().findViewById(id);
     }
@@ -5823,7 +5828,8 @@ public class Activity extends ContextThemeWrapper
      *
      * @param intent The intent to start.
      * @param requestCode If >= 0, this code will be returned in
-     *                    onActivityResult() when the activity exits.
+     *                    onActivityResult() when the activity exits;
+     *                    If < 0, no result will return when the activity exits.
      *
      * @throws android.content.ActivityNotFoundException
      *
@@ -5858,7 +5864,8 @@ public class Activity extends ContextThemeWrapper
      *
      * @param intent The intent to start.
      * @param requestCode If >= 0, this code will be returned in
-     *                    onActivityResult() when the activity exits.
+     *                    onActivityResult() when the activity exits;
+     *                    If < 0, no result will return when the activity exits.
      * @param options Additional options for how the Activity should be started.
      * See {@link android.content.Context#startActivity(Intent, Bundle)}
      * Context.startActivity(Intent, Bundle)} for more details.
@@ -5966,7 +5973,8 @@ public class Activity extends ContextThemeWrapper
      *
      * @param intent      The intent to start.
      * @param requestCode If >= 0, this code will be returned in
-     *                    onActivityResult() when the activity exits.
+     *                    onActivityResult() when the activity exits;
+     *                    If < 0, no result will return when the activity exits.
      * @param user        The user to start the intent as.
      * @hide Implement to provide correct calling token.
      */
@@ -6002,7 +6010,8 @@ public class Activity extends ContextThemeWrapper
      *
      * @param intent      The intent to start.
      * @param requestCode If >= 0, this code will be returned in
-     *                    onActivityResult() when the activity exits.
+     *                    onActivityResult() when the activity exits;
+     *                    If < 0, no result will return when the activity exits.
      * @param options     Additional options for how the Activity should be started. See {@link
      *                    android.content.Context#startActivity(Intent, Bundle)} for more details.
      * @param user        The user to start the intent as.
@@ -6040,7 +6049,8 @@ public class Activity extends ContextThemeWrapper
      *
      * @param intent      The intent to start.
      * @param requestCode If >= 0, this code will be returned in
-     *                    onActivityResult() when the activity exits.
+     *                    onActivityResult() when the activity exits;
+     *                    If < 0, no result will return when the activity exits.
      * @param options     Additional options for how the Activity should be started. See {@link
      *                    android.content.Context#startActivity(Intent, Bundle)} for more details.
      * @param user        The user to start the intent as.
@@ -6166,7 +6176,8 @@ public class Activity extends ContextThemeWrapper
      *
      * @param intent The IntentSender to launch.
      * @param requestCode If >= 0, this code will be returned in
-     *                    onActivityResult() when the activity exits.
+     *                    onActivityResult() when the activity exits;
+     *                    If < 0, no result will return when the activity exits.
      * @param fillInIntent If non-null, this will be provided as the
      * intent parameter to {@link IntentSender#sendIntent}.
      * @param flagsMask Intent flags in the original IntentSender that you
@@ -6205,7 +6216,8 @@ public class Activity extends ContextThemeWrapper
      *
      * @param intent The IntentSender to launch.
      * @param requestCode If >= 0, this code will be returned in
-     *                    onActivityResult() when the activity exits.
+     *                    onActivityResult() when the activity exits;
+     *                    If < 0, no result will return when the activity exits.
      * @param fillInIntent If non-null, this will be provided as the
      * intent parameter to {@link IntentSender#sendIntent}.
      * @param flagsMask Intent flags in the original IntentSender that you
@@ -6437,8 +6449,8 @@ public class Activity extends ContextThemeWrapper
      *
      * @param intent The intent to start.
      * @param requestCode If >= 0, this code will be returned in
-     *         onActivityResult() when the activity exits, as described in
-     *         {@link #startActivityForResult}.
+     *         onActivityResult() when the activity exits; If < 0, no result will
+     *         return when the activity exits, as described in {@link #startActivityForResult}.
      *
      * @return If a new activity was launched then true is returned; otherwise
      *         false is returned and you must handle the Intent yourself.
@@ -6469,7 +6481,8 @@ public class Activity extends ContextThemeWrapper
      *
      * @param intent The intent to start.
      * @param requestCode If >= 0, this code will be returned in
-     *         onActivityResult() when the activity exits, as described in
+     *         onActivityResult() when the activity exits; If < 0, no result
+     *         will return when the activity exits, as described in
      *         {@link #startActivityForResult}.
      * @param options Additional options for how the Activity should be started.
      * See {@link android.content.Context#startActivity(Intent, Bundle)}
@@ -7299,7 +7312,7 @@ public class Activity extends ContextThemeWrapper
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private void finish(int finishTask) {
         if (DEBUG_FINISH_ACTIVITY) {
-            Log.d("Instrumentation", "finishActivity: finishTask=" + finishTask, new Throwable());
+            Log.d(Instrumentation.TAG, "finishActivity: finishTask=" + finishTask, new Throwable());
         }
         if (mParent == null) {
             int resultCode;

@@ -64,8 +64,7 @@ public class DataTypeFactory {
     }
 
     /** Creates an {@link AslMarshallableFactory} from on-device DOM elements */
-    public DataType createFromOdElements(List<Element> elements) throws MalformedXmlException {
-        Element odDataTypeEle = XmlUtils.getSingleElement(elements);
+    public DataType createFromOdElement(Element odDataTypeEle) throws MalformedXmlException {
         String dataTypeName = odDataTypeEle.getAttribute(XmlUtils.OD_ATTR_NAME);
         List<Integer> purposeInts =
                 XmlUtils.getOdIntArray(odDataTypeEle, XmlUtils.OD_NAME_PURPOSES, true);

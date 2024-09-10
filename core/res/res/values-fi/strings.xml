@@ -265,8 +265,6 @@
     <string name="global_action_bug_report" msgid="5127867163044170003">"Virheraportti"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Lopeta käyttökerta"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"Kuvakaappaus"</string>
-    <!-- no translation found for identity_check_biometric_prompt_description (5810195983015866727) -->
-    <skip />
     <string name="bugreport_title" msgid="8549990811777373050">"Virheraportti"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"Toiminto kerää tietoja laitteen tilasta ja lähettää ne sähköpostitse. Virheraportti on valmis lähetettäväksi hetken kuluttua - kiitos kärsivällisyydestäsi."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"Interaktiivinen"</string>
@@ -1196,6 +1194,8 @@
     <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"Käsinkirjoitusta ei tueta salasanakentissä"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Takaisin"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Vaihda syöttötapaa"</string>
+    <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"Avaa syöttötavan valinta"</string>
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"Asetukset"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Tallennustila loppumassa"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Kaikki järjestelmätoiminnot eivät välttämättä toimi"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Tallennustila ei riitä. Varmista, että vapaata tilaa on 250 Mt, ja käynnistä uudelleen."</string>
@@ -1413,10 +1413,8 @@
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"Poista langaton virheenkorjaus käytöstä valitsemalla tämä."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Testikehystila käytössä"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Palauta tehdasasetukset, niin voit poistaa testikehystilan käytöstä."</string>
-    <!-- no translation found for wrong_hsum_configuration_notification_title (7212758829332714385) -->
-    <skip />
-    <!-- no translation found for wrong_hsum_configuration_notification_message (5353475441480684381) -->
-    <skip />
+    <string name="wrong_hsum_configuration_notification_title" msgid="7212758829332714385">"Väärä HSUM-koontiversiomääritys"</string>
+    <string name="wrong_hsum_configuration_notification_message" msgid="5353475441480684381">"Tämän laitteen järjestelmäkäyttäjän tila eroaa koontiversiomäärityksestä. Palauta laitteen tehdasasetukset."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"Sarjakonsoli käytössä"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"Tämä vaikuttaa suorituskykyyn. Jos haluat poistaa toiminnon käytöstä, tarkista käynnistysohjelma."</string>
     <string name="mte_override_notification_title" msgid="4731115381962792944">"Kokeellinen MTE käytössä"</string>
@@ -1432,6 +1430,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"JAA"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"HYLKÄÄ"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Valitse syöttötapa"</string>
+    <string name="input_method_language_settings" msgid="8069089418056819437">"Kieliasetukset"</string>
     <string name="show_ime" msgid="6406112007347443383">"Pidä näytöllä, kun fyysinen näppäimistö on aktiivinen"</string>
     <string name="hardware" msgid="3611039921284836033">"Käytä näyttönäppäimistöä"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Määritä <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
@@ -1747,7 +1746,8 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"Sovellus peittää lupapyynnön, joten vastaustasi ei voi vahvistaa."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Aloita ominaisuuden käyttö napauttamalla sitä:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Valitse ominaisuudet, joita käytetään esteettömyyspainikkeella"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Valitse ominaisuudet, joita käytetään äänenvoimakkuuspikanäppäimellä"</string>
+    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
+    <skip />
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> on laitettu pois päältä"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Muokkaa pikakuvakkeita"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Valmis"</string>
@@ -1761,18 +1761,12 @@
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Äänenvoimakkuuspainikkeita painettiin pitkään. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> laitettiin päälle."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Äänenvoimakkuuspainikkeita painettiin pitkään. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> laitettiin pois päältä."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Vapauta äänenvoimakkuuspainikkeet. Laita <xliff:g id="SERVICE_NAME">%1$s</xliff:g> päälle painamalla äänenvoimakkuuspainikkeita uudelleen kolmen sekunnin ajan."</string>
-    <!-- no translation found for accessibility_button_prompt_text (6105393217162198616) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_prompt_text (6452246951969541792) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_3finger_prompt_text (77745752309056152) -->
-    <skip />
-    <!-- no translation found for accessibility_button_instructional_text (6831154884557881996) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_instructional_text (4133877896011098550) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_3finger_instructional_text (1124458279366968154) -->
-    <skip />
+    <string name="accessibility_button_prompt_text" msgid="6105393217162198616">"Valitse ominaisuus"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="6452246951969541792">"Valitse ominaisuus"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="77745752309056152">"Valitse ominaisuus"</string>
+    <string name="accessibility_button_instructional_text" msgid="6831154884557881996">"Ominaisuus avautuu, kun seuraavan kerran napautat saavutettavuuspainiketta"</string>
+    <string name="accessibility_gesture_instructional_text" msgid="4133877896011098550">"Ominaisuus avautuu, kun seuraavan kerran käytät tätä pikakomentoa. Pyyhkäise näytön alareunasta ylös kahdella sormella ja nosta sormet näytöltä nopeasti."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="1124458279366968154">"Ominaisuus avautuu, kun seuraavan kerran käytät tätä pikakomentoa. Pyyhkäise näytön alareunasta ylös kolmella sormella ja nosta sormet näytöltä nopeasti."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Suurennus"</string>
     <string name="user_switched" msgid="7249833311585228097">"Nykyinen käyttäjä: <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"Vaihdetaan käyttäjään <xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -1895,8 +1889,7 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN-koodi on liian lyhyt. Vähimmäispituus on neljä merkkiä."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Yritä myöhemmin uudelleen"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Koko ruudun tilassa"</string>
-    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
-    <skip />
+    <string name="immersive_cling_description" msgid="2896205051090870978">"Poistu pyyhkäisemällä alas näytön yläreunasta"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Selvä"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Kierrä, niin saat paremman näkymän"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Avaa <xliff:g id="NAME">%s</xliff:g>, niin saat paremman näkymän"</string>
@@ -2432,25 +2425,32 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Sovelluksen sisältö piilotettu näytön jakamiselta turvallisuussyistä"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Yhdistetty automaattisesti satelliittiin"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Voit lähettää ja vastaanottaa viestejä ilman mobiili‑ tai Wi-Fi-verkkoa"</string>
+    <string name="satellite_notification_manual_title" msgid="1097504441849466279">"Käytetäänkö satelliittiviestintää?"</string>
+    <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Lähetä ja vastaanota viestejä ilman mobiili- tai Wi-Fi-verkkoa"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Avaa Messages"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Näin se toimii"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Odottaa…"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Ota sormenjälkiavaus uudelleen käyttöön"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (5851784577768803510) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7925203589860744456) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (1824812666549916586) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (5974657382960155099) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> ei enää ole tunnistettavissa."</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> ja <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> eivät enää ole tunnistettavissa."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="1824812666549916586">"<xliff:g id="FINGERPRINT">%s</xliff:g> ei enää ole tunnistettavissa. Ota sormenjälkiavaus uudelleen käyttöön."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="5974657382960155099">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> ja <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> eivät enää ole tunnistettavissa. Ota sormenjälkiavaus uudelleen käyttöön."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Ota kasvojentunnistusavaus uudelleen käyttöön"</string>
-    <!-- no translation found for face_dangling_notification_msg (746235263598985384) -->
-    <skip />
+    <string name="face_dangling_notification_msg" msgid="746235263598985384">"Kasvomallia ei enää tunnisteta. Ota kasvojentunnistusavaus uudelleen käyttöön."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Ota käyttöön"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Ei nyt"</string>
     <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"Hälytys: <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"Vaihda käyttäjää"</string>
     <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"Mykistä"</string>
     <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"Mykistä äänet napauttamalla"</string>
+    <string name="keyboard_shortcut_group_applications_browser" msgid="6535007304687100909">"Selain"</string>
+    <string name="keyboard_shortcut_group_applications_contacts" msgid="2750702518068326356">"Yhteystiedot"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="4229037666415353683">"Sähköposti"</string>
+    <string name="keyboard_shortcut_group_applications_sms" msgid="3523799286376321137">"Tekstiviesti"</string>
+    <string name="keyboard_shortcut_group_applications_music" msgid="2051507523525651067">"Musiikki"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="3571770335653387606">"Kalenteri"</string>
+    <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"Laskin"</string>
+    <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"Maps"</string>
+    <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"Sovellukset"</string>
+    <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"Sormenjälkiäsi ei voi enää tunnistaa. Ota sormenjälkiavaus uudelleen käyttöön."</string>
 </resources>

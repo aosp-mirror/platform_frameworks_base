@@ -73,11 +73,7 @@
         "PowerComponents\\.java",
         "[^/]*BatteryConsumer[^/]*\\.java"
       ],
-      "name": "FrameworksCoreTests",
-      "options": [
-        { "include-filter": "com.android.internal.os.BatteryStatsTests" },
-        { "exclude-annotation": "com.android.internal.os.SkipPresubmit" }
-      ]
+      "name": "FrameworksCoreTests_battery_stats"
     },
     {
       "file_patterns": [
@@ -86,10 +82,7 @@
         "PowerComponents\\.java",
         "[^/]*BatteryConsumer[^/]*\\.java"
       ],
-      "name": "FrameworksServicesTests",
-      "options": [
-        { "include-filter": "com.android.server.am.BatteryStatsServiceTest" }
-      ]
+      "name": "FrameworksServicesTests_battery_stats"
     },
     {
       "file_patterns": [
@@ -119,7 +112,7 @@
         "PowerComponents\\.java",
         "[^/]*BatteryConsumer[^/]*\\.java"
       ],
-      "name": "BatteryUsageStatsProtoTests"
+      "name": "PowerStatsTests"
     },
     {
       "file_patterns": ["SharedMemory[^/]*\\.java"],
@@ -132,12 +125,7 @@
     },
     {
       "file_patterns": ["Environment[^/]*\\.java"],
-      "name": "FrameworksCoreTests",
-      "options": [
-        {
-          "include-filter": "android.os.EnvironmentTest"
-        }
-      ]
+      "name": "FrameworksCoreTests_environment"
     }
   ],
   "postsubmit": [

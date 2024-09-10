@@ -16,6 +16,7 @@
 
 package com.android.server.vibrator;
 
+import android.annotation.NonNull;
 import android.os.Trace;
 import android.os.VibrationEffect;
 import android.os.vibrator.PrimitiveSegment;
@@ -31,7 +32,7 @@ import java.util.List;
  * <p>This step will use the maximum supported number of consecutive segments of type
  * {@link PrimitiveSegment} starting at the current index.
  */
-final class ComposePrimitivesVibratorStep extends AbstractVibratorStep {
+final class ComposePrimitivesVibratorStep extends AbstractComposedVibratorStep {
     /**
      * Default limit to the number of primitives in a composition, if none is defined by the HAL,
      * to prevent repeating effects from generating an infinite list.
@@ -47,6 +48,7 @@ final class ComposePrimitivesVibratorStep extends AbstractVibratorStep {
                 index, pendingVibratorOffDeadline);
     }
 
+    @NonNull
     @Override
     public List<Step> play() {
         Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "ComposePrimitivesStep");

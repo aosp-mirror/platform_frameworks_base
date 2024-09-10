@@ -108,6 +108,8 @@ filegroup {
 filegroup {
     name: "services-non-updatable-sources",
     srcs: [
+        ":incremental_aidl",
+        ":services.core-aidl-sources",
         ":services.core-sources",
         ":services.core-sources-am-wm",
         "core/java/com/android/server/am/package.html",
@@ -118,6 +120,7 @@ filegroup {
         ":services.backup-sources",
         ":services.companion-sources",
         ":services.contentcapture-sources",
+        ":services.appfunctions-sources",
         ":services.contentsuggestions-sources",
         ":services.contextualsearch-sources",
         ":services.coverage-sources",
@@ -133,6 +136,7 @@ filegroup {
         ":services.searchui-sources",
         ":services.smartspace-sources",
         ":services.soundtrigger-sources",
+        ":services.supervision-sources",
         ":services.systemcaptions-sources",
         ":services.translation-sources",
         ":services.texttospeech-sources",
@@ -186,7 +190,15 @@ art_profile_java_defaults {
 
 // merge all required services into one jar
 // ============================================================
-java_library {
+soong_config_module_type {
+    name: "system_java_library",
+    module_type: "java_library",
+    config_namespace: "system_services",
+    bool_variables: ["without_vibrator"],
+    properties: ["vintf_fragments"],
+}
+
+system_java_library {
     name: "services",
     defaults: [
         "services_java_defaults",
@@ -207,6 +219,7 @@ java_library {
         "services.autofill",
         "services.backup",
         "services.companion",
+        "services.appfunctions",
         "services.contentcapture",
         "services.contentsuggestions",
         "services.contextualsearch",
@@ -225,6 +238,7 @@ java_library {
         "services.searchui",
         "services.smartspace",
         "services.soundtrigger",
+        "services.supervision",
         "services.systemcaptions",
         "services.translation",
         "services.texttospeech",
@@ -248,9 +262,19 @@ java_library {
         "service-sdksandbox.stubs.system_server",
     ],
 
-    vintf_fragments: [
-        "manifest_services.xml",
-    ],
+    soong_config_variables: {
+        without_vibrator: {
+            vintf_fragments: [
+                "manifest_services.xml",
+            ],
+            conditions_default: {
+                vintf_fragments: [
+                    "manifest_services.xml",
+                    "manifest_services_android.frameworks.vibrator.xml",
+                ],
+            },
+        },
+    },
 
     required: [
         "libukey2_jni_shared",
@@ -359,4 +383,8 @@ non_updatable_exportable_droidstubs {
         },
     },
     api_surface: "system-server",
+    sdk_version: "module_current",
+    libs: [
+        "framework-annotations-lib",
+    ],
 }

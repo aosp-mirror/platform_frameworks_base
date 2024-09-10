@@ -100,7 +100,7 @@
     <string name="bluetooth_active_battery_level_untethered_right" msgid="7407517998880370179">"యాక్టివ్‌గా ఉంది. కుడి వైపు: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> బ్యాటరీ."</string>
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> బ్యాటరీ"</string>
     <string name="tv_bluetooth_battery_level" msgid="8786353985605532846">"బ్యాటరీ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_battery_level_untethered" msgid="1616774716076301755">"ఎడమ వైపు: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, కుడివైపు: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> బ్యాటరీ."</string>
+    <string name="bluetooth_battery_level_untethered" msgid="1616774716076301755">"ఎడమ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, కుడి: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> బ్యాటరీ."</string>
     <string name="bluetooth_battery_level_untethered_left" msgid="5725764679536058365">"ఎడమ వైపు: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> బ్యాటరీ"</string>
     <string name="bluetooth_battery_level_untethered_right" msgid="8377995536997790142">"కుడి వైపు: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> బ్యాటరీ"</string>
     <string name="tv_bluetooth_battery_level_untethered_left" msgid="337629670583744410">"ఎడమ వైపు <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
@@ -115,7 +115,7 @@
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"కనెక్ట్ చేయబడింది (ఆడియో షేరింగ్‌కు సపోర్ట్ చేస్తుంది). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> బ్యాటరీ."</string>
     <string name="bluetooth_battery_level_untethered_lea_support" msgid="803110681688633362">"కనెక్ట్ చేయబడింది (ఆడియో షేరింగ్‌కు సపోర్ట్ చేస్తుంది). ఎడమ వైపు: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> బ్యాటరీ, కుడివైపు: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> బ్యాటరీ."</string>
     <string name="bluetooth_battery_level_untethered_left_lea_support" msgid="7707464334346454950">"కనెక్ట్ చేయబడింది (ఆడియో షేరింగ్‌కు సపోర్ట్ చేస్తుంది). ఎడమ వైపు: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> బ్యాటరీ."</string>
-    <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="8941549024377771038">"కనెక్ట్ చేయబడింది (ఆడియో షేరింగ్‌కు సపోర్ట్ చేస్తుంది). కుడి వైపు: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> బ్యాటరీ."</string>
+    <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="8941549024377771038">"కనెక్ట్ అయింది (ఆడియో షేరింగ్‌కు సపోర్ట్ చేస్తుంది). కుడివైపు: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> బ్యాటరీ."</string>
     <string name="bluetooth_no_battery_level_lea_support" msgid="5721725041048434075">"కనెక్ట్ చేయబడింది (ఆడియో షేరింగ్‌కు సపోర్ట్ చేస్తుంది)"</string>
     <string name="bluetooth_active_media_only_no_battery_level" msgid="71106861912593126">"యాక్టివ్ (మీడియా మాత్రమే)"</string>
     <string name="bluetooth_saved_device_lea_support" msgid="7231323139968285768">"ఆడియో షేరింగ్‌కు సపోర్ట్ చేస్తుంది"</string>
@@ -380,6 +380,8 @@
     <string name="show_touches_summary" msgid="3692861665994502193">"నొక్కినప్పుడు దృశ్యపరమైన ప్రతిస్పందన చూపు"</string>
     <string name="show_key_presses" msgid="6360141722735900214">"కీ ప్రెస్‌లను చూడండి"</string>
     <string name="show_key_presses_summary" msgid="725387457373015024">"భౌతిక కీ ప్రెస్‌ల విజువల్ ఫీడ్‌బ్యాక్‌ను చూడండి"</string>
+    <string name="touchpad_visualizer" msgid="3707916068870825115">"టచ్‌ప్యాడ్ ఇన్‌పుట్‌ను చూపండి"</string>
+    <string name="touchpad_visualizer_summary" msgid="4056080018119847449">"స్క్రీన్ ఓవర్‌లే టచ్‌ప్యాడ్ ఇన్‌పుట్ డేటాను, గుర్తించబడిన సంజ్ఞలను డిస్‌ప్లే చేస్తోంది"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"సర్ఫేస్‌ అప్‌డేట్లను చూపు"</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"విండో సర్‌ఫేస్‌లన్నీ అప్‌డేట్‌ అయితే ఫ్లాష్ చేయి"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"వీక్షణ అప్‌డేట్‌లను చూపు"</string>
@@ -408,18 +410,12 @@
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"డీబగ్ యాప్‌ల కోసం GPU డీబగ్ లేయర్‌లను లోడ్ చేయడాన్ని అనుమతించండి"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"వివరణాత్మక వెండార్‌ లాగింగ్‌ను ఎనేబుల్ చేయండి"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"బగ్ రిపోర్ట్‌లలో అదనపు పరికర-నిర్దిష్ట వెండార్ లాగ్‌లను చేర్చండి, అవి ప్రైవేట్ సమాచారాన్ని కలిగి ఉండవచ్చు, మరింత బ్యాటరీని, మరియు/లేదా మరింత స్టోరేజ్‌ను ఉపయోగించవచ్చు."</string>
-    <!-- no translation found for enable_verbose_vendor_logging_checkbox (3864578373293835530) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_title (6811217272559843592) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_summary (5226524769774370942) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_notification_action (1190831050259046071) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_preference_summary_will_disable (6175431593394522553) -->
-    <skip />
-    <!-- no translation found for verbose_vendor_logging_preference_summary_on (9017757242481762036) -->
-    <skip />
+    <string name="enable_verbose_vendor_logging_checkbox" msgid="3864578373293835530">"ఒక రోజు తర్వాత డిజేబుల్ చేయండి"</string>
+    <string name="verbose_vendor_logging_notification_title" msgid="6811217272559843592">"వెర్బోస్ వెండర్ లాగింగ్ ముగిసింది"</string>
+    <string name="verbose_vendor_logging_notification_summary" msgid="5226524769774370942">"ఒక రోజు పాటు ఎనేబుల్ చేసి ఉంది"</string>
+    <string name="verbose_vendor_logging_notification_action" msgid="1190831050259046071">"ఇంకొక రోజు ఎనేబుల్ చేసి ఉంచండి"</string>
+    <string name="verbose_vendor_logging_preference_summary_will_disable" msgid="6175431593394522553">"ఒక రోజు తర్వాత డిజేబుల్ అవుతుంది"</string>
+    <string name="verbose_vendor_logging_preference_summary_on" msgid="9017757242481762036">"నిరవధికంగా ఎనేబుల్ చేయబడింది"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"విండో యానిమేషన్ స్కేల్"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"ట్రాన్సిషన్ యానిమేషన్ స్కేల్"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"యానిమేటర్ వ్యవధి స్కేల్"</string>
@@ -437,7 +433,6 @@
     <string name="force_resizable_activities" msgid="7143612144399959606">"యాక్టివిటీ విండోల సైజ్‌ మార్చ‌గ‌లిగేలా నిర్బంధించు"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"మానిఫెస్ట్ విలువలతో సంబంధం లేకుండా అన్ని యాక్టివిటీస్‌ను పలు రకాల విండోల్లో సరిపోయేటట్లు సైజ్‌ మార్చగలిగేలా చేస్తుంది."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"స్వతంత్ర రూప విండోలను ఎనేబుల్ చేయండి"</string>
-    <string name="enable_freeform_support_summary" msgid="1822862728719276331">"ప్రయోగాత్మక స్వతంత్ర రూప విండోల కోసం సపోర్ట్‌ను ఎనేబుల్ చేస్తుంది."</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"డెస్క్‌టాప్ బ్యాకప్ పాస్‌వర్డ్"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"డెస్క్‌టాప్ పూర్తి బ్యాకప్‌లు ప్రస్తుతం రక్షించబడలేదు"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"డెస్క్‌టాప్ పూర్తి బ్యాకప్‌ల కోసం పాస్‌వర్డ్‌ను మార్చడానికి లేదా తీసివేయడానికి నొక్కండి"</string>
@@ -502,7 +497,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g>లో పూర్తిగా ఛార్జ్ అవుతుంది"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>లో పూర్తిగా ఛార్జ్ అవుతుంది"</string>
-    <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - ఛార్జింగ్ ఆప్టిమైజ్ చేయబడింది"</string>
+    <string name="power_charging_limited" msgid="4144004473976005214">"<xliff:g id="LEVEL">%1$s</xliff:g> - బ్యాటరీని రక్షించడానికి ఛార్జింగ్ హోల్డ్‌లో ఉంచబడింది"</string>
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> - ఛార్జ్ అవుతోంది"</string>
     <string name="power_fast_charging_duration_v2" msgid="3797735998640359490">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATUS">%2$s</xliff:g> - <xliff:g id="TIME">%3$s</xliff:g>కు పూర్తవుతుంది"</string>
     <string name="power_charging_duration_v2" msgid="2938998284074003248">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>కు పూర్తిగా ఛార్జ్ అవుతుంది"</string>
@@ -569,6 +564,8 @@
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"అలారాలు &amp; రిమైండర్‌లు"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"అలారాలను సెట్ చేయడానికి, టైమ్-సెన్సిటివ్ చర్యలను షెడ్యూల్ చేయడానికి ఈ యాప్‌ను అనుమతించండి. ఇది యాప్‌ను బ్యాక్‌గ్రౌండ్‌లో రన్ అవడానికి అనుమతిస్తుంది, ఇది ఎక్కువ బ్యాటరీని ఉపయోగించవచ్చు.\n\nఈ అనుమతిని ఆఫ్ చేస్తే, ఈ యాప్ ద్వారా షెడ్యూల్ చేసినటువంటి ఇప్పటికే ఉన్న అలారాలు, టైమ్-ఆధారిత ఈవెంట్‌లు పనిచేయవు."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"షెడ్యూల్, అలారం, రిమైండర్, గడియారం"</string>
+    <!-- no translation found for zen_mode_do_not_disturb_name (6798711401734798283) -->
+    <skip />
     <string name="zen_mode_settings_title" msgid="7374070457626419755">"అంతరాయం కలిగించవద్దు"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"ఆన్ చేయండి"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"అంతరాయం కలిగించవద్దును ఆన్ చేయండి"</string>

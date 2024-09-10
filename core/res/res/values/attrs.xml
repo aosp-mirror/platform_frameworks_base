@@ -1078,6 +1078,11 @@
         <!-- Background color to use for tooltip popups. -->
         <attr name="tooltipBackgroundColor" format="reference|color" />
 
+        <attr name="tooltipCornerRadius" format="dimension" />
+        <attr name="tooltipHorizontalPadding" format="dimension" />
+        <attr name="tooltipVerticalPadding" format="dimension" />
+        <attr name="tooltipFontSize" format="dimension" />
+
         <!-- Theme to use for Search Dialogs. -->
         <attr name="searchDialogTheme" format="reference" />
 
@@ -4304,7 +4309,7 @@
         <attr name="settingsActivity" format="string" />
         <!-- Component name of an activity that allows the user to modify
              on-screen keyboards variants (e.g. different language or layout) for this service. -->
-        <!-- @FlaggedApi("android.view.inputmethod.ime_switcher_revamp") -->
+        <!-- @FlaggedApi("android.view.inputmethod.ime_switcher_revamp_api") -->
         <attr name="languageSettingsActivity" format="string"/>
         <!-- Set to true in all of the configurations for which this input
              method should be considered an option as the default. -->
@@ -5242,6 +5247,11 @@
         <!-- Determines whether to measure all children or just those in
              the VISIBLE or INVISIBLE state when measuring. Defaults to false. -->
         <attr name="measureAllChildren" format="boolean" />
+    </declare-styleable>
+    <!-- @hide -->
+    <declare-styleable name="MaxHeightFrameLayout">
+        <!-- An optional argument to supply a maximum height for this view. -->
+        <attr name="maxHeight" format="dimension" />
     </declare-styleable>
     <declare-styleable name="ExpandableListView">
         <!-- Indicator shown beside the group View. This can be a stateful Drawable. -->

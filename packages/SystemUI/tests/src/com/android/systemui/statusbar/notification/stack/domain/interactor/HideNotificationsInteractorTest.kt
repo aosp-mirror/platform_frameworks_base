@@ -66,7 +66,8 @@ open class HideNotificationsInteractorTest : SysuiTestCase() {
             repository = powerRepository,
             falsingCollector = mock(),
             screenOffAnimationController = mock(),
-            statusBarStateController = mock()
+            statusBarStateController = mock(),
+            cameraGestureHelper = mock(),
         )
 
     private val configurationRepository =

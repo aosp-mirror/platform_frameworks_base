@@ -28,8 +28,8 @@ import static android.app.ActivityManager.PROCESS_STATE_SERVICE;
 import static android.app.ActivityManager.PROCESS_STATE_TOP;
 import static android.app.ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND;
 import static android.app.ActivityManager.PROCESS_STATE_UNKNOWN;
-import static android.os.PowerExemptionManager.REASON_DENIED;
 import static android.content.ContentResolver.SCHEME_CONTENT;
+import static android.os.PowerExemptionManager.REASON_DENIED;
 import static android.os.UserHandle.USER_ALL;
 import static android.util.DebugUtils.valueToString;
 
@@ -68,11 +68,9 @@ import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.after;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.timeout;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -84,7 +82,6 @@ import android.app.AppOpsManager;
 import android.app.BackgroundStartPrivileges;
 import android.app.BroadcastOptions;
 import android.app.ForegroundServiceDelegationOptions;
-import android.app.IApplicationThread;
 import android.app.IUidObserver;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -129,7 +126,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 import com.android.dx.mockito.inline.extended.ExtendedMockito;
 import com.android.sdksandbox.flags.Flags;
 import com.android.server.LocalServices;
-import com.android.server.am.ActivityManagerService.StickyBroadcast;
+import com.android.server.am.BroadcastController.StickyBroadcast;
 import com.android.server.am.ProcessList.IsolatedUidRange;
 import com.android.server.am.ProcessList.IsolatedUidRangeAllocator;
 import com.android.server.am.UidObserverController.ChangeRecord;
@@ -527,7 +524,7 @@ public class ActivityManagerServiceTest {
 
         final ProcessRecord appRec = new ProcessRecord(mAms, info, info.processName, uid);
         final ProcessStatsService tracker = mAms.mProcessStats;
-        final IApplicationThread appThread = mock(IApplicationThread.class);
+        final ApplicationThreadDeferred appThread = mock(ApplicationThreadDeferred.class);
         doReturn(mock(IBinder.class)).when(appThread).asBinder();
         appRec.makeActive(appThread, tracker);
         mAms.mProcessList.addProcessNameLocked(appRec);
@@ -701,7 +698,8 @@ public class ActivityManagerServiceTest {
         final var wpc = fifoProc.getWindowProcessController();
         spyOn(wpc);
         doReturn(true).when(wpc).useFifoUiScheduling();
-        fifoProc.makeActive(fifoProc.getThread(), mAms.mProcessStats);
+        fifoProc.makeActive(new ApplicationThreadDeferred(fifoProc.getThread()),
+                mAms.mProcessStats);
         assertTrue(fifoProc.useFifoUiScheduling());
         assertTrue(mAms.mSpecifiedFifoProcesses.contains(fifoProc));
 

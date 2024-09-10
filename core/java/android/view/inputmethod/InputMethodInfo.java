@@ -92,7 +92,7 @@ public final class InputMethodInfo implements Parcelable {
      *
      * @see #createImeLanguageSettingsActivityIntent()
      */
-    @FlaggedApi(android.view.inputmethod.Flags.FLAG_IME_SWITCHER_REVAMP)
+    @FlaggedApi(android.view.inputmethod.Flags.FLAG_IME_SWITCHER_REVAMP_API)
     public static final String ACTION_IME_LANGUAGE_SETTINGS =
             "android.view.inputmethod.action.IME_LANGUAGE_SETTINGS";
 
@@ -298,7 +298,7 @@ public final class InputMethodInfo implements Parcelable {
                     com.android.internal.R.styleable.InputMethod);
             settingsActivityComponent = sa.getString(
                     com.android.internal.R.styleable.InputMethod_settingsActivity);
-            if (Flags.imeSwitcherRevamp()) {
+            if (Flags.imeSwitcherRevampApi()) {
                 languageSettingsActivityComponent = sa.getString(
                         com.android.internal.R.styleable.InputMethod_languageSettingsActivity);
             }
@@ -878,25 +878,29 @@ public final class InputMethodInfo implements Parcelable {
 
     /**
      * Returns {@link Intent} for IME language settings activity with
-     * {@link Intent#getAction() Intent action} {@link #ACTION_IME_LANGUAGE_SETTINGS},
-     * else <code>null</code> if
-     * {@link android.R.styleable#InputMethod_languageSettingsActivity} is not defined.
+     * {@link Intent#getAction() Intent action} {@link #ACTION_IME_LANGUAGE_SETTINGS}. If
+     * {@link android.R.styleable#InputMethod_languageSettingsActivity} is not defined, tries to
+     * fall back to the IME general settings activity. If
+     * {@link android.R.styleable#InputMethod_settingsActivity} is also not defined,
+     * returns {code null}.
      *
      * <p>To launch IME language settings, use this method to get the {@link Intent} to launch
      * the IME language settings activity.</p>
      * <p>e.g.<pre><code>startActivity(createImeLanguageSettingsActivityIntent());</code></pre></p>
      *
      * @attr ref R.styleable#InputMethod_languageSettingsActivity
+     * @attr ref R.styleable#InputMethod_settingsActivity
      */
-    @FlaggedApi(android.view.inputmethod.Flags.FLAG_IME_SWITCHER_REVAMP)
+    @FlaggedApi(android.view.inputmethod.Flags.FLAG_IME_SWITCHER_REVAMP_API)
     @Nullable
     public Intent createImeLanguageSettingsActivityIntent() {
-        if (TextUtils.isEmpty(mLanguageSettingsActivityName)) {
+        final var activityName = !TextUtils.isEmpty(mLanguageSettingsActivityName)
+                ? mLanguageSettingsActivityName : mSettingsActivityName;
+        if (TextUtils.isEmpty(activityName)) {
             return null;
         }
         return new Intent(ACTION_IME_LANGUAGE_SETTINGS).setComponent(
-                new ComponentName(getServiceInfo().packageName,
-                        mLanguageSettingsActivityName)
+                new ComponentName(getServiceInfo().packageName, activityName)
         );
     }
 

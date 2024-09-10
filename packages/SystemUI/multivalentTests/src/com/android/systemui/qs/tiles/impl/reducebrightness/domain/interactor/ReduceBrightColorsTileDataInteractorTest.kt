@@ -30,7 +30,6 @@ import com.android.systemui.qs.tiles.impl.reducebrightness.domain.model.ReduceBr
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.toCollection
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -56,8 +55,7 @@ class ReduceBrightColorsTileDataInteractorTest : SysuiTestCase() {
     @Test
     fun alwaysAvailable() =
         testScope.runTest {
-            val availability = underTest.availability(TEST_USER).toCollection(mutableListOf())
-
+            val availability by collectValues(underTest.availability(TEST_USER))
             assertThat(availability).hasSize(1)
             assertThat(availability.last()).isEqualTo(isAvailable)
         }

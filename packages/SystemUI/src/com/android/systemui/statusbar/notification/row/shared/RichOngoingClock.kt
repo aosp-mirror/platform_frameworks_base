@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.row.shared
 
+import android.app.Notification
 import android.app.PendingIntent
 import java.time.Duration
 
@@ -32,6 +33,9 @@ data class TimerContentModel(
 ) : RichOngoingContentModel {
     /** The state (paused or running) of the timer, and relevant time */
     sealed interface TimerState {
+        val addMinuteAction: Notification.Action?
+        val resetAction: Notification.Action?
+
         /**
          * Indicates a running timer
          *
@@ -41,7 +45,8 @@ data class TimerContentModel(
         data class Running(
             val finishTime: Long,
             val pauseIntent: PendingIntent?,
-            val addOneMinuteIntent: PendingIntent?,
+            override val addMinuteAction: Notification.Action?,
+            override val resetAction: Notification.Action?,
         ) : TimerState
 
         /**
@@ -53,7 +58,8 @@ data class TimerContentModel(
         data class Paused(
             val timeRemaining: Duration,
             val resumeIntent: PendingIntent?,
-            val resetIntent: PendingIntent?,
+            override val addMinuteAction: Notification.Action?,
+            override val resetAction: Notification.Action?,
         ) : TimerState
     }
 }

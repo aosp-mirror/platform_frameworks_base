@@ -25,7 +25,7 @@ import android.util.AtomicFile;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
 
-import androidx.test.InstrumentationRegistry;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import org.junit.Test;
 
@@ -54,7 +54,8 @@ public final class AdditionalSubtypeUtilsTest {
 
         // Save & load.
         AtomicFile atomicFile = new AtomicFile(
-                new File(InstrumentationRegistry.getContext().getCacheDir(), "subtypes.xml"));
+                new File(InstrumentationRegistry.getInstrumentation().getContext().getCacheDir(),
+                        "subtypes.xml"));
         AdditionalSubtypeUtils.saveToFile(AdditionalSubtypeMap.of(allSubtypes),
                 InputMethodMap.of(methodMap), atomicFile);
         AdditionalSubtypeMap loadedSubtypes = AdditionalSubtypeUtils.loadFromFile(atomicFile);

@@ -16,10 +16,15 @@
 
 package com.android.settingslib.notification.modes;
 
+import static android.app.AutomaticZenRule.TYPE_SCHEDULE_CALENDAR;
+import static android.app.AutomaticZenRule.TYPE_SCHEDULE_TIME;
+import static android.app.NotificationManager.INTERRUPTION_FILTER_ALARMS;
 import static android.app.NotificationManager.INTERRUPTION_FILTER_ALL;
+import static android.app.NotificationManager.INTERRUPTION_FILTER_NONE;
 import static android.app.NotificationManager.INTERRUPTION_FILTER_PRIORITY;
 import static android.service.notification.SystemZenRules.getTriggerDescriptionForScheduleEvent;
 import static android.service.notification.SystemZenRules.getTriggerDescriptionForScheduleTime;
+import static android.service.notification.ZenModeConfig.tryParseCountdownConditionId;
 import static android.service.notification.ZenModeConfig.tryParseEventConditionId;
 import static android.service.notification.ZenModeConfig.tryParseScheduleConditionId;
 
@@ -32,7 +37,6 @@ import android.annotation.SuppressLint;
 import android.app.AutomaticZenRule;
 import android.app.NotificationManager;
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -46,12 +50,10 @@ import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.android.settingslib.R;
-
 import com.google.common.base.Strings;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.collect.ImmutableList;
 
+import java.util.Comparator;
 import java.util.Objects;
 
 /**
@@ -64,25 +66,50 @@ public class ZenMode implements Parcelable {
 
     private static final String TAG = "ZenMode";
 
-    static final String MANUAL_DND_MODE_ID = "manual_dnd";
+    static final String MANUAL_DND_MODE_ID = ZenModeConfig.MANUAL_RULE_ID;
     static final String TEMP_NEW_MODE_ID = "temp_new_mode";
 
-    // Must match com.android.server.notification.ZenModeHelper#applyCustomPolicy.
-    private static final ZenPolicy POLICY_INTERRUPTION_FILTER_ALARMS =
-            new ZenPolicy.Builder()
-                    .disallowAllSounds()
-                    .allowAlarms(true)
-                    .allowMedia(true)
-                    .allowPriorityChannels(false)
-                    .build();
+    private static final Comparator<Integer> PRIORITIZED_TYPE_COMPARATOR = new Comparator<>() {
 
-    // Must match com.android.server.notification.ZenModeHelper#applyCustomPolicy.
-    private static final ZenPolicy POLICY_INTERRUPTION_FILTER_NONE =
-            new ZenPolicy.Builder()
-                    .disallowAllSounds()
-                    .hideAllVisualEffects()
-                    .allowPriorityChannels(false)
-                    .build();
+        private static final ImmutableList</* @AutomaticZenRule.Type */ Integer>
+                PRIORITIZED_TYPES = ImmutableList.of(
+                        AutomaticZenRule.TYPE_BEDTIME,
+                        AutomaticZenRule.TYPE_DRIVING);
+
+        @Override
+        public int compare(Integer first, Integer second) {
+            if (PRIORITIZED_TYPES.contains(first) && PRIORITIZED_TYPES.contains(second)) {
+                return PRIORITIZED_TYPES.indexOf(first) - PRIORITIZED_TYPES.indexOf(second);
+            } else if (PRIORITIZED_TYPES.contains(first)) {
+                return -1;
+            } else if (PRIORITIZED_TYPES.contains(second)) {
+                return 1;
+            } else {
+                return 0;
+            }
+        }
+    };
+
+    // Manual DND first, Bedtime/Driving, then alphabetically.
+    public static final Comparator<ZenMode> PRIORITIZING_COMPARATOR = Comparator
+            .comparing(ZenMode::isManualDnd).reversed()
+            .thenComparing(ZenMode::getType, PRIORITIZED_TYPE_COMPARATOR)
+            .thenComparing(ZenMode::getName);
+
+    public enum Kind {
+        /** A "normal" mode, created by apps or users via {@code addAutomaticZenRule()}. */
+        NORMAL,
+
+        /** The special, built-in "Do Not Disturb" mode. */
+        MANUAL_DND,
+
+        /**
+         * An implicit mode, automatically created and managed by the system on behalf of apps that
+         * call {@code setInterruptionFilter()} or {@code setNotificationPolicy()} (with some
+         * exceptions).
+         */
+        IMPLICIT,
+    }
 
     public enum Status {
         ENABLED,
@@ -93,8 +120,8 @@ public class ZenMode implements Parcelable {
 
     private final String mId;
     private final AutomaticZenRule mRule;
+    private final Kind mKind;
     private final Status mStatus;
-    private final boolean mIsManualDnd;
 
     /**
      * Initializes a {@link ZenMode}, mainly based on the information from the
@@ -104,9 +131,11 @@ public class ZenMode implements Parcelable {
      * active, or the reason it was disabled) are read from the {@link ZenModeConfig.ZenRule} --
      * see {@link #computeStatus}.
      */
-    public ZenMode(String id, @NonNull AutomaticZenRule rule,
+    ZenMode(String id, @NonNull AutomaticZenRule rule,
             @NonNull ZenModeConfig.ZenRule zenRuleExtraData) {
-        this(id, rule, computeStatus(zenRuleExtraData), false);
+        this(id, rule,
+                ZenModeConfig.isImplicitRuleId(id) ? Kind.IMPLICIT : Kind.NORMAL,
+                computeStatus(zenRuleExtraData));
     }
 
     private static Status computeStatus(@NonNull ZenModeConfig.ZenRule zenRuleExtraData) {
@@ -117,7 +146,7 @@ public class ZenMode implements Parcelable {
                 return Status.ENABLED;
             }
         } else {
-            if (zenRuleExtraData.disabledOrigin == ZenModeConfig.UPDATE_ORIGIN_USER) {
+            if (zenRuleExtraData.disabledOrigin == ZenModeConfig.ORIGIN_USER_IN_SYSTEMUI) {
                 return Status.DISABLED_BY_USER;
             } else {
                 return Status.DISABLED_BY_OTHER; // by APP, SYSTEM, UNKNOWN.
@@ -125,9 +154,12 @@ public class ZenMode implements Parcelable {
         }
     }
 
-    public static ZenMode manualDndMode(AutomaticZenRule manualRule, boolean isActive) {
-        return new ZenMode(MANUAL_DND_MODE_ID, manualRule,
-                isActive ? Status.ENABLED_AND_ACTIVE : Status.ENABLED, true);
+    static ZenMode manualDndMode(AutomaticZenRule manualRule, boolean isActive) {
+        return new ZenMode(
+                MANUAL_DND_MODE_ID,
+                manualRule,
+                Kind.MANUAL_DND,
+                isActive ? Status.ENABLED_AND_ACTIVE : Status.ENABLED);
     }
 
     /**
@@ -146,14 +178,19 @@ public class ZenMode implements Parcelable {
                 .setIconResId(iconResId)
                 .setManualInvocationAllowed(true)
                 .build();
-        return new ZenMode(TEMP_NEW_MODE_ID, rule, Status.ENABLED, false);
+        return new ZenMode(TEMP_NEW_MODE_ID, rule, Kind.NORMAL, Status.ENABLED);
     }
 
-    private ZenMode(String id, @NonNull AutomaticZenRule rule, Status status, boolean isManualDnd) {
+    private ZenMode(String id, @NonNull AutomaticZenRule rule, Kind kind, Status status) {
         mId = id;
         mRule = rule;
+        mKind = kind;
         mStatus = status;
-        mIsManualDnd = isManualDnd;
+    }
+
+    /** Creates a deep copy of this object. */
+    public ZenMode copy() {
+        return new ZenMode(mId, new AutomaticZenRule.Builder(mRule).build(), mKind, mStatus);
     }
 
     @NonNull
@@ -181,20 +218,81 @@ public class ZenMode implements Parcelable {
         return mRule.getType();
     }
 
+    /** Returns the trigger description of the mode. */
     @Nullable
     public String getTriggerDescription() {
         return mRule.getTriggerDescription();
     }
 
-    @NonNull
-    public ListenableFuture<Drawable> getIcon(@NonNull Context context,
-            @NonNull ZenIconLoader iconLoader) {
-        if (mIsManualDnd) {
-            return Futures.immediateFuture(requireNonNull(
-                    context.getDrawable(R.drawable.ic_do_not_disturb_on_24dp)));
+    /**
+     * Returns a "dynamic" trigger description. For some modes (such as manual Do Not Disturb)
+     * when activated, we know when (and if) the mode is expected to end on its own; this dynamic
+     * description reflects that. In other cases, returns {@link #getTriggerDescription}.
+     */
+    @Nullable
+    public String getDynamicDescription(Context context) {
+        if (isManualDnd() && isActive()) {
+            long countdownEndTime = tryParseCountdownConditionId(mRule.getConditionId());
+            if (countdownEndTime > 0) {
+                CharSequence formattedTime = ZenModeConfig.getFormattedTime(context,
+                        countdownEndTime, ZenModeConfig.isToday(countdownEndTime),
+                        context.getUserId());
+                return context.getString(com.android.internal.R.string.zen_mode_until,
+                        formattedTime);
+            }
         }
+        // TODO: b/333527800 - For TYPE_SCHEDULE_TIME rules we could do the same; however
+        //   according to the snoozing discussions the mode may or may not end at the scheduled
+        //   time if manually activated. When we resolve that point, we could calculate end time
+        //   for these modes as well.
 
-        return iconLoader.getIcon(context, mRule);
+        return getTriggerDescription();
+    }
+
+    /**
+     * Returns the {@link ZenIcon.Key} corresponding to the icon resource for this mode. This can be
+     * either app-provided (via {@link AutomaticZenRule#setIconResId}, user-chosen (via the icon
+     * picker in Settings), or a default icon based on the mode {@link Kind} and {@link #getType}.
+     */
+    @NonNull
+    public ZenIcon.Key getIconKey() {
+        if (isManualDnd()) {
+            return ZenIconKeys.MANUAL_DND;
+        }
+        if (mRule.getIconResId() != 0) {
+            if (isSystemOwned()) {
+                // System-owned rules can only have system icons.
+                return ZenIcon.Key.forSystemResource(mRule.getIconResId());
+            } else {
+                // Technically, the icon of an app-provided rule could be a system icon if the
+                // user chose one with the picker. However, we cannot know for sure.
+                return new ZenIcon.Key(mRule.getPackageName(), mRule.getIconResId());
+            }
+        } else {
+            // Using a default icon (which is always a system icon).
+            if (mKind == Kind.IMPLICIT) {
+                return ZenIconKeys.IMPLICIT_MODE_DEFAULT;
+            } else {
+                return ZenIconKeys.forType(getType());
+            }
+        }
+    }
+
+    /** Returns the interruption filter of the mode. */
+    @NotificationManager.InterruptionFilter
+    public int getInterruptionFilter() {
+        return mRule.getInterruptionFilter();
+    }
+
+    /**
+     * Sets the interruption filter of the mode. This is valid for {@link AutomaticZenRule}-backed
+     * modes (and not manual DND).
+     */
+    public void setInterruptionFilter(@NotificationManager.InterruptionFilter int filter) {
+        if (isManualDnd() || !canEditPolicy()) {
+            throw new IllegalStateException("Cannot update interruption filter for mode " + this);
+        }
+        mRule.setInterruptionFilter(filter);
     }
 
     @NonNull
@@ -205,10 +303,12 @@ public class ZenMode implements Parcelable {
                 return requireNonNull(mRule.getZenPolicy());
 
             case NotificationManager.INTERRUPTION_FILTER_ALARMS:
-                return POLICY_INTERRUPTION_FILTER_ALARMS;
+                return new ZenPolicy.Builder(ZenModeConfig.getDefaultZenPolicy()).build()
+                        .overwrittenWith(ZenPolicy.getBasePolicyInterruptionFilterAlarms());
 
             case NotificationManager.INTERRUPTION_FILTER_NONE:
-                return POLICY_INTERRUPTION_FILTER_NONE;
+                return new ZenPolicy.Builder(ZenModeConfig.getDefaultZenPolicy()).build()
+                        .overwrittenWith(ZenPolicy.getBasePolicyInterruptionFilterNone());
 
             case NotificationManager.INTERRUPTION_FILTER_UNKNOWN:
             default:
@@ -225,6 +325,10 @@ public class ZenMode implements Parcelable {
      */
     @SuppressLint("WrongConstant")
     public void setPolicy(@NonNull ZenPolicy policy) {
+        if (!canEditPolicy()) {
+            throw new IllegalStateException("Cannot update ZenPolicy for mode " + this);
+        }
+
         ZenPolicy currentPolicy = getPolicy();
         if (currentPolicy.equals(policy)) {
             return;
@@ -241,11 +345,26 @@ public class ZenMode implements Parcelable {
         mRule.setZenPolicy(policy);
     }
 
+    /**
+     * Returns the {@link ZenDeviceEffects} of the mode.
+     *
+     * <p>This is never {@code null}; if the backing AutomaticZenRule doesn't have effects set then
+     * a default (empty) effects set is returned.
+     */
     @NonNull
     public ZenDeviceEffects getDeviceEffects() {
         return mRule.getDeviceEffects() != null
                 ? mRule.getDeviceEffects()
                 : new ZenDeviceEffects.Builder().build();
+    }
+
+    /** Sets the {@link ZenDeviceEffects} of the mode. */
+    public void setDeviceEffects(@NonNull ZenDeviceEffects effects) {
+        checkNotNull(effects);
+        if (!canEditPolicy()) {
+            throw new IllegalStateException("Cannot update device effects for mode " + this);
+        }
+        mRule.setDeviceEffects(effects);
     }
 
     public void setCustomModeConditionId(Context context, Uri conditionId) {
@@ -286,12 +405,20 @@ public class ZenMode implements Parcelable {
                 mRule, oldCondition, conditionId));
     }
 
-    public boolean canEditName() {
+    public boolean canEditNameAndIcon() {
         return !isManualDnd();
     }
 
-    public boolean canEditIcon() {
-        return !isManualDnd();
+    /**
+     * Whether the mode has an editable policy. Calling {@link #setPolicy},
+     * {@link #setDeviceEffects}, or {@link #setInterruptionFilter} is not valid for modes with a
+     * read-only policy.
+     */
+    public boolean canEditPolicy() {
+        // Cannot edit the policy of a temporarily active non-PRIORITY DND mode.
+        // Note that it's fine to edit the policy of an *AutomaticZenRule* with non-PRIORITY filter;
+        // the filter will we set to PRIORITY if you do.
+        return !isManualDndWithSpecialFilter();
     }
 
     public boolean canBeDeleted() {
@@ -299,7 +426,40 @@ public class ZenMode implements Parcelable {
     }
 
     public boolean isManualDnd() {
-        return mIsManualDnd;
+        return mKind == Kind.MANUAL_DND;
+    }
+
+    private boolean isManualDndWithSpecialFilter() {
+        return isManualDnd()
+                && (mRule.getInterruptionFilter() == INTERRUPTION_FILTER_ALARMS
+                || mRule.getInterruptionFilter() == INTERRUPTION_FILTER_NONE);
+    }
+
+    /**
+     * A <em>custom manual</em> mode is a mode created by the user, and not yet assigned an
+     * automatic trigger condition (neither time schedule nor a calendar).
+     */
+    public boolean isCustomManual() {
+        return isSystemOwned()
+                && getType() != TYPE_SCHEDULE_TIME
+                && getType() != TYPE_SCHEDULE_CALENDAR
+                && !isManualDnd();
+    }
+
+    public boolean isEnabled() {
+        return mRule.isEnabled();
+    }
+
+    /**
+     * Enables or disables the mode.
+     *
+     * <p>The DND mode cannot be disabled; trying to do so will fail.
+     */
+    public void setEnabled(boolean enabled) {
+        if (isManualDnd()) {
+            throw new IllegalStateException("Cannot update enabled for manual DND mode " + this);
+        }
+        mRule.setEnabled(enabled);
     }
 
     public boolean isActive() {
@@ -315,18 +475,18 @@ public class ZenMode implements Parcelable {
         return obj instanceof ZenMode other
                 && mId.equals(other.mId)
                 && mRule.equals(other.mRule)
-                && mStatus.equals(other.mStatus)
-                && mIsManualDnd == other.mIsManualDnd;
+                && mKind.equals(other.mKind)
+                && mStatus.equals(other.mStatus);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mId, mRule, mStatus, mIsManualDnd);
+        return Objects.hash(mId, mRule, mKind, mStatus);
     }
 
     @Override
     public String toString() {
-        return mId + " (" + mStatus + ") -> " + mRule;
+        return mId + " (" + mKind + ", " + mStatus + ") -> " + mRule;
     }
 
     @Override
@@ -338,8 +498,8 @@ public class ZenMode implements Parcelable {
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString(mId);
         dest.writeParcelable(mRule, 0);
+        dest.writeString(mKind.name());
         dest.writeString(mStatus.name());
-        dest.writeBoolean(mIsManualDnd);
     }
 
     public static final Creator<ZenMode> CREATOR = new Creator<ZenMode>() {
@@ -349,8 +509,8 @@ public class ZenMode implements Parcelable {
                     in.readString(),
                     checkNotNull(in.readParcelable(AutomaticZenRule.class.getClassLoader(),
                             AutomaticZenRule.class)),
-                    Status.valueOf(in.readString()),
-                    in.readBoolean());
+                    Kind.valueOf(in.readString()),
+                    Status.valueOf(in.readString()));
         }
 
         @Override

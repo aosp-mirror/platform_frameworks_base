@@ -32,8 +32,6 @@ import java.util.function.Consumer
 class ScrollViewFields {
     /** Used to produce the clipping path */
     var scrimClippingShape: ShadeScrimShape? = null
-    /** Y coordinate in view pixels of the top of the HUN */
-    var headsUpTop: Float = 0f
     /** Whether the notifications are scrolled all the way to the top (i.e. when freshly opened) */
     var isScrolledToTop: Boolean = true
 
@@ -55,6 +53,11 @@ class ScrollViewFields {
      */
     var currentGestureOverscrollConsumer: Consumer<Boolean>? = null
     /**
+     * When a gesture is on open notification guts, which means scene container should not close the
+     * guts off of this gesture, we can notify the placeholder through here.
+     */
+    var currentGestureInGutsConsumer: Consumer<Boolean>? = null
+    /**
      * Any time the heads up height is recalculated, it should be updated here to be used by the
      * placeholder
      */
@@ -68,13 +71,16 @@ class ScrollViewFields {
     fun sendCurrentGestureOverscroll(isCurrentGestureOverscroll: Boolean) =
         currentGestureOverscrollConsumer?.accept(isCurrentGestureOverscroll)
 
+    /** send [isCurrentGestureInGuts] to the [currentGestureInGutsConsumer], if present. */
+    fun sendCurrentGestureInGuts(isCurrentGestureInGuts: Boolean) =
+        currentGestureInGutsConsumer?.accept(isCurrentGestureInGuts)
+
     /** send the [headsUpHeight] to the [headsUpHeightConsumer], if present. */
     fun sendHeadsUpHeight(headsUpHeight: Float) = headsUpHeightConsumer?.accept(headsUpHeight)
 
     fun dump(pw: IndentingPrintWriter) {
         pw.printSection("StackViewStates") {
             pw.println("scrimClippingShape", scrimClippingShape)
-            pw.println("headsUpTop", headsUpTop)
             pw.println("isScrolledToTop", isScrolledToTop)
         }
     }

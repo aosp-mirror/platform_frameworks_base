@@ -85,6 +85,23 @@ class DragDetectorTest {
     }
 
     @Test
+    fun testNoMove_mouse_passesDownAndUp() {
+        assertTrue(dragDetector.onMotionEvent(
+            createMotionEvent(MotionEvent.ACTION_DOWN, isTouch = false)))
+        verify(eventHandler).handleMotionEvent(any(), argThat {
+            return@argThat it.action == MotionEvent.ACTION_DOWN && it.x == X && it.y == Y &&
+                    it.source == InputDevice.SOURCE_MOUSE
+        })
+
+        assertTrue(dragDetector.onMotionEvent(
+            createMotionEvent(MotionEvent.ACTION_UP, isTouch = false)))
+        verify(eventHandler).handleMotionEvent(any(), argThat {
+            return@argThat it.action == MotionEvent.ACTION_UP && it.x == X && it.y == Y &&
+                    it.source == InputDevice.SOURCE_MOUSE
+        })
+    }
+
+    @Test
     fun testMoveInSlop_touch_passesDownAndUp() {
         `when`(eventHandler.handleMotionEvent(any(), argThat {
             return@argThat it.action == MotionEvent.ACTION_DOWN
@@ -162,6 +179,52 @@ class DragDetectorTest {
         verify(eventHandler).handleMotionEvent(any(), argThat {
             return@argThat it.action == MotionEvent.ACTION_UP && it.x == newX && it.y == Y &&
                     it.source == InputDevice.SOURCE_TOUCHSCREEN
+        })
+    }
+
+    @Test
+    fun testDownMoveDown_shouldIgnoreTheSecondDownMotion() {
+        assertTrue(dragDetector.onMotionEvent(createMotionEvent(MotionEvent.ACTION_DOWN)))
+        verify(eventHandler).handleMotionEvent(any(), argThat {
+            return@argThat it.action == MotionEvent.ACTION_DOWN && it.x == X && it.y == Y &&
+                    it.source == InputDevice.SOURCE_TOUCHSCREEN
+        })
+
+        val newX = X + SLOP + 1
+        assertTrue(dragDetector.onMotionEvent(createMotionEvent(MotionEvent.ACTION_MOVE, newX, Y)))
+        verify(eventHandler).handleMotionEvent(any(), argThat {
+            return@argThat it.action == MotionEvent.ACTION_MOVE && it.x == newX && it.y == Y &&
+                    it.source == InputDevice.SOURCE_TOUCHSCREEN
+        })
+
+        assertTrue(dragDetector.onMotionEvent(createMotionEvent(MotionEvent.ACTION_DOWN)))
+        verify(eventHandler).handleMotionEvent(any(), argThat {
+            return@argThat it.action == MotionEvent.ACTION_MOVE && it.x == newX && it.y == Y &&
+                    it.source == InputDevice.SOURCE_TOUCHSCREEN
+        })
+    }
+
+    @Test
+    fun testDownMouseMoveDownTouch_shouldIgnoreTheTouchDownMotion() {
+        assertTrue(dragDetector.onMotionEvent(
+            createMotionEvent(MotionEvent.ACTION_DOWN, isTouch = false)))
+        verify(eventHandler).handleMotionEvent(any(), argThat {
+            return@argThat it.action == MotionEvent.ACTION_DOWN && it.x == X && it.y == Y &&
+                    it.source == InputDevice.SOURCE_MOUSE
+        })
+
+        val newX = X + SLOP + 1
+        assertTrue(dragDetector.onMotionEvent(
+            createMotionEvent(MotionEvent.ACTION_MOVE, newX, Y, isTouch = false)))
+        verify(eventHandler).handleMotionEvent(any(), argThat {
+            return@argThat it.action == MotionEvent.ACTION_MOVE && it.x == newX && it.y == Y &&
+                    it.source == InputDevice.SOURCE_MOUSE
+        })
+
+        assertTrue(dragDetector.onMotionEvent(createMotionEvent(MotionEvent.ACTION_DOWN)))
+        verify(eventHandler).handleMotionEvent(any(), argThat {
+            return@argThat it.action == MotionEvent.ACTION_MOVE && it.x == newX && it.y == Y &&
+                    it.source == InputDevice.SOURCE_MOUSE
         })
     }
 

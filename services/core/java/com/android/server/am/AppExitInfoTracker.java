@@ -353,8 +353,8 @@ public final class AppExitInfoTracker {
     }
 
     /** Called when there is a low memory kill */
-    void scheduleNoteLmkdProcKilled(final int pid, final int uid) {
-        mKillHandler.obtainMessage(KillHandler.MSG_LMKD_PROC_KILLED, pid, uid)
+    void scheduleNoteLmkdProcKilled(final int pid, final int uid, final int rssKb) {
+        mKillHandler.obtainMessage(KillHandler.MSG_LMKD_PROC_KILLED, pid, uid, Long.valueOf(rssKb))
                 .sendToTarget();
     }
 
@@ -401,9 +401,9 @@ public final class AppExitInfoTracker {
 
             if (lmkd != null) {
                 updateExistingExitInfoRecordLocked(info, null,
-                        ApplicationExitInfo.REASON_LOW_MEMORY);
+                        ApplicationExitInfo.REASON_LOW_MEMORY, (Long) lmkd.second);
             } else if (zygote != null) {
-                updateExistingExitInfoRecordLocked(info, (Integer) zygote.second, null);
+                updateExistingExitInfoRecordLocked(info, (Integer) zygote.second, null, null);
             } else {
                 scheduleLogToStatsdLocked(info, false);
             }
@@ -486,7 +486,7 @@ public final class AppExitInfoTracker {
      */
     @GuardedBy("mLock")
     private void updateExistingExitInfoRecordLocked(ApplicationExitInfo info,
-            Integer status, Integer reason) {
+            Integer status, Integer reason, Long rssKb) {
         if (info == null || !isFresh(info.getTimestamp())) {
             // if the record is way outdated, don't update it then (because of potential pid reuse)
             return;
@@ -513,6 +513,9 @@ public final class AppExitInfoTracker {
                 immediateLog = true;
             }
         }
+        if (rssKb != null) {
+            info.setRss(rssKb.longValue());
+        }
         scheduleLogToStatsdLocked(info, immediateLog);
     }
 
@@ -523,7 +526,7 @@ public final class AppExitInfoTracker {
      */
     @GuardedBy("mLock")
     private boolean updateExitInfoIfNecessaryLocked(
-            int pid, int uid, Integer status, Integer reason) {
+            int pid, int uid, Integer status, Integer reason, Long rssKb) {
         Integer k = mIsolatedUidRecords.getUidByIsolatedUid(uid);
         if (k != null) {
             uid = k;
@@ -552,7 +555,7 @@ public final class AppExitInfoTracker {
                 // always be the first one we se as `getExitInfosLocked()` returns them sorted
                 // by most-recent-first.
                 isModified[0] = true;
-                updateExistingExitInfoRecordLocked(info, status, reason);
+                updateExistingExitInfoRecordLocked(info, status, reason, rssKb);
                 return FOREACH_ACTION_STOP_ITERATION;
             }
             return FOREACH_ACTION_NONE;
@@ -1668,11 +1671,11 @@ public final class AppExitInfoTracker {
             switch (msg.what) {
                 case MSG_LMKD_PROC_KILLED:
                     mAppExitInfoSourceLmkd.onProcDied(msg.arg1 /* pid */, msg.arg2 /* uid */,
-                            null /* status */);
+                            null /* status */, (Long) msg.obj /* rss_kb */);
                     break;
                 case MSG_CHILD_PROC_DIED:
                     mAppExitInfoSourceZygote.onProcDied(msg.arg1 /* pid */, msg.arg2 /* uid */,
-                            (Integer) msg.obj /* status */);
+                            (Integer) msg.obj /* status */, null /* rss_kb */);
                     break;
                 case MSG_PROC_DIED: {
                     ApplicationExitInfo raw = (ApplicationExitInfo) msg.obj;
@@ -1833,7 +1836,7 @@ public final class AppExitInfoTracker {
             }
         }
 
-        void onProcDied(final int pid, final int uid, final Integer status) {
+        void onProcDied(final int pid, final int uid, final Integer status, final Long rssKb) {
             if (DEBUG_PROCESSES) {
                 Slog.i(TAG, mTag + ": proc died: pid=" + pid + " uid=" + uid
                         + ", status=" + status);
@@ -1846,8 +1849,12 @@ public final class AppExitInfoTracker {
             // Unlikely but possible: the record has been created
             // Let's update it if we could find a ApplicationExitInfo record
             synchronized (mLock) {
-                if (!updateExitInfoIfNecessaryLocked(pid, uid, status, mPresetReason)) {
-                    addLocked(pid, uid, status);
+                if (!updateExitInfoIfNecessaryLocked(pid, uid, status, mPresetReason, rssKb)) {
+                    if (rssKb != null) {
+                        addLocked(pid, uid, rssKb);     // lmkd
+                    } else {
+                        addLocked(pid, uid, status);    // zygote
+                    }
                 }
 
                 // Notify any interesed party regarding the lmkd kills

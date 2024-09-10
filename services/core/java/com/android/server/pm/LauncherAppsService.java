@@ -71,6 +71,7 @@ import android.content.pm.IPackageInstallerCallback;
 import android.content.pm.IPackageManager;
 import android.content.pm.IShortcutChangeCallback;
 import android.content.pm.IncrementalStatesInfo;
+import android.content.pm.InstallSourceInfo;
 import android.content.pm.LauncherActivityInfoInternal;
 import android.content.pm.LauncherApps;
 import android.content.pm.LauncherApps.ShortcutQuery;
@@ -1856,9 +1857,11 @@ public class LauncherAppsService extends SystemService {
         private String getInstallerPackage(@NonNull String packageName, int callingUserId) {
             String installerPackageName = null;
             try {
-                installerPackageName =
-                        mIPM.getInstallSourceInfo(packageName, callingUserId)
-                                .getInstallingPackageName();
+                InstallSourceInfo info = mIPM.getInstallSourceInfo(packageName, callingUserId);
+                if (info == null) {
+                    return installerPackageName;
+                }
+                installerPackageName = info.getInstallingPackageName();
             } catch (RemoteException re) {
                 Slog.e(TAG, "Couldn't find installer for " + packageName, re);
             }

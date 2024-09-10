@@ -38,7 +38,6 @@ import android.util.Slog;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
-import android.view.SurfaceSession;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.window.ScreenCapture;
@@ -47,7 +46,7 @@ import android.window.TransitionInfo;
 import com.android.internal.R;
 import com.android.internal.policy.TransitionAnimation;
 import com.android.wm.shell.common.ShellExecutor;
-import com.android.wm.shell.common.TransactionPool;
+import com.android.wm.shell.shared.TransactionPool;
 
 import java.util.ArrayList;
 
@@ -112,7 +111,7 @@ class ScreenRotationAnimation {
     /** Intensity of light/whiteness of the layout after rotation occurs. */
     private float mEndLuma;
 
-    ScreenRotationAnimation(Context context, SurfaceSession session, TransactionPool pool,
+    ScreenRotationAnimation(Context context, TransactionPool pool,
             Transaction t, TransitionInfo.Change change, SurfaceControl rootLeash, int animHint) {
         mContext = context;
         mTransactionPool = pool;
@@ -126,7 +125,7 @@ class ScreenRotationAnimation {
         mStartRotation = change.getStartRotation();
         mEndRotation = change.getEndRotation();
 
-        mAnimLeash = new SurfaceControl.Builder(session)
+        mAnimLeash = new SurfaceControl.Builder()
                 .setParent(rootLeash)
                 .setEffectLayer()
                 .setCallsite("ShellRotationAnimation")
@@ -153,7 +152,7 @@ class ScreenRotationAnimation {
                     return;
                 }
 
-                mScreenshotLayer = new SurfaceControl.Builder(session)
+                mScreenshotLayer = new SurfaceControl.Builder()
                         .setParent(mAnimLeash)
                         .setBLASTLayer()
                         .setSecure(screenshotBuffer.containsSecureLayers())
@@ -178,7 +177,7 @@ class ScreenRotationAnimation {
             t.setCrop(mSurfaceControl, new Rect(0, 0, mEndWidth, mEndHeight));
 
             if (!isCustomRotate()) {
-                mBackColorSurface = new SurfaceControl.Builder(session)
+                mBackColorSurface = new SurfaceControl.Builder()
                         .setParent(rootLeash)
                         .setColorLayer()
                         .setOpaque(true)
@@ -325,21 +324,21 @@ class ScreenRotationAnimation {
             @NonNull Runnable finishCallback, @NonNull ShellExecutor mainExecutor) {
         buildSurfaceAnimation(animations, mRotateEnterAnimation, mSurfaceControl, finishCallback,
                 mTransactionPool, mainExecutor, null /* position */, 0 /* cornerRadius */,
-                null /* clipRect */);
+                null /* clipRect */, false /* isActivity */);
     }
 
     private void startScreenshotRotationAnimation(@NonNull ArrayList<Animator> animations,
             @NonNull Runnable finishCallback, @NonNull ShellExecutor mainExecutor) {
         buildSurfaceAnimation(animations, mRotateExitAnimation, mAnimLeash, finishCallback,
                 mTransactionPool, mainExecutor, null /* position */, 0 /* cornerRadius */,
-                null /* clipRect */);
+                null /* clipRect */, false /* isActivity */);
     }
 
     private void buildScreenshotAlphaAnimation(@NonNull ArrayList<Animator> animations,
             @NonNull Runnable finishCallback, @NonNull ShellExecutor mainExecutor) {
         buildSurfaceAnimation(animations, mRotateAlphaAnimation, mAnimLeash, finishCallback,
                 mTransactionPool, mainExecutor, null /* position */, 0 /* cornerRadius */,
-                null /* clipRect */);
+                null /* clipRect */, false /* isActivity */);
     }
 
     private void startColorAnimation(float animationScale, @NonNull ShellExecutor animExecutor) {

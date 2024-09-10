@@ -34,11 +34,11 @@ public final class WebViewUpdateService {
      */
     public static WebViewProviderInfo[] getAllWebViewPackages() {
         if (Flags.updateServiceIpcWrapper()) {
-            WebViewUpdateManager manager = WebViewUpdateManager.getInstance();
-            if (manager == null) {
+            if (WebViewFactory.isWebViewSupported()) {
+                return WebViewUpdateManager.getInstance().getAllWebViewPackages();
+            } else {
                 return new WebViewProviderInfo[0];
             }
-            return manager.getAllWebViewPackages();
         } else {
             IWebViewUpdateService service = getUpdateService();
             if (service == null) {
@@ -57,11 +57,11 @@ public final class WebViewUpdateService {
      */
     public static WebViewProviderInfo[] getValidWebViewPackages() {
         if (Flags.updateServiceIpcWrapper()) {
-            WebViewUpdateManager manager = WebViewUpdateManager.getInstance();
-            if (manager == null) {
+            if (WebViewFactory.isWebViewSupported()) {
+                return WebViewUpdateManager.getInstance().getValidWebViewPackages();
+            } else {
                 return new WebViewProviderInfo[0];
             }
-            return manager.getValidWebViewPackages();
         } else {
             IWebViewUpdateService service = getUpdateService();
             if (service == null) {
@@ -80,11 +80,11 @@ public final class WebViewUpdateService {
      */
     public static String getCurrentWebViewPackageName() {
         if (Flags.updateServiceIpcWrapper()) {
-            WebViewUpdateManager manager = WebViewUpdateManager.getInstance();
-            if (manager == null) {
+            if (WebViewFactory.isWebViewSupported()) {
+                return WebViewUpdateManager.getInstance().getCurrentWebViewPackageName();
+            } else {
                 return null;
             }
-            return manager.getCurrentWebViewPackageName();
         } else {
             IWebViewUpdateService service = getUpdateService();
             if (service == null) {

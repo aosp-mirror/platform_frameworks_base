@@ -1972,10 +1972,10 @@ public final class Settings {
             "android.provider.extra.NOTIFICATION_LISTENER_COMPONENT_NAME";
 
     /**
-     * Activity Action: Show Do Not Disturb access settings.
+     * Activity Action: Show Notification Policy access settings.
      * <p>
-     * Users can grant and deny access to Do Not Disturb configuration from here. Managed
-     * profiles cannot grant Do Not Disturb access.
+     * Users can grant and deny access to Notification Policy (DND / Modes) configuration
+     * from here. Managed profiles cannot grant Notification Policy access.
      * See {@link android.app.NotificationManager#isNotificationPolicyAccessGranted()} for more
      * details.
      * <p>
@@ -2285,6 +2285,26 @@ public final class Settings {
     @SystemApi
     public static final String ACTION_MANAGE_MORE_DEFAULT_APPS_SETTINGS =
             "android.settings.MANAGE_MORE_DEFAULT_APPS_SETTINGS";
+
+    /**
+     * Activity Action: Show Other NFC services settings.
+     * <p>
+     * If a Settings activity handles this intent action, an "Other NFC services" entry will be
+     * shown in the Default payment app settings, and clicking it will launch that activity.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     *
+     * @hide
+     */
+    @FlaggedApi(android.nfc.Flags.FLAG_NFC_ACTION_MANAGE_SERVICES_SETTINGS)
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    @SystemApi
+    public static final String ACTION_MANAGE_OTHER_NFC_SERVICES_SETTINGS =
+            "android.settings.MANAGE_OTHER_NFC_SERVICES_SETTINGS";
 
     /**
      * Activity Action: Show app screen size list settings for user to override app aspect
@@ -2630,7 +2650,7 @@ public final class Settings {
     /**
      * Activity Action: Show screen that let user select its Autofill Service.
      * <p>
-     * Input: Intent's data URI set with an application name, using the
+     * Input: Intent's data URI set with an application package name, using the
      * "package" schema (like "package:com.my.app").
      *
      * <p>
@@ -2650,7 +2670,7 @@ public final class Settings {
     /**
      * Activity Action: Show screen that let user enable a Credential Manager provider.
      * <p>
-     * Input: Intent's data URI set with an application name, using the
+     * Input: Intent's data URI set with an application package name, using the
      * "package" schema (like "package:com.my.app").
      *
      * <p>
@@ -5130,13 +5150,19 @@ public final class Settings {
         public static final String SCREEN_OFF_TIMEOUT = "screen_off_timeout";
 
         /**
-         * The screen backlight brightness between 0 and 255.
+         * The screen backlight brightness between 1 (minimum) and 255 (maximum).
+         *
+         * Use {@link android.view.WindowManager.LayoutParams#screenBrightness} to set the screen
+         * brightness instead.
          */
         @Readable
         public static final String SCREEN_BRIGHTNESS = "screen_brightness";
 
         /**
-         * Control whether to enable automatic brightness mode.
+         * Controls whether to enable automatic brightness mode. Value can be set to
+         * {@link #SCREEN_BRIGHTNESS_MODE_MANUAL} or {@link #SCREEN_BRIGHTNESS_MODE_AUTOMATIC}.
+         * If {@link #SCREEN_BRIGHTNESS_MODE_AUTOMATIC} is set, the system may change
+         * {@link #SCREEN_BRIGHTNESS} automatically.
          */
         @Readable
         public static final String SCREEN_BRIGHTNESS_MODE = "screen_brightness_mode";
@@ -5910,6 +5936,14 @@ public final class Settings {
          * @hide
          */
         public static final String SHOW_KEY_PRESSES = "show_key_presses";
+
+        /**
+         * Show touchpad input visualization on screen.
+         * 0 = no
+         * 1 = yes
+         * @hide
+         */
+        public static final String TOUCHPAD_VISUALIZER = "touchpad_visualizer";
 
         /**
          * Show rotary input dispatched to focused windows on the screen.
@@ -11075,6 +11109,13 @@ public final class Settings {
         public static final String MANDATORY_BIOMETRICS = "mandatory_biometrics";
 
         /**
+         * Whether or not requirements for mandatory biometrics is satisfied.
+         * @hide
+         */
+        public static final String MANDATORY_BIOMETRICS_REQUIREMENTS_SATISFIED =
+                "mandatory_biometrics_requirements_satisfied";
+
+        /**
          * Whether or not active unlock triggers on wake.
          * @hide
          */
@@ -12324,6 +12365,18 @@ public final class Settings {
                 "accessibility_force_invert_color_enabled";
 
         /**
+         * Whether to enable mouse keys for Physical Keyboard accessibility.
+         *
+         * If set to true, key presses (of the mouse keys) on
+         * physical keyboard will control mouse pointer on the display.
+         *
+         * @hide
+         */
+        @Readable
+        public static final String ACCESSIBILITY_MOUSE_KEYS_ENABLED =
+                "accessibility_mouse_keys_enabled";
+
+        /**
          * Whether the Adaptive connectivity option is enabled.
          *
          * @hide
@@ -12516,6 +12569,19 @@ public final class Settings {
                 "launcher_taskbar_education_showing";
 
         /**
+         * Whether any Compat UI Education is currently showing.
+         *
+         * <p>1 if true, 0 or unset otherwise.
+         *
+         * <p>This setting is used to inform other components that the Compat UI Education is
+         * currently showing, which can prevent them from showing something else to the user.
+         *
+         * @hide
+         */
+        public static final String COMPAT_UI_EDUCATION_SHOWING =
+                "compat_ui_education_showing";
+
+        /**
          * Whether or not adaptive charging feature is enabled by user.
          * Type: int (0 for false, 1 for true)
          * Default: 1
@@ -12539,6 +12605,14 @@ public final class Settings {
          */
         public static final String CONTEXTUAL_SCREEN_TIMEOUT_ENABLED =
                 "contextual_screen_timeout_enabled";
+
+        /**
+         * Whether hinge angle lidevent is enabled.
+         *
+         * @hide
+         */
+        public static final String HINGE_ANGLE_LIDEVENT_ENABLED =
+                "hinge_angle_lidevent_enabled";
 
         /**
          * Whether lockscreen weather is enabled.
@@ -14885,6 +14959,7 @@ public final class Settings {
          *
          * @hide
          */
+        @Readable
         public static final String MUTE_ALARM_STREAM_WITH_RINGER_MODE =
                 "mute_alarm_stream_with_ringer_mode";
 
@@ -15793,7 +15868,7 @@ public final class Settings {
          * The following keys are supported:
          *
          * <pre>
-         * screen_brightness_array         (int[])
+         * screen_brightness_array         (int[], values in range [1, 255])
          * dimming_scrim_array             (int[])
          * prox_screen_off_delay           (long)
          * prox_cooldown_trigger           (long)
@@ -19597,6 +19672,8 @@ public final class Settings {
             public static final int PAIRED_DEVICE_OS_TYPE_ANDROID = 1;
             /** @hide */
             public static final int PAIRED_DEVICE_OS_TYPE_IOS = 2;
+            /** @hide */
+            public static final int PAIRED_DEVICE_OS_TYPE_NONE = 3;
 
             /**
              * The bluetooth settings selected BLE role for the companion.
@@ -20123,6 +20200,36 @@ public final class Settings {
              */
             public static final int PHONE_SWITCHING_STATUS_IN_PROGRESS_MIGRATION_SUCCESS = 11;
 
+            /**
+             * Phone switching request source
+             * @hide
+             */
+            public static final String PHONE_SWITCHING_REQUEST_SOURCE =
+                    "phone_switching_request_source";
+
+            /**
+             * No phone switching request source
+             * @hide
+             */
+            public static final int PHONE_SWITCHING_REQUEST_SOURCE_NONE = 0;
+
+            /**
+             * Phone switching triggered by watch
+             * @hide
+             */
+            public static final int PHONE_SWITCHING_REQUEST_SOURCE_WATCH = 1;
+
+            /**
+             * Phone switching triggered by companion, user confirmation required
+             * @hide
+             */
+            public static final int PHONE_SWITCHING_REQUEST_SOURCE_COMPANION_USER_CONFIRMATION = 2;
+
+            /**
+             * Phone switching triggered by companion, user confirmation not required
+             * @hide
+             */
+            public static final int PHONE_SWITCHING_REQUEST_SOURCE_COMPANION = 3;
 
             /**
              * Whether the device has enabled the feature to reduce motion and animation
@@ -20168,14 +20275,6 @@ public final class Settings {
              * Device is set in restricted mode.
              */
             public static final int TETHERED_CONFIG_RESTRICTED = 3;
-
-            /**
-             * Whether phone switching is supported.
-             *
-             * (0 = false, 1 = true)
-             * @hide
-             */
-            public static final String PHONE_SWITCHING_SUPPORTED = "phone_switching_supported";
 
             /**
              * Setting indicating the name of the Wear OS package that hosts the Media Controls UI.

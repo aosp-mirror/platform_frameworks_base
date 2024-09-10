@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2024 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/categories"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="@dimen/qqs_layout_margin_top"
+        android:textAppearance="@style/TextAppearance.Dialog.Body.Message" />
+
+    <TextView
+        android:id="@+id/cpu_buffer_size"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="@dimen/qqs_layout_margin_top"
+        android:textAppearance="@style/TextAppearance.Dialog.Body.Message" />
+
+    <!-- Attach to Bugreport Switch -->
+    <LinearLayout
+        android:id="@+id/attach_to_bugreport_switch_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/qqs_layout_margin_top"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/attach_to_bugreport_switch_label"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:minHeight="@dimen/screenrecord_option_icon_size"
+            android:layout_weight="1"
+            android:layout_gravity="fill_vertical"
+            android:gravity="start"
+            android:textAppearance="@style/TextAppearance.Dialog.Body.Message"
+            android:importantForAccessibility="no" />
+
+        <Switch
+            android:id="@+id/attach_to_bugreport_switch"
+            android:layout_width="wrap_content"
+            android:minHeight="@dimen/screenrecord_option_icon_size"
+            android:layout_height="wrap_content"
+            android:gravity="end"
+            android:layout_gravity="fill_vertical"
+            android:layout_weight="0" />
+    </LinearLayout>
+
+    <!-- Winscope Switch -->
+    <LinearLayout
+        android:id="@+id/winscope_switch_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/qqs_layout_margin_top"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/winscope_switch_label"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:minHeight="@dimen/screenrecord_option_icon_size"
+            android:layout_weight="1"
+            android:layout_gravity="fill_vertical"
+            android:gravity="start"
+            android:textAppearance="@style/TextAppearance.Dialog.Body.Message"
+            android:importantForAccessibility="no" />
+
+        <Switch
+            android:id="@+id/winscope_switch"
+            android:layout_width="wrap_content"
+            android:minHeight="@dimen/screenrecord_option_icon_size"
+            android:layout_height="wrap_content"
+            android:gravity="end"
+            android:layout_gravity="fill_vertical"
+            android:layout_weight="0" />
+    </LinearLayout>
+
+    <!-- Trace Debuggable Apps Switch -->
+    <LinearLayout
+        android:id="@+id/trace_debuggable_apps_switch_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/qqs_layout_margin_top"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/debuggable_apps_switch_label"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:minHeight="@dimen/screenrecord_option_icon_size"
+            android:layout_weight="1"
+            android:layout_gravity="fill_vertical"
+            android:gravity="start"
+            android:textAppearance="@style/TextAppearance.Dialog.Body.Message"
+            android:importantForAccessibility="no" />
+
+        <Switch
+            android:id="@+id/trace_debuggable_apps_switch"
+            android:layout_width="wrap_content"
+            android:minHeight="@dimen/screenrecord_option_icon_size"
+            android:layout_height="wrap_content"
+            android:gravity="end"
+            android:layout_gravity="fill_vertical"
+            android:layout_weight="0" />
+    </LinearLayout>
+
+    <!-- Long Traces Switch -->
+    <LinearLayout
+        android:id="@+id/long_traces_switch_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/qqs_layout_margin_top"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/long_traces_switch_label"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:minHeight="@dimen/screenrecord_option_icon_size"
+            android:layout_weight="1"
+            android:layout_gravity="fill_vertical"
+            android:gravity="start"
+            android:textAppearance="@style/TextAppearance.Dialog.Body.Message"
+            android:importantForAccessibility="no" />
+
+        <Switch
+            android:id="@+id/long_traces_switch"
+            android:layout_width="wrap_content"
+            android:minHeight="@dimen/screenrecord_option_icon_size"
+            android:layout_height="wrap_content"
+            android:gravity="end"
+            android:layout_gravity="fill_vertical"
+            android:layout_weight="0" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/long_trace_size"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="@dimen/qqs_layout_margin_top"
+        android:textAppearance="@style/TextAppearance.Dialog.Body.Message" />
+
+    <TextView
+        android:id="@+id/long_trace_duration"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="@dimen/qqs_layout_margin_top"
+        android:textAppearance="@style/TextAppearance.Dialog.Body.Message" />
+</LinearLayout>
+

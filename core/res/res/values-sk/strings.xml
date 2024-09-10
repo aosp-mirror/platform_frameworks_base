@@ -267,8 +267,6 @@
     <string name="global_action_bug_report" msgid="5127867163044170003">"Hlásenie o chybách"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Ukončiť reláciu"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"Snímka obrazovky"</string>
-    <!-- no translation found for identity_check_biometric_prompt_description (5810195983015866727) -->
-    <skip />
     <string name="bugreport_title" msgid="8549990811777373050">"Nahlásiť chybu"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"Týmto zhromaždíte informácie o aktuálnom stave zariadenia. Informácie je potom možné odoslať e-mailom, chvíľu však potrvá, kým bude hlásenie chyby pripravené na odoslanie. Prosíme vás preto o trpezlivosť."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"Interaktívne nahlásenie"</string>
@@ -1198,11 +1196,13 @@
     <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"V poliach pre heslá nie je rukopis podporovaný"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Späť"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Prepnúť metódu vstupu"</string>
+    <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"Otvoriť výber metódy vstupu"</string>
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"Nastavenia"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Nedostatok ukladacieho priestoru"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Niektoré systémové funkcie nemusia fungovať"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"V úložisku nie je dostatok voľného miesta pre systém. Zaistite, aby ste mali 250 MB voľného miesta a zariadenie reštartujte."</string>
     <string name="app_running_notification_title" msgid="8985999749231486569">"Aplikácia <xliff:g id="APP_NAME">%1$s</xliff:g> je spustená"</string>
-    <string name="app_running_notification_text" msgid="5120815883400228566">"Klepnutím zobrazíte ďalšie informácie alebo zastavíte aplikáciu."</string>
+    <string name="app_running_notification_text" msgid="5120815883400228566">"Klepnutím zobrazíte ďalšie informácie alebo aplikáciu zastavíte."</string>
     <string name="ok" msgid="2646370155170753815">"OK"</string>
     <string name="cancel" msgid="6908697720451760115">"Zrušiť"</string>
     <string name="yes" msgid="9069828999585032361">"OK"</string>
@@ -1415,10 +1415,8 @@
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"Výberom zakážete bezdrôtové ladenie."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Režim správcu testov je aktivovaný"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Ak chcete zakázať režim správcu testov, obnovte výrobné nastavenia."</string>
-    <!-- no translation found for wrong_hsum_configuration_notification_title (7212758829332714385) -->
-    <skip />
-    <!-- no translation found for wrong_hsum_configuration_notification_message (5353475441480684381) -->
-    <skip />
+    <string name="wrong_hsum_configuration_notification_title" msgid="7212758829332714385">"Nesprávna konfigurácia kompilácie pre režim konzolového systémového používateľa"</string>
+    <string name="wrong_hsum_configuration_notification_message" msgid="5353475441480684381">"Stav režimu konzolového systémového používateľa pre toto zariadenie sa líši od jeho konfigurácie kompilácie. Obnovte výrobné nastavenia zariadenia."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"Sériová konzola je povolená"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"Ovplyvňuje výkon. Ak ju chcete zakázať, skontrolujte zavádzací program systému."</string>
     <string name="mte_override_notification_title" msgid="4731115381962792944">"Je zapnuté experimentálne rozšírenie MTE"</string>
@@ -1434,6 +1432,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"ZDIEĽAŤ"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"ODMIETNUŤ"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Zvoliť metódu vstupu"</string>
+    <string name="input_method_language_settings" msgid="8069089418056819437">"Nastavenia jazyka"</string>
     <string name="show_ime" msgid="6406112007347443383">"Ponechať na obrazovke, keď je aktívna fyzická klávesnica"</string>
     <string name="hardware" msgid="3611039921284836033">"Použiť klávesnicu na obrazovke"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Nakonfigurujte <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
@@ -1443,7 +1442,7 @@
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="alert_windows_notification_channel_group_name" msgid="6063891141815714246">"Zobrazenie cez iné aplikácie"</string>
     <string name="alert_windows_notification_channel_name" msgid="3437528564303192620">"<xliff:g id="NAME">%s</xliff:g> sa zobrazuje cez iné aplikácie"</string>
-    <string name="alert_windows_notification_title" msgid="6331662751095228536">"<xliff:g id="NAME">%s</xliff:g> sa zobrazuje cez iné aplikácie"</string>
+    <string name="alert_windows_notification_title" msgid="6331662751095228536">"Aplikácia <xliff:g id="NAME">%s</xliff:g> sa zobrazuje nad inými aplikáciami"</string>
     <string name="alert_windows_notification_message" msgid="6538171456970725333">"Ak nechcete, aby aplikácia <xliff:g id="NAME">%s</xliff:g> používala túto funkciu, klepnutím otvorte nastavenia a vypnite ju."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="7805857234839123780">"Vypnúť"</string>
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"Kontroluje sa <xliff:g id="NAME">%s</xliff:g>…"</string>
@@ -1749,7 +1748,8 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"Aplikácia zakrýva žiadosť o povolenie, takže vaša odpoveď sa nedá overiť."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Klepnutím na funkciu ju začnite používať:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Výber funkcií, ktoré chcete používať tlačidlom dostupnosti"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Výber funkcií, ktoré chcete používať klávesovou skratkou"</string>
+    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
+    <skip />
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Služba <xliff:g id="SERVICE_NAME">%s</xliff:g> bola vypnutá"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Upraviť skratky"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Hotovo"</string>
@@ -1763,18 +1763,12 @@
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Pridržali ste tlačidlá hlasitosti. Služba <xliff:g id="SERVICE_NAME">%1$s</xliff:g> je zapnutá."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Pridržali ste tlačidlá hlasitosti. Služba <xliff:g id="SERVICE_NAME">%1$s</xliff:g> je vypnutá."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Uvoľnite tlačidlá hlasitosti. Ak chcete zapnúť službu <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, znova pridržte tri sekundy obe tlačidlá hlasitosti."</string>
-    <!-- no translation found for accessibility_button_prompt_text (6105393217162198616) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_prompt_text (6452246951969541792) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_3finger_prompt_text (77745752309056152) -->
-    <skip />
-    <!-- no translation found for accessibility_button_instructional_text (6831154884557881996) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_instructional_text (4133877896011098550) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_3finger_instructional_text (1124458279366968154) -->
-    <skip />
+    <string name="accessibility_button_prompt_text" msgid="6105393217162198616">"Vyberte funkciu"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="6452246951969541792">"Vyberte funkciu"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="77745752309056152">"Vyberte funkciu"</string>
+    <string name="accessibility_button_instructional_text" msgid="6831154884557881996">"Táto funkcia sa otvorí, keď nabudúce klepnete na tlačidlo dostupnosti"</string>
+    <string name="accessibility_gesture_instructional_text" msgid="4133877896011098550">"Táto funkcia sa otvorí, keď nabudúce použijete túto skratku. Potiahnite zdola obrazovky dvoma prstami nahor a rýchlo uvoľnite."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="1124458279366968154">"Táto funkcia sa otvorí, keď nabudúce použijete túto skratku. Potiahnite zdola obrazovky troma prstami nahor a rýchlo uvoľnite."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Zväčšenie"</string>
     <string name="user_switched" msgid="7249833311585228097">"Aktuálny používateľ je <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"Prepína sa na účet <xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -1897,8 +1891,7 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"Kód PIN je príliš krátky. Musí mať minimálne 4 číslice."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Skúste to neskôr"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Zobrazenie na celú obrazovku"</string>
-    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
-    <skip />
+    <string name="immersive_cling_description" msgid="2896205051090870978">"Ukončíte potiahnutím zhora obrazovky nadol"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Dobre"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Otočte zariadenie pre lepšie zobrazenie"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Otvorte <xliff:g id="NAME">%s</xliff:g> na celej obrazovke pre lepšie zobrazenie"</string>
@@ -2434,25 +2427,32 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Obsah aplikácie je z bezpečnostných dôvodov pri zdieľaní obrazovky skrytý"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Automaticky pripojené k satelitu"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Správy môžete odosielať a prijímať bez mobilnej siete či siete Wi-Fi"</string>
+    <string name="satellite_notification_manual_title" msgid="1097504441849466279">"Chcete používať správy cez satelit?"</string>
+    <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Odosielajte a prijímajte správy bez mobilnej siete či siete Wi‑Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Otvoriť Správy"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Ako to funguje"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Nespracovaná…"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Znova nastavte odomknutie odtlačkom prsta"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (5851784577768803510) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7925203589860744456) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (1824812666549916586) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (5974657382960155099) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> sa už nedari rozpoznať."</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> a <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> sa už nedari rozpoznať."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="1824812666549916586">"<xliff:g id="FINGERPRINT">%s</xliff:g> sa už nedari rozpoznať. Znova nastavte odomknutie odtlačkom prsta."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="5974657382960155099">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> a <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> sa už nedari rozpoznať. Znova nastavte odomknutie odtlačkom prsta."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Znova nastavte odomknutie tvárou"</string>
-    <!-- no translation found for face_dangling_notification_msg (746235263598985384) -->
-    <skip />
+    <string name="face_dangling_notification_msg" msgid="746235263598985384">"Váš model tváre sa už nedari rozpoznať. Znova nastavte odomknutie tvárou."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Nastaviť"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Teraz nie"</string>
     <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"Budík pre používateľa <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"Prepnúť používateľa"</string>
     <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"Ignorovať"</string>
     <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"Klepnutím vypnite zvuk"</string>
+    <string name="keyboard_shortcut_group_applications_browser" msgid="6535007304687100909">"Prehliadač"</string>
+    <string name="keyboard_shortcut_group_applications_contacts" msgid="2750702518068326356">"Kontakty"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="4229037666415353683">"E‑mail"</string>
+    <string name="keyboard_shortcut_group_applications_sms" msgid="3523799286376321137">"SMS"</string>
+    <string name="keyboard_shortcut_group_applications_music" msgid="2051507523525651067">"Hudba"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="3571770335653387606">"Kalendár"</string>
+    <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"Kalkulačka"</string>
+    <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"Mapy"</string>
+    <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"Aplikácie"</string>
+    <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"Vaše odtlačky prstov sa už nedajú rozpoznať. Znova nastavte odomknutie odtlačkom prsta."</string>
 </resources>

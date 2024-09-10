@@ -24,6 +24,7 @@ import android.content.pm.ActivityInfo.ScreenOrientation;
 import android.content.res.Configuration;
 import android.widget.Toast;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.window.flags.Flags;
 
 /**
@@ -32,7 +33,8 @@ import com.android.window.flags.Flags;
 class AppCompatCameraPolicy {
 
     @Nullable
-    private final CameraStateMonitor mCameraStateMonitor;
+    @VisibleForTesting
+    final CameraStateMonitor mCameraStateMonitor;
     @Nullable
     private final ActivityRefresher mActivityRefresher;
     @Nullable
@@ -45,9 +47,9 @@ class AppCompatCameraPolicy {
         // Not checking DeviceConfig value here to allow enabling via DeviceConfig
         // without the need to restart the device.
         final boolean needsDisplayRotationCompatPolicy =
-                wmService.mLetterboxConfiguration.isCameraCompatTreatmentEnabledAtBuildTime();
+                wmService.mAppCompatConfiguration.isCameraCompatTreatmentEnabledAtBuildTime();
         final boolean needsCameraCompatFreeformPolicy = Flags.cameraCompatForFreeform()
-                && DesktopModeLaunchParamsModifier.canEnterDesktopMode(wmService.mContext);
+                && DesktopModeHelper.canEnterDesktopMode(wmService.mContext);
         if (needsDisplayRotationCompatPolicy || needsCameraCompatFreeformPolicy) {
             mCameraStateMonitor = new CameraStateMonitor(displayContent, wmService.mH);
             mActivityRefresher = new ActivityRefresher(wmService, wmService.mH);
@@ -122,6 +124,9 @@ class AppCompatCameraPolicy {
     }
 
     void start() {
+        if (mDisplayRotationCompatPolicy != null) {
+            mDisplayRotationCompatPolicy.start();
+        }
         if (mCameraCompatFreeformPolicy != null) {
             mCameraCompatFreeformPolicy.start();
         }
@@ -148,6 +153,10 @@ class AppCompatCameraPolicy {
 
     boolean hasCameraCompatFreeformPolicy() {
         return mCameraCompatFreeformPolicy != null;
+    }
+
+    boolean hasCameraStateMonitor() {
+        return mCameraStateMonitor != null;
     }
 
     @ScreenOrientation

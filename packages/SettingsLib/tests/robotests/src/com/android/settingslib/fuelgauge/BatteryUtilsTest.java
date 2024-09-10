@@ -23,11 +23,11 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.robolectric.Shadows.shadowOf;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.content.Context;
-import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -41,7 +41,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.Shadows;
 import org.robolectric.shadows.ShadowAccessibilityManager;
 
 import java.util.Arrays;
@@ -59,12 +58,15 @@ public class BatteryUtilsTest {
     private AccessibilityServiceInfo mAccessibilityServiceInfo1;
     @Mock
     private AccessibilityServiceInfo mAccessibilityServiceInfo2;
+    @Mock
+    private UserManager mUserManager;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mContext = spy(ApplicationProvider.getApplicationContext());
         doReturn(mContext).when(mContext).getApplicationContext();
+        when(mContext.getSystemService(UserManager.class)).thenReturn(mUserManager);
         mAccessibilityManager = spy(mContext.getSystemService(AccessibilityManager.class));
         mShadowAccessibilityManager = shadowOf(mAccessibilityManager);
         doReturn(mAccessibilityManager).when(mContext)
@@ -108,11 +110,40 @@ public class BatteryUtilsTest {
 
     @Test
     public void isWorkProfile_workProfileMode_returnTrue() {
-        final UserManager userManager = mContext.getSystemService(UserManager.class);
-        Shadows.shadowOf(userManager).setManagedProfile(true);
-        Shadows.shadowOf(userManager).setIsSystemUser(false);
+        doReturn(true).when(mUserManager).isManagedProfile();
 
         assertThat(BatteryUtils.isWorkProfile(mContext)).isTrue();
+    }
+
+    @Test
+    public void isPrivateProfile_defaultValue_returnFalse() {
+        assertThat(BatteryUtils.isPrivateProfile(mContext)).isFalse();
+    }
+
+    @Test
+    public void isPrivateProfile_privateProfileMode_returnTrue() {
+        doReturn(true).when(mUserManager).isPrivateProfile();
+
+        assertThat(BatteryUtils.isPrivateProfile(mContext)).isTrue();
+    }
+
+    @Test
+    public void isAdditionalProfile_defaultValue_returnFalse() {
+        assertThat(BatteryUtils.isAdditionalProfile(mContext)).isFalse();
+    }
+
+    @Test
+    public void isAdditionalProfile_workProfileMode_returnTrue() {
+        doReturn(true).when(mUserManager).isManagedProfile();
+
+        assertThat(BatteryUtils.isAdditionalProfile(mContext)).isTrue();
+    }
+
+    @Test
+    public void isAdditionalProfile_privateProfileMode_returnTrue() {
+        doReturn(true).when(mUserManager).isPrivateProfile();
+
+        assertThat(BatteryUtils.isAdditionalProfile(mContext)).isTrue();
     }
 
     private void setTtsPackageName(String defaultTtsPackageName) {
