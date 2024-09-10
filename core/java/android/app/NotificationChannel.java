@@ -55,7 +55,9 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -99,6 +101,11 @@ public final class NotificationChannel implements Parcelable {
     @TestApi
     @FlaggedApi(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
     public static final String RECS_ID = "android.app.recs";
+
+    /** @hide */
+    @FlaggedApi(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+    public static final ArrayList<String> SYSTEM_RESERVED_IDS = new ArrayList<>(
+            List.of(NEWS_ID, SOCIAL_MEDIA_ID, PROMOTIONS_ID, RECS_ID));
 
     /**
      * The formatter used by the system to create an id for notification
