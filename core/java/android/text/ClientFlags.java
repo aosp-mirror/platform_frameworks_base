@@ -42,13 +42,6 @@ public class ClientFlags {
     }
 
     /**
-     * @see Flags#icuBidiMigration()
-     */
-    public static boolean icuBidiMigration() {
-        return TextFlags.isFeatureEnabled(Flags.FLAG_ICU_BIDI_MIGRATION);
-    }
-
-    /**
      * @see Flags#fixMisalignedContextMenu()
      */
     public static boolean fixMisalignedContextMenu() {
