@@ -61,8 +61,11 @@ public class MetadataSyncAdapter {
     @NonNull
     @VisibleForTesting
     static ArrayMap<String, ArraySet<String>> getAddedFunctionsDiffMap(
-            ArrayMap<String, ArraySet<String>> staticPackageToFunctionMap,
-            ArrayMap<String, ArraySet<String>> runtimePackageToFunctionMap) {
+            @NonNull ArrayMap<String, ArraySet<String>> staticPackageToFunctionMap,
+            @NonNull ArrayMap<String, ArraySet<String>> runtimePackageToFunctionMap) {
+        Objects.requireNonNull(staticPackageToFunctionMap);
+        Objects.requireNonNull(runtimePackageToFunctionMap);
+
         return getFunctionsDiffMap(staticPackageToFunctionMap, runtimePackageToFunctionMap);
     }
 
@@ -80,15 +83,21 @@ public class MetadataSyncAdapter {
     @NonNull
     @VisibleForTesting
     static ArrayMap<String, ArraySet<String>> getRemovedFunctionsDiffMap(
-            ArrayMap<String, ArraySet<String>> staticPackageToFunctionMap,
-            ArrayMap<String, ArraySet<String>> runtimePackageToFunctionMap) {
+            @NonNull ArrayMap<String, ArraySet<String>> staticPackageToFunctionMap,
+            @NonNull ArrayMap<String, ArraySet<String>> runtimePackageToFunctionMap) {
+        Objects.requireNonNull(staticPackageToFunctionMap);
+        Objects.requireNonNull(runtimePackageToFunctionMap);
+
         return getFunctionsDiffMap(runtimePackageToFunctionMap, staticPackageToFunctionMap);
     }
 
     @NonNull
     private static ArrayMap<String, ArraySet<String>> getFunctionsDiffMap(
-            ArrayMap<String, ArraySet<String>> packageToFunctionMapA,
-            ArrayMap<String, ArraySet<String>> packageToFunctionMapB) {
+            @NonNull ArrayMap<String, ArraySet<String>> packageToFunctionMapA,
+            @NonNull ArrayMap<String, ArraySet<String>> packageToFunctionMapB) {
+        Objects.requireNonNull(packageToFunctionMapA);
+        Objects.requireNonNull(packageToFunctionMapB);
+
         ArrayMap<String, ArraySet<String>> diffMap = new ArrayMap<>();
         for (String packageName : packageToFunctionMapA.keySet()) {
             if (!packageToFunctionMapB.containsKey(packageName)) {
@@ -125,6 +134,9 @@ public class MetadataSyncAdapter {
             @NonNull String propertyFunctionId,
             @NonNull String propertyPackageName)
             throws ExecutionException, InterruptedException {
+        Objects.requireNonNull(schemaType);
+        Objects.requireNonNull(propertyFunctionId);
+        Objects.requireNonNull(propertyPackageName);
         ArrayMap<String, ArraySet<String>> packageToFunctionIds = new ArrayMap<>();
 
         FutureSearchResults futureSearchResults =
@@ -164,6 +176,9 @@ public class MetadataSyncAdapter {
             @NonNull String schemaType,
             @NonNull String propertyFunctionId,
             @NonNull String propertyPackageName) {
+        Objects.requireNonNull(schemaType);
+        Objects.requireNonNull(propertyFunctionId);
+        Objects.requireNonNull(propertyPackageName);
         return new SearchSpec.Builder()
                 .addFilterSchemas(schemaType)
                 .addProjectionPaths(
