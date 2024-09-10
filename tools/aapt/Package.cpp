@@ -292,12 +292,13 @@ bool processFile(Bundle* bundle, ZipFile* zip,
             }
             if (!hasData) {
                 const String8& srcName = file->getSourceFile();
-                auto fileModWhen = getFileModDate(srcName.c_str());
-                if (fileModWhen == kInvalidModDate) { // file existence tested earlier,
-                    return false;                     //  not expecting an error here
+                time_t fileModWhen;
+                fileModWhen = getFileModDate(srcName.c_str());
+                if (fileModWhen == (time_t) -1) { // file existence tested earlier,
+                    return false;                 //  not expecting an error here
                 }
-
-                if (toTimeT(fileModWhen) > entry->getModWhen()) {
+    
+                if (fileModWhen > entry->getModWhen()) {
                     // mark as deleted so add() will succeed
                     if (bundle->getVerbose()) {
                         printf("      (removing old '%s')\n", storageName.c_str());
