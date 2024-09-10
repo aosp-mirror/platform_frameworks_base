@@ -107,6 +107,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.Insets;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -2371,7 +2372,7 @@ public interface WindowManager extends ViewManager {
         public static final int TYPE_SECURE_SYSTEM_OVERLAY = FIRST_SYSTEM_WINDOW+15;
 
         /**
-         * Window type: the drag-and-drop pseudowindow.  There is only one
+         * Window type: the drag-and-drop pseudowindow. There is only one
          * drag layer (at most), and it is placed on top of all other windows.
          * In multiuser systems shows only on the owning user's window.
          * @hide
@@ -2381,7 +2382,7 @@ public interface WindowManager extends ViewManager {
         /**
          * Window type: panel that slides out from over the status bar
          * In multiuser systems shows on all users' windows. These windows
-         * are displayed on top of the stauts bar and any {@link #TYPE_STATUS_BAR_PANEL}
+         * are displayed on top of the status bar and any {@link #TYPE_STATUS_BAR_PANEL}
          * windows.
          * @hide
          */
@@ -4649,6 +4650,30 @@ public interface WindowManager extends ViewManager {
         public InsetsFrameProvider[] providedInsets;
 
         /**
+         * Sets the insets to be provided by the window.
+         *
+         * @param insetsParams The parameters for the insets to be provided by the window.
+         *
+         * @hide
+         */
+        @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_STATUS_BAR_AND_INSETS)
+        @SystemApi
+        public void setInsetsParams(@NonNull List<InsetsParams> insetsParams) {
+            if (insetsParams.isEmpty()) {
+                providedInsets = null;
+            } else {
+                providedInsets = new InsetsFrameProvider[insetsParams.size()];
+                for (int i = 0; i < insetsParams.size(); ++i) {
+                    final InsetsParams params = insetsParams.get(i);
+                    providedInsets[i] =
+                            new InsetsFrameProvider(/* owner= */ this, /* index= */ i,
+                                    params.getType())
+                                    .setInsetsSize(params.getInsetsSize());
+                }
+            }
+        }
+
+        /**
          * Specifies which {@link InsetsType}s should be forcibly shown. The types shown by this
          * method won't affect the app's layout. This field only takes effects if the caller has
          * {@link android.Manifest.permission#STATUS_BAR_SERVICE} or the caller has the same uid as
@@ -6113,6 +6138,55 @@ public interface WindowManager extends ViewManager {
          */
         public boolean isModal() {
             return (flags & (FLAG_NOT_TOUCH_MODAL | FLAG_NOT_FOCUSABLE)) == 0;
+        }
+    }
+
+    /**
+     * Specifies the parameters of the insets provided by a window.
+     *
+     * @see WindowManager.LayoutParams#setInsetsParams(List)
+     * @see android.graphics.Insets
+     *
+     * @hide
+     */
+    @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_STATUS_BAR_AND_INSETS)
+    @SystemApi
+    public static class InsetsParams {
+
+        private final @InsetsType int mType;
+        private @Nullable Insets mInsets;
+
+        /**
+         * Creates an instance of InsetsParams.
+         *
+         * @param type the type of insets to provide, e.g. {@link WindowInsets.Type#statusBars()}.
+         * @see WindowInsets.Type
+         */
+        public InsetsParams(@InsetsType int type) {
+            mType = type;
+        }
+
+        /**
+         * Sets the size of the provided insets. If {@code null}, then the provided insets will
+         * have the same size as the window frame.
+         */
+        public @NonNull InsetsParams setInsetsSize(@Nullable Insets insets) {
+            mInsets = insets;
+            return this;
+        }
+
+        /**
+         * Returns the type of provided insets.
+         */
+        public @InsetsType int getType() {
+            return mType;
+        }
+
+        /**
+         * Returns the size of the provided insets.
+         */
+        public @Nullable Insets getInsetsSize() {
+            return mInsets;
         }
     }
 

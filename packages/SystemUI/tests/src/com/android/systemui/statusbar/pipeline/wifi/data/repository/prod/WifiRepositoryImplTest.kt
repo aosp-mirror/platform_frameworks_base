@@ -295,7 +295,10 @@ class WifiRepositoryImplTest : SysuiTestCase() {
             whenever(wifiPickerTracker.connectedWifiEntry).thenReturn(wifiEntry)
             getCallback().onWifiEntriesChanged()
 
-            assertThat(latest).isEqualTo(WifiNetworkModel.Inactive)
+            assertThat(latest).isInstanceOf(WifiNetworkModel.Inactive::class.java)
+            val inactiveReason = (latest as WifiNetworkModel.Inactive).inactiveReason
+            assertThat(inactiveReason).contains("level")
+            assertThat(inactiveReason).contains("$WIFI_LEVEL_UNREACHABLE")
         }
 
     @Test
@@ -311,7 +314,10 @@ class WifiRepositoryImplTest : SysuiTestCase() {
             whenever(wifiPickerTracker.connectedWifiEntry).thenReturn(wifiEntry)
             getCallback().onWifiEntriesChanged()
 
-            assertThat(latest).isEqualTo(WifiNetworkModel.Inactive)
+            assertThat(latest).isInstanceOf(WifiNetworkModel.Inactive::class.java)
+            val inactiveReason = (latest as WifiNetworkModel.Inactive).inactiveReason
+            assertThat(inactiveReason).contains("level")
+            assertThat(inactiveReason).contains("${WIFI_LEVEL_MAX + 1}")
         }
 
     @Test
@@ -327,7 +333,10 @@ class WifiRepositoryImplTest : SysuiTestCase() {
             whenever(wifiPickerTracker.connectedWifiEntry).thenReturn(wifiEntry)
             getCallback().onWifiEntriesChanged()
 
-            assertThat(latest).isEqualTo(WifiNetworkModel.Inactive)
+            assertThat(latest).isInstanceOf(WifiNetworkModel.Inactive::class.java)
+            val inactiveReason = (latest as WifiNetworkModel.Inactive).inactiveReason
+            assertThat(inactiveReason).contains("level")
+            assertThat(inactiveReason).contains("${WIFI_LEVEL_MIN - 1}")
         }
 
     @Test
@@ -530,6 +539,25 @@ class WifiRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
+    fun wifiNetwork_carrierMergedButInvalidLevel_flowHasInvalid() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.wifiNetwork)
+
+            val mergedEntry =
+                mock<MergedCarrierEntry>().apply {
+                    whenever(this.isPrimaryNetwork).thenReturn(true)
+                    whenever(this.subscriptionId).thenReturn(3)
+                    whenever(this.isDefaultNetwork).thenReturn(true)
+                    whenever(this.level).thenReturn(WIFI_LEVEL_UNREACHABLE)
+                }
+            whenever(wifiPickerTracker.mergedCarrierEntry).thenReturn(mergedEntry)
+
+            getCallback().onWifiEntriesChanged()
+
+            assertThat(latest).isInstanceOf(WifiNetworkModel.Invalid::class.java)
+        }
+
+    @Test
     fun wifiNetwork_notValidated_networkNotValidated() =
         testScope.runTest {
             val latest by collectLastValue(underTest.wifiNetwork)
@@ -571,7 +599,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
             whenever(wifiPickerTracker.connectedWifiEntry).thenReturn(wifiEntry)
             getCallback().onWifiEntriesChanged()
 
-            assertThat(latest).isEqualTo(WifiNetworkModel.Inactive)
+            assertThat(latest).isEqualTo(WifiNetworkModel.Inactive())
         }
 
     @Test
@@ -587,7 +615,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
             whenever(wifiPickerTracker.connectedWifiEntry).thenReturn(null)
             getCallback().onWifiEntriesChanged()
 
-            assertThat(latest).isEqualTo(WifiNetworkModel.Inactive)
+            assertThat(latest).isEqualTo(WifiNetworkModel.Inactive())
         }
 
     @Test

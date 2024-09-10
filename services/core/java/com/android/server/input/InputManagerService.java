@@ -2269,14 +2269,8 @@ public class InputManagerService extends IInputManager.Stub
     // Native callback.
     @SuppressWarnings("unused")
     private void notifyTouchpadHardwareState(TouchpadHardwareState hardwareStates, int deviceId) {
-        Slog.d(TAG, "notifyTouchpadHardwareState: Time: "
-                + hardwareStates.getTimestamp() + ", No. Buttons: "
-                + hardwareStates.getButtonsDown() + ", No. Fingers: "
-                + hardwareStates.getFingerCount() + ", No. Touch: "
-                + hardwareStates.getTouchCount() + ", Id: "
-                + deviceId);
         if (mTouchpadDebugViewController != null) {
-            mTouchpadDebugViewController.updateTouchpadHardwareState(hardwareStates);
+            mTouchpadDebugViewController.updateTouchpadHardwareState(hardwareStates, deviceId);
         }
     }
 

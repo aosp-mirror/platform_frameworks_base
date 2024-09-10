@@ -3025,7 +3025,6 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     @Override
     public PackageImpl setSplitCodePaths(@Nullable String[] splitCodePaths) {
         this.splitCodePaths = splitCodePaths;
-        this.mSplits = null; // reset for paths changed
         if (splitCodePaths != null) {
             int size = splitCodePaths.length;
             for (int index = 0; index < size; index++) {

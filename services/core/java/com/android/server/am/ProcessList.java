@@ -3397,12 +3397,16 @@ public final class ProcessList {
         final boolean wasStopped = info.isStopped();
         // Check if we should mark the processrecord for first launch after force-stopping
         if (wasStopped) {
-            boolean wasEverLaunched;
+            boolean wasEverLaunched = false;
             if (android.app.Flags.useAppInfoNotLaunched()) {
                 wasEverLaunched = !info.isNotLaunched();
             } else {
-                wasEverLaunched = mService.getPackageManagerInternal()
-                        .wasPackageEverLaunched(r.getApplicationInfo().packageName, r.userId);
+                try {
+                    wasEverLaunched = mService.getPackageManagerInternal()
+                            .wasPackageEverLaunched(r.getApplicationInfo().packageName, r.userId);
+                } catch (IllegalArgumentException e) {
+                    // Package doesn't have state yet, assume not launched
+                }
             }
             // Check if the hosting record is for an activity or not. Since the stopped
             // state tracking is handled differently to avoid WM calling back into AM,
