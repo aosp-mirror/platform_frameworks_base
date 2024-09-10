@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.view;
+package com.android.wm.shell.recents;
 
 import android.app.ActivityManager;
 import android.graphics.GraphicBuffer;
@@ -61,7 +61,6 @@ interface IRecentsAnimationController {
      * @param sendUserLeaveHint If set to true, {@link Activity#onUserLeaving} will be sent to the
      *                          top resumed app, false otherwise.
      */
-    @UnsupportedAppUsage
     void finish(boolean moveHomeToTop, boolean sendUserLeaveHint, in IResultReceiver finishCb);
 
     /**
@@ -71,73 +70,13 @@ interface IRecentsAnimationController {
      * may register the recents animation input consumer prior to starting the recents animation
      * and then enable it mid-animation to start receiving touch events.
      */
-    @UnsupportedAppUsage
     void setInputConsumerEnabled(boolean enabled);
-
-    /**
-    * Informs the system whether the animation targets passed into
-    * IRecentsAnimationRunner.onAnimationStart are currently behind the system bars. If they are,
-    * they can control the SystemUI flags, otherwise the SystemUI flags from home activity will be
-    * taken.
-    */
-    @UnsupportedAppUsage
-    void setAnimationTargetsBehindSystemBars(boolean behindSystemBars);
-
-    /**
-     * Clean up the screenshot of previous task which was created during recents animation that
-     * was cancelled by a stack order change.
-     *
-     * @see {@link IRecentsAnimationRunner#onAnimationCanceled}
-     */
-    void cleanupScreenshot();
-
-    /**
-     * Set a state for controller whether would like to cancel recents animations with deferred
-     * task screenshot presentation.
-     *
-     * When we cancel the recents animation due to a stack order change, we can't just cancel it
-     * immediately as it would lead to a flicker in Launcher if we just remove the task from the
-     * leash. Instead we screenshot the previous task and replace the child of the leash with the
-     * screenshot, so that Launcher can still control the leash lifecycle & make the next app
-     * transition animate smoothly without flickering.
-     *
-     * @param defer When set {@code true}, means that the recents animation will defer canceling the
-     *              animation when a stack order change is triggered until the subsequent app
-     *              transition start and skip previous task's animation.
-     *              When set to {@code false}, means that the recents animation will be canceled
-     *              immediately when the stack order changes.
-     * @param screenshot When set {@code true}, means that the system will take previous task's
-     *                   screenshot and replace the contents of the leash with it when the next app
-     *                   transition starting. The runner must call #cleanupScreenshot() to end the
-     *                   recents animation.
-     *                   When set to {@code false}, means that the system will simply wait for the
-     *                   next app transition start to immediately cancel the recents animation. This
-     *                   can be useful when you want an immediate transition into a state where the
-     *                   task is shown in the home/recents activity (without waiting for a
-     *                   screenshot).
-     *
-     * @see #cleanupScreenshot()
-     * @see IRecentsAnimationRunner#onCancelled
-     */
-    void setDeferCancelUntilNextTransition(boolean defer, boolean screenshot);
 
     /**
      * Sets a state for controller to decide which surface is the destination when the recents
      * animation is cancelled through fail safe mechanism.
      */
     void setWillFinishToHome(boolean willFinishToHome);
-
-    /**
-     * Stops controlling a task that is currently controlled by this recents animation.
-     *
-     * This method should be called when a task that has been received via {@link #onAnimationStart}
-     * or {@link #onTaskAppeared} is no longer needed.  After calling this method, the task will
-     * either disappear from the screen, or jump to its final position in case it was the top task.
-     *
-     * @param taskId Id of the Task target to remove
-     * @return {@code true} when target removed successfully, {@code false} otherwise.
-     */
-    boolean removeTask(int taskId);
 
     /**
      * Detach navigation bar from app.
@@ -153,15 +92,6 @@ interface IRecentsAnimationController {
      *                      app.
      */
     void detachNavigationBarFromApp(boolean moveHomeToTop);
-
-    /**
-     * Used for animating the navigation bar during app launch from recents in live tile mode.
-     *
-     * First fade out the navigation bar at the bottom of the display and then fade in to the app.
-     *
-     * @param duration the duration of the app launch animation
-     */
-    void animateNavigationBarToApp(long duration);
 
     /**
      * Hand off the ongoing animation of a set of remote targets, to be run by another handler using
