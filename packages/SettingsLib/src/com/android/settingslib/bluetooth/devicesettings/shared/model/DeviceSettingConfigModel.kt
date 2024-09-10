@@ -36,10 +36,23 @@ sealed interface DeviceSettingConfigItemModel {
     @DeviceSettingId val settingId: Int
 
     /** A built-in item in Settings. */
-    data class BuiltinItem(
-        @DeviceSettingId override val settingId: Int,
-        val preferenceKey: String?
-    ) : DeviceSettingConfigItemModel
+    sealed interface BuiltinItem : DeviceSettingConfigItemModel {
+        @DeviceSettingId override val settingId: Int
+        val preferenceKey: String
+
+        /** A general built-in item in Settings. */
+        data class CommonBuiltinItem(
+            @DeviceSettingId override val settingId: Int,
+            override val preferenceKey: String,
+        ) : BuiltinItem
+
+        /** A bluetooth profiles in Settings. */
+        data class BluetoothProfilesItem(
+            @DeviceSettingId override val settingId: Int,
+            override val preferenceKey: String,
+            val invisibleProfiles: List<String>,
+        ) : BuiltinItem
+    }
 
     /** A remote item provided by other apps. */
     data class AppProvidedItem(@DeviceSettingId override val settingId: Int) :

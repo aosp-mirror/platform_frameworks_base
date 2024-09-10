@@ -25,7 +25,6 @@ import android.os.UserHandle;
  * services are properly unbound after the operation completes or a timeout occurs.
  *
  * @param <T> Class of wrapped service.
- * @hide
  */
 public interface RemoteServiceCaller<T> {
 

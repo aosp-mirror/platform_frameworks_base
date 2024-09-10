@@ -127,7 +127,11 @@ public class RavenwoodTestStats {
         int passed = 0;
         int skipped = 0;
         int failed = 0;
-        for (var e : mStats.get(classDescription).values()) {
+        var stats = mStats.get(classDescription);
+        if (stats == null) {
+            return;
+        }
+        for (var e : stats.values()) {
             switch (e) {
                 case Passed: passed++; break;
                 case Skipped: skipped++; break;

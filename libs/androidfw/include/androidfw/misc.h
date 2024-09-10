@@ -13,14 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#pragma once
 
-#include <sys/types.h>
+#include <time.h>
 
 //
 // Handy utility functions and portability code.
 //
-#ifndef _LIBS_ANDROID_FW_MISC_H
-#define _LIBS_ANDROID_FW_MISC_H
 
 namespace android {
 
@@ -41,15 +40,35 @@ typedef enum FileType {
 } FileType;
 /* get the file's type; follows symlinks */
 FileType getFileType(const char* fileName);
-/* get the file's modification date; returns -1 w/errno set on failure */
-time_t getFileModDate(const char* fileName);
+
+// MinGW doesn't support nanosecond resolution in stat() modification time, and given
+// that it only matters on the device it's ok to keep it at the second level there.
+#ifdef _WIN32
+using ModDate = time_t;
+inline constexpr ModDate kInvalidModDate = ModDate(-1);
+inline constexpr unsigned long long kModDateResolutionNs = 1ull * 1000 * 1000 * 1000;
+inline time_t toTimeT(ModDate m) {
+  return m;
+}
+#else
+using ModDate = timespec;
+inline constexpr ModDate kInvalidModDate = {-1, -1};
+inline constexpr unsigned long long kModDateResolutionNs = 1;
+inline time_t toTimeT(ModDate m) {
+  return m.tv_sec;
+}
+#endif
+
+/* get the file's modification date; returns kInvalidModDate w/errno set on failure */
+ModDate getFileModDate(const char* fileName);
 /* same, but also returns -1 if the file has already been deleted */
-time_t getFileModDate(int fd);
+ModDate getFileModDate(int fd);
 
 // Check if |path| or |fd| resides on a readonly filesystem.
 bool isReadonlyFilesystem(const char* path);
 bool isReadonlyFilesystem(int fd);
 
-}; // namespace android
+}  // namespace android
 
-#endif // _LIBS_ANDROID_FW_MISC_H
+// Whoever uses getFileModDate() will need this as well
+bool operator==(const timespec& l, const timespec& r);

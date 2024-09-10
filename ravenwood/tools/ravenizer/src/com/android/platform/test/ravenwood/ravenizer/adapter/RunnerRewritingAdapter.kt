@@ -302,7 +302,7 @@ class RunnerRewritingAdapter private constructor(
         override fun visitCode() {
             visitFieldInsn(Opcodes.GETSTATIC,
                 ravenwoodTestRunnerType.internlName,
-                RavenwoodAwareTestRunner.IMPLICIT_CLASS_MIN_RULE_NAME,
+                RavenwoodAwareTestRunner.IMPLICIT_CLASS_OUTER_RULE_NAME,
                 testRuleType.desc
             )
             visitFieldInsn(Opcodes.PUTSTATIC,
@@ -313,7 +313,7 @@ class RunnerRewritingAdapter private constructor(
 
             visitFieldInsn(Opcodes.GETSTATIC,
                 ravenwoodTestRunnerType.internlName,
-                RavenwoodAwareTestRunner.IMPLICIT_CLASS_MAX_RULE_NAME,
+                RavenwoodAwareTestRunner.IMPLICIT_CLASS_INNER_RULE_NAME,
                 testRuleType.desc
             )
             visitFieldInsn(Opcodes.PUTSTATIC,
@@ -361,7 +361,7 @@ class RunnerRewritingAdapter private constructor(
             visitVarInsn(ALOAD, 0)
             visitFieldInsn(Opcodes.GETSTATIC,
                 ravenwoodTestRunnerType.internlName,
-                RavenwoodAwareTestRunner.IMPLICIT_INST_MIN_RULE_NAME,
+                RavenwoodAwareTestRunner.IMPLICIT_INST_OUTER_RULE_NAME,
                 testRuleType.desc
             )
             visitFieldInsn(Opcodes.PUTFIELD,
@@ -373,7 +373,7 @@ class RunnerRewritingAdapter private constructor(
             visitVarInsn(ALOAD, 0)
             visitFieldInsn(Opcodes.GETSTATIC,
                 ravenwoodTestRunnerType.internlName,
-                RavenwoodAwareTestRunner.IMPLICIT_INST_MAX_RULE_NAME,
+                RavenwoodAwareTestRunner.IMPLICIT_INST_INNER_RULE_NAME,
                 testRuleType.desc
             )
             visitFieldInsn(Opcodes.PUTFIELD,

@@ -38,7 +38,6 @@ import android.util.Log;
 import android.view.IWindow;
 import android.view.SurfaceControl;
 import android.view.SurfaceControlViewHost;
-import android.view.SurfaceSession;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowlessWindowManager;
@@ -173,7 +172,7 @@ public abstract class CompatUIWindowManagerAbstract extends WindowlessWindowMana
     @Override
     protected SurfaceControl getParentSurface(IWindow window, WindowManager.LayoutParams attrs) {
         String className = getClass().getSimpleName();
-        final SurfaceControl.Builder builder = new SurfaceControl.Builder(new SurfaceSession())
+        final SurfaceControl.Builder builder = new SurfaceControl.Builder()
                 .setContainerLayer()
                 .setName(className + "Leash")
                 .setHidden(false)

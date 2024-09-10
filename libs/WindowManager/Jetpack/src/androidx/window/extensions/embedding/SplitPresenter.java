@@ -24,6 +24,7 @@ import static androidx.window.extensions.embedding.SplitController.TAG;
 import static androidx.window.extensions.embedding.WindowAttributes.DIM_AREA_ON_TASK;
 
 import android.annotation.AnimRes;
+import android.annotation.NonNull;
 import android.app.Activity;
 import android.app.ActivityThread;
 import android.app.WindowConfiguration;
@@ -47,7 +48,6 @@ import android.window.TaskFragmentCreationParams;
 import android.window.WindowContainerTransaction;
 
 import androidx.annotation.IntDef;
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.window.extensions.core.util.function.Function;
 import androidx.window.extensions.embedding.SplitAttributes.SplitType;
@@ -67,6 +67,7 @@ import com.android.window.flags.Flags;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.Executor;
 
 /**
@@ -174,7 +175,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         } else {
             registerOrganizer();
         }
-        mBackupHelper = new BackupHelper(controller, outSavedState);
+        mBackupHelper = new BackupHelper(controller, this, outSavedState);
         if (!SplitController.ENABLE_SHELL_TRANSITIONS) {
             // TODO(b/207070762): cleanup with legacy app transition
             // Animation will be handled by WM Shell when Shell transition is enabled.
@@ -184,6 +185,15 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
 
     void scheduleBackup() {
         mBackupHelper.scheduleBackup();
+    }
+
+    boolean isRebuildTaskContainersNeeded() {
+        return mBackupHelper.hasPendingStateToRestore();
+    }
+
+    boolean rebuildTaskContainers(@NonNull WindowContainerTransaction wct,
+            @NonNull Set<EmbeddingRule> rules) {
+        return mBackupHelper.rebuildTaskContainers(wct, rules);
     }
 
     /**
