@@ -20,8 +20,8 @@ import android.content.Context
 import android.os.Handler
 import android.os.PowerManager
 import android.view.ViewGroup
-import android.view.WindowManager
 import android.view.accessibility.AccessibilityManager
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.media.taptotransfer.MediaTttFlags
 import com.android.systemui.statusbar.CommandQueue
@@ -36,7 +36,7 @@ class FakeMediaTttChipControllerReceiver(
     commandQueue: CommandQueue,
     context: Context,
     logger: MediaTttReceiverLogger,
-    windowManager: WindowManager,
+    viewCaptureAwareWindowManager: ViewCaptureAwareWindowManager,
     mainExecutor: DelayableExecutor,
     accessibilityManager: AccessibilityManager,
     configurationController: ConfigurationController,
@@ -55,7 +55,7 @@ class FakeMediaTttChipControllerReceiver(
         commandQueue,
         context,
         logger,
-        windowManager,
+        viewCaptureAwareWindowManager,
         mainExecutor,
         accessibilityManager,
         configurationController,

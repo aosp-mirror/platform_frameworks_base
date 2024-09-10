@@ -16,6 +16,7 @@
 
 package com.android.server.appwidget;
 
+import static android.appwidget.flags.Flags.remoteAdapterConversion;
 import static android.appwidget.flags.Flags.removeAppWidgetServiceIoFromCriticalPath;
 import static android.appwidget.flags.Flags.supportResumeRestoreAfterReboot;
 import static android.content.Context.KEYGUARD_SERVICE;
@@ -213,9 +214,20 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             Duration.ofHours(1).toMillis();
     // Default max API calls per reset interval for generated preview API rate limiting.
     private static final int DEFAULT_GENERATED_PREVIEW_MAX_CALLS_PER_INTERVAL = 2;
+    // Default max number of providers for which to keep previews.
+    private static final int DEFAULT_GENERATED_PREVIEW_MAX_PROVIDERS = 50;
     // XML attribute for widget ids that are pending deletion.
     // See {@link Provider#pendingDeletedWidgetIds}.
     private static final String PENDING_DELETED_IDS_ATTR = "pending_deleted_ids";
+
+    // Hard limit of number of hosts an app can create, note that the app that hosts the widgets
+    // can have multiple instances of {@link AppWidgetHost}, typically in respect to different
+    // surfaces in the host app.
+    // @see AppWidgetHost
+    // @see AppWidgetHost#mHostId
+    private static final int MAX_NUMBER_OF_HOSTS_PER_PACKAGE = 20;
+    // Hard limit of number of widgets can be pinned by a host.
+    private static final int MAX_NUMBER_OF_WIDGETS_PER_HOST = 200;
 
     // Handles user and package related broadcasts.
     // See {@link #registerBroadcastReceiver}
@@ -358,10 +370,13 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 SystemUiDeviceConfigFlags.GENERATED_PREVIEW_API_RESET_INTERVAL_MS,
                 DEFAULT_GENERATED_PREVIEW_RESET_INTERVAL_MS);
         final int generatedPreviewMaxCallsPerInterval = DeviceConfig.getInt(NAMESPACE_SYSTEMUI,
-                SystemUiDeviceConfigFlags.GENERATED_PREVIEW_API_RESET_INTERVAL_MS,
+                SystemUiDeviceConfigFlags.GENERATED_PREVIEW_API_MAX_CALLS_PER_INTERVAL,
                 DEFAULT_GENERATED_PREVIEW_MAX_CALLS_PER_INTERVAL);
+        final int generatedPreviewsMaxProviders = DeviceConfig.getInt(NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.GENERATED_PREVIEW_API_MAX_PROVIDERS,
+                DEFAULT_GENERATED_PREVIEW_MAX_PROVIDERS);
         mGeneratedPreviewsApiCounter = new ApiCounter(generatedPreviewResetInterval,
-                generatedPreviewMaxCallsPerInterval);
+                generatedPreviewMaxCallsPerInterval, generatedPreviewsMaxProviders);
         DeviceConfig.addOnPropertiesChangedListener(NAMESPACE_SYSTEMUI,
                 new HandlerExecutor(mCallbackHandler), this::handleSystemUiDeviceConfigChange);
 
@@ -1645,6 +1660,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     public boolean bindRemoteViewsService(String callingPackage, int appWidgetId, Intent intent,
             IApplicationThread caller, IBinder activtiyToken, IServiceConnection connection,
             long flags) {
+        if (remoteAdapterConversion()) {
+            throw new UnsupportedOperationException("bindRemoteViewsService is deprecated");
+        }
         final int userId = UserHandle.getCallingUserId();
         if (DEBUG) {
             Slog.i(TAG, "bindRemoteViewsService() " + userId);
@@ -2275,12 +2293,30 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         if (host != null) {
             return host;
         }
-
+        ensureHostCountBeforeAddLocked(id);
         host = new Host();
         host.id = id;
         mHosts.add(host);
 
         return host;
+    }
+
+    /**
+     * Ensures that the number of hosts for a package is less than the maximum number of hosts per
+     * package. If the number of hosts is greater than the maximum number of hosts per package, then
+     * removes the oldest host.
+     */
+    private void ensureHostCountBeforeAddLocked(@NonNull final HostId hostId) {
+        final List<Host> hosts = new ArrayList<>();
+        for (Host host : mHosts) {
+            if (host.id.uid == hostId.uid
+                    && host.id.packageName.equals(hostId.packageName)) {
+                hosts.add(host);
+            }
+        }
+        while (hosts.size() >= MAX_NUMBER_OF_HOSTS_PER_PACKAGE) {
+            deleteHostLocked(hosts.remove(0));
+        }
     }
 
     private void deleteHostLocked(Host host) {
@@ -2364,6 +2400,11 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 } catch (RemoteException re) {
                     Slog.e(TAG, "Error calling remove view factory", re);
                 }
+                mContext.unbindService(this);
+            }
+
+            @Override
+            public void onNullBinding(ComponentName name) {
                 mContext.unbindService(this);
             }
 
@@ -2511,6 +2552,11 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                                 } catch (RemoteException e) {
                                     Slog.e(TAG, "Error calling onDataSetChangedAsync()", e);
                                 }
+                                mContext.unbindService(this);
+                            }
+
+                            @Override
+                            public void onNullBinding(ComponentName name) {
                                 mContext.unbindService(this);
                             }
 
@@ -3573,9 +3619,30 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         if (DEBUG) {
             Slog.i(TAG, "addWidgetLocked() " + widget);
         }
+        ensureWidgetCountBeforeAddLocked(widget);
         mWidgets.add(widget);
 
         onWidgetProviderAddedOrChangedLocked(widget);
+    }
+
+    /**
+     * Ensures that the widget count for the widget's host is not greater than the maximum
+     * number of widgets per host. If the count is greater than the maximum, removes oldest widgets
+     * from the host until the count is less than or equal to the maximum.
+     */
+    private void ensureWidgetCountBeforeAddLocked(@NonNull final Widget widget) {
+        if (widget.host == null || widget.host.id == null) {
+            return;
+        }
+        final List<Widget> widgetsInSameHost = new ArrayList<>();
+        for (Widget w : mWidgets) {
+            if (w.host != null && widget.host.id.equals(w.host.id)) {
+                widgetsInSameHost.add(w);
+            }
+        }
+        while (widgetsInSameHost.size() >= MAX_NUMBER_OF_WIDGETS_PER_HOST) {
+            removeWidgetLocked(widgetsInSameHost.remove(0));
+        }
     }
 
     /**
@@ -4660,6 +4727,13 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                         /* defaultValue= */ mGeneratedPreviewsApiCounter.getMaxCallsPerInterval());
                 mGeneratedPreviewsApiCounter.setMaxCallsPerInterval(maxCallsPerInterval);
             }
+            if (changed.contains(
+                    SystemUiDeviceConfigFlags.GENERATED_PREVIEW_API_MAX_PROVIDERS)) {
+                int maxProviders = properties.getInt(
+                        SystemUiDeviceConfigFlags.GENERATED_PREVIEW_API_MAX_PROVIDERS,
+                        /* defaultValue= */ mGeneratedPreviewsApiCounter.getMaxProviders());
+                mGeneratedPreviewsApiCounter.setMaxProviders(maxProviders);
+            }
         }
     }
 
@@ -5444,17 +5518,22 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         private long mResetIntervalMs;
         // The max number of API calls per interval.
         private int mMaxCallsPerInterval;
+        // The max number of providers to keep call records for. Any call to tryApiCall for new
+        // providers will return false after this limit.
+        private int mMaxProviders;
+
         // Returns the current time (monotonic). By default this is SystemClock.elapsedRealtime.
         private LongSupplier mMonotonicClock;
 
-        ApiCounter(long resetIntervalMs, int maxCallsPerInterval) {
-            this(resetIntervalMs, maxCallsPerInterval, SystemClock::elapsedRealtime);
+        ApiCounter(long resetIntervalMs, int maxCallsPerInterval, int maxProviders) {
+            this(resetIntervalMs, maxCallsPerInterval, maxProviders, SystemClock::elapsedRealtime);
         }
 
-        ApiCounter(long resetIntervalMs, int maxCallsPerInterval,
+        ApiCounter(long resetIntervalMs, int maxCallsPerInterval, int maxProviders,
                 LongSupplier monotonicClock) {
             mResetIntervalMs = resetIntervalMs;
             mMaxCallsPerInterval = maxCallsPerInterval;
+            mMaxProviders = maxProviders;
             mMonotonicClock = monotonicClock;
         }
 
@@ -5474,12 +5553,27 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             return mMaxCallsPerInterval;
         }
 
+        public void setMaxProviders(int maxProviders) {
+            mMaxProviders = maxProviders;
+        }
+
+        public int getMaxProviders() {
+            return mMaxProviders;
+        }
+
         /**
          * Returns true if the API call for the provider should be allowed, false if it should be
          * rate-limited.
          */
         public boolean tryApiCall(@NonNull ProviderId provider) {
-            final ApiCallRecord record = getOrCreateRecord(provider);
+            if (!mCallCount.containsKey(provider)) {
+                if (mCallCount.size() >= mMaxProviders) {
+                    return false;
+                }
+                mCallCount.put(provider, new ApiCallRecord());
+            }
+            ApiCallRecord record = mCallCount.get(provider);
+
             final long now = mMonotonicClock.getAsLong();
             final long timeSinceLastResetMs = now - record.lastResetTimeMs;
             // If the last reset was beyond the reset interval, reset now.
@@ -5499,14 +5593,6 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
          */
         public void remove(@NonNull ProviderId id) {
             mCallCount.remove(id);
-        }
-
-        @NonNull
-        private ApiCallRecord getOrCreateRecord(@NonNull ProviderId provider) {
-            if (!mCallCount.containsKey(provider)) {
-                mCallCount.put(provider, new ApiCallRecord());
-            }
-            return mCallCount.get(provider);
         }
     }
 

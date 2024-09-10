@@ -380,6 +380,8 @@
     <string name="show_touches_summary" msgid="3692861665994502193">"Shfaq reagimet vizuale për trokitjet"</string>
     <string name="show_key_presses" msgid="6360141722735900214">"Shfaq shtypjet e tasteve"</string>
     <string name="show_key_presses_summary" msgid="725387457373015024">"Shfaq reagim vizual për shtypjet fizike të tasteve"</string>
+    <string name="touchpad_visualizer" msgid="3707916068870825115">"Shfaq hyrjen me bllokun me prekje"</string>
+    <string name="touchpad_visualizer_summary" msgid="4056080018119847449">"Mbivendosja e ekranit që paraqet hyrjen me bllokun me prekje dhe gjestet e njohura"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"Shfaq përditësimet e sipërfaqes"</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"Ndriço të gjitha sipërfaqet e dritares kur ato të përditësohen"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"Shfaq përditësimet e pamjes"</string>
@@ -495,8 +497,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> derisa të mbushet"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> derisa të mbushet"</string>
-    <!-- no translation found for power_charging_limited (4144004473976005214) -->
-    <skip />
+    <string name="power_charging_limited" msgid="4144004473976005214">"<xliff:g id="LEVEL">%1$s</xliff:g> - Karikimi është vendosur në pritje për të mbrojtur baterinë"</string>
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> - Po karikohet"</string>
     <string name="power_fast_charging_duration_v2" msgid="3797735998640359490">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATUS">%2$s</xliff:g> - Plot deri në <xliff:g id="TIME">%3$s</xliff:g>"</string>
     <string name="power_charging_duration_v2" msgid="2938998284074003248">"<xliff:g id="LEVEL">%1$s</xliff:g> - Karikohet plotësisht deri në <xliff:g id="TIME">%2$s</xliff:g>"</string>
@@ -563,6 +564,8 @@
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmet dhe alarmet rikujtuese"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Lejo që ky aplikacion të caktojë alarmet dhe të planifikojë veprime që kanë një afat të caktuar. Kjo mundëson që aplikacioni të ekzekutohet në sfond, gjë që mund të përdorë më shumë bateri.\n\nNëse kjo leje është caktuar si joaktive, alarmet ekzistuese dhe ngjarjet në bazë kohore të planifikuara nga ky aplikacion nuk do të funksionojnë."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"planifiko, alarm, alarm rikujtues, ora"</string>
+    <!-- no translation found for zen_mode_do_not_disturb_name (6798711401734798283) -->
+    <skip />
     <string name="zen_mode_settings_title" msgid="7374070457626419755">"Mos shqetëso"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Aktivizo"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Aktivizo \"Mos shqetëso\""</string>

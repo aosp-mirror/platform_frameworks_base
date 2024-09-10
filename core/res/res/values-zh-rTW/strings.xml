@@ -1194,6 +1194,8 @@
     <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"密碼欄位無法使用手寫功能"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"返回"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"切換輸入法"</string>
+    <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"開啟輸入法挑選器"</string>
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"設定"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"儲存空間即將用盡"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"部分系統功能可能無法運作"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"系統儲存空間不足。請確定你已釋出 250MB 的可用空間，然後重新啟動。"</string>
@@ -1405,7 +1407,7 @@
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"此外接裝置與這支手機不相容。輕觸即可瞭解詳情。"</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"已連接 USB 偵錯工具"</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"輕觸即可關閉 USB 偵錯功能"</string>
-    <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"選取這個選項以停用 USB 偵錯功能。"</string>
+    <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"選取這個選項以停用 USB 偵錯功能"</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"無線偵錯已連線"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"輕觸即可關閉無線偵錯功能"</string>
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"選取即可停用無線偵錯功能。"</string>
@@ -1744,7 +1746,8 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"應用程式遮擋了權限要求，因此系統無法驗證你的回覆。"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"輕觸即可開始使用所需功能："</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"選擇要搭配無障礙工具按鈕使用的功能"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"選擇要搭配音量快速鍵使用的功能"</string>
+    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
+    <skip />
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"「<xliff:g id="SERVICE_NAME">%s</xliff:g>」已關閉"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"編輯捷徑"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"完成"</string>
@@ -2422,6 +2425,8 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"為安全起見，分享螢幕畫面隱藏了這個應用程式的內容"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"已自動連上衛星"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"你可以收發訊息，沒有行動/Wi-Fi 網路也無妨"</string>
+    <string name="satellite_notification_manual_title" msgid="1097504441849466279">"要使用衛星訊息功能嗎？"</string>
+    <string name="satellite_notification_manual_summary" msgid="901206289846283445">"即使沒有行動或 Wi-Fi 網路，還是可以收發訊息"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"開啟「訊息」應用程式"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"運作方式"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"待處理…"</string>
@@ -2447,4 +2452,5 @@
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"計算機"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"地圖"</string>
     <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"應用程式"</string>
+    <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"系統無法再辨識你的指紋，請重新設定「指紋解鎖」。"</string>
 </resources>

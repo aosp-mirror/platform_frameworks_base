@@ -929,9 +929,9 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             // For ordered broadcast, check if the receivers for the new broadcast is a superset
             // of those for the previous one as skipping and removing only one of them could result
             // in an inconsistent state.
-            if (testRecord.ordered || testRecord.prioritized) {
+            if (testRecord.ordered) {
                 return containsAllReceivers(r, testRecord, recordsLookupCache);
-            } else if (testRecord.resultTo != null) {
+            } else if (testRecord.prioritized || testRecord.resultTo != null) {
                 return testRecord.getDeliveryState(testIndex) == DELIVERY_DEFERRED
                         ? r.containsReceiver(testRecord.receivers.get(testIndex))
                         : containsAllReceivers(r, testRecord, recordsLookupCache);
@@ -1005,13 +1005,10 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         final ApplicationInfo info = ((ResolveInfo) receiver).activityInfo.applicationInfo;
         final ComponentName component = ((ResolveInfo) receiver).activityInfo.getComponentName();
 
-        if ((info.flags & ApplicationInfo.FLAG_STOPPED) != 0) {
-            queue.setActiveWasStopped(true);
-        }
-        final int intentFlags = r.intent.getFlags() | Intent.FLAG_FROM_BACKGROUND;
-        final boolean firstLaunch = !mService.wasPackageEverLaunched(info.packageName, r.userId);
-        queue.setActiveFirstLaunch(firstLaunch);
+        queue.setActiveWasStopped(info.isStopped());
+        queue.setActiveFirstLaunch(info.isNotLaunched());
 
+        final int intentFlags = r.intent.getFlags() | Intent.FLAG_FROM_BACKGROUND;
         final HostingRecord hostingRecord = new HostingRecord(HostingRecord.HOSTING_TYPE_BROADCAST,
                 component, r.intent.getAction(), r.getHostingRecordTriggerType());
         final boolean isActivityCapable = (r.options != null

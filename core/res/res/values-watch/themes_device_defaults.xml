@@ -548,4 +548,7 @@ a similar way.
         <item name="primaryContentAlpha">@dimen/primary_content_alpha_device_default</item>
         <item name="secondaryContentAlpha">@dimen/secondary_content_alpha_device_default</item>
     </style>
+
+    <!--  Device default theme for the Input Method Switcher dialog. Override to make it dark.  -->
+    <style name="Theme.DeviceDefault.InputMethodSwitcherDialog" parent="Theme.DeviceDefault.Dialog.Alert"/>
 </resources>

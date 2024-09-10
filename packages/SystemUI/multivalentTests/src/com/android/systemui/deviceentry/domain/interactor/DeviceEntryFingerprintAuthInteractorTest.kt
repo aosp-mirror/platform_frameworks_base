@@ -21,8 +21,6 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.data.repository.fingerprintPropertyRepository
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.keyguard.data.repository.biometricSettingsRepository
-import com.android.systemui.keyguard.data.repository.deviceEntryFingerprintAuthRepository
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
@@ -36,41 +34,29 @@ class DeviceEntryFingerprintAuthInteractorTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
     private val underTest = kosmos.deviceEntryFingerprintAuthInteractor
-    private val fingerprintAuthRepository = kosmos.deviceEntryFingerprintAuthRepository
     private val fingerprintPropertyRepository = kosmos.fingerprintPropertyRepository
-    private val biometricSettingsRepository = kosmos.biometricSettingsRepository
 
     @Test
-    fun isFingerprintAuthCurrentlyAllowed_allowedOnlyWhenItIsNotLockedOutAndAllowedBySettings() =
+    fun isSensorUnderDisplay() =
         testScope.runTest {
-            val currentlyAllowed by collectLastValue(underTest.isFingerprintAuthCurrentlyAllowed)
-            biometricSettingsRepository.setIsFingerprintAuthCurrentlyAllowed(true)
-            fingerprintAuthRepository.setLockedOut(true)
-
-            assertThat(currentlyAllowed).isFalse()
-
-            fingerprintAuthRepository.setLockedOut(false)
-            assertThat(currentlyAllowed).isTrue()
-
-            biometricSettingsRepository.setIsFingerprintAuthCurrentlyAllowed(false)
-            assertThat(currentlyAllowed).isFalse()
+            val isUdfps by collectLastValue(underTest.isSensorUnderDisplay)
+            fingerprintPropertyRepository.supportsUdfps()
+            assertThat(isUdfps).isTrue()
         }
 
     @Test
-    fun isFingerprintCurrentlyAllowedInBouncer_trueForNonUdfpsSensorTypes() =
+    fun isSensorUnderDisplay_rear() =
         testScope.runTest {
-            biometricSettingsRepository.setIsFingerprintAuthCurrentlyAllowed(true)
-
-            val isFingerprintCurrentlyAllowedInBouncer by
-                collectLastValue(underTest.isFingerprintCurrentlyAllowedOnBouncer)
-
-            fingerprintPropertyRepository.supportsUdfps()
-            assertThat(isFingerprintCurrentlyAllowedInBouncer).isFalse()
-
+            val isUdfps by collectLastValue(underTest.isSensorUnderDisplay)
             fingerprintPropertyRepository.supportsRearFps()
-            assertThat(isFingerprintCurrentlyAllowedInBouncer).isTrue()
+            assertThat(isUdfps).isFalse()
+        }
 
+    @Test
+    fun isSensorUnderDisplay_side() =
+        testScope.runTest {
+            val isUdfps by collectLastValue(underTest.isSensorUnderDisplay)
             fingerprintPropertyRepository.supportsSideFps()
-            assertThat(isFingerprintCurrentlyAllowedInBouncer).isTrue()
+            assertThat(isUdfps).isFalse()
         }
 }

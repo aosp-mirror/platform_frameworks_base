@@ -34,6 +34,7 @@ import android.content.pm.UserProperties;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.IpcDataCache;
 import android.os.PersistableBundle;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -100,6 +101,9 @@ public final class UserManagerTest {
 
     @Before
     public void setUp() throws Exception {
+        // Disable binder caches in this process.
+        IpcDataCache.disableForTestMode();
+
         mOriginalCurrentUserId = ActivityManager.getCurrentUser();
         mUserManager = UserManager.get(mContext);
         mActivityManager = mContext.getSystemService(ActivityManager.class);
@@ -121,6 +125,9 @@ public final class UserManagerTest {
         // Making a copy of mUsersToRemove to avoid ConcurrentModificationException
         mUsersToRemove.stream().toList().forEach(this::removeUser);
         mUserRemovalWaiter.close();
+
+        mUserManager.setUserRestriction(UserManager.DISALLOW_GRANT_ADMIN, false,
+                mContext.getUser());
     }
 
     private void removeExistingUsers() {
@@ -935,6 +942,35 @@ public final class UserManagerTest {
 
     @MediumTest
     @Test
+    @RequiresFlagsEnabled(android.multiuser.Flags.FLAG_UNICORN_MODE_REFACTORING_FOR_HSUM_READ_ONLY)
+    public void testSetUserAdminThrowsSecurityException() throws Exception {
+        UserInfo targetUser = createUser("SecondaryUser", /*flags=*/ 0);
+        assertThat(targetUser.isAdmin()).isFalse();
+
+        try {
+            // 1. Target User Restriction
+            mUserManager.setUserRestriction(UserManager.DISALLOW_GRANT_ADMIN, true,
+                    targetUser.getUserHandle());
+            assertThrows(SecurityException.class, () -> mUserManager.setUserAdmin(targetUser.id));
+
+            // 2. Current User Restriction
+            mUserManager.setUserRestriction(UserManager.DISALLOW_GRANT_ADMIN, false,
+                    targetUser.getUserHandle());
+            mUserManager.setUserRestriction(UserManager.DISALLOW_GRANT_ADMIN, true,
+                    mContext.getUser());
+            assertThrows(SecurityException.class, () -> mUserManager.setUserAdmin(targetUser.id));
+
+        } finally {
+            // Ensure restriction is removed even if test fails
+            mUserManager.setUserRestriction(UserManager.DISALLOW_GRANT_ADMIN, false,
+                    targetUser.getUserHandle());
+            mUserManager.setUserRestriction(UserManager.DISALLOW_GRANT_ADMIN, false,
+                    mContext.getUser());
+        }
+    }
+
+    @MediumTest
+    @Test
     public void testRevokeUserAdmin() throws Exception {
         UserInfo userInfo = createUser("Admin", /*flags=*/ UserInfo.FLAG_ADMIN);
         assertThat(userInfo.isAdmin()).isTrue();
@@ -955,6 +991,37 @@ public final class UserManagerTest {
 
         userInfo = mUserManager.getUserInfo(userInfo.id);
         assertThat(userInfo.isAdmin()).isFalse();
+    }
+
+    @MediumTest
+    @Test
+    @RequiresFlagsEnabled(android.multiuser.Flags.FLAG_UNICORN_MODE_REFACTORING_FOR_HSUM_READ_ONLY)
+    public void testRevokeUserAdminThrowsSecurityException() throws Exception {
+        UserInfo targetUser = createUser("SecondaryUser", /*flags=*/ 0);
+        assertThat(targetUser.isAdmin()).isFalse();
+
+        try {
+            // 1. Target User Restriction
+            mUserManager.setUserRestriction(UserManager.DISALLOW_GRANT_ADMIN, true,
+                    targetUser.getUserHandle());
+            assertThrows(SecurityException.class, () -> mUserManager
+                    .revokeUserAdmin(targetUser.id));
+
+            // 2. Current User Restriction
+            mUserManager.setUserRestriction(UserManager.DISALLOW_GRANT_ADMIN, false,
+                    targetUser.getUserHandle());
+            mUserManager.setUserRestriction(UserManager.DISALLOW_GRANT_ADMIN, true,
+                    mContext.getUser());
+            assertThrows(SecurityException.class, () -> mUserManager
+                    .revokeUserAdmin(targetUser.id));
+
+        } finally {
+            // Ensure restriction is removed even if test fails
+            mUserManager.setUserRestriction(UserManager.DISALLOW_GRANT_ADMIN, false,
+                    targetUser.getUserHandle());
+            mUserManager.setUserRestriction(UserManager.DISALLOW_GRANT_ADMIN, false,
+                    mContext.getUser());
+        }
     }
 
     @MediumTest
@@ -1178,6 +1245,23 @@ public final class UserManagerTest {
         try {
             UserInfo createadInfo = createUser("SecondaryUser", /*flags=*/ 0);
             assertThat(createadInfo).isNull();
+        } finally {
+            mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_USER, false,
+                    creatorHandle);
+        }
+    }
+
+    // Make sure createUser for ADMIN would fail if we have DISALLOW_GRANT_ADMIN.
+    @MediumTest
+    @Test
+    @RequiresFlagsEnabled(android.multiuser.Flags.FLAG_UNICORN_MODE_REFACTORING_FOR_HSUM_READ_ONLY)
+    public void testCreateAdminUser_disallowGrantAdmin() throws Exception {
+        final int creatorId = ActivityManager.getCurrentUser();
+        final UserHandle creatorHandle = asHandle(creatorId);
+        mUserManager.setUserRestriction(UserManager.DISALLOW_GRANT_ADMIN, true, creatorHandle);
+        try {
+            UserInfo createdInfo = createUser("SecondaryUser", /*flags=*/ UserInfo.FLAG_ADMIN);
+            assertThat(createdInfo).isNull();
         } finally {
             mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_USER, false,
                     creatorHandle);

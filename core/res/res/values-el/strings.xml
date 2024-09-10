@@ -1029,7 +1029,7 @@
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"Έχετε πληκτρολογήσει τον κωδικό πρόσβασης εσφαλμένα <xliff:g id="NUMBER_0">%1$d</xliff:g> φορές. \n\nΠροσπαθήστε ξανά σε <xliff:g id="NUMBER_1">%2$d</xliff:g> δευτερόλεπτα."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"Έχετε πληκτρολογήσει τον αριθμό σας PIN εσφαλμένα <xliff:g id="NUMBER_0">%1$d</xliff:g> φορές. \n\nΠροσπαθήστε ξανά σε <xliff:g id="NUMBER_1">%2$d</xliff:g> δευτερόλεπτα."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="3069635524964070596">"Σχεδιάσατε το μοτίβο ξεκλειδώματος εσφαλμένα <xliff:g id="NUMBER_0">%1$d</xliff:g> φορές. Μετά από <xliff:g id="NUMBER_1">%2$d</xliff:g> ανεπιτυχείς προσπάθειες ακόμη, θα σας ζητηθεί να ξεκλειδώσετε το tablet σας με τη χρήση της σύνδεσής σας Google.\n\n Προσπαθήστε ξανά σε <xliff:g id="NUMBER_2">%3$d</xliff:g> δευτερόλεπτα."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="6399092175942158529">"Σχεδιάσατε εσφαλμένα το μοτίβο ξεκλειδώματος <xliff:g id="NUMBER_0">%1$d</xliff:g> φορές. Μετά από ακόμα <xliff:g id="NUMBER_1">%2$d</xliff:g> ανεπιτυχείς προσπάθειες, θα σας ζητηθεί να ξεκλειδώσετε τη συσκευή σας Android TV χρησιμοποιώντας τα στοιχεία σύνδεσής σας στο Google.\n\nΠροσπαθήστε ξανά σε <xliff:g id="NUMBER_2">%3$d</xliff:g> δευτερόλεπτα."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="6399092175942158529">"Σχεδιάσατε εσφαλμένα το μοτίβο ξεκλειδώματος <xliff:g id="NUMBER_0">%1$d</xliff:g> φορές. Μετά από ακόμα <xliff:g id="NUMBER_1">%2$d</xliff:g> ανεπιτυχείς προσπάθειες, θα σας ζητηθεί να ξεκλειδώσετε τη συσκευή σας Android TV χρησιμοποιώντας τα στοιχεία σύνδεσής σας στην Google.\n\nΠροσπαθήστε ξανά σε <xliff:g id="NUMBER_2">%3$d</xliff:g> δευτερόλεπτα."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="5691623136957148335">"Σχεδιάσατε το μοτίβο ξεκλειδώματος εσφαλμένα <xliff:g id="NUMBER_0">%1$d</xliff:g> φορές. Μετά από <xliff:g id="NUMBER_1">%2$d</xliff:g> ανεπιτυχείς προσπάθειες ακόμη, θα σας ζητηθεί να ξεκλειδώσετε το τηλέφωνό σας με τη χρήση της σύνδεσής σας Google.\n\n Προσπαθήστε ξανά σε <xliff:g id="NUMBER_2">%3$d</xliff:g> δευτερόλεπτα."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="7914445759242151426">"Προσπαθήσατε να ξεκλειδώσετε εσφαλμένα το tablet <xliff:g id="NUMBER_0">%1$d</xliff:g> φορές. Μετά από <xliff:g id="NUMBER_1">%2$d</xliff:g> προσπάθειες, το tablet θα επαναφερθεί στις εργοστασιακές ρυθμίσεις και όλα τα δεδομένα χρήστη θα χαθούν."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="4275591249631864248">"Δοκιμάσατε να ξεκλειδώσετε τη συσκευή Android TV <xliff:g id="NUMBER_0">%1$d</xliff:g> φορές χωρίς επιτυχία. Μετά από ακόμα <xliff:g id="NUMBER_1">%2$d</xliff:g> ανεπιτυχείς προσπάθειες, θα γίνει επαναφορά των προεπιλεγμένων εργοστασιακών ρυθμίσεων στη συσκευή σας Android TV και όλα τα δεδομένα χρήστη θα χαθούν."</string>
@@ -1194,6 +1194,8 @@
     <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"Η γραφή δεν υποστηρίζεται στα πεδία κωδικού πρόσβασης"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Πίσω"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Εναλλαγή μεθόδου εισαγωγής"</string>
+    <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"Άνοιγμα εργαλείου επιλογής μεθόδου εισαγωγής"</string>
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"Ρυθμίσεις"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Ο αποθηκευτικός χώρος εξαντλείται"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Ορισμένες λειτουργίες συστήματος ενδέχεται να μην λειτουργούν"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Δεν υπάρχει αρκετός αποθηκευτικός χώρος για το σύστημα. Βεβαιωθείτε ότι διαθέτετε 250 MB ελεύθερου χώρου και κάντε επανεκκίνηση."</string>
@@ -1744,7 +1746,8 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"Μια εφαρμογή αποκρύπτει το αίτημα άδειας, με αποτέλεσμα να μην είναι δυνατή η επαλήθευση της απάντησής σας."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Πατήστε μια λειτουργία για να ξεκινήσετε να τη χρησιμοποιείτε:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Επιλέξτε τις λειτουργίες που θέλετε να χρησιμοποιείτε με το κουμπί προσβασιμότητας."</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Επιλέξτε τις λειτουργίες που θέλετε να χρησιμοποιείτε με τη συντόμευση κουμπιού έντασης ήχου"</string>
+    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
+    <skip />
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Η υπηρεσία <xliff:g id="SERVICE_NAME">%s</xliff:g> έχει απενεργοποιηθεί."</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Επεξεργασία συντομεύσεων"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Τέλος"</string>
@@ -2422,6 +2425,8 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Για λόγους ασφάλειας, έγινε απόκρυψη του περιεχομένου της εφαρμογής από την κοινή χρήση οθόνης"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Συνδέθηκε αυτόματα με δορυφόρο"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Μπορείτε να στέλνετε και να λαμβάνετε μηνύματα χωρίς δίκτυο κινητής τηλεφωνίας ή Wi-Fi."</string>
+    <string name="satellite_notification_manual_title" msgid="1097504441849466279">"Χρήση της ανταλλαγής μηνυμάτων μέσω δορυφόρου;"</string>
+    <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Αποστολή και λήψη μηνυμάτων χωρίς δίκτυο κινητής τηλεφωνίας ή Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Άνοιγμα Messages"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Πώς λειτουργεί"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Σε εκκρεμότητα…"</string>
@@ -2447,4 +2452,5 @@
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"Αριθμομηχανή"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"Χάρτες"</string>
     <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"Εφαρμογές"</string>
+    <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"Δεν είναι δυνατή πλέον η αναγνώριση των δακτυλικών αποτυπωμάτων σας. Ρυθμίστε ξανά τη λειτουργία Ξεκλείδωμα με δακτυλικό αποτύπωμα."</string>
 </resources>

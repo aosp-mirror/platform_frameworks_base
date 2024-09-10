@@ -16,13 +16,16 @@
 
 package com.android.systemui.statusbar.policy.domain.interactor
 
+import android.app.AutomaticZenRule
 import android.app.NotificationManager.Policy
 import android.provider.Settings
 import android.provider.Settings.Secure.ZEN_DURATION
 import android.provider.Settings.Secure.ZEN_DURATION_FOREVER
 import android.provider.Settings.Secure.ZEN_DURATION_PROMPT
+import android.service.notification.SystemZenRules
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.internal.R
 import com.android.settingslib.notification.data.repository.updateNotificationPolicy
 import com.android.settingslib.notification.modes.TestModeBuilder
 import com.android.systemui.SysuiTestCase
@@ -172,7 +175,7 @@ class ZenModeInteractorTest : SysuiTestCase() {
     @Test
     fun shouldAskForZenDuration_changesWithSetting() =
         testScope.runTest {
-            val manualDnd = TestModeBuilder.MANUAL_DND
+            val manualDnd = TestModeBuilder.MANUAL_DND_ACTIVE
 
             settingsRepository.setInt(ZEN_DURATION, ZEN_DURATION_FOREVER)
             runCurrent()
@@ -201,7 +204,7 @@ class ZenModeInteractorTest : SysuiTestCase() {
     @Test
     fun activateMode_usesCorrectDuration() =
         testScope.runTest {
-            val manualDnd = TestModeBuilder.MANUAL_DND
+            val manualDnd = TestModeBuilder.MANUAL_DND_ACTIVE
             zenModeRepository.addModes(listOf(manualDnd))
             settingsRepository.setInt(ZEN_DURATION, ZEN_DURATION_FOREVER)
             runCurrent()
@@ -216,5 +219,122 @@ class ZenModeInteractorTest : SysuiTestCase() {
             underTest.activateMode(manualDnd)
             assertThat(zenModeRepository.getModeActiveDuration(manualDnd.id))
                 .isEqualTo(Duration.ofMinutes(60))
+        }
+
+    @Test
+    fun activeModes_computesMainActiveMode() =
+        testScope.runTest {
+            val activeModes by collectLastValue(underTest.activeModes)
+
+            zenModeRepository.addMode(id = "Bedtime", type = AutomaticZenRule.TYPE_BEDTIME)
+            zenModeRepository.addMode(id = "Other", type = AutomaticZenRule.TYPE_OTHER)
+
+            runCurrent()
+            assertThat(activeModes?.modeNames).hasSize(0)
+            assertThat(activeModes?.mainMode).isNull()
+
+            zenModeRepository.activateMode("Other")
+            runCurrent()
+            assertThat(activeModes?.modeNames).containsExactly("Mode Other")
+            assertThat(activeModes?.mainMode?.name).isEqualTo("Mode Other")
+
+            zenModeRepository.activateMode("Bedtime")
+            runCurrent()
+            assertThat(activeModes?.modeNames)
+                .containsExactly("Mode Bedtime", "Mode Other")
+                .inOrder()
+            assertThat(activeModes?.mainMode?.name).isEqualTo("Mode Bedtime")
+
+            zenModeRepository.deactivateMode("Other")
+            runCurrent()
+            assertThat(activeModes?.modeNames).containsExactly("Mode Bedtime")
+            assertThat(activeModes?.mainMode?.name).isEqualTo("Mode Bedtime")
+
+            zenModeRepository.deactivateMode("Bedtime")
+            runCurrent()
+            assertThat(activeModes?.modeNames).hasSize(0)
+            assertThat(activeModes?.mainMode).isNull()
+        }
+
+    @Test
+    fun getActiveModes_computesMainActiveMode() = runTest {
+        zenModeRepository.addMode(id = "Bedtime", type = AutomaticZenRule.TYPE_BEDTIME)
+        zenModeRepository.addMode(id = "Other", type = AutomaticZenRule.TYPE_OTHER)
+
+        var activeModes = underTest.getActiveModes()
+        assertThat(activeModes.modeNames).hasSize(0)
+        assertThat(activeModes.mainMode).isNull()
+
+        zenModeRepository.activateMode("Other")
+        activeModes = underTest.getActiveModes()
+        assertThat(activeModes.modeNames).containsExactly("Mode Other")
+        assertThat(activeModes.mainMode?.name).isEqualTo("Mode Other")
+
+        zenModeRepository.activateMode("Bedtime")
+        activeModes = underTest.getActiveModes()
+        assertThat(activeModes.modeNames).containsExactly("Mode Bedtime", "Mode Other").inOrder()
+        assertThat(activeModes.mainMode?.name).isEqualTo("Mode Bedtime")
+
+        zenModeRepository.deactivateMode("Other")
+        activeModes = underTest.getActiveModes()
+        assertThat(activeModes.modeNames).containsExactly("Mode Bedtime")
+        assertThat(activeModes.mainMode?.name).isEqualTo("Mode Bedtime")
+
+        zenModeRepository.deactivateMode("Bedtime")
+        activeModes = underTest.getActiveModes()
+        assertThat(activeModes.modeNames).hasSize(0)
+        assertThat(activeModes.mainMode).isNull()
+    }
+
+    @Test
+    fun mainActiveMode_flows() =
+        testScope.runTest {
+            val mainActiveMode by collectLastValue(underTest.mainActiveMode)
+
+            zenModeRepository.addModes(
+                listOf(
+                    TestModeBuilder()
+                        .setId("Bedtime")
+                        .setName("Mode Bedtime")
+                        .setType(AutomaticZenRule.TYPE_BEDTIME)
+                        .setActive(false)
+                        .setPackage(mContext.packageName)
+                        .setIconResId(R.drawable.ic_zen_mode_type_bedtime)
+                        .build(),
+                    TestModeBuilder()
+                        .setId("Other")
+                        .setName("Mode Other")
+                        .setType(AutomaticZenRule.TYPE_OTHER)
+                        .setActive(false)
+                        .setPackage(SystemZenRules.PACKAGE_ANDROID)
+                        .setIconResId(R.drawable.ic_zen_mode_type_other)
+                        .build(),
+                )
+            )
+
+            runCurrent()
+            assertThat(mainActiveMode).isNull()
+
+            zenModeRepository.activateMode("Other")
+            runCurrent()
+            assertThat(mainActiveMode?.name).isEqualTo("Mode Other")
+            assertThat(mainActiveMode?.icon?.key?.resId)
+                .isEqualTo(R.drawable.ic_zen_mode_type_other)
+
+            zenModeRepository.activateMode("Bedtime")
+            runCurrent()
+            assertThat(mainActiveMode?.name).isEqualTo("Mode Bedtime")
+            assertThat(mainActiveMode?.icon?.key?.resId)
+                .isEqualTo(R.drawable.ic_zen_mode_type_bedtime)
+
+            zenModeRepository.deactivateMode("Other")
+            runCurrent()
+            assertThat(mainActiveMode?.name).isEqualTo("Mode Bedtime")
+            assertThat(mainActiveMode?.icon?.key?.resId)
+                .isEqualTo(R.drawable.ic_zen_mode_type_bedtime)
+
+            zenModeRepository.deactivateMode("Bedtime")
+            runCurrent()
+            assertThat(mainActiveMode).isNull()
         }
 }

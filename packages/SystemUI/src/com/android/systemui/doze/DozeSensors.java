@@ -256,7 +256,7 @@ public class DozeSensors {
                         Settings.Secure.DOZE_WAKE_DISPLAY_GESTURE,
                         mConfig.wakeScreenGestureAvailable()
                           && mConfig.alwaysOnEnabled(
-                                  mSelectedUserInteractor.getSelectedUserId(true)),
+                                  mSelectedUserInteractor.getSelectedUserId()),
                         DozeLog.REASON_SENSOR_WAKE_UP_PRESENCE,
                         false /* reports touch coordinates */,
                         false /* touchscreen */
@@ -297,7 +297,7 @@ public class DozeSensors {
 
     private boolean udfpsLongPressConfigured() {
         return mUdfpsEnrolled
-                && (mConfig.alwaysOnEnabled(mSelectedUserInteractor.getSelectedUserId(true))
+                && (mConfig.alwaysOnEnabled(mSelectedUserInteractor.getSelectedUserId())
                 || mScreenOffUdfpsEnabled);
     }
 
@@ -477,7 +477,7 @@ public class DozeSensors {
     private final ContentObserver mSettingsObserver = new ContentObserver(mHandler) {
         @Override
         public void onChange(boolean selfChange, Collection<Uri> uris, int flags, int userId) {
-            if (userId != mSelectedUserInteractor.getSelectedUserId(true)) {
+            if (userId != mSelectedUserInteractor.getSelectedUserId()) {
                 return;
             }
             for (TriggerSensor s : mTriggerSensors) {
@@ -703,13 +703,13 @@ public class DozeSensors {
         }
 
         protected boolean enabledBySetting() {
-            if (!mConfig.enabled(mSelectedUserInteractor.getSelectedUserId(true))) {
+            if (!mConfig.enabled(mSelectedUserInteractor.getSelectedUserId())) {
                 return false;
             } else if (TextUtils.isEmpty(mSetting)) {
                 return true;
             }
             return mSecureSettings.getIntForUser(mSetting, mSettingDefault ? 1 : 0,
-                    mSelectedUserInteractor.getSelectedUserId(true)) != 0;
+                    mSelectedUserInteractor.getSelectedUserId()) != 0;
         }
 
         @Override

@@ -82,12 +82,15 @@ public class FrameRateSelectionPriorityTests extends WindowTestsBase {
     public void setUp() {
         DisplayInfo di = new DisplayInfo(mDisplayInfo);
         Mode defaultMode = di.getDefaultMode();
-        di.supportedModes = new Mode[] {
-                new Mode(1, defaultMode.getPhysicalWidth(), defaultMode.getPhysicalHeight(), 90),
-                new Mode(2, defaultMode.getPhysicalWidth(), defaultMode.getPhysicalHeight(), 70),
-                new Mode(LOW_MODE_ID,
-                        defaultMode.getPhysicalWidth(), defaultMode.getPhysicalHeight(), 60),
-        };
+        Mode hiMode = new Mode(1,
+                defaultMode.getPhysicalWidth(), defaultMode.getPhysicalHeight(), 90);
+        Mode midMode = new Mode(2,
+                defaultMode.getPhysicalWidth(), defaultMode.getPhysicalHeight(), 70);
+        Mode lowMode = new Mode(LOW_MODE_ID,
+                defaultMode.getPhysicalWidth(), defaultMode.getPhysicalHeight(), 60);
+
+        di.supportedModes = new Mode[] { hiMode, midMode };
+        di.appsSupportedModes = new Mode[] { hiMode, midMode, lowMode };
         di.defaultModeId = 1;
         mRefreshRatePolicy = new RefreshRatePolicy(mWm, di, mDenylist);
         when(mDisplayPolicy.getRefreshRatePolicy()).thenReturn(mRefreshRatePolicy);

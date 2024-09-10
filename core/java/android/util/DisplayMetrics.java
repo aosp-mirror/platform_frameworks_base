@@ -24,6 +24,7 @@ import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.FontScaleConverter;
 import android.os.SystemProperties;
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
 import android.view.WindowManager;
 
 import java.lang.annotation.Retention;
@@ -45,6 +46,7 @@ import java.lang.annotation.RetentionPolicy;
  * </p>
  *
  */
+@RavenwoodKeepWholeClass
 public class DisplayMetrics {
 
     @IntDef(prefix = { "DENSITY_" }, value = {

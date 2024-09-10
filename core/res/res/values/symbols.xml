@@ -363,6 +363,7 @@
   <java-symbol type="bool" name="config_canSwitchToHeadlessSystemUser"/>
   <java-symbol type="bool" name="config_enableMultiUserUI"/>
   <java-symbol type="bool" name="config_enableMultipleAdmins"/>
+  <java-symbol type="bool" name="config_bootToHeadlessSystemUser"/>
   <java-symbol type="bool" name="config_omnipresentCommunalUser"/>
   <java-symbol type="bool" name="config_enableNewAutoSelectNetworkUI"/>
   <java-symbol type="bool" name="config_disableUsbPermissionDialogs"/>
@@ -2131,6 +2132,7 @@
   <java-symbol type="dimen" name="config_hapticChannelMaxVibrationAmplitude" />
   <java-symbol type="dimen" name="config_keyboardHapticFeedbackFixedAmplitude" />
   <java-symbol type="bool" name="config_keyboardVibrationSettingsSupported" />
+  <java-symbol type="bool" name="config_ringtoneVibrationSettingsSupported" />
   <java-symbol type="integer" name="config_vibrationWaveformRampStepDuration" />
   <java-symbol type="bool" name="config_ignoreVibrationsOnWirelessCharger" />
   <java-symbol type="integer" name="config_vibrationWaveformRampDownDuration" />
@@ -2245,6 +2247,7 @@
   <java-symbol type="string" name="heavy_weight_notification_detail" />
   <java-symbol type="string" name="image_wallpaper_component" />
   <java-symbol type="string" name="input_method_binding_label" />
+  <java-symbol type="string" name="input_method_ime_switch_long_click_action_desc" />
   <java-symbol type="string" name="launch_warning_original" />
   <java-symbol type="string" name="launch_warning_replace" />
   <java-symbol type="string" name="launch_warning_title" />
@@ -4779,6 +4782,7 @@
 
   <java-symbol type="bool" name="config_magnification_area" />
   <java-symbol type="bool" name="config_magnification_always_on_enabled" />
+  <java-symbol type="bool" name="config_magnification_keep_zoom_level_when_context_changed" />
 
   <java-symbol type="bool" name="config_trackerAppNeedsPermissions"/>
   <!-- FullScreenMagnification thumbnail -->
@@ -5460,7 +5464,11 @@
   <java-symbol type="bool" name="config_enable_a11y_fullscreen_magnification_overscroll_handler" />
   <java-symbol type="dimen" name="accessibility_fullscreen_magnification_gesture_edge_slop" />
 
+  <!-- For HapticFeedbackConstants configurability defined at HapticFeedbackCustomization -->
   <java-symbol type="string" name="config_hapticFeedbackCustomizationFile" />
+  <java-symbol type="xml" name="haptic_feedback_customization" />
+  <java-symbol type="xml" name="haptic_feedback_customization_source_rotary_encoder" />
+  <java-symbol type="xml" name="haptic_feedback_customization_source_touchscreen" />
 
   <!-- For ActivityManager PSS profiling configurability -->
   <java-symbol type="bool" name="config_am_disablePssProfiling" />
@@ -5483,8 +5491,11 @@
   <java-symbol type="bool" name="config_tvExternalInputLoggingDisplayNameFilterEnabled" />
   <java-symbol type="array" name="config_tvExternalInputLoggingDeviceOnScreenDisplayNames" />
   <java-symbol type="array" name="config_tvExternalInputLoggingDeviceBrandNames" />
+
+  <!-- Scroll Feedback Configs -->
   <java-symbol type="bool" name="config_viewRotaryEncoderHapticScrollFedbackEnabled" />
   <java-symbol type="bool" name="config_viewBasedRotaryEncoderHapticsEnabled" />
+  <java-symbol type="bool" name="config_viewTouchScreenHapticScrollFeedbackEnabled" />
 
   <java-symbol type="bool" name="config_quickSettingsShowMediaPlayer" />
 
@@ -5499,6 +5510,8 @@
   <!-- System notification for satellite service -->
   <java-symbol type="string" name="satellite_notification_title" />
   <java-symbol type="string" name="satellite_notification_summary" />
+  <java-symbol type="string" name="satellite_notification_manual_title" />
+  <java-symbol type="string" name="satellite_notification_manual_summary" />
   <java-symbol type="string" name="satellite_notification_open_message" />
   <java-symbol type="string" name="satellite_notification_how_it_works" />
   <java-symbol type="drawable" name="ic_satellite_alt_24px" />
@@ -5557,6 +5570,7 @@
   <java-symbol type="string"  name="recs_notification_channel_label"/>
 
   <!-- Priority Modes icons -->
+  <java-symbol type="drawable" name="ic_zen_priority_modes" />
   <java-symbol type="drawable" name="ic_zen_mode_type_bedtime" />
   <java-symbol type="drawable" name="ic_zen_mode_type_driving" />
   <java-symbol type="drawable" name="ic_zen_mode_type_immersive" />
@@ -5566,6 +5580,7 @@
   <java-symbol type="drawable" name="ic_zen_mode_type_schedule_time" />
   <java-symbol type="drawable" name="ic_zen_mode_type_theater" />
   <java-symbol type="drawable" name="ic_zen_mode_type_unknown" />
+  <java-symbol type="drawable" name="ic_zen_mode_type_special_dnd" />
 
   <!-- System notification for background user sound -->
   <java-symbol type="string" name="bg_user_sound_notification_title_alarm" />
@@ -5586,4 +5601,6 @@
 
   <!-- Fingerprint loe notification string -->
   <java-symbol type="string" name="fingerprint_loe_notification_msg" />
+
+  <java-symbol type="bool" name="config_enableViewGroupScalingFading"/>
 </resources>

@@ -17,7 +17,6 @@
 package com.android.systemui.keyguard.ui.binder
 
 import android.content.applicationContext
-import android.view.layoutInflater
 import android.view.mockedLayoutInflater
 import android.view.windowManager
 import com.android.systemui.biometrics.domain.interactor.fingerprintPropertyInteractor
@@ -25,7 +24,6 @@ import com.android.systemui.biometrics.domain.interactor.udfpsOverlayInteractor
 import com.android.systemui.common.ui.domain.interactor.configurationInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryUdfpsInteractor
 import com.android.systemui.deviceentry.ui.viewmodel.AlternateBouncerUdfpsAccessibilityOverlayViewModel
-import com.android.systemui.keyguard.dismissCallbackRegistry
 import com.android.systemui.keyguard.ui.SwipeUpAnywhereGestureHandler
 import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerDependencies
 import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerMessageAreaViewModel
@@ -36,6 +34,7 @@ import com.android.systemui.keyguard.ui.viewmodel.alternateBouncerViewModel
 import com.android.systemui.keyguard.ui.viewmodel.alternateBouncerWindowViewModel
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.statusbar.gesture.TapGestureDetector
 import com.android.systemui.util.mockito.mock
@@ -50,10 +49,10 @@ val Kosmos.alternateBouncerViewBinder by
             alternateBouncerDependencies = { alternateBouncerDependencies },
             windowManager = { windowManager },
             layoutInflater = { mockedLayoutInflater },
-            dismissCallbackRegistry = dismissCallbackRegistry,
         )
     }
 
+@ExperimentalCoroutinesApi
 private val Kosmos.alternateBouncerDependencies by
     Kosmos.Fixture {
         AlternateBouncerDependencies(
@@ -66,9 +65,11 @@ private val Kosmos.alternateBouncerDependencies by
             },
             messageAreaViewModel = mock<AlternateBouncerMessageAreaViewModel>(),
             powerInteractor = powerInteractor,
+            touchLogBuffer = logcatLogBuffer(),
         )
     }
 
+@ExperimentalCoroutinesApi
 private val Kosmos.alternateBouncerUdfpsIconViewModel by
     Kosmos.Fixture {
         AlternateBouncerUdfpsIconViewModel(

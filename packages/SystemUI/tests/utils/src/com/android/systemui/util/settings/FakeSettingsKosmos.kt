@@ -19,6 +19,13 @@ package com.android.systemui.util.settings
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.kosmos.testDispatcher
-import com.android.systemui.settings.fakeUserTracker
+import com.android.systemui.kosmos.unconfinedTestDispatcher
+import com.android.systemui.settings.userTracker
 
-val Kosmos.fakeSettings: FakeSettings by Fixture { FakeSettings(testDispatcher, fakeUserTracker) }
+val Kosmos.fakeSettings: FakeSettings by Fixture {
+    FakeSettings(testDispatcher) { userTracker.userId }
+}
+
+val Kosmos.unconfinedDispatcherFakeSettings: FakeSettings by Fixture {
+    FakeSettings(unconfinedTestDispatcher) { userTracker.userId }
+}

@@ -37,7 +37,6 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
@@ -276,9 +275,8 @@ public class WallpaperControllerTests extends WindowTestsBase {
         final DisplayContent dc = mDisplayContent;
         final WindowState homeWin = createWallpaperTargetWindow(dc);
         final WindowState appWin = createWindow(null, TYPE_BASE_APPLICATION, "app");
-        final RecentsAnimationController recentsController = mock(RecentsAnimationController.class);
-        doReturn(true).when(recentsController).isWallpaperVisible(eq(appWin));
-        mWm.setRecentsAnimationController(recentsController);
+        appWin.mAttrs.flags |= FLAG_SHOW_WALLPAPER;
+        makeWindowVisible(appWin);
 
         dc.mWallpaperController.adjustWallpaperWindows();
         assertEquals(appWin, dc.mWallpaperController.getWallpaperTarget());
@@ -354,46 +352,6 @@ public class WallpaperControllerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testFixedRotationRecentsAnimatingTask() {
-        final WindowState wallpaperWindow = createWallpaperWindow(mDisplayContent);
-        final WallpaperWindowToken wallpaperToken = wallpaperWindow.mToken.asWallpaperToken();
-        final WindowState appWin = createWindow(null, TYPE_BASE_APPLICATION, "app");
-        makeWindowVisible(appWin);
-        final ActivityRecord r = appWin.mActivityRecord;
-        final RecentsAnimationController recentsController = mock(RecentsAnimationController.class);
-        doReturn(true).when(recentsController).isWallpaperVisible(eq(appWin));
-        mWm.setRecentsAnimationController(recentsController);
-
-        r.applyFixedRotationTransform(mDisplayContent.getDisplayInfo(),
-                mDisplayContent.mDisplayFrames, mDisplayContent.getConfiguration());
-        // Invisible requested activity should not share its rotation transform.
-        r.setVisibleRequested(false);
-        mDisplayContent.mWallpaperController.adjustWallpaperWindows();
-        assertFalse(wallpaperToken.hasFixedRotationTransform());
-
-        // Wallpaper should link the transform of its target.
-        r.setVisibleRequested(true);
-        mDisplayContent.mWallpaperController.adjustWallpaperWindows();
-        assertEquals(appWin, mDisplayContent.mWallpaperController.getWallpaperTarget());
-        assertTrue(r.hasFixedRotationTransform());
-        assertTrue(wallpaperToken.hasFixedRotationTransform());
-
-        // The case with shell transition.
-        registerTestTransitionPlayer();
-        final Transition t = r.mTransitionController.createTransition(TRANSIT_OPEN);
-        final ActivityRecord recents = mock(ActivityRecord.class);
-        t.collect(r.getTask());
-        r.mTransitionController.setTransientLaunch(recents, r.getTask());
-        // The activity in restore-below task should not be the target if keyguard is not locked.
-        mDisplayContent.mWallpaperController.adjustWallpaperWindows();
-        assertNotEquals(appWin, mDisplayContent.mWallpaperController.getWallpaperTarget());
-        // The activity in restore-below task should not be the target if keyguard is occluded.
-        doReturn(true).when(mDisplayContent).isKeyguardLocked();
-        mDisplayContent.mWallpaperController.adjustWallpaperWindows();
-        assertNotEquals(appWin, mDisplayContent.mWallpaperController.getWallpaperTarget());
-    }
-
-    @Test
     public void testWallpaperReportConfigChange() {
         final WindowState wallpaperWindow = createWallpaperWindow(mDisplayContent);
         createWallpaperTargetWindow(mDisplayContent);
@@ -449,7 +407,7 @@ public class WallpaperControllerTests extends WindowTestsBase {
         final SurfaceControl.Transaction t = mock(SurfaceControl.Transaction.class);
         token.finishSync(t, token.getSyncGroup(), false /* cancel */);
         transit.onTransactionReady(transit.getSyncId(), t);
-        dc.mTransitionController.finishTransition(transit);
+        dc.mTransitionController.finishTransition(ActionChain.testFinish(transit));
         assertFalse(wallpaperWindow.isVisible());
         assertFalse(token.isVisible());
     }

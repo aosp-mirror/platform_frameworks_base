@@ -175,7 +175,7 @@ class DragState {
      */
     private CompletableFuture<Void> showInputSurface() {
         if (mInputSurface == null) {
-            mInputSurface = mService.makeSurfaceBuilder(mDisplayContent.getSession())
+            mInputSurface = mService.makeSurfaceBuilder()
                     .setContainerLayer()
                     .setName("Drag and Drop Input Consumer")
                     .setCallsite("DragState.showInputSurface")

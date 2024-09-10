@@ -244,6 +244,10 @@ class Context : public IAaptContext {
     return verbose_;
   }
 
+  void SetVerbose(bool verbose) {
+    verbose_ = verbose;
+  }
+
   int GetMinSdkVersion() override {
     return min_sdk_;
   }
@@ -388,6 +392,8 @@ int ConvertCommand::Action(const std::vector<std::string>& args) {
   }
 
   Context context;
+  context.SetVerbose(verbose_);
+
   StringPiece path = args[0];
   unique_ptr<LoadedApk> apk = LoadedApk::LoadApkFromPath(path, context.GetDiagnostics());
   if (apk == nullptr) {

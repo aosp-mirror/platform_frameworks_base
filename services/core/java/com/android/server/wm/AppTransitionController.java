@@ -68,7 +68,6 @@ import static com.android.server.wm.AppTransition.isNormalTransit;
 import static com.android.server.wm.NonAppWindowAnimationAdapter.shouldAttachNavBarToApp;
 import static com.android.server.wm.NonAppWindowAnimationAdapter.shouldStartNonAppWindowAnimationsForKeyguardExit;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
-import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
 import static com.android.server.wm.WallpaperAnimationAdapter.shouldStartWallpaperAnimation;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -98,6 +97,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /**
@@ -173,41 +173,6 @@ public class AppTransitionController {
                 || !transitionGoodToGoForTaskFragments()) {
             return;
         }
-        final boolean isRecentsInOpening = mDisplayContent.mOpeningApps.stream().anyMatch(
-                ConfigurationContainer::isActivityTypeRecents);
-        // In order to avoid visual clutter caused by a conflict between app transition
-        // animation and recents animation, app transition is delayed until recents finishes.
-        // One exceptional case. When 3P launcher is used and a user taps a task screenshot in
-        // task switcher (isRecentsInOpening=true), app transition must start even though
-        // recents is running. Otherwise app transition is blocked until timeout (b/232984498).
-        // When 1P launcher is used, this animation is controlled by the launcher outside of
-        // the app transition, so delaying app transition doesn't cause visible delay. After
-        // recents finishes, app transition is handled just to commit visibility on apps.
-        if (!isRecentsInOpening) {
-            final ArraySet<WindowContainer> participants = new ArraySet<>();
-            participants.addAll(mDisplayContent.mOpeningApps);
-            participants.addAll(mDisplayContent.mChangingContainers);
-            boolean deferForRecents = false;
-            for (int i = 0; i < participants.size(); i++) {
-                WindowContainer wc = participants.valueAt(i);
-                final ActivityRecord activity = getAppFromContainer(wc);
-                if (activity == null) {
-                    continue;
-                }
-                // Don't defer recents animation if one of activity isn't running for it, that one
-                // might be started from quickstep.
-                if (!activity.isAnimating(PARENTS, ANIMATION_TYPE_RECENTS)) {
-                    deferForRecents = false;
-                    break;
-                }
-                deferForRecents = true;
-            }
-            if (deferForRecents) {
-                ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
-                        "Delaying app transition for recents animation to finish");
-                return;
-            }
-        }
 
         Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "AppTransitionReady");
 
@@ -250,7 +215,7 @@ public class AppTransitionController {
 
         ArraySet<ActivityRecord> tmpOpenApps = mDisplayContent.mOpeningApps;
         ArraySet<ActivityRecord> tmpCloseApps = mDisplayContent.mClosingApps;
-        if (mDisplayContent.mAtmService.mBackNavigationController.isMonitoringTransition()) {
+        if (mDisplayContent.mAtmService.mBackNavigationController.isMonitoringFinishTransition()) {
             tmpOpenApps = new ArraySet<>(mDisplayContent.mOpeningApps);
             tmpCloseApps = new ArraySet<>(mDisplayContent.mClosingApps);
             if (mDisplayContent.mAtmService.mBackNavigationController
@@ -289,10 +254,12 @@ public class AppTransitionController {
                 getTopApp(mDisplayContent.mChangingContainers, false /* ignoreHidden */);
         final WindowManager.LayoutParams animLp = getAnimLp(animLpActivity);
 
-        // No AE remote animation with Shell transition.
-        // Unfreeze the windows that were previously frozen for TaskFragment animation.
-        unfreezeEmbeddedChangingWindows();
-        overrideWithRemoteAnimationIfSet(animLpActivity, transit, activityTypes);
+        // Check if there is any override
+        if (!overrideWithTaskFragmentRemoteAnimation(transit, activityTypes)) {
+            // Unfreeze the windows that were previously frozen for TaskFragment animation.
+            unfreezeEmbeddedChangingWindows();
+            overrideWithRemoteAnimationIfSet(animLpActivity, transit, activityTypes);
+        }
 
         final boolean voiceInteraction = containsVoiceInteraction(mDisplayContent.mClosingApps)
                 || containsVoiceInteraction(mDisplayContent.mOpeningApps);
@@ -723,6 +690,64 @@ public class AppTransitionController {
     }
 
     /**
+     * Overrides the pending transition with the remote animation defined by the
+     * {@link ITaskFragmentOrganizer} if all windows in the transition are children of
+     * {@link TaskFragment} that are organized by the same organizer.
+     *
+     * @return {@code true} if the transition is overridden.
+     */
+    private boolean overrideWithTaskFragmentRemoteAnimation(@TransitionOldType int transit,
+            ArraySet<Integer> activityTypes) {
+        if (transitionMayContainNonAppWindows(transit)) {
+            return false;
+        }
+        if (!transitionContainsTaskFragmentWithBoundsOverride()) {
+            // No need to play TaskFragment remote animation if all embedded TaskFragment in the
+            // transition fill the Task.
+            return false;
+        }
+
+        final Task task = findParentTaskForAllEmbeddedWindows();
+        final ITaskFragmentOrganizer organizer = findTaskFragmentOrganizer(task);
+        final RemoteAnimationDefinition definition = organizer != null
+                ? mDisplayContent.mAtmService.mTaskFragmentOrganizerController
+                    .getRemoteAnimationDefinition(organizer)
+                : null;
+        final RemoteAnimationAdapter adapter = definition != null
+                ? definition.getAdapter(transit, activityTypes)
+                : null;
+        if (adapter == null) {
+            return false;
+        }
+        mDisplayContent.mAppTransition.overridePendingAppTransitionRemote(
+                adapter, false /* sync */, true /*isActivityEmbedding*/);
+        ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
+                "Override with TaskFragment remote animation for transit=%s",
+                AppTransition.appTransitionOldToString(transit));
+
+        final int organizerUid = mDisplayContent.mAtmService.mTaskFragmentOrganizerController
+                .getTaskFragmentOrganizerUid(organizer);
+        final boolean shouldDisableInputForRemoteAnimation = !task.isFullyTrustedEmbedding(
+                organizerUid);
+        final RemoteAnimationController remoteAnimationController =
+                mDisplayContent.mAppTransition.getRemoteAnimationController();
+        if (shouldDisableInputForRemoteAnimation && remoteAnimationController != null) {
+            // We are going to use client-driven animation, Disable all input on activity windows
+            // during the animation (unless it is fully trusted) to ensure it is safe to allow
+            // client to animate the surfaces.
+            // This is needed for all activity windows in the animation Task.
+            remoteAnimationController.setOnRemoteAnimationReady(() -> {
+                final Consumer<ActivityRecord> updateActivities =
+                        activity -> activity.setDropInputForAnimation(true);
+                task.forAllActivities(updateActivities);
+            });
+            ProtoLog.d(WM_DEBUG_APP_TRANSITIONS, "Task=%d contains embedded TaskFragment."
+                    + " Disabled all input during TaskFragment remote animation.", task.mTaskId);
+        }
+        return true;
+    }
+
+    /**
      * Overrides the pending transition with the remote animation defined for the transition in the
      * set of defined remote animations in the app window token.
      */
@@ -1032,12 +1057,8 @@ public class AppTransitionController {
     private void applyAnimations(ArraySet<ActivityRecord> openingApps,
             ArraySet<ActivityRecord> closingApps, @TransitionOldType int transit,
             LayoutParams animLp, boolean voiceInteraction) {
-        final RecentsAnimationController rac = mService.getRecentsAnimationController();
         if (transit == WindowManager.TRANSIT_OLD_UNSET
                 || (openingApps.isEmpty() && closingApps.isEmpty())) {
-            if (rac != null) {
-                rac.sendTasksAppeared();
-            }
             return;
         }
 
@@ -1075,9 +1096,6 @@ public class AppTransitionController {
                 voiceInteraction);
         applyAnimations(closingWcs, closingApps, transit, false /* visible */, animLp,
                 voiceInteraction);
-        if (rac != null) {
-            rac.sendTasksAppeared();
-        }
 
         for (int i = 0; i < openingApps.size(); ++i) {
             openingApps.valueAtUnchecked(i).mOverrideTaskTransition = false;

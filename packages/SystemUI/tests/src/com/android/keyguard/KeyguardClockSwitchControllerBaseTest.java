@@ -55,7 +55,6 @@ import com.android.systemui.shared.clocks.ClockRegistry;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController;
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerAlwaysOnDisplayViewBinder;
-import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.NotificationIconContainer;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.settings.SecureSettings;
@@ -77,8 +76,6 @@ public class KeyguardClockSwitchControllerBaseTest extends SysuiTestCase {
     protected ClockRegistry mClockRegistry;
     @Mock
     KeyguardSliceViewController mKeyguardSliceViewController;
-    @Mock
-    NotificationIconAreaController mNotificationIconAreaController;
     @Mock
     LockscreenSmartspaceController mSmartspaceController;
 
@@ -176,7 +173,6 @@ public class KeyguardClockSwitchControllerBaseTest extends SysuiTestCase {
                 mStatusBarStateController,
                 mClockRegistry,
                 mKeyguardSliceViewController,
-                mNotificationIconAreaController,
                 mSmartspaceController,
                 mock(NotificationIconContainerAlwaysOnDisplayViewBinder.class),
                 mKeyguardUnlockAnimationController,

@@ -26,16 +26,19 @@ import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_UP;
 
 import static com.android.launcher3.icons.BaseIconFactory.MODE_DEFAULT;
-import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
+import static com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource.APP_HANDLE_MENU_BUTTON;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getFineResizeCornerSize;
 import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getLargeResizeCornerSize;
 import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getResizeEdgeHandleSize;
+import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getResizeHandleEdgeInset;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.WindowConfiguration.WindowingMode;
+import android.app.assist.AssistContent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
@@ -52,6 +55,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Trace;
+import android.os.UserHandle;
 import android.util.Size;
 import android.util.Slog;
 import android.view.Choreographer;
@@ -72,22 +76,27 @@ import com.android.wm.shell.R;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.apptoweb.AppToWebGenericLinksParser;
+import com.android.wm.shell.apptoweb.AppToWebUtils;
+import com.android.wm.shell.apptoweb.AssistContentRequester;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
+import com.android.wm.shell.common.MultiInstanceHelper;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
 import com.android.wm.shell.shared.desktopmode.DesktopModeFlags;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
+import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource;
 import com.android.wm.shell.splitscreen.SplitScreenController;
-import com.android.wm.shell.windowdecor.common.OnTaskActionClickListener;
 import com.android.wm.shell.windowdecor.extension.TaskInfoKt;
 import com.android.wm.shell.windowdecor.viewholder.AppHandleViewHolder;
 import com.android.wm.shell.windowdecor.viewholder.AppHeaderViewHolder;
 import com.android.wm.shell.windowdecor.viewholder.WindowDecorationViewHolder;
 
 import kotlin.Unit;
+import kotlin.jvm.functions.Function0;
 
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
@@ -108,15 +117,20 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     private final Choreographer mChoreographer;
     private final SyncTransactionQueue mSyncQueue;
     private final SplitScreenController mSplitScreenController;
+    private final WindowManagerWrapper mWindowManagerWrapper;
 
     private WindowDecorationViewHolder mWindowDecorViewHolder;
     private View.OnClickListener mOnCaptionButtonClickListener;
     private View.OnTouchListener mOnCaptionTouchListener;
     private View.OnLongClickListener mOnCaptionLongClickListener;
     private View.OnGenericMotionListener mOnCaptionGenericMotionListener;
-    private OnTaskActionClickListener mOnMaximizeOrRestoreClickListener;
-    private OnTaskActionClickListener mOnLeftSnapClickListener;
-    private OnTaskActionClickListener mOnRightSnapClickListener;
+    private Function0<Unit> mOnMaximizeOrRestoreClickListener;
+    private Function0<Unit> mOnLeftSnapClickListener;
+    private Function0<Unit> mOnRightSnapClickListener;
+    private Consumer<DesktopModeTransitionSource> mOnToDesktopClickListener;
+    private Function0<Unit> mOnToFullscreenClickListener;
+    private Function0<Unit> mOnToSplitscreenClickListener;
+    private Function0<Unit> mOnNewWindowClickListener;
     private DragPositioningCallback mDragPositioningCallback;
     private DragResizeInputListener mDragResizeListener;
     private DragDetector mDragDetector;
@@ -139,7 +153,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     private CharSequence mAppName;
     private CapturedLink mCapturedLink;
     private Uri mGenericLink;
-    private OpenInBrowserClickListener mOpenInBrowserClickListener;
+    private Uri mWebUri;
+    private Consumer<Uri> mOpenInBrowserClickListener;
 
     private ExclusionRegionListener mExclusionRegionListener;
 
@@ -147,6 +162,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     private final MaximizeMenuFactory mMaximizeMenuFactory;
     private final HandleMenuFactory mHandleMenuFactory;
     private final AppToWebGenericLinksParser mGenericLinksParser;
+    private final AssistContentRequester mAssistContentRequester;
 
     // Hover state for the maximize menu and button. The menu will remain open as long as either of
     // these is true. See {@link #onMaximizeHoverStateChanged()}.
@@ -157,6 +173,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     // to cancel the close.
     private final Runnable mCloseMaximizeWindowRunnable = this::closeMaximizeMenu;
     private final Runnable mCapturedLinkExpiredRunnable = this::onCapturedLinkExpired;
+    private final MultiInstanceHelper mMultiInstanceHelper;
 
     DesktopModeWindowDecoration(
             Context context,
@@ -171,13 +188,17 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             Choreographer choreographer,
             SyncTransactionQueue syncQueue,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
-            AppToWebGenericLinksParser genericLinksParser) {
+            AppToWebGenericLinksParser genericLinksParser,
+            AssistContentRequester assistContentRequester,
+            MultiInstanceHelper multiInstanceHelper) {
         this (context, userContext, displayController, splitScreenController, taskOrganizer,
                 taskInfo, taskSurface, handler, bgExecutor, choreographer, syncQueue,
-                rootTaskDisplayAreaOrganizer, genericLinksParser, SurfaceControl.Builder::new,
-                SurfaceControl.Transaction::new,  WindowContainerTransaction::new,
-                SurfaceControl::new, new SurfaceControlViewHostFactory() {},
-                DefaultMaximizeMenuFactory.INSTANCE, DefaultHandleMenuFactory.INSTANCE);
+                rootTaskDisplayAreaOrganizer, genericLinksParser, assistContentRequester,
+                SurfaceControl.Builder::new, SurfaceControl.Transaction::new,
+                WindowContainerTransaction::new, SurfaceControl::new, new WindowManagerWrapper(
+                        context.getSystemService(WindowManager.class)),
+                new SurfaceControlViewHostFactory() {}, DefaultMaximizeMenuFactory.INSTANCE,
+                DefaultHandleMenuFactory.INSTANCE, multiInstanceHelper);
     }
 
     DesktopModeWindowDecoration(
@@ -194,13 +215,16 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             SyncTransactionQueue syncQueue,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
             AppToWebGenericLinksParser genericLinksParser,
+            AssistContentRequester assistContentRequester,
             Supplier<SurfaceControl.Builder> surfaceControlBuilderSupplier,
             Supplier<SurfaceControl.Transaction> surfaceControlTransactionSupplier,
             Supplier<WindowContainerTransaction> windowContainerTransactionSupplier,
             Supplier<SurfaceControl> surfaceControlSupplier,
+            WindowManagerWrapper windowManagerWrapper,
             SurfaceControlViewHostFactory surfaceControlViewHostFactory,
             MaximizeMenuFactory maximizeMenuFactory,
-            HandleMenuFactory handleMenuFactory) {
+            HandleMenuFactory handleMenuFactory,
+            MultiInstanceHelper multiInstanceHelper) {
         super(context, userContext, displayController, taskOrganizer, taskInfo, taskSurface,
                 surfaceControlBuilderSupplier, surfaceControlTransactionSupplier,
                 windowContainerTransactionSupplier, surfaceControlSupplier,
@@ -212,8 +236,11 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         mSyncQueue = syncQueue;
         mRootTaskDisplayAreaOrganizer = rootTaskDisplayAreaOrganizer;
         mGenericLinksParser = genericLinksParser;
+        mAssistContentRequester = assistContentRequester;
         mMaximizeMenuFactory = maximizeMenuFactory;
         mHandleMenuFactory = handleMenuFactory;
+        mMultiInstanceHelper = multiInstanceHelper;
+        mWindowManagerWrapper = windowManagerWrapper;
     }
 
     /**
@@ -222,22 +249,40 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
      * TODO(b/346441962): hook this up to double-tap and the header's maximize button, instead of
      *  having the ViewModel deal with parsing motion events.
      */
-    void setOnMaximizeOrRestoreClickListener(OnTaskActionClickListener listener) {
+    void setOnMaximizeOrRestoreClickListener(Function0<Unit> listener) {
         mOnMaximizeOrRestoreClickListener = listener;
     }
 
-    /**
-     * Register a listener to be called back when one of the tasks snap-left action is triggered.
-     */
-    void setOnLeftSnapClickListener(OnTaskActionClickListener listener) {
+    /** Registers a listener to be called when the decoration's snap-left action is triggered.*/
+    void setOnLeftSnapClickListener(Function0<Unit> listener) {
         mOnLeftSnapClickListener = listener;
     }
 
-    /**
-     * Register a listener to be called back when one of the tasks' snap-right action is triggered.
-     */
-    void setOnRightSnapClickListener(OnTaskActionClickListener listener) {
+    /** Registers a listener to be called when the decoration's snap-right action is triggered. */
+    void setOnRightSnapClickListener(Function0<Unit> listener) {
         mOnRightSnapClickListener = listener;
+    }
+
+    /** Registers a listener to be called when the decoration's to-desktop action is triggered. */
+    void setOnToDesktopClickListener(Consumer<DesktopModeTransitionSource> listener) {
+        mOnToDesktopClickListener = listener;
+    }
+
+    /**
+     * Registers a listener to be called when the decoration's to-fullscreen action is triggered.
+     */
+    void setOnToFullscreenClickListener(Function0<Unit> listener) {
+        mOnToFullscreenClickListener = listener;
+    }
+
+    /** Registers a listener to be called when the decoration's to-split action is triggered. */
+    void setOnToSplitScreenClickListener(Function0<Unit> listener) {
+        mOnToSplitscreenClickListener = listener;
+    }
+
+    /** Registers a listener to be called when the decoration's new window action is triggered. */
+    void setOnNewWindowClickListener(Function0<Unit> listener) {
+        mOnNewWindowClickListener = listener;
     }
 
     void setCaptionListeners(
@@ -264,7 +309,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         mDragDetector.setTouchSlop(ViewConfiguration.get(mContext).getScaledTouchSlop());
     }
 
-    void setOpenInBrowserClickListener(OpenInBrowserClickListener listener) {
+    void setOpenInBrowserClickListener(Consumer<Uri> listener) {
         mOpenInBrowserClickListener = listener;
     }
 
@@ -281,8 +326,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         // transaction (that applies task crop) is synced with the buffer transaction (that draws
         // the View). Both will be shown on screen at the same, whereas applying them independently
         // causes flickering. See b/270202228.
-        final boolean applyTransactionOnDraw =
-                taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM;
+        final boolean applyTransactionOnDraw = taskInfo.isFreeform();
         relayout(taskInfo, t, t, applyTransactionOnDraw, shouldSetTaskPositionAndCrop);
         if (!applyTransactionOnDraw) {
             t.apply();
@@ -293,7 +337,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             SurfaceControl.Transaction startT, SurfaceControl.Transaction finishT,
             boolean applyStartTransactionOnDraw, boolean shouldSetTaskPositionAndCrop) {
         Trace.beginSection("DesktopModeWindowDecoration#relayout");
-        if (taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM) {
+        if (taskInfo.isFreeform()) {
             // The Task is in Freeform mode -> show its header in sync since it's an integral part
             // of the window itself - a delayed header might cause bad UX.
             relayoutInSync(taskInfo, startT, finishT, applyStartTransactionOnDraw,
@@ -439,22 +483,26 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         }
     }
 
-    void onOpenInBrowserClick() {
-        if (mOpenInBrowserClickListener == null || mHandleMenu == null) {
-            return;
-        }
-        mOpenInBrowserClickListener.onClick(this, mHandleMenu.getOpenInBrowserLink());
-        onCapturedLinkExpired();
-    }
-
     @Nullable
     private Uri getBrowserLink() {
+        // Do not show browser link in browser applications
+        final ComponentName baseActivity = mTaskInfo.baseActivity;
+        if (baseActivity != null && AppToWebUtils.isBrowserApp(mContext,
+                baseActivity.getPackageName(), mUserContext.getUserId())) {
+            return null;
+        }
         // If the captured link is available and has not expired, return the captured link.
         // Otherwise, return the generic link which is set to null if a generic link is unavailable.
         if (mCapturedLink != null && !mCapturedLink.mExpired) {
             return mCapturedLink.mUri;
+        } else if (mWebUri != null) {
+            return mWebUri;
         }
         return mGenericLink;
+    }
+
+    UserHandle getUser() {
+        return mUserContext.getUser();
     }
 
     private void updateDragResizeListener(SurfaceControl oldDecorationSurface) {
@@ -492,7 +540,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         final Resources res = mResult.mRootView.getResources();
         if (mDragResizeListener.setGeometry(
                 new DragResizeWindowGeometry(mRelayoutParams.mCornerRadius,
-                        new Size(mResult.mWidth, mResult.mHeight), getResizeEdgeHandleSize(res),
+                        new Size(mResult.mWidth, mResult.mHeight),
+                        getResizeEdgeHandleSize(mContext, res), getResizeHandleEdgeInset(res),
                         getFineResizeCornerSize(res), getLargeResizeCornerSize(res)), touchSlop)
                 || !mTaskInfo.positionInParent.equals(mPositionInParent)) {
             updateExclusionRegion();
@@ -500,9 +549,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     }
 
     private static boolean isDragResizable(ActivityManager.RunningTaskInfo taskInfo) {
-        final boolean isFreeform =
-                taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM;
-        return isFreeform && taskInfo.isResizeable;
+        return taskInfo.isFreeform() && taskInfo.isResizeable;
     }
 
     private void updateMaximizeMenu(SurfaceControl.Transaction startT) {
@@ -547,7 +594,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             return new AppHandleViewHolder(
                     mResult.mRootView,
                     mOnCaptionTouchListener,
-                    mOnCaptionButtonClickListener
+                    mOnCaptionButtonClickListener,
+                    mWindowManagerWrapper
             );
         } else if (mRelayoutParams.mLayoutResId
                 == R.layout.desktop_mode_app_header) {
@@ -621,6 +669,10 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             final RelayoutParams.OccludingCaptionElement controlsElement =
                     new RelayoutParams.OccludingCaptionElement();
             controlsElement.mWidthResId = R.dimen.desktop_mode_customizable_caption_margin_end;
+            if (Flags.enableMinimizeButton()) {
+                controlsElement.mWidthResId =
+                      R.dimen.desktop_mode_customizable_caption_with_minimize_button_margin_end;
+            }
             controlsElement.mAlignment = RelayoutParams.OccludingCaptionElement.Alignment.END;
             relayoutParams.mOccludingCaptionElements.add(controlsElement);
         } else if (isAppHandle && !Flags.enableAdditionalWindowsAboveStatusBar()) {
@@ -950,28 +1002,65 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     }
 
     /**
-     * Create and display handle menu window.
+     * Updates app info and creates and displays handle menu window.
      */
-    void createHandleMenu(SplitScreenController splitScreenController) {
+    void createHandleMenu() {
+        // Requests assist content. When content is received, calls {@link #onAssistContentReceived}
+        // which sets app info and creates the handle menu.
+        mAssistContentRequester.requestAssistContent(
+                mTaskInfo.taskId, this::onAssistContentReceived);
+    }
+
+    /**
+     * Called when assist content is received. updates the saved links and creates the handle menu.
+     */
+    @VisibleForTesting
+    void onAssistContentReceived(@Nullable AssistContent assistContent) {
+        mWebUri = assistContent == null ? null : assistContent.getWebUri();
         loadAppInfoIfNeeded();
         updateGenericLink();
+
+        // Create and display handle menu
         mHandleMenu = mHandleMenuFactory.create(
                 this,
+                mWindowManagerWrapper,
                 mRelayoutParams.mLayoutResId,
-                mOnCaptionButtonClickListener,
-                mOnCaptionTouchListener,
                 mAppIconBitmap,
                 mAppName,
-                mDisplayController,
-                splitScreenController,
+                mSplitScreenController,
                 DesktopModeStatus.canEnterDesktopMode(mContext),
+                Flags.enableDesktopWindowingMultiInstanceFeatures()
+                        && mMultiInstanceHelper
+                        .supportsMultiInstanceSplit(mTaskInfo.baseActivity),
                 getBrowserLink(),
                 mResult.mCaptionWidth,
                 mResult.mCaptionHeight,
                 mResult.mCaptionX
         );
         mWindowDecorViewHolder.onHandleMenuOpened();
-        mHandleMenu.show();
+        mHandleMenu.show(
+                /* onToDesktopClickListener= */ () -> {
+                    mOnToDesktopClickListener.accept(APP_HANDLE_MENU_BUTTON);
+                    mOnToDesktopClickListener.accept(APP_HANDLE_MENU_BUTTON);
+                    return Unit.INSTANCE;
+                },
+                /* onToFullscreenClickListener= */ mOnToFullscreenClickListener,
+                /* onToSplitScreenClickListener= */ mOnToSplitscreenClickListener,
+                /* onNewWindowClickListener= */ mOnNewWindowClickListener,
+                /* openInBrowserClickListener= */ (uri) -> {
+                    mOpenInBrowserClickListener.accept(uri);
+                    onCapturedLinkExpired();
+                    return Unit.INSTANCE;
+                },
+                /* onCloseMenuClickListener= */ () -> {
+                    closeHandleMenu();
+                    return Unit.INSTANCE;
+                },
+                /* onOutsideTouchListener= */ () -> {
+                    closeHandleMenu();
+                    return Unit.INSTANCE;
+                }
+        );
     }
 
     private void updateGenericLink() {
@@ -1226,10 +1315,10 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         return R.id.desktop_mode_caption;
     }
 
-    void setAnimatingTaskResize(boolean animatingTaskResize) {
+    void setAnimatingTaskResizeOrReposition(boolean animatingTaskResizeOrReposition) {
         if (mRelayoutParams.mLayoutResId == R.layout.desktop_mode_app_handle) return;
         ((AppHeaderViewHolder) mWindowDecorViewHolder)
-                .setAnimatingTaskResize(animatingTaskResize);
+                .setAnimatingTaskResizeOrReposition(animatingTaskResizeOrReposition);
     }
 
     /**
@@ -1273,7 +1362,9 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 Choreographer choreographer,
                 SyncTransactionQueue syncQueue,
                 RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
-                AppToWebGenericLinksParser genericLinksParser) {
+                AppToWebGenericLinksParser genericLinksParser,
+                AssistContentRequester assistContentRequester,
+                MultiInstanceHelper multiInstanceHelper) {
             return new DesktopModeWindowDecoration(
                     context,
                     userContext,
@@ -1287,7 +1378,9 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                     choreographer,
                     syncQueue,
                     rootTaskDisplayAreaOrganizer,
-                    genericLinksParser);
+                    genericLinksParser,
+                    assistContentRequester,
+                    multiInstanceHelper);
         }
     }
 
@@ -1306,14 +1399,6 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         void setExpired() {
             mExpired = true;
         }
-    }
-
-
-    /** Listener for the handle menu's "Open in browser" button */
-    interface OpenInBrowserClickListener {
-
-        /** Inform the implementing class that the "Open in browser" button has been clicked */
-        void onClick(DesktopModeWindowDecoration decoration, Uri uri);
     }
 
     interface ExclusionRegionListener {

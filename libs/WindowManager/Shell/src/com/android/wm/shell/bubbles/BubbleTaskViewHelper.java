@@ -36,6 +36,7 @@ import android.view.ViewGroup;
 import androidx.annotation.Nullable;
 
 import com.android.internal.protolog.ProtoLog;
+import com.android.wm.shell.Flags;
 import com.android.wm.shell.taskview.TaskView;
 
 /**
@@ -59,6 +60,9 @@ public class BubbleTaskViewHelper {
 
         /** Called when back is pressed on the task root. */
         void onBackPressed();
+
+        /** Called when task removal has started. */
+        void onTaskRemovalStarted();
     }
 
     private final Context mContext;
@@ -110,6 +114,8 @@ public class BubbleTaskViewHelper {
                     fillInIntent.addFlags(FLAG_ACTIVITY_NEW_DOCUMENT);
                     fillInIntent.addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
 
+                    final boolean isShortcutBubble = (mBubble.hasMetadataShortcutId()
+                            || (mBubble.getShortcutInfo() != null && Flags.enableBubbleAnything()));
                     if (mBubble.isAppBubble()) {
                         Context context =
                                 mContext.createContextAsUser(
@@ -124,7 +130,7 @@ public class BubbleTaskViewHelper {
                                 /* options= */ null);
                         mTaskView.startActivity(pi, /* fillInIntent= */ null, options,
                                 launchBounds);
-                    } else if (mBubble.hasMetadataShortcutId()) {
+                    } else if (isShortcutBubble) {
                         options.setApplyActivityFlagsForBubbles(true);
                         mTaskView.startShortcutActivity(mBubble.getShortcutInfo(),
                                 options, launchBounds);
@@ -187,6 +193,7 @@ public class BubbleTaskViewHelper {
                 ((ViewGroup) mParentView).removeView(mTaskView);
                 mTaskView = null;
             }
+            mListener.onTaskRemovalStarted();
         }
 
         @Override

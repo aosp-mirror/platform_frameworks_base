@@ -380,6 +380,8 @@
     <string name="show_touches_summary" msgid="3692861665994502193">"ट्यापका लागि भिजुअल प्रतिक्रिया देखाउनुहोस्"</string>
     <string name="show_key_presses" msgid="6360141722735900214">"थिचिएका कीहरू देखाइयून्"</string>
     <string name="show_key_presses_summary" msgid="725387457373015024">"थिचिएका भौतिक कीसम्बन्धी भिजुअल प्रतिक्रिया देखाउनुहोस्"</string>
+    <string name="touchpad_visualizer" msgid="3707916068870825115">"टचप्याड इन्पुट देखाउनुहोस्"</string>
+    <string name="touchpad_visualizer_summary" msgid="4056080018119847449">"स्क्रिनको ओभरलेमा टचप्याड इन्पुटसम्बन्धी डेटा र पहिचान गरिएका जेस्चरहरू देखाइँदै छन्"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"सर्फेस अपडेट देखाउनुहोस्"</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"अपडेट हुँदा विन्डोका पूरै सतहमा देखाउनुहोस्"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"GPU भ्युको अपडेट देखाउनुहोस्"</string>
@@ -495,8 +497,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"पूरा चार्ज हुन <xliff:g id="TIME">%1$s</xliff:g> लाग्ने छ"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - पूरा चार्ज हुन <xliff:g id="TIME">%2$s</xliff:g> लाग्ने छ"</string>
-    <!-- no translation found for power_charging_limited (4144004473976005214) -->
-    <skip />
+    <string name="power_charging_limited" msgid="4144004473976005214">"<xliff:g id="LEVEL">%1$s</xliff:g> - ब्याट्री जोगाउन चार्जिङ होल्ड गरिएको छ"</string>
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> - चार्ज गरिँदै छ"</string>
     <string name="power_fast_charging_duration_v2" msgid="3797735998640359490">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATUS">%2$s</xliff:g> - <xliff:g id="TIME">%3$s</xliff:g> बजेसम्ममा पूरा चार्ज हुने छ"</string>
     <string name="power_charging_duration_v2" msgid="2938998284074003248">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> बजेसम्ममा पूरा चार्ज हुने छ"</string>
@@ -563,6 +564,8 @@
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"अलार्म तथा रिमाइन्डर"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"यो एपलाई अलार्म सेट गर्ने र समयमै पूरा गर्नु पर्ने कारबाहीहरूको रुटिन बनाउने अनुमति दिनुहोस्। यो अनुमति दिइएको छ भने यो एप ब्याकग्राउन्डमा चल्छ र धेरै ब्याट्री खपत हुन्छ।\n\nयो अनुमति दिइएको छैन भने सेट गरिएका अलार्म बज्दैनन् र यो एपले तय गरेका गतिविधि चल्दैनन्।"</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"समयतालिका, अलार्म, रिमाइन्डर, घडी"</string>
+    <!-- no translation found for zen_mode_do_not_disturb_name (6798711401734798283) -->
+    <skip />
     <string name="zen_mode_settings_title" msgid="7374070457626419755">"बाधा नपुऱ्याउनुहोस्"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"अन गर्नुहोस्"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"बाधा नपुऱ्याउनुहोस् नामक मोडलाई अन गर्नुहोस्"</string>

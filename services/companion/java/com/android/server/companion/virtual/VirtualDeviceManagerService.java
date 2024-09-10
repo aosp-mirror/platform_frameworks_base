@@ -474,9 +474,7 @@ public class VirtualDeviceManagerService extends SystemService {
                     deviceId,
                     cameraAccessController, mPendingTrampolineCallback, activityListener,
                     soundEffectListener, runningAppsChangedCallback, params);
-            if (Flags.expressMetrics()) {
-                Counter.logIncrement("virtual_devices.value_virtual_devices_created_count");
-            }
+            Counter.logIncrement("virtual_devices.value_virtual_devices_created_count");
 
             synchronized (mVirtualDeviceManagerLock) {
                 if (!Flags.persistentDeviceIdApi() && mVirtualDevices.size() == 0) {
@@ -500,11 +498,9 @@ public class VirtualDeviceManagerService extends SystemService {
                     }
                 });
             }
-            if (android.companion.virtualdevice.flags.Flags.metricsCollection()) {
-                Counter.logIncrementWithUid(
-                        "virtual_devices.value_virtual_devices_created_with_uid_count",
-                        attributionSource.getUid());
-            }
+            Counter.logIncrementWithUid(
+                    "virtual_devices.value_virtual_devices_created_with_uid_count",
+                    attributionSource.getUid());
             return virtualDevice;
         }
 

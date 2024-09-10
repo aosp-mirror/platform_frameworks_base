@@ -888,7 +888,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
                     val mayGrantByPrivileged =
                         !permission.isPrivileged ||
                             requestingPackageStates.anyIndexed { _, it ->
-                                checkPrivilegedPermissionAllowlist(it, permission)
+                                checkPrivilegedPermissionAllowlistIfNeeded(it, permission)
                             }
                     val shouldGrantBySignature =
                         permission.isSignature &&
@@ -1280,7 +1280,16 @@ class AppIdPermissionPolicy : SchemePolicy() {
         }
     }
 
-    private fun MutateStateScope.checkPrivilegedPermissionAllowlist(
+    /**
+     * We only check privileged permission allowlist for system privileged apps. Hence, for platform
+     * or for normal apps, we return true to indicate that we don't need to check the allowlist and
+     * will let follow-up checks to decide whether we should grant the permission.
+     *
+     * @return `true`, if the permission is allowlisted for system privileged apps, or if we
+     *         don't need to check the allowlist (for platform or for normal apps).
+     *         `false`, if the permission is not allowlisted for system privileged apps.
+     */
+    private fun MutateStateScope.checkPrivilegedPermissionAllowlistIfNeeded(
         packageState: PackageState,
         permission: Permission
     ): Boolean {

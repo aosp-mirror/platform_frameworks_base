@@ -26,7 +26,6 @@ import com.android.app.animation.Interpolators;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
-import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor;
 
 /**
 * A state of an expandable view
@@ -157,11 +156,6 @@ public class ExpandableViewState extends ViewState {
             expandableView.setHideSensitive(
                     this.hideSensitive, false /* animated */, 0 /* delay */, 0 /* duration */);
 
-            // apply below shelf speed bump
-            if (!NotificationIconContainerRefactor.isEnabled()) {
-                expandableView.setBelowSpeedBump(this.belowSpeedBump);
-            }
-
             // apply clipping
             final float oldClipTopAmount = expandableView.getClipTopAmount();
             if (oldClipTopAmount != this.clipTopAmount) {
@@ -209,11 +203,6 @@ public class ExpandableViewState extends ViewState {
             startClipAnimation(expandableView, properties, /* clipTop */ false);
         } else {
             abortAnimation(child, TAG_ANIMATOR_BOTTOM_INSET);
-        }
-
-        // apply below the speed bump
-        if (!NotificationIconContainerRefactor.isEnabled()) {
-            expandableView.setBelowSpeedBump(this.belowSpeedBump);
         }
 
         // start hiding sensitive animation

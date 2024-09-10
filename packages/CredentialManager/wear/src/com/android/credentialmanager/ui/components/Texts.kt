@@ -43,7 +43,7 @@ fun WearDisplayNameText(text: String, modifier: Modifier = Modifier) {
     Text(
         modifier = modifier.wrapContentSize(),
         text = text,
-        color = WearMaterialTheme.colors.onSurfaceVariant,
+        color = WearMaterialTheme.colors.onSurface,
         textAlign = TextAlign.Center,
         overflow = TextOverflow.Ellipsis,
         maxLines = 2,
@@ -60,7 +60,7 @@ fun WearUsernameText(
     Text(
         modifier = modifier.padding(start = 8.dp, end = 8.dp).wrapContentSize(),
         text = text,
-        color = WearMaterialTheme.colors.onSurfaceVariant,
+        color = WearMaterialTheme.colors.onSurface,
         style = WearMaterialTheme.typography.caption1,
         overflow = TextOverflow.Ellipsis,
         textAlign = textAlign,
@@ -91,15 +91,17 @@ fun WearButtonText(
 @Composable
 fun WearSecondaryLabel(
     text: String,
+    color: Color = WearMaterialTheme.colors.onSurface,
     modifier: Modifier = Modifier,
+    maxLines: Int = 1,
 ) {
     Text(
         modifier = modifier.wrapContentSize(),
         text = text,
-        color = WearMaterialTheme.colors.onSurfaceVariant,
+        color = color,
         style = WearMaterialTheme.typography.caption1,
         overflow = TextOverflow.Ellipsis,
         textAlign = TextAlign.Start,
-        maxLines = 1,
+        maxLines = maxLines,
     )
 }

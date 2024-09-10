@@ -44,6 +44,8 @@ android_test {
         "androidx.test.runner",
         "androidx.test.rules",
         "androidx.test.ext.junit",
+        "androidx.datastore_datastore",
+        "kotlinx_coroutines_test",
         "androidx.dynamicanimation_dynamicanimation",
         "dagger2",
         "frameworks-base-testutils",
@@ -91,4 +93,11 @@ android_test {
         "--extra-packages",
         "com.android.wm.shell.tests",
     ],
+}
+
+test_module_config {
+    name: "WMShellUnitTests_shell_back",
+    base: "WMShellUnitTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.wm.shell.back"],
 }

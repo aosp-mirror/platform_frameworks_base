@@ -17,6 +17,7 @@
 package com.android.keyguard;
 
 import static com.android.systemui.DejankUtils.whitelistIpcs;
+import static com.android.systemui.Flags.msdlFeedback;
 
 import android.annotation.SuppressLint;
 import android.app.ActivityOptions;
@@ -46,6 +47,9 @@ import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 import com.android.systemui.util.EmergencyDialerConstants;
 import com.android.systemui.util.ViewController;
 
+import com.google.android.msdl.data.model.MSDLToken;
+import com.google.android.msdl.domain.MSDLPlayer;
+
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
@@ -67,6 +71,7 @@ public class EmergencyButtonController extends ViewController<EmergencyButton> {
     private final Executor mMainExecutor;
     private final Executor mBackgroundExecutor;
     private final SelectedUserInteractor mSelectedUserInteractor;
+    private final MSDLPlayer mMSDLPlayer;
 
     private final KeyguardUpdateMonitorCallback mInfoCallback =
             new KeyguardUpdateMonitorCallback() {
@@ -99,7 +104,8 @@ public class EmergencyButtonController extends ViewController<EmergencyButton> {
             MetricsLogger metricsLogger,
             LockPatternUtils lockPatternUtils,
             Executor mainExecutor, Executor backgroundExecutor,
-            SelectedUserInteractor selectedUserInteractor) {
+            SelectedUserInteractor selectedUserInteractor,
+            MSDLPlayer msdlPlayer) {
         super(view);
         mConfigurationController = configurationController;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
@@ -112,6 +118,7 @@ public class EmergencyButtonController extends ViewController<EmergencyButton> {
         mMainExecutor = mainExecutor;
         mBackgroundExecutor = backgroundExecutor;
         mSelectedUserInteractor = selectedUserInteractor;
+        mMSDLPlayer = msdlPlayer;
     }
 
     @Override
@@ -165,6 +172,9 @@ public class EmergencyButtonController extends ViewController<EmergencyButton> {
     @SuppressLint("MissingPermission")
     public void takeEmergencyCallAction() {
         mMetricsLogger.action(MetricsEvent.ACTION_EMERGENCY_CALL);
+        if (msdlFeedback()) {
+            mMSDLPlayer.playToken(MSDLToken.KEYPRESS_RETURN, null);
+        }
         if (mPowerManager != null) {
             mPowerManager.userActivity(SystemClock.uptimeMillis(), true);
         }
@@ -221,6 +231,7 @@ public class EmergencyButtonController extends ViewController<EmergencyButton> {
         private final Executor mMainExecutor;
         private final Executor mBackgroundExecutor;
         private final SelectedUserInteractor mSelectedUserInteractor;
+        private final MSDLPlayer mMSDLPlayer;
 
         @Inject
         public Factory(ConfigurationController configurationController,
@@ -233,7 +244,8 @@ public class EmergencyButtonController extends ViewController<EmergencyButton> {
                 LockPatternUtils lockPatternUtils,
                 @Main Executor mainExecutor,
                 @Background Executor backgroundExecutor,
-                SelectedUserInteractor selectedUserInteractor) {
+                SelectedUserInteractor selectedUserInteractor,
+                MSDLPlayer msdlPlayer) {
 
             mConfigurationController = configurationController;
             mKeyguardUpdateMonitor = keyguardUpdateMonitor;
@@ -246,6 +258,7 @@ public class EmergencyButtonController extends ViewController<EmergencyButton> {
             mMainExecutor = mainExecutor;
             mBackgroundExecutor = backgroundExecutor;
             mSelectedUserInteractor = selectedUserInteractor;
+            mMSDLPlayer = msdlPlayer;
         }
 
         /** Construct an {@link com.android.keyguard.EmergencyButtonController}. */
@@ -253,7 +266,7 @@ public class EmergencyButtonController extends ViewController<EmergencyButton> {
             return new EmergencyButtonController(view, mConfigurationController,
                     mKeyguardUpdateMonitor, mPowerManager, mActivityTaskManager, mShadeController,
                     mTelecomManager, mMetricsLogger, mLockPatternUtils, mMainExecutor,
-                    mBackgroundExecutor, mSelectedUserInteractor);
+                    mBackgroundExecutor, mSelectedUserInteractor, mMSDLPlayer);
         }
     }
 }

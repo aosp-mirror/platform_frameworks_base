@@ -21,6 +21,7 @@ filegroup {
     srcs: [
         "DisabledTestApp/src/**/*.java",
         "EnabledTestApp/src/**/*.java",
+        "BinderFrozenStateChangeCallbackTestApp/src/**/*.java",
         "BinderProxyCountingTestApp/src/**/*.java",
         "BinderProxyCountingTestService/src/**/*.java",
         "BinderDeathRecipientHelperApp/src/**/*.java",
@@ -119,6 +120,7 @@ android_test {
         "libpowermanagertest_jni",
         "libviewRootImplTest_jni",
         "libworksourceparceltest_jni",
+        "libAppOpsTest_jni",
     ],
 
     sdk_version: "core_platform",
@@ -137,8 +139,10 @@ android_test {
         ":BinderDeathRecipientHelperApp1",
         ":BinderDeathRecipientHelperApp2",
         ":com.android.cts.helpers.aosp",
+        ":BinderFrozenStateChangeCallbackTestApp",
         ":BinderProxyCountingTestApp",
         ":BinderProxyCountingTestService",
+        ":AppThatUsesAppOps",
     ],
 }
 
@@ -164,6 +168,7 @@ android_app {
         "org.apache.http.legacy",
     ],
     sdk_version: "core_platform",
+    resource_zips: [":FrameworksCoreTests_apks_as_resources"],
 }
 
 // Rules to copy all the test apks to the intermediate raw resource directory
@@ -237,6 +242,7 @@ android_ravenwood_test {
     static_libs: [
         "core-test-rules", // for libcore.dalvik.system.CloseGuardSupport
         "androidx.core_core",
+        "androidx.core_core-ktx",
         "androidx.annotation_annotation",
         "androidx.test.rules",
         "androidx.test.ext.junit",
@@ -249,13 +255,17 @@ android_ravenwood_test {
     ],
     srcs: [
         "src/android/app/ActivityManagerTest.java",
+        "src/android/colormodel/CamTest.java",
         "src/android/content/ContextTest.java",
         "src/android/content/pm/PackageManagerTest.java",
         "src/android/content/pm/UserInfoTest.java",
         "src/android/database/CursorWindowTest.java",
         "src/android/os/**/*.java",
+        "src/android/content/res/*.java",
+        "src/android/content/res/*.kt",
         "src/android/telephony/PinResultTest.java",
         "src/android/util/**/*.java",
+        "src/android/view/DisplayAdjustmentsTests.java",
         "src/android/view/DisplayTest.java",
         "src/android/view/DisplayInfoTest.java",
         "src/com/android/internal/logging/**/*.java",
@@ -273,6 +283,10 @@ android_ravenwood_test {
         ":FrameworksCoreTests-helpers",
         ":FrameworksCoreTestDoubles-sources",
     ],
+    exclude_srcs: [
+        "src/android/content/res/FontScaleConverterActivityTest.java",
+    ],
+    resource_apk: "FrameworksCoreTests-resonly",
     aidl: {
         generate_get_transaction_name: true,
         local_include_dirs: ["aidl"],
@@ -790,4 +804,12 @@ test_module_config {
     ],
     include_annotations: ["android.platform.test.annotations.PlatinumTest"],
     exclude_annotations: FLAKY_OR_IGNORED,
+}
+
+test_module_config {
+    name: "FrameworksCoreTests_android_tracing",
+    base: "FrameworksCoreTests",
+    team: "trendy_team_windowing_tools",
+    test_suites: ["device-tests"],
+    include_filters: ["android.tracing"],
 }

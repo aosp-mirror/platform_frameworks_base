@@ -107,7 +107,6 @@ import android.app.servertransaction.LaunchActivityItem;
 import android.app.servertransaction.PauseActivityItem;
 import android.app.servertransaction.ResumeActivityItem;
 import android.app.servertransaction.StopActivityItem;
-import android.companion.virtual.VirtualDeviceManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -158,6 +157,7 @@ import com.android.server.LocalServices;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.am.HostingRecord;
 import com.android.server.am.UserState;
+import com.android.server.companion.virtual.VirtualDeviceManagerInternal;
 import com.android.server.pm.SaferIntentUtils;
 import com.android.server.utils.Slogf;
 import com.android.server.wm.ActivityMetricsLogger.LaunchingState;
@@ -201,6 +201,12 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
      * when there is a request to remove the task with killProcess=true.
      */
     private static final int KILL_TASK_PROCESSES_TIMEOUT_MS = 1000;
+
+    /**
+     * The delay to run idle check. It may give a chance to keep launch power mode if an activity
+     * is starting while the device is sleeping and then the device is unlocked in a short time.
+     */
+    private static final int IDLE_NOW_DELAY_WHILE_SLEEPING_MS = 100;
 
     private static final int IDLE_TIMEOUT_MSG = FIRST_SUPERVISOR_TASK_MSG;
     private static final int IDLE_NOW_MSG = FIRST_SUPERVISOR_TASK_MSG + 1;
@@ -279,7 +285,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
     private WindowManagerService mWindowManager;
 
     private AppOpsManager mAppOpsManager;
-    private VirtualDeviceManager mVirtualDeviceManager;
+    private VirtualDeviceManagerInternal mVirtualDeviceManagerInternal;
 
     /** Common synchronization logic used to save things to disks. */
     PersisterQueue mPersisterQueue;
@@ -1292,16 +1298,24 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         if (displayId == DEFAULT_DISPLAY || displayId == INVALID_DISPLAY)  {
             return Context.DEVICE_ID_DEFAULT;
         }
-        if (mVirtualDeviceManager == null) {
+        if (mVirtualDeviceManagerInternal == null) {
             if (mService.mHasCompanionDeviceSetupFeature) {
-                mVirtualDeviceManager =
-                        mService.mContext.getSystemService(VirtualDeviceManager.class);
+                mVirtualDeviceManagerInternal =
+                        LocalServices.getService(VirtualDeviceManagerInternal.class);
             }
-            if (mVirtualDeviceManager == null) {
+            if (mVirtualDeviceManagerInternal == null) {
                 return Context.DEVICE_ID_DEFAULT;
             }
         }
-        return mVirtualDeviceManager.getDeviceIdForDisplayId(displayId);
+        return mVirtualDeviceManagerInternal.getDeviceIdForDisplayId(displayId);
+    }
+
+    boolean isDeviceOwnerUid(int displayId, int callingUid) {
+        final int deviceId = getDeviceIdForDisplayId(displayId);
+        if (deviceId == Context.DEVICE_ID_DEFAULT || deviceId == Context.DEVICE_ID_INVALID) {
+            return false;
+        }
+        return mVirtualDeviceManagerInternal.getDeviceOwnerUid(deviceId) == callingUid;
     }
 
     private AppOpsManager getAppOpsManager() {
@@ -1528,9 +1542,12 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
             }
 
             mService.deferWindowLayout();
-            final Transition newTransition = task.mTransitionController.isShellTransitionsEnabled()
-                    ? task.mTransitionController.isCollecting() ? null
-                    : task.mTransitionController.createTransition(TRANSIT_TO_FRONT) : null;
+            boolean newTransition = false;
+            Transition transition = task.mTransitionController.getCollectingTransition();
+            if (transition == null && task.mTransitionController.isShellTransitionsEnabled()) {
+                transition = task.mTransitionController.createTransition(TRANSIT_TO_FRONT);
+                newTransition = true;
+            }
             task.mTransitionController.collect(task);
             reason = reason + " findTaskToMoveToFront";
             boolean reparented = false;
@@ -1574,8 +1591,8 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                 // transition to avoid delaying the starting window.
                 r.showStartingWindow(true /* taskSwitch */);
             }
-            if (newTransition != null) {
-                task.mTransitionController.requestStartTransition(newTransition, task,
+            if (newTransition) {
+                task.mTransitionController.requestStartTransition(transition, task,
                         options != null ? options.getRemoteTransition() : null,
                         null /* displayChange */);
             }
@@ -1644,7 +1661,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
 
         mService.deferWindowLayout();
         try {
-            rootTask.setWindowingMode(WINDOWING_MODE_UNDEFINED);
+            rootTask.setRootTaskWindowingMode(WINDOWING_MODE_UNDEFINED);
             if (rootTask.getWindowingMode() != WINDOWING_MODE_FREEFORM) {
                 rootTask.setBounds(null);
             }
@@ -1705,7 +1722,10 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
             // Prevent recursion.
             return;
         }
-        final Transition transit = task.mTransitionController.requestCloseTransitionIfNeeded(task);
+        Transition transit = task.mTransitionController.requestCloseTransitionIfNeeded(task);
+        if (transit == null) {
+            transit = task.mTransitionController.getCollectingTransition();
+        }
         if (transit != null) {
             transit.collectClose(task);
             if (!task.mTransitionController.useFullReadyTracking()) {
@@ -1717,8 +1737,6 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                 // before anything that may need it to wait (setReady(false)).
                 transit.setReady(task, true);
             }
-        } else if (task.mTransitionController.isCollecting()) {
-            task.mTransitionController.getCollectingTransition().collectClose(task);
         }
         // Consume the stopping activities immediately so activity manager won't skip killing
         // the process because it is still foreground state, i.e. RESUMED -> PAUSING set from
@@ -2248,7 +2266,9 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
     final void scheduleIdle() {
         if (!mHandler.hasMessages(IDLE_NOW_MSG)) {
             if (DEBUG_IDLE) Slog.d(TAG_IDLE, "scheduleIdle: Callers=" + Debug.getCallers(4));
-            mHandler.sendEmptyMessage(IDLE_NOW_MSG);
+            final long delayMs = mService.isSleepingLocked() && mService.mayBeLaunchingApp()
+                    ? IDLE_NOW_DELAY_WHILE_SLEEPING_MS : 0;
+            mHandler.sendEmptyMessageDelayed(IDLE_NOW_MSG, delayMs);
         }
     }
 
@@ -2846,6 +2866,11 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         } finally {
             SaferIntentUtils.DISABLE_ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS.set(false);
             synchronized (mService.mGlobalLock) {
+                // Remove the empty task in case the activity was failed to be launched on the
+                // task that was restored from Recents.
+                if (!task.hasChild() && task.shouldRemoveSelfOnLastChildRemoval()) {
+                    task.removeIfPossible("start-from-recents");
+                }
                 mService.continueWindowLayout();
             }
         }

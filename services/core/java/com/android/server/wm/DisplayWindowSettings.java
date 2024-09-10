@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.view.Display.REMOVE_MODE_DESTROY_CONTENT;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
 import static android.view.WindowManager.REMOVE_CONTENT_MODE_DESTROY;
@@ -68,6 +69,7 @@ class DisplayWindowSettings {
         mSettingsProvider.updateOverrideSettings(displayInfo, overrideSettings);
     }
 
+    /** Stores the size override settings. If the width or height is zero, it means to clear. */
     void setForcedSize(@NonNull DisplayContent displayContent, int width, int height) {
         if (displayContent.isDefaultDisplay) {
             final String sizeString = (width == 0 || height == 0) ? "" : (width + "," + height);
@@ -129,21 +131,33 @@ class DisplayWindowSettings {
     @WindowConfiguration.WindowingMode
     private int getWindowingModeLocked(@NonNull SettingsProvider.SettingsEntry settings,
             @NonNull DisplayContent dc) {
-        int windowingMode = settings.mWindowingMode;
+        final int windowingModeFromDisplaySettings = settings.mWindowingMode;
         // This display used to be in freeform, but we don't support freeform anymore, so fall
         // back to fullscreen.
-        if (windowingMode == WindowConfiguration.WINDOWING_MODE_FREEFORM
+        if (windowingModeFromDisplaySettings == WindowConfiguration.WINDOWING_MODE_FREEFORM
                 && !mService.mAtmService.mSupportsFreeformWindowManagement) {
             return WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
         }
-        // No record is present so use default windowing mode policy.
-        if (windowingMode == WindowConfiguration.WINDOWING_MODE_UNDEFINED) {
-            windowingMode = mService.mAtmService.mSupportsFreeformWindowManagement
-                    && (mService.mIsPc || dc.forceDesktopMode())
-                    ? WindowConfiguration.WINDOWING_MODE_FREEFORM
-                    : WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+        if (windowingModeFromDisplaySettings != WindowConfiguration.WINDOWING_MODE_UNDEFINED) {
+            return windowingModeFromDisplaySettings;
         }
-        return windowingMode;
+        // No record is present so use default windowing mode policy.
+        final boolean forceFreeForm = mService.mAtmService.mSupportsFreeformWindowManagement
+                && (mService.mIsPc || dc.forceDesktopMode());
+        if (forceFreeForm) {
+            return WindowConfiguration.WINDOWING_MODE_FREEFORM;
+        }
+        final int currentWindowingMode = dc.getDefaultTaskDisplayArea().getWindowingMode();
+        if (currentWindowingMode == WindowConfiguration.WINDOWING_MODE_UNDEFINED) {
+            // No record preset in settings + no mode set via the display area policy.
+            // Move to fullscreen as a fallback.
+            return WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+        }
+        if (currentWindowingMode == WindowConfiguration.WINDOWING_MODE_FREEFORM) {
+            // Freeform was enabled before but disabled now, the TDA should now move to fullscreen.
+            return WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+        }
+        return currentWindowingMode;
     }
 
     @WindowConfiguration.WindowingMode
@@ -171,7 +185,7 @@ class DisplayWindowSettings {
         final DisplayInfo displayInfo = dc.getDisplayInfo();
         final SettingsProvider.SettingsEntry settings = mSettingsProvider.getSettings(displayInfo);
         if (settings.mRemoveContentMode == REMOVE_CONTENT_MODE_UNDEFINED) {
-            if (dc.isPrivate()) {
+            if (dc.isPrivate() || dc.getDisplay().getRemoveMode() == REMOVE_MODE_DESTROY_CONTENT) {
                 // For private displays by default content is destroyed on removal.
                 return REMOVE_CONTENT_MODE_DESTROY;
             }

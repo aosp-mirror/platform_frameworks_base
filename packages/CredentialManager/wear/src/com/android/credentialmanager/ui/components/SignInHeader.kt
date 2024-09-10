@@ -16,9 +16,11 @@
 
 package com.android.credentialmanager.ui.components
 
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import android.graphics.drawable.Drawable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
@@ -36,26 +38,30 @@ fun SignInHeader(
     icon: Drawable?,
     title: String,
 ) {
-    Column(
-        modifier = Modifier,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        if (icon != null) {
-            Icon(
-                bitmap = icon.toBitmap().asImageBitmap(),
-                modifier = Modifier.size(24.dp),
-                // Decorative purpose only.
-                contentDescription = null,
-                tint = Color.Unspecified,
 
+    Row {
+        Spacer(Modifier.weight(0.073f)) // 7.3% side margin
+        Column(
+            modifier = Modifier.weight(0.854f).fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            if (icon != null) {
+                Icon(
+                    bitmap = icon.toBitmap().asImageBitmap(),
+                    modifier = Modifier.size(24.dp),
+                    // Decorative purpose only.
+                    contentDescription = null,
+                    tint = Color.Unspecified,
+                    )
+            }
+            Spacer(modifier = Modifier.size(8.dp))
+
+            WearTitleText(
+                text = title,
             )
+
+            Spacer(modifier = Modifier.size(8.dp))
         }
-        Spacer(modifier = Modifier.size(8.dp))
-
-        WearTitleText(
-            text = title,
-        )
-
-        Spacer(modifier = Modifier.size(8.dp))
+        Spacer(Modifier.weight(0.073f)) // 7.3% side margin
     }
 }

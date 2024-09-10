@@ -43,10 +43,10 @@ public enum EndpointFactory {
         factories.clientFactory, channelType, port, protocols, ciphers);
   }
 
-  public ServerEndpoint newServer(ChannelType channelType, int messageSize,
+  public ServerEndpoint newServer(int messageSize,
       String[] protocols, String[] ciphers) throws IOException {
     return new ServerEndpoint(factories.serverFactory, factories.serverSocketFactory,
-        channelType, messageSize, protocols, ciphers);
+        messageSize, protocols, ciphers);
   }
 
   private static final class Factories {

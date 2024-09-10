@@ -16,8 +16,11 @@ flag {
 }
 
 flag {
-  name: "notify_fingerprint_loe"
+  name: "notify_fingerprints_loe"
   namespace: "biometrics_framework"
   description: "This flag controls whether a notification should be sent to notify user when loss of enrollment happens"
   bug: "351036558"
+  metadata {
+      purpose: PURPOSE_BUGFIX
+  }
 }

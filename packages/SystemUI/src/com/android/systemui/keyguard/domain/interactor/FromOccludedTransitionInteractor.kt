@@ -76,7 +76,6 @@ constructor(
     }
 
     private fun listenForOccludedToPrimaryBouncer() {
-        // TODO(b/336576536): Check if adaptation for scene framework is needed
         if (SceneContainerFlag.isEnabled) return
         scope.launch {
             keyguardInteractor.primaryBouncerShowing
@@ -135,7 +134,7 @@ constructor(
         }
     }
 
-    private suspend fun FromOccludedTransitionInteractor.startTransitionToLockscreenOrHub(
+    private suspend fun startTransitionToLockscreenOrHub(
         isIdleOnCommunal: Boolean,
         showCommunalFromOccluded: Boolean,
         dreamFromOccluded: Boolean,
@@ -146,14 +145,22 @@ constructor(
             if (SceneContainerFlag.isEnabled) return
             if (communalSceneKtfRefactor()) {
                 communalSceneInteractor.changeScene(
-                    CommunalScenes.Communal,
-                    CommunalTransitionKeys.SimpleFade
+                    newScene = CommunalScenes.Communal,
+                    loggingReason = "occluded to hub",
+                    transitionKey = CommunalTransitionKeys.SimpleFade
                 )
             } else {
                 startTransitionTo(KeyguardState.GLANCEABLE_HUB)
             }
         } else {
             startTransitionTo(KeyguardState.LOCKSCREEN)
+        }
+    }
+
+    /** Starts a transition to dismiss the keyguard from the OCCLUDED state. */
+    fun dismissFromOccluded() {
+        scope.launch {
+            startTransitionTo(KeyguardState.GONE, ownerReason = "Dismiss from occluded")
         }
     }
 

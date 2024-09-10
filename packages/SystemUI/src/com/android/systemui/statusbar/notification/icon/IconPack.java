@@ -29,6 +29,7 @@ public final class IconPack {
 
     private final boolean mAreIconsAvailable;
     @Nullable private final StatusBarIconView mStatusBarIcon;
+    @Nullable private final StatusBarIconView mStatusBarChipIcon;
     @Nullable private final StatusBarIconView mShelfIcon;
     @Nullable private final StatusBarIconView mAodIcon;
 
@@ -43,7 +44,7 @@ public final class IconPack {
      * haven't been inflated yet or there was an error while inflating them).
      */
     public static IconPack buildEmptyPack(@Nullable IconPack fromSource) {
-        return new IconPack(false, null, null, null, fromSource);
+        return new IconPack(false, null, null, null, null, fromSource);
     }
 
     /**
@@ -51,20 +52,23 @@ public final class IconPack {
      */
     public static IconPack buildPack(
             @NonNull StatusBarIconView statusBarIcon,
+            @Nullable StatusBarIconView statusBarChipIcon,
             @NonNull StatusBarIconView shelfIcon,
             @NonNull StatusBarIconView aodIcon,
             @Nullable IconPack source) {
-        return new IconPack(true, statusBarIcon, shelfIcon, aodIcon, source);
+        return new IconPack(true, statusBarIcon, statusBarChipIcon, shelfIcon, aodIcon, source);
     }
 
     private IconPack(
             boolean areIconsAvailable,
             @Nullable StatusBarIconView statusBarIcon,
+            @Nullable StatusBarIconView statusBarChipIcon,
             @Nullable StatusBarIconView shelfIcon,
             @Nullable StatusBarIconView aodIcon,
             @Nullable IconPack source) {
         mAreIconsAvailable = areIconsAvailable;
         mStatusBarIcon = statusBarIcon;
+        mStatusBarChipIcon = statusBarChipIcon;
         mShelfIcon = shelfIcon;
         mAodIcon = aodIcon;
         if (source != null) {
@@ -76,6 +80,17 @@ public final class IconPack {
     @Nullable
     public StatusBarIconView getStatusBarIcon() {
         return mStatusBarIcon;
+    }
+
+    /**
+     * The version of the notification icon that appears inside a chip within the status bar.
+     *
+     * Separate from {@link #getStatusBarIcon()} so that we don't have to worry about detaching and
+     * re-attaching the same view when the chip appears and hides.
+     */
+    @Nullable
+    public StatusBarIconView getStatusBarChipIcon() {
+        return mStatusBarChipIcon;
     }
 
     /**

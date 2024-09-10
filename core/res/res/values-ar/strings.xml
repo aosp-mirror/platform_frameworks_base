@@ -287,7 +287,7 @@
     <string name="global_action_settings" msgid="4671878836947494217">"الإعدادات"</string>
     <string name="global_action_assist" msgid="2517047220311505805">"مساعدة"</string>
     <string name="global_action_voice_assist" msgid="6655788068555086695">"المساعد الصوتي"</string>
-    <string name="global_action_lockdown" msgid="2475471405907902963">"إلغاء التأمين"</string>
+    <string name="global_action_lockdown" msgid="2475471405907902963">"إلغاء الفتح الذكي"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
     <string name="notification_compact_heads_up_reply" msgid="2425293958371284340">"ردّ"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"إشعار جديد"</string>
@@ -301,7 +301,7 @@
     <string name="notification_channel_network_status" msgid="2127687368725272809">"حالة الشبكة"</string>
     <string name="notification_channel_network_alerts" msgid="6312366315654526528">"تنبيهات الشبكة"</string>
     <string name="notification_channel_network_available" msgid="6083697929214165169">"الشبكة متوفرة"</string>
-    <string name="notification_channel_vpn" msgid="1628529026203808999">"حالة الشبكة الافتراضية الخاصة"</string>
+    <string name="notification_channel_vpn" msgid="1628529026203808999">"‏حالة شبكة VPN"</string>
     <string name="notification_channel_device_admin" msgid="6384932669406095506">"التنبيهات من مشرف تكنولوجيا المعلومات"</string>
     <string name="notification_channel_alerts" msgid="5070241039583668427">"التنبيهات"</string>
     <string name="notification_channel_retail_mode" msgid="3732239154256431213">"عرض توضيحي لبائع التجزئة"</string>
@@ -646,7 +646,7 @@
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"للسماح للتطبيق بقراءة المواقع من مجموعة الوسائط التابعة لك."</string>
     <string name="biometric_app_setting_name" msgid="3339209978734534457">"استخدام المقاييس الحيوية"</string>
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"استخدام المقاييس الحيوية أو قفل الشاشة"</string>
-    <string name="biometric_dialog_default_title" msgid="55026799173208210">"إثبات هويتك"</string>
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"تأكيد هويتك"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"استخدام المقاييس الحيوية للمتابعة"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"استخدام المقاييس الحيوية أو قفل الشاشة للمتابعة"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"معدّات المقاييس الحيوية غير متاحة."</string>
@@ -1198,6 +1198,8 @@
     <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"الكتابة بخط اليد غير متاحة في حقول كلمات المرور"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"رجوع"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"تبديل أسلوب الإدخال"</string>
+    <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"فتح أداة اختيار أسلوب الإدخال"</string>
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"الإعدادات"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"مساحة التخزين منخفضة"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"قد لا تعمل بعض وظائف النظام"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"ليست هناك مساحة تخزين كافية للنظام. تأكد من أنه لديك مساحة خالية تبلغ ٢٥٠ ميغابايت وأعد التشغيل."</string>
@@ -1355,7 +1357,7 @@
     <item msgid="5520925862115353992">"Wi-Fi"</item>
     <item msgid="1055487873974272842">"بلوتوث"</item>
     <item msgid="1616528372438698248">"إيثرنت"</item>
-    <item msgid="9177085807664964627">"‏شبكة افتراضية خاصة (VPN)"</item>
+    <item msgid="9177085807664964627">"‏شبكة VPN"</item>
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="3665696841646851068">"نوع شبكة غير معروف"</string>
     <string name="accept" msgid="5447154347815825107">"قبول"</string>
@@ -1537,15 +1539,15 @@
     <string name="vr_listener_binding_label" msgid="8013112996671206429">"مستمع واقع افتراضي"</string>
     <string name="condition_provider_service_binding_label" msgid="8490641013951857673">"موفر الحالة"</string>
     <string name="notification_ranker_binding_label" msgid="432708245635563763">"خدمة ترتيب أهمية الإشعارات"</string>
-    <string name="vpn_title" msgid="5906991595291514182">"‏تم تفعيل الشبكة الافتراضية الخاصة (VPN)"</string>
+    <string name="vpn_title" msgid="5906991595291514182">"‏تم تفعيل شبكة VPN"</string>
     <string name="vpn_title_long" msgid="6834144390504619998">"‏تم تفعيل VPN بواسطة <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="vpn_text" msgid="2275388920267251078">"انقر لإدارة الشبكة."</string>
     <string name="vpn_text_long" msgid="278540576806169831">"تم الاتصال بـ <xliff:g id="SESSION">%s</xliff:g>. انقر لإدارة الشبكة."</string>
-    <string name="vpn_lockdown_connecting" msgid="6096725311950342607">"‏جارٍ الاتصال بشبكة افتراضية خاصة (VPN) دائمة التفعيل..."</string>
-    <string name="vpn_lockdown_connected" msgid="2853127976590658469">"‏تم الاتصال بشبكة افتراضية خاصة (VPN) دائمة التفعيل"</string>
-    <string name="vpn_lockdown_disconnected" msgid="5573611651300764955">"‏تم قطع الاتصال بالشبكة الافتراضية الخاصة (VPN) التي يتم تشغيلها دائمًا"</string>
+    <string name="vpn_lockdown_connecting" msgid="6096725311950342607">"‏جارٍ الاتصال بشبكة VPN دائمة التفعيل..."</string>
+    <string name="vpn_lockdown_connected" msgid="2853127976590658469">"‏تم الاتصال بشبكة VPN دائمة التفعيل"</string>
+    <string name="vpn_lockdown_disconnected" msgid="5573611651300764955">"‏تم قطع الاتصال بشبكة VPN التي يتم تشغيلها دائمًا"</string>
     <string name="vpn_lockdown_error" msgid="4453048646854247947">"‏تعذّر الاتصال بشبكة VPN التي يتم تشغيلها دائمًا."</string>
-    <string name="vpn_lockdown_config" msgid="8331697329868252169">"‏تغيير إعدادات الشبكة أو الشبكة الافتراضية الخاصة (VPN)"</string>
+    <string name="vpn_lockdown_config" msgid="8331697329868252169">"‏تغيير إعدادات الشبكة أو شبكة VPN"</string>
     <string name="upload_file" msgid="8651942222301634271">"اختيار ملف"</string>
     <string name="no_file_chosen" msgid="4146295695162318057">"لم يتم اختيار أي ملف"</string>
     <string name="reset" msgid="3865826612628171429">"إعادة الضبط"</string>
@@ -1748,7 +1750,8 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"تعذَّر التحقّق من ردّك بسبب حجب أحد التطبيقات طلب الحصول على الإذن."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"انقر على ميزة لبدء استخدامها:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"اختيار الميزات التي تريد استخدامها مع زر أدوات تمكين الوصول"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"اختيار الميزات التي تريد استخدامها مع اختصار مفتاح التحكّم في مستوى الصوت"</string>
+    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
+    <skip />
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"تم إيقاف <xliff:g id="SERVICE_NAME">%s</xliff:g>."</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"تعديل الاختصارات"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"تم"</string>
@@ -2426,6 +2429,8 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"تم إخفاء محتوى التطبيق بعد تفعيل ميزة \"مشاركة الشاشة\" للحفاظ على أمانك"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"تم الاتصال تلقائيًا بالقمر الصناعي"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"‏يمكنك إرسال الرسائل واستلامها بدون شبكة الجوّال أو شبكة Wi-Fi."</string>
+    <string name="satellite_notification_manual_title" msgid="1097504441849466279">"هل تريد المراسلة عبر القمر الصناعي؟"</string>
+    <string name="satellite_notification_manual_summary" msgid="901206289846283445">"‏يمكنك إرسال الرسائل واستلامها بدون شبكة الجوّال أو شبكة Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"فتح تطبيق \"الرسائل\""</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"طريقة العمل"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"بانتظار الإزالة من الأرشيف…"</string>
@@ -2451,4 +2456,5 @@
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"الآلة الحاسبة"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"‏خرائط Google"</string>
     <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"التطبيقات"</string>
+    <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"لم يعد بالإمكان التعرّف على بصمات أصابعك. يجب ضبط ميزة \"فتح الجهاز ببصمة الإصبع\" مجددًا."</string>
 </resources>

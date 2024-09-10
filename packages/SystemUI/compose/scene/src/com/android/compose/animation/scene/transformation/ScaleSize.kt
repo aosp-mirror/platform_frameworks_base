@@ -21,7 +21,7 @@ import com.android.compose.animation.scene.ContentKey
 import com.android.compose.animation.scene.Element
 import com.android.compose.animation.scene.ElementMatcher
 import com.android.compose.animation.scene.SceneTransitionLayoutImpl
-import com.android.compose.animation.scene.TransitionState
+import com.android.compose.animation.scene.content.state.TransitionState
 import kotlin.math.roundToInt
 
 /**
@@ -37,7 +37,7 @@ internal class ScaleSize(
         layoutImpl: SceneTransitionLayoutImpl,
         content: ContentKey,
         element: Element,
-        sceneState: Element.State,
+        stateInContent: Element.State,
         transition: TransitionState.Transition,
         value: IntSize,
     ): IntSize {

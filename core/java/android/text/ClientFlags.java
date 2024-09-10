@@ -35,34 +35,6 @@ public class ClientFlags {
     }
 
     /**
-     * @see Flags#phraseStrictFallback()
-     */
-    public static boolean phraseStrictFallback() {
-        return TextFlags.isFeatureEnabled(Flags.FLAG_PHRASE_STRICT_FALLBACK);
-    }
-
-    /**
-     * @see Flags#useBoundsForWidth()
-     */
-    public static boolean useBoundsForWidth() {
-        return TextFlags.isFeatureEnabled(Flags.FLAG_USE_BOUNDS_FOR_WIDTH);
-    }
-
-    /**
-     * @see Flags#fixLineHeightForLocale()
-     */
-    public static boolean fixLineHeightForLocale() {
-        return TextFlags.isFeatureEnabled(Flags.FLAG_FIX_LINE_HEIGHT_FOR_LOCALE);
-    }
-
-    /**
-     * @see Flags#icuBidiMigration()
-     */
-    public static boolean icuBidiMigration() {
-        return TextFlags.isFeatureEnabled(Flags.FLAG_ICU_BIDI_MIGRATION);
-    }
-
-    /**
      * @see Flags#fixMisalignedContextMenu()
      */
     public static boolean fixMisalignedContextMenu() {

@@ -53,7 +53,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.view.SurfaceControl;
-import android.view.SurfaceSession;
 import android.window.IRemoteTransition;
 import android.window.RemoteTransition;
 import android.window.TransitionInfo;
@@ -76,9 +75,9 @@ import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.LaunchAdjacentController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
-import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.split.SplitDecorManager;
 import com.android.wm.shell.common.split.SplitLayout;
+import com.android.wm.shell.shared.TransactionPool;
 import com.android.wm.shell.transition.DefaultMixedHandler;
 import com.android.wm.shell.transition.TestRemoteTransition;
 import com.android.wm.shell.transition.TransitionInfoBuilder;
@@ -106,7 +105,6 @@ public class SplitTransitionTests extends ShellTestCase {
     @Mock private DisplayInsetsController mDisplayInsetsController;
     @Mock private TransactionPool mTransactionPool;
     @Mock private Transitions mTransitions;
-    @Mock private SurfaceSession mSurfaceSession;
     @Mock private IconProvider mIconProvider;
     @Mock private WindowDecorViewModel mWindowDecorViewModel;
     @Mock private ShellExecutor mMainExecutor;
@@ -116,8 +114,8 @@ public class SplitTransitionTests extends ShellTestCase {
     @Mock private SplitScreen.SplitInvocationListener mInvocationListener;
     private final TestShellExecutor mTestShellExecutor = new TestShellExecutor();
     private SplitLayout mSplitLayout;
-    private MainStage mMainStage;
-    private SideStage mSideStage;
+    private StageTaskListener mMainStage;
+    private StageTaskListener mSideStage;
     private StageCoordinator mStageCoordinator;
     private SplitScreenTransitions mSplitScreenTransitions;
 
@@ -133,12 +131,12 @@ public class SplitTransitionTests extends ShellTestCase {
         doReturn(mockExecutor).when(mTransitions).getAnimExecutor();
         doReturn(mock(SurfaceControl.Transaction.class)).when(mTransactionPool).acquire();
         mSplitLayout = SplitTestUtils.createMockSplitLayout();
-        mMainStage = spy(new MainStage(mContext, mTaskOrganizer, DEFAULT_DISPLAY, mock(
-                StageTaskListener.StageListenerCallbacks.class), mSyncQueue, mSurfaceSession,
+        mMainStage = spy(new StageTaskListener(mContext, mTaskOrganizer, DEFAULT_DISPLAY, mock(
+                StageTaskListener.StageListenerCallbacks.class), mSyncQueue,
                 mIconProvider, Optional.of(mWindowDecorViewModel)));
         mMainStage.onTaskAppeared(new TestRunningTaskInfoBuilder().build(), createMockSurface());
-        mSideStage = spy(new SideStage(mContext, mTaskOrganizer, DEFAULT_DISPLAY, mock(
-                StageTaskListener.StageListenerCallbacks.class), mSyncQueue, mSurfaceSession,
+        mSideStage = spy(new StageTaskListener(mContext, mTaskOrganizer, DEFAULT_DISPLAY, mock(
+                StageTaskListener.StageListenerCallbacks.class), mSyncQueue,
                 mIconProvider, Optional.of(mWindowDecorViewModel)));
         mSideStage.onTaskAppeared(new TestRunningTaskInfoBuilder().build(), createMockSurface());
         mStageCoordinator = new SplitTestUtils.TestStageCoordinator(mContext, DEFAULT_DISPLAY,
@@ -219,7 +217,7 @@ public class SplitTransitionTests extends ShellTestCase {
 
     @Test
     @UiThreadTest
-    public void testRemoteTransitionConsumed() {
+    public void testRemoteTransitionConsumedForStartAnimation() {
         // Omit side child change
         TransitionInfo info = new TransitionInfoBuilder(TRANSIT_OPEN, 0)
                 .addChange(TRANSIT_OPEN, mMainChild)
@@ -238,7 +236,30 @@ public class SplitTransitionTests extends ShellTestCase {
         assertTrue(accepted);
 
         assertTrue(testRemote.isConsumed());
+    }
 
+    @Test
+    @UiThreadTest
+    public void testRemoteTransitionConsumed() {
+        // Omit side child change
+        TransitionInfo info = new TransitionInfoBuilder(TRANSIT_OPEN, 0)
+                .addChange(TRANSIT_OPEN, mMainChild)
+                .build();
+        TestRemoteTransition testRemote = new TestRemoteTransition();
+
+        IBinder transition = mSplitScreenTransitions.startEnterTransition(
+                TRANSIT_OPEN, new WindowContainerTransaction(),
+                new RemoteTransition(testRemote, "Test"), mStageCoordinator,
+                TRANSIT_SPLIT_SCREEN_PAIR_OPEN, false);
+        mMainStage.onTaskAppeared(mMainChild, createMockSurface());
+        mStageCoordinator.startAnimation(transition, info,
+                mock(SurfaceControl.Transaction.class),
+                mock(SurfaceControl.Transaction.class),
+                mock(Transitions.TransitionFinishCallback.class));
+        mStageCoordinator.onTransitionConsumed(transition, false /*aborted*/,
+                mock(SurfaceControl.Transaction.class));
+
+        assertTrue(testRemote.isConsumed());
     }
 
     @Test

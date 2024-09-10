@@ -25,6 +25,8 @@ import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 import android.view.Choreographer;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.io.PrintWriter;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -33,15 +35,20 @@ class WindowTracingPerfetto extends WindowTracing {
 
     private final AtomicInteger mCountSessionsOnFrame = new AtomicInteger();
     private final AtomicInteger mCountSessionsOnTransaction = new AtomicInteger();
-    private final WindowTracingDataSource mDataSource = new WindowTracingDataSource(
-            this::onStart, this::onStop);
+    private final WindowTracingDataSource mDataSource = new WindowTracingDataSource(this);
 
     WindowTracingPerfetto(WindowManagerService service, Choreographer choreographer) {
-        super(service, choreographer, service.mGlobalLock);
+        this(service, choreographer, service.mGlobalLock);
+    }
+
+    @VisibleForTesting
+    WindowTracingPerfetto(WindowManagerService service, Choreographer choreographer,
+            WindowManagerGlobalLock globalLock) {
+        super(service, choreographer, globalLock);
     }
 
     @Override
-    void setLogLevel(@WindowTraceLogLevel int logLevel, PrintWriter pw) {
+    void setLogLevel(@WindowTracingLogLevel int logLevel, PrintWriter pw) {
         logAndPrintln(pw, "Log level must be configured through perfetto");
     }
 
@@ -110,7 +117,15 @@ class WindowTracingPerfetto extends WindowTracing {
                     if (!isDataSourceStarting) {
                         return;
                     }
-                } else if (isOnFrameLogEvent != dataSourceConfig.mLogOnFrame) {
+                } else if (isOnFrameLogEvent) {
+                    boolean isDataSourceLoggingOnFrame =
+                            dataSourceConfig.mLogFrequency == WindowTracingLogFrequency.FRAME;
+                    if (!isDataSourceLoggingOnFrame) {
+                        return;
+                    }
+                } else if (dataSourceConfig.mLogFrequency
+                        == WindowTracingLogFrequency.SINGLE_DUMP) {
+                    // If it is a dump, write only the start log event and skip the following ones
                     return;
                 }
 
@@ -140,22 +155,22 @@ class WindowTracingPerfetto extends WindowTracing {
         return mCountSessionsOnTransaction.get() > 0;
     }
 
-    private void onStart(WindowTracingDataSource.Config config) {
-        if (config.mLogOnFrame) {
+    void onStart(WindowTracingDataSource.Config config) {
+        if (config.mLogFrequency == WindowTracingLogFrequency.FRAME) {
             mCountSessionsOnFrame.incrementAndGet();
-        } else {
+        } else if (config.mLogFrequency == WindowTracingLogFrequency.TRANSACTION) {
             mCountSessionsOnTransaction.incrementAndGet();
         }
 
         Log.i(TAG, "Started with logLevel: " + config.mLogLevel
-                + " logOnFrame: " + config.mLogOnFrame);
+                + " logFrequency: " + config.mLogFrequency);
         log(WHERE_START_TRACING);
     }
 
-    private void onStop(WindowTracingDataSource.Config config) {
-        if (config.mLogOnFrame) {
+    void onStop(WindowTracingDataSource.Config config) {
+        if (config.mLogFrequency == WindowTracingLogFrequency.FRAME) {
             mCountSessionsOnFrame.decrementAndGet();
-        } else {
+        } else if (config.mLogFrequency == WindowTracingLogFrequency.TRANSACTION) {
             mCountSessionsOnTransaction.decrementAndGet();
         }
         Log.i(TAG, "Stopped");

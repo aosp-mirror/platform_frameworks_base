@@ -16,7 +16,10 @@
 
 package com.android.server.display.brightness.clamper
 
+import android.content.Context
+import android.database.ContentObserver
 import android.hardware.display.DisplayManagerInternal
+import android.net.Uri
 import android.os.IBinder
 import android.os.PowerManager.BRIGHTNESS_MAX
 import android.util.Spline
@@ -51,7 +54,7 @@ class HdrBrightnessModifierTest {
 
     private val stoppedClock = OffsettableClock.Stopped()
     private val testHandler = TestHandler(null, stoppedClock)
-    private val testInjector = TestInjector()
+    private val testInjector = TestInjector(mock<Context>())
     private val mockChangeListener = mock<ClamperChangeListener>()
     private val mockDisplayDeviceConfig = mock<DisplayDeviceConfig>()
     private val mockDisplayBinder = mock<IBinder>()
@@ -63,14 +66,14 @@ class HdrBrightnessModifierTest {
     private val dummyData = createDisplayDeviceData(mockDisplayDeviceConfig, mockDisplayBinder)
 
     @Test
-    fun `change listener is not called on init`() {
+    fun changeListenerIsNotCalledOnInit() {
         initHdrModifier()
 
         verify(mockChangeListener, never()).onChanged()
     }
 
     @Test
-    fun `hdr listener registered on init if hdr data is present`() {
+    fun hdrListenerRegisteredOnInit_hdrDataPresent() {
         initHdrModifier()
 
         assertThat(testInjector.registeredHdrListener).isNotNull()
@@ -78,22 +81,19 @@ class HdrBrightnessModifierTest {
     }
 
     @Test
-    fun `hdr listener not registered on init if hdr data is missing`() {
-        initHdrModifier(null)
-
-        testHandler.flush()
+    fun hdrListenerNotRegisteredOnInit_hdrDataMissing() {
+        initHdrModifier(hdrBrightnessData = null)
 
         assertThat(testInjector.registeredHdrListener).isNull()
         assertThat(testInjector.registeredToken).isNull()
     }
 
     @Test
-    fun `unsubscribes hdr listener when display changed with no hdr data`() {
+    fun unsubscribeHdrListener_displayChangedWithNoHdrData() {
         initHdrModifier()
 
         whenever(mockDisplayDeviceConfig.hdrBrightnessData).thenReturn(null)
         modifier.onDisplayChanged(dummyData)
-        testHandler.flush()
 
         assertThat(testInjector.registeredHdrListener).isNull()
         assertThat(testInjector.registeredToken).isNull()
@@ -101,12 +101,11 @@ class HdrBrightnessModifierTest {
     }
 
     @Test
-    fun `resubscribes hdr listener when display changed with different token`() {
+    fun resubscribesHdrListener_displayChangedWithDifferentToken() {
         initHdrModifier()
 
         modifier.onDisplayChanged(
             createDisplayDeviceData(mockDisplayDeviceConfig, mockDisplayBinderOther))
-        testHandler.flush()
 
         assertThat(testInjector.registeredHdrListener).isNotNull()
         assertThat(testInjector.registeredToken).isEqualTo(mockDisplayBinderOther)
@@ -114,7 +113,28 @@ class HdrBrightnessModifierTest {
     }
 
     @Test
-    fun `test NO_HDR mode`() {
+    fun contentObserverNotRegisteredOnInit_hdrDataMissing() {
+        initHdrModifier(null)
+
+        assertThat(testInjector.registeredContentObserver).isNull()
+    }
+
+    @Test
+    fun contentObserverNotRegisteredOnInit_allowedInLowPowerMode() {
+        initHdrModifier(createHdrBrightnessData(allowInLowPowerMode = true))
+
+        assertThat(testInjector.registeredContentObserver).isNull()
+    }
+
+    @Test
+    fun contentObserverRegisteredOnInit_notAllowedInLowPowerMode() {
+        initHdrModifier(createHdrBrightnessData(allowInLowPowerMode = false))
+
+        assertThat(testInjector.registeredContentObserver).isNotNull()
+    }
+
+    @Test
+    fun testNoHdrMode() {
         initHdrModifier()
         // screen size = 10_000
         setupDisplay(width = 100, height = 100, hdrBrightnessData = createHdrBrightnessData(
@@ -131,7 +151,7 @@ class HdrBrightnessModifierTest {
     }
 
     @Test
-    fun `test NBM_HDR mode`() {
+    fun testNbmHdrMode() {
         initHdrModifier()
         // screen size = 10_000
         val transitionPoint = 0.55f
@@ -157,7 +177,7 @@ class HdrBrightnessModifierTest {
     }
 
     @Test
-    fun `test HBM_HDR mode`() {
+    fun testHbmHdrMode() {
         initHdrModifier()
         // screen size = 10_000
         setupDisplay(width = 100, height = 100, hdrBrightnessData = createHdrBrightnessData(
@@ -182,7 +202,7 @@ class HdrBrightnessModifierTest {
     }
 
     @Test
-    fun `test display change no HDR content`() {
+    fun testDisplayChange_noHdrContent() {
         initHdrModifier()
         setupDisplay(width = 100, height = 100)
         assertModifierState()
@@ -195,7 +215,7 @@ class HdrBrightnessModifierTest {
     }
 
     @Test
-    fun `test display change with HDR content`() {
+    fun testDisplayChange_hdrContent() {
         initHdrModifier()
         setupDisplay(width = 100, height = 100)
         setupHdrLayer(width = 100, height = 100, maxHdrRatio = 5f)
@@ -218,7 +238,7 @@ class HdrBrightnessModifierTest {
     }
 
     @Test
-    fun `test ambient lux decrease above maxBrightnessLimits no HDR`() {
+    fun testSetAmbientLux_decreaseAboveMaxBrightnessLimitNoHdr() {
         initHdrModifier()
         modifier.setAmbientLux(1000f)
         setupDisplay(width = 100, height = 100, hdrBrightnessData = createHdrBrightnessData(
@@ -234,7 +254,7 @@ class HdrBrightnessModifierTest {
     }
 
     @Test
-    fun `test ambient lux decrease above maxBrightnessLimits with HDR`() {
+    fun testSetAmbientLux_decreaseAboveMaxBrightnessLimitWithHdr() {
         initHdrModifier()
         modifier.setAmbientLux(1000f)
         setupDisplay(width = 200, height = 200, hdrBrightnessData = createHdrBrightnessData(
@@ -260,7 +280,7 @@ class HdrBrightnessModifierTest {
     }
 
     @Test
-    fun `test ambient lux decrease below maxBrightnessLimits no HDR`() {
+    fun testSetAmbientLux_decreaseBelowMaxBrightnessLimitNoHdr() {
         initHdrModifier()
         modifier.setAmbientLux(1000f)
         setupDisplay(width = 100, height = 100, hdrBrightnessData = createHdrBrightnessData(
@@ -276,7 +296,7 @@ class HdrBrightnessModifierTest {
     }
 
     @Test
-    fun `test ambient lux decrease below maxBrightnessLimits with HDR`() {
+    fun testSetAmbientLux_decreaseBelowMaxBrightnessLimitWithHdr() {
         initHdrModifier()
         modifier.setAmbientLux(1000f)
         val maxBrightness = 0.6f
@@ -322,6 +342,23 @@ class HdrBrightnessModifierTest {
         )
     }
 
+    @Test
+    fun testLowPower_notAllowedInLowPower() {
+        initHdrModifier()
+        setupDisplay(width = 100, height = 100, hdrBrightnessData = createHdrBrightnessData(
+            allowInLowPowerMode = false
+        ))
+        setupHdrLayer(width = 100, height = 100)
+        clearInvocations(mockChangeListener)
+
+        testInjector.isLowPower = true
+        testInjector.registeredContentObserver!!.onChange(true)
+
+        verify(mockChangeListener).onChanged()
+        assertModifierState()
+    }
+
+    // Helper functions
     private fun setupHdrLayer(width: Int = 100, height: Int = 100, maxHdrRatio: Float = 0.8f) {
         testInjector.registeredHdrListener!!.onHdrInfoChanged(
             mockDisplayBinder, 1, width, height, 0, maxHdrRatio
@@ -345,7 +382,6 @@ class HdrBrightnessModifierTest {
             width = width,
             height = height
         ))
-        testHandler.flush()
     }
 
     private fun initHdrModifier(hdrBrightnessData: HdrBrightnessData? = createHdrBrightnessData()) {
@@ -384,9 +420,12 @@ class HdrBrightnessModifierTest {
         assertThat(stateBuilder.customAnimationRate).isEqualTo(animationRate)
     }
 
-    internal class TestInjector : Injector() {
+    internal class TestInjector(context: Context) : Injector(context) {
         var registeredHdrListener: SurfaceControlHdrLayerInfoListener? = null
         var registeredToken: IBinder? = null
+        var registeredContentObserver: ContentObserver? = null
+
+        var isLowPower: Boolean = false
 
         override fun registerHdrListener(
             listener: SurfaceControlHdrLayerInfoListener, token: IBinder
@@ -400,6 +439,18 @@ class HdrBrightnessModifierTest {
         ) {
             registeredHdrListener = null
             registeredToken = null
+        }
+
+        override fun registerContentObserver(observer: ContentObserver, uri: Uri) {
+            registeredContentObserver = observer
+        }
+
+        override fun unregisterContentObserver(observer: ContentObserver) {
+            registeredContentObserver = null
+        }
+
+        override fun isLowPowerMode(): Boolean {
+            return isLowPower
         }
     }
 }

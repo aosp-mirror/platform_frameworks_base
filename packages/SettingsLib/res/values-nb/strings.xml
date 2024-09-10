@@ -380,6 +380,8 @@
     <string name="show_touches_summary" msgid="3692861665994502193">"Vis visuell tilbakemelding for trykk"</string>
     <string name="show_key_presses" msgid="6360141722735900214">"Vis tastetrykk"</string>
     <string name="show_key_presses_summary" msgid="725387457373015024">"Vis visuell tilbakemelding for fysiske tastetrykk"</string>
+    <string name="touchpad_visualizer" msgid="3707916068870825115">"Vis inndata fra styreflaten"</string>
+    <string name="touchpad_visualizer_summary" msgid="4056080018119847449">"Skjermoverlegget viser inndata fra styreflaten og gjenkjente bevegelser"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"Vis overflateoppdateringer"</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"Fremhev hele vindusoverflater når de oppdateres"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"Vis visningsoppdateringer"</string>
@@ -495,8 +497,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"Fulladet om <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – Fulladet om <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_charging_limited (4144004473976005214) -->
-    <skip />
+    <string name="power_charging_limited" msgid="4144004473976005214">"<xliff:g id="LEVEL">%1$s</xliff:g> – Ladingen er satt på vent for å beskytte batteriet"</string>
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> – lader"</string>
     <string name="power_fast_charging_duration_v2" msgid="3797735998640359490">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATUS">%2$s</xliff:g> – Fulladet innen <xliff:g id="TIME">%3$s</xliff:g>"</string>
     <string name="power_charging_duration_v2" msgid="2938998284074003248">"<xliff:g id="LEVEL">%1$s</xliff:g> – Fulladet innen <xliff:g id="TIME">%2$s</xliff:g>"</string>
@@ -563,6 +564,8 @@
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmer og påminnelser"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Gi denne appen tillatelse til å angi alarmer og planlegge tidssensitive handlinger. Dette gir appen tillatelse til å kjøre i bakgrunnen, noe som kan bruke mer batteri.\n\nHvis denne tillatelsen er av, fungerer ikke eksisterende alarmer og tidsbaserte hendelser som er planlagt av denne appen."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"tidsplan, alarm, påminnelse, klokke"</string>
+    <!-- no translation found for zen_mode_do_not_disturb_name (6798711401734798283) -->
+    <skip />
     <string name="zen_mode_settings_title" msgid="7374070457626419755">"Ikke forstyrr"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Slå på"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Slå på Ikke forstyrr"</string>

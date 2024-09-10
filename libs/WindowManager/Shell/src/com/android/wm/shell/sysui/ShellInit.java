@@ -48,7 +48,7 @@ public class ShellInit {
 
     public ShellInit(ShellExecutor mainExecutor) {
         mMainExecutor = mainExecutor;
-        ProtoLog.registerGroups(ShellProtoLogGroup.values());
+        ProtoLog.init(ShellProtoLogGroup.values());
     }
 
     /**

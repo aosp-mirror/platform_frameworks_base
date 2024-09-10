@@ -19,10 +19,11 @@ import androidx.wear.compose.material.MaterialTheme as WearMaterialTheme
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.Icon
 import android.graphics.drawable.Drawable
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.LockOpen
@@ -47,58 +48,30 @@ import com.android.credentialmanager.model.get.AuthenticationEntryInfo
 /* Used as credential suggestion or user action chip. */
 @Composable
 fun CredentialsScreenChip(
-    label: String,
+    primaryText: @Composable () -> Unit,
+    secondaryText: (@Composable () -> Unit)? = null,
     onClick: () -> Unit,
-    secondaryLabel: String? = null,
     icon: Drawable? = null,
     isAuthenticationEntryLocked: Boolean? = null,
-    textAlign: TextAlign = TextAlign.Center,
     modifier: Modifier = Modifier,
     colors: ChipColors = ChipDefaults.secondaryChipColors()
 ) {
-        return CredentialsScreenChip(
-                    onClick,
-                    text = {
-                        WearButtonText(
-                            text = label,
-                            textAlign = textAlign,
-                            maxLines = if (secondaryLabel != null) 1 else 2
-                        )
-                    },
-                    secondaryLabel,
-                    icon,
-                    isAuthenticationEntryLocked,
-                    modifier,
-                    colors
-        )
-}
-
-
-
-/* Used as credential suggestion or user action chip. */
-@Composable
-fun CredentialsScreenChip(
-    onClick: () -> Unit,
-    text: @Composable () -> Unit,
-    secondaryLabel: String? = null,
-    icon: Drawable? = null,
-    isAuthenticationEntryLocked: Boolean? = null,
-    modifier: Modifier = Modifier,
-    colors: ChipColors = ChipDefaults.primaryChipColors(),
-    ) {
     val labelParam: (@Composable RowScope.() -> Unit) =
         {
-            text()
+            var horizontalArrangement = Arrangement.Start
+            if (icon == null) {
+                horizontalArrangement = Arrangement.Center
+            }
+            Row(horizontalArrangement = horizontalArrangement, modifier = modifier.fillMaxWidth()) {
+                primaryText()
+            }
         }
 
     val secondaryLabelParam: (@Composable RowScope.() -> Unit)? =
-        secondaryLabel?.let {
+        secondaryText?.let {
             {
                 Row {
-                    WearSecondaryLabel(
-                        text = secondaryLabel,
-                    )
-
+                    secondaryText()
                     if (isAuthenticationEntryLocked != null) {
                         if (isAuthenticationEntryLocked) {
                             Icon(
@@ -148,9 +121,19 @@ fun CredentialsScreenChip(
 @Composable
 fun CredentialsScreenChipPreview() {
     CredentialsScreenChip(
-        label = "Elisa Beckett",
+        primaryText = {
+            WearButtonText(
+                text = "Elisa Beckett",
+                textAlign = TextAlign.Start,
+            )
+        },
         onClick = { },
-        secondaryLabel = "beckett_bakery@gmail.com",
+        secondaryText = {
+            WearSecondaryLabel(
+                text = "beckett_bakery@gmail.com",
+                color = WearMaterialTheme.colors.onSurfaceVariant
+            )
+        },
         icon = null,
     )
 }
@@ -158,8 +141,13 @@ fun CredentialsScreenChipPreview() {
 @Composable
 fun SignInOptionsChip(onClick: () -> Unit) {
     CredentialsScreenChip(
-        label = stringResource(R.string.dialog_sign_in_options_button),
-        textAlign = TextAlign.Start,
+        primaryText = {
+            WearButtonText(
+                text = stringResource(R.string.dialog_sign_in_options_button),
+                textAlign = TextAlign.Center,
+                maxLines = 2
+            )
+        },
         onClick = onClick,
     )
 }
@@ -174,10 +162,11 @@ fun SignInOptionsChipPreview() {
 fun ContinueChip(onClick: () -> Unit) {
     CredentialsScreenChip(
         onClick = onClick,
-        text = {
+        primaryText = {
             WearButtonText(
                 text = stringResource(R.string.dialog_continue_button),
                 textAlign = TextAlign.Center,
+                color = WearMaterialTheme.colors.surface,
             )
         },
         colors = ChipDefaults.primaryChipColors(),
@@ -193,14 +182,21 @@ fun ContinueChipPreview() {
 @Composable
 fun DismissChip(onClick: () -> Unit) {
     CredentialsScreenChip(
-        label = stringResource(R.string.dialog_dismiss_button),
+        primaryText = {
+            WearButtonText(
+                text = stringResource(R.string.dialog_dismiss_button),
+                textAlign = TextAlign.Center,
+                maxLines = 2
+            )
+        },
         onClick = onClick,
     )
 }
 @Composable
 fun LockedProviderChip(
     authenticationEntryInfo: AuthenticationEntryInfo,
-    onClick: () -> Unit
+    secondaryMaxLines: Int = 1,
+    onClick: () -> Unit,
 ) {
     val secondaryLabel = stringResource(
         if (authenticationEntryInfo.isUnlockedAndEmpty)
@@ -209,10 +205,21 @@ fun LockedProviderChip(
     )
 
     CredentialsScreenChip(
-        label = authenticationEntryInfo.title,
+        primaryText = {
+            WearButtonText(
+                text = authenticationEntryInfo.title,
+                textAlign = TextAlign.Start,
+                maxLines = 2,
+            )
+        },
         icon = authenticationEntryInfo.icon,
-        secondaryLabel = secondaryLabel,
-        textAlign = TextAlign.Start,
+        secondaryText = {
+            WearSecondaryLabel(
+                text = secondaryLabel,
+                color = WearMaterialTheme.colors.onSurfaceVariant,
+                maxLines = secondaryMaxLines
+                )
+        },
         isAuthenticationEntryLocked = !authenticationEntryInfo.isUnlockedAndEmpty,
         onClick = onClick,
     )

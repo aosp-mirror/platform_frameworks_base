@@ -236,11 +236,8 @@ public final class NfcActivityManager extends IAppCallback.Stub
 
     public void setReaderMode(Binder token, int flags, Bundle extras) {
         if (DBG) Log.d(TAG, "Setting reader mode");
-        try {
-            NfcAdapter.sService.setReaderMode(token, this, flags, extras);
-        } catch (RemoteException e) {
-            mAdapter.attemptDeadServiceRecovery(e);
-        }
+        NfcAdapter.callService(() -> NfcAdapter.sService.setReaderMode(
+                token, this, flags, extras, mAdapter.getContext().getPackageName()));
     }
 
     /**
@@ -248,19 +245,11 @@ public final class NfcActivityManager extends IAppCallback.Stub
      * Makes IPC call - do not hold lock.
      */
     void requestNfcServiceCallback() {
-        try {
-            NfcAdapter.sService.setAppCallback(this);
-        } catch (RemoteException e) {
-            mAdapter.attemptDeadServiceRecovery(e);
-        }
+        NfcAdapter.callService(() -> NfcAdapter.sService.setAppCallback(this));
     }
 
     void verifyNfcPermission() {
-        try {
-            NfcAdapter.sService.verifyNfcPermission();
-        } catch (RemoteException e) {
-            mAdapter.attemptDeadServiceRecovery(e);
-        }
+        NfcAdapter.callService(() -> NfcAdapter.sService.verifyNfcPermission());
     }
 
     @Override
@@ -406,11 +395,9 @@ public final class NfcActivityManager extends IAppCallback.Stub
     }
 
     private void changeDiscoveryTech(Binder token, int pollTech, int listenTech) {
-        try {
-            NfcAdapter.sService.updateDiscoveryTechnology(token, pollTech, listenTech);
-        } catch (RemoteException e) {
-            mAdapter.attemptDeadServiceRecovery(e);
-        }
+        NfcAdapter.callService(
+                () -> NfcAdapter.sService.updateDiscoveryTechnology(
+                        token, pollTech, listenTech, mAdapter.getContext().getPackageName()));
     }
 
 }

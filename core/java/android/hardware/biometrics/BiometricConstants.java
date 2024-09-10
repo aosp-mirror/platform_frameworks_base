@@ -162,6 +162,19 @@ public interface BiometricConstants {
      * @hide
      */
     int BIOMETRIC_ERROR_POWER_PRESSED = 19;
+
+    /**
+     * Mandatory biometrics is not in effect.
+     * @hide
+     */
+    int BIOMETRIC_ERROR_MANDATORY_NOT_ACTIVE = 20;
+
+    /**
+     * Biometrics is not allowed to verify in apps.
+     * @hide
+     */
+    int BIOMETRIC_ERROR_NOT_ENABLED_FOR_APPS = 21;
+
     /**
      * This constant is only used by SystemUI. It notifies SystemUI that authentication was paused
      * because the authentication attempt was unsuccessful.

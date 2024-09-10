@@ -66,6 +66,12 @@ public class TaskInfo {
     public int taskId;
 
     /**
+     * The current effective uid of the identity of this task.
+     * @hide
+     */
+    public int effectiveUid;
+
+    /**
      * Whether or not this task has any running activities.
      */
     public boolean isRunning;
@@ -491,6 +497,7 @@ public class TaskInfo {
     void readFromParcel(Parcel source) {
         userId = source.readInt();
         taskId = source.readInt();
+        effectiveUid = source.readInt();
         displayId = source.readInt();
         isRunning = source.readBoolean();
         baseIntent = source.readTypedObject(Intent.CREATOR);
@@ -541,6 +548,7 @@ public class TaskInfo {
     void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(userId);
         dest.writeInt(taskId);
+        dest.writeInt(effectiveUid);
         dest.writeInt(displayId);
         dest.writeBoolean(isRunning);
         dest.writeTypedObject(baseIntent, 0);
@@ -589,6 +597,7 @@ public class TaskInfo {
     @Override
     public String toString() {
         return "TaskInfo{userId=" + userId + " taskId=" + taskId
+                + " effectiveUid=" + effectiveUid
                 + " displayId=" + displayId
                 + " isRunning=" + isRunning
                 + " baseIntent=" + baseIntent + " baseActivity=" + baseActivity

@@ -1195,6 +1195,8 @@
     <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"Paroļu laukā netiek atbalstīta rokraksta funkcija."</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Atpakaļ"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Pārslēgt ievades metodi"</string>
+    <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"Atvērt ievades metodes atlasītāju"</string>
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"Iestatījumi"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Paliek maz brīvas vietas"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Dažas sistēmas funkcijas var nedarboties."</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Sistēmai pietrūkst vietas. Atbrīvojiet vismaz 250 MB vietas un restartējiet ierīci."</string>
@@ -1745,7 +1747,8 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"Kāda lietotne padara atļaujas pieprasījumu nesaprotamu, tāpēc nevar verificēt jūsu atbildi."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Pieskarieties funkcijai, lai sāktu to izmantot"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Izvēlieties funkcijas, ko izmantot ar pieejamības pogu"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Izvēlieties funkcijas, ko izmantot ar skaļuma pogu saīsni"</string>
+    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
+    <skip />
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Pakalpojums <xliff:g id="SERVICE_NAME">%s</xliff:g> ir izslēgts."</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Rediģēt īsinājumtaustiņus"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Gatavs"</string>
@@ -2423,6 +2426,8 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Drošības nolūkos lietotnes saturs kopīgotajā ekrānā ir paslēpts"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Automātiski izveidots savienojums ar satelītu"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Varat sūtīt un saņemt ziņojumus bez mobilā vai Wi-Fi tīkla."</string>
+    <string name="satellite_notification_manual_title" msgid="1097504441849466279">"Vai izmantot satelīta ziņojumapmaiņu?"</string>
+    <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Sūtiet un saņemiet ziņojumus bez mobilā vai Wi‑Fi tīkla."</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Atvērt lietotni Ziņojumi"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Darbības principi"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Gaida…"</string>
@@ -2448,4 +2453,5 @@
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"Kalkulators"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"Maps"</string>
     <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"Lietojumprogrammas"</string>
+    <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"Jūsu pirkstu nospiedumus vairs nevar atpazīt. Vēlreiz iestatiet autorizāciju ar pirksta nospiedumu."</string>
 </resources>

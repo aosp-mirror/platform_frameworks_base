@@ -345,7 +345,7 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"Telefonanrufe tätigen und verwalten"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Körpersensoren"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"auf Sensordaten zu deinen Vitaldaten zugreifen"</string>
-    <string name="permgrouplab_notifications" msgid="5472972361980668884">"Benachrichtigun­gen"</string>
+    <string name="permgrouplab_notifications" msgid="5472972361980668884">"Benachrichti­gun­gen"</string>
     <string name="permgroupdesc_notifications" msgid="4608679556801506580">"Benachrichtigungen anzeigen"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Fensterinhalte abrufen"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Die Inhalte eines Fensters, mit dem du interagierst, werden abgerufen."</string>
@@ -1194,6 +1194,8 @@
     <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"Handschrift wird in Passwortfeldern nicht unterstützt"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Zurück"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Eingabemethode wechseln"</string>
+    <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"Auswahl für die Eingabemethode öffnen"</string>
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"Einstellungen"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Der Speicherplatz wird knapp"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Einige Systemfunktionen funktionieren eventuell nicht."</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Der Speicherplatz reicht nicht für das System aus. Stelle sicher, dass 250 MB freier Speicherplatz vorhanden sind, und starte das Gerät dann neu."</string>
@@ -1744,7 +1746,8 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"Die Berechtigungsanfrage wird durch eine andere App verdeckt. Daher kann deine Antwort nicht geprüft werden."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Zum Auswählen der gewünschten Funktion tippen:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Funktionen auswählen, die du mit der Schaltfläche \"Bedienungshilfen\" verwenden möchtest"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Funktionen für Verknüpfung mit Lautstärketaste auswählen"</string>
+    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
+    <skip />
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> wurde deaktiviert"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Kurzbefehle bearbeiten"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Fertig"</string>
@@ -2422,6 +2425,8 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Aus Sicherheitsgründen werden bei der Bildschirmfreigabe App-Inhalte ausgeblendet"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Automatisch mit Satellit verbunden"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Du kannst Nachrichten ohne Mobilfunknetz oder WLAN senden und empfangen"</string>
+    <string name="satellite_notification_manual_title" msgid="1097504441849466279">"Nachrichten per Satellit verwenden?"</string>
+    <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Du kannst ohne Mobilgerät oder WLAN Nachrichten senden und empfangen"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages öffnen"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"So funktionierts"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Ausstehend…"</string>
@@ -2447,4 +2452,5 @@
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"Rechner"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"Maps"</string>
     <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"Anwendungen"</string>
+    <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"Deine Fingerabdrücke können nicht mehr erkannt werden. Bitte richte die Entsperrung per Fingerabdruck neu ein."</string>
 </resources>

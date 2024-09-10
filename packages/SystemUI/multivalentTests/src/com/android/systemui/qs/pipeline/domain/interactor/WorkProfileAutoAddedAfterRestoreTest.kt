@@ -20,7 +20,6 @@ import android.content.pm.UserInfo
 import android.os.UserManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.MediumTest
-import com.android.systemui.Flags.FLAG_QS_NEW_PIPELINE
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.Kosmos
@@ -59,6 +58,7 @@ class WorkProfileAutoAddedAfterRestoreTest : SysuiTestCase() {
     // Getter here so it can change when there is a managed profile.
     private val workTileAvailable: Boolean
         get() = hasManagedProfile()
+
     private val currentUser: Int
         get() = kosmos.userTracker.userId
 
@@ -67,8 +67,6 @@ class WorkProfileAutoAddedAfterRestoreTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        mSetFlagsRule.enableFlags(FLAG_QS_NEW_PIPELINE)
-
         kosmos.qsTileFactory = FakeQSFactory(::tileCreator)
         kosmos.restoreReconciliationInteractor.start()
         kosmos.autoAddInteractor.init(kosmos.currentTilesInteractor)

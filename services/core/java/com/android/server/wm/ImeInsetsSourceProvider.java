@@ -104,7 +104,8 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
                 mGivenInsetsReady = true;
                 ImeTracker.forLogging().onProgress(mStatsToken,
                         ImeTracker.PHASE_WM_POST_LAYOUT_NOTIFY_CONTROLS_CHANGED);
-                mStateController.notifyControlChanged(mControlTarget);
+                mStateController.notifyControlChanged(mControlTarget, this);
+                setImeShowing(true);
             } else if (wasServerVisible && mServerVisible && mGivenInsetsReady
                     && givenInsetsPending) {
                 // If the server visibility didn't change (still visible), and mGivenInsetsReady
@@ -113,6 +114,8 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
                 ImeTracker.forLogging().onCancelled(mStatsToken,
                         ImeTracker.PHASE_WM_POST_LAYOUT_NOTIFY_CONTROLS_CHANGED);
                 mStatsToken = null;
+            } else if (wasServerVisible && !mServerVisible) {
+                setImeShowing(false);
             }
         }
     }
@@ -129,15 +132,15 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
     }
 
     @Override
-    protected boolean isLeashReadyForDispatching() {
+    protected boolean isLeashReadyForDispatching(InsetsControlTarget target) {
         if (android.view.inputmethod.Flags.refactorInsetsController()) {
             final WindowState ws =
                     mWindowContainer != null ? mWindowContainer.asWindowState() : null;
             final boolean isDrawn = ws != null && ws.isDrawn();
-            return super.isLeashReadyForDispatching() && mServerVisible && isDrawn
-                    && mGivenInsetsReady;
+            return super.isLeashReadyForDispatching(target)
+                    && mServerVisible && isDrawn && mGivenInsetsReady;
         } else {
-            return super.isLeashReadyForDispatching();
+            return super.isLeashReadyForDispatching(target);
         }
     }
 
@@ -723,7 +726,7 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
     }
 
     @Override
-    void dumpDebug(ProtoOutputStream proto, long fieldId, @WindowTraceLogLevel int logLevel) {
+    void dumpDebug(ProtoOutputStream proto, long fieldId, @WindowTracingLogLevel int logLevel) {
         final long token = proto.start(fieldId);
         super.dumpDebug(proto, INSETS_SOURCE_PROVIDER, logLevel);
         final WindowState imeRequesterWindow =

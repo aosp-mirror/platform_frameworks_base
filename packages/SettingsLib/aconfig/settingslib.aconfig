@@ -9,16 +9,6 @@ flag {
 }
 
 flag {
-    name: "enable_cached_bluetooth_device_dedup"
-    namespace: "bluetooth"
-    description: "Enable dedup in CachedBluetoothDevice"
-    bug: "319197962"
-    metadata {
-        purpose: PURPOSE_BUGFIX
-    }
-}
-
-flag {
    name: "bluetooth_qs_tile_dialog_auto_on_toggle"
    namespace: "bluetooth"
    description: "Displays the auto on toggle in the bluetooth QS tile dialog"
@@ -118,4 +108,34 @@ flag {
     namespace: "android_settings"
     description: "Settings catalyst project migration"
     bug: "323791114"
+}
+
+flag {
+  name: "asha_profile_access_profile_enabled_true"
+  namespace: "accessibility"
+  description: "Changes the return value of HearingAidProfile.accessProfileEnabled() to true"
+  bug: "356530795"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+    name: "audio_sharing_hysteresis_mode_fix"
+    namespace: "cross_device_experiences"
+    description: "Gates whether to enable fix for hysteresis mode"
+    bug: "355222285"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "member_device_lea_active_state_sync_fix"
+    namespace: "cross_device_experiences"
+    description: "Gates whether to enable fix for member device active state sync on lea profile"
+    bug: "364201289"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }

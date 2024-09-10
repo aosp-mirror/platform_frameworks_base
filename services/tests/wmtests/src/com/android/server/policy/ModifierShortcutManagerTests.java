@@ -35,11 +35,14 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.UserHandle;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.view.KeyEvent;
 import android.view.KeyboardShortcutGroup;
 import android.view.KeyboardShortcutInfo;
@@ -49,6 +52,8 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.R;
 
 import org.junit.Before;
+import org.junit.ClassRule;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.util.Collections;
@@ -61,7 +66,13 @@ import java.util.Collections;
  */
 
 @SmallTest
+@EnableFlags(com.android.hardware.input.Flags.FLAG_MODIFIER_SHORTCUT_MANAGER_REFACTOR)
 public class ModifierShortcutManagerTests {
+
+    @ClassRule public static final SetFlagsRule.ClassRule SET_FLAGS_CLASS_RULE =
+            new SetFlagsRule.ClassRule();
+    @Rule public final SetFlagsRule mSetFlagsRule = SET_FLAGS_CLASS_RULE.createSetFlagsRule();
+
     private ModifierShortcutManager mModifierShortcutManager;
     private Handler mHandler;
     private Context mContext;
@@ -89,9 +100,12 @@ public class ModifierShortcutManagerTests {
             testActivityInfo.applicationInfo = new ApplicationInfo();
             testActivityInfo.packageName =
                     testActivityInfo.applicationInfo.packageName = "com.test";
+            ResolveInfo testResolveInfo = new ResolveInfo();
+            testResolveInfo.activityInfo = testActivityInfo;
 
             doReturn(testActivityInfo).when(mPackageManager).getActivityInfo(
                     eq(new ComponentName("com.test", "com.test.BookmarkTest")), anyInt());
+            doReturn(testResolveInfo).when(mPackageManager).resolveActivity(anyObject(), anyInt());
             doThrow(new PackageManager.NameNotFoundException("com.test3")).when(mPackageManager)
                     .getActivityInfo(eq(new ComponentName("com.test3", "com.test.BookmarkTest")),
                         anyInt());

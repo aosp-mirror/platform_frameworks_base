@@ -445,16 +445,20 @@ public final class SurfaceControl implements Parcelable {
         // Jank due to unknown reasons.
         public static final int UNKNOWN = 0x80;
 
-        public JankData(long frameVsyncId, @JankType int jankType, long frameIntervalNs) {
+        public JankData(long frameVsyncId, @JankType int jankType, long frameIntervalNs,
+                long scheduledAppFrameTimeNs, long actualAppFrameTimeNs) {
             this.frameVsyncId = frameVsyncId;
             this.jankType = jankType;
             this.frameIntervalNs = frameIntervalNs;
-
+            this.scheduledAppFrameTimeNs = scheduledAppFrameTimeNs;
+            this.actualAppFrameTimeNs = actualAppFrameTimeNs;
         }
 
         public final long frameVsyncId;
         public final @JankType int jankType;
         public final long frameIntervalNs;
+        public final long scheduledAppFrameTimeNs;
+        public final long actualAppFrameTimeNs;
     }
 
     /**
@@ -3574,7 +3578,7 @@ public final class SurfaceControl implements Parcelable {
             checkPreconditions(sc);
             if (SurfaceControlRegistry.sCallStackDebuggingEnabled) {
                 SurfaceControlRegistry.getProcessInstance().checkCallStackDebugging(
-                        "reparent", this, sc,
+                        "setColor", this, sc,
                         "r=" + color[0] + " g=" + color[1] + " b=" + color[2]);
             }
             nativeSetColor(mNativeObject, sc.mNativeObject, color);
@@ -4898,5 +4902,4 @@ public final class SurfaceControl implements Parcelable {
     public static void notifyShutdown() {
         nativeNotifyShutdown();
     }
-
 }

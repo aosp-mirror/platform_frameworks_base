@@ -16,8 +16,8 @@
 
 package android.libcore;
 
-import android.perftests.utils.BenchmarkState;
-import android.perftests.utils.PerfStatusReporter;
+import androidx.benchmark.BenchmarkState;
+import androidx.benchmark.junit4.BenchmarkRule;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -41,7 +41,8 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class ImtConflictPerfTest {
-    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
+    @Rule
+    public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
 
     @Before
     public void setup() {
@@ -280,7 +281,7 @@ public class ImtConflictPerfTest {
     @Test
     public void timeConflictDepth01() {
         C0 c0 = new C0();
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             callF0(c0);
             callF0(c0);
@@ -308,7 +309,7 @@ public class ImtConflictPerfTest {
     @Test
     public void timeConflictDepth02() {
         C1 c1 = new C1();
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             callF0(c1);
             callF19(c1);
@@ -336,7 +337,7 @@ public class ImtConflictPerfTest {
     @Test
     public void timeConflictDepth03() {
         C2 c2 = new C2();
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             callF0(c2);
             callF19(c2);
@@ -364,7 +365,7 @@ public class ImtConflictPerfTest {
     @Test
     public void timeConflictDepth04() {
         C3 c3 = new C3();
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             callF0(c3);
             callF19(c3);
@@ -392,7 +393,7 @@ public class ImtConflictPerfTest {
     @Test
     public void timeConflictDepth05() {
         C4 c4 = new C4();
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             callF0(c4);
             callF19(c4);
@@ -420,7 +421,7 @@ public class ImtConflictPerfTest {
     @Test
     public void timeConflictDepth06() {
         C5 c5 = new C5();
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             callF0(c5);
             callF19(c5);
@@ -448,7 +449,7 @@ public class ImtConflictPerfTest {
     @Test
     public void timeConflictDepth07() {
         C6 c6 = new C6();
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             callF0(c6);
             callF19(c6);
@@ -476,7 +477,7 @@ public class ImtConflictPerfTest {
     @Test
     public void timeConflictDepth08() {
         C7 c7 = new C7();
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             callF0(c7);
             callF19(c7);
@@ -504,7 +505,7 @@ public class ImtConflictPerfTest {
     @Test
     public void timeConflictDepth09() {
         C8 c8 = new C8();
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             callF0(c8);
             callF19(c8);
@@ -532,7 +533,7 @@ public class ImtConflictPerfTest {
     @Test
     public void timeConflictDepth10() {
         C9 c9 = new C9();
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             callF0(c9);
             callF19(c9);
@@ -560,7 +561,7 @@ public class ImtConflictPerfTest {
     @Test
     public void timeConflictDepth11() {
         C10 c10 = new C10();
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             callF0(c10);
             callF19(c10);
@@ -588,7 +589,7 @@ public class ImtConflictPerfTest {
     @Test
     public void timeConflictDepth12() {
         C11 c11 = new C11();
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             callF0(c11);
             callF19(c11);
@@ -616,7 +617,7 @@ public class ImtConflictPerfTest {
     @Test
     public void timeConflictDepth13() {
         C12 c12 = new C12();
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             callF0(c12);
             callF19(c12);
@@ -644,7 +645,7 @@ public class ImtConflictPerfTest {
     @Test
     public void timeConflictDepth14() {
         C13 c13 = new C13();
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             callF0(c13);
             callF19(c13);
@@ -672,7 +673,7 @@ public class ImtConflictPerfTest {
     @Test
     public void timeConflictDepth15() {
         C14 c14 = new C14();
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             callF0(c14);
             callF19(c14);
@@ -700,7 +701,7 @@ public class ImtConflictPerfTest {
     @Test
     public void timeConflictDepth16() {
         C15 c15 = new C15();
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             callF0(c15);
             callF19(c15);
@@ -728,7 +729,7 @@ public class ImtConflictPerfTest {
     @Test
     public void timeConflictDepth17() {
         C16 c16 = new C16();
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             callF0(c16);
             callF19(c16);
@@ -756,7 +757,7 @@ public class ImtConflictPerfTest {
     @Test
     public void timeConflictDepth18() {
         C17 c17 = new C17();
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             callF0(c17);
             callF19(c17);
@@ -784,7 +785,7 @@ public class ImtConflictPerfTest {
     @Test
     public void timeConflictDepth19() {
         C18 c18 = new C18();
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             callF0(c18);
             callF19(c18);
@@ -812,7 +813,7 @@ public class ImtConflictPerfTest {
     @Test
     public void timeConflictDepth20() {
         C19 c19 = new C19();
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             callF0(c19);
             callF19(c19);

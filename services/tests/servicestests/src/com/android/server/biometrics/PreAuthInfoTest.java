@@ -20,6 +20,7 @@ import static android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_FEATURES_NO
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
 import static android.hardware.biometrics.BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE;
+import static android.hardware.biometrics.BiometricManager.BIOMETRIC_ERROR_NOT_ENABLED_FOR_APPS;
 
 import static com.android.server.biometrics.sensors.LockoutTracker.LOCKOUT_NONE;
 
@@ -231,7 +232,7 @@ public class PreAuthInfoTest {
 
     @Test
     @RequiresFlagsEnabled(Flags.FLAG_MANDATORY_BIOMETRICS)
-    public void testMandatoryBiometricsStatus_whenRequirementsNotSatisfiedAndSensorAvailable()
+    public void testMandatoryBiometricsAndStrongBiometricsStatus_whenRequirementsNotSatisfied()
             throws Exception {
         when(mTrustManager.isInSignificantPlace()).thenReturn(true);
 
@@ -244,6 +245,63 @@ public class PreAuthInfoTest {
                 false /* checkDevicePolicyManager */, mContext, mBiometricCameraManager);
 
         assertThat(preAuthInfo.eligibleSensors).hasSize(1);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_MANDATORY_BIOMETRICS)
+    public void testMandatoryBiometricsStatus_whenRequirementsNotSatisfiedAndSensorAvailable()
+            throws Exception {
+        when(mTrustManager.isInSignificantPlace()).thenReturn(true);
+
+        final BiometricSensor sensor = getFaceSensor();
+        final PromptInfo promptInfo = new PromptInfo();
+        promptInfo.setAuthenticators(BiometricManager.Authenticators.MANDATORY_BIOMETRICS);
+        final PreAuthInfo preAuthInfo = PreAuthInfo.create(mTrustManager, mDevicePolicyManager,
+                mSettingObserver, List.of(sensor), 0 /* userId */, promptInfo, TEST_PACKAGE_NAME,
+                false /* checkDevicePolicyManager */, mContext, mBiometricCameraManager);
+
+        assertThat(preAuthInfo.getCanAuthenticateResult()).isEqualTo(
+                BiometricManager.BIOMETRIC_ERROR_MANDATORY_NOT_ACTIVE);
+        assertThat(preAuthInfo.eligibleSensors).hasSize(0);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_MANDATORY_BIOMETRICS)
+    public void testCalculateByPriority()
+            throws Exception {
+        when(mFaceAuthenticator.hasEnrolledTemplates(anyInt(), any())).thenReturn(false);
+        when(mSettingObserver.getEnabledForApps(anyInt())).thenReturn(false);
+
+        BiometricSensor faceSensor = getFaceSensor();
+        BiometricSensor fingerprintSensor = getFingerprintSensor();
+        PromptInfo promptInfo = new PromptInfo();
+        promptInfo.setConfirmationRequested(false /* requireConfirmation */);
+        promptInfo.setAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG);
+        promptInfo.setDisallowBiometricsIfPolicyExists(false /* checkDevicePolicy */);
+        PreAuthInfo preAuthInfo = PreAuthInfo.create(mTrustManager, mDevicePolicyManager,
+                mSettingObserver, List.of(faceSensor, fingerprintSensor),
+                0 /* userId */, promptInfo, TEST_PACKAGE_NAME,
+                false /* checkDevicePolicyManager */, mContext, mBiometricCameraManager);
+
+        assertThat(preAuthInfo.eligibleSensors).hasSize(0);
+        assertThat(preAuthInfo.getCanAuthenticateResult()).isEqualTo(
+                BIOMETRIC_ERROR_NOT_ENABLED_FOR_APPS);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_MANDATORY_BIOMETRICS)
+    public void testMandatoryBiometricsNegativeButtonText_whenSet()
+            throws Exception {
+        when(mTrustManager.isInSignificantPlace()).thenReturn(false);
+
+        final BiometricSensor sensor = getFaceSensor();
+        final PromptInfo promptInfo = new PromptInfo();
+        promptInfo.setAuthenticators(BiometricManager.Authenticators.MANDATORY_BIOMETRICS);
+        promptInfo.setNegativeButtonText(TEST_PACKAGE_NAME);
+        final PreAuthInfo preAuthInfo = PreAuthInfo.create(mTrustManager, mDevicePolicyManager,
+                mSettingObserver, List.of(sensor), 0 /* userId */, promptInfo, TEST_PACKAGE_NAME,
+                false /* checkDevicePolicyManager */, mContext, mBiometricCameraManager);
+        assertThat(promptInfo.getNegativeButtonText()).isEqualTo(TEST_PACKAGE_NAME);
     }
 
     private BiometricSensor getFingerprintSensor() {

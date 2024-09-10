@@ -330,6 +330,7 @@ abstract class AbsAppSnapshotController<TYPE extends WindowContainer,
         builder.setIsTranslucent(isTranslucent);
         builder.setWindowingMode(source.getWindowingMode());
         builder.setAppearance(mainWindow.mAttrs.insetsFlags.appearance);
+        builder.setUiMode(activity.getConfiguration().uiMode);
 
         final Configuration taskConfig = activity.getTask().getConfiguration();
         final int displayRotation = taskConfig.windowConfiguration.getDisplayRotation();
@@ -448,7 +449,8 @@ abstract class AbsAppSnapshotController<TYPE extends WindowContainer,
                 mainWindow.getWindowConfiguration().getRotation(), new Point(taskWidth, taskHeight),
                 contentInsets, letterboxInsets, false /* isLowResolution */,
                 false /* isRealSnapshot */, source.getWindowingMode(),
-                attrs.insetsFlags.appearance, false /* isTranslucent */, false /* hasImeSurface */);
+                attrs.insetsFlags.appearance, false /* isTranslucent */, false /* hasImeSurface */,
+                topActivity.getConfiguration().uiMode /* uiMode */);
         return validateSnapshot(taskSnapshot);
     }
 

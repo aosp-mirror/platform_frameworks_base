@@ -85,6 +85,14 @@ interface IJobCallback {
      */
     @UnsupportedAppUsage
     void jobFinished(int jobId, boolean reschedule);
+
+    /*
+     * Inform JobScheduler to force finish this job because the client has lost
+     * the job handle. jobFinished can no longer be called from the client.
+     * @param jobId Unique integer used to identify this job
+     */
+    void forceJobFinished(int jobId);
+
     /*
      * Inform JobScheduler of a change in the estimated transfer payload.
      *

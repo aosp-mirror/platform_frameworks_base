@@ -48,6 +48,7 @@ import android.animation.ValueAnimator;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.IntentFilter;
+import android.content.res.Resources;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -67,6 +68,7 @@ import android.widget.Scroller;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.R;
 import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.server.LocalServices;
@@ -118,6 +120,7 @@ public class FullScreenMagnificationControllerTest {
     final FullScreenMagnificationController.ControllerContext mMockControllerCtx =
             mock(FullScreenMagnificationController.ControllerContext.class);
     final Context mMockContext = mock(Context.class);
+    final Resources mMockResources = mock(Resources.class);
     final AccessibilityTraceManager mMockTraceManager = mock(AccessibilityTraceManager.class);
     final WindowManagerInternal mMockWindowManager = mock(WindowManagerInternal.class);
     private final MagnificationAnimationCallback mAnimationCallback = mock(
@@ -162,6 +165,7 @@ public class FullScreenMagnificationControllerTest {
         mResolver = new MockContentResolver();
         mResolver.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
         when(mMockContext.getContentResolver()).thenReturn(mResolver);
+        when(mMockContext.getResources()).thenReturn(mMockResources);
         mOriginalMagnificationPersistedScale = Settings.Secure.getFloatForUser(mResolver,
                 Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE, 2.0f,
                 CURRENT_USER_ID);
@@ -928,7 +932,8 @@ public class FullScreenMagnificationControllerTest {
                     /* displayId= */ i,
                     /* isMagnifierActivated= */ true,
                     /* isAlwaysOnEnabled= */ false,
-                    /* expectedActivated= */ false);
+                    /* expectedActivated= */ false,
+                    /* expectedMagnified= */ false);
             resetMockWindowManager();
         }
     }
@@ -940,7 +945,24 @@ public class FullScreenMagnificationControllerTest {
                     /* displayId= */ i,
                     /* isMagnifierActivated= */ true,
                     /* isAlwaysOnEnabled= */ true,
-                    /* expectedActivated= */ true);
+                    /* expectedActivated= */ true,
+                    /* expectedMagnified= */ false);
+            resetMockWindowManager();
+        }
+    }
+
+    @Test
+    public void testUserContextChange_magnifierActivatedAndKeepMagnifiedEnabled_stayActivated() {
+        when(mMockResources.getBoolean(
+                R.bool.config_magnification_keep_zoom_level_when_context_changed))
+                .thenReturn(true);
+        for (int i = 0; i < DISPLAY_COUNT; i++) {
+            contextChange_expectedValues(
+                    /* displayId= */ i,
+                    /* isMagnifierActivated= */ true,
+                    /* isAlwaysOnEnabled= */ true,
+                    /* expectedActivated= */ true,
+                    /* expectedMagnified= */ true);
             resetMockWindowManager();
         }
     }
@@ -952,7 +974,8 @@ public class FullScreenMagnificationControllerTest {
                     /* displayId= */ i,
                     /* isMagnifierActivated= */ false,
                     /* isAlwaysOnEnabled= */ false,
-                    /* expectedActivated= */ false);
+                    /* expectedActivated= */ false,
+                    /* expectedMagnified= */ false);
             resetMockWindowManager();
         }
     }
@@ -964,14 +987,15 @@ public class FullScreenMagnificationControllerTest {
                     /* displayId= */ i,
                     /* isMagnifierActivated= */ false,
                     /* isAlwaysOnEnabled= */ true,
-                    /* expectedActivated= */ false);
+                    /* expectedActivated= */ false,
+                    /* expectedMagnified= */ false);
             resetMockWindowManager();
         }
     }
 
     private void contextChange_expectedValues(
             int displayId, boolean isMagnifierActivated, boolean isAlwaysOnEnabled,
-            boolean expectedActivated) {
+            boolean expectedActivated, boolean expectedMagnified) {
         mFullScreenMagnificationController.setAlwaysOnMagnificationEnabled(isAlwaysOnEnabled);
         register(displayId);
         MagnificationCallbacks callbacks = getMagnificationCallbacks(displayId);
@@ -982,7 +1006,7 @@ public class FullScreenMagnificationControllerTest {
         callbacks.onUserContextChanged();
         mMessageCapturingHandler.sendAllMessages();
         checkActivatedAndMagnifying(
-                /* activated= */ expectedActivated, /* magnifying= */ false, displayId);
+                /* activated= */ expectedActivated, expectedMagnified, displayId);
 
         if (expectedActivated) {
             verify(mMockThumbnail, times(2)).setThumbnailBounds(
@@ -1526,8 +1550,8 @@ public class FullScreenMagnificationControllerTest {
     private void checkActivatedAndMagnifying(boolean activated, boolean magnifying, int displayId) {
         final boolean isActivated = mFullScreenMagnificationController.isActivated(displayId);
         final boolean isMagnifying = mFullScreenMagnificationController.getScale(displayId) > 1.0f;
-        assertTrue(isActivated == activated);
-        assertTrue(isMagnifying == magnifying);
+        assertEquals(isActivated, activated);
+        assertEquals(isMagnifying, magnifying);
     }
 
     private MagnificationCallbacks getMagnificationCallbacks(int displayId) {

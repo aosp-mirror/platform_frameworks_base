@@ -1194,6 +1194,8 @@
     <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"စကားဝှက်အကွက်များတွင် လက်ရေးကို မပံ့ပိုးပါ"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"နောက်သို့"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"လက်ကွက်ပြောင်းရန်"</string>
+    <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"လက်ကွက်ရွေးစနစ် ဖွင့်ရန်"</string>
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"ဆက်တင်များ"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"သိမ်းဆည်သော နေရာ နည်းနေပါသည်"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"တချို့ စနစ်လုပ်ငန်းများ အလုပ် မလုပ်ခြင်း ဖြစ်နိုင်ပါသည်"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"စနစ်အတွက် သိုလှောင်ခန်း မလုံလောက်ပါ။ သင့်ဆီမှာ နေရာလွတ် ၂၅၀ MB ရှိတာ စစ်ကြည့်ပြီး စတင်ပါ။"</string>
@@ -1744,7 +1746,8 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"အက်ပ်တစ်ခုသည် ခွင့်ပြုချက်တောင်းဆိုမှုကို ပိတ်နေသဖြင့် သင့်တုံ့ပြန်မှုကို စိစစ်၍မရပါ။"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"ဝန်ဆောင်မှုကို စတင်အသုံးပြုရန် တို့ပါ−"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"အများသုံးနိုင်မှု ခလုတ်ဖြင့် အသုံးပြုရန် ဝန်ဆောင်မှုများကို ရွေးပါ"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"အသံခလုတ် ဖြတ်လမ်းလင့်ခ်ဖြင့် အသုံးပြုရန် ဝန်ဆောင်မှုများကို ရွေးပါ"</string>
+    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
+    <skip />
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> ကို ပိတ်ထားသည်"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"ဖြတ်လမ်းများကို တည်းဖြတ်ရန်"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"ပြီးပြီ"</string>
@@ -2422,6 +2425,8 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"လုံခြုံရေးအတွက် အက်ပ်အကြောင်းအရာကို ဖန်သားပြင် မျှဝေခြင်းတွင် ဖျောက်ထားသည်"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"ဂြိုဟ်တုနှင့် အလိုအလျောက် ချိတ်ဆက်ထားသည်"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"မိုဘိုင်း (သို့) Wi-Fi ကွန်ရက်မရှိဘဲ မက်ဆေ့ဂျ်များကို ပို့နိုင်၊ လက်ခံနိုင်သည်"</string>
+    <string name="satellite_notification_manual_title" msgid="1097504441849466279">"ဂြိုဟ်တုမှတစ်ဆင့် မက်ဆေ့ဂျ်ပို့ခြင်း သုံးမလား။"</string>
+    <string name="satellite_notification_manual_summary" msgid="901206289846283445">"မိုဘိုင်း (သို့) Wi-Fi ကွန်ရက်မရှိဘဲ မက်ဆေ့ဂျ်များ ပို့နိုင်၊ လက်ခံနိုင်သည်"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages ဖွင့်ရန်"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"အလုပ်လုပ်ပုံ"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"ဆိုင်းငံ့ထားသည်…"</string>
@@ -2447,4 +2452,5 @@
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"ဂဏန်းတွက်စက်"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"Maps"</string>
     <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"အပလီကေးရှင်းများ"</string>
+    <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"သင့်လက်ဗွေများကို မသိရှိနိုင်တော့ပါ။ ‘လက်ဗွေသုံး လော့ခ်ဖွင့်ခြင်း’ ထပ်မံစနစ်ထည့်သွင်းပါ။"</string>
 </resources>

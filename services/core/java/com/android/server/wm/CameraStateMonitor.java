@@ -26,6 +26,7 @@ import android.os.Handler;
 import android.util.ArraySet;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.ProtoLog;
 
 import java.util.ArrayList;
@@ -74,14 +75,10 @@ class CameraStateMonitor {
     private final ArrayList<CameraCompatStateListener> mCameraStateListeners = new ArrayList<>();
 
     /**
-     * {@link CameraCompatStateListener} which returned {@code true} on the last {@link
-     * CameraCompatStateListener#onCameraOpened(ActivityRecord, String)}, if any.
-     *
-     * <p>This allows the {@link CameraStateMonitor} to notify a particular listener when camera
-     * closes, so they can revert any changes.
+     * Value toggled on {@link #startListeningToCameraState()} to {@code true} and on {@link
+     * #dispose()} to {@code false}.
      */
-    @Nullable
-    private CameraCompatStateListener mCurrentListenerForCameraActivity;
+    private boolean mIsRunning;
 
     private final CameraManager.AvailabilityCallback mAvailabilityCallback =
             new  CameraManager.AvailabilityCallback() {
@@ -111,6 +108,7 @@ class CameraStateMonitor {
     void startListeningToCameraState() {
         mCameraManager.registerAvailabilityCallback(
                 mWmService.mContext.getMainExecutor(), mAvailabilityCallback);
+        mIsRunning = true;
     }
 
     /** Releases camera callback listener. */
@@ -118,6 +116,12 @@ class CameraStateMonitor {
         if (mCameraManager != null) {
             mCameraManager.unregisterAvailabilityCallback(mAvailabilityCallback);
         }
+        mIsRunning = false;
+    }
+
+    @VisibleForTesting
+    boolean isRunning() {
+        return mIsRunning;
     }
 
     void addCameraStateListener(CameraCompatStateListener listener) {
@@ -167,12 +171,7 @@ class CameraStateMonitor {
             @NonNull String cameraId) {
         for (int i = 0; i < mCameraStateListeners.size(); i++) {
             CameraCompatStateListener listener = mCameraStateListeners.get(i);
-            boolean activeCameraTreatment = listener.onCameraOpened(
-                    cameraActivity, cameraId);
-            if (activeCameraTreatment) {
-                mCurrentListenerForCameraActivity = listener;
-                break;
-            }
+            listener.onCameraOpened(cameraActivity, cameraId);
         }
     }
 
@@ -226,17 +225,28 @@ class CameraStateMonitor {
                 return;
             }
 
-            if (mCurrentListenerForCameraActivity != null) {
-                boolean closeSuccessful =
-                        mCurrentListenerForCameraActivity.onCameraClosed(cameraId);
-                if (closeSuccessful) {
-                    mCameraIdPackageBiMapping.removeCameraId(cameraId);
-                    mCurrentListenerForCameraActivity = null;
-                } else {
-                    rescheduleRemoveCameraActivity(cameraId);
-                }
+            final boolean closeSuccessfulForAllListeners = notifyListenersCameraClosed(cameraId);
+            if (closeSuccessfulForAllListeners) {
+                // Finish cleaning up.
+                mCameraIdPackageBiMapping.removeCameraId(cameraId);
+            } else {
+                // Not ready to process closure yet - the camera activity might be refreshing.
+                // Try again later.
+                rescheduleRemoveCameraActivity(cameraId);
             }
         }
+    }
+
+    /**
+     * @return {@code false} if any listeners have reported issues processing the close.
+     */
+    private boolean notifyListenersCameraClosed(@NonNull String cameraId) {
+        boolean closeSuccessfulForAllListeners = true;
+        for (int i = 0; i < mCameraStateListeners.size(); i++) {
+            closeSuccessfulForAllListeners &= mCameraStateListeners.get(i).onCameraClosed(cameraId);
+        }
+
+        return closeSuccessfulForAllListeners;
     }
 
     // TODO(b/335165310): verify that this works in multi instance and permission dialogs.
@@ -286,11 +296,9 @@ class CameraStateMonitor {
     interface CameraCompatStateListener {
         /**
          * Notifies the compat listener that an activity has opened camera.
-         *
-         * @return true if the treatment has been applied.
          */
         // TODO(b/336474959): try to decouple `cameraId` from the listeners.
-        boolean onCameraOpened(@NonNull ActivityRecord cameraActivity, @NonNull String cameraId);
+        void onCameraOpened(@NonNull ActivityRecord cameraActivity, @NonNull String cameraId);
         /**
          * Notifies the compat listener that camera is closed.
          *

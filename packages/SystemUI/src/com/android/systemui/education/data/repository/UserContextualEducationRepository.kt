@@ -25,14 +25,16 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.preferencesDataStoreFile
+import com.android.systemui.contextualeducation.GestureType
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.education.dagger.ContextualEducationModule.EduDataStoreScope
+import com.android.systemui.education.data.model.EduDeviceConnectionTime
 import com.android.systemui.education.data.model.GestureEduModel
-import com.android.systemui.shared.education.GestureType
 import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Provider
+import kotlin.properties.Delegates.notNull
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
@@ -43,10 +45,30 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 
 /**
- * A contextual education repository to:
- * 1) store education data per user
- * 2) provide methods to read and update data on model-level
- * 3) provide method to enable changing datastore when user is changed
+ * Allows to:
+ * 1) read and update data on model-level
+ * 2) change data store when user is changed
+ */
+interface ContextualEducationRepository {
+    fun setUser(userId: Int)
+
+    fun readGestureEduModelFlow(gestureType: GestureType): Flow<GestureEduModel>
+
+    fun readEduDeviceConnectionTime(): Flow<EduDeviceConnectionTime>
+
+    suspend fun updateGestureEduModel(
+        gestureType: GestureType,
+        transform: (GestureEduModel) -> GestureEduModel
+    )
+
+    suspend fun updateEduDeviceConnectionTime(
+        transform: (EduDeviceConnectionTime) -> EduDeviceConnectionTime
+    )
+}
+
+/**
+ * Implementation of [ContextualEducationRepository] that uses [androidx.datastore.preferences.core]
+ * for storage. Data is stored per user.
  */
 @SysUISingleton
 class UserContextualEducationRepository
@@ -54,14 +76,20 @@ class UserContextualEducationRepository
 constructor(
     @Application private val applicationContext: Context,
     @EduDataStoreScope private val dataStoreScopeProvider: Provider<CoroutineScope>
-) {
+) : ContextualEducationRepository {
     companion object {
         const val SIGNAL_COUNT_SUFFIX = "_SIGNAL_COUNT"
         const val NUMBER_OF_EDU_SHOWN_SUFFIX = "_NUMBER_OF_EDU_SHOWN"
         const val LAST_SHORTCUT_TRIGGERED_TIME_SUFFIX = "_LAST_SHORTCUT_TRIGGERED_TIME"
+        const val USAGE_SESSION_START_TIME_SUFFIX = "_USAGE_SESSION_START_TIME"
+        const val LAST_EDUCATION_TIME_SUFFIX = "_LAST_EDUCATION_TIME"
+        const val KEYBOARD_FIRST_CONNECTION_TIME = "KEYBOARD_FIRST_CONNECTION_TIME"
+        const val TOUCHPAD_FIRST_CONNECTION_TIME = "TOUCHPAD_FIRST_CONNECTION_TIME"
 
         const val DATASTORE_DIR = "education/USER%s_ContextualEducation"
     }
+
+    private var userId by notNull<Int>()
 
     private var dataStoreScope: CoroutineScope? = null
 
@@ -70,9 +98,10 @@ constructor(
     @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     private val prefData: Flow<Preferences> = datastore.filterNotNull().flatMapLatest { it.data }
 
-    internal fun setUser(userId: Int) {
+    override fun setUser(userId: Int) {
         dataStoreScope?.cancel()
         val newDsScope = dataStoreScopeProvider.get()
+        this.userId = userId
         datastore.value =
             PreferenceDataStoreFactory.create(
                 produceFile = {
@@ -85,7 +114,7 @@ constructor(
         dataStoreScope = newDsScope
     }
 
-    internal fun readGestureEduModelFlow(gestureType: GestureType): Flow<GestureEduModel> =
+    override fun readGestureEduModelFlow(gestureType: GestureType): Flow<GestureEduModel> =
         prefData.map { preferences -> getGestureEduModel(gestureType, preferences) }
 
     private fun getGestureEduModel(
@@ -97,12 +126,21 @@ constructor(
             educationShownCount = preferences[getEducationShownCountKey(gestureType)] ?: 0,
             lastShortcutTriggeredTime =
                 preferences[getLastShortcutTriggeredTimeKey(gestureType)]?.let {
-                    Instant.ofEpochMilli(it)
+                    Instant.ofEpochSecond(it)
                 },
+            usageSessionStartTime =
+                preferences[getUsageSessionStartTimeKey(gestureType)]?.let {
+                    Instant.ofEpochSecond(it)
+                },
+            lastEducationTime =
+                preferences[getLastEducationTimeKey(gestureType)]?.let {
+                    Instant.ofEpochSecond(it)
+                },
+            userId = userId
         )
     }
 
-    internal suspend fun updateGestureEduModel(
+    override suspend fun updateGestureEduModel(
         gestureType: GestureType,
         transform: (GestureEduModel) -> GestureEduModel
     ) {
@@ -111,12 +149,53 @@ constructor(
             val updatedModel = transform(currentModel)
             preferences[getSignalCountKey(gestureType)] = updatedModel.signalCount
             preferences[getEducationShownCountKey(gestureType)] = updatedModel.educationShownCount
-            updateTimeByInstant(
+            setInstant(
                 preferences,
                 updatedModel.lastShortcutTriggeredTime,
                 getLastShortcutTriggeredTimeKey(gestureType)
             )
+            setInstant(
+                preferences,
+                updatedModel.usageSessionStartTime,
+                getUsageSessionStartTimeKey(gestureType)
+            )
+            setInstant(
+                preferences,
+                updatedModel.lastEducationTime,
+                getLastEducationTimeKey(gestureType)
+            )
         }
+    }
+
+    override fun readEduDeviceConnectionTime(): Flow<EduDeviceConnectionTime> =
+        prefData.map { preferences -> getEduDeviceConnectionTime(preferences) }
+
+    override suspend fun updateEduDeviceConnectionTime(
+        transform: (EduDeviceConnectionTime) -> EduDeviceConnectionTime
+    ) {
+        datastore.filterNotNull().first().edit { preferences ->
+            val currentModel = getEduDeviceConnectionTime(preferences)
+            val updatedModel = transform(currentModel)
+            setInstant(
+                preferences,
+                updatedModel.keyboardFirstConnectionTime,
+                getKeyboardFirstConnectionTimeKey()
+            )
+            setInstant(
+                preferences,
+                updatedModel.touchpadFirstConnectionTime,
+                getTouchpadFirstConnectionTimeKey()
+            )
+        }
+    }
+
+    private fun getEduDeviceConnectionTime(preferences: Preferences): EduDeviceConnectionTime {
+        return EduDeviceConnectionTime(
+            keyboardFirstConnectionTime =
+                preferences[getKeyboardFirstConnectionTimeKey()]?.let { Instant.ofEpochSecond(it) },
+            touchpadFirstConnectionTime =
+                preferences[getTouchpadFirstConnectionTimeKey()]?.let { Instant.ofEpochSecond(it) }
+        )
     }
 
     private fun getSignalCountKey(gestureType: GestureType): Preferences.Key<Int> =
@@ -128,13 +207,28 @@ constructor(
     private fun getLastShortcutTriggeredTimeKey(gestureType: GestureType): Preferences.Key<Long> =
         longPreferencesKey(gestureType.name + LAST_SHORTCUT_TRIGGERED_TIME_SUFFIX)
 
-    private fun updateTimeByInstant(
+    private fun getUsageSessionStartTimeKey(gestureType: GestureType): Preferences.Key<Long> =
+        longPreferencesKey(gestureType.name + USAGE_SESSION_START_TIME_SUFFIX)
+
+    private fun getLastEducationTimeKey(gestureType: GestureType): Preferences.Key<Long> =
+        longPreferencesKey(gestureType.name + LAST_EDUCATION_TIME_SUFFIX)
+
+    private fun getKeyboardFirstConnectionTimeKey(): Preferences.Key<Long> =
+        longPreferencesKey(KEYBOARD_FIRST_CONNECTION_TIME)
+
+    private fun getTouchpadFirstConnectionTimeKey(): Preferences.Key<Long> =
+        longPreferencesKey(TOUCHPAD_FIRST_CONNECTION_TIME)
+
+    private fun setInstant(
         preferences: MutablePreferences,
         instant: Instant?,
         key: Preferences.Key<Long>
     ) {
         if (instant != null) {
-            preferences[key] = instant.toEpochMilli()
+            // Use epochSecond because an instant is defined as a signed long (64bit number) of
+            // seconds. Using toEpochMilli() on Instant.MIN or Instant.MAX will throw exception
+            // when converting to a long. So we use second instead of milliseconds for storage.
+            preferences[key] = instant.epochSecond
         } else {
             preferences.remove(key)
         }

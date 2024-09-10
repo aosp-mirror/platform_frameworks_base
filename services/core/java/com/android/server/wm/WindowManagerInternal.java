@@ -690,15 +690,10 @@ public abstract class WindowManagerInternal {
      * <p>Only {@link com.android.server.inputmethod.InputMethodManagerService} is the expected and
      * tested caller of this method.</p>
      *
-     * @param imeToken token to track the active input method. Corresponding IME windows can be
-     *                 identified by checking {@link android.view.WindowManager.LayoutParams#token}.
-     *                 Note that there is no guarantee that the corresponding window is already
-     *                 created
      * @param imeTargetWindowToken token to identify the target window that the IME is associated
      *                             with
      */
-    public abstract void updateInputMethodTargetWindow(@NonNull IBinder imeToken,
-            @NonNull IBinder imeTargetWindowToken);
+    public abstract void updateInputMethodTargetWindow(@NonNull IBinder imeTargetWindowToken);
 
     /**
       * Returns true when the hardware keyboard is available.
@@ -993,16 +988,6 @@ public abstract class WindowManagerInternal {
             this.imeSurfaceParentName = imeSurfaceParentName;
         }
     }
-
-    /**
-     * Sets by the {@link com.android.server.inputmethod.InputMethodManagerService} to monitor
-     * the visibility change of the IME targeted windows.
-     *
-     * @see ImeTargetChangeListener#onImeTargetOverlayVisibilityChanged
-     * @see ImeTargetChangeListener#onImeInputTargetVisibilityChanged
-     */
-    public abstract void setInputMethodTargetChangeListener(
-            @NonNull ImeTargetChangeListener listener);
 
     /**
      * Moves the {@link WindowToken} {@code binder} to the display specified by {@code displayId}.

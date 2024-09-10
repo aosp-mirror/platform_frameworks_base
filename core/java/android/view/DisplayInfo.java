@@ -708,7 +708,7 @@ public final class DisplayInfo implements Parcelable {
      */
     @Nullable
     public Display.Mode findDefaultModeByRefreshRate(float refreshRate) {
-        Display.Mode[] modes = supportedModes;
+        Display.Mode[] modes = appsSupportedModes;
         Display.Mode defaultMode = getDefaultMode();
         for (int i = 0; i < modes.length; i++) {
             if (modes[i].matches(
@@ -723,7 +723,7 @@ public final class DisplayInfo implements Parcelable {
      * Returns the list of supported refresh rates in the default mode.
      */
     public float[] getDefaultRefreshRates() {
-        Display.Mode[] modes = supportedModes;
+        Display.Mode[] modes = appsSupportedModes;
         ArraySet<Float> rates = new ArraySet<>();
         Display.Mode defaultMode = getDefaultMode();
         for (int i = 0; i < modes.length; i++) {

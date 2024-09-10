@@ -24,62 +24,78 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.approachLayout
 import androidx.compose.ui.layout.layout
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.viewinterop.AndroidView
-import com.android.compose.animation.scene.ElementKey
+import com.android.compose.animation.scene.MovableElementKey
 import com.android.compose.animation.scene.SceneScope
 import com.android.systemui.media.controls.ui.controller.MediaCarouselController
 import com.android.systemui.media.controls.ui.view.MediaHost
 import com.android.systemui.res.R
 import com.android.systemui.util.animation.MeasurementInput
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 object MediaCarousel {
     object Elements {
         internal val Content =
-            ElementKey(debugName = "MediaCarouselContent", scenePicker = MediaScenePicker)
+            MovableElementKey(
+                debugName = "MediaCarouselContent",
+                contentPicker = MediaContentPicker,
+            )
     }
 }
 
+@ExperimentalCoroutinesApi
 @Composable
 fun SceneScope.MediaCarousel(
     isVisible: Boolean,
     mediaHost: MediaHost,
     modifier: Modifier = Modifier,
     carouselController: MediaCarouselController,
+    offsetProvider: (() -> IntOffset)? = null,
 ) {
-    if (!isVisible) {
+    if (!isVisible || carouselController.isLockedAndHidden()) {
         return
     }
 
-    val density = LocalDensity.current
     val mediaHeight = dimensionResource(R.dimen.qs_media_session_height_expanded)
-
-    val layoutWidth = 0
-    val layoutHeight = with(density) { mediaHeight.toPx() }.toInt()
-
-    // Notify controller to size the carousel for the current space
-    mediaHost.measurementInput = MeasurementInput(layoutWidth, layoutHeight)
-    carouselController.setSceneContainerSize(layoutWidth, layoutHeight)
 
     MovableElement(
         key = MediaCarousel.Elements.Content,
-        modifier = modifier.height(mediaHeight).fillMaxWidth()
+        modifier = modifier.height(mediaHeight).fillMaxWidth(),
     ) {
         content {
             AndroidView(
                 modifier =
-                    Modifier.fillMaxSize().layout { measurable, constraints ->
-                        val placeable = measurable.measure(constraints)
+                    Modifier.fillMaxSize()
+                        .approachLayout(
+                            isMeasurementApproachInProgress = { offsetProvider != null },
+                            approachMeasure = { measurable, constraints ->
+                                val placeable = measurable.measure(constraints)
+                                layout(placeable.width, placeable.height) {
+                                    placeable.placeRelative(
+                                        offsetProvider?.invoke() ?: IntOffset.Zero
+                                    )
+                                }
+                            }
+                        )
+                        .layout { measurable, constraints ->
+                            val placeable = measurable.measure(constraints)
 
-                        // Notify controller to size the carousel for the current space
-                        mediaHost.measurementInput =
-                            MeasurementInput(placeable.width, placeable.height)
-                        carouselController.setSceneContainerSize(placeable.width, placeable.height)
+                            // Notify controller to size the carousel for the current space
+                            mediaHost.measurementInput =
+                                MeasurementInput(placeable.width, placeable.height)
+                            carouselController.setSceneContainerSize(
+                                placeable.width,
+                                placeable.height
+                            )
 
-                        layout(placeable.width, placeable.height) { placeable.placeRelative(0, 0) }
-                    },
+                            layout(placeable.width, placeable.height) {
+                                placeable.placeRelative(0, 0)
+                            }
+                        },
                 factory = { context ->
                     FrameLayout(context).apply {
                         layoutParams =

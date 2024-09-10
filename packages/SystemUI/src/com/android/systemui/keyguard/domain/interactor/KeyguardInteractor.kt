@@ -1,26 +1,25 @@
 /*
- *  Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
-
 @file:OptIn(ExperimentalCoroutinesApi::class)
 
 package com.android.systemui.keyguard.domain.interactor
 
 import android.app.StatusBarManager
 import android.graphics.Point
+import android.util.Log
 import android.util.MathUtils
 import com.android.app.animation.Interpolators
 import com.android.systemui.bouncer.data.repository.KeyguardBouncerRepository
@@ -37,9 +36,12 @@ import com.android.systemui.keyguard.shared.model.DozeStateModel
 import com.android.systemui.keyguard.shared.model.DozeStateModel.Companion.isDozeOff
 import com.android.systemui.keyguard.shared.model.DozeTransitionModel
 import com.android.systemui.keyguard.shared.model.Edge
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
+import com.android.systemui.keyguard.shared.model.KeyguardState.DOZING
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
+import com.android.systemui.keyguard.shared.model.KeyguardState.OCCLUDED
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.res.R
@@ -89,6 +91,7 @@ constructor(
     sceneInteractorProvider: Provider<SceneInteractor>,
     private val fromGoneTransitionInteractor: Provider<FromGoneTransitionInteractor>,
     private val fromLockscreenTransitionInteractor: Provider<FromLockscreenTransitionInteractor>,
+    private val fromOccludedTransitionInteractor: Provider<FromOccludedTransitionInteractor>,
     sharedNotificationContainerInteractor: Provider<SharedNotificationContainerInteractor>,
     @Application applicationScope: CoroutineScope,
 ) {
@@ -156,14 +159,23 @@ constructor(
 
     val isPulsing: Flow<Boolean> = dozeTransitionModel.map { it.to == DozeStateModel.DOZE_PULSING }
 
-    /**
-     * Whether the system is dreaming. [isDreaming] will be always be true when [isDozing] is true,
-     * but not vice-versa.
-     */
-    val isDreaming: StateFlow<Boolean> = repository.isDreaming
-
     /** Whether the system is dreaming with an overlay active */
     val isDreamingWithOverlay: Flow<Boolean> = repository.isDreamingWithOverlay
+
+    /**
+     * Whether the system is dreaming. [isDreaming] will be always be true when [isDozing] is true,
+     * but not vice-versa. Also accounts for [isDreamingWithOverlay]
+     */
+    val isDreaming: StateFlow<Boolean> =
+        merge(
+                repository.isDreaming,
+                repository.isDreamingWithOverlay,
+            )
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.Eagerly,
+                initialValue = false,
+            )
 
     /** Whether the system is dreaming and the active dream is hosted in lockscreen */
     val isActiveDreamLockscreenHosted: StateFlow<Boolean> = repository.isActiveDreamLockscreenHosted
@@ -172,6 +184,9 @@ constructor(
     val onCameraLaunchDetected: Flow<CameraLaunchSourceModel> =
         repository.onCameraLaunchDetected.filter { it.type != CameraLaunchType.IGNORE }
 
+    /** Event for when an unlocked keyguard has been requested, such as on device fold */
+    val showDismissibleKeyguard: Flow<Long> = repository.showDismissibleKeyguard.asStateFlow()
+
     /**
      * Dozing and dreaming have overlapping events. If the doze state remains in FINISH, it means
      * that doze mode is not running and DREAMING is ok to commence.
@@ -179,12 +194,25 @@ constructor(
      * Allow a brief moment to prevent rapidly oscillating between true/false signals.
      */
     val isAbleToDream: Flow<Boolean> =
-        merge(isDreaming, isDreamingWithOverlay)
-            .combine(dozeTransitionModel) { isDreaming, dozeTransitionModel ->
-                isDreaming && isDozeOff(dozeTransitionModel.to)
+        dozeTransitionModel
+            .flatMapLatest { dozeTransitionModel ->
+                if (isDozeOff(dozeTransitionModel.to)) {
+                    // When dozing stops, it is a very early signal that the device is exiting the
+                    // dream state. DreamManagerService eventually notifies window manager, which
+                    // invokes SystemUI through KeyguardService. Because of this substantial delay,
+                    // do not immediately process any dreaming information when exiting AOD. It
+                    // should actually be quite strange to leave AOD and then go straight to
+                    // DREAMING so this should be fine.
+                    delay(500L)
+                    isDreaming
+                        .sample(powerInteractor.isAwake) { isDreaming, isAwake ->
+                            isDreaming && isAwake
+                        }
+                        .debounce(50L)
+                } else {
+                    flowOf(false)
+                }
             }
-            .sample(powerInteractor.isAwake) { isAbleToDream, isAwake -> isAbleToDream && isAwake }
-            .debounce(50L)
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),
@@ -193,14 +221,14 @@ constructor(
 
     /** Whether the keyguard is showing or not. */
     @Deprecated("Use KeyguardTransitionInteractor + KeyguardState")
-    val isKeyguardShowing: Flow<Boolean> = repository.isKeyguardShowing
+    val isKeyguardShowing: StateFlow<Boolean> = repository.isKeyguardShowing
 
     /** Whether the keyguard is dismissible or not. */
     val isKeyguardDismissible: StateFlow<Boolean> = repository.isKeyguardDismissible
 
     /** Whether the keyguard is occluded (covered by an activity). */
     @Deprecated("Use KeyguardTransitionInteractor + KeyguardState.OCCLUDED")
-    val isKeyguardOccluded: Flow<Boolean> = repository.isKeyguardOccluded
+    val isKeyguardOccluded: StateFlow<Boolean> = repository.isKeyguardOccluded
 
     /** Whether the keyguard is going away. */
     @Deprecated("Use KeyguardTransitionInteractor + KeyguardState.GONE")
@@ -230,7 +258,7 @@ constructor(
     val ambientIndicationVisible: Flow<Boolean> = repository.ambientIndicationVisible.asStateFlow()
 
     /** Whether the primary bouncer is showing or not. */
-    @JvmField val primaryBouncerShowing: Flow<Boolean> = bouncerRepository.primaryBouncerShow
+    @JvmField val primaryBouncerShowing: StateFlow<Boolean> = bouncerRepository.primaryBouncerShow
 
     /** Whether the alternate bouncer is showing or not. */
     val alternateBouncerShowing: Flow<Boolean> =
@@ -251,7 +279,7 @@ constructor(
     val statusBarState: Flow<StatusBarState> = repository.statusBarState
 
     /** Observable for [BiometricUnlockModel] when biometrics are used to unlock the device. */
-    val biometricUnlockState: Flow<BiometricUnlockModel> = repository.biometricUnlockState
+    val biometricUnlockState: StateFlow<BiometricUnlockModel> = repository.biometricUnlockState
 
     /** Keyguard is present and is not occluded. */
     val isKeyguardVisible: Flow<Boolean> =
@@ -383,6 +411,12 @@ constructor(
         }
     }
 
+    /** Which keyguard state to use when the device goes to sleep. */
+    val asleepKeyguardState: StateFlow<KeyguardState> =
+        repository.isAodAvailable
+            .map { aodAvailable -> if (aodAvailable) AOD else DOZING }
+            .stateIn(applicationScope, SharingStarted.Eagerly, DOZING)
+
     /**
      * Whether the primary authentication is required for the given user due to lockdown or
      * encryption after reboot.
@@ -461,12 +495,20 @@ constructor(
 
     /** Temporary shim, until [KeyguardWmStateRefactor] is enabled */
     fun dismissKeyguard() {
-        fromLockscreenTransitionInteractor.get().dismissKeyguard()
+        when (keyguardTransitionInteractor.transitionState.value.to) {
+            LOCKSCREEN -> fromLockscreenTransitionInteractor.get().dismissKeyguard()
+            OCCLUDED -> fromOccludedTransitionInteractor.get().dismissFromOccluded()
+            else -> Log.v(TAG, "Keyguard was dismissed, no direct transition call needed")
+        }
     }
 
     fun onCameraLaunchDetected(source: Int) {
         repository.onCameraLaunchDetected.value =
             CameraLaunchSourceModel(type = cameraLaunchSourceIntToType(source))
+    }
+
+    fun showDismissibleKeyguard() {
+        repository.showDismissibleKeyguard()
     }
 
     companion object {

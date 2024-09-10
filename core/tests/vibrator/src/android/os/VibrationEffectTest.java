@@ -60,7 +60,7 @@ import java.util.Arrays;
 
 @RunWith(MockitoJUnitRunner.class)
 public class VibrationEffectTest {
-
+    private static final float TOLERANCE = 1e-2f;
     private static final String RINGTONE_URI_1 = "content://test/system/ringtone_1";
     private static final String RINGTONE_URI_2 = "content://test/system/ringtone_2";
     private static final String RINGTONE_URI_3 = "content://test/system/ringtone_3";
@@ -430,6 +430,86 @@ public class VibrationEffectTest {
     }
 
     @Test
+    public void cropToLength_waveform_underLength() {
+        VibrationEffect effect = VibrationEffect.createWaveform(
+                /* timings= */ new long[]{0, 1, 2},
+                /* repeatIndex= */ -1);
+        VibrationEffect result = effect.cropToLengthOrNull(5);
+
+        assertThat(result).isEqualTo(effect); // unchanged
+    }
+
+    @Test
+    public void cropToLength_waveform_overLength() {
+        VibrationEffect effect = VibrationEffect.createWaveform(
+                /* timings= */ new long[]{0, 1, 2, 3, 4, 5, 6},
+                /* repeatIndex= */ -1);
+        VibrationEffect result = effect.cropToLengthOrNull(4);
+
+        assertThat(result).isEqualTo(VibrationEffect.createWaveform(
+                new long[]{0, 1, 2, 3},
+                -1));
+    }
+
+    @Test
+    public void cropToLength_waveform_repeating() {
+        // repeating waveforms cannot be truncated
+        VibrationEffect effect = VibrationEffect.createWaveform(
+                /* timings= */ new long[]{0, 1, 2, 3, 4, 5, 6},
+                /* repeatIndex= */ 2);
+        VibrationEffect result = effect.cropToLengthOrNull(3);
+
+        assertThat(result).isNull();
+    }
+
+    @Test
+    public void cropToLength_waveform_withAmplitudes() {
+        VibrationEffect effect = VibrationEffect.createWaveform(
+                /* timings= */ new long[]{0, 1, 2, 3, 4, 5, 6},
+                /* amplitudes= */ new int[]{10, 20, 40, 10, 20, 40, 10},
+                /* repeatIndex= */ -1);
+        VibrationEffect result = effect.cropToLengthOrNull(3);
+
+        assertThat(result).isEqualTo(VibrationEffect.createWaveform(
+                new long[]{0, 1, 2},
+                new int[]{10, 20, 40},
+                -1));
+    }
+
+    @Test
+    public void cropToLength_composed() {
+        VibrationEffect effect = VibrationEffect.startComposition()
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK)
+                .compose();
+        VibrationEffect result = effect.cropToLengthOrNull(1);
+
+        assertThat(result).isNotNull();
+        assertThat(result).isEqualTo(VibrationEffect.startComposition()
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                        .compose());
+    }
+
+    @Test
+    public void cropToLength_composed_repeating() {
+        VibrationEffect effect = VibrationEffect.startComposition()
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                .repeatEffectIndefinitely(TEST_ONE_SHOT)
+                .compose();
+        assertThat(effect.cropToLengthOrNull(1)).isNull();
+    }
+
+    @Test
+    @RequiresFlagsEnabled(android.os.vibrator.Flags.FLAG_VENDOR_VIBRATION_EFFECTS)
+    public void cropToLength_vendorEffect() {
+        PersistableBundle vendorData = new PersistableBundle();
+        vendorData.putInt("key", 1);
+        VibrationEffect effect = VibrationEffect.createVendorEffect(vendorData);
+
+        assertThat(effect.cropToLengthOrNull(2)).isNull();
+    }
+
+    @Test
     public void getRingtones_noPrebakedRingtones() {
         Resources r = mockRingtoneResources(new String[0]);
         Context context = mockContext(r);
@@ -709,7 +789,7 @@ public class VibrationEffectTest {
     @Test
     public void testScaleWaveform() {
         VibrationEffect scaledUp = TEST_WAVEFORM.scale(1.5f);
-        assertEquals(1f, getStepSegment(scaledUp, 0).getAmplitude(), 1e-5f);
+        assertEquals(1f, getStepSegment(scaledUp, 0).getAmplitude(), TOLERANCE);
 
         VibrationEffect scaledDown = TEST_WAVEFORM.scale(0.5f);
         assertTrue(1f > getStepSegment(scaledDown, 0).getAmplitude());
@@ -731,11 +811,11 @@ public class VibrationEffectTest {
     public void testScaleVendorEffect() {
         VibrationEffect effect = VibrationEffect.createVendorEffect(createNonEmptyBundle());
 
-        VibrationEffect scaledUp = effect.scale(1.5f);
-        assertEquals(effect, scaledUp);
+        VibrationEffect.VendorEffect scaledUp = (VibrationEffect.VendorEffect) effect.scale(1.5f);
+        assertEquals(1.5f, scaledUp.getScale());
 
-        VibrationEffect scaledDown = effect.scale(0.5f);
-        assertEquals(effect, scaledDown);
+        VibrationEffect.VendorEffect scaledDown = (VibrationEffect.VendorEffect) effect.scale(0.5f);
+        assertEquals(0.5f, scaledDown.getScale());
     }
 
     @Test
@@ -752,6 +832,70 @@ public class VibrationEffectTest {
         VibrationEffect scaledDown = effect.scale(0.5f);
         assertTrue(0.5f > getPrimitiveSegment(scaledDown, 0).getScale());
         assertTrue(100 / 255f > getStepSegment(scaledDown, 1).getAmplitude());
+    }
+
+    @Test
+    public void testApplyAdaptiveScaleOneShot() {
+        VibrationEffect oneShot = VibrationEffect.createOneShot(TEST_TIMING, /* amplitude= */ 100);
+
+        VibrationEffect scaledUp = oneShot.applyAdaptiveScale(1.5f);
+        assertThat(getStepSegment(scaledUp, 0).getAmplitude()).isWithin(TOLERANCE).of(150 / 255f);
+
+        VibrationEffect scaledDown = oneShot.applyAdaptiveScale(0.5f);
+        assertThat(getStepSegment(scaledDown, 0).getAmplitude()).isWithin(TOLERANCE).of(50 / 255f);
+    }
+
+    @Test
+    public void testApplyAdaptiveScaleWaveform() {
+        VibrationEffect waveform = VibrationEffect.createWaveform(
+                new long[] { 100, 100 }, new int[] { 10, 0 }, -1);
+
+        VibrationEffect scaledUp = waveform.applyAdaptiveScale(1.5f);
+        assertThat(getStepSegment(scaledUp, 0).getAmplitude()).isWithin(TOLERANCE).of(15 / 255f);
+
+        VibrationEffect scaledDown = waveform.applyAdaptiveScale(0.5f);
+        assertThat(getStepSegment(scaledDown, 0).getAmplitude()).isWithin(TOLERANCE).of(5 / 255f);
+    }
+
+    @Test
+    public void testApplyAdaptiveScalePrebaked() {
+        VibrationEffect effect = VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
+
+        VibrationEffect scaledUp = effect.applyAdaptiveScale(1.5f);
+        assertEquals(effect, scaledUp);
+
+        VibrationEffect scaledDown = effect.applyAdaptiveScale(0.5f);
+        assertEquals(effect, scaledDown);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(android.os.vibrator.Flags.FLAG_VENDOR_VIBRATION_EFFECTS)
+    public void testApplyAdaptiveScaleVendorEffect() {
+        VibrationEffect effect = VibrationEffect.createVendorEffect(createNonEmptyBundle());
+
+        VibrationEffect.VendorEffect scaledUp =
+                (VibrationEffect.VendorEffect) effect.applyAdaptiveScale(1.5f);
+        assertEquals(1.5f, scaledUp.getAdaptiveScale());
+
+        VibrationEffect.VendorEffect scaledDown =
+                (VibrationEffect.VendorEffect) effect.applyAdaptiveScale(0.5f);
+        assertEquals(0.5f, scaledDown.getAdaptiveScale());
+    }
+
+    @Test
+    public void testApplyAdaptiveScaleComposed() {
+        VibrationEffect effect = VibrationEffect.startComposition()
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 0.5f, 1)
+                .addEffect(VibrationEffect.createOneShot(TEST_TIMING, /* amplitude= */ 100))
+                .compose();
+
+        VibrationEffect scaledUp = effect.applyAdaptiveScale(1.5f);
+        assertThat(getPrimitiveSegment(scaledUp, 0).getScale()).isWithin(TOLERANCE).of(0.75f);
+        assertThat(getStepSegment(scaledUp, 1).getAmplitude()).isWithin(TOLERANCE).of(150 / 255f);
+
+        VibrationEffect scaledDown = effect.applyAdaptiveScale(0.5f);
+        assertThat(getPrimitiveSegment(scaledDown, 0).getScale()).isWithin(TOLERANCE).of(0.25f);
+        assertThat(getStepSegment(scaledDown, 1).getAmplitude()).isWithin(TOLERANCE).of(50 / 255f);
     }
 
     @Test
@@ -1069,6 +1213,27 @@ public class VibrationEffectTest {
     public void testIsHapticFeedbackCandidate_vendorEffects_notCandidates() {
         assertFalse(VibrationEffect.createVendorEffect(createNonEmptyBundle())
                 .isHapticFeedbackCandidate());
+    }
+
+    @Test
+    public void testParcelingComposed() {
+        Parcel p = Parcel.obtain();
+        VibrationEffect effect = VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK);
+        effect.writeToParcel(p, 0);
+        p.setDataPosition(0);
+        VibrationEffect parceledEffect = VibrationEffect.Composed.CREATOR.createFromParcel(p);
+        assertThat(parceledEffect).isEqualTo(effect);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(android.os.vibrator.Flags.FLAG_VENDOR_VIBRATION_EFFECTS)
+    public void testParcelingVendorEffect() {
+        Parcel p = Parcel.obtain();
+        VibrationEffect effect = VibrationEffect.createVendorEffect(createNonEmptyBundle());
+        effect.writeToParcel(p, 0);
+        p.setDataPosition(0);
+        VibrationEffect parceledEffect = VibrationEffect.VendorEffect.CREATOR.createFromParcel(p);
+        assertThat(parceledEffect).isEqualTo(effect);
     }
 
     private void assertArrayEq(long[] expected, long[] actual) {

@@ -276,7 +276,7 @@ public class IpSecPacketLossDetector extends NetworkMetricMonitor {
         // enabled on the last one as a sample
         mInboundTransform = inboundTransform;
 
-        if (!Flags.allowDisableIpsecLossDetector() || canStart()) {
+        if (canStart()) {
             start();
         }
     }
@@ -292,7 +292,7 @@ public class IpSecPacketLossDetector extends NetworkMetricMonitor {
             mMaxSeqNumIncreasePerSecond = getMaxSeqNumIncreasePerSecond(carrierConfig);
         }
 
-        if (Flags.allowDisableIpsecLossDetector() && canStart() != isStarted()) {
+        if (canStart() != isStarted()) {
             if (canStart()) {
                 start();
             } else {

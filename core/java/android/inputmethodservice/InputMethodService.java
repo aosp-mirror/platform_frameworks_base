@@ -58,8 +58,6 @@ import static android.view.inputmethod.Flags.FLAG_CONNECTIONLESS_HANDWRITING;
 import static android.view.inputmethod.Flags.ctrlShiftShortcut;
 import static android.view.inputmethod.Flags.predictiveBackIme;
 
-import static java.lang.annotation.RetentionPolicy.SOURCE;
-
 import android.annotation.AnyThread;
 import android.annotation.CallSuper;
 import android.annotation.DrawableRes;
@@ -500,43 +498,53 @@ public class InputMethodService extends AbstractInputMethodService {
     public static final int BACK_DISPOSITION_ADJUST_NOTHING = 3;
 
     /**
-     * Enum flag to be used for {@link #setBackDisposition(int)}.
+     * The disposition mode that indicates the expected affordance for the back button.
      *
      * @hide
      */
-    @Retention(SOURCE)
-    @IntDef(value = {BACK_DISPOSITION_DEFAULT, BACK_DISPOSITION_WILL_NOT_DISMISS,
-            BACK_DISPOSITION_WILL_DISMISS, BACK_DISPOSITION_ADJUST_NOTHING},
-            prefix = "BACK_DISPOSITION_")
+    @IntDef(prefix = { "BACK_DISPOSITION_" }, value = {
+            BACK_DISPOSITION_DEFAULT,
+            BACK_DISPOSITION_WILL_NOT_DISMISS,
+            BACK_DISPOSITION_WILL_DISMISS,
+            BACK_DISPOSITION_ADJUST_NOTHING,
+    })
+    @Retention(RetentionPolicy.SOURCE)
     public @interface BackDispositionMode {}
 
     /**
+     * The IME is active, and ready to accept touch/key events. It may or may not be visible.
+     *
      * @hide
-     * The IME is active.  It may or may not be visible.
      */
-    public static final int IME_ACTIVE = 0x1;
+    public static final int IME_ACTIVE = 1 << 0;
 
     /**
-     * @hide
      * The IME is perceptibly visible to the user.
+     *
+     * @hide
      */
-    public static final int IME_VISIBLE = 0x2;
+    public static final int IME_VISIBLE = 1 << 1;
 
     /**
-     * @hide
-     * The IME is active and ready with views but set invisible.
-     * This flag cannot be combined with {@link #IME_VISIBLE}.
-     */
-    public static final int IME_INVISIBLE = 0x4;
-
-    /**
-     * @hide
      * The IME is visible, but not yet perceptible to the user (e.g. fading in)
      * by {@link android.view.WindowInsetsController}.
      *
      * @see InputMethodManager#reportPerceptible
+     * @hide
      */
-    public static final int IME_VISIBLE_IMPERCEPTIBLE = 0x8;
+    public static final int IME_VISIBLE_IMPERCEPTIBLE = 1 << 2;
+
+    /**
+     * The IME window visibility state.
+     *
+     * @hide
+     */
+    @IntDef(flag = true, prefix = { "IME_" }, value = {
+            IME_ACTIVE,
+            IME_VISIBLE,
+            IME_VISIBLE_IMPERCEPTIBLE,
+    })
+    public @interface ImeWindowVisibility {}
 
     // Min and max values for back disposition.
     private static final int BACK_DISPOSITION_MIN = BACK_DISPOSITION_DEFAULT;
@@ -656,8 +664,13 @@ public class InputMethodService extends AbstractInputMethodService {
     
     int mStatusIcon;
 
+    /** Latest reported value of back disposition mode. */
     @BackDispositionMode
     int mBackDisposition;
+
+    /** Latest reported value of IME window visibility state. */
+    @ImeWindowVisibility
+    private int mImeWindowVisibility;
 
     private Object mLock = new Object();
     @GuardedBy("mLock")
@@ -1039,7 +1052,7 @@ public class InputMethodService extends AbstractInputMethodService {
                 ImeTracker.forLogging().onFailed(statsToken,
                         ImeTracker.PHASE_IME_ON_SHOW_SOFT_INPUT_TRUE);
             }
-            setImeWindowStatus(mapToImeWindowStatus(), mBackDisposition);
+            setImeWindowVisibility(computeImeWindowVis());
 
             final boolean isVisible = isInputViewShown();
             final boolean visibilityChanged = isVisible != wasVisible;
@@ -1349,8 +1362,22 @@ public class InputMethodService extends AbstractInputMethodService {
         mImeSurfaceRemoverRunnable = null;
     }
 
-    private void setImeWindowStatus(int visibilityFlags, int backDisposition) {
-        mPrivOps.setImeWindowStatusAsync(visibilityFlags, backDisposition);
+    /**
+     * Sets the IME window visibility state.
+     *
+     * @param vis the IME window visibility state to be set.
+     */
+    private void setImeWindowVisibility(@ImeWindowVisibility int vis) {
+        if (vis == mImeWindowVisibility) {
+            return;
+        }
+        mImeWindowVisibility = vis;
+        setImeWindowStatus(mImeWindowVisibility, mBackDisposition);
+    }
+
+    private void setImeWindowStatus(@ImeWindowVisibility int vis,
+            @BackDispositionMode int backDisposition) {
+        mPrivOps.setImeWindowStatusAsync(vis, backDisposition);
     }
 
     /** Set region of the keyboard to be avoided from back gesture */
@@ -1977,7 +2004,7 @@ public class InputMethodService extends AbstractInputMethodService {
             }
             // If user uses hard keyboard, IME button should always be shown.
             boolean showing = onEvaluateInputViewShown();
-            setImeWindowStatus(IME_ACTIVE | (showing ? IME_VISIBLE : 0), mBackDisposition);
+            setImeWindowVisibility(IME_ACTIVE | (showing ? IME_VISIBLE : 0));
         }
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }
@@ -2044,7 +2071,7 @@ public class InputMethodService extends AbstractInputMethodService {
             return;
         }
         mBackDisposition = disposition;
-        setImeWindowStatus(mapToImeWindowStatus(), mBackDisposition);
+        setImeWindowStatus(mImeWindowVisibility, mBackDisposition);
     }
 
     /**
@@ -2796,6 +2823,9 @@ public class InputMethodService extends AbstractInputMethodService {
      * <p>This dismisses the {@link #getStylusHandwritingWindow ink window} and stops intercepting
      * stylus {@code MotionEvent}s.
      *
+     * <p>Connectionless handwriting sessions should be finished using {@link
+     * #finishConnectionlessStylusHandwriting(CharSequence)}.
+     *
      * <p>Note for IME developers: Call this method at any time to finish the current handwriting
      * session. Generally, this should be invoked after a short timeout, giving the user enough time
      * to start the next stylus stroke, if any. By default, system will time-out after few seconds.
@@ -2803,9 +2833,6 @@ public class InputMethodService extends AbstractInputMethodService {
      *
      * <p>Handwriting session will be finished by framework on next {@link #onFinishInput()}.
      */
-    // TODO(b/300979854): Once connectionless APIs are finalised, update documentation to add:
-    // <p>Connectionless handwriting sessions should be finished using {@link
-    // #finishConnectionlessStylusHandwriting(CharSequence)}.
     public final void finishStylusHandwriting() {
         if (DEBUG) Log.v(TAG, "finishStylusHandwriting()");
         if (mInkWindow == null) {
@@ -3123,14 +3150,8 @@ public class InputMethodService extends AbstractInputMethodService {
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMS.showWindow");
         mDecorViewWasVisible = mDecorViewVisible;
         mInShowWindow = true;
-        final int previousImeWindowStatus =
-                (mDecorViewVisible ? IME_ACTIVE : 0) | (isInputViewShown()
-                        ? (!mWindowVisible ? IME_INVISIBLE : IME_VISIBLE) : 0);
         startViews(prepareWindow(showInput));
-        final int nextImeWindowStatus = mapToImeWindowStatus();
-        if (previousImeWindowStatus != nextImeWindowStatus) {
-            setImeWindowStatus(nextImeWindowStatus, mBackDisposition);
-        }
+        setImeWindowVisibility(computeImeWindowVis());
 
         mNavigationBarController.onWindowShown();
         // compute visibility
@@ -3308,7 +3329,7 @@ public class InputMethodService extends AbstractInputMethodService {
         ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_IME_HIDE_WINDOW);
         ImeTracing.getInstance().triggerServiceDump("InputMethodService#hideWindow", mDumper,
                 null /* icProto */);
-        setImeWindowStatus(0, mBackDisposition);
+        setImeWindowVisibility(0 /* vis */);
         if (android.view.inputmethod.Flags.refactorInsetsController()) {
             // The ImeInsetsSourceProvider need the statsToken when dispatching the control. We
             // send the token here, so that another request in the provider can be cancelled.
@@ -4483,9 +4504,10 @@ public class InputMethodService extends AbstractInputMethodService {
         };
     }
 
-    private int mapToImeWindowStatus() {
-        return IME_ACTIVE
-                | (isInputViewShown() ? IME_VISIBLE : 0);
+    /** Computes the IME window visibility state. */
+    @ImeWindowVisibility
+    private int computeImeWindowVis() {
+        return IME_ACTIVE | (isInputViewShown() ? IME_VISIBLE : 0);
     }
 
     /**

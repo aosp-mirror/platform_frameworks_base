@@ -16,6 +16,7 @@
 
 package com.android.systemui.scene
 
+import androidx.compose.ui.unit.dp
 import com.android.systemui.CoreStartable
 import com.android.systemui.notifications.ui.composable.NotificationsShadeSessionModule
 import com.android.systemui.scene.domain.SceneDomainModule
@@ -27,8 +28,11 @@ import com.android.systemui.scene.domain.startable.KeyguardStateCallbackStartabl
 import com.android.systemui.scene.domain.startable.SceneContainerStartable
 import com.android.systemui.scene.domain.startable.ScrimStartable
 import com.android.systemui.scene.domain.startable.StatusBarStartable
+import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.scene.ui.viewmodel.SplitEdgeDetector
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.shared.flag.DualShade
 import dagger.Binds
 import dagger.Module
@@ -42,8 +46,10 @@ import dagger.multibindings.IntoMap
         [
             EmptySceneModule::class,
             GoneSceneModule::class,
+            NotificationsShadeOverlayModule::class,
             NotificationsShadeSceneModule::class,
             NotificationsShadeSessionModule::class,
+            QuickSettingsShadeOverlayModule::class,
             QuickSettingsSceneModule::class,
             ShadeSceneModule::class,
             SceneDomainModule::class,
@@ -99,6 +105,11 @@ interface KeyguardlessSceneContainerFrameworkModule {
                         Scenes.Shade.takeUnless { DualShade.isEnabled },
                     ),
                 initialSceneKey = Scenes.Gone,
+                overlayKeys =
+                    listOfNotNull(
+                        Overlays.NotificationsShade.takeIf { DualShade.isEnabled },
+                        Overlays.QuickSettingsShade.takeIf { DualShade.isEnabled },
+                    ),
                 navigationDistances =
                     mapOf(
                             Scenes.Gone to 0,
@@ -109,6 +120,16 @@ interface KeyguardlessSceneContainerFrameworkModule {
                         )
                         .filterValues { it != null }
                         .mapValues { checkNotNull(it.value) }
+            )
+        }
+
+        @Provides
+        fun splitEdgeDetector(shadeInteractor: ShadeInteractor): SplitEdgeDetector {
+            return SplitEdgeDetector(
+                topEdgeSplitFraction = shadeInteractor::getTopEdgeSplitFraction,
+                // TODO(b/338577208): This should be 60dp at the top in the dual-shade UI. Better to
+                //  replace this constant with dynamic window insets.
+                edgeSize = 40.dp
             )
         }
     }

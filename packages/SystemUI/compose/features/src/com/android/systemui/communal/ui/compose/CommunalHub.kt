@@ -19,10 +19,7 @@ package com.android.systemui.communal.ui.compose
 import android.content.Context
 import android.content.res.Configuration
 import android.graphics.drawable.Icon
-import android.os.Bundle
 import android.util.SizeF
-import android.view.View.IMPORTANT_FOR_ACCESSIBILITY_AUTO
-import android.view.View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
 import android.widget.FrameLayout
 import android.widget.RemoteViews
 import androidx.annotation.VisibleForTesting
@@ -68,6 +65,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
@@ -105,7 +103,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
@@ -140,6 +137,7 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.style.TextAlign
@@ -160,6 +158,7 @@ import com.android.compose.modifiers.thenIf
 import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.compose.ui.graphics.painter.rememberDrawablePainter
 import com.android.internal.R.dimen.system_app_widget_background_radius
+import com.android.systemui.Flags
 import com.android.systemui.Flags.communalTimerFlickerFix
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.shared.model.CommunalContentSize
@@ -168,22 +167,23 @@ import com.android.systemui.communal.ui.compose.extensions.allowGestures
 import com.android.systemui.communal.ui.compose.extensions.detectLongPressGesture
 import com.android.systemui.communal.ui.compose.extensions.firstItemAtOffset
 import com.android.systemui.communal.ui.compose.extensions.observeTaps
+import com.android.systemui.communal.ui.view.layout.sections.CommunalAppWidgetSection
 import com.android.systemui.communal.ui.viewmodel.BaseCommunalViewModel
 import com.android.systemui.communal.ui.viewmodel.CommunalEditModeViewModel
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.communal.util.DensityUtils.Companion.adjustedDp
-import com.android.systemui.communal.util.DensityUtils.Companion.scalingAdjustment
 import com.android.systemui.communal.widgets.SmartspaceAppWidgetHostView
 import com.android.systemui.communal.widgets.WidgetConfigurator
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.phone.SystemUIDialogFactory
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CommunalHub(
     modifier: Modifier = Modifier,
     viewModel: BaseCommunalViewModel,
+    widgetSection: CommunalAppWidgetSection,
     interactionHandler: RemoteViews.InteractionHandler? = null,
     dialogFactory: SystemUIDialogFactory? = null,
     widgetConfigurator: WidgetConfigurator? = null,
@@ -198,7 +198,12 @@ fun CommunalHub(
 
     val gridState =
         rememberLazyGridState(viewModel.savedFirstScrollIndex, viewModel.savedFirstScrollOffset)
-    viewModel.clearPersistedScrollPosition()
+
+    LaunchedEffect(Unit) {
+        if (!viewModel.isEditMode) {
+            viewModel.clearPersistedScrollPosition()
+        }
+    }
 
     val contentListState = rememberContentListState(widgetConfigurator, communalContent, viewModel)
     val reorderingWidgets by viewModel.reorderingWidgets.collectAsStateWithLifecycle()
@@ -221,7 +226,6 @@ fun CommunalHub(
     val windowMetrics = WindowMetricsCalculator.getOrCreate().computeCurrentWindowMetrics(context)
     val screenWidth = windowMetrics.bounds.width()
     val layoutDirection = LocalLayoutDirection.current
-
     if (viewModel.isEditMode) {
         ObserveNewWidgetAddedEffect(communalContent, gridState, viewModel)
     } else {
@@ -238,10 +242,15 @@ fun CommunalHub(
         }
     }
 
+    val paneTitle = stringResource(R.string.accessibility_content_description_for_communal_hub)
+
     Box(
         modifier =
             modifier
-                .semantics { testTagsAsResourceId = true }
+                .semantics {
+                    testTagsAsResourceId = true
+                    this.paneTitle = paneTitle
+                }
                 .testTag(COMMUNAL_HUB_TEST_TAG)
                 .fillMaxSize()
                 // Observe taps for selecting items
@@ -269,7 +278,7 @@ fun CommunalHub(
                     }
                 }
                 // Nested scroll for full screen swipe to get to shade and bouncer
-                .thenIf(!viewModel.isEditMode) {
+                .thenIf(!viewModel.isEditMode && Flags.hubmodeFullscreenVerticalSwipeFix()) {
                     Modifier.nestedScroll(nestedScrollConnection).pointerInput(viewModel) {
                         awaitPointerEventScope {
                             while (true) {
@@ -382,6 +391,7 @@ fun CommunalHub(
                             selectedKey = selectedKey,
                             widgetConfigurator = widgetConfigurator,
                             interactionHandler = interactionHandler,
+                            widgetSection = widgetSection,
                         )
                     }
                 }
@@ -478,8 +488,7 @@ fun CommunalHub(
 }
 
 val hubDimensions: Dimensions
-    @Composable
-    get() = Dimensions(LocalContext.current, LocalConfiguration.current, LocalDensity.current)
+    @Composable get() = Dimensions(LocalContext.current, LocalConfiguration.current)
 
 @Composable
 private fun DisclaimerBottomSheetContent(onButtonClicked: () -> Unit) {
@@ -545,23 +554,31 @@ private fun ScrollOnUpdatedLiveContentEffect(
     communalContent: List<CommunalContentModel>,
     gridState: LazyGridState,
 ) {
-    val coroutineScope = rememberCoroutineScope()
     val liveContentKeys = remember { mutableListOf<String>() }
+    var communalContentPending by remember { mutableStateOf(true) }
 
     LaunchedEffect(communalContent) {
+        // Do nothing until any communal content comes in
+        if (communalContentPending && communalContent.isEmpty()) {
+            return@LaunchedEffect
+        }
+
         val prevLiveContentKeys = liveContentKeys.toList()
+        val newLiveContentKeys = communalContent.filter { it.isLiveContent() }.map { it.key }
         liveContentKeys.clear()
-        liveContentKeys.addAll(communalContent.filter { it.isLiveContent() }.map { it.key })
+        liveContentKeys.addAll(newLiveContentKeys)
 
-        // Find the first updated content
+        // Do nothing on first communal content since we don't have a delta
+        if (communalContentPending) {
+            communalContentPending = false
+            return@LaunchedEffect
+        }
+
+        // Do nothing if there is no new live content
         val indexOfFirstUpdatedContent =
-            liveContentKeys.indexOfFirst { !prevLiveContentKeys.contains(it) }
-
-        // Scroll if current position is behind the first updated content
+            newLiveContentKeys.indexOfFirst { !prevLiveContentKeys.contains(it) }
         if (indexOfFirstUpdatedContent in 0 until gridState.firstVisibleItemIndex) {
-            // Launching with a scope to prevent the job from being canceled in the case of a
-            // recomposition during scrolling
-            coroutineScope.launch { gridState.animateScrollToItem(indexOfFirstUpdatedContent) }
+            gridState.scrollToItem(indexOfFirstUpdatedContent)
         }
     }
 }
@@ -631,6 +648,7 @@ private fun BoxScope.CommunalHubLazyGrid(
     updateDragPositionForRemove: (offset: Offset) -> Boolean,
     widgetConfigurator: WidgetConfigurator?,
     interactionHandler: RemoteViews.InteractionHandler?,
+    widgetSection: CommunalAppWidgetSection,
 ) {
     var gridModifier =
         Modifier.align(Alignment.TopStart).onGloballyPositioned { setGridCoordinates(it) }
@@ -679,21 +697,20 @@ private fun BoxScope.CommunalHubLazyGrid(
         horizontalArrangement = Arrangement.spacedBy(Dimensions.ItemSpacing),
         verticalArrangement = Arrangement.spacedBy(Dimensions.ItemSpacing),
     ) {
-        items(
-            count = list.size,
-            key = { index -> list[index].key },
-            contentType = { index -> list[index].key },
-            span = { index -> GridItemSpan(list[index].size.span) },
-        ) { index ->
+        itemsIndexed(
+            items = list,
+            key = { _, item -> item.key },
+            contentType = { _, item -> item.key },
+            span = { _, item -> GridItemSpan(item.size.span) },
+        ) { index, item ->
             val size =
                 SizeF(
                     Dimensions.CardWidth.value,
-                    list[index].size.dp().value,
+                    item.size.dp().value,
                 )
             val cardModifier = Modifier.requiredSize(width = size.width.dp, height = size.height.dp)
             if (viewModel.isEditMode && dragDropState != null) {
-                val selected by
-                    remember(index) { derivedStateOf { list[index].key == selectedKey.value } }
+                val selected = item.key == selectedKey.value
                 DraggableItem(
                     modifier =
                         if (dragDropState.draggingItemIndex == index) {
@@ -705,12 +722,12 @@ private fun BoxScope.CommunalHubLazyGrid(
                         },
                     dragDropState = dragDropState,
                     selected = selected,
-                    enabled = list[index].isWidgetContent(),
+                    enabled = item.isWidgetContent(),
                     index = index,
                 ) { isDragging ->
                     CommunalContent(
                         modifier = cardModifier,
-                        model = list[index],
+                        model = item,
                         viewModel = viewModel,
                         size = size,
                         selected = selected && !isDragging,
@@ -718,18 +735,20 @@ private fun BoxScope.CommunalHubLazyGrid(
                         index = index,
                         contentListState = contentListState,
                         interactionHandler = interactionHandler,
+                        widgetSection = widgetSection,
                     )
                 }
             } else {
                 CommunalContent(
-                    modifier = cardModifier.animateItem(),
-                    model = list[index],
+                    model = item,
                     viewModel = viewModel,
                     size = size,
                     selected = false,
+                    modifier = cardModifier.animateItem(),
                     index = index,
                     contentListState = contentListState,
                     interactionHandler = interactionHandler,
+                    widgetSection = widgetSection,
                 )
             }
         }
@@ -971,6 +990,7 @@ private fun CommunalContent(
     index: Int,
     contentListState: ContentListState,
     interactionHandler: RemoteViews.InteractionHandler?,
+    widgetSection: CommunalAppWidgetSection,
 ) {
     when (model) {
         is CommunalContentModel.WidgetContent.Widget ->
@@ -982,7 +1002,8 @@ private fun CommunalContent(
                 widgetConfigurator,
                 modifier,
                 index,
-                contentListState
+                contentListState,
+                widgetSection,
             )
         is CommunalContentModel.WidgetPlaceholder -> HighlightedItem(modifier)
         is CommunalContentModel.WidgetContent.DisabledWidget ->
@@ -1115,9 +1136,9 @@ private fun WidgetContent(
     modifier: Modifier = Modifier,
     index: Int,
     contentListState: ContentListState,
+    widgetSection: CommunalAppWidgetSection,
 ) {
     val context = LocalContext.current
-    val isFocusable by viewModel.isFocusable.collectAsStateWithLifecycle(initialValue = false)
     val accessibilityLabel =
         remember(model, context) {
             model.providerInfo.loadLabel(context.packageManager).toString().trim()
@@ -1151,7 +1172,7 @@ private fun WidgetContent(
                 .then(selectableModifier)
                 .thenIf(!viewModel.isEditMode && !model.inQuietMode) {
                     Modifier.pointerInput(Unit) {
-                        observeTaps { viewModel.onTapWidget(model.componentName, model.priority) }
+                        observeTaps { viewModel.onTapWidget(model.componentName, model.rank) }
                     }
                 }
                 .thenIf(!viewModel.isEditMode && model.inQuietMode) {
@@ -1204,36 +1225,14 @@ private fun WidgetContent(
                     }
                 }
     ) {
-        AndroidView(
-            modifier = Modifier.fillMaxSize().allowGestures(allowed = !viewModel.isEditMode),
-            factory = { context ->
-                model.appWidgetHost
-                    .createViewForCommunal(context, model.appWidgetId, model.providerInfo)
-                    .apply {
-                        updateAppWidgetSize(
-                            /* newOptions = */ Bundle(),
-                            /* minWidth = */ size.width.toInt(),
-                            /* minHeight = */ size.height.toInt(),
-                            /* maxWidth = */ size.width.toInt(),
-                            /* maxHeight = */ size.height.toInt(),
-                            /* ignorePadding = */ true
-                        )
-                        accessibilityDelegate = viewModel.widgetAccessibilityDelegate
-                    }
-            },
-            update = {
-                it.apply {
-                    importantForAccessibility =
-                        if (isFocusable) {
-                            IMPORTANT_FOR_ACCESSIBILITY_AUTO
-                        } else {
-                            IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
-                        }
-                }
-            },
-            // For reusing composition in lazy lists.
-            onReset = {},
-        )
+        with(widgetSection) {
+            Widget(
+                viewModel = viewModel,
+                model = model,
+                size = size,
+                modifier = Modifier.fillMaxSize().allowGestures(allowed = !viewModel.isEditMode),
+            )
+        }
         if (
             viewModel is CommunalEditModeViewModel &&
                 model.reconfigurable &&
@@ -1305,8 +1304,9 @@ fun DisabledWidgetPlaceholder(
         modifier =
             modifier
                 .background(
-                    MaterialTheme.colorScheme.surfaceVariant,
-                    RoundedCornerShape(dimensionResource(system_app_widget_background_radius))
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    shape =
+                        RoundedCornerShape(dimensionResource(system_app_widget_background_radius))
                 )
                 .clickable(
                     enabled = !viewModel.isEditMode,
@@ -1342,10 +1342,8 @@ fun PendingWidgetPlaceholder(
     Column(
         modifier =
             modifier.background(
-                MaterialTheme.colorScheme.surfaceVariant,
-                RoundedCornerShape(
-                    dimensionResource(system_app_widget_background_radius) * scalingAdjustment
-                )
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                shape = RoundedCornerShape(dimensionResource(system_app_widget_background_radius))
             ),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -1427,7 +1425,10 @@ fun AccessibilityContainer(viewModel: BaseCommunalViewModel, content: @Composabl
                                     R.string.accessibility_action_label_close_communal_hub
                                 )
                             ) {
-                                viewModel.changeScene(CommunalScenes.Blank)
+                                viewModel.changeScene(
+                                    CommunalScenes.Blank,
+                                    "closed by accessibility"
+                                )
                                 true
                             },
                             CustomAccessibilityAction(
@@ -1528,21 +1529,24 @@ data class ContentPaddingInPx(val start: Float, val top: Float) {
     fun toOffset(): Offset = Offset(start, top)
 }
 
-class Dimensions(val context: Context, val config: Configuration, val density: Density) {
+class Dimensions(val context: Context, val config: Configuration) {
     val GridTopSpacing: Dp
         get() {
-            if (config.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                return 114.adjustedDp
-            } else {
-                val windowMetrics =
-                    WindowMetricsCalculator.getOrCreate().computeCurrentWindowMetrics(context)
-                val screenHeight = with(density) { windowMetrics.bounds.height().adjustedDp }
-
-                return (screenHeight - CardHeightFull) / 2
-            }
+            val result =
+                if (config.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                    114.dp
+                } else {
+                    val windowMetrics =
+                        WindowMetricsCalculator.getOrCreate().computeCurrentWindowMetrics(context)
+                    val density = context.resources.displayMetrics.density
+                    val screenHeight = (windowMetrics.bounds.height() / density).dp
+                    ((screenHeight - CardHeightFull) / 2)
+                }
+            return result
         }
 
-    val GridHeight = CardHeightFull + GridTopSpacing
+    val GridHeight: Dp
+        get() = CardHeightFull + GridTopSpacing
 
     companion object {
         val CardHeightFull

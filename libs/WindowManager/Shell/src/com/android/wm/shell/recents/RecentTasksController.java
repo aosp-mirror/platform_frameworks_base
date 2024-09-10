@@ -19,12 +19,14 @@ package com.android.wm.shell.recents;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.content.pm.PackageManager.FEATURE_PC;
 
-import static com.android.window.flags.Flags.enableDesktopWindowingTaskbarRunningApps;
-import static com.android.wm.shell.sysui.ShellSharedConstants.KEY_EXTRA_SHELL_RECENT_TASKS;
+import static com.android.wm.shell.shared.ShellSharedConstants.KEY_EXTRA_SHELL_RECENT_TASKS;
 
+import android.Manifest;
+import android.annotation.RequiresPermission;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.IApplicationThread;
+import android.app.KeyguardManager;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
@@ -52,16 +54,16 @@ import com.android.wm.shell.common.TaskStackListenerCallback;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
+import com.android.wm.shell.shared.GroupedRecentTaskInfo;
 import com.android.wm.shell.shared.annotations.ExternalThread;
 import com.android.wm.shell.shared.annotations.ShellMainThread;
 import com.android.wm.shell.shared.desktopmode.DesktopModeFlags;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
+import com.android.wm.shell.shared.split.SplitBounds;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
-import com.android.wm.shell.util.GroupedRecentTaskInfo;
-import com.android.wm.shell.util.SplitBounds;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -159,6 +161,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
         return new IRecentTasksImpl(this);
     }
 
+    @RequiresPermission(Manifest.permission.SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE)
     private void onInit() {
         mShellController.addExternalInterface(KEY_EXTRA_SHELL_RECENT_TASKS,
                 this::createExternalInterface, this);
@@ -169,6 +172,8 @@ public class RecentTasksController implements TaskStackListenerCallback,
             mTaskStackTransitionObserver.addTaskStackTransitionObserverListener(this,
                     mMainExecutor);
         }
+        mContext.getSystemService(KeyguardManager.class).addKeyguardLockedStateListener(
+                mMainExecutor, isKeyguardLocked -> notifyRecentTasksChanged());
     }
 
     void setTransitionHandler(RecentsTransitionHandler handler) {
@@ -365,7 +370,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
     private boolean shouldEnableRunningTasksForDesktopMode() {
         return mPcFeatureEnabled
                 || (DesktopModeStatus.canEnterDesktopMode(mContext)
-                && enableDesktopWindowingTaskbarRunningApps());
+                && DesktopModeFlags.TASKBAR_RUNNING_APPS.isEnabled(mContext));
     }
 
     @VisibleForTesting

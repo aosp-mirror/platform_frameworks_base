@@ -35,6 +35,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.res.R;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -46,7 +47,6 @@ import com.android.systemui.statusbar.notification.data.repository.HeadsUpReposi
 import com.android.systemui.statusbar.notification.data.repository.HeadsUpRowRepository;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.shared.NotificationThrottleHun;
-import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRefactor;
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.statusbar.policy.AnimationStateHandler;
 import com.android.systemui.statusbar.policy.AvalancheController;
@@ -251,11 +251,20 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
         return entry != null && mSystemClock.elapsedRealtime() < entry.mPostTime;
     }
 
+    @Override
+    public void releaseAfterExpansion() {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
+        onExpandingFinished();
+    }
+
     public void onExpandingFinished() {
         if (mReleaseOnExpandFinish) {
             releaseAllImmediately();
             mReleaseOnExpandFinish = false;
         } else {
+            for (NotificationEntry entry: getAllEntries().toList()) {
+                entry.setSeenInShade(true);
+            }
             for (NotificationEntry entry : mEntriesToRemoveAfterExpand) {
                 if (isHeadsUpEntry(entry.getKey())) {
                     // Maybe the heads-up was removed already
@@ -277,7 +286,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
     private void onShadeOrQsExpanded(Boolean isExpanded) {
         if (isExpanded != mIsExpanded) {
             mIsExpanded = isExpanded;
-            if (!NotificationsHeadsUpRefactor.isEnabled() && isExpanded) {
+            if (!SceneContainerFlag.isEnabled() && isExpanded) {
                 mHeadsUpAnimatingAway.setValue(false);
             }
         }
@@ -295,6 +304,11 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
             }
             mHeadsUpAnimatingAway.setValue(headsUpAnimatingAway);
         }
+    }
+
+    @Override
+    public void unpinAll(boolean userUnPinned) {
+        super.unpinAll(userUnPinned);
     }
 
     /**
@@ -365,12 +379,14 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
 
     @Override
     public boolean removeNotification(@NonNull String key, boolean releaseImmediately,
-            boolean animate) {
+            boolean animate, @NonNull String reason) {
         if (animate) {
-            return removeNotification(key, releaseImmediately);
+            return removeNotification(key, releaseImmediately,
+                    "removeNotification(animate: true), reason: " + reason);
         } else {
             mAnimationStateHandler.setHeadsUpGoingAwayAnimationsAllowed(false);
-            boolean removed = removeNotification(key, releaseImmediately);
+            final boolean removed = removeNotification(key, releaseImmediately,
+                    "removeNotification(animate: false), reason: " + reason);
             mAnimationStateHandler.setHeadsUpGoingAwayAnimationsAllowed(true);
             return removed;
         }
@@ -503,7 +519,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
 
     @Nullable
     private HeadsUpEntryPhone getTopHeadsUpEntryPhone() {
-        if (NotificationsHeadsUpRefactor.isEnabled()) {
+        if (SceneContainerFlag.isEnabled()) {
             return (HeadsUpEntryPhone) mTopHeadsUpRow.getValue();
         } else {
             return (HeadsUpEntryPhone) getTopHeadsUpEntry();
@@ -622,6 +638,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
                             mOnReorderingAllowedListener);
                 } else if (mTrackingHeadsUp) {
                     mEntriesToRemoveAfterExpand.add(entry);
+                    mLogger.logRemoveEntryAfterExpand(entry);
                 } else if (mVisualStabilityProvider.isReorderingAllowed()
                         || entry.showingPulsing()) {
                     removeEntry(entry.getKey(), "createRemoveRunnable");
@@ -696,7 +713,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
         }
 
         private NotificationEntry requireEntry() {
-            /* check if */ NotificationsHeadsUpRefactor.isUnexpectedlyInLegacyMode();
+            /* check if */ SceneContainerFlag.isUnexpectedlyInLegacyMode();
             return Objects.requireNonNull(mEntry);
         }
     }

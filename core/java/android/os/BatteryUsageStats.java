@@ -95,7 +95,6 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
     static final String XML_TAG_USER = "user";
     static final String XML_TAG_POWER_COMPONENTS = "power_components";
     static final String XML_TAG_COMPONENT = "component";
-    static final String XML_TAG_CUSTOM_COMPONENT = "custom_component";
     static final String XML_ATTR_ID = "id";
     static final String XML_ATTR_UID = "uid";
     static final String XML_ATTR_USER_ID = "user_id";
@@ -124,8 +123,8 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
     static final String XML_ATTR_TIME_IN_BACKGROUND = "time_in_background";
     static final String XML_ATTR_TIME_IN_FOREGROUND_SERVICE = "time_in_foreground_service";
 
-    // We need about 700 bytes per UID
-    private static final long BATTERY_CONSUMER_CURSOR_WINDOW_SIZE = 5_000 * 700;
+    // Max window size. CursorWindow uses only as much memory as needed.
+    private static final long BATTERY_CONSUMER_CURSOR_WINDOW_SIZE = 20_000_000; // bytes
 
     private static final int STATSD_PULL_ATOM_MAX_BYTES = 45000;
 
@@ -610,94 +609,107 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
         final BatteryConsumer appsConsumer = getAggregateBatteryConsumer(
                 AGGREGATE_BATTERY_CONSUMER_SCOPE_ALL_APPS);
 
-        for (int componentId = 0; componentId < BatteryConsumer.POWER_COMPONENT_COUNT;
-                componentId++) {
-            final double devicePowerMah = deviceConsumer.getConsumedPower(componentId);
-            final double appsPowerMah = appsConsumer.getConsumedPower(componentId);
+        for (@BatteryConsumer.PowerComponentId int powerComponent :
+                mBatteryConsumerDataLayout.powerComponentIds) {
+            final double devicePowerMah = deviceConsumer.getConsumedPower(powerComponent);
+            final double appsPowerMah = appsConsumer.getConsumedPower(powerComponent);
             if (devicePowerMah == 0 && appsPowerMah == 0) {
                 continue;
             }
 
-            printPowerComponent(pw, prefix, BatteryConsumer.powerComponentIdToString(componentId),
-                    devicePowerMah, appsPowerMah,
-                    BatteryConsumer.POWER_MODEL_UNDEFINED,
-                    deviceConsumer.getUsageDurationMillis(componentId));
+            printPowerComponent(pw, prefix,
+                    mBatteryConsumerDataLayout.getPowerComponentName(powerComponent),
+                    devicePowerMah, appsPowerMah, BatteryConsumer.POWER_MODEL_UNDEFINED,
+                    deviceConsumer.getUsageDurationMillis(powerComponent));
         }
 
-        for (int componentId = BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID;
-                componentId < BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID
-                        + mCustomPowerComponentNames.length;
-                componentId++) {
-            final double devicePowerMah =
-                    deviceConsumer.getConsumedPowerForCustomComponent(componentId);
-            final double appsPowerMah =
-                    appsConsumer.getConsumedPowerForCustomComponent(componentId);
-            if (devicePowerMah == 0 && appsPowerMah == 0) {
-                continue;
+        String prefixPlus = prefix + "  ";
+        if (mIncludesPowerStateData && !mIncludesScreenStateData) {
+            for (@BatteryConsumer.PowerState int powerState = 0;
+                    powerState < BatteryConsumer.POWER_STATE_COUNT;
+                    powerState++) {
+                if (powerState != BatteryConsumer.POWER_STATE_UNSPECIFIED) {
+                    dumpPowerComponents(pw, BatteryConsumer.SCREEN_STATE_ANY, powerState,
+                            prefixPlus);
+                }
             }
-
-            printPowerComponent(pw, prefix, deviceConsumer.getCustomPowerComponentName(componentId),
-                    devicePowerMah, appsPowerMah,
-                    BatteryConsumer.POWER_MODEL_UNDEFINED,
-                    deviceConsumer.getUsageDurationForCustomComponentMillis(componentId));
-        }
-
-        if (mIncludesScreenStateData || mIncludesPowerStateData) {
-            String prefixPlus = prefix + "  ";
-            StringBuilder stateLabel = new StringBuilder();
-            int screenState = BatteryConsumer.SCREEN_STATE_UNSPECIFIED;
-            int powerState = BatteryConsumer.POWER_STATE_UNSPECIFIED;
-            for (BatteryConsumer.Key key : mBatteryConsumerDataLayout.keys) {
-                if (key.processState != BatteryConsumer.PROCESS_STATE_UNSPECIFIED) {
-                    continue;
+        } else if (!mIncludesPowerStateData && mIncludesScreenStateData) {
+            for (@BatteryConsumer.ScreenState int screenState = 0;
+                    screenState < BatteryConsumer.SCREEN_STATE_COUNT;
+                    screenState++) {
+                if (screenState != BatteryConsumer.SCREEN_STATE_UNSPECIFIED) {
+                    dumpPowerComponents(pw, screenState, BatteryConsumer.POWER_STATE_ANY,
+                            prefixPlus);
                 }
-
-                if (key.screenState == BatteryConsumer.SCREEN_STATE_UNSPECIFIED
-                        && key.powerState == BatteryConsumer.POWER_STATE_UNSPECIFIED) {
-                    // Totals already printed earlier in this method
-                    continue;
-                }
-
-                final double devicePowerMah = deviceConsumer.getConsumedPower(key);
-                final double appsPowerMah = appsConsumer.getConsumedPower(key);
-                if (devicePowerMah == 0 && appsPowerMah == 0) {
-                    continue;
-                }
-
-                if (key.screenState != screenState || key.powerState != powerState) {
-                    screenState = key.screenState;
-                    powerState = key.powerState;
-
-                    boolean empty = true;
-                    stateLabel.setLength(0);
-                    stateLabel.append("      (");
-                    if (powerState != BatteryConsumer.POWER_STATE_UNSPECIFIED) {
-                        stateLabel.append(BatteryConsumer.powerStateToString(powerState));
-                        empty = false;
-                    }
-                    if (screenState != BatteryConsumer.SCREEN_STATE_UNSPECIFIED) {
-                        if (!empty) {
-                            stateLabel.append(", ");
+            }
+        } else if (mIncludesPowerStateData && mIncludesScreenStateData) {
+            for (@BatteryConsumer.PowerState int powerState = 0;
+                    powerState < BatteryConsumer.POWER_STATE_COUNT;
+                    powerState++) {
+                if (powerState != BatteryConsumer.POWER_STATE_UNSPECIFIED) {
+                    for (@BatteryConsumer.ScreenState int screenState = 0;
+                            screenState < BatteryConsumer.SCREEN_STATE_COUNT; screenState++) {
+                        if (screenState != BatteryConsumer.SCREEN_STATE_UNSPECIFIED) {
+                            dumpPowerComponents(pw, screenState, powerState, prefixPlus);
                         }
-                        stateLabel.append("screen ").append(
-                                BatteryConsumer.screenStateToString(screenState));
-                        empty = false;
-                    }
-                    if (!empty) {
-                        stateLabel.append(")");
-                        pw.println(stateLabel);
                     }
                 }
-                String label = BatteryConsumer.powerComponentIdToString(key.powerComponent);
-                printPowerComponent(pw, prefixPlus, label, devicePowerMah, appsPowerMah,
-                        mIncludesPowerModels ? deviceConsumer.getPowerModel(key)
-                                : BatteryConsumer.POWER_MODEL_UNDEFINED,
-                        deviceConsumer.getUsageDurationMillis(key));
             }
         }
+
         dumpSortedBatteryConsumers(pw, prefix, getUidBatteryConsumers());
         dumpSortedBatteryConsumers(pw, prefix, getUserBatteryConsumers());
         pw.println();
+    }
+
+    private void dumpPowerComponents(PrintWriter pw,
+            @BatteryConsumer.ScreenState int screenState,
+            @BatteryConsumer.PowerState int powerState, String prefix) {
+        final BatteryConsumer deviceConsumer = getAggregateBatteryConsumer(
+                AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE);
+        final BatteryConsumer appsConsumer = getAggregateBatteryConsumer(
+                AGGREGATE_BATTERY_CONSUMER_SCOPE_ALL_APPS);
+
+        boolean labelPrinted = false;
+        for (@BatteryConsumer.PowerComponentId int powerComponent :
+                mBatteryConsumerDataLayout.powerComponentIds) {
+            BatteryConsumer.Dimensions dimensions = new BatteryConsumer.Dimensions(
+                    powerComponent, BatteryConsumer.PROCESS_STATE_ANY, screenState, powerState);
+            final double devicePowerMah = deviceConsumer.getConsumedPower(dimensions);
+            final double appsPowerMah = appsConsumer.getConsumedPower(dimensions);
+            if (devicePowerMah == 0 && appsPowerMah == 0) {
+                continue;
+            }
+
+            if (!labelPrinted) {
+                boolean empty = true;
+                StringBuilder stateLabel = new StringBuilder();
+                stateLabel.append("      (");
+                if (powerState != BatteryConsumer.POWER_STATE_ANY) {
+                    stateLabel.append(BatteryConsumer.powerStateToString(powerState));
+                    empty = false;
+                }
+                if (screenState != BatteryConsumer.SCREEN_STATE_ANY) {
+                    if (!empty) {
+                        stateLabel.append(", ");
+                    }
+                    stateLabel.append("screen ")
+                            .append(BatteryConsumer.screenStateToString(screenState));
+                    empty = false;
+                }
+                if (!empty) {
+                    stateLabel.append(")");
+                    pw.println(stateLabel);
+                    labelPrinted = true;
+                }
+            }
+            printPowerComponent(pw, prefix,
+                    mBatteryConsumerDataLayout.getPowerComponentName(powerComponent),
+                    devicePowerMah, appsPowerMah,
+                    mIncludesPowerModels ? deviceConsumer.getPowerModel(powerComponent)
+                            : BatteryConsumer.POWER_MODEL_UNDEFINED,
+                    deviceConsumer.getUsageDurationMillis(dimensions));
+        }
     }
 
     private void printPowerComponent(PrintWriter pw, String prefix, String label,
@@ -951,12 +963,14 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
 
         /**
          * Returns true if this Builder is configured to hold data for the specified
-         * custom power component ID.
+         * power component index.
          */
-        public boolean isSupportedCustomPowerComponent(int componentId) {
-            return componentId >= BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID
+        public boolean isSupportedPowerComponent(
+                @BatteryConsumer.PowerComponentId int componentId) {
+            return componentId < BatteryConsumer.POWER_COMPONENT_COUNT
+                    || (componentId >= BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID
                     && componentId < BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID
-                    + mBatteryConsumerDataLayout.customPowerComponentCount;
+                    + mBatteryConsumerDataLayout.customPowerComponentCount);
         }
 
         /**

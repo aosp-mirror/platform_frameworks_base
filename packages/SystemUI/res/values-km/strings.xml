@@ -104,13 +104,17 @@
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> និងកម្មវិធីដែលបើក​ផ្សេងទៀតបានរកឃើញ​រូបថតអេក្រង់នេះ។"</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"បញ្ចូលទៅក្នុងកំណត់ចំណាំ"</string>
     <string name="backlinks_include_link" msgid="4562093591148248158">"រួមបញ្ចូល​តំណ"</string>
+    <string name="backlinks_duplicate_label_format" msgid="558445128952827926">"<xliff:g id="APPNAME">%1$s</xliff:g> <xliff:g id="FREQUENCYCOUNT">(%2$d)</xliff:g>⁠"</string>
     <string name="screenrecord_title" msgid="4257171601439507792">"មុខងារថត​វីដេអូអេក្រង់"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"កំពុង​ដំណើរការ​ការថតអេក្រង់"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ការជូនដំណឹង​ដែល​កំពុង​ដំណើរការ​សម្រាប់​រយៈពេលប្រើ​ការថត​សកម្មភាព​អេក្រង់"</string>
-    <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"ចាប់ផ្តើម​ថត​ឬ?"</string>
-    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"នៅពេលអ្នក​កំពុងថត, Android មានសិទ្ធិចូលប្រើអ្វីៗដែលអាចមើលឃើញនៅលើ​អេក្រង់របស់អ្នក ឬចាក់នៅលើឧបករណ៍របស់អ្នក។ ដូច្នេះ សូមប្រុងប្រយ័ត្នចំពោះអ្វីៗដូចជា ពាក្យសម្ងាត់ ព័ត៌មានលម្អិតអំពីការទូទាត់ប្រាក់ សារ រូបថត ព្រមទាំងសំឡេង និងវីដេអូ។"</string>
-    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"នៅពេលអ្នក​កំពុងថតកម្មវិធី, Android មានសិទ្ធិចូលប្រើអ្វីៗដែលបង្ហាញ ឬចាក់នៅលើកម្មវិធីនោះ។ ដូច្នេះ សូមប្រុងប្រយ័ត្នចំពោះអ្វីៗដូចជា ពាក្យសម្ងាត់ ព័ត៌មានលម្អិតអំពីការទូទាត់ប្រាក់ សារ រូបថត ព្រមទាំងសំឡេង និងវីដេអូ។"</string>
-    <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"ចាប់ផ្តើមថត"</string>
+    <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"ថត​អេក្រង់​របស់អ្នកឬ?"</string>
+    <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"ថត​កម្មវិធី​ទោល"</string>
+    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"ថតអេក្រង់ទាំងមូល"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"នៅពេល​អ្នកកំពុង​ថតអេក្រង់​ទាំងមូល​របស់អ្នក អ្វីគ្រប់យ៉ាង​ដែលបង្ហាញ​នៅលើ​អេក្រង់​របស់អ្នក​ត្រូវបាន​ថត។ ដូច្នេះ សូមប្រុងប្រយ័ត្នចំពោះអ្វីៗដូចជា ពាក្យសម្ងាត់ ព័ត៌មានលម្អិតអំពីការទូទាត់ប្រាក់ សារ រូបថត ព្រមទាំងសំឡេង និងវីដេអូ។"</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"នៅពេលអ្នក​កំពុង​ថតកម្មវិធី​ណាមួយ អ្វីគ្រប់យ៉ាង​ដែលបង្ហាញ ឬចាក់​នៅក្នុង​កម្មវិធីនោះ​ត្រូវបាន​ថត។ ដូច្នេះ សូមប្រុងប្រយ័ត្នចំពោះអ្វីៗដូចជា ពាក្យសម្ងាត់ ព័ត៌មានលម្អិតអំពីការទូទាត់ប្រាក់ សារ រូបថត ព្រមទាំងសំឡេង និងវីដេអូ។"</string>
+    <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"ថត​អេក្រង់"</string>
+    <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"ជ្រើសរើស​កម្មវិធី​ដើម្បីថត"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"ថត​សំឡេង"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"សំឡេង​ឧបករណ៍"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"សំឡេង​ពី​ឧបករណ៍​របស់អ្នក​ដូចជា តន្ត្រី ការហៅទូរសព្ទ និងសំឡេងរោទ៍​ជាដើម"</string>
@@ -134,9 +138,9 @@
     <string name="share_to_app_stop_dialog_title" msgid="9212915050910250438">"ឈប់បង្ហាញអេក្រង់ឬ?"</string>
     <string name="share_to_app_stop_dialog_message_entire_screen_with_host_app" msgid="522823522115375414">"បច្ចុប្បន្ន អ្នកកំពុងបង្ហាញអេក្រង់ទាំងមូលរបស់អ្នកតាមរយៈ <xliff:g id="HOST_APP_NAME">%1$s</xliff:g>"</string>
     <string name="share_to_app_stop_dialog_message_entire_screen" msgid="5090115386271179270">"បច្ចុប្បន្ន អ្នកកំពុងបង្ហាញអេក្រង់ទាំងមូលរបស់អ្នកតាមរយៈកម្មវិធីមួយ"</string>
-    <string name="share_to_app_stop_dialog_message_single_app_specific" msgid="5923772039347985172">"បច្ចុប្បន្ន អ្នកកំពុងបង្ហាញ<xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g>"</string>
+    <string name="share_to_app_stop_dialog_message_single_app_specific" msgid="5923772039347985172">"បច្ចុប្បន្ន អ្នកកំពុងបង្ហាញ <xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g>"</string>
     <string name="share_to_app_stop_dialog_message_single_app_generic" msgid="6681016774654578261">"បច្ចុប្បន្ន អ្នកកំពុងបង្ហាញកម្មវិធីមួយ"</string>
-    <string name="share_to_app_stop_dialog_button" msgid="6334056916284230217">"ឈប់​ចែក​រំលែក"</string>
+    <string name="share_to_app_stop_dialog_button" msgid="6334056916284230217">"ឈប់​បង្ហាញ"</string>
     <string name="cast_screen_to_other_device_chip_accessibility_label" msgid="4687917476203009885">"កំពុង​បញ្ជូន​អេក្រង់"</string>
     <string name="cast_to_other_device_stop_dialog_title" msgid="7836517190930357326">"ឈប់បញ្ជូនឬ?"</string>
     <string name="cast_to_other_device_stop_dialog_message_entire_screen_with_device" msgid="1474703115926205251">"បច្ចុប្បន្ន អ្នកកំពុងបញ្ជូនអេក្រង់ទាំងមូលរបស់អ្នកទៅ <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
@@ -176,8 +180,6 @@
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"ផ្ញើ"</string>
     <string name="cancel" msgid="1089011503403416730">"បោះបង់"</string>
     <string name="biometric_dialog_logo" msgid="7681107853070774595">"និមិត្តសញ្ញាកម្មវិធី"</string>
-  <string-array name="biometric_dialog_package_names_for_logo_with_overrides">
-  </string-array>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"បញ្ជាក់"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"ព្យាយាម​ម្ដង​ទៀត"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"ចុចដើម្បីបោះបង់​ការផ្ទៀងផ្ទាត់"</string>
@@ -290,7 +292,8 @@
     <string name="start_dreams" msgid="9131802557946276718">"ធាតុរក្សាអេក្រង់"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"អ៊ីសឺរណិត"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"កុំ​រំខាន"</string>
-    <string name="quick_settings_modes_label" msgid="5407025818652750501">"មុខងារអាទិភាព"</string>
+    <!-- no translation found for quick_settings_modes_label (879156359479504244) -->
+    <skip />
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"ប៊្លូធូស"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"មិន​មាន​ឧបករណ៍​ផ្គូផ្គង​ដែល​អាច​ប្រើ​បាន"</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"ចុចដើម្បីភ្ជាប់ ឬផ្ដាច់ឧបករណ៍"</string>
@@ -299,6 +302,7 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"ប្រើប៊្លូធូស"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"បានភ្ជាប់"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"ការស្ដាប់សំឡេងរួមគ្នា"</string>
+    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="3227408556754456024">"ចុចដើម្បីប្ដូរ ឬចែករំលែកសំឡេង"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"បាន​រក្សាទុក"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"ផ្ដាច់"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"បើកដំណើរការ"</string>
@@ -307,6 +311,7 @@
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"ប៊្លូធូសនឹងបើកនៅព្រឹកស្អែក"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"ស្ដាប់សំឡេងរួមគ្នា"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"កំពុងស្ដាប់សំឡេងរួមគ្នា"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"បញ្ចូលការកំណត់ការស្ដាប់សំឡេងរួមគ្នា"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"ថ្ម <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"សំឡេង"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"កាស"</string>
@@ -400,7 +405,7 @@
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"ចុច ដើម្បីផ្គូផ្គងឧបករណ៍ថ្មី"</string>
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"មិនអាច​ប្ដូរ​ការកំណត់ជាមុន​បានទេ"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"កំណត់ជាមុន"</string>
-    <string name="live_caption_title" msgid="8916875614623730005">"អក្សររត់ក្នុងពេលជាក់ស្ដែង"</string>
+    <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"អក្សររត់ក្នុងពេលជាក់ស្ដែង"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"ឈប់ទប់ស្កាត់​មីក្រូហ្វូន​របស់ឧបករណ៍ឬ?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"ឈប់ទប់ស្កាត់​កាមេរ៉ា​របស់ឧបករណ៍ឬ?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"ឈប់ទប់ស្កាត់​កាមេរ៉ា និងមីក្រូហ្វូន​របស់ឧបករណ៍ឬ?"</string>
@@ -429,17 +434,16 @@
     <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"បើកការកំណត់"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"ឧបករណ៍ផ្សេងទៀត"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"បិទ/បើក​ទិដ្ឋភាពរួម"</string>
-    <string name="zen_modes_dialog_title" msgid="4159138230418567383">"មុខងារអាទិភាព"</string>
+    <!-- no translation found for zen_modes_dialog_title (8854640808100096934) -->
+    <skip />
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"រួចរាល់"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"ការកំណត់"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"បើក"</string>
+    <string name="zen_mode_on_with_details" msgid="7416143430557895497">"បើក • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"បិទ"</string>
-    <!-- no translation found for zen_mode_set_up (7457957033034460064) -->
-    <skip />
-    <!-- no translation found for zen_mode_no_manual_invocation (1769975741344633672) -->
-    <skip />
-    <!-- no translation found for zen_mode_active_modes (1625850411578488856) -->
-    <skip />
+    <string name="zen_mode_set_up" msgid="7457957033034460064">"រៀបចំ"</string>
+    <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"គ្រប់គ្រង​នៅ​ក្នុង​ការកំណត់"</string>
+    <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{គ្មានមុខងារ​ដែលកំពុងដំណើរការទេ}=1{{mode} កំពុង​ដំណើរការ}other{មុខងារ # កំពុងដំណើរការ}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"សំឡេង និងរំញ័រនឹងមិន​រំខានដល់អ្នកឡើយ លើកលែងតែម៉ោងរោទ៍ ការរំលឹក ព្រឹត្តិការណ៍ និងអ្នកហៅទូរសព្ទដែលអ្នកបញ្ជាក់ប៉ុណ្ណោះ។ អ្នកនឹងនៅតែឮសំឡេងសកម្មភាពគ្រប់យ៉ាងដែលអ្នកលេងដដែល រួមទាំងតន្រ្តី វីដេអូ និងហ្គេម។"</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"សំឡេង និងរំញ័រនឹងមិន​រំខានដល់អ្នកឡើយ លើកលែងតែម៉ោងរោទ៍ប៉ុណ្ណោះ។ អ្នកនឹងនៅតែឮសំឡេងសកម្មភាពគ្រប់យ៉ាងដែលអ្នកលេងដដែល រួមទាំងតន្រ្តី វីដេអូ និងហ្គេម។"</string>
     <string name="zen_priority_customize_button" msgid="4119213187257195047">"ប្ដូរតាមបំណង"</string>
@@ -478,8 +482,7 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • កំពុង​សាកថ្ម​យឺត • ពេញក្នុងរយៈពេល <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • កំពុងសាកថ្ម • ពេញក្នុងរយៈពេល <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_action_open_communal_hub" msgid="3081702792413787849">"ធាតុ​ក្រាហ្វិកនៅលើអេក្រង់ចាក់សោ"</string>
-    <!-- no translation found for accessibility_announcement_communal_widget_added (6911593106099328271) -->
-    <skip />
+    <string name="accessibility_announcement_communal_widget_added" msgid="6911593106099328271">"បានបញ្ចូល​ធាតុ​ក្រាហ្វិក <xliff:g id="WIDGET_NAME">%1$s</xliff:g> ទៅ​អេក្រង់​ចាក់សោ"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"អូសទៅឆ្វេង ដើម្បីចាប់ផ្ដើមមេរៀនសហគមន៍"</string>
     <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"ប្ដូរតាមបំណង"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"ច្រានចោល"</string>
@@ -531,22 +534,31 @@
     <string name="media_projection_dialog_warning" msgid="1303664408388363598">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> នឹងមានសិទ្ធិ​ចូលប្រើ​ព័ត៌មាន​ទាំងអស់​ដែលអាច​មើលឃើញ​នៅលើ​អេក្រង់​របស់អ្នក ឬចាក់​ពីឧបករណ៍​របស់អ្នក នៅពេល​កំពុង​ថត ឬភ្ជាប់។ ព័ត៌មាន​នេះមាន​ដូចជា ពាក្យសម្ងាត់ ព័ត៌មាន​លម្អិត​អំពីការទូទាត់​ប្រាក់ រូបថត សារ និង​សំឡេង​ដែល​អ្នកចាក់​ជាដើម។"</string>
     <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"ចាប់ផ្ដើម​ថត ឬភ្ជាប់​មែនទេ?"</string>
     <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"សេវាកម្មដែលផ្ដល់មុខងារនេះ​នឹងមានសិទ្ធិ​ចូលប្រើ​ព័ត៌មាន​ទាំងអស់​ដែលអាច​មើលឃើញ​នៅលើ​អេក្រង់​របស់អ្នក ឬចាក់​ពីឧបករណ៍​របស់អ្នក នៅពេល​កំពុង​ថត ឬភ្ជាប់។ ព័ត៌មាន​នេះមាន​ដូចជា ពាក្យសម្ងាត់ ព័ត៌មាន​លម្អិត​អំពីការទូទាត់​ប្រាក់ រូបថត សារ និង​សំឡេង​ដែល​អ្នកចាក់​ជាដើម។"</string>
-    <string name="screen_share_permission_dialog_option_entire_screen" msgid="3131200488455089620">"អេក្រង់ទាំងមូល"</string>
-    <string name="screen_share_permission_dialog_option_single_app" msgid="4350961814397220929">"កម្មវិធីតែមួយ"</string>
-    <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"ចែករំលែក ឬថតកម្មវិធី"</string>
-    <string name="media_projection_entry_app_permission_dialog_title" msgid="9155535851866407199">"ចាប់ផ្ដើម​ថត ឬភ្ជាប់​ដោយប្រើ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ឬ?"</string>
-    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"នៅពេលអ្នកកំពុងចែករំលែក ថត ឬភ្ជាប់, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> មានសិទ្ធិចូលប្រើអ្វីៗដែលអាចមើលឃើញនៅលើអេក្រង់របស់អ្នក ឬចាក់នៅលើឧបករណ៍របស់អ្នក។ ដូច្នេះ សូមប្រុងប្រយ័ត្នចំពោះអ្វីៗដូចជា ពាក្យសម្ងាត់ ព័ត៌មានលម្អិតអំពីការទូទាត់ប្រាក់ សារ រូបថត ព្រមទាំងសំឡេង និងវីដេអូ។"</string>
-    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"នៅពេលអ្នកកំពុងចែករំលែក ថត ឬភ្ជាប់កម្មវិធី, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> មានសិទ្ធិចូលប្រើអ្វីៗដែលបង្ហាញ ឬចាក់នៅលើកម្មវិធីនោះ។ ដូច្នេះ សូមប្រុងប្រយ័ត្នចំពោះអ្វីៗដូចជា ពាក្យសម្ងាត់ ព័ត៌មានលម្អិតអំពីការទូទាត់ប្រាក់ សារ រូបថត ព្រមទាំងសំឡេង និងវីដេអូ។"</string>
-    <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"ចាប់ផ្ដើម"</string>
+    <string name="screen_share_generic_app_selector_title" msgid="8331515850599218288">"ចែករំលែក ឬថតកម្មវិធី"</string>
+    <string name="media_projection_entry_app_permission_dialog_title" msgid="4613857256721708062">"បង្ហាញអេក្រង់របស់អ្នកជាមួយ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ឬ?"</string>
+    <string name="screen_share_permission_dialog_option_single_app" msgid="2974054871681567314">"បង្ហាញកម្មវិធី​មួយ"</string>
+    <!-- no translation found for media_projection_entry_app_permission_dialog_option_text_single_app (2308901434964846084) -->
+    <skip />
+    <string name="screen_share_permission_dialog_option_entire_screen" msgid="4493174362775038997">"បង្ហាញអេក្រង់​ទាំង​មូល"</string>
+    <!-- no translation found for media_projection_entry_app_permission_dialog_option_text_entire_screen (5100078808078139706) -->
+    <skip />
+    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="5504288438067851086">"នៅពេលអ្នកបង្ហាញអេក្រង់ទាំងមូលរបស់អ្នក <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> មើលឃើញអ្វីគ្រប់យ៉ាងនៅលើអេក្រង់របស់អ្នក។ ដូច្នេះ សូមប្រុងប្រយ័ត្នចំពោះអ្វីៗដូចជា ពាក្យសម្ងាត់ ព័ត៌មានលម្អិតអំពីការទូទាត់ប្រាក់ សារ រូបថត ព្រមទាំងសំឡេង និងវីដេអូ។"</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="7094417930857938876">"នៅពេលអ្នកបង្ហាញកម្មវិធីណាមួយ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> មើលឃើញអ្វីគ្រប់យ៉ាងដែលបង្ហាញ ឬចាក់ក្នុងកម្មវិធីនោះ។ ដូច្នេះ សូមប្រុងប្រយ័ត្នចំពោះអ្វីៗដូចជា ពាក្យសម្ងាត់ ព័ត៌មានលម្អិតអំពីការទូទាត់ប្រាក់ សារ រូបថត ព្រមទាំងសំឡេង និងវីដេអូ។"</string>
+    <string name="media_projection_entry_app_permission_dialog_continue_entire_screen" msgid="1850848182344377579">"បង្ហាញ​អេក្រង់"</string>
     <string name="media_projection_entry_app_permission_dialog_single_app_disabled" msgid="8999903044874669995">"<xliff:g id="APP_NAME">%1$s</xliff:g> បានបិទជម្រើសនេះ"</string>
-    <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"ចាប់ផ្តើមភ្ជាប់ឬ?"</string>
-    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"នៅពេលអ្នក​កំពុងភ្ជាប់, Android មានសិទ្ធិចូលប្រើអ្វីៗដែលអាចមើលឃើញនៅលើ​អេក្រង់របស់អ្នក ឬចាក់នៅលើឧបករណ៍របស់អ្នក។ ដូច្នេះ សូមប្រុងប្រយ័ត្នចំពោះអ្វីៗដូចជា ពាក្យសម្ងាត់ ព័ត៌មានលម្អិតអំពីការទូទាត់ប្រាក់ សារ រូបថត ព្រមទាំងសំឡេង និងវីដេអូ។"</string>
-    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"នៅពេលអ្នក​កំពុងភ្ជាប់កម្មវិធី, Android មានសិទ្ធិចូលប្រើអ្វីៗដែលបង្ហាញ ឬចាក់នៅលើកម្មវិធីនោះ។ ដូច្នេះ សូមប្រុងប្រយ័ត្នចំពោះអ្វីៗដូចជា ពាក្យសម្ងាត់ ព័ត៌មានលម្អិតអំពីការទូទាត់ប្រាក់ សារ រូបថត ព្រមទាំងសំឡេង និងវីដេអូ។"</string>
-    <string name="media_projection_entry_cast_permission_dialog_continue" msgid="7209890669948870042">"ចាប់ផ្តើមភ្ជាប់"</string>
+    <string name="media_projection_entry_share_app_selector_title" msgid="1419515119767501822">"ជ្រើសរើស​កម្មវិធី​ដើម្បី​ចែករំលែក"</string>
+    <string name="media_projection_entry_cast_permission_dialog_title" msgid="752756942658159416">"បញ្ជូនអេក្រង់របស់អ្នកឬ?"</string>
+    <string name="media_projection_entry_cast_permission_dialog_option_text_single_app" msgid="6073353940838561981">"បញ្ជូនកម្មវិធីមួយ"</string>
+    <string name="media_projection_entry_cast_permission_dialog_option_text_entire_screen" msgid="8389508187954155307">"បញ្ជូនអេក្រង់ទាំងមូល"</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="4040447861037324017">"នៅពេលអ្នកបញ្ជូនអេក្រង់ទាំងមូលរបស់អ្នក អ្នកផ្សេងមើលឃើញអ្វីគ្រប់យ៉ាងនៅលើអេក្រង់របស់អ្នក។ ដូច្នេះ សូមប្រុងប្រយ័ត្នចំពោះអ្វីៗដូចជា ពាក្យសម្ងាត់ ព័ត៌មានលម្អិតអំពីការទូទាត់ប្រាក់ សារ រូបថត ព្រមទាំងសំឡេង និងវីដេអូ។"</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="7487834861348460736">"នៅពេលអ្នកបញ្ជូនកម្មវិធីណាមួយ អ្នកផ្សេងមើលឃើញអ្វីគ្រប់យ៉ាងដែលបង្ហាញ ឬចាក់ក្នុងកម្មវិធីនោះ។ ដូច្នេះ សូមប្រុងប្រយ័ត្នចំពោះអ្វីៗដូចជា ពាក្យសម្ងាត់ ព័ត៌មានលម្អិតអំពីការទូទាត់ប្រាក់ សារ រូបថត ព្រមទាំងសំឡេង និងវីដេអូ។"</string>
+    <string name="media_projection_entry_cast_permission_dialog_continue_entire_screen" msgid="3261124185304676483">"បញ្ជូនអេក្រង់"</string>
+    <string name="media_projection_entry_cast_app_selector_title" msgid="6323062146661922387">"ជ្រើសរើស​កម្មវិធី​ដើម្បី​បញ្ជូន"</string>
     <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"ចាប់ផ្ដើម​ចែករំលែកឬ?"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"នៅពេលអ្នកកំពុងចែករំលែក ថត ឬភ្ជាប់, Android មានសិទ្ធិចូលប្រើអ្វីៗដែលអាចមើលឃើញនៅលើអេក្រង់របស់អ្នក ឬចាក់នៅលើឧបករណ៍របស់អ្នក។ ដូច្នេះ សូមប្រុងប្រយ័ត្នចំពោះអ្វីៗដូចជា ពាក្យសម្ងាត់ ព័ត៌មានលម្អិតអំពីការទូទាត់ប្រាក់ សារ រូបថត ព្រមទាំងសំឡេង និងវីដេអូ។"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"នៅពេលអ្នកកំពុងចែករំលែក ថត ឬភ្ជាប់កម្មវិធី, Android មានសិទ្ធិចូលប្រើអ្វីៗដែលបង្ហាញ ឬចាក់នៅលើកម្មវិធីនោះ។ ដូច្នេះ សូមប្រុងប្រយ័ត្នចំពោះអ្វីៗដូចជា ពាក្យសម្ងាត់ ព័ត៌មានលម្អិតអំពីការទូទាត់ប្រាក់ សារ រូបថត ព្រមទាំងសំឡេង និងវីដេអូ។"</string>
     <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"ចាប់ផ្ដើម"</string>
+    <string name="media_projection_entry_generic_permission_dialog_continue_single_app" msgid="5920814988611877051">"បន្ទាប់"</string>
     <string name="media_projection_task_switcher_text" msgid="590885489897412359">"ការចែករំលែក​ផ្អាក នៅពេលដែល​អ្នកប្ដូរ​កម្មវិធី"</string>
     <string name="media_projection_task_switcher_action_switch" msgid="8682258717291921123">"ចែករំលែក​កម្មវិធីនេះ​ជំនួសវិញ"</string>
     <string name="media_projection_task_switcher_action_back" msgid="5324164224147845282">"ប្ដូរទៅវិញ"</string>
@@ -714,6 +726,7 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"ផ្កាយរណប មានការតភ្ជាប់ល្អ"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"ផ្កាយរណប អាចតភ្ជាប់បាន"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"ការប្រកាសអាសន្នតាមផ្កាយរណប"</string>
+    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"ការហៅទៅលេខសង្គ្រោះបន្ទាន់ ឬ SOS"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"កម្រងព័ត៌មានការងារ"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"ល្អសម្រាប់អ្នកប្រើមួយចំនួន តែមិនសម្រាប់គ្រប់គ្នាទេ"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"កម្មវិធីសម្រួល UI ប្រព័ន្ធផ្តល់ជូនអ្នកនូវមធ្យោបាយបន្ថែមទៀតដើម្បីកែសម្រួល និងប្តូរចំណុចប្រទាក់អ្នកប្រើ Android តាមបំណង។ លក្ខណៈពិសេសសាកល្បងនេះអាចនឹងផ្លាស់ប្តូរ បំបែក ឬបាត់បង់បន្ទាប់ពីការចេញផ្សាយនាពេលអនាគត។ សូមបន្តដោយប្រុងប្រយ័ត្ន។"</string>
@@ -1376,21 +1389,38 @@
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"ភាពងាយស្រួល"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"ផ្លូវកាត់​ក្ដារ​ចុច"</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"ផ្លូវ​កាត់ការស្វែងរក"</string>
+    <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"គ្មាន​លទ្ធផល​ស្វែងរក​ទេ"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"រូបតំណាង \"បង្រួម\""</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"រូបតំណាង \"ពង្រីក\""</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"ឬ"</string>
+    <!-- no translation found for launch_keyboard_tutorial_notification_title (8849933155160522519) -->
+    <skip />
+    <!-- no translation found for launch_keyboard_tutorial_notification_content (2880339951512757918) -->
+    <skip />
+    <!-- no translation found for launch_touchpad_tutorial_notification_title (2243780062772196901) -->
+    <skip />
+    <!-- no translation found for launch_touchpad_tutorial_notification_content (7931085031240753226) -->
+    <skip />
+    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_title (1940023776496198762) -->
+    <skip />
+    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_content (1780725168171929365) -->
+    <skip />
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"ចលនាថយក្រោយ"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"ចលនាទៅទំព័រដើម"</string>
     <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"គ្រាប់ចុចសកម្មភាព"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"រួចរាល់"</string>
-    <string name="touchpad_tutorial_gesture_done" msgid="4784438360736821255">"ធ្វើបានល្អ!"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"ថយ​ក្រោយ"</string>
-    <!-- no translation found for touchpad_back_gesture_guidance (6263750214998421587) -->
-    <skip />
-    <!-- no translation found for touchpad_back_gesture_finished (5353616006999726249) -->
-    <skip />
-    <string name="touchpad_back_gesture_animation_content_description" msgid="2646107450922379918">"ផ្ទាំងប៉ះដែលបង្ហាញម្រាមដៃបីដែលផ្លាស់ទីទៅស្ដាំ និងឆ្វេង"</string>
-    <string name="touchpad_back_gesture_screen_animation_content_description" msgid="4036267494237748710">"អេក្រង់ឧបករណ៍ដែលបង្ហាញរូបមានចលនាសម្រាប់ចលនាថយក្រោយ"</string>
+    <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"ដើម្បីថយក្រោយ សូមអូសទៅឆ្វេង ឬស្ដាំដោយប្រើ​​ម្រាមដៃបីនៅត្រង់ណាក៏បានលើផ្ទាំងប៉ះ។\n\nអ្នកក៏អាចប្រើសកម្មភាពផ្លូវកាត់ក្ដារចុច + ESC សម្រាប់ការធ្វើបែបនេះ។"</string>
+    <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"ធ្វើបានល្អ!"</string>
+    <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"អ្នក​បានបញ្ចប់​ចលនា​ថយក្រោយ​ហើយ។"</string>
+    <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"ទៅទំព័រដើម"</string>
+    <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"ដើម្បីចូលទៅអេក្រង់ដើមរបស់អ្នកនៅពេលណាក៏បាន សូមអូសឡើងលើដោយប្រើម្រាមដៃបីពីផ្នែកខាងក្រោមនៃអេក្រង់របស់អ្នក។"</string>
+    <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"ល្អ!"</string>
+    <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"អ្នក​បានបញ្ចប់​ចលនា​ចូលទៅកាន់​ទំព័រដើម​ហើយ។"</string>
+    <string name="tutorial_action_key_title" msgid="2659466586996495447">"គ្រាប់ចុចសកម្មភាព"</string>
+    <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"ដើម្បីចូលប្រើប្រាស់កម្មវិធីរបស់អ្នក សូមចុចគ្រាប់ចុចសកម្មភាពនៅលើក្ដារចុចរបស់អ្នក។"</string>
+    <string name="tutorial_action_key_success_title" msgid="466467860120112933">"សូមអបអរសាទរ!"</string>
+    <string name="tutorial_action_key_success_body" msgid="7201991081652850430">"អ្នកបានបញ្ចប់មេរៀនអំពីចលនាសម្រាប់គ្រាប់ចុចសកម្មភាព។\n\nគ្រាប់ចុចសកម្មភាព + / បង្ហាញផ្លូវកាត់ទាំងអស់ដែលអ្នកអាចប្រើបាន។"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"ពន្លឺក្រោយក្ដារចុច"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"កម្រិតទី %1$d នៃ %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"ការគ្រប់គ្រង​ផ្ទះ"</string>
@@ -1400,6 +1430,8 @@
     <string name="home_edu_toast_content" msgid="3381071147871955415">"ដើម្បីចូលទៅទំព័រដើម សូមអូសឡើងលើដោយប្រើម្រាមដៃបីនៅលើផ្ទាំងប៉ះ"</string>
     <string name="overview_edu_toast_content" msgid="5797030644017804518">"ដើម្បីមើលកម្មវិធីថ្មីៗ សូមអូសឡើងលើ ហើយសង្កត់ឱ្យជាប់ដោយប្រើម្រាមដៃបីនៅលើផ្ទាំងប៉ះ"</string>
     <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"ដើម្បីមើលកម្មវិធីទាំងអស់របស់អ្នក សូមចុចគ្រាប់ចុចសកម្មភាពនៅលើក្ដារចុចរបស់អ្នក"</string>
+    <string name="redacted_notification_single_line_title" msgid="212019960919261670">"បាន​កែ​លម្អ​ពាក្យពេចន៍"</string>
+    <string name="redacted_notification_single_line_text" msgid="8684166405005242945">"ដោះសោដើម្បីមើល"</string>
     <string name="back_edu_notification_title" msgid="5624780717751357278">"ប្រើផ្ទាំងប៉ះរបស់អ្នក ដើម្បីថយក្រោយ"</string>
     <string name="back_edu_notification_content" msgid="2497557451540954068">"អូសទៅឆ្វេង ឬស្ដាំដោយប្រើ​ម្រាមដៃបី។ ចុច ដើម្បីស្វែងយល់បន្ថែមអំពីចលនា។"</string>
     <string name="home_edu_notification_title" msgid="6097902076909654045">"ប្រើផ្ទាំងប៉ះរបស់អ្នក ដើម្បីចូលទៅទំព័រដើម"</string>
@@ -1408,4 +1440,8 @@
     <string name="overview_edu_notification_content" msgid="3578204677648432500">"អូសឡើងលើ ហើយសង្កត់ឱ្យជាប់ដោយប្រើម្រាមដៃបី។ ចុច ដើម្បីស្វែងយល់បន្ថែមអំពីចលនា។"</string>
     <string name="all_apps_edu_notification_title" msgid="372262997265569063">"ប្រើក្ដារចុចរបស់អ្នក ដើម្បីមើលកម្មវិធីទាំងអស់"</string>
     <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"ចុចគ្រាប់ចុចសកម្មភាពនៅពេលណាក៏បាន។ ចុច ដើម្បីស្វែងយល់បន្ថែមអំពីចលនា។"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_title" msgid="4369307638184799742">"ឥឡូវនេះ មុខងារងងឹតខ្លាំងក្លាយជាផ្នែកមួយនៃរបារពន្លឺ"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="7513137763024327538">"ឥឡូវនេះ អ្នកអាចធ្វើឱ្យអេក្រង់ងងឹតខ្លាំងបានដោយបន្ថយកម្រិតពន្លឺបន្ថែមទៀតដោយចូលទៅកាន់ផ្នែកខាងលើនៃអេក្រង់របស់អ្នក។\n\nការធ្វើបែបនេះទទួលបានលទ្ធផលប្រសើរបំផុត ពេលអ្នកស្ថិតនៅកន្លែងងងឹត។"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_button" msgid="1782147201534669800">"ដកផ្លូវ​កាត់មុខងារងងឹតខ្លាំងចេញ"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="4070696910424515757">"ផ្លូវ​កាត់មុខងារងងឹតខ្លាំងត្រូវបានដកចេញ។ ដើម្បីបន្ថយពន្លឺរបស់អ្នក សូមប្រើរបារពន្លឺធម្មតា។"</string>
 </resources>

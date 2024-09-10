@@ -380,6 +380,8 @@
     <string name="show_touches_summary" msgid="3692861665994502193">"ടാപ്പുകൾക്ക് ദൃശ്യ ഫീഡ്ബാക്ക് കാണിക്കുക"</string>
     <string name="show_key_presses" msgid="6360141722735900214">"കീ അമർത്തലുകൾ കാണിക്കുക"</string>
     <string name="show_key_presses_summary" msgid="725387457373015024">"ഫിസിക്കൽ കീ അമർത്തൽ വിഷ്വൽ ഫീഡ്‌ബാക്ക് കാണിക്കൂ"</string>
+    <string name="touchpad_visualizer" msgid="3707916068870825115">"ടച്ച്‌പാഡ് ഇൻപുട്ട് കാണിക്കുക"</string>
+    <string name="touchpad_visualizer_summary" msgid="4056080018119847449">"ടച്ച്‌പാഡ് ഇൻപുട്ട് ഡാറ്റയും അംഗീകൃത ജെസ്‌ച്ചറുകളും പ്രദർശിപ്പിക്കുന്ന സ്‌ക്രീൻ ഓവർലേ"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"സർഫേസ് അപ്‌ഡേറ്റ് കാണിക്കൂ"</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"അപ്‍ഡേറ്റ് പൂർത്തിയാകുമ്പോൾ മുഴുവൻ വിൻഡോ സർഫേസുകളും ഫ്ലാഷ് ചെയ്യുക"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"\'അപ്‌ഡേറ്റുകൾ കാണുക\' കാണിക്കുക"</string>
@@ -495,8 +497,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"പൂർണ്ണമാകാൻ <xliff:g id="TIME">%1$s</xliff:g> ശേഷിക്കുന്നു"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - പൂർണ്ണമാകാൻ <xliff:g id="TIME">%2$s</xliff:g> ശേഷിക്കുന്നു"</string>
-    <!-- no translation found for power_charging_limited (4144004473976005214) -->
-    <skip />
+    <string name="power_charging_limited" msgid="4144004473976005214">"<xliff:g id="LEVEL">%1$s</xliff:g> - ബാറ്ററി പരിരക്ഷിക്കാൻ ചാർജിംഗ് ഹോൾഡിലാണ്"</string>
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> ‑ ചാർജ് ചെയ്യുന്നു"</string>
     <string name="power_fast_charging_duration_v2" msgid="3797735998640359490">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATUS">%2$s</xliff:g> - <xliff:g id="TIME">%3$s</xliff:g>-നകം പൂർണ്ണമാകും"</string>
     <string name="power_charging_duration_v2" msgid="2938998284074003248">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>-നകം പൂർണ്ണമായി ചാർജ് ചെയ്യും"</string>
@@ -563,6 +564,8 @@
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"അലാറങ്ങളും റിമെെൻഡറുകളും"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"അലാറങ്ങൾ സജ്ജീകരിക്കാനും സമയപ്രാധാന്യമുള്ള പ്രവർത്തനങ്ങൾ ഷെഡ്യൂൾ ചെയ്യാനും ഈ ആപ്പിനെ അനുവദിക്കുക. പശ്ചാത്തലത്തിൽ റൺ ചെയ്യാൻ ഇത് ഈ ആപ്പിന് അനുവാദം നൽകുന്നു, ഇതിന് കൂടുതൽ ബാറ്ററി ഉപയോഗിച്ചേക്കാം.\n\nഈ അനുമതി ഓഫാണെങ്കിൽ, ഈ ആപ്പ് നിലവിൽ ഷെഡ്യൂൾ ചെയ്‌ത അലാറങ്ങളും സമയാധിഷ്‌ഠിത ഇവന്റുകളും പ്രവർത്തിക്കില്ല."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"ഷെഡ്യൂൾ, അലാറം, റിമെെൻഡർ, ക്ലോക്ക്"</string>
+    <!-- no translation found for zen_mode_do_not_disturb_name (6798711401734798283) -->
+    <skip />
     <string name="zen_mode_settings_title" msgid="7374070457626419755">"ശല്യപ്പെടുത്തരുത്"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"ഓണാക്കുക"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"\'ശല്യപ്പെടുത്തരുത്\' ഓണാക്കുക"</string>

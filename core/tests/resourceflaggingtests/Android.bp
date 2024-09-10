@@ -22,46 +22,11 @@ package {
     default_team: "trendy_team_android_resources",
 }
 
-genrule {
-    name: "resource-flagging-test-app-resources-compile",
-    tools: ["aapt2"],
-    srcs: [
-        "flagged_resources_res/values/bools.xml",
-    ],
-    out: ["values_bools.arsc.flat"],
-    cmd: "$(location aapt2) compile $(in) -o $(genDir) " +
-        "--feature-flags test.package.falseFlag:ro=false,test.package.trueFlag:ro=true",
-}
-
-genrule {
-    name: "resource-flagging-test-app-apk",
-    tools: ["aapt2"],
-    // The first input file in the list must be the manifest
-    srcs: [
-        "TestAppAndroidManifest.xml",
-        ":resource-flagging-test-app-resources-compile",
-    ],
-    out: ["resapp.apk"],
-    cmd: "$(location aapt2) link -o $(out) --manifest $(in)",
-}
-
-java_genrule {
-    name: "resource-flagging-apk-as-resource",
-    srcs: [
-        ":resource-flagging-test-app-apk",
-    ],
-    out: ["apks_as_resources.res.zip"],
-    tools: ["soong_zip"],
-
-    cmd: "mkdir -p $(genDir)/res/raw && " +
-        "cp $(in) $(genDir)/res/raw/$$(basename $(in)) && " +
-        "$(location soong_zip) -o $(out) -C $(genDir)/res -D $(genDir)/res",
-}
-
 android_test {
     name: "ResourceFlaggingTests",
     srcs: [
         "src/**/*.java",
+        ":resource-flagging-test-app-r-java",
     ],
     platform_apis: true,
     certificate: "platform",
@@ -70,6 +35,6 @@ android_test {
         "testng",
         "compatibility-device-util-axt",
     ],
-    resource_zips: [":resource-flagging-apk-as-resource"],
+    resource_zips: [":resource-flagging-test-app-apk-as-resource"],
     test_suites: ["device-tests"],
 }

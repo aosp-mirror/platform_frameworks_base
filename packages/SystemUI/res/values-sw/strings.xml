@@ -104,13 +104,17 @@
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> na zingine zinazotumika zimetambua picha hii ya skrini."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Ongeza kwenye dokezo"</string>
     <string name="backlinks_include_link" msgid="4562093591148248158">"Jumuisha kiungo"</string>
+    <string name="backlinks_duplicate_label_format" msgid="558445128952827926">"<xliff:g id="FREQUENCYCOUNT">(%2$d)</xliff:g> <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
     <string name="screenrecord_title" msgid="4257171601439507792">"Kinasa Skrini"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Inachakata rekodi ya skrini"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Arifa inayoendelea ya kipindi cha kurekodi skrini"</string>
-    <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"Ungependa kuanza kurekodi?"</string>
-    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Unaporekodi, Android inaweza kufikia kitu chochote kitakachoonekana kwenye skrini yako au kuchezwa kwenye kifaa chako. Kwa hivyo kuwa mwangalifu na vitu kama vile manenosiri, maelezo ya malipo, ujumbe, picha, sauti na video."</string>
-    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Unaporekodi programu, Android inaweza kufikia kitu chochote kitakachoonekana au kuchezwa kwenye programu hiyo. Kwa hivyo kuwa mwangalifu na vitu kama vile manenosiri, maelezo ya malipo, ujumbe, picha na sauti na video."</string>
-    <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Anza kurekodi"</string>
+    <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"Ungependa kurekodi skrini yako?"</string>
+    <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Rekodi programu moja"</string>
+    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"Rekodi skrini nzima"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Unaporekodi skrini yako nzima, chochote kinachoonyeshwa kwenye skrini yako kitarekodiwa. Kwa hivyo kuwa mwangalifu na vitu kama vile manenosiri, maelezo ya malipo, ujumbe, picha, sauti na video."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Unaporekodi programu, chochote kinachoonyeshwa au kuchezwa kwenye programu hiyo kitarekodiwa. Kwa hivyo kuwa mwangalifu na vitu kama vile manenosiri, maelezo ya malipo, ujumbe, picha, sauti na video."</string>
+    <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Rekodi skrini"</string>
+    <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"Chagua programu ya kurekodi"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Rekodi sauti"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Sauti ya kifaa"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Sauti kutoka kwenye kifaa chako, kama vile muziki, simu na milio ya simu"</string>
@@ -121,7 +125,7 @@
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Inarekodi skrini na sauti"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"Onyesha sehemu za kugusa kwenye skrini"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"Acha"</string>
-    <string name="screenrecord_share_label" msgid="5025590804030086930">"Shiriki"</string>
+    <string name="screenrecord_share_label" msgid="5025590804030086930">"Tuma"</string>
     <string name="screenrecord_save_title" msgid="1886652605520893850">"Imehifadhi rekodi ya skrini"</string>
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Gusa ili uangalie"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"Hitilafu imetokea wakati wa kuhifadhi rekodi ya skrini"</string>
@@ -134,7 +138,7 @@
     <string name="share_to_app_stop_dialog_title" msgid="9212915050910250438">"Ungependa kuacha kuonyesha skrini?"</string>
     <string name="share_to_app_stop_dialog_message_entire_screen_with_host_app" msgid="522823522115375414">"Kwa sasa unatuma maudhui yaliyo katika skrini yako nzima kwenye <xliff:g id="HOST_APP_NAME">%1$s</xliff:g>"</string>
     <string name="share_to_app_stop_dialog_message_entire_screen" msgid="5090115386271179270">"Kwa sasa unatuma maudhui yaliyo katika skrini yako nzima kwenye programu"</string>
-    <string name="share_to_app_stop_dialog_message_single_app_specific" msgid="5923772039347985172">"Kwa sasa unatumia <xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g> pamoja na wengine"</string>
+    <string name="share_to_app_stop_dialog_message_single_app_specific" msgid="5923772039347985172">"Kwa sasa unaonyesha <xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g>"</string>
     <string name="share_to_app_stop_dialog_message_single_app_generic" msgid="6681016774654578261">"Kwa sasa unatumia programu pamoja na wengine"</string>
     <string name="share_to_app_stop_dialog_button" msgid="6334056916284230217">"Acha kuonyesha skrini"</string>
     <string name="cast_screen_to_other_device_chip_accessibility_label" msgid="4687917476203009885">"Inatuma skrini"</string>
@@ -176,8 +180,6 @@
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"Tuma"</string>
     <string name="cancel" msgid="1089011503403416730">"Ghairi"</string>
     <string name="biometric_dialog_logo" msgid="7681107853070774595">"Nembo ya programu"</string>
-  <string-array name="biometric_dialog_package_names_for_logo_with_overrides">
-  </string-array>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"Thibitisha"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"Jaribu tena"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"Gusa ili ughairi uthibitishaji"</string>
@@ -290,7 +292,8 @@
     <string name="start_dreams" msgid="9131802557946276718">"Taswira ya skrini"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Usinisumbue"</string>
-    <string name="quick_settings_modes_label" msgid="5407025818652750501">"Hali za kipaumbele"</string>
+    <!-- no translation found for quick_settings_modes_label (879156359479504244) -->
+    <skip />
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Hakuna vifaa vilivyooanishwa vinavyopatikana"</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"Gusa ili uunganishe au utenganishe kifaa"</string>
@@ -299,6 +302,7 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Tumia Bluetooth"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Imeunganishwa"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"Kusikiliza Pamoja"</string>
+    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="3227408556754456024">"Gusa ili ubadilishe sauti au usikilize pamoja na wengine"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Imehifadhiwa"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"ondoa"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"anza kutumia"</string>
@@ -307,6 +311,7 @@
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bluetooth itawaka kesho asubuhi"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Sikiliza pamoja na wengine"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Mnasikiliza pamoja"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"uweke mipangilio ya kusikiliza pamoja"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Chaji ya betri ni <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Sauti"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Vifaa vya sauti"</string>
@@ -400,7 +405,7 @@
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Bofya ili uunganishe kifaa kipya"</string>
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"Imeshindwa kusasisha mipangilio iliyowekwa mapema"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"Mipangilio iliyowekwa mapema"</string>
-    <string name="live_caption_title" msgid="8916875614623730005">"Manukuu Papo Hapo"</string>
+    <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"Manukuu Papo Hapo"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Ungependa kuwacha kuzuia maikrofoni ya kifaa?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Ungependa kuacha kuzuia kamera ya kifaa?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Ungependa kuwacha kuzuia kamera na maikrofoni ya kifaa?"</string>
@@ -429,17 +434,16 @@
     <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"Fungua Mipangilio"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Kifaa kingine"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Washa Muhtasari"</string>
-    <string name="zen_modes_dialog_title" msgid="4159138230418567383">"Hali za kipaumbele"</string>
+    <!-- no translation found for zen_modes_dialog_title (8854640808100096934) -->
+    <skip />
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"Nimemaliza"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"Mipangilio"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"Imewashwa"</string>
+    <string name="zen_mode_on_with_details" msgid="7416143430557895497">"Imewashwa • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"Imezimwa"</string>
-    <!-- no translation found for zen_mode_set_up (7457957033034460064) -->
-    <skip />
-    <!-- no translation found for zen_mode_no_manual_invocation (1769975741344633672) -->
-    <skip />
-    <!-- no translation found for zen_mode_active_modes (1625850411578488856) -->
-    <skip />
+    <string name="zen_mode_set_up" msgid="7457957033034460064">"Weka mipangilio"</string>
+    <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"Dhibiti katika mipangilio"</string>
+    <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{Hakuna hali za kutumika}=1{Unatumia {mode}}other{Unatumia hali #}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Hutasumbuliwa na sauti na mitetemo, isipokuwa kengele, vikumbusho, matukio na simu zinazopigwa na watu uliobainisha. Bado utasikia chochote utakachochagua kucheza, ikiwa ni pamoja na muziki, video na michezo."</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"Hutasumbuliwa na sauti na mitetemo, isipokuwa kengele. Bado utasikia chochote utakachochagua kucheza, ikiwa ni pamoja na muziki, video na michezo."</string>
     <string name="zen_priority_customize_button" msgid="4119213187257195047">"Badilisha upendavyo"</string>
@@ -478,8 +482,7 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Inachaji polepole • Itajaa baada ya <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Inachaji • Itajaa baada ya <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_action_open_communal_hub" msgid="3081702792413787849">"Wijeti kwenye skrini iliyofungwa"</string>
-    <!-- no translation found for accessibility_announcement_communal_widget_added (6911593106099328271) -->
-    <skip />
+    <string name="accessibility_announcement_communal_widget_added" msgid="6911593106099328271">"Wijeti ya <xliff:g id="WIDGET_NAME">%1$s</xliff:g> imewekwa kwenye skrini iliyofungwa"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"Telezesha kidole kushoto ili uanze mafunzo ya pamoja"</string>
     <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"Weka mapendeleo"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"Funga"</string>
@@ -531,22 +534,31 @@
     <string name="media_projection_dialog_warning" msgid="1303664408388363598">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> itaweza kufikia maelezo yote yanayoonekana kwenye skrini yako au yanayochezwa kwenye kifaa chako wakati wa kurekodi au kutuma. Hii ni pamoja na maelezo kama vile manenosiri, maelezo ya malipo, picha, ujumbe na sauti unayocheza."</string>
     <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"Ungependa kuanza kurekodi au kutuma?"</string>
     <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"Huduma inayotoa utendaji huu itaweza kufikia maelezo yote yanayoonekana kwenye skrini yako au yanayochezwa kwenye kifaa chako wakati wa kurekodi au kutuma. Hii ni pamoja na maelezo kama vile manenosiri, maelezo ya malipo, picha, ujumbe na sauti unayocheza."</string>
-    <string name="screen_share_permission_dialog_option_entire_screen" msgid="3131200488455089620">"Skrini nzima"</string>
-    <string name="screen_share_permission_dialog_option_single_app" msgid="4350961814397220929">"Programu moja"</string>
-    <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"Shiriki au rekodi programu"</string>
-    <string name="media_projection_entry_app_permission_dialog_title" msgid="9155535851866407199">"Ungependa kuanza kurekodi au kutuma ukitumia <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
-    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"Unaposhiriki, kurekodi au kutuma, programu ya <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> inaweza kufikia kitu chochote kitakachoonekana kwenye skrini yako au kuchezwa kwenye kifaa chako. Kwa hivyo kuwa mwangalifu na vitu kama vile manenosiri, maelezo ya malipo, ujumbe, picha na sauti na video."</string>
-    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"Unaposhiriki, kurekodi au kutuma programu, programu, programu ya <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> inaweza kufikia kitu chochote kitakachoonekana au kuchezwa kwenye programu hiyo. Kwa hivyo kuwa mwangalifu na vitu kama vile manenosiri, maelezo ya malipo, ujumbe, picha na sauti na video."</string>
-    <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"Anza"</string>
+    <string name="screen_share_generic_app_selector_title" msgid="8331515850599218288">"Kurekodi au kuruhusu programu ifikiwe"</string>
+    <string name="media_projection_entry_app_permission_dialog_title" msgid="4613857256721708062">"Ungependa kuruhusu <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ifikie skrini yako?"</string>
+    <string name="screen_share_permission_dialog_option_single_app" msgid="2974054871681567314">"Ruhusu ufikiaji wa programu moja"</string>
+    <!-- no translation found for media_projection_entry_app_permission_dialog_option_text_single_app (2308901434964846084) -->
+    <skip />
+    <string name="screen_share_permission_dialog_option_entire_screen" msgid="4493174362775038997">"Ruhusu ufikiaji wa skrini nzima"</string>
+    <!-- no translation found for media_projection_entry_app_permission_dialog_option_text_entire_screen (5100078808078139706) -->
+    <skip />
+    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="5504288438067851086">"Unaporuhusu ufikiaji wa skrini nzima, chochote kilicho katika skrini yako kitaonekana kwa <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>. Kwa hivyo kuwa mwangalifu na vitu kama vile manenosiri, maelezo ya malipo, ujumbe, picha, sauti na video."</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="7094417930857938876">"Unaporuhusu ufikiaji wa programu, chochote kinachoonyeshwa au kuchezwa katika programu hiyo kitaonekana kwa <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>. Kwa hivyo kuwa mwangalifu na vitu kama vile manenosiri, maelezo ya malipo, ujumbe, picha, sauti na video."</string>
+    <string name="media_projection_entry_app_permission_dialog_continue_entire_screen" msgid="1850848182344377579">"Ruhusu ufikiaji wa skrini"</string>
     <string name="media_projection_entry_app_permission_dialog_single_app_disabled" msgid="8999903044874669995">"<xliff:g id="APP_NAME">%1$s</xliff:g> imezima chaguo hili"</string>
-    <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"Ungependa kuanza kutuma?"</string>
-    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"Unapotuma, Android inaweza kufikia kitu chochote kitakachoonekana kwenye skrini yako au kuchezwa kwenye kifaa chako. Kwa hivyo kuwa mwangalifu na vitu kama vile manenosiri, maelezo ya malipo, ujumbe, picha na sauti na video."</string>
-    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"Unapotuma programu, Android inaweza kufikia kitu chochote kitakachoonekana au kuchezwa kwenye programu hiyo. Kwa hivyo kuwa mwangalifu na vitu kama vile manenosiri, maelezo ya malipo, ujumbe, picha na sauti na video."</string>
-    <string name="media_projection_entry_cast_permission_dialog_continue" msgid="7209890669948870042">"Anza kutuma"</string>
+    <string name="media_projection_entry_share_app_selector_title" msgid="1419515119767501822">"Kuchagua programu utakayoruhusu ifikiwe"</string>
+    <string name="media_projection_entry_cast_permission_dialog_title" msgid="752756942658159416">"Ungependa kutuma maudhui yaliyo katika skrini yako?"</string>
+    <string name="media_projection_entry_cast_permission_dialog_option_text_single_app" msgid="6073353940838561981">"Tuma maudhui ya programu moja"</string>
+    <string name="media_projection_entry_cast_permission_dialog_option_text_entire_screen" msgid="8389508187954155307">"Tuma maudhui katika skrini nzima"</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="4040447861037324017">"Unapotuma maudhui katika skrini yako nzima, chochote kilicho kwenye skrini yako kitaonekana. Kwa hivyo kuwa mwangalifu na vitu kama vile manenosiri, maelezo ya malipo, ujumbe, picha, sauti na video."</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="7487834861348460736">"Unapotuma maudhui ya programu moja, chochote kinachoonekana au kucheza katika programu hiyo kitaonekana. Kwa hivyo kuwa mwangalifu na vitu kama vile manenosiri, maelezo ya malipo, ujumbe, picha, sauti na video."</string>
+    <string name="media_projection_entry_cast_permission_dialog_continue_entire_screen" msgid="3261124185304676483">"Tuma maudhui yaliyo kwenye skrini"</string>
+    <string name="media_projection_entry_cast_app_selector_title" msgid="6323062146661922387">"Kuchagua programu utakayotumia kutuma maudhui"</string>
     <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"Ungependa kuanza kushiriki?"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Unaposhiriki, kurekodi au kutuma, Android inaweza kufikia kitu chochote kitakachoonekana kwenye skrini yako au kuchezwa kwenye kifaa chako. Kwa hivyo kuwa mwangalifu na vitu kama vile manenosiri, maelezo ya malipo, ujumbe, picha na sauti na video."</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Unaposhiriki, kurekodi au kutuma programu, Android inaweza kufikia kitu chochote kitakachoonekana au kuchezwa kwenye programu hiyo. Kwa hivyo kuwa mwangalifu na vitu kama vile manenosiri, maelezo ya malipo, ujumbe, picha na sauti na video."</string>
     <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"Anza"</string>
+    <string name="media_projection_entry_generic_permission_dialog_continue_single_app" msgid="5920814988611877051">"Endelea"</string>
     <string name="media_projection_task_switcher_text" msgid="590885489897412359">"Itasitisha kushiriki unapobadilisha programu"</string>
     <string name="media_projection_task_switcher_action_switch" msgid="8682258717291921123">"Shiriki programu hii badala yake"</string>
     <string name="media_projection_task_switcher_action_back" msgid="5324164224147845282">"Rejea"</string>
@@ -714,6 +726,7 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Setilaiti, muunganisho thabiti"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Setilaiti, muunganisho unapatikana"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"Msaada kupitia Setilaiti"</string>
+    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"Simu za dharura"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Wasifu wa kazini"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Kinafurahisha kwa baadhi ya watu lakini si wote"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Kirekebishi cha kiolesura cha mfumo kinakupa njia zaidi za kugeuza na kubadilisha kiolesura cha Android ili kikufae. Vipengele hivi vya majaribio vinaweza kubadilika, kuharibika au kupotea katika matoleo ya siku zijazo. Endelea kwa uangalifu."</string>
@@ -1376,30 +1389,49 @@
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Ufikivu"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Mikato ya kibodi"</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Njia mkato za kutafutia"</string>
+    <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Hamna matokeo ya utafutaji"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Kunja aikoni"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Panua aikoni"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"au"</string>
+    <!-- no translation found for launch_keyboard_tutorial_notification_title (8849933155160522519) -->
+    <skip />
+    <!-- no translation found for launch_keyboard_tutorial_notification_content (2880339951512757918) -->
+    <skip />
+    <!-- no translation found for launch_touchpad_tutorial_notification_title (2243780062772196901) -->
+    <skip />
+    <!-- no translation found for launch_touchpad_tutorial_notification_content (7931085031240753226) -->
+    <skip />
+    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_title (1940023776496198762) -->
+    <skip />
+    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_content (1780725168171929365) -->
+    <skip />
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Ishara ya kurudi nyuma"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Mguso wa kurudi kwenye skrini ya kwanza"</string>
     <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"Kitufe cha vitendo"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Nimemaliza"</string>
-    <string name="touchpad_tutorial_gesture_done" msgid="4784438360736821255">"Kazi nzuri!"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Rudi nyuma"</string>
-    <!-- no translation found for touchpad_back_gesture_guidance (6263750214998421587) -->
-    <skip />
-    <!-- no translation found for touchpad_back_gesture_finished (5353616006999726249) -->
-    <skip />
-    <string name="touchpad_back_gesture_animation_content_description" msgid="2646107450922379918">"Padi ya kugusa inayoonyesha vidole vitatu vikisonga kulia na kushoto"</string>
-    <string name="touchpad_back_gesture_screen_animation_content_description" msgid="4036267494237748710">"Skrini ya kifaa inayoonyesha uhuishaji wa mguso wa nyuma"</string>
+    <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"Telezesha vidole vitatu kushoto au kulia mahali popote kwenye padi ya kugusa ili urudi nyuma.\n\nUnaweza pia kutumia mikato ya kibodi ya Kitendo pamoja na ESC kutekeleza kitendo hiki."</string>
+    <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"Kazi nzuri!"</string>
+    <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Umekamilisha ishara ya kurudi nyuma."</string>
+    <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Nenda kwenye skrini ya kwanza"</string>
+    <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"Ili uende kwenye skrini ya kwanza wakati wowote, telezesha vidole vitatu juu kutoka sehemu ya chini ya skrini yako."</string>
+    <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"Safi!"</string>
+    <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"Umeweka ishara ya kwenda kwenye skrini ya kwanza."</string>
+    <string name="tutorial_action_key_title" msgid="2659466586996495447">"Kitufe cha vitendo"</string>
+    <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"Bonyeza kitufe cha vitendo kwenye kibodi yako ili ufikie programu zako."</string>
+    <string name="tutorial_action_key_success_title" msgid="466467860120112933">"Hongera!"</string>
+    <string name="tutorial_action_key_success_body" msgid="7201991081652850430">"Umekamilisha ishara ya kitufe cha vitendo.\n\nKitendo + / huonyesha njia zote za mkato zinazopatikana."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Mwanga chini ya kibodi"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Kiwango cha %1$d kati ya %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Dhibiti Vifaa Nyumbani"</string>
     <string name="home_controls_dream_description" msgid="4644150952104035789">"Fikia haraka vidhibiti vya vifaa nyumbani vikiwa taswira ya skrini"</string>
     <string name="volume_undo_action" msgid="5815519725211877114">"Tendua"</string>
-    <string name="back_edu_toast_content" msgid="4530314597378982956">"Telezesha vidole vitatu kutoka kushoto au kulia kwenye padi ya kugusa ili urudi nyuma"</string>
+    <string name="back_edu_toast_content" msgid="4530314597378982956">"Telezesha vidole vitatu kushoto au kulia kwenye padi ya kugusa ili urudi nyuma"</string>
     <string name="home_edu_toast_content" msgid="3381071147871955415">"Telezesha vidole vitatu juu kwenye padi ya kugusa ili urudi kwenye skrini ya kwanza"</string>
     <string name="overview_edu_toast_content" msgid="5797030644017804518">"Telezesha vidole vitatu juu na ushikilie kwenye padi ya kugusa ili uangalie programu za hivi majuzi"</string>
     <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"Bonyeza kitufe cha vitendo kwenye kibodi yako ili uangalie programu zako zote"</string>
+    <string name="redacted_notification_single_line_title" msgid="212019960919261670">"Maandishi yameondolewa"</string>
+    <string name="redacted_notification_single_line_text" msgid="8684166405005242945">"Fungua ili uone"</string>
     <string name="back_edu_notification_title" msgid="5624780717751357278">"Kutumia padi yako ya kugusa ili kurudi nyuma"</string>
     <string name="back_edu_notification_content" msgid="2497557451540954068">"Telezesha vidole vitatu kulia au kushoto. Gusa ili upate maelezo kuhusu miguso zaidi."</string>
     <string name="home_edu_notification_title" msgid="6097902076909654045">"Kutumia padi yako ya kugusa ili kurudi kwenye skrini ya kwanza"</string>
@@ -1408,4 +1440,8 @@
     <string name="overview_edu_notification_content" msgid="3578204677648432500">"Telezesha vidole vitatu juu na ushikilie. Gusa ili upate maelezo kuhusu miguso zaidi."</string>
     <string name="all_apps_edu_notification_title" msgid="372262997265569063">"Kutumia kibodi yako kuangalia programu zote"</string>
     <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"Bonyeza kitufe cha vitendo wakati wowote. Gusa ili upate maelezo kuhusu miguso zaidi."</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_title" msgid="4369307638184799742">"Kipunguza mwangaza zaidi sasa ni sehemu ya upau wa mwangaza"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="7513137763024327538">"Sasa unaweza kupunguza mwangaza zaidi kwa kupunguza kabisa kiwango cha mwangaza katika sehemu ya juu ya skrini yako.\n\nMipangilio hii hufanya kazi vyema zaidi ukiwa katika mazingira yenye giza."</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_button" msgid="1782147201534669800">"Ondoa njia ya mkato ya kipunguza mwangaza zaidi"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="4070696910424515757">"Njia ya mkato ya kipunguza mwangaza zaidi imeondolewa. Tumia upau wa kawaida wa mwangaza ili upunguze mwangaza wako."</string>
 </resources>

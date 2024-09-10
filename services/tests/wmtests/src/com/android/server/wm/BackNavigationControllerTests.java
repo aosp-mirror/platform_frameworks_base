@@ -58,6 +58,7 @@ import android.os.Looper;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.RequiresFlagsDisabled;
 import android.util.ArraySet;
 import android.view.WindowManager;
 import android.window.BackAnimationAdapter;
@@ -72,6 +73,7 @@ import android.window.TaskSnapshot;
 import android.window.WindowOnBackInvokedDispatcher;
 
 import com.android.server.LocalServices;
+import com.android.window.flags.Flags;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -108,6 +110,7 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         mWindowManagerInternal = mock(WindowManagerInternal.class);
         LocalServices.addService(WindowManagerInternal.class, mWindowManagerInternal);
         mBackAnimationAdapter = mock(BackAnimationAdapter.class);
+        doReturn(true).when(mBackAnimationAdapter).isAnimatable(anyInt());
         mNavigationMonitor = mock(BackNavigationController.NavigationMonitor.class);
         mRootHomeTask = initHomeActivity();
     }
@@ -612,6 +615,7 @@ public class BackNavigationControllerTests extends WindowTestsBase {
     }
 
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_MIGRATE_PREDICTIVE_BACK_TRANSITION)
     public void testTransitionHappensCancelNavigation() {
         // Create a floating task and a fullscreen task, then navigating on fullscreen task.
         // The navigation should not been cancelled when transition happens on floating task, and

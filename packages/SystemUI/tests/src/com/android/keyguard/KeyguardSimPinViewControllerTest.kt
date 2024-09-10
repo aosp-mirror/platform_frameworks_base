@@ -69,6 +69,7 @@ class KeyguardSimPinViewControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var keyguardMessageAreaController:
         KeyguardMessageAreaController<BouncerKeyguardMessageArea>
+    @Mock private lateinit var mUserActivityNotifier: UserActivityNotifier
     private val updateMonitorCallbackArgumentCaptor =
         ArgumentCaptor.forClass(KeyguardUpdateMonitorCallback::class.java)
 
@@ -101,7 +102,9 @@ class KeyguardSimPinViewControllerTest : SysuiTestCase() {
                 emergencyButtonController,
                 fakeFeatureFlags,
                 mSelectedUserInteractor,
-                keyguardKeyboardInteractor
+                keyguardKeyboardInteractor,
+                null,
+                mUserActivityNotifier
             )
         underTest.init()
         underTest.onViewAttached()

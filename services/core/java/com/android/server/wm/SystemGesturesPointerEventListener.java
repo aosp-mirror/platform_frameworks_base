@@ -116,7 +116,7 @@ class SystemGesturesPointerEventListener implements PointerEventListener {
 
         final Display display = DisplayManagerGlobal.getInstance()
                 .getRealDisplay(Display.DEFAULT_DISPLAY);
-        final DisplayCutout displayCutout = display.getCutout();
+        final DisplayCutout displayCutout = display != null ? display.getCutout() : null;
         if (displayCutout != null) {
             // Expand swipe start threshold such that we can catch touches that just start beyond
             // the notch area

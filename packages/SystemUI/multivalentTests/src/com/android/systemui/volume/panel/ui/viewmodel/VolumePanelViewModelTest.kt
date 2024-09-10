@@ -24,21 +24,31 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.broadcastDispatcher
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.res.R
+import com.android.systemui.statusbar.policy.configurationController
 import com.android.systemui.statusbar.policy.fakeConfigurationController
 import com.android.systemui.testKosmos
+import com.android.systemui.volume.panel.dagger.factory.volumePanelComponentFactory
 import com.android.systemui.volume.panel.data.repository.volumePanelGlobalStateRepository
 import com.android.systemui.volume.panel.domain.interactor.criteriaByKey
+import com.android.systemui.volume.panel.domain.interactor.volumePanelGlobalStateInteractor
 import com.android.systemui.volume.panel.domain.unavailableCriteria
 import com.android.systemui.volume.panel.shared.model.VolumePanelComponentKey
 import com.android.systemui.volume.panel.shared.model.mockVolumePanelUiComponentProvider
 import com.android.systemui.volume.panel.ui.composable.componentByKey
 import com.android.systemui.volume.panel.ui.layout.DefaultComponentsLayoutManager
 import com.android.systemui.volume.panel.ui.layout.componentsLayoutManager
+import com.android.systemui.volume.shared.volumePanelLogger
 import com.google.common.truth.Truth.assertThat
+import java.io.PrintWriter
+import java.io.StringWriter
 import javax.inject.Provider
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -55,6 +65,7 @@ class VolumePanelViewModelTest : SysuiTestCase() {
             volumePanelGlobalStateRepository.updateVolumePanelState { it.copy(isVisible = true) }
         }
 
+    private val realDumpManager = DumpManager()
     private val testableResources = context.orCreateTestableResources
 
     private lateinit var underTest: VolumePanelViewModel
@@ -124,6 +135,64 @@ class VolumePanelViewModelTest : SysuiTestCase() {
     }
 
     @Test
+    fun testDumpableRegister_unregister() =
+        with(kosmos) {
+            testScope.runTest {
+                val job = launch {
+                    applicationCoroutineScope = this
+                    underTest = createViewModel()
+
+                    runCurrent()
+
+                    assertThat(realDumpManager.getDumpables().any { it.name == DUMPABLE_NAME })
+                        .isTrue()
+                }
+
+                runCurrent()
+                job.cancel()
+
+                assertThat(realDumpManager.getDumpables().any { it.name == DUMPABLE_NAME }).isTrue()
+            }
+        }
+
+    @Test
+    fun testDumpingState() =
+        test({
+            testableResources.addOverride(R.bool.volume_panel_is_large_screen, false)
+            testableResources.overrideConfiguration(
+                Configuration().apply { orientation = Configuration.ORIENTATION_PORTRAIT }
+            )
+            componentByKey =
+                mapOf(
+                    COMPONENT_1 to mockVolumePanelUiComponentProvider,
+                    COMPONENT_2 to mockVolumePanelUiComponentProvider,
+                    BOTTOM_BAR to mockVolumePanelUiComponentProvider,
+                )
+            criteriaByKey = mapOf(COMPONENT_2 to Provider { unavailableCriteria })
+        }) {
+            testScope.runTest {
+                runCurrent()
+
+                StringWriter().use {
+                    underTest.dump(PrintWriter(it), emptyArray())
+
+                    assertThat(it.buffer.toString())
+                        .isEqualTo(
+                            "volumePanelState=" +
+                                "VolumePanelState(orientation=1, isLargeScreen=false)\n" +
+                                "componentsLayout=( " +
+                                "headerComponents= " +
+                                "contentComponents=" +
+                                "test_component:1:visible=true, " +
+                                "test_component:2:visible=false " +
+                                "footerComponents= " +
+                                "bottomBarComponent=test_bottom_bar:visible=true )\n"
+                        )
+                }
+            }
+        }
+
+    @Test
     fun dismissBroadcast_dismissesPanel() = test {
         testScope.runTest {
             runCurrent() // run the flows to let allow the receiver to be registered
@@ -140,11 +209,26 @@ class VolumePanelViewModelTest : SysuiTestCase() {
     private fun test(setup: Kosmos.() -> Unit = {}, test: Kosmos.() -> Unit) =
         with(kosmos) {
             setup()
-            underTest = volumePanelViewModel
+            underTest = createViewModel()
+
             test()
         }
 
+    private fun Kosmos.createViewModel(): VolumePanelViewModel =
+        VolumePanelViewModel(
+            context.orCreateTestableResources.resources,
+            applicationCoroutineScope,
+            volumePanelComponentFactory,
+            configurationController,
+            broadcastDispatcher,
+            realDumpManager,
+            volumePanelLogger,
+            volumePanelGlobalStateInteractor,
+        )
+
     private companion object {
+        const val DUMPABLE_NAME = "VolumePanelViewModel"
+
         const val BOTTOM_BAR: VolumePanelComponentKey = "test_bottom_bar"
         const val COMPONENT_1: VolumePanelComponentKey = "test_component:1"
         const val COMPONENT_2: VolumePanelComponentKey = "test_component:2"

@@ -51,6 +51,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
+import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
 import static com.android.window.flags.Flags.explicitRefreshRateHints;
 
 import static org.junit.Assert.assertEquals;
@@ -140,8 +141,7 @@ public class TransitionTests extends WindowTestsBase {
     }
 
     private Transition createTestTransition(int transitType) {
-        final TransitionController controller = new TestTransitionController(
-                mock(ActivityTaskManagerService.class));
+        final TransitionController controller = new TestTransitionController(mAtm);
 
         mSyncEngine = createTestBLASTSyncEngine();
         controller.setSyncEngine(mSyncEngine);
@@ -1251,7 +1251,7 @@ public class TransitionTests extends WindowTestsBase {
         final Transition transition = app.mTransitionController.createTransition(TRANSIT_OPEN);
         app.mTransitionController.requestStartTransition(transition, app.getTask(),
                 null /* remoteTransition */, null /* displayChange */);
-        app.mTransitionController.collectExistenceChange(app.getTask());
+        transition.collectExistenceChange(app.getTask());
         mDisplayContent.setFixedRotationLaunchingAppUnchecked(app);
         final AsyncRotationController asyncRotationController =
                 mDisplayContent.getAsyncRotationController();
@@ -1416,7 +1416,8 @@ public class TransitionTests extends WindowTestsBase {
         activity1.setVisibleRequested(false);
         activity2.setVisibleRequested(true);
 
-        openTransition.finishTransition();
+        final ActionChain chain = ActionChain.testFinish(null);
+        openTransition.finishTransition(chain);
 
         // We finished the openTransition. Even though activity1 is visibleRequested=false, since
         // the closeTransition animation hasn't played yet, make sure that we didn't commit
@@ -1429,7 +1430,7 @@ public class TransitionTests extends WindowTestsBase {
         // normally.
         mWm.mSyncEngine.abort(closeTransition.getSyncId());
 
-        closeTransition.finishTransition();
+        closeTransition.finishTransition(chain);
 
         assertFalse(activity1.isVisible());
         assertTrue(activity2.isVisible());
@@ -1449,7 +1450,7 @@ public class TransitionTests extends WindowTestsBase {
         activity1.setState(ActivityRecord.State.INITIALIZING, "test");
         activity1.mLaunchTaskBehind = true;
         mWm.mSyncEngine.abort(noChangeTransition.getSyncId());
-        noChangeTransition.finishTransition();
+        noChangeTransition.finishTransition(chain);
         assertTrue(activity1.mLaunchTaskBehind);
     }
 
@@ -1468,7 +1469,7 @@ public class TransitionTests extends WindowTestsBase {
         // We didn't call abort on the transition itself, so it will still run onTransactionReady
         // normally.
         mWm.mSyncEngine.abort(transition1.getSyncId());
-        transition1.finishTransition();
+        transition1.finishTransition(ActionChain.testFinish(transition1));
 
         verify(transitionEndedListener).run();
 
@@ -1530,7 +1531,7 @@ public class TransitionTests extends WindowTestsBase {
 
         verify(taskSnapshotController, times(1)).recordSnapshot(eq(task2));
 
-        controller.finishTransition(openTransition);
+        controller.finishTransition(ActionChain.testFinish(openTransition));
 
         // We are now going to simulate closing task1 to return back to (open) task2.
         final Transition closeTransition = createTestTransition(TRANSIT_CLOSE, controller);
@@ -1550,10 +1551,6 @@ public class TransitionTests extends WindowTestsBase {
 
         // An active transient launch overrides idle state to avoid clearing power mode before the
         // transition is finished.
-        spyOn(mRootWindowContainer.mTransitionController);
-        doAnswer(invocation -> controller.isTransientLaunch(invocation.getArgument(0))).when(
-                mRootWindowContainer.mTransitionController).isTransientLaunch(any());
-        activity2.getTask().setResumedActivity(activity2, "test");
         activity2.idle = true;
         assertFalse(mRootWindowContainer.allResumedActivitiesIdle());
 
@@ -1599,7 +1596,7 @@ public class TransitionTests extends WindowTestsBase {
         doReturn(true).when(task1).isTranslucentForTransition();
         assertFalse(controller.canApplyDim(task1));
 
-        controller.finishTransition(closeTransition);
+        controller.finishTransition(ActionChain.testFinish(closeTransition));
         assertTrue(wasInFinishingTransition[0]);
         assertFalse(calledListenerOnOtherDisplay[0]);
         assertNull(controller.mFinishingTransition);
@@ -1655,7 +1652,7 @@ public class TransitionTests extends WindowTestsBase {
         // to avoid the latency to resume the current top, i.e. appB.
         assertTrue(controller.isTransientVisible(taskRecent));
         // The recent is paused after the transient transition is finished.
-        controller.finishTransition(transition);
+        controller.finishTransition(ActionChain.testFinish(transition));
         assertFalse(controller.isTransientVisible(taskRecent));
     }
 
@@ -2360,7 +2357,7 @@ public class TransitionTests extends WindowTestsBase {
     }
 
     @Test
-    public void testMoveToTopWhileVisible() {
+    public void testMoveTaskToTopWhileVisible() {
         final Transition transition = createTestTransition(TRANSIT_OPEN);
         final ArrayMap<WindowContainer, Transition.ChangeInfo> changes = transition.mChanges;
         final ArraySet<WindowContainer> participants = transition.mParticipants;
@@ -2384,6 +2381,55 @@ public class TransitionTests extends WindowTestsBase {
         assertTrue(targets.isEmpty());
 
         // After collecting order changes, it should recognize that a task moved to top.
+        transition.collectOrderChanges(true);
+        targets = Transition.calculateTargets(participants, changes);
+        assertEquals(1, targets.size());
+
+        // Make sure the flag is set
+        final TransitionInfo info = Transition.calculateTransitionInfo(
+                transition.mType, 0 /* flags */, targets, mMockT);
+        assertTrue((info.getChanges().get(0).getFlags() & TransitionInfo.FLAG_MOVED_TO_TOP) != 0);
+        assertEquals(TRANSIT_CHANGE, info.getChanges().get(0).getMode());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_DISPLAY_FOCUS_IN_SHELL_TRANSITIONS)
+    public void testMoveDisplayToTop() {
+        // Set up two displays, each of which has a task.
+        DisplayContent otherDisplay = createNewDisplay();
+        final Consumer<DisplayContent> setUpTask = (DisplayContent dc) -> {
+            final Task task = createTask(dc);
+            final ActivityRecord act = createActivityRecord(task);
+            final TestWindowState win = createWindowState(
+                    new WindowManager.LayoutParams(TYPE_BASE_APPLICATION), act);
+            act.addWindow(win);
+            act.setVisibleRequested(true);
+        };
+        setUpTask.accept(mDisplayContent);
+        setUpTask.accept(otherDisplay);
+        mWm.updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL, true /* updateImWindows */);
+
+        final Transition transition = createTestTransition(TRANSIT_OPEN);
+        final ArrayMap<WindowContainer, Transition.ChangeInfo> changes = transition.mChanges;
+        final ArraySet<WindowContainer> participants = transition.mParticipants;
+
+        // Emulate WindowManagerService#moveDisplayToTopInternal().
+        transition.recordTaskOrder(mDefaultDisplay);
+        mDefaultDisplay.getParent().positionChildAt(WindowContainer.POSITION_TOP,
+                mDefaultDisplay, true /* includingParents */);
+        mWm.updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL, true /* updateImWindows */);
+        transition.setReady(mDefaultDisplay, true /* ready */);
+
+        // Test has order changes, a shallow check of order changes.
+        assertTrue(transition.hasOrderChanges());
+
+        // We just moved a display to top, so there shouldn't be any changes.
+        ArrayList<Transition.ChangeInfo> targets = Transition.calculateTargets(
+                participants, changes);
+        assertTrue(targets.isEmpty());
+
+        // After collecting order changes, the task on the newly focused display should be
+        // considered to get moved to top.
         transition.collectOrderChanges(true);
         targets = Transition.calculateTargets(participants, changes);
         assertEquals(1, targets.size());

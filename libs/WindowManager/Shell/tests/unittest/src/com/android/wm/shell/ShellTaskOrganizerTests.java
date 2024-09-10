@@ -49,7 +49,6 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.SparseArray;
 import android.view.SurfaceControl;
-import android.view.SurfaceSession;
 import android.window.ITaskOrganizer;
 import android.window.ITaskOrganizerController;
 import android.window.TaskAppearedInfo;
@@ -169,7 +168,7 @@ public class ShellTaskOrganizerTests extends ShellTestCase {
     public void testTaskLeashReleasedAfterVanished() throws RemoteException {
         assumeFalse(ENABLE_SHELL_TRANSITIONS);
         RunningTaskInfo taskInfo = createTaskInfo(/* taskId= */ 1, WINDOWING_MODE_MULTI_WINDOW);
-        SurfaceControl taskLeash = new SurfaceControl.Builder(new SurfaceSession())
+        SurfaceControl taskLeash = new SurfaceControl.Builder()
                 .setName("task").build();
         mOrganizer.registerOrganizer();
         mOrganizer.onTaskAppeared(taskInfo, taskLeash);
@@ -365,7 +364,7 @@ public class ShellTaskOrganizerTests extends ShellTestCase {
         final RunningTaskInfo taskInfo1 = createTaskInfo(/* taskId= */ 12,
                 WINDOWING_MODE_FULLSCREEN);
         taskInfo1.displayId = DEFAULT_DISPLAY;
-        taskInfo1.appCompatTaskInfo.topActivityInSizeCompat = false;
+        taskInfo1.appCompatTaskInfo.setTopActivityInSizeCompat(false);
         final TrackingTaskListener taskListener = new TrackingTaskListener();
         mOrganizer.addListenerForType(taskListener, TASK_LISTENER_TYPE_FULLSCREEN);
         mOrganizer.onTaskAppeared(taskInfo1, /* leash= */ null);
@@ -378,7 +377,7 @@ public class ShellTaskOrganizerTests extends ShellTestCase {
         final RunningTaskInfo taskInfo2 =
                 createTaskInfo(taskInfo1.taskId, taskInfo1.getWindowingMode());
         taskInfo2.displayId = taskInfo1.displayId;
-        taskInfo2.appCompatTaskInfo.topActivityInSizeCompat = true;
+        taskInfo2.appCompatTaskInfo.setTopActivityInSizeCompat(true);
         taskInfo2.isVisible = true;
         mOrganizer.onTaskInfoChanged(taskInfo2);
         verifyOnCompatInfoChangedInvokedWith(taskInfo2, taskListener);
@@ -388,7 +387,7 @@ public class ShellTaskOrganizerTests extends ShellTestCase {
         final RunningTaskInfo taskInfo3 =
                 createTaskInfo(taskInfo1.taskId, taskInfo1.getWindowingMode());
         taskInfo3.displayId = taskInfo1.displayId;
-        taskInfo3.appCompatTaskInfo.topActivityInSizeCompat = true;
+        taskInfo3.appCompatTaskInfo.setTopActivityInSizeCompat(true);
         taskInfo3.isVisible = false;
         mOrganizer.onTaskInfoChanged(taskInfo3);
         verifyOnCompatInfoChangedInvokedWith(taskInfo3, null /* taskListener */);
@@ -403,7 +402,7 @@ public class ShellTaskOrganizerTests extends ShellTestCase {
         final RunningTaskInfo taskInfo1 = createTaskInfo(/* taskId= */ 12,
                 WINDOWING_MODE_FULLSCREEN);
         taskInfo1.displayId = DEFAULT_DISPLAY;
-        taskInfo1.appCompatTaskInfo.topActivityEligibleForLetterboxEducation = false;
+        taskInfo1.appCompatTaskInfo.setEligibleForLetterboxEducation(false);
         final TrackingTaskListener taskListener = new TrackingTaskListener();
         mOrganizer.addListenerForType(taskListener, TASK_LISTENER_TYPE_FULLSCREEN);
         mOrganizer.onTaskAppeared(taskInfo1, /* leash= */ null);
@@ -418,7 +417,7 @@ public class ShellTaskOrganizerTests extends ShellTestCase {
         final RunningTaskInfo taskInfo2 =
                 createTaskInfo(taskInfo1.taskId, WINDOWING_MODE_FULLSCREEN);
         taskInfo2.displayId = taskInfo1.displayId;
-        taskInfo2.appCompatTaskInfo.topActivityEligibleForLetterboxEducation = true;
+        taskInfo2.appCompatTaskInfo.setEligibleForLetterboxEducation(true);
         taskInfo2.isVisible = true;
         mOrganizer.onTaskInfoChanged(taskInfo2);
         verifyOnCompatInfoChangedInvokedWith(taskInfo2, taskListener);
@@ -428,7 +427,7 @@ public class ShellTaskOrganizerTests extends ShellTestCase {
         final RunningTaskInfo taskInfo3 =
                 createTaskInfo(taskInfo1.taskId, WINDOWING_MODE_FULLSCREEN);
         taskInfo3.displayId = taskInfo1.displayId;
-        taskInfo3.appCompatTaskInfo.topActivityEligibleForLetterboxEducation = true;
+        taskInfo3.appCompatTaskInfo.setEligibleForLetterboxEducation(true);
         taskInfo3.isVisible = false;
         mOrganizer.onTaskInfoChanged(taskInfo3);
         verifyOnCompatInfoChangedInvokedWith(taskInfo3, null /* taskListener */);

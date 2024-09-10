@@ -26,6 +26,7 @@ import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPR
 import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ERROR_USER_CANCELED;
 import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ERROR_VENDOR;
 import static android.hardware.biometrics.SensorProperties.STRENGTH_STRONG;
+import static android.hardware.fingerprint.FingerprintSensorConfigurations.getIFingerprint;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -78,6 +79,7 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.SystemService;
@@ -1015,7 +1017,7 @@ public class FingerprintService extends SystemService {
         this(context, BiometricContext.getInstance(context),
                 () -> IBiometricService.Stub.asInterface(
                         ServiceManager.getService(Context.BIOMETRIC_SERVICE)),
-                () -> ServiceManager.getDeclaredInstances(IFingerprint.DESCRIPTOR),
+                () -> getDeclaredInstances(),
                 null /* fingerprintProvider */,
                 null /* fingerprintProviderFunction */);
     }
@@ -1039,8 +1041,7 @@ public class FingerprintService extends SystemService {
         mFingerprintProvider = fingerprintProvider != null ? fingerprintProvider :
                 (name) -> {
                     final String fqName = IFingerprint.DESCRIPTOR + "/" + name;
-                    final IFingerprint fp = IFingerprint.Stub.asInterface(
-                            Binder.allowBlocking(ServiceManager.waitForDeclaredService(fqName)));
+                    final IFingerprint fp = getIFingerprint(fqName);
                     if (fp != null) {
                         try {
                             return new FingerprintProvider(getContext(),
@@ -1127,6 +1128,24 @@ public class FingerprintService extends SystemService {
     @Override
     public void onStart() {
         publishBinderService(Context.FINGERPRINT_SERVICE, mServiceWrapper);
+    }
+
+    /**
+     * Get all fingerprint hal instances declared in manifest
+     * @return instance names
+     */
+    public static String[] getDeclaredInstances() {
+        String[] a = ServiceManager.getDeclaredInstances(IFingerprint.DESCRIPTOR);
+        Slog.i(TAG, "Before:getDeclaredInstances: IFingerprint instance found, a.length="
+                + a.length);
+        if (!ArrayUtils.contains(a, "virtual")) {
+            // Now, the virtual hal is registered with IVirtualHal interface and it is also
+            //   moved from vendor to system_ext partition without a device manifest. So
+            //   if the old vhal is not declared, add here.
+            a = ArrayUtils.appendElement(String.class, a, "virtual");
+        }
+        Slog.i(TAG, "After:getDeclaredInstances: a.length=" + a.length);
+        return a;
     }
 
     @NonNull

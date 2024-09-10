@@ -133,6 +133,7 @@ import static com.android.window.flags.Flags.enableCaptionCompatInsetForceConsum
 import static com.android.window.flags.Flags.insetsControlChangedItem;
 import static com.android.window.flags.Flags.insetsControlSeq;
 import static com.android.window.flags.Flags.setScPropertiesInClient;
+import static com.android.window.flags.Flags.systemUiImmersiveConfirmationDialog;
 
 import android.Manifest;
 import android.accessibilityservice.AccessibilityService;
@@ -207,6 +208,7 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.os.Vibrator;
 import android.provider.Settings;
 import android.sysprop.DisplayProperties;
 import android.sysprop.ViewProperties;
@@ -302,6 +304,7 @@ import java.util.OptionalInt;
 import java.util.Queue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 /**
@@ -362,14 +365,6 @@ public final class ViewRootImpl implements ViewParent,
     private static final boolean ENABLE_INPUT_LATENCY_TRACKING = true;
 
     /**
-     * Controls whether to use the new oneway performHapticFeedback call. This returns
-     * true in a few more conditions, but doesn't affect which haptics happen. Notably, it
-     * makes the call to performHapticFeedback non-blocking, which reduces potential UI jank.
-     * This is intended as a temporary flag, ultimately becoming permanently 'true'.
-     */
-    private static final boolean USE_ASYNC_PERFORM_HAPTIC_FEEDBACK = true;
-
-    /**
      * Whether the client (system UI) is handling the transient gesture and the corresponding
      * animation.
      * @hide
@@ -385,7 +380,7 @@ public final class ViewRootImpl implements ViewParent,
      * @hide
      */
     public static final boolean CLIENT_IMMERSIVE_CONFIRMATION =
-            SystemProperties.getBoolean("persist.wm.debug.client_immersive_confirmation", false);
+            systemUiImmersiveConfirmationDialog();
 
     /**
      * Set this system property to true to force the view hierarchy to render
@@ -956,6 +951,11 @@ public final class ViewRootImpl implements ViewParent,
      */
     AudioManager mAudioManager;
 
+    /**
+     * see {@link #performHapticFeedback(int, int, int)}
+     */
+    Vibrator mVibrator;
+
     final AccessibilityManager mAccessibilityManager;
 
     AccessibilityInteractionController mAccessibilityInteractionController;
@@ -1202,8 +1202,7 @@ public final class ViewRootImpl implements ViewParent,
     private String mLargestViewTraceName;
 
     private final boolean mAppStartInfoTimestampsFlagValue;
-    @GuardedBy("this")
-    private boolean mAppStartTimestampsSent = false;
+    private AtomicBoolean mAppStartTimestampsSent = new AtomicBoolean(false);
     private boolean mAppStartTrackingStarted = false;
     private long mRenderThreadDrawStartTimeNs = -1;
     private long mFirstFramePresentedTimeNs = -1;
@@ -2648,7 +2647,7 @@ public final class ViewRootImpl implements ViewParent,
                 destroySurface();
 
                 // Reset so they can be sent again for warm starts.
-                mAppStartTimestampsSent = false;
+                mAppStartTimestampsSent.set(false);
                 mAppStartTrackingStarted = false;
                 mRenderThreadDrawStartTimeNs = -1;
                 mFirstFramePresentedTimeNs = -1;
@@ -2822,6 +2821,12 @@ public final class ViewRootImpl implements ViewParent,
         if (mAttachInfo.mThreadedRenderer != null) {
             mAttachInfo.mThreadedRenderer.setSurfaceControl(null, null);
         }
+
+        // Also reset the VRR relevant values.
+        mPreferredFrameRateCategory = FRAME_RATE_CATEGORY_DEFAULT;
+        mLastPreferredFrameRateCategory = FRAME_RATE_CATEGORY_DEFAULT;
+        mPreferredFrameRate = 0;
+        mLastPreferredFrameRate = 0;
     }
 
     /**
@@ -4340,6 +4345,7 @@ public final class ViewRootImpl implements ViewParent,
 
             handleSyncRequestWhenNoAsyncDraw(mActiveSurfaceSyncGroup, mHasPendingTransactions,
                     mPendingTransaction, "view not visible");
+            mHasPendingTransactions = false;
         } else if (cancelAndRedraw) {
             if (!mWasLastDrawCanceled) {
                 logAndTrace("Canceling draw."
@@ -4367,6 +4373,7 @@ public final class ViewRootImpl implements ViewParent,
             if (!performDraw(mActiveSurfaceSyncGroup)) {
                 handleSyncRequestWhenNoAsyncDraw(mActiveSurfaceSyncGroup, mHasPendingTransactions,
                         mPendingTransaction, mLastPerformDrawSkippedReason);
+                mHasPendingTransactions = false;
             }
         }
         mWasLastDrawCanceled = cancelAndRedraw;
@@ -4498,42 +4505,29 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private void maybeSendAppStartTimes() {
-        synchronized (this) {
-            if (mAppStartTimestampsSent) {
-                // Don't send timestamps more than once.
-                return;
-            }
-
-            // If we already have {@link mRenderThreadDrawStartTimeNs} then pass it through, if not
-            // post to main thread and check if we have it there.
-            if (mRenderThreadDrawStartTimeNs != -1) {
-                sendAppStartTimesLocked();
-            } else {
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        synchronized (ViewRootImpl.this) {
-                            if (mRenderThreadDrawStartTimeNs == -1) {
-                                return;
-                            }
-                            sendAppStartTimesLocked();
-                        }
-                    }
-                });
-            }
+        if (mAppStartTimestampsSent.get()) {
+            // Don't send timestamps more than once.
+            return;
         }
-    }
 
-    @GuardedBy("this")
-    private void sendAppStartTimesLocked() {
-        try {
-            ActivityManager.getService().reportStartInfoViewTimestamps(
-                    mRenderThreadDrawStartTimeNs, mFirstFramePresentedTimeNs);
-            mAppStartTimestampsSent = true;
-        } catch (RemoteException e) {
-            // Ignore, timestamps may be lost.
-            if (DBG) Log.d(TAG, "Exception attempting to report start timestamps.", e);
-        }
+        // Post to main thread
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                if (mRenderThreadDrawStartTimeNs == -1) {
+                    return;
+                }
+
+                try {
+                    ActivityManager.getService().reportStartInfoViewTimestamps(
+                            mRenderThreadDrawStartTimeNs, mFirstFramePresentedTimeNs);
+                    mAppStartTimestampsSent.set(true);
+                } catch (RemoteException e) {
+                    // Ignore, timestamps may be lost.
+                    if (DBG) Log.d(TAG, "Exception attempting to report start timestamps.", e);
+                }
+            }
+        });
     }
 
     /**
@@ -5320,6 +5314,7 @@ public final class ViewRootImpl implements ViewParent,
     private void registerCallbackForPendingTransactions() {
         Transaction t = new Transaction();
         t.merge(mPendingTransaction);
+        mHasPendingTransactions = false;
 
         registerRtFrameCallback(new FrameDrawingCallback() {
             @Override
@@ -5399,6 +5394,7 @@ public final class ViewRootImpl implements ViewParent,
         if (!usingAsyncReport && mHasPendingTransactions) {
             pendingTransaction = new Transaction();
             pendingTransaction.merge(mPendingTransaction);
+            mHasPendingTransactions = false;
         } else {
             pendingTransaction = null;
         }
@@ -6109,6 +6105,12 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     boolean scrollToRectOrFocus(Rect rectangle, boolean immediate) {
+        if (mImeBackAnimationController.isAnimationInProgress()) {
+            // IME predictive back animation is currently in progress which means that scrollY is
+            // currently controlled by ImeBackAnimationController.
+            return false;
+        }
+
         final Rect ci = mAttachInfo.mContentInsets;
         final Rect vi = mAttachInfo.mVisibleInsets;
         int scrollY = 0;
@@ -9236,6 +9238,13 @@ public final class ViewRootImpl implements ViewParent,
         return mAudioManager;
     }
 
+    private Vibrator getSystemVibrator() {
+        if (mVibrator == null) {
+            mVibrator = mContext.getSystemService(Vibrator.class);
+        }
+        return mVibrator;
+    }
+
     private @Nullable AutofillManager getAutofillManager() {
         if (mView instanceof ViewGroup) {
             ViewGroup decorView = (ViewGroup) mView;
@@ -9662,17 +9671,23 @@ public final class ViewRootImpl implements ViewParent,
             return false;
         }
 
-        try {
-            if (USE_ASYNC_PERFORM_HAPTIC_FEEDBACK) {
-                mWindowSession.performHapticFeedbackAsync(effectId, flags, privFlags);
-                return true;
-            } else {
-                // Original blocking binder call path.
-                return mWindowSession.performHapticFeedback(effectId, flags, privFlags);
-            }
-        } catch (RemoteException e) {
-            return false;
+        getSystemVibrator().performHapticFeedback(
+                effectId, "ViewRootImpl#performHapticFeedback", flags, privFlags);
+        return true;
+    }
+
+    @Override
+    public void performHapticFeedbackForInputDevice(int effectId,
+            int inputDeviceId, int inputSource,
+            @HapticFeedbackConstants.Flags int flags,
+            @HapticFeedbackConstants.PrivateFlags int privFlags) {
+        if ((mDisplay.getFlags() & Display.FLAG_TOUCH_FEEDBACK_DISABLED) != 0) {
+            return;
         }
+
+        getSystemVibrator().performHapticFeedbackForInputDevice(effectId,
+                inputDeviceId, inputSource, "ViewRootImpl#performHapticFeedbackForInputDevice",
+                flags, privFlags);
     }
 
     /**
@@ -9938,6 +9953,7 @@ public final class ViewRootImpl implements ViewParent,
         }
         handleSyncRequestWhenNoAsyncDraw(mActiveSurfaceSyncGroup, mHasPendingTransactions,
                 mPendingTransaction, "shutting down VRI");
+        mHasPendingTransactions = false;
         WindowManagerGlobal.getInstance().doRemoveView(this);
     }
 
@@ -12597,6 +12613,7 @@ public final class ViewRootImpl implements ViewParent,
         if (mHasPendingTransactions) {
             t = new Transaction();
             t.merge(mPendingTransaction);
+            mHasPendingTransactions = false;
         } else {
             t = null;
         }
@@ -13007,7 +13024,7 @@ public final class ViewRootImpl implements ViewParent,
 
     private boolean shouldSetFrameRateCategory() {
         // use toolkitSetFrameRate flag to gate the change
-        return shouldEnableDvrr() && mSurface.isValid() && shouldEnableDvrr();
+        return shouldEnableDvrr() && mSurface.isValid();
     }
 
     private boolean shouldSetFrameRate() {

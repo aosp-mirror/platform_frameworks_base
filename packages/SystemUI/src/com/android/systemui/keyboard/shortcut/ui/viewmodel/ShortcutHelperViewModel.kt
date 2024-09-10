@@ -63,7 +63,11 @@ constructor(
                 if (categories.isEmpty()) {
                     ShortcutsUiState.Inactive
                 } else {
-                    val filteredCategories = filterCategoriesBySearchQuery(query, categories)
+                    /* temporarily hiding launcher shortcut categories until b/327141011
+                     * is completed. */
+                    val categoriesWithLauncherExcluded = excludeLauncherApp(categories)
+                    val filteredCategories =
+                        filterCategoriesBySearchQuery(query, categoriesWithLauncherExcluded)
                     ShortcutsUiState.Active(
                         searchQuery = query,
                         shortcutCategories = filteredCategories,
@@ -77,15 +81,27 @@ constructor(
                 initialValue = ShortcutsUiState.Inactive
             )
 
+    private suspend fun excludeLauncherApp(
+        categories: List<ShortcutCategory>
+    ): List<ShortcutCategory> {
+        val launcherAppCategory =
+            categories.firstOrNull { it.type is CurrentApp && isLauncherApp(it.type.packageName) }
+        return if (launcherAppCategory != null) {
+            categories - launcherAppCategory
+        } else {
+            categories
+        }
+    }
+
     private suspend fun getDefaultSelectedCategory(
         categories: List<ShortcutCategory>
     ): ShortcutCategoryType? {
         val currentAppShortcuts =
-            categories.firstOrNull { it.type is CurrentApp && !isAppLauncher(it.type.packageName) }
+            categories.firstOrNull { it.type is CurrentApp && !isLauncherApp(it.type.packageName) }
         return currentAppShortcuts?.type ?: categories.firstOrNull()?.type
     }
 
-    private suspend fun isAppLauncher(packageName: String): Boolean {
+    private suspend fun isLauncherApp(packageName: String): Boolean {
         return withContext(backgroundDispatcher) {
             roleManager
                 .getRoleHoldersAsUser(RoleManager.ROLE_HOME, userTracker.userHandle)

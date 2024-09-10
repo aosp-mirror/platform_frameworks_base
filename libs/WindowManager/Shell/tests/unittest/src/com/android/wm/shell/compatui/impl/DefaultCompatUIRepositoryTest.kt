@@ -16,9 +16,14 @@
 
 package com.android.wm.shell.compatui.impl
 
+
+import android.graphics.Point
 import android.platform.test.flag.junit.DeviceFlagsValueProvider
 import android.testing.AndroidTestingRunner
+import android.view.View
 import androidx.test.filters.SmallTest
+import com.android.wm.shell.compatui.api.CompatUILayout
+import com.android.wm.shell.compatui.api.CompatUILifecyclePredicates
 import com.android.wm.shell.compatui.api.CompatUIRepository
 import com.android.wm.shell.compatui.api.CompatUISpec
 import org.junit.Assert.assertEquals
@@ -50,16 +55,16 @@ class DefaultCompatUIRepositoryTest {
 
     @Test(expected = IllegalStateException::class)
     fun `addSpec throws exception with specs with duplicate id`() {
-        repository.addSpec(CompatUISpec("one"))
-        repository.addSpec(CompatUISpec("one"))
+        repository.addSpec(specById("one"))
+        repository.addSpec(specById("one"))
     }
 
     @Test
     fun `iterateOn invokes the consumer`() {
         with(repository) {
-            addSpec(CompatUISpec("one"))
-            addSpec(CompatUISpec("two"))
-            addSpec(CompatUISpec("three"))
+            addSpec(specById("one"))
+            addSpec(specById("two"))
+            addSpec(specById("three"))
             val consumer = object : (CompatUISpec) -> Unit {
                 var acc = ""
                 override fun invoke(spec: CompatUISpec) {
@@ -74,9 +79,9 @@ class DefaultCompatUIRepositoryTest {
     @Test
     fun `findSpec returns existing specs`() {
         with(repository) {
-            val one = CompatUISpec("one")
-            val two = CompatUISpec("two")
-            val three = CompatUISpec("three")
+            val one = specById("one")
+            val two = specById("two")
+            val three = specById("three")
             addSpec(one)
             addSpec(two)
             addSpec(three)
@@ -86,4 +91,16 @@ class DefaultCompatUIRepositoryTest {
             assertNull(findSpec("abc"))
         }
     }
+
+    private fun specById(name: String): CompatUISpec =
+        CompatUISpec(name = name,
+            lifecycle = CompatUILifecyclePredicates(
+                creationPredicate = { _, _ -> true },
+                removalPredicate = { _, _, _ -> true }
+            ),
+            layout = CompatUILayout(
+                viewBuilder = { ctx, _, _ -> View(ctx) },
+                positionFactory = { _, _, _, _ -> Point(0, 0) }
+            )
+        )
 }

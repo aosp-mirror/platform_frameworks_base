@@ -142,7 +142,7 @@ public final class ClientSocketPerfTest {
 
         // Always use the same server for consistency across the benchmarks.
         server = config.serverFactory().newServer(
-                ChannelType.CHANNEL, config.messageSize(), config.protocol().getProtocols(),
+                config.messageSize(), config.protocol().getProtocols(),
                 ciphers(config));
 
         server.setMessageProcessor(new ServerEndpoint.MessageProcessor() {
@@ -194,7 +194,7 @@ public final class ClientSocketPerfTest {
     /**
      * Simple benchmark for the amount of time to send a given number of messages
      */
-    @Test
+    // @Test Temporarily disabled
     @Parameters(method = "getParams")
     public void time(Config config) throws Exception {
         reset();

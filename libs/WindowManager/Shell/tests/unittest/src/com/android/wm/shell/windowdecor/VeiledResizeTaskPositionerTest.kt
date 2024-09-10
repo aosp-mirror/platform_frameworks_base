@@ -200,7 +200,7 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
         verify(mockTransaction).setPosition(any(), eq(rectAfterMove.left.toFloat()),
                 eq(rectAfterMove.top.toFloat()))
 
-        taskPositioner.onDragPositioningEnd(
+        val endBounds = taskPositioner.onDragPositioningEnd(
             STARTING_BOUNDS.left.toFloat() + 70,
             STARTING_BOUNDS.top.toFloat() + 20
         )
@@ -212,12 +212,7 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
 
         verify(mockDesktopWindowDecoration, never()).showResizeVeil(any())
         verify(mockDesktopWindowDecoration, never()).hideResizeVeil()
-        verify(mockTransitions).startTransition(eq(TRANSIT_CHANGE), argThat { wct ->
-            return@argThat wct.changes.any { (token, change) ->
-                token == taskBinder &&
-                        (change.windowSetMask and WindowConfiguration.WINDOW_CONFIG_BOUNDS) != 0 &&
-                        change.configuration.windowConfiguration.bounds == rectAfterEnd }},
-                eq(taskPositioner))
+        Assert.assertEquals(rectAfterEnd, endBounds)
     }
 
     @Test
@@ -377,6 +372,7 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
             CTRL_TYPE_RIGHT or CTRL_TYPE_BOTTOM)
         val rectAfterDrag = Rect(STARTING_BOUNDS)
         rectAfterDrag.right += 2000
+        rectAfterDrag.bottom = STABLE_BOUNDS_LANDSCAPE.bottom
         // First drag; we should fetch stable bounds.
         verify(mockDisplayLayout, times(1)).getStableBounds(any())
         verify(mockTransitions).startTransition(eq(TRANSIT_CHANGE), argThat { wct ->
@@ -401,8 +397,8 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
         performDrag(STARTING_BOUNDS.right.toFloat(), STARTING_BOUNDS.bottom.toFloat(),
             STARTING_BOUNDS.right.toFloat() + 2000, STARTING_BOUNDS.bottom.toFloat() + 2000,
             CTRL_TYPE_RIGHT or CTRL_TYPE_BOTTOM)
-        rectAfterDrag.right -= 2000
-        rectAfterDrag.bottom += 2000
+        rectAfterDrag.right = STABLE_BOUNDS_PORTRAIT.right
+        rectAfterDrag.bottom = STARTING_BOUNDS.bottom + 2000
 
         verify(mockTransitions).startTransition(eq(TRANSIT_CHANGE), argThat { wct ->
             return@argThat wct.changes.any { (token, change) ->

@@ -29,6 +29,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.FastPrintWriter;
 
 import java.lang.annotation.Retention;
@@ -1260,7 +1261,7 @@ public class PropertyInvalidatedCache<Query, Result> {
         }
 
         public void autoCork() {
-            if (Looper.getMainLooper() == null) {
+            if (getLooper() == null) {
                 // We're not ready to auto-cork yet, so just invalidate the cache immediately.
                 if (DEBUG) {
                     Log.w(TAG, "invalidating instead of autocorking early in init: "
@@ -1322,7 +1323,7 @@ public class PropertyInvalidatedCache<Query, Result> {
         @GuardedBy("mLock")
         private Handler getHandlerLocked() {
             if (mHandler == null) {
-                mHandler = new Handler(Looper.getMainLooper()) {
+                mHandler = new Handler(getLooper()) {
                         @Override
                         public void handleMessage(Message msg) {
                             AutoCorker.this.handleMessage(msg);
@@ -1330,6 +1331,14 @@ public class PropertyInvalidatedCache<Query, Result> {
                     };
             }
             return mHandler;
+        }
+
+        /**
+         * Return a looper for auto-uncork messages.  Messages should be processed on the
+         * background thread, not on the main thread.
+         */
+        private static Looper getLooper() {
+            return BackgroundThread.getHandler().getLooper();
         }
     }
 
@@ -1615,20 +1624,6 @@ public class PropertyInvalidatedCache<Query, Result> {
             barray.close();
         } catch (IOException e) {
             Log.e(TAG, "Failed to dump PropertyInvalidatedCache instances");
-        }
-    }
-
-    /**
-     * Trim memory by clearing all the caches.
-     * @hide
-     */
-    public static void onTrimMemory() {
-        ArrayList<PropertyInvalidatedCache> activeCaches;
-        synchronized (sGlobalLock) {
-            activeCaches = getActiveCaches();
-        }
-        for (int i = 0; i < activeCaches.size(); i++) {
-            activeCaches.get(i).clear();
         }
     }
 }

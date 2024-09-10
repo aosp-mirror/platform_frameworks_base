@@ -16,7 +16,11 @@
 
 package com.android.systemui.accessibility.accessibilitymenu.view;
 
+import static android.view.View.LAYOUT_DIRECTION_LTR;
+
+import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.text.TextUtils;
 import android.view.TouchDelegate;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -37,46 +41,73 @@ public class A11yMenuFooter {
     public interface A11yMenuFooterCallBack {
 
         /** Calls back when user clicks the left button. */
-        void onLeftButtonClicked();
+        void onNextButtonClicked();
 
         /** Calls back when user clicks the right button. */
-        void onRightButtonClicked();
+        void onPreviousButtonClicked();
     }
 
     private final FooterButtonClickListener mFooterButtonClickListener;
 
-    private ImageButton mPreviousPageBtn;
-    private ImageButton mNextPageBtn;
+    private ImageButton mPageLeftBtn;
+    private ImageButton mPageRightBtn;
     private View mTopListDivider;
     private View mBottomListDivider;
     private final A11yMenuFooterCallBack mCallBack;
+    private final ViewGroup mMenuLayout;
+    private ViewGroup mFooterContainer;
+    private int mFooterContainerBaseHeight = 0;
+    private int mRightToLeftDirection = LAYOUT_DIRECTION_LTR;
 
     public A11yMenuFooter(ViewGroup menuLayout, A11yMenuFooterCallBack callBack) {
         this.mCallBack = callBack;
         mFooterButtonClickListener = new FooterButtonClickListener();
         configureFooterLayout(menuLayout);
+        mMenuLayout = menuLayout;
     }
 
     public @Nullable ImageButton getPreviousPageBtn() {
-        return mPreviousPageBtn;
+        return mRightToLeftDirection == LAYOUT_DIRECTION_LTR
+                ? mPageLeftBtn : mPageRightBtn;
     }
 
     public @Nullable ImageButton getNextPageBtn() {
-        return mNextPageBtn;
+        return mRightToLeftDirection == LAYOUT_DIRECTION_LTR
+                ? mPageRightBtn : mPageLeftBtn;
+    }
+
+    void adjustFooterToDensityScale(float densityScale) {
+        mFooterContainer.getLayoutParams().height =
+                (int) (mFooterContainerBaseHeight / densityScale);
+    }
+
+    int getHeight() {
+        return mFooterContainer.getLayoutParams().height;
+    }
+
+    /** Sets right to left direction of footer. */
+    public void updateRightToLeftDirection(Configuration configuration) {
+        mRightToLeftDirection = TextUtils.getLayoutDirectionFromLocale(
+                configuration.getLocales().get(0));
+        getPreviousPageBtn().setContentDescription(mMenuLayout.getResources().getString(
+                R.string.previous_button_content_description));
+        getNextPageBtn().setContentDescription(mMenuLayout.getResources().getString(
+                R.string.next_button_content_description));
     }
 
     private void configureFooterLayout(ViewGroup menuLayout) {
-        ViewGroup footerContainer = menuLayout.findViewById(R.id.footerlayout);
-        footerContainer.setVisibility(View.VISIBLE);
+        mFooterContainer = menuLayout.findViewById(R.id.footerlayout);
+        mFooterContainer.setVisibility(View.VISIBLE);
+        mFooterContainerBaseHeight = mFooterContainer.getLayoutParams().height;
 
-        mPreviousPageBtn = menuLayout.findViewById(R.id.menu_prev_button);
-        mNextPageBtn = menuLayout.findViewById(R.id.menu_next_button);
+        mPageLeftBtn = menuLayout.findViewById(R.id.menu_left_button);
+        mPageRightBtn = menuLayout.findViewById(R.id.menu_right_button);
         mTopListDivider = menuLayout.findViewById(R.id.top_listDivider);
         mBottomListDivider = menuLayout.findViewById(R.id.bottom_listDivider);
 
         // Registers listeners for footer buttons.
-        setListener(mPreviousPageBtn);
-        setListener(mNextPageBtn);
+        setListener(mPageLeftBtn);
+        setListener(mPageRightBtn);
 
         menuLayout
                 .getViewTreeObserver()
@@ -85,8 +116,8 @@ public class A11yMenuFooter {
                             @Override
                             public void onGlobalLayout() {
                                 menuLayout.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                                expandBtnTouchArea(mPreviousPageBtn, menuLayout);
-                                expandBtnTouchArea(mNextPageBtn, (View) mNextPageBtn.getParent());
+                                expandBtnTouchArea(mPageLeftBtn, menuLayout);
+                                expandBtnTouchArea(mPageRightBtn, (View) mPageRightBtn.getParent());
                             }
                         });
     }
@@ -115,10 +146,10 @@ public class A11yMenuFooter {
     private class FooterButtonClickListener implements OnClickListener {
         @Override
         public void onClick(View view) {
-            if (view.getId() == R.id.menu_prev_button) {
-                mCallBack.onLeftButtonClicked();
-            } else if (view.getId() == R.id.menu_next_button) {
-                mCallBack.onRightButtonClicked();
+            if (view.getId() == getPreviousPageBtn().getId()) {
+                mCallBack.onPreviousButtonClicked();
+            } else if (view.getId() == getNextPageBtn().getId()) {
+                mCallBack.onNextButtonClicked();
             }
         }
     }

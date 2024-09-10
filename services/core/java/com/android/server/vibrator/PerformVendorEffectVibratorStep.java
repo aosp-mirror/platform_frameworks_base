@@ -52,6 +52,7 @@ final class PerformVendorEffectVibratorStep extends AbstractVibratorStep {
             long vibratorOnResult = controller.on(effect, getVibration().id);
             vibratorOnResult = Math.min(vibratorOnResult, VENDOR_EFFECT_MAX_DURATION_MS);
             handleVibratorOnResult(vibratorOnResult);
+            getVibration().stats.reportPerformVendorEffect(vibratorOnResult);
             return List.of(new CompleteEffectVibratorStep(conductor, startTime,
                     /* cancelled= */ false, controller, mPendingVibratorOffDeadline));
         } finally {

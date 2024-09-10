@@ -1729,10 +1729,18 @@
     <dimen name="wallet_button_vertical_padding">8dp</dimen>
 
     <!-- Ongoing activity chip -->
+    <!-- The activity chip side padding, used with the default phone icon. -->
     <dimen name="ongoing_activity_chip_side_padding">12dp</dimen>
+    <!-- The activity chip side padding, used with an icon that has embedded padding (e.g. if the icon comes from the notification's smallIcon field). If the icon has padding, the chip itself can have less padding. -->
+    <dimen name="ongoing_activity_chip_side_padding_for_embedded_padding_icon">6dp</dimen>
+    <!-- The icon size, used with the default phone icon. -->
     <dimen name="ongoing_activity_chip_icon_size">16dp</dimen>
-    <!-- The padding between the icon and the text. -->
+    <!-- The icon size, used with an icon that has embedded padding. (If the icon has embedded padding, we need to make the whole icon larger so the icon itself doesn't look small.) -->
+    <dimen name="ongoing_activity_chip_embedded_padding_icon_size">22dp</dimen>
+    <!-- The padding between the icon and the text. Only used if the default phone icon is used. -->
     <dimen name="ongoing_activity_chip_icon_text_padding">4dp</dimen>
+    <!-- The end padding for the timer text view. Only used if an embedded padding icon is used. -->
+    <dimen name="ongoing_activity_chip_text_end_padding_for_embedded_padding_icon">6dp</dimen>
     <dimen name="ongoing_activity_chip_corner_radius">28dp</dimen>
 
     <!-- Status bar user chip -->
@@ -1743,6 +1751,7 @@
 
     <!-- System UI Dialog -->
     <dimen name="dialog_title_text_size">24sp</dimen>
+    <dimen name="dialog_button_side_margin">8dp</dimen>
 
     <!-- Internet panel related dimensions -->
     <dimen name="internet_dialog_list_max_height">662dp</dimen>
@@ -1993,10 +2002,10 @@
     <!-- Shadow for dream overlay status bar complications -->
     <dimen name="dream_overlay_status_bar_key_text_shadow_dx">0.5dp</dimen>
     <dimen name="dream_overlay_status_bar_key_text_shadow_dy">0.5dp</dimen>
-    <dimen name="dream_overlay_status_bar_key_text_shadow_radius">1dp</dimen>
+    <dimen name="dream_overlay_status_bar_key_text_shadow_radius">3dp</dimen>
     <dimen name="dream_overlay_status_bar_ambient_text_shadow_dx">0.5dp</dimen>
     <dimen name="dream_overlay_status_bar_ambient_text_shadow_dy">0.5dp</dimen>
-    <dimen name="dream_overlay_status_bar_ambient_text_shadow_radius">2dp</dimen>
+    <dimen name="dream_overlay_status_bar_ambient_text_shadow_radius">3dp</dimen>
     <dimen name="dream_overlay_icon_inset_dimen">0dp</dimen>
 
     <!-- Default device corner radius, used for assist UI -->

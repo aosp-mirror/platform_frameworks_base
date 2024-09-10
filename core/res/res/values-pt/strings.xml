@@ -1195,6 +1195,8 @@
     <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"Não há suporte para escrita à mão em campos de senha"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Voltar"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Mudar o método de entrada"</string>
+    <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"Abrir o seletor de método de entrada"</string>
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"Configurações"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Pouco espaço de armazenamento"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Algumas funções do sistema podem não funcionar"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Não há armazenamento suficiente para o sistema. Certifique-se de ter 250 MB de espaço livre e reinicie."</string>
@@ -1400,7 +1402,7 @@
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"MIDI via USB ativado"</string>
     <string name="usb_uvc_notification_title" msgid="2030032862673400008">"Dispositivo conectado como Webcam"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"Acessório USB conectado"</string>
-    <string name="usb_notification_message" msgid="4715163067192110676">"Toque para conferir mais opções."</string>
+    <string name="usb_notification_message" msgid="4715163067192110676">"Toque para mais opções."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Carregando dispositivo conectado. Toque para ver mais opções."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Acessório de áudio analógico detectado"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"O dispositivo anexo não é compatível com esse smartphone. Toque para saber mais."</string>
@@ -1745,7 +1747,8 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"Um app está ocultando a solicitação de permissão e impedindo a verificação da sua resposta."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Toque em um recurso para começar a usá-lo:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Escolha recursos para usar com o botão de acessibilidade"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Escolha recursos para usar com o atalho da tecla de volume"</string>
+    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
+    <skip />
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"O <xliff:g id="SERVICE_NAME">%s</xliff:g> foi desativado"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Editar atalhos"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Concluído"</string>
@@ -2423,6 +2426,8 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Conteúdo oculto no compartilhamento de tela por segurança"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Conectado automaticamente ao satélite"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Você pode enviar e receber mensagens sem um dispositivo móvel ou uma rede Wi-Fi"</string>
+    <string name="satellite_notification_manual_title" msgid="1097504441849466279">"Usar mensagens via satélite?"</string>
+    <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Enviar e receber mensagens sem uma rede móvel ou Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Abrir o app Mensagens"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Como funciona"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Pendente…"</string>
@@ -2448,4 +2453,5 @@
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"Calculadora"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"Mapas"</string>
     <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"Apps"</string>
+    <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"As impressões digitais não são mais reconhecidas. Configure o Desbloqueio por impressão digital de novo."</string>
 </resources>

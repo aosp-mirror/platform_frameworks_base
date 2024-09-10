@@ -81,9 +81,11 @@ class CustomTraceSettingsDialogDelegate(
                         }
                 setOnClickListener { showCategorySelector(this) }
             }
+            val attachToBRLabel = context.getString(T.string.attach_to_bug_report)
             requireViewById<Switch>(R.id.attach_to_bugreport_switch).apply {
                 isChecked = builder.attachToBugreport
                 setOnCheckedChangeListener { _, isChecked -> builder.attachToBugreport = isChecked }
+                contentDescription = attachToBRLabel
             }
             requireViewById<TextView>(R.id.cpu_buffer_size).setupSingleChoiceText(
                 T.array.buffer_size_values,
@@ -111,6 +113,7 @@ class CustomTraceSettingsDialogDelegate(
                 ) {
                     builder.maxLongTraceDurationMinutes = it
                 }
+            val longTracesLabel = context.getString(T.string.long_traces)
             requireViewById<Switch>(R.id.long_traces_switch).apply {
                 isChecked = builder.longTrace
                 val disabledAlpha by lazy { getDisabledAlpha(context) }
@@ -127,23 +130,24 @@ class CustomTraceSettingsDialogDelegate(
                     longTraceDurationText.alpha = newAlpha
                     longTraceSizeText.alpha = newAlpha
                 }
+                contentDescription = longTracesLabel
             }
+            val winscopeLabel = context.getString(T.string.winscope_tracing)
             requireViewById<Switch>(R.id.winscope_switch).apply {
                 isChecked = builder.winscope
                 setOnCheckedChangeListener { _, isChecked -> builder.winscope = isChecked }
+                contentDescription = winscopeLabel
             }
+            val debuggableAppsLabel = context.getString(T.string.trace_debuggable_applications)
             requireViewById<Switch>(R.id.trace_debuggable_apps_switch).apply {
                 isChecked = builder.apps
                 setOnCheckedChangeListener { _, isChecked -> builder.apps = isChecked }
+                contentDescription = debuggableAppsLabel
             }
-            requireViewById<TextView>(R.id.long_traces_switch_label).text =
-                context.getString(T.string.long_traces)
-            requireViewById<TextView>(R.id.debuggable_apps_switch_label).text =
-                context.getString(T.string.trace_debuggable_applications)
-            requireViewById<TextView>(R.id.winscope_switch_label).text =
-                context.getString(T.string.winscope_tracing)
-            requireViewById<TextView>(R.id.attach_to_bugreport_switch_label).text =
-                context.getString(T.string.attach_to_bug_report)
+            requireViewById<TextView>(R.id.long_traces_switch_label).text = longTracesLabel
+            requireViewById<TextView>(R.id.debuggable_apps_switch_label).text = debuggableAppsLabel
+            requireViewById<TextView>(R.id.winscope_switch_label).text = winscopeLabel
+            requireViewById<TextView>(R.id.attach_to_bugreport_switch_label).text = attachToBRLabel
         }
     }
 

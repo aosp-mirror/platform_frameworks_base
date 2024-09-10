@@ -79,10 +79,8 @@ public class InputMethodBindingControllerTest extends InputMethodManagerServiceT
         // from system.
         synchronized (ImfLock.class) {
             mBindingController =
-                    new InputMethodBindingController(
-                            mInputMethodManagerService.getCurrentImeUserIdLocked(),
-                            mInputMethodManagerService, mImeConnectionBindFlags,
-                            mCountDownLatch);
+                    new InputMethodBindingController(mUserId, mInputMethodManagerService,
+                            mImeConnectionBindFlags, mCountDownLatch);
         }
     }
 

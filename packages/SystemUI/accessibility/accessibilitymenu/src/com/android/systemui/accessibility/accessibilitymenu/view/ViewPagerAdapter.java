@@ -16,55 +16,73 @@
 
 package com.android.systemui.accessibility.accessibilitymenu.view;
 
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.GridView;
 
-import androidx.viewpager.widget.PagerAdapter;
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.android.systemui.accessibility.accessibilitymenu.AccessibilityMenuService;
+import com.android.systemui.accessibility.accessibilitymenu.R;
+import com.android.systemui.accessibility.accessibilitymenu.model.A11yMenuShortcut;
 
 import java.util.List;
 
 /** The pager adapter, which provides the pages to the view pager widget. */
-class ViewPagerAdapter<T extends View> extends PagerAdapter {
+class ViewPagerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    /** The widget list in each page of view pager. */
-    private List<T> mWidgetList;
+    /** List of shortcuts, split into sub lists per page */
+    private List<List<A11yMenuShortcut>> mShortcutList;
+    private final AccessibilityMenuService mService;
+    private int mVerticalSpacing = 0;
 
-    ViewPagerAdapter() {}
+    ViewPagerAdapter(AccessibilityMenuService service) {
+        mService = service;
+    }
 
-    public void set(List<T> tList) {
-        mWidgetList = tList;
+    public void setVerticalSpacing(int spacing) {
+        if (mVerticalSpacing != spacing) {
+            mVerticalSpacing = spacing;
+            notifyDataSetChanged();
+        }
+    }
+
+    public void set(List<List<A11yMenuShortcut>> tList) {
+        mShortcutList = tList;
         notifyDataSetChanged();
     }
 
+    @NonNull
     @Override
-    public int getCount() {
-        if (mWidgetList == null) {
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+        View view = inflater.inflate(R.layout.grid_view, parent, false);
+        return new MenuViewHolder(view.findViewById(R.id.gridview));
+    }
+
+    @Override
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+        A11yMenuAdapter adapter = new A11yMenuAdapter(
+                mService, mShortcutList.get(position));
+        GridView gridView = (GridView) holder.itemView;
+        gridView.setNumColumns(A11yMenuViewPager.GridViewParams.getGridColumnCount(mService));
+        gridView.setAdapter(adapter);
+        gridView.setVerticalSpacing(mVerticalSpacing);
+    }
+
+    @Override
+    public int getItemCount() {
+        if (mShortcutList == null) {
             return 0;
         }
-        return mWidgetList.size();
+        return mShortcutList.size();
     }
 
-    @Override
-    public int getItemPosition(Object object) {
-        return POSITION_NONE;
-    }
-
-    @Override
-    public boolean isViewFromObject(View view, Object object) {
-        return view == object;
-    }
-
-    @Override
-    public Object instantiateItem(ViewGroup container, int position) {
-        if (mWidgetList == null) {
-            return null;
+    static class MenuViewHolder extends RecyclerView.ViewHolder {
+        MenuViewHolder(View itemView) {
+            super(itemView);
         }
-        container.addView(mWidgetList.get(position));
-        return mWidgetList.get(position);
-    }
-
-    @Override
-    public void destroyItem(ViewGroup container, int position, Object object) {
-        container.removeView((View) object);
     }
 }

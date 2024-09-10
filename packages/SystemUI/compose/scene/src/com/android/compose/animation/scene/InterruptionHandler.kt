@@ -16,6 +16,8 @@
 
 package com.android.compose.animation.scene
 
+import com.android.compose.animation.scene.content.state.TransitionState
+
 /**
  * A handler to specify how a transition should be interrupted.
  *
@@ -35,7 +37,7 @@ interface InterruptionHandler {
      * @see InterruptionResult
      */
     fun onInterruption(
-        interrupted: TransitionState.Transition,
+        interrupted: TransitionState.Transition.ChangeScene,
         newTargetScene: SceneKey,
     ): InterruptionResult?
 }
@@ -74,7 +76,7 @@ class InterruptionResult(
  */
 object DefaultInterruptionHandler : InterruptionHandler {
     override fun onInterruption(
-        interrupted: TransitionState.Transition,
+        interrupted: TransitionState.Transition.ChangeScene,
         newTargetScene: SceneKey,
     ): InterruptionResult {
         return InterruptionResult(

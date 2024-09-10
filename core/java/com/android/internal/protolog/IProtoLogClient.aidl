@@ -20,7 +20,7 @@ package com.android.internal.protolog;
  * The ProtoLog client interface.
  *
  * These clients will communicate bi-directionally with the ProtoLog service
- * (@see IProtoLogService.aidl) running in the system process.
+ * (@see IProtoLogConfigurationService.aidl) running in the system process.
  *
  * {@hide}
  */

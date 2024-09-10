@@ -705,7 +705,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         assertEquals(ORIENTATION_PORTRAIT, activity.getConfiguration().orientation);
 
         // Clear size compat.
-        activity.clearSizeCompatMode();
+        activity.mAppCompatController.getAppCompatSizeCompatModePolicy().clearSizeCompatMode();
         activity.ensureActivityConfiguration();
         mDisplayContent.sendNewConfiguration();
 
@@ -1629,10 +1629,10 @@ public class ActivityRecordTests extends WindowTestsBase {
     @Test
     public void testCompleteResume_updateCompatDisplayInsets() {
         final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true).build();
-        doReturn(true).when(activity).shouldCreateCompatDisplayInsets();
+        doReturn(true).when(activity).shouldCreateAppCompatDisplayInsets();
         activity.setState(RESUMED, "test");
         activity.completeResumeLocked();
-        assertNotNull(activity.getCompatDisplayInsets());
+        assertNotNull(activity.getAppCompatDisplayInsets());
     }
 
     /**
@@ -1723,10 +1723,12 @@ public class ActivityRecordTests extends WindowTestsBase {
     @Test
     public void testDestroyImmediately_hadApp_notFinishing() {
         final ActivityRecord activity = createActivityWithTask();
+        activity.idle = true;
         activity.finishing = false;
         activity.destroyImmediately("test");
 
         assertEquals(DESTROYED, activity.getState());
+        assertFalse(activity.idle);
     }
 
     /**
@@ -3229,7 +3231,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         mDisplayContent.mOpeningApps.remove(activity);
         mDisplayContent.mClosingApps.remove(activity);
         activity.commitVisibility(false /* visible */, false /* performLayout */);
-        mDisplayContent.getDisplayPolicy().screenTurnedOff();
+        mDisplayContent.getDisplayPolicy().screenTurnedOff(false /* acquireSleepToken */);
         final KeyguardController controller = mSupervisor.getKeyguardController();
         doReturn(true).when(controller).isKeyguardGoingAway(anyInt());
         activity.setVisibility(true);

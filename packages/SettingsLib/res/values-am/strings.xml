@@ -380,6 +380,8 @@
     <string name="show_touches_summary" msgid="3692861665994502193">"ለነካ ማድረጎች ምስላዊ ግብረመልስን አሳይ"</string>
     <string name="show_key_presses" msgid="6360141722735900214">"የቁልፍ ጭነቶችን አሳይ"</string>
     <string name="show_key_presses_summary" msgid="725387457373015024">"ለአካላዊ የቁልፍ ጭነቶች የሚታይ ግብረመልስን አሳይ"</string>
+    <string name="touchpad_visualizer" msgid="3707916068870825115">"የመዳሰሻ ሰሌዳ ግብዓት አሳይ"</string>
+    <string name="touchpad_visualizer_summary" msgid="4056080018119847449">"የማያ ገፅ ተደራቢ የመዳሰሻ ሰሌዳ ግብዓት ውሂብ እና የታወቁ ምልክቶችን በማሳየት ላይ"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"የወለል ዝማኔዎችን አሳይ"</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"የመስኮት ወለሎች ሲዘምኑ መላ መስኮቱን አብለጭልጭ"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"የእይታ ዝማኔዎችን አሳይ"</string>
@@ -495,8 +497,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"እስኪሞላ ድረስ <xliff:g id="TIME">%1$s</xliff:g> ይቀራል"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - እስኪሞላ ድረስ <xliff:g id="TIME">%2$s</xliff:g> ይቀራል"</string>
-    <!-- no translation found for power_charging_limited (4144004473976005214) -->
-    <skip />
+    <string name="power_charging_limited" msgid="4144004473976005214">"<xliff:g id="LEVEL">%1$s</xliff:g> - ባትሪን ለመጠበቅ ኃይል መሙላት በይቆይ ላይ"</string>
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> - ኃይል በመሙላት ላይ"</string>
     <string name="power_fast_charging_duration_v2" msgid="3797735998640359490">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATUS">%2$s</xliff:g> - እስከ <xliff:g id="TIME">%3$s</xliff:g> ድረስ ይሞላል"</string>
     <string name="power_charging_duration_v2" msgid="2938998284074003248">"<xliff:g id="LEVEL">%1$s</xliff:g> - እስከ <xliff:g id="TIME">%2$s</xliff:g> ሙሉ ለሙሉ ይሞላል"</string>
@@ -563,6 +564,8 @@
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"ማንቂያዎች እና አስታዋሾች"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"ይህ መተግበሪያ ማንቂያዎችን እንዲያቀናብር እና የጊዜ ትብነት ያላቸው እርምጃዎችን መርሐግብር እንዲያስይዝ ይፍቀዱለት። ይህ መተግበሪያው ከበስተጀርባ ማሄድ እንዲችል ያስችለዋል፣ ይህም የበለጠ ባትሪ ሊጠቀም ይችላል።\n\nይህ ፈቃድ ከጠፋ በዚህ መተግበሪያ መርሐግብር የተያዘላቸው ነባር ማንቂያዎች እና ጊዜ-ተኮር ክስተቶች አይሰሩም።"</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"የጊዜ መርሐግብር፣ ማንቂያ፣ አስታዋሽ ሰዓት"</string>
+    <!-- no translation found for zen_mode_do_not_disturb_name (6798711401734798283) -->
+    <skip />
     <string name="zen_mode_settings_title" msgid="7374070457626419755">"አይረብሹ"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"አብራ"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"አትረብሽን አብራ"</string>
