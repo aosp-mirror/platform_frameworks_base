@@ -31,7 +31,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Creats a "stats" CSV file containing the test results.
+ * Collect test result stats and write them into a CSV file containing the test results.
  *
  * The output file is created as `/tmp/Ravenwood-stats_[TEST-MODULE=NAME]_[TIMESTAMP].csv`.
  * A symlink to the latest result will be created as
@@ -41,6 +41,21 @@ public class RavenwoodTestStats {
     private static final String TAG = "RavenwoodTestStats";
     private static final String HEADER = "Module,Class,ClassDesc,Passed,Failed,Skipped";
 
+    private static RavenwoodTestStats sInstance;
+
+    /**
+     * @return a singleton instance.
+     */
+    public static RavenwoodTestStats getInstance() {
+        if (sInstance == null) {
+            sInstance = new RavenwoodTestStats();
+        }
+        return sInstance;
+    }
+
+    /**
+     * Represents a test result.
+     */
     public enum Result {
         Passed,
         Failed,
@@ -113,16 +128,25 @@ public class RavenwoodTestStats {
         });
     }
 
+    /**
+     * Call it when a test class is skipped.
+     */
     public void onClassSkipped(Description classDescription) {
         addResult(classDescription, Description.EMPTY, Result.Skipped);
         onClassFinished(classDescription);
     }
 
+    /**
+     * Call it when a test method is finished.
+     */
     public void onTestFinished(Description classDescription, Description testDescription,
             Result result) {
         addResult(classDescription, testDescription, result);
     }
 
+    /**
+     * Call it when a test class is finished.
+     */
     public void onClassFinished(Description classDescription) {
         int passed = 0;
         int skipped = 0;

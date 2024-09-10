@@ -98,7 +98,7 @@ interface AudioRepository {
      */
     suspend fun setMuted(audioStream: AudioStream, isMuted: Boolean): Boolean
 
-    suspend fun setRingerMode(audioStream: AudioStream, mode: RingerMode)
+    suspend fun setRingerModeInternal(audioStream: AudioStream, mode: RingerMode)
 
     /** Gets audio device category. */
     @AudioDeviceCategory suspend fun getBluetoothAudioDeviceCategory(bluetoothAddress: String): Int
@@ -248,8 +248,8 @@ class AudioRepositoryImpl(
         }
     }
 
-    override suspend fun setRingerMode(audioStream: AudioStream, mode: RingerMode) {
-        withContext(backgroundCoroutineContext) { audioManager.ringerMode = mode.value }
+    override suspend fun setRingerModeInternal(audioStream: AudioStream, mode: RingerMode) {
+        withContext(backgroundCoroutineContext) { audioManager.ringerModeInternal = mode.value }
     }
 
     @AudioDeviceCategory

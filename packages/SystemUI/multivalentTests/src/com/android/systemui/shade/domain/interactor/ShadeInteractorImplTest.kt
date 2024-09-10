@@ -19,8 +19,6 @@ package com.android.systemui.shade.domain.interactor
 import android.app.StatusBarManager.DISABLE2_NONE
 import android.app.StatusBarManager.DISABLE2_NOTIFICATION_SHADE
 import android.app.StatusBarManager.DISABLE2_QUICK_SETTINGS
-import android.platform.test.annotations.DisableFlags
-import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.FlagsParameterization
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -38,11 +36,7 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.power.data.repository.fakePowerRepository
 import com.android.systemui.power.shared.model.WakeSleepReason
 import com.android.systemui.power.shared.model.WakefulnessState
-import com.android.systemui.shade.data.repository.fakeShadeRepository
-import com.android.systemui.shade.data.repository.shadeRepository
 import com.android.systemui.shade.shadeTestUtil
-import com.android.systemui.shade.shared.flag.DualShade
-import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.statusbar.disableflags.data.model.DisableFlagsModel
 import com.android.systemui.statusbar.disableflags.data.repository.fakeDisableFlagsRepository
 import com.android.systemui.statusbar.phone.dozeParameters
@@ -73,7 +67,6 @@ class ShadeInteractorImplTest(flags: FlagsParameterization) : SysuiTestCase() {
     private val keyguardRepository by lazy { kosmos.fakeKeyguardRepository }
     private val keyguardTransitionRepository by lazy { kosmos.fakeKeyguardTransitionRepository }
     private val powerRepository by lazy { kosmos.fakePowerRepository }
-    private val shadeRepository by lazy { kosmos.fakeShadeRepository }
     private val shadeTestUtil by lazy { kosmos.shadeTestUtil }
     private val userRepository by lazy { kosmos.fakeUserRepository }
     private val userSetupRepository by lazy { kosmos.fakeUserSetupRepository }
@@ -142,9 +135,7 @@ class ShadeInteractorImplTest(flags: FlagsParameterization) : SysuiTestCase() {
             userSetupRepository.setUserSetUp(true)
 
             disableFlagsRepository.disableFlags.value =
-                DisableFlagsModel(
-                    disable2 = DISABLE2_NOTIFICATION_SHADE,
-                )
+                DisableFlagsModel(disable2 = DISABLE2_NOTIFICATION_SHADE)
 
             val actual by collectLastValue(underTest.isExpandToQsEnabled)
 
@@ -158,9 +149,7 @@ class ShadeInteractorImplTest(flags: FlagsParameterization) : SysuiTestCase() {
             userSetupRepository.setUserSetUp(true)
 
             disableFlagsRepository.disableFlags.value =
-                DisableFlagsModel(
-                    disable2 = DISABLE2_QUICK_SETTINGS,
-                )
+                DisableFlagsModel(disable2 = DISABLE2_QUICK_SETTINGS)
             val actual by collectLastValue(underTest.isExpandToQsEnabled)
 
             assertThat(actual).isFalse()
@@ -171,10 +160,7 @@ class ShadeInteractorImplTest(flags: FlagsParameterization) : SysuiTestCase() {
         testScope.runTest {
             deviceProvisioningRepository.setDeviceProvisioned(true)
             userSetupRepository.setUserSetUp(true)
-            disableFlagsRepository.disableFlags.value =
-                DisableFlagsModel(
-                    disable2 = DISABLE2_NONE,
-                )
+            disableFlagsRepository.disableFlags.value = DisableFlagsModel(disable2 = DISABLE2_NONE)
 
             keyguardRepository.setIsDozing(true)
 
@@ -188,10 +174,7 @@ class ShadeInteractorImplTest(flags: FlagsParameterization) : SysuiTestCase() {
         testScope.runTest {
             deviceProvisioningRepository.setDeviceProvisioned(true)
             keyguardRepository.setIsDozing(false)
-            disableFlagsRepository.disableFlags.value =
-                DisableFlagsModel(
-                    disable2 = DISABLE2_NONE,
-                )
+            disableFlagsRepository.disableFlags.value = DisableFlagsModel(disable2 = DISABLE2_NONE)
 
             userSetupRepository.setUserSetUp(true)
 
@@ -205,10 +188,7 @@ class ShadeInteractorImplTest(flags: FlagsParameterization) : SysuiTestCase() {
         testScope.runTest {
             deviceProvisioningRepository.setDeviceProvisioned(true)
             keyguardRepository.setIsDozing(false)
-            disableFlagsRepository.disableFlags.value =
-                DisableFlagsModel(
-                    disable2 = DISABLE2_NONE,
-                )
+            disableFlagsRepository.disableFlags.value = DisableFlagsModel(disable2 = DISABLE2_NONE)
 
             userRepository.setSettings(UserSwitcherSettingsModel(isSimpleUserSwitcher = false))
 
@@ -222,10 +202,7 @@ class ShadeInteractorImplTest(flags: FlagsParameterization) : SysuiTestCase() {
         testScope.runTest {
             deviceProvisioningRepository.setDeviceProvisioned(true)
             keyguardRepository.setIsDozing(false)
-            disableFlagsRepository.disableFlags.value =
-                DisableFlagsModel(
-                    disable2 = DISABLE2_NONE,
-                )
+            disableFlagsRepository.disableFlags.value = DisableFlagsModel(disable2 = DISABLE2_NONE)
             userSetupRepository.setUserSetUp(true)
 
             val actual by collectLastValue(underTest.isExpandToQsEnabled)
@@ -250,10 +227,7 @@ class ShadeInteractorImplTest(flags: FlagsParameterization) : SysuiTestCase() {
         testScope.runTest {
             deviceProvisioningRepository.setDeviceProvisioned(true)
             keyguardRepository.setIsDozing(false)
-            disableFlagsRepository.disableFlags.value =
-                DisableFlagsModel(
-                    disable2 = DISABLE2_NONE,
-                )
+            disableFlagsRepository.disableFlags.value = DisableFlagsModel(disable2 = DISABLE2_NONE)
             userSetupRepository.setUserSetUp(true)
 
             val actual by collectLastValue(underTest.isExpandToQsEnabled)
@@ -262,17 +236,12 @@ class ShadeInteractorImplTest(flags: FlagsParameterization) : SysuiTestCase() {
 
             // WHEN QS is disabled
             disableFlagsRepository.disableFlags.value =
-                DisableFlagsModel(
-                    disable2 = DISABLE2_QUICK_SETTINGS,
-                )
+                DisableFlagsModel(disable2 = DISABLE2_QUICK_SETTINGS)
             // THEN expand is disabled
             assertThat(actual).isFalse()
 
             // WHEN QS is enabled
-            disableFlagsRepository.disableFlags.value =
-                DisableFlagsModel(
-                    disable2 = DISABLE2_NONE,
-                )
+            disableFlagsRepository.disableFlags.value = DisableFlagsModel(disable2 = DISABLE2_NONE)
             // THEN expand is enabled
             assertThat(actual).isTrue()
         }
@@ -282,10 +251,7 @@ class ShadeInteractorImplTest(flags: FlagsParameterization) : SysuiTestCase() {
         testScope.runTest {
             deviceProvisioningRepository.setDeviceProvisioned(true)
             keyguardRepository.setIsDozing(false)
-            disableFlagsRepository.disableFlags.value =
-                DisableFlagsModel(
-                    disable2 = DISABLE2_NONE,
-                )
+            disableFlagsRepository.disableFlags.value = DisableFlagsModel(disable2 = DISABLE2_NONE)
             userSetupRepository.setUserSetUp(true)
 
             val actual by collectLastValue(underTest.isExpandToQsEnabled)
@@ -359,9 +325,7 @@ class ShadeInteractorImplTest(flags: FlagsParameterization) : SysuiTestCase() {
                 )
             )
             keyguardRepository.setDozeTransitionModel(
-                DozeTransitionModel(
-                    to = DozeStateModel.DOZE_AOD,
-                )
+                DozeTransitionModel(to = DozeStateModel.DOZE_AOD)
             )
             val isShadeTouchable by collectLastValue(underTest.isShadeTouchable)
             assertThat(isShadeTouchable).isFalse()
@@ -385,9 +349,7 @@ class ShadeInteractorImplTest(flags: FlagsParameterization) : SysuiTestCase() {
                 )
             )
             keyguardRepository.setDozeTransitionModel(
-                DozeTransitionModel(
-                    to = DozeStateModel.DOZE_PULSING,
-                )
+                DozeTransitionModel(to = DozeStateModel.DOZE_PULSING)
             )
             val isShadeTouchable by collectLastValue(underTest.isShadeTouchable)
             assertThat(isShadeTouchable).isTrue()
@@ -450,71 +412,9 @@ class ShadeInteractorImplTest(flags: FlagsParameterization) : SysuiTestCase() {
                 lastSleepReason = WakeSleepReason.OTHER,
             )
             keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(
-                    transitionState = TransitionState.STARTED,
-                )
+                TransitionStep(transitionState = TransitionState.STARTED)
             )
             val isShadeTouchable by collectLastValue(underTest.isShadeTouchable)
             assertThat(isShadeTouchable).isTrue()
-        }
-
-    @Test
-    @DisableFlags(DualShade.FLAG_NAME)
-    fun legacyShadeMode_narrowScreen_singleShade() =
-        testScope.runTest {
-            val shadeMode by collectLastValue(underTest.shadeMode)
-            kosmos.shadeRepository.setShadeLayoutWide(false)
-
-            assertThat(shadeMode).isEqualTo(ShadeMode.Single)
-        }
-
-    @Test
-    @DisableFlags(DualShade.FLAG_NAME)
-    fun legacyShadeMode_wideScreen_splitShade() =
-        testScope.runTest {
-            val shadeMode by collectLastValue(underTest.shadeMode)
-            kosmos.shadeRepository.setShadeLayoutWide(true)
-
-            assertThat(shadeMode).isEqualTo(ShadeMode.Split)
-        }
-
-    @Test
-    @EnableFlags(DualShade.FLAG_NAME)
-    fun shadeMode_wideScreen_isDual() =
-        testScope.runTest {
-            val shadeMode by collectLastValue(underTest.shadeMode)
-            kosmos.shadeRepository.setShadeLayoutWide(true)
-
-            assertThat(shadeMode).isEqualTo(ShadeMode.Dual)
-        }
-
-    @Test
-    @EnableFlags(DualShade.FLAG_NAME)
-    fun shadeMode_narrowScreen_isDual() =
-        testScope.runTest {
-            val shadeMode by collectLastValue(underTest.shadeMode)
-            kosmos.shadeRepository.setShadeLayoutWide(false)
-
-            assertThat(shadeMode).isEqualTo(ShadeMode.Dual)
-        }
-
-    @Test
-    fun getTopEdgeSplitFraction_narrowScreen_splitInHalf() =
-        testScope.runTest {
-            // Ensure isShadeLayoutWide is collected.
-            val isShadeLayoutWide by collectLastValue(underTest.isShadeLayoutWide)
-            shadeRepository.setShadeLayoutWide(false)
-
-            assertThat(underTest.getTopEdgeSplitFraction()).isEqualTo(0.5f)
-        }
-
-    @Test
-    fun getTopEdgeSplitFraction_wideScreen_leftSideLarger() =
-        testScope.runTest {
-            // Ensure isShadeLayoutWide is collected.
-            val isShadeLayoutWide by collectLastValue(underTest.isShadeLayoutWide)
-            shadeRepository.setShadeLayoutWide(true)
-
-            assertThat(underTest.getTopEdgeSplitFraction()).isGreaterThan(0.5f)
         }
 }

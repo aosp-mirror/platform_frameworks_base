@@ -71,6 +71,7 @@ import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.KeyguardIndicationController
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.temporarydisplay.chipbar.ChipbarCoordinator
 import com.google.android.msdl.domain.MSDLPlayer
 import dagger.Lazy
@@ -112,6 +113,7 @@ constructor(
     private val clockInteractor: KeyguardClockInteractor,
     private val keyguardViewMediator: KeyguardViewMediator,
     private val deviceEntryUnlockTrackerViewBinder: Optional<DeviceEntryUnlockTrackerViewBinder>,
+    private val statusBarKeyguardViewManager: StatusBarKeyguardViewManager,
     @Main private val mainDispatcher: CoroutineDispatcher,
     private val msdlPlayer: MSDLPlayer,
 ) : CoreStartable {
@@ -220,6 +222,7 @@ constructor(
                 vibratorHelper,
                 falsingManager,
                 keyguardViewMediator,
+                statusBarKeyguardViewManager,
                 mainDispatcher,
                 msdlPlayer,
             )

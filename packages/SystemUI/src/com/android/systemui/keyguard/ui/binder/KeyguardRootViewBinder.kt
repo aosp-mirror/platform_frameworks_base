@@ -24,6 +24,8 @@ import android.graphics.Point
 import android.graphics.Rect
 import android.util.Log
 import android.view.HapticFeedbackConstants
+import android.view.InputDevice
+import android.view.MotionEvent
 import android.view.View
 import android.view.View.OnLayoutChangeListener
 import android.view.View.VISIBLE
@@ -41,6 +43,7 @@ import com.android.app.tracing.coroutines.launch
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.jank.InteractionJankMonitor.CUJ_SCREEN_OFF_SHOW_AOD
 import com.android.keyguard.AuthInteractionProperties
+import com.android.systemui.Flags
 import com.android.systemui.Flags.msdlFeedback
 import com.android.systemui.Flags.newAodTransition
 import com.android.systemui.common.shared.model.Icon
@@ -73,6 +76,7 @@ import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.CrossFadeHelper
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.temporarydisplay.ViewPriority
 import com.android.systemui.temporarydisplay.chipbar.ChipbarCoordinator
 import com.android.systemui.temporarydisplay.chipbar.ChipbarInfo
@@ -115,6 +119,7 @@ object KeyguardRootViewBinder {
         vibratorHelper: VibratorHelper?,
         falsingManager: FalsingManager?,
         keyguardViewMediator: KeyguardViewMediator?,
+        statusBarKeyguardViewManager: StatusBarKeyguardViewManager?,
         mainImmediateDispatcher: CoroutineDispatcher,
         msdlPlayer: MSDLPlayer?,
     ): DisposableHandle {
@@ -124,12 +129,30 @@ object KeyguardRootViewBinder {
         if (KeyguardBottomAreaRefactor.isEnabled) {
             disposables +=
                 view.onTouchListener { _, event ->
+                    var consumed = false
                     if (falsingManager?.isFalseTap(FalsingManager.LOW_PENALTY) == false) {
+                        // signifies a primary button click down has reached keyguardrootview
+                        // we need to return true here otherwise an ACTION_UP will never arrive
+                        if (Flags.nonTouchscreenDevicesBypassFalsing()) {
+                            if (
+                                event.action == MotionEvent.ACTION_DOWN &&
+                                    event.buttonState == MotionEvent.BUTTON_PRIMARY &&
+                                    !event.isTouchscreenSource()
+                            ) {
+                                consumed = true
+                            } else if (
+                                event.action == MotionEvent.ACTION_UP &&
+                                    !event.isTouchscreenSource()
+                            ) {
+                                statusBarKeyguardViewManager?.showBouncer(true)
+                                consumed = true
+                            }
+                        }
                         viewModel.setRootViewLastTapPosition(
                             Point(event.x.toInt(), event.y.toInt())
                         )
                     }
-                    false
+                    consumed
                 }
         }
 
@@ -635,6 +658,10 @@ object KeyguardRootViewBinder {
         if (!MigrateClocksToBlueprint.isEnabled) {
             animate().animateInIconTranslation().setDuration(AOD_ICONS_APPEAR_DURATION).start()
         }
+    }
+
+    private fun MotionEvent.isTouchscreenSource(): Boolean {
+        return device?.supportsSource(InputDevice.SOURCE_TOUCHSCREEN) == true
     }
 
     private fun ViewPropertyAnimator.animateInIconTranslation(): ViewPropertyAnimator =

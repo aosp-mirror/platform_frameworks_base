@@ -3397,12 +3397,16 @@ public final class ProcessList {
         final boolean wasStopped = info.isStopped();
         // Check if we should mark the processrecord for first launch after force-stopping
         if (wasStopped) {
-            boolean wasEverLaunched;
+            boolean wasEverLaunched = false;
             if (android.app.Flags.useAppInfoNotLaunched()) {
                 wasEverLaunched = !info.isNotLaunched();
             } else {
-                wasEverLaunched = mService.getPackageManagerInternal()
-                        .wasPackageEverLaunched(r.getApplicationInfo().packageName, r.userId);
+                try {
+                    wasEverLaunched = mService.getPackageManagerInternal()
+                            .wasPackageEverLaunched(r.getApplicationInfo().packageName, r.userId);
+                } catch (IllegalArgumentException e) {
+                    // Package doesn't have state yet, assume not launched
+                }
             }
             // Check if the hosting record is for an activity or not. Since the stopped
             // state tracking is handled differently to avoid WM calling back into AM,
@@ -4121,19 +4125,6 @@ public final class ProcessList {
         return false;
     }
 
-    private static int procStateToImportance(int procState, int memAdj,
-            ActivityManager.RunningAppProcessInfo currApp,
-            int clientTargetSdk) {
-        int imp = ActivityManager.RunningAppProcessInfo.procStateToImportanceForTargetSdk(
-                procState, clientTargetSdk);
-        if (imp == ActivityManager.RunningAppProcessInfo.IMPORTANCE_BACKGROUND) {
-            currApp.lru = memAdj;
-        } else {
-            currApp.lru = 0;
-        }
-        return imp;
-    }
-
     @GuardedBy(anyOf = {"mService", "mProcLock"})
     void fillInProcMemInfoLOSP(ProcessRecord app,
             ActivityManager.RunningAppProcessInfo outInfo,
@@ -4151,14 +4142,20 @@ public final class ProcessList {
         }
         outInfo.lastTrimLevel = app.mProfile.getTrimMemoryLevel();
         final ProcessStateRecord state = app.mState;
-        int adj = state.getCurAdj();
-        int procState = state.getCurProcState();
-        outInfo.importance = procStateToImportance(procState, adj, outInfo,
-                clientTargetSdk);
+        final int procState = state.getCurProcState();
+        outInfo.importance = ActivityManager.RunningAppProcessInfo
+                                .procStateToImportanceForTargetSdk(procState, clientTargetSdk);
+        if (outInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_BACKGROUND) {
+            outInfo.lru = state.getCurAdj();
+        } else {
+            outInfo.lru = 0;
+        }
         outInfo.importanceReasonCode = state.getAdjTypeCode();
         outInfo.processState = procState;
         outInfo.isFocused = (app == mService.getTopApp());
         outInfo.lastActivityTime = app.getLastActivityTime();
+        // Note: ActivityManager$RunningAppProcessInfo.copyTo() must be updated if what gets
+        // "filled into" outInfo in this method changes.
     }
 
     @GuardedBy(anyOf = {"mService", "mProcLock"})

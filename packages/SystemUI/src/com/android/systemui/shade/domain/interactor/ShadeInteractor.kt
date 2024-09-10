@@ -145,7 +145,7 @@ interface BaseShadeInteractor {
 fun createAnyExpansionFlow(
     scope: CoroutineScope,
     shadeExpansion: Flow<Float>,
-    qsExpansion: Flow<Float>
+    qsExpansion: Flow<Float>,
 ): StateFlow<Float> {
     return combine(shadeExpansion, qsExpansion) { shadeExp, qsExp -> maxOf(shadeExp, qsExp) }
         .stateIn(scope, SharingStarted.Eagerly, 0f)

@@ -241,3 +241,11 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "wallet_role_icon_property_enabled"
+    is_exported: true
+    namespace: "wallet_integration"
+    description: "This flag is used to enabled the Wallet Role s icon fetching from manifest property"
+    bug: "349942654"
+}

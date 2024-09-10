@@ -61,6 +61,20 @@ public class AppFunctionRuntimeMetadata extends GenericDocument {
         return RUNTIME_SCHEMA_TYPE + RUNTIME_SCHEMA_TYPE_SEPARATOR + Objects.requireNonNull(pkg);
     }
 
+    /** Returns the package name from the runtime metadata schema name. */
+    @NonNull
+    public static String getPackageNameFromSchema(String metadataSchemaType) {
+        String[] split = metadataSchemaType.split(RUNTIME_SCHEMA_TYPE_SEPARATOR);
+        if (split.length > 2) {
+            throw new IllegalArgumentException(
+                    "Invalid schema type: " + metadataSchemaType + " for app function runtime");
+        }
+        if (split.length < 2) {
+            return APP_FUNCTION_INDEXER_PACKAGE;
+        }
+        return split[1];
+    }
+
     /** Returns the document id for an app function's runtime metadata. */
     public static String getDocumentIdForAppFunction(
             @NonNull String pkg, @NonNull String functionId) {

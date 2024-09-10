@@ -21,7 +21,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.shade.domain.interactor.ShadeModeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode
 import dagger.Binds
 import dagger.Module
@@ -38,17 +38,17 @@ class QuickSettingsSceneFamilyResolver
 @Inject
 constructor(
     @Application applicationScope: CoroutineScope,
-    shadeInteractor: ShadeInteractor,
+    shadeModeInteractor: ShadeModeInteractor,
 ) : SceneResolver {
     override val targetFamily: SceneKey = SceneFamilies.QuickSettings
 
     override val resolvedScene: StateFlow<SceneKey> =
-        shadeInteractor.shadeMode
+        shadeModeInteractor.shadeMode
             .map(::quickSettingsScene)
             .stateIn(
                 applicationScope,
                 started = SharingStarted.Eagerly,
-                initialValue = quickSettingsScene(shadeInteractor.shadeMode.value),
+                initialValue = quickSettingsScene(shadeModeInteractor.shadeMode.value),
             )
 
     override fun includesScene(scene: SceneKey): Boolean = scene in quickSettingsScenes
@@ -62,11 +62,7 @@ constructor(
 
     companion object {
         val quickSettingsScenes =
-            setOf(
-                Scenes.QuickSettings,
-                Scenes.QuickSettingsShade,
-                Scenes.Shade,
-            )
+            setOf(Scenes.QuickSettings, Scenes.QuickSettingsShade, Scenes.Shade)
     }
 }
 

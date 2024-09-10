@@ -10561,6 +10561,7 @@ package android.nfc.cardemulation {
     method @FlaggedApi("android.nfc.nfc_observe_mode") public boolean shouldDefaultToObserveMode();
     method @FlaggedApi("android.nfc.enable_nfc_mainline") public void writeToParcel(@NonNull android.os.Parcel, int);
     field @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public static final android.os.Parcelable.Creator<android.nfc.cardemulation.ApduServiceInfo> CREATOR;
+    field @FlaggedApi("android.permission.flags.wallet_role_icon_property_enabled") public static final String PROPERTY_WALLET_PREFERRED_BANNER_AND_LABEL = "android.nfc.cardemulation.PROPERTY_WALLET_PREFERRED_BANNER_AND_LABEL";
   }
 
   @FlaggedApi("android.nfc.enable_nfc_mainline") public final class NfcFServiceInfo implements android.os.Parcelable {
@@ -18155,9 +18156,17 @@ package android.view {
     field public static final int DISPLAY_IME_POLICY_LOCAL = 0; // 0x0
   }
 
+  @FlaggedApi("android.companion.virtualdevice.flags.status_bar_and_insets") public static class WindowManager.InsetsParams {
+    ctor public WindowManager.InsetsParams(int);
+    method @Nullable public android.graphics.Insets getInsetsSize();
+    method public int getType();
+    method @NonNull public android.view.WindowManager.InsetsParams setInsetsSize(@Nullable android.graphics.Insets);
+  }
+
   public static class WindowManager.LayoutParams extends android.view.ViewGroup.LayoutParams implements android.os.Parcelable {
     method public final long getUserActivityTimeout();
     method public boolean isSystemApplicationOverlay();
+    method @FlaggedApi("android.companion.virtualdevice.flags.status_bar_and_insets") public void setInsetsParams(@NonNull java.util.List<android.view.WindowManager.InsetsParams>);
     method @RequiresPermission(android.Manifest.permission.SYSTEM_APPLICATION_OVERLAY) public void setSystemApplicationOverlay(boolean);
     method public final void setUserActivityTimeout(long);
     field @RequiresPermission(android.Manifest.permission.HIDE_NON_SYSTEM_OVERLAY_WINDOWS) public static final int SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS = 524288; // 0x80000

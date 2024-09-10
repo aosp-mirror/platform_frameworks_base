@@ -26,6 +26,7 @@ import java.io.FileInputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
@@ -277,6 +278,18 @@ public class RavenwoodCommonUtils {
                 "Method %s.%s() expected to be public %svoid",
                 method.getDeclaringClass().getName(), method.getName(),
                 (isStatic ? "static " : "")));
+    }
+
+    public static void ensureIsPublicMember(Member member, boolean isStatic) {
+        var ok = Modifier.isPublic(member.getModifiers())
+                && (Modifier.isStatic(member.getModifiers()) == isStatic);
+        if (ok) {
+            return; // okay
+        }
+        throw new AssertionError(String.format(
+                "%s.%s expected to be public %s",
+                member.getDeclaringClass().getName(), member.getName(),
+                (isStatic ? "static" : "")));
     }
 
     @NonNull

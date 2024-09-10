@@ -24,7 +24,7 @@ import com.android.systemui.keyguard.domain.interactor.keyguardEnabledInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.scene.shared.model.SceneFamilies
-import com.android.systemui.shade.domain.interactor.shadeInteractor
+import com.android.systemui.shade.domain.interactor.shadeModeInteractor
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 val Kosmos.sceneFamilyResolvers: Map<SceneKey, SceneResolver>
@@ -48,7 +48,7 @@ val Kosmos.notifShadeSceneFamilyResolver by
     Kosmos.Fixture {
         NotifShadeSceneFamilyResolver(
             applicationScope = applicationCoroutineScope,
-            shadeInteractor = shadeInteractor,
+            shadeModeInteractor = shadeModeInteractor,
         )
     }
 
@@ -56,6 +56,6 @@ val Kosmos.quickSettingsSceneFamilyResolver by
     Kosmos.Fixture {
         QuickSettingsSceneFamilyResolver(
             applicationScope = applicationCoroutineScope,
-            shadeInteractor = shadeInteractor,
+            shadeModeInteractor = shadeModeInteractor,
         )
     }
