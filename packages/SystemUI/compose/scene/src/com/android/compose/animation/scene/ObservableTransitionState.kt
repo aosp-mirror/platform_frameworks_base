@@ -57,10 +57,8 @@ sealed interface ObservableTransitionState {
     /** No transition/animation is currently running. */
     data class Idle
     @JvmOverloads
-    constructor(
-        val currentScene: SceneKey,
-        val currentOverlays: Set<OverlayKey> = emptySet(),
-    ) : ObservableTransitionState
+    constructor(val currentScene: SceneKey, val currentOverlays: Set<OverlayKey> = emptySet()) :
+        ObservableTransitionState
 
     /** There is a transition animating between two scenes. */
     sealed class Transition(
@@ -219,10 +217,7 @@ fun SceneTransitionLayoutState.observableTransitionState(): Flow<ObservableTrans
     return snapshotFlow {
             when (val state = transitionState) {
                 is TransitionState.Idle ->
-                    ObservableTransitionState.Idle(
-                        state.currentScene,
-                        state.currentOverlays,
-                    )
+                    ObservableTransitionState.Idle(state.currentScene, state.currentOverlays)
                 is TransitionState.Transition.ChangeScene -> {
                     ObservableTransitionState.Transition.ChangeScene(
                         fromScene = state.fromScene,

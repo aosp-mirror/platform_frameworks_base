@@ -333,7 +333,7 @@ object HighestZIndexContentPicker : ElementContentPicker {
         element: ElementKey,
         transition: TransitionState.Transition,
         fromContentZIndex: Float,
-        toContentZIndex: Float
+        toContentZIndex: Float,
     ): ContentKey {
         return if (fromContentZIndex > toContentZIndex) {
             transition.fromContent
@@ -354,7 +354,7 @@ object HighestZIndexContentPicker : ElementContentPicker {
                 element: ElementKey,
                 transition: TransitionState.Transition,
                 fromContentZIndex: Float,
-                toContentZIndex: Float
+                toContentZIndex: Float,
             ): ContentKey {
                 return HighestZIndexContentPicker.contentDuringTransition(
                     element,
@@ -375,7 +375,7 @@ object LowestZIndexContentPicker : ElementContentPicker {
         element: ElementKey,
         transition: TransitionState.Transition,
         fromContentZIndex: Float,
-        toContentZIndex: Float
+        toContentZIndex: Float,
     ): ContentKey {
         return if (fromContentZIndex < toContentZIndex) {
             transition.fromContent
@@ -396,7 +396,7 @@ object LowestZIndexContentPicker : ElementContentPicker {
                 element: ElementKey,
                 transition: TransitionState.Transition,
                 fromContentZIndex: Float,
-                toContentZIndex: Float
+                toContentZIndex: Float,
             ): ContentKey {
                 return LowestZIndexContentPicker.contentDuringTransition(
                     element,
@@ -423,9 +423,8 @@ object LowestZIndexContentPicker : ElementContentPicker {
  * is not the same as when going from scene B to scene A, so it's not usable in situations where
  * z-ordering during the transition matters.
  */
-class MovableElementContentPicker(
-    override val contents: Set<ContentKey>,
-) : StaticElementContentPicker {
+class MovableElementContentPicker(override val contents: Set<ContentKey>) :
+    StaticElementContentPicker {
     override fun contentDuringTransition(
         element: ElementKey,
         transition: TransitionState.Transition,
@@ -501,7 +500,7 @@ interface PropertyTransformationBuilder {
         matcher: ElementMatcher,
         scaleX: Float = 1f,
         scaleY: Float = 1f,
-        pivot: Offset = Offset.Unspecified
+        pivot: Offset = Offset.Unspecified,
     )
 
     /**
