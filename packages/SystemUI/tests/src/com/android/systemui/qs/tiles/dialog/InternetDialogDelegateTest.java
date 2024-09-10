@@ -1,7 +1,9 @@
 package com.android.systemui.qs.tiles.dialog;
 
 import static com.android.systemui.qs.tiles.dialog.InternetDialogController.MAX_WIFI_ENTRY_COUNT;
+
 import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -16,7 +18,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Handler;
 import android.telephony.TelephonyManager;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -24,6 +25,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.dx.mockito.inline.extended.ExtendedMockito;
@@ -37,6 +39,8 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 import com.android.wifitrackerlib.WifiEntry;
+
+import kotlinx.coroutines.CoroutineScope;
 
 import org.junit.After;
 import org.junit.Before;
@@ -52,7 +56,7 @@ import java.util.List;
 
 @Ignore("b/257089187")
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class InternetDialogDelegateTest extends SysuiTestCase {
 
@@ -63,6 +67,8 @@ public class InternetDialogDelegateTest extends SysuiTestCase {
 
     @Mock
     private Handler mHandler;
+    @Mock
+    CoroutineScope mScope;
     @Mock
     private TelephonyManager mTelephonyManager;
     @Mock
@@ -133,6 +139,7 @@ public class InternetDialogDelegateTest extends SysuiTestCase {
                 true,
                 true,
                 true,
+                mScope,
                 mock(UiEventLogger.class),
                 mDialogTransitionAnimator,
                 mHandler,
@@ -244,7 +251,7 @@ public class InternetDialogDelegateTest extends SysuiTestCase {
         // Mobile network should be gone if the list of active subscriptionId is null.
         when(mInternetDialogController.isCarrierNetworkActive()).thenReturn(false);
         when(mInternetDialogController.isAirplaneModeEnabled()).thenReturn(false);
-        when(mInternetDialogController.hasActiveSubId()).thenReturn(false);
+        when(mInternetDialogController.hasActiveSubIdOnDds()).thenReturn(false);
 
         mInternetDialogDelegate.updateDialog(true);
 
@@ -329,7 +336,7 @@ public class InternetDialogDelegateTest extends SysuiTestCase {
 
     @Test
     public void updateDialog_mobileDataIsEnabled_checkMobileDataSwitch() {
-        doReturn(true).when(mInternetDialogController).hasActiveSubId();
+        doReturn(true).when(mInternetDialogController).hasActiveSubIdOnDds();
         when(mInternetDialogController.isCarrierNetworkActive()).thenReturn(true);
         when(mInternetDialogController.isMobileDataEnabled()).thenReturn(true);
         mMobileToggleSwitch.setChecked(false);
@@ -341,7 +348,7 @@ public class InternetDialogDelegateTest extends SysuiTestCase {
 
     @Test
     public void updateDialog_mobileDataIsNotChanged_checkMobileDataSwitch() {
-        doReturn(true).when(mInternetDialogController).hasActiveSubId();
+        doReturn(true).when(mInternetDialogController).hasActiveSubIdOnDds();
         when(mInternetDialogController.isCarrierNetworkActive()).thenReturn(true);
         when(mInternetDialogController.isMobileDataEnabled()).thenReturn(false);
         mMobileToggleSwitch.setChecked(false);
@@ -354,7 +361,7 @@ public class InternetDialogDelegateTest extends SysuiTestCase {
     @Test
     public void updateDialog_wifiOnAndHasInternetWifi_showConnectedWifi() {
         mInternetDialogDelegate.dismissDialog();
-        doReturn(true).when(mInternetDialogController).hasActiveSubId();
+        doReturn(true).when(mInternetDialogController).hasActiveSubIdOnDds();
         createInternetDialog();
         // The preconditions WiFi ON and Internet WiFi are already in setUp()
         doReturn(false).when(mInternetDialogController).activeNetworkIsCellular();
@@ -515,7 +522,7 @@ public class InternetDialogDelegateTest extends SysuiTestCase {
     public void updateDialog_showSecondaryDataSub() {
         mInternetDialogDelegate.dismissDialog();
         doReturn(1).when(mInternetDialogController).getActiveAutoSwitchNonDdsSubId();
-        doReturn(true).when(mInternetDialogController).hasActiveSubId();
+        doReturn(true).when(mInternetDialogController).hasActiveSubIdOnDds();
         doReturn(false).when(mInternetDialogController).isAirplaneModeEnabled();
         createInternetDialog();
 

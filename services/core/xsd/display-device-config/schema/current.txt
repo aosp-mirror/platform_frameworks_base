@@ -35,9 +35,11 @@ package com.android.server.display.config {
     method public final com.android.server.display.config.BlockingZoneThreshold getBlockingZoneThreshold();
     method public final java.math.BigInteger getDefaultRefreshRate();
     method @Nullable public final String getRefreshRateThermalThrottlingId();
+    method @Nullable public final com.android.server.display.config.NonNegativeFloatToFloatMap getSupportedModes();
     method public final void setBlockingZoneThreshold(com.android.server.display.config.BlockingZoneThreshold);
     method public final void setDefaultRefreshRate(java.math.BigInteger);
     method public final void setRefreshRateThermalThrottlingId(@Nullable String);
+    method public final void setSupportedModes(@Nullable com.android.server.display.config.NonNegativeFloatToFloatMap);
   }
 
   public class BlockingZoneThreshold {
@@ -51,6 +53,16 @@ package com.android.server.display.config {
     method @NonNull public final com.android.server.display.config.PredefinedBrightnessLimitNames getType();
     method public final void setMap(@NonNull com.android.server.display.config.NonNegativeFloatToFloatMap);
     method public final void setType(@NonNull com.android.server.display.config.PredefinedBrightnessLimitNames);
+  }
+
+  public class BrightnessPoint {
+    ctor public BrightnessPoint();
+    method @NonNull public final java.math.BigDecimal getBacklight();
+    method @NonNull public final java.math.BigDecimal getBrightness();
+    method @NonNull public final java.math.BigDecimal getNits();
+    method public final void setBacklight(@NonNull java.math.BigDecimal);
+    method public final void setBrightness(@NonNull java.math.BigDecimal);
+    method public final void setNits(@NonNull java.math.BigDecimal);
   }
 
   public class BrightnessThresholds {
@@ -74,6 +86,13 @@ package com.android.server.display.config {
     method @NonNull public final com.android.server.display.config.ThermalStatus getThermalStatus();
     method public final void setBrightness(@NonNull java.math.BigDecimal);
     method public final void setThermalStatus(@NonNull com.android.server.display.config.ThermalStatus);
+  }
+
+  public class ComprehensiveBrightnessMap {
+    ctor public ComprehensiveBrightnessMap();
+    method @NonNull public final java.util.List<com.android.server.display.config.BrightnessPoint> getBrightnessPoint();
+    method public String getInterpolation();
+    method public void setInterpolation(String);
   }
 
   public class Density {
@@ -109,13 +128,15 @@ package com.android.server.display.config {
     method @Nullable public final com.android.server.display.config.DensityMapping getDensityMapping();
     method @NonNull public final com.android.server.display.config.Thresholds getDisplayBrightnessChangeThresholds();
     method public final com.android.server.display.config.Thresholds getDisplayBrightnessChangeThresholdsIdle();
+    method public final com.android.server.display.config.EvenDimmerMode getEvenDimmer();
     method @Nullable public final com.android.server.display.config.HdrBrightnessConfig getHdrBrightnessConfig();
     method public com.android.server.display.config.HighBrightnessMode getHighBrightnessMode();
+    method public final com.android.server.display.config.IdleScreenRefreshRateTimeout getIdleScreenRefreshRateTimeout();
     method public final com.android.server.display.config.SensorDetails getLightSensor();
     method public com.android.server.display.config.LuxThrottling getLuxThrottling();
     method @Nullable public final String getName();
     method public com.android.server.display.config.PowerThrottlingConfig getPowerThrottlingConfig();
-    method public final com.android.server.display.config.SensorDetails getProxSensor();
+    method public final java.util.List<com.android.server.display.config.SensorDetails> getProxSensor();
     method public com.android.server.display.config.DisplayQuirks getQuirks();
     method public com.android.server.display.config.RefreshRateConfigs getRefreshRate();
     method public final java.math.BigDecimal getScreenBrightnessCapForWearBedtimeMode();
@@ -133,6 +154,7 @@ package com.android.server.display.config {
     method public final java.math.BigDecimal getScreenBrightnessRampSlowIncreaseIdle();
     method public final com.android.server.display.config.SensorDetails getScreenOffBrightnessSensor();
     method public final com.android.server.display.config.IntegerArray getScreenOffBrightnessSensorValueToLux();
+    method public final boolean getSupportsVrr();
     method public final com.android.server.display.config.SensorDetails getTempSensor();
     method @NonNull public final com.android.server.display.config.ThermalThrottling getThermalThrottling();
     method public final com.android.server.display.config.UsiVersion getUsiVersion();
@@ -144,13 +166,14 @@ package com.android.server.display.config {
     method public final void setDensityMapping(@Nullable com.android.server.display.config.DensityMapping);
     method public final void setDisplayBrightnessChangeThresholds(@NonNull com.android.server.display.config.Thresholds);
     method public final void setDisplayBrightnessChangeThresholdsIdle(com.android.server.display.config.Thresholds);
+    method public final void setEvenDimmer(com.android.server.display.config.EvenDimmerMode);
     method public final void setHdrBrightnessConfig(@Nullable com.android.server.display.config.HdrBrightnessConfig);
     method public void setHighBrightnessMode(com.android.server.display.config.HighBrightnessMode);
+    method public final void setIdleScreenRefreshRateTimeout(com.android.server.display.config.IdleScreenRefreshRateTimeout);
     method public final void setLightSensor(com.android.server.display.config.SensorDetails);
     method public void setLuxThrottling(com.android.server.display.config.LuxThrottling);
     method public final void setName(@Nullable String);
     method public void setPowerThrottlingConfig(com.android.server.display.config.PowerThrottlingConfig);
-    method public final void setProxSensor(com.android.server.display.config.SensorDetails);
     method public void setQuirks(com.android.server.display.config.DisplayQuirks);
     method public void setRefreshRate(com.android.server.display.config.RefreshRateConfigs);
     method public final void setScreenBrightnessCapForWearBedtimeMode(java.math.BigDecimal);
@@ -168,6 +191,7 @@ package com.android.server.display.config {
     method public final void setScreenBrightnessRampSlowIncreaseIdle(java.math.BigDecimal);
     method public final void setScreenOffBrightnessSensor(com.android.server.display.config.SensorDetails);
     method public final void setScreenOffBrightnessSensorValueToLux(com.android.server.display.config.IntegerArray);
+    method public final void setSupportsVrr(boolean);
     method public final void setTempSensor(com.android.server.display.config.SensorDetails);
     method public final void setThermalThrottling(@NonNull com.android.server.display.config.ThermalThrottling);
     method public final void setUsiVersion(com.android.server.display.config.UsiVersion);
@@ -176,6 +200,18 @@ package com.android.server.display.config {
   public class DisplayQuirks {
     ctor public DisplayQuirks();
     method public java.util.List<java.lang.String> getQuirk();
+  }
+
+  public class EvenDimmerMode {
+    ctor public EvenDimmerMode();
+    method public com.android.server.display.config.ComprehensiveBrightnessMap getBrightnessMapping();
+    method public boolean getEnabled();
+    method public com.android.server.display.config.NitsMap getLuxToMinimumNitsMap();
+    method public java.math.BigDecimal getTransitionPoint();
+    method public void setBrightnessMapping(com.android.server.display.config.ComprehensiveBrightnessMap);
+    method public void setEnabled(boolean);
+    method public void setLuxToMinimumNitsMap(com.android.server.display.config.NitsMap);
+    method public void setTransitionPoint(java.math.BigDecimal);
   }
 
   public class HbmTiming {
@@ -220,6 +256,25 @@ package com.android.server.display.config {
     method public final void setSdrHdrRatioMap_all(@Nullable com.android.server.display.config.SdrHdrRatioMap);
     method public void setTiming_all(com.android.server.display.config.HbmTiming);
     method public final void setTransitionPoint_all(@NonNull java.math.BigDecimal);
+  }
+
+  public class IdleScreenRefreshRateTimeout {
+    ctor public IdleScreenRefreshRateTimeout();
+    method public final com.android.server.display.config.IdleScreenRefreshRateTimeoutLuxThresholds getLuxThresholds();
+    method public final void setLuxThresholds(com.android.server.display.config.IdleScreenRefreshRateTimeoutLuxThresholds);
+  }
+
+  public class IdleScreenRefreshRateTimeoutLuxThresholdPoint {
+    ctor public IdleScreenRefreshRateTimeoutLuxThresholdPoint();
+    method public final java.math.BigInteger getLux();
+    method public final java.math.BigInteger getTimeout();
+    method public final void setLux(java.math.BigInteger);
+    method public final void setTimeout(java.math.BigInteger);
+  }
+
+  public class IdleScreenRefreshRateTimeoutLuxThresholds {
+    ctor public IdleScreenRefreshRateTimeoutLuxThresholds();
+    method public java.util.List<com.android.server.display.config.IdleScreenRefreshRateTimeoutLuxThresholdPoint> getPoint();
   }
 
   public class IntegerArray {
@@ -307,6 +362,7 @@ package com.android.server.display.config {
     method public final java.math.BigInteger getDefaultRefreshRateInHbmHdr();
     method public final java.math.BigInteger getDefaultRefreshRateInHbmSunlight();
     method public final com.android.server.display.config.BlockingZoneConfig getHigherBlockingZoneConfigs();
+    method @Nullable public final com.android.server.display.config.NonNegativeFloatToFloatMap getLowPowerSupportedModes();
     method public final com.android.server.display.config.BlockingZoneConfig getLowerBlockingZoneConfigs();
     method public final com.android.server.display.config.RefreshRateZoneProfiles getRefreshRateZoneProfiles();
     method public final void setDefaultPeakRefreshRate(java.math.BigInteger);
@@ -314,6 +370,7 @@ package com.android.server.display.config {
     method public final void setDefaultRefreshRateInHbmHdr(java.math.BigInteger);
     method public final void setDefaultRefreshRateInHbmSunlight(java.math.BigInteger);
     method public final void setHigherBlockingZoneConfigs(com.android.server.display.config.BlockingZoneConfig);
+    method public final void setLowPowerSupportedModes(@Nullable com.android.server.display.config.NonNegativeFloatToFloatMap);
     method public final void setLowerBlockingZoneConfigs(com.android.server.display.config.BlockingZoneConfig);
     method public final void setRefreshRateZoneProfiles(com.android.server.display.config.RefreshRateZoneProfiles);
   }
@@ -369,10 +426,12 @@ package com.android.server.display.config {
 
   public class SensorDetails {
     ctor public SensorDetails();
+    method public String getFeatureFlag();
     method @Nullable public final String getName();
     method @Nullable public final com.android.server.display.config.RefreshRateRange getRefreshRate();
     method @Nullable public final com.android.server.display.config.NonNegativeFloatToFloatMap getSupportedModes();
     method @Nullable public final String getType();
+    method public void setFeatureFlag(String);
     method public final void setName(@Nullable String);
     method public final void setRefreshRate(@Nullable com.android.server.display.config.RefreshRateRange);
     method public final void setSupportedModes(@Nullable com.android.server.display.config.NonNegativeFloatToFloatMap);

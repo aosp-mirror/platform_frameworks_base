@@ -22,6 +22,8 @@ import static android.security.attestationverification.AttestationVerificationMa
 import static android.security.attestationverification.AttestationVerificationManager.RESULT_FAILURE;
 import static android.security.attestationverification.AttestationVerificationManager.RESULT_UNKNOWN;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -31,11 +33,19 @@ import android.security.attestationverification.AttestationProfile;
 import android.security.attestationverification.IAttestationVerificationManagerService;
 import android.security.attestationverification.IVerificationResult;
 import android.security.attestationverification.VerificationToken;
+import android.text.TextUtils;
 import android.util.ExceptionUtils;
+import android.util.IndentingPrintWriter;
 import android.util.Slog;
+import android.util.TimeUtils;
 
 import com.android.internal.infra.AndroidFuture;
+import com.android.internal.util.DumpUtils;
 import com.android.server.SystemService;
+
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+import java.util.ArrayDeque;
 
 /**
  * A {@link SystemService} which provides functionality related to verifying attestations of
@@ -46,11 +56,13 @@ import com.android.server.SystemService;
 public class AttestationVerificationManagerService extends SystemService {
 
     private static final String TAG = "AVF";
+    private static final int DUMP_EVENT_LOG_SIZE = 10;
     private final AttestationVerificationPeerDeviceVerifier mPeerDeviceVerifier;
+    private final DumpLogger mDumpLogger = new DumpLogger();
 
     public AttestationVerificationManagerService(final Context context) throws Exception {
         super(context);
-        mPeerDeviceVerifier = new AttestationVerificationPeerDeviceVerifier(context);
+        mPeerDeviceVerifier = new AttestationVerificationPeerDeviceVerifier(context, mDumpLogger);
     }
 
     private final IBinder mService = new IAttestationVerificationManagerService.Stub() {
@@ -82,6 +94,28 @@ public class AttestationVerificationManagerService extends SystemService {
 
         private void enforceUsePermission() {
             getContext().enforceCallingOrSelfPermission(USE_ATTESTATION_VERIFICATION_SERVICE, null);
+        }
+
+        @Override
+        protected void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter writer,
+                @Nullable String[] args) {
+            if (!android.security.Flags.dumpAttestationVerifications()) {
+                super.dump(fd, writer, args);
+                return;
+            }
+
+            if (!DumpUtils.checkDumpAndUsageStatsPermission(getContext(), TAG, writer)) return;
+
+            final IndentingPrintWriter fout = new IndentingPrintWriter(writer, "    ");
+
+            fout.print("AttestationVerificationManagerService");
+            fout.println();
+            fout.increaseIndent();
+
+            fout.println("Event Log:");
+            fout.increaseIndent();
+            mDumpLogger.dumpTo(fout);
+            fout.decreaseIndent();
         }
     };
 
@@ -118,5 +152,46 @@ public class AttestationVerificationManagerService extends SystemService {
     public void onStart() {
         Slog.d(TAG, "Started");
         publishBinderService(Context.ATTESTATION_VERIFICATION_SERVICE, mService);
+    }
+
+
+    static class DumpLogger {
+        private final ArrayDeque<DumpData> mData = new ArrayDeque<>(DUMP_EVENT_LOG_SIZE);
+        private int mEventsLogged = 0;
+
+        void logAttempt(DumpData data) {
+            synchronized (mData) {
+                if (mData.size() == DUMP_EVENT_LOG_SIZE) {
+                    mData.removeFirst();
+                }
+
+                mEventsLogged++;
+                data.mEventNumber = mEventsLogged;
+
+                data.mEventTimeMs = System.currentTimeMillis();
+
+                mData.add(data);
+            }
+        }
+
+        void dumpTo(IndentingPrintWriter writer) {
+            synchronized (mData) {
+                for (DumpData data : mData.reversed()) {
+                    writer.println(
+                            TextUtils.formatSimple("Verification #%d [%s]", data.mEventNumber,
+                                    TimeUtils.formatForLogging(data.mEventTimeMs)));
+                    writer.increaseIndent();
+                    data.dumpTo(writer);
+                    writer.decreaseIndent();
+                }
+            }
+        }
+    }
+
+    abstract static class DumpData {
+        protected int mEventNumber = -1;
+        protected long mEventTimeMs = -1;
+
+        abstract void dumpTo(IndentingPrintWriter writer);
     }
 }

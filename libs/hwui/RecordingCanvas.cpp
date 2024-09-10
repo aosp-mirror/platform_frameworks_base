@@ -573,9 +573,9 @@ struct DrawSkMesh final : Op {
 struct DrawMesh final : Op {
     static const auto kType = Type::DrawMesh;
     DrawMesh(const Mesh& mesh, sk_sp<SkBlender> blender, const SkPaint& paint)
-            : mesh(mesh), blender(std::move(blender)), paint(paint) {}
+            : mesh(mesh.takeSnapshot()), blender(std::move(blender)), paint(paint) {}
 
-    const Mesh& mesh;
+    Mesh::Snapshot mesh;
     sk_sp<SkBlender> blender;
     SkPaint paint;
 
@@ -1294,15 +1294,6 @@ void RecordingCanvas::drawVectorDrawable(VectorDrawableRoot* tree) {
 
 void RecordingCanvas::drawWebView(skiapipeline::FunctorDrawable* drawable) {
     fDL->drawWebView(drawable);
-}
-
-[[nodiscard]] const SkMesh& DrawMeshPayload::getSkMesh() const {
-    LOG_FATAL_IF(!meshWrapper && !mesh, "One of Mesh or Mesh must be non-null");
-    if (meshWrapper) {
-        return meshWrapper->getSkMesh();
-    } else {
-        return *mesh;
-    }
 }
 
 }  // namespace uirenderer

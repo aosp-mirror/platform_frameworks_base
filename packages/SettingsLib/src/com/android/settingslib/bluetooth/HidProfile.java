@@ -27,6 +27,8 @@ import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import com.android.settingslib.R;
 
 import java.util.List;
@@ -185,6 +187,14 @@ public class HidProfile implements LocalBluetoothProfile {
             default:
                 return com.android.internal.R.drawable.ic_bt_misc_hid;
         }
+    }
+
+    /** Set preferred transport for the device */
+    public boolean setPreferredTransport(@NonNull BluetoothDevice device, int transport) {
+        if (mService != null) {
+            mService.setPreferredTransport(device, transport);
+        }
+        return false;
     }
 
     protected void finalize() {

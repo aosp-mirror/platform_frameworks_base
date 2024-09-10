@@ -29,7 +29,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
@@ -37,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.theme.PlatformTheme
 import com.android.systemui.keyboard.stickykeys.shared.model.Locked
 import com.android.systemui.keyboard.stickykeys.shared.model.ModifierKey
@@ -57,7 +57,7 @@ fun createStickyKeyIndicatorView(context: Context, viewModel: StickyKeysIndicato
 
 @Composable
 fun StickyKeysIndicator(viewModel: StickyKeysIndicatorViewModel) {
-    val stickyKeys by viewModel.indicatorContent.collectAsState(emptyMap())
+    val stickyKeys by viewModel.indicatorContent.collectAsStateWithLifecycle(emptyMap())
     StickyKeysIndicator(stickyKeys)
 }
 

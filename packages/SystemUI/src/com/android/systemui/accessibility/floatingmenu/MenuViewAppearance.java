@@ -34,7 +34,6 @@ import android.view.WindowMetrics;
 
 import androidx.annotation.DimenRes;
 
-import com.android.systemui.Flags;
 import com.android.systemui.res.R;
 
 import java.lang.annotation.Retention;
@@ -154,11 +153,6 @@ class MenuViewAppearance {
     private Rect getMenuDraggableBoundsWith(boolean includeIme) {
         final int margin = getMenuMargin();
         final Rect draggableBounds = new Rect(getWindowAvailableBounds());
-
-        if (!Flags.floatingMenuOverlapsNavBarsFlag()) {
-            // Initializes start position for mapping the translation of the menu view.
-            draggableBounds.offsetTo(/* newLeft= */ 0, /* newTop= */ 0);
-        }
 
         draggableBounds.top += margin;
         draggableBounds.right -= getMenuWidth();

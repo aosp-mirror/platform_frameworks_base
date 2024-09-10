@@ -46,6 +46,7 @@ class SceneLogger @Inject constructor(@SceneFrameworkLog private val logBuffer: 
         from: SceneKey,
         to: SceneKey,
         reason: String,
+        isInstant: Boolean,
     ) {
         logBuffer.log(
             tag = TAG,
@@ -54,8 +55,17 @@ class SceneLogger @Inject constructor(@SceneFrameworkLog private val logBuffer: 
                 str1 = from.toString()
                 str2 = to.toString()
                 str3 = reason
+                bool1 = isInstant
             },
-            messagePrinter = { "Scene change requested: $str1 → $str2, reason: $str3" },
+            messagePrinter = {
+                buildString {
+                    append("Scene change requested: $str1 → $str2")
+                    if (isInstant) {
+                        append(" (instant)")
+                    }
+                    append(", reason: $str3")
+                }
+            },
         )
     }
 
@@ -102,7 +112,7 @@ class SceneLogger @Inject constructor(@SceneFrameworkLog private val logBuffer: 
             tag = TAG,
             level = LogLevel.INFO,
             messageInitializer = { str1 = reason },
-            messagePrinter = { "remote user interaction started, reason: $str3" },
+            messagePrinter = { "remote user interaction started, reason: $str1" },
         )
     }
 
@@ -112,6 +122,15 @@ class SceneLogger @Inject constructor(@SceneFrameworkLog private val logBuffer: 
             level = LogLevel.INFO,
             messageInitializer = {},
             messagePrinter = { "user interaction finished" },
+        )
+    }
+
+    fun logSceneBackStack(backStack: Iterable<SceneKey>) {
+        logBuffer.log(
+            tag = TAG,
+            level = LogLevel.INFO,
+            messageInitializer = { str1 = backStack.joinToString(", ") { it.debugName } },
+            messagePrinter = { "back stack: $str1" },
         )
     }
 

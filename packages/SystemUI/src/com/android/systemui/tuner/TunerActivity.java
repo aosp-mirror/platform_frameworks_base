@@ -30,9 +30,9 @@ import androidx.preference.PreferenceFragment;
 import androidx.preference.PreferenceScreen;
 
 import com.android.systemui.Dependency;
-import com.android.systemui.res.R;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.fragments.FragmentService;
+import com.android.systemui.res.R;
 import com.android.systemui.util.settings.GlobalSettings;
 
 import javax.inject.Inject;

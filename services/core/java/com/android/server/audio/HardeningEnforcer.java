@@ -19,6 +19,7 @@ import static android.media.audio.Flags.autoPublicVolumeApiHardening;
 
 import android.Manifest;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.content.Context;
@@ -26,6 +27,7 @@ import android.content.pm.PackageManager;
 import android.media.AudioFocusRequest;
 import android.media.AudioManager;
 import android.os.Binder;
+import android.os.Build;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Slog;
@@ -128,17 +130,26 @@ public class HardeningEnforcer {
      * @param focusMethod name of the method to check, for logging purposes
      * @param clientId id of the requester
      * @param durationHint focus type being requested
+     * @param attributionTag attribution of the caller
+     * @param targetSdk target SDK of the caller
      * @return false if the method call is allowed, true if it should be a no-op
      */
+    @SuppressWarnings("AndroidFrameworkCompatChange")
     protected boolean blockFocusMethod(int callingUid, int focusMethod, @NonNull String clientId,
-            int durationHint, @NonNull String packageName) {
+            int durationHint, @NonNull String packageName, String attributionTag, int targetSdk) {
         if (packageName.isEmpty()) {
             packageName = getPackNameForUid(callingUid);
         }
 
-        if (checkAppOp(AppOpsManager.OP_TAKE_AUDIO_FOCUS, callingUid, packageName)) {
+        if (noteOp(AppOpsManager.OP_TAKE_AUDIO_FOCUS, callingUid, packageName, attributionTag)) {
             if (DEBUG) {
                 Slog.i(TAG, "blockFocusMethod pack:" + packageName + " NOT blocking");
+            }
+            return false;
+        } else if (targetSdk < Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+            if (DEBUG) {
+                Slog.i(TAG, "blockFocusMethod pack:" + packageName + " NOT blocking due to sdk="
+                        + targetSdk);
             }
             return false;
         }
@@ -169,14 +180,17 @@ public class HardeningEnforcer {
     }
 
     /**
-     * Checks the given op without throwing
+     * Notes the given op without throwing
      * @param op the appOp code
      * @param uid the calling uid
      * @param packageName the package name of the caller
+     * @param attributionTag attribution of the caller
      * @return return false if the operation is not allowed
      */
-    private boolean checkAppOp(int op, int uid, @NonNull String packageName) {
-        if (mAppOps.checkOpNoThrow(op, uid, packageName) != AppOpsManager.MODE_ALLOWED) {
+    private boolean noteOp(int op, int uid, @NonNull String packageName,
+            @Nullable String attributionTag) {
+        if (mAppOps.noteOpNoThrow(op, uid, packageName, attributionTag, null)
+                != AppOpsManager.MODE_ALLOWED) {
             return false;
         }
         return true;

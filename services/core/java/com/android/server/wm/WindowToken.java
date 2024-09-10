@@ -563,9 +563,15 @@ class WindowToken extends WindowContainer<WindowState> {
         if (mTransitionController.isShellTransitionsEnabled()
                 && asActivityRecord() != null && isVisible()) {
             // Trigger an activity level rotation transition.
-            mTransitionController.requestTransitionIfNeeded(WindowManager.TRANSIT_CHANGE, this);
-            mTransitionController.collectVisibleChange(this);
-            mTransitionController.setReady(this);
+            Transition transition = mTransitionController.getCollectingTransition();
+            if (transition == null) {
+                transition = mTransitionController.requestStartTransition(
+                        mTransitionController.createTransition(WindowManager.TRANSIT_CHANGE),
+                        null /* trigger */, null /* remote */, null /* disp */);
+            }
+            transition.collect(this);
+            transition.collectVisibleChange(this);
+            transition.setReady(mDisplayContent, true);
         }
         final int originalRotation = getWindowConfiguration().getRotation();
         onConfigurationChanged(parent.getConfiguration());

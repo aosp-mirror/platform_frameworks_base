@@ -30,15 +30,19 @@ import static com.android.server.security.AndroidKeystoreAttestationVerification
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import android.annotation.NonNull;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
+import android.security.attestationverification.AttestationVerificationManager;
 import android.security.attestationverification.AttestationVerificationManager.LocalBindingType;
+import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.security.AttestationVerificationManagerService.DumpLogger;
 
 import org.json.JSONObject;
 
@@ -71,7 +75,9 @@ import java.util.Set;
 
 /**
  * Verifies Android key attestation according to the
- * {@link android.security.attestationverification.AttestationVerificationManager#PROFILE_PEER_DEVICE PROFILE_PEER_DEVICE}
+ * {@link
+ * android.security.attestationverification.AttestationVerificationManager#PROFILE_PEER_DEVICE
+ * PROFILE_PEER_DEVICE}
  * profile.
  *
  * <p>
@@ -118,9 +124,12 @@ class AttestationVerificationPeerDeviceVerifier {
     private final LocalDate mTestLocalPatchDate;
     private final CertificateFactory mCertificateFactory;
     private final CertPathValidator mCertPathValidator;
+    private final DumpLogger mDumpLogger;
 
-    AttestationVerificationPeerDeviceVerifier(@NonNull Context context) throws Exception {
+    AttestationVerificationPeerDeviceVerifier(@NonNull Context context,
+            @NonNull DumpLogger dumpLogger) throws Exception {
         mContext = Objects.requireNonNull(context);
+        mDumpLogger = dumpLogger;
         mCertificateFactory = CertificateFactory.getInstance("X.509");
         mCertPathValidator = CertPathValidator.getInstance("PKIX");
         mTrustAnchors = getTrustAnchors();
@@ -132,9 +141,10 @@ class AttestationVerificationPeerDeviceVerifier {
     // Use ONLY for hermetic unit testing.
     @VisibleForTesting
     AttestationVerificationPeerDeviceVerifier(@NonNull Context context,
-            Set<TrustAnchor> trustAnchors, boolean revocationEnabled,
+            DumpLogger dumpLogger, Set<TrustAnchor> trustAnchors, boolean revocationEnabled,
             LocalDate systemDate, LocalDate localPatchDate) throws Exception {
         mContext = Objects.requireNonNull(context);
+        mDumpLogger = dumpLogger;
         mCertificateFactory = CertificateFactory.getInstance("X.509");
         mCertPathValidator = CertPathValidator.getInstance("PKIX");
         mTrustAnchors = trustAnchors;
@@ -153,63 +163,90 @@ class AttestationVerificationPeerDeviceVerifier {
      * bounded at the end by {@code -----END CERTIFICATE-----}.
      *
      * @param localBindingType Only {@code TYPE_PUBLIC_KEY} and {@code TYPE_CHALLENGE} supported.
-     * @param requirements Only {@code PARAM_PUBLIC_KEY} and {@code PARAM_CHALLENGE} supported.
-     * @param attestation Certificates should be DER encoded with leaf certificate appended first.
+     * @param requirements     Only {@code PARAM_PUBLIC_KEY} and {@code PARAM_CHALLENGE} supported.
+     * @param attestation      Certificates should be DER encoded with leaf certificate appended
+     *                         first.
      */
     int verifyAttestation(
             @LocalBindingType int localBindingType,
             @NonNull Bundle requirements,
             @NonNull byte[] attestation) {
+
+        MyDumpData dumpData = new MyDumpData();
+
+        int result =
+                verifyAttestationInternal(localBindingType, requirements, attestation, dumpData);
+        dumpData.mResult = result;
+        mDumpLogger.logAttempt(dumpData);
+        return result;
+    }
+
+    private int verifyAttestationInternal(
+            @LocalBindingType int localBindingType,
+            @NonNull Bundle requirements,
+            @NonNull byte[] attestation,
+            @NonNull MyDumpData dumpData) {
         if (mCertificateFactory == null) {
             debugVerboseLog("Unable to access CertificateFactory");
             return RESULT_FAILURE;
         }
+        dumpData.mCertificationFactoryAvailable = true;
 
         if (mCertPathValidator == null) {
             debugVerboseLog("Unable to access CertPathValidator");
             return RESULT_FAILURE;
         }
+        dumpData.mCertPathValidatorAvailable = true;
+
 
         // Check if the provided local binding type is supported and if the provided requirements
         // "match" the binding type.
         if (!validateAttestationParameters(localBindingType, requirements)) {
             return RESULT_FAILURE;
         }
+        dumpData.mAttestationParametersOk = true;
+
+        // To provide the most information in the dump logs, we track the failure state but keep
+        // verifying the rest of the attestation. For code safety, there are no transitions past
+        // here to set failed = false
+        boolean failed = false;
 
         try {
             // First: parse and validate the certificate chain.
             final List<X509Certificate> certificateChain = getCertificates(attestation);
             // (returns void, but throws CertificateException and other similar Exceptions)
             validateCertificateChain(certificateChain);
+            dumpData.mCertChainOk = true;
 
             final var leafCertificate = certificateChain.get(0);
             final var attestationExtension = fromCertificate(leafCertificate);
 
             // Second: verify if the attestation satisfies the "peer device" profile.
-            if (!checkAttestationForPeerDeviceProfile(attestationExtension)) {
-                return RESULT_FAILURE;
+            if (!checkAttestationForPeerDeviceProfile(attestationExtension, dumpData)) {
+                failed = true;
             }
 
             // Third: check if the attestation satisfies local binding requirements.
             if (!checkLocalBindingRequirements(
-                    leafCertificate, attestationExtension, localBindingType, requirements)) {
-                return RESULT_FAILURE;
+                    leafCertificate, attestationExtension, localBindingType, requirements,
+                    dumpData)) {
+                failed = true;
             }
-
-            return RESULT_SUCCESS;
         } catch (CertificateException | CertPathValidatorException
-                | InvalidAlgorithmParameterException | IOException e) {
+                 | InvalidAlgorithmParameterException | IOException e) {
             // Catch all non-RuntimeExpceptions (all of these are thrown by either getCertificates()
             // or validateCertificateChain() or
             // AndroidKeystoreAttestationVerificationAttributes.fromCertificate())
             debugVerboseLog("Unable to parse/validate Android Attestation certificate(s)", e);
-            return RESULT_FAILURE;
+            failed = true;
         } catch (RuntimeException e) {
             // Catch everyting else (RuntimeExpcetions), since we don't want to throw any exceptions
             // out of this class/method.
             debugVerboseLog("Unexpected error", e);
-            return RESULT_FAILURE;
+            failed = true;
         }
+
+        return failed ? RESULT_FAILURE : RESULT_SUCCESS;
     }
 
     @NonNull
@@ -255,7 +292,7 @@ class AttestationVerificationPeerDeviceVerifier {
 
     private void validateCertificateChain(List<X509Certificate> certificates)
             throws CertificateException, CertPathValidatorException,
-            InvalidAlgorithmParameterException  {
+            InvalidAlgorithmParameterException {
         if (certificates.size() < 2) {
             debugVerboseLog("Certificate chain less than 2 in size.");
             throw new CertificateException("Certificate chain less than 2 in size.");
@@ -277,7 +314,7 @@ class AttestationVerificationPeerDeviceVerifier {
     private Set<TrustAnchor> getTrustAnchors() throws CertPathValidatorException {
         Set<TrustAnchor> modifiableSet = new HashSet<>();
         try {
-            for (String certString: getTrustAnchorResources()) {
+            for (String certString : getTrustAnchorResources()) {
                 modifiableSet.add(
                         new TrustAnchor((X509Certificate) mCertificateFactory.generateCertificate(
                                 new ByteArrayInputStream(getCertificateBytes(certString))), null));
@@ -307,8 +344,9 @@ class AttestationVerificationPeerDeviceVerifier {
             @NonNull X509Certificate leafCertificate,
             @NonNull AndroidKeystoreAttestationVerificationAttributes attestationAttributes,
             @LocalBindingType int localBindingType,
-            @NonNull Bundle requirements) {
+            @NonNull Bundle requirements, MyDumpData dumpData) {
         // First: check non-optional (for the given local binding type) requirements.
+        dumpData.mBindingType = localBindingType;
         switch (localBindingType) {
             case TYPE_PUBLIC_KEY:
                 // Verify leaf public key matches provided public key.
@@ -336,9 +374,11 @@ class AttestationVerificationPeerDeviceVerifier {
                 throw new IllegalArgumentException("Unsupported local binding type "
                         + localBindingTypeToString(localBindingType));
         }
+        dumpData.mBindingOk = true;
 
         // Second: check specified optional requirements.
         if (requirements.containsKey(PARAM_OWNED_BY_SYSTEM)) {
+            dumpData.mSystemOwnershipChecked = true;
             if (requirements.getBoolean(PARAM_OWNED_BY_SYSTEM)) {
                 // Verify key is owned by the system.
                 final boolean ownedBySystem = checkOwnedBySystem(
@@ -347,6 +387,7 @@ class AttestationVerificationPeerDeviceVerifier {
                     debugVerboseLog("Certificate public key is not owned by the AndroidSystem.");
                     return false;
                 }
+                dumpData.mSystemOwned = true;
             } else {
                 throw new IllegalArgumentException("The value of the requirement key "
                         + PARAM_OWNED_BY_SYSTEM
@@ -359,73 +400,98 @@ class AttestationVerificationPeerDeviceVerifier {
     }
 
     private boolean checkAttestationForPeerDeviceProfile(
-            @NonNull AndroidKeystoreAttestationVerificationAttributes attestationAttributes) {
+            @NonNull AndroidKeystoreAttestationVerificationAttributes attestationAttributes,
+            MyDumpData dumpData) {
+        boolean result = true;
+
         // Checks for support of Keymaster 4.
         if (attestationAttributes.getAttestationVersion() < 3) {
             debugVerboseLog("Attestation version is not at least 3 (Keymaster 4).");
-            return false;
+            result = false;
+        } else {
+            dumpData.mAttestationVersionAtLeast3 = true;
         }
 
         // Checks for support of Keymaster 4.
         if (attestationAttributes.getKeymasterVersion() < 4) {
             debugVerboseLog("Keymaster version is not at least 4.");
-            return false;
+            result = false;
+        } else {
+            dumpData.mKeymasterVersionAtLeast4 = true;
         }
 
         // First two characters are Android OS version.
         if (attestationAttributes.getKeyOsVersion() < 100000) {
             debugVerboseLog("Android OS version is not 10+.");
-            return false;
+            result = false;
+        } else {
+            dumpData.mOsVersionAtLeast10 = true;
         }
 
         if (!attestationAttributes.isAttestationHardwareBacked()) {
             debugVerboseLog("Key is not HW backed.");
-            return false;
+            result = false;
+        } else {
+            dumpData.mKeyHwBacked = true;
         }
 
         if (!attestationAttributes.isKeymasterHardwareBacked()) {
             debugVerboseLog("Keymaster is not HW backed.");
-            return false;
+            result = false;
+        } else {
+            dumpData.mKeymasterHwBacked = true;
         }
 
         if (attestationAttributes.getVerifiedBootState() != VERIFIED) {
             debugVerboseLog("Boot state not Verified.");
-            return false;
+            result = false;
+        } else {
+            dumpData.mBootStateIsVerified = true;
         }
 
         try {
             if (!attestationAttributes.isVerifiedBootLocked()) {
                 debugVerboseLog("Verified boot state is not locked.");
-                return false;
+                result = false;
+            } else {
+                dumpData.mVerifiedBootStateLocked = true;
             }
         } catch (IllegalStateException e) {
             debugVerboseLog("VerifiedBootLocked is not set.", e);
-            return false;
+            result = false;
         }
 
         // Patch level integer YYYYMM is expected to be within 1 year of today.
         if (!isValidPatchLevel(attestationAttributes.getKeyOsPatchLevel())) {
             debugVerboseLog("OS patch level is not within valid range.");
-            return false;
+            result = false;
+        } else {
+            dumpData.mOsPatchLevelInRange = true;
         }
 
         // Patch level integer YYYYMMDD is expected to be within 1 year of today.
         if (!isValidPatchLevel(attestationAttributes.getKeyBootPatchLevel())) {
             debugVerboseLog("Boot patch level is not within valid range.");
-            return false;
+            result = false;
+        } else {
+            dumpData.mKeyBootPatchLevelInRange = true;
         }
 
         if (!isValidPatchLevel(attestationAttributes.getKeyVendorPatchLevel())) {
             debugVerboseLog("Vendor patch level is not within valid range.");
-            return false;
+            result = false;
+        } else {
+            dumpData.mKeyVendorPatchLevelInRange = true;
         }
 
         if (!isValidPatchLevel(attestationAttributes.getKeyBootPatchLevel())) {
             debugVerboseLog("Boot patch level is not within valid range.");
-            return false;
+            result = false;
+        } else {
+            dumpData.mKeyBootPatchLevelInRange = true;
         }
 
-        return true;
+        return result;
     }
 
     private boolean checkPublicKey(
@@ -607,6 +673,101 @@ class AttestationVerificationPeerDeviceVerifier {
     private static void debugVerboseLog(String str) {
         if (DEBUG) {
             Slog.v(TAG, str);
+        }
+    }
+
+    /* Mutable data class for tracking dump data from verifications. */
+    private static class MyDumpData extends AttestationVerificationManagerService.DumpData {
+
+        // Top-Level Result
+        int mResult = -1;
+
+        // Configuration/Setup preconditions
+        boolean mCertificationFactoryAvailable = false;
+        boolean mCertPathValidatorAvailable = false;
+
+        // AttestationParameters (Valid Input Only)
+        boolean mAttestationParametersOk = false;
+
+        // Certificate Chain (Structure & Chaining Conditions)
+        boolean mCertChainOk = false;
+
+        // Binding
+        boolean mBindingOk = false;
+        int mBindingType = -1;
+
+        // System Ownership
+        boolean mSystemOwnershipChecked = false;
+        boolean mSystemOwned = false;
+
+        // Android Keystore attestation properties
+        boolean mOsVersionAtLeast10 = false;
+        boolean mKeyHwBacked = false;
+        boolean mAttestationVersionAtLeast3 = false;
+        boolean mKeymasterVersionAtLeast4 = false;
+        boolean mKeymasterHwBacked = false;
+        boolean mBootStateIsVerified = false;
+        boolean mVerifiedBootStateLocked = false;
+        boolean mOsPatchLevelInRange = false;
+        boolean mKeyBootPatchLevelInRange = false;
+        boolean mKeyVendorPatchLevelInRange = false;
+
+        @SuppressLint("WrongConstant")
+        @Override
+        public void dumpTo(IndentingPrintWriter writer) {
+            writer.println(
+                    "Result: " + AttestationVerificationManager.verificationResultCodeToString(
+                            mResult));
+            if (!mCertificationFactoryAvailable) {
+                writer.println("Certificate Factory Unavailable");
+                return;
+            }
+            if (!mCertPathValidatorAvailable) {
+                writer.println("Cert Path Validator Unavailable");
+                return;
+            }
+            if (!mAttestationParametersOk) {
+                writer.println("Attestation parameters set incorrectly.");
+                return;
+            }
+
+            writer.println("Certificate Chain Valid (inc. Trust Anchor): " + booleanToOkFail(
+                    mCertChainOk));
+            if (!mCertChainOk) {
+                return;
+            }
+
+            // Binding
+            writer.println("Local Binding: " + booleanToOkFail(mBindingOk));
+            writer.increaseIndent();
+            writer.println("Binding Type: " + mBindingType);
+            writer.decreaseIndent();
+
+            if (mSystemOwnershipChecked) {
+                writer.println("System Ownership: " + booleanToOkFail(mSystemOwned));
+            }
+
+            // Keystore Attestation params
+            writer.println("KeyStore Attestation Parameters");
+            writer.increaseIndent();
+            writer.println("OS Version >= 10: " + booleanToOkFail(mOsVersionAtLeast10));
+            writer.println("OS Patch Level in Range: " + booleanToOkFail(mOsPatchLevelInRange));
+            writer.println(
+                    "Attestation Version >= 3: " + booleanToOkFail(mAttestationVersionAtLeast3));
+            writer.println("Keymaster Version >= 4: " + booleanToOkFail(mKeymasterVersionAtLeast4));
+            writer.println("Keymaster HW-Backed: " + booleanToOkFail(mKeymasterHwBacked));
+            writer.println("Key is HW Backed: " + booleanToOkFail(mKeyHwBacked));
+            writer.println("Boot State is VERIFIED: " + booleanToOkFail(mBootStateIsVerified));
+            writer.println("Verified Boot is LOCKED: " + booleanToOkFail(mVerifiedBootStateLocked));
+            writer.println(
+                    "Key Boot Level in Range: " + booleanToOkFail(mKeyBootPatchLevelInRange));
+            writer.println("Key Vendor Patch Level in Range: " + booleanToOkFail(
+                    mKeyVendorPatchLevelInRange));
+            writer.decreaseIndent();
+        }
+
+        private String booleanToOkFail(boolean value) {
+            return value ? "OK" : "FAILURE";
         }
     }
 }

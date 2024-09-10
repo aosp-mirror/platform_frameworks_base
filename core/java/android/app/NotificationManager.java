@@ -57,6 +57,7 @@ import android.provider.Settings.Global;
 import android.service.notification.Adjustment;
 import android.service.notification.Condition;
 import android.service.notification.StatusBarNotification;
+import android.service.notification.ZenDeviceEffects;
 import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenPolicy;
 import android.util.Log;
@@ -270,13 +271,16 @@ public class NotificationManager {
      * Integer extra for {@link #ACTION_AUTOMATIC_ZEN_RULE_STATUS_CHANGED} containing the state of
      * the {@link AutomaticZenRule}.
      *
-     * <p>
-     *     The value will be one of {@link #AUTOMATIC_RULE_STATUS_ENABLED},
-     *     {@link #AUTOMATIC_RULE_STATUS_DISABLED}, {@link #AUTOMATIC_RULE_STATUS_REMOVED},
-     *     {@link #AUTOMATIC_RULE_STATUS_UNKNOWN}.
-     * </p>
+     * <p>The value will be one of {@link #AUTOMATIC_RULE_STATUS_ENABLED},
+     * {@link #AUTOMATIC_RULE_STATUS_DISABLED}, {@link #AUTOMATIC_RULE_STATUS_REMOVED},
+     * {@link #AUTOMATIC_RULE_STATUS_ACTIVATED}, {@link #AUTOMATIC_RULE_STATUS_DEACTIVATED}, or
+     * {@link #AUTOMATIC_RULE_STATUS_UNKNOWN}.
+     *
+     * <p>Note that the {@link #AUTOMATIC_RULE_STATUS_ACTIVATED} and
+     * {@link #AUTOMATIC_RULE_STATUS_DEACTIVATED} statuses are only sent to packages targeting
+     * {@link Build.VERSION_CODES#VANILLA_ICE_CREAM} and above; apps targeting a lower SDK version
+     * will be sent {@link #AUTOMATIC_RULE_STATUS_UNKNOWN} in their place instead.
      */
-    // TODO (b/309101513): Add new status types to javadoc
     public static final String EXTRA_AUTOMATIC_ZEN_RULE_STATUS =
             "android.app.extra.AUTOMATIC_ZEN_RULE_STATUS";
 
@@ -370,11 +374,15 @@ public class NotificationManager {
             = "android.app.action.NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED";
 
     /**
-     * Intent that is broadcast when the state of getNotificationPolicy() changes.
+     * Intent that is broadcast when the state of {@link #getNotificationPolicy()} changes.
      *
      * <p>This broadcast is only sent to registered receivers and (starting from
      * {@link Build.VERSION_CODES#Q}) receivers in packages that have been granted Do Not
      * Disturb access (see {@link #isNotificationPolicyAccessGranted()}).
+     *
+     * <p>Starting with {@link Build.VERSION_CODES#VANILLA_ICE_CREAM}, most calls to
+     * {@link #setNotificationPolicy(Policy)} will update the app's implicit rule policy instead of
+     * the global policy, so this broadcast will be sent much less frequently.
      */
     @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_NOTIFICATION_POLICY_CHANGED
@@ -1378,12 +1386,16 @@ public class NotificationManager {
     /**
      * Updates the given zen rule.
      *
-     * <p>
-     * Throws a SecurityException if policy access is not granted to this package.
+     * <p>Before {@link Build.VERSION_CODES#VANILLA_ICE_CREAM}, updating a rule that is not backed
+     * up by a {@link android.service.notification.ConditionProviderService} will deactivate it if
+     * it was previously active. Starting with {@link Build.VERSION_CODES#VANILLA_ICE_CREAM}, this
+     * will only happen if the rule's definition is actually changing.
+     *
+     * <p>Throws a SecurityException if policy access is not granted to this package.
      * See {@link #isNotificationPolicyAccessGranted}.
      *
-     * <p>
-     * Callers can only update rules that they own. See {@link AutomaticZenRule#getOwner}.
+     * <p>Callers can only update rules that they own. See {@link AutomaticZenRule#getOwner}.
+     *
      * @param id The id of the rule to update
      * @param automaticZenRule the rule to update.
      * @return Whether the rule was successfully updated.
@@ -1744,9 +1756,11 @@ public class NotificationManager {
     /**
      * Gets the current user-specified default notification policy.
      *
-     * <p>
+     * <p>For apps targeting {@link Build.VERSION_CODES#VANILLA_ICE_CREAM} and above (with some
+     * exceptions, such as companion device managers) this method will return the policy associated
+     * to their implicit {@link AutomaticZenRule} instead, if it exists. See
+     * {@link #setNotificationPolicy(Policy)}.
      */
-    // TODO(b/309457271): Update documentation with VANILLA_ICE_CREAM behavior.
     public Policy getNotificationPolicy() {
         INotificationManager service = getService();
         try {
@@ -1757,15 +1771,20 @@ public class NotificationManager {
     }
 
     /**
-     * Sets the current notification policy.
+     * Sets the current notification policy (which applies when {@link #setInterruptionFilter} is
+     * called with the {@link #INTERRUPTION_FILTER_PRIORITY} value).
      *
-     * <p>
-     * Only available if policy access is granted to this package.
-     * See {@link #isNotificationPolicyAccessGranted}.
+     * <p>Apps targeting {@link Build.VERSION_CODES#VANILLA_ICE_CREAM} and above (with some
+     * exceptions, such as companion device managers) cannot modify the global notification policy.
+     * Calling this method will instead create or update an {@link AutomaticZenRule} associated to
+     * the app, using a {@link ZenPolicy} corresponding to the {@link Policy} supplied here, and
+     * which will be activated/deactivated by calls to {@link #setInterruptionFilter(int)}.
+     *
+     * <p>Only available if policy access is granted to this package. See
+     * {@link #isNotificationPolicyAccessGranted}.
      *
      * @param policy The new desired policy.
      */
-    // TODO(b/309457271): Update documentation with VANILLA_ICE_CREAM behavior.
     public void setNotificationPolicy(@NonNull Policy policy) {
         setNotificationPolicy(policy, /* fromUser= */ false);
     }
@@ -1806,6 +1825,18 @@ public class NotificationManager {
         INotificationManager service = getService();
         try {
             return service.getDefaultZenPolicy();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+    /**
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_MODES_UI)
+    public void setManualZenRuleDeviceEffects(@NonNull ZenDeviceEffects effects) {
+        INotificationManager service = getService();
+        try {
+            service.setManualZenRuleDeviceEffects(effects);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2052,10 +2083,12 @@ public class NotificationManager {
 
         /** Notification senders to prioritize for calls. One of:
          * PRIORITY_SENDERS_ANY, PRIORITY_SENDERS_CONTACTS, PRIORITY_SENDERS_STARRED */
+        @PrioritySenders
         public final int priorityCallSenders;
 
         /** Notification senders to prioritize for messages. One of:
          * PRIORITY_SENDERS_ANY, PRIORITY_SENDERS_CONTACTS, PRIORITY_SENDERS_STARRED */
+        @PrioritySenders
         public final int priorityMessageSenders;
 
         /**
@@ -2063,6 +2096,7 @@ public class NotificationManager {
          * {@link #CONVERSATION_SENDERS_NONE}, {@link #CONVERSATION_SENDERS_IMPORTANT},
          * {@link #CONVERSATION_SENDERS_ANYONE}.
          */
+        @ConversationSenders
         public final int priorityConversationSenders;
 
         /**
@@ -2630,16 +2664,19 @@ public class NotificationManager {
         }
 
         /** @hide **/
+        @PrioritySenders
         public int allowCallsFrom() {
             return priorityCallSenders;
         }
 
         /** @hide **/
+        @PrioritySenders
         public int allowMessagesFrom() {
             return priorityMessageSenders;
         }
 
         /** @hide **/
+        @ConversationSenders
         public int allowConversationsFrom() {
             return priorityConversationSenders;
         }
@@ -2780,11 +2817,17 @@ public class NotificationManager {
      * The interruption filter defines which notifications are allowed to
      * interrupt the user (e.g. via sound &amp; vibration) and is applied
      * globally.
-     * <p>
-     * Only available if policy access is granted to this package. See
+     *
+     * <p>Apps targeting {@link Build.VERSION_CODES#VANILLA_ICE_CREAM} and above (with some
+     * exceptions, such as companion device managers) cannot modify the global interruption filter.
+     * Calling this method will instead activate or deactivate an {@link AutomaticZenRule}
+     * associated to the app, using a {@link ZenPolicy} that corresponds to the {@link Policy}
+     * supplied to {@link #setNotificationPolicy(Policy)} (or the global policy when one wasn't
+     * provided).
+     *
+     * <p> Only available if policy access is granted to this package. See
      * {@link #isNotificationPolicyAccessGranted}.
      */
-    // TODO(b/309457271): Update documentation with VANILLA_ICE_CREAM behavior.
     public final void setInterruptionFilter(@InterruptionFilter int interruptionFilter) {
         setInterruptionFilter(interruptionFilter, /* fromUser= */ false);
     }
@@ -2942,6 +2985,7 @@ public class NotificationManager {
         android.Manifest.permission.INTERACT_ACROSS_USERS,
         android.Manifest.permission.ACCESS_NOTIFICATIONS})
     @FlaggedApi(android.service.notification.Flags.FLAG_CALLSTYLE_CALLBACK_API)
+    @SuppressLint("UserHandle")
     public void registerCallNotificationEventListener(@NonNull String packageName,
             @NonNull UserHandle userHandle, @NonNull @CallbackExecutor Executor executor,
             @NonNull CallNotificationEventListener listener) {

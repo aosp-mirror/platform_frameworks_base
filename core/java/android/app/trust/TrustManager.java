@@ -18,6 +18,7 @@ package android.app.trust;
 
 import android.Manifest;
 import android.annotation.RequiresPermission;
+import android.annotation.SdkConstant;
 import android.annotation.SystemService;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -39,6 +40,15 @@ import java.util.List;
  */
 @SystemService(Context.TRUST_SERVICE)
 public class TrustManager {
+
+    /**
+     * Intent action used to identify services that can serve as significant providers.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstant.SdkConstantType.SERVICE_ACTION)
+    public static final String ACTION_BIND_SIGNIFICANT_PLACE_PROVIDER =
+            "com.android.trust.provider.SignificantPlaceProvider.BIND";
 
     private static final int MSG_TRUST_CHANGED = 1;
     private static final int MSG_TRUST_MANAGED_CHANGED = 2;
@@ -284,6 +294,20 @@ public class TrustManager {
     public void clearAllBiometricRecognized(BiometricSourceType source, int unlockedUser) {
         try {
             mService.clearAllBiometricRecognized(source, unlockedUser);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns true if the device is currently in a significant place, and false in all other
+     * circumstances.
+     *
+     * @hide
+     */
+    public boolean isInSignificantPlace() {
+        try {
+            return mService.isInSignificantPlace();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

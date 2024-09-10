@@ -45,7 +45,6 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.OnReceiveContentListener;
 import android.view.View;
-import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
 import android.view.ViewRootImpl;
 import android.view.WindowInsets;
@@ -85,9 +84,7 @@ import com.android.systemui.res.R;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewWrapper;
-import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.LightBarController;
-import com.android.wm.shell.animation.Interpolators;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -132,10 +129,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     private boolean mColorized;
     private int mLastBackgroundColor;
     private boolean mResetting;
-    @Nullable
-    private RevealParams mRevealParams;
     private Rect mContentBackgroundBounds;
-    private boolean mIsFocusAnimationFlagActive;
     private boolean mIsAnimatingAppearance = false;
 
     // TODO(b/193539698): move these to a Controller
@@ -432,7 +426,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         // case to prevent flicker.
         if (!mRemoved) {
             ViewGroup parent = (ViewGroup) getParent();
-            if (animate && parent != null && mIsFocusAnimationFlagActive) {
+            if (animate && parent != null) {
 
                 ViewGroup grandParent = (ViewGroup) parent.getParent();
                 View actionsContainer = getActionsContainerLayout();
@@ -466,20 +460,6 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
                 if (actionsContainer != null) actionsContainer.setAlpha(0f);
                 animator.start();
 
-            } else if (animate && mRevealParams != null && mRevealParams.radius > 0) {
-                android.animation.Animator reveal = mRevealParams.createCircularHideAnimator(this);
-                reveal.setInterpolator(Interpolators.FAST_OUT_LINEAR_IN);
-                reveal.setDuration(StackStateAnimator.ANIMATION_DURATION_CLOSE_REMOTE_INPUT);
-                reveal.addListener(new android.animation.AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(android.animation.Animator animation) {
-                        setVisibility(GONE);
-                        if (mWrapper != null) {
-                            mWrapper.setRemoteInputVisible(false);
-                        }
-                    }
-                });
-                reveal.start();
             } else {
                 setVisibility(GONE);
                 if (doAfterDefocus != null) doAfterDefocus.run();
@@ -498,8 +478,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     }
 
     private void setTopMargin(int topMargin) {
-        if (!(getLayoutParams() instanceof FrameLayout.LayoutParams)) return;
-        final FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) getLayoutParams();
+        if (!(getLayoutParams() instanceof FrameLayout.LayoutParams layoutParams)) return;
         layoutParams.topMargin = topMargin;
         setLayoutParams(layoutParams);
     }
@@ -609,24 +588,10 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     }
 
     /**
-     * Sets whether the feature flag for the revised inline reply animation is active or not.
-     * @param active
-     */
-    public void setIsFocusAnimationFlagActive(boolean active) {
-        mIsFocusAnimationFlagActive = active;
-    }
-
-    /**
      * Focuses the RemoteInputView and animates its appearance
      */
     public void focusAnimated() {
-        if (!mIsFocusAnimationFlagActive && getVisibility() != VISIBLE
-                && mRevealParams != null) {
-            android.animation.Animator animator = mRevealParams.createCircularRevealAnimator(this);
-            animator.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
-            animator.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
-            animator.start();
-        } else if (mIsFocusAnimationFlagActive && getVisibility() != VISIBLE) {
+        if (getVisibility() != VISIBLE) {
             mIsAnimatingAppearance = true;
             setAlpha(0f);
             Animator focusAnimator = getFocusAnimator(getActionsContainerLayout());
@@ -681,37 +646,19 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     }
 
     private void reset() {
-        if (mIsFocusAnimationFlagActive) {
-            mProgressBar.setVisibility(INVISIBLE);
-            mResetting = true;
-            mSending = false;
-            mController.removeSpinning(mEntry.getKey(), mToken);
-            onDefocus(true /* animate */, false /* logClose */, () -> {
-                mEntry.remoteInputTextWhenReset = SpannedString.valueOf(mEditText.getText());
-                mEditText.getText().clear();
-                mEditText.setEnabled(isAggregatedVisible());
-                mSendButton.setVisibility(VISIBLE);
-                updateSendButton();
-                setAttachment(null);
-                mResetting = false;
-            });
-            return;
-        }
-
+        mProgressBar.setVisibility(INVISIBLE);
         mResetting = true;
         mSending = false;
-        mEntry.remoteInputTextWhenReset = SpannedString.valueOf(mEditText.getText());
-
-        mEditText.getText().clear();
-        mEditText.setEnabled(isAggregatedVisible());
-        mSendButton.setVisibility(VISIBLE);
-        mProgressBar.setVisibility(INVISIBLE);
         mController.removeSpinning(mEntry.getKey(), mToken);
-        updateSendButton();
-        onDefocus(false /* animate */, false /* logClose */, null /* doAfterDefocus */);
-        setAttachment(null);
-
-        mResetting = false;
+        onDefocus(true /* animate */, false /* logClose */, () -> {
+            mEntry.remoteInputTextWhenReset = SpannedString.valueOf(mEditText.getText());
+            mEditText.getText().clear();
+            mEditText.setEnabled(isAggregatedVisible());
+            mSendButton.setVisibility(VISIBLE);
+            updateSendButton();
+            setAttachment(null);
+            mResetting = false;
+        });
     }
 
     @Override
@@ -752,10 +699,6 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
 
     public void setRemoved() {
         mRemoved = true;
-    }
-
-    public void setRevealParameters(@Nullable RevealParams revealParams) {
-        mRevealParams = revealParams;
     }
 
     @Override
@@ -855,7 +798,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
-        if (mIsFocusAnimationFlagActive) setPivotY(getMeasuredHeight());
+        setPivotY(getMeasuredHeight());
         if (mContentBackgroundBounds != null) {
             mContentBackground.setBounds(mContentBackgroundBounds);
         }
@@ -1016,9 +959,9 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
 
         private RemoteInputView mRemoteInputView;
         boolean mShowImeOnInputConnection;
-        private LightBarController mLightBarController;
+        private final LightBarController mLightBarController;
         private InputMethodManager mInputMethodManager;
-        private ArraySet<String> mSupportedMimes = new ArraySet<>();
+        private final ArraySet<String> mSupportedMimes = new ArraySet<>();
         UserHandle mUser;
 
         public RemoteEditText(Context context, AttributeSet attrs) {
@@ -1211,25 +1154,5 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
             return remainingItems;
         }
 
-    }
-
-    public static class RevealParams {
-        final int centerX;
-        final int centerY;
-        final int radius;
-
-        public RevealParams(int centerX, int centerY, int radius) {
-            this.centerX = centerX;
-            this.centerY = centerY;
-            this.radius = radius;
-        }
-
-        android.animation.Animator createCircularHideAnimator(View view) {
-            return ViewAnimationUtils.createCircularReveal(view, centerX, centerY, radius, 0);
-        }
-
-        android.animation.Animator createCircularRevealAnimator(View view) {
-            return ViewAnimationUtils.createCircularReveal(view, centerX, centerY, 0, radius);
-        }
     }
 }

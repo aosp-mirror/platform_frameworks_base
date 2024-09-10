@@ -25,6 +25,7 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
 import com.android.systemui.statusbar.notification.shared.NotificationsImprovedHunAnimation
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
+import com.android.systemui.statusbar.policy.AvalancheController
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Expect
 import com.google.common.truth.Truth.assertThat
@@ -48,6 +49,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     @JvmField @Rule var expect: Expect = Expect.create()
 
     private val largeScreenShadeInterpolator = mock<LargeScreenShadeInterpolator>()
+    private val avalancheController = mock<AvalancheController>()
 
     private val hostView = FrameLayout(context)
     private val stackScrollAlgorithm = StackScrollAlgorithm(context, hostView)
@@ -71,6 +73,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
             /* bypassController */ { false },
             mStatusBarKeyguardViewManager,
             largeScreenShadeInterpolator,
+            avalancheController
         )
 
     private val testableResources = mContext.getOrCreateTestableResources()
@@ -391,8 +394,20 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     }
 
     @Test
+    fun resetViewStates_shadeCollapsed_emptyShadeViewBecomesTransparent() {
+        ambientState.expansionFraction = 0f
+        stackScrollAlgorithm.initView(context)
+        hostView.removeAllViews()
+        hostView.addView(emptyShadeView)
+
+        stackScrollAlgorithm.resetViewStates(ambientState, /* speedBumpIndex= */ 0)
+
+        assertThat(emptyShadeView.viewState.alpha).isEqualTo(0f)
+    }
+
+    @Test
     fun resetViewStates_isOnKeyguard_emptyShadeViewBecomesOpaque() {
-        ambientState.setStatusBarState(StatusBarState.SHADE)
+        ambientState.setStatusBarState(StatusBarState.KEYGUARD)
         ambientState.fractionToShade = 0.25f
         stackScrollAlgorithm.initView(context)
         hostView.removeAllViews()
@@ -400,7 +415,8 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
 
         stackScrollAlgorithm.resetViewStates(ambientState, /* speedBumpIndex= */ 0)
 
-        assertThat(emptyShadeView.viewState.alpha).isEqualTo(1f)
+        val expected = getContentAlpha(ambientState.fractionToShade)
+        assertThat(emptyShadeView.viewState.alpha).isEqualTo(expected)
     }
 
     @Test
@@ -886,7 +902,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     fun shadeClosed_hunShouldHaveFullShadow() {
         // Given: shade is closed, ambientState.stackTranslation == -ambientState.topPadding,
         // the height of HUN is equal to the height of QQS Panel,
-        ambientState.stackTranslation = -ambientState.topPadding
+        ambientState.stackTranslation = (-ambientState.topPadding).toFloat()
         // Mock the height of shade
         ambientState.setLayoutMinHeight(1000)
         val childHunView =
@@ -914,7 +930,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     fun draggingHunToOpenShade_hunShouldHavePartialShadow() {
         // Given: shade is closed when HUN pops up,
         // now drags down the HUN to open shade
-        ambientState.stackTranslation = -ambientState.topPadding
+        ambientState.stackTranslation = (-ambientState.topPadding).toFloat()
         // Mock the height of shade
         ambientState.setLayoutMinHeight(1000)
         val childHunView =

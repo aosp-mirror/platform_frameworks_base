@@ -109,7 +109,7 @@ public final class MediaProjection {
         try {
             final Callback c = Objects.requireNonNull(callback);
             if (handler == null) {
-                handler = new Handler();
+                handler = new Handler(mContext.getMainLooper());
             }
             mCallbacks.put(c, new CallbackRecord(c, handler));
         } catch (NullPointerException e) {

@@ -37,6 +37,9 @@
         <item>400</item>
     </integer-array>
 
+    <!-- Whether to use deadzone with nav bar -->
+    <bool name="config_useDeadZone">true</bool>
+
     <!-- decay duration (from size_max -> size), in ms -->
     <integer name="navigation_bar_deadzone_hold">333</integer>
     <integer name="navigation_bar_deadzone_decay">333</integer>
@@ -70,6 +73,9 @@
     <!-- The number of rows in the QuickSettings -->
     <integer name="quick_settings_max_rows">4</integer>
 
+    <!-- The number of columns in the infinite grid QuickSettings -->
+    <integer name="quick_settings_infinite_grid_num_columns">4</integer>
+
     <!-- Override column number for quick settings.
     For now, this value has effect only when flag lockscreen.enable_landscape is enabled.
     TODO (b/293252410) - change this comment/resource when flag is enabled -->
@@ -101,7 +107,7 @@
 
     <!-- Tiles native to System UI. Order should match "quick_settings_tiles_default" -->
     <string name="quick_settings_tiles_stock" translatable="false">
-        internet,bt,flashlight,dnd,alarm,airplane,controls,wallet,rotation,battery,cast,screenrecord,mictoggle,cameratoggle,location,hotspot,inversion,saver,dark,work,night,reverse,reduce_brightness,qr_code_scanner,onehanded,color_correction,dream,font_scaling,record_issue
+        internet,bt,flashlight,dnd,alarm,airplane,controls,wallet,rotation,battery,cast,screenrecord,mictoggle,cameratoggle,location,hotspot,inversion,saver,dark,work,night,reverse,reduce_brightness,qr_code_scanner,onehanded,color_correction,dream,font_scaling,record_issue,hearing_devices
     </string>
 
     <!-- The tiles to display in QuickSettings -->
@@ -116,14 +122,25 @@
          The syntax is setting-name:spec. If the tile is a TileService, the spec should be specified
          as custom(package/class). Relative class name is supported. -->
     <string-array name="config_quickSettingsAutoAdd" translatable="false">
-        <item>accessibility_display_daltonizer_enabled:color_correction</item>
-        <item>accessibility_display_inversion_enabled:inversion</item>
-        <item>one_handed_mode_enabled:onehanded</item>
         <item>accessibility_font_scaling_has_been_changed:font_scaling</item>
     </string-array>
 
     <!-- Use collapsed layout for media player in landscape QQS -->
     <bool name="config_quickSettingsMediaLandscapeCollapsed">true</bool>
+
+    <!-- For hearing devices related tool list. Need to be in ComponentName format (package/class).
+         Should be activity to be launched.
+         Already contains tool that holds intent: "com.android.settings.action.live_caption".
+         Maximum number is 3. -->
+    <string-array name="config_quickSettingsHearingDevicesRelatedToolName" translatable="false">
+    </string-array>
+
+    <!-- The drawable resource names. If provided, it will replace the corresponding icons in
+         config_quickSettingsHearingDevicesRelatedToolName. Can be empty to use original icons.
+         Already contains tool that holds intent: "com.android.settings.action.live_caption".
+         Maximum number is 3. -->
+    <string-array name="config_quickSettingsHearingDevicesRelatedToolIcon" translatable="false">
+    </string-array>
 
     <!-- Show indicator for Wifi on but not connected. -->
     <bool name="config_showWifiIndicatorWhenEnabled">false</bool>
@@ -345,9 +362,6 @@
          the notification is not swiped enough to dismiss it. -->
     <bool name="config_showNotificationGear">true</bool>
 
-    <!-- Whether or not a background should be drawn behind a notification. -->
-    <bool name="config_drawNotificationBackground">false</bool>
-
     <!-- Whether or the notifications can be shown and dismissed with a drag. -->
     <bool name="config_enableNotificationShadeDrag">true</bool>
 
@@ -464,10 +478,11 @@
          This name is in the ComponentName flattened format (package/class)  -->
     <string name="config_screenshotEditor" translatable="false"></string>
 
-    <!-- ComponentName for the file browsing app that the system would expect to be used in work
-         profile. The icon for this app will be shown to the user when informing them that a
-         screenshot has been saved to work profile. If blank, a default icon will be shown. -->
-    <string name="config_sceenshotWorkProfileFilesApp" translatable="false"></string>
+    <!-- ComponentName for the file browsing app that the system would expect to be used for
+         screenshots. The icon for this app will be shown to the user when informing them that a
+         screenshot has been saved to a different profile (e.g. work profile). If blank, a default
+         icon will be shown. -->
+    <string name="config_screenshotFilesApp" translatable="false"></string>
 
     <!-- The component name of the screenshot editing activity that provides the App Clips flow.
          The App Clips flow includes taking a screenshot, showing user screenshot cropping activity
@@ -637,8 +652,12 @@
         58.0001 29.2229,56.9551 26.8945,55.195
     </string>
 
-    <!-- The time (in ms) needed to trigger the lock icon view's long-press affordance -->
+    <!-- The time (in ms) needed to trigger the device entry icon view's long-press affordance -->
     <integer name="config_lockIconLongPress" translatable="false">200</integer>
+
+    <!-- The time (in ms) needed to trigger the device entry icon view's long-press affordance
+         when the device supports an under-display fingerprint sensor -->
+    <integer name="config_udfpsDeviceEntryIconLongPress" translatable="false">100</integer>
 
     <!-- package name of a built-in camera app to use to restrict implicit intent resolution
          when the double-press power gesture is used. Ignored if empty. -->
@@ -714,6 +733,20 @@
          Message ids correspond with the acquired ids in BiometricFaceConstants -->
     <integer-array name="config_face_help_msgs_when_fingerprint_enrolled">
         <item>3</item> <!-- TOO_DARK -->
+        <item>25</item> <!-- DARK_GLASSES -->
+        <item>26</item> <!-- MOUTH_COVERING_DETECTED -->
+    </integer-array>
+
+    <!-- Which face help messages to surface when fingerprint is enrolled and device is unfolded.
+     Message ids correspond with the acquired ids in BiometricFaceConstants -->
+    <integer-array name="config_face_help_msgs_when_fingerprint_enrolled_unfolded">
+        <item>3</item> <!-- TOO_DARK -->
+        <item>4</item> <!-- TOO_CLOSE -->
+        <item>5</item> <!-- TOO_FAR -->
+        <item>6</item> <!-- TOO_HIGH -->
+        <item>7</item> <!-- TOO_LOW -->
+        <item>8</item> <!-- TOO_RIGHT -->
+        <item>9</item> <!-- TOO_LEFT -->
         <item>25</item> <!-- DARK_GLASSES -->
         <item>26</item> <!-- MOUTH_COVERING_DETECTED -->
     </integer-array>
@@ -1013,4 +1046,7 @@
 
     <!-- Whether volume panel should use the large screen layout or not -->
     <bool name="volume_panel_is_large_screen">false</bool>
+
+    <!-- The width of the shortcut helper container, as a fraction of the screen's width. -->
+    <item name="shortcut_helper_screen_width_fraction" format="float" type="dimen">1.0</item>
 </resources>

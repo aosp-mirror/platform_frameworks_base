@@ -91,27 +91,6 @@ class PrimaryBouncerToLockscreenTransitionViewModelTest : SysuiTestCase() {
             assertThat(bgViewAlpha).isEqualTo(1f)
         }
 
-    @Test
-    fun deviceEntryBackgroundViewAlpha_rearFpEnrolled_noUpdates() =
-        testScope.runTest {
-            fingerprintPropertyRepository.supportsRearFps()
-            val bgViewAlpha by collectLastValue(underTest.deviceEntryBackgroundViewAlpha)
-            keyguardTransitionRepository.sendTransitionStep(step(0f, TransitionState.STARTED))
-            assertThat(bgViewAlpha).isNull()
-
-            keyguardTransitionRepository.sendTransitionStep(step(0.5f))
-            assertThat(bgViewAlpha).isNull()
-
-            keyguardTransitionRepository.sendTransitionStep(step(.75f))
-            assertThat(bgViewAlpha).isNull()
-
-            keyguardTransitionRepository.sendTransitionStep(step(1f))
-            assertThat(bgViewAlpha).isNull()
-
-            keyguardTransitionRepository.sendTransitionStep(step(1f, TransitionState.FINISHED))
-            assertThat(bgViewAlpha).isNull()
-        }
-
     private fun step(
         value: Float,
         state: TransitionState = TransitionState.RUNNING

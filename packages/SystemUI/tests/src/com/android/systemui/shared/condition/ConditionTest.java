@@ -31,13 +31,13 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 
+import kotlinx.coroutines.CoroutineScope;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import kotlinx.coroutines.CoroutineScope;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)

@@ -32,7 +32,6 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMA
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 
-import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
 import static com.android.wm.shell.sysui.ShellSharedConstants.KEY_EXTRA_SHELL_DRAG_AND_DROP;
 
 import android.app.ActivityManager;
@@ -67,8 +66,8 @@ import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.ExternalInterfaceBinder;
 import com.android.wm.shell.common.RemoteCallable;
 import com.android.wm.shell.common.ShellExecutor;
-import com.android.wm.shell.common.annotations.ExternalMainThread;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
+import com.android.wm.shell.shared.annotations.ExternalMainThread;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
@@ -316,7 +315,8 @@ public class DragAndDropController implements RemoteCallable<DragAndDropControll
                 }
                 // TODO(b/290391688): Also update the session data with task stack changes
                 pd.dragSession = new DragSession(ActivityTaskManager.getInstance(),
-                        mDisplayController.getDisplayLayout(displayId), event.getClipData());
+                        mDisplayController.getDisplayLayout(displayId), event.getClipData(),
+                        event.getDragFlags());
                 pd.dragSession.update();
                 pd.activeDragCount++;
                 pd.dragLayout.prepare(pd.dragSession, mLogger.logStart(pd.dragSession));

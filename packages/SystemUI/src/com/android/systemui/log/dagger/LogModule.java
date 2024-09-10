@@ -364,6 +364,16 @@ public class LogModule {
         return factory.create("MediaCarouselCtlrLog", 20);
     }
 
+    /**
+     * Provides a buffer for media loading changes
+     */
+    @Provides
+    @SysUISingleton
+    @MediaLoadingLog
+    public static LogBuffer providesMediaLoadingLogBuffer(LogBufferFactory factory) {
+        return factory.create("MediaLoadingLog", 20);
+    }
+
     /** Allows logging buffers to be tweaked via adb on debug builds but not on prod builds. */
     @Provides
     @SysUISingleton
@@ -458,7 +468,7 @@ public class LogModule {
     @SysUISingleton
     @CarrierTextManagerLog
     public static LogBuffer provideCarrierTextManagerLog(LogBufferFactory factory) {
-        return factory.create("CarrierTextManagerLog", 100);
+        return factory.create("CarrierTextManagerLog", 400);
     }
 
     /**
@@ -654,4 +664,13 @@ public class LogModule {
     public static LogBuffer provideNavbarOrientationTrackingLogBuffer(LogBufferFactory factory) {
         return factory.create("NavbarOrientationTrackingLog", 50);
     }
+
+    /** Provides a {@link LogBuffer} for use by the DeviceEntryIcon and related classes. */
+    @Provides
+    @SysUISingleton
+    @DeviceEntryIconLog
+    public static LogBuffer provideDeviceEntryIconLogBuffer(LogBufferFactory factory) {
+        return factory.create("DeviceEntryIconLog", 100);
+    }
+
 }

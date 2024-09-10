@@ -23,20 +23,20 @@ import android.hardware.radio.IAnnouncementListener;
 import android.hardware.radio.ICloseHandle;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.server.utils.Slogf;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
-public class AnnouncementAggregator extends ICloseHandle.Stub {
+public final class AnnouncementAggregator extends ICloseHandle.Stub {
     private static final String TAG = "BcRadio2Srv.AnnAggr";
 
     private final Object mLock;
-    @NonNull private final IAnnouncementListener mListener;
+    private final IAnnouncementListener mListener;
     private final IBinder.DeathRecipient mDeathRecipient = new DeathRecipient();
 
     @GuardedBy("mLock")
@@ -77,14 +77,16 @@ public class AnnouncementAggregator extends ICloseHandle.Stub {
         public void binderDied() {
             try {
                 close();
-            } catch (RemoteException ex) {}
+            } catch (RemoteException ex) {
+                Slogf.e(TAG, ex, "Cannot close Announcement aggregator for DeathRecipient");
+            }
         }
     }
 
     private void onListUpdated() {
         synchronized (mLock) {
             if (mIsClosed) {
-                Slog.e(TAG, "Announcement aggregator is closed, it shouldn't receive callbacks");
+                Slogf.e(TAG, "Announcement aggregator is closed, it shouldn't receive callbacks");
                 return;
             }
             List<Announcement> combined = new ArrayList<>();
@@ -94,7 +96,7 @@ public class AnnouncementAggregator extends ICloseHandle.Stub {
             try {
                 mListener.onListUpdated(combined);
             } catch (RemoteException ex) {
-                Slog.e(TAG, "mListener.onListUpdated() failed: ", ex);
+                Slogf.e(TAG, "mListener.onListUpdated() failed: ", ex);
             }
         }
     }
@@ -111,7 +113,7 @@ public class AnnouncementAggregator extends ICloseHandle.Stub {
             try {
                 closeHandle = module.addAnnouncementListener(enabledTypes, watcher);
             } catch (RemoteException ex) {
-                Slog.e(TAG, "Failed to add announcement listener", ex);
+                Slogf.e(TAG, "Failed to add announcement listener", ex);
                 return;
             }
             watcher.setCloseHandle(closeHandle);

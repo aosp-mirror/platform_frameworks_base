@@ -37,6 +37,7 @@ import com.android.internal.jank.Cuj.CujType
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.util.maybeForceFullscreen
 import com.android.systemui.util.registerAnimationOnBackInvoked
+import java.util.concurrent.Executor
 import kotlin.math.roundToInt
 
 private const val TAG = "DialogTransitionAnimator"
@@ -55,10 +56,16 @@ private const val TAG = "DialogTransitionAnimator"
 class DialogTransitionAnimator
 @JvmOverloads
 constructor(
+    private val mainExecutor: Executor,
     private val callback: Callback,
     private val interactionJankMonitor: InteractionJankMonitor,
     private val featureFlags: AnimationFeatureFlags,
-    private val transitionAnimator: TransitionAnimator = TransitionAnimator(TIMINGS, INTERPOLATORS),
+    private val transitionAnimator: TransitionAnimator =
+        TransitionAnimator(
+            mainExecutor,
+            TIMINGS,
+            INTERPOLATORS,
+        ),
     private val isForTesting: Boolean = false,
 ) {
     private companion object {
@@ -711,7 +718,6 @@ private class AnimatedDialog(
         dialog.setDismissOverride(this::onDialogDismissed)
 
         if (featureFlags.isPredictiveBackQsDialogAnim) {
-            // TODO(b/265923095) Improve animations for QS dialogs on configuration change
             dialog.registerAnimationOnBackInvoked(targetView = dialogContentWithBackground)
         }
 
@@ -917,6 +923,12 @@ private class AnimatedDialog(
                         endController.transitionContainer = value
                     }
 
+                // We tell TransitionController that this is always a launch, and handle the launch
+                // vs return logic internally.
+                // TODO(b/323863002): maybe move the launch vs return logic out of this class and
+                //     delegate it to TransitionController?
+                override val isLaunching: Boolean = true
+
                 override fun createAnimatorState(): TransitionAnimator.State {
                     return startController.createAnimatorState()
                 }
@@ -944,6 +956,8 @@ private class AnimatedDialog(
                     // [Controller.onLaunchAnimationEnd], leaving this Choreographer frame, ensuring
                     // that the move of the content back to its original window will be reflected in
                     // the next frame right after [onLaunchAnimationEnd] is called.
+                    //
+                    // TODO(b/330672236): Move this to TransitionAnimator.
                     dialog.context.mainExecutor.execute {
                         startController.onTransitionAnimationEnd(isExpandingFullyAbove)
                         endController.onTransitionAnimationEnd(isExpandingFullyAbove)

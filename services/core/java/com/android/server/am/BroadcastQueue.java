@@ -75,12 +75,6 @@ public abstract class BroadcastQueue {
         }
     }
 
-    static void checkStateWtf(boolean expression, @NonNull String msg) {
-        if (!expression) {
-            Slog.wtf(TAG, new IllegalStateException(msg));
-        }
-    }
-
     static int traceBegin(@NonNull String methodName) {
         final int cookie = methodName.hashCode();
         Trace.asyncTraceForTrackBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
@@ -99,8 +93,6 @@ public abstract class BroadcastQueue {
     }
 
     public abstract void start(@NonNull ContentResolver resolver);
-
-    public abstract boolean isDelayBehindServices();
 
     /**
      * Return the preferred scheduling group for the given process, typically

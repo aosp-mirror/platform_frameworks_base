@@ -168,17 +168,16 @@ public class SettingsInjector {
     /**
      * Gets a list of preferences that other apps have injected.
      *
-     * @param profileId Identifier of the user/profile to obtain the injected settings for or
-     *                  UserHandle.USER_CURRENT for all profiles associated with current user.
+     * @param profiles UserHandles of the users/profiles for which to obtain the injected settings.
      */
     public Map<Integer, List<Preference>> getInjectedSettings(Context prefContext,
-            final int profileId) {
+            final Set<UserHandle> profiles) {
         final UserManager um = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
-        final List<UserHandle> profiles = um.getUserProfiles();
+        final List<UserHandle> allProfilesForUser = um.getUserProfiles();
         final ArrayMap<Integer, List<Preference>> result = new ArrayMap<>();
         mSettings.clear();
-        for (UserHandle userHandle : profiles) {
-            if (profileId == UserHandle.USER_CURRENT || profileId == userHandle.getIdentifier()) {
+        for (UserHandle userHandle : allProfilesForUser) {
+            if (profiles.contains(userHandle)) {
                 final List<Preference> prefs = new ArrayList<>();
                 Iterable<InjectedSetting> settings = getSettings(userHandle);
                 for (InjectedSetting setting : settings) {

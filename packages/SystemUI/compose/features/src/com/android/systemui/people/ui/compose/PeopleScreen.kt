@@ -36,7 +36,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
@@ -46,6 +45,7 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.people.ui.viewmodel.PeopleTileViewModel
@@ -64,8 +64,8 @@ fun PeopleScreen(
     viewModel: PeopleViewModel,
     onResult: (PeopleViewModel.Result) -> Unit,
 ) {
-    val priorityTiles by viewModel.priorityTiles.collectAsState()
-    val recentTiles by viewModel.recentTiles.collectAsState()
+    val priorityTiles by viewModel.priorityTiles.collectAsStateWithLifecycle()
+    val recentTiles by viewModel.recentTiles.collectAsStateWithLifecycle()
 
     // Call [onResult] this activity when the ViewModel tells us so.
     LaunchedEffect(viewModel.result) {

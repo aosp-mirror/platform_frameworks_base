@@ -24,11 +24,11 @@ import kotlinx.coroutines.flow.asStateFlow
 
 class FakeMediaControllerRepository : MediaControllerRepository {
 
-    private val mutableActiveLocalMediaController = MutableStateFlow<MediaController?>(null)
-    override val activeLocalMediaController: StateFlow<MediaController?> =
-        mutableActiveLocalMediaController.asStateFlow()
+    private val mutableActiveSessions = MutableStateFlow<List<MediaController>>(emptyList())
+    override val activeSessions: StateFlow<List<MediaController>>
+        get() = mutableActiveSessions.asStateFlow()
 
-    fun setActiveLocalMediaController(controller: MediaController?) {
-        mutableActiveLocalMediaController.value = controller
+    fun setActiveSessions(sessions: List<MediaController>) {
+        mutableActiveSessions.value = sessions
     }
 }

@@ -36,10 +36,9 @@ import androidx.core.animation.Animator;
 import androidx.core.animation.AnimatorListenerAdapter;
 import androidx.core.animation.ObjectAnimator;
 
-import com.android.systemui.res.R;
-
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.InteractionJankMonitor;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.policy.ScrollAdapter;
@@ -568,6 +567,11 @@ public class ExpandHelper implements Gefingerpoken {
                     " mNaturalHeight: " + mNaturalHeight);
         InteractionJankMonitor.getInstance().begin(v, CUJ_NOTIFICATION_SHADE_ROW_EXPAND);
         return true;
+    }
+
+    /** Finish the current expand motion without accounting for velocity. */
+    public void finishExpanding() {
+        finishExpanding(false, 0);
     }
 
     /**

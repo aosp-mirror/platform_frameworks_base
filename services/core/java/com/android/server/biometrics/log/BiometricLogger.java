@@ -16,13 +16,14 @@
 
 package com.android.server.biometrics.log;
 
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ACQUIRED_START;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.SensorManager;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricsProtoEnums;
-import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.util.Slog;
 
@@ -137,7 +138,7 @@ public class BiometricLogger {
         final boolean isFingerprint = mStatsModality == BiometricsProtoEnums.MODALITY_FINGERPRINT;
         if (isFace || isFingerprint) {
             if ((isFingerprint && acquiredInfo == FingerprintManager.FINGERPRINT_ACQUIRED_START)
-                    || (isFace && acquiredInfo == FaceManager.FACE_ACQUIRED_START)) {
+                    || (isFace && acquiredInfo == FACE_ACQUIRED_START)) {
                 mFirstAcquireTimeMs = System.currentTimeMillis();
             }
         } else if (acquiredInfo == BiometricConstants.BIOMETRIC_ACQUIRED_GOOD) {

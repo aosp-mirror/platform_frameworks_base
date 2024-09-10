@@ -36,6 +36,7 @@ import static org.mockito.Mockito.verify;
 
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.Intent;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiPortInfo;
@@ -98,6 +99,8 @@ public class HdmiCecAtomLoggingTest {
                 audioFramework.getAudioManager(), audioFramework.getAudioDeviceVolumeManager()));
         doNothing().when(mHdmiControlServiceSpy)
                 .writeStringSystemProperty(anyString(), anyString());
+        doNothing().when(mHdmiControlServiceSpy)
+                .sendBroadcastAsUser(any(Intent.class));
         doReturn(mHdmiCecAtomWriterSpy).when(mHdmiControlServiceSpy).getAtomWriter();
         HdmiCecConfig hdmiCecConfig = new FakeHdmiCecConfig(mContextSpy);
         doReturn(hdmiCecConfig).when(mHdmiControlServiceSpy).getHdmiCecConfig();

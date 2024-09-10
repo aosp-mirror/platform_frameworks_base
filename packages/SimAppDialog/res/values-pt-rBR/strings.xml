@@ -22,5 +22,5 @@
     <string name="install_carrier_app_description" msgid="4014303558674923797">"Para que o novo chip funcione corretamente, instale o app <xliff:g id="ID_1">%1$s</xliff:g>"</string>
     <string name="install_carrier_app_description_default" msgid="7356830245205847840">"Para que o novo chip funcione corretamente, instale o app da operadora"</string>
     <string name="install_carrier_app_defer_action" msgid="2558576736886876209">"Agora não"</string>
-    <string name="install_carrier_app_download_action" msgid="7859229305958538064">"Fazer o download do app"</string>
+    <string name="install_carrier_app_download_action" msgid="7859229305958538064">"Baixar o app"</string>
 </resources>

@@ -101,6 +101,7 @@ import com.android.internal.pm.pkg.component.ParsedServiceImpl;
 import com.android.internal.pm.pkg.component.ParsedUsesPermission;
 import com.android.internal.pm.pkg.component.ParsedUsesPermissionImpl;
 import com.android.internal.pm.pkg.parsing.ParsingPackage;
+import com.android.internal.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.pm.parsing.PackageCacher;
 import com.android.server.pm.parsing.PackageInfoUtils;
@@ -126,6 +127,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -154,6 +156,7 @@ public class PackageParserTest {
     private static final String TEST_APP5_APK = "PackageParserTestApp5.apk";
     private static final String TEST_APP6_APK = "PackageParserTestApp6.apk";
     private static final String TEST_APP7_APK = "PackageParserTestApp7.apk";
+    private static final String TEST_APP8_APK = "PackageParserTestApp8.apk";
     private static final String PACKAGE_NAME = "com.android.servicestests.apps.packageparserapp";
 
     @Before
@@ -809,6 +812,39 @@ public class PackageParserTest {
                         PackageUserStateInternal.DEFAULT, appInfo, 0, pkgSetting)
                         .metaData);
             }
+        } finally {
+            testFile.delete();
+        }
+    }
+
+    @Test
+    @RequiresFlagsEnabled(android.content.res.Flags.FLAG_MANIFEST_FLAGGING)
+    public void testParseWithFeatureFlagAttributes() throws Exception {
+        final File testFile = extractFile(TEST_APP8_APK);
+        try (PackageParser2 parser = new TestPackageParser2()) {
+            Map<String, Boolean> flagValues = new HashMap<>();
+            flagValues.put("my.flag1", true);
+            flagValues.put("my.flag2", false);
+            flagValues.put("my.flag3", false);
+            flagValues.put("my.flag4", true);
+            ParsingPackageUtils.getAconfigFlags().addFlagValuesForTesting(flagValues);
+
+            // The manifest has:
+            //    <permission android:name="PERM1" android:featureFlag="my.flag1 " />
+            //    <permission android:name="PERM2" android:featureFlag=" !my.flag2" />
+            //    <permission android:name="PERM3" android:featureFlag="my.flag3" />
+            //    <permission android:name="PERM4" android:featureFlag="!my.flag4" />
+            //    <permission android:name="PERM5" android:featureFlag="unknown.flag" />
+            // Therefore with the above flag values, only PERM1 and PERM2 should be present.
+
+            final ParsedPackage pkg = parser.parsePackage(testFile, 0, false);
+            List<String> permissionNames =
+                    pkg.getPermissions().stream().map(ParsedComponent::getName).toList();
+            assertThat(permissionNames).contains(PACKAGE_NAME + ".PERM1");
+            assertThat(permissionNames).contains(PACKAGE_NAME + ".PERM2");
+            assertThat(permissionNames).doesNotContain(PACKAGE_NAME + ".PERM3");
+            assertThat(permissionNames).doesNotContain(PACKAGE_NAME + ".PERM4");
+            assertThat(permissionNames).doesNotContain(PACKAGE_NAME + ".PERM5");
         } finally {
             testFile.delete();
         }

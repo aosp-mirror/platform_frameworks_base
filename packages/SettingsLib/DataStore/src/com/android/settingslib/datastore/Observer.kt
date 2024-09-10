@@ -18,33 +18,8 @@ package com.android.settingslib.datastore
 
 import androidx.annotation.AnyThread
 import androidx.annotation.GuardedBy
-import androidx.annotation.IntDef
 import java.util.WeakHashMap
 import java.util.concurrent.Executor
-
-/** The reason of a change. */
-@IntDef(
-    ChangeReason.UNKNOWN,
-    ChangeReason.UPDATE,
-    ChangeReason.DELETE,
-    ChangeReason.RESTORE,
-    ChangeReason.SYNC_ACROSS_PROFILES,
-)
-@Retention(AnnotationRetention.SOURCE)
-annotation class ChangeReason {
-    companion object {
-        /** Unknown reason of the change. */
-        const val UNKNOWN = 0
-        /** Data is updated. */
-        const val UPDATE = 1
-        /** Data is deleted. */
-        const val DELETE = 2
-        /** Data is restored from backup/restore framework. */
-        const val RESTORE = 3
-        /** Data is synced from another profile (e.g. personal profile to work profile). */
-        const val SYNC_ACROSS_PROFILES = 4
-    }
-}
 
 /**
  * Callback to be informed of changes in [Observable] object.
@@ -60,7 +35,7 @@ fun interface Observer {
      * @param reason the reason of change
      * @see [Observable.addObserver] for the notices.
      */
-    fun onChanged(@ChangeReason reason: Int)
+    fun onChanged(reason: Int)
 }
 
 /** An observable object allows to observe change with [Observer]. */
@@ -90,7 +65,7 @@ interface Observable {
      *
      * @param reason reason of the change
      */
-    fun notifyChange(@ChangeReason reason: Int)
+    fun notifyChange(reason: Int)
 }
 
 /** A thread safe implementation of [Observable]. */
@@ -110,7 +85,7 @@ class DataObservable : Observable {
         synchronized(observers) { observers.remove(observer) }
     }
 
-    override fun notifyChange(@ChangeReason reason: Int) {
+    override fun notifyChange(reason: Int) {
         // make a copy to avoid potential ConcurrentModificationException
         val entries = synchronized(observers) { observers.entries.toTypedArray() }
         for (entry in entries) {

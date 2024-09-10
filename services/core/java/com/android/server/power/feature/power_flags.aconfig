@@ -10,3 +10,11 @@ flag {
     bug: "309861917"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "improve_wakelock_latency"
+    namespace: "power"
+    description: "Feature flag for tracking the optimizations to improve the latency of acquiring and releasing a wakelock."
+    bug: "339590565"
+    is_fixed_read_only: true
+}

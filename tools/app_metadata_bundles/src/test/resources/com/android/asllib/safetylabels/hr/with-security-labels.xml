@@ -1,0 +1,6 @@
+<safety-labels version="12345">
+    <security-labels
+        isDataDeletable="true"
+        isDataEncrypted="false"
+    />
+</safety-labels>

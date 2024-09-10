@@ -16,6 +16,8 @@
 
 package com.android.providers.settings;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.backup.BackupAgentHelper;
 import android.app.backup.BackupDataInput;
@@ -57,6 +59,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.settingslib.display.DisplayDensityConfiguration;
+import com.android.window.flags.Flags;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
@@ -75,7 +78,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.zip.CRC32;
 
 /**
@@ -88,6 +94,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
 
     private static final byte[] NULL_VALUE = new byte[0];
     private static final int NULL_SIZE = -1;
+    private static final float FONT_SCALE_DEF_VALUE = 1.0f;
 
     private static final String KEY_SYSTEM = "system";
     private static final String KEY_SECURE = "secure";
@@ -103,6 +110,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     // fatal crash. Creating a backup with a different key will prevent Android 12 versions from
     // restoring this data.
     private static final String KEY_SIM_SPECIFIC_SETTINGS_2 = "sim_specific_settings_2";
+    private static final String KEY_WIFI_SETTINGS_BACKUP_DATA = "wifi_settings_backup_data";
 
     // Versioning of the state file.  Increment this version
     // number any time the set of state items is altered.
@@ -110,7 +118,6 @@ public class SettingsBackupAgent extends BackupAgentHelper {
 
     // Versioning of the Network Policies backup payload.
     private static final int NETWORK_POLICIES_BACKUP_VERSION = 1;
-
 
     // Slots in the checksum array.  Never insert new items in the middle
     // of this array; new slots must be appended.
@@ -126,8 +133,9 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     private static final int STATE_WIFI_NEW_CONFIG       = 9;
     private static final int STATE_DEVICE_CONFIG         = 10;
     private static final int STATE_SIM_SPECIFIC_SETTINGS = 11;
+    private static final int STATE_WIFI_SETTINGS         = 12;
 
-    private static final int STATE_SIZE                  = 12; // The current number of state items
+    private static final int STATE_SIZE                  = 13; // The current number of state items
 
     // Number of entries in the checksum array at various version numbers
     private static final int STATE_SIZES[] = {
@@ -140,7 +148,8 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             9,              // version 6 added STATE_NETWORK_POLICIES
             10,             // version 7 added STATE_WIFI_NEW_CONFIG
             11,             // version 8 added STATE_DEVICE_CONFIG
-            STATE_SIZE      // version 9 added STATE_SIM_SPECIFIC_SETTINGS
+            12,             // version 9 added STATE_SIM_SPECIFIC_SETTINGS
+            STATE_SIZE      // version 10 added STATE_WIFI_SETTINGS
     };
 
     private static final int FULL_BACKUP_ADDED_GLOBAL = 2;  // added the "global" entry
@@ -208,10 +217,19 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     // Populated in onRestore().
     private int mRestoredFromSdkInt;
 
+    // The available font scale for the current device
+    @Nullable
+    private String[] mAvailableFontScales;
+
+    // The font_scale default value for this device.
+    private float mDefaultFontScale;
+
     @Override
     public void onCreate() {
         if (DEBUG_BACKUP) Log.d(TAG, "onCreate() invoked");
-
+        mDefaultFontScale = getBaseContext().getResources().getFloat(R.dimen.def_device_font_scale);
+        mAvailableFontScales = getBaseContext().getResources()
+                .getStringArray(R.array.entryvalues_font_size);
         mSettingsHelper = new SettingsHelper(this);
         mWifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
         super.onCreate();
@@ -230,6 +248,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         byte[] wifiFullConfigData = getNewWifiConfigData();
         byte[] deviceSpecificInformation = getDeviceSpecificConfiguration();
         byte[] simSpecificSettingsData = getSimSpecificSettingsData();
+        byte[] wifiSettingsData = getWifiSettingsBackupData();
 
         long[] stateChecksums = readOldChecksums(oldState);
 
@@ -265,6 +284,9 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         stateChecksums[STATE_SIM_SPECIFIC_SETTINGS] =
                 writeIfChanged(stateChecksums[STATE_SIM_SPECIFIC_SETTINGS],
                         KEY_SIM_SPECIFIC_SETTINGS_2, simSpecificSettingsData, data);
+        stateChecksums[STATE_WIFI_SETTINGS] =
+                writeIfChanged(stateChecksums[STATE_WIFI_SETTINGS],
+                        KEY_WIFI_SETTINGS_BACKUP_DATA, wifiSettingsData, data);
 
         writeNewChecksums(stateChecksums, newState);
     }
@@ -413,7 +435,13 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                     data.readEntityData(restoredSimSpecificSettings, 0, size);
                     restoreSimSpecificSettings(restoredSimSpecificSettings);
                     break;
-
+                case KEY_WIFI_SETTINGS_BACKUP_DATA:
+                    byte[] restoredWifiData = new byte[size];
+                    data.readEntityData(restoredWifiData, 0, size);
+                    if (!isWatch()) {
+                        restoreWifiData(restoredWifiData);
+                    }
+                    break;
                 default :
                     data.skipEntityData();
 
@@ -917,11 +945,54 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                     continue;
                 }
             }
+
+            if (Settings.System.FONT_SCALE.equals(key)) {
+                // If the current value is different from the default it means that it's been
+                // already changed for a11y reason. In that case we don't need to restore
+                // the new value.
+                final float currentValue = Settings.System.getFloat(cr, Settings.System.FONT_SCALE,
+                        mDefaultFontScale);
+                if (currentValue != mDefaultFontScale) {
+                    Log.d(TAG, "Font scale not restored because changed for a11y reason.");
+                    continue;
+                }
+                final String toRestore = value;
+                value = findClosestAllowedFontScale(value, mAvailableFontScales);
+                Log.d(TAG, "Restored font scale from: " + toRestore + " to " + value);
+            }
+
+
             settingsHelper.restoreValue(this, cr, contentValues, destination, key, value,
                     mRestoredFromSdkInt);
 
             Log.d(TAG, "Restored setting: " + destination + " : " + key + "=" + value);
         }
+    }
+
+
+    @VisibleForTesting
+    static String findClosestAllowedFontScale(@NonNull String requestedFontScale,
+            @NonNull String[] availableFontScales) {
+        if (Flags.configurableFontScaleDefault()) {
+            final float requestedValue = Float.parseFloat(requestedFontScale);
+            // Whatever is the requested value, we search the closest allowed value which is
+            // equals or larger. Note that if the requested value is the previous default,
+            // and this is still available, the value will be preserved.
+            float candidate = 0.0f;
+            boolean fontScaleFound = false;
+            for (int i = 0; !fontScaleFound && i < availableFontScales.length; i++) {
+                final float fontScale = Float.parseFloat(availableFontScales[i]);
+                if (fontScale >= requestedValue) {
+                    candidate = fontScale;
+                    fontScaleFound = true;
+                }
+            }
+            // If the current value is greater than all the allowed ones, we return the
+            // largest possible.
+            return fontScaleFound ? String.valueOf(candidate) : String.valueOf(
+                    availableFontScales[availableFontScales.length - 1]);
+        }
+        return requestedFontScale;
     }
 
     @VisibleForTesting
@@ -1133,16 +1204,15 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             // Depending on device hardware, we may need to notify the user of a setting change
             SoftApConfiguration storedConfig = mWifiManager.getSoftApConfiguration();
 
-            if (isNeedToNotifyUserConfigurationHasChanged(configInCloud, storedConfig)) {
-                Log.d(TAG, "restored ap configuration requires a conversion, notify the user"
+            if (isConfigurationHasChanged(configInCloud, storedConfig)) {
+                Log.d(TAG, "restored ap configuration requires a conversion: "
                         + ", configInCloud is " + configInCloud + " but storedConfig is "
                         + storedConfig);
-                WifiSoftApConfigChangedNotifier.notifyUserOfConfigConversion(this);
             }
         }
     }
 
-    private boolean isNeedToNotifyUserConfigurationHasChanged(SoftApConfiguration configInCloud,
+    private boolean isConfigurationHasChanged(SoftApConfiguration configInCloud,
             SoftApConfiguration storedConfig) {
         // Check if the cloud configuration was modified when restored to the device.
         // All elements of the configuration are compared except:
@@ -1345,6 +1415,45 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             SubscriptionManager subManager = SubscriptionManager.from(getBaseContext());
             subManager.restoreAllSimSpecificSettingsFromBackup(data);
         }
+    }
+
+    private static final class Mutable<E> {
+        public volatile E value;
+
+        Mutable() {
+            value = null;
+        }
+    }
+
+    private byte[] getWifiSettingsBackupData() {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final Mutable<byte[]> backupWifiData = new Mutable<byte[]>();
+
+        try {
+            mWifiManager.retrieveWifiBackupData(getBaseContext().getMainExecutor(),
+                    new Consumer<byte[]>() {
+                        @Override
+                        public void accept(byte[] value) {
+                            backupWifiData.value = value;
+                            latch.countDown();
+                        }
+                    });
+            // cts requires B&R with 10 seconds
+            if (latch.await(10, TimeUnit.SECONDS) && backupWifiData.value != null) {
+                return backupWifiData.value;
+            }
+        } catch (InterruptedException ie) {
+            Log.e(TAG, "fail to retrieveWifiBackupData, " + ie);
+        }
+        Log.e(TAG, "fail to retrieveWifiBackupData");
+        return new byte[0];
+    }
+
+    private void restoreWifiData(byte[] data) {
+        if (DEBUG_BACKUP) {
+            Log.v(TAG, "Applying restored all wifi data");
+        }
+        mWifiManager.restoreWifiBackupData(data);
     }
 
     private void updateWindowManagerIfNeeded(Integer previousDensity) {

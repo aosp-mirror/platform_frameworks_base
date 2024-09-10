@@ -29,7 +29,7 @@ import org.junit.runners.Parameterized
 /**
  * Test creating a bubble notification
  *
- * To run this test: `atest WMShellFlickerTests:LaunchBubbleScreen`
+ * To run this test: `atest WMShellFlickerTestsBubbles:SendBubbleNotificationTest`
  *
  * Actions:
  * ```

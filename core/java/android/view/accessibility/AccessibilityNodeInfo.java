@@ -159,7 +159,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * <p> To avoid disconnected trees, this flag will also prefetch the parent. Siblings will be
      * prefetched before descendants.
      *
-     * @see #FLAG_PREFETCH_ANCESTORS for where to use these flags.
+     * <p> See {@link #FLAG_PREFETCH_ANCESTORS} for information on where these flags can be used.
      */
     public static final int FLAG_PREFETCH_SIBLINGS = 1 << 1;
 
@@ -171,7 +171,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * {@link #FLAG_PREFETCH_DESCENDANTS_BREADTH_FIRST} or this will trigger an
      * IllegalArgumentException.
      *
-     * @see #FLAG_PREFETCH_ANCESTORS for where to use these flags.
+     * <p> See {@link #FLAG_PREFETCH_ANCESTORS} for information on where these flags can be used.
      */
     public static final int FLAG_PREFETCH_DESCENDANTS_HYBRID = 1 << 2;
 
@@ -181,7 +181,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * {@link #FLAG_PREFETCH_DESCENDANTS_BREADTH_FIRST} or this will trigger an
      * IllegalArgumentException.
      *
-     * @see #FLAG_PREFETCH_ANCESTORS for where to use these flags.
+     * <p> See {@link #FLAG_PREFETCH_ANCESTORS} for information on where these flags can be used.
      */
     public static final int FLAG_PREFETCH_DESCENDANTS_DEPTH_FIRST = 1 << 3;
 
@@ -191,7 +191,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * {@link #FLAG_PREFETCH_DESCENDANTS_DEPTH_FIRST} or this will trigger an
      * IllegalArgumentException.
      *
-     * @see #FLAG_PREFETCH_ANCESTORS for where to use these flags.
+     * <p> See {@link #FLAG_PREFETCH_ANCESTORS} for information on where these flags can be used.
      */
     public static final int FLAG_PREFETCH_DESCENDANTS_BREADTH_FIRST = 1 << 4;
 
@@ -199,7 +199,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * Prefetching flag that specifies prefetching should not be interrupted by a request to
      * retrieve a node or perform an action on a node.
      *
-     * @see #FLAG_PREFETCH_ANCESTORS for where to use these flags.
+     * <p> See {@link #FLAG_PREFETCH_ANCESTORS} for information on where these flags can be used.
      */
     public static final int FLAG_PREFETCH_UNINTERRUPTIBLE = 1 << 5;
 
@@ -1295,6 +1295,8 @@ public class AccessibilityNodeInfo implements Parcelable {
     /**
      * Get the child at given index.
      *
+     * <p>
+     * See {@link #getParent(int)} for a description of prefetching.
      * @param index The child index.
      * @param prefetchingStrategy the prefetching strategy.
      * @return The child node.
@@ -1302,7 +1304,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @throws IllegalStateException If called outside of an {@link AccessibilityService} and before
      *                               calling {@link #setQueryFromAppProcessEnabled}.
      *
-     * @see AccessibilityNodeInfo#getParent(int) for a description of prefetching.
      */
     @Nullable
     public AccessibilityNodeInfo getChild(int index, @PrefetchingStrategy int prefetchingStrategy) {
@@ -1903,8 +1904,13 @@ public class AccessibilityNodeInfo implements Parcelable {
      * Accessibility service will throttle those content change events and only handle one event
      * per minute for that view.
      * </p>
+     * <p>
+     * Example UI elements that frequently update and may benefit from a duration are progress bars,
+     * timers, and stopwatches.
+     * </p>
      *
-     * @see AccessibilityEvent#getContentChangeTypes for all content change types.
+     * @see AccessibilityEvent#TYPE_WINDOW_CONTENT_CHANGED
+     * @see AccessibilityEvent#getContentChangeTypes
      * @param duration the minimum duration between content change events.
      *                                         Negative duration would be treated as zero.
      */
@@ -3954,7 +3960,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     /**
      * Returns the container title.
      *
-     * @see #setContainerTitle for details.
+     * @see #setContainerTitle
      */
     @Nullable
     public CharSequence getContainerTitle() {
@@ -5161,15 +5167,17 @@ public class AccessibilityNodeInfo implements Parcelable {
      * {@link View#onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo)} and are performed
      * within {@link View#performAccessibilityAction(int, Bundle)}.
      * </p>
+     * <p>
      * <aside class="note">
      * <b>Note:</b> Views which support these actions should invoke
      * {@link View#setImportantForAccessibility(int)} with
      * {@link View#IMPORTANT_FOR_ACCESSIBILITY_YES} to ensure an {@link AccessibilityService}
-     * can discover the set of supported actions.
+     * can discover the set of supported actions. </aside>
      * </p>
+     * <p>
      * <aside class="note">
      * <b>Note:</b> Use {@link androidx.core.view.ViewCompat#addAccessibilityAction(View,
-     * CharSequence, AccessibilityViewCommand)} to register an action directly on the view.
+     * CharSequence, AccessibilityViewCommand)} to register an action directly on the view. </aside>
      * </p>
      */
     public static final class AccessibilityAction implements Parcelable {
@@ -5185,8 +5193,8 @@ public class AccessibilityNodeInfo implements Parcelable {
          * <p>The node that is focused should return {@code true} for
          * {@link AccessibilityNodeInfo#isFocused()}.
          *
-         * @see #ACTION_ACCESSIBILITY_FOCUS for the difference between system and accessibility
-         * focus.
+         * See {@link #ACTION_ACCESSIBILITY_FOCUS} for the difference between system and
+         * accessibility focus.
          */
         public static final AccessibilityAction ACTION_FOCUS =
                 new AccessibilityAction(AccessibilityNodeInfo.ACTION_FOCUS);

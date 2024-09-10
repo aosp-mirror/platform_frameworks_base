@@ -26,8 +26,11 @@
     <string name="profile_name_glasses" msgid="3506504967216601277">"裝置"</string>
     <string name="summary_glasses" msgid="2872254734959842579">"這個應用程式將可取得<xliff:g id="DEVICE_NAME">%1$s</xliff:g>上的這些權限"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"允許「<xliff:g id="APP_NAME">%1$s</xliff:g>」&lt;strong&gt;&lt;/strong&gt;存取手機中的這項資訊"</string>
+    <string name="title_app_streaming_with_mirroring" msgid="3364582597581570658">"要允許「<xliff:g id="APP_NAME">%1$s</xliff:g>」&lt;strong&gt;&lt;/strong&gt;串流傳輸手機的應用程式嗎？"</string>
+    <string name="summary_app_streaming" msgid="295548145144086753">"「%1$s」將可存取手機顯示或播放的所有內容，包括音訊、相片、密碼和訊息。&lt;br/&gt;&lt;br/&gt;「%1$s」將可串流傳輸應用程式，直到你移除這個權限為止。"</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"跨裝置服務"</string>
     <string name="helper_summary_app_streaming" msgid="2396773196949578425">"為了在裝置間串流傳輸應用程式內容，「<xliff:g id="APP_NAME">%1$s</xliff:g>」正在代表 <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> 要求相關權限"</string>
+    <string name="helper_summary_app_streaming_with_mirroring" msgid="6138581029144467467">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」正在代表你的 <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> 要求必要權限，以便在裝置間顯示及串流傳輸應用程式"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
     <string name="title_computer" msgid="4693714143506569253">"允許「<xliff:g id="APP_NAME">%1$s</xliff:g>」&lt;strong&gt;&lt;/strong&gt;存取你手機中的這項資訊"</string>
@@ -35,6 +38,8 @@
     <string name="helper_title_computer" msgid="4671071173916176037">"Google Play 服務"</string>
     <string name="helper_summary_computer" msgid="8774832742608187072">"為了存取手機上的相片、媒體和通知，「<xliff:g id="APP_NAME">%1$s</xliff:g>」正在代表 <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> 要求相關權限"</string>
     <string name="title_nearby_device_streaming" msgid="7269956847378799794">"要允許「<xliff:g id="DEVICE_NAME">%1$s</xliff:g>」&lt;strong&gt;&lt;/strong&gt;執行這項操作嗎？"</string>
+    <string name="title_nearby_device_streaming_with_mirroring" msgid="242855799919611657">"要允許「<xliff:g id="DEVICE_NAME">%1$s</xliff:g>」&lt;strong&gt;&lt;/strong&gt;串流傳輸手機的應用程式及存取系統功能嗎？"</string>
+    <string name="summary_nearby_device_streaming" msgid="4039565463149145573">"「%1$s」將可存取手機顯示或播放的所有內容，包括音訊、相片、付款資訊、密碼和訊息。&lt;br/&gt;&lt;br/&gt;「%1$s」將可串流傳輸應用程式及存取系統功能，直到你移除這個權限為止。"</string>
     <string name="helper_summary_nearby_device_streaming" msgid="2063965070936844876">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」正在代表「<xliff:g id="DEVICE_NAME">%2$s</xliff:g>」要求必要權限，才能在鄰近裝置上串流播放應用程式和其他系統功能"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"裝置"</string>
     <string name="summary_generic" msgid="1761976003668044801">"這個應用程式將可在手機和指定裝置間同步資訊，例如來電者名稱"</string>

@@ -40,6 +40,8 @@ public class ApplicationLoadersTest {
     private static final String LIB_A = "/system/framework/android.hidl.base-V1.0-java.jar";
     // a library installed onto the device which only depends on A
     private static final String LIB_DEP_A = "/system/framework/android.hidl.manager-V1.0-java.jar";
+    // a commonly used, non-BCP, app-facing library installed onto the device
+    private static final String LIB_APACHE_HTTP = "/system/framework/org.apache.http.legacy.jar";
 
     private static SharedLibraryInfo createLib(String zip) {
         return new SharedLibraryInfo(
@@ -136,5 +138,16 @@ public class ApplicationLoadersTest {
         libB.addDependency(libA);
 
         loaders.createAndCacheNonBootclasspathSystemClassLoaders(Lists.newArrayList(libB, libA));
+    }
+
+    @Test
+    public void testCacheApacheHttpLegacy() {
+        ApplicationLoaders loaders = new ApplicationLoaders();
+        SharedLibraryInfo libApacheHttp = createLib(LIB_APACHE_HTTP);
+
+        loaders.createAndCacheNonBootclasspathSystemClassLoaders(Lists.newArrayList(libApacheHttp));
+
+        assertNotNull(loaders.getCachedNonBootclasspathSystemLib(
+                LIB_APACHE_HTTP, null, null, null));
     }
 }

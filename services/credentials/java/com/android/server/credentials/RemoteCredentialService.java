@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.credentials.ClearCredentialStateException;
 import android.credentials.CreateCredentialException;
+import android.credentials.CredentialManager;
 import android.credentials.GetCredentialException;
 import android.os.Binder;
 import android.os.Handler;
@@ -58,7 +59,7 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class RemoteCredentialService extends ServiceConnector.Impl<ICredentialProviderService> {
 
-    private static final String TAG = "RemoteCredentialService";
+    private static final String TAG = CredentialManager.TAG;
     /** Timeout for a single request. */
     private static final long TIMEOUT_REQUEST_MILLIS = 3 * DateUtils.SECOND_IN_MILLIS;
     /** Timeout to unbind after the task queue is empty. */

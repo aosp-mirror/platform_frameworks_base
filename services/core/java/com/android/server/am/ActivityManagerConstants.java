@@ -51,6 +51,7 @@ import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.KeyValueListParser;
 import android.util.Slog;
+import android.util.SparseBooleanArray;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
@@ -162,12 +163,22 @@ final class ActivityManagerConstants extends ContentObserver {
 
     static final String KEY_USE_TIERED_CACHED_ADJ = "use_tiered_cached_adj";
     static final String KEY_TIERED_CACHED_ADJ_DECAY_TIME = "tiered_cached_adj_decay_time";
-    static final String KEY_USE_MODERN_TRIM = "use_modern_trim";
 
     /**
      * Whether or not to enable the new oom adjuster implementation.
      */
     static final String KEY_ENABLE_NEW_OOMADJ = "enable_new_oom_adj";
+
+    /**
+     * Whether or not to enable the batching of OOM adjuster calls to LMKD
+     */
+    static final String KEY_ENABLE_BATCHING_OOM_ADJ = "enable_batching_oom_adj";
+
+    /**
+     * How long to wait before scheduling another follow-up oomAdjuster update for time based state.
+     */
+    static final String KEY_FOLLOW_UP_OOMADJ_UPDATE_WAIT_DURATION =
+            "follow_up_oomadj_update_wait_duration";
 
     private static final int DEFAULT_MAX_CACHED_PROCESSES = 1024;
     private static final boolean DEFAULT_PRIORITIZE_ALARM_BROADCASTS = true;
@@ -231,19 +242,27 @@ final class ActivityManagerConstants extends ContentObserver {
 
     static final long DEFAULT_BACKGROUND_SETTLE_TIME = 60 * 1000;
     static final long DEFAULT_KILL_BG_RESTRICTED_CACHED_IDLE_SETTLE_TIME_MS = 60 * 1000;
-    static final boolean DEFAULT_KILL_BG_RESTRICTED_CACHED_IDLE = true;
+    static final boolean DEFAULT_KILL_BG_RESTRICTED_CACHED_IDLE = false;
 
     static final int DEFAULT_MAX_SERVICE_CONNECTIONS_PER_PROCESS = 3000;
 
     private static final boolean DEFAULT_USE_TIERED_CACHED_ADJ = false;
     private static final long DEFAULT_TIERED_CACHED_ADJ_DECAY_TIME = 60 * 1000;
 
-    private static final boolean DEFAULT_USE_MODERN_TRIM = true;
-
     /**
      * The default value to {@link #KEY_ENABLE_NEW_OOMADJ}.
      */
     private static final boolean DEFAULT_ENABLE_NEW_OOM_ADJ = Flags.oomadjusterCorrectnessRewrite();
+
+    /**
+     * The default value to {@link #KEY_ENABLE_BATCHING_OOM_ADJ}.
+     */
+    private static final boolean DEFAULT_ENABLE_BATCHING_OOM_ADJ = Flags.batchingOomAdj();
+
+    /**
+     * The default value to {@link #KEY_FOLLOW_UP_OOMADJ_UPDATE_WAIT_DURATION}.
+     */
+    private static final long DEFAULT_FOLLOW_UP_OOMADJ_UPDATE_WAIT_DURATION = 1000L;
 
     /**
      * Same as {@link TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED}
@@ -435,6 +454,18 @@ final class ActivityManagerConstants extends ContentObserver {
 
     private static final String KEY_MAX_SERVICE_CONNECTIONS_PER_PROCESS =
             "max_service_connections_per_process";
+
+    private static final String KEY_PROC_STATE_DEBUG_UIDS = "proc_state_debug_uids";
+
+    /**
+     * UIDs we want to print detailed info in OomAdjuster.
+     * It's only used for debugging, and it's almost never updated, so we just create a new
+     * array when it's changed to avoid synchronization.
+     */
+    volatile SparseBooleanArray mProcStateDebugUids = new SparseBooleanArray(0);
+    volatile boolean mEnableProcStateStacktrace = false;
+    volatile int mProcStateDebugSetProcStateDelay = 0;
+    volatile int mProcStateDebugSetUidStateDelay = 0;
 
     // Maximum number of cached processes we will allow.
     public int MAX_CACHED_PROCESSES = DEFAULT_MAX_CACHED_PROCESSES;
@@ -1105,17 +1136,17 @@ final class ActivityManagerConstants extends ContentObserver {
 
     /**
      * If a service of a timeout-enforced type doesn't finish within this duration after its
-     * timeout, then we'll declare an ANR.
+     * timeout, then we'll crash the app.
      * i.e. if the time limit for a type is 1 hour, and this extra duration is 10 seconds, then
-     * the app will be ANR'ed 1 hour and 10 seconds after it started.
+     * the app will crash 1 hour and 10 seconds after it started.
      */
-    private static final String KEY_FGS_ANR_EXTRA_WAIT_DURATION = "fgs_anr_extra_wait_duration";
+    private static final String KEY_FGS_CRASH_EXTRA_WAIT_DURATION = "fgs_crash_extra_wait_duration";
 
-    /** @see #KEY_FGS_ANR_EXTRA_WAIT_DURATION */
-    static final long DEFAULT_FGS_ANR_EXTRA_WAIT_DURATION = 10_000;
+    /** @see #KEY_FGS_CRASH_EXTRA_WAIT_DURATION */
+    static final long DEFAULT_FGS_CRASH_EXTRA_WAIT_DURATION = 10_000;
 
-    /** @see #KEY_FGS_ANR_EXTRA_WAIT_DURATION */
-    public volatile long mFgsAnrExtraWaitDuration = DEFAULT_FGS_ANR_EXTRA_WAIT_DURATION;
+    /** @see #KEY_FGS_CRASH_EXTRA_WAIT_DURATION */
+    public volatile long mFgsCrashExtraWaitDuration = DEFAULT_FGS_CRASH_EXTRA_WAIT_DURATION;
 
     /** @see #KEY_USE_TIERED_CACHED_ADJ */
     public boolean USE_TIERED_CACHED_ADJ = DEFAULT_USE_TIERED_CACHED_ADJ;
@@ -1123,11 +1154,15 @@ final class ActivityManagerConstants extends ContentObserver {
     /** @see #KEY_TIERED_CACHED_ADJ_DECAY_TIME */
     public long TIERED_CACHED_ADJ_DECAY_TIME = DEFAULT_TIERED_CACHED_ADJ_DECAY_TIME;
 
-    /** @see #KEY_USE_MODERN_TRIM */
-    public boolean USE_MODERN_TRIM = DEFAULT_USE_MODERN_TRIM;
-
     /** @see #KEY_ENABLE_NEW_OOMADJ */
     public boolean ENABLE_NEW_OOMADJ = DEFAULT_ENABLE_NEW_OOM_ADJ;
+
+    /** @see #KEY_ENABLE_BATCHING_OOM_ADJ */
+    public boolean ENABLE_BATCHING_OOM_ADJ = DEFAULT_ENABLE_BATCHING_OOM_ADJ;
+
+    /** @see #KEY_FOLLOW_UP_OOMADJ_UPDATE_WAIT_DURATION */
+    public long FOLLOW_UP_OOMADJ_UPDATE_WAIT_DURATION =
+            DEFAULT_FOLLOW_UP_OOMADJ_UPDATE_WAIT_DURATION;
 
     /**
      * Indicates whether PSS profiling in AppProfiler is disabled or not.
@@ -1308,8 +1343,8 @@ final class ActivityManagerConstants extends ContentObserver {
                             case KEY_SHORT_FGS_ANR_EXTRA_WAIT_DURATION:
                                 updateShortFgsAnrExtraWaitDuration();
                                 break;
-                            case KEY_FGS_ANR_EXTRA_WAIT_DURATION:
-                                updateFgsAnrExtraWaitDuration();
+                            case KEY_FGS_CRASH_EXTRA_WAIT_DURATION:
+                                updateFgsCrashExtraWaitDuration();
                                 break;
                             case KEY_PROACTIVE_KILLS_ENABLED:
                                 updateProactiveKillsEnabled();
@@ -1330,14 +1365,17 @@ final class ActivityManagerConstants extends ContentObserver {
                             case KEY_TIERED_CACHED_ADJ_DECAY_TIME:
                                 updateUseTieredCachedAdj();
                                 break;
-                            case KEY_USE_MODERN_TRIM:
-                                updateUseModernTrim();
-                                break;
                             case KEY_DISABLE_APP_PROFILER_PSS_PROFILING:
                                 updateDisableAppProfilerPssProfiling();
                                 break;
                             case KEY_PSS_TO_RSS_THRESHOLD_MODIFIER:
                                 updatePssToRssThresholdModifier();
+                                break;
+                            case KEY_PROC_STATE_DEBUG_UIDS:
+                                updateProcStateDebugUids();
+                                break;
+                            case KEY_FOLLOW_UP_OOMADJ_UPDATE_WAIT_DURATION:
+                                updateFollowUpOomAdjUpdateWaitDuration();
                                 break;
                             default:
                                 updateFGSPermissionEnforcementFlagsIfNecessary(name);
@@ -1472,6 +1510,8 @@ final class ActivityManagerConstants extends ContentObserver {
     private void loadNativeBootDeviceConfigConstants() {
         ENABLE_NEW_OOMADJ = getDeviceConfigBoolean(KEY_ENABLE_NEW_OOMADJ,
                 DEFAULT_ENABLE_NEW_OOM_ADJ);
+        ENABLE_BATCHING_OOM_ADJ = getDeviceConfigBoolean(KEY_ENABLE_BATCHING_OOM_ADJ,
+                DEFAULT_ENABLE_BATCHING_OOM_ADJ);
     }
 
     public void setOverrideMaxCachedProcesses(int value) {
@@ -2039,6 +2079,76 @@ final class ActivityManagerConstants extends ContentObserver {
                 DEFAULT_MAX_PREVIOUS_TIME);
     }
 
+    private void updateProcStateDebugUids() {
+        final String val = DeviceConfig.getString(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_PROC_STATE_DEBUG_UIDS,
+                "").trim();
+
+        // Parse KEY_PROC_STATE_DEBUG_UIDS as comma-separated values. Each values can be:
+        // Number:  Enable debugging on the given UID.
+        // "stack": Enable stack trace when updating proc/uid-states.s
+        // "u" + delay-ms: Enable sleep when updating uid-state
+        // "p" + delay-ms: Enable sleep when updating procstate
+        //
+        // Example:
+        //   device_config put activity_manager proc_state_debug_uids '10177,10202,stack,p500,u100'
+        // means:
+        // - Monitor UID 10177 and 10202
+        // - Also enable stack trace
+        // - Sleep 500 ms when updating the procstate.
+        // - Sleep 100 ms when updating the UID state.
+
+        mEnableProcStateStacktrace = false;
+        mProcStateDebugSetProcStateDelay = 0;
+        mProcStateDebugSetUidStateDelay = 0;
+        if (val.length() == 0) {
+            mProcStateDebugUids = new SparseBooleanArray(0);
+            return;
+        }
+        final String[] uids = val.split(",");
+
+        final SparseBooleanArray newArray = new SparseBooleanArray(0);
+
+        for (String token : uids) {
+            if (token.length() == 0) {
+                continue;
+            }
+            // "stack" -> enable stacktrace.
+            if ("stack".equals(token)) {
+                mEnableProcStateStacktrace = true;
+                continue;
+            }
+            boolean isUid = true;
+            char prefix = token.charAt(0);
+            if ('a' <= prefix && prefix <= 'z') {
+                // If the token starts with an alphabet, it's not a UID.
+                isUid = false;
+                token = token.substring(1);
+            }
+
+            int value = -1;
+            try {
+                value = Integer.parseInt(token.trim());
+            } catch (NumberFormatException e) {
+                Slog.w(TAG, "Invalid number " + token + " in " + val);
+                continue;
+            }
+            if (isUid) {
+                newArray.put(value, true);
+            } else if (prefix == 'p') {
+                // Enable delay in set-proc-state
+                mProcStateDebugSetProcStateDelay = value;
+            } else if (prefix == 'u') {
+                // Enable delay in set-uid-state
+                mProcStateDebugSetUidStateDelay = value;
+            } else {
+                Slog.w(TAG, "Invalid prefix " + prefix + " in " + val);
+            }
+        }
+        mProcStateDebugUids = newArray;
+    }
+
     private void updateMinAssocLogDuration() {
         MIN_ASSOC_LOG_DURATION = DeviceConfig.getLong(
                 DeviceConfig.NAMESPACE_ACTIVITY_MANAGER, KEY_MIN_ASSOC_LOG_DURATION,
@@ -2122,11 +2232,11 @@ final class ActivityManagerConstants extends ContentObserver {
                 DEFAULT_DATA_SYNC_FGS_TIMEOUT_DURATION);
     }
 
-    private void updateFgsAnrExtraWaitDuration() {
-        mFgsAnrExtraWaitDuration = DeviceConfig.getLong(
+    private void updateFgsCrashExtraWaitDuration() {
+        mFgsCrashExtraWaitDuration = DeviceConfig.getLong(
                 DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
-                KEY_FGS_ANR_EXTRA_WAIT_DURATION,
-                DEFAULT_FGS_ANR_EXTRA_WAIT_DURATION);
+                KEY_FGS_CRASH_EXTRA_WAIT_DURATION,
+                DEFAULT_FGS_CRASH_EXTRA_WAIT_DURATION);
     }
 
     private void updateEnableWaitForFinishAttachApplication() {
@@ -2147,18 +2257,18 @@ final class ActivityManagerConstants extends ContentObserver {
             DEFAULT_TIERED_CACHED_ADJ_DECAY_TIME);
     }
 
-    private void updateUseModernTrim() {
-        USE_MODERN_TRIM = DeviceConfig.getBoolean(
-            DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
-            KEY_USE_MODERN_TRIM,
-            DEFAULT_USE_MODERN_TRIM);
-    }
-
     private void updateEnableNewOomAdj() {
         ENABLE_NEW_OOMADJ = DeviceConfig.getBoolean(
             DeviceConfig.NAMESPACE_ACTIVITY_MANAGER_NATIVE_BOOT,
             KEY_ENABLE_NEW_OOMADJ,
             DEFAULT_ENABLE_NEW_OOM_ADJ);
+    }
+
+    private void updateFollowUpOomAdjUpdateWaitDuration() {
+        FOLLOW_UP_OOMADJ_UPDATE_WAIT_DURATION = DeviceConfig.getLong(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_FOLLOW_UP_OOMADJ_UPDATE_WAIT_DURATION,
+                DEFAULT_FOLLOW_UP_OOMADJ_UPDATE_WAIT_DURATION);
     }
 
     private void updateFGSPermissionEnforcementFlagsIfNecessary(@NonNull String name) {
@@ -2176,6 +2286,35 @@ final class ActivityManagerConstants extends ContentObserver {
         PSS_TO_RSS_THRESHOLD_MODIFIER = DeviceConfig.getFloat(
                 DeviceConfig.NAMESPACE_ACTIVITY_MANAGER, KEY_PSS_TO_RSS_THRESHOLD_MODIFIER,
                 mDefaultPssToRssThresholdModifier);
+    }
+
+    private void updateEnableBatchingOomAdj() {
+        ENABLE_BATCHING_OOM_ADJ = DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER_NATIVE_BOOT,
+                KEY_ENABLE_BATCHING_OOM_ADJ,
+                DEFAULT_ENABLE_BATCHING_OOM_ADJ);
+    }
+
+    boolean shouldDebugUidForProcState(int uid) {
+        SparseBooleanArray ar = mProcStateDebugUids;
+        final var size = ar.size();
+        if (size == 0) { // Most common case.
+            return false;
+        }
+        // If the array is small (also common), avoid the binary search.
+        if (size <= 8) {
+            for (int i = 0; i < size; i++) {
+                if (ar.keyAt(i) == uid) {
+                    return ar.valueAt(i);
+                }
+            }
+            return false;
+        }
+        return ar.get(uid, false);
+    }
+
+    boolean shouldEnableProcStateDebug() {
+        return mProcStateDebugUids.size() > 0;
     }
 
     @NeverCompile // Avoid size overhead of debugging code.
@@ -2364,8 +2503,8 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.print("="); pw.println(mMediaProcessingFgsTimeoutDuration);
         pw.print("  "); pw.print(KEY_DATA_SYNC_FGS_TIMEOUT_DURATION);
         pw.print("="); pw.println(mDataSyncFgsTimeoutDuration);
-        pw.print("  "); pw.print(KEY_FGS_ANR_EXTRA_WAIT_DURATION);
-        pw.print("="); pw.println(mFgsAnrExtraWaitDuration);
+        pw.print("  "); pw.print(KEY_FGS_CRASH_EXTRA_WAIT_DURATION);
+        pw.print("="); pw.println(mFgsCrashExtraWaitDuration);
 
         pw.print("  "); pw.print(KEY_USE_TIERED_CACHED_ADJ);
         pw.print("="); pw.println(USE_TIERED_CACHED_ADJ);
@@ -2381,6 +2520,12 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.print("  "); pw.print(KEY_PSS_TO_RSS_THRESHOLD_MODIFIER);
         pw.print("="); pw.println(PSS_TO_RSS_THRESHOLD_MODIFIER);
 
+        pw.print("  "); pw.print(KEY_MAX_PREVIOUS_TIME);
+        pw.print("="); pw.println(MAX_PREVIOUS_TIME);
+
+        pw.print("  "); pw.print(KEY_ENABLE_BATCHING_OOM_ADJ);
+        pw.print("="); pw.println(ENABLE_BATCHING_OOM_ADJ);
+
         pw.println();
         if (mOverrideMaxCachedProcesses >= 0) {
             pw.print("  mOverrideMaxCachedProcesses="); pw.println(mOverrideMaxCachedProcesses);
@@ -2393,5 +2538,15 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.print("  OOMADJ_UPDATE_QUICK="); pw.println(OOMADJ_UPDATE_QUICK);
         pw.print("  ENABLE_WAIT_FOR_FINISH_ATTACH_APPLICATION=");
         pw.println(mEnableWaitForFinishAttachApplication);
+
+        pw.print("  "); pw.print(KEY_FOLLOW_UP_OOMADJ_UPDATE_WAIT_DURATION);
+        pw.print("="); pw.println(FOLLOW_UP_OOMADJ_UPDATE_WAIT_DURATION);
+
+        synchronized (mProcStateDebugUids) {
+            pw.print("  "); pw.print(KEY_PROC_STATE_DEBUG_UIDS);
+            pw.print("="); pw.println(mProcStateDebugUids);
+            pw.print("    uid-state-delay="); pw.println(mProcStateDebugSetUidStateDelay);
+            pw.print("    proc-state-delay="); pw.println(mProcStateDebugSetProcStateDelay);
+        }
     }
 }

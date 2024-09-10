@@ -17,11 +17,13 @@
 package com.android.systemui.volume.panel.component.captioning.ui.viewmodel
 
 import android.content.Context
+import com.android.internal.logging.UiEventLogger
 import com.android.settingslib.view.accessibility.domain.interactor.CaptioningInteractor
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.res.R
-import com.android.systemui.volume.panel.component.button.ui.viewmodel.ToggleButtonViewModel
+import com.android.systemui.volume.panel.component.button.ui.viewmodel.ButtonViewModel
 import com.android.systemui.volume.panel.dagger.scope.VolumePanelScope
+import com.android.systemui.volume.panel.ui.VolumePanelUiEvent
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
@@ -38,13 +40,14 @@ constructor(
     private val context: Context,
     private val captioningInteractor: CaptioningInteractor,
     @VolumePanelScope private val coroutineScope: CoroutineScope,
+    private val uiEventLogger: UiEventLogger,
 ) {
 
-    val buttonViewModel: StateFlow<ToggleButtonViewModel?> =
+    val buttonViewModel: StateFlow<ButtonViewModel?> =
         captioningInteractor.isSystemAudioCaptioningEnabled
             .map { isEnabled ->
-                ToggleButtonViewModel(
-                    isChecked = isEnabled,
+                ButtonViewModel(
+                    isActive = isEnabled,
                     icon =
                         Icon.Resource(
                             if (isEnabled) R.drawable.ic_volume_odi_captions
@@ -57,6 +60,13 @@ constructor(
             .stateIn(coroutineScope, SharingStarted.Eagerly, null)
 
     fun setIsSystemAudioCaptioningEnabled(enabled: Boolean) {
+        uiEventLogger.logWithPosition(
+            VolumePanelUiEvent.VOLUME_PANEL_LIVE_CAPTION_TOGGLE_CLICKED,
+            0,
+            null,
+            if (enabled) VolumePanelUiEvent.LIVE_CAPTION_TOGGLE_ENABLED
+            else VolumePanelUiEvent.LIVE_CAPTION_TOGGLE_DISABLED
+        )
         coroutineScope.launch { captioningInteractor.setIsSystemAudioCaptioningEnabled(enabled) }
     }
 }

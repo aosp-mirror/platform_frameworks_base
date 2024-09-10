@@ -24,10 +24,9 @@ import androidx.annotation.Nullable;
 
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.shade.ShadeExpansionStateManager;
-import com.android.systemui.shade.ShadeLockscreenInteractor;
+import com.android.systemui.shade.domain.interactor.ShadeLockscreenInteractor;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
-import com.android.systemui.statusbar.phone.KeyguardBypassController;
 
 /**
  *  Interface to control Keyguard View. It should be implemented by KeyguardViewManagers, which
@@ -189,6 +188,5 @@ public interface KeyguardViewController {
             ShadeLockscreenInteractor shadeLockscreenInteractor,
             @Nullable ShadeExpansionStateManager shadeExpansionStateManager,
             BiometricUnlockController biometricUnlockController,
-            View notificationContainer,
-            KeyguardBypassController bypassController);
+            View notificationContainer);
 }

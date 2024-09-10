@@ -29,9 +29,13 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
         <TextView
+            android:id="@+id/magnifier_size_title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:singleLine="true"
+            android:scrollHorizontally="true"
+            android:ellipsize="marquee"
             android:text="@string/accessibility_magnifier_size"
             android:textAppearance="@style/TextAppearance.MagnificationSetting.Title"
             android:focusable="true"
@@ -121,6 +125,7 @@
             android:ellipsize="marquee"
             android:text="@string/accessibility_allow_diagonal_scrolling"
             android:textAppearance="@style/TextAppearance.MagnificationSetting.Title"
+            android:labelFor="@id/magnifier_horizontal_lock_switch"
             android:layout_gravity="center_vertical" />
 
         <Switch

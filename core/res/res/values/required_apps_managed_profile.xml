@@ -26,5 +26,6 @@
         <item>com.android.providers.downloads</item>
         <item>com.android.providers.downloads.ui</item>
         <item>com.android.documentsui</item>
+        <item>com.android.webview</item>
     </string-array>
 </resources>

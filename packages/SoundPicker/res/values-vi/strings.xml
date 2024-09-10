@@ -20,7 +20,7 @@
     <string name="notification_sound_default" msgid="8133121186242636840">"Âm thanh thông báo mặc định"</string>
     <string name="alarm_sound_default" msgid="4787646764557462649">"Âm thanh chuông báo mặc định"</string>
     <string name="add_ringtone_text" msgid="6642389991738337529">"Thêm nhạc chuông"</string>
-    <string name="add_alarm_text" msgid="3545497316166999225">"Thêm báo thức"</string>
+    <string name="add_alarm_text" msgid="3545497316166999225">"Thêm chuông báo"</string>
     <string name="add_notification_text" msgid="4431129543300614788">"Thêm thông báo"</string>
     <string name="delete_ringtone_text" msgid="201443984070732499">"Xóa"</string>
     <string name="unable_to_add_ringtone" msgid="4583511263449467326">"Không thể thêm nhạc chuông tùy chỉnh"</string>

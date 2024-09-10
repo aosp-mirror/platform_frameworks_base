@@ -19,6 +19,7 @@ package com.android.server.utils;
 import static android.text.TextUtils.formatSimple;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
@@ -26,6 +27,7 @@ import android.os.Trace;
 import android.text.TextUtils;
 import android.text.format.TimeMigrationUtils;
 import android.util.ArrayMap;
+import android.util.CloseGuard;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.LongSparseArray;
@@ -40,6 +42,7 @@ import java.lang.ref.WeakReference;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Objects;
 
 /**
@@ -47,7 +50,7 @@ import java.util.Objects;
  * mode, the timer just sends a delayed message.  In modern mode, the timer is implemented in
  * native code; on expiration, the message is sent without delay.
  *
- * <p>There are four external operations on a timer:
+ * <p>There are five external operations on a timer:
  * <ul>
  *
  * <li>{@link #start} starts a timer.  The timer is started with an object that the message
@@ -74,9 +77,13 @@ import java.util.Objects;
  * exit. (So, instances in system server generally need not be explicitly closed since they are
  * created during process start and will last until process exit.)
  *
+ * <p>AnrTimer parameterized by the type <code>V</code>.  The public methods on AnrTimer require
+ * an instance of <code>V</code>; the instance of <code>V</code> is a key that identifies a
+ * specific timer.
+ *
  * @hide
  */
-public class AnrTimer<V> implements AutoCloseable {
+public abstract class AnrTimer<V> implements AutoCloseable {
 
     /**
      * The log tag.
@@ -88,7 +95,7 @@ public class AnrTimer<V> implements AutoCloseable {
      * tracks give a sense of handler latency: the time between timer expiration and ANR
      * collection.
      */
-    private final static String TRACK = "AnrTimer";
+    private final static String TRACK = "AnrTimerTrack";
 
     /**
      * Enable debug messages.
@@ -101,11 +108,32 @@ public class AnrTimer<V> implements AutoCloseable {
     private static final long TRACE_TAG = Trace.TRACE_TAG_ACTIVITY_MANAGER;
 
     /**
+     * Fetch the Linux pid from the object. The returned value may be zero to indicate that there
+     * is no valid pid available.
+     * @return a valid pid or zero.
+     */
+    public abstract int getPid(V obj);
+
+    /**
+     * Fetch the Linux uid from the object. The returned value may be zero to indicate that there
+     * is no valid uid available.
+     * @return a valid uid or zero.
+     */
+    public abstract int getUid(V obj);
+
+    /**
      * Return true if the feature is enabled.  By default, the value is take from the Flags class
      * but it can be changed for local testing.
      */
     private static boolean anrTimerServiceEnabled() {
         return Flags.anrTimerService();
+    }
+
+    /**
+     * Return true if freezing is enabled.  This has no effect if the service is not enabled.
+     */
+    private static boolean anrTimerFreezerEnabled() {
+        return Flags.anrTimerFreezer();
     }
 
     /**
@@ -115,10 +143,92 @@ public class AnrTimer<V> implements AutoCloseable {
         boolean anrTimerServiceEnabled() {
             return AnrTimer.anrTimerServiceEnabled();
         }
+
+        boolean anrTimerFreezerEnabled() {
+            return AnrTimer.anrTimerFreezerEnabled();
+        }
     }
 
     /** The default injector. */
     private static final Injector sDefaultInjector = new Injector();
+
+    /**
+     * This class provides build-style arguments to an AnrTimer constructor.  This simplifies the
+     * number of AnrTimer constructors needed, especially as new options are added.
+     */
+    public static class Args {
+        /** The Injector (used only for testing). */
+        private Injector mInjector = AnrTimer.sDefaultInjector;
+
+        /** Grant timer extensions when the system is heavily loaded. */
+        private boolean mExtend = false;
+
+        /** Freeze ANR'ed processes. */
+        boolean mFreeze = false;
+
+        // This is only used for testing, so it is limited to package visibility.
+        Args injector(@NonNull Injector injector) {
+            mInjector = injector;
+            return this;
+        }
+
+        public Args extend(boolean flag) {
+            mExtend = flag;
+            return this;
+        }
+
+        public Args freeze(boolean enable) {
+            mFreeze = enable;
+            return this;
+        }
+    }
+
+    /**
+     * A target process may be modified when its timer expires.  The modification (if any) will be
+     * undone if the expiration is discarded, but is persisted if the expiration is accepted.  If
+     * the expiration is accepted, then a TimerLock is returned to the client.  The client must
+     * close the TimerLock to complete the state machine.
+     */
+    private class TimerLock implements AutoCloseable {
+        // Detect failures to close.
+        private final CloseGuard mGuard = new CloseGuard();
+
+        // A lock to ensure closing is thread-safe.
+        private final Object mLock = new Object();
+
+        // Allow multiple calls to close().
+        private boolean mClosed = false;
+
+        // The native timer ID that must be closed.  This may be zero.
+        final int mTimerId;
+
+        TimerLock(int timerId) {
+            mTimerId = timerId;
+            mGuard.open("AnrTimer.release");
+        }
+
+        @Override
+        public void close() {
+            synchronized (mLock) {
+                if (!mClosed) {
+                    AnrTimer.this.release(this);
+                    mGuard.close();
+                    mClosed = true;
+                }
+            }
+        }
+
+        @Override
+        protected void finalize() throws Throwable {
+            try {
+                // Note that guard could be null if the constructor threw.
+                if (mGuard != null) mGuard.warnIfOpen();
+                close();
+            } finally {
+                super.finalize();
+            }
+        }
+    }
 
     /**
      * An error is defined by its issue, the operation that detected the error, the tag of the
@@ -210,11 +320,8 @@ public class AnrTimer<V> implements AutoCloseable {
     /** A label that identifies the AnrTimer associated with a Timer in log messages. */
     private final String mLabel;
 
-    /** Whether this timer instance supports extending timeouts. */
-    private final boolean mExtend;
-
-    /** The injector used to create this instance.  This is only used for testing. */
-    private final Injector mInjector;
+    /** The configuration for this instance. */
+    private final Args mArgs;
 
     /** The top-level switch for the feature enabled or disabled. */
     private final FeatureSwitch mFeature;
@@ -235,18 +342,14 @@ public class AnrTimer<V> implements AutoCloseable {
      * @param handler The handler to which the expiration message will be delivered.
      * @param what The "what" parameter for the expiration message.
      * @param label A name for this instance.
-     * @param extend A flag to indicate if expired timers can be granted extensions.
-     * @param injector An injector to provide overrides for testing.
+     * @param args Configuration information for this instance.
      */
-    @VisibleForTesting
-    AnrTimer(@NonNull Handler handler, int what, @NonNull String label, boolean extend,
-             @NonNull Injector injector) {
+    public AnrTimer(@NonNull Handler handler, int what, @NonNull String label, @NonNull Args args) {
         mHandler = handler;
         mWhat = what;
         mLabel = label;
-        mExtend = extend;
-        mInjector = injector;
-        boolean enabled = mInjector.anrTimerServiceEnabled() && nativeTimersSupported();
+        mArgs = args;
+        boolean enabled = args.mInjector.anrTimerServiceEnabled() && nativeTimersSupported();
         mFeature = createFeatureSwitch(enabled);
     }
 
@@ -269,29 +372,7 @@ public class AnrTimer<V> implements AutoCloseable {
     }
 
     /**
-     * Create one AnrTimer instance.  The instance is given a handler and a "what".  Individual
-     * timers are started with {@link #start}.  If a timer expires, then a {@link Message} is sent
-     * immediately to the handler with {@link Message.what} set to what and {@link Message.obj} set
-     * to the timer key.
-     *
-     * AnrTimer instances have a label, which must be unique.  The label is used for reporting and
-     * debug.
-     *
-     * If an individual timer expires internally, and the "extend" parameter is true, then the
-     * AnrTimer may extend the individual timer rather than immediately delivering the timeout to
-     * the client.  The extension policy is not part of the instance.
-     *
-     * @param handler The handler to which the expiration message will be delivered.
-     * @param what The "what" parameter for the expiration message.
-     * @param label A name for this instance.
-     * @param extend A flag to indicate if expired timers can be granted extensions.
-     */
-    public AnrTimer(@NonNull Handler handler, int what, @NonNull String label, boolean extend) {
-        this(handler, what, label, extend, sDefaultInjector);
-    }
-
-    /**
-     * Create an AnrTimer instance with the default {@link #Injector} and with extensions disabled.
+     * Create an AnrTimer instance with the default {@link #Injector} and the default configuration.
      * See {@link AnrTimer(Handler, int, String, boolean, Injector} for a functional description.
      *
      * @param handler The handler to which the expiration message will be delivered.
@@ -299,7 +380,7 @@ public class AnrTimer<V> implements AutoCloseable {
      * @param label A name for this instance.
      */
     public AnrTimer(@NonNull Handler handler, int what, @NonNull String label) {
-        this(handler, what, label, false);
+        this(handler, what, label, new Args());
     }
 
     /**
@@ -321,6 +402,7 @@ public class AnrTimer<V> implements AutoCloseable {
         final String label =
                 formatSimple("%s(%d,%d,%d,%s,%d)", op, timerId, pid, uid, mLabel, milliseconds);
         Trace.instantForTrack(TRACE_TAG, TRACK, label);
+        if (DEBUG) Log.i(TAG, label);
     }
 
     /**
@@ -329,6 +411,16 @@ public class AnrTimer<V> implements AutoCloseable {
     private void trace(String op, int timerId) {
         final String label = formatSimple("%s(%d)", op, timerId);
         Trace.instantForTrack(TRACE_TAG, TRACK, label);
+        if (DEBUG) Log.i(TAG, label);
+    }
+
+    /**
+     * Generate a trace point with a pid and uid but no timer ID.
+     */
+    private static void trace(String op, int pid, int uid) {
+        final String label = formatSimple("%s(%d,%d)", op, pid, uid);
+        Trace.instantForTrack(TRACE_TAG, TRACK, label);
+        if (DEBUG) Log.i(TAG, label);
     }
 
     /**
@@ -340,13 +432,16 @@ public class AnrTimer<V> implements AutoCloseable {
 
         abstract boolean cancel(@NonNull V arg);
 
-        abstract boolean accept(@NonNull V arg);
+        @Nullable
+        abstract TimerLock accept(@NonNull V arg);
 
         abstract boolean discard(@NonNull V arg);
 
+        abstract void release(@NonNull TimerLock timer);
+
         abstract boolean enabled();
 
-        abstract void dump(PrintWriter pw, boolean verbose);
+        abstract void dump(IndentingPrintWriter pw, boolean verbose);
 
         abstract void close();
     }
@@ -372,8 +467,9 @@ public class AnrTimer<V> implements AutoCloseable {
 
         /** accept() is a no-op when the feature is disabled. */
         @Override
-        boolean accept(@NonNull V arg) {
-            return true;
+        @Nullable
+        TimerLock accept(@NonNull V arg) {
+            return null;
         }
 
         /** discard() is a no-op when the feature is disabled. */
@@ -382,15 +478,25 @@ public class AnrTimer<V> implements AutoCloseable {
             return true;
         }
 
+        /** release() is a no-op when the feature is disabled. */
+        @Override
+        void release(@NonNull TimerLock timer) {
+        }
+
         /** The feature is not enabled. */
         @Override
         boolean enabled() {
             return false;
         }
 
-        /** dump() is a no-op when the feature is disabled. */
+        /** Dump the limited statistics captured when the feature is disabled. */
         @Override
-        void dump(PrintWriter pw, boolean verbose) {
+        void dump(IndentingPrintWriter pw, boolean verbose) {
+            synchronized (mLock) {
+                pw.format("started=%d maxStarted=%d running=%d expired=%d errors=%d\n",
+                        mTotalStarted, mMaxStarted, mTimerIdMap.size(),
+                        mTotalExpired, mTotalErrors);
+            }
         }
 
         /** close() is a no-op when the feature is disabled. */
@@ -419,9 +525,15 @@ public class AnrTimer<V> implements AutoCloseable {
          */
         private long mNative = 0;
 
-        /** Fetch the native tag (an integer) for the given label. */
+        /** The total number of timers that were restarted without an explicit cancel. */
+        @GuardedBy("mLock")
+        private int mTotalRestarted = 0;
+
+        /** Create the native AnrTimerService that will host all timers from this instance. */
         FeatureEnabled() {
-            mNative = nativeAnrTimerCreate(mLabel);
+            mNative = nativeAnrTimerCreate(mLabel,
+                    mArgs.mExtend,
+                    mArgs.mFreeze && mArgs.mInjector.anrTimerFreezerEnabled());
             if (mNative == 0) throw new IllegalArgumentException("unable to create native timer");
             synchronized (sAnrTimerList) {
                 sAnrTimerList.put(mNative, new WeakReference(AnrTimer.this));
@@ -434,11 +546,11 @@ public class AnrTimer<V> implements AutoCloseable {
         @Override
         void start(@NonNull V arg, int pid, int uid, long timeoutMs) {
             synchronized (mLock) {
-                if (mTimerIdMap.containsKey(arg)) {
-                    // There is an existing timer.  Cancel it.
-                    cancel(arg);
-                }
-                int timerId = nativeAnrTimerStart(mNative, pid, uid, timeoutMs, mExtend);
+                // If there is an existing timer, cancel it.  This is a nop if the timer does not
+                // exist.
+                if (cancel(arg)) mTotalRestarted++;
+
+                int timerId = nativeAnrTimerStart(mNative, pid, uid, timeoutMs);
                 if (timerId > 0) {
                     mTimerIdMap.put(arg, timerId);
                     mTimerArgMap.put(timerId, arg);
@@ -472,19 +584,26 @@ public class AnrTimer<V> implements AutoCloseable {
 
         /**
          * Accept a timer in the framework-level handler.  The timeout has been accepted and the
-         * timeout handler is executing.
+         * client's timeout handler is executing.  If the function returns a non-null TimerLock then
+         * the associated process may have been paused (or otherwise modified in preparation for
+         * debugging). The TimerLock must be closed to allow the process to continue, or to be
+         * dumped in an AnrReport.
          */
         @Override
-        boolean accept(@NonNull V arg) {
+        @Nullable
+        TimerLock accept(@NonNull V arg) {
             synchronized (mLock) {
                 Integer timer = removeLocked(arg);
                 if (timer == null) {
                     notFoundLocked("accept", arg);
-                    return false;
+                    return null;
                 }
-                nativeAnrTimerAccept(mNative, timer);
+                boolean accepted = nativeAnrTimerAccept(mNative, timer);
                 trace("accept", timer);
-                return true;
+                // If "accepted" is true then the native layer has pending operations against this
+                // timer.  Wrap the timer ID in a TimerLock and return it to the caller.  If
+                // "accepted" is false then the native later does not have any pending operations.
+                return accepted ? new TimerLock(timer) : null;
             }
         }
 
@@ -507,6 +626,21 @@ public class AnrTimer<V> implements AutoCloseable {
             }
         }
 
+        /**
+         * Unfreeze an app that was frozen because its timer had expired.  This method catches
+         * errors that might be thrown by the unfreeze method.  This method does nothing if
+         * freezing is not enabled or if the AnrTimer never froze the timer.  Note that the native
+         * release method returns false only if the timer's process was frozen, is still frozen,
+         * and could not be unfrozen.
+         */
+        @Override
+        void release(@NonNull TimerLock t) {
+            if (t.mTimerId == 0) return;
+            if (!nativeAnrTimerRelease(mNative, t.mTimerId)) {
+                Log.e(TAG, "failed to release id=" + t.mTimerId, new Exception(TAG));
+            }
+        }
+
         /** The feature is enabled. */
         @Override
         boolean enabled() {
@@ -515,13 +649,22 @@ public class AnrTimer<V> implements AutoCloseable {
 
         /** Dump statistics from the native layer. */
         @Override
-        void dump(PrintWriter pw, boolean verbose) {
+        void dump(IndentingPrintWriter pw, boolean verbose) {
             synchronized (mLock) {
-                if (mNative != 0) {
-                    nativeAnrTimerDump(mNative, verbose);
-                } else {
+                if (mNative == 0) {
                     pw.println("closed");
+                    return;
                 }
+                String[] nativeDump = nativeAnrTimerDump(mNative);
+                if (nativeDump == null) {
+                    pw.println("no-data");
+                    return;
+                }
+                for (String s : nativeDump) {
+                    pw.println(s);
+                }
+                // The following counter is only available at the Java level.
+                pw.println("restarted:" + mTotalRestarted);
             }
         }
 
@@ -546,9 +689,7 @@ public class AnrTimer<V> implements AutoCloseable {
         private Integer removeLocked(V arg) {
             Integer r = mTimerIdMap.remove(arg);
             if (r != null) {
-                synchronized (mTimerArgMap) {
-                    mTimerArgMap.remove(r);
-                }
+                mTimerArgMap.remove(r);
             }
             return r;
         }
@@ -562,13 +703,11 @@ public class AnrTimer<V> implements AutoCloseable {
      * allows a client to deliver an immediate timeout via the AnrTimer.
      *
      * @param arg The key by which the timer is known.  This is never examined or modified.
-     * @param pid The Linux process ID of the target being timed.
-     * @param uid The Linux user ID of the target being timed.
      * @param timeoutMs The timer timeout, in milliseconds.
      */
-    public void start(@NonNull V arg, int pid, int uid, long timeoutMs) {
+    public void start(@NonNull V arg, long timeoutMs) {
         if (timeoutMs < 0) timeoutMs = 0;
-        mFeature.start(arg, pid, uid, timeoutMs);
+        mFeature.start(arg, getPid(arg), getUid(arg), timeoutMs);
     }
 
     /**
@@ -589,16 +728,20 @@ public class AnrTimer<V> implements AutoCloseable {
     /**
      * Accept the expired timer associated with arg.  This indicates that the caller considers the
      * timer expiration to be a true ANR.  (See {@link #discard} for an alternate response.)  The
-     * function returns true if an expired timer was found and false if a running timer was found or
-     * if no timer was found.  After this call, the timer does not exist.  It is an error to accept
-     * a running timer, however, the running timer will be canceled.
+     * function returns a {@link TimerLock} if an expired timer was found and null otherwise.
+     * After this call, the timer does not exist.  It is an error to accept a running timer,
+     * however, the running timer will be canceled.
      *
-     * Note: the return value is always true if the feature is not enabled.
+     * If a non-null TimerLock is returned, the TimerLock must be closed before the target process
+     * is dumped (for an ANR report) or continued.
+     *
+     * Note: the return value is always null if the feature is not enabled.
      *
      * @param arg The key by which the timer is known.  This is never examined or modified.
-     * @return True if an expired timer was accepted.
+     * @return A TimerLock if an expired timer was accepted.
      */
-    public boolean accept(@NonNull V arg) {
+    @Nullable
+    public TimerLock accept(@NonNull V arg) {
         return mFeature.accept(arg);
     }
 
@@ -617,6 +760,13 @@ public class AnrTimer<V> implements AutoCloseable {
      */
     public boolean discard(@NonNull V arg) {
         return mFeature.discard(arg);
+    }
+
+    /**
+     * Release an expired timer.
+     */
+    private void release(@NonNull TimerLock t) {
+        mFeature.release(t);
     }
 
     /**
@@ -672,11 +822,8 @@ public class AnrTimer<V> implements AutoCloseable {
         synchronized (mLock) {
             pw.format("timer: %s\n", mLabel);
             pw.increaseIndent();
-            pw.format("started=%d maxStarted=%d running=%d expired=%d errors=%d\n",
-                    mTotalStarted, mMaxStarted, mTimerIdMap.size(),
-                    mTotalExpired, mTotalErrors);
-            pw.decreaseIndent();
             mFeature.dump(pw, false);
+            pw.decreaseIndent();
         }
     }
 
@@ -737,6 +884,14 @@ public class AnrTimer<V> implements AutoCloseable {
         recordErrorLocked(operation, "notFound", arg);
     }
 
+    /** Compare two AnrTimers in display order. */
+    private static final Comparator<AnrTimer> sComparator =
+            Comparator.nullsLast(new Comparator<>() {
+                    @Override
+                    public int compare(AnrTimer o1, AnrTimer o2) {
+                        return o1.mLabel.compareTo(o2.mLabel);
+                    }});
+
     /** Dumpsys output, allowing for overrides. */
     @VisibleForTesting
     static void dump(@NonNull PrintWriter pw, boolean verbose, @NonNull Injector injector) {
@@ -746,11 +901,18 @@ public class AnrTimer<V> implements AutoCloseable {
         ipw.println("AnrTimer statistics");
         ipw.increaseIndent();
         synchronized (sAnrTimerList) {
+            // Find the currently live instances and sort them by their label.  The goal is to
+            // have consistent output ordering.
             final int size = sAnrTimerList.size();
-            ipw.println("reporting " + size + " timers");
+            AnrTimer[] active = new AnrTimer[size];
+            int valid = 0;
             for (int i = 0; i < size; i++) {
                 AnrTimer a = sAnrTimerList.valueAt(i).get();
-                if (a != null) a.dump(ipw);
+                if (a != null) active[valid++] = a;
+            }
+            Arrays.sort(active, 0, valid, sComparator);
+            for (int i = 0; i < valid; i++) {
+                if (active[i] != null) active[i].dump(ipw);
             }
         }
         if (verbose) dumpErrors(ipw);
@@ -783,19 +945,17 @@ public class AnrTimer<V> implements AutoCloseable {
     private static native boolean nativeAnrTimerSupported();
 
     /**
-     * Create a new native timer with the given key and name.  The key is not used by the native
-     * code but it is returned to the Java layer in the expiration handler.  The name is only for
-     * logging.  Unlike the other methods, this is an instance method: the "this" parameter is
-     * passed into the native layer.
+     * Create a new native timer with the given name and flags.  The name is only for logging.
+     * Unlike the other methods, this is an instance method: the "this" parameter is passed into
+     * the native layer.
      */
-    private native long nativeAnrTimerCreate(String name);
+    private native long nativeAnrTimerCreate(String name, boolean extend, boolean freeze);
 
     /** Release the native resources.  No further operations are premitted. */
     private static native int nativeAnrTimerClose(long service);
 
     /** Start a timer and return its ID.  Zero is returned on error. */
-    private static native int nativeAnrTimerStart(long service, int pid, int uid, long timeoutMs,
-            boolean extend);
+    private static native int nativeAnrTimerStart(long service, int pid, int uid, long timeoutMs);
 
     /**
      * Cancel a timer by ID.  Return true if the timer was running and canceled.  Return false if
@@ -803,12 +963,24 @@ public class AnrTimer<V> implements AutoCloseable {
      */
     private static native boolean nativeAnrTimerCancel(long service, int timerId);
 
-    /** Accept an expired timer by ID.  Return true if the timer was found. */
+    /**
+     * Accept an expired timer by ID.  Return true if the timer must be released.  Return false if
+     * the native layer is completely finished with this timer.
+     */
     private static native boolean nativeAnrTimerAccept(long service, int timerId);
 
     /** Discard an expired timer by ID.  Return true if the timer was found.  */
     private static native boolean nativeAnrTimerDiscard(long service, int timerId);
 
-    /** Prod the native library to log a few statistics. */
-    private static native void nativeAnrTimerDump(long service, boolean verbose);
+    /**
+     * Release (unfreeze) the process associated with the timer, if the process was previously
+     * frozen by the service.  The function returns false if three conditions are true: the timer
+     * does exist, the timer's process was frozen, and the timer's process could not be unfrozen.
+     * Otherwise, the function returns true.  In other words, a return value of value means there
+     * is a process that is unexpectedly stuck in the frozen state.
+     */
+    private static native boolean nativeAnrTimerRelease(long service, int timerId);
+
+    /** Retrieve runtime dump information from the native layer. */
+    private static native String[] nativeAnrTimerDump(long service);
 }

@@ -39,9 +39,9 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"بينما ننطلق نحو مستقبل بدون كلمات مرور، ستظل كلمات المرور متوفّرة إلى جانب مفاتيح المرور."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"اختيار المكان الذي تريد حفظ <xliff:g id="CREATETYPES">%1$s</xliff:g> فيه"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"اختَر مدير كلمات مرور لحفظ معلوماتك وتسجيل الدخول بشكل أسرع في المرة القادمة."</string>
-    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"هل تريد إنشاء مفتاح مرور لتسجيل الدخول إلى تطبيق <xliff:g id="APPNAME">%1$s</xliff:g>؟"</string>
-    <string name="choose_create_option_password_title" msgid="6238446571944651980">"هل تريد حفظ كلمة المرور لتسجيل الدخول إلى تطبيق <xliff:g id="APPNAME">%1$s</xliff:g>؟"</string>
-    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"هل تريد حفظ معلومات تسجيل الدخول لتطبيق \"<xliff:g id="APPNAME">%1$s</xliff:g>\"؟"</string>
+    <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"هل تريد إنشاء مفتاح مرور لتسجيل الدخول إلى \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"؟"</string>
+    <string name="choose_create_option_password_title" msgid="4481366993598649224">"هل تريد حفظ كلمة المرور لتسجيل الدخول إلى \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"؟"</string>
+    <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"هل تريد حفظ معلومات تسجيل الدخول إلى \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"؟"</string>
     <string name="passkey" msgid="632353688396759522">"مفتاح المرور"</string>
     <string name="password" msgid="6738570945182936667">"كلمة المرور"</string>
     <string name="passkeys" msgid="5733880786866559847">"مفاتيح المرور"</string>
@@ -68,14 +68,15 @@
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"العودة إلى الصفحة السابقة"</string>
     <string name="accessibility_close_button" msgid="1163435587545377687">"إغلاق"</string>
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"إغلاق"</string>
-    <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"هل تريد استخدام مفتاح المرور المحفوظ لتطبيق \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"؟"</string>
-    <string name="get_dialog_title_use_password_for" msgid="625828023234318484">"هل تريد استخدام كلمة المرور المحفوظة لتطبيق \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"؟"</string>
-    <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"هل تريد استخدام معلومات تسجيل دخولك لتطبيق \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"؟"</string>
-    <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"هل تريد فتح القفل لاستعادة خيارات تسجيل الدخول لتطبيق \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"؟"</string>
+    <string name="get_dialog_title_use_passkey_for" msgid="479261099705979148">"استخدام مفتاح المرور المحفوظ لتسجيل الدخول إلى \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
+    <string name="get_dialog_title_use_password_for" msgid="688557784207167647">"استخدام كلمة المرور المحفوظة لتسجيل الدخول إلى \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
+    <string name="get_dialog_title_use_sign_in_for" msgid="4233553937542583226">"استخدام حسابك لتسجيل الدخول إلى \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
+    <string name="get_dialog_description_single_tap" msgid="2797059565126030879">"استخدِم قفل الشاشة لتسجيل الدخول إلى \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" باستخدام <xliff:g id="USERNAME">%2$s</xliff:g>"</string>
+    <string name="get_dialog_title_unlock_options_for" msgid="7096423827682163270">"فتح القفل لاستعادة خيارات تسجيل الدخول إلى \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"اختيار مفتاح مرور محفوظ لتطبيق \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
     <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"اختيار كلمة مرور محفوظة لتطبيق \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
     <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"اختيار بيانات اعتماد تسجيل دخول محفوظة لتطبيق \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
-    <string name="get_dialog_title_choose_sign_in_for" msgid="3048870756117876514">"اختيار معلومات تسجيل الدخول لتطبيق \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
+    <string name="get_dialog_title_choose_sign_in_for" msgid="645728947702442421">"اختيار حساب لتسجيل الدخول إلى \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
     <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"هل تريد اختيار بيانات الاعتماد لتطبيق \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"؟"</string>
     <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"هل تريد استخدام بيانات الاعتماد هذه في \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"؟"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"تسجيل الدخول بطريقة أخرى"</string>

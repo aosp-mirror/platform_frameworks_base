@@ -802,13 +802,19 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     public static final int SCREEN_WIDTH_DP_UNDEFINED = 0;
 
     /**
-     * The width of the available screen space in dp units excluding the area
-     * occupied by {@link android.view.WindowInsets window insets}.
+     * The width of the available screen space in dp units.
      *
-     * <aside class="note"><b>Note:</b> The width measurement excludes window
-     * insets even when the app is displayed edge to edge using
-     * {@link android.view.Window#setDecorFitsSystemWindows(boolean)
+     * <aside class="note"><b>Note:</b> If the app targets
+     * {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM}
+     * or after, the width measurement reflects the window size without excluding insets.
+     * Otherwise, the measurement excludes window insets even when the app is displayed edge to edge
+     * using {@link android.view.Window#setDecorFitsSystemWindows(boolean)
      * Window#setDecorFitsSystemWindows(boolean)}.</aside>
+     *
+     * Use {@link android.view.WindowMetrics#getBounds()} to always obtain the horizontal
+     * display area available to an app or embedded activity including the area
+     * occupied by window insets. A version of the API is also available for use on older platforms
+     * through {@link androidx.window.layout.WindowMetrics}.
      *
      * <p>Corresponds to the
      * <a href="{@docRoot}guide/topics/resources/providing-resources.html#AvailableWidthHeightQualifier">
@@ -831,14 +837,15 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * environment, {@code screenWidthDp} is the width of the screen on which
      * the app is displayed excluding window insets.
      *
-     * <p>Differs from {@link android.view.WindowMetrics} by not including
+     * <p>If the app targets {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM} or after,
+     * it is the same as {@link android.view.WindowMetrics}, but is expressed rounded to the nearest
+     * dp rather than px.
+     *
+     * <p>Otherwise, differs from {@link android.view.WindowMetrics} by not including
      * window insets in the width measurement and by expressing the measurement
      * in dp rather than px. Use {@code screenWidthDp} to obtain the width of
      * the display area available to an app or embedded activity excluding the
-     * area occupied by window insets. Use
-     * {@link android.view.WindowMetrics#getBounds()} to obtain the horizontal
-     * display area available to an app or embedded activity including the area
-     * occupied by window insets.
+     * area occupied by window insets.
      */
     public int screenWidthDp;
 
@@ -849,14 +856,19 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     public static final int SCREEN_HEIGHT_DP_UNDEFINED = 0;
 
     /**
-     * The height of the available screen space in dp units excluding the area
-     * occupied by {@link android.view.WindowInsets window insets}, such as the
-     * status bar, navigation bar, and cutouts.
+     * The height of the available screen space in dp units.
      *
-     * <aside class="note"><b>Note:</b> The height measurement excludes window
-     * insets even when the app is displayed edge to edge using
-     * {@link android.view.Window#setDecorFitsSystemWindows(boolean)
+     * <aside class="note"><b>Note:</b> If the app targets
+     * {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM}
+     * or after, the height measurement reflects the window size without excluding insets.
+     * Otherwise, the measurement excludes window insets even when the app is displayed edge to edge
+     * using {@link android.view.Window#setDecorFitsSystemWindows(boolean)
      * Window#setDecorFitsSystemWindows(boolean)}.</aside>
+     *
+     * Use {@link android.view.WindowMetrics#getBounds()} to always obtain the vertical
+     * display area available to an app or embedded activity including the area
+     * occupied by window insets. A version of the API is also available for use on older platforms
+     * through {@link androidx.window.layout.WindowMetrics}.
      *
      * <p>Corresponds to the
      * <a href="{@docRoot}guide/topics/resources/providing-resources.html#AvailableWidthHeightQualifier">
@@ -879,14 +891,15 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * multiple-screen environment, {@code screenHeightDp} is the height of the
      * screen on which the app is displayed excluding window insets.
      *
-     * <p>Differs from {@link android.view.WindowMetrics} by not including
+     * <p>If the app targets {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM} or after,
+     * it is the same as {@link android.view.WindowMetrics}, but is expressed rounded to the nearest
+     * dp rather than px.
+     *
+     * <p>Otherwise, differs from {@link android.view.WindowMetrics} by not including
      * window insets in the height measurement and by expressing the measurement
      * in dp rather than px. Use {@code screenHeightDp} to obtain the height of
      * the display area available to an app or embedded activity excluding the
-     * area occupied by window insets. Use
-     * {@link android.view.WindowMetrics#getBounds()} to obtain the vertical
-     * display area available to an app or embedded activity including the area
-     * occupied by window insets.
+     * area occupied by window insets.
      */
     public int screenHeightDp;
 

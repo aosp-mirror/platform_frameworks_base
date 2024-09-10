@@ -19,4 +19,5 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="settingslib_category_personal" msgid="1142302328104700620">"ကိုယ်ရေးကိုယ်တာ"</string>
     <string name="settingslib_category_work" msgid="4867750733682444676">"အလုပ်"</string>
+    <string name="settingslib_category_private" msgid="5039276873477591386">"သီးသန့်"</string>
 </resources>

@@ -27,7 +27,6 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -49,8 +48,11 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.PlatformIconButton
 import com.android.systemui.bouncer.ui.viewmodel.PasswordBouncerViewModel
+import com.android.systemui.common.ui.compose.SelectedUserAwareInputConnection
+import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.res.R
 
 /** UI for the input part of a password-requiring version of the bouncer. */
@@ -60,22 +62,22 @@ internal fun PasswordBouncer(
     modifier: Modifier = Modifier,
 ) {
     val focusRequester = remember { FocusRequester() }
-    val isTextFieldFocusRequested by viewModel.isTextFieldFocusRequested.collectAsState()
+    val isTextFieldFocusRequested by
+        viewModel.isTextFieldFocusRequested.collectAsStateWithLifecycle()
     LaunchedEffect(isTextFieldFocusRequested) {
         if (isTextFieldFocusRequested) {
             focusRequester.requestFocus()
         }
     }
 
-    val password: String by viewModel.password.collectAsState()
-    val isInputEnabled: Boolean by viewModel.isInputEnabled.collectAsState()
-    val animateFailure: Boolean by viewModel.animateFailure.collectAsState()
-    val isImeSwitcherButtonVisible by viewModel.isImeSwitcherButtonVisible.collectAsState()
+    val password: String by viewModel.password.collectAsStateWithLifecycle()
+    val isInputEnabled: Boolean by viewModel.isInputEnabled.collectAsStateWithLifecycle()
+    val animateFailure: Boolean by viewModel.animateFailure.collectAsStateWithLifecycle()
+    val isImeSwitcherButtonVisible by
+        viewModel.isImeSwitcherButtonVisible.collectAsStateWithLifecycle()
+    val selectedUserId by viewModel.selectedUserId.collectAsStateWithLifecycle()
 
-    DisposableEffect(Unit) {
-        viewModel.onShown()
-        onDispose { viewModel.onHidden() }
-    }
+    DisposableEffect(Unit) { onDispose { viewModel.onHidden() } }
 
     LaunchedEffect(animateFailure) {
         if (animateFailure) {
@@ -87,47 +89,52 @@ internal fun PasswordBouncer(
     val color = MaterialTheme.colorScheme.onSurfaceVariant
     val lineWidthPx = with(LocalDensity.current) { 2.dp.toPx() }
 
-    TextField(
-        value = password,
-        onValueChange = viewModel::onPasswordInputChanged,
-        enabled = isInputEnabled,
-        visualTransformation = PasswordVisualTransformation(),
-        singleLine = true,
-        textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
-        keyboardOptions =
-            KeyboardOptions(
-                keyboardType = KeyboardType.Password,
-                imeAction = ImeAction.Done,
-            ),
-        keyboardActions =
-            KeyboardActions(
-                onDone = { viewModel.onAuthenticateKeyPressed() },
-            ),
-        modifier =
-            modifier
-                .focusRequester(focusRequester)
-                .onFocusChanged { viewModel.onTextFieldFocusChanged(it.isFocused) }
-                .drawBehind {
-                    drawLine(
-                        color = color,
-                        start = Offset(x = 0f, y = size.height - lineWidthPx),
-                        end = Offset(size.width, y = size.height - lineWidthPx),
-                        strokeWidth = lineWidthPx,
-                    )
-                }
-                .onInterceptKeyBeforeSoftKeyboard { keyEvent ->
-                    if (keyEvent.key == Key.Back) {
-                        viewModel.onImeDismissed()
-                        true
-                    } else {
-                        false
+    SelectedUserAwareInputConnection(selectedUserId) {
+        TextField(
+            value = password,
+            onValueChange = viewModel::onPasswordInputChanged,
+            enabled = isInputEnabled,
+            visualTransformation = PasswordVisualTransformation(),
+            singleLine = true,
+            textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
+            keyboardOptions =
+                KeyboardOptions(
+                    keyboardType = KeyboardType.Password,
+                    imeAction = ImeAction.Done,
+                ),
+            keyboardActions =
+                KeyboardActions(
+                    onDone = { viewModel.onAuthenticateKeyPressed() },
+                ),
+            modifier =
+                modifier
+                    .sysuiResTag("bouncer_text_entry")
+                    .focusRequester(focusRequester)
+                    .onFocusChanged { viewModel.onTextFieldFocusChanged(it.isFocused) }
+                    .drawBehind {
+                        drawLine(
+                            color = color,
+                            start = Offset(x = 0f, y = size.height - lineWidthPx),
+                            end = Offset(size.width, y = size.height - lineWidthPx),
+                            strokeWidth = lineWidthPx,
+                        )
                     }
-                },
-        trailingIcon =
-            if (isImeSwitcherButtonVisible) {
-                { ImeSwitcherButton(viewModel, color) }
-            } else null
-    )
+                    .onInterceptKeyBeforeSoftKeyboard { keyEvent ->
+                        if (keyEvent.key == Key.Back) {
+                            viewModel.onImeDismissed()
+                            true
+                        } else {
+                            false
+                        }
+                    },
+            trailingIcon =
+                if (isImeSwitcherButtonVisible) {
+                    { ImeSwitcherButton(viewModel, color) }
+                } else {
+                    null
+                }
+        )
+    }
 }
 
 /** Button for changing the password input method (IME). */

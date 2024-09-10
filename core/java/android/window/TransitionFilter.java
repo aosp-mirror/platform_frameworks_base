@@ -25,6 +25,7 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.WindowConfiguration;
 import android.content.ComponentName;
+import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.WindowManager;
@@ -180,6 +181,7 @@ public final class TransitionFilter implements Parcelable {
 
         public @ContainerOrder int mOrder = CONTAINER_ORDER_ANY;
         public ComponentName mTopActivity;
+        public IBinder mLaunchCookie;
 
         public Requirement() {
         }
@@ -193,6 +195,7 @@ public final class TransitionFilter implements Parcelable {
             mMustBeTask = in.readBoolean();
             mOrder = in.readInt();
             mTopActivity = in.readTypedObject(ComponentName.CREATOR);
+            mLaunchCookie = in.readStrongBinder();
         }
 
         /** Go through changes and find if at-least one change matches this filter */
@@ -231,6 +234,9 @@ public final class TransitionFilter implements Parcelable {
                 if (mMustBeTask && change.getTaskInfo() == null) {
                     continue;
                 }
+                if (!matchesCookie(change.getTaskInfo())) {
+                    continue;
+                }
                 return true;
             }
             return false;
@@ -247,13 +253,25 @@ public final class TransitionFilter implements Parcelable {
             return false;
         }
 
+        private boolean matchesCookie(ActivityManager.RunningTaskInfo info) {
+            if (mLaunchCookie == null) return true;
+            if (info == null) return false;
+            for (IBinder cookie : info.launchCookies) {
+                if (mLaunchCookie.equals(cookie)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         /** Check if the request matches this filter. It may generate false positives */
         boolean matches(@NonNull TransitionRequestInfo request) {
             // Can't check modes/order since the transition hasn't been built at this point.
             if (mActivityType == ACTIVITY_TYPE_UNDEFINED) return true;
             return request.getTriggerTask() != null
                     && request.getTriggerTask().getActivityType() == mActivityType
-                    && matchesTopActivity(request.getTriggerTask(), null /* activityCmp */);
+                    && matchesTopActivity(request.getTriggerTask(), null /* activityCmp */)
+                    && matchesCookie(request.getTriggerTask());
         }
 
         @Override
@@ -267,6 +285,7 @@ public final class TransitionFilter implements Parcelable {
             dest.writeBoolean(mMustBeTask);
             dest.writeInt(mOrder);
             dest.writeTypedObject(mTopActivity, flags);
+            dest.writeStrongBinder(mLaunchCookie);
         }
 
         @NonNull
@@ -307,6 +326,7 @@ public final class TransitionFilter implements Parcelable {
             out.append(" mustBeTask=" + mMustBeTask);
             out.append(" order=" + containerOrderToString(mOrder));
             out.append(" topActivity=").append(mTopActivity);
+            out.append(" launchCookie=").append(mLaunchCookie);
             out.append("}");
             return out.toString();
         }

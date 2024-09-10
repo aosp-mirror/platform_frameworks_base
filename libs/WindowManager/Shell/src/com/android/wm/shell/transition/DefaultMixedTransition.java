@@ -41,7 +41,7 @@ class DefaultMixedTransition extends DefaultMixedHandler.MixedTransition {
     private final ActivityEmbeddingController mActivityEmbeddingController;
 
     DefaultMixedTransition(int type, IBinder transition, Transitions player,
-            DefaultMixedHandler mixedHandler, PipTransitionController pipHandler,
+            MixedTransitionHandler mixedHandler, PipTransitionController pipHandler,
             StageCoordinator splitHandler, KeyguardTransitionHandler keyguardHandler,
             UnfoldTransitionHandler unfoldHandler,
             ActivityEmbeddingController activityEmbeddingController) {
@@ -70,13 +70,18 @@ class DefaultMixedTransition extends DefaultMixedHandler.MixedTransition {
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
         return switch (mType) {
-            case TYPE_DISPLAY_AND_SPLIT_CHANGE -> false;
+            case TYPE_DISPLAY_AND_SPLIT_CHANGE, TYPE_ENTER_PIP_WITH_DISPLAY_CHANGE -> false;
             case TYPE_ENTER_PIP_FROM_ACTIVITY_EMBEDDING ->
                     animateEnterPipFromActivityEmbedding(
                             info, startTransaction, finishTransaction, finishCallback);
             case TYPE_ENTER_PIP_FROM_SPLIT ->
                     animateEnterPipFromSplit(this, info, startTransaction, finishTransaction,
-                            finishCallback, mPlayer, mMixedHandler, mPipHandler, mSplitHandler);
+                            finishCallback, mPlayer, mMixedHandler, mPipHandler, mSplitHandler,
+                            /*replacingPip*/ false);
+            case TYPE_ENTER_PIP_REPLACE_FROM_SPLIT ->
+                    animateEnterPipFromSplit(this, info, startTransaction, finishTransaction,
+                            finishCallback, mPlayer, mMixedHandler, mPipHandler, mSplitHandler,
+                            /*replacingPip*/ true);
             case TYPE_KEYGUARD ->
                     animateKeyguard(this, info, startTransaction, finishTransaction, finishCallback,
                             mKeyguardHandler, mPipHandler);
@@ -248,6 +253,7 @@ class DefaultMixedTransition extends DefaultMixedHandler.MixedTransition {
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
         switch (mType) {
             case TYPE_DISPLAY_AND_SPLIT_CHANGE:
+            case TYPE_ENTER_PIP_WITH_DISPLAY_CHANGE:
                 // queue since no actual animation.
                 return;
             case TYPE_ENTER_PIP_FROM_ACTIVITY_EMBEDDING:

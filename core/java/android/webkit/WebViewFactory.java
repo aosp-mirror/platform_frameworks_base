@@ -30,6 +30,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
+import android.content.res.Resources;
 import android.os.Build;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -39,6 +40,7 @@ import android.text.TextUtils;
 import android.util.AndroidRuntimeException;
 import android.util.ArraySet;
 import android.util.Log;
+import android.util.Slog;
 
 import java.io.File;
 import java.lang.reflect.Method;
@@ -92,6 +94,9 @@ public final class WebViewFactory {
 
     // error for namespace lookup
     public static final int LIBLOAD_FAILED_TO_FIND_NAMESPACE = 10;
+
+    // generic error for future use
+    static final int LIBLOAD_FAILED_OTHER = 11;
 
     /**
      * Stores the timestamps at which various WebView startup events occurred in this process.
@@ -544,8 +549,14 @@ public final class WebViewFactory {
             Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "WebViewFactory.getChromiumProviderClass()");
             try {
                 sTimestamps.mAddAssetsStart = SystemClock.uptimeMillis();
-                for (String newAssetPath : webViewContext.getApplicationInfo().getAllApkPaths()) {
-                    initialApplication.getAssets().addAssetPathAsSharedLibrary(newAssetPath);
+                if (android.content.res.Flags.registerResourcePaths()) {
+                    Resources.registerResourcePaths(webViewContext.getPackageName(),
+                            webViewContext.getApplicationInfo());
+                } else {
+                    for (String newAssetPath : webViewContext.getApplicationInfo()
+                            .getAllApkPaths()) {
+                        initialApplication.getAssets().addAssetPathAsSharedLibrary(newAssetPath);
+                    }
                 }
                 sTimestamps.mAddAssetsEnd = sTimestamps.mGetClassLoaderStart =
                         SystemClock.uptimeMillis();
@@ -599,7 +610,7 @@ public final class WebViewFactory {
             startedRelroProcesses = WebViewLibraryLoader.prepareNativeLibraries(packageInfo);
         } catch (Throwable t) {
             // Log and discard errors at this stage as we must not crash the system server.
-            Log.e(LOGTAG, "error preparing webview native library", t);
+            Slog.wtf(LOGTAG, "error preparing webview native library", t);
         }
 
         WebViewZygote.onWebViewProviderChanged(packageInfo);

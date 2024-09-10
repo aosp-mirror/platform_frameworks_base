@@ -18,13 +18,10 @@ package android.hardware.face;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.hardware.biometrics.face.IFace;
-import android.hardware.biometrics.face.SensorProps;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 
@@ -37,8 +34,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
-import java.util.function.Function;
-
 @Presubmit
 @SmallTest
 public class FaceSensorConfigurationsTest {
@@ -48,10 +43,6 @@ public class FaceSensorConfigurationsTest {
     private Context mContext;
     @Mock
     private Resources mResources;
-    @Mock
-    private IFace mFace;
-    @Mock
-    private Function<String, IFace> mGetIFace;
 
     private final String[] mAidlInstances = new String[]{"default", "virtual"};
     private String[] mHidlConfigStrings = new String[]{"0:2:15", "0:8:15"};
@@ -59,15 +50,13 @@ public class FaceSensorConfigurationsTest {
 
     @Before
     public void setUp() throws RemoteException {
-        when(mGetIFace.apply(anyString())).thenReturn(mFace);
-        when(mFace.getSensorProps()).thenReturn(new SensorProps[]{});
         when(mContext.getResources()).thenReturn(mResources);
     }
 
     @Test
     public void testAidlInstanceSensorProps() {
         mFaceSensorConfigurations = new FaceSensorConfigurations(false);
-        mFaceSensorConfigurations.addAidlConfigs(mAidlInstances, mGetIFace);
+        mFaceSensorConfigurations.addAidlConfigs(mAidlInstances);
 
         assertThat(mFaceSensorConfigurations.hasSensorConfigurations()).isTrue();
         assertThat(!mFaceSensorConfigurations.isSingleSensorConfigurationPresent()).isTrue();

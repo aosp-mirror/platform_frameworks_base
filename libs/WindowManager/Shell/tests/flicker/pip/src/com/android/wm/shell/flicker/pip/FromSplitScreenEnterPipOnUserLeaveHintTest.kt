@@ -24,6 +24,7 @@ import android.tools.flicker.legacy.LegacyFlickerTest
 import android.tools.flicker.legacy.LegacyFlickerTestFactory
 import android.tools.helpers.WindowUtils
 import android.tools.traces.parsers.toFlickerComponent
+import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import com.android.server.wm.flicker.testapp.ActivityOptions
@@ -39,7 +40,7 @@ import org.junit.runners.Parameterized
 /**
  * Test entering pip from an app via auto-enter property when navigating to home from split screen.
  *
- * To run this test: `atest WMShellFlickerTests:AutoEnterPipOnGoToHomeTest`
+ * To run this test: `atest WMShellFlickerTestsPip1:FromSplitScreenEnterPipOnUserLeaveHintTest`
  *
  * Actions:
  * ```
@@ -181,11 +182,25 @@ class FromSplitScreenEnterPipOnUserLeaveHintTest(flicker: LegacyFlickerTest) :
         }
     }
 
+    /** {@inheritDoc} */
+    @FlakyTest(bugId = 312446524)
+    @Test
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
+        super.visibleLayersShownMoreThanOneConsecutiveEntry()
+
+    /** {@inheritDoc} */
+    @Test
+    @FlakyTest(bugId = 336510055)
+    override fun entireScreenCovered() {
+        super.entireScreenCovered()
+    }
+
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams() = LegacyFlickerTestFactory.nonRotationTests(
-            supportedRotations = listOf(Rotation.ROTATION_0)
-        )
+        fun getParams() =
+            LegacyFlickerTestFactory.nonRotationTests(
+                supportedRotations = listOf(Rotation.ROTATION_0)
+            )
     }
 }

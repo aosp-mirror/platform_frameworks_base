@@ -146,4 +146,22 @@
 
     <!-- Georgian keyboard layout label. [CHAR LIMIT=35] -->
     <string name="keyboard_layout_georgian">Georgian</string>
+
+    <!-- Thai (Kedmanee variant) keyboard layout label. [CHAR LIMIT=35] -->
+    <string name="keyboard_layout_thai_kedmanee">Thai (Kedmanee)</string>
+
+    <!-- Thai (Pattachote variant) keyboard layout label. [CHAR LIMIT=35] -->
+    <string name="keyboard_layout_thai_pattachote">Thai (Pattachote)</string>
+
+    <!-- Serbian (Latin) keyboard layout label. [CHAR LIMIT=35] -->
+    <string name="keyboard_layout_serbian_latin">Serbian (Latin)</string>
+
+    <!-- Montenegrin (Latin) keyboard layout label. [CHAR LIMIT=35] -->
+    <string name="keyboard_layout_montenegrin_latin">Montenegrin (Latin)</string>
+
+    <!-- Serbian (Cyrillic) keyboard layout label. [CHAR LIMIT=35] -->
+    <string name="keyboard_layout_serbian_cyrillic">Serbian (Cyrillic)</string>
+
+    <!-- Montenegrin (Cyrillic) keyboard layout label. [CHAR LIMIT=35] -->
+    <string name="keyboard_layout_montenegrin_cyrillic">Montenegrin (Cyrillic)</string>
 </resources>

@@ -297,6 +297,8 @@ public final class InputMethodDebug {
                 return "SHOW_SOFT_INPUT_IME_TOGGLE_SOFT_INPUT";
             case SoftInputShowHideReason.SHOW_SOFT_INPUT_IMM_DEPRECATION:
                 return "SHOW_SOFT_INPUT_IMM_DEPRECATION";
+            case SoftInputShowHideReason.CONTROL_WINDOW_INSETS_ANIMATION:
+                return "CONTROL_WINDOW_INSETS_ANIMATION";
             default:
                 return "Unknown=" + reason;
         }

@@ -16,7 +16,7 @@
 
 package com.android.systemui.util.kotlin
 
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.time.FakeSystemClock
@@ -47,7 +47,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class PairwiseFlowTest : SysuiTestCase() {
     @Test
     fun simple() = runBlocking {
@@ -89,7 +89,9 @@ class PairwiseFlowTest : SysuiTestCase() {
                         initRun = true
                         "initial"
                     }
-                ) { prev: String, next: String -> "$prev|$next" }
+                ) { prev: String, next: String ->
+                    "$prev|$next"
+                }
             )
             .emitsExactly("initial|val1", "val1|val2")
         assertThat(initRun).isTrue()
@@ -104,7 +106,9 @@ class PairwiseFlowTest : SysuiTestCase() {
                         initRun = true
                         "initial"
                     }
-                ) { prev: String, next: String -> "$prev|$next" }
+                ) { prev: String, next: String ->
+                    "$prev|$next"
+                }
             )
             .emitsNothing()
         // Even though the flow will not emit anything, the initial value function should still get
@@ -120,7 +124,9 @@ class PairwiseFlowTest : SysuiTestCase() {
                 initRun = true
                 "initial"
             }
-        ) { prev: String, next: String -> "$prev|$next" }
+        ) { prev: String, next: String ->
+            "$prev|$next"
+        }
 
         // Since the flow isn't collected, ensure [initialValueFun] isn't run.
         assertThat(initRun).isFalse()
@@ -146,7 +152,7 @@ class PairwiseFlowTest : SysuiTestCase() {
 }
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class SetChangesFlowTest : SysuiTestCase() {
     @Test
     fun simple() = runBlocking {
@@ -198,7 +204,7 @@ class SetChangesFlowTest : SysuiTestCase() {
 }
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class SampleFlowTest : SysuiTestCase() {
     @Test
     fun simple() = runBlocking {
@@ -240,7 +246,7 @@ class SampleFlowTest : SysuiTestCase() {
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class ThrottleFlowTest : SysuiTestCase() {
 
     @Test
@@ -248,13 +254,16 @@ class ThrottleFlowTest : SysuiTestCase() {
         // Arrange
         val choreographer = createChoreographer(this)
         val output = mutableListOf<Int>()
-        val collectJob = backgroundScope.launch {
-            flow {
-                emit(1)
-                delay(1000)
-                emit(2)
-            }.throttle(1000, choreographer.fakeClock).toList(output)
-        }
+        val collectJob =
+            backgroundScope.launch {
+                flow {
+                        emit(1)
+                        delay(1000)
+                        emit(2)
+                    }
+                    .throttle(1000, choreographer.fakeClock)
+                    .toList(output)
+            }
 
         // Act
         choreographer.advanceAndRun(0)
@@ -283,13 +292,16 @@ class ThrottleFlowTest : SysuiTestCase() {
         // Arrange
         val choreographer = createChoreographer(this)
         val output = mutableListOf<Int>()
-        val collectJob = backgroundScope.launch {
-            flow {
-                emit(1)
-                delay(500)
-                emit(2)
-            }.throttle(1000, choreographer.fakeClock).toList(output)
-        }
+        val collectJob =
+            backgroundScope.launch {
+                flow {
+                        emit(1)
+                        delay(500)
+                        emit(2)
+                    }
+                    .throttle(1000, choreographer.fakeClock)
+                    .toList(output)
+            }
 
         // Act
         choreographer.advanceAndRun(0)
@@ -319,15 +331,18 @@ class ThrottleFlowTest : SysuiTestCase() {
         // Arrange
         val choreographer = createChoreographer(this)
         val output = mutableListOf<Int>()
-        val collectJob = backgroundScope.launch {
-            flow {
-                emit(1)
-                delay(500)
-                emit(2)
-                delay(500)
-                emit(3)
-            }.throttle(1000, choreographer.fakeClock).toList(output)
-        }
+        val collectJob =
+            backgroundScope.launch {
+                flow {
+                        emit(1)
+                        delay(500)
+                        emit(2)
+                        delay(500)
+                        emit(3)
+                    }
+                    .throttle(1000, choreographer.fakeClock)
+                    .toList(output)
+            }
 
         // Act
         choreographer.advanceAndRun(0)
@@ -357,15 +372,18 @@ class ThrottleFlowTest : SysuiTestCase() {
         // Arrange
         val choreographer = createChoreographer(this)
         val output = mutableListOf<Int>()
-        val collectJob = backgroundScope.launch {
-            flow {
-                emit(1)
-                delay(500)
-                emit(2)
-                delay(250)
-                emit(3)
-            }.throttle(1000, choreographer.fakeClock).toList(output)
-        }
+        val collectJob =
+            backgroundScope.launch {
+                flow {
+                        emit(1)
+                        delay(500)
+                        emit(2)
+                        delay(250)
+                        emit(3)
+                    }
+                    .throttle(1000, choreographer.fakeClock)
+                    .toList(output)
+            }
 
         // Act
         choreographer.advanceAndRun(0)
@@ -391,15 +409,16 @@ class ThrottleFlowTest : SysuiTestCase() {
         collectJob.cancel()
     }
 
-    private fun createChoreographer(testScope: TestScope) = object {
-        val fakeClock = FakeSystemClock()
+    private fun createChoreographer(testScope: TestScope) =
+        object {
+            val fakeClock = FakeSystemClock()
 
-        fun advanceAndRun(millis: Long) {
-            fakeClock.advanceTime(millis)
-            testScope.advanceTimeBy(millis)
-            testScope.runCurrent()
+            fun advanceAndRun(millis: Long) {
+                fakeClock.advanceTime(millis)
+                testScope.advanceTimeBy(millis)
+                testScope.runCurrent()
+            }
         }
-    }
 }
 
 private fun <T> assertThatFlow(flow: Flow<T>) =

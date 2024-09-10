@@ -20,7 +20,9 @@ import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.service.dreams.Flags.dismissDreamOnKeyguardDismiss;
 import static android.view.WindowManager.KEYGUARD_VISIBILITY_TRANSIT_FLAGS;
+import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_APPEARING;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_LOCKED;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_OCCLUDING;
@@ -44,12 +46,15 @@ import android.window.IRemoteTransition;
 import android.window.IRemoteTransitionFinishedCallback;
 import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
+import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.common.ShellExecutor;
-import com.android.wm.shell.common.annotations.ExternalThread;
+import com.android.wm.shell.common.TaskStackListenerCallback;
+import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
+import com.android.wm.shell.shared.annotations.ExternalThread;
 import com.android.wm.shell.sysui.KeyguardChangeListener;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
@@ -62,7 +67,8 @@ import com.android.wm.shell.transition.Transitions.TransitionFinishCallback;
  * <p>This takes the highest priority.
  */
 public class KeyguardTransitionHandler
-        implements Transitions.TransitionHandler, KeyguardChangeListener {
+        implements Transitions.TransitionHandler, KeyguardChangeListener,
+        TaskStackListenerCallback {
     private static final String TAG = "KeyguardTransition";
 
     private final Transitions mTransitions;
@@ -71,12 +77,14 @@ public class KeyguardTransitionHandler
     private final ShellExecutor mMainExecutor;
 
     private final ArrayMap<IBinder, StartedTransition> mStartedTransitions = new ArrayMap<>();
+    private final TaskStackListenerImpl mTaskStackListener;
 
     /**
      * Local IRemoteTransition implementations registered by the keyguard service.
      * @see KeyguardTransitions
      */
     private IRemoteTransition mExitTransition = null;
+    private IRemoteTransition mAppearTransition = null;
     private IRemoteTransition mOccludeTransition = null;
     private IRemoteTransition mOccludeByDreamTransition = null;
     private IRemoteTransition mUnoccludeTransition = null;
@@ -87,6 +95,8 @@ public class KeyguardTransitionHandler
 
     // Last value reported by {@link KeyguardChangeListener}.
     private boolean mKeyguardShowing = true;
+    @Nullable
+    private WindowContainerToken mDreamToken;
 
     private final class StartedTransition {
         final TransitionInfo mInfo;
@@ -105,18 +115,23 @@ public class KeyguardTransitionHandler
             @NonNull ShellInit shellInit,
             @NonNull ShellController shellController,
             @NonNull Transitions transitions,
+            @NonNull TaskStackListenerImpl taskStackListener,
             @NonNull Handler mainHandler,
             @NonNull ShellExecutor mainExecutor) {
         mTransitions = transitions;
         mShellController = shellController;
         mMainHandler = mainHandler;
         mMainExecutor = mainExecutor;
+        mTaskStackListener = taskStackListener;
         shellInit.addInitCallback(this::onInit, this);
     }
 
     private void onInit() {
         mTransitions.addHandler(this);
         mShellController.addKeyguardChangeListener(this);
+        if (dismissDreamOnKeyguardDismiss()) {
+            mTaskStackListener.addListener(this);
+        }
     }
 
     /**
@@ -128,6 +143,10 @@ public class KeyguardTransitionHandler
     }
 
     public static boolean handles(TransitionInfo info) {
+        // There is no animation for screen-wake unless we are immediately unlocking.
+        if (info.getType() == WindowManager.TRANSIT_WAKE && !info.isKeyguardGoingAway()) {
+            return false;
+        }
         return (info.getFlags() & KEYGUARD_VISIBILITY_TRANSIT_FLAGS) != 0;
     }
 
@@ -142,6 +161,11 @@ public class KeyguardTransitionHandler
     }
 
     @Override
+    public void onTaskMovedToFront(ActivityManager.RunningTaskInfo taskInfo) {
+        mDreamToken = taskInfo.getActivityType() == ACTIVITY_TYPE_DREAM ? taskInfo.token : null;
+    }
+
+    @Override
     public boolean startAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
@@ -152,26 +176,28 @@ public class KeyguardTransitionHandler
 
         // Choose a transition applicable for the changes and keyguard state.
         if ((info.getFlags() & TRANSIT_FLAG_KEYGUARD_GOING_AWAY) != 0) {
-            return startAnimation(mExitTransition,
-                    "going-away",
+            return startAnimation(mExitTransition, "going-away",
                     transition, info, startTransaction, finishTransaction, finishCallback);
         }
+
+        if ((info.getFlags() & TRANSIT_FLAG_KEYGUARD_APPEARING) != 0) {
+            return startAnimation(mAppearTransition, "appearing",
+                    transition, info, startTransaction, finishTransaction, finishCallback);
+        }
+
 
         // Occlude/unocclude animations are only played if the keyguard is locked.
         if ((info.getFlags() & TRANSIT_FLAG_KEYGUARD_LOCKED) != 0) {
             if ((info.getFlags() & TRANSIT_FLAG_KEYGUARD_OCCLUDING) != 0) {
                 if (hasOpeningDream(info)) {
-                    return startAnimation(mOccludeByDreamTransition,
-                            "occlude-by-dream",
+                    return startAnimation(mOccludeByDreamTransition, "occlude-by-dream",
                             transition, info, startTransaction, finishTransaction, finishCallback);
                 } else {
-                    return startAnimation(mOccludeTransition,
-                            "occlude",
+                    return startAnimation(mOccludeTransition, "occlude",
                             transition, info, startTransaction, finishTransaction, finishCallback);
                 }
             } else if ((info.getFlags() & TRANSIT_FLAG_KEYGUARD_UNOCCLUDING) != 0) {
-                return startAnimation(mUnoccludeTransition,
-                        "unocclude",
+                return startAnimation(mUnoccludeTransition, "unocclude",
                         transition, info, startTransaction, finishTransaction, finishCallback);
             }
         }
@@ -271,6 +297,13 @@ public class KeyguardTransitionHandler
     @Override
     public WindowContainerTransaction handleRequest(@NonNull IBinder transition,
             @NonNull TransitionRequestInfo request) {
+        if (dismissDreamOnKeyguardDismiss()
+                && (request.getFlags() & TRANSIT_FLAG_KEYGUARD_GOING_AWAY) != 0
+                && mDreamToken != null) {
+            // Dismiss the dream in the same transaction, so that it isn't visible once the device
+            // is unlocked.
+            return new WindowContainerTransaction().removeTask(mDreamToken);
+        }
         return null;
     }
 
@@ -334,11 +367,13 @@ public class KeyguardTransitionHandler
         @Override
         public void register(
                 IRemoteTransition exitTransition,
+                IRemoteTransition appearTransition,
                 IRemoteTransition occludeTransition,
                 IRemoteTransition occludeByDreamTransition,
                 IRemoteTransition unoccludeTransition) {
             mMainExecutor.execute(() -> {
                 mExitTransition = exitTransition;
+                mAppearTransition = appearTransition;
                 mOccludeTransition = occludeTransition;
                 mOccludeByDreamTransition = occludeByDreamTransition;
                 mUnoccludeTransition = unoccludeTransition;

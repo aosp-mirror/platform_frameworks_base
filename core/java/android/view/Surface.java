@@ -103,9 +103,9 @@ public class Surface implements Parcelable {
             long nativeObject, float frameRate, int compatibility, int changeFrameRateStrategy);
     private static native void nativeDestroy(long nativeObject);
 
-    // 5MB is a wild guess for what the average surface should be. On most new phones, a full-screen
-    // surface is about 9MB... but not all surfaces are screen size. This should be a nice balance.
-    private static final long SURFACE_NATIVE_ALLOCATION_SIZE_BYTES = 5_000_000;
+    // 5KB is a balanced guess, since these are still pretty heavyweight objects, but if we make
+    // this too big, it can overwhelm the GC.
+    private static final long SURFACE_NATIVE_ALLOCATION_SIZE_BYTES = 5_000;
 
     public static final @android.annotation.NonNull Parcelable.Creator<Surface> CREATOR =
             new Parcelable.Creator<Surface>() {
@@ -203,9 +203,7 @@ public class Surface implements Parcelable {
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"FRAME_RATE_COMPATIBILITY_"},
-            value = {FRAME_RATE_COMPATIBILITY_DEFAULT, FRAME_RATE_COMPATIBILITY_FIXED_SOURCE,
-                    FRAME_RATE_COMPATIBILITY_EXACT, FRAME_RATE_COMPATIBILITY_NO_VOTE,
-                    FRAME_RATE_COMPATIBILITY_MIN, FRAME_RATE_COMPATIBILITY_GTE})
+            value = {FRAME_RATE_COMPATIBILITY_DEFAULT, FRAME_RATE_COMPATIBILITY_FIXED_SOURCE})
     public @interface FrameRateCompatibility {}
 
     // From native_window.h. Keep these in sync.
@@ -837,8 +835,8 @@ public class Surface implements Parcelable {
     @Override
     public String toString() {
         synchronized (mLock) {
-            return "Surface(name=" + mName + ")/@0x" +
-                    Integer.toHexString(System.identityHashCode(this));
+            return "Surface(name=" + mName + " mNativeObject=" + mNativeObject + ")/@0x"
+                    + Integer.toHexString(System.identityHashCode(this));
         }
     }
 

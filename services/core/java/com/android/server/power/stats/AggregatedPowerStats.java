@@ -19,6 +19,7 @@ package com.android.server.power.stats;
 import android.annotation.CurrentTimeMillisLong;
 import android.annotation.DurationMillisLong;
 import android.annotation.NonNull;
+import android.os.BatteryStats;
 import android.os.UserHandle;
 import android.text.format.DateFormat;
 import android.util.IndentingPrintWriter;
@@ -34,11 +35,14 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TimeZone;
 
 /**
  * This class represents aggregated power stats for a variety of power components (CPU, WiFi,
@@ -66,7 +70,7 @@ class AggregatedPowerStats {
                 aggregatedPowerStatsConfig.getPowerComponentsAggregatedStatsConfigs();
         mPowerComponentStats = new PowerComponentAggregatedPowerStats[configs.size()];
         for (int i = 0; i < configs.size(); i++) {
-            mPowerComponentStats[i] = new PowerComponentAggregatedPowerStats(configs.get(i));
+            mPowerComponentStats[i] = new PowerComponentAggregatedPowerStats(this, configs.get(i));
         }
     }
 
@@ -152,8 +156,14 @@ class AggregatedPowerStats {
         int powerComponentId = powerStats.descriptor.powerComponentId;
         for (PowerComponentAggregatedPowerStats stats : mPowerComponentStats) {
             if (stats.powerComponentId == powerComponentId) {
-                stats.addPowerStats(powerStats, time);
+                stats.getConfig().getProcessor().addPowerStats(stats, powerStats, time);
             }
+        }
+    }
+
+    public void noteStateChange(BatteryStats.HistoryItem item) {
+        for (PowerComponentAggregatedPowerStats stats : mPowerComponentStats) {
+            stats.getConfig().getProcessor().noteStateChange(stats, item);
         }
     }
 
@@ -223,7 +233,7 @@ class AggregatedPowerStats {
             if (i == 0) {
                 baseTime = clockUpdate.monotonicTime;
                 sb.append("Start time: ")
-                        .append(DateFormat.format("yyyy-MM-dd-HH-mm-ss", clockUpdate.currentTime))
+                        .append(formatDateTime(clockUpdate.currentTime))
                         .append(" (")
                         .append(baseTime)
                         .append(") duration: ")
@@ -235,8 +245,7 @@ class AggregatedPowerStats {
                 TimeUtils.formatDuration(
                         clockUpdate.monotonicTime - baseTime, sb,
                         TimeUtils.HUNDRED_DAY_FIELD_LEN + 3);
-                sb.append(" ").append(
-                        DateFormat.format("yyyy-MM-dd-HH-mm-ss", clockUpdate.currentTime));
+                sb.append(" ").append(formatDateTime(clockUpdate.currentTime));
                 ipw.increaseIndent();
                 ipw.println(sb);
                 ipw.decreaseIndent();
@@ -265,6 +274,12 @@ class AggregatedPowerStats {
             }
             ipw.decreaseIndent();
         }
+    }
+
+    private static String formatDateTime(long timeInMillis) {
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
+        format.getCalendar().setTimeZone(TimeZone.getTimeZone("GMT"));
+        return format.format(new Date(timeInMillis));
     }
 
     @Override

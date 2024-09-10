@@ -6,15 +6,18 @@ import android.app.WindowConfiguration
 import android.graphics.Point
 import android.graphics.Rect
 import android.os.PowerManager
-import android.testing.AndroidTestingRunner
+import android.platform.test.annotations.DisableFlags
 import android.testing.TestableLooper.RunWithLooper
 import android.view.RemoteAnimationTarget
 import android.view.SurfaceControl
 import android.view.SyncRtSurfaceTransactionApplier
 import android.view.View
 import android.view.ViewRootImpl
+import android.view.WindowManager
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardViewController
+import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.shared.system.smartspace.ILauncherUnlockAnimationController
@@ -41,14 +44,17 @@ import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.clearInvocations
 import java.util.function.Predicate
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @RunWithLooper
 @SmallTest
 class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
     private lateinit var keyguardUnlockAnimationController: KeyguardUnlockAnimationController
 
+    @Mock
+    private lateinit var windowManager: WindowManager
     @Mock
     private lateinit var keyguardViewMediator: KeyguardViewMediator
     @Mock
@@ -97,7 +103,8 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         keyguardUnlockAnimationController = KeyguardUnlockAnimationController(
-            context, keyguardStateController, { keyguardViewMediator }, keyguardViewController,
+            windowManager, context.resources,
+            keyguardStateController, { keyguardViewMediator }, keyguardViewController,
             featureFlags, { biometricUnlockController }, statusBarStateController,
             notificationShadeWindowController, powerManager, wallpaperManager
         )
@@ -130,6 +137,7 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
      * surface, or the user will see the wallpaper briefly as the app animates in.
      */
     @Test
+    @DisableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
     fun noSurfaceAnimation_ifWakeAndUnlocking() {
         whenever(biometricUnlockController.isWakeAndUnlock).thenReturn(true)
 
@@ -320,6 +328,7 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
      * If we are not wake and unlocking, we expect the unlock animation to play normally.
      */
     @Test
+    @DisableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
     fun surfaceAnimation_multipleTargets() {
         keyguardUnlockAnimationController.notifyStartSurfaceBehindRemoteAnimation(
                 arrayOf(remoteTarget1, remoteTarget2),
@@ -327,6 +336,10 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
                 0 /* startTime */,
                 false /* requestedShowSurfaceBehindKeyguard */
         )
+
+        // Cancel the animator so we can verify only the setSurfaceBehind call below.
+        keyguardUnlockAnimationController.surfaceBehindAlphaAnimator.end()
+        clearInvocations(surfaceTransactionApplier)
 
         // Set appear to 50%, we'll just verify that we're not applying the identity matrix which
         // means an animation is in progress.
@@ -358,6 +371,7 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
     fun surfaceBehindAlphaOverriddenTo0_ifNotInteractive() {
         whenever(powerManager.isInteractive).thenReturn(false)
 
@@ -367,6 +381,10 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
                 0 /* startTime */,
                 false /* requestedShowSurfaceBehindKeyguard */
         )
+
+        // Cancel the animator so we can verify only the setSurfaceBehind call below.
+        keyguardUnlockAnimationController.surfaceBehindAlphaAnimator.end()
+        clearInvocations(surfaceTransactionApplier)
 
         keyguardUnlockAnimationController.setSurfaceBehindAppearAmount(1f)
         keyguardUnlockAnimationController.setWallpaperAppearAmount(1f)
@@ -389,6 +407,7 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
     fun surfaceBehindAlphaNotOverriddenTo0_ifInteractive() {
         whenever(powerManager.isInteractive).thenReturn(true)
 
@@ -398,6 +417,10 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
                 0 /* startTime */,
                 false /* requestedShowSurfaceBehindKeyguard */
         )
+
+        // Stop the animator - we just want to test whether the override is not applied.
+        keyguardUnlockAnimationController.surfaceBehindAlphaAnimator.end()
+        clearInvocations(surfaceTransactionApplier)
 
         keyguardUnlockAnimationController.setSurfaceBehindAppearAmount(1f)
         keyguardUnlockAnimationController.setWallpaperAppearAmount(1f)

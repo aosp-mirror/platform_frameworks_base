@@ -18,19 +18,27 @@ package com.android.systemui.volume.panel.component.volume.slider.ui.viewmodel
 
 import android.content.Context
 import android.media.AudioManager
+import android.util.Log
+import com.android.internal.logging.UiEventLogger
 import com.android.settingslib.volume.domain.interactor.AudioVolumeInteractor
 import com.android.settingslib.volume.shared.model.AudioStream
 import com.android.settingslib.volume.shared.model.AudioStreamModel
+import com.android.settingslib.volume.shared.model.RingerMode
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.res.R
-import com.android.systemui.volume.panel.component.volume.domain.interactor.VolumeSliderInteractor
+import com.android.systemui.volume.panel.ui.VolumePanelUiEvent
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import kotlin.math.roundToInt
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -42,30 +50,30 @@ constructor(
     @Assisted private val coroutineScope: CoroutineScope,
     private val context: Context,
     private val audioVolumeInteractor: AudioVolumeInteractor,
-    private val volumeSliderInteractor: VolumeSliderInteractor,
+    private val uiEventLogger: UiEventLogger,
 ) : SliderViewModel {
 
+    private val volumeChanges = MutableStateFlow<Int?>(null)
+    private val streamsAffectedByRing =
+        setOf(
+            AudioManager.STREAM_RING,
+            AudioManager.STREAM_NOTIFICATION,
+        )
     private val audioStream = audioStreamWrapper.audioStream
     private val iconsByStream =
         mapOf(
             AudioStream(AudioManager.STREAM_MUSIC) to R.drawable.ic_music_note,
             AudioStream(AudioManager.STREAM_VOICE_CALL) to R.drawable.ic_call,
+            AudioStream(AudioManager.STREAM_BLUETOOTH_SCO) to R.drawable.ic_call,
             AudioStream(AudioManager.STREAM_RING) to R.drawable.ic_ring_volume,
             AudioStream(AudioManager.STREAM_NOTIFICATION) to R.drawable.ic_volume_ringer,
             AudioStream(AudioManager.STREAM_ALARM) to R.drawable.ic_volume_alarm,
-        )
-    private val mutedIconsByStream =
-        mapOf(
-            AudioStream(AudioManager.STREAM_MUSIC) to R.drawable.ic_volume_off,
-            AudioStream(AudioManager.STREAM_VOICE_CALL) to R.drawable.ic_volume_off,
-            AudioStream(AudioManager.STREAM_RING) to R.drawable.ic_volume_off,
-            AudioStream(AudioManager.STREAM_NOTIFICATION) to R.drawable.ic_volume_off,
-            AudioStream(AudioManager.STREAM_ALARM) to R.drawable.ic_volume_off,
         )
     private val labelsByStream =
         mapOf(
             AudioStream(AudioManager.STREAM_MUSIC) to R.string.stream_music,
             AudioStream(AudioManager.STREAM_VOICE_CALL) to R.string.stream_voice_call,
+            AudioStream(AudioManager.STREAM_BLUETOOTH_SCO) to R.string.stream_voice_call,
             AudioStream(AudioManager.STREAM_RING) to R.string.stream_ring,
             AudioStream(AudioManager.STREAM_NOTIFICATION) to R.string.stream_notification,
             AudioStream(AudioManager.STREAM_ALARM) to R.string.stream_alarm,
@@ -75,59 +83,131 @@ constructor(
             AudioStream(AudioManager.STREAM_NOTIFICATION) to
                 R.string.stream_notification_unavailable,
         )
+    private val uiEventByStream =
+        mapOf(
+            AudioStream(AudioManager.STREAM_MUSIC) to
+                VolumePanelUiEvent.VOLUME_PANEL_MUSIC_SLIDER_TOUCHED,
+            AudioStream(AudioManager.STREAM_VOICE_CALL) to
+                VolumePanelUiEvent.VOLUME_PANEL_VOICE_CALL_SLIDER_TOUCHED,
+            AudioStream(AudioManager.STREAM_BLUETOOTH_SCO) to
+                VolumePanelUiEvent.VOLUME_PANEL_VOICE_CALL_SLIDER_TOUCHED,
+            AudioStream(AudioManager.STREAM_RING) to
+                VolumePanelUiEvent.VOLUME_PANEL_RING_SLIDER_TOUCHED,
+            AudioStream(AudioManager.STREAM_NOTIFICATION) to
+                VolumePanelUiEvent.VOLUME_PANEL_NOTIFICATION_SLIDER_TOUCHED,
+            AudioStream(AudioManager.STREAM_ALARM) to
+                VolumePanelUiEvent.VOLUME_PANEL_ALARM_SLIDER_TOUCHED,
+        )
 
-    private var value = 0f
     override val slider: StateFlow<SliderState> =
         combine(
                 audioVolumeInteractor.getAudioStream(audioStream),
                 audioVolumeInteractor.canChangeVolume(audioStream),
-            ) { model, isEnabled ->
-                model.toState(value, isEnabled)
+                audioVolumeInteractor.ringerMode,
+            ) { model, isEnabled, ringerMode ->
+                model.toState(isEnabled, ringerMode)
             }
-            .stateIn(coroutineScope, SharingStarted.Eagerly, EmptyState)
+            .stateIn(coroutineScope, SharingStarted.Eagerly, SliderState.Empty)
 
-    override fun onValueChangeFinished(state: SliderState, newValue: Float) {
+    init {
+        volumeChanges
+            .filterNotNull()
+            .onEach { audioVolumeInteractor.setVolume(audioStream, it) }
+            .launchIn(coroutineScope)
+    }
+
+    override fun onValueChanged(state: SliderState, newValue: Float) {
+        val audioViewModel = state as? State
+        audioViewModel ?: return
+        volumeChanges.tryEmit(newValue.roundToInt())
+    }
+
+    override fun onValueChangeFinished() {
+        uiEventByStream[audioStream]?.let { uiEventLogger.log(it) }
+    }
+
+    override fun toggleMuted(state: SliderState) {
         val audioViewModel = state as? State
         audioViewModel ?: return
         coroutineScope.launch {
-            value = newValue
-            val volume =
-                volumeSliderInteractor.translateValueToVolume(
-                    newValue,
-                    audioViewModel.audioStreamModel.volumeRange
-                )
-            audioVolumeInteractor.setVolume(audioStream, volume)
+            audioVolumeInteractor.setMuted(audioStream, !audioViewModel.audioStreamModel.isMuted)
         }
     }
 
-    private fun AudioStreamModel.toState(value: Float, isEnabled: Boolean): State {
+    private fun AudioStreamModel.toState(
+        isEnabled: Boolean,
+        ringerMode: RingerMode,
+    ): State {
+        val label =
+            labelsByStream[audioStream]?.let(context::getString)
+                ?: error("No label for the stream: $audioStream")
         return State(
-            value =
-                volumeSliderInteractor.processVolumeToValue(
-                    volume,
-                    volumeRange,
-                    value,
-                    isMuted,
+            value = volume.toFloat(),
+            valueRange = volumeRange.first.toFloat()..volumeRange.last.toFloat(),
+            icon = getIcon(ringerMode),
+            label = label,
+            disabledMessage =
+                context.getString(
+                    disabledTextByStream.getOrDefault(
+                        audioStream,
+                        R.string.stream_alarm_unavailable,
+                    )
                 ),
-            valueRange = volumeSliderInteractor.displayValueRange,
-            icon = getIcon(this),
-            label = labelsByStream[audioStream]?.let(context::getString)
-                    ?: error("No label for the stream: $audioStream"),
-            disabledMessage = disabledTextByStream[audioStream]?.let(context::getString),
             isEnabled = isEnabled,
+            a11yStep = volumeRange.step,
+            a11yClickDescription =
+                if (isAffectedByMute) {
+                    context.getString(
+                        if (isMuted) {
+                            R.string.volume_panel_hint_unmute
+                        } else {
+                            R.string.volume_panel_hint_mute
+                        },
+                        label,
+                    )
+                } else {
+                    null
+                },
+            a11yStateDescription =
+                if (volume == volumeRange.first) {
+                    context.getString(
+                        if (audioStream.value in streamsAffectedByRing) {
+                            if (ringerMode.value == AudioManager.RINGER_MODE_VIBRATE) {
+                                R.string.volume_panel_hint_vibrate
+                            } else {
+                                R.string.volume_panel_hint_muted
+                            }
+                        } else {
+                            R.string.volume_panel_hint_muted
+                        }
+                    )
+                } else {
+                    null
+                },
             audioStreamModel = this,
+            isMutable = isAffectedByMute,
         )
     }
 
-    private fun getIcon(model: AudioStreamModel): Icon {
-        val isMutedOrNoVolume = model.isMuted || model.volume == model.minVolume
+    private fun AudioStreamModel.getIcon(ringerMode: RingerMode): Icon {
         val iconRes =
-            if (isMutedOrNoVolume) {
-                mutedIconsByStream
+            if (isAffectedByMute && isMuted) {
+                if (audioStream.value in streamsAffectedByRing) {
+                    if (ringerMode.value == AudioManager.RINGER_MODE_VIBRATE) {
+                        R.drawable.ic_volume_ringer_vibrate
+                    } else {
+                        R.drawable.ic_volume_off
+                    }
+                } else {
+                    R.drawable.ic_volume_off
+                }
             } else {
-                iconsByStream
-            }[audioStream]
-                ?: error("No icon for the stream: $audioStream")
+                iconsByStream[audioStream]
+                    ?: run {
+                        Log.wtf(TAG, "No icon for the stream: $audioStream")
+                        R.drawable.ic_music_note
+                    }
+            }
         return Icon.Resource(iconRes, null)
     }
 
@@ -141,17 +221,12 @@ constructor(
         override val label: String,
         override val disabledMessage: String?,
         override val isEnabled: Boolean,
+        override val a11yStep: Int,
+        override val a11yClickDescription: String?,
+        override val a11yStateDescription: String?,
+        override val isMutable: Boolean,
         val audioStreamModel: AudioStreamModel,
     ) : SliderState
-
-    private data object EmptyState : SliderState {
-        override val value: Float = 0f
-        override val valueRange: ClosedFloatingPointRange<Float> = 0f..1f
-        override val icon: Icon? = null
-        override val label: String = ""
-        override val disabledMessage: String? = null
-        override val isEnabled: Boolean = true
-    }
 
     @AssistedFactory
     interface Factory {
@@ -167,4 +242,8 @@ constructor(
      * when using [AudioStream] directly because it expects another type.
      */
     class FactoryAudioStreamWrapper(val audioStream: AudioStream)
+
+    private companion object {
+        const val TAG = "AudioStreamSliderViewModel"
+    }
 }

@@ -72,6 +72,9 @@
     <!-- The default margin used in immersive mode to capture the start of a swipe gesture from the
          edge of the screen to show the system bars. -->
     <dimen name="system_gestures_start_threshold">24dp</dimen>
+    <!-- The minimum swipe gesture distance for showing the system bars when in immersive mode. This
+         swipe must be within the specified system_gestures_start_threshold area. -->
+    <dimen name="system_gestures_distance_threshold">24dp</dimen>
 
     <!-- Height of the bottom navigation bar frame; this is different than navigation_bar_height
          where that is the height reported to all the other windows to resize themselves around the
@@ -617,6 +620,9 @@
     <!-- width of the border of the magnification thumbnail -->
     <dimen name="accessibility_magnification_thumbnail_container_stroke_width">4dp</dimen>
 
+    <!-- The distance from the edge within which the gesture is considered to be at the edge -->
+    <dimen name="accessibility_fullscreen_magnification_gesture_edge_slop">12dp</dimen>
+
     <!-- The padding ratio of the Accessibility icon foreground drawable -->
     <item name="accessibility_icon_foreground_padding_ratio" type="dimen">21.88%</item>
 
@@ -846,6 +852,12 @@
     <dimen name="conversation_face_pile_protection_width">2dp</dimen>
     <!-- The width of the protection of the face pile layout when expanded-->
     <dimen name="conversation_face_pile_protection_width_expanded">@dimen/conversation_face_pile_protection_width</dimen>
+    <!-- size of the compact face pile -->
+    <dimen name="conversation_compact_face_pile_size">24dp</dimen>
+    <!-- size of the face pile avatar -->
+    <dimen name="conversation_compact_face_pile_avatar_size">17dp</dimen>
+    <!-- size of the face pile protection -->
+    <dimen name="conversation_compact_face_pile_protection_width">1dp</dimen>
     <!-- The padding of the expanded message container-->
     <dimen name="expanded_group_conversation_message_padding">32dp</dimen>
     <!-- The stroke width of the ring used to visually mark a conversation as important -->
@@ -1028,9 +1040,25 @@
     <dimen name="popup_enter_animation_from_y_delta">20dp</dimen>
     <dimen name="popup_exit_animation_to_y_delta">-10dp</dimen>
 
+    <!-- Dimensions for the activity embedding divider. -->
+    <dimen name="activity_embedding_divider_handle_width">4dp</dimen>
+    <dimen name="activity_embedding_divider_handle_height">48dp</dimen>
+    <dimen name="activity_embedding_divider_handle_radius">2dp</dimen>
+    <dimen name="activity_embedding_divider_handle_width_pressed">12dp</dimen>
+    <dimen name="activity_embedding_divider_handle_height_pressed">53dp</dimen>
+    <dimen name="activity_embedding_divider_handle_radius_pressed">6dp</dimen>
+    <dimen name="activity_embedding_divider_touch_target_width">24dp</dimen>
+    <dimen name="activity_embedding_divider_touch_target_height">64dp</dimen>
+
     <!-- Default handwriting bounds offsets for editors. -->
     <dimen name="handwriting_bounds_offset_left">10dp</dimen>
     <dimen name="handwriting_bounds_offset_top">40dp</dimen>
     <dimen name="handwriting_bounds_offset_right">10dp</dimen>
     <dimen name="handwriting_bounds_offset_bottom">40dp</dimen>
+
+    <!-- The threshold for full back swipe progress. -->
+    <dimen name="navigation_edge_action_progress_threshold">412dp</dimen>
+    <!-- The non-linear progress interval when the screen is wider than the
+        navigation_edge_action_progress_threshold. -->
+    <item name="back_progress_non_linear_factor" format="float" type="dimen">0.2</item>
 </resources>

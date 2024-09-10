@@ -25,10 +25,12 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -321,5 +323,27 @@ public class DefaultDeviceEffectsApplierTest {
         verify(mContext).registerReceiver(any(),
                 argThat(filter -> Intent.ACTION_SCREEN_OFF.equals(filter.getAction(0))),
                 anyInt());
+    }
+
+    @Test
+    public void apply_servicesThrow_noCrash() {
+        mSetFlagsRule.enableFlags(android.app.Flags.FLAG_MODES_API);
+
+        doThrow(new RuntimeException()).when(mPowerManager)
+                .suppressAmbientDisplay(anyString(), anyBoolean());
+        doThrow(new RuntimeException()).when(mColorDisplayManager).setSaturationLevel(anyInt());
+        doThrow(new RuntimeException()).when(mWallpaperManager).setWallpaperDimAmount(anyFloat());
+        doThrow(new RuntimeException()).when(mUiModeManager).setAttentionModeThemeOverlay(anyInt());
+        mApplier = new DefaultDeviceEffectsApplier(mContext);
+
+        ZenDeviceEffects effects = new ZenDeviceEffects.Builder()
+                .setShouldSuppressAmbientDisplay(true)
+                .setShouldDimWallpaper(true)
+                .setShouldDisplayGrayscale(true)
+                .setShouldUseNightMode(true)
+                .build();
+        mApplier.apply(effects, UPDATE_ORIGIN_USER);
+
+        // No crashes
     }
 }

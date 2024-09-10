@@ -27,7 +27,7 @@ android_test {
         "androidx.test.runner",
         "androidx.test.rules",
         "androidx.test.ext.junit",
-        "animationlib",
+        "//frameworks/libs/systemui:animationlib",
         "frameworks-base-testutils",
         "junit",
         "kotlinx_coroutines_test",

@@ -70,6 +70,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.service.notification.INotificationListener;
+import android.service.notification.IStatusBarNotificationHolder;
 import android.service.notification.NotificationListenerFilter;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationRankingUpdate;
@@ -90,6 +91,7 @@ import com.google.common.collect.ImmutableList;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -154,6 +156,11 @@ public class NotificationListenersTest extends UiServiceTestCase {
                 .thenReturn(new ArrayList<>());
         mNm.mHandler = mock(NotificationManagerService.WorkerHandler.class);
         mNm.mAssistants = mock(NotificationManagerService.NotificationAssistants.class);
+        FieldSetter.setField(mNm,
+                NotificationManagerService.class.getDeclaredField("mListeners"),
+                mListeners);
+        doReturn(android.service.notification.NotificationListenerService.TRIM_FULL)
+                .when(mListeners).getOnNotificationPostedTrim(any());
     }
 
     @Test
@@ -825,6 +832,68 @@ public class NotificationListenersTest extends UiServiceTestCase {
         when(r.hasSensitiveContent()).thenReturn(true);
         mListeners.notifyRemovedLocked(r, 0, mock(NotificationStats.class));
         verify(mListeners, never()).redactStatusBarNotification(eq(sbn));
+    }
+
+    @Test
+    public void testListenerPost_UpdateLifetimeExtended() throws Exception {
+        mSetFlagsRule.enableFlags(android.app.Flags.FLAG_LIFETIME_EXTENSION_REFACTOR);
+
+        // Create original notification, with FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY.
+        String pkg = "pkg";
+        int uid = 9;
+        UserHandle userHandle = UserHandle.getUserHandleForUid(uid);
+        NotificationChannel channel = new NotificationChannel("id", "name",
+                NotificationManager.IMPORTANCE_HIGH);
+        Notification.Builder nb = new Notification.Builder(mContext, channel.getId())
+                .setContentTitle("foo")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setFlag(Notification.FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY, true);
+        StatusBarNotification sbn = new StatusBarNotification(pkg, pkg, 8, "tag", uid, 0,
+                nb.build(), userHandle, null, 0);
+        NotificationRecord old = new NotificationRecord(mContext, sbn, channel);
+
+        // Creates updated notification (without FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY)
+        Notification.Builder nb2 = new Notification.Builder(mContext, channel.getId())
+                .setContentTitle("new title")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setFlag(Notification.FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY, false);
+        StatusBarNotification sbn2 = new StatusBarNotification(pkg, pkg, 8, "tag", uid, 0,
+                nb2.build(), userHandle, null, 0);
+        NotificationRecord toPost = new NotificationRecord(mContext, sbn2, channel);
+
+        // Create system ui-like service.
+        ManagedServices.ManagedServiceInfo info = mListeners.new ManagedServiceInfo(
+                null, new ComponentName("a", "a"), sbn2.getUserId(), false, null, 33, 33);
+        info.isSystemUi = true;
+        INotificationListener l1 = mock(INotificationListener.class);
+        info.service = l1;
+        List<ManagedServices.ManagedServiceInfo> services = ImmutableList.of(info);
+        when(mListeners.getServices()).thenReturn(services);
+
+        FieldSetter.setField(mNm,
+                NotificationManagerService.class.getDeclaredField("mHandler"),
+                mock(NotificationManagerService.WorkerHandler.class));
+        doReturn(true).when(mNm).isVisibleToListener(any(), anyInt(), any());
+        doReturn(mock(NotificationRankingUpdate.class)).when(mNm).makeRankingUpdateLocked(info);
+        doReturn(false).when(mNm).isInLockDownMode(anyInt());
+        doNothing().when(mNm).updateUriPermissions(any(), any(), any(), anyInt());
+        doReturn(sbn2).when(mListeners).redactStatusBarNotification(sbn2);
+        doReturn(sbn2).when(mListeners).redactStatusBarNotification(any());
+
+        // The notification change is posted to the service listener.
+        mListeners.notifyPostedLocked(toPost, old);
+
+        // Verify that the post occcurs with the updated notification value.
+        ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
+        verify(mNm.mHandler, times(1)).post(runnableCaptor.capture());
+        runnableCaptor.getValue().run();
+        ArgumentCaptor<IStatusBarNotificationHolder> sbnCaptor =
+                ArgumentCaptor.forClass(IStatusBarNotificationHolder.class);
+        verify(l1, times(1)).onNotificationPosted(sbnCaptor.capture(), any());
+        StatusBarNotification sbnResult = sbnCaptor.getValue().get();
+        assertThat(sbnResult.getNotification()
+                .extras.getCharSequence(Notification.EXTRA_TITLE).toString())
+                .isEqualTo("new title");
     }
 
     /**

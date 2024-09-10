@@ -19,7 +19,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
-import android.view.View;
 import android.widget.Switch;
 
 import androidx.annotation.Nullable;
@@ -30,6 +29,7 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Prefs;
 import com.android.systemui.animation.DialogCuj;
 import com.android.systemui.animation.DialogTransitionAnimator;
+import com.android.systemui.animation.Expandable;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
@@ -47,7 +47,7 @@ import com.android.systemui.statusbar.policy.DataSaverController;
 import javax.inject.Inject;
 
 public class DataSaverTile extends QSTileImpl<BooleanState> implements
-        DataSaverController.Listener{
+        DataSaverController.Listener {
 
     public static final String TILE_SPEC = "saver";
 
@@ -89,8 +89,9 @@ public class DataSaverTile extends QSTileImpl<BooleanState> implements
     public Intent getLongClickIntent() {
         return new Intent(Settings.ACTION_DATA_SAVER_SETTINGS);
     }
+
     @Override
-    protected void handleClick(@Nullable View view) {
+    protected void handleClick(@Nullable Expandable expandable) {
         if (mState.value
                 || Prefs.getBoolean(mContext, Prefs.Key.QS_DATA_SAVER_DIALOG_SHOWN, false)) {
             // Do it right away.
@@ -112,10 +113,16 @@ public class DataSaverTile extends QSTileImpl<BooleanState> implements
             dialog.setNeutralButton(com.android.internal.R.string.cancel, null);
             dialog.setShowForAllUsers(true);
 
-            if (view != null) {
-                mDialogTransitionAnimator.showFromView(dialog, view, new DialogCuj(
-                        InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN,
-                        INTERACTION_JANK_TAG));
+            if (expandable != null) {
+                DialogTransitionAnimator.Controller controller =
+                        expandable.dialogTransitionController(new DialogCuj(
+                                InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN,
+                                INTERACTION_JANK_TAG));
+                if (controller != null) {
+                    mDialogTransitionAnimator.show(dialog, controller);
+                } else {
+                    dialog.show();
+                }
             } else {
                 dialog.show();
             }

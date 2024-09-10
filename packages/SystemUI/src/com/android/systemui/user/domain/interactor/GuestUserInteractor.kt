@@ -70,8 +70,10 @@ constructor(
     val isGuestUserResetting: Boolean = repository.isGuestUserResetting
 
     init {
-        resumeSessionReceiver.register()
-        resetOrExitSessionReceiver.register()
+        if (applicationContext.userId == UserHandle.USER_SYSTEM) {
+            resumeSessionReceiver.register()
+            resetOrExitSessionReceiver.register()
+        }
     }
 
     /** Notifies that the device has finished booting. */

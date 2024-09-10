@@ -89,7 +89,7 @@ public class InsetsAnimationThreadControlRunner implements InsetsAnimationContro
                 SyncRtSurfaceTransactionApplier.SurfaceParams surfaceParams = params[i];
                 applyParams(t, surfaceParams, mTmpFloat9);
             }
-            t.setFrameTimelineVsync(Choreographer.getSfInstance().getVsyncId());
+            t.setFrameTimelineVsync(Choreographer.getInstance().getVsyncId());
             t.apply();
             t.close();
         }
@@ -185,5 +185,12 @@ public class InsetsAnimationThreadControlRunner implements InsetsAnimationContro
     @Override
     public int getAnimationType() {
         return mControl.getAnimationType();
+    }
+
+    @Override
+    public void updateLayoutInsetsDuringAnimation(
+            @LayoutInsetsDuringAnimation int layoutInsetsDuringAnimation) {
+        InsetsAnimationThread.getHandler().post(
+                () -> mControl.updateLayoutInsetsDuringAnimation(layoutInsetsDuringAnimation));
     }
 }

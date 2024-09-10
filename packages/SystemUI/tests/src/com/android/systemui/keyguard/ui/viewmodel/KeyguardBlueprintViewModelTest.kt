@@ -17,28 +17,34 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import android.os.fakeExecutorHandler
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
+import com.android.systemui.testKosmos
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class KeyguardBlueprintViewModelTest : SysuiTestCase() {
     @Mock private lateinit var keyguardBlueprintInteractor: KeyguardBlueprintInteractor
     private lateinit var undertest: KeyguardBlueprintViewModel
+    private val kosmos = testKosmos()
 
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
         undertest =
-            KeyguardBlueprintViewModel(keyguardBlueprintInteractor = keyguardBlueprintInteractor)
+            KeyguardBlueprintViewModel(
+                handler = kosmos.fakeExecutorHandler,
+                keyguardBlueprintInteractor = keyguardBlueprintInteractor,
+            )
     }
 
     @Test

@@ -39,11 +39,17 @@ fun SettingsAlertDialogWithIcon(
     confirmButton: AlertDialogButton?,
     dismissButton: AlertDialogButton?,
     title: String?,
+    icon: @Composable (() -> Unit)? = {
+        Icon(
+            Icons.Default.WarningAmber,
+            contentDescription = null
+        )
+    },
     text: @Composable (() -> Unit)?,
 ) {
     AlertDialog(
         onDismissRequest = onDismissRequest,
-        icon = { Icon(Icons.Default.WarningAmber, contentDescription = null) },
+        icon = icon,
         modifier = Modifier.width(getDialogWidth()),
         confirmButton = {
             confirmButton?.let {

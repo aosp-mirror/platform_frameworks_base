@@ -15,7 +15,7 @@
  */
 package com.android.systemui.statusbar.notification.collection.provider
 
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.mockito.mock
@@ -29,7 +29,7 @@ import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class VisualStabilityProviderTest : SysuiTestCase() {
     private val visualStabilityProvider = VisualStabilityProvider()
     private val listener: OnReorderingAllowedListener = mock()

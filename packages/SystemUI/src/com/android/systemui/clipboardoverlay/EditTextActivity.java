@@ -23,13 +23,19 @@ import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.ClipboardManager;
 import android.content.pm.PackageManager;
+import android.graphics.Insets;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.text.Editable;
 import android.util.Log;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowInsets;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
 
 import com.android.systemui.res.R;
 
@@ -53,6 +59,24 @@ public class EditTextActivity extends Activity
         mEditText = findViewById(R.id.edit_text);
         mAttribution = findViewById(R.id.attribution);
         mClipboardManager = requireNonNull(getSystemService(ClipboardManager.class));
+
+        findViewById(R.id.editor_root).setOnApplyWindowInsetsListener(
+                new View.OnApplyWindowInsetsListener() {
+                    @NonNull
+                    @Override
+                    public WindowInsets onApplyWindowInsets(@NonNull View view,
+                            @NonNull WindowInsets windowInsets) {
+                        Insets insets = windowInsets.getInsets(WindowInsets.Type.systemBars());
+                        ViewGroup.MarginLayoutParams layoutParams =
+                                (ViewGroup.MarginLayoutParams) view.getLayoutParams();
+                        layoutParams.leftMargin = insets.left;
+                        layoutParams.bottomMargin = insets.bottom;
+                        layoutParams.rightMargin = insets.right;
+                        layoutParams.topMargin = insets.top;
+                        view.setLayoutParams(layoutParams);
+                        return WindowInsets.CONSUMED;
+                    }
+                });
     }
 
     @Override

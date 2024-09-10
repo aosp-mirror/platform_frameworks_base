@@ -12,7 +12,11 @@
   "ravenwood-presubmit": [
     {
       "name": "PowerStatsTestsRavenwood",
-      "host": true
+      "host": true,
+      "options": [
+        {"include-filter": "com.android.server.power.stats"},
+        {"exclude-annotation": "android.platform.test.annotations.DisabledOnRavenwood"}
+      ]
     }
   ],
   "postsubmit": [

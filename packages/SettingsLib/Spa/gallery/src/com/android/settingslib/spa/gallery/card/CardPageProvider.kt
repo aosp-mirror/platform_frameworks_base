@@ -112,7 +112,8 @@ object CardPageProvider : SettingsPageProvider {
                     isVisible = { isVisible0 },
                     onDismiss = { isVisible0 = false },
                     buttons = listOf(
-                        CardButton(text = "Action") {},
+                        CardButton(text = "Override") {},
+                        CardButton(text = "Learn more") {},
                     ),
                 ),
                 CardModel(

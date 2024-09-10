@@ -341,7 +341,7 @@ public class QRCodeScannerController implements
         }
 
         mQRCodeScannerPreferenceObserver.forEach((key, value) -> {
-            mSecureSettings.unregisterContentObserver(value);
+            mSecureSettings.unregisterContentObserverSync(value);
         });
 
         // Reset cached values to default as we are no longer listening
@@ -418,7 +418,7 @@ public class QRCodeScannerController implements
                 });
             }
         });
-        mSecureSettings.registerContentObserverForUser(
+        mSecureSettings.registerContentObserverForUserSync(
                 mSecureSettings.getUriFor(LOCK_SCREEN_SHOW_QR_CODE_SCANNER), false,
                 mQRCodeScannerPreferenceObserver.get(userId), userId);
     }

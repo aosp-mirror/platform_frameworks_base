@@ -56,7 +56,16 @@ public class ClientWindowFrames implements Parcelable {
     public ClientWindowFrames() {
     }
 
-    public ClientWindowFrames(ClientWindowFrames other) {
+    public ClientWindowFrames(@NonNull ClientWindowFrames other) {
+        setTo(other);
+    }
+
+    private ClientWindowFrames(@NonNull Parcel in) {
+        readFromParcel(in);
+    }
+
+    /** Updates the current frames to the given frames. */
+    public void setTo(@NonNull ClientWindowFrames other) {
         frame.set(other.frame);
         displayFrame.set(other.displayFrame);
         parentFrame.set(other.parentFrame);
@@ -65,10 +74,6 @@ public class ClientWindowFrames implements Parcelable {
         }
         isParentFrameClippedByDisplayCutout = other.isParentFrameClippedByDisplayCutout;
         compatScale = other.compatScale;
-    }
-
-    private ClientWindowFrames(Parcel in) {
-        readFromParcel(in);
     }
 
     /** Needed for AIDL out parameters. */

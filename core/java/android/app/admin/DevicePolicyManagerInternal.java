@@ -317,11 +317,6 @@ public abstract class DevicePolicyManagerInternal {
     public abstract boolean isUserOrganizationManaged(@UserIdInt int userId);
 
     /**
-     * Returns whether the application exemptions feature flag is enabled.
-     */
-    public abstract boolean isApplicationExemptionsFlagEnabled();
-
-    /**
      * Returns a map of admin to {@link Bundle} map of restrictions set by the admins for the
      * provided {@code packageName} in the provided {@code userId}
      */

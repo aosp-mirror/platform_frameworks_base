@@ -16,8 +16,8 @@
 
 package android.libcore;
 
-import androidx.benchmark.BenchmarkState;
-import androidx.benchmark.junit4.BenchmarkRule;
+import android.perftests.utils.BenchmarkState;
+import android.perftests.utils.PerfStatusReporter;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -38,7 +38,7 @@ public class ArrayIterationPerfTest {
     }
 
     @Rule
-    public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
+    public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
     Foo[] mArray = new Foo[27];
     {
@@ -46,7 +46,7 @@ public class ArrayIterationPerfTest {
     }
     @Test
     public void timeArrayIteration() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             int sum = 0;
             for (int i = 0; i < mArray.length; i++) {
@@ -56,7 +56,7 @@ public class ArrayIterationPerfTest {
     }
     @Test
     public void timeArrayIterationCached() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             int sum = 0;
             Foo[] localArray = mArray;
@@ -69,7 +69,7 @@ public class ArrayIterationPerfTest {
     }
     @Test
     public void timeArrayIterationForEach() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             int sum = 0;
             for (Foo a: mArray) {

@@ -15,12 +15,18 @@
  */
 package com.android.systemui.qs.external;
 
+import static android.platform.test.flag.junit.FlagsParameterization.allCombinationsOf;
+
+import static com.android.systemui.Flags.FLAG_QS_CUSTOM_TILE_CLICK_GUARANTEED_BUG_FIX;
+import static com.android.systemui.util.concurrency.MockExecutorHandlerKt.mockExecutorHandler;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -32,16 +38,19 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.UserHandle;
-import android.test.suitebuilder.annotation.SmallTest;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.FlagsParameterization;
 
-import androidx.test.runner.AndroidJUnit4;
+import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.pipeline.data.repository.CustomTileAddedRepository;
 import com.android.systemui.settings.UserTracker;
+import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.After;
 import org.junit.Before;
@@ -51,9 +60,19 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.List;
+
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
+import platform.test.runner.parameterized.Parameters;
+
 @SmallTest
-@RunWith(AndroidJUnit4.class)
+@RunWith(ParameterizedAndroidJunit4.class)
 public class TileServiceManagerTest extends SysuiTestCase {
+
+    @Parameters(name = "{0}")
+    public static List<FlagsParameterization> getParams() {
+        return allCombinationsOf(FLAG_QS_CUSTOM_TILE_CLICK_GUARANTEED_BUG_FIX);
+    }
 
     @Mock
     private TileServices mTileServices;
@@ -68,17 +87,22 @@ public class TileServiceManagerTest extends SysuiTestCase {
     @Mock
     private CustomTileAddedRepository mCustomTileAddedRepository;
 
-    private HandlerThread mThread;
-    private Handler mHandler;
+    private FakeExecutor mFakeExecutor;
+
     private TileServiceManager mTileServiceManager;
     private ComponentName mComponentName;
+
+    public TileServiceManagerTest(FlagsParameterization flags) {
+        super();
+        mSetFlagsRule.setFlagsParameterization(flags);
+    }
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mThread = new HandlerThread("TestThread");
-        mThread.start();
-        mHandler = Handler.createAsync(mThread.getLooper());
+        mFakeExecutor = new FakeExecutor(new FakeSystemClock());
+        Handler handler = mockExecutorHandler(mFakeExecutor);
+
         when(mUserTracker.getUserId()).thenReturn(UserHandle.USER_SYSTEM);
         when(mUserTracker.getUserHandle()).thenReturn(UserHandle.SYSTEM);
 
@@ -90,13 +114,12 @@ public class TileServiceManagerTest extends SysuiTestCase {
         mComponentName = new ComponentName(mContext, TileServiceManagerTest.class);
         when(mTileLifecycle.getComponent()).thenReturn(mComponentName);
 
-        mTileServiceManager = new TileServiceManager(mTileServices, mHandler, mUserTracker,
+        mTileServiceManager = new TileServiceManager(mTileServices, handler, mUserTracker,
                 mCustomTileAddedRepository, mTileLifecycle);
     }
 
     @After
     public void tearDown() throws Exception {
-        mThread.quit();
         mTileServiceManager.handleDestroy();
     }
 
@@ -200,5 +223,60 @@ public class TileServiceManagerTest extends SysuiTestCase {
         captor = ArgumentCaptor.forClass(Boolean.class);
         verify(mTileLifecycle, times(2)).executeSetBindService(captor.capture());
         assertFalse((boolean) captor.getValue());
+    }
+
+    @Test
+    @DisableFlags(FLAG_QS_CUSTOM_TILE_CLICK_GUARANTEED_BUG_FIX)
+    public void testStopListeningAndUnbindImmediatelyAfterUpdate() {
+        when(mTileLifecycle.isActiveTile()).thenReturn(true);
+        mTileServiceManager.startLifecycleManagerAndAddTile();
+        mTileServiceManager.setBindAllowed(true);
+        clearInvocations(mTileLifecycle);
+
+        mTileServiceManager.setBindRequested(true);
+        verify(mTileLifecycle).executeSetBindService(true);
+
+        mTileServiceManager.setLastUpdate(0);
+        mFakeExecutor.advanceClockToLast();
+        mFakeExecutor.runAllReady();
+        verify(mTileLifecycle).onStopListening();
+        verify(mTileLifecycle).executeSetBindService(false);
+    }
+
+    @Test
+    @EnableFlags(FLAG_QS_CUSTOM_TILE_CLICK_GUARANTEED_BUG_FIX)
+    public void testStopListeningAndUnbindImmediatelyAfterUpdate_ifRequestedFromTileService() {
+        when(mTileLifecycle.isActiveTile()).thenReturn(true);
+        mTileServiceManager.startLifecycleManagerAndAddTile();
+        mTileServiceManager.setBindAllowed(true);
+        clearInvocations(mTileLifecycle);
+
+        mTileServiceManager.setBindRequested(true);
+        mTileServiceManager.onStartListeningFromRequest();
+        verify(mTileLifecycle).onStartListening();
+
+        mTileServiceManager.setLastUpdate(0);
+        mFakeExecutor.advanceClockToLast();
+        mFakeExecutor.runAllReady();
+        verify(mTileLifecycle).onStopListening();
+        verify(mTileLifecycle).executeSetBindService(false);
+    }
+
+    @Test
+    @EnableFlags(FLAG_QS_CUSTOM_TILE_CLICK_GUARANTEED_BUG_FIX)
+    public void testNotUnbindImmediatelyAfterUpdate_ifRequestedFromSystemUI() {
+        when(mTileLifecycle.isActiveTile()).thenReturn(true);
+        mTileServiceManager.startLifecycleManagerAndAddTile();
+        mTileServiceManager.setBindAllowed(true);
+        clearInvocations(mTileLifecycle);
+
+        mTileServiceManager.setBindRequested(true);
+        // The tile requests startListening (because a click happened)
+
+        mTileServiceManager.setLastUpdate(0);
+        mFakeExecutor.advanceClockToLast();
+        mFakeExecutor.runAllReady();
+        verify(mTileLifecycle, never()).onStopListening();
+        verify(mTileLifecycle, never()).executeSetBindService(false);
     }
 }

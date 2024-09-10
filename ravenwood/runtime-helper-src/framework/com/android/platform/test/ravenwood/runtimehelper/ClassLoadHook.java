@@ -15,7 +15,7 @@
  */
 package com.android.platform.test.ravenwood.runtimehelper;
 
-import android.platform.test.ravenwood.RavenwoodUtils;
+import com.android.ravenwood.common.RavenwoodCommonUtils;
 
 import java.io.File;
 import java.lang.reflect.Modifier;
@@ -42,8 +42,15 @@ public class ClassLoadHook {
     public static final String KEYBOARD_PATHS = "keyboard_paths";
     public static final String GRAPHICS_NATIVE_CLASSES = "graphics_native_classes";
 
-    public static final String VALUE_N_A = "**n/a**";
     public static final String LIBANDROID_RUNTIME_NAME = "android_runtime";
+
+    /**
+     * Extra strings needed to pass to register_android_graphics_classes().
+     *
+     * `android.graphics.Graphics` is not actually a class, so we can't use the same initialization
+     * strategy than the "normal" classes. So we just hardcode it here.
+     */
+    public static final String GRAPHICS_EXTRA_INIT_PARAMS = ",android.graphics.Graphics";
 
     private static String sInitialDir = new File("").getAbsolutePath();
 
@@ -99,7 +106,6 @@ public class ClassLoadHook {
     private static void loadFrameworkNativeCode() {
         // This is called from class-initializers, so no synchronization is needed.
         if (sLoadFrameworkNativeCodeCalled) {
-            // This method has already been called before.s
             return;
         }
         sLoadFrameworkNativeCodeCalled = true;
@@ -113,7 +119,8 @@ public class ClassLoadHook {
         }
 
         if (SKIP_LOADING_LIBANDROID) {
-            log("Skip loading " + LIBANDROID_RUNTIME_NAME);
+            log("Skip loading native runtime.");
+            return;
         }
 
         // Make sure these properties are not set.
@@ -122,55 +129,66 @@ public class ClassLoadHook {
         ensurePropertyNotSet(KEYBOARD_PATHS);
         ensurePropertyNotSet(GRAPHICS_NATIVE_CLASSES);
 
-        // Tell libandroid what JNI to use.
-        final var jniClasses = getCoreNativeClassesToUse();
-        if (jniClasses.isEmpty()) {
-            log("No classes require JNI methods, skip loading " + LIBANDROID_RUNTIME_NAME);
+        // Load the libraries, if needed.
+        final var libanrdoidClasses = getClassesWithNativeMethods(sLibandroidClasses);
+        final var libhwuiClasses = getClassesWithNativeMethods(sLibhwuiClasses);
+        if (libanrdoidClasses.isEmpty() && libhwuiClasses.isEmpty()) {
+            log("No classes require JNI methods, skip loading native runtime.");
             return;
         }
-        setProperty(CORE_NATIVE_CLASSES, jniClasses);
-        setProperty(GRAPHICS_NATIVE_CLASSES, "");
-        setProperty(ICU_DATA_PATH, VALUE_N_A);
-        setProperty(KEYBOARD_PATHS, VALUE_N_A);
+        setProperty(CORE_NATIVE_CLASSES, libanrdoidClasses);
+        setProperty(GRAPHICS_NATIVE_CLASSES, libhwuiClasses + GRAPHICS_EXTRA_INIT_PARAMS);
 
-        RavenwoodUtils.loadJniLibrary(LIBANDROID_RUNTIME_NAME);
+        log("Loading " + LIBANDROID_RUNTIME_NAME + " for '" + libanrdoidClasses + "' and '"
+                + libhwuiClasses + "'");
+        RavenwoodCommonUtils.loadJniLibrary(LIBANDROID_RUNTIME_NAME);
     }
 
     /**
-     * Classes with native methods that are backed by `libandroid_runtime`.
+     * Classes with native methods that are backed by libandroid_runtime.
      *
-     * At runtime, we check if these classes have any methods, and if so, we'll have
-     * `libandroid_runtime` register the native functions.
+     * See frameworks/base/core/jni/platform/host/HostRuntime.cpp
      */
-    private static final Class<?>[] sClassesWithLibandroidNativeMethods = {
+    private static final Class<?>[] sLibandroidClasses = {
             android.util.Log.class,
-            android.os.Parcel.class,
     };
 
     /**
-     * @return if a given class has any native method or not.
+     * Classes with native methods that are backed by libhwui.
+     *
+     * See frameworks/base/libs/hwui/apex/LayoutlibLoader.cpp
+     */
+    private static final Class<?>[] sLibhwuiClasses = {
+            android.graphics.Interpolator.class,
+            android.graphics.Matrix.class,
+            android.graphics.Path.class,
+            android.graphics.Color.class,
+            android.graphics.ColorSpace.class,
+    };
+
+    /**
+     * @return if a given class and its nested classes, if any, have any native method or not.
      */
     private static boolean hasNativeMethod(Class<?> clazz) {
-        for (var method : clazz.getDeclaredMethods()) {
-            if (Modifier.isNative(method.getModifiers())) {
-                return true;
+        for (var nestedClass : clazz.getNestMembers()) {
+            for (var method : nestedClass.getDeclaredMethods()) {
+                if (Modifier.isNative(method.getModifiers())) {
+                    return true;
+                }
             }
         }
         return false;
     }
-
     /**
-     * Create a list of classes as comma-separated that require JNI methods to be set up.
-     *
-     * <p>This list is used by frameworks/base/core/jni/LayoutlibLoader.cpp to decide
-     * what JNI methods to set up.
+     * Create a list of classes as comma-separated that require JNI methods to be set up from
+     * a given class list, ignoring classes with no native methods.
      */
-    private static String getCoreNativeClassesToUse() {
+    private static String getClassesWithNativeMethods(Class<?>[] classes) {
         final var coreNativeClassesToLoad = new ArrayList<String>();
 
-        for (var clazz : sClassesWithLibandroidNativeMethods) {
+        for (var clazz : classes) {
             if (hasNativeMethod(clazz)) {
-                log("Class %s has native methods", clazz);
+                log("Class %s has native methods", clazz.getCanonicalName());
                 coreNativeClassesToLoad.add(clazz.getName());
             }
         }

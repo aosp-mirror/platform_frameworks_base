@@ -7,82 +7,17 @@ The tests are organized in packages according to the transitions they test (e.g.
 
 ## Adding a Test
 
-By default tests should inherit from `RotationTestBase` or `NonRotationTestBase` and must override the variable `transitionToRun` (Kotlin) or the function `getTransitionToRun()` (Java).
-Only tests that are not supported by these classes should inherit directly from the `FlickerTestBase` class.
+By default, tests should inherit from `TestBase` and override the variable `transition` (Kotlin) or the function `getTransition()` (Java).
 
-### Rotation animations and transitions
+Inheriting from this class ensures the common assertions will be executed, namely:
 
-Tests that rotate the device should inherit from `RotationTestBase`.
-Tests that inherit from the class automatically receive start and end rotation values.  
-Moreover, these tests inherit the following checks:
 * all regions on the screen are covered
 * status bar is always visible
-* status bar rotates
+* status bar is at the correct position at the start and end of the transition
 * nav bar is always visible
-* nav bar is rotates
+* nav bar is at the correct position at the start and end of the transition
 
 The default tests can be disabled by overriding the respective methods and including an `@Ignore` annotation.
 
-### Non-Rotation animations and transitions
+For more examples of how a test looks like check `ChangeAppRotationTest` within the `Rotation` subdirectory.
 
-`NonRotationTestBase` was created to make it easier to write tests that do not involve rotation (e.g., `Pip`, `split screen` or `IME`).
-Tests that inherit from the class are automatically executed twice: once in portrait and once in landscape mode and the assertions are checked independently.
-Moreover, these tests inherit the following checks:
-* all regions on the screen are covered
-* status bar is always visible
-* nav bar is always visible
-
-The default tests can be disabled by overriding the respective methods and including an `@Ignore` annotation.
-
-### Exceptional cases
-
-Tests that rotate the device should inherit from `RotationTestBase`.
-This class allows the test to be freely configured and does not provide any assertions.  
-
-
-### Example
-
-Start by defining common or error prone transitions using `TransitionRunner`.
-```kotlin
-@LargeTest
-@RunWith(Parameterized::class)
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class MyTest(
-    beginRotationName: String,
-    beginRotation: Int
-) : NonRotationTestBase(beginRotationName, beginRotation) {
-    init {
-        mTestApp = MyAppHelper(InstrumentationRegistry.getInstrumentation())
-    }
-
-    override val transitionToRun: TransitionRunner
-        get() = TransitionRunner.newBuilder()
-            .withTag("myTest")
-            .recordAllRuns()
-            .runBefore { device.pressHome() }
-            .runBefore { device.waitForIdle() }
-            .run { testApp.open() }
-            .runAfter{ testApp.exit() }
-            .repeat(2)
-            .includeJankyRuns()
-            .build()
-
-    @Test
-    fun myWMTest() {
-        checkResults {
-            WmTraceSubject.assertThat(it)
-                    .showsAppWindow(MyTestApp)
-                    .forAllEntries()
-        }
-    }
-
-    @Test
-    fun mySFTest() {
-        checkResults {
-            LayersTraceSubject.assertThat(it)
-                    .showsLayer(MyTestApp)
-                    .forAllEntries()
-        }
-    }
-}
-```

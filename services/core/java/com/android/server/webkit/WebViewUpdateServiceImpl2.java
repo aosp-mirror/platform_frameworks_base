@@ -31,6 +31,8 @@ import android.webkit.WebViewFactory;
 import android.webkit.WebViewProviderInfo;
 import android.webkit.WebViewProviderResponse;
 
+import com.android.modules.expresslog.Counter;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -245,9 +247,12 @@ class WebViewUpdateServiceImpl2 implements WebViewUpdateServiceInterface {
                 attemptRepair();
             }
 
+        } catch (WebViewPackageMissingException e) {
+            Slog.e(TAG, "Could not find valid WebView package to create relro with", e);
         } catch (Throwable t) {
-            // Log and discard errors at this stage as we must not crash the system server.
-            Slog.e(TAG, "error preparing webview provider from system server", t);
+            // We don't know a case when this should happen but we log and discard errors at this
+            // stage as we must not crash the system server.
+            Slog.wtf(TAG, "error preparing webview provider from system server", t);
         }
     }
 
@@ -412,6 +417,12 @@ class WebViewUpdateServiceImpl2 implements WebViewUpdateServiceInterface {
                 mNumRelroCreationsFinished = 0;
                 mNumRelroCreationsStarted =
                     mSystemInterface.onWebViewProviderChanged(newPackage);
+                Counter.logIncrement("webview.value_on_webview_provider_changed_counter");
+                if (newPackage.packageName.equals(getDefaultWebViewPackage().packageName)) {
+                    Counter.logIncrement(
+                            "webview.value_on_webview_provider_changed_"
+                            + "with_default_package_counter");
+                }
                 // If the relro creations finish before we know the number of started creations
                 // we will have to do any cleanup/notifying here.
                 checkIfRelrosDoneLocked();
@@ -479,6 +490,7 @@ class WebViewUpdateServiceImpl2 implements WebViewUpdateServiceInterface {
      * for all users, otherwise use the default provider.
      */
     private PackageInfo findPreferredWebViewPackage() throws WebViewPackageMissingException {
+        Counter.logIncrement("webview.value_find_preferred_webview_package_counter");
         // If the user has chosen provider, use that (if it's installed and enabled for all
         // users).
         String userChosenPackageName = mSystemInterface.getUserChosenWebViewProvider(mContext);
@@ -508,12 +520,15 @@ class WebViewUpdateServiceImpl2 implements WebViewUpdateServiceInterface {
             PackageInfo packageInfo = mSystemInterface.getPackageInfoForProvider(mDefaultProvider);
             if (validityResult(mDefaultProvider, packageInfo) == VALIDITY_OK) {
                 return packageInfo;
+            } else {
+                Counter.logIncrement("webview.value_default_webview_package_invalid_counter");
             }
         } catch (NameNotFoundException e) {
             Slog.w(TAG, "Default WebView package (" + mDefaultProvider.packageName + ") not found");
         }
 
         // This should never happen during normal operation (only with modified system images).
+        Counter.logIncrement("webview.value_webview_not_usable_for_all_users_counter");
         mAnyWebViewInstalled = false;
         throw new WebViewPackageMissingException("Could not find a loadable WebView package");
     }

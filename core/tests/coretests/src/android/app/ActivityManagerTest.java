@@ -78,6 +78,6 @@ public class ActivityManagerTest {
     public void testRestrictionLevel() throws Exception {
         // For the moment mostly want to confirm we don't crash
         assertNotNull(ActivityManager.restrictionLevelToName(
-                ActivityManager.RESTRICTION_LEVEL_HIBERNATION));
+                ActivityManager.RESTRICTION_LEVEL_FORCE_STOPPED));
     }
 }

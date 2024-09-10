@@ -38,7 +38,7 @@ import java.util.concurrent.Executor
 import javax.inject.Inject
 
 /** Class responsible to "glue" all note task dependencies. */
-internal class NoteTaskInitializer
+class NoteTaskInitializer
 @Inject
 constructor(
     private val controller: NoteTaskController,
@@ -138,11 +138,12 @@ constructor(
      * Returns a [NoteTaskEntryPoint] if an action should be taken, and null otherwise.
      */
     private fun KeyEvent.toNoteTaskEntryPointOrNull(): NoteTaskEntryPoint? {
-        val entryPoint = when {
-            keyCode == KEYCODE_STYLUS_BUTTON_TAIL && isTailButtonNotesGesture() -> TAIL_BUTTON
-            keyCode == KEYCODE_N && isMetaPressed && isCtrlPressed -> KEYBOARD_SHORTCUT
-            else -> null
-        }
+        val entryPoint =
+            when {
+                keyCode == KEYCODE_STYLUS_BUTTON_TAIL && isTailButtonNotesGesture() -> TAIL_BUTTON
+                keyCode == KEYCODE_N && isMetaPressed && isCtrlPressed -> KEYBOARD_SHORTCUT
+                else -> null
+            }
         debugLog { "toNoteTaskEntryPointOrNull: entryPoint=$entryPoint" }
         return entryPoint
     }
@@ -164,7 +165,9 @@ constructor(
 
         // For now, trigger action immediately on UP of a single press, without waiting for
         // the multi-press timeout to expire.
-        debugLog { "isTailButtonNotesGesture: isMultiPress=$isMultiPress, isLongPress=$isLongPress" }
+        debugLog {
+            "isTailButtonNotesGesture: isMultiPress=$isMultiPress, isLongPress=$isLongPress"
+        }
         return !isMultiPress && !isLongPress
     }
 

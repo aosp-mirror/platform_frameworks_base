@@ -23,14 +23,16 @@ import android.app.job.JobScheduler;
 import android.app.job.JobService;
 import android.content.ComponentName;
 import android.content.Context;
+import android.provider.DeviceConfig;
+import android.provider.DeviceConfig.Properties;
 import android.util.EventLog;
-import android.util.Log;
+import android.util.Slog;
 
 import java.time.Duration;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Scheduled jobs related to logging of SELinux denials and audits. The job runs daily on idle
@@ -43,58 +45,68 @@ public class SelinuxAuditLogsService extends JobService {
 
     static final int AUDITD_TAG_CODE = EventLog.getTagCode("auditd");
 
+    private static final String CONFIG_SELINUX_AUDIT_JOB_FREQUENCY_HOURS =
+            "selinux_audit_job_frequency_hours";
+    private static final String CONFIG_SELINUX_ENABLE_AUDIT_JOB = "selinux_enable_audit_job";
+    private static final String CONFIG_SELINUX_AUDIT_CAP = "selinux_audit_cap";
+    private static final int MAX_PERMITS_CAP_DEFAULT = 50000;
+
     private static final int SELINUX_AUDIT_JOB_ID = 25327386;
-    private static final JobInfo SELINUX_AUDIT_JOB =
-            new JobInfo.Builder(
-                            SELINUX_AUDIT_JOB_ID,
-                            new ComponentName("android", SelinuxAuditLogsService.class.getName()))
-                    .setPeriodic(TimeUnit.DAYS.toMillis(1))
-                    .setRequiresDeviceIdle(true)
-                    .setRequiresCharging(true)
-                    .setRequiresBatteryNotLow(true)
-                    .build();
+    private static final ComponentName SELINUX_AUDIT_JOB_COMPONENT =
+            new ComponentName("android", SelinuxAuditLogsService.class.getName());
 
     private static final ExecutorService EXECUTOR_SERVICE = Executors.newSingleThreadExecutor();
-    private static final AtomicReference<Boolean> IS_RUNNING = new AtomicReference<>(false);
 
-    // Audit logging is subject to both rate and quota limiting. We can only push one atom every 10
-    // milliseconds, and no more than 50K atoms can be pushed each day.
-    private static final SelinuxAuditLogsCollector AUDIT_LOGS_COLLECTOR =
-            new SelinuxAuditLogsCollector(
-                    new RateLimiter(/* window= */ Duration.ofMillis(10)),
-                    new QuotaLimiter(/* maxPermitsPerDay= */ 50000));
+    // Audit logging is subject to both rate and quota limiting. A {@link RateLimiter} makes sure
+    // that we push no more than one atom every 10 milliseconds. A {@link QuotaLimiter} caps the
+    // number of atoms pushed per day to CONFIG_SELINUX_AUDIT_CAP. The quota limiter is static
+    // because new job executions happen in a new instance of this class. Making the quota limiter
+    // an instance reference would reset the quota limitations between jobs executions.
+    private static final Duration RATE_LIMITER_WINDOW = Duration.ofMillis(10);
+    private static final QuotaLimiter QUOTA_LIMITER =
+            new QuotaLimiter(
+                    DeviceConfig.getInt(
+                            DeviceConfig.NAMESPACE_ADSERVICES,
+                            CONFIG_SELINUX_AUDIT_CAP,
+                            MAX_PERMITS_CAP_DEFAULT));
+    private static final SelinuxAuditLogsJob LOGS_COLLECTOR_JOB =
+            new SelinuxAuditLogsJob(
+                    new SelinuxAuditLogsCollector(
+                            new RateLimiter(RATE_LIMITER_WINDOW), QUOTA_LIMITER));
 
     /** Schedule jobs with the {@link JobScheduler}. */
     public static void schedule(Context context) {
         if (!selinuxSdkSandboxAudit()) {
-            Log.d(TAG, "SelinuxAuditLogsService not enabled");
+            Slog.d(TAG, "SelinuxAuditLogsService not enabled");
             return;
         }
 
         if (AUDITD_TAG_CODE == -1) {
-            Log.e(TAG, "auditd is not a registered tag on this system");
+            Slog.e(TAG, "auditd is not a registered tag on this system");
             return;
         }
 
-        if (context.getSystemService(JobScheduler.class)
-                        .forNamespace(SELINUX_AUDIT_NAMESPACE)
-                        .schedule(SELINUX_AUDIT_JOB)
-                == JobScheduler.RESULT_FAILURE) {
-            Log.e(TAG, "SelinuxAuditLogsService could not be started.");
-        }
+        LogsCollectorJobScheduler propertiesListener =
+                new LogsCollectorJobScheduler(
+                        context.getSystemService(JobScheduler.class)
+                                .forNamespace(SELINUX_AUDIT_NAMESPACE));
+        propertiesListener.schedule();
+        DeviceConfig.addOnPropertiesChangedListener(
+                DeviceConfig.NAMESPACE_ADSERVICES, context.getMainExecutor(), propertiesListener);
     }
 
     @Override
     public boolean onStartJob(JobParameters params) {
         if (params.getJobId() != SELINUX_AUDIT_JOB_ID) {
-            Log.e(TAG, "The job id does not match the expected selinux job id.");
+            Slog.e(TAG, "The job id does not match the expected selinux job id.");
+            return false;
+        }
+        if (!selinuxSdkSandboxAudit()) {
+            Slog.i(TAG, "Selinux audit job disabled.");
             return false;
         }
 
-        AUDIT_LOGS_COLLECTOR.mStopRequested.set(false);
-        IS_RUNNING.set(true);
-        EXECUTOR_SERVICE.execute(new LogsCollectorJob(this, params));
-
+        EXECUTOR_SERVICE.execute(() -> LOGS_COLLECTOR_JOB.start(this, params));
         return true; // the job is running
     }
 
@@ -104,29 +116,69 @@ public class SelinuxAuditLogsService extends JobService {
             return false;
         }
 
-        AUDIT_LOGS_COLLECTOR.mStopRequested.set(true);
-        return IS_RUNNING.get();
+        if (LOGS_COLLECTOR_JOB.isRunning()) {
+            LOGS_COLLECTOR_JOB.requestStop();
+            return true;
+        }
+        return false;
     }
 
-    private static class LogsCollectorJob implements Runnable {
-        private final JobService mAuditLogService;
-        private final JobParameters mParams;
+    /**
+     * This class is in charge of scheduling the job service, and keeping the scheduling up to date
+     * when the parameters change.
+     */
+    private static final class LogsCollectorJobScheduler
+            implements DeviceConfig.OnPropertiesChangedListener {
 
-        LogsCollectorJob(JobService auditLogService, JobParameters params) {
-            mAuditLogService = auditLogService;
-            mParams = params;
+        private final JobScheduler mJobScheduler;
+
+        private LogsCollectorJobScheduler(JobScheduler jobScheduler) {
+            mJobScheduler = jobScheduler;
         }
 
         @Override
-        public void run() {
-            IS_RUNNING.updateAndGet(
-                    isRunning -> {
-                        boolean done = AUDIT_LOGS_COLLECTOR.collect(AUDITD_TAG_CODE);
-                        if (done) {
-                            mAuditLogService.jobFinished(mParams, /* wantsReschedule= */ false);
-                        }
-                        return !done;
-                    });
+        public void onPropertiesChanged(Properties changedProperties) {
+            Set<String> keyset = changedProperties.getKeyset();
+
+            if (keyset.contains(CONFIG_SELINUX_AUDIT_CAP)) {
+                QUOTA_LIMITER.setMaxPermits(
+                        changedProperties.getInt(
+                                CONFIG_SELINUX_AUDIT_CAP, MAX_PERMITS_CAP_DEFAULT));
+            }
+
+            if (keyset.contains(CONFIG_SELINUX_ENABLE_AUDIT_JOB)) {
+                boolean enabled =
+                        changedProperties.getBoolean(
+                                CONFIG_SELINUX_ENABLE_AUDIT_JOB, /* defaultValue= */ false);
+                if (enabled) {
+                    schedule();
+                } else {
+                    mJobScheduler.cancel(SELINUX_AUDIT_JOB_ID);
+                }
+            } else if (keyset.contains(CONFIG_SELINUX_AUDIT_JOB_FREQUENCY_HOURS)) {
+                // The job frequency changed, reschedule.
+                schedule();
+            }
+        }
+
+        private void schedule() {
+            long frequencyMillis =
+                    TimeUnit.HOURS.toMillis(
+                            DeviceConfig.getInt(
+                                    DeviceConfig.NAMESPACE_ADSERVICES,
+                                    CONFIG_SELINUX_AUDIT_JOB_FREQUENCY_HOURS,
+                                    24));
+            if (mJobScheduler.schedule(
+                            new JobInfo.Builder(SELINUX_AUDIT_JOB_ID, SELINUX_AUDIT_JOB_COMPONENT)
+                                    .setPeriodic(frequencyMillis)
+                                    .setRequiresDeviceIdle(true)
+                                    .setRequiresBatteryNotLow(true)
+                                    .build())
+                    == JobScheduler.RESULT_FAILURE) {
+                Slog.e(TAG, "SelinuxAuditLogsService could not be scheduled.");
+            } else {
+                Slog.d(TAG, "SelinuxAuditLogsService scheduled successfully.");
+            }
         }
     }
 }

@@ -16,71 +16,89 @@
 
 package com.android.systemui.statusbar.notification
 
+import android.platform.test.annotations.DisableFlags
 import android.provider.DeviceConfig
 import android.provider.Settings
-import android.testing.AndroidTestingRunner
-
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.dx.mockito.inline.extended.ExtendedMockito
-
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags.NOTIFICATIONS_USE_PEOPLE_FILTERING
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.statusbar.notification.shared.NotificationMinimalismPrototype
+import com.android.systemui.statusbar.notification.shared.PriorityPeopleSection
 import com.android.systemui.util.DeviceConfigProxyFake
 import com.android.systemui.util.Utils
 import com.android.systemui.util.mockito.any
-
 import org.junit.After
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito.`when`
 import org.mockito.MockitoSession
+import org.mockito.kotlin.whenever
 import org.mockito.quality.Strictness
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
+// this class has no testable logic with either of these flags enabled
+@DisableFlags(PriorityPeopleSection.FLAG_NAME, NotificationMinimalismPrototype.V2.FLAG_NAME)
 class NotificationSectionsFeatureManagerTest : SysuiTestCase() {
-    var manager: NotificationSectionsFeatureManager? = null
-    val proxyFake = DeviceConfigProxyFake()
+    lateinit var manager: NotificationSectionsFeatureManager
+    private val proxyFake = DeviceConfigProxyFake()
     private lateinit var staticMockSession: MockitoSession
 
     @Before
-    public fun setup() {
+    fun setup() {
         manager = NotificationSectionsFeatureManager(proxyFake, mContext)
-        manager!!.clearCache()
-        staticMockSession = ExtendedMockito.mockitoSession()
-            .mockStatic<Utils>(Utils::class.java)
-            .strictness(Strictness.LENIENT)
-            .startMocking()
-        `when`(Utils.useQsMediaPlayer(any())).thenReturn(false)
-        Settings.Global.putInt(context.getContentResolver(),
-                Settings.Global.SHOW_MEDIA_ON_QUICK_SETTINGS, 0)
+        manager.clearCache()
+        staticMockSession =
+            ExtendedMockito.mockitoSession()
+                .mockStatic(Utils::class.java)
+                .strictness(Strictness.LENIENT)
+                .startMocking()
+        whenever(Utils.useQsMediaPlayer(any())).thenReturn(false)
+        Settings.Global.putInt(
+            context.getContentResolver(),
+            Settings.Global.SHOW_MEDIA_ON_QUICK_SETTINGS,
+            0
+        )
     }
 
     @After
-    public fun teardown() {
+    fun teardown() {
         staticMockSession.finishMocking()
     }
 
     @Test
-    public fun testPeopleFilteringOff_newInterruptionModelOn() {
+    fun testPeopleFilteringOff_newInterruptionModelOn() {
         proxyFake.setProperty(
-                DeviceConfig.NAMESPACE_SYSTEMUI, NOTIFICATIONS_USE_PEOPLE_FILTERING, "false", false)
+            DeviceConfig.NAMESPACE_SYSTEMUI,
+            NOTIFICATIONS_USE_PEOPLE_FILTERING,
+            "false",
+            false
+        )
 
-        assertFalse("People filtering should be disabled", manager!!.isFilteringEnabled())
-        assertTrue("Expecting 2 buckets when people filtering is disabled",
-                manager!!.getNumberOfBuckets() == 2)
+        assertFalse("People filtering should be disabled", manager.isFilteringEnabled())
+        assertTrue(
+            "Expecting 2 buckets when people filtering is disabled",
+            manager.getNumberOfBuckets() == 2
+        )
     }
 
     @Test
-    public fun testPeopleFilteringOn_newInterruptionModelOn() {
+    fun testPeopleFilteringOn_newInterruptionModelOn() {
         proxyFake.setProperty(
-                DeviceConfig.NAMESPACE_SYSTEMUI, NOTIFICATIONS_USE_PEOPLE_FILTERING, "true", false)
+            DeviceConfig.NAMESPACE_SYSTEMUI,
+            NOTIFICATIONS_USE_PEOPLE_FILTERING,
+            "true",
+            false
+        )
 
-        assertTrue("People filtering should be enabled", manager!!.isFilteringEnabled())
-        assertTrue("Expecting 5 buckets when people filtering is enabled",
-                manager!!.getNumberOfBuckets() == 5)
+        assertTrue("People filtering should be enabled", manager.isFilteringEnabled())
+        assertTrue(
+            "Expecting 5 buckets when people filtering is enabled",
+            manager.getNumberOfBuckets() == 5
+        )
     }
 }

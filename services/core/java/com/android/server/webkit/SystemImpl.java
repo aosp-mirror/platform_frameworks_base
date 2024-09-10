@@ -35,6 +35,7 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.util.AndroidRuntimeException;
 import android.util.Log;
+import android.util.Slog;
 import android.webkit.UserPackage;
 import android.webkit.WebViewFactory;
 import android.webkit.WebViewProviderInfo;
@@ -201,6 +202,7 @@ public class SystemImpl implements SystemInterface {
             ActivityManager.getService().killPackageDependents(packageName,
                     UserHandle.USER_ALL);
         } catch (RemoteException e) {
+            Slog.wtf(TAG, "failed to call killPackageDependents for " + packageName, e);
         }
     }
 
@@ -310,8 +312,10 @@ public class SystemImpl implements SystemInterface {
 
         ArrayList<String> apksToPin = new ArrayList<>();
         boolean pinSharedFirst = appInfo.metaData.getBoolean("PIN_SHARED_LIBS_FIRST", true);
-        for (String sharedLib : appInfo.sharedLibraryFiles) {
-            apksToPin.add(sharedLib);
+        if (appInfo.sharedLibraryFiles != null) {
+            for (String sharedLib : appInfo.sharedLibraryFiles) {
+                apksToPin.add(sharedLib);
+            }
         }
         apksToPin.add(appInfo.sourceDir);
         if (!pinSharedFirst) {

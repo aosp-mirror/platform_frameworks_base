@@ -62,6 +62,7 @@ android_test {
         "cts-wm-util",
         "platform-compat-test-rules",
         "mockito-target-minus-junit4",
+        "mockito-kotlin2",
         "platform-test-annotations",
         "ShortcutManagerTestUtils",
         "truth",
@@ -271,21 +272,12 @@ java_genrule {
         "$(location soong_zip) -o $(out) -C $(genDir)/res -D $(genDir)/res",
 }
 
-FLAKY = [
-    "androidx.test.filters.FlakyTest",
-]
-
-FLAKY_AND_IGNORED = [
-    "androidx.test.filters.FlakyTest",
-    "org.junit.Ignore",
-]
 // Used by content protection TEST_MAPPING
 test_module_config {
     name: "FrameworksServicesTests_contentprotection",
     base: "FrameworksServicesTests",
     test_suites: ["device-tests"],
     include_filters: ["com.android.server.contentprotection"],
-    exclude_annotations: FLAKY_AND_IGNORED,
 }
 
 test_module_config {
@@ -293,7 +285,6 @@ test_module_config {
     base: "FrameworksServicesTests",
     test_suites: ["device-tests"],
     include_filters: ["com.android.server.om."],
-    exclude_annotations: FLAKY_AND_IGNORED,
 }
 
 // Used by contexthub TEST_MAPPING
@@ -304,7 +295,6 @@ test_module_config {
     include_filters: ["com.android.server.location.contexthub."],
     // TODO(ron): are these right, does it run anything?
     include_annotations: ["android.platform.test.annotations.Presubmit"],
-    exclude_annotations: FLAKY_AND_IGNORED,
 }
 
 test_module_config {
@@ -314,7 +304,6 @@ test_module_config {
     include_filters: ["com.android.server.location.contexthub."],
     // TODO(ron): are these right, does it run anything?
     include_annotations: ["android.platform.test.annotations.Postsubmit"],
-    exclude_annotations: FLAKY_AND_IGNORED,
 }
 
 // Used by contentcapture
@@ -323,7 +312,6 @@ test_module_config {
     base: "FrameworksServicesTests",
     test_suites: ["device-tests"],
     include_filters: ["com.android.server.contentcapture"],
-    exclude_annotations: FLAKY_AND_IGNORED,
 }
 
 test_module_config {
@@ -331,7 +319,6 @@ test_module_config {
     base: "FrameworksServicesTests",
     test_suites: ["device-tests"],
     include_filters: ["com.android.server.recoverysystem."],
-    exclude_annotations: FLAKY,
 }
 
 // server pm TEST_MAPPING
@@ -341,7 +328,6 @@ test_module_config {
     test_suites: ["device-tests"],
     include_annotations: ["android.platform.test.annotations.Presubmit"],
     include_filters: ["com.android.server.pm."],
-    exclude_annotations: FLAKY_AND_IGNORED,
 }
 
 test_module_config {
@@ -350,7 +336,6 @@ test_module_config {
     test_suites: ["device-tests"],
     include_annotations: ["android.platform.test.annotations.Postsubmit"],
     include_filters: ["com.android.server.pm."],
-    exclude_annotations: FLAKY_AND_IGNORED,
 }
 
 // server os TEST_MAPPING
@@ -366,7 +351,6 @@ test_module_config {
     base: "FrameworksServicesTests",
     test_suites: ["device-tests"],
     include_annotations: ["android.platform.test.annotations.Presubmit"],
-    exclude_annotations: FLAKY_AND_IGNORED,
 }
 
 test_module_config {
@@ -388,26 +372,10 @@ test_module_config {
 }
 
 test_module_config {
-    name: "FrameworksServicesTests_com_android_server_tare_Presubmit",
-    base: "FrameworksServicesTests",
-    test_suites: ["device-tests"],
-    include_filters: ["com.android.server.tare"],
-    exclude_annotations: FLAKY,
-}
-
-test_module_config {
     name: "FrameworksServicesTests_com_android_server_tare",
     base: "FrameworksServicesTests",
     test_suites: ["device-tests"],
     include_filters: ["com.android.server.tare"],
-}
-
-test_module_config {
-    name: "FrameworksServicesTests_com_android_server_usage_Presubmit",
-    base: "FrameworksServicesTests",
-    test_suites: ["device-tests"],
-    include_filters: ["com.android.server.usage"],
-    exclude_annotations: FLAKY,
 }
 
 test_module_config {
@@ -422,14 +390,6 @@ test_module_config {
     base: "FrameworksServicesTests",
     test_suites: ["device-tests"],
     include_filters: ["com.android.server.am.BatteryStatsServiceTest"],
-}
-
-test_module_config {
-    name: "FrameworksServicesTests_accessibility_Presubmit",
-    base: "FrameworksServicesTests",
-    test_suites: ["device-tests"],
-    include_filters: ["com.android.server.accessibility"],
-    exclude_annotations: FLAKY,
 }
 
 test_module_config {
@@ -460,7 +420,6 @@ test_module_config {
     test_suites: ["device-tests"],
     include_filters: ["com.android.server.am."],
     include_annotations: ["android.platform.test.annotations.Presubmit"],
-    exclude_annotations: FLAKY,
 }
 
 test_module_config {
@@ -483,7 +442,6 @@ test_module_config {
     test_suites: ["device-tests"],
     include_filters: ["com.android.server.audio"],
     include_annotations: ["android.platform.test.annotations.Presubmit"],
-    exclude_annotations: FLAKY_AND_IGNORED,
 }
 
 test_module_config {
@@ -499,7 +457,6 @@ test_module_config {
     test_suites: ["device-tests"],
     include_filters: ["com.android.server.hdmi"],
     include_annotations: ["android.platform.test.annotations.Presubmit"],
-    exclude_annotations: FLAKY_AND_IGNORED,
 }
 
 test_module_config {
@@ -507,7 +464,6 @@ test_module_config {
     base: "FrameworksServicesTests",
     test_suites: ["device-tests"],
     include_filters: ["com.android.server.hdmi"],
-    exclude_annotations: ["org.junit.Ignore"],
 }
 
 test_module_config {
@@ -522,7 +478,6 @@ test_module_config {
     base: "FrameworksServicesTests",
     test_suites: ["device-tests"],
     include_filters: ["com.android.server.lights"],
-    exclude_annotations: FLAKY,
 }
 
 test_module_config {
@@ -538,7 +493,6 @@ test_module_config {
     test_suites: ["device-tests"],
     include_filters: ["com.android.server.location.contexthub."],
     include_annotations: ["android.platform.test.annotations.Presubmit"],
-    exclude_annotations: FLAKY_AND_IGNORED,
 }
 
 test_module_config {
@@ -546,15 +500,6 @@ test_module_config {
     base: "FrameworksServicesTests",
     test_suites: ["device-tests"],
     include_filters: ["com.android.server.locksettings."],
-    exclude_annotations: FLAKY,
-}
-
-test_module_config {
-    name: "FrameworksServicesTests_android_server_logcat_Presubmit",
-    base: "FrameworksServicesTests",
-    test_suites: ["device-tests"],
-    include_filters: ["com.android.server.logcat"],
-    exclude_annotations: FLAKY,
 }
 
 test_module_config {
@@ -570,7 +515,6 @@ test_module_config {
     test_suites: ["device-tests"],
     include_filters: ["com.android.server.net."],
     include_annotations: ["android.platform.test.annotations.Presubmit"],
-    exclude_annotations: FLAKY,
 }
 
 test_module_config {
@@ -600,7 +544,6 @@ test_module_config {
     test_suites: ["device-tests"],
     include_filters: ["com.android.server.policy."],
     include_annotations: ["android.platform.test.annotations.Presubmit"],
-    exclude_annotations: FLAKY,
 }
 
 test_module_config {
@@ -622,7 +565,6 @@ test_module_config {
     base: "FrameworksServicesTests",
     test_suites: ["device-tests"],
     include_filters: ["com.android.server.power.hint"],
-    exclude_annotations: FLAKY,
 }
 
 test_module_config {
@@ -652,7 +594,6 @@ test_module_config {
     test_suites: ["device-tests"],
     include_filters: ["com.android.server.location.contexthub."],
     include_annotations: ["android.platform.test.annotations.Postsubmit"],
-    exclude_annotations: FLAKY_AND_IGNORED,
 }
 
 test_module_config {

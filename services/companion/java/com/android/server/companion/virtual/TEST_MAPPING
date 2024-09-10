@@ -38,7 +38,8 @@
         {
           "exclude-annotation": "androidx.test.filters.FlakyTest"
         }
-      ]
+      ],
+      "keywords": ["primary-device"]
     },
     {
       "name": "CtsHardwareTestCases",
@@ -80,14 +81,19 @@
       "name": "CtsPermissionTestCases",
       "options": [
         {
-          "include-filter": "android.permissionmultidevice.cts.DeviceAwarePermissionGrantTest"
-        },
-        {
           "include-filter": "android.permission.cts.DevicePermissionsTest"
         },
         {
           "include-filter": "android.permission.cts.PermissionUpdateListenerTest"
         },
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
+    },
+    {
+      "name": "CtsPermissionMultiDeviceTestCases",
+      "options": [
         {
           "exclude-annotation": "androidx.test.filters.FlakyTest"
         }

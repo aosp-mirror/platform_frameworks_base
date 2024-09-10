@@ -11,23 +11,18 @@ package com.android.server.policy.devicestate.config {
   public class DeviceState {
     ctor public DeviceState();
     method public com.android.server.policy.devicestate.config.Conditions getConditions();
-    method public com.android.server.policy.devicestate.config.Flags getFlags();
     method public java.math.BigInteger getIdentifier();
     method @Nullable public String getName();
+    method public com.android.server.policy.devicestate.config.Properties getProperties();
     method public void setConditions(com.android.server.policy.devicestate.config.Conditions);
-    method public void setFlags(com.android.server.policy.devicestate.config.Flags);
     method public void setIdentifier(java.math.BigInteger);
     method public void setName(@Nullable String);
+    method public void setProperties(com.android.server.policy.devicestate.config.Properties);
   }
 
   public class DeviceStateConfig {
     ctor public DeviceStateConfig();
     method public java.util.List<com.android.server.policy.devicestate.config.DeviceState> getDeviceState();
-  }
-
-  public class Flags {
-    ctor public Flags();
-    method @Nullable public java.util.List<java.lang.String> getFlag();
   }
 
   public class LidSwitchCondition {
@@ -46,6 +41,11 @@ package com.android.server.policy.devicestate.config {
     method public void setMax_optional(@Nullable java.math.BigDecimal);
     method public void setMinInclusive_optional(@Nullable java.math.BigDecimal);
     method public void setMin_optional(@Nullable java.math.BigDecimal);
+  }
+
+  public class Properties {
+    ctor public Properties();
+    method @Nullable public java.util.List<java.lang.String> getProperty();
   }
 
   public class SensorCondition {

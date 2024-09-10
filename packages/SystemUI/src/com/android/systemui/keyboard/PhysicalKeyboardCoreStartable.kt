@@ -19,10 +19,12 @@ package com.android.systemui.keyboard
 
 import android.hardware.input.InputSettings
 import com.android.systemui.CoreStartable
+import com.android.systemui.Flags
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
+import com.android.systemui.flags.Flags as LegacyFlag
 import com.android.systemui.keyboard.backlight.ui.KeyboardBacklightDialogCoordinator
+import com.android.systemui.keyboard.docking.binder.KeyboardDockingIndicationViewBinder
 import com.android.systemui.keyboard.stickykeys.ui.StickyKeysIndicatorCoordinator
 import dagger.Lazy
 import javax.inject.Inject
@@ -34,14 +36,18 @@ class PhysicalKeyboardCoreStartable
 constructor(
     private val keyboardBacklightDialogCoordinator: Lazy<KeyboardBacklightDialogCoordinator>,
     private val stickyKeysIndicatorCoordinator: Lazy<StickyKeysIndicatorCoordinator>,
+    private val keyboardDockingIndicationViewBinder: Lazy<KeyboardDockingIndicationViewBinder>,
     private val featureFlags: FeatureFlags,
 ) : CoreStartable {
     override fun start() {
-        if (featureFlags.isEnabled(Flags.KEYBOARD_BACKLIGHT_INDICATOR)) {
+        if (featureFlags.isEnabled(LegacyFlag.KEYBOARD_BACKLIGHT_INDICATOR)) {
             keyboardBacklightDialogCoordinator.get().startListening()
         }
         if (InputSettings.isAccessibilityStickyKeysFeatureEnabled()) {
             stickyKeysIndicatorCoordinator.get().startListening()
+        }
+        if (Flags.keyboardDockingIndicator()) {
+            keyboardDockingIndicationViewBinder.get().startListening()
         }
     }
 }

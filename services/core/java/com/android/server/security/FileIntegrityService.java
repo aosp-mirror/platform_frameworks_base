@@ -16,6 +16,7 @@
 
 package com.android.server.security;
 
+import android.annotation.EnforcePermission;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AppOpsManager;
@@ -27,6 +28,7 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
+import android.os.PermissionEnforcer;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
@@ -79,7 +81,11 @@ public class FileIntegrityService extends SystemService {
         return LocalServices.getService(FileIntegrityService.class);
     }
 
-    private final IBinder mService = new IFileIntegrityService.Stub() {
+    private final class BinderService extends IFileIntegrityService.Stub {
+        BinderService(Context context) {
+            super(PermissionEnforcer.fromContext(context));
+        }
+
         @Override
         public boolean isApkVeritySupported() {
             return VerityUtils.isFsVeritySupported();
@@ -168,8 +174,10 @@ public class FileIntegrityService extends SystemService {
         }
 
         @Override
+        @EnforcePermission(android.Manifest.permission.SETUP_FSVERITY)
         public int setupFsverity(android.os.IInstalld.IFsveritySetupAuthToken authToken,
                 String filePath, String packageName) throws RemoteException {
+            setupFsverity_enforcePermission();
             Objects.requireNonNull(authToken);
             Objects.requireNonNull(filePath);
             Objects.requireNonNull(packageName);
@@ -181,10 +189,12 @@ public class FileIntegrityService extends SystemService {
                 throw new RemoteException(e);
             }
         }
-    };
+    }
+    private final IBinder mService;
 
     public FileIntegrityService(final Context context) {
         super(context);
+        mService = new BinderService(context);
         try {
             sCertFactory = CertificateFactory.getInstance("X.509");
         } catch (CertificateException e) {

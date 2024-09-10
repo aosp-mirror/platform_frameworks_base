@@ -93,4 +93,7 @@
 
     <!-- If this is true, allow wake from theater mode from motion. -->
     <bool name="config_allowTheaterModeWakeFromMotion">true</bool>
+
+    <!-- True if the device supports system decorations on secondary displays. -->
+    <bool name="config_supportsSystemDecorsOnSecondaryDisplays">false</bool>
 </resources>

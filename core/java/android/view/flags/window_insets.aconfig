@@ -3,6 +3,7 @@ container: "system"
 
 flag {
     name: "customizable_window_headers"
+    is_exported: true
     namespace: "lse_desktop_experience"
     description: "Flag to control the caption bar appearance and to fit app content in its empty space"
     bug: "316387515"

@@ -23,7 +23,6 @@ import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.DestroyActivityItem;
 import android.app.servertransaction.PendingTransactionActions;
 import android.app.servertransaction.TransactionExecutor;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
@@ -32,7 +31,6 @@ import android.util.MergedConfiguration;
 import android.view.SurfaceControl;
 import android.window.ActivityWindowInfo;
 import android.window.SplashScreenView.SplashScreenViewParcelable;
-import android.window.WindowContext;
 import android.window.WindowContextInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -90,10 +88,6 @@ public abstract class ClientTransactionHandler {
     /** Get activity instance for the token. */
     public abstract Activity getActivity(IBinder token);
 
-    /** Gets the {@link WindowContext} instance for the token. */
-    @Nullable
-    public abstract Context getWindowContext(@NonNull IBinder clientToken);
-
     // Prepare phase related logic and handlers. Methods that inform about about pending changes or
     // do other internal bookkeeping.
 
@@ -114,11 +108,11 @@ public abstract class ClientTransactionHandler {
 
     /** Destroy the activity. */
     public abstract void handleDestroyActivity(@NonNull ActivityClientRecord r, boolean finishing,
-            int configChanges, boolean getNonConfigInstance, String reason);
+            boolean getNonConfigInstance, String reason);
 
     /** Pause the activity. */
     public abstract void handlePauseActivity(@NonNull ActivityClientRecord r, boolean finished,
-            boolean userLeaving, int configChanges, boolean autoEnteringPip,
+            boolean userLeaving, boolean autoEnteringPip,
             PendingTransactionActions pendingActions, String reason);
 
     /**
@@ -146,14 +140,13 @@ public abstract class ClientTransactionHandler {
     /**
      * Stop the activity.
      * @param r Target activity record.
-     * @param configChanges Activity configuration changes.
      * @param pendingActions Pending actions to be used on this or later stages of activity
      *                       transaction.
      * @param finalStateRequest Flag indicating if this call is handling final lifecycle state
      *                          request for a transaction.
      * @param reason Reason for performing this operation.
      */
-    public abstract void handleStopActivity(@NonNull ActivityClientRecord r, int configChanges,
+    public abstract void handleStopActivity(@NonNull ActivityClientRecord r,
             PendingTransactionActions pendingActions, boolean finalStateRequest, String reason);
 
     /** Report that activity was stopped to server. */

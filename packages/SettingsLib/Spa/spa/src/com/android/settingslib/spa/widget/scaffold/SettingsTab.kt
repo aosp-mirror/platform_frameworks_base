@@ -51,8 +51,8 @@ internal fun SettingsTab(
             .clip(SettingsShape.CornerMedium)
             .background(
                 color = lerp(
-                    start = SettingsTheme.colorScheme.primaryContainer,
-                    stop = SettingsTheme.colorScheme.surface,
+                    start = MaterialTheme.colorScheme.primaryContainer,
+                    stop = MaterialTheme.colorScheme.surface,
                     fraction = colorFraction,
                 ),
             ),
@@ -61,8 +61,8 @@ internal fun SettingsTab(
             text = title,
             style = MaterialTheme.typography.labelLarge,
             color = lerp(
-                start = SettingsTheme.colorScheme.onPrimaryContainer,
-                stop = SettingsTheme.colorScheme.secondaryText,
+                start = MaterialTheme.colorScheme.onPrimaryContainer,
+                stop = MaterialTheme.colorScheme.onSurface,
                 fraction = colorFraction,
             ),
         )

@@ -162,15 +162,12 @@ data class Permission(
     companion object {
         // The permission is defined in an application manifest.
         const val TYPE_MANIFEST = 0
-        // The permission is defined in a system config.
-        const val TYPE_CONFIG = 1
         // The permission is defined dynamically.
         const val TYPE_DYNAMIC = 2
 
         fun typeToString(type: Int): String =
             when (type) {
                 TYPE_MANIFEST -> "TYPE_MANIFEST"
-                TYPE_CONFIG -> "TYPE_CONFIG"
                 TYPE_DYNAMIC -> "TYPE_DYNAMIC"
                 else -> type.toString()
             }

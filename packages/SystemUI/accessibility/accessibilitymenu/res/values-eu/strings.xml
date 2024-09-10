@@ -20,7 +20,7 @@
     <string name="brightness_down_label" msgid="7115662941913272072">"Txikitu distira"</string>
     <string name="previous_button_content_description" msgid="840869171117765966">"Joan aurreko pantailara"</string>
     <string name="next_button_content_description" msgid="6810058269847364406">"Joan hurrengo pantailara"</string>
-    <string name="accessibility_menu_description" msgid="4458354794093858297">"Erabilerraztasun-menuari esker, tamaina handiko menu bat izango duzu pantailan; menu horren bidez, gailua kontrolatzeko aukera izango duzu. Besteak beste, hauek egin ahalko dituzu: gailua blokeatu; bolumena eta distira kontrolatu, eta pantaila-argazkiak egin."</string>
+    <string name="accessibility_menu_description" msgid="4458354794093858297">"Erabilerraztasun-menuari esker, tamaina handiko menu bat izango duzu pantailan; menu horren bidez, gailua kontrolatzeko aukera izango duzu. Besteak beste, hauek egin ahalko dituzu: gailua blokeatu, bolumena eta distira kontrolatu, eta pantaila-argazkiak egin."</string>
     <string name="accessibility_menu_summary" msgid="340071398148208130">"Kontrolatu gailua menu handiaren bidez"</string>
     <string name="accessibility_menu_settings_name" msgid="1716888058785672611">"Erabilerraztasun-menuaren ezarpenak"</string>
     <string name="accessibility_menu_large_buttons_title" msgid="8978499601044961736">"Botoi handiak"</string>

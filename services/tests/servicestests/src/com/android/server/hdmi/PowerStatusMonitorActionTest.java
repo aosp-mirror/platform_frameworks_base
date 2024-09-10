@@ -25,8 +25,10 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.spy;
 
+import android.annotation.RequiresPermission;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.Intent;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiPortInfo;
@@ -78,6 +80,11 @@ public class PowerStatusMonitorActionTest {
             protected void writeStringSystemProperty(String key, String value) {
                 // do nothing
             }
+
+            @Override
+            protected void sendBroadcastAsUser(@RequiresPermission Intent intent) {
+                // do nothing
+            }
         };
 
         Looper looper = mTestLooper.getLooper();
@@ -104,12 +111,12 @@ public class PowerStatusMonitorActionTest {
                         .setArcSupported(false)
                         .build();
         mNativeWrapper.setPortInfo(hdmiPortInfo);
+        mPhysicalAddress = 0x0000;
+        mNativeWrapper.setPhysicalAddress(mPhysicalAddress);
         mHdmiControlService.initService();
         mHdmiControlService.onBootPhase(PHASE_SYSTEM_SERVICES_READY);
         mPowerManager = new FakePowerManagerWrapper(mContextSpy);
         mHdmiControlService.setPowerManager(mPowerManager);
-        mPhysicalAddress = 0x0000;
-        mNativeWrapper.setPhysicalAddress(mPhysicalAddress);
         mTestLooper.dispatchAll();
         mTvDevice = mHdmiControlService.tv();
         mNativeWrapper.clearResultMessages();

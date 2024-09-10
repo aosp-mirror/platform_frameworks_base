@@ -16,7 +16,9 @@
 
 package com.android.systemui.volume.panel.component.anc.domain
 
+import android.media.AudioManager
 import android.net.Uri
+import android.testing.TestableLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -26,10 +28,13 @@ import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
+import com.android.systemui.volume.data.repository.audioRepository
+import com.android.systemui.volume.localMediaRepository
 import com.android.systemui.volume.panel.component.anc.FakeSliceFactory
 import com.android.systemui.volume.panel.component.anc.ancSliceInteractor
 import com.android.systemui.volume.panel.component.anc.ancSliceRepository
 import com.android.systemui.volume.panel.component.anc.sliceViewManager
+import com.android.systemui.volume.panel.component.mediaoutput.domain.interactor.TestMediaDevicesFactory
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
@@ -41,6 +46,7 @@ import org.junit.runner.RunWith
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
+@TestableLooper.RunWithLooper(setAsMainLooper = true)
 class AncAvailabilityCriteriaTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
@@ -74,6 +80,10 @@ class AncAvailabilityCriteriaTest : SysuiTestCase() {
     fun hasSlice_available() {
         with(kosmos) {
             testScope.runTest {
+                audioRepository.setMode(AudioManager.MODE_NORMAL)
+                localMediaRepository.updateCurrentConnectedDevice(
+                    TestMediaDevicesFactory.bluetoothMediaDevice()
+                )
                 ancSliceRepository.putSlice(
                     1,
                     FakeSliceFactory.createSlice(hasError = false, hasSliceItem = true)

@@ -16,6 +16,31 @@
 
 package com.android.systemui.statusbar.ui
 
-class FakeSystemBarUtilsProxy(private var statusBarHeight: Int) : SystemBarUtilsProxy {
-    override fun getStatusBarHeight(): Int = statusBarHeight
+import com.android.systemui.statusbar.policy.FakeConfigurationController
+
+class FakeSystemBarUtilsProxy(
+    val fakeConfigurationController: FakeConfigurationController,
+    statusBarHeight: Int,
+    keyguardStatusBarHeight: Int,
+) : SystemBarUtilsProxy {
+    var fakeStatusBarHeight: Int = statusBarHeight
+        get() = field
+        set(value) {
+            if (field != value) {
+                field = value
+                fakeConfigurationController.notifyConfigurationChanged()
+            }
+        }
+
+    var fakeKeyguardStatusBarHeight = keyguardStatusBarHeight
+        get() = field
+        set(value) {
+            if (field != value) {
+                field = value
+                fakeConfigurationController.notifyConfigurationChanged()
+            }
+        }
+
+    override fun getStatusBarHeight(): Int = fakeStatusBarHeight
+    override fun getStatusBarHeaderHeightKeyguard(): Int = fakeKeyguardStatusBarHeight
 }

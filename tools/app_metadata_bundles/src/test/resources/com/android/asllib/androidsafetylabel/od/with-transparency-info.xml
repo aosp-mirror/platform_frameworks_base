@@ -1,0 +1,4 @@
+<bundle>
+    <long name="version" value="123456"/>
+    <pbundle_as_map name="transparency_info"/>
+</bundle>

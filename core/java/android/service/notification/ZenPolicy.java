@@ -349,23 +349,29 @@ public final class ZenPolicy implements Parcelable {
     /**
      * Indicates no explicit setting for which channels may bypass DND when this policy is active.
      * Defaults to {@link #CHANNEL_POLICY_PRIORITY}.
+     *
+     * @hide
      */
     @FlaggedApi(Flags.FLAG_MODES_API)
-    private static final int CHANNEL_POLICY_UNSET = 0;
+    public static final int CHANNEL_POLICY_UNSET = 0;
 
     /**
      * Indicates that channels marked as {@link NotificationChannel#canBypassDnd()} can bypass DND
      * when this policy is active.
+     *
+     * @hide
      */
     @FlaggedApi(Flags.FLAG_MODES_API)
-    private static final int CHANNEL_POLICY_PRIORITY = 1;
+    public static final int CHANNEL_POLICY_PRIORITY = 1;
 
     /**
      * Indicates that no channels can bypass DND when this policy is active, even those marked as
      * {@link NotificationChannel#canBypassDnd()}.
+     *
+     * @hide
      */
     @FlaggedApi(Flags.FLAG_MODES_API)
-    private static final int CHANNEL_POLICY_NONE = 2;
+    public static final int CHANNEL_POLICY_NONE = 2;
 
     /** @hide */
     public ZenPolicy() {
@@ -561,6 +567,13 @@ public final class ZenPolicy implements Parcelable {
      */
     public @State int getVisualEffectNotificationList() {
         return mVisualEffects.get(VISUAL_EFFECT_NOTIFICATION_LIST);
+    }
+
+    /**
+     * @hide
+     */
+    public @ChannelType int getAllowedChannels() {
+        return mAllowChannels;
     }
 
     /**
@@ -994,9 +1007,16 @@ public final class ZenPolicy implements Parcelable {
         /**
          * Set whether priority channels are permitted to break through DND.
          */
+        @SuppressLint("BuilderSetStyle")
         @FlaggedApi(Flags.FLAG_MODES_API)
         public @NonNull Builder allowPriorityChannels(boolean allow) {
             mZenPolicy.mAllowChannels = allow ? CHANNEL_POLICY_PRIORITY : CHANNEL_POLICY_NONE;
+            return this;
+        }
+
+        /** @hide */
+        public @NonNull Builder allowChannels(@ChannelType int channelType) {
+            mZenPolicy.mAllowChannels = channelType;
             return this;
         }
     }

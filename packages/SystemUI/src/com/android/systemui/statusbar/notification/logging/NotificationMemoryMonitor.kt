@@ -20,8 +20,6 @@ package com.android.systemui.statusbar.notification.logging
 import android.util.Log
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import dagger.Lazy
 import javax.inject.Inject
 
@@ -30,7 +28,6 @@ import javax.inject.Inject
 class NotificationMemoryMonitor
 @Inject
 constructor(
-    private val featureFlags: FeatureFlags,
     private val notificationMemoryDumper: NotificationMemoryDumper,
     private val notificationMemoryLogger: Lazy<NotificationMemoryLogger>,
 ) : CoreStartable {
@@ -42,9 +39,6 @@ constructor(
     override fun start() {
         Log.d(TAG, "NotificationMemoryMonitor initialized.")
         notificationMemoryDumper.init()
-        if (featureFlags.isEnabled(Flags.NOTIFICATION_MEMORY_LOGGING_ENABLED)) {
-            Log.d(TAG, "Notification memory logging enabled.")
-            notificationMemoryLogger.get().init()
-        }
+        notificationMemoryLogger.get().init()
     }
 }

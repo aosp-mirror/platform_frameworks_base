@@ -27,6 +27,7 @@ import android.os.Binder;
 import android.os.UserHandle;
 
 import com.android.modules.utils.BasicShellCommandHandler;
+import com.android.server.job.controllers.JobStatus;
 
 import java.io.PrintWriter;
 
@@ -59,6 +60,10 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
                     return cancelJob(pw);
                 case "monitor-battery":
                     return monitorBattery(pw);
+                case "disable-flex-policy":
+                    return disableFlexPolicy(pw);
+                case "enable-flex-policy":
+                    return enableFlexPolicy(pw);
                 case "get-aconfig-flag-state":
                     return getAconfigFlagState(pw);
                 case "get-battery-seq":
@@ -91,6 +96,8 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
                     return resetExecutionQuota(pw);
                 case "reset-schedule-quota":
                     return resetScheduleQuota(pw);
+                case "reset-flex-policy":
+                    return resetFlexPolicy(pw);
                 case "stop":
                     return stop(pw);
                 case "trigger-dock-state":
@@ -346,6 +353,65 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
         return 0;
     }
 
+    private int disableFlexPolicy(PrintWriter pw) throws Exception {
+        checkPermission("disable flex policy");
+
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            mInternal.setFlexPolicy(true, 0);
+            pw.println("Set flex policy to 0");
+            return 0;
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    private int enableFlexPolicy(PrintWriter pw) throws Exception {
+        checkPermission("enable flex policy");
+
+        int enabled = 0;
+
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            switch (opt) {
+                case "-o":
+                case "--option":
+                    final String constraint = getNextArgRequired();
+                    switch (constraint) {
+                        case "battery-not-low":
+                            enabled |= JobStatus.CONSTRAINT_BATTERY_NOT_LOW;
+                            break;
+                        case "charging":
+                            enabled |= JobStatus.CONSTRAINT_CHARGING;
+                            break;
+                        case "connectivity":
+                            enabled |= JobStatus.CONSTRAINT_CONNECTIVITY;
+                            break;
+                        case "idle":
+                            enabled |= JobStatus.CONSTRAINT_IDLE;
+                            break;
+                        default:
+                            pw.println("Unsupported option: " + constraint);
+                            return -1;
+                    }
+                    break;
+
+                default:
+                    pw.println("Error: unknown option '" + opt + "'");
+                    return -1;
+            }
+        }
+
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            mInternal.setFlexPolicy(true, enabled);
+            pw.println("Set flex policy to " + enabled);
+            return 0;
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
     private int getAconfigFlagState(PrintWriter pw) throws Exception {
         checkPermission("get aconfig flag state", Manifest.permission.DUMP);
 
@@ -581,6 +647,19 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
         return 0;
     }
 
+    private int resetFlexPolicy(PrintWriter pw) throws Exception {
+        checkPermission("reset flex policy");
+
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            mInternal.setFlexPolicy(false, 0);
+            pw.println("Reset flex policy to its default state");
+            return 0;
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
     private int resetExecutionQuota(PrintWriter pw) throws Exception {
         checkPermission("reset execution quota");
 
@@ -773,6 +852,15 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
         pw.println("  monitor-battery [on|off]");
         pw.println("    Control monitoring of all battery changes.  Off by default.  Turning");
         pw.println("    on makes get-battery-seq useful.");
+        pw.println("  enable-flex-policy --option <option>");
+        pw.println("    Enable flex policy with the specified options. Supported options are");
+        pw.println("    battery-not-low, charging, connectivity, idle.");
+        pw.println("    Multiple enable options can be specified (e.g.");
+        pw.println("    enable-flex-policy --option battery-not-low --option charging");
+        pw.println("  disable-flex-policy");
+        pw.println("    Turn off flex policy so that it does not affect job execution.");
+        pw.println("  reset-flex-policy");
+        pw.println("    Resets the flex policy to its default state.");
         pw.println("  get-aconfig-flag-state FULL_FLAG_NAME");
         pw.println("    Return the state of the specified aconfig flag, if known. The flag name");
         pw.println("         must be fully qualified.");

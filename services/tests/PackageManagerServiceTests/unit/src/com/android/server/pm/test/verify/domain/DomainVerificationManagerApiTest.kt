@@ -83,11 +83,7 @@ class DomainVerificationManagerApiTest {
         }
 
         val bundle = service.getUriRelativeFilterGroups(PKG_ONE, listOf(DOMAIN_1, DOMAIN_2))
-        assertThat(bundle.keySet()).containsExactlyElementsIn(listOf(DOMAIN_1, DOMAIN_2))
-        assertThat(bundle.getParcelableArrayList(DOMAIN_1, UriRelativeFilterGroup::class.java))
-            .isEmpty()
-        assertThat(bundle.getParcelableArrayList(DOMAIN_2, UriRelativeFilterGroup::class.java))
-            .isEmpty()
+        assertThat(bundle.keySet()).isEmpty()
 
         val pathGroup = UriRelativeFilterGroup(UriRelativeFilterGroup.ACTION_ALLOW)
         pathGroup.addUriRelativeFilter(

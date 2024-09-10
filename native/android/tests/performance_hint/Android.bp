@@ -39,6 +39,7 @@ cc_test {
         "libandroid",
         "liblog",
         "libbinder",
+        "libbinder_ndk",
         "libpowermanager",
         "libutils",
     ],

@@ -15,12 +15,10 @@
  */
 package com.android.internal.accessibility.dialog;
 
-import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_BUTTON;
-import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_SHORTCUT_KEY;
-import static android.view.accessibility.AccessibilityManager.ShortcutType;
-
 import static com.android.internal.accessibility.common.ShortcutConstants.ShortcutMenuMode;
-import static com.android.internal.accessibility.dialog.AccessibilityTargetHelper.createEnableDialogContentView;
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType;
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.HARDWARE;
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.SOFTWARE;
 import static com.android.internal.accessibility.dialog.AccessibilityTargetHelper.getInstalledTargets;
 import static com.android.internal.accessibility.dialog.AccessibilityTargetHelper.getTargets;
 import static com.android.internal.accessibility.util.AccessibilityUtils.isUserSetupCompleted;
@@ -38,7 +36,6 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
-import android.view.accessibility.Flags;
 import android.widget.AdapterView;
 
 import com.android.internal.R;
@@ -52,8 +49,8 @@ import java.util.List;
  * activity or allowlisting feature for volume key shortcut.
  */
 public class AccessibilityShortcutChooserActivity extends Activity {
-    @ShortcutType
-    private final int mShortcutType = ACCESSIBILITY_SHORTCUT_KEY;
+    @UserShortcutType
+    private final int mShortcutType = HARDWARE;
     private static final String KEY_ACCESSIBILITY_SHORTCUT_MENU_MODE =
             "accessibility_shortcut_menu_mode";
     private final List<AccessibilityTarget> mTargets = new ArrayList<>();
@@ -115,39 +112,22 @@ public class AccessibilityShortcutChooserActivity extends Activity {
     private void onTargetChecked(AdapterView<?> parent, View view, int position, long id) {
         final AccessibilityTarget target = mTargets.get(position);
 
-        if (Flags.cleanupAccessibilityWarningDialog()) {
-            if (target instanceof AccessibilityServiceTarget serviceTarget) {
-                if (sendRestrictedDialogIntentIfNeeded(target)) {
-                    return;
-                }
-                final AccessibilityManager am = getSystemService(AccessibilityManager.class);
-                if (am.isAccessibilityServiceWarningRequired(
-                        serviceTarget.getAccessibilityServiceInfo())) {
-                    showPermissionDialogIfNeeded(this, (AccessibilityServiceTarget) target,
-                            position, mTargetAdapter);
-                    return;
-                }
+        if (target instanceof AccessibilityServiceTarget serviceTarget) {
+            if (sendRestrictedDialogIntentIfNeeded(target)) {
+                return;
             }
-            if (target instanceof AccessibilityActivityTarget activityTarget) {
-                if (!activityTarget.isShortcutEnabled()
-                        && sendRestrictedDialogIntentIfNeeded(activityTarget)) {
-                    return;
-                }
+            final AccessibilityManager am = getSystemService(AccessibilityManager.class);
+            if (am.isAccessibilityServiceWarningRequired(
+                    serviceTarget.getAccessibilityServiceInfo())) {
+                showPermissionDialogIfNeeded(this, (AccessibilityServiceTarget) target,
+                        position, mTargetAdapter);
+                return;
             }
-        } else {
-            if (!target.isShortcutEnabled()) {
-                if (target instanceof AccessibilityServiceTarget
-                        || target instanceof AccessibilityActivityTarget) {
-                    if (sendRestrictedDialogIntentIfNeeded(target)) {
-                        return;
-                    }
-                }
-
-                if (target instanceof AccessibilityServiceTarget) {
-                    showPermissionDialogIfNeeded(this, (AccessibilityServiceTarget) target,
-                            position, mTargetAdapter);
-                    return;
-                }
+        }
+        if (target instanceof AccessibilityActivityTarget activityTarget) {
+            if (!activityTarget.isShortcutEnabled()
+                    && sendRestrictedDialogIntentIfNeeded(activityTarget)) {
+                return;
             }
         }
 
@@ -178,37 +158,25 @@ public class AccessibilityShortcutChooserActivity extends Activity {
             return;
         }
 
-        if (Flags.cleanupAccessibilityWarningDialog()) {
-            mPermissionDialog = AccessibilityServiceWarning
-                    .createAccessibilityServiceWarningDialog(context,
-                            serviceTarget.getAccessibilityServiceInfo(),
-                            v -> {
-                                serviceTarget.onCheckedChanged(true);
-                                targetAdapter.notifyDataSetChanged();
-                                mPermissionDialog.dismiss();
-                            }, v -> {
-                                serviceTarget.onCheckedChanged(false);
-                                mPermissionDialog.dismiss();
-                            },
-                            v -> {
-                                mTargets.remove(position);
-                                context.getPackageManager().getPackageInstaller().uninstall(
-                                        serviceTarget.getComponentName().getPackageName(), null);
-                                targetAdapter.notifyDataSetChanged();
-                                mPermissionDialog.dismiss();
-                            });
-            mPermissionDialog.setOnDismissListener(dialog -> mPermissionDialog = null);
-        } else {
-            mPermissionDialog = new AlertDialog.Builder(context)
-                    .setView(createEnableDialogContentView(context, serviceTarget,
-                            v -> {
-                                mPermissionDialog.dismiss();
-                                targetAdapter.notifyDataSetChanged();
-                            },
-                            v -> mPermissionDialog.dismiss()))
-                    .setOnDismissListener(dialog -> mPermissionDialog = null)
-                    .create();
-        }
+        mPermissionDialog = AccessibilityServiceWarning
+                .createAccessibilityServiceWarningDialog(context,
+                        serviceTarget.getAccessibilityServiceInfo(),
+                        v -> {
+                            serviceTarget.onCheckedChanged(true);
+                            targetAdapter.notifyDataSetChanged();
+                            mPermissionDialog.dismiss();
+                        }, v -> {
+                            serviceTarget.onCheckedChanged(false);
+                            mPermissionDialog.dismiss();
+                        },
+                        v -> {
+                            mTargets.remove(position);
+                            context.getPackageManager().getPackageInstaller().uninstall(
+                                    serviceTarget.getComponentName().getPackageName(), null);
+                            targetAdapter.notifyDataSetChanged();
+                            mPermissionDialog.dismiss();
+                        });
+        mPermissionDialog.setOnDismissListener(dialog -> mPermissionDialog = null);
         mPermissionDialog.show();
     }
 
@@ -246,7 +214,7 @@ public class AccessibilityShortcutChooserActivity extends Activity {
                 mTargetAdapter.getShortcutMenuMode() == ShortcutMenuMode.EDIT;
         final int selectDialogTitleId = R.string.accessibility_select_shortcut_menu_title;
         final int editDialogTitleId =
-                mShortcutType == ACCESSIBILITY_BUTTON
+                mShortcutType == SOFTWARE
                         ? R.string.accessibility_edit_shortcut_menu_button_title
                         : R.string.accessibility_edit_shortcut_menu_volume_title;
 
@@ -278,12 +246,10 @@ public class AccessibilityShortcutChooserActivity extends Activity {
 
         boolean allowEditing = isUserSetupCompleted(this);
         boolean showWhenLocked = false;
-        if (Flags.allowShortcutChooserOnLockscreen()) {
-            final KeyguardManager keyguardManager = getSystemService(KeyguardManager.class);
-            if (keyguardManager != null && keyguardManager.isKeyguardLocked()) {
-                allowEditing = false;
-                showWhenLocked = true;
-            }
+        final KeyguardManager keyguardManager = getSystemService(KeyguardManager.class);
+        if (keyguardManager != null && keyguardManager.isKeyguardLocked()) {
+            allowEditing = false;
+            showWhenLocked = true;
         }
         if (allowEditing) {
             final String positiveButtonText =

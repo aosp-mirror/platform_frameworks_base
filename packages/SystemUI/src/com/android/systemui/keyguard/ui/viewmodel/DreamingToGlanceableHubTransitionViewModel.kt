@@ -19,15 +19,20 @@ package com.android.systemui.keyguard.ui.viewmodel
 import com.android.app.animation.Interpolators.EMPHASIZED
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.Edge
+import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
+import com.android.systemui.keyguard.shared.model.KeyguardState.GLANCEABLE_HUB
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
+import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import com.android.systemui.res.R
+import com.android.systemui.scene.shared.model.Scenes
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
@@ -36,14 +41,16 @@ class DreamingToGlanceableHubTransitionViewModel
 constructor(
     animationFlow: KeyguardTransitionAnimationFlow,
     configurationInteractor: ConfigurationInteractor,
-) {
-
+) : DeviceEntryIconTransition {
     private val transitionAnimation =
-        animationFlow.setup(
-            duration = TO_GLANCEABLE_HUB_DURATION,
-            from = KeyguardState.DREAMING,
-            to = KeyguardState.GLANCEABLE_HUB,
-        )
+        animationFlow
+            .setup(
+                duration = TO_GLANCEABLE_HUB_DURATION,
+                edge = Edge.create(from = DREAMING, to = Scenes.Communal),
+            )
+            .setupWithoutSceneContainer(
+                edge = Edge.create(from = DREAMING, to = GLANCEABLE_HUB),
+            )
 
     val dreamOverlayTranslationX: Flow<Float> =
         configurationInteractor
@@ -58,11 +65,34 @@ constructor(
                 )
             }
 
+    // Keep the dream visible while the hub swipes in over the dream.
+    val dreamAlpha: Flow<Float> = transitionAnimation.immediatelyTransitionTo(1f)
+
     val dreamOverlayAlpha: Flow<Float> =
         transitionAnimation.sharedFlow(
             duration = 167.milliseconds,
             onStep = { 1f - it },
             name = "DREAMING->GLANCEABLE_HUB: dreamOverlayAlpha",
+        )
+
+    // Show UMO once the transition starts.
+    val showUmo: Flow<Boolean> =
+        transitionAnimation
+            .sharedFlow(
+                duration = TO_GLANCEABLE_HUB_DURATION,
+                onStep = { it },
+                onCancel = { 0f },
+                onFinish = { 1f },
+            )
+            .map { step -> step != 0f }
+
+    override val deviceEntryParentViewAlpha: Flow<Float> =
+        transitionAnimation.sharedFlow(
+            startTime = 167.milliseconds,
+            duration = 167.milliseconds,
+            onStep = { it },
+            onCancel = { 0f },
+            onFinish = { 1f },
         )
 
     private companion object {

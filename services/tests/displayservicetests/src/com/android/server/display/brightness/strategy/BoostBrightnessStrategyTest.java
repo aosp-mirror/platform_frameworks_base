@@ -27,6 +27,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.display.DisplayBrightnessState;
 import com.android.server.display.brightness.BrightnessReason;
+import com.android.server.display.brightness.StrategyExecutionRequest;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -58,7 +59,9 @@ public class BoostBrightnessStrategyTest {
                         .setDisplayBrightnessStrategyName(mBoostBrightnessStrategy.getName())
                         .build();
         DisplayBrightnessState updatedDisplayBrightnessState =
-                mBoostBrightnessStrategy.updateBrightness(displayPowerRequest);
+                mBoostBrightnessStrategy.updateBrightness(
+                        new StrategyExecutionRequest(displayPowerRequest, 0.2f,
+                                /* userSetBrightnessChanged= */ false));
         assertEquals(updatedDisplayBrightnessState, expectedDisplayBrightnessState);
     }
 

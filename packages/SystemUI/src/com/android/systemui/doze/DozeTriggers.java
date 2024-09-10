@@ -40,6 +40,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.InstanceId;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
+import com.android.systemui.Flags;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dock.DockManager;
@@ -561,6 +562,12 @@ public class DozeTriggers implements DozeMachine.Part {
         if (dozeState == DozeMachine.State.DOZE_PULSING
                 && reason == DozeLog.PULSE_REASON_SENSOR_WAKE_REACH) {
             mMachine.requestState(DozeMachine.State.DOZE_PULSING_BRIGHT);
+            return;
+        }
+
+        // When already in pulsing, we can show the new Notification without requesting a new pulse.
+        if (Flags.notificationPulsingFix()
+                && dozeState == State.DOZE_PULSING && reason == DozeLog.PULSE_REASON_NOTIFICATION) {
             return;
         }
 

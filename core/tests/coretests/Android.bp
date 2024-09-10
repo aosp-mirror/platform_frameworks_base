@@ -86,6 +86,7 @@ android_test {
         "kotlin-test",
         "mockito-target-minus-junit4",
         "androidx.test.uiautomator_uiautomator",
+        "platform-parametric-runner-lib",
         "platform-test-annotations",
         "platform-compat-test-rules",
         "truth",
@@ -102,6 +103,7 @@ android_test {
         "flickerlib-trace_processor_shell",
         "mockito-target-extended-minus-junit4",
         "TestParameterInjector",
+        "android.content.res.flags-aconfig-java",
     ],
 
     libs: [
@@ -116,6 +118,7 @@ android_test {
     ],
     jni_libs: [
         "libpowermanagertest_jni",
+        "libviewRootImplTest_jni",
         "libworksourceparceltest_jni",
     ],
 
@@ -261,6 +264,7 @@ android_ravenwood_test {
         "src/com/android/internal/os/**/*.java",
         "src/com/android/internal/util/**/*.java",
         "src/com/android/internal/power/EnergyConsumerStatsTest.java",
+        "src/com/android/internal/ravenwood/**/*.java",
 
         // Pull in R.java from FrameworksCoreTests-resonly, not from FrameworksCoreTests,
         // to avoid having a dependency to FrameworksCoreTests.
@@ -275,13 +279,13 @@ android_ravenwood_test {
         generate_get_transaction_name: true,
         local_include_dirs: ["aidl"],
     },
+    java_resources: [
+        "res/xml/power_profile_test.xml",
+        "res/xml/power_profile_test_cpu_legacy.xml",
+        "res/xml/power_profile_test_modem.xml",
+    ],
     auto_gen_config: true,
 }
-
-FLAKY_OR_IGNORED = [
-    "androidx.test.filters.FlakyTest",
-    "org.junit.Ignore",
-]
 
 test_module_config {
     name: "FrameworksCoreTests_Presubmit",
@@ -291,7 +295,6 @@ test_module_config {
         "device-platinum-tests",
     ],
     include_annotations: ["android.platform.test.annotations.Presubmit"],
-    exclude_annotations: FLAKY_OR_IGNORED,
 }
 
 test_module_config {
@@ -316,7 +319,6 @@ test_module_config {
         "device-platinum-tests",
     ],
     include_filters: ["android.content.ContextTest"],
-    exclude_annotations: FLAKY_OR_IGNORED,
 }
 
 test_module_config {
@@ -327,7 +329,6 @@ test_module_config {
         "device-platinum-tests",
     ],
     include_filters: ["android.app.KeyguardManagerTest"],
-    exclude_annotations: FLAKY_OR_IGNORED,
 }
 
 test_module_config {
@@ -338,7 +339,6 @@ test_module_config {
         "device-platinum-tests",
     ],
     include_filters: ["android.app.PropertyInvalidatedCacheTests"],
-    exclude_annotations: FLAKY_OR_IGNORED,
 }
 
 test_module_config {
@@ -353,7 +353,6 @@ test_module_config {
         "android.content.ComponentCallbacksControllerTest",
         "android.content.ContextWrapperTest",
     ],
-    exclude_annotations: FLAKY_OR_IGNORED,
 }
 
 test_module_config {
@@ -364,7 +363,6 @@ test_module_config {
         "device-platinum-tests",
     ],
     include_filters: ["android.database.sqlite.SQLiteRawStatementTest"],
-    exclude_annotations: FLAKY_OR_IGNORED,
 }
 
 test_module_config {
@@ -376,7 +374,6 @@ test_module_config {
     ],
     include_filters: ["android.net"],
     include_annotations: ["android.platform.test.annotations.Presubmit"],
-    exclude_annotations: FLAKY_OR_IGNORED,
 }
 
 test_module_config {
@@ -489,7 +486,6 @@ test_module_config {
         "device-platinum-tests",
     ],
     include_filters: ["com.android.internal.jank"],
-    exclude_annotations: FLAKY_OR_IGNORED,
 }
 
 test_module_config {
@@ -548,7 +544,6 @@ test_module_config {
         "device-platinum-tests",
     ],
     include_filters: ["com.android.internal.util.LatencyTrackerTest"],
-    exclude_annotations: FLAKY_OR_IGNORED,
 }
 
 test_module_config {
@@ -559,7 +554,6 @@ test_module_config {
         "device-platinum-tests",
     ],
     include_filters: ["android.content.ContentCaptureOptionsTest"],
-    exclude_annotations: FLAKY_OR_IGNORED,
 }
 
 test_module_config {
@@ -581,7 +575,6 @@ test_module_config {
     ],
     include_filters: ["android.content.pm."],
     include_annotations: ["android.platform.test.annotations.Presubmit"],
-    exclude_annotations: FLAKY_OR_IGNORED,
 }
 
 test_module_config {
@@ -593,7 +586,6 @@ test_module_config {
     ],
     include_filters: ["android.content.pm."],
     include_annotations: ["android.platform.test.annotations.Postsubmit"],
-    exclude_annotations: FLAKY_OR_IGNORED,
 }
 
 test_module_config {
@@ -621,7 +613,6 @@ test_module_config {
     ],
     include_filters: ["android.content.res."],
     include_annotations: ["android.platform.test.annotations.Postsubmit"],
-    exclude_annotations: FLAKY_OR_IGNORED,
 }
 
 test_module_config {
@@ -651,7 +642,6 @@ test_module_config {
         "device-platinum-tests",
     ],
     include_filters: ["android.view.contentcapture"],
-    exclude_annotations: FLAKY_OR_IGNORED,
 }
 
 test_module_config {
@@ -662,7 +652,6 @@ test_module_config {
         "device-platinum-tests",
     ],
     include_filters: ["android.view.contentprotection"],
-    exclude_annotations: FLAKY_OR_IGNORED,
 }
 
 test_module_config {
@@ -674,7 +663,6 @@ test_module_config {
     ],
     include_filters: ["com.android.internal.content."],
     include_annotations: ["android.platform.test.annotations.Presubmit"],
-    exclude_annotations: FLAKY_OR_IGNORED,
 }
 
 test_module_config {
@@ -685,21 +673,6 @@ test_module_config {
         "device-platinum-tests",
     ],
     include_filters: ["android.graphics.drawable.IconTest"],
-}
-
-test_module_config {
-    name: "FrameworksCoreTests_accessibility_NO_FLAKES",
-    base: "FrameworksCoreTests",
-    test_suites: [
-        "device-tests",
-        "device-platinum-tests",
-    ],
-    include_filters: [
-        "com.android.internal.accessibility",
-        "android.accessibilityservice",
-        "android.view.accessibility",
-    ],
-    exclude_annotations: ["androidx.test.filters.FlakyTest"],
 }
 
 test_module_config {
@@ -771,7 +744,6 @@ test_module_config {
         "com.android.internal.jank.InteractionJankMonitorTest",
         "com.android.internal.util.LatencyTrackerTest",
     ],
-    exclude_annotations: FLAKY_OR_IGNORED,
 }
 
 test_module_config {
@@ -782,5 +754,4 @@ test_module_config {
         "device-platinum-tests",
     ],
     include_annotations: ["android.platform.test.annotations.PlatinumTest"],
-    exclude_annotations: FLAKY_OR_IGNORED,
 }

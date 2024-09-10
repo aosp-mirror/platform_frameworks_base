@@ -203,23 +203,6 @@ class AppIdPermissionPolicyPermissionDefinitionsTest : BasePermissionPolicyTest(
     }
 
     @Test
-    fun testPermissionDefinition_configPermission_getsTakenOver() {
-        testTakingOverPermissionAndPermissionGroupDefinitions(
-            oldPermissionOwnerIsSystem = true,
-            newPermissionOwnerIsSystem = true,
-            type = Permission.TYPE_CONFIG,
-            isReconciled = false
-        )
-
-        assertWithMessage(
-            "After $action is called for a config permission with" +
-                " no owner, the ownership is not taken over by a system app $PACKAGE_NAME_0"
-        )
-            .that(getPermission(PERMISSION_NAME_0)?.packageName)
-            .isEqualTo(PACKAGE_NAME_0)
-    }
-
-    @Test
     fun testPermissionDefinition_systemAppTakingOverPermissionDefinition_getsTakenOver() {
         testTakingOverPermissionAndPermissionGroupDefinitions(newPermissionOwnerIsSystem = true)
 

@@ -16,18 +16,18 @@ import com.android.systemui.statusbar.phone.LightBarTransitionsController
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.wm.shell.back.BackAnimation
 import com.android.wm.shell.pip.Pip
+import java.util.Optional
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentMatchers
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.any
 import org.mockito.Mockito.anyBoolean
-import org.mockito.Mockito.anyInt
+import org.mockito.Mockito.anyLong
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
-import java.util.Optional
 
 @SmallTest
 class TaskbarDelegateTest : SysuiTestCase() {
@@ -74,7 +74,7 @@ class TaskbarDelegateTest : SysuiTestCase() {
         `when`(mNavBarHelper.edgeBackGestureHandler).thenReturn(mEdgeBackGestureHandler)
         `when`(mLightBarControllerFactory.create(any())).thenReturn(mLightBarTransitionController)
         `when`(mNavBarHelper.currentSysuiState).thenReturn(mCurrentSysUiState)
-        `when`(mSysUiState.setFlag(anyInt(), anyBoolean())).thenReturn(mSysUiState)
+        `when`(mSysUiState.setFlag(anyLong(), anyBoolean())).thenReturn(mSysUiState)
         mTaskStackChangeListeners = TaskStackChangeListeners.getTestInstance()
         mTaskbarDelegate = TaskbarDelegate(context, mLightBarControllerFactory,
             mStatusBarKeyguardViewManager)

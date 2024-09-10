@@ -37,7 +37,7 @@ import kotlinx.coroutines.DisposableHandle
 class LongPressHandlingView(
     context: Context,
     attrs: AttributeSet?,
-    private val longPressDuration: () -> Long,
+    longPressDuration: () -> Long,
 ) :
     View(
         context,
@@ -88,6 +88,12 @@ class LongPressHandlingView(
             longPressDuration = longPressDuration,
         )
     }
+
+    var longPressDuration: () -> Long
+        get() = interactionHandler.longPressDuration
+        set(longPressDuration) {
+            interactionHandler.longPressDuration = longPressDuration
+        }
 
     fun setLongPressHandlingEnabled(isEnabled: Boolean) {
         interactionHandler.isLongPressHandlingEnabled = isEnabled

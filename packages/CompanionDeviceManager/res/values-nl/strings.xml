@@ -26,8 +26,11 @@
     <string name="profile_name_glasses" msgid="3506504967216601277">"apparaat"</string>
     <string name="summary_glasses" msgid="2872254734959842579">"Deze app krijgt toegang tot deze rechten op je <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; toegang geven tot deze informatie op je telefoon"</string>
+    <string name="title_app_streaming_with_mirroring" msgid="3364582597581570658">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; toestaan de apps van je telefoon te streamen?"</string>
+    <string name="summary_app_streaming" msgid="295548145144086753">"%1$s heeft toegang tot alles wat zichtbaar is of wordt afgespeeld op de telefoon, waaronder audio, foto\'s, wachtwoorden en berichten.&lt;br/&gt;&lt;br/&gt;%1$s kan apps streamen totdat je dit recht verwijdert."</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"Cross-device-services"</string>
     <string name="helper_summary_app_streaming" msgid="2396773196949578425">"<xliff:g id="APP_NAME">%1$s</xliff:g> vraagt namens jouw <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> toestemming om apps te streamen tussen je apparaten"</string>
+    <string name="helper_summary_app_streaming_with_mirroring" msgid="6138581029144467467">"<xliff:g id="APP_NAME">%1$s</xliff:g> vraagt namens jouw <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> toestemming om apps tussen je apparaten weer te geven en te streamen"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
     <string name="title_computer" msgid="4693714143506569253">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; toegang geven tot deze informatie op je telefoon"</string>
@@ -35,6 +38,8 @@
     <string name="helper_title_computer" msgid="4671071173916176037">"Google Play-services"</string>
     <string name="helper_summary_computer" msgid="8774832742608187072">"<xliff:g id="APP_NAME">%1$s</xliff:g> vraagt namens jouw <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> toegang tot de foto\'s, media en meldingen van je telefoon"</string>
     <string name="title_nearby_device_streaming" msgid="7269956847378799794">"Toestaan dat &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; deze actie uitvoert?"</string>
+    <string name="title_nearby_device_streaming_with_mirroring" msgid="242855799919611657">"&lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; toestaan de apps en systeemfuncties van je telefoon te streamen?"</string>
+    <string name="summary_nearby_device_streaming" msgid="4039565463149145573">"%1$s heeft toegang tot alles wat zichtbaar is of wordt afgespeeld op je telefoon, waaronder audio, foto\'s, betalingsgegevens, wachtwoorden en berichten.&lt;br/&gt;&lt;br/&gt;%1$s kan apps en systeemfuncties streamen totdat je dit recht verwijdert."</string>
     <string name="helper_summary_nearby_device_streaming" msgid="2063965070936844876">"<xliff:g id="APP_NAME">%1$s</xliff:g> vraagt namens je <xliff:g id="DEVICE_NAME">%2$s</xliff:g> toestemming om apps en andere systeemfuncties naar apparaten in de buurt te streamen"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"apparaat"</string>
     <string name="summary_generic" msgid="1761976003668044801">"Deze app kan informatie, zoals de naam van iemand die belt, synchroniseren tussen je telefoon en het gekozen apparaat"</string>

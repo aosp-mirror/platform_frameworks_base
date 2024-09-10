@@ -26,8 +26,11 @@
     <string name="profile_name_glasses" msgid="3506504967216601277">"устройство"</string>
     <string name="summary_glasses" msgid="2872254734959842579">"Това приложение ще има достъп до следните разрешения за вашето <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"Разрешете на &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; да осъществява достъп до тази информация от телефона ви"</string>
+    <string name="title_app_streaming_with_mirroring" msgid="3364582597581570658">"Да се разреши ли на &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; да предава поточно приложенията на телефона ви?"</string>
+    <string name="summary_app_streaming" msgid="295548145144086753">"%1$s ще има достъп до всичко, което се показва или възпроизвежда на телефона, включително аудиосъдържание, снимки, пароли и съобщения.&lt;br/&gt;&lt;br/&gt;%1$s ще може да предава поточно приложения, докато не премахнете това разрешение."</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"Услуги за различни устройства"</string>
     <string name="helper_summary_app_streaming" msgid="2396773196949578425">"<xliff:g id="APP_NAME">%1$s</xliff:g> иска разрешение от името на <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> да предава поточно приложения между устройствата ви"</string>
+    <string name="helper_summary_app_streaming_with_mirroring" msgid="6138581029144467467">"„<xliff:g id="APP_NAME">%1$s</xliff:g>“ иска разрешение от името на <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> да показва и да предава поточно приложения между устройствата ви"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
     <string name="title_computer" msgid="4693714143506569253">"Разрешете на &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; да осъществява достъп до тази информация от телефона ви"</string>
@@ -35,6 +38,8 @@
     <string name="helper_title_computer" msgid="4671071173916176037">"Услуги за Google Play"</string>
     <string name="helper_summary_computer" msgid="8774832742608187072">"<xliff:g id="APP_NAME">%1$s</xliff:g> иска разрешение от името на <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> за достъп до снимките, мултимедията и известията на телефона ви"</string>
     <string name="title_nearby_device_streaming" msgid="7269956847378799794">"Разрешавате ли на &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; да предприема това действие?"</string>
+    <string name="title_nearby_device_streaming_with_mirroring" msgid="242855799919611657">"Да се разреши ли на &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; да предава поточно приложенията и системните функции на телефона ви?"</string>
+    <string name="summary_nearby_device_streaming" msgid="4039565463149145573">"%1$s ще има достъп до всичко, което се показва или възпроизвежда на телефона, включително аудиосъдържание, снимки, данни за плащане, пароли и съобщения.&lt;br/&gt;&lt;br/&gt;%1$s ще може да предава поточно приложения и системни функции, докато не премахнете това разрешение."</string>
     <string name="helper_summary_nearby_device_streaming" msgid="2063965070936844876">"<xliff:g id="APP_NAME">%1$s</xliff:g> иска разрешение от името на <xliff:g id="DEVICE_NAME">%2$s</xliff:g> да предава поточно приложения и други системни функции към устройства в близост"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"устройство"</string>
     <string name="summary_generic" msgid="1761976003668044801">"Това приложение ще може да синхронизира различна информация, като например името на обаждащия се, между телефона ви и избраното устройство"</string>

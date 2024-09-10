@@ -15,8 +15,11 @@
  */
 package com.android.settingslib.bluetooth;
 
+import static com.android.settingslib.flags.Flags.FLAG_ENABLE_DETERMINING_ADVANCED_DETAILS_HEADER_WITH_METADATA;
+
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.spy;
@@ -25,17 +28,20 @@ import static org.mockito.Mockito.when;
 
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothLeBroadcastReceiveState;
 import android.content.Context;
-import android.content.pm.PackageInfo;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.net.Uri;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.util.Pair;
 
 import com.android.settingslib.widget.AdaptiveIcon;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Answers;
@@ -43,6 +49,9 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @RunWith(RobolectricTestRunner.class)
 public class BluetoothUtilsTest {
@@ -55,6 +64,16 @@ public class BluetoothUtilsTest {
     private AudioManager mAudioManager;
     @Mock
     private PackageManager mPackageManager;
+    @Mock
+    private LocalBluetoothLeBroadcast mBroadcast;
+    @Mock
+    private LocalBluetoothProfileManager mProfileManager;
+    @Mock
+    private LocalBluetoothManager mLocalBluetoothManager;
+    @Mock
+    private LocalBluetoothLeBroadcastAssistant mAssistant;
+    @Mock
+    private BluetoothLeBroadcastReceiveState mLeBroadcastReceiveState;
 
     private Context mContext;
     private static final String STRING_METADATA = "string_metadata";
@@ -65,13 +84,21 @@ public class BluetoothUtilsTest {
     private static final String CONTROL_METADATA =
             "<HEARABLE_CONTROL_SLICE_WITH_WIDTH>" + STRING_METADATA
                     + "</HEARABLE_CONTROL_SLICE_WITH_WIDTH>";
-    private static final String FAKE_EXCLUSIVE_MANAGER_NAME = "com.fake.name";
+    private static final String TEST_EXCLUSIVE_MANAGER_PACKAGE = "com.test.manager";
+    private static final String TEST_EXCLUSIVE_MANAGER_COMPONENT = "com.test.manager/.component";
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
         mContext = spy(RuntimeEnvironment.application);
+        mSetFlagsRule.disableFlags(FLAG_ENABLE_DETERMINING_ADVANCED_DETAILS_HEADER_WITH_METADATA);
+        when(mLocalBluetoothManager.getProfileManager()).thenReturn(mProfileManager);
+        when(mProfileManager.getLeAudioBroadcastProfile()).thenReturn(mBroadcast);
+        when(mProfileManager.getLeAudioBroadcastAssistantProfile()).thenReturn(mAssistant);
     }
 
     @Test
@@ -234,6 +261,25 @@ public class BluetoothUtilsTest {
     }
 
     @Test
+    public void isAdvancedDetailsHeader_noMainIcon_returnFalse() {
+        mSetFlagsRule.enableFlags(FLAG_ENABLE_DETERMINING_ADVANCED_DETAILS_HEADER_WITH_METADATA);
+
+        when(mBluetoothDevice.getMetadata(BluetoothDevice.METADATA_MAIN_ICON)).thenReturn(null);
+
+        assertThat(BluetoothUtils.isAdvancedDetailsHeader(mBluetoothDevice)).isFalse();
+    }
+
+    @Test
+    public void isAdvancedDetailsHeader_hasMainIcon_returnTrue() {
+        mSetFlagsRule.enableFlags(FLAG_ENABLE_DETERMINING_ADVANCED_DETAILS_HEADER_WITH_METADATA);
+
+        when(mBluetoothDevice.getMetadata(BluetoothDevice.METADATA_MAIN_ICON))
+                .thenReturn(STRING_METADATA.getBytes());
+
+        assertThat(BluetoothUtils.isAdvancedDetailsHeader(mBluetoothDevice)).isTrue();
+    }
+
+    @Test
     public void isAdvancedUntetheredDevice_untetheredHeadset_returnTrue() {
         when(mBluetoothDevice.getMetadata(
                 BluetoothDevice.METADATA_IS_UNTETHERED_HEADSET)).thenReturn(
@@ -272,6 +318,18 @@ public class BluetoothUtilsTest {
     @Test
     public void isAdvancedUntetheredDevice_noMetadata_returnFalse() {
         assertThat(BluetoothUtils.isAdvancedUntetheredDevice(mBluetoothDevice)).isEqualTo(false);
+    }
+
+    @Test
+    public void isAdvancedUntetheredDevice_untetheredHeadsetMetadataIsFalse_returnFalse() {
+        mSetFlagsRule.enableFlags(FLAG_ENABLE_DETERMINING_ADVANCED_DETAILS_HEADER_WITH_METADATA);
+
+        when(mBluetoothDevice.getMetadata(BluetoothDevice.METADATA_IS_UNTETHERED_HEADSET))
+                .thenReturn("false".getBytes());
+        when(mBluetoothDevice.getMetadata(BluetoothDevice.METADATA_DEVICE_TYPE))
+                .thenReturn(BluetoothDevice.DEVICE_TYPE_UNTETHERED_HEADSET.getBytes());
+
+        assertThat(BluetoothUtils.isAdvancedUntetheredDevice(mBluetoothDevice)).isFalse();
     }
 
     @Test
@@ -381,7 +439,7 @@ public class BluetoothUtilsTest {
     }
 
     @Test
-    public void isExclusivelyManagedBluetoothDevice_isNotExclusivelyManaged_returnFalse() {
+    public void isExclusivelyManaged_hasNoManager_returnFalse() {
         when(mBluetoothDevice.getMetadata(BluetoothDevice.METADATA_EXCLUSIVE_MANAGER)).thenReturn(
                 null);
 
@@ -390,44 +448,118 @@ public class BluetoothUtilsTest {
     }
 
     @Test
-    public void isExclusivelyManagedBluetoothDevice_isNotInAllowList_returnFalse() {
+    public void isExclusivelyManaged_hasPackageName_packageNotInstalled_returnFalse()
+            throws Exception {
         when(mBluetoothDevice.getMetadata(BluetoothDevice.METADATA_EXCLUSIVE_MANAGER)).thenReturn(
-                FAKE_EXCLUSIVE_MANAGER_NAME.getBytes());
+                TEST_EXCLUSIVE_MANAGER_PACKAGE.getBytes());
+        when(mContext.getPackageManager()).thenReturn(mPackageManager);
+        doThrow(new PackageManager.NameNotFoundException()).when(mPackageManager)
+                .getApplicationInfo(TEST_EXCLUSIVE_MANAGER_PACKAGE, 0);
 
         assertThat(BluetoothUtils.isExclusivelyManagedBluetoothDevice(mContext,
                 mBluetoothDevice)).isEqualTo(false);
     }
 
     @Test
-    public void isExclusivelyManagedBluetoothDevice_packageNotInstalled_returnFalse()
+    public void isExclusivelyManaged_hasComponentName_packageNotInstalled_returnFalse()
             throws Exception {
-        final String exclusiveManagerName =
-                BluetoothUtils.getExclusiveManagers().stream().findAny().orElse(
-                        FAKE_EXCLUSIVE_MANAGER_NAME);
-
         when(mBluetoothDevice.getMetadata(BluetoothDevice.METADATA_EXCLUSIVE_MANAGER)).thenReturn(
-                exclusiveManagerName.getBytes());
+                TEST_EXCLUSIVE_MANAGER_COMPONENT.getBytes());
         when(mContext.getPackageManager()).thenReturn(mPackageManager);
-        doThrow(new PackageManager.NameNotFoundException()).when(mPackageManager).getPackageInfo(
-                exclusiveManagerName, 0);
+        doThrow(new PackageManager.NameNotFoundException()).when(mPackageManager)
+                .getApplicationInfo(TEST_EXCLUSIVE_MANAGER_PACKAGE, 0);
 
         assertThat(BluetoothUtils.isExclusivelyManagedBluetoothDevice(mContext,
-                mBluetoothDevice)).isEqualTo(false);
+            mBluetoothDevice)).isEqualTo(false);
     }
 
     @Test
-    public void isExclusivelyManagedBluetoothDevice_isExclusivelyManaged_returnTrue()
-            throws Exception {
-        final String exclusiveManagerName =
-                BluetoothUtils.getExclusiveManagers().stream().findAny().orElse(
-                        FAKE_EXCLUSIVE_MANAGER_NAME);
-
-        when(mBluetoothDevice.getMetadata(BluetoothDevice.METADATA_EXCLUSIVE_MANAGER)).thenReturn(
-                exclusiveManagerName.getBytes());
+    public void isExclusivelyManaged_hasPackageName_packageNotEnabled_returnFalse()
+             throws Exception {
+        ApplicationInfo appInfo = new ApplicationInfo();
+        appInfo.enabled = false;
         when(mContext.getPackageManager()).thenReturn(mPackageManager);
-        doReturn(new PackageInfo()).when(mPackageManager).getPackageInfo(exclusiveManagerName, 0);
+        doReturn(appInfo).when(mPackageManager).getApplicationInfo(
+                TEST_EXCLUSIVE_MANAGER_PACKAGE, 0);
+        when(mBluetoothDevice.getMetadata(BluetoothDevice.METADATA_EXCLUSIVE_MANAGER)).thenReturn(
+                TEST_EXCLUSIVE_MANAGER_PACKAGE.getBytes());
 
         assertThat(BluetoothUtils.isExclusivelyManagedBluetoothDevice(mContext,
-                mBluetoothDevice)).isEqualTo(true);
+            mBluetoothDevice)).isEqualTo(false);
+    }
+
+    @Test
+    public void isExclusivelyManaged_hasComponentName_packageNotEnabled_returnFalse()
+            throws Exception {
+        ApplicationInfo appInfo = new ApplicationInfo();
+        appInfo.enabled = false;
+        when(mContext.getPackageManager()).thenReturn(mPackageManager);
+        doReturn(appInfo).when(mPackageManager).getApplicationInfo(
+                TEST_EXCLUSIVE_MANAGER_PACKAGE, 0);
+        when(mBluetoothDevice.getMetadata(BluetoothDevice.METADATA_EXCLUSIVE_MANAGER)).thenReturn(
+                TEST_EXCLUSIVE_MANAGER_COMPONENT.getBytes());
+
+        assertThat(BluetoothUtils.isExclusivelyManagedBluetoothDevice(mContext,
+            mBluetoothDevice)).isEqualTo(false);
+    }
+
+    @Test
+    public void isExclusivelyManaged_hasPackageName_packageInstalledAndEnabled_returnTrue()
+            throws Exception {
+        when(mBluetoothDevice.getMetadata(BluetoothDevice.METADATA_EXCLUSIVE_MANAGER)).thenReturn(
+                TEST_EXCLUSIVE_MANAGER_PACKAGE.getBytes());
+        when(mContext.getPackageManager()).thenReturn(mPackageManager);
+        doReturn(new ApplicationInfo()).when(mPackageManager).getApplicationInfo(
+                TEST_EXCLUSIVE_MANAGER_PACKAGE, 0);
+
+        assertThat(BluetoothUtils.isExclusivelyManagedBluetoothDevice(mContext,
+            mBluetoothDevice)).isEqualTo(true);
+    }
+
+    @Test
+    public void isExclusivelyManaged_hasComponentName_packageInstalledAndEnabled_returnTrue()
+            throws Exception {
+        when(mBluetoothDevice.getMetadata(BluetoothDevice.METADATA_EXCLUSIVE_MANAGER)).thenReturn(
+                TEST_EXCLUSIVE_MANAGER_COMPONENT.getBytes());
+        when(mContext.getPackageManager()).thenReturn(mPackageManager);
+        doReturn(new ApplicationInfo()).when(mPackageManager).getApplicationInfo(
+                TEST_EXCLUSIVE_MANAGER_PACKAGE, 0);
+
+        assertThat(BluetoothUtils.isExclusivelyManagedBluetoothDevice(mContext,
+            mBluetoothDevice)).isEqualTo(true);
+    }
+
+    @Test
+    public void testIsBroadcasting_broadcastEnabled_returnTrue() {
+        when(mBroadcast.isEnabled(any())).thenReturn(true);
+        assertThat(BluetoothUtils.isBroadcasting(mLocalBluetoothManager)).isEqualTo(true);
+    }
+
+    @Test
+    public void testHasConnectedBroadcastSource_deviceConnectedToBroadcastSource() {
+        when(mCachedBluetoothDevice.getDevice()).thenReturn(mBluetoothDevice);
+
+        List<Long> bisSyncState = new ArrayList<>();
+        bisSyncState.add(1L);
+        when(mLeBroadcastReceiveState.getBisSyncState()).thenReturn(bisSyncState);
+
+        List<BluetoothLeBroadcastReceiveState> sourceList = new ArrayList<>();
+        sourceList.add(mLeBroadcastReceiveState);
+        when(mAssistant.getAllSources(any())).thenReturn(sourceList);
+
+        assertThat(
+                BluetoothUtils.hasConnectedBroadcastSource(
+                        mCachedBluetoothDevice, mLocalBluetoothManager))
+                .isEqualTo(true);
+    }
+
+    @Test
+    public void isAvailableHearingDevice_isConnectedHearingAid_returnTure() {
+        when(mCachedBluetoothDevice.isConnectedHearingAidDevice()).thenReturn(true);
+        when(mCachedBluetoothDevice.getDevice()).thenReturn(mBluetoothDevice);
+        when(mBluetoothDevice.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
+        when(mBluetoothDevice.isConnected()).thenReturn(true);
+
+        assertThat(BluetoothUtils.isAvailableHearingDevice(mCachedBluetoothDevice)).isEqualTo(true);
     }
 }

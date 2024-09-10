@@ -17,27 +17,34 @@ package com.android.hoststubgen.filters
 
 import com.android.hoststubgen.ParseException
 import com.android.hoststubgen.asm.ClassNodes
+import com.android.hoststubgen.asm.toHumanReadableClassName
 import com.android.hoststubgen.log
 import com.android.hoststubgen.normalizeTextLine
 import com.android.hoststubgen.whitespaceRegex
 import org.objectweb.asm.Opcodes
+import org.objectweb.asm.commons.Remapper
 import org.objectweb.asm.tree.ClassNode
 import java.io.BufferedReader
 import java.io.FileReader
 import java.io.PrintWriter
 import java.util.Objects
+import java.util.regex.Pattern
 
 /**
  * Print a class node as a "keep" policy.
  */
 fun printAsTextPolicy(pw: PrintWriter, cn: ClassNode) {
-    pw.printf("class %s\t%s\n", cn.name, "keep")
+    pw.printf("class %s %s\n", cn.name.toHumanReadableClassName(), "keep")
 
-    for (f in cn.fields ?: emptyList()) {
-        pw.printf("  field %s\t%s\n", f.name, "keep")
+    cn.fields?.let {
+        for (f in it.sortedWith(compareBy({ it.name }))) {
+            pw.printf("    field %s %s\n", f.name, "keep")
+        }
     }
-    for (m in cn.methods ?: emptyList()) {
-        pw.printf("  method %s\t%s\t%s\n", m.name, m.desc, "keep")
+    cn.methods?.let {
+        for (m in it.sortedWith(compareBy({ it.name }, { it.desc }))) {
+            pw.printf("    method %s %s %s\n", m.name, m.desc, "keep")
+        }
     }
 }
 
@@ -55,27 +62,27 @@ fun createFilterFromTextPolicyFile(
         filename: String,
         classes: ClassNodes,
         fallback: OutputFilter,
-        ): OutputFilter {
+        ): Pair<OutputFilter, Remapper?> {
     log.i("Loading offloaded annotations from $filename ...")
     log.withIndent {
         val subclassFilter = SubclassFilter(classes, fallback)
-        val imf = InMemoryOutputFilter(classes, subclassFilter)
+        val packageFilter = PackageFilter(subclassFilter)
+        val imf = InMemoryOutputFilter(classes, packageFilter)
 
         var lineNo = 0
 
         var aidlPolicy: FilterPolicyWithReason? = null
         var featureFlagsPolicy: FilterPolicyWithReason? = null
         var syspropsPolicy: FilterPolicyWithReason? = null
+        var rFilePolicy: FilterPolicyWithReason? = null
+        val typeRenameSpec = mutableListOf<TextFilePolicyRemapper.TypeRenameSpec>()
 
         try {
             BufferedReader(FileReader(filename)).use { reader ->
                 var className = ""
 
                 while (true) {
-                    var line = reader.readLine()
-                    if (line == null) {
-                        break
-                    }
+                    var line = reader.readLine() ?: break
                     lineNo++
 
                     line = normalizeTextLine(line)
@@ -89,6 +96,31 @@ fun createFilterFromTextPolicyFile(
 
                     val fields = line.split(whitespaceRegex).toTypedArray()
                     when (fields[0].lowercase()) {
+                        "p", "package" -> {
+                            if (fields.size < 3) {
+                                throw ParseException("Package ('p') expects 2 fields.")
+                            }
+                            val name = fields[1]
+                            val rawPolicy = fields[2]
+                            if (resolveExtendingClass(name) != null) {
+                                throw ParseException("Package can't be a super class type")
+                            }
+                            if (resolveSpecialClass(name) != SpecialClass.NotSpecial) {
+                                throw ParseException("Package can't be a special class type")
+                            }
+                            if (rawPolicy.startsWith("!")) {
+                                throw ParseException("Package can't have a substitution")
+                            }
+                            if (rawPolicy.startsWith("~")) {
+                                throw ParseException("Package can't have a class load hook")
+                            }
+                            val policy = parsePolicy(rawPolicy)
+                            if (!policy.isUsableWithClasses) {
+                                throw ParseException("Package can't have policy '$policy'")
+                            }
+                            packageFilter.addPolicy(name, policy.withReason(FILTER_REASON))
+                        }
+
                         "c", "class" -> {
                             if (fields.size < 3) {
                                 throw ParseException("Class ('c') expects 2 fields.")
@@ -162,6 +194,14 @@ fun createFilterFromTextPolicyFile(
                                         syspropsPolicy = policy.withReason(
                                                 "$FILTER_REASON (special-class sysprops)")
                                     }
+                                    SpecialClass.RFile -> {
+                                        if (rFilePolicy != null) {
+                                            throw ParseException(
+                                                "Policy for R file already defined")
+                                        }
+                                        rFilePolicy = policy.withReason(
+                                            "$FILTER_REASON (special-class R file)")
+                                    }
                                 }
                             }
                         }
@@ -214,6 +254,22 @@ fun createFilterFromTextPolicyFile(
                                 imf.setRenameTo(className, fromName, signature, name)
                             }
                         }
+                        "r", "rename" -> {
+                            if (fields.size < 3) {
+                                throw ParseException("Rename ('r') expects 2 fields.")
+                            }
+                            // Add ".*" to make it a prefix match.
+                            val pattern = Pattern.compile(fields[1] + ".*")
+
+                            // Removing the leading /'s from the prefix. This allows
+                            // using a single '/' as an empty suffix, which is useful to have a
+                            // "negative" rename rule to avoid subsequent raname's from getting
+                            // applied. (Which is needed for services.jar)
+                            val prefix = fields[2].trimStart('/')
+
+                            typeRenameSpec += TextFilePolicyRemapper.TypeRenameSpec(
+                                pattern, prefix)
+                        }
 
                         else -> {
                             throw ParseException("Unknown directive \"${fields[0]}\"")
@@ -225,13 +281,16 @@ fun createFilterFromTextPolicyFile(
             throw e.withSourceInfo(filename, lineNo)
         }
 
-        var ret: OutputFilter = imf
-        if (aidlPolicy != null || featureFlagsPolicy != null || syspropsPolicy != null) {
-            log.d("AndroidHeuristicsFilter enabled")
-            ret = AndroidHeuristicsFilter(
-                    classes, aidlPolicy, featureFlagsPolicy, syspropsPolicy, imf)
+        var remapper: TextFilePolicyRemapper? = null
+        if (typeRenameSpec.isNotEmpty()) {
+            remapper = TextFilePolicyRemapper(typeRenameSpec)
         }
-        return ret
+
+        // Wrap the in-memory-filter with AHF.
+        return Pair(
+            AndroidHeuristicsFilter(
+                classes, aidlPolicy, featureFlagsPolicy, syspropsPolicy, rFilePolicy, imf),
+            remapper)
     }
 }
 
@@ -240,6 +299,7 @@ private enum class SpecialClass {
     Aidl,
     FeatureFlags,
     Sysprops,
+    RFile,
 }
 
 private fun resolveSpecialClass(className: String): SpecialClass {
@@ -250,6 +310,7 @@ private fun resolveSpecialClass(className: String): SpecialClass {
         ":aidl" -> return SpecialClass.Aidl
         ":feature_flags" -> return SpecialClass.FeatureFlags
         ":sysprops" -> return SpecialClass.Sysprops
+        ":r" -> return SpecialClass.RFile
     }
     throw ParseException("Invalid special class name \"$className\"")
 }

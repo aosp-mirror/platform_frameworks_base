@@ -17,6 +17,7 @@ package com.android.server.broadcastradio.hal2;
 
 import static org.junit.Assert.*;
 
+import android.hardware.broadcastradio.V2_0.ProgramIdentifier;
 import android.hardware.broadcastradio.V2_0.ProgramListChunk;
 import android.hardware.radio.ProgramList;
 import android.hardware.radio.ProgramSelector;
@@ -34,6 +35,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -259,6 +261,25 @@ public class ProgramInfoCacheTest extends ExtendedRadioMockitoTestCase {
         verifyChunkListFlags(chunks, false, false);
         verifyChunkListModified(chunks, 5, newHdInfo);
         verifyChunkListRemoved(chunks, 1, TEST_DAB_UNIQUE_ID, TEST_VENDOR_UNIQUE_ID);
+    }
+
+    @Test
+    public void filterAndApplyChunkInternal_withInvalidIdentifier() {
+        ProgramInfoCache cache = new ProgramInfoCache(/* filter= */ null, /* complete= */ false,
+                TEST_AM_FM_INFO, TEST_RDS_INFO, TEST_DAB_INFO, TEST_VENDOR_INFO);
+        ArrayList<ProgramIdentifier> halRemoved = new ArrayList<>();
+        halRemoved.add(new ProgramIdentifier());
+        ProgramListChunk halChunk = new ProgramListChunk();
+        halChunk.complete = true;
+        halChunk.purge = false;
+        halChunk.modified = new ArrayList<>();
+        halChunk.removed = halRemoved;
+
+        List<ProgramList.Chunk> programListChunks = cache.filterAndApplyChunkInternal(halChunk,
+                /* maxNumModifiedPerChunk= */ 1, /* maxNumRemovedPerChunk= */ 1);
+
+        expect.withMessage("Program list chunk applied with invalid identifier")
+                .that(programListChunks).isEmpty();
     }
 
     // Verifies that:

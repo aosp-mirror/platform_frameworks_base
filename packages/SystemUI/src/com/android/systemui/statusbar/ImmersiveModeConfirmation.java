@@ -24,6 +24,7 @@ import static android.app.StatusBarManager.DISABLE_RECENT;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.ViewRootImpl.CLIENT_IMMERSIVE_CONFIRMATION;
 import static android.view.ViewRootImpl.CLIENT_TRANSIENT;
+import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.window.DisplayAreaOrganizer.FEATURE_UNDEFINED;
 import static android.window.DisplayAreaOrganizer.KEY_ROOT_DISPLAY_AREA_ID;
 
@@ -36,12 +37,11 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.res.ColorStateList;
 import android.content.res.Resources;
-import android.content.res.TypedArray;
 import android.database.ContentObserver;
 import android.graphics.Insets;
 import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Binder;
 import android.os.Bundle;
@@ -71,7 +71,7 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
+import android.widget.RelativeLayout;
 
 import com.android.systemui.CoreStartable;
 import com.android.systemui.res.R;
@@ -263,6 +263,7 @@ public class ImmersiveModeConfirmation implements CoreStartable, CommandQueue.Ca
                         | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
                 PixelFormat.TRANSLUCENT);
         lp.setFitInsetsTypes(lp.getFitInsetsTypes() & ~Type.statusBars());
+        lp.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
         // Trusted overlay so touches outside the touchable area are allowed to pass through
         lp.privateFlags |= WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS
                 | WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY
@@ -275,10 +276,17 @@ public class ImmersiveModeConfirmation implements CoreStartable, CommandQueue.Ca
 
     private FrameLayout.LayoutParams getBubbleLayoutParams() {
         return new FrameLayout.LayoutParams(
-                mSysUiContext.getResources().getDimensionPixelSize(
-                        R.dimen.immersive_mode_cling_width),
+                getClingWindowWidth(),
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 Gravity.CENTER_HORIZONTAL | Gravity.TOP);
+    }
+
+    /**
+     * Returns the width of the cling window.
+     */
+    private int getClingWindowWidth() {
+        return mSysUiContext.getResources().getDimensionPixelSize(
+                R.dimen.immersive_mode_cling_width);
     }
 
     /**
@@ -318,10 +326,10 @@ public class ImmersiveModeConfirmation implements CoreStartable, CommandQueue.Ca
             };
 
             // Register to listen for changes in Settings.Secure settings.
-            mSecureSettings.registerContentObserverForUser(
+            mSecureSettings.registerContentObserverForUserSync(
                     Settings.Secure.IMMERSIVE_MODE_CONFIRMATIONS, mContentObserver,
                     UserHandle.USER_CURRENT);
-            mSecureSettings.registerContentObserverForUser(
+            mSecureSettings.registerContentObserverForUserSync(
                     Settings.Secure.USER_SETUP_COMPLETE, mContentObserver,
                     UserHandle.USER_CURRENT);
         }
@@ -409,21 +417,6 @@ public class ImmersiveModeConfirmation implements CoreStartable, CommandQueue.Ca
             mClingLayout = (ViewGroup)
                     View.inflate(mSysUiContext, R.layout.immersive_mode_cling, null);
 
-            TypedArray ta = mDisplayContext.obtainStyledAttributes(
-                    new int[]{android.R.attr.colorAccent});
-            int colorAccent = ta.getColor(0, 0);
-            ta.recycle();
-            mClingLayout.setBackgroundColor(colorAccent);
-            ImageView expandMore = mClingLayout.findViewById(R.id.immersive_cling_ic_expand_more);
-            if (expandMore != null) {
-                expandMore.setImageTintList(ColorStateList.valueOf(colorAccent));
-            }
-            ImageView lightBgCirc = mClingLayout.findViewById(R.id.immersive_cling_back_bg_light);
-            if (lightBgCirc != null) {
-                // Set transparency to 50%
-                lightBgCirc.setImageAlpha(128);
-            }
-
             final Button ok = mClingLayout.findViewById(R.id.ok);
             ok.setOnClickListener(new OnClickListener() {
                 @Override
@@ -482,6 +475,24 @@ public class ImmersiveModeConfirmation implements CoreStartable, CommandQueue.Ca
 
         @Override
         public WindowInsets onApplyWindowInsets(WindowInsets insets) {
+            // If the top display cutout overlaps with the full-width (windowWidth=-1)/centered
+            // dialog, then adjust the dialog contents by the cutout
+            final int width = getWidth();
+            final int windowWidth = getClingWindowWidth();
+            final Rect topDisplayCutout = insets.getDisplayCutout() != null
+                    ? insets.getDisplayCutout().getBoundingRectTop()
+                    : new Rect();
+            final boolean intersectsTopCutout = topDisplayCutout.intersects(
+                    width - (windowWidth / 2), 0,
+                    width + (windowWidth / 2), topDisplayCutout.bottom);
+            if (mClingWindow != null &&
+                    (windowWidth < 0 || (width > 0 && intersectsTopCutout))) {
+                final View iconView = mClingWindow.findViewById(R.id.immersive_cling_icon);
+                RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams)
+                        iconView.getLayoutParams();
+                lp.topMargin = topDisplayCutout.bottom;
+                iconView.setLayoutParams(lp);
+            }
             // we will be hiding the nav bar, so layout as if it's already hidden
             return new WindowInsets.Builder(insets).setInsets(
                     Type.systemBars(), Insets.NONE).build();
