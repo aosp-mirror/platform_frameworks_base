@@ -17,6 +17,7 @@
 package com.android.systemui.bouncer.ui.composable
 
 import android.view.HapticFeedbackConstants
+import android.view.MotionEvent
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationSpec
@@ -49,6 +50,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -110,6 +112,7 @@ fun PinPad(
                 onClicked = viewModel::onPinButtonClicked,
                 scaling = buttonScaleAnimatables[index]::value,
                 isAnimationEnabled = isDigitButtonAnimationEnabled,
+                onPointerDown = viewModel::onDigitButtonDown,
             )
         }
 
@@ -133,6 +136,7 @@ fun PinPad(
             onClicked = viewModel::onPinButtonClicked,
             scaling = buttonScaleAnimatables[10]::value,
             isAnimationEnabled = isDigitButtonAnimationEnabled,
+            onPointerDown = viewModel::onDigitButtonDown
         )
 
         ActionButton(
@@ -155,6 +159,7 @@ private fun DigitButton(
     digit: Int,
     isInputEnabled: Boolean,
     onClicked: (Int) -> Unit,
+    onPointerDown: () -> Unit,
     scaling: () -> Float,
     isAnimationEnabled: Boolean,
 ) {
@@ -164,6 +169,7 @@ private fun DigitButton(
         backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
         foregroundColor = MaterialTheme.colorScheme.onSurfaceVariant,
         isAnimationEnabled = isAnimationEnabled,
+        onPointerDown = onPointerDown,
         modifier =
             Modifier.graphicsLayer {
                 val scale = if (isAnimationEnabled) scaling() else 1f
@@ -235,6 +241,7 @@ private fun PinPadButton(
     isAnimationEnabled: Boolean,
     modifier: Modifier = Modifier,
     onLongPressed: (() -> Unit)? = null,
+    onPointerDown: (() -> Unit)? = null,
     content: @Composable (contentColor: () -> Color) -> Unit,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -303,11 +310,17 @@ private fun PinPadButton(
                 .clip(CircleShape)
                 .thenIf(isEnabled) {
                     Modifier.combinedClickable(
-                        interactionSource = interactionSource,
-                        indication = indication,
-                        onClick = onClicked,
-                        onLongClick = onLongPressed
-                    )
+                            interactionSource = interactionSource,
+                            indication = indication,
+                            onClick = onClicked,
+                            onLongClick = onLongPressed
+                        )
+                        .pointerInteropFilter { motionEvent ->
+                            if (motionEvent.action == MotionEvent.ACTION_DOWN) {
+                                onPointerDown?.let { it() }
+                            }
+                            false
+                        }
                 },
     ) {
         content(contentColor::value)
