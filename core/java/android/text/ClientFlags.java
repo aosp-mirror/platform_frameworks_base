@@ -28,13 +28,6 @@ import com.android.text.flags.Flags;
  */
 public class ClientFlags {
     /**
-     * @see Flags#noBreakNoHyphenationSpan()
-     */
-    public static boolean noBreakNoHyphenationSpan() {
-        return TextFlags.isFeatureEnabled(Flags.FLAG_NO_BREAK_NO_HYPHENATION_SPAN);
-    }
-
-    /**
      * @see Flags#fixMisalignedContextMenu()
      */
     public static boolean fixMisalignedContextMenu() {

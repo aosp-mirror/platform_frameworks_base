@@ -2,14 +2,6 @@ package: "com.android.text.flags"
 container: "system"
 
 flag {
-  name: "no_break_no_hyphenation_span"
-  is_exported: true
-  namespace: "text"
-  description: "A feature flag that adding new spans that prevents line breaking and hyphenation."
-  bug: "283193586"
-}
-
-flag {
   name: "use_optimized_boottime_font_loading"
   namespace: "text"
   description: "Feature flag ensuring that font is loaded once and asynchronously."
