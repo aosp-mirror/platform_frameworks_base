@@ -295,12 +295,13 @@ public final class OverlayManagerService extends SystemService {
 
             restoreSettings();
 
-            // Wipe all shell overlays on boot, to recover from a potentially broken device
-            String shellPkgName = TextUtils.emptyIfNull(
-                    getContext().getString(android.R.string.config_systemShell));
-            mSettings.removeIf(overlayInfo -> overlayInfo.isFabricated
-                    && shellPkgName.equals(overlayInfo.packageName));
-
+            if (Build.IS_USER) {
+                // Wipe all shell overlays on boot, to recover from a potentially broken device
+                String shellPkgName = TextUtils.emptyIfNull(
+                        getContext().getString(android.R.string.config_systemShell));
+                mSettings.removeIf(overlayInfo -> overlayInfo.isFabricated
+                        && shellPkgName.equals(overlayInfo.packageName));
+            }
             initIfNeeded();
             onStartUser(UserHandle.USER_SYSTEM);
 
