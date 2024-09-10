@@ -27,6 +27,7 @@ import android.app.appsearch.GenericDocument;
 import android.app.appsearch.GetByDocumentIdRequest;
 import android.app.appsearch.GetSchemaResponse;
 import android.app.appsearch.PutDocumentsRequest;
+import android.app.appsearch.RemoveByDocumentIdRequest;
 import android.app.appsearch.SearchResult;
 import android.app.appsearch.SearchResults;
 import android.app.appsearch.SearchSpec;
@@ -146,6 +147,22 @@ public class FutureAppSearchSession implements Closeable {
                         });
     }
 
+    /** Removes documents from the AppSearchSession database. */
+    public AndroidFuture<AppSearchBatchResult<String, Void>> remove(
+            @NonNull RemoveByDocumentIdRequest removeRequest) {
+        return getSessionAsync()
+                .thenCompose(
+                        session -> {
+                            AndroidFuture<AppSearchBatchResult<String, Void>>
+                                    settableBatchResultFuture = new AndroidFuture<>();
+                            session.remove(
+                                    removeRequest,
+                                    mExecutor,
+                                    new BatchResultCallbackAdapter<>(settableBatchResultFuture));
+                            return settableBatchResultFuture;
+                        });
+    }
+
     /**
      * Retrieves documents from the open AppSearchSession that match a given query string and type
      * of search provided.
@@ -200,9 +217,7 @@ public class FutureAppSearchSession implements Closeable {
         Objects.requireNonNull(namespace);
 
         GetByDocumentIdRequest request =
-                new GetByDocumentIdRequest.Builder(namespace)
-                        .addIds(documentId)
-                        .build();
+                new GetByDocumentIdRequest.Builder(namespace).addIds(documentId).build();
         return getSessionAsync()
                 .thenCompose(
                         session -> {
