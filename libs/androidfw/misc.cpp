@@ -28,10 +28,12 @@
 #include <sys/vfs.h>
 #endif  // __linux__
 
-#include <cstring>
-#include <cstdio>
 #include <errno.h>
 #include <sys/stat.h>
+
+#include <cstdio>
+#include <cstring>
+#include <tuple>
 
 namespace android {
 
@@ -73,27 +75,32 @@ FileType getFileType(const char* fileName)
     }
 }
 
-/*
- * Get a file's modification date.
- */
-time_t getFileModDate(const char* fileName) {
-    struct stat sb;
-    if (stat(fileName, &sb) < 0) {
-        return (time_t)-1;
-    }
-    return sb.st_mtime;
+static ModDate getModDate(const struct stat& st) {
+#ifdef _WIN32
+  return st.st_mtime;
+#else
+  return st.st_mtim;
+#endif
 }
 
-time_t getFileModDate(int fd) {
-    struct stat sb;
-    if (fstat(fd, &sb) < 0) {
-        return (time_t)-1;
-    }
-    if (sb.st_nlink <= 0) {
-        errno = ENOENT;
-        return (time_t)-1;
-    }
-    return sb.st_mtime;
+ModDate getFileModDate(const char* fileName) {
+  struct stat sb;
+  if (stat(fileName, &sb) < 0) {
+    return kInvalidModDate;
+  }
+  return getModDate(sb);
+}
+
+ModDate getFileModDate(int fd) {
+  struct stat sb;
+  if (fstat(fd, &sb) < 0) {
+    return kInvalidModDate;
+  }
+  if (sb.st_nlink <= 0) {
+    errno = ENOENT;
+    return kInvalidModDate;
+  }
+  return getModDate(sb);
 }
 
 #ifndef __linux__
@@ -124,4 +131,8 @@ bool isReadonlyFilesystem(int fd) {
 }
 #endif  // __linux__
 
-}; // namespace android
+}  // namespace android
+
+bool operator==(const timespec& l, const timespec& r) {
+  return std::tie(l.tv_sec, l.tv_nsec) == std::tie(r.tv_sec, l.tv_nsec);
+}

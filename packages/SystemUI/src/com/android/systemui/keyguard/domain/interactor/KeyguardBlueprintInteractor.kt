@@ -80,10 +80,7 @@ constructor(
         }
         applicationScope.launch {
             val refreshConfig =
-                Config(
-                    Type.NoTransition,
-                    rebuildSections = listOf(smartspaceSection),
-                )
+                Config(Type.NoTransition, rebuildSections = listOf(smartspaceSection))
             configurationInteractor.onAnyConfigurationChange.collect {
                 refreshBlueprint(refreshConfig)
             }

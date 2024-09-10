@@ -312,11 +312,16 @@ internal class SwipeAnimation<T : ContentKey>(
 
     fun isAnimatingOffset(): Boolean = offsetAnimation != null
 
+    /**
+     * Animate the offset to a [targetContent], using the [initialVelocity] and an optional [spec]
+     *
+     * @return the velocity consumed
+     */
     fun animateOffset(
         initialVelocity: Float,
         targetContent: T,
         spec: AnimationSpec<Float>? = null,
-    ) {
+    ): Float {
         check(!isAnimatingOffset()) { "SwipeAnimation.animateOffset() can only be called once" }
 
         val initialProgress = progress
@@ -374,7 +379,7 @@ internal class SwipeAnimation<T : ContentKey>(
         if (skipAnimation) {
             // Unblock the job.
             offsetAnimationRunnable.complete(null)
-            return
+            return 0f
         }
 
         val isTargetGreater = targetOffset > animatable.value
@@ -424,6 +429,9 @@ internal class SwipeAnimation<T : ContentKey>(
                 /* Ignore. */
             }
         }
+
+        // This animation always consumes the whole available velocity
+        return initialVelocity
     }
 
     /** An exception thrown during the animation to stop it immediately. */

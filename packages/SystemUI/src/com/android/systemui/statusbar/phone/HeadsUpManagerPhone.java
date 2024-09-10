@@ -262,6 +262,9 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
             releaseAllImmediately();
             mReleaseOnExpandFinish = false;
         } else {
+            for (NotificationEntry entry: getAllEntries().toList()) {
+                entry.setSeenInShade(true);
+            }
             for (NotificationEntry entry : mEntriesToRemoveAfterExpand) {
                 if (isHeadsUpEntry(entry.getKey())) {
                     // Maybe the heads-up was removed already

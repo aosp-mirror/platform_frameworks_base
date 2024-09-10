@@ -379,9 +379,7 @@ public class CameraServiceProxy extends SystemService
                 streamCount = mStreamStats.size();
             }
             if (CameraServiceProxy.DEBUG) {
-                String ultrawideDebug = Flags.logUltrawideUsage()
-                        ? ", wideAngleUsage " + mUsedUltraWide
-                        : "";
+                String ultrawideDebug = ", wideAngleUsage " + mUsedUltraWide;
                 String zoomOverrideDebug = Flags.logZoomOverrideUsage()
                         ? ", zoomOverrideUsage " + mUsedZoomOverride
                         : "";
@@ -1338,7 +1336,7 @@ public class CameraServiceProxy extends SystemService
         List<CameraStreamStats> streamStats = cameraState.getStreamStats();
         String userTag = cameraState.getUserTag();
         int videoStabilizationMode = cameraState.getVideoStabilizationMode();
-        boolean usedUltraWide = Flags.logUltrawideUsage() ? cameraState.getUsedUltraWide() : false;
+        boolean usedUltraWide = cameraState.getUsedUltraWide();
         boolean usedZoomOverride =
                 Flags.logZoomOverrideUsage() ? cameraState.getUsedZoomOverride() : false;
         long logId = cameraState.getLogId();

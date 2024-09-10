@@ -34,7 +34,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
 
-import static com.android.internal.accessibility.common.ShortcutConstants.CHOOSER_PACKAGE_NAME;
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.HOME_BUTTON_LONG_PRESS_DURATION_MS;
 import static com.android.systemui.navigationbar.NavBarHelper.transitionMode;
 import static com.android.systemui.recents.OverviewProxyService.OverviewProxyListener;
@@ -60,7 +59,6 @@ import android.app.ActivityTaskManager;
 import android.app.IActivityTaskManager;
 import android.app.StatusBarManager;
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Insets;
 import android.graphics.PixelFormat;
@@ -105,7 +103,6 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
-import com.android.internal.accessibility.dialog.AccessibilityButtonChooserActivity;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
@@ -1625,11 +1622,9 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     }
 
     private boolean onAccessibilityLongClick(View v) {
-        final Intent intent = new Intent(AccessibilityManager.ACTION_CHOOSE_ACCESSIBILITY_BUTTON);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        final String chooserClassName = AccessibilityButtonChooserActivity.class.getName();
-        intent.setClassName(CHOOSER_PACKAGE_NAME, chooserClassName);
-        mContext.startActivityAsUser(intent, mUserTracker.getUserHandle());
+        final Display display = v.getDisplay();
+        mAccessibilityManager.notifyAccessibilityButtonLongClicked(
+                display != null ? display.getDisplayId() : mDisplayTracker.getDefaultDisplayId());
         return true;
     }
 

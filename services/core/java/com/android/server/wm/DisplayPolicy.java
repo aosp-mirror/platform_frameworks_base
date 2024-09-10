@@ -804,6 +804,14 @@ public class DisplayPolicy {
                     mAwake /* waiting */);
             if (!awake) {
                 onDisplaySwitchFinished();
+                // In case PhoneWindowManager's startedGoingToSleep is called after screenTurnedOff
+                // (the source caller is in order but the methods run on different threads) and
+                // updateScreenOffSleepToken was skipped by mIsGoingToSleepDefaultDisplay. Then
+                // acquire sleep token if screen is off.
+                if (!mScreenOnEarly && !mScreenOnFully && !mDisplayContent.isSleeping()) {
+                    Slog.w(TAG, "Late acquire sleep token for " + mDisplayContent);
+                    mService.mRoot.mDisplayOffTokenAcquirer.acquire(mDisplayContent.mDisplayId);
+                }
             }
         }
     }
@@ -851,6 +859,7 @@ public class DisplayPolicy {
     public void screenTurningOn(ScreenOnListener screenOnListener) {
         WindowProcessController visibleDozeUiProcess = null;
         synchronized (mLock) {
+            mService.mRoot.mDisplayOffTokenAcquirer.release(mDisplayContent.mDisplayId);
             mScreenOnEarly = true;
             mScreenOnFully = false;
             mKeyguardDrawComplete = false;
@@ -875,8 +884,12 @@ public class DisplayPolicy {
         onDisplaySwitchFinished();
     }
 
-    public void screenTurnedOff() {
+    /** It is called after {@link #screenTurningOn}. This runs on PowerManager's thread. */
+    public void screenTurnedOff(boolean acquireSleepToken) {
         synchronized (mLock) {
+            if (acquireSleepToken) {
+                mService.mRoot.mDisplayOffTokenAcquirer.acquire(mDisplayContent.mDisplayId);
+            }
             mScreenOnEarly = false;
             mScreenOnFully = false;
             mKeyguardDrawComplete = false;

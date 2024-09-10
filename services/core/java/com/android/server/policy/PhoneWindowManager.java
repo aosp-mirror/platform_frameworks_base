@@ -535,7 +535,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     volatile boolean mRequestedOrSleepingDefaultDisplay;
 
     /**
-     * This is used to check whether to invoke {@link #updateScreenOffSleepToken} when screen is
+     * This is used to check whether to acquire screen-off sleep token when screen is
      * turned off. E.g. if it is false when screen is turned off and the display is swapping, it
      * is expected that the screen will be on in a short time. Then it is unnecessary to acquire
      * screen-off-sleep-token, so it can avoid intermediate visibility or lifecycle changes.
@@ -610,7 +610,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private boolean mPendingKeyguardOccluded;
     private boolean mKeyguardOccludedChanged;
 
-    private ActivityTaskManagerInternal.SleepTokenAcquirer mScreenOffSleepTokenAcquirer;
     Intent mHomeIntent;
     Intent mCarDockIntent;
     Intent mDeskDockIntent;
@@ -2219,9 +2218,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mGlobalActionsFactory = injector.getGlobalActionsFactory();
         mLockPatternUtils = new LockPatternUtils(mContext);
         mLogger = new MetricsLogger();
-
-        mScreenOffSleepTokenAcquirer = mActivityTaskManagerInternal
-                .createSleepTokenAcquirer("ScreenOff");
 
         Resources res = mContext.getResources();
         mWakeOnDpadKeyPress =
@@ -5521,13 +5517,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mRequestedOrSleepingDefaultDisplay = true;
         mIsGoingToSleepDefaultDisplay = true;
 
-        // In case startedGoingToSleep is called after screenTurnedOff (the source caller is in
-        // order but the methods run on different threads) and updateScreenOffSleepToken was
-        // skipped. Then acquire sleep token if screen was off.
-        if (!mDefaultDisplayPolicy.isScreenOnFully() && !mDefaultDisplayPolicy.isScreenOnEarly()) {
-            updateScreenOffSleepToken(true /* acquire */);
-        }
-
         if (mKeyguardDelegate != null) {
             mKeyguardDelegate.onStartedGoingToSleep(pmSleepReason);
         }
@@ -5688,11 +5677,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (DEBUG_WAKEUP) Slog.i(TAG, "Display" + displayId + " turned off...");
 
         if (displayId == DEFAULT_DISPLAY) {
-            if (!isSwappingDisplay || mIsGoingToSleepDefaultDisplay) {
-                updateScreenOffSleepToken(true /* acquire */);
-            }
+            final boolean acquireSleepToken = !isSwappingDisplay || mIsGoingToSleepDefaultDisplay;
             mRequestedOrSleepingDefaultDisplay = false;
-            mDefaultDisplayPolicy.screenTurnedOff();
+            mDefaultDisplayPolicy.screenTurnedOff(acquireSleepToken);
             synchronized (mLock) {
                 if (mKeyguardDelegate != null) {
                     mKeyguardDelegate.onScreenTurnedOff();
@@ -5748,7 +5735,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (displayId == DEFAULT_DISPLAY) {
             Trace.asyncTraceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "screenTurningOn",
                     0 /* cookie */);
-            updateScreenOffSleepToken(false /* acquire */);
             mDefaultDisplayPolicy.screenTurningOn(screenOnListener);
             mBootAnimationDismissable = false;
 
@@ -6252,15 +6238,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
                 mLockScreenTimerActive = enable;
             }
-        }
-    }
-
-    // TODO (multidisplay): Support multiple displays in WindowManagerPolicy.
-    private void updateScreenOffSleepToken(boolean acquire) {
-        if (acquire) {
-            mScreenOffSleepTokenAcquirer.acquire(DEFAULT_DISPLAY);
-        } else {
-            mScreenOffSleepTokenAcquirer.release(DEFAULT_DISPLAY);
         }
     }
 

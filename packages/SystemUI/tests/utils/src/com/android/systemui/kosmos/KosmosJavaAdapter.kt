@@ -61,6 +61,7 @@ import com.android.systemui.scene.shared.model.sceneDataSource
 import com.android.systemui.settings.brightness.domain.interactor.brightnessMirrorShowingInteractor
 import com.android.systemui.shade.data.repository.shadeRepository
 import com.android.systemui.shade.domain.interactor.shadeInteractor
+import com.android.systemui.shade.domain.interactor.shadeModeInteractor
 import com.android.systemui.shade.shadeController
 import com.android.systemui.shade.ui.viewmodel.notificationShadeWindowModel
 import com.android.systemui.statusbar.chips.ui.viewmodel.ongoingActivityChipsViewModel
@@ -156,4 +157,5 @@ class KosmosJavaAdapter() {
     val scrimStartable by lazy { kosmos.scrimStartable }
     val sceneContainerOcclusionInteractor by lazy { kosmos.sceneContainerOcclusionInteractor }
     val msdlPlayer by lazy { kosmos.fakeMSDLPlayer }
+    val shadeModeInteractor by lazy { kosmos.shadeModeInteractor }
 }
