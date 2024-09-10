@@ -79,7 +79,7 @@ open class PreferenceFragment :
      * This is for flagging purpose. If false (e.g. flag is disabled), xml resource is used to build
      * preference screen.
      */
-    protected open fun usePreferenceScreenMetadata(): Boolean = true
+    protected open fun usePreferenceScreenMetadata(): Boolean = false
 
     /** Returns the xml resource to create preference screen. */
     @XmlRes protected open fun getPreferenceScreenResId(context: Context): Int = 0
