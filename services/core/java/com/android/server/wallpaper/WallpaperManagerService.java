@@ -3169,7 +3169,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 final WallpaperDestinationChangeHandler
                         liveSync = new WallpaperDestinationChangeHandler(
                         newWallpaper);
-                boolean same = changingToSame(name, newWallpaper);
+                boolean same = changingToSame(name, newWallpaper.connection,
+                        newWallpaper.wallpaperComponent);
 
                 /*
                  * If we have a shared system+lock wallpaper, and we reapply the same wallpaper
@@ -3257,14 +3258,15 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         return name == null || name.equals(mDefaultWallpaperComponent);
     }
 
-    private boolean changingToSame(ComponentName componentName, WallpaperData wallpaper) {
-        if (wallpaper.connection != null) {
-            final ComponentName wallpaperName = wallpaper.wallpaperComponent;
-            if (isDefaultComponent(componentName) && isDefaultComponent(wallpaperName)) {
+    private boolean changingToSame(ComponentName newComponentName,
+            WallpaperConnection currentConnection, ComponentName currentComponentName) {
+        if (currentConnection != null) {
+            if (isDefaultComponent(newComponentName) && isDefaultComponent(currentComponentName)) {
                 if (DEBUG) Slog.v(TAG, "changingToSame: still using default");
                 // Still using default wallpaper.
                 return true;
-            } else if (wallpaperName != null && wallpaperName.equals(componentName)) {
+            } else if (currentComponentName != null && currentComponentName.equals(
+                    newComponentName)) {
                 // Changing to same wallpaper.
                 if (DEBUG) Slog.v(TAG, "same wallpaper");
                 return true;
@@ -3279,7 +3281,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             Slog.v(TAG, "bindWallpaperComponentLocked: componentName=" + componentName);
         }
         // Has the component changed?
-        if (!force && changingToSame(componentName, wallpaper)) {
+        if (!force && changingToSame(componentName, wallpaper.connection,
+                wallpaper.wallpaperComponent)) {
             try {
                 if (DEBUG_LIVE) {
                     Slog.v(TAG, "Changing to the same component, ignoring");

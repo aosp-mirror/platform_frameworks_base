@@ -982,7 +982,6 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         mShellBackAnimationRegistry.resetDefaultCrossActivity();
         cancelLatencyTracking();
         mReceivedNullNavigationInfo = false;
-        mBackTransitionHandler.mLastTrigger = triggerBack;
         if (mBackNavigationInfo != null) {
             mPreviousNavigationType = mBackNavigationInfo.getType();
             mBackNavigationInfo.onBackNavigationFinished(triggerBack);
@@ -1103,7 +1102,6 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                                     endLatencyTracking();
                                     if (!validateAnimationTargets(apps)) {
                                         Log.e(TAG, "Invalid animation targets!");
-                                        mBackTransitionHandler.consumeQueuedTransitionIfNeeded();
                                         return;
                                     }
                                     mBackAnimationFinishedCallback = finishedCallback;
@@ -1113,7 +1111,6 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                                         return;
                                     }
                                     kickStartAnimation();
-                                    mBackTransitionHandler.consumeQueuedTransitionIfNeeded();
                                 });
                     }
 
@@ -1121,7 +1118,6 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                     public void onAnimationCancelled() {
                         mShellExecutor.execute(
                                 () -> {
-                                    mBackTransitionHandler.consumeQueuedTransitionIfNeeded();
                                     if (!mShellBackAnimationRegistry.cancel(
                                             mBackNavigationInfo != null
                                                     ? mBackNavigationInfo.getType()
@@ -1160,8 +1156,6 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         boolean mCloseTransitionRequested;
         SurfaceControl.Transaction mFinishOpenTransaction;
         Transitions.TransitionFinishCallback mFinishOpenTransitionCallback;
-        QueuedTransition mQueuedTransition = null;
-        boolean mLastTrigger;
         // The Transition to make behindActivity become visible
         IBinder mPrepareOpenTransition;
         // The Transition to make behindActivity become invisible, if prepare open exist and
@@ -1175,13 +1169,6 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             if (mOnAnimationFinishCallback != null) {
                 mOnAnimationFinishCallback.run();
                 mOnAnimationFinishCallback = null;
-            }
-        }
-
-        void consumeQueuedTransitionIfNeeded() {
-            if (mQueuedTransition != null) {
-                mQueuedTransition.consume();
-                mQueuedTransition = null;
             }
         }
 
@@ -1215,7 +1202,9 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                 @NonNull SurfaceControl.Transaction st,
                 @NonNull SurfaceControl.Transaction ft,
                 @NonNull Transitions.TransitionFinishCallback finishCallback) {
-            if (info.getType() == WindowManager.TRANSIT_PREPARE_BACK_NAVIGATION) {
+            final boolean isPrepareTransition =
+                    info.getType() == WindowManager.TRANSIT_PREPARE_BACK_NAVIGATION;
+            if (isPrepareTransition) {
                 kickStartAnimation();
             }
             // Both mShellExecutor and Transitions#mMainExecutor are ShellMainThread, so we don't
@@ -1240,21 +1229,14 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             }
 
             if (mApps == null || mApps.length == 0) {
-                if (mBackNavigationInfo != null && mShellBackAnimationRegistry
-                        .isWaitingAnimation(mBackNavigationInfo.getType())) {
-                    // Waiting for animation? Queue update to wait for animation start.
-                    consumeQueuedTransitionIfNeeded();
-                    mQueuedTransition = new QueuedTransition(info, st, ft, finishCallback);
-                    return true;
-                } else if (mLastTrigger) {
-                    // animation was done, consume directly
+                if (mCloseTransitionRequested) {
+                    // animation never start, consume directly
                     applyAndFinish(st, ft, finishCallback);
                     return true;
-                } else {
-                    // animation was cancelled but transition haven't happen, we must handle it
-                    if (mClosePrepareTransition == null && mCurrentTracker.isFinished()) {
-                        createClosePrepareTransition();
-                    }
+                } else if (mClosePrepareTransition == null && isPrepareTransition) {
+                    // Gesture animation was cancelled before prepare transition ready, create the
+                    // the close prepare transition
+                    createClosePrepareTransition();
                 }
             }
 
@@ -1413,9 +1395,6 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                 if (mPrepareOpenTransition != null) {
                     applyFinishOpenTransition();
                 }
-                if (mQueuedTransition != null) {
-                    consumeQueuedTransitionIfNeeded();
-                }
                 return;
             }
             // Handle the commit transition if this handler is running the open transition.
@@ -1423,11 +1402,9 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             t.apply();
             if (mCloseTransitionRequested) {
                 if (mApps == null || mApps.length == 0) {
-                    if (mQueuedTransition == null) {
-                        // animation was done
-                        applyFinishOpenTransition();
-                        mCloseTransitionRequested = false;
-                    } // let queued transition finish.
+                    // animation was done
+                    applyFinishOpenTransition();
+                    mCloseTransitionRequested = false;
                 } else {
                     // we are animating, wait until animation finish
                     mOnAnimationFinishCallback = () -> {

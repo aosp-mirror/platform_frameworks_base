@@ -57,6 +57,7 @@ import android.view.accessibility.IAccessibilityManagerClient;
 
 import com.android.internal.R;
 import com.android.internal.accessibility.AccessibilityShortcutController;
+import com.android.internal.accessibility.common.ShortcutConstants;
 import com.android.internal.accessibility.util.ShortcutUtils;
 
 import java.io.FileDescriptor;
@@ -707,11 +708,16 @@ class AccessibilityUserState {
     }
 
     /**
-     * Returns true if navibar magnification or shortcut key magnification is enabled.
+     * Returns true if a magnification shortcut of any type is enabled.
      */
     public boolean isShortcutMagnificationEnabledLocked() {
-        return mAccessibilityShortcutKeyTargets.contains(MAGNIFICATION_CONTROLLER_NAME)
-                || mAccessibilityButtonTargets.contains(MAGNIFICATION_CONTROLLER_NAME);
+        for (int shortcutType : ShortcutConstants.USER_SHORTCUT_TYPES) {
+            if (getShortcutTargetsInternalLocked(shortcutType)
+                    .contains(MAGNIFICATION_CONTROLLER_NAME)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

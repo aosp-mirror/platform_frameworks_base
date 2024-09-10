@@ -132,4 +132,9 @@ oneway interface IOverviewProxy {
      * Sent when {@link TaskbarDelegate#transitionTo} is called.
      */
     void transitionTo(int barMode, boolean animate) = 33;
+
+    /**
+     * Sent when {@link TaskbarDelegate#appTransitionPending} is called.
+     */
+    void appTransitionPending(boolean pending) = 34;
 }
