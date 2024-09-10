@@ -22,6 +22,7 @@ import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.hardware.input.InputManager;
 import android.util.Slog;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -65,7 +66,7 @@ public class TouchpadDebugView extends LinearLayout {
         mTouchpadId = touchpadId;
         mWindowManager =
                 Objects.requireNonNull(getContext().getSystemService(WindowManager.class));
-        init(context);
+        init(context, touchpadId);
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
 
         // TODO(b/360137366): Use the hardware properties to initialise layout parameters.
@@ -88,32 +89,40 @@ public class TouchpadDebugView extends LinearLayout {
         mWindowLayoutParams.gravity = Gravity.TOP | Gravity.LEFT;
     }
 
-    private void init(Context context) {
+    private void init(Context context, int touchpadId) {
         setOrientation(VERTICAL);
         setLayoutParams(new LayoutParams(
                 LayoutParams.WRAP_CONTENT,
                 LayoutParams.WRAP_CONTENT));
-        setBackgroundColor(Color.RED);
+        setBackgroundColor(Color.TRANSPARENT);
 
-        // TODO(b/286551975): Replace this content with the touchpad debug view.
-        TextView textView1 = new TextView(context);
-        textView1.setBackgroundColor(Color.TRANSPARENT);
-        textView1.setTextSize(20);
-        textView1.setText("Touchpad Debug View 1");
-        textView1.setGravity(Gravity.CENTER);
-        textView1.setTextColor(Color.WHITE);
-        textView1.setLayoutParams(new LayoutParams(1000, 200));
+        TextView nameView = new TextView(context);
+        nameView.setBackgroundColor(Color.RED);
+        nameView.setTextSize(20);
+        nameView.setText(Objects.requireNonNull(Objects.requireNonNull(
+                        mContext.getSystemService(InputManager.class))
+                .getInputDevice(touchpadId)).getName());
+        nameView.setGravity(Gravity.CENTER);
+        nameView.setTextColor(Color.WHITE);
+        nameView.setLayoutParams(new LayoutParams(1000, 200));
 
-        TextView textView2 = new TextView(context);
-        textView2.setBackgroundColor(Color.TRANSPARENT);
-        textView2.setTextSize(20);
-        textView2.setText("Touchpad Debug View 2");
-        textView2.setGravity(Gravity.CENTER);
-        textView2.setTextColor(Color.WHITE);
-        textView2.setLayoutParams(new LayoutParams(1000, 200));
+        TouchpadVisualisationView touchpadVisualisationView =
+                new TouchpadVisualisationView(context);
+        touchpadVisualisationView.setBackgroundColor(Color.WHITE);
+        touchpadVisualisationView.setLayoutParams(new LayoutParams(1000, 200));
 
-        addView(textView1);
-        addView(textView2);
+        //TODO(b/365562952): Add a display for recognized gesture info here
+        TextView gestureInfoView = new TextView(context);
+        gestureInfoView.setBackgroundColor(Color.GRAY);
+        gestureInfoView.setTextSize(20);
+        gestureInfoView.setText("Touchpad Debug View 3");
+        gestureInfoView.setGravity(Gravity.CENTER);
+        gestureInfoView.setTextColor(Color.BLACK);
+        gestureInfoView.setLayoutParams(new LayoutParams(1000, 200));
+
+        addView(nameView);
+        addView(touchpadVisualisationView);
+        addView(gestureInfoView);
 
         updateScreenDimensions();
     }
@@ -219,18 +228,11 @@ public class TouchpadDebugView extends LinearLayout {
 
     private void onTouchpadButtonPress() {
         Slog.d("TouchpadDebugView", "You clicked me!");
-
-        // Iterate through all child views
-        // Temporary demonstration for testing
-        for (int i = 0; i < getChildCount(); i++) {
-            getChildAt(i).setBackgroundColor(Color.BLUE);
-        }
+        getChildAt(0).setBackgroundColor(Color.BLUE);
     }
 
     private void onTouchpadButtonRelease() {
         Slog.d("TouchpadDebugView", "You released the click");
-        for (int i = 0; i < getChildCount(); i++) {
-            getChildAt(i).setBackgroundColor(Color.RED);
-        }
+        getChildAt(0).setBackgroundColor(Color.RED);
     }
 }
