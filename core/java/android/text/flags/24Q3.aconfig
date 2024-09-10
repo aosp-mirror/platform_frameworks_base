@@ -34,3 +34,13 @@ flag {
   description: "Feature flag that preserve the line height of the TextView and EditText even if the the locale is different from Latin"
   bug: "303326708"
 }
+
+flag {
+  name: "new_fonts_fallback_xml"
+  is_exported: true
+  namespace: "text"
+  description: "Feature flag for deprecating fonts.xml. By setting true for this feature flag, the new font configuration XML, /system/etc/font_fallback.xml is used. The new XML has a new syntax and flexibility of variable font declarations, but it is not compatible with the apps that reads fonts.xml. So, fonts.xml is maintained as a subset of the font_fallback.xml"
+  # Make read only, as it could be used before the Settings provider is initialized.
+  is_fixed_read_only: true
+  bug: "281769620"
+}
