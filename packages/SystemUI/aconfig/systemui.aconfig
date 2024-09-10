@@ -545,13 +545,6 @@ flag {
 }
 
 flag {
-    name: "haptic_volume_slider"
-    namespace: "systemui"
-    description: "Adds haptic feedback to the volume slider."
-    bug: "316953430"
-}
-
-flag {
     name: "new_volume_panel"
     namespace: "systemui"
     description: "Switches to the new volume panel (without Slices)."

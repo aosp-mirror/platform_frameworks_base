@@ -35,7 +35,6 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_VOLUME_CONTROL;
 import static com.android.internal.jank.InteractionJankMonitor.Configuration.Builder;
 import static com.android.settingslib.flags.Flags.volumeDialogAudioSharingFix;
-import static com.android.systemui.Flags.hapticVolumeSlider;
 import static com.android.systemui.volume.Events.DISMISS_REASON_POSTURE_CHANGED;
 import static com.android.systemui.volume.Events.DISMISS_REASON_SETTINGS_CLICKED;
 
@@ -928,10 +927,8 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
     }
 
     private void addSliderHapticsToRow(VolumeRow row) {
-        if (hapticVolumeSlider()) {
-            row.createPlugin(mVibratorHelper, mSystemClock);
-            HapticSliderViewBinder.bind(row.slider, row.mHapticPlugin);
-        }
+        row.createPlugin(mVibratorHelper, mSystemClock);
+        HapticSliderViewBinder.bind(row.slider, row.mHapticPlugin);
     }
 
     @VisibleForTesting void addSliderHapticsToRows() {
