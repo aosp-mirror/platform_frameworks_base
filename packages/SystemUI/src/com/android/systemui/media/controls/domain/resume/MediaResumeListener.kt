@@ -80,6 +80,7 @@ constructor(
             field?.disconnect()
             field = value
         }
+
     private var currentUserId: Int = context.userId
 
     @VisibleForTesting
@@ -89,7 +90,7 @@ constructor(
                 if (Intent.ACTION_USER_UNLOCKED == intent.action) {
                     val userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1)
                     if (userId == currentUserId) {
-                        loadMediaResumptionControls()
+                        backgroundExecutor.execute { loadMediaResumptionControls() }
                     }
                 }
             }
@@ -254,15 +255,15 @@ constructor(
             if (data.resumeAction == null && !data.hasCheckedForResume && isEligibleForResume) {
                 // TODO also check for a media button receiver intended for restarting (b/154127084)
                 // Set null action to prevent additional attempts to connect
-                mediaDataManager.setResumeAction(key, null)
-                Log.d(TAG, "Checking for service component for " + data.packageName)
-                val pm = context.packageManager
-                val serviceIntent = Intent(MediaBrowserService.SERVICE_INTERFACE)
-                val resumeInfo = pm.queryIntentServicesAsUser(serviceIntent, 0, currentUserId)
+                backgroundExecutor.execute {
+                    mediaDataManager.setResumeAction(key, null)
+                    Log.d(TAG, "Checking for service component for " + data.packageName)
+                    val pm = context.packageManager
+                    val serviceIntent = Intent(MediaBrowserService.SERVICE_INTERFACE)
+                    val resumeInfo = pm.queryIntentServicesAsUser(serviceIntent, 0, currentUserId)
 
-                val inf = resumeInfo?.filter { it.serviceInfo.packageName == data.packageName }
-                if (inf != null && inf.size > 0) {
-                    backgroundExecutor.execute {
+                    val inf = resumeInfo?.filter { it.serviceInfo.packageName == data.packageName }
+                    if (inf != null && inf.size > 0) {
                         tryUpdateResumptionList(key, inf!!.get(0).componentInfo.componentName)
                     }
                 }
