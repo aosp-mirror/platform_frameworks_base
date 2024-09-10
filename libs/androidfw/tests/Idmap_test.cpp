@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-#include <chrono>
-#include <thread>
-
 #include "android-base/file.h"
 #include "androidfw/ApkAssets.h"
 #include "androidfw/AssetManager2.h"
@@ -30,7 +27,6 @@
 #include "data/overlayable/R.h"
 #include "data/system/R.h"
 
-using namespace std::chrono_literals;
 using ::testing::NotNull;
 
 namespace overlay = com::android::overlay;
@@ -222,13 +218,10 @@ TEST_F(IdmapTest, OverlayAssetsIsUpToDate) {
 
   unlink(temp_file.path);
   ASSERT_FALSE(apk_assets->IsUpToDate());
-
-  const auto sleep_duration =
-      std::chrono::nanoseconds(std::max(kModDateResolutionNs, 1'000'000ull));
-  std::this_thread::sleep_for(sleep_duration);
+  sleep(2);
 
   base::WriteStringToFile("hello", temp_file.path);
-  std::this_thread::sleep_for(sleep_duration);
+  sleep(2);
 
   ASSERT_FALSE(apk_assets->IsUpToDate());
 }

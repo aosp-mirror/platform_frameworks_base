@@ -38,6 +38,8 @@ import android.media.session.MediaSession
 import android.media.session.PlaybackState
 import android.net.Uri
 import android.os.Bundle
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.FlagsParameterization
 import android.provider.Settings
 import android.service.notification.StatusBarNotification
@@ -61,6 +63,8 @@ import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.media.controls.domain.resume.MediaResumeListener
 import com.android.systemui.media.controls.domain.resume.ResumeMediaBrowser
+import com.android.systemui.media.controls.shared.mediaLogger
+import com.android.systemui.media.controls.shared.mockMediaLogger
 import com.android.systemui.media.controls.shared.model.EXTRA_KEY_TRIGGER_SOURCE
 import com.android.systemui.media.controls.shared.model.EXTRA_VALUE_TRIGGER_PERIODIC
 import com.android.systemui.media.controls.shared.model.MediaData
@@ -69,7 +73,6 @@ import com.android.systemui.media.controls.shared.model.SmartspaceMediaDataProvi
 import com.android.systemui.media.controls.util.MediaUiEventLogger
 import com.android.systemui.media.controls.util.fakeMediaControllerFactory
 import com.android.systemui.media.controls.util.mediaFlags
-import com.android.systemui.plugins.activityStarter
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.SbnBuilder
 import com.android.systemui.testKosmos
@@ -186,11 +189,10 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
         mSetFlagsRule.setFlagsParameterization(flags)
     }
 
-    private val kosmos = testKosmos()
+    private val kosmos = testKosmos().apply { mediaLogger = mockMediaLogger }
     private val testDispatcher = kosmos.testDispatcher
     private val testScope = kosmos.testScope
     private val fakeFeatureFlags = kosmos.fakeFeatureFlagsClassic
-    private val activityStarter = kosmos.activityStarter
     private val mediaControllerFactory = kosmos.fakeMediaControllerFactory
     private val instanceIdSequence = InstanceIdSequenceFake(1 shl 20)
 
@@ -240,7 +242,6 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                 mediaDeviceManager = mediaDeviceManager,
                 mediaDataCombineLatest = mediaDataCombineLatest,
                 mediaDataFilter = mediaDataFilter,
-                activityStarter = activityStarter,
                 smartspaceMediaDataProvider = smartspaceMediaDataProvider,
                 useMediaResumption = true,
                 useQsMediaPlayer = true,
@@ -251,6 +252,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                 smartspaceManager = smartspaceManager,
                 keyguardUpdateMonitor = keyguardUpdateMonitor,
                 mediaDataLoader = { kosmos.mediaDataLoader },
+                mediaLogger = kosmos.mediaLogger,
             )
         verify(tunerService)
             .addTunable(capture(tunableCaptor), eq(Settings.Secure.MEDIA_CONTROLS_RECOMMENDATION))
@@ -2402,6 +2404,45 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
 
         // Then the artwork is not loaded
         assertThat(mediaDataCaptor.value.artwork).isNull()
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MEDIA_CONTROLS_POSTS_OPTIMIZATION)
+    fun postDuplicateNotification_doesNotCallListeners() {
+        addNotificationAndLoad()
+        reset(listener)
+        mediaDataManager.onNotificationAdded(KEY, mediaNotification)
+
+        testScope.assertRunAllReady(foreground = 0, background = 1)
+        verify(listener, never())
+            .onMediaDataLoaded(
+                eq(KEY),
+                eq(KEY),
+                capture(mediaDataCaptor),
+                eq(true),
+                eq(0),
+                eq(false)
+            )
+        verify(kosmos.mediaLogger).logDuplicateMediaNotification(eq(KEY))
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_MEDIA_CONTROLS_POSTS_OPTIMIZATION)
+    fun postDuplicateNotification_callsListeners() {
+        addNotificationAndLoad()
+        reset(listener)
+        mediaDataManager.onNotificationAdded(KEY, mediaNotification)
+        testScope.assertRunAllReady(foreground = 1, background = 1)
+        verify(listener)
+            .onMediaDataLoaded(
+                eq(KEY),
+                eq(KEY),
+                capture(mediaDataCaptor),
+                eq(true),
+                eq(0),
+                eq(false)
+            )
+        verify(kosmos.mediaLogger, never()).logDuplicateMediaNotification(eq(KEY))
     }
 
     private fun TestScope.assertRunAllReady(foreground: Int = 0, background: Int = 0) {

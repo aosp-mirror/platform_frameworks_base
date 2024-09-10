@@ -23,6 +23,7 @@ import android.os.UserManager.DISALLOW_SHARE_LOCATION
 import com.android.systemui.Flags
 import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.pipeline.shared.TileSpec
+import com.android.systemui.qs.shared.model.TileCategory
 import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.qs.tiles.AlarmTile
 import com.android.systemui.qs.tiles.CameraToggleTile
@@ -157,6 +158,7 @@ interface PolicyModule {
                         labelRes = R.string.quick_settings_flashlight_label,
                     ),
                 instanceId = uiEventLogger.getNewInstanceId(),
+                category = TileCategory.UTILITIES,
             )
 
         /** Inject FlashlightTile into tileViewModelMap in QSModule */
@@ -192,7 +194,8 @@ interface PolicyModule {
                 policy =
                     QSTilePolicy.Restricted(
                         listOf(DISALLOW_SHARE_LOCATION, DISALLOW_CONFIG_LOCATION)
-                    )
+                    ),
+                category = TileCategory.PRIVACY,
             )
 
         /** Inject LocationTile into tileViewModelMap in QSModule */
@@ -225,6 +228,7 @@ interface PolicyModule {
                         labelRes = R.string.status_bar_alarm,
                     ),
                 instanceId = uiEventLogger.getNewInstanceId(),
+                category = TileCategory.UTILITIES,
             )
 
         /** Inject AlarmTile into tileViewModelMap in QSModule */
@@ -257,6 +261,7 @@ interface PolicyModule {
                         labelRes = R.string.quick_settings_ui_mode_night_label,
                     ),
                 instanceId = uiEventLogger.getNewInstanceId(),
+                category = TileCategory.DISPLAY,
             )
 
         /** Inject uimodenight into tileViewModelMap in QSModule */
@@ -290,6 +295,7 @@ interface PolicyModule {
                     ),
                 instanceId = uiEventLogger.getNewInstanceId(),
                 autoRemoveOnUnavailable = false,
+                category = TileCategory.PRIVACY,
             )
 
         /** Inject work mode into tileViewModelMap in QSModule */
@@ -323,6 +329,7 @@ interface PolicyModule {
                     ),
                 instanceId = uiEventLogger.getNewInstanceId(),
                 policy = QSTilePolicy.Restricted(listOf(DISALLOW_CAMERA_TOGGLE)),
+                category = TileCategory.PRIVACY,
             )
 
         /** Inject camera toggle tile into tileViewModelMap in QSModule */
@@ -365,6 +372,7 @@ interface PolicyModule {
                     ),
                 instanceId = uiEventLogger.getNewInstanceId(),
                 policy = QSTilePolicy.Restricted(listOf(DISALLOW_MICROPHONE_TOGGLE)),
+                category = TileCategory.PRIVACY,
             )
 
         /** Inject microphone toggle tile into tileViewModelMap in QSModule */
@@ -407,6 +415,7 @@ interface PolicyModule {
                             labelRes = R.string.quick_settings_modes_label,
                         ),
                     instanceId = uiEventLogger.getNewInstanceId(),
+                    category = TileCategory.CONNECTIVITY,
                 )
             } else {
                 QSTileConfig(
@@ -417,6 +426,7 @@ interface PolicyModule {
                             labelRes = R.string.quick_settings_dnd_label,
                         ),
                     instanceId = uiEventLogger.getNewInstanceId(),
+                    category = TileCategory.CONNECTIVITY,
                 )
             }
 

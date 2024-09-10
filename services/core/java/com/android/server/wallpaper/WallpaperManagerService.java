@@ -2224,15 +2224,21 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     public ParcelFileDescriptor getWallpaperWithFeature(String callingPkg, String callingFeatureId,
             IWallpaperManagerCallback cb, final int which, Bundle outParams, int wallpaperUserId,
             boolean getCropped) {
-        final boolean hasPrivilege = hasPermission(READ_WALLPAPER_INTERNAL)
-                || hasPermission(MANAGE_EXTERNAL_STORAGE);
+        final int callingPid = Binder.getCallingPid();
+        final int callingUid = Binder.getCallingUid();
+        final boolean hasPrivilege = hasPermission(READ_WALLPAPER_INTERNAL);
         if (!hasPrivilege) {
-            mContext.getSystemService(StorageManager.class).checkPermissionReadImages(true,
-                    Binder.getCallingPid(), Binder.getCallingUid(), callingPkg, callingFeatureId);
+            boolean hasManageExternalStorage = hasPermission(MANAGE_EXTERNAL_STORAGE)
+                    || hasAppOpPermission(MANAGE_EXTERNAL_STORAGE, callingUid, callingPkg,
+                        callingFeatureId, "getWallpaperWithFeature from package: " + callingPkg);
+            if (!hasManageExternalStorage) {
+                mContext.getSystemService(StorageManager.class).checkPermissionReadImages(true,
+                        callingPid, callingUid, callingPkg, callingFeatureId);
+            }
         }
 
-        wallpaperUserId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
-                Binder.getCallingUid(), wallpaperUserId, false, true, "getWallpaper", null);
+        wallpaperUserId = ActivityManager.handleIncomingUser(callingPid, callingUid,
+                wallpaperUserId, false, true, "getWallpaper", null);
 
         if (which != FLAG_SYSTEM && which != FLAG_LOCK) {
             throw new IllegalArgumentException("Must specify exactly one kind of wallpaper to read");
@@ -2346,6 +2352,22 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
 
     private boolean hasPermission(String permission) {
         return mContext.checkCallingOrSelfPermission(permission) == PERMISSION_GRANTED;
+    }
+
+    private boolean hasAppOpPermission(String permission, int callingUid, String callingPackage,
+            String attributionTag, String message) {
+        final String op = AppOpsManager.permissionToOp(permission);
+        final int opMode = mAppOpsManager.noteOpNoThrow(op, callingUid, callingPackage,
+                attributionTag, message);
+        switch (opMode) {
+            case AppOpsManager.MODE_ALLOWED:
+            case AppOpsManager.MODE_FOREGROUND:
+                return true;
+            case AppOpsManager.MODE_DEFAULT:
+                return hasPermission(permission);
+            default:
+                return false;
+        }
     }
 
     @Override

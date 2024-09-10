@@ -28,27 +28,6 @@ import com.android.text.flags.Flags;
  */
 public class ClientFlags {
     /**
-     * @see Flags#noBreakNoHyphenationSpan()
-     */
-    public static boolean noBreakNoHyphenationSpan() {
-        return TextFlags.isFeatureEnabled(Flags.FLAG_NO_BREAK_NO_HYPHENATION_SPAN);
-    }
-
-    /**
-     * @see Flags#fixLineHeightForLocale()
-     */
-    public static boolean fixLineHeightForLocale() {
-        return TextFlags.isFeatureEnabled(Flags.FLAG_FIX_LINE_HEIGHT_FOR_LOCALE);
-    }
-
-    /**
-     * @see Flags#icuBidiMigration()
-     */
-    public static boolean icuBidiMigration() {
-        return TextFlags.isFeatureEnabled(Flags.FLAG_ICU_BIDI_MIGRATION);
-    }
-
-    /**
      * @see Flags#fixMisalignedContextMenu()
      */
     public static boolean fixMisalignedContextMenu() {

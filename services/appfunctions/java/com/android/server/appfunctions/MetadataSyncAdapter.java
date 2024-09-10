@@ -18,6 +18,7 @@ package com.android.server.appfunctions;
 
 import android.annotation.NonNull;
 import android.annotation.WorkerThread;
+import android.app.appsearch.PropertyPath;
 import android.app.appsearch.SearchResult;
 import android.app.appsearch.SearchSpec;
 import android.util.ArrayMap;
@@ -110,26 +111,29 @@ public class MetadataSyncAdapter {
     }
 
     /**
-     * This method returns a map of package names to a set of function ids.
+     * This method returns a map of package names to a set of function ids from the AppFunction
+     * metadata.
      *
-     * @param queryExpression The query expression to use when searching for AppFunction metadata.
-     * @param metadataSearchSpec The search spec to use when searching for AppFunction metadata.
-     * @return A map of package names to a set of function ids.
-     * @throws ExecutionException If the future search results fail to execute.
-     * @throws InterruptedException If the future search results are interrupted.
+     * @param schemaType The name space of the AppFunction metadata.
+     * @return A map of package names to a set of function ids from the AppFunction metadata.
      */
     @NonNull
     @VisibleForTesting
     @WorkerThread
     ArrayMap<String, ArraySet<String>> getPackageToFunctionIdMap(
-            @NonNull String queryExpression,
-            @NonNull SearchSpec metadataSearchSpec,
+            @NonNull String schemaType,
             @NonNull String propertyFunctionId,
             @NonNull String propertyPackageName)
             throws ExecutionException, InterruptedException {
         ArrayMap<String, ArraySet<String>> packageToFunctionIds = new ArrayMap<>();
+
         FutureSearchResults futureSearchResults =
-                mFutureAppSearchSession.search(queryExpression, metadataSearchSpec).get();
+                mFutureAppSearchSession
+                        .search(
+                                "",
+                                buildMetadataSearchSpec(
+                                        schemaType, propertyFunctionId, propertyPackageName))
+                        .get();
         List<SearchResult> searchResultsList = futureSearchResults.getNextPage().get();
         // TODO(b/357551503): This could be expensive if we have more functions
         while (!searchResultsList.isEmpty()) {
@@ -145,5 +149,28 @@ public class MetadataSyncAdapter {
             searchResultsList = futureSearchResults.getNextPage().get();
         }
         return packageToFunctionIds;
+    }
+
+    /**
+     * This method returns a {@link SearchSpec} for searching the AppFunction metadata.
+     *
+     * @param schemaType The schema type of the AppFunction metadata.
+     * @param propertyFunctionId The property name of the function id in the AppFunction metadata.
+     * @param propertyPackageName The property name of the package name in the AppFunction metadata.
+     * @return A {@link SearchSpec} for searching the AppFunction metadata.
+     */
+    @NonNull
+    private static SearchSpec buildMetadataSearchSpec(
+            @NonNull String schemaType,
+            @NonNull String propertyFunctionId,
+            @NonNull String propertyPackageName) {
+        return new SearchSpec.Builder()
+                .addFilterSchemas(schemaType)
+                .addProjectionPaths(
+                        schemaType,
+                        List.of(
+                                new PropertyPath(propertyFunctionId),
+                                new PropertyPath(propertyPackageName)))
+                .build();
     }
 }

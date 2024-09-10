@@ -307,7 +307,7 @@ public class MediaProjectionPermissionActivity extends Activity {
 
     private void setUpDialog(AlertDialog dialog) {
         SystemUIDialog.registerDismissListener(dialog);
-        SystemUIDialog.applyFlags(dialog);
+        SystemUIDialog.applyFlags(dialog, /* showWhenLocked= */ false);
         SystemUIDialog.setDialogSize(dialog);
 
         dialog.setOnCancelListener(this::onDialogDismissedOrCancelled);

@@ -849,7 +849,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
      *
      * Make sure DisplayManagerService.mSyncRoot lock is held when this is called
      */
-    public void onDisplayChanged(HighBrightnessModeMetadata hbmMetadata, int leadDisplayId) {
+    public void onDisplayChanged(@Nullable HighBrightnessModeMetadata hbmMetadata,
+            int leadDisplayId) {
         mLeadDisplayId = leadDisplayId;
         final DisplayDevice device = mLogicalDisplay.getPrimaryDisplayDeviceLocked();
         if (device == null) {
@@ -949,7 +950,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     }
 
     private void loadFromDisplayDeviceConfig(IBinder token, DisplayDeviceInfo info,
-            HighBrightnessModeMetadata hbmMetadata) {
+            @Nullable HighBrightnessModeMetadata hbmMetadata) {
         // All properties that depend on the associated DisplayDevice and the DDC must be
         // updated here.
         mScreenBrightnessDozeConfig = BrightnessUtils.clampAbsoluteBrightness(

@@ -21,6 +21,10 @@ import com.android.systemui.scene.shared.flag.SceneContainerFlag
 
 object ComposeBouncerFlags {
 
+    /** @see [isComposeBouncerOrSceneContainerEnabled] */
+    val isEnabled: Boolean
+        get() = isComposeBouncerOrSceneContainerEnabled()
+
     /**
      * Returns `true` if the Compose bouncer is enabled or if the scene container framework is
      * enabled; `false` otherwise.

@@ -82,6 +82,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.CornerRadius
@@ -92,8 +93,12 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -824,9 +829,18 @@ private fun ShortcutsSearchBar(onQueryChange: (String) -> Unit) {
     // from the ViewModel.
     var queryInternal by remember { mutableStateOf("") }
     val focusRequester = remember { FocusRequester() }
+    val focusManager = LocalFocusManager.current
     LaunchedEffect(Unit) { focusRequester.requestFocus() }
     SearchBar(
-        modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
+        modifier =
+            Modifier.fillMaxWidth().focusRequester(focusRequester).onKeyEvent {
+                if (it.key == Key.DirectionDown) {
+                    focusManager.moveFocus(FocusDirection.Down)
+                    return@onKeyEvent true
+                } else {
+                    return@onKeyEvent false
+                }
+            },
         colors = SearchBarDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceBright),
         query = queryInternal,
         active = false,

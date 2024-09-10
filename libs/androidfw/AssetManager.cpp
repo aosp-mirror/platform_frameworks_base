@@ -1420,20 +1420,18 @@ void AssetManager::mergeInfoLocked(SortedVector<AssetDir::FileInfo>* pMergedInfo
 Mutex AssetManager::SharedZip::gLock;
 DefaultKeyedVector<String8, wp<AssetManager::SharedZip> > AssetManager::SharedZip::gOpen;
 
-AssetManager::SharedZip::SharedZip(const String8& path, ModDate modWhen)
-    : mPath(path),
-      mZipFile(NULL),
-      mModWhen(modWhen),
-      mResourceTableAsset(NULL),
-      mResourceTable(NULL) {
-  if (kIsDebug) {
-    ALOGI("Creating SharedZip %p %s\n", this, mPath.c_str());
-  }
-  ALOGV("+++ opening zip '%s'\n", mPath.c_str());
-  mZipFile = ZipFileRO::open(mPath.c_str());
-  if (mZipFile == NULL) {
-    ALOGD("failed to open Zip archive '%s'\n", mPath.c_str());
-  }
+AssetManager::SharedZip::SharedZip(const String8& path, time_t modWhen)
+    : mPath(path), mZipFile(NULL), mModWhen(modWhen),
+      mResourceTableAsset(NULL), mResourceTable(NULL)
+{
+    if (kIsDebug) {
+        ALOGI("Creating SharedZip %p %s\n", this, mPath.c_str());
+    }
+    ALOGV("+++ opening zip '%s'\n", mPath.c_str());
+    mZipFile = ZipFileRO::open(mPath.c_str());
+    if (mZipFile == NULL) {
+        ALOGD("failed to open Zip archive '%s'\n", mPath.c_str());
+    }
 }
 
 AssetManager::SharedZip::SharedZip(int fd, const String8& path)
@@ -1455,7 +1453,7 @@ sp<AssetManager::SharedZip> AssetManager::SharedZip::get(const String8& path,
         bool createIfNotPresent)
 {
     AutoMutex _l(gLock);
-    auto modWhen = getFileModDate(path.c_str());
+    time_t modWhen = getFileModDate(path.c_str());
     sp<SharedZip> zip = gOpen.valueFor(path).promote();
     if (zip != NULL && zip->mModWhen == modWhen) {
         return zip;
@@ -1522,8 +1520,8 @@ ResTable* AssetManager::SharedZip::setResourceTable(ResTable* res)
 
 bool AssetManager::SharedZip::isUpToDate()
 {
-  auto modWhen = getFileModDate(mPath.c_str());
-  return mModWhen == modWhen;
+    time_t modWhen = getFileModDate(mPath.c_str());
+    return mModWhen == modWhen;
 }
 
 void AssetManager::SharedZip::addOverlay(const asset_path& ap)

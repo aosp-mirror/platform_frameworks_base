@@ -22,8 +22,8 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.repository.fakeAuthenticationRepository
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
-import com.android.systemui.bouncer.domain.interactor.alternateBouncerInteractor
 import com.android.systemui.bouncer.data.repository.fakeKeyguardBouncerRepository
+import com.android.systemui.bouncer.domain.interactor.alternateBouncerInteractor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.flags.EnableSceneContainer
@@ -42,6 +42,7 @@ import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.domain.resolver.notifShadeSceneFamilyResolver
 import com.android.systemui.scene.domain.resolver.quickSettingsSceneFamilyResolver
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -77,12 +78,14 @@ class KeyguardDismissActionInteractorTest : SysuiTestCase() {
                 transitionInteractor = kosmos.keyguardTransitionInteractor,
                 dismissInteractor = dismissInteractor,
                 applicationScope = testScope.backgroundScope,
-                sceneInteractor = kosmos.sceneInteractor,
-                deviceEntryInteractor = kosmos.deviceEntryInteractor,
-                quickSettingsSceneFamilyResolver = kosmos.quickSettingsSceneFamilyResolver,
-                notifShadeSceneFamilyResolver = kosmos.notifShadeSceneFamilyResolver,
+                sceneInteractor = { kosmos.sceneInteractor },
+                deviceEntryInteractor = { kosmos.deviceEntryInteractor },
+                quickSettingsSceneFamilyResolver = { kosmos.quickSettingsSceneFamilyResolver },
+                notifShadeSceneFamilyResolver = { kosmos.notifShadeSceneFamilyResolver },
                 powerInteractor = kosmos.powerInteractor,
                 alternateBouncerInteractor = kosmos.alternateBouncerInteractor,
+                keyguardInteractor = { kosmos.keyguardInteractor },
+                shadeInteractor = { kosmos.shadeInteractor },
             )
     }
 

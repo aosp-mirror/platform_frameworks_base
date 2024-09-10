@@ -251,3 +251,10 @@ flag {
     description: "Persists the desktop windowing session across reboots."
     bug: "350456942"
 }
+
+flag {
+    name: "enable_display_focus_in_shell_transitions"
+    namespace: "lse_desktop_experience"
+    description: "Creates a shell transition when display focus switches."
+    bug: "356109871"
+}

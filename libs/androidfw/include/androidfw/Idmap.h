@@ -25,9 +25,8 @@
 #include "android-base/macros.h"
 #include "android-base/unique_fd.h"
 #include "androidfw/ConfigDescription.h"
-#include "androidfw/ResourceTypes.h"
 #include "androidfw/StringPiece.h"
-#include "androidfw/misc.h"
+#include "androidfw/ResourceTypes.h"
 #include "utils/ByteOrder.h"
 
 namespace android {
@@ -203,7 +202,7 @@ class LoadedIdmap {
   android::base::unique_fd idmap_fd_;
   std::string_view overlay_apk_path_;
   std::string_view target_apk_path_;
-  ModDate idmap_last_mod_time_;
+  time_t idmap_last_mod_time_;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(LoadedIdmap);
