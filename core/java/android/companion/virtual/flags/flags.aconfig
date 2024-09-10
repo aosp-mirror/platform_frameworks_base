@@ -121,7 +121,6 @@ flag {
     description: "Make relevant PowerManager APIs display aware by default"
     bug: "365042486"
     is_fixed_read_only: true
-    is_exported: true
 }
 
 flag {
