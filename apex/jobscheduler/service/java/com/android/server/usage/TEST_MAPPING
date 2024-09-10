@@ -10,14 +10,10 @@
       ]
     },
     {
-      "name": "CtsBRSTestCases",
-      "options": [
-        {"exclude-annotation": "androidx.test.filters.FlakyTest"},
-        {"exclude-annotation": "org.junit.Ignore"}
-      ]
+      "name": "CtsBRSTestCases"
     },
     {
-      "name": "FrameworksServicesTests_com_android_server_usage_Presubmit"
+      "name": "FrameworksServicesTests_com_android_server_usage"
     }
   ],
   "postsubmit": [
