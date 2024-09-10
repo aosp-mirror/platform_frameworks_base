@@ -2530,25 +2530,6 @@ public class OomAdjuster {
             }
         }
 
-        state.setCurRawAdj(adj);
-        adj = psr.modifyRawOomAdj(adj);
-        if (adj > state.getMaxAdj()) {
-            adj = state.getMaxAdj();
-            if (adj <= PERCEPTIBLE_LOW_APP_ADJ) {
-                schedGroup = SCHED_GROUP_DEFAULT;
-            }
-        }
-
-        // Put bound foreground services in a special sched group for additional
-        // restrictions on screen off
-        if (procState >= PROCESS_STATE_BOUND_FOREGROUND_SERVICE
-                && mService.mWakefulness.get() != PowerManagerInternal.WAKEFULNESS_AWAKE
-                && !state.shouldScheduleLikeTopApp()) {
-            if (schedGroup > SCHED_GROUP_RESTRICTED) {
-                schedGroup = SCHED_GROUP_RESTRICTED;
-            }
-        }
-
         // apply capability from FGS.
         if (psr.hasForegroundServices()) {
             capability |= capabilityFromFGS;
