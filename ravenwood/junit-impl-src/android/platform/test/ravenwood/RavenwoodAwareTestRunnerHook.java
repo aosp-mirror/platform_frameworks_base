@@ -34,6 +34,8 @@ import org.junit.runner.Description;
 import org.junit.runner.Runner;
 import org.junit.runners.model.TestClass;
 
+import java.util.Stack;
+
 /**
  * Provide hook points created by {@link RavenwoodAwareTestRunner}.
  */
@@ -44,6 +46,11 @@ public class RavenwoodAwareTestRunnerHook {
     }
 
     private static RavenwoodTestStats sStats; // lazy initialization.
+
+    // Keep track of the current class description.
+
+    // Test classes can be nested because of "Suite", so we need a stack to keep track.
+    private static final Stack<Description> sClassDescriptions = new Stack<>();
     private static Description sCurrentClassDescription;
 
     private static RavenwoodTestStats getStats() {
@@ -108,14 +115,15 @@ public class RavenwoodAwareTestRunnerHook {
             Scope scope, Order order) {
         Log.v(TAG, "onBefore: description=" + description + ", " + scope + ", " + order);
 
-        if (scope == Scope.Class && order == Order.First) {
+        if (scope == Scope.Class && order == Order.Outer) {
             // Keep track of the current class.
             sCurrentClassDescription = description;
+            sClassDescriptions.push(description);
         }
 
         // Class-level annotations are checked by the runner already, so we only check
         // method-level annotations here.
-        if (scope == Scope.Instance && order == Order.First) {
+        if (scope == Scope.Instance && order == Order.Outer) {
             if (!RavenwoodEnablementChecker.shouldEnableOnRavenwood(
                     description, true)) {
                 getStats().onTestFinished(sCurrentClassDescription, description, Result.Skipped);
@@ -134,17 +142,20 @@ public class RavenwoodAwareTestRunnerHook {
             Scope scope, Order order, Throwable th) {
         Log.v(TAG, "onAfter: description=" + description + ", " + scope + ", " + order + ", " + th);
 
-        if (scope == Scope.Instance && order == Order.First) {
+        if (scope == Scope.Instance && order == Order.Outer) {
             getStats().onTestFinished(sCurrentClassDescription, description,
                     th == null ? Result.Passed : Result.Failed);
 
-        } else if (scope == Scope.Class && order == Order.Last) {
+        } else if (scope == Scope.Class && order == Order.Outer) {
             getStats().onClassFinished(sCurrentClassDescription);
+            sClassDescriptions.pop();
+            sCurrentClassDescription =
+                    sClassDescriptions.size() == 0 ? null : sClassDescriptions.peek();
         }
 
         // If RUN_DISABLED_TESTS is set, and the method did _not_ throw, make it an error.
         if (RavenwoodRule.private$ravenwood().isRunningDisabledTests()
-                && scope == Scope.Instance && order == Order.First) {
+                && scope == Scope.Instance && order == Order.Outer) {
 
             boolean isTestEnabled = RavenwoodEnablementChecker.shouldEnableOnRavenwood(
                     description, false);

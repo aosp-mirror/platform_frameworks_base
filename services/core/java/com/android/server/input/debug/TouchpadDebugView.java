@@ -30,6 +30,9 @@ import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.android.server.input.TouchpadFingerState;
+import com.android.server.input.TouchpadHardwareState;
+
 import java.util.Objects;
 
 public class TouchpadDebugView extends LinearLayout {
@@ -52,6 +55,10 @@ public class TouchpadDebugView extends LinearLayout {
     private int mScreenHeight;
     private int mWindowLocationBeforeDragX;
     private int mWindowLocationBeforeDragY;
+    @NonNull
+    private TouchpadHardwareState mLastTouchpadState =
+            new TouchpadHardwareState(0, 0 /* buttonsDown */, 0, 0,
+                    new TouchpadFingerState[0]);
 
     public TouchpadDebugView(Context context, int touchpadId) {
         super(context);
@@ -83,14 +90,14 @@ public class TouchpadDebugView extends LinearLayout {
 
     private void init(Context context) {
         setOrientation(VERTICAL);
-        setLayoutParams(new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT));
-        setBackgroundColor(Color.TRANSPARENT);
+        setLayoutParams(new LayoutParams(
+                LayoutParams.WRAP_CONTENT,
+                LayoutParams.WRAP_CONTENT));
+        setBackgroundColor(Color.RED);
 
         // TODO(b/286551975): Replace this content with the touchpad debug view.
         TextView textView1 = new TextView(context);
-        textView1.setBackgroundColor(Color.parseColor("#FFFF0000"));
+        textView1.setBackgroundColor(Color.TRANSPARENT);
         textView1.setTextSize(20);
         textView1.setText("Touchpad Debug View 1");
         textView1.setGravity(Gravity.CENTER);
@@ -98,7 +105,7 @@ public class TouchpadDebugView extends LinearLayout {
         textView1.setLayoutParams(new LayoutParams(1000, 200));
 
         TextView textView2 = new TextView(context);
-        textView2.setBackgroundColor(Color.BLUE);
+        textView2.setBackgroundColor(Color.TRANSPARENT);
         textView2.setTextSize(20);
         textView2.setText("Touchpad Debug View 2");
         textView2.setGravity(Gravity.CENTER);
@@ -126,18 +133,13 @@ public class TouchpadDebugView extends LinearLayout {
             case MotionEvent.ACTION_MOVE:
                 deltaX = event.getRawX() - mWindowLayoutParams.x - mTouchDownX;
                 deltaY = event.getRawY() - mWindowLayoutParams.y - mTouchDownY;
-                Slog.d("TouchpadDebugView", "Slop = " + mTouchSlop);
                 if (isSlopExceeded(deltaX, deltaY)) {
-                    Slog.d("TouchpadDebugView", "Slop exceeded");
                     mWindowLayoutParams.x =
                             Math.max(0, Math.min((int) (event.getRawX() - mTouchDownX),
                                     mScreenWidth - this.getWidth()));
                     mWindowLayoutParams.y =
                             Math.max(0, Math.min((int) (event.getRawY() - mTouchDownY),
                                     mScreenHeight - this.getHeight()));
-
-                    Slog.d("TouchpadDebugView", "New position X: "
-                            + mWindowLayoutParams.x + ", Y: " + mWindowLayoutParams.y);
 
                     mWindowManager.updateViewLayout(this, mWindowLayoutParams);
                 }
@@ -166,7 +168,7 @@ public class TouchpadDebugView extends LinearLayout {
     @Override
     public boolean performClick() {
         super.performClick();
-        Slog.d("TouchpadDebugView", "You clicked me!");
+        Slog.d("TouchpadDebugView", "You tapped the window!");
         return true;
     }
 
@@ -200,5 +202,35 @@ public class TouchpadDebugView extends LinearLayout {
 
     public WindowManager.LayoutParams getWindowLayoutParams() {
         return mWindowLayoutParams;
+    }
+
+    public void updateHardwareState(TouchpadHardwareState touchpadHardwareState) {
+        if (mLastTouchpadState.getButtonsDown() == 0) {
+            if (touchpadHardwareState.getButtonsDown() > 0) {
+                onTouchpadButtonPress();
+            }
+        } else {
+            if (touchpadHardwareState.getButtonsDown() == 0) {
+                onTouchpadButtonRelease();
+            }
+        }
+        mLastTouchpadState = touchpadHardwareState;
+    }
+
+    private void onTouchpadButtonPress() {
+        Slog.d("TouchpadDebugView", "You clicked me!");
+
+        // Iterate through all child views
+        // Temporary demonstration for testing
+        for (int i = 0; i < getChildCount(); i++) {
+            getChildAt(i).setBackgroundColor(Color.BLUE);
+        }
+    }
+
+    private void onTouchpadButtonRelease() {
+        Slog.d("TouchpadDebugView", "You released the click");
+        for (int i = 0; i < getChildCount(); i++) {
+            getChildAt(i).setBackgroundColor(Color.RED);
+        }
     }
 }

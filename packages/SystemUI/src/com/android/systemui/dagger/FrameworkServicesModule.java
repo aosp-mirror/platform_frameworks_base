@@ -202,6 +202,13 @@ public class FrameworkServicesModule {
         return context.getSystemService(CaptioningManager.class);
     }
 
+    @Provides
+    @Singleton
+    static UserScopedService<CaptioningManager> provideUserScopedCaptioningManager(
+            Context context) {
+        return new UserScopedServiceImpl<>(context, CaptioningManager.class);
+    }
+
     /** */
     @Provides
     @Singleton

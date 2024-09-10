@@ -26,6 +26,7 @@ import android.app.ActivityManager;
 import android.app.Instrumentation;
 import android.app.ResourcesManager;
 import android.content.res.Resources;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.HandlerThread;
@@ -67,6 +68,8 @@ public class RavenwoodRuleImpl {
 
     private static ScheduledFuture<?> sPendingTimeout;
 
+    private static long sOriginalIdentityToken = -1;
+
     /**
      * When enabled, attempt to detect uncaught exceptions from background threads.
      */
@@ -85,6 +88,19 @@ public class RavenwoodRuleImpl {
                 sPendingUncaughtException.compareAndSet(null, throwable);
             };
 
+    // TODO: expose packCallingIdentity function in libbinder and use it directly
+    // See: packCallingIdentity in frameworks/native/libs/binder/IPCThreadState.cpp
+    private static long packBinderIdentityToken(
+            boolean hasExplicitIdentity, int callingUid, int callingPid) {
+        long res = ((long) callingUid << 32) | callingPid;
+        if (hasExplicitIdentity) {
+            res |= (0x1 << 30);
+        } else {
+            res &= ~(0x1 << 30);
+        }
+        return res;
+    }
+
     public static void init(RavenwoodRule rule) throws IOException {
         if (ENABLE_UNCAUGHT_EXCEPTION_DETECTION) {
             maybeThrowPendingUncaughtException(false);
@@ -92,7 +108,8 @@ public class RavenwoodRuleImpl {
         }
 
         android.os.Process.init$ravenwood(rule.mUid, rule.mPid);
-        android.os.Binder.init$ravenwood();
+        sOriginalIdentityToken = Binder.clearCallingIdentity();
+        Binder.restoreCallingIdentity(packBinderIdentityToken(false, rule.mUid, rule.mPid));
         setSystemProperties(rule.mSystemProperties);
 
         ServiceManager.init$ravenwood();
@@ -173,7 +190,7 @@ public class RavenwoodRuleImpl {
         ServiceManager.reset$ravenwood();
 
         setSystemProperties(RavenwoodSystemProperties.DEFAULT_VALUES);
-        android.os.Binder.reset$ravenwood();
+        Binder.restoreCallingIdentity(sOriginalIdentityToken);
         android.os.Process.reset$ravenwood();
 
         ResourcesManager.setInstance(null); // Better structure needed.

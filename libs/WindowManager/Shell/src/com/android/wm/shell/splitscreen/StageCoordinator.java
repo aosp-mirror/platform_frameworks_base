@@ -104,7 +104,6 @@ import android.view.IRemoteAnimationRunner;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
-import android.view.SurfaceSession;
 import android.view.WindowManager;
 import android.widget.Toast;
 import android.window.DisplayAreaInfo;
@@ -170,8 +169,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         ShellTaskOrganizer.TaskListener {
 
     private static final String TAG = StageCoordinator.class.getSimpleName();
-
-    private final SurfaceSession mSurfaceSession = new SurfaceSession();
 
     private final StageTaskListener mMainStage;
     private final StageListenerImpl mMainStageListener = new StageListenerImpl();
@@ -334,7 +331,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 mDisplayId,
                 mMainStageListener,
                 mSyncQueue,
-                mSurfaceSession,
                 iconProvider,
                 mWindowDecorViewModel);
         mSideStage = new StageTaskListener(
@@ -343,7 +339,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 mDisplayId,
                 mSideStageListener,
                 mSyncQueue,
-                mSurfaceSession,
                 iconProvider,
                 mWindowDecorViewModel);
         mDisplayController = displayController;

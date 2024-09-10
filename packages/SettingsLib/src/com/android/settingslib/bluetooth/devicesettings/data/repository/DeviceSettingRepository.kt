@@ -22,6 +22,7 @@ import android.text.TextUtils
 import com.android.settingslib.bluetooth.CachedBluetoothDevice
 import com.android.settingslib.bluetooth.devicesettings.ActionSwitchPreference
 import com.android.settingslib.bluetooth.devicesettings.DeviceSetting
+import com.android.settingslib.bluetooth.devicesettings.DeviceSettingContract
 import com.android.settingslib.bluetooth.devicesettings.DeviceSettingId
 import com.android.settingslib.bluetooth.devicesettings.DeviceSettingItem
 import com.android.settingslib.bluetooth.devicesettings.DeviceSettingsConfig
@@ -30,6 +31,9 @@ import com.android.settingslib.bluetooth.devicesettings.DeviceSettingHelpPrefere
 import com.android.settingslib.bluetooth.devicesettings.MultiTogglePreference
 import com.android.settingslib.bluetooth.devicesettings.ToggleInfo
 import com.android.settingslib.bluetooth.devicesettings.shared.model.DeviceSettingConfigItemModel
+import com.android.settingslib.bluetooth.devicesettings.shared.model.DeviceSettingConfigItemModel.AppProvidedItem
+import com.android.settingslib.bluetooth.devicesettings.shared.model.DeviceSettingConfigItemModel.BuiltinItem.BluetoothProfilesItem
+import com.android.settingslib.bluetooth.devicesettings.shared.model.DeviceSettingConfigItemModel.BuiltinItem.CommonBuiltinItem
 import com.android.settingslib.bluetooth.devicesettings.shared.model.DeviceSettingConfigModel
 import com.android.settingslib.bluetooth.devicesettings.shared.model.DeviceSettingIcon
 import com.android.settingslib.bluetooth.devicesettings.shared.model.DeviceSettingModel
@@ -103,9 +107,18 @@ class DeviceSettingRepositoryImpl(
 
     private fun DeviceSettingItem.toModel(): DeviceSettingConfigItemModel {
         return if (!TextUtils.isEmpty(preferenceKey)) {
-            DeviceSettingConfigItemModel.BuiltinItem(settingId, preferenceKey!!)
+            if (settingId == DeviceSettingId.DEVICE_SETTING_ID_BLUETOOTH_PROFILES) {
+                BluetoothProfilesItem(
+                    settingId,
+                    preferenceKey!!,
+                    extras.getStringArrayList(DeviceSettingContract.INVISIBLE_PROFILES)
+                        ?: emptyList()
+                )
+            } else {
+                CommonBuiltinItem(settingId, preferenceKey!!)
+            }
         } else {
-            DeviceSettingConfigItemModel.AppProvidedItem(settingId)
+            AppProvidedItem(settingId)
         }
     }
 

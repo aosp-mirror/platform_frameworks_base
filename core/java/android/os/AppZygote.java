@@ -111,12 +111,15 @@ public class AppZygote {
         try {
             int runtimeFlags = Zygote.getMemorySafetyRuntimeFlagsForSecondaryZygote(
                     mAppInfo, mProcessInfo);
+
+            final int[] sharedAppGid = {
+                    UserHandle.getSharedAppGid(UserHandle.getAppId(mAppInfo.uid)) };
             mZygote = Process.ZYGOTE_PROCESS.startChildZygote(
                     "com.android.internal.os.AppZygoteInit",
                     mAppInfo.processName + "_zygote",
                     mZygoteUid,
                     mZygoteUid,
-                    null,  // gids
+                    sharedAppGid,  // Zygote gets access to shared app GID for profiles
                     runtimeFlags,
                     "app_zygote",  // seInfo
                     abi,  // abi

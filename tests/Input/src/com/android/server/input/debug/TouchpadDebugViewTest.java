@@ -26,7 +26,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.Rect;
+import android.graphics.drawable.ColorDrawable;
 import android.testing.TestableContext;
 import android.view.MotionEvent;
 import android.view.View;
@@ -40,6 +42,8 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.cts.input.MotionEventBuilder;
 import com.android.cts.input.PointerBuilder;
+import com.android.server.input.TouchpadFingerState;
+import com.android.server.input.TouchpadHardwareState;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -288,5 +292,37 @@ public class TouchpadDebugViewTest {
                 mWindowLayoutParamsCaptor.capture());
         assertEquals(initialX, mWindowLayoutParamsCaptor.getValue().x);
         assertEquals(initialY, mWindowLayoutParamsCaptor.getValue().y);
+    }
+
+    @Test
+    public void testTouchpadClick() {
+        View child;
+
+        mTouchpadDebugView.updateHardwareState(
+                new TouchpadHardwareState(0, 1 /* buttonsDown */, 0, 0,
+                        new TouchpadFingerState[0]));
+
+        for (int i = 0; i < mTouchpadDebugView.getChildCount(); i++) {
+            child = mTouchpadDebugView.getChildAt(i);
+            assertEquals(((ColorDrawable) child.getBackground()).getColor(), Color.BLUE);
+        }
+
+        mTouchpadDebugView.updateHardwareState(
+                new TouchpadHardwareState(0, 0 /* buttonsDown */, 0, 0,
+                        new TouchpadFingerState[0]));
+
+        for (int i = 0; i < mTouchpadDebugView.getChildCount(); i++) {
+            child = mTouchpadDebugView.getChildAt(i);
+            assertEquals(((ColorDrawable) child.getBackground()).getColor(), Color.RED);
+        }
+
+        mTouchpadDebugView.updateHardwareState(
+                new TouchpadHardwareState(0, 1 /* buttonsDown */, 0, 0,
+                        new TouchpadFingerState[0]));
+
+        for (int i = 0; i < mTouchpadDebugView.getChildCount(); i++) {
+            child = mTouchpadDebugView.getChildAt(i);
+            assertEquals(((ColorDrawable) child.getBackground()).getColor(), Color.BLUE);
+        }
     }
 }

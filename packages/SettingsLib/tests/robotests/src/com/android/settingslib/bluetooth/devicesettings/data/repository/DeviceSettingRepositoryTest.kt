@@ -91,7 +91,9 @@ class DeviceSettingRepositoryTest {
         `when`(cachedDevice.address).thenReturn(BLUETOOTH_ADDRESS)
         `when`(
                 bluetoothDevice.getMetadata(
-                    DeviceSettingServiceConnection.METADATA_FAST_PAIR_CUSTOMIZED_FIELDS))
+                    DeviceSettingServiceConnection.METADATA_FAST_PAIR_CUSTOMIZED_FIELDS
+                )
+            )
             .thenReturn(BLUETOOTH_DEVICE_METADATA.toByteArray())
 
         `when`(configService.queryLocalInterface(anyString())).thenReturn(configService)
@@ -114,7 +116,8 @@ class DeviceSettingRepositoryTest {
                     connection.onServiceConnected(
                         ComponentName(
                             SETTING_PROVIDER_SERVICE_PACKAGE_NAME_1,
-                            SETTING_PROVIDER_SERVICE_CLASS_NAME_1),
+                            SETTING_PROVIDER_SERVICE_CLASS_NAME_1,
+                        ),
                         settingProviderService1,
                     )
                 SETTING_PROVIDER_SERVICE_INTENT_ACTION_2 ->
@@ -146,16 +149,24 @@ class DeviceSettingRepositoryTest {
     fun getDeviceSettingsConfig_withMetadata_success() {
         testScope.runTest {
             `when`(configService.getDeviceSettingsConfig(any())).thenReturn(DEVICE_SETTING_CONFIG)
-            `when`(settingProviderService1.serviceStatus).thenReturn(
-                DeviceSettingsProviderServiceStatus(true)
-            )
-            `when`(settingProviderService2.serviceStatus).thenReturn(
-                DeviceSettingsProviderServiceStatus(true)
-            )
+            `when`(settingProviderService1.serviceStatus)
+                .thenReturn(DeviceSettingsProviderServiceStatus(true))
+            `when`(settingProviderService2.serviceStatus)
+                .thenReturn(DeviceSettingsProviderServiceStatus(true))
 
             val config = underTest.getDeviceSettingsConfig(cachedDevice)
 
             assertConfig(config!!, DEVICE_SETTING_CONFIG)
+            assertThat(config.mainItems[0])
+                .isInstanceOf(DeviceSettingConfigItemModel.AppProvidedItem::class.java)
+            assertThat(config.mainItems[1])
+                .isInstanceOf(
+                    DeviceSettingConfigItemModel.BuiltinItem.CommonBuiltinItem::class.java
+                )
+            assertThat(config.mainItems[2])
+                .isInstanceOf(
+                    DeviceSettingConfigItemModel.BuiltinItem.BluetoothProfilesItem::class.java
+                )
         }
     }
 
@@ -163,16 +174,16 @@ class DeviceSettingRepositoryTest {
     fun getDeviceSettingsConfig_noMetadata_returnNull() {
         testScope.runTest {
             `when`(
-                bluetoothDevice.getMetadata(
-                    DeviceSettingServiceConnection.METADATA_FAST_PAIR_CUSTOMIZED_FIELDS))
+                    bluetoothDevice.getMetadata(
+                        DeviceSettingServiceConnection.METADATA_FAST_PAIR_CUSTOMIZED_FIELDS
+                    )
+                )
                 .thenReturn("".toByteArray())
             `when`(configService.getDeviceSettingsConfig(any())).thenReturn(DEVICE_SETTING_CONFIG)
-            `when`(settingProviderService1.serviceStatus).thenReturn(
-                DeviceSettingsProviderServiceStatus(true)
-            )
-            `when`(settingProviderService2.serviceStatus).thenReturn(
-                DeviceSettingsProviderServiceStatus(true)
-            )
+            `when`(settingProviderService1.serviceStatus)
+                .thenReturn(DeviceSettingsProviderServiceStatus(true))
+            `when`(settingProviderService2.serviceStatus)
+                .thenReturn(DeviceSettingsProviderServiceStatus(true))
 
             val config = underTest.getDeviceSettingsConfig(cachedDevice)
 
@@ -184,12 +195,10 @@ class DeviceSettingRepositoryTest {
     fun getDeviceSettingsConfig_providerServiceNotEnabled_returnNull() {
         testScope.runTest {
             `when`(configService.getDeviceSettingsConfig(any())).thenReturn(DEVICE_SETTING_CONFIG)
-            `when`(settingProviderService1.serviceStatus).thenReturn(
-                DeviceSettingsProviderServiceStatus(false)
-            )
-            `when`(settingProviderService2.serviceStatus).thenReturn(
-                DeviceSettingsProviderServiceStatus(true)
-            )
+            `when`(settingProviderService1.serviceStatus)
+                .thenReturn(DeviceSettingsProviderServiceStatus(false))
+            `when`(settingProviderService2.serviceStatus)
+                .thenReturn(DeviceSettingsProviderServiceStatus(true))
 
             val config = underTest.getDeviceSettingsConfig(cachedDevice)
 
@@ -219,12 +228,10 @@ class DeviceSettingRepositoryTest {
                     .getArgument<IDeviceSettingsListener>(1)
                     .onDeviceSettingsChanged(listOf(DEVICE_SETTING_1))
             }
-            `when`(settingProviderService1.serviceStatus).thenReturn(
-                DeviceSettingsProviderServiceStatus(true)
-            )
-            `when`(settingProviderService2.serviceStatus).thenReturn(
-                DeviceSettingsProviderServiceStatus(true)
-            )
+            `when`(settingProviderService1.serviceStatus)
+                .thenReturn(DeviceSettingsProviderServiceStatus(true))
+            `when`(settingProviderService2.serviceStatus)
+                .thenReturn(DeviceSettingsProviderServiceStatus(true))
             var setting: DeviceSettingModel? = null
 
             underTest
@@ -247,12 +254,10 @@ class DeviceSettingRepositoryTest {
                     .getArgument<IDeviceSettingsListener>(1)
                     .onDeviceSettingsChanged(listOf(DEVICE_SETTING_2))
             }
-            `when`(settingProviderService1.serviceStatus).thenReturn(
-                DeviceSettingsProviderServiceStatus(true)
-            )
-            `when`(settingProviderService2.serviceStatus).thenReturn(
-                DeviceSettingsProviderServiceStatus(true)
-            )
+            `when`(settingProviderService1.serviceStatus)
+                .thenReturn(DeviceSettingsProviderServiceStatus(true))
+            `when`(settingProviderService2.serviceStatus)
+                .thenReturn(DeviceSettingsProviderServiceStatus(true))
             var setting: DeviceSettingModel? = null
 
             underTest
@@ -270,17 +275,15 @@ class DeviceSettingRepositoryTest {
         testScope.runTest {
             `when`(configService.getDeviceSettingsConfig(any())).thenReturn(DEVICE_SETTING_CONFIG)
             `when`(settingProviderService2.registerDeviceSettingsListener(any(), any())).then {
-                    input ->
+                input ->
                 input
                     .getArgument<IDeviceSettingsListener>(1)
                     .onDeviceSettingsChanged(listOf(DEVICE_SETTING_HELP))
             }
-            `when`(settingProviderService1.serviceStatus).thenReturn(
-                DeviceSettingsProviderServiceStatus(true)
-            )
-            `when`(settingProviderService2.serviceStatus).thenReturn(
-                DeviceSettingsProviderServiceStatus(true)
-            )
+            `when`(settingProviderService1.serviceStatus)
+                .thenReturn(DeviceSettingsProviderServiceStatus(true))
+            `when`(settingProviderService2.serviceStatus)
+                .thenReturn(DeviceSettingsProviderServiceStatus(true))
             var setting: DeviceSettingModel? = null
 
             underTest
@@ -324,12 +327,10 @@ class DeviceSettingRepositoryTest {
                     .getArgument<IDeviceSettingsListener>(1)
                     .onDeviceSettingsChanged(listOf(DEVICE_SETTING_1))
             }
-            `when`(settingProviderService1.serviceStatus).thenReturn(
-                DeviceSettingsProviderServiceStatus(true)
-            )
-            `when`(settingProviderService2.serviceStatus).thenReturn(
-                DeviceSettingsProviderServiceStatus(true)
-            )
+            `when`(settingProviderService1.serviceStatus)
+                .thenReturn(DeviceSettingsProviderServiceStatus(true))
+            `when`(settingProviderService2.serviceStatus)
+                .thenReturn(DeviceSettingsProviderServiceStatus(true))
             var setting: DeviceSettingModel? = null
 
             underTest
@@ -347,8 +348,10 @@ class DeviceSettingRepositoryTest {
                     DeviceSettingState.Builder()
                         .setSettingId(DeviceSettingId.DEVICE_SETTING_ID_HEADER)
                         .setPreferenceState(
-                            ActionSwitchPreferenceState.Builder().setChecked(false).build())
-                        .build())
+                            ActionSwitchPreferenceState.Builder().setChecked(false).build()
+                        )
+                        .build(),
+                )
         }
     }
 
@@ -362,12 +365,10 @@ class DeviceSettingRepositoryTest {
                     .getArgument<IDeviceSettingsListener>(1)
                     .onDeviceSettingsChanged(listOf(DEVICE_SETTING_2))
             }
-            `when`(settingProviderService1.serviceStatus).thenReturn(
-                DeviceSettingsProviderServiceStatus(true)
-            )
-            `when`(settingProviderService2.serviceStatus).thenReturn(
-                DeviceSettingsProviderServiceStatus(true)
-            )
+            `when`(settingProviderService1.serviceStatus)
+                .thenReturn(DeviceSettingsProviderServiceStatus(true))
+            `when`(settingProviderService2.serviceStatus)
+                .thenReturn(DeviceSettingsProviderServiceStatus(true))
             var setting: DeviceSettingModel? = null
 
             underTest
@@ -385,8 +386,10 @@ class DeviceSettingRepositoryTest {
                     DeviceSettingState.Builder()
                         .setSettingId(DeviceSettingId.DEVICE_SETTING_ID_ANC)
                         .setPreferenceState(
-                            MultiTogglePreferenceState.Builder().setState(2).build())
-                        .build())
+                            MultiTogglePreferenceState.Builder().setState(2).build()
+                        )
+                        .build(),
+                )
         }
     }
 
@@ -437,7 +440,7 @@ class DeviceSettingRepositoryTest {
 
     private fun assertConfig(
         actual: DeviceSettingConfigModel,
-        serviceResponse: DeviceSettingsConfig
+        serviceResponse: DeviceSettingsConfig,
     ) {
         assertThat(actual.mainItems.size).isEqualTo(serviceResponse.mainContentItems.size)
         for (i in 0..<actual.mainItems.size) {
@@ -451,7 +454,7 @@ class DeviceSettingRepositoryTest {
 
     private fun assertConfigItem(
         actual: DeviceSettingConfigItemModel,
-        serviceResponse: DeviceSettingItem
+        serviceResponse: DeviceSettingItem,
     ) {
         assertThat(actual.settingId).isEqualTo(serviceResponse.settingId)
     }
@@ -485,24 +488,43 @@ class DeviceSettingRepositoryTest {
                 "</DEVICE_SETTINGS_CONFIG_ACTION>"
         val DEVICE_INFO = DeviceInfo.Builder().setBluetoothAddress(BLUETOOTH_ADDRESS).build()
         const val DEVICE_SETTING_ID_HELP = 12345
-        val DEVICE_SETTING_ITEM_1 =
+        val DEVICE_SETTING_APP_PROVIDED_ITEM_1 =
             DeviceSettingItem(
                 DeviceSettingId.DEVICE_SETTING_ID_HEADER,
                 SETTING_PROVIDER_SERVICE_PACKAGE_NAME_1,
                 SETTING_PROVIDER_SERVICE_CLASS_NAME_1,
-                SETTING_PROVIDER_SERVICE_INTENT_ACTION_1)
-        val DEVICE_SETTING_ITEM_2 =
+                SETTING_PROVIDER_SERVICE_INTENT_ACTION_1,
+            )
+        val DEVICE_SETTING_APP_PROVIDED_ITEM_2 =
             DeviceSettingItem(
                 DeviceSettingId.DEVICE_SETTING_ID_ANC,
                 SETTING_PROVIDER_SERVICE_PACKAGE_NAME_2,
                 SETTING_PROVIDER_SERVICE_CLASS_NAME_2,
-                SETTING_PROVIDER_SERVICE_INTENT_ACTION_2)
+                SETTING_PROVIDER_SERVICE_INTENT_ACTION_2,
+            )
+        val DEVICE_SETTING_BUILT_IN_ITEM =
+            DeviceSettingItem(
+                DeviceSettingId.DEVICE_SETTING_ID_BLUETOOTH_AUDIO_DEVICE_TYPE_GROUP,
+                "",
+                "",
+                "",
+                "device_type",
+            )
+        val DEVICE_SETTING_BUILT_IN_BT_PROFILES_ITEM =
+            DeviceSettingItem(
+                DeviceSettingId.DEVICE_SETTING_ID_BLUETOOTH_PROFILES,
+                "",
+                "",
+                "",
+                "bluetooth_profiles",
+            )
         val DEVICE_SETTING_HELP_ITEM =
             DeviceSettingItem(
                 DEVICE_SETTING_ID_HELP,
                 SETTING_PROVIDER_SERVICE_PACKAGE_NAME_2,
                 SETTING_PROVIDER_SERVICE_CLASS_NAME_2,
-                SETTING_PROVIDER_SERVICE_INTENT_ACTION_2)
+                SETTING_PROVIDER_SERVICE_INTENT_ACTION_2,
+            )
         val DEVICE_SETTING_1 =
             DeviceSetting.Builder()
                 .setSettingId(DeviceSettingId.DEVICE_SETTING_ID_HEADER)
@@ -511,7 +533,8 @@ class DeviceSettingRepositoryTest {
                         .setTitle("title1")
                         .setHasSwitch(true)
                         .setAllowedChangingState(true)
-                        .build())
+                        .build()
+                )
                 .build()
         val DEVICE_SETTING_2 =
             DeviceSetting.Builder()
@@ -524,22 +547,30 @@ class DeviceSettingRepositoryTest {
                             ToggleInfo.Builder()
                                 .setLabel("label1")
                                 .setIcon(Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888))
-                                .build())
+                                .build()
+                        )
                         .addToggleInfo(
                             ToggleInfo.Builder()
                                 .setLabel("label2")
                                 .setIcon(Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888))
-                                .build())
-                        .build())
+                                .build()
+                        )
+                        .build()
+                )
                 .build()
-        val DEVICE_SETTING_HELP = DeviceSetting.Builder()
-            .setSettingId(DEVICE_SETTING_ID_HELP)
-            .setPreference(DeviceSettingHelpPreference.Builder().setIntent(Intent()).build())
-            .build()
+        val DEVICE_SETTING_HELP =
+            DeviceSetting.Builder()
+                .setSettingId(DEVICE_SETTING_ID_HELP)
+                .setPreference(DeviceSettingHelpPreference.Builder().setIntent(Intent()).build())
+                .build()
         val DEVICE_SETTING_CONFIG =
             DeviceSettingsConfig(
-                listOf(DEVICE_SETTING_ITEM_1),
-                listOf(DEVICE_SETTING_ITEM_2),
+                listOf(
+                    DEVICE_SETTING_APP_PROVIDED_ITEM_1,
+                    DEVICE_SETTING_BUILT_IN_ITEM,
+                    DEVICE_SETTING_BUILT_IN_BT_PROFILES_ITEM,
+                ),
+                listOf(DEVICE_SETTING_APP_PROVIDED_ITEM_2),
                 DEVICE_SETTING_HELP_ITEM,
             )
     }

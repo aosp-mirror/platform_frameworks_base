@@ -27,6 +27,7 @@ import android.view.WindowManager;
 
 import com.android.server.input.InputManagerService;
 import com.android.server.input.TouchpadHardwareProperties;
+import com.android.server.input.TouchpadHardwareState;
 
 import java.util.Objects;
 
@@ -131,5 +132,11 @@ public class TouchpadDebugViewController implements InputManager.InputDeviceList
         wm.removeView(mTouchpadDebugView);
         mTouchpadDebugView = null;
         Slog.d(TAG, "Touchpad debug view removed.");
+    }
+
+    public void updateTouchpadHardwareState(TouchpadHardwareState touchpadHardwareState) {
+        if (mTouchpadDebugView != null) {
+            mTouchpadDebugView.updateHardwareState(touchpadHardwareState);
+        }
     }
 }

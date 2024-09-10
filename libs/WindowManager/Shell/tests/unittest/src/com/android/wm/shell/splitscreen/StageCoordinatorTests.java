@@ -50,7 +50,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.SurfaceControl;
-import android.view.SurfaceSession;
 import android.window.RemoteTransition;
 import android.window.WindowContainerTransaction;
 
@@ -119,7 +118,6 @@ public class StageCoordinatorTests extends ShellTestCase {
     private final Rect mBounds2 = new Rect(5, 10, 15, 20);
     private final Rect mRootBounds = new Rect(0, 0, 45, 60);
 
-    private SurfaceSession mSurfaceSession = new SurfaceSession();
     private SurfaceControl mRootLeash;
     private SurfaceControl mDividerLeash;
     private ActivityManager.RunningTaskInfo mRootTask;
@@ -139,7 +137,7 @@ public class StageCoordinatorTests extends ShellTestCase {
                 mDisplayInsetsController, mSplitLayout, mTransitions, mTransactionPool,
                 mMainExecutor, mMainHandler, Optional.empty(), mLaunchAdjacentController,
                 Optional.empty()));
-        mDividerLeash = new SurfaceControl.Builder(mSurfaceSession).setName("fakeDivider").build();
+        mDividerLeash = new SurfaceControl.Builder().setName("fakeDivider").build();
 
         when(mSplitLayout.getBounds1()).thenReturn(mBounds1);
         when(mSplitLayout.getBounds2()).thenReturn(mBounds2);
@@ -149,7 +147,7 @@ public class StageCoordinatorTests extends ShellTestCase {
         when(mSplitLayout.getDividerLeash()).thenReturn(mDividerLeash);
 
         mRootTask = new TestRunningTaskInfoBuilder().build();
-        mRootLeash = new SurfaceControl.Builder(mSurfaceSession).setName("test").build();
+        mRootLeash = new SurfaceControl.Builder().setName("test").build();
         mStageCoordinator.onTaskAppeared(mRootTask, mRootLeash);
 
         mSideStage.mRootTaskInfo = new TestRunningTaskInfoBuilder().build();

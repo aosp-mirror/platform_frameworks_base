@@ -12,6 +12,8 @@ import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.FakeOverlay
 import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
+import com.android.systemui.scene.ui.viewmodel.splitEdgeDetector
+import com.android.systemui.shade.domain.interactor.shadeInteractor
 import kotlinx.coroutines.flow.MutableStateFlow
 
 var Kosmos.sceneKeys by Fixture {
@@ -70,6 +72,8 @@ val Kosmos.sceneContainerViewModel by Fixture {
             sceneInteractor = sceneInteractor,
             falsingInteractor = falsingInteractor,
             powerInteractor = powerInteractor,
+            shadeInteractor = shadeInteractor,
+            splitEdgeDetector = splitEdgeDetector,
             motionEventHandlerReceiver = {},
             logger = sceneLogger
         )

@@ -39,7 +39,6 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
-import android.view.SurfaceSession;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
@@ -93,7 +92,6 @@ public class StageTaskListener implements ShellTaskOrganizer.TaskListener {
 
     private final Context mContext;
     private final StageListenerCallbacks mCallbacks;
-    private final SurfaceSession mSurfaceSession;
     private final SyncTransactionQueue mSyncQueue;
     private final IconProvider mIconProvider;
     private final Optional<WindowDecorViewModel> mWindowDecorViewModel;
@@ -108,12 +106,11 @@ public class StageTaskListener implements ShellTaskOrganizer.TaskListener {
 
     StageTaskListener(Context context, ShellTaskOrganizer taskOrganizer, int displayId,
             StageListenerCallbacks callbacks, SyncTransactionQueue syncQueue,
-            SurfaceSession surfaceSession, IconProvider iconProvider,
+            IconProvider iconProvider,
             Optional<WindowDecorViewModel> windowDecorViewModel) {
         mContext = context;
         mCallbacks = callbacks;
         mSyncQueue = syncQueue;
-        mSurfaceSession = surfaceSession;
         mIconProvider = iconProvider;
         mWindowDecorViewModel = windowDecorViewModel;
         taskOrganizer.createRootTask(displayId, WINDOWING_MODE_MULTI_WINDOW, this);
@@ -203,12 +200,11 @@ public class StageTaskListener implements ShellTaskOrganizer.TaskListener {
             mRootTaskInfo = taskInfo;
             mSplitDecorManager = new SplitDecorManager(
                     mRootTaskInfo.configuration,
-                    mIconProvider,
-                    mSurfaceSession);
+                    mIconProvider);
             mCallbacks.onRootTaskAppeared();
             sendStatusChanged();
             mSyncQueue.runInSync(t -> mDimLayer =
-                    SurfaceUtils.makeDimLayer(t, mRootLeash, "Dim layer", mSurfaceSession));
+                    SurfaceUtils.makeDimLayer(t, mRootLeash, "Dim layer"));
         } else if (taskInfo.parentTaskId == mRootTaskInfo.taskId) {
             final int taskId = taskInfo.taskId;
             mChildrenLeashes.put(taskId, leash);
