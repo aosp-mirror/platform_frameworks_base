@@ -424,7 +424,7 @@
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Թույլ է տալիս ցանկացած հավելված պահել արտաքին սարքում՝ մանիֆեստի արժեքներից անկախ"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Չափերի փոփոխում բազմապատուհան ռեժիմում"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Բոլոր ակտիվությունների չափերը բազմապատուհան ռեժիմի համար դարձնել փոփոխելի՝ մանիֆեստի արժեքներից անկախ:"</string>
-    <string name="enable_freeform_support" msgid="7599125687603914253">"Ակտիվացնել կամայական ձևի պատուհանները"</string>
+    <string name="enable_freeform_support" msgid="7599125687603914253">"Թույլատրել կամայական ձևի պատուհանների ստեղծումը"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Միացնել ազատ ձևի փորձնական պատուհանների աջակցումը:"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Աշխատասեղանի պահուստավորման գաղտնաբառ"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Աշխատասեղանի ամբողջական պահուստավորումները այժմ պաշտպանված չեն"</string>

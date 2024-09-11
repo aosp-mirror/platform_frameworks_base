@@ -48,7 +48,7 @@
     <string name="wifi_security_psk_sae" msgid="8135104122179904684">"WPA2/WPA3-Personal"</string>
     <string name="wifi_security_none_owe" msgid="5241745828327404101">"କିଛି ନାହିଁ/Enhanced Open"</string>
     <string name="wifi_security_owe" msgid="3343421403561657809">"Enhanced Open"</string>
-    <string name="wifi_security_eap_suiteb" msgid="415842785991698142">"WPA3-Enterprise 192-ବିଟ୍"</string>
+    <string name="wifi_security_eap_suiteb" msgid="415842785991698142">"WPA3-Enterprise 192-ବିଟ"</string>
     <string name="wifi_remembered" msgid="3266709779723179188">"ସେଭ୍‌ ହୋଇଗଲା"</string>
     <string name="wifi_disconnected" msgid="7054450256284661757">"ବିଛିନ୍ନ କରାଯାଇଛି"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"ଅକ୍ଷମ ହୋଇଛି"</string>
@@ -112,13 +112,13 @@
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"ସକ୍ରିୟ (ବାମ ଏବଂ ଡାହାଣ)"</string>
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"ସକ୍ରିୟ (କେବଳ ମିଡିଆ)। <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ବେଟେରୀ।"</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"ସକ୍ରିୟ (କେବଳ ମିଡିଆ)। ବାମ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, ଡାହାଣ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> ବେଟେରୀ।"</string>
-    <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"କନେକ୍ଟ କରାଯାଇଛି (ଅଡିଓ ସେୟାରିଂକୁ ସମର୍ଥନ କରେ)। <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ବେଟେରୀ।"</string>
+    <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"କନେକ୍ଟ କରାଯାଇଛି (ଅଡିଓ ସେୟାରିଂକୁ ସପୋର୍ଟ କରେ)। <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ବେଟେରୀ।"</string>
     <string name="bluetooth_battery_level_untethered_lea_support" msgid="803110681688633362">"କନେକ୍ଟ କରାଯାଇଛି (ଅଡିଓ ସେୟାରିଂକୁ ସମର୍ଥନ କରେ)। ବାମ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, ଡାହାଣ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> ବେଟେରୀ।"</string>
     <string name="bluetooth_battery_level_untethered_left_lea_support" msgid="7707464334346454950">"କନେକ୍ଟ କରାଯାଇଛି (ଅଡିଓ ସେୟାରିଂକୁ ସମର୍ଥନ କରେ)। ବାମ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ବେଟେରୀ।"</string>
-    <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="8941549024377771038">"କନେକ୍ଟ କରାଯାଇଛି (ଅଡିଓ ସେୟାରିଂକୁ ସମର୍ଥନ କରେ)। ଡାହାଣ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ବେଟେରୀ।"</string>
+    <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="8941549024377771038">"କନେକ୍ଟ କରାଯାଇଛି (ଅଡିଓ ସେୟାରିଂକୁ ସପୋର୍ଟ କରେ)। ଡାହାଣ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ବେଟେରୀ।"</string>
     <string name="bluetooth_no_battery_level_lea_support" msgid="5721725041048434075">"କନେକ୍ଟ କରାଯାଇଛି (ଅଡିଓ ସେୟାରିଂକୁ ସମର୍ଥନ କରେ)"</string>
     <string name="bluetooth_active_media_only_no_battery_level" msgid="71106861912593126">"ସକ୍ରିୟ (କେବଳ ମିଡିଆ)"</string>
-    <string name="bluetooth_saved_device_lea_support" msgid="7231323139968285768">"ଅଡିଓ ସେୟାରିଂକୁ ସମର୍ଥନ କରେ"</string>
+    <string name="bluetooth_saved_device_lea_support" msgid="7231323139968285768">"ଅଡିଓ ସେୟାରିଂକୁ ସପୋର୍ଟ କରେ"</string>
     <string name="bluetooth_hearing_aid_media_only_left_active" msgid="1632152540901488645">"ସକ୍ରିୟ (କେବଳ ମିଡିଆ), କେବଳ ବାମ"</string>
     <string name="bluetooth_hearing_aid_media_only_right_active" msgid="3854140683042617230">"ସକ୍ରିୟ (କେବଳ ମିଡିଆ), କେବଳ ଡାହାଣ"</string>
     <string name="bluetooth_hearing_aid_media_only_left_and_right_active" msgid="1299913413062528417">"ସକ୍ରିୟ (କେବଳ ମିଡିଆ), ବାମ ଏବଂ ଡାହାଣ"</string>

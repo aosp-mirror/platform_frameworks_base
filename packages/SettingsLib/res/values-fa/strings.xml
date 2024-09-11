@@ -421,10 +421,10 @@
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"نمایش هشدارهای کانال اعلان"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"هنگامی که برنامه‌ای بدون وجود کانالی معتبر، اعلانی پست می‌کند، هشدار روی صفحه‌ای نمایش می‌دهد"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"اجازه اجباری به برنامه‌های دستگاه ذخیره خارجی"</string>
-    <string name="force_allow_on_external_summary" msgid="8525425782530728238">"بدون توجه به مقادیر آشکار، هر برنامه‌ای را برای نوشتن در حافظه خارجی واجد شرایط می‌کند"</string>
+    <string name="force_allow_on_external_summary" msgid="8525425782530728238">"صرف‌نظر از مقادیر مانیفست، هر برنامه‌ای را برای نوشتن در حافظه خارجی واجد شرایط می‌کند"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"اجبار فعالیت‌ها به قابل تغییر اندازه بودن"</string>
-    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"بدون توجه به مقادیر مانیفست، اندازه همه فعالیت‌ها برای حالت چند پنجره‌ای می‌تواند تغییر کند."</string>
-    <string name="enable_freeform_support" msgid="7599125687603914253">"فعال کردن پنجره‌های آزاد"</string>
+    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"صرف‌نظر از مقادیر مانیفست، اندازه همه فعالیت‌ها را برای حالت چندپنجره‌ای قابل‌تغییر می‌کند."</string>
+    <string name="enable_freeform_support" msgid="7599125687603914253">"فعال کردن پنجره قالب آزاد"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"فعال کردن پشتیبانی برای پنجره‌های آزاد آزمایشی."</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"گذرواژه پشتیبان‌گیری محلی"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"پشتیبان‌گیری کامل رایانه درحال حاضر محافظت نمی‌شود"</string>
@@ -660,7 +660,7 @@
     <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"حذف"</string>
     <string name="guest_exit_save_data_button" msgid="3690974510644963547">"ذخیره"</string>
     <string name="guest_exit_button" msgid="5774985819191803960">"خروج از حالت مهمان"</string>
-    <string name="guest_reset_button" msgid="2515069346223503479">"بازنشاندن جلسه مهمان"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"بازنشانی جلسه مهمان"</string>
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"خروج مهمان"</string>
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"همه فعالیت‌ها هنگام خروج حذف خواهد شد"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"می‌توانید فعالیتتان را هنگام خروج ذخیره یا حذف کنید"</string>

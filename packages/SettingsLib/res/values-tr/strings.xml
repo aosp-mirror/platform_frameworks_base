@@ -111,9 +111,9 @@
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"Etkin (yalnızca sağ taraf)"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"Etkin (sol ve sağ taraf)"</string>
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"Etkin (yalnızca medya). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> pil seviyesi."</string>
-    <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"Etkin (yalnızca medya), Sol: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, Sağ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> pil seviyesi."</string>
-    <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"Bağlı (ses paylaşımını destekler), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> pil seviyesi."</string>
-    <string name="bluetooth_battery_level_untethered_lea_support" msgid="803110681688633362">"Bağlı (ses paylaşımını destekler), Sol: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, Sağ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> pil seviyesi."</string>
+    <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"Etkin (yalnızca medya). Sol: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, Sağ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> pil seviyesi."</string>
+    <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"Bağlı (ses paylaşımını destekler). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> pil seviyesi."</string>
+    <string name="bluetooth_battery_level_untethered_lea_support" msgid="803110681688633362">"Bağlı (ses paylaşımını destekler). Sol: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, Sağ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> pil seviyesi."</string>
     <string name="bluetooth_battery_level_untethered_left_lea_support" msgid="7707464334346454950">"Bağlı (ses paylaşımını destekler). Sol: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> pil seviyesi."</string>
     <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="8941549024377771038">"Bağlı (ses paylaşımını destekler). Sağ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> pil seviyesi."</string>
     <string name="bluetooth_no_battery_level_lea_support" msgid="5721725041048434075">"Bağlı (ses paylaşımını destekler)"</string>
