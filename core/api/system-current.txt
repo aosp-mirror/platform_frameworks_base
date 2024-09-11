@@ -10772,6 +10772,7 @@ package android.os {
   public class Environment {
     method @NonNull public static java.io.File getDataCePackageDirectoryForUser(@NonNull java.util.UUID, @NonNull android.os.UserHandle, @NonNull String);
     method @NonNull public static java.io.File getDataDePackageDirectoryForUser(@NonNull java.util.UUID, @NonNull android.os.UserHandle, @NonNull String);
+    method @FlaggedApi("android.crashrecovery.flags.enable_crashrecovery") @NonNull public static java.io.File getDataSystemDeDirectory();
     method @NonNull public static java.util.Collection<java.io.File> getInternalMediaDirectories();
     method @NonNull public static java.io.File getOdmDirectory();
     method @NonNull public static java.io.File getOemDirectory();
