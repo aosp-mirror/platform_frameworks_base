@@ -104,6 +104,8 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -174,6 +176,7 @@ import com.android.systemui.communal.widgets.SmartspaceAppWidgetHostView
 import com.android.systemui.communal.widgets.WidgetConfigurator
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.phone.SystemUIDialogFactory
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -1143,6 +1146,15 @@ private fun WidgetContent(
     val selectedIndex =
         selectedKey?.let { key -> contentListState.list.indexOfFirst { it.key == key } }
 
+    val interactionSource = remember { MutableInteractionSource() }
+    val focusRequester = remember { FocusRequester() }
+    if (viewModel.isEditMode && selected) {
+        LaunchedEffect(Unit) {
+            delay(TransitionDuration.BETWEEN_HUB_AND_EDIT_MODE_MS.toLong())
+            focusRequester.requestFocus()
+        }
+    }
+
     val isSelected = selectedKey == model.key
 
     val selectableModifier =
@@ -1150,7 +1162,7 @@ private fun WidgetContent(
             Modifier.selectable(
                 selected = isSelected,
                 onClick = { viewModel.setSelectedKey(model.key) },
-                interactionSource = remember { MutableInteractionSource() },
+                interactionSource = interactionSource,
                 indication = null,
             )
         } else {
@@ -1160,6 +1172,8 @@ private fun WidgetContent(
     Box(
         modifier =
             modifier
+                .focusRequester(focusRequester)
+                .focusable(interactionSource = interactionSource)
                 .then(selectableModifier)
                 .thenIf(!viewModel.isEditMode && !model.inQuietMode) {
                     Modifier.pointerInput(Unit) {
