@@ -48,3 +48,11 @@ flag {
     description: "Tuner V4.0 APIs for Android W"
     bug: "320419647"
 }
+
+flag {
+    name: "hdmi_control_enhanced_behavior"
+    is_exported: true
+    namespace: "media_tv"
+    description: "Enhance HDMI-CEC power state and activeness transitions"
+    bug: "332780751"
+}
