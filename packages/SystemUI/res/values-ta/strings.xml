@@ -186,6 +186,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"முகம் மூலம் அன்லாக் செய்யப்பட்டது. தொடர அழுத்தவும்."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"முகம் அங்கீகரிக்கப்பட்டது. தொடர அழுத்தவும்."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"முகம் அங்கீகரிக்கப்பட்டது. தொடர அன்லாக் ஐகானை அழுத்தவும்."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"முகம் கொண்டு அன்லாக் செய்யப்பட்டது. தொடர தட்டவும்."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"அங்கீகரிக்கப்பட்டது"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"அங்கீகரிப்பை ரத்துசெய்"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"கூடுதல் விருப்பங்கள்"</string>
@@ -468,7 +469,7 @@
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"முடக்கப்பட்ட விட்ஜெட்டுக்கான ஆப்ஸ் ஐகான்"</string>
     <string name="icon_description_for_pending_widget" msgid="8413816401868001755">"நிறுவப்படும் விட்ஜெட்டுக்கான ஆப்ஸ் ஐகான்"</string>
     <string name="edit_widget" msgid="9030848101135393954">"விட்ஜெட்டைத் திருத்து"</string>
-    <string name="button_to_remove_widget" msgid="3948204829181214098">"அகற்றும்"</string>
+    <string name="button_to_remove_widget" msgid="3948204829181214098">"அகற்று"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"விட்ஜெட்டைச் சேர்"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"முடிந்தது"</string>
     <string name="label_for_button_in_empty_state_cta" msgid="7314975555382055823">"விட்ஜெட்களைச் சேர்"</string>

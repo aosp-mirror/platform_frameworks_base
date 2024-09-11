@@ -143,12 +143,12 @@
     <string name="cast_to_other_device_stop_dialog_message_specific_app" msgid="4891536209254041850">"‏הפעלת ה-Cast‏ של &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; תיפסק"</string>
     <string name="cast_to_other_device_stop_dialog_button" msgid="6420183747435521834">"‏הפסקת ה-Cast"</string>
     <string name="close_dialog_button" msgid="4749497706540104133">"סגירה"</string>
-    <string name="issuerecord_title" msgid="286627115110121849">"בעיה במכשיר ההקלטה"</string>
+    <string name="issuerecord_title" msgid="286627115110121849">"תיעוד של בעיה"</string>
     <string name="issuerecord_background_processing_label" msgid="1666840264959336876">"מתבצע עיבוד של בעיית ההקלטה"</string>
     <string name="issuerecord_channel_description" msgid="6142326363431474632">"התראה מתמשכת לסשן איסוף הבעיה"</string>
-    <string name="issuerecord_ongoing_screen_only" msgid="6248206059935015722">"בעיית הקלטה"</string>
+    <string name="issuerecord_ongoing_screen_only" msgid="6248206059935015722">"הבעיה בתהליך הקלטה"</string>
     <string name="issuerecord_share_label" msgid="3992657993619876199">"שיתוף"</string>
-    <string name="issuerecord_save_title" msgid="4161043023696751591">"בעיית ההקלטה נשמרה"</string>
+    <string name="issuerecord_save_title" msgid="4161043023696751591">"הקלטת הבעיה נשמרה"</string>
     <string name="issuerecord_save_text" msgid="1205985304551521495">"אפשר להקיש כדי להציג"</string>
     <string name="issuerecord_save_error" msgid="6913040083446722726">"שגיאה בשמירה של בעיית ההקלטה"</string>
     <string name="issuerecord_start_error" msgid="3402782952722871190">"שגיאה בהפעלה של בעיית ההקלטה"</string>
@@ -186,6 +186,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"הנעילה בוטלה באמצעות זיהוי הפנים. יש ללחוץ כדי להמשיך."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"הפנים זוהו. יש ללחוץ כדי להמשיך."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"הפנים זוהו. להמשך יש ללחוץ על סמל ביטול הנעילה."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"הנעילה בוטלה באמצעות זיהוי הפנים. צריך להקיש כדי להמשיך."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"מאומת"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"ביטול האימות"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"אפשרויות נוספות"</string>
@@ -372,8 +373,8 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"הקלטת המסך"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"התחלה"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"עצירה"</string>
-    <string name="qs_record_issue_label" msgid="8166290137285529059">"תיעוד הבעיה"</string>
-    <string name="qs_record_issue_start" msgid="2979831312582567056">"התחלה"</string>
+    <string name="qs_record_issue_label" msgid="8166290137285529059">"תיעוד בעיה"</string>
+    <string name="qs_record_issue_start" msgid="2979831312582567056">"קדימה"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"עצירה"</string>
     <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"דיווח על באג"</string>
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"איזה חלק בחוויית השימוש שלך במכשיר הושפע?"</string>
@@ -472,7 +473,7 @@
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"הוספת ווידג\'ט"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"סיום"</string>
     <string name="label_for_button_in_empty_state_cta" msgid="7314975555382055823">"הוספת ווידג\'טים"</string>
-    <string name="title_for_empty_state_cta" msgid="6161654421223450530">"קבלת גישה מהירה לווידג\'טים של האפליקציות המועדפות עליך בלי לבטל את נעילת הטאבלט."</string>
+    <string name="title_for_empty_state_cta" msgid="6161654421223450530">"קבלת גישה מהירה לווידג\'טים של אפליקציות בלי לבטל את נעילת הטאבלט."</string>
     <string name="dialog_title_to_allow_any_widget" msgid="1004820948962675644">"לאפשר להציג כל ווידג\'ט במסך הנעילה?"</string>
     <string name="button_text_to_open_settings" msgid="1987729256950941628">"לפתיחת ההגדרות"</string>
     <string name="work_mode_off_title" msgid="5794818421357835873">"להפעיל את האפליקציות לעבודה?"</string>
@@ -560,15 +561,15 @@
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
     <string name="monitoring_subtitle_network_logging" msgid="2444199331891219596">"רישום התנועה ברשת"</string>
     <string name="monitoring_subtitle_ca_certificate" msgid="8588092029755175800">"‏אישורי CA"</string>
-    <string name="monitoring_button_view_policies" msgid="3869724835853502410">"הצגת מדיניות"</string>
+    <string name="monitoring_button_view_policies" msgid="3869724835853502410">"צפייה במדיניות"</string>
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"לצפייה באמצעי בקרת ההורים"</string>
     <string name="monitoring_description_named_management" msgid="505833016545056036">"‏המכשיר הזה שייך לארגון <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nמנהל ה-IT יכול לנטר ולנהל הגדרות, גישה ארגונית, אפליקציות, נתונים המשויכים למכשיר ומידע על מיקום המכשיר.\n\nלמידע נוסף, יש לפנות למנהל ה-IT."</string>
     <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"ל-<xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g> תהיה אפשרות לגשת לנתונים המשויכים למכשיר הזה, לנהל אפליקציות ולשנות את הגדרות המכשיר.\n\nאם יש לך שאלות, ניתן ליצור קשר עם <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g>."</string>
-    <string name="monitoring_description_management" msgid="4308879039175729014">"‏המכשיר הזה שייך לארגון שלך.\n\nמנהל ה-IT יכול לנטר ולנהל הגדרות, גישה ארגונית, אפליקציות, נתונים המשויכים למכשיר ומידע על מיקום המכשיר.\n\nלמידע נוסף, יש לפנות למנהל ה-IT."</string>
+    <string name="monitoring_description_management" msgid="4308879039175729014">"‏המכשיר הזה שייך לארגון שלך.\n\nהאדמין ב-IT יכול לנטר ולנהל הגדרות, הרשאות גישה לארגון, אפליקציות, נתונים המשויכים למכשיר ומידע על מיקום המכשיר.\n\nלמידע נוסף, אפשר לפנות לאדמין ב-IT."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"הארגון שלך התקין רשות אישורים במכשיר. ניתן לעקוב אחר התנועה ברשת המאובטחת או לשנות אותה."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"הארגון שלך התקין רשות אישורים בפרופיל העבודה. ניתן לעקוב אחר התנועה ברשת המאובטחת או לשנות אותה."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"במכשיר זה מותקנת רשות אישורים. ניתן לעקוב אחר התנועה ברשת המאובטחת או לשנות אותה."</string>
-    <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"מנהל המערכת הפעיל את התכונה \'רישום התנועה ברשת\', שמנטרת את תנועת הנתונים במכשיר."</string>
+    <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"האדמין הפעיל את התכונה \'רישום התנועה ברשת\', שמנטרת את תנועת הנתונים במכשיר."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"מנהל המערכת הפעיל את תכונת רישום התנועה ברשת, שמנטרת את תנועת הנתונים בפרופיל העבודה, אבל לא בפרופיל האישי."</string>
     <string name="monitoring_description_named_vpn" msgid="8220190039787149671">"‏המכשיר הזה מחובר לאינטרנט דרך <xliff:g id="VPN_APP">%1$s</xliff:g>. הפעילויות שלך ברשת, כולל האימיילים ונתוני הגלישה, גלויות לספק ה-VPN."</string>
     <string name="monitoring_description_managed_device_named_vpn" msgid="7693648349547785255">"‏המכשיר הזה מחובר לאינטרנט דרך <xliff:g id="VPN_APP">%1$s</xliff:g>. הפעילויות שלך ברשת, כולל האימיילים ונתוני הגלישה, גלויות לאדמין ב-IT."</string>
@@ -957,7 +958,7 @@
     <string name="slice_permission_text_1" msgid="6675965177075443714">"- תהיה לה אפשרות לקרוא מידע מאפליקציית <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="slice_permission_text_2" msgid="6758906940360746983">"- תהיה לה יכולת לנקוט פעולה בתוך <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="slice_permission_checkbox" msgid="4242888137592298523">"יש לאשר לאפליקציית <xliff:g id="APP">%1$s</xliff:g> להראות חלקים מכל אפליציה שהיא"</string>
-    <string name="slice_permission_allow" msgid="6340449521277951123">"אני רוצה לאשר"</string>
+    <string name="slice_permission_allow" msgid="6340449521277951123">"אישור"</string>
     <string name="slice_permission_deny" msgid="6870256451658176895">"אני לא מרשה"</string>
     <string name="auto_saver_title" msgid="6873691178754086596">"יש להקיש כדי לתזמן את מצב החיסכון בסוללה"</string>
     <string name="auto_saver_text" msgid="3214960308353838764">"מומלץ להפעיל את התכונה כשיש סבירות גבוהה שהסוללה תתרוקן"</string>

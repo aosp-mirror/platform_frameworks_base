@@ -148,7 +148,7 @@
     <string name="issuerecord_channel_description" msgid="6142326363431474632">"การแจ้งเตือนต่อเนื่องสำหรับเซสชันการรวบรวมปัญหา"</string>
     <string name="issuerecord_ongoing_screen_only" msgid="6248206059935015722">"กำลังบันทึกปัญหา"</string>
     <string name="issuerecord_share_label" msgid="3992657993619876199">"แชร์"</string>
-    <string name="issuerecord_save_title" msgid="4161043023696751591">"บันทึกไฟล์บันทึกปัญหาแล้ว"</string>
+    <string name="issuerecord_save_title" msgid="4161043023696751591">"จัดเก็บไฟล์บันทึกปัญหาแล้ว"</string>
     <string name="issuerecord_save_text" msgid="1205985304551521495">"แตะเพื่อดู"</string>
     <string name="issuerecord_save_error" msgid="6913040083446722726">"เกิดข้อผิดพลาดในการบันทึกไฟล์บันทึกปัญหา"</string>
     <string name="issuerecord_start_error" msgid="3402782952722871190">"เกิดข้อผิดพลาดในการเริ่มบันทึกปัญหา"</string>
@@ -186,6 +186,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"ปลดล็อกด้วยใบหน้าแล้ว กดเพื่อดำเนินการต่อ"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"จดจำใบหน้าได้ กดเพื่อดำเนินการต่อ"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"จดจำใบหน้าได้ กดไอคอนปลดล็อกเพื่อดำเนินการต่อ"</string>
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"ปลดล็อกด้วยใบหน้าแล้ว แตะเพื่อดำเนินการต่อ"</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"ตรวจสอบสิทธิ์แล้ว"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"ยกเลิกการตรวจสอบสิทธิ์"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"ตัวเลือกเพิ่มเติม"</string>

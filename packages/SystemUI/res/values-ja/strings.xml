@@ -44,8 +44,8 @@
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"<xliff:g id="APPLICATION">%1$s</xliff:g> を起動して <xliff:g id="USB_DEVICE">%2$s</xliff:g> を処理しますか？"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"<xliff:g id="APPLICATION">%1$s</xliff:g> を開いて <xliff:g id="USB_DEVICE">%2$s</xliff:g>を利用しますか？\nこのアプリに録音権限は付与されていませんが、この USB デバイスから音声を収集できるようになります。"</string>
     <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"<xliff:g id="APPLICATION">%1$s</xliff:g> を起動して <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> を処理しますか？"</string>
-    <string name="usb_accessory_uri_prompt" msgid="6756649383432542382">"このUSBアクセサリを扱うアプリはインストールされていません。詳細: <xliff:g id="URL">%1$s</xliff:g>"</string>
-    <string name="title_usb_accessory" msgid="1236358027511638648">"USBアクセサリ"</string>
+    <string name="usb_accessory_uri_prompt" msgid="6756649383432542382">"このUSBアクセサリーを扱うアプリはインストールされていません。詳細: <xliff:g id="URL">%1$s</xliff:g>"</string>
+    <string name="title_usb_accessory" msgid="1236358027511638648">"USBアクセサリー"</string>
     <string name="label_view" msgid="6815442985276363364">"表示"</string>
     <string name="always_use_device" msgid="210535878779644679">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> を接続している場合は常に <xliff:g id="APPLICATION">%1$s</xliff:g> を起動する"</string>
     <string name="always_use_accessory" msgid="1977225429341838444">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g> を接続している場合は常に <xliff:g id="APPLICATION">%1$s</xliff:g> を起動する"</string>
@@ -67,8 +67,8 @@
     <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"ワイヤレス デバッグは許可されていません"</string>
     <string name="wifi_debugging_secondary_user_message" msgid="9085779370142222881">"このデバイスに現在ログインしているユーザーはワイヤレス デバッグを ON にできません。この機能を使用するには、管理者ユーザーに切り替えてください。"</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"USB ポート無効"</string>
-    <string name="usb_contaminant_message" msgid="7730476585174719805">"液体やゴミからデバイスを保護するため、USB ポートは無効になっています。アクセサリの検出は行われません。\n\nUSB ポートを再び安全に使用できるようになりましたらお知らせします。"</string>
-    <string name="usb_port_enabled" msgid="531823867664717018">"USB ポートが有効になり、充電器やアクセサリを検出できるようになりました"</string>
+    <string name="usb_contaminant_message" msgid="7730476585174719805">"液体やゴミからデバイスを保護するため、USB ポートは無効になっています。アクセサリーの検出は行われません。\n\nUSB ポートを再び安全に使用できるようになりましたらお知らせします。"</string>
+    <string name="usb_port_enabled" msgid="531823867664717018">"USB ポートが有効になり、充電器やアクセサリーを検出できるようになりました"</string>
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"USB を有効にする"</string>
     <string name="learn_more" msgid="4690632085667273811">"詳細"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"スクリーンショット"</string>
@@ -186,6 +186,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"顔でロック解除しました。押して続行してください。"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"顔を認識しました。押して続行してください。"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"顔を認識しました。ロック解除アイコンを押して続行します。"</string>
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"顔認証でロック解除しました。タップして続行します。"</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"認証済み"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"認証をキャンセルします"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"その他のオプション"</string>
@@ -903,7 +904,7 @@
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"取り扱いに関する手順をご覧ください"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"取り扱いに関する手順をご覧ください"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"デバイスを電源から外します"</string>
-    <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"充電ポートの近くにデバイスを置くと、本体が熱くなります。デバイスが充電器や USB アクセサリに接続されている場合は外してください。ケーブルが熱くなっていることもあるので注意してください。"</string>
+    <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"充電ポートの近くにデバイスを置くと、本体が熱くなります。デバイスが充電器や USB アクセサリーに接続されている場合は外してください。ケーブルが熱くなっていることもあるので注意してください。"</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"取り扱いに関する手順をご覧ください"</string>
     <string name="lockscreen_shortcut_left" msgid="1238765178956067599">"左ショートカット"</string>
     <string name="lockscreen_shortcut_right" msgid="4138414674531853719">"右ショートカット"</string>
@@ -1279,7 +1280,7 @@
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"アプリを選択"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"ショートカットの長押しが必要です"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"キャンセル"</string>
-    <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"画面を切り替えましょう"</string>
+    <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"画面を切り替える"</string>
     <string name="rear_display_folded_bottom_sheet_title" msgid="3930008746560711990">"スマートフォンを開いてください"</string>
     <string name="rear_display_unfolded_bottom_sheet_title" msgid="6291111173057304055">"画面を切り替えますか？"</string>
     <string name="rear_display_folded_bottom_sheet_description" msgid="6842767125783222695">"高解像度で撮るには背面カメラを使用してください"</string>

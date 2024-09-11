@@ -186,6 +186,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Dibuka kunci dengan wajah. Tekan untuk meneruskan."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Wajah dicam. Tekan untuk meneruskan."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Wajah dicam. Tekan ikon buka kunci untuk meneruskan."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"Dibuka kunci dengan wajah. Ketik untuk meneruskan proses."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Disahkan"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Batalkan Pengesahan"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"Lagi Pilihan"</string>
@@ -372,7 +373,7 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Rakam skrin"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Mula"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Berhenti"</string>
-    <string name="qs_record_issue_label" msgid="8166290137285529059">"Rekodkan Masalah"</string>
+    <string name="qs_record_issue_label" msgid="8166290137285529059">"Rakam Masalah"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"Mula"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"Hentikan"</string>
     <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"Laporan Pepijat"</string>
@@ -472,7 +473,7 @@
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Tambahkan widget"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"Selesai"</string>
     <string name="label_for_button_in_empty_state_cta" msgid="7314975555382055823">"Tambahkan widget"</string>
-    <string name="title_for_empty_state_cta" msgid="6161654421223450530">"Dapatkan akses pantas kepada widget apl kegemaran anda tanpa membuka kunci tablet anda."</string>
+    <string name="title_for_empty_state_cta" msgid="6161654421223450530">"Dapatkan akses pantas kepada widget apl kegemaran anda tanpa perlu membuka kunci tablet."</string>
     <string name="dialog_title_to_allow_any_widget" msgid="1004820948962675644">"Benarkan sebarang widget pada skrin kunci?"</string>
     <string name="button_text_to_open_settings" msgid="1987729256950941628">"Buka tetapan"</string>
     <string name="work_mode_off_title" msgid="5794818421357835873">"Nyahjeda apl kerja?"</string>

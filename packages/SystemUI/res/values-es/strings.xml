@@ -186,6 +186,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Desbloqueado con la cara. Pulsa para continuar."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Cara reconocida. Pulsa para continuar."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Cara reconocida. Pulsa el icono de desbloquear para continuar."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"Desbloqueado con la cara. Toca para continuar."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Se ha autenticado"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Cancelar autenticación"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"Más opciones"</string>
@@ -372,10 +373,10 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Grabar pantalla"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Iniciar"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Detener"</string>
-    <string name="qs_record_issue_label" msgid="8166290137285529059">"Problema de grabación"</string>
+    <string name="qs_record_issue_label" msgid="8166290137285529059">"Grabar problema"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"Iniciar"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"Detener"</string>
-    <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"Informe errores"</string>
+    <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"Informe de errores"</string>
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"¿Qué parte de tu experiencia se ha visto afectada?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"Selecciona el tipo de problema"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Grabar pantalla"</string>

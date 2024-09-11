@@ -19,7 +19,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="4811759950673118541">"UI sistema"</string>
+    <string name="app_label" msgid="4811759950673118541">"UI di sistema"</string>
     <string name="battery_low_title" msgid="5319680173344341779">"Attivare il risparmio energetico?"</string>
     <string name="battery_low_description" msgid="3282977755476423966">"Batteria rimanente: <xliff:g id="PERCENTAGE">%s</xliff:g>. Il risparmio energetico attiva il tema scuro, limita l\'attività in background e ritarda le notifiche."</string>
     <string name="battery_low_intro" msgid="5148725009653088790">"Il risparmio energetico attiva il tema scuro, limita l\'attività in background e ritarda le notifiche."</string>
@@ -186,6 +186,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Sbloccato con il volto. Premi per continuare."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Volto riconosciuto. Premi per continuare."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Volto riconosciuto. Premi l\'icona Sblocca e continua."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"Sbloccato con il volto. Tocca per continuare."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Autenticazione eseguita"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Annulla autenticazione"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"Altre opzioni"</string>
@@ -376,7 +377,7 @@
     <string name="qs_record_issue_start" msgid="2979831312582567056">"Avvia"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"Interrompi"</string>
     <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"Segnalazione di bug"</string>
-    <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"Quali problemi ha l\'esperienza del dispositivo?"</string>
+    <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"Quali problemi ha l\'esperienza con il dispositivo?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"Seleziona il tipo di problema"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Registrazione schermo"</string>
     <string name="performance" msgid="6552785217174378320">"Prestazioni"</string>
@@ -461,7 +462,7 @@
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"Scorri a sinistra per iniziare il tutorial della community"</string>
     <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"Personalizza"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"Chiudi"</string>
-    <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"Aggiungi, rimuovi e riordina i tuoi widget in questo spazio"</string>
+    <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"Aggiungi, rimuovi e riordina i widget in questo spazio"</string>
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Aggiungi altri widget"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Premi a lungo per personalizzare i widget"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Personalizza widget"</string>
@@ -1175,7 +1176,7 @@
     <string name="video_status" msgid="4548544654316843225">"Visione in corso"</string>
     <string name="audio_status" msgid="4237055636967709208">"Ascolto in corso"</string>
     <string name="game_status" msgid="1340694320630973259">"Gioco in corso"</string>
-    <string name="empty_user_name" msgid="3389155775773578300">"Persone amiche"</string>
+    <string name="empty_user_name" msgid="3389155775773578300">"Amico"</string>
     <string name="empty_status" msgid="5938893404951307749">"Chattiamo stasera."</string>
     <string name="status_before_loading" msgid="1500477307859631381">"I contenuti verranno mostrati a breve"</string>
     <string name="missed_call" msgid="4228016077700161689">"Chiamata persa"</string>
