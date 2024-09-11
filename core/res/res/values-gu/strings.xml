@@ -90,7 +90,7 @@
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"કટોકટી કૉલબૅક મોડ"</string>
     <string name="notification_channel_mobile_data_status" msgid="1941911162076442474">"મોબાઇલ ડેટાની સ્થિતિ"</string>
     <string name="notification_channel_sms" msgid="1243384981025535724">"SMS મેસેજ"</string>
-    <string name="notification_channel_voice_mail" msgid="8457433203106654172">"વૉઇસમેઇલ સંદેશા"</string>
+    <string name="notification_channel_voice_mail" msgid="8457433203106654172">"વૉઇસમેઇલ મેસેજ"</string>
     <string name="notification_channel_wfc" msgid="9048240466765169038">"વાઇ-ફાઇ કૉલિંગ"</string>
     <string name="notification_channel_sim" msgid="5098802350325677490">"સિમનું સ્ટેટસ"</string>
     <string name="notification_channel_sim_high_prio" msgid="642361929452850928">"સિમ કાર્ડનું ઉચ્ચ પ્રાધાન્યતાનું સ્ટેટસ"</string>
@@ -122,7 +122,7 @@
     <string name="roamingTextSearching" msgid="5323235489657753486">"સેવા શોધી રહ્યું છે"</string>
     <string name="wfcRegErrorTitle" msgid="3193072971584858020">"વાઇ-ફાઇ કૉલિંગ સેટ કરી શકાયું નથી"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="468830943567116703">"વાઇ-ફાઇ પરથી કૉલ કરવા અને સંદેશા મોકલવા માટે પહેલાં તમારા કૅરિઅરને આ સેવા સેટ કરવા માટે કહો. પછી સેટિંગમાંથી વાઇ-ફાઇ કૉલિંગ ફરીથી ચાલુ કરો. (ભૂલ કોડ: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
+    <item msgid="468830943567116703">"વાઇ-ફાઇ પરથી કૉલ કરવા અને મેસેજ મોકલવા માટે પહેલાં તમારા મોબાઇલ ઑપરેટરને આ સેવા સેટ કરવા માટે કહો. પછી સેટિંગમાંથી વાઇ-ફાઇ કૉલિંગ ફરીથી ચાલુ કરો. (ભૂલ કોડ: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="4795145070505729156">"તમારા કૅરિઅરમાં વાઇ-ફાઇ કૉલિંગ રજિસ્ટર કરવામાં સમસ્યા આવી: <xliff:g id="CODE">%1$s</xliff:g>"</item>
@@ -203,8 +203,8 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"વ્યવસ્થાપકે ડિવાઇસ વ્યક્તિગત ઉપયોગ માટે આપી દીધું છે"</string>
     <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"ખાનગી સ્પેસ કાઢી નાખી"</string>
     <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"મેનેજ કરેલા ડિવાઇસ પર, તમારી સંસ્થા દ્વારા ખાનગી સ્પેસને મંજૂરી આપવામાં આવતી નથી."</string>
-    <string name="network_logging_notification_title" msgid="554983187553845004">"ડિવાઇસ મેનેજ થયેલ છે"</string>
-    <string name="network_logging_notification_text" msgid="1327373071132562512">"તમારી સંસ્થા આ ઉપકરણનું સંચાલન કરે છે અને નેટવર્ક ટ્રાફિફનું નિયમન કરી શકે છે. વિગતો માટે ટૅપ કરો."</string>
+    <string name="network_logging_notification_title" msgid="554983187553845004">"ડિવાઇસ મેનેજ થયેલું છે"</string>
+    <string name="network_logging_notification_text" msgid="1327373071132562512">"તમારી સંસ્થા આ ડિવાઇસને મેનેજ કરે છે અને નેટવર્ક ટ્રાફિફ મૉનિટર કરી શકે છે. વિગતો માટે ટૅપ કરો."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"ઍપ તમારા સ્થાનને ઍક્સેસ કરી શકે છે"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"વધુ જાણવા માટે તમારા IT વ્યવસ્થાપકનો સંપર્ક કરો"</string>
     <string name="geofencing_service" msgid="3826902410740315456">"જીઓફેન્સિંગ સેવા"</string>
@@ -266,7 +266,7 @@
     <string name="global_action_logout" msgid="6093581310002476511">"સત્ર સમાપ્ત કરો"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"સ્ક્રીનશૉટ"</string>
     <string name="bugreport_title" msgid="8549990811777373050">"બગ રિપોર્ટ"</string>
-    <string name="bugreport_message" msgid="5212529146119624326">"આ, એક ઇ-મેઇલ સંદેશ તરીકે મોકલવા માટે, તમારા વર્તમાન ઉપકરણ સ્થિતિ વિશેની માહિતી એકત્રિત કરશે. એક બગ રિપોર્ટ પ્રારંભ કરીને તે મોકલવા માટે તૈયાર ન થઈ જાય ત્યાં સુધી તેમાં થોડો સમય લાગશે; કૃપા કરીને ધીરજ રાખો."</string>
+    <string name="bugreport_message" msgid="5212529146119624326">"આ, એક ઇ-મેઇલ મેસેજ તરીકે મોકલવા માટે, તમારા વર્તમાન ડિવાઇસના સ્ટેટસ વિશે માહિતી એકત્રિત કરશે. એક બગ રિપોર્ટના શરુ થવાથી લઈને મોકલવા માટે તૈયાર થવા સુધીની પ્રક્રિયામાં થોડો સમય લાગશે; કૃપા કરીને ધીરજ રાખો."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"ક્રિયાપ્રતિક્રિયાત્મક રિપોર્ટ"</string>
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"મોટાભાગના સંજોગોમાં આનો ઉપયોગ કરો. તે રિપોર્ટની પ્રગતિને ટ્રૅક કરવા, સમસ્યા વિશે વધુ વિગતો દાખલ કરવાની અને સ્ક્રીનશૉટ્સ લેવાની મંજૂરી આપે છે. તે કેટલાક ઓછા ઉપયોગમાં આવતાં વિભાગો કે જે જાણ કરવામાં વધુ સમય લેતાં હોય તેને છોડી દઈ શકે છે."</string>
     <string name="bugreport_option_full_title" msgid="7681035745950045690">"પૂર્ણ રિપોર્ટ"</string>
@@ -291,8 +291,8 @@
     <string name="notification_channel_security" msgid="8516754650348238057">"સુરક્ષા"</string>
     <string name="notification_channel_car_mode" msgid="2123919247040988436">"કાર મોડ"</string>
     <string name="notification_channel_account" msgid="6436294521740148173">"એકાઉન્ટ સ્થિતિ"</string>
-    <string name="notification_channel_developer" msgid="1691059964407549150">"વિકાસકર્તા માટેના સંદેશા"</string>
-    <string name="notification_channel_developer_important" msgid="7197281908918789589">"ડેવલપર માટેના મહત્ત્વપૂર્ણ સંદેશા"</string>
+    <string name="notification_channel_developer" msgid="1691059964407549150">"ડેવલપર માટેના મેસેજ"</string>
+    <string name="notification_channel_developer_important" msgid="7197281908918789589">"ડેવલપર માટેના મહત્ત્વપૂર્ણ મેસેજ"</string>
     <string name="notification_channel_updates" msgid="7907863984825495278">"અપડેટ્સ"</string>
     <string name="notification_channel_network_status" msgid="2127687368725272809">"નેટવર્ક સ્થિતિ"</string>
     <string name="notification_channel_network_alerts" msgid="6312366315654526528">"નેટવર્ક ચેતવણીઓ"</string>
@@ -324,7 +324,7 @@
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"કૅલેન્ડર"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"તમારા કેલેન્ડરને ઍક્સેસ કરવાની"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS સંદેશા મોકલવાની અને જોવાની"</string>
+    <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS મેસેજ મોકલો અને જુઓ"</string>
     <string name="permgrouplab_storage" msgid="17339216290379241">"ફાઇલો"</string>
     <string name="permgroupdesc_storage" msgid="5378659041354582769">"તમારા ડિવાઇસ પરની ફાઇલો ઍક્સેસ કરો"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"મ્યુઝિક અને ઑડિયો"</string>
@@ -379,28 +379,28 @@
     <string name="permdesc_processOutgoingCalls" msgid="7833149750590606334">"એપ્લિકેશનને આઉટગોઇંગ કૉલ દરમિયાન કૉલને એક અલગ નંબર પર રીડાયરેક્ટ કરવા અથવા કૉલને સંપૂર્ણપણે છોડી દેવાનાં વિકલ્પ સાથે ડાયલ થઈ રહેલા નંબરને જોવાની મંજૂરી આપે છે."</string>
     <string name="permlab_answerPhoneCalls" msgid="4131324833663725855">"ફોન કૉલને જવાબ આપો"</string>
     <string name="permdesc_answerPhoneCalls" msgid="894386681983116838">"ઍપ્લિકેશનને ઇનકમિંગ ફોન કૉલને જવાબ આપવાની મંજૂરી આપે છે."</string>
-    <string name="permlab_receiveSms" msgid="505961632050451881">"ટેક્સ્ટ સંદેશા (SMS) પ્રાપ્ત કરો"</string>
-    <string name="permdesc_receiveSms" msgid="1797345626687832285">"ઍપ્લિકેશનને SMS સંદેશા પ્રાપ્ત કરવાની અને તેના પર પ્રક્રિયા કરવાની મંજૂરી આપે છે. આનો અર્થ એ કે ઍપ્લિકેશન તમને દર્શાવ્યા વિના તમારા ઉપકરણ પર મોકલેલ સંદેશાઓનું નિરીક્ષણ કરી શકે છે અથવા કાઢી નાખી શકે છે."</string>
-    <string name="permlab_receiveMms" msgid="4000650116674380275">"ટેક્સ્ટ સંદેશા (MMS) પ્રાપ્ત કરો"</string>
-    <string name="permdesc_receiveMms" msgid="958102423732219710">"ઍપ્લિકેશનને MMS સંદેશા પ્રાપ્ત કરવાની અને તેના પર પ્રક્રિયા કરવાની મંજૂરી આપે છે. આનો અર્થ એ કે ઍપ્લિકેશન તમને દર્શાવ્યા વિના તમારા ઉપકરણ પર મોકલેલ સંદેશાઓનું નિરીક્ષણ કરી શકે છે અથવા કાઢી નાખી શકે છે."</string>
-    <string name="permlab_bindCellBroadcastService" msgid="586746677002040651">"સેલ બ્રોડકાસ્ટ સંદેશા ફૉરવર્ડ કરો"</string>
-    <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"સેલ બ્રોડકાસ્ટ સંદેશા પ્રાપ્ત થાય કે તરત ફૉરવર્ડ કરવા માટે સેલ બ્રોડકાસ્ટ મૉડ્યૂલ સાથે પ્રતિબદ્ધ થવા બાબતે ઍપને મંજૂરી આપે છે. તમને કટોકટીની પરિસ્થિતિની ચેતવણી આપવા માટે સેલ બ્રોડકાસ્ટ અલર્ટ અમુક સ્થાનોમાં ડિલિવર કરવામાં આવે છે. કટોકટી અંગેનો સેલ બ્રોડકાસ્ટ પ્રાપ્ત થાય, ત્યારે દુર્ભાવનાપૂર્ણ ઍપ તમારા ડિવાઇસના કાર્યપ્રદર્શન અથવા ઑપરેશનમાં વિક્ષેપ પાડે તેમ બની શકે છે."</string>
+    <string name="permlab_receiveSms" msgid="505961632050451881">"ટેક્સ્ટ મેસેજ (SMS) મેળવો"</string>
+    <string name="permdesc_receiveSms" msgid="1797345626687832285">"ઍપને SMS મેસેજ મેળવવાની અને તેના પર પ્રક્રિયા કરવાની મંજૂરી આપે છે. આનો અર્થ એ કે ઍપ તમને દર્શાવ્યા વિના તમારા ડિવાઇસ પર મોકલેલા મેસેજનું નિરીક્ષણ કરી શકે છે અથવા કાઢી નાખી શકે છે."</string>
+    <string name="permlab_receiveMms" msgid="4000650116674380275">"ટેક્સ્ટ મેસેજ (MMS) મેળવો"</string>
+    <string name="permdesc_receiveMms" msgid="958102423732219710">"ઍપને MMS મેસેજ પ્રાપ્ત કરવાની અને તેના પર પ્રક્રિયા કરવાની મંજૂરી આપે છે. આનો અર્થ એ કે ઍપ તમને દર્શાવ્યા વિના તમારા ડિવાઇસ પર મોકલેલા મેસેજને મૉનિટર કરી શકે છે અથવા ડિલીટ કરી શકે છે."</string>
+    <string name="permlab_bindCellBroadcastService" msgid="586746677002040651">"સેલ બ્રોડકાસ્ટ મેસેજ ફૉરવર્ડ કરો"</string>
+    <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"સેલ બ્રોડકાસ્ટ મેસેજ પ્રાપ્ત થાય કે તરત ફૉરવર્ડ કરવા માટે સેલ બ્રોડકાસ્ટ મૉડ્યૂલ સાથે પ્રતિબદ્ધ થવા બાબતે ઍપને મંજૂરી આપે છે. તમને કટોકટીની પરિસ્થિતિની ચેતવણી આપવા માટે સેલ બ્રોડકાસ્ટ અલર્ટ અમુક સ્થાનોમાં ડિલિવર કરવામાં આવે છે. કટોકટી અંગેનો સેલ બ્રોડકાસ્ટ પ્રાપ્ત થાય, ત્યારે દુર્ભાવનાપૂર્ણ ઍપ તમારા ડિવાઇસના કાર્યપ્રદર્શન અથવા ઑપરેશનમાં વિક્ષેપ પાડે તેમ બની શકે છે."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"ચાલી રહેલા કૉલ મેનેજ કરો"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"ઍપને તમારા ડિવાઇસ પર ચાલુ કૉલ વિશેની વિગતો જોવાની અને આ કૉલને નિયંત્રિત કરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_accessLastKnownCellId" msgid="7638226620825665130">"છેલ્લી જ્ઞાત સેલ ઓળખને ઍક્સેસ કરો."</string>
     <string name="permdesc_accessLastKnownCellId" msgid="6664621339249308857">"ઍપને ટેલિફોન દ્વારા પ્રદાન કરવામાં આવેલી છેલ્લી જ્ઞાત સેલ ઓળખને ઍક્સેસ કરવાની મંજૂરી આપે છે."</string>
-    <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"સેલ બ્રોડકાસ્ટ સંદેશા વાંચો"</string>
+    <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"સેલ બ્રોડકાસ્ટ મેસેજ વાંચો"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"ઍપ તમારા ડિવાઇસ દ્વારા પ્રાપ્ત થયેલ સેલ બ્રોડકાસ્ટ સંદેશાને વાંચવાની મંજૂરી આપે છે. સેલ બ્રોડકાસ્ટ ચેતવણીઓ તમને ઇમર્જન્સીની સ્થિતિઓ અંગે ચેતવવા માટે કેટલાક સ્થાનોમાં વિતરિત થાય છે. જ્યારે ઇમર્જન્સીનો સેલ બ્રોડકાસ્ટ પ્રાપ્ત થાય ત્યારે દુર્ભાવનાપૂર્ણ ઍપ તમારા ડિવાઇસના કાર્યપ્રદર્શન અથવા ઓપરેશનમાં હસ્તક્ષેપ કરી શકે છે."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"સબ્સ્ક્રાઇબ કરેલ ફીડ્સ વાંચો"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="6911349196661811865">"એપ્લિકેશનને હાલમાં સમન્વયિત ફીડ્સ વિશે વિગતો મેળવવાની મંજૂરી આપે છે."</string>
-    <string name="permlab_sendSms" msgid="7757368721742014252">"SMS સંદેશા મોકલો અને જુઓ"</string>
-    <string name="permdesc_sendSms" msgid="6757089798435130769">"એપ્લિકેશનને SMS સંદેશા મોકલવાની મંજૂરી આપે છે. આના પરિણામે અનપેક્ષિત શુલ્ક લાગી શકે છે. દુર્ભાવનાપૂર્ણ ઍપ્લિકેશનો તમારી પુષ્ટિ વિના સંદેશા મોકલીને તમારા નાણા ખર્ચાવી શકે છે."</string>
-    <string name="permlab_readSms" msgid="5164176626258800297">"તમારા ટેક્સ્ટ સંદેશા (SMS અથવા MMS) વાંચો"</string>
-    <string name="permdesc_readSms" product="tablet" msgid="7912990447198112829">"આ ઍપ્લિકેશન, તમારા ટેબ્લેટ પર સંગ્રહિત તમામ SMS (ટેક્સ્ટ) સંદેશા વાંચી શકે છે."</string>
-    <string name="permdesc_readSms" product="tv" msgid="3054753345758011986">"આ ઍપ, તમારા Android TV ડિવાઇસ પર સંગ્રહિત તમામ SMS (ટેક્સ્ટ) સંદેશા વાંચી શકે છે."</string>
-    <string name="permdesc_readSms" product="default" msgid="774753371111699782">"આ ઍપ્લિકેશન, તમારા ફોન પર સંગ્રહિત તમામ SMS (ટેક્સ્ટ) સંદેશા વાંચી શકે છે."</string>
-    <string name="permlab_receiveWapPush" msgid="4223747702856929056">"ટેક્સ્ટ સંદેશા (WAP) પ્રાપ્ત કરો"</string>
-    <string name="permdesc_receiveWapPush" msgid="1638677888301778457">"એપ્લિકેશનને WAP સંદેશા પ્રાપ્ત કરવાની અને તેના પર પ્રક્રિયા કરવાની મંજૂરી આપે છે. આ પરવાનગીમાં તમને દર્શાવ્યા વિના તમને મોકલેલ સંદેશાઓનું નિરીક્ષણ કરવાની અને કાઢી નાખવાની ક્ષમતાનો સમાવેશ થાય છે."</string>
+    <string name="permlab_sendSms" msgid="7757368721742014252">"SMS મેસેજ મોકલો અને જુઓ"</string>
+    <string name="permdesc_sendSms" msgid="6757089798435130769">"ઍપને SMS મેસેજ મોકલવાની મંજૂરી આપે છે. આના પરિણામે અનપેક્ષિત શુલ્ક લાગી શકે છે. દુર્ભાવનાપૂર્ણ ઍપ તમારા કન્ફર્મેશન વિના મેસેજ મોકલીને તમારા નાણા ખર્ચાવી શકે છે."</string>
+    <string name="permlab_readSms" msgid="5164176626258800297">"તમારા ટેક્સ્ટ મેસેજ (SMS અથવા MMS) વાંચો"</string>
+    <string name="permdesc_readSms" product="tablet" msgid="7912990447198112829">"આ ઍપ, તમારા ટેબ્લેટ પર સંગ્રહિત તમામ SMS (ટેક્સ્ટ) મેસેજ વાંચી શકે છે."</string>
+    <string name="permdesc_readSms" product="tv" msgid="3054753345758011986">"આ ઍપ, તમારા Android TV ડિવાઇસ પર સંગ્રહિત તમામ SMS (ટેક્સ્ટ) મેસેજ વાંચી શકે છે."</string>
+    <string name="permdesc_readSms" product="default" msgid="774753371111699782">"આ ઍપ, તમારા ફોન પર સંગ્રહિત તમામ SMS (ટેક્સ્ટ) મેસેજ વાંચી શકે છે."</string>
+    <string name="permlab_receiveWapPush" msgid="4223747702856929056">"ટેક્સ્ટ મેસેજ  (WAP) મેળવો"</string>
+    <string name="permdesc_receiveWapPush" msgid="1638677888301778457">"ઍપને WAP મેસેજ મેળવવાની અને તેના પર પ્રક્રિયા કરવાની મંજૂરી આપે છે. આ પરવાનગીમાં તમને દર્શાવ્યા વિના તમને મોકલેલા મેસેજનું નિરીક્ષણ કરવાની અને ડિલીટ કરવાની ક્ષમતાનો સમાવેશ થાય છે."</string>
     <string name="permlab_getTasks" msgid="7460048811831750262">"ચાલુ ઍપ્લિકેશનો પુનઃપ્રાપ્ત કરો"</string>
     <string name="permdesc_getTasks" msgid="7388138607018233726">"એપ્લિકેશનને વર્તમાનમાં અને તાજેતરમાં ચાલી રહેલ Tasks વિશેની વિગતવાર માહિતી પુનઃપ્રાપ્ત કરવાની મંજૂરી આપે છે. આ એપ્લિકેશનને ઉપકરણ પર કઈ એપ્લિકેશન્સનો ઉપયોગ થાય છે તેના વિશેની માહિતી શોધવાની મંજૂરી આપી શકે છે."</string>
     <string name="permlab_manageProfileAndDeviceOwners" msgid="639849495253987493">"પ્રોફાઇલ અને ડિવાઇસ માલિકોને મેનેજ કરો"</string>
@@ -492,9 +492,9 @@
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"આ ઍપ, તમારા Android TV ડિવાઇસ પર સંગ્રહિત બધા કૅલેન્ડર ઇવેન્ટને વાંચી શકે છે અને તમારા કૅલેન્ડર ડેટાને શેર કરી અથવા સાચવી શકે છે."</string>
     <string name="permdesc_readCalendar" product="default" msgid="9118823807655829957">"આ ઍપ્લિકેશન, તમારા ફોન પર સંગ્રહિત તમામ કૅલેન્ડર ઇવેન્ટ્સને વાંચી શકે છે અને તમારા કૅલેન્ડર ડેટાને શેર કરી અથવા સાચવી શકે છે."</string>
     <string name="permlab_writeCalendar" msgid="6422137308329578076">"કૅલેન્ડર  ઇવેન્ટ્સ ઉમેરો અથવા સંશોધિત કરો અને માલિકની જાણ બહાર અતિથિઓને ઇમેઇલ મોકલો"</string>
-    <string name="permdesc_writeCalendar" product="tablet" msgid="8722230940717092850">"આ ઍપ્લિકેશન, તમારા ટેબ્લેટ પર કૅલેન્ડર ઇવેન્ટ્સ ઉમેરી, દૂર કરી અથવા બદલી શકે છે. આ ઍપ્લિકેશન, કૅલેન્ડર માલિકો તરફથી આવતાં હોય તેવા લાગતાં સંદેશા મોકલી શકે છે અથવા તેમના માલિકોને સૂચિત કર્યા વિના ઇવેન્ટ્સ બદલી શકે છે."</string>
-    <string name="permdesc_writeCalendar" product="tv" msgid="951246749004952706">"આ ઍપ, તમારા Android TV ડિવાઇસ પર કૅલેન્ડર ઇવેન્ટ ઉમેરી, કાઢી નાખી અથવા બદલી શકે છે. આ ઍપ, કૅલેન્ડર માલિકો તરફથી આવતાં હોય તેવા લાગતાં સંદેશા મોકલી શકે છે અથવા તેમના માલિકોને સૂચિત કર્યા વિના ઇવેન્ટ બદલી શકે છે."</string>
-    <string name="permdesc_writeCalendar" product="default" msgid="5416380074475634233">"આ ઍપ્લિકેશન, તમારા ફોન પર કૅલેન્ડર ઇવેન્ટ્સ ઉમેરી, દૂર કરી અથવા બદલી શકે છે. આ ઍપ્લિકેશન, કૅલેન્ડર માલિકો તરફથી આવતાં હોય તેવા લાગતાં સંદેશા મોકલી શકે છે અથવા તેમના માલિકોને સૂચિત કર્યા વિના ઇવેન્ટ્સ બદલી શકે છે."</string>
+    <string name="permdesc_writeCalendar" product="tablet" msgid="8722230940717092850">"આ ઍપ, તમારા ટેબ્લેટ પર કૅલેન્ડર ઇવેન્ટ ઉમેરી, દૂર કરી અથવા બદલી શકે છે. આ ઍપ, કૅલેન્ડર માલિકો તરફથી આવતાં હોય તેવા લાગતાં મેસેજ મોકલી શકે છે અથવા તેમના માલિકોને સૂચિત કર્યા વિના કૅલેન્ડર બદલી શકે છે."</string>
+    <string name="permdesc_writeCalendar" product="tv" msgid="951246749004952706">"આ ઍપ, તમારા Android TV ડિવાઇસ પર કૅલેન્ડર ઇવેન્ટ ઉમેરી, કાઢી નાખી અથવા બદલી શકે છે. આ ઍપ, કૅલેન્ડર માલિકો તરફથી આવતાં હોય તેવા લાગતાં મેસેજ મોકલી શકે છે અથવા તેમના માલિકોને સૂચિત કર્યા વિના ઇવેન્ટ બદલી શકે છે."</string>
+    <string name="permdesc_writeCalendar" product="default" msgid="5416380074475634233">"આ ઍપ, તમારા ફોન પર કૅલેન્ડર ઇવેન્ટ ઉમેરી, દૂર કરી અથવા બદલી શકે છે. આ ઍપ, કૅલેન્ડર માલિકો તરફથી આવતાં હોય તેવા લાગતાં મેસેજ મોકલી શકે છે અથવા તેમના માલિકોને સૂચિત કર્યા વિના ઇવેન્ટ બદલી શકે છે."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"વધારાના સ્થાન પ્રદાતા આદેશોને ઍક્સેસ કરો"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"એપ્લિકેશનને વધારાના સ્થાન પ્રદાતા આદેશોને ઍક્સેસ કરવાની મંજૂરી આપે છે. આ એપ્લિકેશનને GPS અથવા અન્ય સ્થાન સ્રોતોના ઓપરેશનમાં દખલ કરવાની મંજૂરી આપી શકે છે."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"ફૉરગ્રાઉન્ડમાં ફક્ત ચોક્કસ સ્થાન ઍક્સેસ કરો"</string>
@@ -1101,7 +1101,7 @@
     <string name="permlab_setAlarm" msgid="1158001610254173567">"એલાર્મ સેટ કરો"</string>
     <string name="permdesc_setAlarm" msgid="2185033720060109640">"એપ્લિકેશનને ઇન્સ્ટોલ કરેલ અલાર્મ ઘડિયાળ એપ્લિકેશનમાં અલાર્મ સેટ કરવાની મંજૂરી આપે છે. કેટલીક અલાર્મ ઘડિયાળ ઍપ્લિકેશનો, આ સુવિધા લાગુ કરી શકતી નથી."</string>
     <string name="permlab_addVoicemail" msgid="4770245808840814471">"વૉઇસમેઇલ ઉમેરો"</string>
-    <string name="permdesc_addVoicemail" msgid="5470312139820074324">"એપ્લિકેશનને તમારા વૉઇસમેઇલ ઇનબોક્સ પર સંદેશા ઉમેરવાની મંજૂરી આપે છે."</string>
+    <string name="permdesc_addVoicemail" msgid="5470312139820074324">"એપને તમારા વૉઇસમેઇલ ઇનબોક્સ પર મેસેજ ઉમેરવાની મંજૂરી આપે છે."</string>
     <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> દ્વારા તમારા ક્લિપબોર્ડ પરથી પેસ્ટ કરવામાં આવ્યું"</string>
     <string name="more_item_label" msgid="7419249600215749115">"વધુ"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"મેનૂ+"</string>
@@ -1357,11 +1357,11 @@
     <string name="accept" msgid="5447154347815825107">"સ્વીકારો"</string>
     <string name="decline" msgid="6490507610282145874">"નકારો"</string>
     <string name="select_character" msgid="3352797107930786979">"અક્ષર શામેલ કરો"</string>
-    <string name="sms_control_title" msgid="4748684259903148341">"SMS સંદેશા મોકલી રહ્યું છે"</string>
-    <string name="sms_control_message" msgid="6574313876316388239">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; મોટા પ્રમાણમાં SMS સંદેશા મોકલી રહ્યું છે. શું તમે સંદેશા મોકલવાનું ચાલુ રાખવા માટે આ એપ્લિકેશનને મંજૂરી આપવા માગો છો?"</string>
+    <string name="sms_control_title" msgid="4748684259903148341">"SMS મેસેજ મોકલી રહ્યાં છે"</string>
+    <string name="sms_control_message" msgid="6574313876316388239">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; મોટા પ્રમાણમાં SMS મેસેજ મોકલી રહ્યું છે. શું તમે મેસેજ મોકલવાનું ચાલુ રાખવા માટે આ એપને મંજૂરી આપવા માગો છો?"</string>
     <string name="sms_control_yes" msgid="4858845109269524622">"મંજૂરી આપો"</string>
     <string name="sms_control_no" msgid="4845717880040355570">"નકારો"</string>
-    <string name="sms_short_code_confirm_message" msgid="1385416688897538724">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; તમને &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; પર સંદેશ મોકલવા માગે છે."</string>
+    <string name="sms_short_code_confirm_message" msgid="1385416688897538724">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;, &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; પર મેસેજ મોકલવા માગે છે."</string>
     <string name="sms_short_code_details" msgid="2723725738333388351">"આનાથી તમારા મોબાઇલ એકાઉન્ટ પર "<b>"શુલ્ક લાગી શકે છે"</b>"."</string>
     <string name="sms_premium_short_code_details" msgid="1400296309866638111"><b>"આનાથી તમારા મોબાઇલ એકાઉન્ટ પર શુલ્ક લાગશે."</b></string>
     <string name="sms_short_code_confirm_allow" msgid="920477594325526691">"મોકલો"</string>
@@ -2027,7 +2027,7 @@
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Androidના કોઈ જૂના વર્ઝન માટે આ ઍપ બનાવવામાં આવી હતી. તે કદાચ યોગ્ય રીતે કામ કરતી નથી અને તેમાં નવીનતમ સુરક્ષા અને પ્રાઇવસી સંબંધિત સંરક્ષણો શામેલ નથી. કોઈ અપડેટ ચેક કરો અથવા ઍપના ડેવલપરનો સંપર્ક કરો."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"અપડેટ માટે તપાસો"</string>
     <string name="deprecated_abi_message" msgid="6820548011196218091">"આ ઍપ Androidના નવીનતમ વર્ઝન સાથે સુસંગત નથી. કોઈ અપડેટ ચેક કરો અથવા ઍપના ડેવલપરનો સંપર્ક કરો."</string>
-    <string name="new_sms_notification_title" msgid="6528758221319927107">"તમારી પાસે નવા સંદેશા છે"</string>
+    <string name="new_sms_notification_title" msgid="6528758221319927107">"તમારી પાસે નવા મેસેજ છે"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"જોવા માટે SMS ઍપ્લિકેશન ખોલો"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"કેટલીક કાર્યક્ષમતા મર્યાદિત હોઈ શકે છે"</string>
     <string name="profile_encrypted_detail" msgid="5279730442756849055">"કાર્યાલયની પ્રોફાઇલ લૉક કરી"</string>
@@ -2143,7 +2143,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"ઓકે"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"બંધ કરો"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"વધુ જાણો"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12માં Android માટે અનુકૂળ નોટિફિકેશનને બદલે વધુ સારા નોટિફિકેશન છે. આ સુવિધા સૂચિત ક્રિયાઓ અને જવાબો બતાવે છે તેમજ તમારા નોટિફિકેશનની યોગ્ય ગોઠવણી કરે છે.\n\nવધુ સારા નોટિફિકેશન સંપર્કોના નામ અને સંદેશા જેવી વ્યક્તિગત માહિતી સહિત નોટિફિકેશનનું બધું કન્ટેન્ટ ઍક્સેસ કરી શકે છે. આ સુવિધા ફોન કૉલના જવાબ આપવા કે \'ખલેલ પાડશો નહીં\'નું નિયંત્રણ કરવા જેવા નોટિફિકેશન છોડવાની કે તેનો જવાબ આપવાની ક્રિયા પણ કરી શકે છે."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12માં Android માટે અનુકૂળ નોટિફિકેશનને બદલે વધુ સારા નોટિફિકેશન છે. આ સુવિધા સૂચિત ક્રિયાઓ અને જવાબો બતાવે છે તેમજ તમારા નોટિફિકેશનની યોગ્ય ગોઠવણી કરે છે.\n\nવધુ સારા નોટિફિકેશન સંપર્કોના નામ અને મેસેજ જેવી વ્યક્તિગત માહિતી સહિત નોટિફિકેશનનું બધું કન્ટેન્ટ ઍક્સેસ કરી શકે છે. આ સુવિધા ફોન કૉલના જવાબ આપવા કે \'ખલેલ પાડશો નહીં\'નું નિયંત્રણ કરવા જેવા નોટિફિકેશન છોડવાની કે તેનો જવાબ આપવાની ક્રિયા પણ કરી શકે છે."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"રૂટિન મોડની માહિતીનું નોટિફિકેશન"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"બૅટરી સેવરની સુવિધા ચાલુ કરી છે"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"બૅટરીની આવરદા વધારવા માટે બૅટરીનો વપરાશ ઘટાડી રહ્યાં છીએ"</string>

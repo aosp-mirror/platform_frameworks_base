@@ -168,7 +168,7 @@
     <string name="scNullCipherIssueActionSettings" msgid="5888857706424639946">"Налады сеткавай бяспекі"</string>
     <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"Даведацца больш"</string>
     <string name="scNullCipherIssueActionGotIt" msgid="8747796640866585787">"ОК"</string>
-    <string name="fcComplete" msgid="1080909484660507044">"Код аб\'екта завершаны."</string>
+    <string name="fcComplete" msgid="1080909484660507044">"Код аб’екта завершаны."</string>
     <string name="fcError" msgid="5325116502080221346">"Праблема падлучэння ці няправільны код функцыі."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"ОК"</string>
     <string name="httpError" msgid="3406003584150566720">"Адбылася памылка сеткі."</string>
@@ -426,9 +426,9 @@
     <string name="permlab_use_exact_alarm" msgid="348045139777131552">"Уключэнне будзільніка ці паказ напамінаў пра падзею"</string>
     <string name="permdesc_use_exact_alarm" msgid="7033761461886938912">"Гэта праграма зможа наладжваць выкананне такіх дзеянняў, як уключэнне будзільніка ці паказ напамінаў."</string>
     <string name="permlab_persistentActivity" msgid="464970041740567970">"прымусіць прыкладанне працаваць заўсёды"</string>
-    <string name="permdesc_persistentActivity" product="tablet" msgid="6055271149187369916">"Дазваляе прыкладанню захоўваць некаторыя пастаянныя часткi ў памяцi. Гэта можа абмежаваць аб\'ём памяці, даступнай для іншых прыкладанняў, i запаволiць працу планшэта."</string>
-    <string name="permdesc_persistentActivity" product="tv" msgid="6800526387664131321">"Дазваляе праграме пастаянна захоўваць некаторыя свае часткі ў памяці прылады. Гэта можа абмежаваць аб\'ём памяці, даступнай для іншых праграм, і запаволіць працу прылады Android TV."</string>
-    <string name="permdesc_persistentActivity" product="default" msgid="1914841924366562051">"Дазваляе прыкладанню захоўваць некаторыя пастаянныя часткi ў памяцi. Гэта можа абмежаваць аб\'ём памяці, даступнай для іншых прыкладанняў, i запаволiць працу тэлефона."</string>
+    <string name="permdesc_persistentActivity" product="tablet" msgid="6055271149187369916">"Дазваляе прыкладанню захоўваць некаторыя пастаянныя часткi ў памяцi. Гэта можа абмежаваць аб’ём памяці, даступнай для іншых прыкладанняў, i запаволiць працу планшэта."</string>
+    <string name="permdesc_persistentActivity" product="tv" msgid="6800526387664131321">"Дазваляе праграме пастаянна захоўваць некаторыя свае часткі ў памяці прылады. Гэта можа абмежаваць аб’ём памяці, даступнай для іншых праграм, і запаволіць працу прылады Android TV."</string>
+    <string name="permdesc_persistentActivity" product="default" msgid="1914841924366562051">"Дазваляе прыкладанню захоўваць некаторыя пастаянныя часткi ў памяцi. Гэта можа абмежаваць аб’ём памяці, даступнай для іншых прыкладанняў, i запаволiць працу тэлефона."</string>
     <string name="permlab_foregroundService" msgid="1768855976818467491">"запусціць актыўныя сэрвісы"</string>
     <string name="permdesc_foregroundService" msgid="8720071450020922795">"Дазваляе праграме выкарыстоўваць асноўныя сэрвісы."</string>
     <string name="permlab_foregroundServiceCamera" msgid="7814751737955715297">"запуск актыўнага сэрвісу тыпу \"camera\""</string>
@@ -460,7 +460,7 @@
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"запуск актыўнага сэрвісу тыпу \"specialUse\""</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"Дазваляе праграме выкарыстоўваць актыўныя сэрвісы тыпу \"specialUse\""</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"вымерыць прастору для захоўвання прыкладання"</string>
-    <string name="permdesc_getPackageSize" msgid="742743530909966782">"Дазваляе прыкладанням атрымліваць яго код, дадзеныя і аб\'ём кэш-памяці"</string>
+    <string name="permdesc_getPackageSize" msgid="742743530909966782">"Дазваляе прыкладанням атрымліваць яго код, дадзеныя і аб’ём кэш-памяці"</string>
     <string name="permlab_writeSettings" msgid="8057285063719277394">"змена сістэмных налад"</string>
     <string name="permdesc_writeSettings" msgid="8293047411196067188">"Дазваляе прыкладаннем змяняць дадзеныя налад сістэмы. Шкоднасныя прыкладанні могуць пашкодзіць канфігурацыю вашай сістэмы."</string>
     <string name="permlab_receiveBootCompleted" msgid="6643339400247325379">"запуск пры загрузцы сістэмы"</string>
@@ -621,7 +621,7 @@
     <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Трасанкцыі з выкарыстаннем ахоўнага элемента"</string>
     <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Праграма зможа атрымліваць інфармацыю пра трансакцыі, якія адбываюцца з выкарыстаннем ахоўнага элемента."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"адключэнне блакiроўкi экрана"</string>
-    <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Дазваляе прыкладанням адключаць блакiроўку клавіятуры і любыя сродкі абароны, звязаныя з паролем. Прыкладам гэтага з\'яўляецца адключэнне тэлефонам блакiроўкi клавіятуры пры атрыманні ўваходнага выкліку і паўторнае ўключэнне блакiроўкi клавіятуры, калі выклік завершаны."</string>
+    <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Дазваляе прыкладанням адключаць блакiроўку клавіятуры і любыя сродкі абароны, звязаныя з паролем. Прыкладам гэтага з’яўляецца адключэнне тэлефонам блакiроўкi клавіятуры пры атрыманні ўваходнага выкліку і паўторнае ўключэнне блакiроўкi клавіятуры, калі выклік завершаны."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"запытваць узровень складанасці блакіроўкі экрана"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Дазваляе праграме вызначаць узровень складанасці блакіроўкі экрана (высокі, сярэдні, нізкі ці нулявы), які залежыць ад даўжыні пароля і ад тыпу блакіроўкі экрана. Праграма можа прапанаваць карыстальнікам ускладніць блакіроўку экрана, аднак гэту прапанову можна ігнараваць. Заўважце, што праграма не можа ведаць тып і пароль блакіроўкі экрана, таму што яны захоўваюцца ў зашыфраваным выглядзе."</string>
     <string name="permlab_postNotification" msgid="4875401198597803658">"паказваць апавяшчэнні"</string>
@@ -1433,7 +1433,7 @@
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Наладзьце прыладу \"<xliff:g id="DEVICE_NAME">%s</xliff:g>\""</string>
     <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"Наладзьце фізічныя клавіятуры"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Дакраніцеся, каб выбраць мову і раскладку"</string>
-    <string name="fast_scroll_alphabet" msgid="8854435958703888376">" АБВГДЕЁЖЗІЙКЛМНОПРСТУЎФХЦЧШ\'ЫЬЭЮЯ"</string>
+    <string name="fast_scroll_alphabet" msgid="8854435958703888376">" АБВГДЕЁЖЗІЙКЛМНОПРСТУЎФХЦЧШ’ЫЬЭЮЯ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="alert_windows_notification_channel_group_name" msgid="6063891141815714246">"Паказваць паверх іншых праграм"</string>
     <string name="alert_windows_notification_channel_name" msgid="3437528564303192620">"<xliff:g id="NAME">%s</xliff:g> паказваецца паверх іншых праграм"</string>

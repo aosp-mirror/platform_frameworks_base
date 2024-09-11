@@ -203,7 +203,7 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"व्यवस्थापकले यन्त्रलाई व्यक्तिगत प्रयोगका लागि अस्वीकार गर्नुभयो"</string>
     <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"निजी स्पेस हटाइएको छ"</string>
     <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"तपाईंको सङ्गठन आफूले व्यवस्थापन गरेको यो डिभाइसमा निजी स्पेस राख्ने अनुमति दिँदैन।"</string>
-    <string name="network_logging_notification_title" msgid="554983187553845004">"यन्त्र व्यवस्थित गरिएको छ"</string>
+    <string name="network_logging_notification_title" msgid="554983187553845004">"यो डिभाइस व्यवस्थित गरिएको छ"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"तपाईंको संगठनले यस डिभाइसको व्यवस्थापन गर्दछ र नेटवर्क ट्राफिकको अनुगमन गर्न सक्छ। विवरणहरूका लागि ट्याप गर्नुहोस्।"</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"एपहरूले तपाईंको स्थान प्रयोग गर्न सक्छन्"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"थप जानकारी प्राप्त गर्न आफ्ना IT प्रशासकसँग सम्पर्क गर्नुहोस्"</string>
@@ -1097,7 +1097,7 @@
     <string name="js_dialog_before_unload_positive_button" msgid="4274257182303565509">"यस पृष्ठलाई छोड्नुहोस्"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="3873765747622415310">"यही पृष्ठमा रहनुहोस्"</string>
     <string name="js_dialog_before_unload" msgid="7213364985774778744">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nके तपाईं यो पेजबाट नेभिगेट गर्न चाहनु हुन्छ भन्ने निश्चत छ?"</string>
-    <string name="autofill_window_title" msgid="4379134104008111961">"<xliff:g id="SERVICENAME">%1$s</xliff:g> मार्फत स्वतः भरण गर्नुहोस्‌"</string>
+    <string name="autofill_window_title" msgid="4379134104008111961">"<xliff:g id="SERVICENAME">%1$s</xliff:g> मार्फत अटोफिल गर्नुहोस्‌"</string>
     <string name="permlab_setAlarm" msgid="1158001610254173567">"एउटा आलर्म सेट गर्नुहोस्"</string>
     <string name="permdesc_setAlarm" msgid="2185033720060109640">"स्थापना गरिएको सङ्केत घडी एपमा सङ्केत समय मिलाउन एपलाई अनुमति दिन्छ। केही सङ्केत घडी एपहरूले यो सुविधा कार्यान्वयन नगर्न सक्छन्।"</string>
     <string name="permlab_addVoicemail" msgid="4770245808840814471">"भ्वाइसमेल थप गर्नुहोस्"</string>
@@ -1184,7 +1184,7 @@
     <string name="selectTextMode" msgid="3225108910999318778">"पाठ चयन गर्नुहोस्"</string>
     <string name="undo" msgid="3175318090002654673">"अन्डू गर्नुहोस्"</string>
     <string name="redo" msgid="7231448494008532233">"रिडू गर्नुहोस्"</string>
-    <string name="autofill" msgid="511224882647795296">"स्वतः भरण"</string>
+    <string name="autofill" msgid="511224882647795296">"अटोफिल"</string>
     <string name="textSelectionCABTitle" msgid="5151441579532476940">"पाठ चयनता"</string>
     <string name="addToDictionary" msgid="8041821113480950096">"शब्दकोशमा थप्नुहोस्"</string>
     <string name="deleteText" msgid="4200807474529938112">"मेट्नुहोस्"</string>
@@ -1214,10 +1214,10 @@
     <string name="rating_label" msgid="1837085249662154601">"{rating,plural, =1{{max} मा एक तारा}other{{max} मा # तारा}}"</string>
     <string name="in_progress" msgid="2149208189184319441">"जारी छ"</string>
     <string name="whichApplication" msgid="5432266899591255759">"प्रयोग गरेर कारबाही पुरा गर्नुहोस्"</string>
-    <string name="whichApplicationNamed" msgid="6969946041713975681">"निम्न एपको प्रयोग गरी कारबाही पुरा गर्नुहोस्: %1$s"</string>
+    <string name="whichApplicationNamed" msgid="6969946041713975681">"%1$s प्रयोग गरी यो कार्य पूरा गर्नुहोस्"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"पूर्ण कारबाही"</string>
     <string name="whichViewApplication" msgid="5733194231473132945">"निम्नबाट खोल्नुहोस्"</string>
-    <string name="whichViewApplicationNamed" msgid="415164730629690105">"निम्न एपमा खोल्नुहोस्: %1$s"</string>
+    <string name="whichViewApplicationNamed" msgid="415164730629690105">"%1$s मार्फत खोल्नुहोस्"</string>
     <string name="whichViewApplicationLabel" msgid="7367556735684742409">"खोल्नुहोस्"</string>
     <string name="whichOpenHostLinksWith" msgid="7645631470199397485">"निम्नमार्फत <xliff:g id="HOST">%1$s</xliff:g> का लिंकहरू खोल्नुहोस्"</string>
     <string name="whichOpenLinksWith" msgid="1120936181362907258">"निम्नमार्फत लिंकहरू खोल्नुहोस्"</string>
@@ -1225,7 +1225,7 @@
     <string name="whichOpenHostLinksWithApp" msgid="2401668560768463004">"<xliff:g id="APPLICATION">%2$s</xliff:g> मार्फत <xliff:g id="HOST">%1$s</xliff:g> का लिंकहरू खोल्नुहोस्"</string>
     <string name="whichGiveAccessToApplicationLabel" msgid="7805857277166106236">"पहुँच दिनुहोस्"</string>
     <string name="whichEditApplication" msgid="6191568491456092812">"सँग सम्पादन गर्नुहोस्"</string>
-    <string name="whichEditApplicationNamed" msgid="8096494987978521514">"%1$s सँग सम्पादन गर्नुहोस्"</string>
+    <string name="whichEditApplicationNamed" msgid="8096494987978521514">"%1$s प्रयोग गरी सम्पादन गर्नुहोस्"</string>
     <string name="whichEditApplicationLabel" msgid="1463288652070140285">"सम्पादन गर्नुहोस्"</string>
     <string name="whichSendApplication" msgid="4143847974460792029">"सेयर गर्नुहोस्"</string>
     <string name="whichSendApplicationNamed" msgid="4470386782693183461">"%1$s सँग सेयर गर्नुहोस्"</string>
@@ -1437,7 +1437,7 @@
     <string name="alert_windows_notification_channel_name" msgid="3437528564303192620">"<xliff:g id="NAME">%s</xliff:g> अन्य एपहरूमा देखिँदैछ"</string>
     <string name="alert_windows_notification_title" msgid="6331662751095228536">"<xliff:g id="NAME">%s</xliff:g> अन्य एपहरूमा देखिँदैछ"</string>
     <string name="alert_windows_notification_message" msgid="6538171456970725333">"तपाईं <xliff:g id="NAME">%s</xliff:g> ले यो विशेषता प्रयोग नगरेको चाहनुहुन्न भने सेटिङहरू खोली यसलाई निष्क्रिय पार्न ट्याप गर्नुहोस्।"</string>
-    <string name="alert_windows_notification_turn_off_action" msgid="7805857234839123780">"निष्क्रिय पार्नुहोस्"</string>
+    <string name="alert_windows_notification_turn_off_action" msgid="7805857234839123780">"अफ गर्नुहोस्"</string>
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"जाँच गर्दै <xliff:g id="NAME">%s</xliff:g>…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"हालको सामग्री समीक्षा गर्दै"</string>
     <string name="ext_media_checking_notification_message" product="tv" msgid="7986154434946021415">"मिडिया भण्डारणको जाँच गरिँदै छ"</string>

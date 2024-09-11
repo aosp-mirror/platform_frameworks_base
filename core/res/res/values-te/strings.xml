@@ -203,8 +203,8 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"వ్యక్తిగత వినియోగం కోసం నిర్వాహకులు పరికరాన్ని తీసి వేశారు"</string>
     <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"ప్రైవేట్ స్పేస్ తీసివేయబడింది"</string>
     <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"మీ సంస్థ ఈ మేనేజ్ చేసే పరికరంలో ప్రైవేట్ స్పేస్‌లను అనుమతించదు."</string>
-    <string name="network_logging_notification_title" msgid="554983187553845004">"పరికరం నిర్వహించబడింది"</string>
-    <string name="network_logging_notification_text" msgid="1327373071132562512">"మీ సంస్థ ఈ పరికరాన్ని నిర్వహిస్తుంది మరియు నెట్‌వర్క్ ట్రాఫిక్‌ని పర్యవేక్షించవచ్చు. వివరాల కోసం నొక్కండి."</string>
+    <string name="network_logging_notification_title" msgid="554983187553845004">"ఈ డివైజ్ మేనేజ్ చేయబడుతోంది"</string>
+    <string name="network_logging_notification_text" msgid="1327373071132562512">"మీ సంస్థ ఈ డివైజ్‌ను మేనేజ్ చేస్తోంది, నెట్‌వర్క్ ట్రాఫిక్‌ను మానిటర్ చేసే అవకాశం ఉంది. వివరాల కోసం ట్యాప్ చేయండి."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"యాప్‌లు మీ లొకేషన్‌ను యాక్సెస్ చేయగలవు"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"మరింత తెలుసుకోవడానికి మీ IT అడ్మిన్‌ను కాంటాక్ట్ చేయండి"</string>
     <string name="geofencing_service" msgid="3826902410740315456">"భౌగోళిక సరిహద్దుల సర్వీస్"</string>

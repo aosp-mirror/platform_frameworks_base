@@ -1354,7 +1354,7 @@
     <item msgid="9177085807664964627">"ভিপিএন"</item>
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="3665696841646851068">"অজ্ঞাত প্ৰকাৰৰ নেটৱৰ্ক"</string>
-    <string name="accept" msgid="5447154347815825107">"স্বীকাৰ কৰক"</string>
+    <string name="accept" msgid="5447154347815825107">"গ্ৰহণ কৰক"</string>
     <string name="decline" msgid="6490507610282145874">"প্ৰত্যাখ্যান কৰক"</string>
     <string name="select_character" msgid="3352797107930786979">"বর্ণ লিখক"</string>
     <string name="sms_control_title" msgid="4748684259903148341">"এছএমএছ বার্তাবোৰ পঠিয়াই থকা হৈছে"</string>
