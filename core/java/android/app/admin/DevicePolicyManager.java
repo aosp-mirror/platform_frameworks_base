@@ -473,16 +473,9 @@ public class DevicePolicyManager {
      * that the user backed-out of provisioning or some precondition for provisioning wasn't met.
      *
      * <p>If a <a href="#roleholder">device policy management role holder</a> updater is present on
-     * the device, an internet connection attempt must be made prior to launching this intent. If
-     * an internet connection can not be established, provisioning will fail unless {@link
-     * #EXTRA_PROVISIONING_ALLOW_OFFLINE} is explicitly set to {@code true}, in which case
-     * provisioning will continue without using the
-     * <a href="#roleholder">device policy management role holder</a>. If an internet connection
-     * has been established, the <a href="#roleholder">device policy management role holder</a>
-     * updater will be launched, which may update the
-     * <a href="#roleholder">device policy management role holder</a> before continuing
-     * provisioning.
+     * the device, an internet connection attempt must be made prior to launching this intent.
      */
+    // See b/365955253 for additional behaviours of this API.
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_PROVISION_MANAGED_PROFILE
         = "android.app.action.PROVISION_MANAGED_PROFILE";
@@ -963,23 +956,8 @@ public class DevicePolicyManager {
      * A boolean extra indicating whether offline provisioning should be used.
      *
      * <p>The default value is {@code false}.
-     *
-     * <p>Usually during the <a href="#managedprovisioning">provisioning flow</a>, there will be
-     * an attempt to download and install the latest version of the <a href="#roleholder">device
-     * policy management role holder</a>. The platform will then
-     * delegate provisioning to the <a href="#roleholder">device
-     *      * policy management role holder</a>.
-     *
-     * <p>When this extra is set to {@code true}, the
-     * <a href="#managedprovisioning">provisioning flow</a> will always be handled by the platform
-     * and the <a href="#roleholder">device policy management role holder</a>'s part skipped.
-     *
-     * <p>On Android versions prior to {@link Build.VERSION_CODES#TIRAMISU}, when this extra is
-     * {@code false}, the <a href="#managedprovisioning">provisioning flow</a> will enforce that an
-     * internet connection is established, or otherwise fail. When this extra is {@code true}, a
-     * connection will still be attempted but when it cannot be established provisioning will
-     * continue offline.
      */
+    // See b/365955253 for detailed behaviours of this API.
     public static final String EXTRA_PROVISIONING_ALLOW_OFFLINE =
             "android.app.extra.PROVISIONING_ALLOW_OFFLINE";
 
