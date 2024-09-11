@@ -961,10 +961,13 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
      * Set animation options for collecting transition by ActivityRecord.
      * @param options AnimationOptions captured from ActivityOptions
      */
-    void setOverrideAnimation(@Nullable AnimationOptions options,
+    void setOverrideAnimation(@Nullable AnimationOptions options, @NonNull ActivityRecord r,
             @Nullable IRemoteCallback startCallback, @Nullable IRemoteCallback finishCallback) {
         if (!isCollecting()) return;
         mOverrideOptions = options;
+        if (mOverrideOptions != null) {
+            mOverrideOptions.setUserId(r.mUserId);
+        }
         sendRemoteCallback(mClientAnimationStartCallback);
         mClientAnimationStartCallback = startCallback;
         mClientAnimationFinishCallback = finishCallback;
@@ -3014,7 +3017,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                         // Create the options based on this change's custom animations and layout
                         // parameters
                         animOptions = getOptions(activityRecord /* customAnimActivity */,
-                                                 activityRecord /* animLpActivity */);
+                                activityRecord /* animLpActivity */);
                         if (!change.hasFlags(FLAG_TRANSLUCENT)) {
                             // If this change is not translucent, its options are going to be
                             // inherited by the changes below
@@ -3036,6 +3039,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                                 params.getOpenAnimationResId(), params.getChangeAnimationResId(),
                                 params.getCloseAnimationResId(), 0 /* backgroundColor */,
                                 false /* overrideTaskTransition */);
+                        animOptions.setUserId(taskFragment.getTask().mUserId);
                     }
                 }
                 if (animOptions != null) {
@@ -3116,6 +3120,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             } else {
                 animOptions = TransitionInfo.AnimationOptions
                         .makeAnimOptionsFromLayoutParameters(animLp);
+                animOptions.setUserId(animLpActivity.mUserId);
             }
         }
         return animOptions;
@@ -3141,6 +3146,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             if (animOptions == null) {
                 animOptions = TransitionInfo.AnimationOptions
                         .makeCommonAnimOptions(activity.packageName);
+                animOptions.setUserId(activity.mUserId);
             }
             animOptions.addCustomActivityTransition(open, customAnim.mEnterAnim,
                     customAnim.mExitAnim, customAnim.mBackgroundColor);
@@ -3925,9 +3931,9 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
 
         /** @return true if all tracked subtrees are ready. */
         boolean allReady() {
-            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, " allReady query: used=%b "
-                    + "override=%b defer=%d states=[%s]", mUsed, mReadyOverride, mDeferReadyDepth,
-                    groupsToString());
+            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
+                    " allReady query: used=%b " + "override=%b defer=%d states=[%s]", mUsed,
+                    mReadyOverride, mDeferReadyDepth, groupsToString());
             // If the readiness has never been touched, mUsed will be false. We never want to
             // consider a transition ready if nothing has been reported on it.
             if (!mUsed) return false;
