@@ -14,7 +14,10 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.AttributeSet;
+import android.view.InputDevice;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
@@ -188,6 +191,34 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
             setAdapter(mAdapter);
             setCurrentItem(page, false);
         }
+    }
+
+    @Override
+    public boolean onGenericMotionEvent(MotionEvent event) {
+        if ((event.getSource() & InputDevice.SOURCE_CLASS_POINTER) != 0
+                && event.getAction() == MotionEvent.ACTION_SCROLL) {
+            // Handle mouse (or ext. device) by swiping the page depending on the scroll
+            final float vscroll;
+            final float hscroll;
+            if ((event.getMetaState() & KeyEvent.META_SHIFT_ON) != 0) {
+                vscroll = 0;
+                hscroll = event.getAxisValue(MotionEvent.AXIS_VSCROLL);
+            } else {
+                vscroll = -event.getAxisValue(MotionEvent.AXIS_VSCROLL);
+                hscroll = event.getAxisValue(MotionEvent.AXIS_HSCROLL);
+            }
+            if (hscroll != 0 || vscroll != 0) {
+                boolean isForwardScroll =
+                        isLayoutRtl() ? (hscroll < 0 || vscroll < 0) : (hscroll > 0 || vscroll > 0);
+                int swipeDirection = isForwardScroll ? RIGHT : LEFT;
+                if (mScroller.isFinished()) {
+                    scrollByX(getDeltaXForPageScrolling(swipeDirection),
+                            SINGLE_PAGE_SCROLL_DURATION_MILLIS);
+                }
+                return true;
+            }
+        }
+        return super.onGenericMotionEvent(event);
     }
 
     @Override

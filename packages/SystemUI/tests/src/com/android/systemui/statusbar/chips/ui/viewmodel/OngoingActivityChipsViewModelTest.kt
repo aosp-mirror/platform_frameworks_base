@@ -19,8 +19,9 @@ package com.android.systemui.statusbar.chips.ui.viewmodel
 import android.content.DialogInterface
 import android.content.packageManager
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
-import android.platform.test.annotations.EnableFlags
+import android.platform.test.annotations.DisableFlags
 import android.view.View
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -39,11 +40,9 @@ import com.android.systemui.screenrecord.data.model.ScreenRecordModel
 import com.android.systemui.screenrecord.data.repository.screenRecordRepository
 import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.MediaProjectionChipInteractorTest.Companion.NORMAL_PACKAGE
 import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.MediaProjectionChipInteractorTest.Companion.setUpPackageManagerForMediaProjection
-import com.android.systemui.statusbar.chips.ron.demo.ui.viewmodel.DemoRonChipViewModelTest.Companion.addDemoRonChip
 import com.android.systemui.statusbar.chips.ron.demo.ui.viewmodel.demoRonChipViewModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.ui.view.ChipBackgroundContainer
-import com.android.systemui.statusbar.commandline.commandRegistry
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.phone.mockSystemUIDialogFactory
 import com.android.systemui.statusbar.phone.ongoingcall.data.repository.ongoingCallRepository
@@ -51,8 +50,6 @@ import com.android.systemui.statusbar.phone.ongoingcall.shared.model.OngoingCall
 import com.android.systemui.statusbar.phone.ongoingcall.shared.model.inCallModel
 import com.android.systemui.util.time.fakeSystemClock
 import com.google.common.truth.Truth.assertThat
-import java.io.PrintWriter
-import java.io.StringWriter
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -69,20 +66,21 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
+/**
+ * Tests for [OngoingActivityChipsViewModel] when the [FLAG_STATUS_BAR_RON_CHIPS] flag is disabled.
+ */
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @OptIn(ExperimentalCoroutinesApi::class)
+@DisableFlags(FLAG_STATUS_BAR_RON_CHIPS)
 class OngoingActivityChipsViewModelTest : SysuiTestCase() {
     private val kosmos = Kosmos().also { it.testCase = this }
     private val testScope = kosmos.testScope
     private val systemClock = kosmos.fakeSystemClock
-    private val commandRegistry = kosmos.commandRegistry
 
     private val screenRecordState = kosmos.screenRecordRepository.screenRecordState
     private val mediaProjectionState = kosmos.fakeMediaProjectionRepository.mediaProjectionState
     private val callRepo = kosmos.ongoingCallRepository
-
-    private val pw = PrintWriter(StringWriter())
 
     private val mockSystemUIDialog = mock<SystemUIDialog>()
     private val chipBackgroundView = mock<ChipBackgroundContainer>()
@@ -102,8 +100,12 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
     fun setUp() {
         setUpPackageManagerForMediaProjection(kosmos)
         kosmos.demoRonChipViewModel.start()
-        whenever(kosmos.packageManager.getApplicationIcon(any<String>()))
-            .thenReturn(BitmapDrawable())
+        val icon =
+            BitmapDrawable(
+                context.resources,
+                Bitmap.createBitmap(/* width= */ 100, /* height= */ 100, Bitmap.Config.ARGB_8888)
+            )
+        whenever(kosmos.packageManager.getApplicationIcon(any<String>())).thenReturn(icon)
     }
 
     @Test
@@ -183,24 +185,16 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    @EnableFlags(FLAG_STATUS_BAR_RON_CHIPS)
     fun primaryChip_higherPriorityChipAdded_lowerPriorityChipReplaced() =
         testScope.runTest {
             // Start with just the lowest priority chip shown
-            addDemoRonChip(commandRegistry, pw)
+            callRepo.setOngoingCallState(inCallModel(startTimeMs = 34))
             // And everything else hidden
-            callRepo.setOngoingCallState(OngoingCallModel.NoCall)
             mediaProjectionState.value = MediaProjectionState.NotProjecting
             screenRecordState.value = ScreenRecordModel.DoingNothing
 
             val latest by collectLastValue(underTest.primaryChip)
 
-            assertIsDemoRonChip(latest)
-
-            // WHEN the higher priority call chip is added
-            callRepo.setOngoingCallState(inCallModel(startTimeMs = 34))
-
-            // THEN the higher priority call chip is used
             assertIsCallChip(latest)
 
             // WHEN the higher priority media projection chip is added
@@ -222,7 +216,6 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    @EnableFlags(FLAG_STATUS_BAR_RON_CHIPS)
     fun primaryChip_highestPriorityChipRemoved_showsNextPriorityChip() =
         testScope.runTest {
             // WHEN all chips are active
@@ -230,7 +223,6 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
             mediaProjectionState.value =
                 MediaProjectionState.Projecting.EntireScreen(NORMAL_PACKAGE)
             callRepo.setOngoingCallState(inCallModel(startTimeMs = 34))
-            addDemoRonChip(commandRegistry, pw)
 
             val latest by collectLastValue(underTest.primaryChip)
 
@@ -248,12 +240,6 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
 
             // THEN the lower priority call is used
             assertIsCallChip(latest)
-
-            // WHEN the higher priority call is removed
-            callRepo.setOngoingCallState(OngoingCallModel.NoCall)
-
-            // THEN the lower priority demo RON is used
-            assertIsDemoRonChip(latest)
         }
 
     /** Regression test for b/347726238. */
@@ -389,12 +375,6 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
                         as OngoingActivityChipModel.ChipIcon.SingleColorIcon)
                     .impl as Icon.Resource
             assertThat(icon.res).isEqualTo(com.android.internal.R.drawable.ic_phone)
-        }
-
-        fun assertIsDemoRonChip(latest: OngoingActivityChipModel?) {
-            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
-            assertThat((latest as OngoingActivityChipModel.Shown).icon)
-                .isInstanceOf(OngoingActivityChipModel.ChipIcon.FullColorAppIcon::class.java)
         }
     }
 }

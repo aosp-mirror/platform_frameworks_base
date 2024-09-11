@@ -385,12 +385,9 @@ class SwipeToSceneTest {
 
             SceneTransitionLayout(
                 state = layoutState,
-                modifier = Modifier.size(LayoutWidth, LayoutHeight)
+                modifier = Modifier.size(LayoutWidth, LayoutHeight),
             ) {
-                scene(
-                    SceneA,
-                    userActions = mapOf(Swipe.Down to SceneB),
-                ) {
+                scene(SceneA, userActions = mapOf(Swipe.Down to SceneB)) {
                     Spacer(Modifier.fillMaxSize())
                 }
                 scene(SceneB) { Spacer(Modifier.fillMaxSize()) }
@@ -507,7 +504,7 @@ class SwipeToSceneTest {
                         fade(TestElements.Foo)
                         fade(TestElements.Bar)
                     }
-                }
+                },
             )
 
         var touchSlop = 0f
@@ -519,8 +516,8 @@ class SwipeToSceneTest {
                     userActions =
                         mapOf(
                             Swipe.Down to SceneB,
-                            Swipe.Up to UserActionResult(SceneB, transitionKey = transitionkey)
-                        )
+                            Swipe.Up to UserActionResult(SceneB, transitionKey = transitionkey),
+                        ),
                 ) {
                     Box(Modifier.fillMaxSize())
                 }
@@ -565,7 +562,7 @@ class SwipeToSceneTest {
         val state =
             layoutState(
                 SceneA,
-                transitions { from(SceneA, to = SceneB) { distance = swipeDistance } }
+                transitions { from(SceneA, to = SceneB) { distance = swipeDistance } },
             )
 
         val layoutSize = 200.dp
@@ -617,7 +614,7 @@ class SwipeToSceneTest {
                             progressConverter = ProgressConverter.linear()
                             translate(TestElements.Foo, x = { 20.dp.toPx() }, y = { 30.dp.toPx() })
                         }
-                    }
+                    },
                 )
             }
         val layoutSize = 200.dp
@@ -801,7 +798,7 @@ class SwipeToSceneTest {
                 override fun onPostScroll(
                     consumed: Offset,
                     available: Offset,
-                    source: NestedScrollSource
+                    source: NestedScrollSource,
                 ): Offset {
                     availableOnPostScroll = available.y
                     return super.onPostScroll(consumed, available, source)
@@ -814,7 +811,7 @@ class SwipeToSceneTest {
                     transitions {
                         from(SceneA, to = SceneB) { distance = FixedDistance(swipeDistance) }
                         overscrollDisabled(SceneB, Orientation.Vertical)
-                    }
+                    },
                 )
             }
         val layoutSize = 200.dp

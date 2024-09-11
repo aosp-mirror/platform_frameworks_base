@@ -43,7 +43,7 @@ class CommunalSwipeDetector(private var lastDirection: SwipeSource.Resolved? = n
         layoutSize: IntSize,
         position: IntOffset,
         density: Density,
-        orientation: Orientation
+        orientation: Orientation,
     ): SwipeSource.Resolved? {
         return lastDirection
     }

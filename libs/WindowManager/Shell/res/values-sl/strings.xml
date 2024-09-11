@@ -73,8 +73,7 @@
     <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"strnitev oblačka <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"Nastavitve za <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"Opusti oblaček"</string>
-    <!-- no translation found for bubble_fullscreen_text (1006758103218086231) -->
-    <skip />
+    <string name="bubble_fullscreen_text" msgid="1006758103218086231">"Premik na celozaslonski način"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"Pogovora ne prikaži v oblačku"</string>
     <string name="bubbles_user_education_title" msgid="2112319053732691899">"Klepet z oblački"</string>
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"Novi pogovori so prikazani kot lebdeče ikone ali oblački. Če želite odpreti oblaček, se ga dotaknite. Če ga želite premakniti, ga povlecite."</string>

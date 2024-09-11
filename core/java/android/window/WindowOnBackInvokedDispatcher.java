@@ -243,6 +243,8 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
             if (previousTopCallback == callback) {
                 // We should call onBackCancelled() when an active callback is removed from
                 // dispatcher.
+                mProgressAnimator.removeOnBackCancelledFinishCallback();
+                mProgressAnimator.removeOnBackInvokedFinishCallback();
                 sendCancelledIfInProgress(callback);
                 mHandler.post(mProgressAnimator::reset);
                 setTopOnBackInvokedCallback(getTopCallback());

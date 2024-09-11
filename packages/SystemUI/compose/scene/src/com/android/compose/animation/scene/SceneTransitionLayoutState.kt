@@ -328,9 +328,7 @@ internal class MutableSceneTransitionLayoutStateImpl(
     ): Job {
         // Note that we start with UNDISPATCHED so that startTransition() is called directly and
         // transition becomes the current [transitionState] right after this call.
-        return animationScope.launch(
-            start = CoroutineStart.UNDISPATCHED,
-        ) {
+        return animationScope.launch(start = CoroutineStart.UNDISPATCHED) {
             startTransition(transition, chain)
         }
     }
@@ -461,7 +459,7 @@ internal class MutableSceneTransitionLayoutStateImpl(
                     val indicator = if (finishedTransitions.contains(transition)) "x" else " "
                     appendLine("  [$indicator] $from => $to ($transition)")
                 }
-            }
+            },
         )
     }
 
@@ -621,7 +619,7 @@ internal class MutableSceneTransitionLayoutStateImpl(
     override fun showOverlay(
         overlay: OverlayKey,
         animationScope: CoroutineScope,
-        transitionKey: TransitionKey?
+        transitionKey: TransitionKey?,
     ) {
         checkThread()
 
@@ -654,7 +652,7 @@ internal class MutableSceneTransitionLayoutStateImpl(
         ) {
             animate(
                 replacedTransition = currentState,
-                reversed = overlay == currentState.fromContent
+                reversed = overlay == currentState.fromContent,
             )
         } else {
             animate()
@@ -664,7 +662,7 @@ internal class MutableSceneTransitionLayoutStateImpl(
     override fun hideOverlay(
         overlay: OverlayKey,
         animationScope: CoroutineScope,
-        transitionKey: TransitionKey?
+        transitionKey: TransitionKey?,
     ) {
         checkThread()
 
@@ -705,7 +703,7 @@ internal class MutableSceneTransitionLayoutStateImpl(
         from: OverlayKey,
         to: OverlayKey,
         animationScope: CoroutineScope,
-        transitionKey: TransitionKey?
+        transitionKey: TransitionKey?,
     ) {
         checkThread()
 

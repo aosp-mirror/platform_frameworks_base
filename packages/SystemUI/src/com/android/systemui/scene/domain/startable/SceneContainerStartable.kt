@@ -205,7 +205,7 @@ constructor(
                                 is ObservableTransitionState.Transition -> state.fromContent
                             }.let { it == Scenes.Shade || it == Scenes.QuickSettings }
                         }
-                        .distinctUntilChanged()
+                        .distinctUntilChanged(),
                 ) { inBackStack, isCurrentScene ->
                     inBackStack || isCurrentScene
                 }
@@ -248,8 +248,7 @@ constructor(
                                 visibilityForTransitionState,
                                 isHeadsUpOrAnimatingAway,
                                 invisibleDueToOcclusion,
-                                isAlternateBouncerVisible,
-                                ->
+                                isAlternateBouncerVisible ->
                                 when {
                                     isHeadsUpOrAnimatingAway -> true to "showing a HUN"
                                     isAlternateBouncerVisible -> true to "showing alternate bouncer"
@@ -322,7 +321,7 @@ constructor(
                             switchToScene(
                                 // TODO(b/336581871): add sceneState?
                                 targetSceneKey = Scenes.Bouncer,
-                                loggingReason = "Need to authenticate locked SIM card."
+                                loggingReason = "Need to authenticate locked SIM card.",
                             )
                         }
                         unlockStatus.isUnlocked &&
@@ -332,7 +331,7 @@ constructor(
                                 targetSceneKey = Scenes.Gone,
                                 loggingReason =
                                     "All SIM cards unlocked and device already unlocked and " +
-                                        "lockscreen doesn't require a swipe to dismiss."
+                                        "lockscreen doesn't require a swipe to dismiss.",
                             )
                         }
                         else -> {
@@ -341,7 +340,7 @@ constructor(
                                 targetSceneKey = Scenes.Lockscreen,
                                 loggingReason =
                                     "All SIM cards unlocked and device still locked" +
-                                        " or lockscreen still requires a swipe to dismiss."
+                                        " or lockscreen still requires a swipe to dismiss.",
                             )
                         }
                     }
@@ -363,10 +362,7 @@ constructor(
                         when (val transitionState = sceneInteractor.transitionState.value) {
                             is ObservableTransitionState.Idle -> setOf(transitionState.currentScene)
                             is ObservableTransitionState.Transition ->
-                                setOf(
-                                    transitionState.fromContent,
-                                    transitionState.toContent,
-                                )
+                                setOf(transitionState.fromContent, transitionState.toContent)
                         }
                     val isOnLockscreen = renderedScenes.contains(Scenes.Lockscreen)
                     val isAlternateBouncerVisible = alternateBouncerInteractor.isVisibleState()
@@ -451,10 +447,7 @@ constructor(
                     }
                 }
                 .collect { (targetSceneKey, loggingReason) ->
-                    switchToScene(
-                        targetSceneKey = targetSceneKey,
-                        loggingReason = loggingReason,
-                    )
+                    switchToScene(targetSceneKey = targetSceneKey, loggingReason = loggingReason)
                 }
         }
     }
@@ -718,7 +711,6 @@ constructor(
                                     Scenes.Lockscreen -> true
                                     Scenes.Bouncer -> false
                                     Scenes.Shade -> false
-                                    Scenes.NotificationsShade -> false
                                     else -> null
                                 }
                             }
@@ -812,7 +804,7 @@ constructor(
     private fun switchToScene(
         targetSceneKey: SceneKey,
         loggingReason: String,
-        sceneState: Any? = null
+        sceneState: Any? = null,
     ) {
         sceneInteractor.changeScene(
             toScene = targetSceneKey,
@@ -831,10 +823,9 @@ constructor(
 
     private fun notifyKeyguardDismissCancelledCallbacks() {
         applicationScope.launch {
-            combine(
-                    deviceEntryInteractor.isUnlocked,
-                    sceneInteractor.currentScene.pairwise(),
-                ) { isUnlocked, (from, to) ->
+            combine(deviceEntryInteractor.isUnlocked, sceneInteractor.currentScene.pairwise()) {
+                    isUnlocked,
+                    (from, to) ->
                     when {
                         from != Scenes.Bouncer -> false
                         to != Scenes.Gone && !isUnlocked -> true

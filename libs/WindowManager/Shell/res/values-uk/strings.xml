@@ -73,8 +73,7 @@
     <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"згорнути \"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>\""</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"Налаштування параметра \"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>\""</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"Закрити підказку"</string>
-    <!-- no translation found for bubble_fullscreen_text (1006758103218086231) -->
-    <skip />
+    <string name="bubble_fullscreen_text" msgid="1006758103218086231">"Перейти в повноекранний режим"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"Не показувати спливаючі чати для розмов"</string>
     <string name="bubbles_user_education_title" msgid="2112319053732691899">"Спливаючий чат"</string>
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"Нові повідомлення чату з\'являються у вигляді спливаючих значків. Щоб відкрити чат, натисніть його, а щоб перемістити – перетягніть."</string>

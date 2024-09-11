@@ -54,6 +54,7 @@ message RemoteViewsProto {
     optional bool has_draw_instructions = 13;
     repeated bytes bitmap_cache = 14;
     optional RemoteCollectionCache remote_collection_cache = 15;
+    repeated Action actions = 16;
 
     message RemoteCollectionCache {
         message Entry {
@@ -287,6 +288,91 @@ message RemoteViewsProto {
                 optional string url = 1;
             }
         }
+    }
+
+    message Action {
+        oneof action {
+            AttributeReflectionAction attribute_reflection_action = 1;
+            BitmapReflectionAction bitmap_reflection_action = 2;
+            ComplexUnitDimensionReflectionAction complex_unit_dimension_reflection_action = 3;
+            LayoutParamAction layout_param_action = 4;
+            NightModeReflectionAction night_mode_reflection_action = 5;
+            ReflectionAction reflection_action = 6;
+            RemoveFromParentAction remove_from_parent_action = 7;
+        }
+    }
+
+    message AttributeReflectionAction {
+        optional string view_id = 1;
+        optional string method_name = 2;
+        optional int32 parameter_type = 3;
+        optional int32 resource_type = 4;
+        optional string attribute_id = 5;
+    }
+
+    message BitmapReflectionAction {
+        optional string view_id = 1;
+        optional string method_name = 2;
+        optional int32 bitmap_id = 3;
+    }
+
+    message ComplexUnitDimensionReflectionAction {
+        optional string view_id = 1;
+        optional string method_name = 2;
+        optional int32 parameter_type = 3;
+        optional float dimension_value = 4;
+        optional int32 unit = 5;
+    }
+
+    message LayoutParamAction {
+        optional string view_id = 1;
+        optional int32 property = 2;
+        optional int32 layout_value = 3;
+        optional int32 value_type = 4;
+    }
+
+    message NightModeReflectionAction {
+        optional string view_id = 1;
+        optional string method_name = 2;
+        optional int32 parameter_type = 3;
+        oneof light {
+            Icon light_icon = 4;
+            android.content.res.ColorStateListProto light_color_state_list = 5;
+            int32 light_int = 6;
+        }
+        oneof dark {
+            Icon dark_icon = 7;
+            android.content.res.ColorStateListProto dark_color_state_list = 8;
+            int32 dark_int = 9;
+        }
+    }
+
+    message ReflectionAction {
+        optional string view_id = 1;
+        optional string method_name = 2;
+        optional int32 parameter_type = 3;
+        oneof reflection_value {
+            bool boolean_value = 4;
+            bytes byte_value = 5;
+            int32 short_value = 6;
+            int32 int_value = 7;
+            int64 long_value = 8;
+            float float_value = 9;
+            double double_value = 10;
+            int32 char_value = 11;
+            string string_value = 12;
+            CharSequence char_sequence_value = 13;
+            string uri_value = 14;
+            bytes bitmap_value = 15;
+            android.content.res.ColorStateListProto color_state_list_value = 16;
+            Icon icon_value = 17;
+            int32 blend_mode_value = 18;
+            // Intent and Bundle values are excluded.
+        }
+    }
+
+    message RemoveFromParentAction {
+        optional string view_id = 1;
     }
 }
 

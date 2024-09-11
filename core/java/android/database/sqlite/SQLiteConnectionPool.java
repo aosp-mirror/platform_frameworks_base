@@ -96,6 +96,10 @@ public final class SQLiteConnectionPool implements Closeable {
     private boolean mIsOpen;
     private int mNextConnectionId;
 
+    // Record the caller that explicitly closed the database.
+    @GuardedBy("mLock")
+    private Throwable mClosedBy;
+
     private ConnectionWaiter mConnectionWaiterPool;
     private ConnectionWaiter mConnectionWaiterQueue;
 
@@ -265,6 +269,7 @@ public final class SQLiteConnectionPool implements Closeable {
                 throwIfClosedLocked();
 
                 mIsOpen = false;
+                mClosedBy = new Exception("SQLiteConnectionPool.close()").fillInStackTrace();
 
                 closeAvailableConnectionsAndLogExceptionsLocked();
 
@@ -1101,7 +1106,7 @@ public final class SQLiteConnectionPool implements Closeable {
     private void throwIfClosedLocked() {
         if (!mIsOpen) {
             throw new IllegalStateException("Cannot perform this operation "
-                    + "because the connection pool has been closed.");
+                    + "because the connection pool has been closed.", mClosedBy);
         }
     }
 

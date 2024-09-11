@@ -68,6 +68,9 @@ public final class FakeVibratorControllerProvider {
     private int[] mSupportedPrimitives;
     private int mCompositionSizeMax;
     private int mPwleSizeMax;
+    private int mMaxEnvelopeEffectSize;
+    private int mMinEnvelopeEffectControlPointDurationMillis;
+    private int mMaxEnvelopeEffectControlPointDurationMillis;
     private float mMinFrequency = Float.NaN;
     private float mResonantFrequency = Float.NaN;
     private float mFrequencyResolution = Float.NaN;
@@ -217,6 +220,11 @@ public final class FakeVibratorControllerProvider {
             infoBuilder.setQFactor(mQFactor);
             infoBuilder.setFrequencyProfile(new VibratorInfo.FrequencyProfile(
                     mResonantFrequency, mMinFrequency, mFrequencyResolution, mMaxAmplitudes));
+            infoBuilder.setMaxEnvelopeEffectSize(mMaxEnvelopeEffectSize);
+            infoBuilder.setMinEnvelopeEffectControlPointDurationMillis(
+                    mMinEnvelopeEffectControlPointDurationMillis);
+            infoBuilder.setMaxEnvelopeEffectControlPointDurationMillis(
+                    mMaxEnvelopeEffectControlPointDurationMillis);
             return mIsInfoLoadSuccessful;
         }
 
@@ -355,6 +363,26 @@ public final class FakeVibratorControllerProvider {
     /** Set the duration of vendor effects in fake vibrator hardware. */
     public void setVendorEffectDuration(long durationMs) {
         mVendorEffectDuration = durationMs;
+    }
+
+    /**
+     * Set the maximum number of envelope effects control points supported in fake vibrator
+     * hardware.
+     */
+    public void setMaxEnvelopeEffectSize(int envelopeEffectControlPointsMax) {
+        mMaxEnvelopeEffectSize = envelopeEffectControlPointsMax;
+    }
+
+    /** Set the envelope effect minimum segment duration in fake vibrator hardware. */
+    public void setMinEnvelopeEffectControlPointDurationMillis(
+            int minEnvelopeEffectControlPointDurationMillis) {
+        mMinEnvelopeEffectControlPointDurationMillis = minEnvelopeEffectControlPointDurationMillis;
+    }
+
+    /** Set the envelope effect maximum segment duration in fake vibrator hardware. */
+    public void setMaxEnvelopeEffectControlPointDurationMillis(
+            int maxEnvelopeEffectControlPointDurationMillis) {
+        mMaxEnvelopeEffectControlPointDurationMillis = maxEnvelopeEffectControlPointDurationMillis;
     }
 
     /**

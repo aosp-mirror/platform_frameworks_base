@@ -367,6 +367,7 @@ LIBANDROID_PLATFORM {
     APerformanceHint_sendHint;
     APerformanceHint_getThreadIds;
     APerformanceHint_createSessionInternal;
+    APerformanceHint_setUseFMQForTesting;
     extern "C++" {
         ASurfaceControl_registerSurfaceStatsListener*;
         ASurfaceControl_unregisterSurfaceStatsListener*;

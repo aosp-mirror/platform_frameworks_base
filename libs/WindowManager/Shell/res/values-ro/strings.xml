@@ -73,8 +73,7 @@
     <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"restrânge <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"Setări <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"Închide balonul"</string>
-    <!-- no translation found for bubble_fullscreen_text (1006758103218086231) -->
-    <skip />
+    <string name="bubble_fullscreen_text" msgid="1006758103218086231">"Treci la ecran complet"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"Nu afișa conversația în balon"</string>
     <string name="bubbles_user_education_title" msgid="2112319053732691899">"Chat cu baloane"</string>
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"Conversațiile noi apar ca pictograme flotante sau baloane. Atinge pentru a deschide balonul. Trage pentru a-l muta."</string>

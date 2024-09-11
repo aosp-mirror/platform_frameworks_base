@@ -6,9 +6,9 @@ android_test {
     name: "foldable-device-state-provider-tests",
     srcs: ["src/**/*.java"],
     libs: [
-        "android.test.runner",
-        "android.test.base",
-        "android.test.mock",
+        "android.test.runner.stubs.system",
+        "android.test.base.stubs.system",
+        "android.test.mock.stubs.system",
     ],
     jni_libs: [
         "libdexmakerjvmtiagent",
