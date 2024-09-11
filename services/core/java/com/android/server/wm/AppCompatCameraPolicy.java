@@ -166,6 +166,9 @@ class AppCompatCameraPolicy {
                 : SCREEN_ORIENTATION_UNSPECIFIED;
     }
 
+    /**
+     * @return {@code true} if the Camera is active for the provided {@link ActivityRecord}.
+     */
     boolean isCameraActive(@NonNull ActivityRecord activity, boolean mustBeFullscreen) {
         return mDisplayRotationCompatPolicy != null
                 && mDisplayRotationCompatPolicy.isCameraActive(activity, mustBeFullscreen);
@@ -179,4 +182,13 @@ class AppCompatCameraPolicy {
         return null;
     }
 
+    /**
+     * Whether we should apply the min aspect ratio per-app override only when an app is connected
+     * to the camera.
+     */
+    boolean shouldOverrideMinAspectRatioForCamera(@NonNull ActivityRecord activityRecord) {
+        return isCameraActive(activityRecord, /* mustBeFullscreen= */ true)
+                && activityRecord.mAppCompatController.getAppCompatCameraOverrides()
+                        .isOverrideMinAspectRatioForCameraEnabled();
+    }
 }
