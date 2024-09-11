@@ -391,3 +391,13 @@ test_module_config {
     ],
     include_filters: ["com.android.server.trust"],
 }
+
+test_module_config {
+    name: "FrameworksMockingServicesTests_server_storagemanagerservicetest",
+    base: "FrameworksMockingServicesTests",
+    test_suites: [
+        "automotive-tests",
+        "device-tests",
+    ],
+    include_filters: ["com.android.server.StorageManagerServiceTest"],
+}
