@@ -555,6 +555,13 @@ flag {
 }
 
 flag {
+    name: "status_bar_simple_fragment"
+    namespace: "systemui"
+    description: "Feature flag for refactoring the collapsed status bar fragment"
+    bug: "364360986"
+}
+
+flag {
     name: "new_volume_panel"
     namespace: "systemui"
     description: "Switches to the new volume panel (without Slices)."
