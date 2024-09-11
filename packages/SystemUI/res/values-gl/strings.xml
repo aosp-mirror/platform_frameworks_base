@@ -186,6 +186,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Usouse o desbloqueo facial. Preme para continuar."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Recoñeceuse a cara. Preme para continuar."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Recoñeceuse a cara. Preme a icona de desbloquear."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"Usouse o desbloqueo facial. Toca para continuar."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Autenticado"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Cancelar a autenticación"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"Máis opcións"</string>
@@ -372,7 +373,7 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Gravar pantalla"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Iniciar"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Deter"</string>
-    <string name="qs_record_issue_label" msgid="8166290137285529059">"Rexistrar problema"</string>
+    <string name="qs_record_issue_label" msgid="8166290137285529059">"Gravar problema"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"Iniciar"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"Deter"</string>
     <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"Informe de erros"</string>
@@ -463,7 +464,7 @@
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"Pechar"</string>
     <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"Engadir, quitar e reordenar widgets neste espazo"</string>
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Engadir máis widgets"</string>
-    <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Pulsación longa para personalizar os widgets"</string>
+    <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Mantén premido para personalizar os widgets"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Personalizar widgets"</string>
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"Icona da aplicación de widget desactivado"</string>
     <string name="icon_description_for_pending_widget" msgid="8413816401868001755">"Icona da aplicación para un widget que se está instalando"</string>

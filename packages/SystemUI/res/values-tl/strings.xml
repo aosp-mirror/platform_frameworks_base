@@ -186,6 +186,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Na-unlock gamit ang mukha. Pindutin para magpatuloy."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Nakilala ang mukha. Pindutin para magpatuloy."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Nakilala ang mukha. Pindutin ang unlock para magpatuloy."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"Na-unlock gamit ang mukha. I-tap para magpatuloy."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Na-authenticate"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Kanselahin ang Pag-authenticate"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"Higit Pang Opsyon"</string>
@@ -593,7 +594,7 @@
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Mga Setting"</string>
     <string name="volume_panel_captioning_title" msgid="5984936949147684357">"Instant Caption"</string>
     <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"Ibinaba sa mas ligtas na level ang volume"</string>
-    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"Naging malakas ang volume ng headphones nang mas matagal sa inirerekomenda"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"Malakas ang volume ng headphones nang mas matagal sa inirerekomenda"</string>
     <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"Lampas na sa ligtas na limitasyon para sa linggong ito ang volume ng headphone"</string>
     <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"Magpatuloy sa pakikinig"</string>
     <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"Hinaan"</string>

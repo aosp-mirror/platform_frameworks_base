@@ -186,6 +186,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Ierīce atbloķēta ar seju. Nospiediet, lai turpinātu."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Seja atpazīta. Nospiediet, lai turpinātu."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Seja atpazīta. Lai turpinātu, nospiediet atbloķēšanas ikonu."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"Ierīce atbloķēta pēc sejas. Pieskarieties, lai turpinātu."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Autentifikācija veikta"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Atcelt autentificēšanu"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"Citas opcijas"</string>

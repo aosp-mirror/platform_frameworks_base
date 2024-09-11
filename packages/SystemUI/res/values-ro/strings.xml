@@ -186,6 +186,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"S-a deblocat cu ajutorul feței. Apasă pentru a continua."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Chipul a fost recunoscut. Apasă pentru a continua."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Chip recunoscut. Apasă pictograma Deblocare ca să continui."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"S-a deblocat folosind fața. Atinge pentru a continua."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Autentificat"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Anulează autentificarea"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"Mai multe opțiuni"</string>
@@ -549,7 +550,7 @@
     <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"Acest dispozitiv aparține organizației <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> și este conectat la internet prin rețele VPN."</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"E posibil ca organizația ta să monitorizeze traficul de rețea în profilul de serviciu"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"E posibil ca <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> să monitorizeze traficul de rețea din profilul tău de serviciu"</string>
-    <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"Adminul IT poate vedea profilul de serviciu"</string>
+    <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"Administratorul IT poate vedea profilul de serviciu"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Este posibil ca rețeaua să fie monitorizată"</string>
     <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"Acest dispozitiv este conectat la internet prin rețele VPN."</string>
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"Aplicațiile pentru lucru sunt conectate la internet prin <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>

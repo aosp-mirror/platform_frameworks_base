@@ -186,6 +186,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Avati näoga. Vajutage jätkamiseks."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Nägu tuvastati. Vajutage jätkamiseks."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Nägu tuvastati. Jätkamiseks vajutage avamise ikooni."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"Avati näoga. Puudutage jätkamiseks."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Autenditud"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Tühista autentimine"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"Rohkem valikuid"</string>
@@ -461,10 +462,10 @@
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"Ühise õpetuse käivitamiseks pühkige vasakule"</string>
     <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"Kohandage"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"Loobuge"</string>
-    <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"Lisage ja eemaldage selles ruumis oma vidinaid ning muutke nende järjestust"</string>
+    <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"Lisage ja eemaldage vidinaid ning muutke nende järjestust"</string>
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Lisage rohkem vidinaid"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Vajutage pikalt vidinate kohandamiseks"</string>
-    <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Kohanda vidinaid"</string>
+    <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Vidinate kohandamine"</string>
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"Keelatud vidina rakenduseikoon"</string>
     <string name="icon_description_for_pending_widget" msgid="8413816401868001755">"Installitava vidina rakenduseikoon"</string>
     <string name="edit_widget" msgid="9030848101135393954">"Muuda vidinat"</string>
@@ -472,13 +473,13 @@
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Lisa vidin"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"Valmis"</string>
     <string name="label_for_button_in_empty_state_cta" msgid="7314975555382055823">"Vidinate lisamine"</string>
-    <string name="title_for_empty_state_cta" msgid="6161654421223450530">"Pääsege kiiresti juurde rakenduse lemmikvidinatele ilma tahvelarvutit avamata."</string>
+    <string name="title_for_empty_state_cta" msgid="6161654421223450530">"Kiire juurdepääs rakenduse lemmikvidinatele ilma tahvelarvutit lukust avamata."</string>
     <string name="dialog_title_to_allow_any_widget" msgid="1004820948962675644">"Kas lubada lukustuskuval kõik vidinad?"</string>
     <string name="button_text_to_open_settings" msgid="1987729256950941628">"Ava seaded"</string>
     <string name="work_mode_off_title" msgid="5794818421357835873">"Kas lõpetada töörakenduste peatamine?"</string>
     <string name="work_mode_turn_on" msgid="907813741770247267">"Lõpeta peatamine"</string>
     <string name="accessibility_action_label_close_communal_hub" msgid="6790396569621032333">"Lukustuskuva vidinate sulgemine"</string>
-    <string name="accessibility_action_label_edit_widgets" msgid="3821868581348322346">"Kohanda vidinaid"</string>
+    <string name="accessibility_action_label_edit_widgets" msgid="3821868581348322346">"Vidinate kohandamine"</string>
     <string name="accessibility_content_description_for_communal_hub" msgid="1670220840599380118">"Lukustuskuva vidinad"</string>
     <string name="accessibility_action_label_select_widget" msgid="8897281501387398191">"vidina valimine"</string>
     <string name="accessibility_action_label_remove_widget" msgid="3373779447448758070">"eemaldage vidin"</string>

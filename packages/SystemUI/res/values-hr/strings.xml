@@ -186,6 +186,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Otključano pomoću lica. Pritisnite da biste nastavili."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Lice je prepoznato. Pritisnite da biste nastavili."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Lice je prepoznato. Pritisnite ikonu otključavanja da biste nastavili."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"Otključano licem. Dodirnite za nastavak."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Autentifikacija izvršena"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Otkaži autentifikaciju"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"Više opcija"</string>
@@ -372,16 +373,16 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Snimanje zaslona"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Početak"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Zaustavi"</string>
-    <string name="qs_record_issue_label" msgid="8166290137285529059">"Zabilježite poteškoću"</string>
+    <string name="qs_record_issue_label" msgid="8166290137285529059">"Snimite poteškoću"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"Pokreni"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"Zaustavi"</string>
     <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"Izvješće o programskim pogreškama"</string>
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"Na koji je dio doživljaja na uređaju to utjecalo?"</string>
-    <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"Odaberite vrstu problema"</string>
+    <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"Odaberite vrstu poteškoće"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Snimanje zaslona"</string>
     <string name="performance" msgid="6552785217174378320">"Izvedba"</string>
     <string name="user_interface" msgid="3712869377953950887">"Korisničko sučelje"</string>
-    <string name="thermal" msgid="6758074791325414831">"Termalno"</string>
+    <string name="thermal" msgid="6758074791325414831">"Pregrijavanje"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Način rada jednom rukom"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"Slušna pomagala"</string>
     <string name="quick_settings_hearing_devices_connected" msgid="6519069502397037781">"Aktivno"</string>
@@ -593,7 +594,7 @@
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Postavke"</string>
     <string name="volume_panel_captioning_title" msgid="5984936949147684357">"Automatski titlovi"</string>
     <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"Glasnoća je stišana na sigurniju razinu"</string>
-    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"Glasnoća u slušalicama pojačana je dulje nego što se preporučuje"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"Zvuk u slušalicama bio je preglasan dulje nego što se preporučuje"</string>
     <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"Glasnoća slušalica premašila je sigurno ograničenje za ovaj tjedan"</string>
     <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"Nastavi slušati"</string>
     <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"Stišaj"</string>

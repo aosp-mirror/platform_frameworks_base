@@ -186,6 +186,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Gerät mit dem Gesicht entsperrt. Tippe, um fortzufahren."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Gesicht erkannt. Tippe, um fortzufahren."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Gesicht erkannt. Tippe zum Fortfahren auf das Symbol „Entsperren“."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"Per Gesichtserkennung entsperrt. Tippe, um fortzufahren."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Authentifiziert"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Authentifizierung abbrechen"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"Weitere Optionen"</string>
@@ -372,7 +373,7 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Bildschirmaufzeichnung"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Starten"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Beenden"</string>
-    <string name="qs_record_issue_label" msgid="8166290137285529059">"Problem aufnehmen"</string>
+    <string name="qs_record_issue_label" msgid="8166290137285529059">"Problem aufzeichnen"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"Starten"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"Aufnahme beenden"</string>
     <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"Fehlerbericht"</string>
@@ -593,7 +594,7 @@
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Einstellungen"</string>
     <string name="volume_panel_captioning_title" msgid="5984936949147684357">"Automatische Untertitel"</string>
     <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"Auf verträglichere Lautstärke eingestellt"</string>
-    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"Die Kopfhörerlautstärke war länger als empfohlen hoch eingestellt"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"Die Kopfhörer sind schon länger als empfohlen auf hohe Lautstärke eingestellt"</string>
     <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"Die Kopfhörerlautstärke hat für diese Woche das Sicherheitslimit überschritten"</string>
     <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"Weiterhören"</string>
     <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"Leiser stellen"</string>
