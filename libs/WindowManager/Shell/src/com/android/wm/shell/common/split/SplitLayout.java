@@ -72,11 +72,12 @@ import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.pip.PipUtils;
+import com.android.wm.shell.common.split.DividerSnapAlgorithm.SnapTarget;
+import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.shared.animation.Interpolators;
 import com.android.wm.shell.shared.split.SplitScreenConstants.PersistentSnapPosition;
 import com.android.wm.shell.shared.split.SplitScreenConstants.SnapPosition;
 import com.android.wm.shell.shared.split.SplitScreenConstants.SplitPosition;
-import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.splitscreen.StageTaskListener;
 
 import java.io.PrintWriter;
@@ -543,7 +544,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
      * to middle position if the provided SnapTarget is not supported.
      */
     public void setDivideRatio(@PersistentSnapPosition int snapPosition) {
-        final DividerSnapAlgorithm.SnapTarget snapTarget = mDividerSnapAlgorithm.findSnapTarget(
+        final SnapTarget snapTarget = mDividerSnapAlgorithm.findSnapTarget(
                 snapPosition);
 
         setDividerPosition(snapTarget != null
@@ -577,7 +578,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
      * Sets new divider position and updates bounds correspondingly. Notifies listener if the new
      * target indicates dismissing split.
      */
-    public void snapToTarget(int currentPosition, DividerSnapAlgorithm.SnapTarget snapTarget) {
+    public void snapToTarget(int currentPosition, SnapTarget snapTarget) {
         switch (snapTarget.snapPosition) {
             case SNAP_TO_START_AND_DISMISS:
                 flingDividerPosition(currentPosition, snapTarget.position, FLING_RESIZE_DURATION,
@@ -613,10 +614,10 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
     }
 
     /**
-     * Returns {@link DividerSnapAlgorithm.SnapTarget} which matches passing position and velocity.
+     * Returns {@link SnapTarget} which matches passing position and velocity.
      * If hardDismiss is set to {@code true}, it will be harder to reach dismiss target.
      */
-    public DividerSnapAlgorithm.SnapTarget findSnapTarget(int position, float velocity,
+    public SnapTarget findSnapTarget(int position, float velocity,
             boolean hardDismiss) {
         return mDividerSnapAlgorithm.calculateSnapTarget(position, velocity, hardDismiss);
     }
