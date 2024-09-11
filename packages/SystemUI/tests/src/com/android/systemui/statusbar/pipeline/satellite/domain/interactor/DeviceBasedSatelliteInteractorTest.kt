@@ -574,7 +574,7 @@ class DeviceBasedSatelliteInteractorTest : SysuiTestCase() {
             val latest by collectLastValue(underTest.isWifiActive)
 
             // WHEN wifi is active
-            wifiRepository.setWifiNetwork(WifiNetworkModel.Active(level = 1))
+            wifiRepository.setWifiNetwork(WifiNetworkModel.Active.of(level = 1))
 
             // THEN the interactor returns true due to the wifi network being active
             assertThat(latest).isTrue()

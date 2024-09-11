@@ -16,12 +16,9 @@
 package com.android.server.appfunctions
 
 import android.app.appfunctions.AppFunctionRuntimeMetadata
-import android.app.appfunctions.AppFunctionRuntimeMetadata.PROPERTY_FUNCTION_ID
-import android.app.appfunctions.AppFunctionRuntimeMetadata.PROPERTY_PACKAGE_NAME
 import android.app.appsearch.AppSearchManager
 import android.app.appsearch.AppSearchManager.SearchContext
 import android.app.appsearch.PutDocumentsRequest
-import android.app.appsearch.SearchSpec
 import android.app.appsearch.SetSchemaRequest
 import android.util.ArrayMap
 import android.util.ArraySet
@@ -76,20 +73,11 @@ class MetadataSyncAdapterTest {
                 testExecutor,
                 FutureAppSearchSession(appSearchManager, testExecutor, searchContext),
             )
-        val searchSpec: SearchSpec =
-            SearchSpec.Builder()
-                .addFilterSchemas(
-                    AppFunctionRuntimeMetadata.RUNTIME_SCHEMA_TYPE,
-                    AppFunctionRuntimeMetadata.createAppFunctionRuntimeSchema(TEST_TARGET_PKG_NAME)
-                        .schemaType,
-                )
-                .build()
         val packageToFunctionIdMap =
             metadataSyncAdapter.getPackageToFunctionIdMap(
-                "",
-                searchSpec,
-                PROPERTY_FUNCTION_ID,
-                PROPERTY_PACKAGE_NAME,
+                AppFunctionRuntimeMetadata.RUNTIME_SCHEMA_TYPE,
+                AppFunctionRuntimeMetadata.PROPERTY_FUNCTION_ID,
+                AppFunctionRuntimeMetadata.PROPERTY_PACKAGE_NAME,
             )
 
         assertThat(packageToFunctionIdMap).isNotNull()
@@ -135,21 +123,11 @@ class MetadataSyncAdapterTest {
                 testExecutor,
                 FutureAppSearchSession(appSearchManager, testExecutor, searchContext),
             )
-        val searchSpec: SearchSpec =
-            SearchSpec.Builder()
-                .setResultCountPerPage(1)
-                .addFilterSchemas(
-                    AppFunctionRuntimeMetadata.RUNTIME_SCHEMA_TYPE,
-                    AppFunctionRuntimeMetadata.createAppFunctionRuntimeSchema(TEST_TARGET_PKG_NAME)
-                        .schemaType,
-                )
-                .build()
         val packageToFunctionIdMap =
             metadataSyncAdapter.getPackageToFunctionIdMap(
-                "",
-                searchSpec,
-                PROPERTY_FUNCTION_ID,
-                PROPERTY_PACKAGE_NAME,
+                AppFunctionRuntimeMetadata.RUNTIME_SCHEMA_TYPE,
+                AppFunctionRuntimeMetadata.PROPERTY_FUNCTION_ID,
+                AppFunctionRuntimeMetadata.PROPERTY_PACKAGE_NAME,
             )
 
         assertThat(packageToFunctionIdMap).isNotNull()

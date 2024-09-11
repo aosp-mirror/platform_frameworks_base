@@ -109,3 +109,11 @@ flag {
     description: "Flag for GNSS configuration from resource"
     bug: "317734846"
 }
+
+flag {
+    name: "enable_ni_supl_message_injection_by_carrier_config"
+    namespace: "location"
+    description: "Flag for enabling NI SUPL message injection by carrier config"
+    bug: "242105192"
+    is_fixed_read_only: true
+}

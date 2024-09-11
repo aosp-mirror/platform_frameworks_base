@@ -18,6 +18,7 @@ package com.android.server.appfunctions;
 
 import android.annotation.NonNull;
 import android.annotation.WorkerThread;
+import android.app.appsearch.PropertyPath;
 import android.app.appsearch.SearchResult;
 import android.app.appsearch.SearchSpec;
 import android.util.ArrayMap;
@@ -60,8 +61,11 @@ public class MetadataSyncAdapter {
     @NonNull
     @VisibleForTesting
     static ArrayMap<String, ArraySet<String>> getAddedFunctionsDiffMap(
-            ArrayMap<String, ArraySet<String>> staticPackageToFunctionMap,
-            ArrayMap<String, ArraySet<String>> runtimePackageToFunctionMap) {
+            @NonNull ArrayMap<String, ArraySet<String>> staticPackageToFunctionMap,
+            @NonNull ArrayMap<String, ArraySet<String>> runtimePackageToFunctionMap) {
+        Objects.requireNonNull(staticPackageToFunctionMap);
+        Objects.requireNonNull(runtimePackageToFunctionMap);
+
         return getFunctionsDiffMap(staticPackageToFunctionMap, runtimePackageToFunctionMap);
     }
 
@@ -79,15 +83,21 @@ public class MetadataSyncAdapter {
     @NonNull
     @VisibleForTesting
     static ArrayMap<String, ArraySet<String>> getRemovedFunctionsDiffMap(
-            ArrayMap<String, ArraySet<String>> staticPackageToFunctionMap,
-            ArrayMap<String, ArraySet<String>> runtimePackageToFunctionMap) {
+            @NonNull ArrayMap<String, ArraySet<String>> staticPackageToFunctionMap,
+            @NonNull ArrayMap<String, ArraySet<String>> runtimePackageToFunctionMap) {
+        Objects.requireNonNull(staticPackageToFunctionMap);
+        Objects.requireNonNull(runtimePackageToFunctionMap);
+
         return getFunctionsDiffMap(runtimePackageToFunctionMap, staticPackageToFunctionMap);
     }
 
     @NonNull
     private static ArrayMap<String, ArraySet<String>> getFunctionsDiffMap(
-            ArrayMap<String, ArraySet<String>> packageToFunctionMapA,
-            ArrayMap<String, ArraySet<String>> packageToFunctionMapB) {
+            @NonNull ArrayMap<String, ArraySet<String>> packageToFunctionMapA,
+            @NonNull ArrayMap<String, ArraySet<String>> packageToFunctionMapB) {
+        Objects.requireNonNull(packageToFunctionMapA);
+        Objects.requireNonNull(packageToFunctionMapB);
+
         ArrayMap<String, ArraySet<String>> diffMap = new ArrayMap<>();
         for (String packageName : packageToFunctionMapA.keySet()) {
             if (!packageToFunctionMapB.containsKey(packageName)) {
@@ -110,26 +120,32 @@ public class MetadataSyncAdapter {
     }
 
     /**
-     * This method returns a map of package names to a set of function ids.
+     * This method returns a map of package names to a set of function ids from the AppFunction
+     * metadata.
      *
-     * @param queryExpression The query expression to use when searching for AppFunction metadata.
-     * @param metadataSearchSpec The search spec to use when searching for AppFunction metadata.
-     * @return A map of package names to a set of function ids.
-     * @throws ExecutionException If the future search results fail to execute.
-     * @throws InterruptedException If the future search results are interrupted.
+     * @param schemaType The name space of the AppFunction metadata.
+     * @return A map of package names to a set of function ids from the AppFunction metadata.
      */
     @NonNull
     @VisibleForTesting
     @WorkerThread
     ArrayMap<String, ArraySet<String>> getPackageToFunctionIdMap(
-            @NonNull String queryExpression,
-            @NonNull SearchSpec metadataSearchSpec,
+            @NonNull String schemaType,
             @NonNull String propertyFunctionId,
             @NonNull String propertyPackageName)
             throws ExecutionException, InterruptedException {
+        Objects.requireNonNull(schemaType);
+        Objects.requireNonNull(propertyFunctionId);
+        Objects.requireNonNull(propertyPackageName);
         ArrayMap<String, ArraySet<String>> packageToFunctionIds = new ArrayMap<>();
+
         FutureSearchResults futureSearchResults =
-                mFutureAppSearchSession.search(queryExpression, metadataSearchSpec).get();
+                mFutureAppSearchSession
+                        .search(
+                                "",
+                                buildMetadataSearchSpec(
+                                        schemaType, propertyFunctionId, propertyPackageName))
+                        .get();
         List<SearchResult> searchResultsList = futureSearchResults.getNextPage().get();
         // TODO(b/357551503): This could be expensive if we have more functions
         while (!searchResultsList.isEmpty()) {
@@ -145,5 +161,31 @@ public class MetadataSyncAdapter {
             searchResultsList = futureSearchResults.getNextPage().get();
         }
         return packageToFunctionIds;
+    }
+
+    /**
+     * This method returns a {@link SearchSpec} for searching the AppFunction metadata.
+     *
+     * @param schemaType The schema type of the AppFunction metadata.
+     * @param propertyFunctionId The property name of the function id in the AppFunction metadata.
+     * @param propertyPackageName The property name of the package name in the AppFunction metadata.
+     * @return A {@link SearchSpec} for searching the AppFunction metadata.
+     */
+    @NonNull
+    private static SearchSpec buildMetadataSearchSpec(
+            @NonNull String schemaType,
+            @NonNull String propertyFunctionId,
+            @NonNull String propertyPackageName) {
+        Objects.requireNonNull(schemaType);
+        Objects.requireNonNull(propertyFunctionId);
+        Objects.requireNonNull(propertyPackageName);
+        return new SearchSpec.Builder()
+                .addFilterSchemas(schemaType)
+                .addProjectionPaths(
+                        schemaType,
+                        List.of(
+                                new PropertyPath(propertyFunctionId),
+                                new PropertyPath(propertyPackageName)))
+                .build();
     }
 }

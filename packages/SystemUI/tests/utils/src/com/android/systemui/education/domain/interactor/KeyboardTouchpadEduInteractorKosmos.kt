@@ -50,6 +50,13 @@ var Kosmos.keyboardTouchpadEduStatsInteractor by
     Kosmos.Fixture {
         KeyboardTouchpadEduStatsInteractorImpl(
             backgroundScope = testScope.backgroundScope,
-            contextualEducationInteractor = contextualEducationInteractor
+            contextualEducationInteractor = contextualEducationInteractor,
+            inputDeviceRepository =
+                UserInputDeviceRepository(
+                    testDispatcher,
+                    keyboardRepository,
+                    touchpadRepository,
+                    userRepository
+                )
         )
     }

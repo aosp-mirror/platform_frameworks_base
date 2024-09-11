@@ -37,7 +37,6 @@ import android.os.RemoteException;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
-import android.view.IRecentsAnimationRunner;
 import android.window.WindowContainerToken;
 
 import androidx.annotation.BinderThread;
@@ -54,6 +53,7 @@ import com.android.wm.shell.common.TaskStackListenerCallback;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
+import com.android.wm.shell.recents.IRecentsAnimationRunner;
 import com.android.wm.shell.shared.GroupedRecentTaskInfo;
 import com.android.wm.shell.shared.annotations.ExternalThread;
 import com.android.wm.shell.shared.annotations.ShellMainThread;

@@ -68,6 +68,13 @@ public class TouchpadDebugViewController implements InputManager.InputDeviceList
     @Override
     public void onInputDeviceRemoved(int deviceId) {
         hideDebugView(deviceId);
+        if (mTouchpadDebugView == null) {
+            final InputManager inputManager = Objects.requireNonNull(
+                    mContext.getSystemService(InputManager.class));
+            for (int id : inputManager.getInputDeviceIds()) {
+                onInputDeviceAdded(id);
+            }
+        }
     }
 
     @Override
@@ -134,9 +141,13 @@ public class TouchpadDebugViewController implements InputManager.InputDeviceList
         Slog.d(TAG, "Touchpad debug view removed.");
     }
 
-    public void updateTouchpadHardwareState(TouchpadHardwareState touchpadHardwareState) {
+    /**
+     * Notify the TouchpadDebugView with the new TouchpadHardwareState.
+     */
+    public void updateTouchpadHardwareState(TouchpadHardwareState touchpadHardwareState,
+                                            int deviceId) {
         if (mTouchpadDebugView != null) {
-            mTouchpadDebugView.updateHardwareState(touchpadHardwareState);
+            mTouchpadDebugView.updateHardwareState(touchpadHardwareState, deviceId);
         }
     }
 }

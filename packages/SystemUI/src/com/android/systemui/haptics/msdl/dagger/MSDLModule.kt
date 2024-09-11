@@ -16,7 +16,9 @@
 
 package com.android.systemui.haptics.msdl.dagger
 
+import android.annotation.SuppressLint
 import android.content.Context
+import android.os.VibratorManager
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.google.android.msdl.domain.MSDLPlayer
@@ -25,8 +27,12 @@ import dagger.Provides
 
 @Module
 object MSDLModule {
+    @SuppressLint("NonInjectedService")
     @Provides
     @SysUISingleton
-    fun provideMSDLPlayer(@Application context: Context): MSDLPlayer =
-        MSDLPlayer.createPlayer(context)
+    fun provideMSDLPlayer(@Application context: Context): MSDLPlayer {
+        val vibratorManager =
+            context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+        return MSDLPlayer.createPlayer(vibratorManager.defaultVibrator)
+    }
 }
