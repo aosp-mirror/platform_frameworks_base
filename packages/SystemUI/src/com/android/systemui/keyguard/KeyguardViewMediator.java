@@ -42,6 +42,7 @@ import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STR
 import static com.android.systemui.DejankUtils.whitelistIpcs;
 import static com.android.systemui.Flags.notifyPowerManagerUserActivityBackground;
 import static com.android.systemui.Flags.relockWithPowerButtonImmediately;
+import static com.android.systemui.Flags.simPinBouncerReset;
 import static com.android.systemui.Flags.translucentOccludingActivityFix;
 import static com.android.systemui.keyguard.ui.viewmodel.LockscreenToDreamingTransitionViewModel.DREAMING_ANIMATION_DURATION_MS;
 
@@ -238,7 +239,6 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
     private static final long KEYGUARD_DONE_PENDING_TIMEOUT_MS = 3000;
 
     private static final boolean DEBUG = KeyguardConstants.DEBUG;
-    private static final boolean DEBUG_SIM_STATES = KeyguardConstants.DEBUG_SIM_STATES;
 
     private final static String TAG = "KeyguardViewMediator";
 
@@ -649,11 +649,8 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
 
         @Override
         public void onSimStateChanged(int subId, int slotId, int simState) {
-
-            if (DEBUG_SIM_STATES) {
-                Log.d(TAG, "onSimStateChanged(subId=" + subId + ", slotId=" + slotId
-                        + ",state=" + simState + ")");
-            }
+            Log.d(TAG, "onSimStateChanged(subId=" + subId + ", slotId=" + slotId
+                    + ",state=" +  TelephonyManager.simStateToString(simState) + ")");
 
             int size = mKeyguardStateCallbacks.size();
             boolean simPinSecure = mUpdateMonitor.isSimPinSecure();
@@ -686,7 +683,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                     synchronized (KeyguardViewMediator.this) {
                         if (shouldWaitForProvisioning()) {
                             if (!mShowing) {
-                                if (DEBUG_SIM_STATES) Log.d(TAG, "ICC_ABSENT isn't showing,"
+                                Log.d(TAG, "ICC_ABSENT isn't showing,"
                                         + " we need to show the keyguard since the "
                                         + "device isn't provisioned yet.");
                                 doKeyguardLocked(null);
@@ -698,11 +695,21 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                             // MVNO SIMs can become transiently NOT_READY when switching networks,
                             // so we should only lock when they are ABSENT.
                             if (lastSimStateWasLocked) {
-                                if (DEBUG_SIM_STATES) Log.d(TAG, "SIM moved to ABSENT when the "
+                                Log.d(TAG, "SIM moved to ABSENT when the "
                                         + "previous state was locked. Reset the state.");
                                 resetStateLocked();
                             }
                             mSimWasLocked.append(slotId, false);
+                        } else if (simState == TelephonyManager.SIM_STATE_NOT_READY) {
+                            if (simPinBouncerReset()) {
+                                // Support eSIM disablement, and do not clear `mSimWasLocked`.
+                                // NOT_READY could just be a temporary state
+                                if (lastSimStateWasLocked) {
+                                    Log.d(TAG, "SIM moved to NOT_READY when the "
+                                            + "previous state was locked. Reset the state.");
+                                    resetStateLocked();
+                                }
+                            }
                         }
                     }
                     break;
@@ -712,7 +719,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                         mSimWasLocked.append(slotId, true);
                         mPendingPinLock = true;
                         if (!mShowing) {
-                            if (DEBUG_SIM_STATES) Log.d(TAG,
+                            Log.d(TAG,
                                     "INTENT_VALUE_ICC_LOCKED and keygaurd isn't "
                                     + "showing; need to show keyguard so user can enter sim pin");
                             doKeyguardLocked(null);
@@ -724,11 +731,11 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                 case TelephonyManager.SIM_STATE_PERM_DISABLED:
                     synchronized (KeyguardViewMediator.this) {
                         if (!mShowing) {
-                            if (DEBUG_SIM_STATES) Log.d(TAG, "PERM_DISABLED and "
+                            Log.d(TAG, "PERM_DISABLED and "
                                   + "keygaurd isn't showing.");
                             doKeyguardLocked(null);
                         } else {
-                            if (DEBUG_SIM_STATES) Log.d(TAG, "PERM_DISABLED, resetStateLocked to"
+                            Log.d(TAG, "PERM_DISABLED, resetStateLocked to"
                                   + "show permanently disabled message in lockscreen.");
                             resetStateLocked();
                         }
@@ -736,9 +743,9 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                     break;
                 case TelephonyManager.SIM_STATE_READY:
                     synchronized (KeyguardViewMediator.this) {
-                        if (DEBUG_SIM_STATES) Log.d(TAG, "READY, reset state? " + mShowing);
+                        Log.d(TAG, "READY, reset state? " + mShowing);
                         if (mShowing && mSimWasLocked.get(slotId, false)) {
-                            if (DEBUG_SIM_STATES) Log.d(TAG, "SIM moved to READY when the "
+                            Log.d(TAG, "SIM moved to READY when the "
                                     + "previously was locked. Reset the state.");
                             mSimWasLocked.append(slotId, false);
                             resetStateLocked();
@@ -746,7 +753,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                     }
                     break;
                 default:
-                    if (DEBUG_SIM_STATES) Log.v(TAG, "Unspecific state: " + simState);
+                    Log.v(TAG, "Unspecific state: " + simState);
                     break;
             }
         }
