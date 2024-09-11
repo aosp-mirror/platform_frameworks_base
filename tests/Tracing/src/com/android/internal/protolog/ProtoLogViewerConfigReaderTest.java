@@ -27,7 +27,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-import perfetto.protos.Protolog;
 import perfetto.protos.ProtologCommon;
 
 @Presubmit
@@ -48,7 +47,7 @@ public class ProtoLogViewerConfigReaderTest {
                                 .setTag(TEST_GROUP_TAG)
                 ).addGroups(
                         perfetto.protos.Protolog.ProtoLogViewerConfig.Group.newBuilder()
-                                .setId(1)
+                                .setId(2)
                                 .setName(OTHER_TEST_GROUP_NAME)
                                 .setTag(OTHER_TEST_GROUP_TAG)
                 ).addMessages(
