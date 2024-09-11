@@ -116,7 +116,7 @@
     <string name="bluetooth_battery_level_untethered_lea_support" msgid="803110681688633362">"कनेक्ट हो गया (ऑडियो शेयर करने की सुविधा काम करती है). बायां हेडसेट: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, दायां हेडसेट: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> बैटरी."</string>
     <string name="bluetooth_battery_level_untethered_left_lea_support" msgid="7707464334346454950">"कनेक्ट हो गया (ऑडियो शेयर करने की सुविधा काम करती है). बायां हेडसेट: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> बैटरी."</string>
     <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="8941549024377771038">"कनेक्ट हो गया (ऑडियो शेयर करने की सुविधा काम करती है). दायां हेडसेट: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> बैटरी."</string>
-    <string name="bluetooth_no_battery_level_lea_support" msgid="5721725041048434075">"कनेक्ट हो गया (ऑडियो शेयर करने की सुविधा काम करती है)"</string>
+    <string name="bluetooth_no_battery_level_lea_support" msgid="5721725041048434075">"कनेक्ट है (ऑडियो शेयर करने की सुविधा काम करती है)"</string>
     <string name="bluetooth_active_media_only_no_battery_level" msgid="71106861912593126">"चालू है (सिर्फ़ मीडिया के लिए)"</string>
     <string name="bluetooth_saved_device_lea_support" msgid="7231323139968285768">"ऑडियो शेयर करने की सुविधा काम करती है"</string>
     <string name="bluetooth_hearing_aid_media_only_left_active" msgid="1632152540901488645">"चालू है (सिर्फ़ मीडिया के लिए), सिर्फ़ बाएं कान की मशीन"</string>
@@ -503,7 +503,7 @@
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"वायरलेस चार्जिंग"</string>
     <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"चार्ज हो रहा है"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"चार्ज नहीं हो रही है"</string>
-    <string name="battery_info_status_not_charging" msgid="1103084691314264664">"फ़ोन कनेक्ट हो गया, लेकिन चार्ज नहीं हो रहा है"</string>
+    <string name="battery_info_status_not_charging" msgid="1103084691314264664">"फ़ोन कनेक्ट है, लेकिन चार्ज नहीं हो रहा"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"बैटरी चार्ज हो गई"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"बैटरी पूरी चार्ज है"</string>
     <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"फ़ोन को चार्ज होने से रोक दिया गया है"</string>
