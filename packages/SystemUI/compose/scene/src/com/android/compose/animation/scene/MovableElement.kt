@@ -86,7 +86,7 @@ private abstract class BaseElementScope<ContentScope>(
         value: T,
         key: ValueKey,
         type: SharedValueType<T, *>,
-        canOverflow: Boolean
+        canOverflow: Boolean,
     ): AnimatedState<T> {
         return animateSharedValueAsState(
             layoutImpl,
@@ -200,7 +200,7 @@ private fun shouldComposeMovableElement(
                 content,
                 element,
                 elementState,
-                isInContent = { contents.contains(it) }
+                isInContent = { contents.contains(it) },
             )
         }
     }
@@ -220,11 +220,7 @@ private fun movableElementContentWhenIdle(
     elementState: TransitionState.Idle,
 ): ContentKey {
     val contents = element.contentPicker.contents
-    return elementContentWhenIdle(
-        layoutImpl,
-        elementState,
-        isInContent = { contents.contains(it) },
-    )
+    return elementContentWhenIdle(layoutImpl, elementState, isInContent = { contents.contains(it) })
 }
 
 /**

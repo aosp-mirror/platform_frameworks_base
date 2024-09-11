@@ -83,17 +83,13 @@ internal class RangedPropertyTransformation<T>(
     override fun reversed(): Transformation {
         return RangedPropertyTransformation(
             delegate.reversed() as PropertyTransformation<T>,
-            range.reversed()
+            range.reversed(),
         )
     }
 }
 
 /** The progress-based range of a [PropertyTransformation]. */
-data class TransformationRange(
-    val start: Float,
-    val end: Float,
-    val easing: Easing,
-) {
+data class TransformationRange(val start: Float, val end: Float, val easing: Easing) {
     constructor(
         start: Float? = null,
         end: Float? = null,

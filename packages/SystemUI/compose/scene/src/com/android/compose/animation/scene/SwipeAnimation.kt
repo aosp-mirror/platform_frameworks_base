@@ -54,7 +54,7 @@ internal fun createSwipeAnimation(
     result: UserActionResult,
     isUpOrLeft: Boolean,
     orientation: Orientation,
-    distance: Float = DistanceUnspecified
+    distance: Float = DistanceUnspecified,
 ): SwipeAnimation<*> {
     var lastDistance = distance
 
