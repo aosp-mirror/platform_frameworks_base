@@ -43,6 +43,7 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.cts.input.MotionEventBuilder;
 import com.android.cts.input.PointerBuilder;
 import com.android.server.input.TouchpadFingerState;
+import com.android.server.input.TouchpadHardwareProperties;
 import com.android.server.input.TouchpadHardwareState;
 
 import org.junit.Before;
@@ -83,7 +84,10 @@ public class TouchpadDebugViewTest {
 
         when(mWindowManager.getCurrentWindowMetrics()).thenReturn(mWindowMetrics);
 
-        mTouchpadDebugView = new TouchpadDebugView(mTestableContext, TOUCHPAD_DEVICE_ID);
+        mTouchpadDebugView = new TouchpadDebugView(mTestableContext, TOUCHPAD_DEVICE_ID,
+                new TouchpadHardwareProperties.Builder(500f, 500f, 500f,
+                        500f, 0f, 0f, -5f, 5f, (short) 10, true,
+                        true).build());
 
         mTouchpadDebugView.measure(
                 View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
