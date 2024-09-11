@@ -24,6 +24,7 @@ import static android.content.Intent.ACTION_MAIN;
 import static android.content.Intent.ACTION_VIEW;
 import static android.content.Intent.CAPTURE_CONTENT_FOR_NOTE_FAILED;
 import static android.content.Intent.CATEGORY_LAUNCHER;
+import static android.content.pm.PackageManager.MATCH_DEFAULT_ONLY;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -32,6 +33,7 @@ import static com.google.common.util.concurrent.MoreExecutors.directExecutor;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.reset;
@@ -73,6 +75,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -108,19 +111,24 @@ public final class AppClipsViewModelTest extends SysuiTestCase {
     Context mMockedContext;
     @Mock
     private PackageManager mPackageManager;
-    private ArgumentCaptor<Intent> mPackageManagerIntentCaptor;
+    private ArgumentCaptor<Intent> mPackageManagerLauncherIntentCaptor;
+    private ArgumentCaptor<Intent> mPackageManagerBacklinkIntentCaptor;
     private AppClipsViewModel mViewModel;
 
     @Before
     public void setUp() throws RemoteException {
         MockitoAnnotations.initMocks(this);
-        mPackageManagerIntentCaptor = ArgumentCaptor.forClass(Intent.class);
+        mPackageManagerLauncherIntentCaptor = ArgumentCaptor.forClass(Intent.class);
+        mPackageManagerBacklinkIntentCaptor = ArgumentCaptor.forClass(Intent.class);
 
         // Set up mocking for backlinks.
         when(mAtmService.getTasks(Integer.MAX_VALUE, false, false, DEFAULT_DISPLAY))
                 .thenReturn(List.of(createTaskInfoForBacklinksTask()));
-        when(mPackageManager.resolveActivity(mPackageManagerIntentCaptor.capture(), anyInt()))
-                .thenReturn(createBacklinksTaskResolveInfo());
+        ResolveInfo expectedResolveInfo = createBacklinksTaskResolveInfo();
+        when(mPackageManager.resolveActivity(mPackageManagerLauncherIntentCaptor.capture(),
+                anyInt())).thenReturn(expectedResolveInfo);
+        when(mPackageManager.queryIntentActivities(mPackageManagerBacklinkIntentCaptor.capture(),
+                eq(MATCH_DEFAULT_ONLY))).thenReturn(List.of(expectedResolveInfo));
         when(mPackageManager.loadItemIcon(any(), any())).thenReturn(FAKE_DRAWABLE);
         when(mMockedContext.getPackageManager()).thenReturn(mPackageManager);
 
@@ -209,7 +217,7 @@ public final class AppClipsViewModelTest extends SysuiTestCase {
         mViewModel.triggerBacklinks(Collections.emptySet(), DEFAULT_DISPLAY);
         waitForIdleSync();
 
-        Intent queriedIntent = mPackageManagerIntentCaptor.getValue();
+        Intent queriedIntent = mPackageManagerBacklinkIntentCaptor.getValue();
         assertThat(queriedIntent.getData()).isEqualTo(expectedUri);
         assertThat(queriedIntent.getAction()).isEqualTo(ACTION_VIEW);
 
@@ -223,6 +231,63 @@ public final class AppClipsViewModelTest extends SysuiTestCase {
         assertThat(clipData.getItemAt(0).getUri()).isEqualTo(expectedUri);
 
         assertThat(result).isEqualTo(mViewModel.getBacklinksLiveData().getValue().get(0));
+    }
+
+    @Test
+    public void triggerBacklinks_shouldUpdateBacklinks_withUriForDifferentApp() {
+        Uri expectedUri = Uri.parse("https://android.com");
+        AssistContent contentWithUri = new AssistContent();
+        contentWithUri.setWebUri(expectedUri);
+        mockForAssistContent(contentWithUri, BACKLINKS_TASK_ID);
+
+        // Reset PackageManager mocking done in setup.
+        reset(mPackageManager);
+        String package2 = BACKLINKS_TASK_PACKAGE_NAME + 2;
+        String appName2 = BACKLINKS_TASK_APP_NAME + 2;
+        ResolveInfo resolveInfo2 = createBacklinksTaskResolveInfo();
+        ActivityInfo activityInfo2 = resolveInfo2.activityInfo;
+        activityInfo2.name = appName2;
+        activityInfo2.packageName = package2;
+        activityInfo2.applicationInfo.packageName = package2;
+
+        Intent app2LauncherIntent = new Intent(ACTION_MAIN).addCategory(
+                CATEGORY_LAUNCHER).setPackage(package2);
+        when(mPackageManager.resolveActivity(intentEquals(app2LauncherIntent), eq(/* flags= */ 0)))
+                .thenReturn(resolveInfo2);
+        Intent uriIntent = new Intent(ACTION_VIEW).setData(expectedUri);
+        when(mPackageManager.queryIntentActivities(intentEquals(uriIntent), eq(MATCH_DEFAULT_ONLY)))
+                .thenReturn(List.of(resolveInfo2));
+        when(mPackageManager.loadItemIcon(any(), any())).thenReturn(FAKE_DRAWABLE);
+
+        mViewModel.triggerBacklinks(Collections.emptySet(), DEFAULT_DISPLAY);
+        waitForIdleSync();
+
+        BacklinksData result = (BacklinksData) mViewModel.mSelectedBacklinksLiveData.getValue();
+        ClipData clipData = result.getClipData();
+        ClipDescription resultDescription = clipData.getDescription();
+        assertThat(resultDescription.getLabel().toString()).isEqualTo(appName2);
+        assertThat(resultDescription.getMimeType(0)).isEqualTo(MIMETYPE_TEXT_URILIST);
+        assertThat(clipData.getItemCount()).isEqualTo(1);
+        assertThat(clipData.getItemAt(0).getUri()).isEqualTo(expectedUri);
+
+        assertThat(mViewModel.getBacklinksLiveData().getValue().size()).isEqualTo(1);
+    }
+
+    private static class IntentMatcher implements ArgumentMatcher<Intent> {
+        private final Intent mExpectedIntent;
+
+        IntentMatcher(Intent expectedIntent) {
+            mExpectedIntent = expectedIntent;
+        }
+
+        @Override
+        public boolean matches(Intent actualIntent) {
+            return actualIntent != null && mExpectedIntent.filterEquals(actualIntent);
+        }
+    }
+
+    private static Intent intentEquals(Intent intent) {
+        return argThat(new IntentMatcher(intent));
     }
 
     @Test
@@ -249,7 +314,7 @@ public final class AppClipsViewModelTest extends SysuiTestCase {
         mViewModel.triggerBacklinks(Collections.emptySet(), DEFAULT_DISPLAY);
         waitForIdleSync();
 
-        Intent queriedIntent = mPackageManagerIntentCaptor.getValue();
+        Intent queriedIntent = mPackageManagerBacklinkIntentCaptor.getValue();
         assertThat(queriedIntent.getPackage()).isEqualTo(expectedIntent.getPackage());
 
         BacklinksData result = (BacklinksData) mViewModel.mSelectedBacklinksLiveData.getValue();
@@ -283,7 +348,7 @@ public final class AppClipsViewModelTest extends SysuiTestCase {
         mViewModel.triggerBacklinks(Collections.emptySet(), DEFAULT_DISPLAY);
         waitForIdleSync();
 
-        Intent queriedIntent = mPackageManagerIntentCaptor.getValue();
+        Intent queriedIntent = mPackageManagerLauncherIntentCaptor.getValue();
         assertThat(queriedIntent.getPackage()).isEqualTo(BACKLINKS_TASK_PACKAGE_NAME);
         assertThat(queriedIntent.getAction()).isEqualTo(ACTION_MAIN);
         assertThat(queriedIntent.getCategories()).containsExactly(CATEGORY_LAUNCHER);
@@ -356,7 +421,9 @@ public final class AppClipsViewModelTest extends SysuiTestCase {
         // For each task, the logic queries PM 3 times, twice for verifying if an app can be
         // launched via launcher and once with the data provided in backlink intent.
         when(mPackageManager.resolveActivity(any(), anyInt())).thenReturn(resolveInfo1,
-                resolveInfo1, resolveInfo1, resolveInfo2, resolveInfo2, resolveInfo2);
+                resolveInfo1, resolveInfo2, resolveInfo2);
+        when(mPackageManager.queryIntentActivities(any(Intent.class), eq(MATCH_DEFAULT_ONLY)))
+                .thenReturn(List.of(resolveInfo1)).thenReturn(List.of(resolveInfo2));
         when(mPackageManager.loadItemIcon(any(), any())).thenReturn(FAKE_DRAWABLE);
         when(mAtmService.getTasks(Integer.MAX_VALUE, false, false, DEFAULT_DISPLAY))
                 .thenReturn(List.of(runningTaskInfo1, runningTaskInfo2));
