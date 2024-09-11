@@ -18,8 +18,6 @@ package com.android.systemui.qs.tiles;
 
 import static junit.framework.Assert.assertEquals;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -27,7 +25,6 @@ import static org.mockito.Mockito.when;
 
 import android.os.Handler;
 import android.platform.test.annotations.RequiresFlagsDisabled;
-import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.service.quicksettings.Tile;
 import android.testing.TestableLooper;
 
@@ -38,7 +35,6 @@ import com.android.internal.R;
 import com.android.internal.logging.MetricsLogger;
 import com.android.server.display.feature.flags.Flags;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.accessibility.extradim.ExtraDimDialogManager;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QSTile;
@@ -78,8 +74,6 @@ public class ReduceBrightColorsTileTest extends SysuiTestCase {
     private ReduceBrightColorsController mReduceBrightColorsController;
     @Mock
     private QsEventLogger mUiEventLogger;
-    @Mock
-    private ExtraDimDialogManager mExtraDimDialogManager;
 
     private TestableLooper mTestableLooper;
     private ReduceBrightColorsTile mTile;
@@ -103,8 +97,7 @@ public class ReduceBrightColorsTileTest extends SysuiTestCase {
                 mMetricsLogger,
                 mStatusBarStateController,
                 mActivityStarter,
-                mQSLogger,
-                mExtraDimDialogManager
+                mQSLogger
         );
 
         mTile.initialize();
@@ -152,78 +145,6 @@ public class ReduceBrightColorsTileTest extends SysuiTestCase {
 
         verify(mReduceBrightColorsController, times(1))
                 .setReduceBrightColorsActivated(eq(true));
-    }
-
-    @Test
-    @RequiresFlagsEnabled(Flags.FLAG_EVEN_DIMMER)
-    public void testDialogueShownOnClick() {
-        when(mReduceBrightColorsController.isReduceBrightColorsActivated()).thenReturn(true);
-        when(mReduceBrightColorsController.isInUpgradeMode(mContext.getResources()))
-                .thenReturn(true);
-        mTile = new ReduceBrightColorsTile(
-                true,
-                mReduceBrightColorsController,
-                mHost,
-                mUiEventLogger,
-                mTestableLooper.getLooper(),
-                new Handler(mTestableLooper.getLooper()),
-                new FalsingManagerFake(),
-                mMetricsLogger,
-                mStatusBarStateController,
-                mActivityStarter,
-                mQSLogger,
-                mExtraDimDialogManager
-        );
-
-        mTile.initialize();
-        mTestableLooper.processAllMessages();
-
-        // Validity check
-        assertEquals(Tile.STATE_ACTIVE, mTile.getState().state);
-        mTile.handleClick(null /* view */);
-
-        verify(mExtraDimDialogManager, times(1))
-                .dismissKeyguardIfNeededAndShowDialog(any());
-        verify(mReduceBrightColorsController, times(0))
-                .setReduceBrightColorsActivated(anyBoolean());
-        mTile.destroy();
-        mTestableLooper.processAllMessages();
-    }
-
-    @Test
-    @RequiresFlagsEnabled(Flags.FLAG_EVEN_DIMMER)
-    public void testDialogueShownOnLongClick() {
-        when(mReduceBrightColorsController.isReduceBrightColorsActivated()).thenReturn(true);
-        when(mReduceBrightColorsController.isInUpgradeMode(mContext.getResources()))
-                .thenReturn(true);
-        mTile = new ReduceBrightColorsTile(
-                true,
-                mReduceBrightColorsController,
-                mHost,
-                mUiEventLogger,
-                mTestableLooper.getLooper(),
-                new Handler(mTestableLooper.getLooper()),
-                new FalsingManagerFake(),
-                mMetricsLogger,
-                mStatusBarStateController,
-                mActivityStarter,
-                mQSLogger,
-                mExtraDimDialogManager
-        );
-
-        mTile.initialize();
-        mTestableLooper.processAllMessages();
-
-        // Validity check
-        assertEquals(Tile.STATE_ACTIVE, mTile.getState().state);
-        mTile.handleLongClick(null /* view */);
-
-        verify(mExtraDimDialogManager, times(1))
-                .dismissKeyguardIfNeededAndShowDialog(any());
-        verify(mReduceBrightColorsController, times(0))
-                .setReduceBrightColorsActivated(anyBoolean());
-        mTile.destroy();
-        mTestableLooper.processAllMessages();
     }
 
     @Test
