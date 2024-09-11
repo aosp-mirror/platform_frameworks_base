@@ -32,7 +32,7 @@ android_test {
     ],
     libs: [
         "framework-nfc.impl",
-        "android.test.runner",
+        "android.test.runner.stubs.system",
     ],
     srcs: ["src/**/*.java"],
     platform_apis: true,

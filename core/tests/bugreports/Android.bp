@@ -26,8 +26,8 @@ android_test {
     srcs: ["src/**/*.java"],
     data: [":bugreport_artifacts"],
     libs: [
-        "android.test.runner",
-        "android.test.base",
+        "android.test.runner.stubs.test",
+        "android.test.base.stubs.test",
     ],
     static_libs: [
         "androidx.test.rules",

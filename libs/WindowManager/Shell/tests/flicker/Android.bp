@@ -59,7 +59,7 @@ java_defaults {
         enabled: false,
     },
     test_suites: ["device-tests"],
-    libs: ["android.test.runner"],
+    libs: ["android.test.runner.stubs.system"],
     static_libs: [
         "wm-shell-flicker-utils",
         "androidx.test.ext.junit",

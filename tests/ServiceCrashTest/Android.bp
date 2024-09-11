@@ -13,7 +13,7 @@ android_test {
     srcs: ["src/**/*.java"],
     platform_apis: true,
     certificate: "platform",
-    libs: ["android.test.base"],
+    libs: ["android.test.base.stubs.system"],
     static_libs: [
         "compatibility-device-util-axt",
         "androidx.test.rules",
