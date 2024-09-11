@@ -161,9 +161,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
             val upDestinationSceneKey =
                 (actions?.get(Swipe.Up) as? UserActionResult.ChangeScene)?.toScene
             assertThat(upDestinationSceneKey).isEqualTo(Scenes.Bouncer)
-            kosmos.emulateUserDrivenTransition(
-                to = upDestinationSceneKey,
-            )
+            kosmos.emulateUserDrivenTransition(to = upDestinationSceneKey)
 
             kosmos.fakeSceneDataSource.pause()
             kosmos.enterPin()
@@ -226,16 +224,14 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
                 (actions?.get(Swipe.Up) as? UserActionResult.ChangeScene)?.toScene
             assertThat(upDestinationSceneKey).isEqualTo(SceneFamilies.Home)
             assertThat(homeScene).isEqualTo(Scenes.Gone)
-            kosmos.emulateUserDrivenTransition(
-                to = homeScene,
-            )
+            kosmos.emulateUserDrivenTransition(to = homeScene)
         }
 
     @Test
     fun withAuthMethodNone_deviceWakeUp_skipsLockscreen() =
         testScope.runTest {
             kosmos.setAuthMethod(AuthenticationMethodModel.None, enableLockscreen = false)
-            kosmos.putDeviceToSleep(instantlyLockDevice = false)
+            kosmos.putDeviceToSleep()
             kosmos.assertCurrentScene(Scenes.Lockscreen)
 
             kosmos.wakeUpDevice()
@@ -246,7 +242,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
     fun withAuthMethodSwipe_deviceWakeUp_doesNotSkipLockscreen() =
         testScope.runTest {
             kosmos.setAuthMethod(AuthenticationMethodModel.None, enableLockscreen = true)
-            kosmos.putDeviceToSleep(instantlyLockDevice = false)
+            kosmos.putDeviceToSleep()
             kosmos.assertCurrentScene(Scenes.Lockscreen)
 
             kosmos.wakeUpDevice()
@@ -302,7 +298,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
         testScope.runTest {
             kosmos.unlockDevice()
             kosmos.assertCurrentScene(Scenes.Gone)
-            kosmos.putDeviceToSleep(instantlyLockDevice = false)
+            kosmos.putDeviceToSleep()
             kosmos.assertCurrentScene(Scenes.Lockscreen)
 
             // Pretend like the timeout elapsed and now lock the device.
@@ -318,9 +314,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
             val upDestinationSceneKey =
                 (actions?.get(Swipe.Up) as? UserActionResult.ChangeScene)?.toScene
             assertThat(upDestinationSceneKey).isEqualTo(Scenes.Bouncer)
-            kosmos.emulateUserDrivenTransition(
-                to = upDestinationSceneKey,
-            )
+            kosmos.emulateUserDrivenTransition(to = upDestinationSceneKey)
 
             kosmos.fakeSceneDataSource.pause()
             kosmos.dismissIme()
@@ -388,7 +382,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
             kosmos.emulatePendingTransitionProgress(expectedVisible = true)
             kosmos.enterSimPin(
                 authMethodAfterSimUnlock = AuthenticationMethodModel.None,
-                enableLockscreen = false
+                enableLockscreen = false,
             )
 
             kosmos.assertCurrentScene(Scenes.Gone)
@@ -434,7 +428,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
     /** Updates the current authentication method and related states in the data layer. */
     private fun Kosmos.setAuthMethod(
         authMethod: AuthenticationMethodModel,
-        enableLockscreen: Boolean = true
+        enableLockscreen: Boolean = true,
     ) {
         if (authMethod.isSecure) {
             assert(enableLockscreen) {
@@ -538,24 +532,27 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
         kosmos.fakeSceneDataSource.pause()
         sceneInteractor.changeScene(to, "reason")
 
-        emulatePendingTransitionProgress(
-            expectedVisible = to != Scenes.Gone,
-        )
+        emulatePendingTransitionProgress(expectedVisible = to != Scenes.Gone)
     }
 
     /**
-     * Locks the device immediately (without delay).
+     * Locks the device.
      *
      * Asserts the device to be lockable (e.g. that the current authentication is secure).
      *
-     * Not to be confused with [putDeviceToSleep], which may also instantly lock the device.
+     * Internally emulates a power button press that puts the device to sleep, followed by another
+     * power button press that wakes up the device but is then expected to be in the locked state.
      */
     private suspend fun Kosmos.lockDevice() {
         val authMethod = authenticationInteractor.getAuthenticationMethod()
         assertWithMessage("The authentication method of $authMethod is not secure, cannot lock!")
             .that(authMethod.isSecure)
             .isTrue()
-        sceneInteractor.changeScene(Scenes.Lockscreen, "")
+
+        powerInteractor.setAsleepForTest()
+        testScope.runCurrent()
+
+        powerInteractor.setAwakeForTest()
         testScope.runCurrent()
     }
 
@@ -569,9 +566,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
         fakeSceneDataSource.pause()
         enterPin()
 
-        emulatePendingTransitionProgress(
-            expectedVisible = false,
-        )
+        emulatePendingTransitionProgress(expectedVisible = false)
     }
 
     /**
@@ -645,9 +640,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
     }
 
     /** Changes device wakefulness state from awake to asleep, going through intermediary states. */
-    private suspend fun Kosmos.putDeviceToSleep(
-        instantlyLockDevice: Boolean = true,
-    ) {
+    private suspend fun Kosmos.putDeviceToSleep() {
         val wakefulnessModel = powerInteractor.detailedWakefulness.value
         assertWithMessage("Cannot put device to sleep as it's already asleep!")
             .that(wakefulnessModel.isAwake())
@@ -655,10 +648,6 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
 
         powerInteractor.setAsleepForTest()
         testScope.runCurrent()
-
-        if (instantlyLockDevice) {
-            lockDevice()
-        }
     }
 
     /** Emulates the dismissal of the IME (soft keyboard). */
