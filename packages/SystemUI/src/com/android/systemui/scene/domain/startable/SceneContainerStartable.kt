@@ -280,6 +280,8 @@ constructor(
         applicationScope.launch {
             sceneInteractor.currentScene.collectLatest { currentScene ->
                 if (currentScene == Scenes.Lockscreen) {
+                    // Wait for the screen to be on
+                    powerInteractor.isAwake.first { it }
                     // Wait for surface to become visible
                     windowMgrLockscreenVisInteractor.surfaceBehindVisibility.first { it }
                     // Make sure the device is actually unlocked before force-changing the scene
