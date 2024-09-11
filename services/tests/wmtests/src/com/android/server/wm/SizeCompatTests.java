@@ -1640,7 +1640,7 @@ public class SizeCompatTests extends WindowTestsBase {
                 .build();
         setUpApp(display);
         prepareUnresizable(mActivity, /* maxAspect */ 0f, SCREEN_ORIENTATION_PORTRAIT);
-        mActivity.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        mTask.getWindowConfiguration().setWindowingMode(WINDOWING_MODE_FREEFORM);
         assertFalse(mActivity.inSizeCompatMode());
 
         // Resize app to make original app bounds larger than parent bounds.
@@ -1667,7 +1667,7 @@ public class SizeCompatTests extends WindowTestsBase {
                 .build();
         setUpApp(display);
         prepareUnresizable(mActivity, /* maxAspect */ 0f, SCREEN_ORIENTATION_PORTRAIT);
-        mActivity.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        mTask.getWindowConfiguration().setWindowingMode(WINDOWING_MODE_FREEFORM);
         assertFalse(mActivity.inSizeCompatMode());
 
         // Resize app to make original app bounds smaller than parent bounds.
@@ -1692,13 +1692,45 @@ public class SizeCompatTests extends WindowTestsBase {
                 .build();
         setUpApp(display);
         prepareUnresizable(mActivity, /* maxAspect */ 0f, SCREEN_ORIENTATION_PORTRAIT);
-        mActivity.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        mTask.getWindowConfiguration().setWindowingMode(WINDOWING_MODE_FREEFORM);
         assertFalse(mActivity.inSizeCompatMode());
         final Rect originalAppBounds = mActivity.getBounds();
 
         // Resize app to make original app bounds smaller than parent bounds.
         mTask.getWindowConfiguration().setAppBounds(
                 new Rect(0, 0, dw + 300, dh + 400));
+        mActivity.onConfigurationChanged(mTask.getConfiguration());
+        // App should enter size compat mode but remain its original size.
+        assertTrue(mActivity.inSizeCompatMode());
+        assertEquals(originalAppBounds, mActivity.getBounds());
+    }
+
+    /**
+     * Test that when desktop mode is enabled, a freeform unresizeable activity is not up-scaled
+     * when exiting freeform despite its larger parent bounds.
+     */
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
+    public void testCompatScaling_freeformUnresizeableApp_exitFreeform_notScaled() {
+        doReturn(true).when(() ->
+                DesktopModeHelper.canEnterDesktopMode(any()));
+        final int dw = 600;
+        final int dh = 800;
+        final DisplayContent display = new TestDisplayContent.Builder(mAtm, dw, dh)
+                .setWindowingMode(WINDOWING_MODE_FREEFORM)
+                .build();
+        setUpApp(display);
+        prepareUnresizable(mActivity, /* maxAspect */ 0f, SCREEN_ORIENTATION_PORTRAIT);
+        mTask.getWindowConfiguration().setWindowingMode(WINDOWING_MODE_FREEFORM);
+        final Rect originalAppBounds = mActivity.getBounds();
+
+        assertFalse(mActivity.inSizeCompatMode());
+
+        // Resize app to make original app bounds smaller than parent bounds.
+        mTask.getWindowConfiguration().setAppBounds(
+                new Rect(0, 0, dw + 300, dh + 400));
+        // Change windowing mode from freeform to fullscreen
+        mTask.getWindowConfiguration().setWindowingMode(WINDOWING_MODE_FULLSCREEN);
         mActivity.onConfigurationChanged(mTask.getConfiguration());
         // App should enter size compat mode but remain its original size.
         assertTrue(mActivity.inSizeCompatMode());
