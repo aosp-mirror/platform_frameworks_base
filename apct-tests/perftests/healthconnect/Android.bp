@@ -37,7 +37,7 @@ android_test {
         "collector-device-lib-platform",
     ],
 
-    libs: ["android.test.base"],
+    libs: ["android.test.base.stubs.system"],
     platform_apis: true,
     test_suites: ["device-tests"],
     data: [":perfetto_artifacts"],

@@ -21,7 +21,7 @@ android_test {
     name: "ConcurrentMultiSessionImeTest",
     srcs: ["src/**/*.java"],
     resource_dirs: ["res"],
-    libs: ["android.test.runner"],
+    libs: ["android.test.runner.stubs"],
     static_libs: [
         "androidx.test.ext.junit",
         "androidx.test.rules",

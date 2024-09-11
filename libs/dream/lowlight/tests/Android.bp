@@ -37,9 +37,9 @@ android_test {
         "truth",
     ],
     libs: [
-        "android.test.mock",
-        "android.test.base",
-        "android.test.runner",
+        "android.test.mock.stubs.system",
+        "android.test.base.stubs.system",
+        "android.test.runner.stubs.system",
     ],
     jni_libs: [
         "libdexmakerjvmtiagent",

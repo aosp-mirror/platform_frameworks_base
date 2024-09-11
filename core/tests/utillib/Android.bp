@@ -28,5 +28,5 @@ java_library {
     srcs: ["**/*.java"],
 
     static_libs: ["junit"],
-    libs: ["android.test.base"],
+    libs: ["android.test.base.stubs"],
 }

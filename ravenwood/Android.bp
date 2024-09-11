@@ -155,13 +155,12 @@ java_library {
         "ravenwood-runtime-common",
     ],
     libs: [
-        "android.test.mock",
+        "android.test.mock.impl",
         "framework-minus-apex.ravenwood",
         "ravenwood-framework",
         "services.core.ravenwood",
         "junit",
     ],
-    sdk_version: "core_current",
     visibility: ["//frameworks/base"],
     jarjar_rules: ":ravenwood-services-jarjar-rules",
 }
