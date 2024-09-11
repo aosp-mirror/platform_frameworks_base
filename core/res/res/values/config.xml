@@ -7121,4 +7121,8 @@
     <!-- The maximum number of call log entries for each sim card that can be stored in the call log
          provider on the device. -->
     <integer name="config_maximumCallLogEntriesPerSim">500</integer>
+
+    <!-- Whether to enable scaling and fading animation to scrollviews while scrolling.
+         P.S this is a change only intended for wear devices. -->
+    <bool name="config_enableViewGroupScalingFading">false</bool>
 </resources>

@@ -139,6 +139,7 @@ public class SettingsToPropertiesMapper {
     static final String[] sDeviceConfigAconfigScopes = new String[] {
         "accessibility",
         "android_core_networking",
+        "android_health_services",
         "android_sdk",
         "android_stylus",
         "aoc",
@@ -235,7 +236,6 @@ public class SettingsToPropertiesMapper {
         "wear_connectivity",
         "wear_esim_carriers",
         "wear_frameworks",
-        "wear_health_services",
         "wear_media",
         "wear_offload",
         "wear_security",
@@ -453,7 +453,9 @@ public class SettingsToPropertiesMapper {
       proto.write(StorageRequestMessage.FlagOverrideMessage.PACKAGE_NAME, packageName);
       proto.write(StorageRequestMessage.FlagOverrideMessage.FLAG_NAME, flagName);
       proto.write(StorageRequestMessage.FlagOverrideMessage.FLAG_VALUE, flagValue);
-      proto.write(StorageRequestMessage.FlagOverrideMessage.IS_LOCAL, isLocal);
+      proto.write(StorageRequestMessage.FlagOverrideMessage.OVERRIDE_TYPE, isLocal
+                ? StorageRequestMessage.LOCAL_ON_REBOOT
+                : StorageRequestMessage.SERVER_ON_REBOOT);
       proto.end(msgToken);
       proto.end(msgsToken);
     }

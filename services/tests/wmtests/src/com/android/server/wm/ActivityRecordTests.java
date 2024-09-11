@@ -3231,7 +3231,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         mDisplayContent.mOpeningApps.remove(activity);
         mDisplayContent.mClosingApps.remove(activity);
         activity.commitVisibility(false /* visible */, false /* performLayout */);
-        mDisplayContent.getDisplayPolicy().screenTurnedOff();
+        mDisplayContent.getDisplayPolicy().screenTurnedOff(false /* acquireSleepToken */);
         final KeyguardController controller = mSupervisor.getKeyguardController();
         doReturn(true).when(controller).isKeyguardGoingAway(anyInt());
         activity.setVisibility(true);

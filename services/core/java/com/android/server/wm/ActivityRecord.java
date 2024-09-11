@@ -2848,7 +2848,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final boolean hasImeSurface;
         if (mStartingData != null) {
             if (mStartingData.mWaitForSyncTransactionCommit
-                    || mTransitionController.isCollecting(this)) {
+                    || mSyncState != SYNC_STATE_NONE) {
                 mStartingData.mRemoveAfterTransaction = AFTER_TRANSACTION_REMOVE_DIRECTLY;
                 mStartingData.mPrepareRemoveAnimation = prepareAnimation;
                 return;
@@ -6079,9 +6079,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return false;
         }
 
-        // Check if the activity is on a sleeping display, canTurnScreenOn will also check
-        // keyguard visibility
-        if (mDisplayContent.isSleeping()) {
+        // Check if the activity is on a sleeping display and keyguard is not going away (to
+        // align with TaskFragment#shouldSleepActivities), canTurnScreenOn will also check keyguard
+        // visibility
+        if (mDisplayContent.isSleeping() && !mDisplayContent.isKeyguardGoingAway()) {
             return canTurnScreenOn();
         } else {
             return mTaskSupervisor.getKeyguardController().checkKeyguardVisibility(this);
@@ -8149,7 +8150,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      */
     @Override
     protected int getOverrideOrientation() {
-        if (mWmService.mConstants.mIgnoreActivityOrientationRequest) {
+        if (mWmService.mConstants.mIgnoreActivityOrientationRequest
+                && info.applicationInfo.category != ApplicationInfo.CATEGORY_GAME) {
             return ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
         }
         return mAppCompatController.getOrientationPolicy()

@@ -19,12 +19,15 @@ package com.android.systemui.education.domain.interactor
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.contextualeducation.GestureType.ALL_APPS
 import com.android.systemui.contextualeducation.GestureType.BACK
+import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.education.data.repository.contextualEducationRepository
 import com.android.systemui.education.data.repository.fakeEduClock
+import com.android.systemui.keyboard.data.repository.keyboardRepository
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
+import com.android.systemui.touchpad.data.repository.touchpadRepository
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -36,22 +39,62 @@ class KeyboardTouchpadStatsInteractorTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
     private val underTest = kosmos.keyboardTouchpadEduStatsInteractor
+    private val keyboardRepository = kosmos.keyboardRepository
+    private val touchpadRepository = kosmos.touchpadRepository
+    private val repository = kosmos.contextualEducationRepository
 
     @Test
-    fun dataUpdatedOnIncrementSignalCount() =
+    fun dataUpdatedOnIncrementSignalCountWhenTouchpadConnected() =
         testScope.runTest {
-            val model by
-                collectLastValue(kosmos.contextualEducationRepository.readGestureEduModelFlow(BACK))
+            touchpadRepository.setIsAnyTouchpadConnected(true)
+
+            val model by collectLastValue(repository.readGestureEduModelFlow(BACK))
             val originalValue = model!!.signalCount
             underTest.incrementSignalCount(BACK)
+
             assertThat(model?.signalCount).isEqualTo(originalValue + 1)
+        }
+
+    @Test
+    fun dataUnchangedOnIncrementSignalCountWhenTouchpadDisconnected() =
+        testScope.runTest {
+            touchpadRepository.setIsAnyTouchpadConnected(false)
+
+            val model by collectLastValue(repository.readGestureEduModelFlow(BACK))
+            val originalValue = model!!.signalCount
+            underTest.incrementSignalCount(BACK)
+
+            assertThat(model?.signalCount).isEqualTo(originalValue)
+        }
+
+    @Test
+    fun dataUpdatedOnIncrementSignalCountWhenKeyboardConnected() =
+        testScope.runTest {
+            keyboardRepository.setIsAnyKeyboardConnected(true)
+
+            val model by collectLastValue(repository.readGestureEduModelFlow(ALL_APPS))
+            val originalValue = model!!.signalCount
+            underTest.incrementSignalCount(ALL_APPS)
+
+            assertThat(model?.signalCount).isEqualTo(originalValue + 1)
+        }
+
+    @Test
+    fun dataUnchangedOnIncrementSignalCountWhenKeyboardDisconnected() =
+        testScope.runTest {
+            keyboardRepository.setIsAnyKeyboardConnected(false)
+
+            val model by collectLastValue(repository.readGestureEduModelFlow(ALL_APPS))
+            val originalValue = model!!.signalCount
+            underTest.incrementSignalCount(ALL_APPS)
+
+            assertThat(model?.signalCount).isEqualTo(originalValue)
         }
 
     @Test
     fun dataAddedOnUpdateShortcutTriggerTime() =
         testScope.runTest {
-            val model by
-                collectLastValue(kosmos.contextualEducationRepository.readGestureEduModelFlow(BACK))
+            val model by collectLastValue(repository.readGestureEduModelFlow(BACK))
             assertThat(model?.lastShortcutTriggeredTime).isNull()
             underTest.updateShortcutTriggerTime(BACK)
             assertThat(model?.lastShortcutTriggeredTime).isEqualTo(kosmos.fakeEduClock.instant())

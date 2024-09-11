@@ -18,7 +18,6 @@ package com.android.systemui.screenshot;
 
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 
-import static com.android.systemui.Flags.screenshotSaveImageExporter;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_ANIM;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_CALLBACK;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_INPUT;
@@ -124,7 +123,6 @@ public class ScreenshotController implements InteractiveScreenshotHandler {
     private final MessageContainerController mMessageContainerController;
     private final AnnouncementResolver mAnnouncementResolver;
     private Bitmap mScreenBitmap;
-    private SaveImageInBackgroundTask mSaveInBgTask;
     private boolean mScreenshotTakenInPortrait;
     private Animator mScreenshotAnimation;
     private RequestCallback mCurrentRequestCallback;
@@ -373,10 +371,6 @@ public class ScreenshotController implements InteractiveScreenshotHandler {
     // Any cleanup needed when the service is being destroyed.
     @Override
     public void onDestroy() {
-        if (mSaveInBgTask != null) {
-            // just log success/failure for the pre-existing screenshot
-            mSaveInBgTask.setActionsReadyListener(this::logSuccessOnActionsReady);
-        }
         removeWindow();
         releaseMediaPlayer();
         releaseContext();
@@ -525,36 +519,12 @@ public class ScreenshotController implements InteractiveScreenshotHandler {
         // Play the shutter sound to notify that we've taken a screenshot
         playCameraSoundIfNeeded();
 
-        if (screenshotSaveImageExporter()) {
-            saveScreenshotInBackground(screenshot, UUID.randomUUID(), finisher, result -> {
-                if (result.uri != null) {
-                    mScreenshotHandler.post(() -> Toast.makeText(mContext,
-                            R.string.screenshot_saved_title, Toast.LENGTH_SHORT).show());
-                }
-            });
-        } else {
-            saveScreenshotInWorkerThread(
-                    screenshot.getUserHandle(),
-                    /* onComplete */ finisher,
-                    /* actionsReadyListener */ imageData -> {
-                        if (DEBUG_CALLBACK) {
-                            Log.d(TAG,
-                                    "returning URI to finisher (Consumer<URI>): " + imageData.uri);
-                        }
-                        finisher.accept(imageData.uri);
-                        if (imageData.uri == null) {
-                            mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_NOT_SAVED, 0,
-                                    mPackageName);
-                            mNotificationsController.notifyScreenshotError(
-                                    R.string.screenshot_failed_to_save_text);
-                        } else {
-                            mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SAVED, 0, mPackageName);
-                            mScreenshotHandler.post(() -> Toast.makeText(mContext,
-                                    R.string.screenshot_saved_title, Toast.LENGTH_SHORT).show());
-                        }
-                    },
-                    null);
-        }
+        saveScreenshotInBackground(screenshot, UUID.randomUUID(), finisher, result -> {
+            if (result.uri != null) {
+                mScreenshotHandler.post(() -> Toast.makeText(mContext,
+                        R.string.screenshot_saved_title, Toast.LENGTH_SHORT).show());
+            }
+        });
     }
 
     /**
@@ -627,35 +597,6 @@ public class ScreenshotController implements InteractiveScreenshotHandler {
     }
 
     /**
-     * Creates a new worker thread and saves the screenshot to the media store.
-     */
-    private void saveScreenshotInWorkerThread(
-            UserHandle owner,
-            @NonNull Consumer<Uri> finisher,
-            @Nullable SaveImageInBackgroundTask.ActionsReadyListener actionsReadyListener,
-            @Nullable SaveImageInBackgroundTask.QuickShareActionReadyListener
-                    quickShareActionsReadyListener) {
-        SaveImageInBackgroundTask.SaveImageInBackgroundData
-                data = new SaveImageInBackgroundTask.SaveImageInBackgroundData();
-        data.image = mScreenBitmap;
-        data.finisher = finisher;
-        data.mActionsReadyListener = actionsReadyListener;
-        data.mQuickShareActionsReadyListener = quickShareActionsReadyListener;
-        data.owner = owner;
-        data.displayId = mDisplay.getDisplayId();
-
-        if (mSaveInBgTask != null) {
-            // just log success/failure for the pre-existing screenshot
-            mSaveInBgTask.setActionsReadyListener(this::logSuccessOnActionsReady);
-        }
-
-        mSaveInBgTask = new SaveImageInBackgroundTask(mContext, mFlags, mImageExporter,
-                mScreenshotSmartActions, data,
-                mScreenshotNotificationSmartActionsProvider);
-        mSaveInBgTask.execute();
-    }
-
-    /**
      * Logs success/failure of the screenshot saving task, and shows an error if it failed.
      */
     private void logScreenshotResultStatus(Uri uri, UserHandle owner) {
@@ -670,13 +611,6 @@ public class ScreenshotController implements InteractiveScreenshotHandler {
                         mPackageName);
             }
         }
-    }
-
-    /**
-     * Logs success/failure of the screenshot saving task, and shows an error if it failed.
-     */
-    private void logSuccessOnActionsReady(SaveImageInBackgroundTask.SavedImageData imageData) {
-        logScreenshotResultStatus(imageData.uri, imageData.owner);
     }
 
     private boolean isUserSetupComplete(UserHandle owner) {

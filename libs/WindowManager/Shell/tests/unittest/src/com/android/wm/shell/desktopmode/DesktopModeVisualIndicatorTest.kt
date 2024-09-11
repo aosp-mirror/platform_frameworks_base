@@ -22,6 +22,7 @@ import android.graphics.Region
 import android.testing.AndroidTestingRunner
 import android.view.SurfaceControl
 import androidx.test.filters.SmallTest
+import com.android.internal.policy.SystemBarUtils
 import com.android.wm.shell.R
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.ShellTestCase
@@ -67,8 +68,7 @@ class DesktopModeVisualIndicatorTest : ShellTestCase() {
 
         createVisualIndicator(DesktopModeVisualIndicator.DragStartState.FROM_FREEFORM)
         testRegion = visualIndicator.calculateFullscreenRegion(displayLayout, CAPTION_HEIGHT)
-        val transitionHeight = context.resources.getDimensionPixelSize(
-            R.dimen.desktop_mode_transition_region_thickness)
+        val transitionHeight = SystemBarUtils.getStatusBarHeight(context)
         val toFullscreenScale = mContext.resources.getFloat(
             R.dimen.desktop_mode_fullscreen_region_scale
         )

@@ -10,6 +10,7 @@ package {
 filegroup {
     name: "services.accessibility-sources",
     srcs: ["java/**/*.java"],
+    exclude_srcs: ["java/**/a11ychecker/*.java"],
     path: "java",
     visibility: ["//frameworks/base/services"],
 }
@@ -26,16 +27,13 @@ java_library_static {
     },
     srcs: [
         ":services.accessibility-sources",
-        ":statslog-accessibility-java-gen",
         "//frameworks/base/packages/SettingsLib/RestrictedLockUtils:SettingsLibRestrictedLockUtilsSrc",
     ],
     libs: [
-        "aatf",
         "services.core",
         "androidx.annotation_annotation",
     ],
     static_libs: [
-        "accessibility_protos_lite",
         "com_android_server_accessibility_flags_lib",
         "//frameworks/base/packages/SystemUI/aconfig:com_android_systemui_flags_lib",
     ],
@@ -69,13 +67,4 @@ aconfig_declarations {
 java_aconfig_library {
     name: "com_android_server_accessibility_flags_lib",
     aconfig_declarations: "com_android_server_accessibility_flags",
-}
-
-genrule {
-    name: "statslog-accessibility-java-gen",
-    tools: ["stats-log-api-gen"],
-    cmd: "$(location stats-log-api-gen) --java $(out) --module accessibility" +
-        " --javaPackage com.android.server.accessibility.a11ychecker" +
-        " --javaClass AccessibilityCheckerStatsLog --minApiLevel 34",
-    out: ["java/com/android/server/accessibility/a11ychecker/AccessibilityCheckerStatsLog.java"],
 }

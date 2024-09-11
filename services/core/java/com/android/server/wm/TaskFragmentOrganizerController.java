@@ -17,6 +17,8 @@
 package com.android.server.wm;
 
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
+import static android.window.TaskFragmentOrganizer.KEY_RESTORE_TASK_FRAGMENTS_INFO;
+import static android.window.TaskFragmentOrganizer.KEY_RESTORE_TASK_FRAGMENT_PARENT_INFO;
 import static android.window.TaskFragmentOrganizer.putErrorInfoInBundle;
 import static android.window.TaskFragmentTransaction.TYPE_ACTIVITY_REPARENTED_TO_TASK;
 import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_APPEARED;
@@ -206,7 +208,13 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
             mOrganizerPid = pid;
             mAppThread = getAppThread(pid, mOrganizerUid);
             for (int i = mOrganizedTaskFragments.size() - 1; i >= 0; i--) {
-                mOrganizedTaskFragments.get(i).onTaskFragmentOrganizerRestarted(organizer);
+                final TaskFragment taskFragment = mOrganizedTaskFragments.get(i);
+                if (taskFragment.isAttached()
+                        && taskFragment.getTopNonFinishingActivity() != null) {
+                    taskFragment.onTaskFragmentOrganizerRestarted(organizer);
+                } else {
+                    mOrganizedTaskFragments.remove(taskFragment);
+                }
             }
             try {
                 mOrganizer.asBinder().linkToDeath(this, 0 /*flags*/);
@@ -575,8 +583,29 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
         }
 
         mCachedTaskFragmentOrganizerStates.remove(cachedState);
-        outSavedState.putAll(cachedState.mSavedState);
         cachedState.restore(organizer, pid);
+        outSavedState.putAll(cachedState.mSavedState);
+
+        // Collect the organized TfInfo and TfParentInfo in the system.
+        final ArrayList<TaskFragmentInfo> infos = new ArrayList<>();
+        final ArrayMap<Integer, Task> tasks = new ArrayMap<>();
+        final int fragmentCount = cachedState.mOrganizedTaskFragments.size();
+        for (int j = 0; j < fragmentCount; j++) {
+            final TaskFragment tf = cachedState.mOrganizedTaskFragments.get(j);
+            infos.add(tf.getTaskFragmentInfo());
+            if (!tasks.containsKey(tf.getTask().mTaskId)) {
+                tasks.put(tf.getTask().mTaskId, tf.getTask());
+            }
+        }
+        outSavedState.putParcelableArrayList(KEY_RESTORE_TASK_FRAGMENTS_INFO, infos);
+
+        final ArrayList<TaskFragmentParentInfo> parentInfos = new ArrayList<>();
+        for (int j = tasks.size() - 1; j >= 0; j--) {
+            parentInfos.add(tasks.valueAt(j).getTaskFragmentParentInfo());
+        }
+        outSavedState.putParcelableArrayList(KEY_RESTORE_TASK_FRAGMENT_PARENT_INFO,
+                parentInfos);
+
         mTaskFragmentOrganizerState.put(organizer.asBinder(), cachedState);
         mPendingTaskFragmentEvents.put(organizer.asBinder(), new ArrayList<>());
         return true;

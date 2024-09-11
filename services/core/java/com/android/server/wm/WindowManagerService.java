@@ -90,6 +90,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManager.REMOVE_CONTENT_MODE_UNDEFINED;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_OPEN;
+import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.view.WindowManager.fixScale;
 import static android.view.WindowManagerGlobal.ADD_OKAY;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_CANCEL_AND_REDRAW;
@@ -158,6 +159,7 @@ import static com.android.server.wm.WindowManagerServiceDumpProto.ROOT_WINDOW_CO
 import static com.android.server.wm.WindowManagerServiceDumpProto.WINDOW_FRAMES_VALID;
 import static com.android.window.flags.Flags.multiCrop;
 import static com.android.window.flags.Flags.setScPropertiesInClient;
+import static com.android.window.flags.Flags.enableDisplayFocusInShellTransitions;
 
 import android.Manifest;
 import android.Manifest.permission;
@@ -1545,7 +1547,23 @@ public class WindowManagerService extends IWindowManager.Stub
                 return WindowManagerGlobal.ADD_APP_EXITING;
             }
 
-            final DisplayContent displayContent = getDisplayContentOrCreate(displayId, attrs.token);
+            if (type >= FIRST_SUB_WINDOW && type <= LAST_SUB_WINDOW) {
+                parentWindow = windowForClientLocked(null, attrs.token, false);
+                if (parentWindow == null) {
+                    ProtoLog.w(WM_ERROR, "Attempted to add window with token that is not a window: "
+                            + "%s.  Aborting.", attrs.token);
+                    return WindowManagerGlobal.ADD_BAD_SUBWINDOW_TOKEN;
+                }
+                if (parentWindow.mAttrs.type >= FIRST_SUB_WINDOW
+                        && parentWindow.mAttrs.type <= LAST_SUB_WINDOW) {
+                    ProtoLog.w(WM_ERROR, "Attempted to add window with token that is a sub-window: "
+                            + "%s.  Aborting.", attrs.token);
+                    return WindowManagerGlobal.ADD_BAD_SUBWINDOW_TOKEN;
+                }
+            }
+            final DisplayContent displayContent = parentWindow != null
+                    ? parentWindow.mDisplayContent
+                    : getDisplayContentOrCreate(displayId, attrs.token);
 
             if (displayContent == null) {
                 ProtoLog.w(WM_ERROR, "Attempted to add window to a display that does "
@@ -1563,21 +1581,6 @@ public class WindowManagerService extends IWindowManager.Stub
             if (mWindowMap.containsKey(client.asBinder())) {
                 ProtoLog.w(WM_ERROR, "Window %s is already added", client);
                 return WindowManagerGlobal.ADD_DUPLICATE_ADD;
-            }
-
-            if (type >= FIRST_SUB_WINDOW && type <= LAST_SUB_WINDOW) {
-                parentWindow = windowForClientLocked(null, attrs.token, false);
-                if (parentWindow == null) {
-                    ProtoLog.w(WM_ERROR, "Attempted to add window with token that is not a window: "
-                            + "%s.  Aborting.", attrs.token);
-                    return WindowManagerGlobal.ADD_BAD_SUBWINDOW_TOKEN;
-                }
-                if (parentWindow.mAttrs.type >= FIRST_SUB_WINDOW
-                        && parentWindow.mAttrs.type <= LAST_SUB_WINDOW) {
-                    ProtoLog.w(WM_ERROR, "Attempted to add window with token that is a sub-window: "
-                            + "%s.  Aborting.", attrs.token);
-                    return WindowManagerGlobal.ADD_BAD_SUBWINDOW_TOKEN;
-                }
             }
 
             if (type == TYPE_PRESENTATION || type == TYPE_PRIVATE_PRESENTATION) {
@@ -3238,9 +3241,28 @@ public class WindowManagerService extends IWindowManager.Stub
                     return;
                 }
 
+                Transition transition = null;
+                boolean transitionNewlyCreated = false;
+                if (enableDisplayFocusInShellTransitions()) {
+                    transition = mAtmService.getTransitionController().requestTransitionIfNeeded(
+                                    TRANSIT_TO_FRONT, 0 /* flags */, null /* trigger */,
+                                    displayContent);
+                    if (transition != null) {
+                        transitionNewlyCreated = true;
+                    } else {
+                        transition =
+                                mAtmService.getTransitionController().getCollectingTransition();
+                    }
+                    if (transition != null) {
+                        transition.recordTaskOrder(displayContent);
+                    }
+                }
                 // Nothing prevented us from moving the display to the top. Let's do it!
                 displayContent.getParent().positionChildAt(WindowContainer.POSITION_TOP,
                         displayContent, true /* includingParents */);
+                if (transitionNewlyCreated) {
+                    transition.setReady(displayContent, true /* ready */);
+                }
             }
         }
     }

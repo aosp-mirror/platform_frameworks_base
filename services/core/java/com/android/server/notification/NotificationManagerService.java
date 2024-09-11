@@ -3020,6 +3020,7 @@ public class NotificationManagerService extends SystemService {
             BubbleExtractor bubbsExtractor = mRankingHelper.findExtractor(BubbleExtractor.class);
             if (bubbsExtractor != null) {
                 bubbsExtractor.setShortcutHelper(mShortcutHelper);
+                bubbsExtractor.setPackageManager(mPackageManagerClient);
             }
             registerNotificationPreferencesPullers();
             if (mLockUtils == null) {

@@ -20,7 +20,6 @@ import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
 
 import static com.android.internal.accessibility.AccessibilityShortcutController.MAGNIFICATION_COMPONENT_NAME;
 import static com.android.internal.accessibility.AccessibilityShortcutController.MAGNIFICATION_CONTROLLER_NAME;
-import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.GESTURE;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.SOFTWARE;
 import static com.android.internal.accessibility.dialog.AccessibilityTargetHelper.getTargets;
 import static com.android.internal.accessibility.util.AccessibilityStatsLogUtils.logAccessibilityButtonLongPressStatus;
@@ -44,6 +43,8 @@ import java.util.List;
  * Activity used to display and persist a service or feature target for the Accessibility button.
  */
 public class AccessibilityButtonChooserActivity extends Activity {
+    public static final String EXTRA_TYPE_TO_CHOOSE = "TYPE";
+
     private final List<AccessibilityTarget> mTargets = new ArrayList<>();
 
     @Override
@@ -67,8 +68,8 @@ public class AccessibilityButtonChooserActivity extends Activity {
                 NAV_BAR_MODE_GESTURAL == getResources().getInteger(
                         com.android.internal.R.integer.config_navBarInteractionMode);
 
-        final int targetType = (isGestureNavigateEnabled
-                && android.provider.Flags.a11yStandaloneGestureEnabled()) ? GESTURE : SOFTWARE;
+        final int targetType = android.provider.Flags.a11yStandaloneGestureEnabled()
+                ? getIntent().getIntExtra(EXTRA_TYPE_TO_CHOOSE, SOFTWARE) : SOFTWARE;
 
         if (isGestureNavigateEnabled) {
             final TextView promptPrologue = findViewById(R.id.accessibility_button_prompt_prologue);

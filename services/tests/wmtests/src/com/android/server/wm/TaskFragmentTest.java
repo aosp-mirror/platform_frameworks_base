@@ -242,7 +242,7 @@ public class TaskFragmentTest extends WindowTestsBase {
 
         final Rect relStartBounds = new Rect(mTaskFragment.getRelativeEmbeddedBounds());
         final DisplayPolicy displayPolicy = mDisplayContent.getDisplayPolicy();
-        displayPolicy.screenTurnedOff();
+        displayPolicy.screenTurnedOff(false /* acquireSleepToken */);
 
         assertFalse(mTaskFragment.okToAnimate());
 

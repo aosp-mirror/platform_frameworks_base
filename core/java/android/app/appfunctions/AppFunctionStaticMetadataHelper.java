@@ -39,6 +39,8 @@ public class AppFunctionStaticMetadataHelper {
     public static final String STATIC_PROPERTY_ENABLED_BY_DEFAULT = "enabledByDefault";
 
     public static final String APP_FUNCTION_STATIC_NAMESPACE = "app_functions";
+    public static final String PROPERTY_FUNCTION_ID = "functionId";
+    public static final String PROPERTY_PACKAGE_NAME = "packageName";
 
     // These are constants that has to be kept the same with {@code
     // com.android.server.appsearch.appsindexer.appsearchtypes.AppSearchHelper}.
