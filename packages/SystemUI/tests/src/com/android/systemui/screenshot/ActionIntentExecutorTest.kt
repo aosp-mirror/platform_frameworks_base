@@ -23,17 +23,18 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableContext
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.screenshot.proxy.SystemUiProxy
 import com.android.systemui.settings.DisplayTracker
 import com.android.systemui.shared.system.ActivityManagerWrapper
 import com.android.systemui.statusbar.phone.CentralSurfaces
-import com.android.systemui.util.mockito.mock
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito.verify
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 
 @RunWith(AndroidTestingRunner::class)
 class ActionIntentExecutorTest : SysuiTestCase() {
@@ -44,8 +45,9 @@ class ActionIntentExecutorTest : SysuiTestCase() {
     private val testableContext = TestableContext(mContext)
 
     private val activityManagerWrapper = mock<ActivityManagerWrapper>()
+    private val systemUiProxy = mock<SystemUiProxy>()
+
     private val displayTracker = mock<DisplayTracker>()
-    private val keyguardController = mock<ScreenshotKeyguardController>()
 
     private val actionIntentExecutor =
         ActionIntentExecutor(
@@ -53,18 +55,18 @@ class ActionIntentExecutorTest : SysuiTestCase() {
             activityManagerWrapper,
             testScope,
             mainDispatcher,
+            systemUiProxy,
             displayTracker,
-            keyguardController,
         )
 
     @Test
-    @EnableFlags(Flags.FLAG_SCREENSHOT_ACTION_DISMISS_SYSTEM_WINDOWS)
+    @EnableFlags(Flags.FLAG_FIX_SCREENSHOT_ACTION_DISMISS_SYSTEM_WINDOWS)
     fun launchIntent_callsCloseSystemWindows() =
         testScope.runTest {
             val intent = Intent(Intent.ACTION_EDIT).apply { flags = Intent.FLAG_ACTIVITY_NEW_TASK }
             val userHandle = myUserHandle()
 
-            actionIntentExecutor.launchIntent(intent, null, userHandle, false)
+            actionIntentExecutor.launchIntent(intent, userHandle, false, null, null)
             scheduler.advanceUntilIdle()
 
             verify(activityManagerWrapper)

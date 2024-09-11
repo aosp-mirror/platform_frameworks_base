@@ -25,8 +25,8 @@ import android.graphics.drawable.Drawable
 import android.os.Looper
 import android.os.UserHandle
 import android.os.UserManager
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import androidx.test.runner.AndroidJUnit4
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.util.mockito.any

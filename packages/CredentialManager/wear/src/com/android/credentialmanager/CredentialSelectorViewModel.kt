@@ -24,9 +24,6 @@ import com.android.credentialmanager.CredentialSelectorUiState.Get
 import com.android.credentialmanager.model.Request
 import com.android.credentialmanager.client.CredentialManagerClient
 import com.android.credentialmanager.model.EntryInfo
-import com.android.credentialmanager.model.get.ActionEntryInfo
-import com.android.credentialmanager.model.get.AuthenticationEntryInfo
-import com.android.credentialmanager.model.get.CredentialEntryInfo
 import com.android.credentialmanager.ui.mappers.toGet
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -53,14 +50,16 @@ class CredentialSelectorViewModel @Inject constructor(
     private val shouldClose = MutableStateFlow(false)
     private lateinit var selectedEntry: EntryInfo
     private var isAutoSelected: Boolean = false
-    val uiState: StateFlow<CredentialSelectorUiState> =
+    override val uiState: StateFlow<CredentialSelectorUiState> =
         combine(
             credentialManagerClient.requests,
             isPrimaryScreen,
             shouldClose
         ) { request, isPrimary, shouldClose ->
+            Log.d(TAG, "Request updated: " + request?.toString() +
+                    " isClose: " + shouldClose.toString() +
+                    " isPrimaryScreen: " + isPrimary.toString())
             if (shouldClose) {
-                Log.d(TAG, "Request finished, closing ")
                 return@combine Close
             }
 
@@ -87,7 +86,7 @@ class CredentialSelectorViewModel @Inject constructor(
         when (uiState.value) {
             is Get.MultipleEntry -> isPrimaryScreen.value = true
             is Create, Close, is Cancel, Idle -> shouldClose.value = true
-            is Get.SingleEntry, is Get.SingleEntryPerAccount -> cancel()
+            is Get.SingleEntry, is Get.MultipleEntryPrimaryScreen -> cancel()
         }
     }
 
@@ -135,26 +134,3 @@ class CredentialSelectorViewModel @Inject constructor(
     }
 }
 
-sealed class CredentialSelectorUiState {
-    data object Idle : CredentialSelectorUiState()
-    sealed class Get : CredentialSelectorUiState() {
-        data class SingleEntry(val entry: CredentialEntryInfo) : Get()
-        data class SingleEntryPerAccount(val sortedEntries: List<CredentialEntryInfo>) : Get()
-        data class MultipleEntry(
-            val accounts: List<PerUserNameEntries>,
-            val actionEntryList: List<ActionEntryInfo>,
-            val authenticationEntryList: List<AuthenticationEntryInfo>,
-        ) : Get() {
-            data class PerUserNameEntries(
-                val userName: String,
-                val sortedCredentialEntryList: List<CredentialEntryInfo>,
-            )
-        }
-
-        // TODO: b/301206470 add the remaining states
-    }
-
-    data object Create : CredentialSelectorUiState()
-    data class Cancel(val appName: String) : CredentialSelectorUiState()
-    data object Close : CredentialSelectorUiState()
-}

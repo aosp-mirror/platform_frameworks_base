@@ -25,6 +25,8 @@ import static android.os.UserHandle.USER_ALL;
 import static android.os.UserHandle.USER_SYSTEM;
 import static android.service.notification.NotificationListenerService.META_DATA_DEFAULT_AUTOBIND;
 
+import static com.android.server.notification.NotificationManagerService.privateSpaceFlagsEnabled;
+
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.app.ActivityManager;
@@ -1433,7 +1435,7 @@ abstract public class ManagedServices {
     protected void rebindServices(boolean forceRebind, int userToRebind) {
         if (DEBUG) Slog.d(TAG, "rebindServices " + forceRebind + " " + userToRebind);
         IntArray userIds = mUserProfiles.getCurrentProfileIds();
-        boolean rebindAllCurrentUsers = mUserProfiles.isProfileUser(userToRebind)
+        boolean rebindAllCurrentUsers = mUserProfiles.isProfileUser(userToRebind, mContext)
                 && allowRebindForParentUser();
         if (userToRebind != USER_ALL && !rebindAllCurrentUsers) {
             userIds = new IntArray(1);
@@ -1615,7 +1617,8 @@ abstract public class ManagedServices {
         intent.putExtra(Intent.EXTRA_CLIENT_LABEL, mConfig.clientLabel);
 
         final ActivityOptions activityOptions = ActivityOptions.makeBasic();
-        activityOptions.setIgnorePendingIntentCreatorForegroundState(true);
+        activityOptions.setPendingIntentCreatorBackgroundActivityStartMode(
+                ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED);
         final PendingIntent pendingIntent = PendingIntent.getActivity(
                 mContext, 0, new Intent(mConfig.settingsAction), PendingIntent.FLAG_IMMUTABLE,
                 activityOptions.toBundle());
@@ -1623,8 +1626,8 @@ abstract public class ManagedServices {
 
         ApplicationInfo appInfo = null;
         try {
-            appInfo = mContext.getPackageManager().getApplicationInfo(
-                name.getPackageName(), 0);
+            appInfo = mContext.getPackageManager().getApplicationInfoAsUser(
+                name.getPackageName(), 0, userid);
         } catch (NameNotFoundException e) {
             // Ignore if the package doesn't exist we won't be able to bind to the service.
         }
@@ -1958,7 +1961,7 @@ abstract public class ManagedServices {
          * from receiving events from the profile.
          */
         public boolean isPermittedForProfile(int userId) {
-            if (!mUserProfiles.isProfileUser(userId)) {
+            if (!mUserProfiles.isProfileUser(userId, mContext)) {
                 return true;
             }
             DevicePolicyManager dpm =
@@ -2036,16 +2039,26 @@ abstract public class ManagedServices {
             }
         }
 
-        public boolean isProfileUser(int userId) {
+        public boolean isProfileUser(int userId, Context context) {
             synchronized (mCurrentProfiles) {
                 UserInfo user = mCurrentProfiles.get(userId);
                 if (user == null) {
                     return false;
                 }
-                if (user.isManagedProfile() || user.isCloneProfile()) {
-                    return true;
+                if (privateSpaceFlagsEnabled()) {
+                    return user.isProfile() && hasParent(user, context);
                 }
-                return false;
+                return user.isManagedProfile() || user.isCloneProfile();
+            }
+        }
+
+        boolean hasParent(UserInfo profile, Context context) {
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                UserManager um = context.getSystemService(UserManager.class);
+                return um.getProfileParent(profile.id) != null;
+            } finally {
+                Binder.restoreCallingIdentity(identity);
             }
         }
     }

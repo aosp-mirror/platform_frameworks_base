@@ -17,10 +17,15 @@
 package com.android.settingslib.widget;
 
 import android.content.Context;
+import android.content.Intent;
 import android.text.SpannableString;
+import android.text.Spanned;
 import android.text.TextUtils;
+import android.text.method.LinkMovementMethod;
+import android.text.style.ClickableSpan;
 import android.text.style.URLSpan;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -32,18 +37,20 @@ import androidx.preference.PreferenceViewHolder;
 
 import com.android.settingslib.widget.preference.footer.R;
 
+import java.net.URISyntaxException;
+
 /**
  * A custom preference acting as "footer" of a page. It has a field for icon and text. It is added
  * to screen as the last preference.
  */
 public class FooterPreference extends Preference {
+    private static final String TAG = "FooterPreference";
 
     public static final String KEY_FOOTER = "footer_preference";
+    private static final String INTENT_URL_PREFIX = "intent:";
     static final int ORDER_FOOTER = Integer.MAX_VALUE - 1;
-    @VisibleForTesting
-    View.OnClickListener mLearnMoreListener;
-    @VisibleForTesting
-    int mIconVisibility = View.VISIBLE;
+    @VisibleForTesting View.OnClickListener mLearnMoreListener;
+    @VisibleForTesting int mIconVisibility = View.VISIBLE;
     private CharSequence mContentDescription;
     private CharSequence mLearnMoreText;
     private FooterLearnMoreSpan mLearnMoreSpan;
@@ -57,12 +64,57 @@ public class FooterPreference extends Preference {
         this(context, null);
     }
 
+    private void linkifyTitle(TextView title) {
+        final CharSequence text = getTitle();
+        if (!(text instanceof Spanned)) {
+            return;
+        }
+        final ClickableSpan[] spans =
+                ((Spanned) text).getSpans(0, text.length(), ClickableSpan.class);
+        if (spans.length == 0) {
+            return;
+        }
+        SpannableString spannable = new SpannableString(text);
+        for (ClickableSpan clickable : spans) {
+            if (!(clickable instanceof URLSpan)) {
+                continue;
+            }
+            final URLSpan urlSpan = (URLSpan) clickable;
+            final String url = urlSpan.getURL();
+            if (url == null || !url.startsWith(INTENT_URL_PREFIX)) {
+                continue;
+            }
+            final int start = spannable.getSpanStart(urlSpan);
+            final int end = spannable.getSpanEnd(urlSpan);
+            spannable.removeSpan(urlSpan);
+            try {
+                final Intent intent = Intent.parseUri(url, Intent.URI_INTENT_SCHEME);
+                final ClickableSpan clickableSpan =
+                        new ClickableSpan() {
+                            @Override
+                            public void onClick(@NonNull View textView) {
+                                // May throw ActivityNotFoundException. Just let it propagate.
+                                getContext().startActivity(intent);
+                            }
+                        };
+                spannable.setSpan(clickableSpan, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            } catch (URISyntaxException e) {
+                Log.e(TAG, "Invalid URI " + url, e);
+            }
+        }
+        title.setText(spannable);
+        title.setMovementMethod(LinkMovementMethod.getInstance());
+    }
+
     @Override
     public void onBindViewHolder(PreferenceViewHolder holder) {
         super.onBindViewHolder(holder);
         TextView title = holder.itemView.findViewById(android.R.id.title);
-        if (title != null && !TextUtils.isEmpty(mContentDescription)) {
-            title.setContentDescription(mContentDescription);
+        if (title != null) {
+            if (!TextUtils.isEmpty(mContentDescription)) {
+                title.setContentDescription(mContentDescription);
+            }
+            linkifyTitle(title);
         }
 
         TextView learnMore = holder.itemView.findViewById(R.id.settingslib_learn_more);
@@ -79,8 +131,7 @@ public class FooterPreference extends Preference {
                     learnMoreText.removeSpan(mLearnMoreSpan);
                 }
                 mLearnMoreSpan = new FooterLearnMoreSpan(mLearnMoreListener);
-                learnMoreText.setSpan(mLearnMoreSpan, 0,
-                        learnMoreText.length(), 0);
+                learnMoreText.setSpan(mLearnMoreSpan, 0, learnMoreText.length(), 0);
                 learnMore.setText(learnMoreText);
             } else {
                 learnMore.setVisibility(View.GONE);
@@ -121,9 +172,7 @@ public class FooterPreference extends Preference {
         }
     }
 
-    /**
-     * Return the content description of footer preference.
-     */
+    /** Return the content description of footer preference. */
     @VisibleForTesting
     CharSequence getContentDescription() {
         return mContentDescription;
@@ -141,9 +190,7 @@ public class FooterPreference extends Preference {
         }
     }
 
-    /**
-     * Assign an action for the learn more link.
-     */
+    /** Assign an action for the learn more link. */
     public void setLearnMoreAction(View.OnClickListener listener) {
         if (mLearnMoreListener != listener) {
             mLearnMoreListener = listener;
@@ -151,9 +198,7 @@ public class FooterPreference extends Preference {
         }
     }
 
-    /**
-     * Set visibility of footer icon.
-     */
+    /** Set visibility of footer icon. */
     public void setIconVisibility(int iconVisibility) {
         if (mIconVisibility == iconVisibility) {
             return;
@@ -174,9 +219,7 @@ public class FooterPreference extends Preference {
         setSelectable(false);
     }
 
-    /**
-     * The builder is convenient to creat a dynamic FooterPreference.
-     */
+    /** The builder is convenient to creat a dynamic FooterPreference. */
     public static class Builder {
         private Context mContext;
         private String mKey;
@@ -241,8 +284,8 @@ public class FooterPreference extends Preference {
         }
 
         /**
-         * To set learn more string of the learn more text. This can use for talkback
-         * environment if developer wants to have a customization content.
+         * To set learn more string of the learn more text. This can use for talkback environment if
+         * developer wants to have a customization content.
          *
          * @param learnMoreText The resource id of the learn more string.
          */
@@ -262,10 +305,7 @@ public class FooterPreference extends Preference {
             return this;
         }
 
-
-        /**
-         * To generate the {@link FooterPreference}.
-         */
+        /** To generate the {@link FooterPreference}. */
         public FooterPreference build() {
             final FooterPreference footerPreference = new FooterPreference(mContext);
             footerPreference.setSelectable(false);
@@ -288,9 +328,7 @@ public class FooterPreference extends Preference {
         }
     }
 
-    /**
-     * A {@link URLSpan} that opens a support page when clicked
-     */
+    /** A {@link URLSpan} that opens a support page when clicked */
     static class FooterLearnMoreSpan extends URLSpan {
 
         private final View.OnClickListener mClickListener;

@@ -73,7 +73,8 @@ public class TinyFrameworkClassAnnotations {
     @HostSideTestSubstitute(suffix = "_host")
     public static native int nativeAddThree(int value);
 
-    public static int nativeAddThree_host(int value) {
+    // This method is private, but at runtime, it'll inherit the visibility of the original method
+    private static int nativeAddThree_host(int value) {
         return value + 3;
     }
 

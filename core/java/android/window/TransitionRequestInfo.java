@@ -113,7 +113,7 @@ public final class TransitionRequestInfo implements Parcelable {
 
     /** Requested change to a display. */
     @DataClass(genToString = true, genSetters = true, genBuilder = false, genConstructor = false)
-    public static class DisplayChange implements Parcelable {
+    public static final class DisplayChange implements Parcelable {
         private final int mDisplayId;
         @Nullable private Rect mStartAbsBounds = null;
         @Nullable private Rect mEndAbsBounds = null;

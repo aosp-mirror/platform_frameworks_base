@@ -20,8 +20,6 @@ import android.animation.ValueAnimator
 import android.graphics.Point
 import com.android.systemui.CoreStartable
 import com.android.systemui.Flags
-import com.android.systemui.biometrics.SideFpsController
-import com.android.systemui.biometrics.shared.SideFpsControllerRefactor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.ui.view.SideFpsProgressBar
@@ -38,7 +36,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
-private const val spfsProgressBarCommand = "sfps-progress-bar"
+private const val sfpsProgressBarCommand = "sfps-progress-bar"
 
 @SysUISingleton
 class SideFpsProgressBarViewBinder
@@ -47,8 +45,6 @@ constructor(
     private val viewModel: SideFpsProgressBarViewModel,
     private val view: SideFpsProgressBar,
     @Application private val applicationScope: CoroutineScope,
-    // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
-    private val sfpsController: dagger.Lazy<SideFpsController>,
     private val logger: SideFpsLogger,
     private val commandRegistry: CommandRegistry,
 ) : CoreStartable {
@@ -61,7 +57,7 @@ constructor(
         // not required.
         var layoutJob: Job? = null
         var progressJob: Job? = null
-        commandRegistry.registerCommand(spfsProgressBarCommand) { SfpsProgressBarCommand() }
+        commandRegistry.registerCommand(sfpsProgressBarCommand) { SfpsProgressBarCommand() }
         applicationScope.launch {
             viewModel.isProlongedTouchRequiredForAuthentication.collectLatest { enabled ->
                 logger.isProlongedTouchRequiredForAuthenticationChanged(enabled)
@@ -109,17 +105,6 @@ constructor(
     ) {
         logger.sfpsProgressBarStateChanged(visible, location, fpDetectRunning, length, rotation)
         view.updateView(visible, location, length, thickness, rotation)
-        // We have to hide the SFPS indicator as the progress bar will
-        // be shown at the same location
-        if (!SideFpsControllerRefactor.isEnabled) {
-            if (visible) {
-                logger.hidingSfpsIndicator()
-                sfpsController.get().hideIndicator()
-            } else if (fpDetectRunning) {
-                logger.showingSfpsIndicator()
-                sfpsController.get().showIndicator()
-            }
-        }
     }
 
     inner class SfpsProgressBarCommand : Command {
@@ -164,7 +149,7 @@ constructor(
         }
 
         override fun help(pw: PrintWriter) {
-            pw.println("Usage: adb shell cmd statusbar $spfsProgressBarCommand <command>")
+            pw.println("Usage: adb shell cmd statusbar $sfpsProgressBarCommand <command>")
             pw.println("Available commands:")
             pw.println("  show x y width height rotation")
             pw.println("  hide")

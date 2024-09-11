@@ -95,7 +95,11 @@ public:
     virtual void setTransformationMatrix(const SpriteTransformationMatrix& matrix) = 0;
 
     /* Sets the id of the display where the sprite should be shown. */
-    virtual void setDisplayId(int32_t displayId) = 0;
+    virtual void setDisplayId(ui::LogicalDisplayId displayId) = 0;
+
+    /* Sets the flag to hide sprite on mirrored displays.
+     * This will add ISurfaceComposerClient::eSkipScreenshot flag to the sprite. */
+    virtual void setSkipScreenshot(bool skip) = 0;
 };
 
 /*
@@ -111,7 +115,7 @@ public:
  */
 class SpriteController {
 public:
-    using ParentSurfaceProvider = std::function<sp<SurfaceControl>(int /*displayId*/)>;
+    using ParentSurfaceProvider = std::function<sp<SurfaceControl>(ui::LogicalDisplayId)>;
     SpriteController(const sp<Looper>& looper, int32_t overlayLayer, ParentSurfaceProvider parent);
     SpriteController(const SpriteController&) = delete;
     SpriteController& operator=(const SpriteController&) = delete;
@@ -151,6 +155,8 @@ private:
         DIRTY_HOTSPOT = 1 << 6,
         DIRTY_DISPLAY_ID = 1 << 7,
         DIRTY_ICON_STYLE = 1 << 8,
+        DIRTY_DRAW_DROP_SHADOW = 1 << 9,
+        DIRTY_SKIP_SCREENSHOT = 1 << 10,
     };
 
     /* Describes the state of a sprite.
@@ -159,28 +165,23 @@ private:
      * on the sprites for a long time.
      * Note that the SpriteIcon holds a reference to a shared (and immutable) bitmap. */
     struct SpriteState {
-        inline SpriteState() :
-                dirty(0), visible(false),
-                positionX(0), positionY(0), layer(0), alpha(1.0f), displayId(ADISPLAY_ID_DEFAULT),
-                surfaceWidth(0), surfaceHeight(0), surfaceDrawn(false), surfaceVisible(false) {
-        }
-
-        uint32_t dirty;
+        uint32_t dirty{0};
 
         SpriteIcon icon;
-        bool visible;
-        float positionX;
-        float positionY;
-        int32_t layer;
-        float alpha;
+        bool visible{false};
+        float positionX{0};
+        float positionY{0};
+        int32_t layer{0};
+        float alpha{1.0f};
         SpriteTransformationMatrix transformationMatrix;
-        int32_t displayId;
+        ui::LogicalDisplayId displayId{ui::LogicalDisplayId::DEFAULT};
 
         sp<SurfaceControl> surfaceControl;
-        int32_t surfaceWidth;
-        int32_t surfaceHeight;
-        bool surfaceDrawn;
-        bool surfaceVisible;
+        int32_t surfaceWidth{0};
+        int32_t surfaceHeight{0};
+        bool surfaceDrawn{false};
+        bool surfaceVisible{false};
+        bool skipScreenshot{false};
 
         inline bool wantSurfaceVisible() const {
             return visible && alpha > 0.0f && icon.isValid();
@@ -207,7 +208,8 @@ private:
         virtual void setLayer(int32_t layer);
         virtual void setAlpha(float alpha);
         virtual void setTransformationMatrix(const SpriteTransformationMatrix& matrix);
-        virtual void setDisplayId(int32_t displayId);
+        virtual void setDisplayId(ui::LogicalDisplayId displayId);
+        virtual void setSkipScreenshot(bool skip);
 
         inline const SpriteState& getStateLocked() const {
             return mLocked.state;
@@ -271,7 +273,8 @@ private:
     void doDisposeSurfaces();
 
     void ensureSurfaceComposerClient();
-    sp<SurfaceControl> obtainSurface(int32_t width, int32_t height, int32_t displayId);
+    sp<SurfaceControl> obtainSurface(int32_t width, int32_t height, ui::LogicalDisplayId displayId,
+                                     bool hideOnMirrored);
 };
 
 } // namespace android

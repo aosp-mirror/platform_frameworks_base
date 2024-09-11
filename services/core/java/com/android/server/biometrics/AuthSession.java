@@ -108,6 +108,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
     }
 
     private final Context mContext;
+    private final BiometricManager mBiometricManager;
     @NonNull private final BiometricContext mBiometricContext;
     private final IStatusBarService mStatusBarService;
     @VisibleForTesting final IBiometricSysuiReceiver mSysuiReceiver;
@@ -131,6 +132,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
     private final String mOpPackageName;
     private final boolean mDebugEnabled;
     private final List<FingerprintSensorPropertiesInternal> mFingerprintSensorProperties;
+    private final List<Integer> mSfpsSensorIds;
 
     // The current state, which can be either idle, called, or started
     private @SessionState int mState = STATE_AUTH_IDLE;
@@ -220,6 +222,11 @@ public final class AuthSession implements IBinder.DeathRecipient {
         mCancelled = false;
         mBiometricFrameworkStatsLogger = logger;
         mOperationContext = new OperationContextExt(true /* isBP */);
+        mBiometricManager = mContext.getSystemService(BiometricManager.class);
+
+        mSfpsSensorIds = mFingerprintSensorProperties.stream().filter(
+                FingerprintSensorPropertiesInternal::isAnySidefpsType).map(
+                    prop -> prop.sensorId).toList();
 
         try {
             mClientReceiver.asBinder().linkToDeath(this, 0 /* flags */);
@@ -265,6 +272,8 @@ public final class AuthSession implements IBinder.DeathRecipient {
                     && state != BiometricSensor.STATE_CANCELING) {
                 Slog.d(TAG, "Skip retry because sensor: " + sensor.id + " is: " + state);
                 continue;
+            } else if (isTryAgain) {
+                mState = STATE_AUTH_PAUSED_RESUMING;
             }
 
             final int cookie = mRandom.nextInt(Integer.MAX_VALUE - 1) + 1;
@@ -314,7 +323,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
             Slog.w(TAG, "Received cookie but already cancelled (ignoring): " + cookie);
             return;
         }
-        if (hasAuthenticated()) {
+        if (hasAuthenticatedAndConfirmed()) {
             Slog.d(TAG, "onCookieReceived after successful auth");
             return;
         }
@@ -492,6 +501,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
             }
 
             case STATE_AUTH_STARTED:
+            case STATE_AUTH_PENDING_CONFIRM:
             case STATE_AUTH_STARTED_UI_SHOWING: {
                 if (isAllowDeviceCredential() && errorLockout) {
                     // SystemUI handles transition from biometric to device credential.
@@ -537,7 +547,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
     }
 
     void onAcquired(int sensorId, int acquiredInfo, int vendorCode) {
-        if (hasAuthenticated()) {
+        if (hasAuthenticatedAndConfirmed()) {
             Slog.d(TAG, "onAcquired after successful auth");
             return;
         }
@@ -560,7 +570,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
     }
 
     void onSystemEvent(int event) {
-        if (hasAuthenticated()) {
+        if (hasAuthenticatedAndConfirmed()) {
             Slog.d(TAG, "onSystemEvent after successful auth");
             return;
         }
@@ -576,12 +586,16 @@ public final class AuthSession implements IBinder.DeathRecipient {
     }
 
     void onDialogAnimatedIn(boolean startFingerprintNow) {
-        if (mState != STATE_AUTH_STARTED && mState != STATE_ERROR_PENDING_SYSUI) {
+        if (mState != STATE_AUTH_STARTED && mState != STATE_ERROR_PENDING_SYSUI
+                && mState != STATE_AUTH_PAUSED && mState != STATE_AUTH_PENDING_CONFIRM) {
             Slog.e(TAG, "onDialogAnimatedIn, unexpected state: " + mState);
             return;
         }
 
-        mState = STATE_AUTH_STARTED_UI_SHOWING;
+        if (mState != STATE_AUTH_PENDING_CONFIRM) {
+            mState = STATE_AUTH_STARTED_UI_SHOWING;
+        }
+
         if (startFingerprintNow) {
             startAllPreparedFingerprintSensors();
         } else {
@@ -597,6 +611,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
         if (mState != STATE_AUTH_STARTED
                 && mState != STATE_AUTH_STARTED_UI_SHOWING
                 && mState != STATE_AUTH_PAUSED
+                && mState != STATE_AUTH_PENDING_CONFIRM
                 && mState != STATE_ERROR_PENDING_SYSUI) {
             Slog.w(TAG, "onStartFingerprint, started from unexpected state: " + mState);
         }
@@ -605,7 +620,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
     }
 
     void onTryAgainPressed() {
-        if (hasAuthenticated()) {
+        if (hasAuthenticatedAndConfirmed()) {
             Slog.d(TAG, "onTryAgainPressed after successful auth");
             return;
         }
@@ -616,14 +631,13 @@ public final class AuthSession implements IBinder.DeathRecipient {
 
         try {
             setSensorsToStateWaitingForCookie(true /* isTryAgain */);
-            mState = STATE_AUTH_PAUSED_RESUMING;
         } catch (RemoteException e) {
             Slog.e(TAG, "RemoteException: " + e);
         }
     }
 
     void onAuthenticationSucceeded(int sensorId, boolean strong, byte[] token) {
-        if (hasAuthenticated()) {
+        if (hasAuthenticatedAndConfirmed()) {
             Slog.d(TAG, "onAuthenticationSucceeded after successful auth");
             return;
         }
@@ -654,11 +668,17 @@ public final class AuthSession implements IBinder.DeathRecipient {
             Slog.e(TAG, "RemoteException", e);
         }
 
-        cancelAllSensors(sensor -> sensor.id != sensorId);
+        if (mState == STATE_AUTH_PENDING_CONFIRM) {
+            // Do not cancel Sfps sensors so auth can continue running
+            cancelAllSensors(
+                    sensor -> sensor.id != sensorId && !mSfpsSensorIds.contains(sensor.id));
+        } else {
+            cancelAllSensors(sensor -> sensor.id != sensorId);
+        }
     }
 
     void onAuthenticationRejected(int sensorId) {
-        if (hasAuthenticated()) {
+        if (hasAuthenticatedAndConfirmed()) {
             Slog.d(TAG, "onAuthenticationRejected after successful auth");
             return;
         }
@@ -676,7 +696,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
     }
 
     void onAuthenticationTimedOut(int sensorId, int cookie, int error, int vendorCode) {
-        if (hasAuthenticated()) {
+        if (hasAuthenticatedAndConfirmed()) {
             Slog.d(TAG, "onAuthenticationTimedOut after successful auth");
             return;
         }
@@ -701,7 +721,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
     }
 
     void onDeviceCredentialPressed() {
-        if (hasAuthenticated()) {
+        if (hasAuthenticatedAndConfirmed()) {
             Slog.d(TAG, "onDeviceCredentialPressed after successful auth");
             return;
         }
@@ -735,6 +755,10 @@ public final class AuthSession implements IBinder.DeathRecipient {
 
     private boolean hasAuthenticated() {
         return mAuthenticatedSensorId != -1;
+    }
+
+    private boolean hasAuthenticatedAndConfirmed() {
+        return mAuthenticatedSensorId != -1 && mState == STATE_AUTHENTICATED_PENDING_SYSUI;
     }
 
     private void logOnDialogDismissed(@BiometricPrompt.DismissedReason int reason) {
@@ -826,11 +850,13 @@ public final class AuthSession implements IBinder.DeathRecipient {
                     } else {
                         Slog.e(TAG, "mTokenEscrow is null");
                     }
+
                     mClientReceiver.onAuthenticationSucceeded(
                             Utils.getAuthenticationTypeForResult(reason));
                     break;
 
                 case BiometricPrompt.DISMISSED_REASON_NEGATIVE:
+                case BiometricPrompt.DISMISSED_REASON_CONTENT_VIEW_MORE_OPTIONS:
                     mClientReceiver.onDialogDismissed(reason);
                     break;
 
@@ -858,6 +884,16 @@ public final class AuthSession implements IBinder.DeathRecipient {
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception", e);
         } finally {
+            if (mTokenEscrow != null && mBiometricManager != null) {
+                final byte[] byteToken = new byte[mTokenEscrow.length];
+                for (int i = 0; i < mTokenEscrow.length; i++) {
+                    byteToken[i] = mTokenEscrow[i];
+                }
+                mBiometricManager.resetLockoutTimeBound(mToken,
+                        mContext.getOpPackageName(),
+                        mAuthenticatedSensorId, mUserId, byteToken);
+            }
+
             // ensure everything is cleaned up when dismissed
             cancelAllSensors();
         }
@@ -871,7 +907,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
      * @return true if this AuthSession is finished, e.g. should be set to null
      */
     boolean onCancelAuthSession(boolean force) {
-        if (hasAuthenticated()) {
+        if (hasAuthenticatedAndConfirmed()) {
             Slog.d(TAG, "onCancelAuthSession after successful auth");
             return true;
         }

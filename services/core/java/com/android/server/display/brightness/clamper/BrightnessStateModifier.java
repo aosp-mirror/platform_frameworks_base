@@ -42,4 +42,17 @@ public interface BrightnessStateModifier {
      * Called when stopped. Listeners can be unregistered here.
      */
     void stop();
+
+    /**
+     *
+     * @return whether the brightness state modifier needs to listen to the ambient lux in order to
+     * calculate its bounds.
+     */
+    boolean shouldListenToLightSensor();
+
+    /**
+     * Current ambient lux
+     * @param lux - ambient lux
+     */
+    void setAmbientLux(float lux);
 }

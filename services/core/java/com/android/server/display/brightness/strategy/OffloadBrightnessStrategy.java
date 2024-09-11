@@ -16,11 +16,13 @@
 
 package com.android.server.display.brightness.strategy;
 
-import android.hardware.display.DisplayManagerInternal;
 import android.os.PowerManager;
 
 import com.android.server.display.DisplayBrightnessState;
 import com.android.server.display.brightness.BrightnessReason;
+import com.android.server.display.brightness.StrategyExecutionRequest;
+import com.android.server.display.brightness.StrategySelectionNotifyRequest;
+import com.android.server.display.feature.DisplayManagerFlags;
 
 import java.io.PrintWriter;
 
@@ -31,19 +33,29 @@ import java.io.PrintWriter;
 public class OffloadBrightnessStrategy implements DisplayBrightnessStrategy {
 
     private float mOffloadScreenBrightness;
+    private final DisplayManagerFlags mDisplayManagerFlags;
 
-    public OffloadBrightnessStrategy() {
+    public OffloadBrightnessStrategy(DisplayManagerFlags displayManagerFlags) {
+        mDisplayManagerFlags = displayManagerFlags;
         mOffloadScreenBrightness = PowerManager.BRIGHTNESS_INVALID_FLOAT;
     }
 
     @Override
     public DisplayBrightnessState updateBrightness(
-            DisplayManagerInternal.DisplayPowerRequest displayPowerRequest) {
+            StrategyExecutionRequest strategyExecutionRequest) {
+        float offloadBrightness = mOffloadScreenBrightness;
+        if (mDisplayManagerFlags.isRefactorDisplayPowerControllerEnabled()) {
+            // We reset the offload brightness to invalid so that there is no stale value lingering
+            // around. After this request is processed, the current brightness will be set to
+            // offload brightness. Hence even if the lux values don't become valid for the next
+            // request, we will fallback to the current brightness anyways.
+            mOffloadScreenBrightness = PowerManager.BRIGHTNESS_INVALID_FLOAT;
+        }
         BrightnessReason brightnessReason = new BrightnessReason();
         brightnessReason.setReason(BrightnessReason.REASON_OFFLOAD);
         return new DisplayBrightnessState.Builder()
-                .setBrightness(mOffloadScreenBrightness)
-                .setSdrBrightness(mOffloadScreenBrightness)
+                .setBrightness(offloadBrightness)
+                .setSdrBrightness(offloadBrightness)
                 .setBrightnessReason(brightnessReason)
                 .setDisplayBrightnessStrategyName(getName())
                 .setIsSlowChange(false)
@@ -71,5 +83,24 @@ public class OffloadBrightnessStrategy implements DisplayBrightnessStrategy {
     public void dump(PrintWriter writer) {
         writer.println("OffloadBrightnessStrategy:");
         writer.println("  mOffloadScreenBrightness:" + mOffloadScreenBrightness);
+    }
+
+    @Override
+    public void strategySelectionPostProcessor(
+            StrategySelectionNotifyRequest strategySelectionNotifyRequest) {
+        // We reset the offload brightness only if the selected strategy is not offload or invalid,
+        // as we are yet to use the brightness to evaluate the brightness state.
+        if (!strategySelectionNotifyRequest.getSelectedDisplayBrightnessStrategy().getName()
+                .equals(getName())
+                && !strategySelectionNotifyRequest.getSelectedDisplayBrightnessStrategy().getName()
+                .equals(
+                DisplayBrightnessStrategyConstants.INVALID_BRIGHTNESS_STRATEGY_NAME)) {
+            mOffloadScreenBrightness = PowerManager.BRIGHTNESS_INVALID_FLOAT;
+        }
+    }
+
+    @Override
+    public int getReason() {
+        return BrightnessReason.REASON_OFFLOAD;
     }
 }

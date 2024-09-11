@@ -44,7 +44,7 @@ public class ScreenshotNotificationSmartActionsProvider {
     public static final String DEFAULT_ACTION_TYPE = "Smart Action";
 
     /* Define phases of screenshot execution. */
-    protected enum ScreenshotOp {
+    public enum ScreenshotOp {
         OP_UNKNOWN,
         RETRIEVE_SMART_ACTIONS,
         REQUEST_SMART_ACTIONS,
@@ -52,7 +52,7 @@ public class ScreenshotNotificationSmartActionsProvider {
     }
 
     /* Enum to report success or failure for screenshot execution phases. */
-    protected enum ScreenshotOpStatus {
+    public enum ScreenshotOpStatus {
         OP_STATUS_UNKNOWN,
         SUCCESS,
         ERROR,

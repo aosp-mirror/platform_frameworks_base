@@ -72,6 +72,7 @@
         android:layout_marginEnd="24dp"
         android:clipToPadding="false"
         android:drawSelectorOnTop="true"
+        android:contentSensitivity="sensitive"
         android:clickable="true"
         android:divider="@null"
         android:visibility="gone" />

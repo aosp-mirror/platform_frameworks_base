@@ -22,32 +22,32 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-  <LinearLayout
-      xmlns:android="http://schemas.android.com/apk/res/android"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:theme="?android:attr/alertDialogTheme"
-      android:orientation="vertical"
-      android:paddingTop="8dp"
-      android:paddingStart="?android:attr/dialogPreferredPadding"
-      android:paddingEnd="?android:attr/dialogPreferredPadding"
-      android:clipToPadding="false">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="?android:attr/alertDialogTheme"
+        android:orientation="vertical"
+        android:paddingTop="8dp"
+        android:paddingStart="?android:attr/dialogPreferredPadding"
+        android:paddingEnd="?android:attr/dialogPreferredPadding"
+        android:clipToPadding="false">
 
-      <TextView
-          android:id="@+id/message"
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          style="@android:style/TextAppearance.Material.Subhead" />
+        <TextView
+            android:id="@+id/message"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@android:style/TextAppearance.DeviceDefault.SearchResult.Subtitle" />
 
-      <CheckBox
-          android:id="@+id/keepData"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:layout_marginTop="8dp"
-          android:layout_marginStart="-8dp"
-          android:paddingLeft="8sp"
-          android:visibility="gone"
-          style="@android:style/TextAppearance.Material.Subhead" />
+        <CheckBox
+            android:id="@+id/keepData"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="-8dp"
+            android:paddingStart="8sp"
+            android:paddingEnd="0sp"
+            android:visibility="gone"
+            style="@android:style/TextAppearance.DeviceDefault.SearchResult.Subtitle" />
 
-  </LinearLayout>
+    </LinearLayout>
 </ScrollView>

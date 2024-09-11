@@ -41,7 +41,6 @@ import com.android.systemui.power.domain.interactor.PowerInteractorFactory
 import com.android.systemui.scene.data.repository.WindowRootViewVisibilityRepository
 import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
-import com.android.systemui.scene.shared.flag.sceneContainerFlags
 import com.android.systemui.scene.ui.view.WindowRootView
 import com.android.systemui.shade.QuickSettingsController
 import com.android.systemui.shade.ShadeController
@@ -109,7 +108,6 @@ class BackActionInteractorTest : SysuiTestCase() {
             headsUpManager,
             powerInteractor,
             activeNotificationsInteractor,
-            kosmos.sceneContainerFlags,
             kosmos::sceneInteractor,
         )
     }

@@ -19,6 +19,16 @@
     <string name="application_title">Window Insets Tests</string>
     <string name="chat_activity_title">New Insets Chat</string>
     <string name="controller_activity_title">Window Insets Controller</string>
+    <string name="status_bars_toggle_button">Status Bars Toggle Button</string>
+    <string name="status_bars_invisible">Status Bars Invisible</string>
+    <string name="status_bars_visible">Status Bars Visible</string>
+    <string name="navigation_bars_toggle_button">Navigation Bars Toggle Button</string>
+    <string name="navigation_bars_invisible">Navigation Bars Invisible</string>
+    <string name="navigation_bars_visible">Navigation Bars Visible</string>
+    <string name="ime_toggle_button">IME Bars Toggle Button</string>
+    <string name="ime_invisible">IME Bars Invisible</string>
+    <string name="ime_visible">IME Bars Visible</string>
+    <string name="for_testing_ime">For testing IME&#8230;</string>
 
     <!-- The item positions should match the flag values respectively. -->
     <string-array name="behaviors">

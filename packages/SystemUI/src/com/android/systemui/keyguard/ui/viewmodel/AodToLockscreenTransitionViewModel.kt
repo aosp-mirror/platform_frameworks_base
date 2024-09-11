@@ -19,9 +19,10 @@ package com.android.systemui.keyguard.ui.viewmodel
 import android.util.MathUtils
 import com.android.app.animation.Interpolators.FAST_OUT_SLOW_IN
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor
 import com.android.systemui.keyguard.domain.interactor.FromAodTransitionInteractor.Companion.TO_LOCKSCREEN_DURATION
-import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.Edge
+import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
+import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.StateToValue
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
@@ -30,8 +31,6 @@ import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
 
 /**
  * Breaks down AOD->LOCKSCREEN transition into discrete steps for corresponding views to consume.
@@ -41,7 +40,6 @@ import kotlinx.coroutines.flow.map
 class AodToLockscreenTransitionViewModel
 @Inject
 constructor(
-    deviceEntryUdfpsInteractor: DeviceEntryUdfpsInteractor,
     shadeInteractor: ShadeInteractor,
     animationFlow: KeyguardTransitionAnimationFlow,
 ) : DeviceEntryIconTransition {
@@ -49,9 +47,10 @@ constructor(
     private val transitionAnimation =
         animationFlow.setup(
             duration = TO_LOCKSCREEN_DURATION,
-            from = KeyguardState.AOD,
-            to = KeyguardState.LOCKSCREEN,
+            edge = Edge.create(from = AOD, to = LOCKSCREEN),
         )
+
+    private var isShadeExpanded = false
 
     /**
      * Begin the transition from wherever the y-translation value is currently. This helps ensure a
@@ -77,22 +76,21 @@ constructor(
     }
 
     val notificationAlpha: Flow<Float> =
-        combine(
-            shadeInteractor.shadeExpansion.map { it > 0f },
-            shadeInteractor.qsExpansion.map { it > 0f },
-            transitionAnimation.sharedFlow(
-                duration = 500.milliseconds,
-                onStep = { it },
-                onCancel = { 1f },
-            ),
-        ) { isShadeExpanded, isQsExpanded, alpha ->
-            if (isShadeExpanded || isQsExpanded) {
-                // One example of this happening is dragging a notification while pulsing on AOD
-                1f
-            } else {
-                alpha
-            }
-        }
+        transitionAnimation.sharedFlow(
+            duration = 500.milliseconds,
+            onStart = {
+                isShadeExpanded =
+                    shadeInteractor.shadeExpansion.value > 0f ||
+                        shadeInteractor.qsExpansion.value > 0f
+            },
+            onStep = {
+                if (isShadeExpanded) {
+                    1f
+                } else {
+                    it
+                }
+            },
+        )
 
     val shortcutsAlpha: Flow<Float> =
         transitionAnimation.sharedFlow(

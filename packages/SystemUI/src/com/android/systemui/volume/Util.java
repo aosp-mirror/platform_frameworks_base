@@ -17,6 +17,7 @@
 package com.android.systemui.volume;
 
 import android.media.AudioManager;
+import android.util.MathUtils;
 import android.view.View;
 
 /**
@@ -45,5 +46,28 @@ class Util extends com.android.settingslib.volume.Util {
     public static final void setVisOrGone(View v, boolean vis) {
         if (v == null || (v.getVisibility() == View.VISIBLE) == vis) return;
         v.setVisibility(vis ? View.VISIBLE : View.GONE);
+    }
+
+    /**
+     * Translates a value from one range to another.
+     *
+     * ```
+     * Given: currentValue=3, currentRange=[0, 8], targetRange=[0, 100]
+     * Result: 37.5
+     * ```
+     */
+    public static float translateToRange(float value,
+            float valueRangeStart,
+            float valueRangeEnd,
+            float targetRangeStart,
+            float targetRangeEnd) {
+        float currentRangeLength = valueRangeEnd - valueRangeStart;
+        float targetRangeLength = targetRangeEnd - targetRangeStart;
+        if (currentRangeLength == 0f || targetRangeLength == 0f) {
+            return targetRangeStart;
+        }
+        float valueFraction = (value - valueRangeStart) / currentRangeLength;
+        return MathUtils.constrain(targetRangeStart + valueFraction * targetRangeLength,
+                targetRangeStart, targetRangeEnd);
     }
 }

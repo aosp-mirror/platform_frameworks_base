@@ -24,6 +24,8 @@ import com.android.systemui.accessibility.Magnification
 import com.android.systemui.back.domain.interactor.BackActionInteractor
 import com.android.systemui.biometrics.BiometricNotificationService
 import com.android.systemui.clipboardoverlay.ClipboardListener
+import com.android.systemui.communal.CommunalDreamStartable
+import com.android.systemui.communal.CommunalBackupRestoreStartable
 import com.android.systemui.communal.CommunalSceneStartable
 import com.android.systemui.communal.log.CommunalLoggerStartable
 import com.android.systemui.communal.widgets.CommunalAppWidgetHostStartable
@@ -54,6 +56,7 @@ import com.android.systemui.statusbar.gesture.GesturePointerEventListener
 import com.android.systemui.statusbar.notification.InstantAppNotifier
 import com.android.systemui.statusbar.phone.ScrimController
 import com.android.systemui.statusbar.phone.StatusBarHeadsUpChangeListener
+import com.android.systemui.statusbar.policy.BatteryControllerStartable
 import com.android.systemui.stylus.StylusUsiPowerStartable
 import com.android.systemui.temporarydisplay.chipbar.ChipbarCoordinator
 import com.android.systemui.theme.ThemeOverlayController
@@ -328,6 +331,11 @@ abstract class SystemUICoreStartableModule {
 
     @Binds
     @IntoMap
+    @ClassKey(CommunalDreamStartable::class)
+    abstract fun bindCommunalDreamStartable(impl: CommunalDreamStartable): CoreStartable
+
+    @Binds
+    @IntoMap
     @ClassKey(CommunalAppWidgetHostStartable::class)
     abstract fun bindCommunalAppWidgetHostStartable(
         impl: CommunalAppWidgetHostStartable
@@ -335,6 +343,19 @@ abstract class SystemUICoreStartableModule {
 
     @Binds
     @IntoMap
+    @ClassKey(CommunalBackupRestoreStartable::class)
+    abstract fun bindCommunalBackupRestoreStartable(
+        impl: CommunalBackupRestoreStartable
+    ): CoreStartable
+
+    @Binds
+    @IntoMap
     @ClassKey(HomeControlsDreamStartable::class)
     abstract fun bindHomeControlsDreamStartable(impl: HomeControlsDreamStartable): CoreStartable
+
+    /** Binds {@link BatteryControllerStartable} as a {@link CoreStartable}. */
+    @Binds
+    @IntoMap
+    @ClassKey(BatteryControllerStartable::class)
+    abstract fun bindsBatteryControllerStartable(impl: BatteryControllerStartable): CoreStartable
 }

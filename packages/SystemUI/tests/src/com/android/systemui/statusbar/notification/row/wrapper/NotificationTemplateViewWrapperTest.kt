@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.notification.row.wrapper
 import android.app.PendingIntent
 import android.app.PendingIntent.CancelListener
 import android.content.Intent
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
 import android.testing.ViewUtils
@@ -27,6 +26,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.R
 import com.android.systemui.SysuiTestCase
@@ -46,7 +46,7 @@ import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @RunWithLooper
 class NotificationTemplateViewWrapperTest : SysuiTestCase() {
 
@@ -69,7 +69,7 @@ class NotificationTemplateViewWrapperTest : SysuiTestCase() {
             TestUiOffloadThread(looper.looper)
         )
 
-        helper = NotificationTestHelper(mContext, mDependency, looper)
+        helper = NotificationTestHelper(mContext, mDependency)
         row = helper.createRow()
         // Some code in the view iterates through parents so we need some extra containers around
         // it.

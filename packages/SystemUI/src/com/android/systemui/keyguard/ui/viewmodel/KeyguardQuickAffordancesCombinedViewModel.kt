@@ -52,6 +52,7 @@ constructor(
     occludedToLockscreenTransitionViewModel: OccludedToLockscreenTransitionViewModel,
     offToLockscreenTransitionViewModel: OffToLockscreenTransitionViewModel,
     primaryBouncerToLockscreenTransitionViewModel: PrimaryBouncerToLockscreenTransitionViewModel,
+    glanceableHubToLockscreenTransitionViewModel: GlanceableHubToLockscreenTransitionViewModel,
     lockscreenToAodTransitionViewModel: LockscreenToAodTransitionViewModel,
     lockscreenToDozingTransitionViewModel: LockscreenToDozingTransitionViewModel,
     lockscreenToDreamingHostedTransitionViewModel: LockscreenToDreamingHostedTransitionViewModel,
@@ -59,6 +60,7 @@ constructor(
     lockscreenToGoneTransitionViewModel: LockscreenToGoneTransitionViewModel,
     lockscreenToOccludedTransitionViewModel: LockscreenToOccludedTransitionViewModel,
     lockscreenToPrimaryBouncerTransitionViewModel: LockscreenToPrimaryBouncerTransitionViewModel,
+    lockscreenToGlanceableHubTransitionViewModel: LockscreenToGlanceableHubTransitionViewModel,
     transitionInteractor: KeyguardTransitionInteractor,
 ) {
 
@@ -110,6 +112,7 @@ constructor(
             occludedToLockscreenTransitionViewModel.shortcutsAlpha,
             offToLockscreenTransitionViewModel.shortcutsAlpha,
             primaryBouncerToLockscreenTransitionViewModel.shortcutsAlpha,
+            glanceableHubToLockscreenTransitionViewModel.shortcutsAlpha,
         )
 
     /** alpha while fading the quick affordances in */
@@ -122,6 +125,7 @@ constructor(
             lockscreenToGoneTransitionViewModel.shortcutsAlpha,
             lockscreenToOccludedTransitionViewModel.shortcutsAlpha,
             lockscreenToPrimaryBouncerTransitionViewModel.shortcutsAlpha,
+            lockscreenToGlanceableHubTransitionViewModel.shortcutsAlpha,
             shadeExpansionAlpha,
         )
 

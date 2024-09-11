@@ -1082,7 +1082,6 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
      * @param fd
      * @param clientId
      * @param callingPackageName
-     * @param attributionTag
      * @param flags
      * @param sdk
      * @param forceDuck only true if
@@ -1096,7 +1095,7 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
      */
     protected int requestAudioFocus(@NonNull AudioAttributes aa, int focusChangeHint, IBinder cb,
             IAudioFocusDispatcher fd, @NonNull String clientId, @NonNull String callingPackageName,
-            String attributionTag, int flags, int sdk, boolean forceDuck, int testUid,
+            int flags, int sdk, boolean forceDuck, int testUid,
             boolean permissionOverridesCheck) {
         new MediaMetrics.Item(mMetricsId)
                 .setUid(Binder.getCallingUid())
@@ -1126,12 +1125,6 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
         // we need a valid binder callback for clients
         if (!cb.pingBinder()) {
             Log.e(TAG, " AudioFocus DOA client for requestAudioFocus(), aborting.");
-            return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
-        }
-
-        final int res = mAppOps.noteOp(AppOpsManager.OP_TAKE_AUDIO_FOCUS, Binder.getCallingUid(),
-                callingPackageName, attributionTag, null);
-        if (!permissionOverridesCheck && res != AppOpsManager.MODE_ALLOWED) {
             return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
         }
 

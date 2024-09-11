@@ -32,7 +32,6 @@ import com.android.systemui.coroutines.collectValues
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.table.TableLogBuffer
-import com.android.systemui.scene.shared.flag.sceneContainerFlags
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
 import com.android.systemui.testKosmos
@@ -86,7 +85,6 @@ class AuthenticationRepositoryTest : SysuiTestCase() {
             AuthenticationRepositoryImpl(
                 applicationScope = testScope.backgroundScope,
                 backgroundDispatcher = kosmos.testDispatcher,
-                flags = kosmos.sceneContainerFlags,
                 clock = clock,
                 getSecurityMode = getSecurityMode,
                 userRepository = userRepository,

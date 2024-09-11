@@ -18,11 +18,11 @@ package com.android.systemui.mediaprojection.permission
 
 import android.app.AlertDialog
 import android.media.projection.MediaProjectionConfig
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.WindowManager
 import android.widget.Spinner
 import android.widget.TextView
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FeatureFlagsClassic
@@ -40,7 +40,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 class MediaProjectionPermissionDialogDelegateTest : SysuiTestCase() {
 
@@ -79,7 +79,7 @@ class MediaProjectionPermissionDialogDelegateTest : SysuiTestCase() {
         val overrideDisableSingleAppOption = false
         setUpAndShowDialog(overrideDisableSingleAppOption)
 
-        val spinner = dialog.requireViewById<Spinner>(R.id.screen_share_mode_spinner)
+        val spinner = dialog.requireViewById<Spinner>(R.id.screen_share_mode_options)
         val secondOptionText =
             spinner.adapter
                 .getDropDownView(1, null, spinner)
@@ -100,7 +100,7 @@ class MediaProjectionPermissionDialogDelegateTest : SysuiTestCase() {
         val overrideDisableSingleAppOption = true
         setUpAndShowDialog(overrideDisableSingleAppOption)
 
-        val spinner = dialog.requireViewById<Spinner>(R.id.screen_share_mode_spinner)
+        val spinner = dialog.requireViewById<Spinner>(R.id.screen_share_mode_options)
         val secondOptionText =
             spinner.adapter
                 .getDropDownView(1, null, spinner)

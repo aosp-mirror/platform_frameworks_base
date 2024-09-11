@@ -18,7 +18,6 @@ package android.hardware.camera2;
 
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
-import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureRequest.Key;
 import android.hardware.camera2.impl.ExtensionKey;
@@ -40,8 +39,11 @@ import com.android.internal.camera.flags.Flags;
  * @see CaptureRequest
  * @see CameraExtensionSession
  */
-@FlaggedApi(Flags.FLAG_CONCERT_MODE)
+@FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
 public final class ExtensionCaptureRequest {
+
+    /** To avoid exposing constructor */
+    private ExtensionCaptureRequest() {}
 
     /**
      * <p>Used to apply an additional digital zoom factor for the
@@ -74,7 +76,7 @@ public final class ExtensionCaptureRequest {
     @PublicKey
     @NonNull
     @ExtensionKey
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
     public static final Key<Float> EFV_PADDING_ZOOM_FACTOR = CaptureRequest.EFV_PADDING_ZOOM_FACTOR;
 
     /**
@@ -99,7 +101,7 @@ public final class ExtensionCaptureRequest {
     @PublicKey
     @NonNull
     @ExtensionKey
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
     public static final Key<Boolean> EFV_AUTO_ZOOM = CaptureRequest.EFV_AUTO_ZOOM;
 
     /**
@@ -125,7 +127,7 @@ public final class ExtensionCaptureRequest {
     @PublicKey
     @NonNull
     @ExtensionKey
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
     public static final Key<Float> EFV_MAX_PADDING_ZOOM_FACTOR = CaptureRequest.EFV_MAX_PADDING_ZOOM_FACTOR;
 
     /**
@@ -152,7 +154,7 @@ public final class ExtensionCaptureRequest {
     @PublicKey
     @NonNull
     @ExtensionKey
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
     public static final Key<Integer> EFV_STABILIZATION_MODE = CaptureRequest.EFV_STABILIZATION_MODE;
 
     /**
@@ -176,7 +178,7 @@ public final class ExtensionCaptureRequest {
     @PublicKey
     @NonNull
     @ExtensionKey
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
     public static final Key<android.util.Pair<Integer,Integer>> EFV_TRANSLATE_VIEWPORT = CaptureRequest.EFV_TRANSLATE_VIEWPORT;
 
     /**
@@ -193,7 +195,7 @@ public final class ExtensionCaptureRequest {
     @PublicKey
     @NonNull
     @ExtensionKey
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
     public static final Key<Float> EFV_ROTATE_VIEWPORT = CaptureRequest.EFV_ROTATE_VIEWPORT;
 
 
@@ -205,14 +207,14 @@ public final class ExtensionCaptureRequest {
      * <p>No stabilization.</p>
      * @see ExtensionCaptureRequest#EFV_STABILIZATION_MODE
      */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
     public static final int EFV_STABILIZATION_MODE_OFF = CaptureRequest.EFV_STABILIZATION_MODE_OFF;
 
     /**
      * <p>Gimbal stabilization mode.</p>
      * @see ExtensionCaptureRequest#EFV_STABILIZATION_MODE
      */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
     public static final int EFV_STABILIZATION_MODE_GIMBAL = CaptureRequest.EFV_STABILIZATION_MODE_GIMBAL;
 
     /**
@@ -221,7 +223,7 @@ public final class ExtensionCaptureRequest {
      * stabilization to directionally steady the target region.</p>
      * @see ExtensionCaptureRequest#EFV_STABILIZATION_MODE
      */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
     public static final int EFV_STABILIZATION_MODE_LOCKED = CaptureRequest.EFV_STABILIZATION_MODE_LOCKED;
 
-} 
+}

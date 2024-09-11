@@ -16,9 +16,9 @@
 
 package com.android.server.display;
 
-import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_DISABLED;
 import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_ENABLED;
 import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DEFAULT;
+import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DOZE;
 import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_IDLE;
 
 import static org.junit.Assert.assertArrayEquals;
@@ -43,13 +43,17 @@ import android.hardware.SensorManager;
 import android.hardware.display.DisplayManagerInternal.DisplayPowerRequest;
 import android.os.Handler;
 import android.os.PowerManager;
+import android.os.SystemClock;
 import android.os.test.TestLooper;
 import android.util.SparseArray;
+import android.view.Display;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.server.display.config.HysteresisLevels;
+import com.android.server.display.feature.DisplayManagerFlags;
 import com.android.server.testutils.OffsettableClock;
 
 import org.junit.After;
@@ -64,6 +68,8 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class AutomaticBrightnessControllerTest {
+    private static final int ANDROID_SLEEP_TIME = 1000;
+    private static final int NANO_SECONDS_MULTIPLIER = 1000000;
     private static final float BRIGHTNESS_MIN_FLOAT = 0.0f;
     private static final float BRIGHTNESS_MAX_FLOAT = 1.0f;
     private static final int LIGHT_SENSOR_RATE = 20;
@@ -72,7 +78,7 @@ public class AutomaticBrightnessControllerTest {
     private static final int DARKENING_LIGHT_DEBOUNCE_CONFIG = 4000;
     private static final int BRIGHTENING_LIGHT_DEBOUNCE_CONFIG_IDLE = 1000;
     private static final int DARKENING_LIGHT_DEBOUNCE_CONFIG_IDLE = 2000;
-    private static final float DOZE_SCALE_FACTOR = 0.0f;
+    private static final float DOZE_SCALE_FACTOR = 0.54f;
     private static final boolean RESET_AMBIENT_LUX_AFTER_WARMUP_CONFIG = false;
     private static final int LIGHT_SENSOR_WARMUP_TIME = 0;
     private static final int AMBIENT_LIGHT_HORIZON_SHORT = 1000;
@@ -87,12 +93,15 @@ public class AutomaticBrightnessControllerTest {
     @Mock SensorManager mSensorManager;
     @Mock BrightnessMappingStrategy mBrightnessMappingStrategy;
     @Mock BrightnessMappingStrategy mIdleBrightnessMappingStrategy;
+    @Mock BrightnessMappingStrategy mDozeBrightnessMappingStrategy;
     @Mock HysteresisLevels mAmbientBrightnessThresholds;
     @Mock HysteresisLevels mScreenBrightnessThresholds;
     @Mock HysteresisLevels mAmbientBrightnessThresholdsIdle;
     @Mock HysteresisLevels mScreenBrightnessThresholdsIdle;
     @Mock Handler mNoOpHandler;
     @Mock BrightnessRangeController mBrightnessRangeController;
+    @Mock
+    DisplayManagerFlags mDisplayManagerFlags;
     @Mock BrightnessThrottler mBrightnessThrottler;
 
     @Before
@@ -124,12 +133,15 @@ public class AutomaticBrightnessControllerTest {
 
         when(mBrightnessMappingStrategy.getMode()).thenReturn(AUTO_BRIGHTNESS_MODE_DEFAULT);
         when(mIdleBrightnessMappingStrategy.getMode()).thenReturn(AUTO_BRIGHTNESS_MODE_IDLE);
+        when(mDozeBrightnessMappingStrategy.getMode()).thenReturn(AUTO_BRIGHTNESS_MODE_DOZE);
 
         SparseArray<BrightnessMappingStrategy> brightnessMappingStrategyMap = new SparseArray<>();
         brightnessMappingStrategyMap.append(AUTO_BRIGHTNESS_MODE_DEFAULT,
                 mBrightnessMappingStrategy);
         brightnessMappingStrategyMap.append(AUTO_BRIGHTNESS_MODE_IDLE,
                 mIdleBrightnessMappingStrategy);
+        brightnessMappingStrategyMap.append(AUTO_BRIGHTNESS_MODE_DOZE,
+                mDozeBrightnessMappingStrategy);
         mController = new AutomaticBrightnessController(
                 new AutomaticBrightnessController.Injector() {
                     @Override
@@ -138,8 +150,18 @@ public class AutomaticBrightnessControllerTest {
                     }
 
                     @Override
-                    AutomaticBrightnessController.Clock createClock() {
-                        return mClock::now;
+                    AutomaticBrightnessController.Clock createClock(boolean isEnabled) {
+                        return new AutomaticBrightnessController.Clock() {
+                            @Override
+                            public long uptimeMillis() {
+                                return mClock.now();
+                            }
+
+                            @Override
+                            public long getSensorEventScaleTime() {
+                                return mClock.now() + ANDROID_SLEEP_TIME;
+                            }
+                        };
                     }
 
                 }, // pass in test looper instead, pass in offsettable clock
@@ -155,7 +177,8 @@ public class AutomaticBrightnessControllerTest {
                 mAmbientBrightnessThresholdsIdle, mScreenBrightnessThresholdsIdle,
                 mContext, mBrightnessRangeController, mBrightnessThrottler,
                 useHorizon ? AMBIENT_LIGHT_HORIZON_SHORT : 1,
-                useHorizon ? AMBIENT_LIGHT_HORIZON_LONG : 10000, userLux, userNits
+                useHorizon ? AMBIENT_LIGHT_HORIZON_LONG : 10000, userLux, userNits,
+                mDisplayManagerFlags
         );
 
         when(mBrightnessRangeController.getCurrentBrightnessMax()).thenReturn(
@@ -170,7 +193,7 @@ public class AutomaticBrightnessControllerTest {
         // through which we can deliver fake (for test) sensor values.
         mController.configure(AUTO_BRIGHTNESS_ENABLED, null /* configuration= */,
                 0 /* brightness= */, false /* userChangedBrightness= */, 0 /* adjustment= */,
-                false /* userChanged= */, DisplayPowerRequest.POLICY_BRIGHT,
+                false /* userChanged= */, DisplayPowerRequest.POLICY_BRIGHT, Display.STATE_ON,
                 /* shouldResetShortTermModel= */ true);
     }
 
@@ -276,7 +299,7 @@ public class AutomaticBrightnessControllerTest {
         // User sets brightness to 100
         mController.configure(AUTO_BRIGHTNESS_ENABLED, null /* configuration= */,
                 0.5f /* brightness= */, true /* userChangedBrightness= */, 0 /* adjustment= */,
-                false /* userChanged= */, DisplayPowerRequest.POLICY_BRIGHT,
+                false /* userChanged= */, DisplayPowerRequest.POLICY_BRIGHT, Display.STATE_ON,
                 /* shouldResetShortTermModel= */ true);
 
         // There should be a user data point added to the mapper.
@@ -300,7 +323,7 @@ public class AutomaticBrightnessControllerTest {
                 null, ApplicationInfo.CATEGORY_UNDEFINED)).thenReturn(0.5f);
         mController.configure(AUTO_BRIGHTNESS_ENABLED, null /* configuration= */,
                 0.5f /* brightness= */, true /* userChangedBrightness= */, 0 /* adjustment= */,
-                false /* userChanged= */, DisplayPowerRequest.POLICY_BRIGHT,
+                false /* userChanged= */, DisplayPowerRequest.POLICY_BRIGHT, Display.STATE_ON,
                 /* shouldResetShortTermModel= */ true);
 
         //Recalculating the spline with RBC enabled, verifying that the short term model is reset,
@@ -334,12 +357,12 @@ public class AutomaticBrightnessControllerTest {
         // User sets brightness to 100
         mController.configure(AUTO_BRIGHTNESS_ENABLED, /* configuration= */ null,
                 /* brightness= */ 0.5f, /* userChangedBrightness= */ true, /* adjustment= */ 0,
-                /* userChanged= */ false, DisplayPowerRequest.POLICY_BRIGHT,
+                /* userChanged= */ false, DisplayPowerRequest.POLICY_BRIGHT, Display.STATE_ON,
                 /* shouldResetShortTermModel= */ true);
 
         when(mBrightnessMappingStrategy.getShortTermModelTimeout()).thenReturn(2000L);
 
-        mController.switchMode(AUTO_BRIGHTNESS_MODE_IDLE);
+        mController.switchMode(AUTO_BRIGHTNESS_MODE_IDLE, /* sendUpdate= */ true);
         when(mBrightnessMappingStrategy.shouldResetShortTermModel(
                 123f, 0.5f)).thenReturn(true);
 
@@ -349,7 +372,7 @@ public class AutomaticBrightnessControllerTest {
                 mBrightnessMappingStrategy.getShortTermModelTimeout() + 1000);
         mTestLooper.dispatchAll();
 
-        mController.switchMode(AUTO_BRIGHTNESS_MODE_DEFAULT);
+        mController.switchMode(AUTO_BRIGHTNESS_MODE_DEFAULT, /* sendUpdate= */ true);
         mTestLooper.moveTimeForward(4000);
         mTestLooper.dispatchAll();
 
@@ -374,7 +397,7 @@ public class AutomaticBrightnessControllerTest {
         // User sets brightness to 100
         mController.configure(AUTO_BRIGHTNESS_ENABLED, null /* configuration= */,
                 0.51f /* brightness= */, true /* userChangedBrightness= */, 0 /* adjustment= */,
-                false /* userChanged= */, DisplayPowerRequest.POLICY_BRIGHT,
+                false /* userChanged= */, DisplayPowerRequest.POLICY_BRIGHT, Display.STATE_ON,
                 /* shouldResetShortTermModel= */ true);
 
         when(mBrightnessMappingStrategy.shouldResetShortTermModel(
@@ -383,14 +406,14 @@ public class AutomaticBrightnessControllerTest {
         when(mBrightnessMappingStrategy.getUserBrightness()).thenReturn(0.51f);
         when(mBrightnessMappingStrategy.getUserLux()).thenReturn(123.0f);
 
-        mController.switchMode(AUTO_BRIGHTNESS_MODE_IDLE);
+        mController.switchMode(AUTO_BRIGHTNESS_MODE_IDLE, /* sendUpdate= */ true);
 
         // Time does not move forward, since clock is doesn't increment naturally.
         mTestLooper.dispatchAll();
 
         // Sensor reads 100000 lux,
         listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, 678910));
-        mController.switchMode(AUTO_BRIGHTNESS_MODE_DEFAULT);
+        mController.switchMode(AUTO_BRIGHTNESS_MODE_DEFAULT, /* sendUpdate= */ true);
 
         // Verify short term model is not reset.
         verify(mBrightnessMappingStrategy, never()).clearUserDataPoints();
@@ -414,14 +437,14 @@ public class AutomaticBrightnessControllerTest {
         // User sets brightness to 100
         mController.configure(AUTO_BRIGHTNESS_ENABLED, /* configuration= */ null,
                 /* brightness= */ 0.5f, /* userChangedBrightness= */ true, /* adjustment= */ 0,
-                /* userChanged= */ false, DisplayPowerRequest.POLICY_BRIGHT,
+                /* userChanged= */ false, DisplayPowerRequest.POLICY_BRIGHT, Display.STATE_ON,
                 /* shouldResetShortTermModel= */ true);
 
         when(mBrightnessMappingStrategy.getShortTermModelTimeout()).thenReturn(2000L);
         when(mBrightnessMappingStrategy.getUserBrightness()).thenReturn(0.5f);
         when(mBrightnessMappingStrategy.getUserLux()).thenReturn(123f);
 
-        mController.switchMode(AUTO_BRIGHTNESS_MODE_IDLE);
+        mController.switchMode(AUTO_BRIGHTNESS_MODE_IDLE, /* sendUpdate= */ true);
         when(mIdleBrightnessMappingStrategy.getUserBrightness()).thenReturn(
                 PowerManager.BRIGHTNESS_INVALID_FLOAT);
         when(mIdleBrightnessMappingStrategy.getUserLux()).thenReturn(
@@ -435,7 +458,7 @@ public class AutomaticBrightnessControllerTest {
                 mBrightnessMappingStrategy.getShortTermModelTimeout() + 1000);
         mTestLooper.dispatchAll();
 
-        mController.switchMode(AUTO_BRIGHTNESS_MODE_DEFAULT);
+        mController.switchMode(AUTO_BRIGHTNESS_MODE_DEFAULT, /* sendUpdate= */ true);
         mTestLooper.moveTimeForward(4000);
         mTestLooper.dispatchAll();
 
@@ -460,7 +483,7 @@ public class AutomaticBrightnessControllerTest {
         // User sets brightness to 100
         mController.configure(AUTO_BRIGHTNESS_ENABLED, /* configuration= */ null,
                 /* brightness= */ 0.5f, /* userChangedBrightness= */ true, /* adjustment= */ 0,
-                /* userChanged= */ false, DisplayPowerRequest.POLICY_BRIGHT,
+                /* userChanged= */ false, DisplayPowerRequest.POLICY_BRIGHT, Display.STATE_ON,
                 /* shouldResetShortTermModel= */ true);
 
         when(mBrightnessMappingStrategy.getShortTermModelTimeout()).thenReturn(2000L);
@@ -468,7 +491,7 @@ public class AutomaticBrightnessControllerTest {
         when(mBrightnessMappingStrategy.getUserBrightness()).thenReturn(0.5f);
         when(mBrightnessMappingStrategy.getUserLux()).thenReturn(123f);
 
-        mController.switchMode(AUTO_BRIGHTNESS_MODE_IDLE);
+        mController.switchMode(AUTO_BRIGHTNESS_MODE_IDLE, /* sendUpdate= */ true);
         when(mIdleBrightnessMappingStrategy.getUserBrightness()).thenReturn(
                 PowerManager.BRIGHTNESS_INVALID_FLOAT);
         when(mIdleBrightnessMappingStrategy.getUserLux()).thenReturn(
@@ -482,7 +505,7 @@ public class AutomaticBrightnessControllerTest {
         // Do not fast-forward time.
         mTestLooper.dispatchAll();
 
-        mController.switchMode(AUTO_BRIGHTNESS_MODE_DEFAULT);
+        mController.switchMode(AUTO_BRIGHTNESS_MODE_DEFAULT, /* sendUpdate= */ true);
         // Do not fast-forward time
         mTestLooper.dispatchAll();
 
@@ -512,7 +535,7 @@ public class AutomaticBrightnessControllerTest {
 
         // No user brightness interaction.
 
-        mController.switchMode(AUTO_BRIGHTNESS_MODE_IDLE);
+        mController.switchMode(AUTO_BRIGHTNESS_MODE_IDLE, /* sendUpdate= */ true);
         when(mIdleBrightnessMappingStrategy.getUserBrightness()).thenReturn(
                 PowerManager.BRIGHTNESS_INVALID_FLOAT);
         when(mIdleBrightnessMappingStrategy.getUserLux()).thenReturn(
@@ -523,7 +546,7 @@ public class AutomaticBrightnessControllerTest {
         // Do not fast-forward time.
         mTestLooper.dispatchAll();
 
-        mController.switchMode(AUTO_BRIGHTNESS_MODE_DEFAULT);
+        mController.switchMode(AUTO_BRIGHTNESS_MODE_DEFAULT, /* sendUpdate= */ true);
         // Do not fast-forward time
         mTestLooper.dispatchAll();
 
@@ -547,7 +570,7 @@ public class AutomaticBrightnessControllerTest {
         // User sets brightness to 100
         mController.configure(AUTO_BRIGHTNESS_ENABLED, null /* configuration= */,
                 0.5f /* brightness= */, true /* userChangedBrightness= */, 0 /* adjustment= */,
-                false /* userChanged= */, DisplayPowerRequest.POLICY_BRIGHT,
+                false /* userChanged= */, DisplayPowerRequest.POLICY_BRIGHT, Display.STATE_ON,
                 /* shouldResetShortTermModel= */ true);
 
         // There should be a user data point added to the mapper.
@@ -557,7 +580,7 @@ public class AutomaticBrightnessControllerTest {
         verify(mBrightnessMappingStrategy, times(3)).getBrightness(anyFloat(), any(), anyInt());
 
         // Now let's do the same for idle mode
-        mController.switchMode(AUTO_BRIGHTNESS_MODE_IDLE);
+        mController.switchMode(AUTO_BRIGHTNESS_MODE_IDLE, /* sendUpdate= */ true);
         // Called once when switching,
         // setAmbientLux() is called twice and once in updateAutoBrightness(),
         // nextAmbientLightBrighteningTransition() and nextAmbientLightDarkeningTransition() are
@@ -574,7 +597,7 @@ public class AutomaticBrightnessControllerTest {
         // User sets idle brightness to 0.5
         mController.configure(AUTO_BRIGHTNESS_ENABLED, null /* configuration= */,
                 0.5f /* brightness= */, true /* userChangedBrightness= */, 0 /* adjustment= */,
-                false /* userChanged= */, DisplayPowerRequest.POLICY_BRIGHT,
+                false /* userChanged= */, DisplayPowerRequest.POLICY_BRIGHT, Display.STATE_ON,
                 /* shouldResetShortTermModel= */ true);
 
         // Ensure we use the correct mapping strategy
@@ -736,7 +759,7 @@ public class AutomaticBrightnessControllerTest {
         mController.configure(AUTO_BRIGHTNESS_ENABLED, null /* configuration= */,
                 BRIGHTNESS_MAX_FLOAT /* brightness= */, false /* userChangedBrightness= */,
                 0 /* adjustment= */, false /* userChanged= */, DisplayPowerRequest.POLICY_BRIGHT,
-                /* shouldResetShortTermModel= */ true);
+                Display.STATE_ON, /* shouldResetShortTermModel= */ true);
         assertEquals(throttledBrightness, mController.getAutomaticScreenBrightness(), 0.0f);
         // The raw brightness value should not have throttling applied
         assertEquals(BRIGHTNESS_MAX_FLOAT, mController.getRawAutomaticScreenBrightness(), 0.0f);
@@ -747,7 +770,7 @@ public class AutomaticBrightnessControllerTest {
         mController.configure(AUTO_BRIGHTNESS_ENABLED, null /* configuration= */,
                 BRIGHTNESS_MAX_FLOAT /* brightness= */, false /* userChangedBrightness= */,
                 0 /* adjustment= */, false /* userChanged= */, DisplayPowerRequest.POLICY_BRIGHT,
-                /* shouldResetShortTermModel= */ true);
+                Display.STATE_ON, /* shouldResetShortTermModel= */ true);
         assertEquals(BRIGHTNESS_MAX_FLOAT, mController.getAutomaticScreenBrightness(), 0.0f);
         assertEquals(BRIGHTNESS_MAX_FLOAT, mController.getRawAutomaticScreenBrightness(), 0.0f);
     }
@@ -786,6 +809,43 @@ public class AutomaticBrightnessControllerTest {
         }
         assertEquals(lux, sensorValues[0], EPSILON);
         assertEquals(mClock.now() - AMBIENT_LIGHT_HORIZON_LONG, sensorTimestamps[0]);
+    }
+
+    @Test
+    public void testAmbientLuxBuffers_prunedBeyondLongHorizonExceptLatestValue() throws Exception {
+        when(mDisplayManagerFlags.offloadControlsDozeAutoBrightness()).thenReturn(true);
+        ArgumentCaptor<SensorEventListener> listenerCaptor =
+                ArgumentCaptor.forClass(SensorEventListener.class);
+        verify(mSensorManager).registerListener(listenerCaptor.capture(), eq(mLightSensor),
+                eq(INITIAL_LIGHT_SENSOR_RATE * 1000), any(Handler.class));
+        SensorEventListener listener = listenerCaptor.getValue();
+
+        // Choose values such that the ring buffer's capacity is extended and the buffer is pruned
+        int increment = 11;
+        int lux = 5000;
+        for (int i = 0; i < 1000; i++) {
+            lux += increment;
+            mClock.fastForward(increment);
+            listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, lux,
+                    (mClock.now() + ANDROID_SLEEP_TIME) * NANO_SECONDS_MULTIPLIER));
+        }
+        mClock.fastForward(AMBIENT_LIGHT_HORIZON_LONG + 10);
+        int newLux = 2000;
+        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, newLux,
+                (mClock.now() + ANDROID_SLEEP_TIME) * NANO_SECONDS_MULTIPLIER));
+
+        float[] sensorValues = mController.getLastSensorValues();
+        long[] sensorTimestamps = mController.getLastSensorTimestamps();
+        // Only the values within the horizon should be kept
+        assertEquals(2, sensorValues.length);
+        assertEquals(2, sensorTimestamps.length);
+
+        assertEquals(lux, sensorValues[0], EPSILON);
+        assertEquals(newLux, sensorValues[1], EPSILON);
+        assertEquals(mClock.now() + ANDROID_SLEEP_TIME - AMBIENT_LIGHT_HORIZON_LONG,
+                sensorTimestamps[0]);
+        assertEquals(mClock.now() + ANDROID_SLEEP_TIME,
+                sensorTimestamps[1]);
     }
 
     @Test
@@ -847,13 +907,13 @@ public class AutomaticBrightnessControllerTest {
         mController.configure(AUTO_BRIGHTNESS_ENABLED, null /* configuration= */,
                 BRIGHTNESS_MAX_FLOAT /* brightness= */, false /* userChangedBrightness= */,
                 0 /* adjustment= */, false /* userChanged= */, DisplayPowerRequest.POLICY_BRIGHT,
-                /* shouldResetShortTermModel= */ false);
+                Display.STATE_ON, /* shouldResetShortTermModel= */ false);
         verify(mBrightnessMappingStrategy, never()).clearUserDataPoints();
 
         mController.configure(AUTO_BRIGHTNESS_ENABLED, null /* configuration= */,
                 BRIGHTNESS_MAX_FLOAT /* brightness= */, false /* userChangedBrightness= */,
                 0 /* adjustment= */, false /* userChanged= */, DisplayPowerRequest.POLICY_BRIGHT,
-                /* shouldResetShortTermModel= */ true);
+                Display.STATE_ON, /* shouldResetShortTermModel= */ true);
         verify(mBrightnessMappingStrategy).clearUserDataPoints();
     }
 
@@ -955,7 +1015,7 @@ public class AutomaticBrightnessControllerTest {
                 BrightnessMappingStrategy.INVALID_NITS, /* applyDebounce= */ true,
                 /* useHorizon= */ false);
 
-        mController.switchMode(AUTO_BRIGHTNESS_MODE_IDLE);
+        mController.switchMode(AUTO_BRIGHTNESS_MODE_IDLE, /* sendUpdate= */ true);
 
         ArgumentCaptor<SensorEventListener> listenerCaptor =
                 ArgumentCaptor.forClass(SensorEventListener.class);
@@ -992,7 +1052,7 @@ public class AutomaticBrightnessControllerTest {
                 BrightnessMappingStrategy.INVALID_NITS, /* applyDebounce= */ true,
                 /* useHorizon= */ false);
 
-        mController.switchMode(AUTO_BRIGHTNESS_MODE_IDLE);
+        mController.switchMode(AUTO_BRIGHTNESS_MODE_IDLE, /* sendUpdate= */ true);
 
         ArgumentCaptor<SensorEventListener> listenerCaptor =
                 ArgumentCaptor.forClass(SensorEventListener.class);
@@ -1019,7 +1079,7 @@ public class AutomaticBrightnessControllerTest {
     }
 
     @Test
-    public void testBrightnessBasedOnLastObservedLux() throws Exception {
+    public void testAutoBrightnessInDoze() throws Exception {
         ArgumentCaptor<SensorEventListener> listenerCaptor =
                 ArgumentCaptor.forClass(SensorEventListener.class);
         verify(mSensorManager).registerListener(listenerCaptor.capture(), eq(mLightSensor),
@@ -1032,19 +1092,147 @@ public class AutomaticBrightnessControllerTest {
         float normalizedBrightness = 0.3f;
         when(mAmbientBrightnessThresholds.getBrighteningThreshold(lux)).thenReturn(lux);
         when(mAmbientBrightnessThresholds.getDarkeningThreshold(lux)).thenReturn(lux);
-        when(mBrightnessMappingStrategy.getBrightness(eq(lux), eq(null), anyInt()))
-                .thenReturn(normalizedBrightness);
+        when(mBrightnessMappingStrategy.getBrightness(eq(lux), /* packageName= */ eq(null),
+                /* category= */ anyInt())).thenReturn(normalizedBrightness);
         when(mBrightnessThrottler.getBrightnessCap()).thenReturn(BRIGHTNESS_MAX_FLOAT);
-        when(mBrightnessThrottler.isThrottled()).thenReturn(true);
 
-        // Send a new sensor value, disable the sensor and verify
-        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, (int) lux));
-        mController.configure(AUTO_BRIGHTNESS_DISABLED, /* configuration= */ null,
+        // Set policy to DOZE
+        mController.configure(AUTO_BRIGHTNESS_ENABLED, /* configuration= */ null,
                 /* brightness= */ 0, /* userChangedBrightness= */ false, /* adjustment= */ 0,
-                /* userChanged= */ false, DisplayPowerRequest.POLICY_BRIGHT,
+                /* userChanged= */ false, DisplayPowerRequest.POLICY_DOZE, Display.STATE_DOZE,
                 /* shouldResetShortTermModel= */ true);
-        assertEquals(normalizedBrightness,
-                mController.getAutomaticScreenBrightnessBasedOnLastObservedLux(
+
+        // Send a new sensor value
+        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, (int) lux));
+
+        // The brightness should be scaled by the doze factor
+        assertEquals(normalizedBrightness * DOZE_SCALE_FACTOR,
+                mController.getAutomaticScreenBrightness(
                         /* brightnessEvent= */ null), EPSILON);
+    }
+
+    @Test
+    public void testAutoBrightnessInDoze_ShouldNotScaleIfUsingDozeCurve() throws Exception {
+        ArgumentCaptor<SensorEventListener> listenerCaptor =
+                ArgumentCaptor.forClass(SensorEventListener.class);
+        verify(mSensorManager).registerListener(listenerCaptor.capture(), eq(mLightSensor),
+                eq(INITIAL_LIGHT_SENSOR_RATE * 1000), any(Handler.class));
+        SensorEventListener listener = listenerCaptor.getValue();
+
+        // Set up system to return 0.3f as a brightness value
+        float lux = 100.0f;
+        // Brightness as float (from 0.0f to 1.0f)
+        float normalizedBrightness = 0.3f;
+        when(mAmbientBrightnessThresholds.getBrighteningThreshold(lux)).thenReturn(lux);
+        when(mAmbientBrightnessThresholds.getDarkeningThreshold(lux)).thenReturn(lux);
+        when(mDozeBrightnessMappingStrategy.getBrightness(eq(lux), /* packageName= */ eq(null),
+                /* category= */ anyInt())).thenReturn(normalizedBrightness);
+        when(mBrightnessThrottler.getBrightnessCap()).thenReturn(BRIGHTNESS_MAX_FLOAT);
+
+        // Switch mode to DOZE
+        mController.switchMode(AUTO_BRIGHTNESS_MODE_DOZE, /* sendUpdate= */ false);
+
+        // Set policy to DOZE
+        mController.configure(AUTO_BRIGHTNESS_ENABLED, /* configuration= */ null,
+                /* brightness= */ 0, /* userChangedBrightness= */ false, /* adjustment= */ 0,
+                /* userChanged= */ false, DisplayPowerRequest.POLICY_DOZE, Display.STATE_DOZE,
+                /* shouldResetShortTermModel= */ true);
+
+        // Send a new sensor value
+        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, (int) lux));
+
+        // The brightness should not be scaled by the doze factor
+        assertEquals(normalizedBrightness,
+                mController.getAutomaticScreenBrightness(/* brightnessEvent= */ null), EPSILON);
+    }
+
+    @Test
+    public void testAutoBrightnessInDoze_ShouldNotScaleIfScreenOn() throws Exception {
+        ArgumentCaptor<SensorEventListener> listenerCaptor =
+                ArgumentCaptor.forClass(SensorEventListener.class);
+        verify(mSensorManager).registerListener(listenerCaptor.capture(), eq(mLightSensor),
+                eq(INITIAL_LIGHT_SENSOR_RATE * 1000), any(Handler.class));
+        SensorEventListener listener = listenerCaptor.getValue();
+
+        // Set up system to return 0.3f as a brightness value
+        float lux = 100.0f;
+        // Brightness as float (from 0.0f to 1.0f)
+        float normalizedBrightness = 0.3f;
+        when(mAmbientBrightnessThresholds.getBrighteningThreshold(lux)).thenReturn(lux);
+        when(mAmbientBrightnessThresholds.getDarkeningThreshold(lux)).thenReturn(lux);
+        when(mBrightnessMappingStrategy.getBrightness(eq(lux), /* packageName= */ eq(null),
+                /* category= */ anyInt())).thenReturn(normalizedBrightness);
+        when(mBrightnessThrottler.getBrightnessCap()).thenReturn(BRIGHTNESS_MAX_FLOAT);
+
+        // Set policy to DOZE
+        mController.configure(AUTO_BRIGHTNESS_ENABLED, /* configuration= */ null,
+                /* brightness= */ 0, /* userChangedBrightness= */ false, /* adjustment= */ 0,
+                /* userChanged= */ false, DisplayPowerRequest.POLICY_DOZE, Display.STATE_ON,
+                /* shouldResetShortTermModel= */ true);
+
+        // Send a new sensor value
+        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, (int) lux));
+
+        // The brightness should not be scaled by the doze factor
+        assertEquals(normalizedBrightness,
+                mController.getAutomaticScreenBrightness(/* brightnessEvent= */ null), EPSILON);
+    }
+
+    @Test
+    public void testSwitchMode_UpdateBrightnessImmediately() throws Exception {
+        ArgumentCaptor<SensorEventListener> listenerCaptor =
+                ArgumentCaptor.forClass(SensorEventListener.class);
+        verify(mSensorManager).registerListener(listenerCaptor.capture(), eq(mLightSensor),
+                eq(INITIAL_LIGHT_SENSOR_RATE * 1000), any(Handler.class));
+        SensorEventListener listener = listenerCaptor.getValue();
+
+        // Set up system to return 0.3f as a brightness value
+        float lux = 100.0f;
+        // Brightness as float (from 0.0f to 1.0f)
+        float normalizedBrightness = 0.3f;
+        when(mAmbientBrightnessThresholds.getBrighteningThreshold(lux)).thenReturn(lux);
+        when(mAmbientBrightnessThresholds.getDarkeningThreshold(lux)).thenReturn(lux);
+        when(mDozeBrightnessMappingStrategy.getBrightness(eq(lux), /* packageName= */ eq(null),
+                /* category= */ anyInt())).thenReturn(normalizedBrightness);
+        when(mBrightnessThrottler.getBrightnessCap()).thenReturn(BRIGHTNESS_MAX_FLOAT);
+
+        // Send a new sensor value
+        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, (int) lux));
+
+        // Switch mode to DOZE
+        mController.switchMode(AUTO_BRIGHTNESS_MODE_DOZE, /* sendUpdate= */ false);
+
+        assertEquals(normalizedBrightness,
+                mController.getAutomaticScreenBrightness(/* brightnessEvent= */ null), EPSILON);
+    }
+
+    @Test
+    public void testSwitchMode_UpdateBrightnessInBackground() throws Exception {
+        ArgumentCaptor<SensorEventListener> listenerCaptor =
+                ArgumentCaptor.forClass(SensorEventListener.class);
+        verify(mSensorManager).registerListener(listenerCaptor.capture(), eq(mLightSensor),
+                eq(INITIAL_LIGHT_SENSOR_RATE * 1000), any(Handler.class));
+        SensorEventListener listener = listenerCaptor.getValue();
+
+        // Set up system to return 0.3f as a brightness value
+        float lux = 100.0f;
+        // Brightness as float (from 0.0f to 1.0f)
+        float normalizedBrightness = 0.3f;
+        when(mAmbientBrightnessThresholds.getBrighteningThreshold(lux)).thenReturn(lux);
+        when(mAmbientBrightnessThresholds.getDarkeningThreshold(lux)).thenReturn(lux);
+        when(mDozeBrightnessMappingStrategy.getBrightness(eq(lux), /* packageName= */ eq(null),
+                /* category= */ anyInt())).thenReturn(normalizedBrightness);
+        when(mBrightnessThrottler.getBrightnessCap()).thenReturn(BRIGHTNESS_MAX_FLOAT);
+
+        // Send a new sensor value
+        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, (int) lux));
+
+        // Switch mode to DOZE
+        mController.switchMode(AUTO_BRIGHTNESS_MODE_DOZE, /* sendUpdate= */ true);
+        mClock.fastForward(SystemClock.uptimeMillis());
+        mTestLooper.dispatchAll();
+
+        assertEquals(normalizedBrightness,
+                mController.getAutomaticScreenBrightness(/* brightnessEvent= */ null), EPSILON);
     }
 }

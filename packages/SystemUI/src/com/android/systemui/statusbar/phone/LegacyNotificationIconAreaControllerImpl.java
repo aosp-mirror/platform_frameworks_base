@@ -16,7 +16,6 @@
 package com.android.systemui.statusbar.phone;
 
 import static com.android.systemui.Flags.newAodTransition;
-import static com.android.systemui.Flags.migrateClocksToBlueprint;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -41,6 +40,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.keyguard.MigrateClocksToBlueprint;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -545,7 +545,7 @@ public class LegacyNotificationIconAreaControllerImpl implements
             return;
         }
         if (mScreenOffAnimationController.shouldAnimateAodIcons()) {
-            if (!migrateClocksToBlueprint()) {
+            if (!MigrateClocksToBlueprint.isEnabled()) {
                 mAodIcons.setTranslationY(-mAodIconAppearTranslation);
             }
             mAodIcons.setAlpha(0);
@@ -557,14 +557,14 @@ public class LegacyNotificationIconAreaControllerImpl implements
                     .start();
         } else {
             mAodIcons.setAlpha(1.0f);
-            if (!migrateClocksToBlueprint()) {
+            if (!MigrateClocksToBlueprint.isEnabled()) {
                 mAodIcons.setTranslationY(0);
             }
         }
     }
 
     private void animateInAodIconTranslation() {
-        if (!migrateClocksToBlueprint()) {
+        if (!MigrateClocksToBlueprint.isEnabled()) {
             mAodIcons.animate()
                     .setInterpolator(Interpolators.DECELERATE_QUINT)
                     .translationY(0)
@@ -667,7 +667,7 @@ public class LegacyNotificationIconAreaControllerImpl implements
                 }
             } else {
                 mAodIcons.setAlpha(1.0f);
-                if (!migrateClocksToBlueprint()) {
+                if (!MigrateClocksToBlueprint.isEnabled()) {
                     mAodIcons.setTranslationY(0);
                 }
                 mAodIcons.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);

@@ -39,6 +39,10 @@
         }
       ],
       "file_patterns": ["(/|^)Context.java", "(/|^)ContextWrapper.java"]
+    },
+    {
+      "name": "CtsWindowManagerBackgroundActivityTestCases",
+      "file_patterns": ["(/|^)IntentSender.java"]
     }
   ],
   "ravenwood-presubmit": [
@@ -46,5 +50,7 @@
       "name": "CtsContentTestCasesRavenwood",
       "host": true
     }
+  ],
+  "postsubmit": [
   ]
 }

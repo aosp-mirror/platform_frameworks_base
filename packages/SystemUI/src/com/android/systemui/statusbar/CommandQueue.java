@@ -50,6 +50,7 @@ import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.util.Pair;
 import android.util.SparseArray;
 import android.view.KeyEvent;
@@ -133,7 +134,7 @@ public class CommandQueue extends IStatusBar.Stub implements
     private static final int MSG_DISMISS_KEYBOARD_SHORTCUTS        = 32 << MSG_SHIFT;
     private static final int MSG_HANDLE_SYSTEM_KEY                 = 33 << MSG_SHIFT;
     private static final int MSG_SHOW_GLOBAL_ACTIONS               = 34 << MSG_SHIFT;
-    private static final int MSG_TOGGLE_PANEL                      = 35 << MSG_SHIFT;
+    private static final int MSG_TOGGLE_NOTIFICATION_PANEL         = 35 << MSG_SHIFT;
     private static final int MSG_SHOW_SHUTDOWN_UI                  = 36 << MSG_SHIFT;
     private static final int MSG_SET_TOP_APP_HIDES_STATUS_BAR      = 37 << MSG_SHIFT;
     private static final int MSG_ROTATION_PROPOSAL                 = 38 << MSG_SHIFT;
@@ -169,7 +170,7 @@ public class CommandQueue extends IStatusBar.Stub implements
     private static final int MSG_TILE_SERVICE_REQUEST_LISTENING_STATE = 68 << MSG_SHIFT;
     private static final int MSG_SHOW_REAR_DISPLAY_DIALOG = 69 << MSG_SHIFT;
     private static final int MSG_MOVE_FOCUSED_TASK_TO_FULLSCREEN = 70 << MSG_SHIFT;
-    private static final int MSG_ENTER_STAGE_SPLIT_FROM_RUNNING_APP = 71 << MSG_SHIFT;
+    private static final int MSG_MOVE_FOCUSED_TASK_TO_STAGE_SPLIT = 71 << MSG_SHIFT;
     private static final int MSG_SHOW_MEDIA_OUTPUT_SWITCHER = 72 << MSG_SHIFT;
     private static final int MSG_TOGGLE_TASKBAR = 73 << MSG_SHIFT;
     private static final int MSG_SETTING_CHANGED = 74 << MSG_SHIFT;
@@ -178,6 +179,8 @@ public class CommandQueue extends IStatusBar.Stub implements
     private static final int MSG_IMMERSIVE_CHANGED = 78 << MSG_SHIFT;
     private static final int MSG_SET_QS_TILES = 79 << MSG_SHIFT;
     private static final int MSG_ENTER_DESKTOP = 80 << MSG_SHIFT;
+    private static final int MSG_SET_SPLITSCREEN_FOCUS = 81 << MSG_SHIFT;
+    private static final int MSG_TOGGLE_QUICK_SETTINGS_PANEL = 82 << MSG_SHIFT;
     public static final int FLAG_EXCLUDE_NONE = 0;
     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
     public static final int FLAG_EXCLUDE_RECENTS_PANEL = 1 << 1;
@@ -220,10 +223,33 @@ public class CommandQueue extends IStatusBar.Stub implements
          */
         default void disable(int displayId, @DisableFlags int state1, @Disable2Flags int state2,
                 boolean animate) { }
+
+        /**
+         * Called to expand Notifications panel with animation.
+         */
         default void animateExpandNotificationsPanel() { }
+        /**
+         * Called to collapse Notifications panel with animation.
+         * @param flags Exclusion flags. See {@link FLAG_EXCLUDE_NONE}.
+         * @param force True to force the operation.
+         */
         default void animateCollapsePanels(int flags, boolean force) { }
-        default void togglePanel() { }
-        default void animateExpandSettingsPanel(String obj) { }
+
+        /**
+         * Called to toggle Notifications panel.
+         */
+        default void toggleNotificationsPanel() { }
+
+        /**
+         * Called to expand Quick Settings panel with animation.
+         * @param subPanel subPanel one wish to expand.
+         */
+        default void animateExpandSettingsPanel(String subPanel) { }
+
+        /**
+         * Called to toggle Quick Settings panel.
+         */
+        default void toggleQuickSettingsPanel() { }
 
         /**
          * Called to notify IME window status changes.
@@ -503,14 +529,19 @@ public class CommandQueue extends IStatusBar.Stub implements
         default void moveFocusedTaskToFullscreen(int displayId) {}
 
         /**
-         * @see IStatusBar#enterStageSplitFromRunningApp
+         * @see IStatusBar#moveFocusedTaskToStageSplit
          */
-        default void enterStageSplitFromRunningApp(boolean leftOrTop) {}
+        default void moveFocusedTaskToStageSplit(int displayId, boolean leftOrTop) {}
+
+        /**
+         * @see IStatusBar#setSplitscreenFocus
+         */
+        default void setSplitscreenFocus(boolean leftOrTop) {}
 
         /**
          * @see IStatusBar#showMediaOutputSwitcher
          */
-        default void showMediaOutputSwitcher(String packageName) {}
+        default void showMediaOutputSwitcher(String packageName, UserHandle userHandle) {}
 
         /**
          * @see IStatusBar#confirmImmersivePrompt
@@ -523,9 +554,9 @@ public class CommandQueue extends IStatusBar.Stub implements
         default void immersiveModeChanged(int rootDisplayAreaId, boolean isImmersiveMode) {}
 
         /**
-         * @see IStatusBar#enterDesktop(int)
+         * @see IStatusBar#moveFocusedTaskToDesktop(int)
          */
-        default void enterDesktop(int displayId) {}
+        default void moveFocusedTaskToDesktop(int displayId) {}
     }
 
     @VisibleForTesting
@@ -689,10 +720,10 @@ public class CommandQueue extends IStatusBar.Stub implements
         }
     }
 
-    public void togglePanel() {
+    public void toggleNotificationsPanel() {
         synchronized (mLock) {
-            mHandler.removeMessages(MSG_TOGGLE_PANEL);
-            mHandler.obtainMessage(MSG_TOGGLE_PANEL, 0, 0).sendToTarget();
+            mHandler.removeMessages(MSG_TOGGLE_NOTIFICATION_PANEL);
+            mHandler.obtainMessage(MSG_TOGGLE_NOTIFICATION_PANEL, 0, 0).sendToTarget();
         }
     }
 
@@ -700,6 +731,13 @@ public class CommandQueue extends IStatusBar.Stub implements
         synchronized (mLock) {
             mHandler.removeMessages(MSG_EXPAND_SETTINGS);
             mHandler.obtainMessage(MSG_EXPAND_SETTINGS, subPanel).sendToTarget();
+        }
+    }
+
+    public void toggleQuickSettingsPanel() {
+        synchronized (mLock) {
+            mHandler.removeMessages(MSG_TOGGLE_QUICK_SETTINGS_PANEL);
+            mHandler.obtainMessage(MSG_TOGGLE_QUICK_SETTINGS_PANEL, 0, 0).sendToTarget();
         }
     }
 
@@ -1338,15 +1376,24 @@ public class CommandQueue extends IStatusBar.Stub implements
     }
 
     @Override
-    public void enterStageSplitFromRunningApp(boolean leftOrTop) {
+    public void moveFocusedTaskToStageSplit(int displayId, boolean leftOrTop) {
         synchronized (mLock) {
-            mHandler.obtainMessage(MSG_ENTER_STAGE_SPLIT_FROM_RUNNING_APP,
-                    leftOrTop).sendToTarget();
+            SomeArgs args = SomeArgs.obtain();
+            args.argi1 = displayId;
+            args.argi2 = leftOrTop ? 1 : 0;
+            mHandler.obtainMessage(MSG_MOVE_FOCUSED_TASK_TO_STAGE_SPLIT,
+                    args).sendToTarget();
         }
     }
 
     @Override
-    public void showMediaOutputSwitcher(String packageName) {
+    public void setSplitscreenFocus(boolean leftOrTop) {
+        synchronized (mLock) {
+            mHandler.obtainMessage(MSG_SET_SPLITSCREEN_FOCUS, leftOrTop).sendToTarget();
+        }
+    }
+    @Override
+    public void showMediaOutputSwitcher(String packageName, UserHandle userHandle) {
         int callingUid = Binder.getCallingUid();
         if (callingUid != 0 && callingUid != Process.SYSTEM_UID) {
             throw new SecurityException("Call only allowed from system server.");
@@ -1354,6 +1401,7 @@ public class CommandQueue extends IStatusBar.Stub implements
         synchronized (mLock) {
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = packageName;
+            args.arg2 = userHandle;
             mHandler.obtainMessage(MSG_SHOW_MEDIA_OUTPUT_SWITCHER, args).sendToTarget();
         }
     }
@@ -1429,7 +1477,7 @@ public class CommandQueue extends IStatusBar.Stub implements
     }
 
     @Override
-    public void enterDesktop(int displayId) {
+    public void moveFocusedTaskToDesktop(int displayId) {
         SomeArgs args = SomeArgs.obtain();
         args.arg1 = displayId;
         mHandler.obtainMessage(MSG_ENTER_DESKTOP, args).sendToTarget();
@@ -1477,14 +1525,19 @@ public class CommandQueue extends IStatusBar.Stub implements
                         mCallbacks.get(i).animateCollapsePanels(msg.arg1, msg.arg2 != 0);
                     }
                     break;
-                case MSG_TOGGLE_PANEL:
+                case MSG_TOGGLE_NOTIFICATION_PANEL:
                     for (int i = 0; i < mCallbacks.size(); i++) {
-                        mCallbacks.get(i).togglePanel();
+                        mCallbacks.get(i).toggleNotificationsPanel();
                     }
                     break;
                 case MSG_EXPAND_SETTINGS:
                     for (int i = 0; i < mCallbacks.size(); i++) {
                         mCallbacks.get(i).animateExpandSettingsPanel((String) msg.obj);
+                    }
+                    break;
+                case MSG_TOGGLE_QUICK_SETTINGS_PANEL:
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).toggleQuickSettingsPanel();
                     }
                     break;
                 case MSG_SHOW_IME_BUTTON:
@@ -1907,16 +1960,27 @@ public class CommandQueue extends IStatusBar.Stub implements
                     }
                     break;
                 }
-                case MSG_ENTER_STAGE_SPLIT_FROM_RUNNING_APP:
+                case MSG_MOVE_FOCUSED_TASK_TO_STAGE_SPLIT: {
+                    args = (SomeArgs) msg.obj;
+                    int displayId = args.argi1;
+                    boolean leftOrTop = args.argi2 != 0;
                     for (int i = 0; i < mCallbacks.size(); i++) {
-                        mCallbacks.get(i).enterStageSplitFromRunningApp((Boolean) msg.obj);
+                        mCallbacks.get(i).moveFocusedTaskToStageSplit(displayId, leftOrTop);
+                    }
+                    break;
+                }
+                case MSG_SET_SPLITSCREEN_FOCUS:
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).setSplitscreenFocus((Boolean) msg.obj);
                     }
                     break;
                 case MSG_SHOW_MEDIA_OUTPUT_SWITCHER:
                     args = (SomeArgs) msg.obj;
                     String clientPackageName = (String) args.arg1;
+                    UserHandle clientUserHandle = (UserHandle) args.arg2;
                     for (int i = 0; i < mCallbacks.size(); i++) {
-                        mCallbacks.get(i).showMediaOutputSwitcher(clientPackageName);
+                        mCallbacks.get(i).showMediaOutputSwitcher(clientPackageName,
+                                clientUserHandle);
                     }
                     break;
                 case MSG_CONFIRM_IMMERSIVE_PROMPT:
@@ -1936,7 +2000,7 @@ public class CommandQueue extends IStatusBar.Stub implements
                     args = (SomeArgs) msg.obj;
                     int displayId = args.argi1;
                     for (int i = 0; i < mCallbacks.size(); i++) {
-                        mCallbacks.get(i).enterDesktop(displayId);
+                        mCallbacks.get(i).moveFocusedTaskToDesktop(displayId);
                     }
                     break;
                 }

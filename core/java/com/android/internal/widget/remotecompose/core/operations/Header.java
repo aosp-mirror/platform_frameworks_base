@@ -26,11 +26,11 @@ import java.util.List;
 
 /**
  * Describe some basic information for a RemoteCompose document
- *
+ * <p>
  * It encodes the version of the document (following semantic versioning) as well
  * as the dimensions of the document in pixels.
  */
-public class Header  implements RemoteComposeOperation {
+public class Header implements RemoteComposeOperation {
     public static final int MAJOR_VERSION = 0;
     public static final int MINOR_VERSION = 1;
     public static final int PATCH_VERSION = 0;
@@ -89,7 +89,8 @@ public class Header  implements RemoteComposeOperation {
     }
 
     public static class Companion implements CompanionOperation {
-        private Companion() {}
+        private Companion() {
+        }
 
         @Override
         public String name() {

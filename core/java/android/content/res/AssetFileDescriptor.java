@@ -419,6 +419,10 @@ public class AssetFileDescriptor implements Parcelable, Closeable {
             if (available <= 0) {
                 return -1;
             }
+            if (count == 0) {
+                // Java's InputStream explicitly specifies that this returns zero.
+                return 0;
+            }
 
             if (count > available) count = available;
             try {

@@ -21,7 +21,6 @@ import com.android.tools.lint.detector.api.Detector
 import com.android.tools.lint.detector.api.Issue
 import org.junit.Test
 
-@Suppress("UnstableApiUsage")
 class SlowUserQueryDetectorTest : SystemUILintDetectorTest() {
 
     override fun getDetector(): Detector = SlowUserQueryDetector()
@@ -182,5 +181,19 @@ class SlowUserQueryDetectorTest : SystemUILintDetectorTest() {
             .expectClean()
     }
 
-    private val stubs = androidStubs
+    private val stubs =
+        arrayOf(
+            *androidStubs,
+            java(
+                    """
+package com.android.systemui.settings;
+import android.content.pm.UserInfo;
+public interface UserTracker {
+    int getUserId();
+    UserInfo getUserInfo();
+}
+"""
+                )
+                .indented()
+        )
 }

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "Perfetto"
-
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/Log.h>
 #include <nativehelper/JNIHelp.h>
@@ -46,9 +44,17 @@ public:
     jobject newInstance(JNIEnv* env, void* ds_config, size_t ds_config_size,
                         PerfettoDsInstanceIndex inst_id);
 
-    jobject createTlsStateGlobalRef(JNIEnv* env, PerfettoDsInstanceIndex inst_id);
-    jobject createIncrementalStateGlobalRef(JNIEnv* env, PerfettoDsInstanceIndex inst_id);
-    void trace(JNIEnv* env, jobject trace_function);
+    bool TraceIterateBegin();
+    bool TraceIterateNext();
+    void TraceIterateBreak();
+    PerfettoDsInstanceIndex GetInstanceIndex();
+    void WritePackets(JNIEnv* env, jobjectArray packets);
+
+    jobject GetCustomTls();
+    void SetCustomTls(jobject);
+    jobject GetIncrementalState();
+    void SetIncrementalState(jobject);
+
     void flushAll();
 
 private:

@@ -83,7 +83,7 @@
     <string name="kg_primary_auth_locked_out_pin" msgid="5492230176361601475">"Příliš mnoho pokusů s nesprávným kódem PIN"</string>
     <string name="kg_primary_auth_locked_out_pattern" msgid="8266214607346180952">"Příliš mnoho pokusů s nesprávným gestem"</string>
     <string name="kg_primary_auth_locked_out_password" msgid="6170245108400198659">"Příliš mnoho pokusů s nesprávným heslem"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{Zkuste to znovu za # sekundu.}few{Zkuste to znovu za # sekundy.}many{Zkuste to znovu za # sekundy.}other{Zkuste to znovu za # sekund.}}"</string>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{Zkuste to znovu za # sekundu}few{Zkuste to znovu za # sekundy}many{Zkuste to znovu za # sekundy}other{Zkuste to znovu za # sekund}}"</string>
     <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"Zadejte kód PIN SIM karty."</string>
     <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"Zadejte kód PIN SIM karty <xliff:g id="CARRIER">%1$s</xliff:g>."</string>
     <string name="kg_sim_lock_esim_instructions" msgid="5577169988158738030">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> eSIM kartu deaktivujte, chcete-li zařízení používat bez mobilních služeb."</string>
@@ -111,6 +111,9 @@
     <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Z bezpečnostních důvodů raději použijte gesto"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Z bezpečnostních důvodů raději použijte PIN"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Z bezpečnostních důvodů raději použijte heslo"</string>
+    <string name="kg_prompt_added_security_pin" msgid="5487992065995475528">"Pro ještě lepší zabezpečení je vyžadován kód PIN"</string>
+    <string name="kg_prompt_added_security_pattern" msgid="1017068086102168544">"Pro ještě lepší zabezpečení je vyžadováno gesto"</string>
+    <string name="kg_prompt_added_security_password" msgid="6053156069765029006">"Pro ještě lepší zabezpečení je vyžadováno heslo"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Zařízení je uzamknuto administrátorem"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Zařízení bylo ručně uzamčeno"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Nerozpoznáno"</string>

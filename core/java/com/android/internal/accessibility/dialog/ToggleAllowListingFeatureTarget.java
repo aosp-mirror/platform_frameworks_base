@@ -21,11 +21,11 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.provider.Settings;
 import android.view.View;
-import android.view.accessibility.AccessibilityManager.ShortcutType;
 
 import com.android.internal.R;
 import com.android.internal.accessibility.common.ShortcutConstants.AccessibilityFragmentType;
 import com.android.internal.accessibility.common.ShortcutConstants.ShortcutMenuMode;
+import com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType;
 import com.android.internal.accessibility.dialog.TargetAdapter.ViewHolder;
 
 /**
@@ -34,7 +34,7 @@ import com.android.internal.accessibility.dialog.TargetAdapter.ViewHolder;
  */
 class ToggleAllowListingFeatureTarget extends AccessibilityTarget {
 
-    ToggleAllowListingFeatureTarget(Context context, @ShortcutType int shortcutType,
+    ToggleAllowListingFeatureTarget(Context context, @UserShortcutType int shortcutType,
             boolean isShortcutSwitched, String id, int uid, CharSequence label, Drawable icon,
             String key) {
         super(context, shortcutType, AccessibilityFragmentType.TOGGLE, isShortcutSwitched, id,

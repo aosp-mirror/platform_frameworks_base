@@ -48,6 +48,8 @@ interface IVirtualDeviceManagerNative {
     const int POLICY_TYPE_AUDIO = 1;
     const int POLICY_TYPE_RECENTS = 2;
     const int POLICY_TYPE_ACTIVITY = 3;
+    const int POLICY_TYPE_CLIPBOARD = 4;
+    const int POLICY_TYPE_CAMERA = 5;
 
     /**
      * Returns the IDs for all VirtualDevices where an app with the given is running.

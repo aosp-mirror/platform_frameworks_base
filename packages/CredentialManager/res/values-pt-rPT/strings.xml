@@ -20,7 +20,7 @@
     <string name="app_name" msgid="4539824758261855508">"Credential Manager"</string>
     <string name="string_cancel" msgid="6369133483981306063">"Cancelar"</string>
     <string name="string_continue" msgid="1346732695941131882">"Continuar"</string>
-    <string name="string_more_options" msgid="2763852250269945472">"Guardar outra forma"</string>
+    <string name="string_more_options" msgid="2763852250269945472">"Guardar de outra forma"</string>
     <string name="string_learn_more" msgid="4541600451688392447">"Saber mais"</string>
     <string name="content_description_show_password" msgid="3283502010388521607">"Mostrar palavra-passe"</string>
     <string name="content_description_hide_password" msgid="6841375971631767996">"Ocultar palavra-passe"</string>
@@ -39,9 +39,9 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"À medida que avançamos para um futuro sem palavras-passe, as palavras-passe continuam disponíveis juntamente com as chaves de acesso."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Escolha onde guardar as suas <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Selecione um gestor de palavras-passe para guardar as suas informações e iniciar sessão mais rapidamente da próxima vez"</string>
-    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"Criar a chave de acesso para iniciar sessão na app <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_password_title" msgid="6238446571944651980">"Guardar a palavra-passe para iniciar sessão na app <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Guardar as informações de início de sessão da app <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"Criar a chave de acesso para iniciar sessão na app <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_password_title" msgid="4481366993598649224">"Guardar a palavra-passe para iniciar sessão na app <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"Guardar as informações de início de sessão da app <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="passkey" msgid="632353688396759522">"chave de acesso"</string>
     <string name="password" msgid="6738570945182936667">"palavra-passe"</string>
     <string name="passkeys" msgid="5733880786866559847">"chaves de acesso"</string>
@@ -68,14 +68,15 @@
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"Volte à página anterior"</string>
     <string name="accessibility_close_button" msgid="1163435587545377687">"Fechar"</string>
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"Ignorar"</string>
-    <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Usar a sua chave de acesso guardada na app <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="get_dialog_title_use_password_for" msgid="625828023234318484">"Usar a sua palavra-passe guardada para a app <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"Usar o seu início de sessão para a app <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"Desbloquear as opções de início de sessão para a app <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="get_dialog_title_use_passkey_for" msgid="479261099705979148">"Use a sua chave de acesso guardada na app <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_use_password_for" msgid="688557784207167647">"Use a sua palavra-passe guardada na app <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_use_sign_in_for" msgid="4233553937542583226">"Use sua conta na app <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_description_single_tap" msgid="2797059565126030879">"Use o seu bloqueio de ecrã para iniciar sessão na app <xliff:g id="APP_NAME">%1$s</xliff:g> com <xliff:g id="USERNAME">%2$s</xliff:g>"</string>
+    <string name="get_dialog_title_unlock_options_for" msgid="7096423827682163270">"Desbloqueie as opções de início de sessão para a app <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"Escolha uma chave de acesso guardada para a app <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"Escolha uma palavra-passe guardada para a app <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"Escolha um início de sessão guardado para a app <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="get_dialog_title_choose_sign_in_for" msgid="3048870756117876514">"Escolha um início de sessão para a app <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_choose_sign_in_for" msgid="645728947702442421">"Escolha uma conta para a app <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"Escolher uma opção para a app <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"Usar estas informações na app <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Iniciar sessão de outra forma"</string>
@@ -90,7 +91,7 @@
     <string name="no_sign_in_info_in" msgid="2641118151920288356">"Sem informações de início de sessão em <xliff:g id="SOURCE">%1$s</xliff:g>"</string>
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Faça a gestão dos inícios de sessão"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"De outro dispositivo"</string>
-    <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Use um dispositivo diferente"</string>
+    <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Use outro diferente"</string>
     <string name="request_cancelled_by" msgid="3735222326886267820">"Pedido cancelado pela app <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="dropdown_presentation_more_sign_in_options_text" msgid="1693727354272417902">"Opções de início de sessão"</string>
     <string name="more_options_content_description" msgid="1323427365788198808">"Mais"</string>

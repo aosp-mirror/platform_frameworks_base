@@ -22,9 +22,11 @@ import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -59,6 +61,7 @@ import com.android.settingslib.spa.framework.compose.hideKeyboardAction
 import com.android.settingslib.spa.framework.compose.horizontalValues
 import com.android.settingslib.spa.framework.theme.SettingsOpacity
 import com.android.settingslib.spa.framework.theme.SettingsTheme
+import com.android.settingslib.spa.framework.theme.settingsBackground
 import com.android.settingslib.spa.widget.preference.Preference
 import com.android.settingslib.spa.widget.preference.PreferenceModel
 
@@ -90,6 +93,8 @@ fun SearchScaffold(
                 onSearchQueryChange = { viewModel.searchQuery = it },
             )
         },
+        containerColor = MaterialTheme.colorScheme.settingsBackground,
+        contentWindowInsets = WindowInsets.safeDrawing,
     ) { paddingValues ->
         Box(
             Modifier

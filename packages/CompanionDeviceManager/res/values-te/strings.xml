@@ -26,8 +26,11 @@
     <string name="profile_name_glasses" msgid="3506504967216601277">"పరికరం"</string>
     <string name="summary_glasses" msgid="2872254734959842579">"మీ <xliff:g id="DEVICE_NAME">%1$s</xliff:g>లో ఈ అనుమతులను యాక్సెస్ చేయడానికి ఈ యాప్ అనుమతించబడుతుంది"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"మీ ఫోన్ నుండి ఈ సమాచారాన్ని యాక్సెస్ చేయడానికి &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; యాప్‌ను అనుమతించండి"</string>
+    <string name="title_app_streaming_with_mirroring" msgid="3364582597581570658">"మీ ఫోన్ యాప్‌లను స్ట్రీమ్ చేయడానికి &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;ను అనుమతించాలా?"</string>
+    <string name="summary_app_streaming" msgid="295548145144086753">"ఆడియో, ఫోటోలు, పాస్‌వర్డ్‌లు, మెసేజ్‌లతో సహా ఫోన్‌లో కనిపించే లేదా ప్లే అయ్యే దేనికైనా %1$sకు యాక్సెస్ ఉంటుంది.&lt;br/&gt;&lt;br/&gt;మీరు ఈ అనుమతికి యాక్సెస్‌ను తీసివేసే వరకు %1$s యాప్‌లను స్ట్రీమ్ చేయగలదు."</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"క్రాస్-డివైజ్ సర్వీసులు"</string>
     <string name="helper_summary_app_streaming" msgid="2396773196949578425">"మీ పరికరాల మధ్య యాప్‌లను స్ట్రీమ్ చేయడానికి <xliff:g id="APP_NAME">%1$s</xliff:g> మీ <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> తరఫున అనుమతిని రిక్వెస్ట్ చేస్తోంది"</string>
+    <string name="helper_summary_app_streaming_with_mirroring" msgid="6138581029144467467">"మీ పరికరాలలో యాప్‌లను డిస్‌ప్లే చేయడానికి, స్ట్రీమ్ చేయడానికి <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> తరఫున <xliff:g id="APP_NAME">%1$s</xliff:g> అనుమతిని రిక్వెస్ట్ చేస్తోంది"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
     <string name="title_computer" msgid="4693714143506569253">"మీ ఫోన్ నుండి ఈ సమాచారాన్ని యాక్సెస్ చేయడానికి &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; యాప్‌ను అనుమతించండి"</string>
@@ -35,6 +38,8 @@
     <string name="helper_title_computer" msgid="4671071173916176037">"Google Play సర్వీసులు"</string>
     <string name="helper_summary_computer" msgid="8774832742608187072">"<xliff:g id="APP_NAME">%1$s</xliff:g> మీ ఫోన్‌లోని ఫోటోలను, మీడియాను, ఇంకా నోటిఫికేషన్‌లను యాక్సెస్ చేయడానికి మీ <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> తరఫున అనుమతిని రిక్వెస్ట్ చేస్తోంది"</string>
     <string name="title_nearby_device_streaming" msgid="7269956847378799794">"ఈ చర్యను అమలు చేయడానికి &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt;‌ను అనుమతించాలా?"</string>
+    <string name="title_nearby_device_streaming_with_mirroring" msgid="242855799919611657">"మీ ఫోన్ యాప్‌లను, సిస్టమ్ ఫీచర్‌లను స్ట్రీమ్ చేయడానికి &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt;ను అనుమతించాలా?"</string>
+    <string name="summary_nearby_device_streaming" msgid="4039565463149145573">"ఆడియో, ఫోటోలు, పేమెంట్ సమాచారం, పాస్‌వర్డ్‌లు, మెసేజ్‌లతో సహా మీ ఫోన్‌లో కనిపించే లేదా ప్లే అయ్యే దేనికైనా %1$sకు యాక్సెస్ ఉంటుంది.&lt;br/&gt;&lt;br/&gt;మీరు ఈ అనుమతికి యాక్సెస్‌ను తీసివేసే వరకు %1$s యాప్‌లను, సిస్టమ్ ఫీచర్‌లను స్ట్రీమ్ చేయగలదు."</string>
     <string name="helper_summary_nearby_device_streaming" msgid="2063965070936844876">"సమీపంలోని పరికరాలకు యాప్‌లను, ఇతర సిస్టమ్ ఫీచర్‌లను స్ట్రీమ్ చేయడానికి <xliff:g id="APP_NAME">%1$s</xliff:g> మీ <xliff:g id="DEVICE_NAME">%2$s</xliff:g> తరఫున అనుమతిని రిక్వెస్ట్ చేస్తోంది"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"పరికరం"</string>
     <string name="summary_generic" msgid="1761976003668044801">"కాల్ చేస్తున్న వారి పేరు వంటి సమాచారాన్ని ఈ యాప్ మీ ఫోన్ కు, ఎంచుకున్న పరికరానికీ మధ్య సింక్ చేయగలుగుతుంది"</string>

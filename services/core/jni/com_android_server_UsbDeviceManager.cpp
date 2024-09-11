@@ -108,18 +108,6 @@ static jboolean android_server_UsbDeviceManager_isStartRequested(JNIEnv* /* env 
     return (result == 1);
 }
 
-static jint android_server_UsbDeviceManager_getAudioMode(JNIEnv* /* env */, jobject /* thiz */)
-{
-    int fd = open(DRIVER_NAME, O_RDWR);
-    if (fd < 0) {
-        ALOGE("could not open %s", DRIVER_NAME);
-        return false;
-    }
-    int result = ioctl(fd, ACCESSORY_GET_AUDIO_MODE);
-    close(fd);
-    return result;
-}
-
 static jobject android_server_UsbDeviceManager_openControl(JNIEnv *env, jobject /* thiz */, jstring jFunction) {
     ScopedUtfChars function(env, jFunction);
     bool ptp = false;
@@ -148,16 +136,13 @@ static jobject android_server_UsbDeviceManager_openControl(JNIEnv *env, jobject 
 }
 
 static const JNINativeMethod method_table[] = {
-    { "nativeGetAccessoryStrings",  "()[Ljava/lang/String;",
-                                    (void*)android_server_UsbDeviceManager_getAccessoryStrings },
-    { "nativeOpenAccessory",        "()Landroid/os/ParcelFileDescriptor;",
-                                    (void*)android_server_UsbDeviceManager_openAccessory },
-    { "nativeIsStartRequested",     "()Z",
-                                    (void*)android_server_UsbDeviceManager_isStartRequested },
-    { "nativeGetAudioMode",         "()I",
-                                    (void*)android_server_UsbDeviceManager_getAudioMode },
-    { "nativeOpenControl",          "(Ljava/lang/String;)Ljava/io/FileDescriptor;",
-                                    (void*)android_server_UsbDeviceManager_openControl },
+        {"nativeGetAccessoryStrings", "()[Ljava/lang/String;",
+         (void *)android_server_UsbDeviceManager_getAccessoryStrings},
+        {"nativeOpenAccessory", "()Landroid/os/ParcelFileDescriptor;",
+         (void *)android_server_UsbDeviceManager_openAccessory},
+        {"nativeIsStartRequested", "()Z", (void *)android_server_UsbDeviceManager_isStartRequested},
+        {"nativeOpenControl", "(Ljava/lang/String;)Ljava/io/FileDescriptor;",
+         (void *)android_server_UsbDeviceManager_openControl},
 };
 
 int register_android_server_UsbDeviceManager(JNIEnv *env)

@@ -1,0 +1,12 @@
+package: "com.android.settingslib.widget.flags"
+container: "system"
+
+flag {
+    name: "auto_hide_empty_lottie_res"
+    namespace: "android_settings"
+    description: "Hides IllustrationPreference when Lottie resource is an empty file"
+    bug: "337873972"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

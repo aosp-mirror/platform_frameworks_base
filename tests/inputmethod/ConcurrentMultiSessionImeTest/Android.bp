@@ -20,17 +20,29 @@ package {
 android_test {
     name: "ConcurrentMultiSessionImeTest",
     srcs: ["src/**/*.java"],
+    resource_dirs: ["res"],
     libs: ["android.test.runner"],
     static_libs: [
         "androidx.test.ext.junit",
+        "androidx.test.rules",
+        "compatibility-device-util-axt",
         "platform-test-annotations",
         "platform-test-rules",
         "truth",
+
+        // beadstead
+        "Nene",
+        "Harrier",
+        "TestApp",
     ],
     test_suites: [
         "general-tests",
     ],
-    sdk_version: "current",
+    sdk_version: "test_current",
+
+    data: [
+        ":CtsMockInputMethod",
+    ],
 
     // Store test artifacts in separated directories for easier debugging.
     per_testcase_directory: true,

@@ -391,11 +391,9 @@ please see themes_device_defaults.xml.
 
         <!-- Floating toolbar styles -->
         <item name="floatingToolbarCloseDrawable">@drawable/ic_ab_back_material_dark</item>
-        <item name="floatingToolbarForegroundColor">@color/foreground_material_dark</item>
         <item name="floatingToolbarItemBackgroundBorderlessDrawable">@drawable/item_background_borderless_material_dark</item>
         <item name="floatingToolbarItemBackgroundDrawable">@drawable/item_background_material_dark</item>
         <item name="floatingToolbarOpenDrawable">@drawable/ic_menu_moreoverflow_material_dark</item>
-        <item name="floatingToolbarPopupBackgroundDrawable">@drawable/floating_popup_background_dark</item>
         <item name="floatingToolbarDividerColor">@color/floating_popup_divider_dark</item>
 
         <!-- SearchView attributes -->
@@ -579,11 +577,9 @@ please see themes_device_defaults.xml.
 
         <!-- Floating toolbar styles -->
         <item name="floatingToolbarCloseDrawable">@drawable/ic_ab_back_material_light</item>
-        <item name="floatingToolbarForegroundColor">@color/foreground_material_light</item>
         <item name="floatingToolbarItemBackgroundBorderlessDrawable">@drawable/item_background_borderless_material_light</item>
         <item name="floatingToolbarItemBackgroundDrawable">@drawable/item_background_material_light</item>
         <item name="floatingToolbarOpenDrawable">@drawable/ic_menu_moreoverflow_material_light</item>
-        <item name="floatingToolbarPopupBackgroundDrawable">@drawable/floating_popup_background_light</item>
         <item name="floatingToolbarDividerColor">@color/floating_popup_divider_light</item>
 
         <!-- Tooltip popup colors -->

@@ -33,7 +33,10 @@ android_test {
         "android.test.base",
         "android.test.mock",
     ],
-    static_libs: ["junit"],
+    static_libs: [
+        "junit",
+        "androidx.test.rules",
+    ],
 
     // Include all test java files.
     srcs: ["src/**/*.java"],

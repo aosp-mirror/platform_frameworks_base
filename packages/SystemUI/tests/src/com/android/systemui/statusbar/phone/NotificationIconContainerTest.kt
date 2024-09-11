@@ -16,8 +16,8 @@
 package com.android.systemui.statusbar.phone
 
 import android.service.notification.StatusBarNotification
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.StatusBarIconView
@@ -34,7 +34,7 @@ import org.mockito.Mockito.`when` as whenever
 
 /** Tests for {@link NotificationIconContainer}. */
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @RunWithLooper
 class NotificationIconContainerTest : SysuiTestCase() {
 

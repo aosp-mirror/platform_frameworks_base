@@ -172,6 +172,7 @@ class RotationLockTileMapperTest : SysuiTestCase() {
         val label = context.getString(R.string.quick_settings_rotation_unlocked_label)
         return QSTileState(
             { Icon.Loaded(context.getDrawable(iconRes)!!, null) },
+            iconRes,
             label,
             activationState,
             secondaryLabel,

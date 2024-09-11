@@ -39,8 +39,6 @@ import com.android.app.animation.Interpolators;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.SystemBarUtils;
 import com.android.systemui.animation.ShadeInterpolation;
-import com.android.systemui.flags.Flags;
-import com.android.systemui.flags.RefactorFlag;
 import com.android.systemui.res.R;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.statusbar.notification.ColorUpdateLogger;
@@ -95,8 +93,6 @@ public class NotificationShelf extends ActivatableNotificationView {
     private float mCornerAnimationDistance;
     private float mActualWidth = -1;
     private int mMaxIconsOnLockscreen;
-    private final RefactorFlag mSensitiveRevealAnim =
-            RefactorFlag.forView(Flags.SENSITIVE_REVEAL_ANIM);
     private boolean mCanModifyColorOfNotifications;
     private boolean mCanInteract;
     private NotificationStackScrollLayout mHostLayout;
@@ -266,7 +262,7 @@ public class NotificationShelf extends ActivatableNotificationView {
         }
 
         final float stackEnd = ambientState.getStackY() + ambientState.getStackHeight();
-        if (mSensitiveRevealAnim.isEnabled() && viewState.hidden) {
+        if (viewState.hidden) {
             // if the shelf is hidden, position it at the end of the stack (plus the clip
             // padding), such that when it appears animated, it will smoothly move in from the
             // bottom, without jump cutting any notifications
@@ -398,10 +394,6 @@ public class NotificationShelf extends ActivatableNotificationView {
         //  find the first view that doesn't overlap with the shelf
         int notGoneIndex = 0;
         int colorOfViewBeforeLast = NO_COLOR;
-        boolean backgroundForceHidden = false;
-        if (mHideBackground && !((ShelfState) getViewState()).hasItemsInStableShelf) {
-            backgroundForceHidden = true;
-        }
         int colorTwoBefore = NO_COLOR;
         int previousColor = NO_COLOR;
         float transitionAmount = 0.0f;
@@ -429,8 +421,7 @@ public class NotificationShelf extends ActivatableNotificationView {
                     expandingAnimated, isLastChild, shelfClipStart);
 
             // TODO(b/172289889) scale mPaddingBetweenElements with expansion amount
-            if ((!mSensitiveRevealAnim.isEnabled() && ((isLastChild && !child.isInShelf())
-                    || backgroundForceHidden)) || aboveShelf) {
+            if (aboveShelf) {
                 notificationClipEnd = shelfStart + getIntrinsicHeight();
             } else {
                 notificationClipEnd = shelfStart - mPaddingBetweenElements;
@@ -440,8 +431,7 @@ public class NotificationShelf extends ActivatableNotificationView {
 
             // If the current row is an ExpandableNotificationRow, update its color, roundedness,
             // and icon state.
-            if (child instanceof ExpandableNotificationRow) {
-                ExpandableNotificationRow expandableRow = (ExpandableNotificationRow) child;
+            if (child instanceof ExpandableNotificationRow expandableRow) {
                 numViewsInShelf += inShelfAmount;
                 int ownColorUntinted = expandableRow.getBackgroundColorWithoutTint();
                 if (viewStart >= shelfStart && mNotGoneIndex == -1) {
@@ -471,16 +461,8 @@ public class NotificationShelf extends ActivatableNotificationView {
                 notGoneIndex++;
             }
 
-            if (child instanceof ActivatableNotificationView) {
-                ActivatableNotificationView anv = (ActivatableNotificationView) child;
-                // Because we show whole notifications on the lockscreen, the bottom notification is
-                // always "just about to enter the shelf" by normal scrolling rules.  This is fine
-                // if the shelf is visible, but if the shelf is hidden, it causes incorrect curling.
-                // notificationClipEnd handles the discrepancy between a visible and hidden shelf,
-                // so we use that when on the keyguard (and while animating away) to reduce curling.
-                final float keyguardSafeShelfStart = !mSensitiveRevealAnim.isEnabled()
-                        && mAmbientState.isOnKeyguard() ? notificationClipEnd : shelfStart;
-                updateCornerRoundnessOnScroll(anv, viewStart, keyguardSafeShelfStart);
+            if (child instanceof ActivatableNotificationView anv) {
+                updateCornerRoundnessOnScroll(anv, viewStart, shelfStart);
             }
         }
 
@@ -519,11 +501,10 @@ public class NotificationShelf extends ActivatableNotificationView {
         mShelfIcons.applyIconStates();
         for (int i = 0; i < getHostLayoutChildCount(); i++) {
             View child = getHostLayoutChildAt(i);
-            if (!(child instanceof ExpandableNotificationRow)
+            if (!(child instanceof ExpandableNotificationRow row)
                     || child.getVisibility() == GONE) {
                 continue;
             }
-            ExpandableNotificationRow row = (ExpandableNotificationRow) child;
             updateContinuousClipping(row);
         }
         boolean hideBackground = isHidden;
@@ -613,8 +594,7 @@ public class NotificationShelf extends ActivatableNotificationView {
     private void clipTransientViews() {
         for (int i = 0; i < getHostLayoutTransientViewCount(); i++) {
             View transientView = getHostLayoutTransientView(i);
-            if (transientView instanceof ExpandableView) {
-                ExpandableView transientExpandableView = (ExpandableView) transientView;
+            if (transientView instanceof ExpandableView transientExpandableView) {
                 updateNotificationClipHeight(transientExpandableView, getTranslationY(), -1);
             }
         }
@@ -871,10 +851,9 @@ public class NotificationShelf extends ActivatableNotificationView {
     }
 
     private void setIconTransformationAmount(ExpandableView view, float transitionAmount) {
-        if (!(view instanceof ExpandableNotificationRow)) {
+        if (!(view instanceof ExpandableNotificationRow row)) {
             return;
         }
-        ExpandableNotificationRow row = (ExpandableNotificationRow) view;
         StatusBarIconView icon = row.getShelfIcon();
         NotificationIconContainer.IconState iconState = getIconState(icon);
         if (iconState == null) {
@@ -884,7 +863,7 @@ public class NotificationShelf extends ActivatableNotificationView {
         boolean isAppearing = row.isDrawingAppearAnimation() && !row.isInShelf();
         iconState.hidden = isAppearing
                 || (view instanceof ExpandableNotificationRow
-                && ((ExpandableNotificationRow) view).isLowPriority()
+                && ((ExpandableNotificationRow) view).isMinimized()
                 && mShelfIcons.areIconsOverflowing())
                 || (transitionAmount == 0.0f && !iconState.isAnimating(icon))
                 || row.isAboveShelf()

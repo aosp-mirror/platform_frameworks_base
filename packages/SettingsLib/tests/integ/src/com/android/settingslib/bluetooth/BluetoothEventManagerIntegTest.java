@@ -20,6 +20,8 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
+
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
@@ -37,13 +39,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
-
 import java.util.concurrent.CountDownLatch;
 
 /**
- * Test that verifies that BluetoothEventManager can receive broadcasts for non-current
- * users for all bluetooth events.
+ * Test that verifies that BluetoothEventManager can receive broadcasts for non-current users for
+ * all bluetooth events.
  *
  * <p>Creation and deletion of users takes a long time, so marking this as a LargeTest.
  */
@@ -64,9 +64,14 @@ public class BluetoothEventManagerIntegTest {
         mContext = InstrumentationRegistry.getTargetContext();
         mUserManager = UserManager.get(mContext);
 
-        mBluetoothEventManager = new BluetoothEventManager(
-                mock(LocalBluetoothAdapter.class), mock(CachedBluetoothDeviceManager.class),
-                mContext, /* handler= */ null, UserHandle.ALL);
+        mBluetoothEventManager =
+                new BluetoothEventManager(
+                        mock(LocalBluetoothAdapter.class),
+                        mock(LocalBluetoothManager.class),
+                        mock(CachedBluetoothDeviceManager.class),
+                        mContext,
+                        /* handler= */ null,
+                        UserHandle.ALL);
 
         // Create and start another user in the background.
         mOtherUser = mUserManager.createUser("TestUser", /* flags= */ 0);

@@ -18,29 +18,38 @@ package com.android.systemui.shade.domain.interactor
 
 import com.android.keyguard.LockIconViewController
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.shade.ShadeLockscreenInteractor
+import com.android.systemui.shade.data.repository.ShadeRepository
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class ShadeLockscreenInteractorImpl
 @Inject
 constructor(
-    @Background private val scope: CoroutineScope,
-    shadeInteractor: ShadeInteractor,
+    @Main private val mainDispatcher: CoroutineDispatcher,
+    @Background private val backgroundScope: CoroutineScope,
+    private val shadeInteractor: ShadeInteractor,
     private val sceneInteractor: SceneInteractor,
     private val lockIconViewController: LockIconViewController,
+    shadeRepository: ShadeRepository,
 ) : ShadeLockscreenInteractor {
+
+    override val udfpsTransitionToFullShadeProgress =
+        shadeRepository.udfpsTransitionToFullShadeProgress
+
     override fun expandToNotifications() {
         changeToShadeScene()
     }
 
-    override val isExpandingOrCollapsing = shadeInteractor.isUserInteracting.value
-
-    override val isExpanded = shadeInteractor.isAnyExpanded.value
+    override val isExpanded
+        get() = shadeInteractor.isAnyExpanded.value
 
     override fun startBouncerPreHideAnimation() {
         // TODO("b/324280998") Implement replacement or delete
@@ -62,10 +71,11 @@ constructor(
     override fun setPulsing(pulsing: Boolean) {
         // Now handled elsewhere. Do nothing.
     }
+
     override fun transitionToExpandedShade(delay: Long) {
-        scope.launch {
+        backgroundScope.launch {
             delay(delay)
-            changeToShadeScene()
+            withContext(mainDispatcher) { changeToShadeScene() }
         }
     }
 
@@ -85,9 +95,14 @@ constructor(
         // TODO(b/325072511) delete this
     }
 
+    override fun showAodUi() {
+        sceneInteractor.changeScene(Scenes.Lockscreen, "showAodUi")
+        // TODO(b/330311871) implement transition to AOD
+    }
+
     private fun changeToShadeScene() {
         sceneInteractor.changeScene(
-            Scenes.Shade,
+            SceneFamilies.NotifShade,
             "ShadeLockscreenInteractorImpl.expandToNotifications",
         )
     }

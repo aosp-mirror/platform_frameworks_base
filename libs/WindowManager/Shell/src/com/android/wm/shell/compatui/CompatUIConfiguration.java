@@ -24,8 +24,8 @@ import android.provider.DeviceConfig;
 
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.ShellExecutor;
-import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.dagger.WMSingleton;
+import com.android.wm.shell.shared.annotations.ShellMainThread;
 
 import javax.inject.Inject;
 
@@ -192,6 +192,10 @@ public class CompatUIConfiguration implements DeviceConfig.OnPropertiesChangedLi
 
     int getHideSizeCompatRestartButtonTolerance() {
         return mHideSizeCompatRestartButtonTolerance;
+    }
+
+    int getDefaultHideRestartButtonTolerance() {
+        return MAX_PERCENTAGE_VAL;
     }
 
     boolean getHasSeenLetterboxEducation(int userId) {

@@ -411,18 +411,6 @@ public final class InputManagerGlobal {
     }
 
     /**
-     * @see InputManager#isInputDeviceEnabled(int)
-     */
-    public boolean isInputDeviceEnabled(int id) {
-        try {
-            return mIm.isInputDeviceEnabled(id);
-        } catch (RemoteException ex) {
-            Log.w(TAG, "Could not check enabled status of input device with id = " + id);
-            throw ex.rethrowFromSystemServer();
-        }
-    }
-
-    /**
      * @see InputManager#enableInputDevice(int)
      */
     public void enableInputDevice(int id) {
@@ -1068,36 +1056,21 @@ public final class InputManagerGlobal {
     }
 
     /**
-     * @see InputManager#getKeyboardLayoutsForInputDevice(InputDeviceIdentifier)
+     * TODO(b/330517633): Cleanup the unsupported API
      */
     @NonNull
     public KeyboardLayout[] getKeyboardLayoutsForInputDevice(
             @NonNull InputDeviceIdentifier identifier) {
-        try {
-            return mIm.getKeyboardLayoutsForInputDevice(identifier);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
+        return new KeyboardLayout[0];
     }
 
     /**
-     * @see InputManager#setCurrentKeyboardLayoutForInputDevice
-     * (InputDeviceIdentifier, String)
+     * TODO(b/330517633): Cleanup the unsupported API
      */
-    @RequiresPermission(Manifest.permission.SET_KEYBOARD_LAYOUT)
     public void setCurrentKeyboardLayoutForInputDevice(
             @NonNull InputDeviceIdentifier identifier,
-            @NonNull String keyboardLayoutDescriptor) {
-        Objects.requireNonNull(identifier, "identifier must not be null");
-        Objects.requireNonNull(keyboardLayoutDescriptor,
-                "keyboardLayoutDescriptor must not be null");
-        try {
-            mIm.setCurrentKeyboardLayoutForInputDevice(identifier,
-                    keyboardLayoutDescriptor);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
-    }
+            @NonNull String keyboardLayoutDescriptor) {}
+
 
     /**
      * @see InputDevice#getSensorManager()
@@ -1426,28 +1399,6 @@ public final class InputManagerGlobal {
     }
 
     /**
-     * @see InputManager#setPointerIconType(int)
-     */
-    public void setPointerIconType(int iconId) {
-        try {
-            mIm.setPointerIconType(iconId);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * @see InputManager#setCustomPointerIcon(PointerIcon)
-     */
-    public void setCustomPointerIcon(PointerIcon icon) {
-        try {
-            mIm.setCustomPointerIcon(icon);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
-    }
-
-    /**
      * @see InputManager#setPointerIcon(PointerIcon, int, int, int, IBinder)
      */
     public boolean setPointerIcon(PointerIcon icon, int displayId, int deviceId, int pointerId,
@@ -1482,22 +1433,46 @@ public final class InputManagerGlobal {
     }
 
     /**
-     * @see InputManager#addUniqueIdAssociation(String, String)
+     * @see InputManager#addUniqueIdAssociationByPort(String, String)
      */
-    public void addUniqueIdAssociation(@NonNull String inputPort, @NonNull String displayUniqueId) {
+    public void addUniqueIdAssociationByPort(@NonNull String inputPort,
+            @NonNull String displayUniqueId) {
         try {
-            mIm.addUniqueIdAssociation(inputPort, displayUniqueId);
+            mIm.addUniqueIdAssociationByPort(inputPort, displayUniqueId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     /**
-     * @see InputManager#removeUniqueIdAssociation(String)
+     * @see InputManager#removeUniqueIdAssociationByPort(String)
      */
-    public void removeUniqueIdAssociation(@NonNull String inputPort) {
+    public void removeUniqueIdAssociationByPort(@NonNull String inputPort) {
         try {
-            mIm.removeUniqueIdAssociation(inputPort);
+            mIm.removeUniqueIdAssociationByPort(inputPort);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @see InputManager#addUniqueIdAssociationByDescriptor(String, String)
+     */
+    public void addUniqueIdAssociationByDescriptor(@NonNull String inputDeviceDescriptor,
+                                                   @NonNull String displayUniqueId) {
+        try {
+            mIm.addUniqueIdAssociationByDescriptor(inputDeviceDescriptor, displayUniqueId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @see InputManager#removeUniqueIdAssociationByDescriptor(String)
+     */
+    public void removeUniqueIdAssociationByDescriptor(@NonNull String inputDeviceDescriptor) {
+        try {
+            mIm.removeUniqueIdAssociationByDescriptor(inputDeviceDescriptor);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 @file:OptIn(ExperimentalCoroutinesApi::class)
 
 package com.android.systemui.keyguard.ui.viewmodel
@@ -24,6 +23,7 @@ import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
+import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.notificationsKeyguardInteractor
 import com.android.systemui.statusbar.phone.dozeParameters
@@ -32,6 +32,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 val Kosmos.keyguardRootViewModel by Fixture {
     KeyguardRootViewModel(
+        applicationScope = applicationCoroutineScope,
         deviceEntryInteractor = deviceEntryInteractor,
         dozeParameters = dozeParameters,
         keyguardInteractor = keyguardInteractor,
@@ -41,11 +42,17 @@ val Kosmos.keyguardRootViewModel by Fixture {
         alternateBouncerToGoneTransitionViewModel = alternateBouncerToGoneTransitionViewModel,
         aodToGoneTransitionViewModel = aodToGoneTransitionViewModel,
         aodToLockscreenTransitionViewModel = aodToLockscreenTransitionViewModel,
+        aodToOccludedTransitionViewModel = aodToOccludedTransitionViewModel,
         dozingToGoneTransitionViewModel = dozingToGoneTransitionViewModel,
         dozingToLockscreenTransitionViewModel = dozingToLockscreenTransitionViewModel,
+        dozingToOccludedTransitionViewModel = dozingToOccludedTransitionViewModel,
+        dreamingToGoneTransitionViewModel = dreamingToGoneTransitionViewModel,
+        dreamingToLockscreenTransitionViewModel = dreamingToLockscreenTransitionViewModel,
         glanceableHubToLockscreenTransitionViewModel = glanceableHubToLockscreenTransitionViewModel,
         goneToAodTransitionViewModel = goneToAodTransitionViewModel,
         goneToDozingTransitionViewModel = goneToDozingTransitionViewModel,
+        goneToDreamingTransitionViewModel = goneToDreamingTransitionViewModel,
+        goneToLockscreenTransitionViewModel = goneToLockscreenTransitionViewModel,
         lockscreenToAodTransitionViewModel = lockscreenToAodTransitionViewModel,
         lockscreenToDozingTransitionViewModel = lockscreenToDozingTransitionViewModel,
         lockscreenToDreamingTransitionViewModel = lockscreenToDreamingTransitionViewModel,
@@ -55,6 +62,7 @@ val Kosmos.keyguardRootViewModel by Fixture {
         lockscreenToPrimaryBouncerTransitionViewModel =
             lockscreenToPrimaryBouncerTransitionViewModel,
         occludedToAodTransitionViewModel = occludedToAodTransitionViewModel,
+        occludedToDozingTransitionViewModel = occludedToDozingTransitionViewModel,
         occludedToLockscreenTransitionViewModel = occludedToLockscreenTransitionViewModel,
         primaryBouncerToAodTransitionViewModel = primaryBouncerToAodTransitionViewModel,
         primaryBouncerToGoneTransitionViewModel = primaryBouncerToGoneTransitionViewModel,

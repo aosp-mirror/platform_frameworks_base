@@ -16,6 +16,7 @@
 
 package com.android.systemui.deviceentry.domain.interactor
 
+import android.content.pm.UserInfo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -24,16 +25,30 @@ import com.android.systemui.authentication.domain.interactor.authenticationInter
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
+import com.android.systemui.deviceentry.shared.model.DeviceUnlockSource
+import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFaceAuthRepository
+import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintAuthRepository
+import com.android.systemui.keyguard.data.repository.fakeTrustRepository
+import com.android.systemui.keyguard.domain.interactor.trustInteractor
+import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
+import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
+import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.testKosmos
+import com.android.systemui.user.data.model.SelectionStatus
+import com.android.systemui.user.data.repository.fakeUserRepository
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-@android.platform.test.annotations.EnabledOnRavenwood
 class DeviceUnlockedInteractorTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
@@ -46,71 +61,170 @@ class DeviceUnlockedInteractorTest : SysuiTestCase() {
             applicationScope = testScope.backgroundScope,
             authenticationInteractor = kosmos.authenticationInteractor,
             deviceEntryRepository = deviceEntryRepository,
+            trustInteractor = kosmos.trustInteractor,
+            faceAuthInteractor = kosmos.deviceEntryFaceAuthInteractor,
+            fingerprintAuthInteractor = kosmos.deviceEntryFingerprintAuthInteractor,
+            powerInteractor = kosmos.powerInteractor,
         )
 
-    @Test
-    fun isDeviceUnlocked_whenUnlockedAndAuthMethodIsNone_isTrue() =
-        testScope.runTest {
-            val isUnlocked by collectLastValue(underTest.isDeviceUnlocked)
+    @Before
+    fun setup() {
+        kosmos.fakeUserRepository.setUserInfos(listOf(primaryUser, secondaryUser))
+    }
 
-            deviceEntryRepository.setUnlocked(true)
+    @Test
+    fun deviceUnlockStatus_whenUnlockedAndAuthMethodIsNone_isTrue() =
+        testScope.runTest {
+            val deviceUnlockStatus by collectLastValue(underTest.deviceUnlockStatus)
+
             authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.None)
 
-            assertThat(isUnlocked).isTrue()
+            assertThat(deviceUnlockStatus?.isUnlocked).isTrue()
+            assertThat(deviceUnlockStatus?.deviceUnlockSource).isNull()
         }
 
     @Test
-    fun isDeviceUnlocked_whenUnlockedAndAuthMethodIsPin_isTrue() =
+    fun deviceUnlockStatus_whenUnlockedAndAuthMethodIsPin_isTrue() =
         testScope.runTest {
-            val isUnlocked by collectLastValue(underTest.isDeviceUnlocked)
+            val deviceUnlockStatus by collectLastValue(underTest.deviceUnlockStatus)
 
-            deviceEntryRepository.setUnlocked(true)
             authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+            kosmos.fakeDeviceEntryFingerprintAuthRepository.setAuthenticationStatus(
+                SuccessFingerprintAuthenticationStatus(0, true)
+            )
+            runCurrent()
 
-            assertThat(isUnlocked).isTrue()
+            assertThat(deviceUnlockStatus?.isUnlocked).isTrue()
+            assertThat(deviceUnlockStatus?.deviceUnlockSource)
+                .isEqualTo(DeviceUnlockSource.Fingerprint)
         }
 
     @Test
-    fun isDeviceUnlocked_whenUnlockedAndAuthMethodIsSim_isFalse() =
+    fun deviceUnlockStatus_whenUnlockedAndAuthMethodIsSim_isFalse() =
         testScope.runTest {
-            val isUnlocked by collectLastValue(underTest.isDeviceUnlocked)
+            val deviceUnlockStatus by collectLastValue(underTest.deviceUnlockStatus)
 
-            deviceEntryRepository.setUnlocked(true)
             authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Sim)
+            kosmos.fakeDeviceEntryFingerprintAuthRepository.setAuthenticationStatus(
+                SuccessFingerprintAuthenticationStatus(0, true)
+            )
+            runCurrent()
 
-            assertThat(isUnlocked).isFalse()
+            assertThat(deviceUnlockStatus?.isUnlocked).isFalse()
         }
 
     @Test
-    fun isDeviceUnlocked_whenLockedAndAuthMethodIsNone_isTrue() =
+    fun deviceUnlockStatus_whenLockedAndAuthMethodIsNone_isTrue() =
         testScope.runTest {
-            val isUnlocked by collectLastValue(underTest.isDeviceUnlocked)
+            val deviceUnlockStatus by collectLastValue(underTest.deviceUnlockStatus)
 
-            deviceEntryRepository.setUnlocked(false)
             authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.None)
 
-            assertThat(isUnlocked).isTrue()
+            assertThat(deviceUnlockStatus?.isUnlocked).isTrue()
         }
 
     @Test
-    fun isDeviceUnlocked_whenLockedAndAuthMethodIsPin_isFalse() =
+    fun deviceUnlockStatus_whenLockedAndAuthMethodIsPin_isFalse() =
         testScope.runTest {
-            val isUnlocked by collectLastValue(underTest.isDeviceUnlocked)
+            val deviceUnlockStatus by collectLastValue(underTest.deviceUnlockStatus)
 
-            deviceEntryRepository.setUnlocked(false)
             authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
 
-            assertThat(isUnlocked).isFalse()
+            assertThat(deviceUnlockStatus?.isUnlocked).isFalse()
         }
 
     @Test
-    fun isDeviceUnlocked_whenLockedAndAuthMethodIsSim_isFalse() =
+    fun deviceUnlockStatus_whenLockedAndAuthMethodIsSim_isFalse() =
         testScope.runTest {
-            val isUnlocked by collectLastValue(underTest.isDeviceUnlocked)
+            val deviceUnlockStatus by collectLastValue(underTest.deviceUnlockStatus)
 
-            deviceEntryRepository.setUnlocked(false)
             authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Sim)
 
-            assertThat(isUnlocked).isFalse()
+            assertThat(deviceUnlockStatus?.isUnlocked).isFalse()
         }
+
+    @Test
+    fun deviceUnlockStatus_whenFaceIsAuthenticatedWhileAwakeWithBypass_isTrue() =
+        testScope.runTest {
+            val deviceUnlockStatus by collectLastValue(underTest.deviceUnlockStatus)
+            kosmos.powerInteractor.setAwakeForTest()
+
+            kosmos.fakeDeviceEntryFaceAuthRepository.isAuthenticated.value = true
+            kosmos.fakeDeviceEntryRepository.setBypassEnabled(true)
+            runCurrent()
+
+            assertThat(deviceUnlockStatus?.isUnlocked).isTrue()
+            assertThat(deviceUnlockStatus?.deviceUnlockSource)
+                .isEqualTo(DeviceUnlockSource.FaceWithBypass)
+        }
+
+    @Test
+    fun deviceUnlockStatus_whenFaceIsAuthenticatedWithoutBypass_providesThatInfo() =
+        testScope.runTest {
+            val deviceUnlockStatus by collectLastValue(underTest.deviceUnlockStatus)
+
+            kosmos.fakeDeviceEntryFaceAuthRepository.isAuthenticated.value = true
+            kosmos.fakeDeviceEntryRepository.setBypassEnabled(false)
+            runCurrent()
+
+            assertThat(deviceUnlockStatus?.isUnlocked).isTrue()
+            assertThat(deviceUnlockStatus?.deviceUnlockSource)
+                .isEqualTo(DeviceUnlockSource.FaceWithoutBypass)
+        }
+
+    @Test
+    fun deviceUnlockStatus_whenFingerprintIsAuthenticated_providesThatInfo() =
+        testScope.runTest {
+            val deviceUnlockStatus by collectLastValue(underTest.deviceUnlockStatus)
+
+            kosmos.fakeDeviceEntryFingerprintAuthRepository.setAuthenticationStatus(
+                SuccessFingerprintAuthenticationStatus(0, true)
+            )
+            runCurrent()
+
+            assertThat(deviceUnlockStatus?.isUnlocked).isTrue()
+            assertThat(deviceUnlockStatus?.deviceUnlockSource)
+                .isEqualTo(DeviceUnlockSource.Fingerprint)
+        }
+
+    @Test
+    fun deviceUnlockStatus_whenUnlockedByTrustAgent_providesThatInfo() =
+        testScope.runTest {
+            val deviceUnlockStatus by collectLastValue(underTest.deviceUnlockStatus)
+            kosmos.fakeUserRepository.setSelectedUserInfo(
+                primaryUser,
+                SelectionStatus.SELECTION_COMPLETE
+            )
+
+            kosmos.fakeTrustRepository.setCurrentUserTrusted(true)
+            runCurrent()
+
+            assertThat(deviceUnlockStatus?.isUnlocked).isTrue()
+            assertThat(deviceUnlockStatus?.deviceUnlockSource)
+                .isEqualTo(DeviceUnlockSource.TrustAgent)
+        }
+
+    @Test
+    fun deviceUnlockStatus_isResetToFalse_whenDeviceGoesToSleep() =
+        testScope.runTest {
+            val deviceUnlockStatus by collectLastValue(underTest.deviceUnlockStatus)
+
+            kosmos.fakeDeviceEntryFingerprintAuthRepository.setAuthenticationStatus(
+                SuccessFingerprintAuthenticationStatus(0, true)
+            )
+            runCurrent()
+            assertThat(deviceUnlockStatus?.isUnlocked).isTrue()
+
+            kosmos.powerInteractor.setAsleepForTest()
+            runCurrent()
+
+            assertThat(deviceUnlockStatus?.isUnlocked).isFalse()
+        }
+
+    companion object {
+        private const val primaryUserId = 1
+        private val primaryUser = UserInfo(primaryUserId, "test user", UserInfo.FLAG_PRIMARY)
+
+        private val secondaryUser = UserInfo(2, "secondary user", 0)
+    }
 }

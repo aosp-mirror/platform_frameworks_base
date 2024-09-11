@@ -17,8 +17,11 @@
 package com.android.systemui.communal.data.repository
 
 import android.content.Context
+import android.content.IntentFilter
 import android.content.SharedPreferences
 import android.content.pm.UserInfo
+import com.android.systemui.backup.BackupHelper
+import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.log.LogBuffer
@@ -30,15 +33,18 @@ import com.android.systemui.log.table.logDiffsForTable
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.user.data.repository.UserRepository
 import com.android.systemui.util.kotlin.SharedPreferencesExt.observe
+import com.android.systemui.util.kotlin.emitOnStart
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.withContext
@@ -65,14 +71,36 @@ constructor(
     @Background private val bgDispatcher: CoroutineDispatcher,
     private val userRepository: UserRepository,
     private val userFileManager: UserFileManager,
+    broadcastDispatcher: BroadcastDispatcher,
     @CommunalLog logBuffer: LogBuffer,
     @CommunalTableLog tableLogBuffer: TableLogBuffer,
 ) : CommunalPrefsRepository {
 
     private val logger = Logger(logBuffer, "CommunalPrefsRepositoryImpl")
 
+    /**
+     * Emits an event each time a Backup & Restore restoration job is completed. Does not emit an
+     * initial value.
+     */
+    private val backupRestorationEvents: Flow<Unit> =
+        broadcastDispatcher.broadcastFlow(
+            filter = IntentFilter(BackupHelper.ACTION_RESTORE_FINISHED),
+            flags = Context.RECEIVER_NOT_EXPORTED,
+            permission = BackupHelper.PERMISSION_SELF,
+        )
+
     override val isCtaDismissed: Flow<Boolean> =
-        userRepository.selectedUserInfo
+        combine(
+                userRepository.selectedUserInfo,
+                // Make sure combine can emit even if we never get a Backup & Restore event,
+                // which is the most common case as restoration only happens on initial device
+                // setup.
+                backupRestorationEvents.emitOnStart().onEach {
+                    logger.i("Restored state for communal preferences.")
+                },
+            ) { user, _ ->
+                user
+            }
             .flatMapLatest(::observeCtaDismissState)
             .logDiffsForTable(
                 tableLogBuffer = tableLogBuffer,
@@ -98,7 +126,7 @@ constructor(
 
     private fun observeCtaDismissState(user: UserInfo): Flow<Boolean> =
         getSharedPrefsForUser(user)
-            .observe(CTA_DISMISSED_STATE)
+            .observe()
             // Emit at the start of collection to ensure we get an initial value
             .onStart { emit(Unit) }
             .map { getCtaDismissedState() }

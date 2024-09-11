@@ -16,7 +16,6 @@
 
 package com.android.keyguard;
 
-import static com.android.systemui.Flags.migrateClocksToBlueprint;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
 
@@ -24,6 +23,7 @@ import android.util.Property;
 import android.view.View;
 
 import com.android.app.animation.Interpolators;
+import com.android.systemui.keyguard.MigrateClocksToBlueprint;
 import com.android.systemui.log.LogBuffer;
 import com.android.systemui.log.core.LogLevel;
 import com.android.systemui.statusbar.StatusBarState;
@@ -88,8 +88,8 @@ public class KeyguardVisibilityHelper {
             boolean keyguardFadingAway,
             boolean goingToFullShade,
             int oldStatusBarState) {
-        if (migrateClocksToBlueprint()) {
-            log("Ignoring all of KeyguardVisibilityelper");
+        if (MigrateClocksToBlueprint.isEnabled()) {
+            log("Ignoring KeyguardVisibilityelper, migrateClocksToBlueprint flag on");
             return;
         }
         Assert.isMainThread();
@@ -113,7 +113,7 @@ public class KeyguardVisibilityHelper {
                 animProps.setDelay(0).setDuration(160);
                 log("goingToFullShade && !keyguardFadingAway");
             }
-            if (migrateClocksToBlueprint()) {
+            if (MigrateClocksToBlueprint.isEnabled()) {
                 log("Using LockscreenToGoneTransition 1");
             } else {
                 PropertyAnimator.setProperty(
@@ -171,7 +171,7 @@ public class KeyguardVisibilityHelper {
                         animProps,
                         true /* animate */);
             } else if (mScreenOffAnimationController.shouldAnimateInKeyguard()) {
-                if (migrateClocksToBlueprint()) {
+                if (MigrateClocksToBlueprint.isEnabled()) {
                     log("Using GoneToAodTransition");
                     mKeyguardViewVisibilityAnimating = false;
                 } else {
@@ -187,7 +187,7 @@ public class KeyguardVisibilityHelper {
                 mView.setVisibility(View.VISIBLE);
             }
         } else {
-            if (migrateClocksToBlueprint()) {
+            if (MigrateClocksToBlueprint.isEnabled()) {
                 log("Using LockscreenToGoneTransition 2");
             } else {
                 log("Direct set Visibility to GONE");

@@ -49,6 +49,7 @@ import android.view.ViewDebug;
 
 import com.android.internal.os.ByteTransferPipe;
 import com.android.internal.protolog.LegacyProtoLogImpl;
+import com.android.internal.protolog.PerfettoProtoLogImpl;
 import com.android.internal.protolog.common.IProtoLog;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.IoThread;
@@ -111,8 +112,13 @@ public class WindowManagerShellCommand extends ShellCommand {
                 case "logging":
                     IProtoLog instance = ProtoLog.getSingleInstance();
                     int result = 0;
-                    if (instance instanceof LegacyProtoLogImpl) {
-                        result = ((LegacyProtoLogImpl) instance).onShellCommand(this);
+                    if (instance instanceof LegacyProtoLogImpl
+                            || instance instanceof PerfettoProtoLogImpl) {
+                        if (instance instanceof LegacyProtoLogImpl) {
+                            result = ((LegacyProtoLogImpl) instance).onShellCommand(this);
+                        } else {
+                            result = ((PerfettoProtoLogImpl) instance).onShellCommand(this);
+                        }
                         if (result != 0) {
                             pw.println("Not handled, please use "
                                     + "`adb shell dumpsys activity service SystemUIService "
@@ -120,8 +126,7 @@ public class WindowManagerShellCommand extends ShellCommand {
                         }
                     } else {
                         result = -1;
-                        pw.println("Command not supported. "
-                                + "Only supported when using legacy ProtoLog.");
+                        pw.println("ProtoLog impl doesn't support handling commands");
                     }
                     return result;
                 case "user-rotation":
@@ -514,6 +519,9 @@ public class WindowManagerShellCommand extends ShellCommand {
             case "default":
                 fixedToUserRotation = IWindowManager.FIXED_TO_USER_ROTATION_DEFAULT;
                 break;
+            case "enabled_if_no_auto_rotation":
+                fixedToUserRotation = IWindowManager.FIXED_TO_USER_ROTATION_IF_NO_AUTO_ROTATION;
+                break;
             default:
                 getErrPrintWriter().println("Error: expecting enabled, disabled or default, but we "
                         + "get " + arg);
@@ -532,6 +540,9 @@ public class WindowManagerShellCommand extends ShellCommand {
                 return 0;
             case IWindowManager.FIXED_TO_USER_ROTATION_DISABLED:
                 pw.println("disabled");
+                return 0;
+            case IWindowManager.FIXED_TO_USER_ROTATION_IF_NO_AUTO_ROTATION:
+                pw.println("enabled_if_no_auto_rotation");
                 return 0;
             case IWindowManager.FIXED_TO_USER_ROTATION_ENABLED:
                 pw.println("enabled");
@@ -837,7 +848,12 @@ public class WindowManagerShellCommand extends ShellCommand {
             return -1;
         }
         synchronized (mInternal.mGlobalLock) {
-            mLetterboxConfiguration.setLetterboxHorizontalPositionMultiplier(multiplier);
+            try {
+                mLetterboxConfiguration.setLetterboxHorizontalPositionMultiplier(multiplier);
+            } catch (IllegalArgumentException  e) {
+                getErrPrintWriter().println("Error: invalid multiplier value " + e);
+                return -1;
+            }
         }
         return 0;
     }
@@ -856,7 +872,12 @@ public class WindowManagerShellCommand extends ShellCommand {
             return -1;
         }
         synchronized (mInternal.mGlobalLock) {
-            mLetterboxConfiguration.setLetterboxVerticalPositionMultiplier(multiplier);
+            try {
+                mLetterboxConfiguration.setLetterboxVerticalPositionMultiplier(multiplier);
+            } catch (IllegalArgumentException  e) {
+                getErrPrintWriter().println("Error: invalid multiplier value " + e);
+                return -1;
+            }
         }
         return 0;
     }
@@ -1489,7 +1510,8 @@ public class WindowManagerShellCommand extends ShellCommand {
         pw.println("    Print or set user rotation mode and user rotation.");
         pw.println("  dump-visible-window-views");
         pw.println("    Dumps the encoded view hierarchies of visible windows");
-        pw.println("  fixed-to-user-rotation [-d DISPLAY_ID] [enabled|disabled|default]");
+        pw.println("  fixed-to-user-rotation [-d DISPLAY_ID] [enabled|disabled|default");
+        pw.println("      |enabled_if_no_auto_rotation]");
         pw.println("    Print or set rotating display for app requested orientation.");
         pw.println("  set-ignore-orientation-request [-d DISPLAY_ID] [true|1|false|0]");
         pw.println("  get-ignore-orientation-request [-d DISPLAY_ID] ");
@@ -1527,9 +1549,9 @@ public class WindowManagerShellCommand extends ShellCommand {
         pw.println("        both it and R.dimen.config_fixedOrientationLetterboxAspectRatio will");
         pw.println("        be ignored and framework implementation will determine aspect ratio.");
         pw.println("      --cornerRadius radius");
-        pw.println("        Corners radius for activities in the letterbox mode. If radius < 0,");
-        pw.println("        both it and R.integer.config_letterboxActivityCornersRadius will be");
-        pw.println("        ignored and corners of the activity won't be rounded.");
+        pw.println("        Corners radius (in pixels) for activities in the letterbox mode.");
+        pw.println("        If radius < 0, both R.integer.config_letterboxActivityCornersRadius");
+        pw.println("        and it will be ignored and corners of the activity won't be rounded.");
         pw.println("      --backgroundType [reset|solid_color|app_color_background");
         pw.println("          |app_color_background_floating|wallpaper]");
         pw.println("        Type of background used in the letterbox mode.");

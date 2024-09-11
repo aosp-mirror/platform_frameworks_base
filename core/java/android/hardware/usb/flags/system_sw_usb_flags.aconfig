@@ -3,6 +3,7 @@ container: "system"
 
 flag {
     name: "enable_usb_data_compliance_warning"
+    is_exported: true
     namespace: "system_sw_usb"
     description: "Enable USB data compliance warnings when set"
     bug: "296119135"
@@ -26,5 +27,12 @@ flag {
     name: "enable_usb_data_signal_staking"
     namespace: "preload_safety"
     description: "Enables signal API with staking"
-    bug: "296119135"
+    bug: "287498482"
+}
+
+flag {
+    name: "enable_usb_sysfs_midi_identification"
+    namespace: "system_sw_usb"
+    description: "Enable identifying midi device using USB sysfs"
+    bug: "333778731"
 }

@@ -16,6 +16,7 @@
 
 package com.android.systemui.animation
 
+import android.content.ComponentName
 import android.graphics.Canvas
 import android.graphics.ColorFilter
 import android.graphics.Insets
@@ -59,11 +60,17 @@ constructor(
     /** The view that will be ghosted and from which the background will be extracted. */
     private val ghostedView: View,
 
-    /** The [CujType] associated to this animation. */
-    private val cujType: Int? = null,
+    /** The [CujType] associated to this launch animation. */
+    private val launchCujType: Int? = null,
+    override val transitionCookie: ActivityTransitionAnimator.TransitionCookie? = null,
+    override val component: ComponentName? = null,
+
+    /** The [CujType] associated to this return animation. */
+    private val returnCujType: Int? = null,
     private var interactionJankMonitor: InteractionJankMonitor =
         InteractionJankMonitor.getInstance(),
 ) : ActivityTransitionAnimator.Controller {
+    override val isLaunching: Boolean = true
 
     /** The container to which we will add the ghost view and expanding background. */
     override var transitionContainer = ghostedView.rootView as ViewGroup
@@ -102,6 +109,15 @@ constructor(
      * then set back to its initial value at the end of the animation.
      */
     private val background: Drawable?
+
+    /** CUJ identifier accounting for whether this controller is for a launch or a return. */
+    private val cujType: Int?
+        get() =
+            if (isLaunching) {
+                launchCujType
+            } else {
+                returnCujType
+            }
 
     init {
         // Make sure the View we launch from implements LaunchableView to avoid visibility issues.
@@ -190,14 +206,20 @@ constructor(
         // so we have to take the optical insets into account.
         ghostedView.getLocationOnScreen(ghostedViewLocation)
         val insets = backgroundInsets
-        state.top = ghostedViewLocation[1] + insets.top
+        val boundCorrections: Rect =
+            if (ghostedView is LaunchableView) {
+                ghostedView.getPaddingForLaunchAnimation()
+            } else {
+                Rect()
+            }
+        state.top = ghostedViewLocation[1] + insets.top + boundCorrections.top
         state.bottom =
             ghostedViewLocation[1] + (ghostedView.height * ghostedView.scaleY).roundToInt() -
-                insets.bottom
-        state.left = ghostedViewLocation[0] + insets.left
+                insets.bottom + boundCorrections.bottom
+        state.left = ghostedViewLocation[0] + insets.left + boundCorrections.left
         state.right =
             ghostedViewLocation[0] + (ghostedView.width * ghostedView.scaleX).roundToInt() -
-                insets.right
+                insets.right + boundCorrections.right
     }
 
     override fun onTransitionAnimationStart(isExpandingFullyAbove: Boolean) {
@@ -337,6 +359,7 @@ constructor(
         if (ghostedView is LaunchableView) {
             // Restore the ghosted view visibility.
             ghostedView.setShouldBlockVisibilityChanges(false)
+            ghostedView.onActivityLaunchAnimationEnd()
         } else {
             // Make the ghosted view visible. We ensure that the view is considered VISIBLE by
             // accessibility by first making it INVISIBLE then VISIBLE (see b/204944038#comment17

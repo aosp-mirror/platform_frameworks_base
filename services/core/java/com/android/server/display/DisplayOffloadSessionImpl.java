@@ -20,14 +20,22 @@ import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIG
 
 import android.annotation.Nullable;
 import android.hardware.display.DisplayManagerInternal;
-import android.os.PowerManager;
 import android.os.Trace;
+import android.util.Slog;
+import android.view.Display;
+
+import com.android.server.display.utils.DebugUtils;
 
 /**
  * An implementation of the offload session that keeps track of whether the session is active.
  * An offload session is used to control the display's brightness using the offload chip.
  */
 public class DisplayOffloadSessionImpl implements DisplayManagerInternal.DisplayOffloadSession {
+    private static final String TAG = "DisplayOffloadSessionImpl";
+
+    // To enable these logs, run:
+    // 'adb shell setprop persist.log.tag.DisplayOffloadSessionImpl DEBUG && adb reboot'
+    private static final boolean DEBUG = DebugUtils.isDebuggable(TAG);
 
     @Nullable
     private final DisplayManagerInternal.DisplayOffloader mDisplayOffloader;
@@ -43,12 +51,20 @@ public class DisplayOffloadSessionImpl implements DisplayManagerInternal.Display
 
     @Override
     public void setDozeStateOverride(int displayState) {
-        mDisplayPowerController.overrideDozeScreenState(displayState);
+        mDisplayPowerController.overrideDozeScreenState(displayState, Display.STATE_REASON_OFFLOAD);
     }
 
     @Override
     public boolean isActive() {
         return mIsActive;
+    }
+
+    @Override
+    public boolean allowAutoBrightnessInDoze() {
+        if (mDisplayOffloader == null) {
+            return false;
+        }
+        return mDisplayOffloader.allowAutoBrightnessInDoze();
     }
 
     @Override
@@ -91,9 +107,14 @@ public class DisplayOffloadSessionImpl implements DisplayManagerInternal.Display
         if (mDisplayOffloader == null || mIsActive) {
             return false;
         }
+
         Trace.traceBegin(Trace.TRACE_TAG_POWER, "DisplayOffloader#startOffload");
         try {
-            return mIsActive = mDisplayOffloader.startOffload();
+            mIsActive = mDisplayOffloader.startOffload();
+            if (DEBUG) {
+                Slog.d(TAG, "startOffload = " + mIsActive);
+            }
+            return mIsActive;
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_POWER);
         }
@@ -110,9 +131,21 @@ public class DisplayOffloadSessionImpl implements DisplayManagerInternal.Display
         try {
             mDisplayOffloader.stopOffload();
             mIsActive = false;
-            mDisplayPowerController.setBrightnessFromOffload(PowerManager.BRIGHTNESS_INVALID_FLOAT);
+            if (DEBUG) {
+                Slog.i(TAG, "stopOffload");
+            }
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_POWER);
         }
+    }
+
+    @Override
+    public float getBrightness() {
+        return mDisplayPowerController.getScreenBrightnessSetting();
+    }
+
+    @Override
+    public float getDozeBrightness() {
+        return mDisplayPowerController.getDozeBrightnessForOffload();
     }
 }

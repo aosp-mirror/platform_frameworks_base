@@ -18,6 +18,7 @@ package com.android.server.accessibility.magnification;
 
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_MAGNIFICATION_CONNECTION;
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_MAGNIFICATION_CONNECTION_CALLBACK;
+import static android.os.Build.HW_TIMEOUT_MULTIPLIER;
 import static android.view.accessibility.MagnificationAnimationCallback.STUB_ANIMATION_CALLBACK;
 
 import static com.android.server.accessibility.AccessibilityManagerService.INVALID_SERVICE_ID;
@@ -26,6 +27,7 @@ import static com.android.server.accessibility.AccessibilityManagerService.MAGNI
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresNoPermission;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -126,7 +128,7 @@ public class MagnificationConnectionManager implements
     @ConnectionState
     private int mConnectionState = DISCONNECTED;
 
-    private static final int WAIT_CONNECTION_TIMEOUT_MILLIS = 100;
+    private static final int WAIT_CONNECTION_TIMEOUT_MILLIS = 200 * HW_TIMEOUT_MULTIPLIER;
 
     private final Object mLock;
     private final Context mContext;
@@ -678,8 +680,7 @@ public class MagnificationConnectionManager implements
      */
     public boolean onFullscreenMagnificationActivationChanged(int displayId, boolean activated) {
         synchronized (mLock) {
-            waitForConnectionIfNeeded();
-            if (mConnectionWrapper == null) {
+            if (!waitConnectionWithTimeoutIfNeeded()) {
                 Slog.w(TAG,
                         "onFullscreenMagnificationActivationChanged mConnectionWrapper is null. "
                                 + "mConnectionState=" + connectionStateToString(mConnectionState));
@@ -939,11 +940,11 @@ public class MagnificationConnectionManager implements
         disableWindowMagnification(displayId, true);
     }
 
-    @SuppressWarnings("MissingPermissionAnnotation")
     private class ConnectionCallback extends IMagnificationConnectionCallback.Stub implements
             IBinder.DeathRecipient {
         private boolean mExpiredDeathRecipient = false;
 
+        @RequiresNoPermission
         @Override
         public void onWindowMagnifierBoundsChanged(int displayId, Rect bounds) {
             if (mTrace.isA11yTracingEnabledForTypes(
@@ -965,6 +966,7 @@ public class MagnificationConnectionManager implements
             }
         }
 
+        @RequiresNoPermission
         @Override
         public void onChangeMagnificationMode(int displayId, int magnificationMode)
                 throws RemoteException {
@@ -977,6 +979,7 @@ public class MagnificationConnectionManager implements
             mCallback.onChangeMagnificationMode(displayId, magnificationMode);
         }
 
+        @RequiresNoPermission
         @Override
         public void onSourceBoundsChanged(int displayId, Rect sourceBounds) {
             if (mTrace.isA11yTracingEnabledForTypes(
@@ -995,6 +998,7 @@ public class MagnificationConnectionManager implements
             mCallback.onSourceBoundsChanged(displayId, sourceBounds);
         }
 
+        @RequiresNoPermission
         @Override
         public void onPerformScaleAction(int displayId, float scale, boolean updatePersistence) {
             if (mTrace.isA11yTracingEnabledForTypes(
@@ -1007,6 +1011,7 @@ public class MagnificationConnectionManager implements
             mCallback.onPerformScaleAction(displayId, scale, updatePersistence);
         }
 
+        @RequiresNoPermission
         @Override
         public void onAccessibilityActionPerformed(int displayId) {
             if (mTrace.isA11yTracingEnabledForTypes(
@@ -1018,6 +1023,7 @@ public class MagnificationConnectionManager implements
             mCallback.onAccessibilityActionPerformed(displayId);
         }
 
+        @RequiresNoPermission
         @Override
         public void onMove(int displayId) {
             if (mTrace.isA11yTracingEnabledForTypes(
@@ -1284,8 +1290,7 @@ public class MagnificationConnectionManager implements
             float centerY, float magnificationFrameOffsetRatioX,
             float magnificationFrameOffsetRatioY,
             MagnificationAnimationCallback animationCallback) {
-        waitForConnectionIfNeeded();
-        if (mConnectionWrapper == null) {
+        if (!waitConnectionWithTimeoutIfNeeded()) {
             Slog.w(TAG,
                     "enableWindowMagnificationInternal mConnectionWrapper is null. "
                             + "mConnectionState=" + connectionStateToString(mConnectionState));
@@ -1327,7 +1332,7 @@ public class MagnificationConnectionManager implements
                 displayId, positionX, positionY, animationCallback);
     }
 
-    private void waitForConnectionIfNeeded() {
+    boolean waitConnectionWithTimeoutIfNeeded() {
         // Wait for the connection with a timeout.
         final long endMillis = SystemClock.uptimeMillis() + WAIT_CONNECTION_TIMEOUT_MILLIS;
         while (mConnectionState == CONNECTING && (SystemClock.uptimeMillis() < endMillis)) {
@@ -1337,5 +1342,6 @@ public class MagnificationConnectionManager implements
                 /* ignore */
             }
         }
+        return isConnected();
     }
 }

@@ -38,6 +38,7 @@ public interface IProtoLogGroup {
 
     /**
      * returns true is any logging is enabled for this group.
+     * @deprecated TODO(b/324128613) remove once we migrate fully to Perfetto
      */
     default boolean isLogToAny() {
         return isLogToLogcat() || isLogToProto();
@@ -50,6 +51,7 @@ public interface IProtoLogGroup {
 
     /**
      * set binary logging for this group.
+     * @deprecated TODO(b/324128613) remove once we migrate fully to Perfetto
      */
     void setLogToProto(boolean logToProto);
 
@@ -62,4 +64,9 @@ public interface IProtoLogGroup {
      * returns name of the logging group.
      */
     String name();
+
+    /**
+     * returns the id of the logging group (unique for each group).
+     */
+    int getId();
 }

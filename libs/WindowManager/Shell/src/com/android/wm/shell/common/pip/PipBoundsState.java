@@ -125,6 +125,7 @@ public class PipBoundsState {
     private @Nullable Runnable mOnMinimalSizeChangeCallback;
     private @Nullable TriConsumer<Boolean, Integer, Boolean> mOnShelfVisibilityChangeCallback;
     private List<Consumer<Rect>> mOnPipExclusionBoundsChangeCallbacks = new ArrayList<>();
+    private List<Consumer<Float>> mOnAspectRatioChangedCallbacks = new ArrayList<>();
 
     // the size of the current bounds relative to the max size spec
     private float mBoundsScale;
@@ -297,7 +298,12 @@ public class PipBoundsState {
 
     /** Set the PIP aspect ratio. */
     public void setAspectRatio(float aspectRatio) {
-        mAspectRatio = aspectRatio;
+        if (Float.compare(mAspectRatio, aspectRatio) != 0) {
+            mAspectRatio = aspectRatio;
+            for (Consumer<Float> callback : mOnAspectRatioChangedCallbacks) {
+                callback.accept(mAspectRatio);
+            }
+        }
     }
 
     /** Get the PIP aspect ratio. */
@@ -525,6 +531,23 @@ public class PipBoundsState {
     public void removePipExclusionBoundsChangeCallback(
             @Nullable Consumer<Rect> onPipExclusionBoundsChangeCallback) {
         mOnPipExclusionBoundsChangeCallbacks.remove(onPipExclusionBoundsChangeCallback);
+    }
+
+    /** Adds callback to listen on aspect ratio change. */
+    public void addOnAspectRatioChangedCallback(
+            @NonNull Consumer<Float> onAspectRatioChangedCallback) {
+        if (!mOnAspectRatioChangedCallbacks.contains(onAspectRatioChangedCallback)) {
+            mOnAspectRatioChangedCallbacks.add(onAspectRatioChangedCallback);
+            onAspectRatioChangedCallback.accept(mAspectRatio);
+        }
+    }
+
+    /** Removes callback to listen on aspect ratio change. */
+    public void removeOnAspectRatioChangedCallback(
+            @NonNull Consumer<Float> onAspectRatioChangedCallback) {
+        if (mOnAspectRatioChangedCallbacks.contains(onAspectRatioChangedCallback)) {
+            mOnAspectRatioChangedCallbacks.remove(onAspectRatioChangedCallback);
+        }
     }
 
     public LauncherState getLauncherState() {

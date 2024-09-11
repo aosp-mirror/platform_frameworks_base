@@ -78,6 +78,9 @@ private constructor(
             setPackageStates(packageStates)
             setDisabledSystemPackageStates(disabledSystemPackageStates)
             packageStates.forEach { (_, packageState) ->
+                if (packageState.isApex) {
+                    return@forEach
+                }
                 mutateAppIdPackageNames()
                     .mutateOrPut(packageState.appId) { MutableIndexedListSet() }
                     .add(packageState.packageName)
@@ -98,15 +101,14 @@ private constructor(
         forEachSchemePolicy { with(it) { onStateMutated() } }
     }
 
-    fun MutateStateScope.onInitialized() {
-        forEachSchemePolicy { with(it) { onInitialized() } }
-    }
-
     fun MutateStateScope.onUserAdded(userId: Int) {
         newState.mutateExternalState().mutateUserIds() += userId
         newState.mutateUserStatesNoWrite()[userId] = MutableUserState()
         forEachSchemePolicy { with(it) { onUserAdded(userId) } }
         newState.externalState.packageStates.forEach { (_, packageState) ->
+            if (packageState.isApex) {
+                return@forEach
+            }
             upgradePackageVersion(packageState, userId)
         }
     }
@@ -130,6 +132,9 @@ private constructor(
             setPackageStates(packageStates)
             setDisabledSystemPackageStates(disabledSystemPackageStates)
             packageStates.forEach { (packageName, packageState) ->
+                if (packageState.isApex) {
+                    return@forEach
+                }
                 if (packageState.volumeUuid == volumeUuid) {
                     // The APK for a package on a mounted storage volume may still be unavailable
                     // due to APK being deleted, e.g. after an OTA.
@@ -155,6 +160,9 @@ private constructor(
             with(it) { onStorageVolumeMounted(volumeUuid, packageNames, isSystemUpdated) }
         }
         packageStates.forEach { (_, packageState) ->
+            if (packageState.isApex) {
+                return@forEach
+            }
             if (packageState.volumeUuid == volumeUuid) {
                 newState.userStates.forEachIndexed { _, userId, _ ->
                     upgradePackageVersion(packageState, userId)
@@ -442,8 +450,6 @@ abstract class SchemePolicy {
     abstract val objectScheme: String
 
     open fun GetStateScope.onStateMutated() {}
-
-    open fun MutateStateScope.onInitialized() {}
 
     open fun MutateStateScope.onUserAdded(userId: Int) {}
 

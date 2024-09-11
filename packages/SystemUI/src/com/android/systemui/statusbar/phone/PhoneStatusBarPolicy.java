@@ -44,7 +44,6 @@ import android.view.View;
 
 import androidx.lifecycle.Observer;
 
-import com.android.systemui.res.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -56,9 +55,11 @@ import com.android.systemui.privacy.PrivacyType;
 import com.android.systemui.privacy.logging.PrivacyLogger;
 import com.android.systemui.qs.tiles.DndTile;
 import com.android.systemui.qs.tiles.RotationLockTile;
+import com.android.systemui.res.R;
 import com.android.systemui.screenrecord.RecordingController;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.phone.ui.StatusBarIconController;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.CastController.CastDevice;
@@ -548,12 +549,23 @@ public class PhoneStatusBarPolicy
             try {
                 final int userId = ActivityTaskManager.getService().getLastResumedActivityUserId();
                 final int iconResId = mUserManager.getUserStatusBarIconResId(userId);
-                // TODO(b/170249807, b/230779281): Handle non-managed-profile String
-                String accessibilityString = getManagedProfileAccessibilityString();
                 mMainExecutor.execute(() -> {
                     final boolean showIcon;
                     if (iconResId != Resources.ID_NULL && (!mKeyguardStateController.isShowing()
                             || mKeyguardStateController.isOccluded())) {
+                        String accessibilityString = "";
+                        if (android.os.Flags.allowPrivateProfile()
+                                && android.multiuser.Flags.enablePrivateSpaceFeatures()) {
+                            try {
+                                accessibilityString =
+                                        mUserManager.getProfileAccessibilityString(userId);
+                            } catch (Resources.NotFoundException nfe) {
+                                Log.e(TAG, "Accessibility string not found for userId:"
+                                        + userId);
+                            }
+                        } else {
+                            accessibilityString = getManagedProfileAccessibilityString();
+                        }
                         showIcon = true;
                         mIconController.setIcon(mSlotManagedProfile,
                                 iconResId,

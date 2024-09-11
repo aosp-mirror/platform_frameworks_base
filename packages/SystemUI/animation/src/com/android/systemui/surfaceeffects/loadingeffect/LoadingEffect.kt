@@ -22,6 +22,8 @@ import android.animation.ValueAnimator
 import android.graphics.Paint
 import android.graphics.RenderEffect
 import android.view.View
+import com.android.systemui.surfaceeffects.PaintDrawCallback
+import com.android.systemui.surfaceeffects.RenderEffectDrawCallback
 import com.android.systemui.surfaceeffects.turbulencenoise.TurbulenceNoiseAnimationConfig
 import com.android.systemui.surfaceeffects.turbulencenoise.TurbulenceNoiseShader
 
@@ -181,6 +183,11 @@ private constructor(
         turbulenceNoiseShader.setColor(newColor)
     }
 
+    /** Updates the noise color that's screen blended on top. */
+    fun updateScreenColor(newColor: Int) {
+        turbulenceNoiseShader.setScreenColor(newColor)
+    }
+
     /**
      * Retrieves the noise offset x, y, z values. This is useful for replaying the animation
      * smoothly from the last animation, by passing in the last values to the next animation.
@@ -322,56 +329,38 @@ private constructor(
     private fun draw() {
         paintCallback?.onDraw(paint!!)
         renderEffectCallback?.onDraw(
-            RenderEffect.createRuntimeShaderEffect(turbulenceNoiseShader, "in_src")
+            RenderEffect.createRuntimeShaderEffect(
+                turbulenceNoiseShader,
+                TurbulenceNoiseShader.BACKGROUND_UNIFORM
+            )
         )
     }
 
-    companion object {
+    /**
+     * States of the loading effect animation.
+     *
+     * <p>The state is designed to be follow the order below: [AnimationState.EASE_IN],
+     * [AnimationState.MAIN], [AnimationState.EASE_OUT]. Note that ease in and out don't necessarily
+     * mean the acceleration and deceleration in the animation curve. They simply mean each stage of
+     * the animation. (i.e. Intro, core, and rest)
+     */
+    enum class AnimationState {
+        EASE_IN,
+        MAIN,
+        EASE_OUT,
+        NOT_PLAYING
+    }
+
+    /** Optional callback that is triggered when the animation state changes. */
+    interface AnimationStateChangedCallback {
         /**
-         * States of the loading effect animation.
-         *
-         * <p>The state is designed to be follow the order below: [AnimationState.EASE_IN],
-         * [AnimationState.MAIN], [AnimationState.EASE_OUT]. Note that ease in and out don't
-         * necessarily mean the acceleration and deceleration in the animation curve. They simply
-         * mean each stage of the animation. (i.e. Intro, core, and rest)
+         * A callback that's triggered when the [AnimationState] changes. Example usage is
+         * performing a cleanup when [AnimationState] becomes [NOT_PLAYING].
          */
-        enum class AnimationState {
-            EASE_IN,
-            MAIN,
-            EASE_OUT,
-            NOT_PLAYING
-        }
+        fun onStateChanged(oldState: AnimationState, newState: AnimationState) {}
+    }
 
-        /** Client must implement one of the draw callbacks. */
-        interface PaintDrawCallback {
-            /**
-             * A callback with a [Paint] object that contains shader info, which is triggered every
-             * frame while animation is playing. Note that the [Paint] object here is always the
-             * same instance.
-             */
-            fun onDraw(loadingPaint: Paint)
-        }
-
-        interface RenderEffectDrawCallback {
-            /**
-             * A callback with a [RenderEffect] object that contains shader info, which is triggered
-             * every frame while animation is playing. Note that the [RenderEffect] instance is
-             * different each time to update shader uniforms.
-             */
-            fun onDraw(loadingRenderEffect: RenderEffect)
-        }
-
-        /** Optional callback that is triggered when the animation state changes. */
-        interface AnimationStateChangedCallback {
-            /**
-             * A callback that's triggered when the [AnimationState] changes. Example usage is
-             * performing a cleanup when [AnimationState] becomes [NOT_PLAYING].
-             */
-            fun onStateChanged(oldState: AnimationState, newState: AnimationState) {}
-        }
-
+    private companion object {
         private const val MS_TO_SEC = 0.001f
-
-        private val TAG = LoadingEffect::class.java.simpleName
     }
 }

@@ -250,6 +250,24 @@ final class IInputMethodClientInvoker {
     }
 
     @AnyThread
+    void setImeVisibility(boolean visible) {
+        if (mIsProxy) {
+            setImeVisibilityInternal(visible);
+        } else {
+            mHandler.post(() -> setImeVisibilityInternal(visible));
+        }
+    }
+
+    @AnyThread
+    private void setImeVisibilityInternal(boolean visible) {
+        try {
+            mTarget.setImeVisibility(visible);
+        } catch (RemoteException e) {
+            logRemoteException(e);
+        }
+    }
+
+    @AnyThread
     void scheduleStartInputIfNecessary(boolean fullscreen) {
         if (mIsProxy) {
             scheduleStartInputIfNecessaryInternal(fullscreen);

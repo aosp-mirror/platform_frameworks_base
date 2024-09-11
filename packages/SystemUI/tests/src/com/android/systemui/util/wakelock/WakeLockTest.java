@@ -35,15 +35,18 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 
 import java.util.List;
 
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
+import platform.test.runner.parameterized.Parameters;
+
+
 @SmallTest
-@RunWith(Parameterized.class)
+@RunWith(ParameterizedAndroidJunit4.class)
 public class WakeLockTest extends SysuiTestCase {
 
-    @Parameterized.Parameters(name = "{0}")
+    @Parameters(name = "{0}")
     public static List<FlagsParameterization> getFlags() {
         return FlagsParameterization.allCombinationsOf(
                 Flags.FLAG_DELAYED_WAKELOCK_RELEASE_ON_BACKGROUND_THREAD);

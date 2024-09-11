@@ -46,6 +46,7 @@ import android.widget.TextView;
 import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.CarrierTextManager;
+import com.android.systemui.log.core.FakeLogBuffer;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.connectivity.IconState;
 import com.android.systemui.statusbar.connectivity.MobileDataIndicators;
@@ -62,6 +63,8 @@ import com.android.systemui.util.kotlin.FlowProviderKt;
 import com.android.systemui.utils.leaks.LeakCheckedTest;
 import com.android.systemui.utils.os.FakeHandler;
 
+import kotlinx.coroutines.flow.MutableStateFlow;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -72,8 +75,6 @@ import org.mockito.MockitoAnnotations;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import kotlinx.coroutines.flow.MutableStateFlow;
 
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
@@ -169,6 +170,7 @@ public class ShadeCarrierGroupControllerTest extends LeakCheckedTest {
                 mActivityStarter,
                 handler,
                 TestableLooper.get(this).getLooper(),
+                new ShadeCarrierGroupControllerLogger(FakeLogBuffer.Factory.Companion.create()),
                 mNetworkController,
                 mCarrierTextControllerBuilder,
                 mContext,
@@ -310,9 +312,10 @@ public class ShadeCarrierGroupControllerTest extends LeakCheckedTest {
                 info = new CarrierTextManager.CarrierTextCallbackInfo(
                 "",
                 new CharSequence[]{""},
-                true,
+                /* anySimReady= */ true,
+                /* isInSatelliteMode= */ false,
                 new int[]{0},
-                true /* airplaneMode */);
+                /* airplaneMode= */ true);
         mCallback.updateCarrierInfo(info);
         mTestableLooper.processAllMessages();
         assertEquals(View.GONE, mShadeCarrierGroup.getNoSimTextView().getVisibility());
@@ -324,12 +327,56 @@ public class ShadeCarrierGroupControllerTest extends LeakCheckedTest {
                 info = new CarrierTextManager.CarrierTextCallbackInfo(
                 "",
                 new CharSequence[]{FIRST_CARRIER_NAME, ""},
-                true,
+                /* anySimReady= */ true,
+                /* isInSatelliteMode= */ false,
                 new int[]{0, 1},
-                false /* airplaneMode */);
+                /* airplaneMode= */ false);
         mCallback.updateCarrierInfo(info);
         mTestableLooper.processAllMessages();
         assertEquals(View.VISIBLE, mShadeCarrierGroupController.getShadeCarrierVisibility(0));
+    }
+
+    @Test
+    public void isInSatelliteMode_true_noSimViewShownWithText() {
+        CarrierTextManager.CarrierTextCallbackInfo
+            info = new CarrierTextManager.CarrierTextCallbackInfo(
+            "Satellite Mode Test",
+            new CharSequence[]{FIRST_CARRIER_NAME},
+            /* anySimReady= */ true,
+            /* isInSatelliteMode= */ true,
+            new int[]{1},
+            /* airplaneMode= */ false);
+
+        mCallback.updateCarrierInfo(info);
+        mTestableLooper.processAllMessages();
+
+        assertThat(mShadeCarrierGroup.getNoSimTextView().getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mShadeCarrierGroup.getNoSimTextView().getText()).isEqualTo(
+                "Satellite Mode Test");
+
+        verify(mShadeCarrier1).setVisibility(View.GONE);
+        verify(mShadeCarrier2).setVisibility(View.GONE);
+        verify(mShadeCarrier3).setVisibility(View.GONE);
+    }
+
+    @Test
+    public void isInSatelliteMode_false_normalSimViewsShown() {
+        CarrierTextManager.CarrierTextCallbackInfo
+                info = new CarrierTextManager.CarrierTextCallbackInfo(
+                "Satellite Mode Test",
+                new CharSequence[]{FIRST_CARRIER_NAME, SECOND_CARRIER_NAME},
+                /* anySimReady= */ true,
+                /* isInSatelliteMode= */ false,
+                new int[]{0, 1},
+                /* airplaneMode= */ false);
+
+        mCallback.updateCarrierInfo(info);
+        mTestableLooper.processAllMessages();
+
+        assertThat(mShadeCarrierGroup.getNoSimTextView().getVisibility()).isEqualTo(View.GONE);
+
+        verify(mShadeCarrier1).setVisibility(View.VISIBLE);
+        verify(mShadeCarrier2).setVisibility(View.VISIBLE);
     }
 
     @Test
@@ -348,8 +395,7 @@ public class ShadeCarrierGroupControllerTest extends LeakCheckedTest {
                 SINGLE_CARRIER_TEXT,
                 new CharSequence[]{SINGLE_CARRIER_TEXT},
                 true,
-                new int[]{0},
-                false /* airplaneMode */);
+                new int[]{0});
 
         mCallback.updateCarrierInfo(info);
         mTestableLooper.processAllMessages();
@@ -367,8 +413,7 @@ public class ShadeCarrierGroupControllerTest extends LeakCheckedTest {
                 MULTI_CARRIER_TEXT,
                 new CharSequence[]{FIRST_CARRIER_NAME, SECOND_CARRIER_NAME},
                 true,
-                new int[]{0, 1},
-                false /* airplaneMode */);
+                new int[]{0, 1});
 
         mCallback.updateCarrierInfo(info);
         mTestableLooper.processAllMessages();
@@ -385,16 +430,14 @@ public class ShadeCarrierGroupControllerTest extends LeakCheckedTest {
                 SINGLE_CARRIER_TEXT,
                 new CharSequence[]{FIRST_CARRIER_NAME},
                 true,
-                new int[]{0},
-                false /* airplaneMode */);
+                new int[]{0});
 
         CarrierTextManager.CarrierTextCallbackInfo
                 multiCarrierInfo = new CarrierTextManager.CarrierTextCallbackInfo(
                 MULTI_CARRIER_TEXT,
                 new CharSequence[]{FIRST_CARRIER_NAME, SECOND_CARRIER_NAME},
                 true,
-                new int[]{0, 1},
-                false /* airplaneMode */);
+                new int[]{0, 1});
 
         mCallback.updateCarrierInfo(singleCarrierInfo);
         mTestableLooper.processAllMessages();
@@ -419,8 +462,7 @@ public class ShadeCarrierGroupControllerTest extends LeakCheckedTest {
                 SINGLE_CARRIER_TEXT,
                 new CharSequence[]{FIRST_CARRIER_NAME},
                 true,
-                new int[]{0},
-                false /* airplaneMode */);
+                new int[]{0});
 
         mCallback.updateCarrierInfo(singleCarrierInfo);
         mTestableLooper.processAllMessages();
@@ -441,8 +483,7 @@ public class ShadeCarrierGroupControllerTest extends LeakCheckedTest {
                 MULTI_CARRIER_TEXT,
                 new CharSequence[]{FIRST_CARRIER_NAME, SECOND_CARRIER_NAME},
                 true,
-                new int[]{0, 1},
-                false /* airplaneMode */);
+                new int[]{0, 1});
 
         mCallback.updateCarrierInfo(multiCarrierInfo);
         mTestableLooper.processAllMessages();

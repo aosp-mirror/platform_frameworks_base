@@ -28,8 +28,10 @@ import java.lang.annotation.Target;
  * Add this with a fully-specified method name (e.g. {@code "com.package.Class.methodName"})
  * of a callback to get a callback at the class load time.
  *
- * The method must be {@code public static} with a single argument that takes
- * {@link Class}.
+ * The method must be {@code public static} with a single argument that takes {@link Class}.
+ *
+ * Typically, this is used with {@link #LIBANDROID_LOADING_HOOK}, which will load the necessary
+ * native libraries.
  *
  * @hide
  */
@@ -37,4 +39,10 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.CLASS)
 public @interface RavenwoodClassLoadHook {
     String value();
+
+    /**
+     * Class load hook that loads <code>libandroid_runtime</code>.
+     */
+    public static String LIBANDROID_LOADING_HOOK
+            = "com.android.platform.test.ravenwood.runtimehelper.ClassLoadHook.onClassLoaded";
 }

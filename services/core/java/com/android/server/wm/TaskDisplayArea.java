@@ -223,7 +223,7 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
 
     @VisibleForTesting
     Task getTopRootTask() {
-        return getRootTask(t -> true);
+        return getRootTask(alwaysTruePredicate());
     }
 
     @Nullable
@@ -1880,7 +1880,6 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         mTempConfiguration.setTo(getRequestedOverrideConfiguration());
         WindowConfiguration tempRequestWindowConfiguration = mTempConfiguration.windowConfiguration;
         tempRequestWindowConfiguration.setWindowingMode(windowingMode);
-        tempRequestWindowConfiguration.setDisplayWindowingMode(windowingMode);
         onRequestedOverrideConfigurationChanged(mTempConfiguration);
     }
 

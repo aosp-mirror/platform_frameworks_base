@@ -28,6 +28,7 @@ import android.os.RemoteException;
  * outside the test it is implemented by the system server.
  */
 public final class FakeIMediaProjection extends IMediaProjection.Stub {
+    int mTaskId = -1;
     boolean mIsStarted = false;
     LaunchCookie mLaunchCookie = null;
     IMediaProjectionCallback mIMediaProjectionCallback = null;
@@ -87,9 +88,23 @@ public final class FakeIMediaProjection extends IMediaProjection.Stub {
 
     @Override
     @EnforcePermission(MANAGE_MEDIA_PROJECTION)
+    public int getTaskId() throws RemoteException {
+        getTaskId_enforcePermission();
+        return mTaskId;
+    }
+
+    @Override
+    @EnforcePermission(MANAGE_MEDIA_PROJECTION)
     public void setLaunchCookie(LaunchCookie launchCookie) throws RemoteException {
         setLaunchCookie_enforcePermission();
         mLaunchCookie = launchCookie;
+    }
+
+    @Override
+    @EnforcePermission(MANAGE_MEDIA_PROJECTION)
+    public void setTaskId(int taskId) throws RemoteException {
+        setTaskId_enforcePermission();
+        mTaskId = taskId;
     }
 
     @Override

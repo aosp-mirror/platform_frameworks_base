@@ -40,6 +40,7 @@ import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.animation.Interpolators;
+import com.android.wm.shell.common.pip.PipUtils;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.transition.Transitions;
 
@@ -583,7 +584,7 @@ public class PipAnimationController {
         }
 
         static PipTransitionAnimator<Rect> ofBounds(TaskInfo taskInfo, SurfaceControl leash,
-                Rect baseValue, Rect startValue, Rect endValue, Rect sourceHintRect,
+                Rect baseValue, Rect startValue, Rect endValue, Rect sourceRectHint,
                 @PipAnimationController.TransitionDirection int direction, float startingAngle,
                 @Surface.Rotation int rotationDelta) {
             final boolean isOutPipDirection = isOutPipDirection(direction);
@@ -613,14 +614,25 @@ public class PipAnimationController {
                 initialContainerRect = initialSourceValue;
             }
 
-            final Rect sourceHintRectInsets;
-            if (sourceHintRect == null) {
-                sourceHintRectInsets = null;
+            final Rect adjustedSourceRectHint = new Rect();
+            if (sourceRectHint == null || sourceRectHint.isEmpty()) {
+                // Crop a Rect matches the aspect ratio and pivots at the center point.
+                // This is done for entering case only.
+                if (isInPipDirection(direction)) {
+                    final float aspectRatio = endValue.width() / (float) endValue.height();
+                    adjustedSourceRectHint.set(PipUtils.getEnterPipWithOverlaySrcRectHint(
+                            startValue, aspectRatio));
+                }
             } else {
-                sourceHintRectInsets = new Rect(sourceHintRect.left - initialContainerRect.left,
-                        sourceHintRect.top - initialContainerRect.top,
-                        initialContainerRect.right - sourceHintRect.right,
-                        initialContainerRect.bottom - sourceHintRect.bottom);
+                adjustedSourceRectHint.set(sourceRectHint);
+            }
+            final Rect sourceHintRectInsets = new Rect();
+            if (!adjustedSourceRectHint.isEmpty()) {
+                sourceHintRectInsets.set(
+                        adjustedSourceRectHint.left - initialContainerRect.left,
+                        adjustedSourceRectHint.top - initialContainerRect.top,
+                        initialContainerRect.right - adjustedSourceRectHint.right,
+                        initialContainerRect.bottom - adjustedSourceRectHint.bottom);
             }
             final Rect zeroInsets = new Rect(0, 0, 0, 0);
 
@@ -648,7 +660,7 @@ public class PipAnimationController {
                     }
                     float angle = (1.0f - fraction) * startingAngle;
                     setCurrentValue(bounds);
-                    if (inScaleTransition() || sourceHintRect == null) {
+                    if (inScaleTransition() || adjustedSourceRectHint.isEmpty()) {
                         if (isOutPipDirection) {
                             getSurfaceTransactionHelper().crop(tx, leash, end)
                                     .scale(tx, leash, end, bounds);
@@ -661,7 +673,7 @@ public class PipAnimationController {
                     } else {
                         final Rect insets = computeInsets(fraction);
                         getSurfaceTransactionHelper().scaleAndCrop(tx, leash,
-                                sourceHintRect, initialSourceValue, bounds, insets,
+                                adjustedSourceRectHint, initialSourceValue, bounds, insets,
                                 isInPipDirection, fraction);
                         if (shouldApplyCornerRadius()) {
                             final Rect sourceBounds = new Rect(initialContainerRect);
@@ -729,9 +741,6 @@ public class PipAnimationController {
                 }
 
                 private Rect computeInsets(float fraction) {
-                    if (sourceHintRectInsets == null) {
-                        return zeroInsets;
-                    }
                     final Rect startRect = isOutPipDirection ? sourceHintRectInsets : zeroInsets;
                     final Rect endRect = isOutPipDirection ? zeroInsets : sourceHintRectInsets;
                     return mInsetsEvaluator.evaluate(fraction, startRect, endRect);
@@ -743,11 +752,6 @@ public class PipAnimationController {
                             .alpha(tx, leash, 1f)
                             .round(tx, leash, shouldApplyCornerRadius())
                             .shadow(tx, leash, shouldApplyShadowRadius());
-                    // TODO(b/178632364): this is a work around for the black background when
-                    // entering PiP in button navigation mode.
-                    if (isInPipDirection(direction)) {
-                        tx.setWindowCrop(leash, getStartValue());
-                    }
                     tx.show(leash);
                     tx.apply();
                 }

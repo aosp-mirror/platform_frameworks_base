@@ -18,31 +18,29 @@ package com.android.systemui.statusbar.notification
 
 import android.content.Context
 import android.provider.DeviceConfig
-
 import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags.NOTIFICATIONS_USE_PEOPLE_FILTERING
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.statusbar.notification.shared.NotificationMinimalismPrototype
+import com.android.systemui.statusbar.notification.shared.PriorityPeopleSection
 import com.android.systemui.statusbar.notification.stack.BUCKET_ALERTING
 import com.android.systemui.statusbar.notification.stack.BUCKET_FOREGROUND_SERVICE
 import com.android.systemui.statusbar.notification.stack.BUCKET_HEADS_UP
 import com.android.systemui.statusbar.notification.stack.BUCKET_MEDIA_CONTROLS
 import com.android.systemui.statusbar.notification.stack.BUCKET_PEOPLE
 import com.android.systemui.statusbar.notification.stack.BUCKET_SILENT
+import com.android.systemui.statusbar.notification.stack.PriorityBucket
 import com.android.systemui.util.DeviceConfigProxy
 import com.android.systemui.util.Utils
-
 import javax.inject.Inject
 
 private var sUsePeopleFiltering: Boolean? = null
 
-/**
- * Feature controller for the NOTIFICATIONS_USE_PEOPLE_FILTERING config.
- */
+/** Feature controller for the NOTIFICATIONS_USE_PEOPLE_FILTERING config. */
 @SysUISingleton
-class NotificationSectionsFeatureManager @Inject constructor(
-    val proxy: DeviceConfigProxy,
-    val context: Context
-) {
+class NotificationSectionsFeatureManager
+@Inject
+constructor(val proxy: DeviceConfigProxy, val context: Context) {
 
     fun isFilteringEnabled(): Boolean {
         return usePeopleFiltering(proxy)
@@ -53,18 +51,37 @@ class NotificationSectionsFeatureManager @Inject constructor(
     }
 
     fun getNotificationBuckets(): IntArray {
+        if (PriorityPeopleSection.isEnabled || NotificationMinimalismPrototype.V2.isEnabled) {
+            // We don't need this list to be adaptive, it can be the superset of all features.
+            return PriorityBucket.getAllInOrder()
+        }
         return when {
             isFilteringEnabled() && isMediaControlsEnabled() ->
-                intArrayOf(BUCKET_HEADS_UP, BUCKET_FOREGROUND_SERVICE, BUCKET_MEDIA_CONTROLS,
-                        BUCKET_PEOPLE, BUCKET_ALERTING, BUCKET_SILENT)
+                intArrayOf(
+                    BUCKET_HEADS_UP,
+                    BUCKET_FOREGROUND_SERVICE,
+                    BUCKET_MEDIA_CONTROLS,
+                    BUCKET_PEOPLE,
+                    BUCKET_ALERTING,
+                    BUCKET_SILENT
+                )
             !isFilteringEnabled() && isMediaControlsEnabled() ->
-                intArrayOf(BUCKET_HEADS_UP, BUCKET_FOREGROUND_SERVICE, BUCKET_MEDIA_CONTROLS,
-                        BUCKET_ALERTING, BUCKET_SILENT)
+                intArrayOf(
+                    BUCKET_HEADS_UP,
+                    BUCKET_FOREGROUND_SERVICE,
+                    BUCKET_MEDIA_CONTROLS,
+                    BUCKET_ALERTING,
+                    BUCKET_SILENT
+                )
             isFilteringEnabled() && !isMediaControlsEnabled() ->
-                intArrayOf(BUCKET_HEADS_UP, BUCKET_FOREGROUND_SERVICE, BUCKET_PEOPLE,
-                        BUCKET_ALERTING, BUCKET_SILENT)
-            else ->
-                intArrayOf(BUCKET_ALERTING, BUCKET_SILENT)
+                intArrayOf(
+                    BUCKET_HEADS_UP,
+                    BUCKET_FOREGROUND_SERVICE,
+                    BUCKET_PEOPLE,
+                    BUCKET_ALERTING,
+                    BUCKET_SILENT
+                )
+            else -> intArrayOf(BUCKET_ALERTING, BUCKET_SILENT)
         }
     }
 
@@ -80,8 +97,12 @@ class NotificationSectionsFeatureManager @Inject constructor(
 
 private fun usePeopleFiltering(proxy: DeviceConfigProxy): Boolean {
     if (sUsePeopleFiltering == null) {
-        sUsePeopleFiltering = proxy.getBoolean(
-                DeviceConfig.NAMESPACE_SYSTEMUI, NOTIFICATIONS_USE_PEOPLE_FILTERING, true)
+        sUsePeopleFiltering =
+            proxy.getBoolean(
+                DeviceConfig.NAMESPACE_SYSTEMUI,
+                NOTIFICATIONS_USE_PEOPLE_FILTERING,
+                true
+            )
     }
 
     return sUsePeopleFiltering!!

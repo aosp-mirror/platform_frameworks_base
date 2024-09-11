@@ -28,6 +28,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -541,6 +542,18 @@ public class TransportConnectionTest {
         mShadowWorkerLooper.runToEndOfTasks();
         mShadowMainLooper.reset();
         return future.get();
+    }
+
+    @Test
+    public void onBindingDied_referenceLost_doesNotThrow() {
+        TransportConnection.TransportConnectionMonitor transportConnectionMonitor =
+                new TransportConnection.TransportConnectionMonitor(
+                        mContext, /* transportConnection= */ null);
+        doThrow(new IllegalArgumentException("Service not registered")).when(
+                mContext).unbindService(any());
+
+        // Test no exception is thrown
+        transportConnectionMonitor.onBindingDied(mTransportComponent);
     }
 
     private ServiceConnection verifyBindServiceAsUserAndCaptureServiceConnection(Context context) {

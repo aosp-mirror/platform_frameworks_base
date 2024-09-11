@@ -106,7 +106,6 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TimeZone;
-import java.util.function.Consumer;
 
 /**
  * An intent is an abstract description of an operation to be performed.  It
@@ -3771,6 +3770,10 @@ public class Intent implements Parcelable, Cloneable {
      *   <li><em>{@link android.content.Intent#EXTRA_PHONE_NUMBER}</em> -
      *       the phone number originally intended to be dialed.</li>
      * </ul>
+     * <p class="note">Starting in Android 15, this broadcast is no longer sent as an ordered
+     * broadcast.  The <code>resultData</code> no longer has any effect and will not determine the
+     * actual routing of the call.  Further, receivers of this broadcast do not get foreground
+     * priority and cannot launch background activities.</p>
      * <p>Once the broadcast is finished, the resultData is used as the actual
      * number to call.  If  <code>null</code>, no call will be placed.</p>
      * <p>It is perfectly acceptable for multiple receivers to process the
@@ -3811,8 +3814,8 @@ public class Intent implements Parcelable, Cloneable {
      * {@link android.telecom.CallRedirectionService} API.  Apps that perform call screening
      * should use the {@link android.telecom.CallScreeningService} API.  Apps which need to be
      * notified of basic call state should use
-     * {@link android.telephony.PhoneStateListener#onCallStateChanged(int, String)} to determine
-     * when a new outgoing call is placed.
+     * {@link android.telephony.TelephonyCallback.CallStateListener} to determine when a new
+     * outgoing call is placed.
      */
     @Deprecated
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
@@ -4347,13 +4350,6 @@ public class Intent implements Parcelable, Cloneable {
      */
     public static final String EXTRA_BRIGHTNESS_DIALOG_IS_FULL_WIDTH =
             "android.intent.extra.BRIGHTNESS_DIALOG_IS_FULL_WIDTH";
-
-    /**
-     * Activity Action: Shows the contrast setting dialog.
-     * @hide
-     */
-    public static final String ACTION_SHOW_CONTRAST_DIALOG =
-            "com.android.intent.action.SHOW_CONTRAST_DIALOG";
 
     /**
      * Broadcast Action:  A global button was pressed.  Includes a single
@@ -6113,11 +6109,17 @@ public class Intent implements Parcelable, Cloneable {
      * {@link ContentProvider#query(Uri, String[], Bundle, CancellationSignal)}
      * method will contains the original intent Chooser has been launched with under the
      * {@link #EXTRA_INTENT} key as a context for the current sharing session. The returned
-     * {@link android.database.Cursor} should contain
-     * {@link android.service.chooser.AdditionalContentContract.Columns#URI} column for the item URI
-     * and, optionally, {@link AdditionalContentContract.CursorExtraKeys#POSITION} extra that
+     * {@link android.database.Cursor} should contain:
+     * <ul>
+     * <li>{@link android.service.chooser.AdditionalContentContract.Columns#URI} column for the item
+     * URI.</li>
+     * <li>Optional columns {@link MediaStore.MediaColumns#WIDTH} and
+     * {@link MediaStore.MediaColumns#HEIGHT} for the dimensions of the preview image.
+     * These columns can also be returned for each {@link #EXTRA_STREAM} item metadata
+     * {@link ContentProvider#query(Uri, String[], Bundle, CancellationSignal)} call.</li>
+     * <li>Optional {@link AdditionalContentContract.CursorExtraKeys#POSITION} extra that
      * specifies the cursor starting position; the item at this position is expected to match the
-     * item specified by {@link #EXTRA_CHOOSER_FOCUSED_ITEM_POSITION}.</p>
+     * item specified by {@link #EXTRA_CHOOSER_FOCUSED_ITEM_POSITION}.</li></ul></p>
      *
      * <p>When the user makes a selection change,
      * {@link ContentProvider#call(String, String, Bundle)} method will be invoked with the "method"
@@ -6129,10 +6131,14 @@ public class Intent implements Parcelable, Cloneable {
      * the selection changes made by the user.
      * Applications may implement this method to change any of the following Chooser arguments by
      * returning new values in the result bundle:
-     * {@link #EXTRA_CHOOSER_TARGETS}, {@link #EXTRA_ALTERNATE_INTENTS},
+     * {@link #EXTRA_CHOOSER_TARGETS},
+     * {@link #EXTRA_ALTERNATE_INTENTS},
      * {@link #EXTRA_CHOOSER_CUSTOM_ACTIONS},
      * {@link #EXTRA_CHOOSER_MODIFY_SHARE_ACTION},
-     * {@link #EXTRA_CHOOSER_REFINEMENT_INTENT_SENDER}.</p>
+     * {@link #EXTRA_METADATA_TEXT},
+     * {@link #EXTRA_CHOOSER_REFINEMENT_INTENT_SENDER},
+     * {@link #EXTRA_CHOOSER_RESULT_INTENT_SENDER}.
+     * </p>
      */
     @FlaggedApi(android.service.chooser.Flags.FLAG_CHOOSER_PAYLOAD_TOGGLING)
     public static final String EXTRA_CHOOSER_ADDITIONAL_CONTENT_URI =
@@ -8156,6 +8162,9 @@ public class Intent implements Parcelable, Cloneable {
                 int eq = uri.indexOf('=', i);
                 if (eq < 0) eq = i-1;
                 int semi = uri.indexOf(';', i);
+                if (semi < 0) {
+                    throw new URISyntaxException(uri, "uri end not found");
+                }
                 String value = eq < semi ? Uri.decode(uri.substring(eq + 1, semi)) : "";
 
                 // action
@@ -8183,7 +8192,7 @@ public class Intent implements Parcelable, Cloneable {
 
                 // launch flags
                 else if (uri.startsWith("launchFlags=", i)) {
-                    intent.mFlags = Integer.decode(value);
+                    intent.mFlags = decodeInteger(value);
                     if ((flags& URI_ALLOW_UNSAFE) == 0) {
                         intent.mFlags &= ~IMMUTABLE_FLAGS;
                     }
@@ -8191,7 +8200,7 @@ public class Intent implements Parcelable, Cloneable {
 
                 // extended flags
                 else if (uri.startsWith("extendedLaunchFlags=", i)) {
-                    intent.mExtendedFlags = Integer.decode(value);
+                    intent.mExtendedFlags = decodeInteger(value);
                 }
 
                 // package
@@ -8326,27 +8335,6 @@ public class Intent implements Parcelable, Cloneable {
         }
     }
 
-    /**
-     * Note all {@link Uri} that are referenced internally, with the expectation that Uri permission
-     * grants will need to be issued to ensure the recipient of this object is able to render its
-     * contents.
-     * See b/281044385 for more context and examples about what happens when this isn't done
-     * correctly.
-     *
-     * @hide
-     */
-    public void visitUris(@NonNull Consumer<Uri> visitor) {
-        if (android.app.Flags.visitRiskyUris()) {
-            visitor.accept(mData);
-            if (mSelector != null) {
-                mSelector.visitUris(visitor);
-            }
-            if (mOriginalIntent != null) {
-                mOriginalIntent.visitUris(visitor);
-            }
-        }
-    }
-
     public static Intent getIntentOld(String uri) throws URISyntaxException {
         Intent intent = getIntentOld(uri, 0);
         intent.mLocalFlags |= LOCAL_FLAG_FROM_URI;
@@ -8401,7 +8389,7 @@ public class Intent implements Parcelable, Cloneable {
                 isIntentFragment = true;
                 i += 12;
                 int j = uri.indexOf(')', i);
-                intent.mFlags = Integer.decode(uri.substring(i, j));
+                intent.mFlags = decodeInteger(uri.substring(i, j));
                 if ((flags& URI_ALLOW_UNSAFE) == 0) {
                     intent.mFlags &= ~IMMUTABLE_FLAGS;
                 }
@@ -8512,6 +8500,23 @@ public class Intent implements Parcelable, Cloneable {
         return intent;
     }
 
+    private static Integer decodeInteger(String value) {
+        try {
+            return Integer.decode(value);
+        } catch (NumberFormatException e) {
+            try {
+                if (value != null && value.startsWith("0x")) {
+                    // In toUriInner, we do "0x".append(Integer.toHexString).
+                    // Sometimes "decode" fails to parse, e.g. 0x90000000.
+                    return Integer.parseUnsignedInt(value.substring(2), 16);
+                }
+            } catch (NumberFormatException ignored) {
+                // ignored, throw the original exception
+            }
+            throw e;
+        }
+    }
+
     /** @hide */
     public interface CommandOptionHandler {
         boolean handleOption(String opt, ShellCommand cmd);
@@ -8577,7 +8582,7 @@ public class Intent implements Parcelable, Cloneable {
                 case "--ei": {
                     String key = cmd.getNextArgRequired();
                     String value = cmd.getNextArgRequired();
-                    intent.putExtra(key, Integer.decode(value));
+                    intent.putExtra(key, decodeInteger(value));
                 }
                 break;
                 case "--eu": {
@@ -8601,7 +8606,7 @@ public class Intent implements Parcelable, Cloneable {
                     String[] strings = value.split(",");
                     int[] list = new int[strings.length];
                     for (int i = 0; i < strings.length; i++) {
-                        list[i] = Integer.decode(strings[i]);
+                        list[i] = decodeInteger(strings[i]);
                     }
                     intent.putExtra(key, list);
                 }
@@ -8612,7 +8617,7 @@ public class Intent implements Parcelable, Cloneable {
                     String[] strings = value.split(",");
                     ArrayList<Integer> list = new ArrayList<>(strings.length);
                     for (int i = 0; i < strings.length; i++) {
-                        list.add(Integer.decode(strings[i]));
+                        list.add(decodeInteger(strings[i]));
                     }
                     intent.putExtra(key, list);
                 }
@@ -8747,7 +8752,7 @@ public class Intent implements Parcelable, Cloneable {
                         arg = false;
                     } else {
                         try {
-                            arg = Integer.decode(value) != 0;
+                            arg = decodeInteger(value) != 0;
                         } catch (NumberFormatException ex) {
                             throw new IllegalArgumentException("Invalid boolean value: " + value);
                         }
@@ -8777,7 +8782,7 @@ public class Intent implements Parcelable, Cloneable {
                 break;
                 case "-f":
                     String str = cmd.getNextArgRequired();
-                    intent.setFlags(Integer.decode(str).intValue());
+                    intent.setFlags(decodeInteger(str).intValue());
                     break;
                 case "--grant-read-uri-permission":
                     intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);

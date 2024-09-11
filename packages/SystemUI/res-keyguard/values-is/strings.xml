@@ -108,9 +108,12 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="3321211830602827742">"Mynsturs er krafist eftir að tækið er endurræst"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="2672166323886110512">"PIN-númers er krafist eftir að tækið er endurræst"</string>
     <string name="kg_prompt_reason_restart_password" msgid="3967993994418885887">"Aðgangsorðs er krafist eftir að tækið er endurræst"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Fyrir aukið öryggi skaltu nota mynstur í staðinn"</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Fyrir aukið öryggi skaltu nota PIN-númer í staðinn"</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Fyrir aukið öryggi skaltu nota aðgangsorð í staðinn"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Til að auka öryggi skaltu nota mynstur í staðinn"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Til að auka öryggi skaltu nota PIN-númer í staðinn"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Til að auka öryggi skaltu nota aðgangsorð í staðinn"</string>
+    <string name="kg_prompt_added_security_pin" msgid="5487992065995475528">"PIN-númers er krafist af öryggisástæðum"</string>
+    <string name="kg_prompt_added_security_pattern" msgid="1017068086102168544">"Mynsturs er krafist af öryggisástæðum"</string>
+    <string name="kg_prompt_added_security_password" msgid="6053156069765029006">"Aðgangsorðs er krafist af öryggisástæðum"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Kerfisstjóri læsti tæki"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Tækinu var læst handvirkt"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Þekktist ekki"</string>

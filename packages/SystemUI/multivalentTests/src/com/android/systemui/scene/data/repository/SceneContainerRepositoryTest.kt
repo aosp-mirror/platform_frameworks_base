@@ -23,10 +23,10 @@ import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.sceneContainerConfig
 import com.android.systemui.scene.sceneKeys
-import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
@@ -39,10 +39,10 @@ import org.junit.runner.RunWith
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-@android.platform.test.annotations.EnabledOnRavenwood
+@EnableSceneContainer
 class SceneContainerRepositoryTest : SysuiTestCase() {
 
-    private val kosmos = testKosmos().apply { fakeSceneContainerFlags.enabled = true }
+    private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
 
     @Test
@@ -70,6 +70,9 @@ class SceneContainerRepositoryTest : SysuiTestCase() {
 
             underTest.changeScene(Scenes.Shade)
             assertThat(currentScene).isEqualTo(Scenes.Shade)
+
+            underTest.snapToScene(Scenes.QuickSettings)
+            assertThat(currentScene).isEqualTo(Scenes.QuickSettings)
         }
 
     @Test(expected = IllegalStateException::class)
@@ -77,6 +80,13 @@ class SceneContainerRepositoryTest : SysuiTestCase() {
         kosmos.sceneKeys = listOf(Scenes.QuickSettings, Scenes.Lockscreen)
         val underTest = kosmos.sceneContainerRepository
         underTest.changeScene(Scenes.Shade)
+    }
+
+    @Test(expected = IllegalStateException::class)
+    fun snapToScene_noSuchSceneInContainer_throws() {
+        kosmos.sceneKeys = listOf(Scenes.QuickSettings, Scenes.Lockscreen)
+        val underTest = kosmos.sceneContainerRepository
+        underTest.snapToScene(Scenes.Shade)
     }
 
     @Test
@@ -122,6 +132,7 @@ class SceneContainerRepositoryTest : SysuiTestCase() {
                 ObservableTransitionState.Transition(
                     fromScene = Scenes.Lockscreen,
                     toScene = Scenes.Shade,
+                    currentScene = flowOf(Scenes.Shade),
                     progress = progress,
                     isInitiatedByUserInput = false,
                     isUserInputOngoing = flowOf(false),

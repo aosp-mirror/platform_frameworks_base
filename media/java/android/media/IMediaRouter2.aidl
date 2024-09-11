@@ -36,6 +36,5 @@ oneway interface IMediaRouter2 {
      * Call MediaRouterService#requestCreateSessionWithRouter2 to pass the result.
      */
     void requestCreateSessionByManager(long uniqueRequestId, in RoutingSessionInfo oldSession,
-        in MediaRoute2Info route, in UserHandle transferInitiatorUserHandle,
-        in String transferInitiatorPackageName);
+        in MediaRoute2Info route);
 }

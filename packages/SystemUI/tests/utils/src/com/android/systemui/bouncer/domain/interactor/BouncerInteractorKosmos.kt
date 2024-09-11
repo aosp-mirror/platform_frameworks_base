@@ -16,7 +16,7 @@
 
 package com.android.systemui.bouncer.domain.interactor
 
-import android.content.applicationContext
+import com.android.internal.logging.uiEventLogger
 import com.android.systemui.authentication.domain.interactor.authenticationInteractor
 import com.android.systemui.bouncer.data.repository.bouncerRepository
 import com.android.systemui.classifier.domain.interactor.falsingInteractor
@@ -24,17 +24,20 @@ import com.android.systemui.deviceentry.domain.interactor.deviceEntryFaceAuthInt
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.log.sessionTracker
 import com.android.systemui.power.domain.interactor.powerInteractor
+import com.android.systemui.scene.domain.interactor.sceneBackInteractor
 
 val Kosmos.bouncerInteractor by Fixture {
     BouncerInteractor(
         applicationScope = testScope.backgroundScope,
-        applicationContext = applicationContext,
         repository = bouncerRepository,
         authenticationInteractor = authenticationInteractor,
         deviceEntryFaceAuthInteractor = deviceEntryFaceAuthInteractor,
         falsingInteractor = falsingInteractor,
         powerInteractor = powerInteractor,
-        simBouncerInteractor = simBouncerInteractor,
+        uiEventLogger = uiEventLogger,
+        sessionTracker = sessionTracker,
+        sceneBackInteractor = sceneBackInteractor,
     )
 }

@@ -90,7 +90,7 @@ public class LegacyProtoLogImplTest {
         //noinspection ResultOfMethodCallIgnored
         mFile.delete();
         mProtoLog = new LegacyProtoLogImpl(mFile, mViewerConfigFilename,
-                1024 * 1024, mReader, 1024, new TreeMap<>());
+                1024 * 1024, mReader, 1024, new TreeMap<>(), () -> {});
     }
 
     @After
@@ -391,6 +391,11 @@ public class LegacyProtoLogImplTest {
         @Override
         public void setLogToLogcat(boolean logToLogcat) {
             this.mLogToLogcat = logToLogcat;
+        }
+
+        @Override
+        public int getId() {
+            return ordinal();
         }
 
     }

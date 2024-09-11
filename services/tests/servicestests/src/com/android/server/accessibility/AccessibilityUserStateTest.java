@@ -30,6 +30,8 @@ import static android.view.accessibility.AccessibilityManager.STATE_FLAG_TOUCH_E
 
 import static com.android.server.accessibility.AccessibilityUserState.doesShortcutTargetsStringContain;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNull;
@@ -45,9 +47,10 @@ import android.accessibilityservice.AccessibilityServiceInfo;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
 import android.graphics.Color;
-import android.platform.test.annotations.RequiresFlagsDisabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.provider.Settings;
@@ -59,6 +62,7 @@ import android.view.Display;
 import androidx.test.InstrumentationRegistry;
 
 import com.android.internal.R;
+import com.android.internal.accessibility.AccessibilityShortcutController;
 import com.android.internal.util.test.FakeSettingsProvider;
 
 import org.junit.After;
@@ -67,6 +71,9 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.Map;
+import java.util.Set;
 
 /** Tests for AccessibilityUserState */
 public class AccessibilityUserStateTest {
@@ -209,18 +216,6 @@ public class AccessibilityUserStateTest {
         assertTrue(mUserState.getBoundServicesLocked().contains(mMockConnection));
         assertEquals(mMockConnection, mUserState.mComponentNameToServiceMap.get(COMPONENT_NAME));
         verify(mMockListener).onServiceInfoChangedLocked(eq(mUserState));
-    }
-
-    @Test
-    // addServiceLocked only calls addWindowTokensForAllDisplays when
-    // FLAG_ADD_WINDOW_TOKEN_WITHOUT_LOCK is off, so skip the test if it is on.
-    @RequiresFlagsDisabled(Flags.FLAG_ADD_WINDOW_TOKEN_WITHOUT_LOCK)
-    public void addService_flagDisabled_addsWindowTokens() {
-        when(mMockConnection.getComponentName()).thenReturn(COMPONENT_NAME);
-
-        mUserState.addServiceLocked(mMockConnection);
-
-        verify(mMockConnection).addWindowTokensForAllDisplays();
     }
 
     @Test
@@ -431,7 +426,70 @@ public class AccessibilityUserStateTest {
 
         assertEquals(focusStrokeWidthValue, mUserState.getFocusStrokeWidthLocked());
         assertEquals(focusColorValue, mUserState.getFocusColorLocked());
+    }
 
+    @Test
+    public void updateA11yQsTargetLocked_valueUpdated() {
+        Set<String> newTargets = Set.of(
+                AccessibilityShortcutController.DALTONIZER_COMPONENT_NAME.flattenToString(),
+                AccessibilityShortcutController.COLOR_INVERSION_COMPONENT_NAME.flattenToString()
+        );
+
+        mUserState.updateA11yQsTargetLocked(newTargets);
+
+        assertThat(mUserState.getA11yQsTargets()).isEqualTo(newTargets);
+    }
+
+    @Test
+    public void getA11yQsTargets_returnsCopiedData() {
+        updateA11yQsTargetLocked_valueUpdated();
+
+        Set<String> targets = mUserState.getA11yQsTargets();
+        targets.clear();
+
+        assertThat(mUserState.getA11yQsTargets()).isNotEmpty();
+    }
+
+    @Test
+    public void updateA11yTilesInQsPanelLocked_valueUpdated() {
+        Set<ComponentName> newTargets = Set.of(
+                AccessibilityShortcutController.DALTONIZER_TILE_COMPONENT_NAME,
+                AccessibilityShortcutController.COLOR_INVERSION_TILE_COMPONENT_NAME
+        );
+
+        mUserState.updateA11yTilesInQsPanelLocked(newTargets);
+
+        assertThat(mUserState.getA11yQsTilesInQsPanel()).isEqualTo(newTargets);
+    }
+
+    @Test
+    public void getA11yQsTilesInQsPanel_returnsCopiedData() {
+        updateA11yTilesInQsPanelLocked_valueUpdated();
+
+        Set<ComponentName> targets = mUserState.getA11yQsTilesInQsPanel();
+        targets.clear();
+
+        assertThat(mUserState.getA11yQsTilesInQsPanel()).isNotEmpty();
+    }
+
+    @Test
+    public void getTileServiceToA11yServiceInfoMapLocked() {
+        final ComponentName tileComponent =
+                new ComponentName(COMPONENT_NAME.getPackageName(), "FakeTileService");
+        ServiceInfo serviceInfo = new ServiceInfo();
+        serviceInfo.packageName = tileComponent.getPackageName();
+        serviceInfo.name = COMPONENT_NAME.getClassName();
+        ResolveInfo resolveInfo = new ResolveInfo();
+        resolveInfo.serviceInfo = serviceInfo;
+        when(mMockServiceInfo.getTileServiceName()).thenReturn(tileComponent.getClassName());
+        when(mMockServiceInfo.getResolveInfo()).thenReturn(resolveInfo);
+        mUserState.mInstalledServices.add(mMockServiceInfo);
+        mUserState.updateTileServiceMapForAccessibilityServiceLocked();
+
+        Map<ComponentName, AccessibilityServiceInfo> actual =
+                mUserState.getTileServiceToA11yServiceInfoMapLocked();
+
+        assertThat(actual).containsExactly(tileComponent, mMockServiceInfo);
     }
 
     private int getSecureIntForUser(String key, int userId) {

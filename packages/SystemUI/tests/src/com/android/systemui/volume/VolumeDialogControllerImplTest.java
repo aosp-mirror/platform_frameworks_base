@@ -37,10 +37,10 @@ import android.media.IAudioService;
 import android.media.session.MediaSession;
 import android.os.Handler;
 import android.os.Process;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.accessibility.AccessibilityManager;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -65,7 +65,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.concurrent.Executor;
 
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @SmallTest
 @TestableLooper.RunWithLooper
 public class VolumeDialogControllerImplTest extends SysuiTestCase {

@@ -29,6 +29,7 @@ interface BubbleExpandedViewManager {
     fun setAppBubbleTaskId(key: String, taskId: Int)
     fun isStackExpanded(): Boolean
     fun isShowingAsBubbleBar(): Boolean
+    fun hideCurrentInputMethod()
 
     companion object {
         /**
@@ -73,6 +74,10 @@ interface BubbleExpandedViewManager {
                 override fun isStackExpanded(): Boolean = controller.isStackExpanded
 
                 override fun isShowingAsBubbleBar(): Boolean = controller.isShowingAsBubbleBar
+
+                override fun hideCurrentInputMethod() {
+                    controller.hideCurrentInputMethod()
+                }
             }
         }
     }

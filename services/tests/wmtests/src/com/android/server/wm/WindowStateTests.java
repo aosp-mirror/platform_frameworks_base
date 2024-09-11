@@ -104,6 +104,7 @@ import android.view.SurfaceControl;
 import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowManager;
+import android.view.WindowRelayoutResult;
 import android.view.inputmethod.ImeTracker;
 import android.window.ClientWindowFrames;
 import android.window.ITaskFragmentOrganizer;
@@ -113,6 +114,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.server.testutils.StubTransaction;
 import com.android.server.wm.SensitiveContentPackages.PackageInfo;
+import com.android.window.flags.Flags;
 
 import org.junit.After;
 import org.junit.Test;
@@ -804,7 +806,8 @@ public class WindowStateTests extends WindowTestsBase {
                     anyBoolean() /* reportDraw */, any() /* mergedConfig */,
                     any() /* insetsState */, anyBoolean() /* forceLayout */,
                     anyBoolean() /* alwaysConsumeSystemBars */, anyInt() /* displayId */,
-                    anyInt() /* seqId */, anyBoolean() /* dragResizing */);
+                    anyInt() /* seqId */, anyBoolean() /* dragResizing */,
+                    any() /* activityWindowInfo */);
         } catch (RemoteException ignored) {
         }
         win.reportResized();
@@ -816,17 +819,20 @@ public class WindowStateTests extends WindowTestsBase {
         assertFalse(win.getOrientationChanging());
     }
 
-    @SetupWindows(addWindows = W_ABOVE_ACTIVITY)
     @Test
     public void testRequestResizeForBlastSync() {
-        final WindowState win = mChildAppWindowAbove;
-        makeWindowVisible(win, win.getParentWindow());
+        final WindowState win = createWindow(null, TYPE_APPLICATION, "window");
+        makeWindowVisible(win);
+        makeLastConfigReportedToClient(win, true /* visible */);
         win.mLayoutSeq = win.getDisplayContent().mLayoutSeq;
         win.reportResized();
         win.updateResizingWindowIfNeeded();
         assertThat(mWm.mResizingWindows).doesNotContain(win);
 
         // Check that the window is in resizing if using blast sync.
+        final BLASTSyncEngine.SyncGroup syncGroup = mock(BLASTSyncEngine.SyncGroup.class);
+        syncGroup.mSyncMethod = BLASTSyncEngine.METHOD_BLAST;
+        win.mSyncGroup = syncGroup;
         win.reportResized();
         win.prepareSync();
         assertEquals(SYNC_STATE_WAITING_FOR_DRAW, win.mSyncState);
@@ -839,6 +845,20 @@ public class WindowStateTests extends WindowTestsBase {
         mWm.mResizingWindows.remove(win);
         win.updateResizingWindowIfNeeded();
         assertThat(mWm.mResizingWindows).doesNotContain(win);
+
+        // Non blast sync doesn't require to force resizing, because it won't use syncSeqId.
+        // And if the window is already drawn, it can report sync finish immediately so that the
+        // sync group won't be blocked.
+        win.finishSync(mTransaction, syncGroup, false /* cancel */);
+        syncGroup.mSyncMethod = BLASTSyncEngine.METHOD_NONE;
+        win.mSyncGroup = syncGroup;
+        win.mWinAnimator.mDrawState = WindowStateAnimator.HAS_DRAWN;
+        win.prepareSync();
+        assertEquals(SYNC_STATE_WAITING_FOR_DRAW, win.mSyncState);
+        win.updateResizingWindowIfNeeded();
+        assertThat(mWm.mResizingWindows).doesNotContain(win);
+        assertTrue(win.isSyncFinished(syncGroup));
+        assertEquals(WindowContainer.SYNC_STATE_READY, win.mSyncState);
     }
 
     @Test
@@ -1349,7 +1369,9 @@ public class WindowStateTests extends WindowTestsBase {
 
     @SetupWindows(addWindows = {W_INPUT_METHOD})
     @Test
-    public void testImeTargetChangeListener_OnImeTargetOverlayVisibilityChanged() {
+    public void testImeTargetChangeListener_OnImeTargetOverlayVisibilityChanged_legacy() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_WINDOW_SESSION_RELAYOUT_INFO);
+
         final TestImeTargetChangeListener listener = new TestImeTargetChangeListener();
         mWm.mImeTargetChangeListener = listener;
 
@@ -1387,6 +1409,65 @@ public class WindowStateTests extends WindowTestsBase {
         // Scenario 2: test relayoutWindow to let the Ime layering target overlay window invisible.
         mWm.relayoutWindow(session, client, params, 100, 200, View.GONE, 0, 0, 0,
                 outFrames, outConfig, outSurfaceControl, outInsetsState, outControls, outBundle);
+        waitHandlerIdle(mWm.mH);
+
+        assertThat(imeLayeringTargetOverlay.isVisible()).isFalse();
+        assertThat(listener.mImeTargetToken).isEqualTo(client.asBinder());
+        assertThat(listener.mIsRemoved).isFalse();
+        assertThat(listener.mIsVisibleForImeTargetOverlay).isFalse();
+
+        // Scenario 3: test removeWindow to remove the Ime layering target overlay window.
+        mWm.removeClientToken(session, client.asBinder());
+        waitHandlerIdle(mWm.mH);
+
+        assertThat(listener.mImeTargetToken).isEqualTo(client.asBinder());
+        assertThat(listener.mIsRemoved).isTrue();
+        assertThat(listener.mIsVisibleForImeTargetOverlay).isFalse();
+    }
+
+    @SetupWindows(addWindows = {W_INPUT_METHOD})
+    @Test
+    public void testImeTargetChangeListener_OnImeTargetOverlayVisibilityChanged() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_WINDOW_SESSION_RELAYOUT_INFO);
+
+        final TestImeTargetChangeListener listener = new TestImeTargetChangeListener();
+        mWm.mImeTargetChangeListener = listener;
+
+        // Scenario 1: test addWindow/relayoutWindow to add Ime layering overlay window as visible.
+        final WindowToken windowToken = createTestWindowToken(TYPE_APPLICATION_OVERLAY,
+                mDisplayContent);
+        final IWindow client = new TestIWindow();
+        final Session session = getTestSession();
+        final ClientWindowFrames outFrames = new ClientWindowFrames();
+        final MergedConfiguration outConfig = new MergedConfiguration();
+        final SurfaceControl outSurfaceControl = new SurfaceControl();
+        final InsetsState outInsetsState = new InsetsState();
+        final InsetsSourceControl.Array outControls = new InsetsSourceControl.Array();
+        final WindowRelayoutResult outRelayoutResult = new WindowRelayoutResult(outFrames,
+                outConfig, outSurfaceControl, outInsetsState, outControls);
+        final WindowManager.LayoutParams params = new WindowManager.LayoutParams(
+                TYPE_APPLICATION_OVERLAY);
+        params.setTitle("imeLayeringTargetOverlay");
+        params.token = windowToken.token;
+        params.flags = FLAG_NOT_FOCUSABLE | FLAG_ALT_FOCUSABLE_IM;
+
+        mWm.addWindow(session, client, params, View.VISIBLE, DEFAULT_DISPLAY,
+                0 /* userUd */, WindowInsets.Type.defaultVisible(), null, new InsetsState(),
+                new InsetsSourceControl.Array(), new Rect(), new float[1]);
+        mWm.relayoutWindow(session, client, params, 100, 200, View.VISIBLE, 0, 0, 0,
+                outRelayoutResult);
+        waitHandlerIdle(mWm.mH);
+
+        final WindowState imeLayeringTargetOverlay = mDisplayContent.getWindow(
+                w -> w.mClient.asBinder() == client.asBinder());
+        assertThat(imeLayeringTargetOverlay.isVisible()).isTrue();
+        assertThat(listener.mImeTargetToken).isEqualTo(client.asBinder());
+        assertThat(listener.mIsRemoved).isFalse();
+        assertThat(listener.mIsVisibleForImeTargetOverlay).isTrue();
+
+        // Scenario 2: test relayoutWindow to let the Ime layering target overlay window invisible.
+        mWm.relayoutWindow(session, client, params, 100, 200, View.GONE, 0, 0, 0,
+                outRelayoutResult);
         waitHandlerIdle(mWm.mH);
 
         assertThat(imeLayeringTargetOverlay.isVisible()).isFalse();

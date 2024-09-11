@@ -22,7 +22,7 @@ import android.view.ViewGroup
 import androidx.constraintlayout.widget.Barrier
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
-import com.android.systemui.Flags.migrateClocksToBlueprint
+import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController
@@ -34,7 +34,7 @@ constructor(
     val smartspaceController: LockscreenSmartspaceController,
 ) : KeyguardSection() {
     override fun addViews(constraintLayout: ConstraintLayout) {
-        if (!migrateClocksToBlueprint()) return
+        if (!MigrateClocksToBlueprint.isEnabled) return
         if (smartspaceController.isEnabled()) return
 
         constraintLayout.findViewById<View?>(R.id.keyguard_slice_view)?.let {
@@ -46,7 +46,7 @@ constructor(
     override fun bindData(constraintLayout: ConstraintLayout) {}
 
     override fun applyConstraints(constraintSet: ConstraintSet) {
-        if (!migrateClocksToBlueprint()) return
+        if (!MigrateClocksToBlueprint.isEnabled) return
         if (smartspaceController.isEnabled()) return
 
         constraintSet.apply {
@@ -81,7 +81,7 @@ constructor(
     }
 
     override fun removeViews(constraintLayout: ConstraintLayout) {
-        if (!migrateClocksToBlueprint()) return
+        if (!MigrateClocksToBlueprint.isEnabled) return
         if (smartspaceController.isEnabled()) return
 
         constraintLayout.removeView(R.id.keyguard_slice_view)

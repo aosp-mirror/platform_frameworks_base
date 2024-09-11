@@ -27,12 +27,12 @@ import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
 import android.media.ImageReader;
 import android.os.SystemClock;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 import android.util.Log;
 import android.view.Display;
 import android.view.DisplayInfo;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -53,7 +53,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.function.Predicate;
 
 /** atest NavigationBarButtonTest */
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @RunWithLooper
 @SmallTest
 public class NavigationBarButtonTest extends SysuiTestCase {

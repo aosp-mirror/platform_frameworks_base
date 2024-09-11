@@ -53,7 +53,7 @@ constructor(
                 updateMediaModel(data)
             }
 
-            override fun onMediaDataRemoved(key: String) {
+            override fun onMediaDataRemoved(key: String, userInitiated: Boolean) {
                 updateMediaModel()
             }
         }

@@ -17,17 +17,23 @@
 package com.android.systemui.communal.domain.interactor
 
 import com.android.systemui.communal.data.repository.communalSettingsRepository
+import com.android.systemui.concurrency.fakeExecutor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.settings.userTracker
 import com.android.systemui.user.domain.interactor.selectedUserInteractor
 import com.android.systemui.util.mockito.mock
 
 val Kosmos.communalSettingsInteractor by Fixture {
     CommunalSettingsInteractor(
         bgScope = applicationCoroutineScope,
+        bgExecutor = fakeExecutor,
+        bgDispatcher = testDispatcher,
         repository = communalSettingsRepository,
         userInteractor = selectedUserInteractor,
+        userTracker = userTracker,
         tableLogBuffer = mock(),
     )
 }

@@ -241,7 +241,7 @@ final class DeletePackageHelper {
             isInstallerPackage = mPm.mSettings.isInstallerPackage(packageName);
         }
 
-        synchronized (mPm.mInstallLock) {
+        try (PackageManagerTracedLock installLock = mPm.mInstallLock.acquireLock()) {
             if (DEBUG_REMOVE) Slog.d(TAG, "deletePackageX: pkg=" + packageName + " user=" + userId);
             try (PackageFreezer freezer = mPm.freezePackageForDelete(packageName, freezeUser,
                     deleteFlags, "deletePackageX", ApplicationExitInfo.REASON_OTHER)) {
@@ -280,7 +280,7 @@ final class DeletePackageHelper {
 
         // Delete the resources here after sending the broadcast to let
         // other processes clean up before deleting resources.
-        synchronized (mPm.mInstallLock) {
+        try (PackageManagerTracedLock installLock = mPm.mInstallLock.acquireLock()) {
             if (info.mArgs != null) {
                 mRemovePackageHelper.cleanUpResources(info.mArgs.getPackageName(),
                         info.mArgs.getCodeFile(), info.mArgs.getInstructionSets());
@@ -435,7 +435,7 @@ final class DeletePackageHelper {
     public void executeDeletePackage(DeletePackageAction action, String packageName,
             boolean deleteCodeAndResources, @NonNull int[] allUserHandles, boolean writeSettings)
             throws SystemDeleteException {
-        synchronized (mPm.mInstallLock) {
+        try (PackageManagerTracedLock installLock = mPm.mInstallLock.acquireLock()) {
             executeDeletePackageLIF(action, packageName, deleteCodeAndResources, allUserHandles,
                     writeSettings);
         }
@@ -461,7 +461,7 @@ final class DeletePackageHelper {
 
         final int userId = user == null ? UserHandle.USER_ALL : user.getIdentifier();
         // Remember which users are affected, before the installed states are modified
-        outInfo.mRemovedUsers = (systemApp || userId == UserHandle.USER_ALL)
+        outInfo.mRemovedUsers = userId == UserHandle.USER_ALL
                 ? ps.queryUsersInstalledOrHasData(allUserHandles)
                 : new int[]{userId};
         outInfo.populateBroadcastUsers(ps);
@@ -513,7 +513,11 @@ final class DeletePackageHelper {
                 // Legacy behavior to report appId as UID here.
                 // The final broadcasts will contain a per-user UID.
                 outInfo.mUid = ps.getAppId();
-                outInfo.mIsAppIdRemoved = true;
+                // Only send Intent.ACTION_UID_REMOVED when flag & DELETE_KEEP_DATA is 0
+                // i.e. the mDataRemoved is true
+                if (outInfo.mDataRemoved) {
+                    outInfo.mIsAppIdRemoved = true;
+                }
                 mPm.scheduleWritePackageRestrictions(user);
                 return;
             }
@@ -542,7 +546,8 @@ final class DeletePackageHelper {
         final Computer snapshot = mPm.snapshotComputer();
         for (final int affectedUserId : outInfo.mRemovedUsers) {
             if (hadSuspendAppsPermission.get(affectedUserId)) {
-                mPm.unsuspendForSuspendingPackage(snapshot, packageName, affectedUserId);
+                mPm.unsuspendForSuspendingPackage(snapshot, packageName,
+                        affectedUserId /*suspendingUserId*/, true /*inAllUsers*/);
                 mPm.removeAllDistractingPackageRestrictions(snapshot, affectedUserId);
             }
         }
@@ -676,7 +681,7 @@ final class DeletePackageHelper {
             // Preserve data by setting flag
             flags |= PackageManager.DELETE_KEEP_DATA;
         }
-        synchronized (mPm.mInstallLock) {
+        try (PackageManagerTracedLock installLock = mPm.mInstallLock.acquireLock()) {
             deleteInstalledPackageLIF(deletedPs, UserHandle.USER_ALL, true, flags, allUserHandles,
                     outInfo, writeSettings);
         }

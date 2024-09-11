@@ -60,6 +60,7 @@ public class DreamBackend {
         public CharSequence description;
         public Drawable previewImage;
         public boolean supportsComplications = false;
+        public int dreamCategory;
 
         @Override
         public String toString() {
@@ -201,12 +202,13 @@ public class DreamBackend {
             dreamInfo.componentName = componentName;
             dreamInfo.isActive = dreamInfo.componentName.equals(activeDream);
 
-            final DreamService.DreamMetadata dreamMetadata = DreamService.getDreamMetadata(mContext,
-                    resolveInfo.serviceInfo);
+            final DreamService.DreamMetadata dreamMetadata = DreamService.getDreamMetadata(
+                    mContext.getPackageManager(), resolveInfo.serviceInfo);
             if (dreamMetadata != null) {
                 dreamInfo.settingsComponentName = dreamMetadata.settingsActivity;
                 dreamInfo.previewImage = dreamMetadata.previewImage;
                 dreamInfo.supportsComplications = dreamMetadata.showComplications;
+                dreamInfo.dreamCategory = dreamMetadata.dreamCategory;
             }
             dreamInfos.add(dreamInfo);
         }

@@ -18,8 +18,10 @@ package com.android.systemui.statusbar.notification.collection.provider
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.notification.collection.ListEntry
+import com.android.systemui.statusbar.notification.collection.SortBySectionTimeFlag
 import com.android.systemui.statusbar.notification.collection.listbuilder.NotifSection
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner
+import com.android.systemui.statusbar.notification.stack.BUCKET_PEOPLE
 import javax.inject.Inject
 
 /**
@@ -27,7 +29,8 @@ import javax.inject.Inject
  * NOTE: This class exists to avoid putting metadata like "isMinimized" on the NotifSection
  */
 @SysUISingleton
-class SectionStyleProvider @Inject constructor() {
+class SectionStyleProvider @Inject constructor(
+        private val highPriorityProvider: HighPriorityProvider) {
     private lateinit var silentSections: Set<NotifSectioner>
     private lateinit var lowPrioritySections: Set<NotifSectioner>
 
@@ -76,6 +79,13 @@ class SectionStyleProvider @Inject constructor() {
     @JvmOverloads
     fun isSilent(entry: ListEntry, ifNotInSection: Boolean = true): Boolean {
         val section = entry.section ?: return ifNotInSection
-        return isSilentSection(section)
+        if (SortBySectionTimeFlag.isEnabled) {
+            if (entry.section?.bucket == BUCKET_PEOPLE) {
+                return !highPriorityProvider.isHighPriorityConversation(entry)
+            }
+            return isSilentSection(section)
+        } else {
+            return isSilentSection(section)
+        }
     }
 }

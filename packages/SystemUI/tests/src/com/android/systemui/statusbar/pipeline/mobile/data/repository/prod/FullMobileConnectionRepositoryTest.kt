@@ -684,7 +684,6 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
         telephonyManager: TelephonyManager,
     ): MobileConnectionRepositoryImpl {
         whenever(telephonyManager.subscriptionId).thenReturn(SUB_ID)
-
         val realRepo =
             MobileConnectionRepositoryImpl(
                 SUB_ID,

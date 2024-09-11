@@ -18,6 +18,9 @@ package com.android.wm.shell.desktopmode;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 
+import static com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.getExitTransitionType;
+import static com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.isExitDesktopModeTransition;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
@@ -30,6 +33,7 @@ import android.os.IBinder;
 import android.util.DisplayMetrics;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
+import android.view.WindowManager.TransitionType;
 import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
 import android.window.WindowContainerTransaction;
@@ -38,6 +42,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.wm.shell.common.desktopmode.DesktopModeTransitionSource;
 import com.android.wm.shell.transition.Transitions;
 
 import java.util.ArrayList;
@@ -52,11 +57,12 @@ import java.util.function.Supplier;
  */
 public class ExitDesktopTaskTransitionHandler implements Transitions.TransitionHandler {
     private static final int FULLSCREEN_ANIMATION_DURATION = 336;
+
     private final Context mContext;
     private final Transitions mTransitions;
     private final List<IBinder> mPendingTransitionTokens = new ArrayList<>();
     private Consumer<SurfaceControl.Transaction> mOnAnimationFinishedCallback;
-    private Supplier<SurfaceControl.Transaction> mTransactionSupplier;
+    private final Supplier<SurfaceControl.Transaction> mTransactionSupplier;
     private Point mPosition;
 
     public ExitDesktopTaskTransitionHandler(
@@ -76,17 +82,19 @@ public class ExitDesktopTaskTransitionHandler implements Transitions.TransitionH
 
     /**
      * Starts Transition of a given type
-     * @param type Transition type
-     * @param wct WindowContainerTransaction for transition
-     * @param position Position of the task when transition is started
+     *
+     * @param transitionSource       DesktopModeTransitionSource for transition
+     * @param wct                    WindowContainerTransaction for transition
+     * @param position               Position of the task when transition is started
      * @param onAnimationEndCallback to be called after animation
      */
-    public void startTransition(@WindowManager.TransitionType int type,
+    public void startTransition(@NonNull DesktopModeTransitionSource transitionSource,
             @NonNull WindowContainerTransaction wct, Point position,
             Consumer<SurfaceControl.Transaction> onAnimationEndCallback) {
         mPosition = position;
         mOnAnimationFinishedCallback = onAnimationEndCallback;
-        final IBinder token = mTransitions.startTransition(type, wct, this);
+        final IBinder token = mTransitions.startTransition(getExitTransitionType(transitionSource),
+                wct, this);
         mPendingTransitionTokens.add(token);
     }
 
@@ -120,7 +128,7 @@ public class ExitDesktopTaskTransitionHandler implements Transitions.TransitionH
     @VisibleForTesting
     boolean startChangeTransition(
             @NonNull IBinder transition,
-            @WindowManager.TransitionType int type,
+            @TransitionType int type,
             @NonNull TransitionInfo.Change change,
             @NonNull SurfaceControl.Transaction startT,
             @NonNull SurfaceControl.Transaction finishT,
@@ -129,7 +137,7 @@ public class ExitDesktopTaskTransitionHandler implements Transitions.TransitionH
             return false;
         }
         final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
-        if (type == Transitions.TRANSIT_EXIT_DESKTOP_MODE
+        if (isExitDesktopModeTransition(type)
                 && taskInfo.getWindowingMode() == WINDOWING_MODE_FULLSCREEN) {
             // This Transition animates a task to fullscreen after being dragged to status bar
             final Resources resources = mContext.getResources();

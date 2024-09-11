@@ -37,7 +37,6 @@ import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.Icon;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.text.Spannable;
@@ -163,6 +162,8 @@ public class ConversationLayout extends FrameLayout
     private TouchDelegateComposite mTouchDelegate = new TouchDelegateComposite(this);
     private ArrayList<MessagingLinearLayout.MessagingChild> mToRecycle = new ArrayList<>();
     private boolean mPrecomputedTextEnabled = false;
+    @Nullable
+    private ConversationHeaderData mConversationHeaderData;
 
     public ConversationLayout(@NonNull Context context) {
         super(context);
@@ -652,6 +653,7 @@ public class ConversationLayout extends FrameLayout
 
     private void setConversationAvatarAndNameFromData(
             ConversationHeaderData conversationHeaderData) {
+        mConversationHeaderData = conversationHeaderData;
         final OneToOneConversationAvatarData oneToOneConversationDrawable;
         final GroupConversationAvatarData groupConversationAvatarData;
         final ConversationAvatarData conversationAvatar =
@@ -805,7 +807,10 @@ public class ConversationLayout extends FrameLayout
         bottomBackground.setLayoutParams(layoutParams);
     }
 
-    private void bindFacePileWithDrawable(ImageView bottomBackground, ImageView bottomView,
+    /**
+     * Binds group avatar drawables to face pile.
+     */
+    public void bindFacePileWithDrawable(ImageView bottomBackground, ImageView bottomView,
             ImageView topView, GroupConversationAvatarData groupConversationAvatarData) {
         applyNotificationBackgroundColor(bottomBackground);
         bottomView.setImageDrawable(groupConversationAvatarData.mLastIcon);
@@ -1207,6 +1212,10 @@ public class ConversationLayout extends FrameLayout
                 }
             }
         }
+        if (android.app.Flags.cleanUpSpansAndNewLines() && conversationText != null) {
+            // remove formatting from title.
+            conversationText = conversationText.toString();
+        }
 
         if (conversationIcon == null) {
             conversationIcon = largeIcon;
@@ -1216,7 +1225,7 @@ public class ConversationLayout extends FrameLayout
             return new ConversationHeaderData(
                     conversationText,
                     new OneToOneConversationAvatarData(
-                            resolveAvatarImage(conversationIcon)));
+                            resolveAvatarImageForOneToOne(conversationIcon)));
         }
 
         final List<List<Notification.MessagingStyle.Message>> groupMessages = new ArrayList<>();
@@ -1283,18 +1292,45 @@ public class ConversationLayout extends FrameLayout
 
         return new ConversationHeaderData(
                 conversationText,
-                new GroupConversationAvatarData(resolveAvatarImage(lastIcon),
-                        resolveAvatarImage(secondLastIcon)));
+                new GroupConversationAvatarData(resolveAvatarImageForFacePile(lastIcon),
+                        resolveAvatarImageForFacePile(secondLastIcon)));
     }
 
     /**
-     * {@link ImageResolver#loadImage(Uri)} accepts Uri to load images. However Conversation Avatars
-     * are received as Icon. So, we can't make use of ImageResolver.
+     * One To One Conversation Avatars is loaded by CachingIconView(conversation icon view).
      */
     @Nullable
-    private Drawable resolveAvatarImage(Icon conversationIcon) {
+    private Drawable resolveAvatarImageForOneToOne(Icon conversationIcon) {
+        final Drawable conversationIconDrawable =
+                tryLoadingSizeRestrictedIconForOneToOne(conversationIcon);
+        if (conversationIconDrawable != null) {
+            return conversationIconDrawable;
+        }
+        // when size restricted icon loading fails, we fallback to icons load drawable.
+        return loadDrawableFromIcon(conversationIcon);
+    }
+
+    @Nullable
+    private Drawable tryLoadingSizeRestrictedIconForOneToOne(Icon conversationIcon) {
         try {
-            return LocalImageResolver.resolveImage(conversationIcon, getContext());
+            return mConversationIconView.loadSizeRestrictedIcon(conversationIcon);
+        } catch (Exception ex) {
+            return null;
+        }
+    }
+
+    /**
+     * Group Avatar drawables are loaded by Icon.
+     */
+    @Nullable
+    private Drawable resolveAvatarImageForFacePile(Icon conversationIcon) {
+        return loadDrawableFromIcon(conversationIcon);
+    }
+
+    @Nullable
+    private Drawable loadDrawableFromIcon(Icon conversationIcon) {
+        try {
+            return conversationIcon.loadDrawable(getContext());
         } catch (Exception ex) {
             return null;
         }
@@ -1561,6 +1597,11 @@ public class ConversationLayout extends FrameLayout
     @Nullable
     public Icon getConversationIcon() {
         return mConversationIcon;
+    }
+
+    @Nullable
+    public ConversationHeaderData getConversationHeaderData() {
+        return mConversationHeaderData;
     }
 
     private static class TouchDelegateComposite extends TouchDelegate {

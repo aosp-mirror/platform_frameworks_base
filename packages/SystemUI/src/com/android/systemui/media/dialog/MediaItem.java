@@ -16,7 +16,9 @@
 
 package com.android.systemui.media.dialog;
 
-import androidx.annotation.IntDef;
+import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 
 import com.android.settingslib.media.MediaDevice;
 import com.android.systemui.res.R;
@@ -46,40 +48,50 @@ public class MediaItem {
         int TYPE_PAIR_NEW_DEVICE = 2;
     }
 
-    public MediaItem() {
-        this.mMediaDeviceOptional = Optional.empty();
-        this.mTitle = null;
-        this.mMediaItemType = MediaItemType.TYPE_PAIR_NEW_DEVICE;
+    /**
+     * Returns a new {@link MediaItemType#TYPE_DEVICE} {@link MediaItem} with its {@link
+     * #getMediaDevice() media device} set to {@code device} and its title set to {@code device}'s
+     * name.
+     */
+    public static MediaItem createDeviceMediaItem(@NonNull MediaDevice device) {
+        return new MediaItem(device, device.getName(), MediaItemType.TYPE_DEVICE);
     }
 
-    public MediaItem(String title, int mediaItemType) {
-        this.mMediaDeviceOptional = Optional.empty();
+    /**
+     * Returns a new {@link MediaItemType#TYPE_PAIR_NEW_DEVICE} {@link MediaItem} with both {@link
+     * #getMediaDevice() media device} and title set to {@code null}.
+     */
+    public static MediaItem createPairNewDeviceMediaItem() {
+        return new MediaItem(
+                /* device */ null, /* title */ null, MediaItemType.TYPE_PAIR_NEW_DEVICE);
+    }
+
+    /**
+     * Returns a new {@link MediaItemType#TYPE_GROUP_DIVIDER} {@link MediaItem} with the specified
+     * title and a {@code null} {@link #getMediaDevice() media device}.
+     */
+    public static MediaItem createGroupDividerMediaItem(@Nullable String title) {
+        return new MediaItem(/* device */ null, title, MediaItemType.TYPE_GROUP_DIVIDER);
+    }
+
+    private MediaItem(
+            @Nullable MediaDevice device, @Nullable String title, @MediaItemType int type) {
+        this.mMediaDeviceOptional = Optional.ofNullable(device);
         this.mTitle = title;
-        this.mMediaItemType = mediaItemType;
-    }
-
-    public MediaItem(MediaDevice mediaDevice) {
-        this.mMediaDeviceOptional = Optional.of(mediaDevice);
-        this.mTitle = mediaDevice.getName();
-        this.mMediaItemType = MediaItemType.TYPE_DEVICE;
+        this.mMediaItemType = type;
     }
 
     public Optional<MediaDevice> getMediaDevice() {
         return mMediaDeviceOptional;
     }
 
-    /**
-     * Get layout id based on media item Type.
-     */
-    public static int getMediaLayoutId(int mediaItemType) {
-        switch (mediaItemType) {
-            case MediaItemType.TYPE_DEVICE:
-            case MediaItemType.TYPE_PAIR_NEW_DEVICE:
-                return R.layout.media_output_list_item_advanced;
-            case MediaItemType.TYPE_GROUP_DIVIDER:
-            default:
-                return R.layout.media_output_list_group_divider;
-        }
+    /** Get layout id based on media item Type. */
+    public static int getMediaLayoutId(@MediaItemType int mediaItemType) {
+        return switch (mediaItemType) {
+            case MediaItemType.TYPE_DEVICE, MediaItemType.TYPE_PAIR_NEW_DEVICE ->
+                    R.layout.media_output_list_item_advanced;
+            default -> R.layout.media_output_list_group_divider;
+        };
     }
 
     public String getTitle() {

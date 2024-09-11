@@ -22,6 +22,7 @@ import android.view.View
 import android.view.WindowManager
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Constraints
@@ -32,12 +33,12 @@ import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.SceneScope
 import com.android.keyguard.LockIconView
 import com.android.keyguard.LockIconViewController
-import com.android.systemui.Flags.keyguardBottomAreaRefactor
 import com.android.systemui.biometrics.AuthController
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.flags.Flags
+import com.android.systemui.keyguard.KeyguardBottomAreaRefactor
 import com.android.systemui.keyguard.ui.binder.DeviceEntryIconViewBinder
 import com.android.systemui.keyguard.ui.composable.blueprint.BlueprintAlignmentLines
 import com.android.systemui.keyguard.ui.view.DeviceEntryIconView
@@ -68,8 +69,8 @@ constructor(
     private val notificationPanelView: NotificationPanelView,
 ) {
     @Composable
-    fun SceneScope.LockIcon(modifier: Modifier = Modifier) {
-        if (!keyguardBottomAreaRefactor() && !DeviceEntryUdfpsRefactor.isEnabled) {
+    fun SceneScope.LockIcon(overrideColor: Color? = null, modifier: Modifier = Modifier) {
+        if (!KeyguardBottomAreaRefactor.isEnabled && !DeviceEntryUdfpsRefactor.isEnabled) {
             return
         }
 
@@ -93,10 +94,11 @@ constructor(
                                 deviceEntryBackgroundViewModel.get(),
                                 falsingManager.get(),
                                 vibratorHelper.get(),
+                                overrideColor,
                             )
                         }
                     } else {
-                        // keyguardBottomAreaRefactor()
+                        // KeyguardBottomAreaRefactor.isEnabled
                         LockIconView(context, null).apply {
                             id = R.id.lock_icon_view
                             lockIconViewController.get().setLockIconView(this)

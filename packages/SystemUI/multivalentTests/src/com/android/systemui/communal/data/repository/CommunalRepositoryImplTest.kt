@@ -22,36 +22,27 @@ import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.scene.data.repository.sceneContainerRepository
-import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
+import com.android.systemui.scene.shared.model.sceneDataSource
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class CommunalRepositoryImplTest : SysuiTestCase() {
-    private lateinit var underTest: CommunalRepositoryImpl
 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
-    private val sceneContainerRepository = kosmos.sceneContainerRepository
-
-    @Before
-    fun setUp() {
-        underTest = createRepositoryImpl(false)
-    }
-
-    private fun createRepositoryImpl(sceneContainerEnabled: Boolean): CommunalRepositoryImpl {
-        return CommunalRepositoryImpl(
-            testScope.backgroundScope,
-            kosmos.fakeSceneContainerFlags.apply { enabled = sceneContainerEnabled },
-            sceneContainerRepository,
+    private val underTest by lazy {
+        CommunalSceneRepositoryImpl(
+            kosmos.applicationCoroutineScope,
+            kosmos.applicationCoroutineScope,
+            kosmos.sceneDataSource,
         )
     }
 

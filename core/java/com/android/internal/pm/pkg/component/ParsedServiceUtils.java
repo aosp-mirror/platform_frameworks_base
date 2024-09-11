@@ -34,6 +34,7 @@ import android.os.Build;
 
 import com.android.internal.R;
 import com.android.internal.pm.pkg.parsing.ParsingPackage;
+import com.android.internal.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.internal.pm.pkg.parsing.ParsingUtils;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -135,6 +136,9 @@ public class ParsedServiceUtils {
                 && (type != XmlPullParser.END_TAG
                 || parser.getDepth() > depth)) {
             if (type != XmlPullParser.START_TAG) {
+                continue;
+            }
+            if (ParsingPackageUtils.getAconfigFlags().skipCurrentElement(parser)) {
                 continue;
             }
 

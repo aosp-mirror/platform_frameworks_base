@@ -16,17 +16,16 @@
 
 package com.android.server.wm;
 
+import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.View.DRAG_FLAG_GLOBAL;
 import static android.view.View.DRAG_FLAG_GLOBAL_SAME_APPLICATION;
 import static android.view.View.DRAG_FLAG_START_INTENT_SENDER_ON_UNHANDLED_DRAG;
 
-import static com.android.input.flags.Flags.enablePointerChoreographer;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DRAG;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.annotation.NonNull;
-import android.app.ActivityManager;
 import android.content.ClipData;
 import android.content.Context;
 import android.hardware.input.InputManagerGlobal;
@@ -36,6 +35,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
+import android.os.Trace;
 import android.util.Slog;
 import android.view.Display;
 import android.view.DragEvent;
@@ -52,6 +52,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.wm.WindowManagerInternal.IDragDropCallback;
 
 import java.util.Objects;
+import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -263,16 +264,12 @@ class DragDropController {
 
                 final SurfaceControl surfaceControl = mDragState.mSurfaceControl;
                 mDragState.broadcastDragStartedLocked(touchX, touchY);
-                if (enablePointerChoreographer()) {
-                    if ((touchSource & InputDevice.SOURCE_MOUSE) == InputDevice.SOURCE_MOUSE) {
-                        InputManagerGlobal.getInstance().setPointerIcon(
-                                PointerIcon.getSystemIcon(
-                                        mService.mContext, PointerIcon.TYPE_GRABBING),
-                                mDragState.mDisplayContent.getDisplayId(), touchDeviceId,
-                                touchPointerId, mDragState.getInputToken());
-                    }
-                } else {
-                    mDragState.overridePointerIconLocked(touchSource);
+                if ((touchSource & InputDevice.SOURCE_MOUSE) == InputDevice.SOURCE_MOUSE) {
+                    InputManagerGlobal.getInstance().setPointerIcon(
+                            PointerIcon.getSystemIcon(
+                                    mService.mContext, PointerIcon.TYPE_GRABBING),
+                            mDragState.mDisplayContent.getDisplayId(), touchDeviceId,
+                            touchPointerId, mDragState.getInputToken());
                 }
                 // remember the thumb offsets for later
                 mDragState.mThumbOffsetX = thumbCenterX;
@@ -386,6 +383,9 @@ class DragDropController {
                     + "(listener=" + mGlobalDragListener + ", flags=" + mDragState.mFlags + ")");
             return false;
         }
+        final int traceCookie = new Random().nextInt();
+        Trace.asyncTraceBegin(TRACE_TAG_WINDOW_MANAGER, "DragDropController#notifyUnhandledDrop",
+                traceCookie);
         if (DEBUG_DRAG) Slog.d(TAG_WM, "Sending DROP to unhandled listener (" + reason + ")");
         try {
             // Schedule timeout for the unhandled drag listener to call back
@@ -396,6 +396,8 @@ class DragDropController {
                     if (DEBUG_DRAG) Slog.d(TAG_WM, "Unhandled listener finished handling DROP");
                     synchronized (mService.mGlobalLock) {
                         onUnhandledDropCallback(consumedByListener);
+                        Trace.asyncTraceEnd(TRACE_TAG_WINDOW_MANAGER,
+                                "DragDropController#notifyUnhandledDrop", traceCookie);
                     }
                 }
             });

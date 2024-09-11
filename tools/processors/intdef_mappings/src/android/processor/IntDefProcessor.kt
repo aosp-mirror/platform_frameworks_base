@@ -30,7 +30,7 @@ import javax.lang.model.SourceVersion
 import javax.lang.model.element.AnnotationValue
 import javax.lang.model.element.TypeElement
 import javax.tools.Diagnostic.Kind
-import javax.tools.StandardLocation.CLASS_OUTPUT
+import javax.tools.StandardLocation.SOURCE_OUTPUT
 import kotlin.collections.set
 
 /**
@@ -126,7 +126,7 @@ class IntDefProcessor : AbstractProcessor() {
     @Throws(IOException::class)
     private fun outputToFile(annotationTypeToIntDefMapping: Map<String, IntDefMapping>) {
         val resource = processingEnv.filer.createResource(
-                CLASS_OUTPUT, "com.android.winscope", outputName)
+                SOURCE_OUTPUT, "com.android.winscope", outputName)
         val writer = resource.openWriter()
         serializeTo(annotationTypeToIntDefMapping, writer)
         writer.close()

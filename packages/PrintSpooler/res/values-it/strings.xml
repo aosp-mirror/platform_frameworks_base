@@ -56,7 +56,7 @@
     <string name="print_select_printer" msgid="7388760939873368698">"Seleziona stampante"</string>
     <string name="print_forget_printer" msgid="5035287497291910766">"Elimina stampante"</string>
     <plurals name="print_search_result_count_utterance" formatted="false" msgid="6997663738361080868">
-      <item quantity="many"><xliff:g id="COUNT_1">%1$s</xliff:g> stampanti trovate</item>
+      <item quantity="many"><xliff:g id="COUNT_1">%1$s</xliff:g> di stampanti trovate</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$s</xliff:g> stampanti trovate</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$s</xliff:g> stampante trovata</item>
     </plurals>
@@ -77,9 +77,9 @@
     <string name="disabled_services_title" msgid="7313253167968363211">"Servizi disattivati"</string>
     <string name="all_services_title" msgid="5578662754874906455">"Tutti i servizi"</string>
     <plurals name="print_services_recommendation_subtitle" formatted="false" msgid="5678487708807185138">
-      <item quantity="many">Installa per rilevare <xliff:g id="COUNT_1">%1$s</xliff:g> stampanti</item>
-      <item quantity="other">Installa per rilevare <xliff:g id="COUNT_1">%1$s</xliff:g> stampanti</item>
-      <item quantity="one">Installa per rilevare <xliff:g id="COUNT_0">%1$s</xliff:g> stampante</item>
+      <item quantity="many">Installa per individuare <xliff:g id="COUNT_1">%1$s</xliff:g> di stampanti</item>
+      <item quantity="other">Installa per individuare <xliff:g id="COUNT_1">%1$s</xliff:g> stampanti</item>
+      <item quantity="one">Installa per individuare <xliff:g id="COUNT_0">%1$s</xliff:g> stampante</item>
     </plurals>
     <string name="printing_notification_title_template" msgid="295903957762447362">"Stampa di <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="cancelling_notification_title_template" msgid="1821759594704703197">"Annullamento di <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
@@ -96,7 +96,7 @@
     <item msgid="2762241247228983754">"A colori"</item>
   </string-array>
   <string-array name="duplex_mode_labels">
-    <item msgid="3882302912790928315">"Nessuno"</item>
+    <item msgid="3882302912790928315">"Nessuna"</item>
     <item msgid="7296563835355641719">"Lato lungo"</item>
     <item msgid="79513688117503758">"Lato corto"</item>
   </string-array>

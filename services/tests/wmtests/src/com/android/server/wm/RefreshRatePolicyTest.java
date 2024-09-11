@@ -109,6 +109,7 @@ public class RefreshRatePolicyTest extends WindowTestsBase {
                         defaultMode.getPhysicalWidth(), defaultMode.getPhysicalHeight(),
                         LOW_REFRESH_RATE),
         };
+        mDisplayInfo.appsSupportedModes = mDisplayInfo.supportedModes;
         mDisplayInfo.defaultModeId = HI_MODE_ID;
         mPolicy = new RefreshRatePolicy(mWm, mDisplayInfo, mDenylist);
     }

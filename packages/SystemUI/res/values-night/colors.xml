@@ -77,6 +77,7 @@
     <color name="biometric_dialog_gray">#ffcccccc</color>
     <color name="biometric_dialog_accent">@color/material_dynamic_primary70</color>
     <color name="biometric_dialog_error">#fff28b82</color> <!-- red 300 -->
+    <color name="biometric_dialog_face_checkmark">#5bb974</color> <!-- green 400 -->
 
     <color name="GM2_green_500">#FF41Af6A</color>
     <color name="GM2_blue_500">#5195EA</color>
@@ -102,10 +103,6 @@
     <color name="accessibility_floating_menu_message_text">@*android:color/primary_text_default_material_dark</color>
 
     <color name="people_tile_background">@color/material_dynamic_secondary20</color>
-
-    <!-- Internet Dialog -->
-    <color name="connected_network_primary_color">@color/material_dynamic_primary80</color>
-    <color name="connected_network_secondary_color">@color/material_dynamic_secondary80</color>
 
     <!-- Keyboard shortcut helper dialog -->
     <color name="ksh_key_item_color">@*android:color/system_on_surface_variant_dark</color>

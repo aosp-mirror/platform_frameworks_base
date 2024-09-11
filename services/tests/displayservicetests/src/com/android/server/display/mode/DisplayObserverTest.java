@@ -39,6 +39,7 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.res.Resources;
 import android.hardware.display.DisplayManager;
+import android.hardware.display.DisplayManagerInternal;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.DeviceConfigInterface;
@@ -112,6 +113,8 @@ public class DisplayObserverTest {
     private Resources mResources;
     @Mock
     private DisplayManagerFlags mDisplayManagerFlags;
+    @Mock
+    private DisplayModeDirector.DisplayDeviceConfigProvider mDisplayDeviceConfigProvider;
     private int mExternalDisplayUserPreferredModeId = INVALID_MODE_ID;
     private int mInternalDisplayUserPreferredModeId = INVALID_MODE_ID;
     private Display mDefaultDisplay;
@@ -404,7 +407,8 @@ public class DisplayObserverTest {
             assertThat(mObserver).isNull();
             mObserver = invocation.getArgument(0);
             return null;
-        }).when(mInjector).registerDisplayListener(any(), any());
+        }).when(mInjector).registerDisplayListener(
+                any(DisplayModeDirector.DisplayObserver.class), any());
 
         doAnswer(c -> {
             DisplayInfo info = c.getArgument(1);
@@ -426,8 +430,12 @@ public class DisplayObserverTest {
             return true;
         }).when(mInjector).getDisplayInfo(eq(EXTERNAL_DISPLAY), /*displayInfo=*/ any());
 
-        doAnswer(c -> mock(SensorManagerInternal.class)).when(mInjector).getSensorManagerInternal();
+        doAnswer(c -> mock(SensorManagerInternal.class))
+                .when(mInjector).getSensorManagerInternal();
         doAnswer(c -> mock(DeviceConfigInterface.class)).when(mInjector).getDeviceConfig();
+        doAnswer(c -> mock(DisplayManagerInternal.class))
+                .when(mInjector).getDisplayManagerInternal();
+
 
         mDefaultDisplay = mock(Display.class);
         when(mDefaultDisplay.getDisplayId()).thenReturn(DEFAULT_DISPLAY);
@@ -441,7 +449,8 @@ public class DisplayObserverTest {
 
         when(mInjector.getDisplays()).thenReturn(new Display[] {mDefaultDisplay, mExternalDisplay});
 
-        mDmd = new DisplayModeDirector(mContext, mHandler, mInjector, mDisplayManagerFlags);
+        mDmd = new DisplayModeDirector(mContext, mHandler, mInjector,
+                mDisplayManagerFlags, mDisplayDeviceConfigProvider);
         mDmd.start(null);
         assertThat(mObserver).isNotNull();
     }

@@ -42,11 +42,9 @@ import com.android.systemui.flags.Flags;
 import com.android.systemui.mediaprojection.MediaProjectionMetricsLogger;
 import com.android.systemui.mediaprojection.SessionCreationSource;
 import com.android.systemui.mediaprojection.devicepolicy.ScreenCaptureDevicePolicyResolver;
-import com.android.systemui.mediaprojection.devicepolicy.ScreenCaptureDisabledDialog;
+import com.android.systemui.mediaprojection.devicepolicy.ScreenCaptureDisabledDialogDelegate;
 import com.android.systemui.plugins.ActivityStarter;
-import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.settings.UserTracker;
-import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.CallbackController;
 
 import dagger.Lazy;
@@ -71,18 +69,19 @@ public class RecordingController
     private CountDownTimer mCountDownTimer = null;
     private final Executor mMainExecutor;
     private final BroadcastDispatcher mBroadcastDispatcher;
-    private final Context mContext;
     private final FeatureFlags mFlags;
-    private final UserContextProvider mUserContextProvider;
     private final UserTracker mUserTracker;
     private final MediaProjectionMetricsLogger mMediaProjectionMetricsLogger;
-    private final SystemUIDialog.Factory mDialogFactory;
+    private final ScreenCaptureDisabledDialogDelegate mScreenCaptureDisabledDialogDelegate;
+    private final ScreenRecordDialogDelegate.Factory mScreenRecordDialogFactory;
+    private final ScreenRecordPermissionDialogDelegate.Factory
+            mScreenRecordPermissionDialogDelegateFactory;
 
     protected static final String INTENT_UPDATE_STATE =
             "com.android.systemui.screenrecord.UPDATE_STATE";
     protected static final String EXTRA_STATE = "extra_state";
 
-    private CopyOnWriteArrayList<RecordingStateChangeCallback> mListeners =
+    private final CopyOnWriteArrayList<RecordingStateChangeCallback> mListeners =
             new CopyOnWriteArrayList<>();
 
     private final Lazy<ScreenCaptureDevicePolicyResolver> mDevicePolicyResolver;
@@ -115,24 +114,26 @@ public class RecordingController
      * Create a new RecordingController
      */
     @Inject
-    public RecordingController(@Main Executor mainExecutor,
+    public RecordingController(
+            @Main Executor mainExecutor,
             BroadcastDispatcher broadcastDispatcher,
-            Context context,
             FeatureFlags flags,
-            UserContextProvider userContextProvider,
             Lazy<ScreenCaptureDevicePolicyResolver> devicePolicyResolver,
             UserTracker userTracker,
             MediaProjectionMetricsLogger mediaProjectionMetricsLogger,
-            SystemUIDialog.Factory dialogFactory) {
+            ScreenCaptureDisabledDialogDelegate screenCaptureDisabledDialogDelegate,
+            ScreenRecordDialogDelegate.Factory screenRecordDialogFactory,
+            ScreenRecordPermissionDialogDelegate.Factory
+                    screenRecordPermissionDialogDelegateFactory) {
         mMainExecutor = mainExecutor;
-        mContext = context;
         mFlags = flags;
         mDevicePolicyResolver = devicePolicyResolver;
         mBroadcastDispatcher = broadcastDispatcher;
-        mUserContextProvider = userContextProvider;
         mUserTracker = userTracker;
         mMediaProjectionMetricsLogger = mediaProjectionMetricsLogger;
-        mDialogFactory = dialogFactory;
+        mScreenCaptureDisabledDialogDelegate = screenCaptureDisabledDialogDelegate;
+        mScreenRecordDialogFactory = screenRecordDialogFactory;
+        mScreenRecordPermissionDialogDelegateFactory = screenRecordPermissionDialogDelegateFactory;
 
         BroadcastOptions options = BroadcastOptions.makeBasic();
         options.setInteractive(true);
@@ -163,27 +164,18 @@ public class RecordingController
         if (mFlags.isEnabled(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING_ENTERPRISE_POLICIES)
                 && mDevicePolicyResolver.get()
                         .isScreenCaptureCompletelyDisabled(getHostUserHandle())) {
-            return new ScreenCaptureDisabledDialog(mContext);
+            return mScreenCaptureDisabledDialogDelegate.createSysUIDialog();
         }
 
         mMediaProjectionMetricsLogger.notifyProjectionInitiated(
                 getHostUid(), SessionCreationSource.SYSTEM_UI_SCREEN_RECORDER);
 
-        return flags.isEnabled(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING)
-                ? mDialogFactory.create(new ScreenRecordPermissionDialogDelegate(
-                getHostUserHandle(),
-                getHostUid(),
-                /* controller= */ this,
-                activityStarter,
-                mUserContextProvider,
-                onStartRecordingClicked,
-                mMediaProjectionMetricsLogger,
-                mDialogFactory))
-                : new ScreenRecordDialog(
-                        context,
-                        /* controller= */ this,
-                        mUserContextProvider,
-                        onStartRecordingClicked);
+        return (flags.isEnabled(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING)
+                ? mScreenRecordPermissionDialogDelegateFactory
+                    .create(this, getHostUserHandle(), getHostUid(), onStartRecordingClicked)
+                : mScreenRecordDialogFactory
+                    .create(this, onStartRecordingClicked))
+                .createDialog();
     }
 
     /**

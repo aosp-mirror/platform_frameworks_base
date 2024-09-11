@@ -3,6 +3,7 @@ container: "system"
 
 flag {
     name: "always_update_wallpaper_permission"
+    is_exported: true
     namespace: "wear_frameworks"
     description: "Allow out of focus process to update wallpaper complications"
     bug: "271132915"
@@ -20,4 +21,21 @@ flag {
   namespace: "systemui"
   description: "Prevent the system from sending consecutive onVisibilityChanged(false) events."
   bug: "285631818"
+}
+
+flag {
+  name: "offload_color_extraction"
+  namespace: "systemui"
+  description: "Let ImageWallpaper take care of its wallpaper color extraction, instead of system_server"
+  bug: "328791519"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "no_visibility_event_on_display_state_change"
+  namespace: "wear_frameworks"
+  description: "Prevent the system from sending visibility event on display state change."
+  bug: "331725519"
 }

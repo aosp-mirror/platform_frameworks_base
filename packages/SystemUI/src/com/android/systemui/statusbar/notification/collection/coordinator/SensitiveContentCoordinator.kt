@@ -16,12 +16,14 @@
 
 package com.android.systemui.statusbar.notification.collection.coordinator
 
+import android.app.Notification
 import android.os.UserHandle
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.server.notification.Flags.screenshareNotificationHiding
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.StatusBarState
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter
 import com.android.systemui.statusbar.notification.DynamicPrivacyController
 import com.android.systemui.statusbar.notification.collection.GroupEntry
 import com.android.systemui.statusbar.notification.collection.ListEntry
@@ -63,11 +65,32 @@ class SensitiveContentCoordinatorImpl @Inject constructor(
         SensitiveContentCoordinator,
         DynamicPrivacyController.Listener,
         OnBeforeRenderListListener {
+    private val onSensitiveStateChanged = Runnable() {
+        invalidateList("onSensitiveStateChanged")
+    }
+
+    private val screenshareSecretFilter = object : NotifFilter("ScreenshareSecretFilter") {
+        val NotificationEntry.isSecret
+            get() = channel?.lockscreenVisibility == Notification.VISIBILITY_SECRET ||
+                sbn.notification?.visibility == Notification.VISIBILITY_SECRET
+        override fun shouldFilterOut(entry: NotificationEntry, now: Long): Boolean {
+            return screenshareNotificationHiding() &&
+                sensitiveNotificationProtectionController.isSensitiveStateActive &&
+                entry.isSecret
+        }
+    }
 
     override fun attach(pipeline: NotifPipeline) {
         dynamicPrivacyController.addListener(this)
+        if (screenshareNotificationHiding()) {
+            sensitiveNotificationProtectionController
+                .registerSensitiveStateListener(onSensitiveStateChanged)
+        }
         pipeline.addOnBeforeRenderListListener(this)
         pipeline.addPreRenderInvalidator(this)
+        if (screenshareNotificationHiding()) {
+            pipeline.addFinalizeFilter(screenshareSecretFilter)
+        }
     }
 
     override fun onDynamicPrivacyChanged(): Unit = invalidateList("onDynamicPrivacyChanged")

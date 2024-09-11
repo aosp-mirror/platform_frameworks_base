@@ -788,7 +788,13 @@ public class AppIdleHistory {
                         }
                         appUsageHistory.nextEstimatedLaunchTime = getLongValue(parser,
                                 ATTR_NEXT_ESTIMATED_APP_LAUNCH_TIME, 0);
-                        appUsageHistory.lastInformedBucket = -1;
+                        if (Flags.avoidIdleCheck()) {
+                            // Set lastInformedBucket to the same value with the currentBucket
+                            // it should have already been informed.
+                            appUsageHistory.lastInformedBucket = appUsageHistory.currentBucket;
+                        } else {
+                            appUsageHistory.lastInformedBucket = -1;
+                        }
                         userHistory.put(packageName, appUsageHistory);
 
                         if (version >= XML_VERSION_ADD_BUCKET_EXPIRY_TIMES) {

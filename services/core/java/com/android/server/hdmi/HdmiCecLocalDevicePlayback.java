@@ -53,6 +53,16 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
     @VisibleForTesting
     static final long STANDBY_AFTER_HOTPLUG_OUT_DELAY_MS = 30_000;
 
+    // How long to wait on active source lost before possibly going to Standby.
+    @VisibleForTesting
+    static final long STANDBY_AFTER_ACTIVE_SOURCE_LOST_DELAY_MS = 30_000;
+
+    // How long to wait after losing active source, before launching the pop-up that allows the user
+    // to keep the device as the current active source.
+    // We do this to prevent an unnecessary pop-up from being displayed when we lose and regain
+    // active source within this timeout.
+    static final long POPUP_AFTER_ACTIVE_SOURCE_LOST_DELAY_MS = 5_000;
+
     // Used to keep the device awake while it is the active source. For devices that
     // cannot wake up via CEC commands, this address the inconvenience of having to
     // turn them on. True by default, and can be disabled (i.e. device can go to sleep
@@ -63,6 +73,14 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
 
     // Handler for queueing a delayed Standby runnable after hotplug out.
     private Handler mDelayedStandbyHandler;
+
+    // Handler for queueing a delayed Standby runnable after active source lost and after the pop-up
+    // on active source lost was displayed.
+    Handler mDelayedStandbyOnActiveSourceLostHandler;
+
+    // Handler for queueing a delayed runnable that triggers a pop-up notification on active source
+    // lost.
+    private Handler mDelayedPopupOnActiveSourceLostHandler;
 
     // Determines what action should be taken upon receiving Routing Control messages.
     @VisibleForTesting
@@ -75,6 +93,8 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
         super(service, HdmiDeviceInfo.DEVICE_PLAYBACK);
 
         mDelayedStandbyHandler = new Handler(service.getServiceLooper());
+        mDelayedStandbyOnActiveSourceLostHandler = new Handler(service.getServiceLooper());
+        mDelayedPopupOnActiveSourceLostHandler = new Handler(service.getServiceLooper());
         mStandbyHandler = new HdmiCecStandbyModeHandler(service, this);
     }
 
@@ -239,6 +259,27 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
         }
     }
 
+    private class DelayedStandbyOnActiveSourceLostRunnable implements Runnable {
+        @Override
+        public void run() {
+            if (mService.getPowerManagerInternal().wasDeviceIdleFor(
+                    STANDBY_AFTER_ACTIVE_SOURCE_LOST_DELAY_MS)) {
+                mService.standby();
+            } else {
+                mService.setAndBroadcastActiveSource(mService.getPhysicalAddress(),
+                        getDeviceInfo().getDeviceType(), Constants.ADDR_TV,
+                        "DelayedActiveSourceLostStandbyRunnable");
+            }
+        }
+    }
+
+    @ServiceThreadOnly
+    void dismissUiOnActiveSourceStatusRecovered() {
+        assertRunOnServiceThread();
+        Intent intent = new Intent(HdmiControlManager.ACTION_ON_ACTIVE_SOURCE_RECOVERED_DISMISS_UI);
+        mService.sendBroadcastAsUser(intent);
+    }
+
     @Override
     @ServiceThreadOnly
     protected void onStandby(boolean initiatedByCec, int standbyAction,
@@ -387,10 +428,44 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
         switch (mService.getHdmiCecConfig().getStringValue(
                     HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST)) {
             case HdmiControlManager.POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_STANDBY_NOW:
-                mService.standby();
+                mDelayedPopupOnActiveSourceLostHandler.removeCallbacksAndMessages(null);
+                mDelayedPopupOnActiveSourceLostHandler.postDelayed(
+                        new Runnable() {
+                            @Override
+                            public void run() {
+                                if (!isActiveSource()) {
+                                    startHdmiCecActiveSourceLostActivity();
+                                    mDelayedStandbyOnActiveSourceLostHandler
+                                            .removeCallbacksAndMessages(null);
+                                    mDelayedStandbyOnActiveSourceLostHandler.postDelayed(
+                                            new DelayedStandbyOnActiveSourceLostRunnable(),
+                                            STANDBY_AFTER_ACTIVE_SOURCE_LOST_DELAY_MS);
+                                }
+                            }
+                        }, POPUP_AFTER_ACTIVE_SOURCE_LOST_DELAY_MS);
                 return;
             case HdmiControlManager.POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_NONE:
                 return;
+        }
+    }
+
+    @VisibleForTesting
+    @ServiceThreadOnly
+    void startHdmiCecActiveSourceLostActivity() {
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            Context context = mService.getContext();
+            Intent intent = new Intent();
+            intent.setComponent(
+                    ComponentName.unflattenFromString(context.getResources().getString(
+                            com.android.internal.R.string.config_hdmiCecActiveSourceLostActivity
+                    )));
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivityAsUser(intent, context.getUser());
+        } catch (ActivityNotFoundException e) {
+            Slog.e(TAG, "Unable to start HdmiCecActiveSourceLostActivity");
+        } finally {
+            Binder.restoreCallingIdentity(identity);
         }
     }
 
@@ -557,6 +632,7 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
             setActiveSource(physicalAddress,
                     "HdmiCecLocalDevicePlayback#handleRoutingChangeAndInformation()");
         }
+        dismissUiOnActiveSourceStatusRecovered();
         switch (mPlaybackDeviceActionOnRoutingControl) {
             case WAKE_UP_AND_SEND_ACTIVE_SOURCE:
                 setAndBroadcastActiveSource(message, physicalAddress,

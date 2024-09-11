@@ -333,6 +333,11 @@ public abstract class BaseCanvas {
         nDrawPath(mNativeCanvasWrapper, path.readOnlyNI(), paint.getNativeInstance());
     }
 
+    public void drawRegion(@NonNull Region region, @NonNull Paint paint) {
+        throwIfHasHwFeaturesInSwMode(paint);
+        nDrawRegion(mNativeCanvasWrapper, region.mNativeRegion, paint.getNativeInstance());
+    }
+
     public void drawPoint(float x, float y, @NonNull Paint paint) {
         throwIfHasHwFeaturesInSwMode(paint);
         nDrawPoint(mNativeCanvasWrapper, x, y, paint.getNativeInstance());

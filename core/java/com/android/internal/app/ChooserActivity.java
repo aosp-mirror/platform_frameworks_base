@@ -96,7 +96,6 @@ import android.provider.Downloads;
 import android.provider.OpenableColumns;
 import android.provider.Settings;
 import android.service.chooser.ChooserTarget;
-import android.service.chooser.Flags;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.HashedStringCache;
@@ -1801,54 +1800,6 @@ public class ChooserActivity extends ResolverActivity implements
         return getIntent().getBooleanExtra(Intent.EXTRA_AUTO_LAUNCH_SINGLE_CHOICE, true);
     }
 
-    private void showTargetDetails(TargetInfo targetInfo) {
-        if (targetInfo == null) return;
-
-        ArrayList<DisplayResolveInfo> targetList;
-        ChooserTargetActionsDialogFragment fragment = new ChooserTargetActionsDialogFragment();
-        Bundle bundle = new Bundle();
-
-        if (targetInfo instanceof SelectableTargetInfo) {
-            SelectableTargetInfo selectableTargetInfo = (SelectableTargetInfo) targetInfo;
-            if (selectableTargetInfo.getDisplayResolveInfo() == null
-                    || selectableTargetInfo.getChooserTarget() == null) {
-                Log.e(TAG, "displayResolveInfo or chooserTarget in selectableTargetInfo are null");
-                return;
-            }
-            targetList = new ArrayList<>();
-            targetList.add(selectableTargetInfo.getDisplayResolveInfo());
-            bundle.putString(ChooserTargetActionsDialogFragment.SHORTCUT_ID_KEY,
-                    selectableTargetInfo.getChooserTarget().getIntentExtras().getString(
-                            Intent.EXTRA_SHORTCUT_ID));
-            bundle.putBoolean(ChooserTargetActionsDialogFragment.IS_SHORTCUT_PINNED_KEY,
-                    selectableTargetInfo.isPinned());
-            bundle.putParcelable(ChooserTargetActionsDialogFragment.INTENT_FILTER_KEY,
-                    getTargetIntentFilter());
-            if (selectableTargetInfo.getDisplayLabel() != null) {
-                bundle.putString(ChooserTargetActionsDialogFragment.SHORTCUT_TITLE_KEY,
-                        selectableTargetInfo.getDisplayLabel().toString());
-            }
-        } else if (targetInfo instanceof MultiDisplayResolveInfo) {
-            // For multiple targets, include info on all targets
-            MultiDisplayResolveInfo mti = (MultiDisplayResolveInfo) targetInfo;
-            targetList = mti.getTargets();
-        } else {
-            targetList = new ArrayList<DisplayResolveInfo>();
-            targetList.add((DisplayResolveInfo) targetInfo);
-        }
-        // Adding userHandle from ResolveInfo allows the app icon in Dialog Box to be
-        // resolved correctly.
-        bundle.putParcelable(ChooserTargetActionsDialogFragment.USER_HANDLE_KEY,
-                getResolveInfoUserHandle(
-                        targetInfo.getResolveInfo(),
-                        mChooserMultiProfilePagerAdapter.getCurrentUserHandle()));
-        bundle.putParcelableArrayList(ChooserTargetActionsDialogFragment.TARGET_INFOS_KEY,
-                targetList);
-        fragment.setArguments(bundle);
-
-        fragment.show(getFragmentManager(), TARGET_DETAILS_FRAGMENT_TAG);
-    }
-
     private void modifyTargetIntent(Intent in) {
         if (isSendAction(in)) {
             in.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT |
@@ -2544,10 +2495,7 @@ public class ChooserActivity extends ResolverActivity implements
 
         @Override
         public boolean isComponentPinned(ComponentName name) {
-            if (Flags.legacyChooserPinningRemoval()) {
-                return false;
-            }
-            return mPinnedSharedPrefs.getBoolean(name.flattenToString(), false);
+            return false;
         }
 
         @Override
@@ -3135,32 +3083,8 @@ public class ChooserActivity extends ResolverActivity implements
             if (isClickable) {
                 itemView.setOnClickListener(v -> startSelected(mListPosition,
                         false/* always */, true/* filterd */));
-
-                itemView.setOnLongClickListener(v -> {
-                    final TargetInfo ti = mChooserMultiProfilePagerAdapter.getActiveListAdapter()
-                            .targetInfoForPosition(mListPosition, /* filtered */ true);
-
-                    // This should always be the case for ItemViewHolder, check for validity
-                    if (ti instanceof DisplayResolveInfo && shouldShowTargetDetails(ti)) {
-                        showTargetDetails((DisplayResolveInfo) ti);
-                    }
-                    return true;
-                });
             }
         }
-    }
-
-    private boolean shouldShowTargetDetails(TargetInfo ti) {
-        if (Flags.legacyChooserPinningRemoval()) {
-            // Never show the long press menu if we've removed pinning.
-            return false;
-        }
-        ComponentName nearbyShare = getNearbySharingComponent();
-        //  Suppress target details for nearby share to hide pin/unpin action
-        boolean isNearbyShare = nearbyShare != null && nearbyShare.equals(
-                ti.getResolvedComponentName()) && shouldNearbyShareBeFirstInRankedRow();
-        return ti instanceof SelectableTargetInfo
-                || (ti instanceof DisplayResolveInfo && !isNearbyShare);
     }
 
     /**
@@ -3515,16 +3439,6 @@ public class ChooserActivity extends ResolverActivity implements
                     public void onClick(View v) {
                         startSelected(holder.getItemIndex(column), false, true);
                     }
-                });
-
-                // Show menu for both direct share and app share targets after long click.
-                v.setOnLongClickListener(v1 -> {
-                    TargetInfo ti = mChooserListAdapter.targetInfoForPosition(
-                            holder.getItemIndex(column), true);
-                    if (shouldShowTargetDetails(ti)) {
-                        showTargetDetails(ti);
-                    }
-                    return true;
                 });
 
                 holder.addView(i, v);

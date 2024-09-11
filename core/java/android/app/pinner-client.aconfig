@@ -4,6 +4,7 @@ container: "system"
 flag {
      namespace: "system_performance"
      name: "pinner_service_client_api"
+     is_exported: true
      description: "Control exposing PinnerService APIs."
      bug: "307594624"
 }

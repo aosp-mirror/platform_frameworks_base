@@ -54,9 +54,21 @@ abstract class UdfpsAccessibilityOverlayViewModel(
     fun onHoverEvent(v: View, event: MotionEvent): Boolean {
         val overlayParams = udfpsOverlayParams.value
         val scaledTouch: Point =
-            udfpsUtils.getTouchInNativeCoordinates(event.getPointerId(0), event, overlayParams)
+            udfpsUtils.getTouchInNativeCoordinates(
+                event.getPointerId(0),
+                event,
+                overlayParams, /* rotateToPortrait */
+                false
+            )
 
-        if (!udfpsUtils.isWithinSensorArea(event.getPointerId(0), event, overlayParams)) {
+        if (
+            !udfpsUtils.isWithinSensorArea(
+                event.getPointerId(0),
+                event,
+                overlayParams,
+                /* rotateTouchToPortrait */ false
+            )
+        ) {
             // view only receives motionEvents when [visible] which requires touchExplorationEnabled
             val announceStr =
                 udfpsUtils.onTouchOutsideOfSensorArea(
@@ -65,6 +77,7 @@ abstract class UdfpsAccessibilityOverlayViewModel(
                     scaledTouch.x,
                     scaledTouch.y,
                     overlayParams,
+                    /* touchRotatedToPortrait */ false
                 )
             if (announceStr != null) {
                 v.announceForAccessibility(announceStr)

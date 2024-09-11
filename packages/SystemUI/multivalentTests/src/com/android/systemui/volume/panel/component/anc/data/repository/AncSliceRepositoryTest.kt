@@ -18,20 +18,13 @@ package com.android.systemui.volume.panel.component.anc.data.repository
 
 import android.bluetooth.BluetoothDevice
 import android.net.Uri
+import android.testing.TestableLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.settingslib.bluetooth.CachedBluetoothDevice
-import com.android.settingslib.media.BluetoothMediaDevice
-import com.android.settingslib.media.MediaDevice
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
-import com.android.systemui.util.mockito.any
-import com.android.systemui.util.mockito.mock
-import com.android.systemui.util.mockito.whenever
-import com.android.systemui.volume.localMediaRepository
-import com.android.systemui.volume.localMediaRepositoryFactory
 import com.android.systemui.volume.panel.component.anc.FakeSliceFactory
 import com.android.systemui.volume.panel.component.anc.sliceViewManager
 import com.google.common.truth.Truth.assertThat
@@ -41,10 +34,14 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
+@TestableLooper.RunWithLooper(setAsMainLooper = true)
 class AncSliceRepositoryTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
@@ -57,22 +54,23 @@ class AncSliceRepositoryTest : SysuiTestCase() {
             val slice = FakeSliceFactory.createSlice(hasError = false, hasSliceItem = true)
             whenever(sliceViewManager.bindSlice(any<Uri>())).thenReturn(slice)
 
-            underTest =
-                AncSliceRepositoryImpl(
-                    localMediaRepositoryFactory,
-                    testScope.testScheduler,
-                    sliceViewManager,
-                )
+            underTest = AncSliceRepositoryImpl(testScope.testScheduler, sliceViewManager)
         }
     }
 
     @Test
-    fun noConnectedDevice_noSlice() {
+    fun connectedDevice_noUri_noSlice() {
         with(kosmos) {
             testScope.runTest {
-                localMediaRepository.updateCurrentConnectedDevice(null)
-
-                val slice by collectLastValue(underTest.ancSlice(1))
+                val slice by
+                    collectLastValue(
+                        underTest.ancSlice(
+                            device = createMediaDevice(""),
+                            width = 1,
+                            isCollapsed = false,
+                            hideLabel = false,
+                        )
+                    )
                 runCurrent()
 
                 assertThat(slice).isNull()
@@ -81,12 +79,18 @@ class AncSliceRepositoryTest : SysuiTestCase() {
     }
 
     @Test
-    fun connectedDevice_sliceReturned() {
+    fun connectedDevice_hasUri_sliceReturned() {
         with(kosmos) {
             testScope.runTest {
-                localMediaRepository.updateCurrentConnectedDevice(createMediaDevice())
-
-                val slice by collectLastValue(underTest.ancSlice(1))
+                val slice by
+                    collectLastValue(
+                        underTest.ancSlice(
+                            device = createMediaDevice("content://test.slice"),
+                            width = 1,
+                            isCollapsed = false,
+                            hideLabel = false,
+                        )
+                    )
                 runCurrent()
 
                 assertThat(slice).isNotNull()
@@ -94,21 +98,13 @@ class AncSliceRepositoryTest : SysuiTestCase() {
         }
     }
 
-    private fun createMediaDevice(sliceUri: String = "content://test.slice"): MediaDevice {
-        val bluetoothDevice: BluetoothDevice = mock {
-            whenever(getMetadata(any()))
-                .thenReturn(
-                    ("<HEARABLE_CONTROL_SLICE_WITH_WIDTH>" +
-                            sliceUri +
-                            "</HEARABLE_CONTROL_SLICE_WITH_WIDTH>")
-                        .toByteArray()
-                )
-        }
-        val cachedBluetoothDevice: CachedBluetoothDevice = mock {
-            whenever(device).thenReturn(bluetoothDevice)
-        }
-        return mock<BluetoothMediaDevice> {
-            whenever(cachedDevice).thenReturn(cachedBluetoothDevice)
-        }
+    private fun createMediaDevice(sliceUri: String): BluetoothDevice = mock {
+        on { getMetadata(any()) }
+            .thenReturn(
+                ("<HEARABLE_CONTROL_SLICE_WITH_WIDTH>" +
+                        sliceUri +
+                        "</HEARABLE_CONTROL_SLICE_WITH_WIDTH>")
+                    .toByteArray()
+            )
     }
 }

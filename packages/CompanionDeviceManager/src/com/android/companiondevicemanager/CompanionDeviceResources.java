@@ -27,11 +27,13 @@ import static android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.Collections.unmodifiableSet;
 
+import android.companion.virtual.flags.Flags;
 import android.os.Build;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -122,10 +124,19 @@ final class CompanionDeviceResources {
     static final Map<String, Integer> PROFILE_TITLES;
     static {
         final Map<String, Integer> map = new ArrayMap<>();
-        map.put(DEVICE_PROFILE_APP_STREAMING, R.string.title_app_streaming);
+        if (Flags.interactiveScreenMirror()) {
+            map.put(DEVICE_PROFILE_APP_STREAMING, R.string.title_app_streaming_with_mirroring);
+        } else {
+            map.put(DEVICE_PROFILE_APP_STREAMING, R.string.title_app_streaming);
+        }
         map.put(DEVICE_PROFILE_AUTOMOTIVE_PROJECTION, R.string.title_automotive_projection);
         map.put(DEVICE_PROFILE_COMPUTER, R.string.title_computer);
-        map.put(DEVICE_PROFILE_NEARBY_DEVICE_STREAMING, R.string.title_nearby_device_streaming);
+        if (Flags.interactiveScreenMirror()) {
+            map.put(DEVICE_PROFILE_NEARBY_DEVICE_STREAMING,
+                    R.string.title_nearby_device_streaming_with_mirroring);
+        } else {
+            map.put(DEVICE_PROFILE_NEARBY_DEVICE_STREAMING, R.string.title_nearby_device_streaming);
+        }
         map.put(DEVICE_PROFILE_WATCH, R.string.confirmation_title);
         map.put(DEVICE_PROFILE_GLASSES, R.string.confirmation_title_glasses);
         map.put(null, R.string.confirmation_title);
@@ -138,6 +149,11 @@ final class CompanionDeviceResources {
         final Map<String, Integer> map = new ArrayMap<>();
         map.put(DEVICE_PROFILE_WATCH, R.string.summary_watch);
         map.put(DEVICE_PROFILE_GLASSES, R.string.summary_glasses);
+        if (Flags.interactiveScreenMirror()) {
+            map.put(DEVICE_PROFILE_APP_STREAMING, R.string.summary_app_streaming);
+            map.put(DEVICE_PROFILE_NEARBY_DEVICE_STREAMING,
+                    R.string.summary_nearby_device_streaming);
+        }
         map.put(null, R.string.summary_generic);
 
         PROFILE_SUMMARIES = unmodifiableMap(map);
@@ -146,11 +162,16 @@ final class CompanionDeviceResources {
     static final Map<String, List<Integer>> PROFILE_PERMISSIONS;
     static {
         final Map<String, List<Integer>> map = new ArrayMap<>();
-        map.put(DEVICE_PROFILE_APP_STREAMING, Arrays.asList(PERMISSION_APP_STREAMING));
         map.put(DEVICE_PROFILE_COMPUTER, Arrays.asList(
                 PERMISSION_NOTIFICATION_LISTENER_ACCESS, PERMISSION_STORAGE));
-        map.put(DEVICE_PROFILE_NEARBY_DEVICE_STREAMING,
-                Arrays.asList(PERMISSION_NEARBY_DEVICE_STREAMING));
+        if (Flags.interactiveScreenMirror()) {
+            map.put(DEVICE_PROFILE_APP_STREAMING, Collections.emptyList());
+            map.put(DEVICE_PROFILE_NEARBY_DEVICE_STREAMING, Collections.emptyList());
+        } else {
+            map.put(DEVICE_PROFILE_APP_STREAMING, Arrays.asList(PERMISSION_APP_STREAMING));
+            map.put(DEVICE_PROFILE_NEARBY_DEVICE_STREAMING,
+                    Arrays.asList(PERMISSION_NEARBY_DEVICE_STREAMING));
+        }
         if (Build.VERSION.SDK_INT > UPSIDE_DOWN_CAKE) {
             map.put(DEVICE_PROFILE_WATCH, Arrays.asList(PERMISSION_NOTIFICATIONS, PERMISSION_PHONE,
                     PERMISSION_CALL_LOGS, PERMISSION_SMS, PERMISSION_CONTACTS, PERMISSION_CALENDAR,

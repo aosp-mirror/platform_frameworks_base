@@ -290,15 +290,20 @@ AwDrawFnRenderMode QueryRenderMode(void) {
   }
 }
 
+void ReportRenderingThreads(int functor, const int32_t* thread_ids, size_t size) {
+    uirenderer::WebViewFunctor_reportRenderingThreads(functor, thread_ids, size);
+}
+
 jlong GetDrawFnFunctionTable() {
-  static AwDrawFnFunctionTable function_table = {
-    .version = kAwDrawFnVersion,
-    .query_render_mode = &QueryRenderMode,
-    .create_functor = &CreateFunctor,
-    .release_functor = &ReleaseFunctor,
-    .create_functor_v3 = &CreateFunctor_v3,
-  };
-  return reinterpret_cast<intptr_t>(&function_table);
+    static AwDrawFnFunctionTable function_table = {
+            .version = kAwDrawFnVersion,
+            .query_render_mode = &QueryRenderMode,
+            .create_functor = &CreateFunctor,
+            .release_functor = &ReleaseFunctor,
+            .create_functor_v3 = &CreateFunctor_v3,
+            .report_rendering_threads = &ReportRenderingThreads,
+    };
+    return reinterpret_cast<intptr_t>(&function_table);
 }
 
 const char kClassName[] = "com/android/webview/chromium/DrawFunctor";

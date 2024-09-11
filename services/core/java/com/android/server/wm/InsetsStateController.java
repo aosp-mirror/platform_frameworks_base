@@ -221,11 +221,13 @@ class InsetsStateController {
         for (int i = mProviders.size() - 1; i >= 0; i--) {
             changed |= mProviders.valueAt(i).updateClientVisibility(caller);
         }
-        if (changed) {
-            notifyInsetsChanged();
-            mDisplayContent.updateSystemGestureExclusion();
-            mDisplayContent.updateKeepClearAreas();
-            mDisplayContent.getDisplayPolicy().updateSystemBarAttributes();
+        if (!android.view.inputmethod.Flags.refactorInsetsController()) {
+            if (changed) {
+                notifyInsetsChanged();
+                mDisplayContent.updateSystemGestureExclusion();
+
+                mDisplayContent.getDisplayPolicy().updateSystemBarAttributes();
+            }
         }
     }
 
@@ -358,6 +360,13 @@ class InsetsStateController {
     void notifyControlChanged(InsetsControlTarget target) {
         mPendingControlChanged.add(target);
         notifyPendingInsetsControlChanged();
+
+        if (android.view.inputmethod.Flags.refactorInsetsController()) {
+            notifyInsetsChanged();
+            mDisplayContent.updateSystemGestureExclusion();
+            mDisplayContent.updateKeepClearAreas();
+            mDisplayContent.getDisplayPolicy().updateSystemBarAttributes();
+        }
     }
 
     private void notifyPendingInsetsControlChanged() {
@@ -388,11 +397,23 @@ class InsetsStateController {
                 onRequestedVisibleTypesChanged(newControlTargets.valueAt(i));
             }
             newControlTargets.clear();
+            // Check for and try to run the scheduled show IME request (if it exists), as we
+            // now applied the surface transaction and notified the target of the new control.
+            getImeSourceProvider().checkAndStartShowImePostLayout();
         });
     }
 
     void notifyInsetsChanged() {
         mDisplayContent.notifyInsetsChanged(mDispatchInsetsChanged);
+    }
+
+    /**
+     * Checks if the control target has pending controls.
+     *
+     * @param target the control target to check.
+     */
+    boolean hasPendingControls(@NonNull InsetsControlTarget target) {
+        return mPendingControlChanged.contains(target);
     }
 
     void dump(String prefix, PrintWriter pw) {

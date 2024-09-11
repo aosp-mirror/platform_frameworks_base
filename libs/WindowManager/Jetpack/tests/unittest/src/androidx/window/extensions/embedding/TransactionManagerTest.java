@@ -41,10 +41,12 @@ import androidx.test.filters.SmallTest;
 import androidx.window.extensions.embedding.TransactionManager.TransactionRecord;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 /**
  * Test class for {@link TransactionManager}.
@@ -56,6 +58,8 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class TransactionManagerTest {
+    @Rule
+    public MockitoRule rule = MockitoJUnit.rule();
 
     @Mock
     private TaskFragmentOrganizer mOrganizer;
@@ -63,7 +67,6 @@ public class TransactionManagerTest {
 
     @Before
     public void setup() {
-        MockitoAnnotations.initMocks(this);
         mTransactionManager = new TransactionManager(mOrganizer);
     }
 

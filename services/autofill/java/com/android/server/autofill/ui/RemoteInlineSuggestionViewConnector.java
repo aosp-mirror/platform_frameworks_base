@@ -118,7 +118,7 @@ final class RemoteInlineSuggestionViewConnector {
         final InputMethodManagerInternal inputMethodManagerInternal =
                 LocalServices.getService(InputMethodManagerInternal.class);
         if (!inputMethodManagerInternal.transferTouchFocusToImeWindow(sourceInputToken,
-                displayId)) {
+                displayId, mUserId)) {
             Slog.e(TAG, "Cannot transfer touch focus from suggestion to IME");
             mOnErrorCallback.run();
         }

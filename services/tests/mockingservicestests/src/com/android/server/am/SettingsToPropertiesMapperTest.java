@@ -93,7 +93,7 @@ public class SettingsToPropertiesMapperTest {
                 }
         ).when(() -> SystemProperties.get(anyString()));
 
-        // Mock Settings.Global methods
+        // Mock Settings.Global method
         doAnswer((Answer<String>) invocationOnMock -> {
                     String key = invocationOnMock.getArgument(1);
 

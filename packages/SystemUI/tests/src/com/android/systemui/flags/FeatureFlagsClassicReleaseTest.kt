@@ -17,7 +17,7 @@ package com.android.systemui.flags
 
 import android.content.pm.PackageManager.NameNotFoundException
 import android.content.res.Resources
-import android.test.suitebuilder.annotation.SmallTest
+import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.google.common.truth.Truth.assertThat
 import org.junit.Assert.assertThrows

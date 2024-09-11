@@ -23,7 +23,6 @@ import static com.android.systemui.bouncer.shared.constants.KeyguardBouncerConst
 import static com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import static com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_WAKE_AND_UNLOCK;
 import static com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_WAKE_AND_UNLOCK_PULSING;
-import static com.android.systemui.util.kotlin.JavaAdapterKt.combineFlows;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -68,13 +67,13 @@ import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.KeyguardWmStateRefactor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardDismissActionInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardSurfaceBehindInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.keyguard.domain.interactor.WindowManagerLockscreenVisibilityInteractor;
 import com.android.systemui.keyguard.shared.model.DismissAction;
+import com.android.systemui.keyguard.shared.model.Edge;
 import com.android.systemui.keyguard.shared.model.KeyguardDone;
 import com.android.systemui.keyguard.shared.model.KeyguardState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
@@ -83,17 +82,21 @@ import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.navigationbar.TaskbarDelegate;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.scene.domain.interactor.SceneInteractor;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
+import com.android.systemui.scene.shared.model.Scenes;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeExpansionChangeEvent;
 import com.android.systemui.shade.ShadeExpansionListener;
 import com.android.systemui.shade.ShadeExpansionStateManager;
-import com.android.systemui.shade.ShadeLockscreenInteractor;
+import com.android.systemui.shade.domain.interactor.ShadeLockscreenInteractor;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
+import com.android.systemui.statusbar.domain.interactor.StatusBarKeyguardViewManagerInteractor;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.unfold.FoldAodAnimationController;
@@ -105,7 +108,12 @@ import dagger.Lazy;
 
 import kotlin.Unit;
 
+import kotlinx.coroutines.CoroutineDispatcher;
+import kotlinx.coroutines.ExperimentalCoroutinesApi;
+import kotlinx.coroutines.Job;
+
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Objects;
@@ -113,10 +121,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
-
-import kotlinx.coroutines.CoroutineDispatcher;
-import kotlinx.coroutines.ExperimentalCoroutinesApi;
-import kotlinx.coroutines.Job;
 
 /**
  * Manages creating, showing, hiding and resetting the keyguard within the status bar. Calls back
@@ -162,9 +166,11 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private final AlternateBouncerInteractor mAlternateBouncerInteractor;
     private final BouncerView mPrimaryBouncerView;
     private final Lazy<ShadeController> mShadeController;
+    private final Lazy<SceneInteractor> mSceneInteractorLazy;
 
     private Job mListenForAlternateBouncerTransitionSteps = null;
     private Job mListenForKeyguardAuthenticatedBiometricsHandled = null;
+    private Job mListenForCanShowAlternateBouncer = null;
 
     // Local cache of expansion events, to avoid duplicates
     private float mFraction = -1f;
@@ -327,7 +333,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private final LatencyTracker mLatencyTracker;
     private final KeyguardSecurityModel mKeyguardSecurityModel;
     private final SelectedUserInteractor mSelectedUserInteractor;
-    @Nullable private KeyguardBypassController mBypassController;
     @Nullable private OccludingAppBiometricUI mOccludingAppBiometricUI;
 
     @Nullable private TaskbarDelegate mTaskbarDelegate;
@@ -355,8 +360,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private Lazy<WindowManagerLockscreenVisibilityInteractor> mWmLockscreenVisibilityInteractor;
     private Lazy<KeyguardSurfaceBehindInteractor> mSurfaceBehindInteractor;
     private Lazy<KeyguardDismissActionInteractor> mKeyguardDismissActionInteractor;
-
     private final JavaAdapter mJavaAdapter;
+    private StatusBarKeyguardViewManagerInteractor mStatusBarKeyguardViewManagerInteractor;
 
     @Inject
     public StatusBarKeyguardViewManager(
@@ -376,7 +381,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             Lazy<ShadeController> shadeController,
             LatencyTracker latencyTracker,
             KeyguardSecurityModel keyguardSecurityModel,
-            FeatureFlags featureFlags,
             PrimaryBouncerCallbackInteractor primaryBouncerCallbackInteractor,
             PrimaryBouncerInteractor primaryBouncerInteractor,
             BouncerView primaryBouncerView,
@@ -389,7 +393,9 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             Lazy<KeyguardDismissActionInteractor> keyguardDismissActionInteractorLazy,
             SelectedUserInteractor selectedUserInteractor,
             Lazy<KeyguardSurfaceBehindInteractor> surfaceBehindInteractor,
-            JavaAdapter javaAdapter
+            JavaAdapter javaAdapter,
+            Lazy<SceneInteractor> sceneInteractorLazy,
+            StatusBarKeyguardViewManagerInteractor statusBarKeyguardViewManagerInteractor
     ) {
         mContext = context;
         mViewMediatorCallback = callback;
@@ -406,7 +412,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mShadeController = shadeController;
         mLatencyTracker = latencyTracker;
         mKeyguardSecurityModel = keyguardSecurityModel;
-        mFlags = featureFlags;
         mPrimaryBouncerCallbackInteractor = primaryBouncerCallbackInteractor;
         mPrimaryBouncerInteractor = primaryBouncerInteractor;
         mPrimaryBouncerView = primaryBouncerView;
@@ -423,6 +428,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mSelectedUserInteractor = selectedUserInteractor;
         mSurfaceBehindInteractor = surfaceBehindInteractor;
         mJavaAdapter = javaAdapter;
+        mSceneInteractorLazy = sceneInteractorLazy;
+        mStatusBarKeyguardViewManagerInteractor = statusBarKeyguardViewManagerInteractor;
     }
 
     KeyguardTransitionInteractor mKeyguardTransitionInteractor;
@@ -433,8 +440,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             ShadeLockscreenInteractor shadeLockscreenInteractor,
             ShadeExpansionStateManager shadeExpansionStateManager,
             BiometricUnlockController biometricUnlockController,
-            View notificationContainer,
-            KeyguardBypassController bypassController) {
+            View notificationContainer) {
         mCentralSurfaces = centralSurfaces;
         mBiometricUnlockController = biometricUnlockController;
 
@@ -445,7 +451,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                     shadeExpansionStateManager.addExpansionListener(this);
             onPanelExpansionChanged(currentState);
         }
-        mBypassController = bypassController;
         mNotificationContainer = notificationContainer;
         if (!DeviceEntryUdfpsRefactor.isEnabled()) {
             mKeyguardMessageAreaController = mKeyguardMessageAreaFactory.create(
@@ -498,10 +503,14 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             mListenForKeyguardAuthenticatedBiometricsHandled.cancel(null);
         }
         mListenForKeyguardAuthenticatedBiometricsHandled = null;
+        if (mListenForCanShowAlternateBouncer != null) {
+            mListenForCanShowAlternateBouncer.cancel(null);
+        }
+        mListenForCanShowAlternateBouncer = null;
         if (!DeviceEntryUdfpsRefactor.isEnabled()) {
             mListenForAlternateBouncerTransitionSteps = mJavaAdapter.alwaysCollectFlow(
-                    mKeyguardTransitionInteractor.transitionStepsFromState(
-                            KeyguardState.ALTERNATE_BOUNCER),
+                    mKeyguardTransitionInteractor
+                            .transition(Edge.create(KeyguardState.ALTERNATE_BOUNCER)),
                     this::consumeFromAlternateBouncerTransitionSteps
             );
 
@@ -509,22 +518,23 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                     mPrimaryBouncerInteractor.getKeyguardAuthenticatedBiometricsHandled(),
                     this::consumeKeyguardAuthenticatedBiometricsHandled
             );
+        } else {
+            mListenForCanShowAlternateBouncer = mJavaAdapter.alwaysCollectFlow(
+                    mAlternateBouncerInteractor.getCanShowAlternateBouncer(),
+                    this::consumeCanShowAlternateBouncer
+            );
         }
 
         if (KeyguardWmStateRefactor.isEnabled()) {
             // Show the keyguard views whenever we've told WM that the lockscreen is visible.
             mJavaAdapter.alwaysCollectFlow(
-                    combineFlows(
-                            mWmLockscreenVisibilityInteractor.get().getLockscreenVisibility(),
-                            mSurfaceBehindInteractor.get().isAnimatingSurface(),
-                            (lockscreenVis, animatingSurface) ->
-                                    // TODO(b/322546110): Waiting until we're not animating the
-                                    // surface is a workaround to avoid jank. We should actually
-                                    // fix the source of the jank, and then hide the keyguard
-                                    // view without waiting for the animation to end.
-                                    lockscreenVis || animatingSurface
-                    ),
+                    mStatusBarKeyguardViewManagerInteractor.getKeyguardViewVisibility(),
                     this::consumeShowStatusBarKeyguardView);
+
+            mJavaAdapter.alwaysCollectFlow(
+                    mStatusBarKeyguardViewManagerInteractor.getKeyguardViewOcclusionState(),
+                    (occlusionState) -> setOccluded(
+                            occlusionState.getOccluded(), occlusionState.getAnimate()));
         }
     }
 
@@ -554,13 +564,18 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         }
     }
 
+    private void consumeCanShowAlternateBouncer(boolean canShow) {
+        // do nothing, we only are registering for the flow to ensure that there's at least
+        // one subscriber that will update AlternateBouncerInteractor.canShowAlternateBouncer.value
+    }
+
     /** Register a callback, to be invoked by the Predictive Back system. */
     private void registerBackCallback() {
         if (!mIsBackCallbackRegistered) {
             ViewRootImpl viewRoot = getViewRootImpl();
             if (viewRoot != null) {
                 viewRoot.getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
-                        OnBackInvokedDispatcher.PRIORITY_OVERLAY, mOnBackInvokedCallback);
+                        OnBackInvokedDispatcher.PRIORITY_DEFAULT, mOnBackInvokedCallback);
                 mIsBackCallbackRegistered = true;
             } else {
                 if (DEBUG) {
@@ -609,7 +624,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         final boolean hideBouncerOverDream =
                 mDreamOverlayStateController.isOverlayActive()
                         && (mShadeLockscreenInteractor.isExpanded()
-                        || mShadeLockscreenInteractor.isExpandingOrCollapsing());
+                        || mShadeController.get().isExpandingOrCollapsing());
 
         final boolean isUserTrackingStarted =
                 event.getFraction() != EXPANSION_HIDDEN && event.getTracking();
@@ -642,7 +657,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
          * device state and touch handling. The bouncer MUST have been notified that it is about to
          * show if any subsequent events are to be handled.
          */
-        if (beginShowingBouncer(event)) {
+        if (!SceneContainerFlag.isEnabled() && beginShowingBouncer(event)) {
             mPrimaryBouncerInteractor.show(/* isScrimmed= */false);
         }
 
@@ -677,8 +692,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     public void show(Bundle options) {
         Trace.beginSection("StatusBarKeyguardViewManager#show");
         mNotificationShadeWindowController.setKeyguardShowing(true);
-        mKeyguardStateController.notifyKeyguardState(true,
-                mKeyguardStateController.isOccluded());
+        mKeyguardStateController.notifyKeyguardState(true, mKeyguardStateController.isOccluded());
         reset(true /* hideBouncerWhenShowing */);
         SysUiStatsLog.write(SysUiStatsLog.KEYGUARD_STATE_CHANGED,
                 SysUiStatsLog.KEYGUARD_STATE_CHANGED__STATE__SHOWN);
@@ -694,7 +708,12 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             // The keyguard might be showing (already). So we need to hide it.
             if (!primaryBouncerIsShowing()) {
                 mCentralSurfaces.hideKeyguard();
-                mPrimaryBouncerInteractor.show(true);
+                if (SceneContainerFlag.isEnabled()) {
+                    mSceneInteractorLazy.get().changeScene(
+                            Scenes.Bouncer, "StatusBarKeyguardViewManager.showBouncerOrKeyguard");
+                } else {
+                    mPrimaryBouncerInteractor.show(/* isScrimmed= */ true);
+                }
             } else {
                 Log.e(TAG, "Attempted to show the sim bouncer when it is already showing.");
             }
@@ -716,6 +735,17 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
      *                 {@see KeyguardBouncer#show(boolean, boolean)}
      */
     public void showBouncer(boolean scrimmed) {
+        if (DeviceEntryUdfpsRefactor.isEnabled()) {
+            if (mAlternateBouncerInteractor.canShowAlternateBouncerForFingerprint()) {
+                Log.d(TAG, "showBouncer:alternateBouncer.forceShow()");
+                mAlternateBouncerInteractor.forceShow();
+                updateAlternateBouncerShowing(mAlternateBouncerInteractor.isVisibleState());
+            } else {
+                showPrimaryBouncer(scrimmed);
+            }
+            return;
+        }
+
         if (!mAlternateBouncerInteractor.show()) {
             showPrimaryBouncer(scrimmed);
         } else {
@@ -746,7 +776,12 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     public void showPrimaryBouncer(boolean scrimmed) {
         hideAlternateBouncer(false);
         if (mKeyguardStateController.isShowing() && !isBouncerShowing()) {
-            mPrimaryBouncerInteractor.show(scrimmed);
+            if (SceneContainerFlag.isEnabled()) {
+                mSceneInteractorLazy.get().changeScene(
+                        Scenes.Bouncer, "StatusBarKeyguardViewManager.showPrimaryBouncer");
+            } else {
+                mPrimaryBouncerInteractor.show(scrimmed);
+            }
         }
         updateStates();
     }
@@ -758,7 +793,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     public void dismissWithAction(OnDismissAction r, Runnable cancelAction,
             boolean afterKeyguardGone, String message) {
-        if (mFlags.isEnabled(Flags.REFACTOR_KEYGUARD_DISMISS_INTENT)) {
+        if (SceneContainerFlag.isEnabled()) {
             if (r == null) {
                 return;
             }
@@ -810,7 +845,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                     return;
                 }
 
-                if (!mFlags.isEnabled(Flags.REFACTOR_KEYGUARD_DISMISS_INTENT)) {
+                if (!SceneContainerFlag.isEnabled()) {
                     mAfterKeyguardGoneAction = r;
                     mKeyguardGoneCancelAction = cancelAction;
                     mDismissActionWillAnimateOnKeyguard = r != null
@@ -827,7 +862,13 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                         mKeyguardGoneCancelAction = null;
                     }
 
-                    updateAlternateBouncerShowing(mAlternateBouncerInteractor.show());
+                    if (DeviceEntryUdfpsRefactor.isEnabled()) {
+                        Log.d(TAG, "dismissWithAction:alternateBouncer.forceShow()");
+                        mAlternateBouncerInteractor.forceShow();
+                        updateAlternateBouncerShowing(mAlternateBouncerInteractor.isVisibleState());
+                    } else {
+                        updateAlternateBouncerShowing(mAlternateBouncerInteractor.show());
+                    }
                     setKeyguardMessage(message, null, null);
                     return;
                 }
@@ -836,13 +877,23 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                 if (afterKeyguardGone) {
                     // we'll handle the dismiss action after keyguard is gone, so just show the
                     // bouncer
-                    mPrimaryBouncerInteractor.show(/* isScrimmed= */true);
+                    if (SceneContainerFlag.isEnabled()) {
+                        mSceneInteractorLazy.get().changeScene(
+                                Scenes.Bouncer, "StatusBarKeyguardViewManager.dismissWithAction");
+                    } else {
+                        mPrimaryBouncerInteractor.show(/* isScrimmed= */ true);
+                    }
                 } else {
                     // after authentication success, run dismiss action with the option to defer
                     // hiding the keyguard based on the return value of the OnDismissAction
                     mPrimaryBouncerInteractor.setDismissAction(
                             mAfterKeyguardGoneAction, mKeyguardGoneCancelAction);
-                    mPrimaryBouncerInteractor.show(/* isScrimmed= */true);
+                    if (SceneContainerFlag.isEnabled()) {
+                        mSceneInteractorLazy.get().changeScene(
+                                Scenes.Bouncer, "StatusBarKeyguardViewManager.dismissWithAction");
+                    } else {
+                        mPrimaryBouncerInteractor.show(/* isScrimmed= */ true);
+                    }
                     // bouncer will handle the dismiss action, so we no longer need to track it here
                     mAfterKeyguardGoneAction = null;
                     mKeyguardGoneCancelAction = null;
@@ -850,6 +901,11 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             } finally {
                 Trace.endSection();
             }
+        } else {
+            Log.w(TAG, "Ignoring request to dismiss, dumping state: ");
+            StringWriter sw = new StringWriter();
+            mKeyguardStateController.dump(new PrintWriter(sw), null);
+            Log.w(TAG, sw.toString());
         }
         updateStates();
     }
@@ -863,7 +919,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
      * Adds a {@param runnable} to be executed after Keyguard is gone.
      */
     public void addAfterKeyguardGoneRunnable(Runnable runnable) {
-        if (mFlags.isEnabled(Flags.REFACTOR_KEYGUARD_DISMISS_INTENT)) {
+        if (SceneContainerFlag.isEnabled()) {
             if (runnable != null) {
                 mKeyguardDismissActionInteractor.get().runAfterKeyguardGone(runnable);
             }
@@ -913,7 +969,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             mKeyguardMessageAreaController.setIsVisible(isShowingAlternateBouncer);
             mKeyguardMessageAreaController.setMessage("");
         }
-        mBypassController.setAltBouncerShowing(isShowingAlternateBouncer);
         mKeyguardUpdateManager.setAlternateBouncerShowing(isShowingAlternateBouncer);
 
         if (updateScrim) {
@@ -1023,12 +1078,17 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             SysUiStatsLog.write(SysUiStatsLog.KEYGUARD_STATE_CHANGED,
                     SysUiStatsLog.KEYGUARD_STATE_CHANGED__STATE__OCCLUDED);
             if (mCentralSurfaces.isLaunchingActivityOverLockscreen()) {
-                // When isLaunchingActivityOverLockscreen() is true, we know for sure that the post
-                // collapse runnables will be run.
-                mShadeController.get().addPostCollapseAction(() -> {
+                final Runnable postCollapseAction = () -> {
                     mNotificationShadeWindowController.setKeyguardOccluded(isOccluded);
                     reset(true /* hideBouncerWhenShowing */);
-                });
+                };
+                if (mCentralSurfaces.isDismissingShadeForActivityLaunch()) {
+                    // When isDismissingShadeForActivityLaunch() is true, we know for sure that the
+                    // post collapse runnables will be run.
+                    mShadeController.get().addPostCollapseAction(postCollapseAction);
+                } else {
+                    postCollapseAction.run();
+                }
                 return;
             }
         } else if (isShowing && isUnOccluding) {
@@ -1056,7 +1116,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             // We update the state (which will show the keyguard) only if an animation will run on
             // the keyguard. If there is no animation, we wait before updating the state so that we
             // go directly from bouncer to launcher/app.
-            if (mFlags.isEnabled(Flags.REFACTOR_KEYGUARD_DISMISS_INTENT)) {
+            if (SceneContainerFlag.isEnabled()) {
                 if (mKeyguardDismissActionInteractor.get().runDismissAnimationOnKeyguard()) {
                     updateStates();
                 }
@@ -1183,7 +1243,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     private void executeAfterKeyguardGoneAction() {
-        if (mFlags.isEnabled(Flags.REFACTOR_KEYGUARD_DISMISS_INTENT)) {
+        if (SceneContainerFlag.isEnabled()) {
             return;
         }
         if (mAfterKeyguardGoneAction != null) {
@@ -1236,9 +1296,11 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             return;
         }
 
+        boolean hideBouncerOverDream = isBouncerShowing()
+                && mDreamOverlayStateController.isOverlayActive();
         mCentralSurfaces.endAffordanceLaunch();
         // The second condition is for SIM card locked bouncer
-        if (primaryBouncerIsScrimmed() && !needsFullscreenBouncer()) {
+        if (hideBouncerOverDream || (primaryBouncerIsScrimmed() && !needsFullscreenBouncer())) {
             hideBouncer(false);
             updateStates();
         } else {
@@ -1487,6 +1549,11 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         if (mAlternateBouncerInteractor.isVisibleState()) {
             executeAfterKeyguardGoneAction();
         }
+
+        if (KeyguardWmStateRefactor.isEnabled()) {
+            mKeyguardTransitionInteractor.startDismissKeyguardTransition(
+                    "SBKVM#keyguardAuthenticated");
+        }
     }
 
     /** Display security message to relevant KeyguardMessageArea. */
@@ -1567,8 +1634,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         pw.println("  isBouncerShowing(): " + isBouncerShowing());
         pw.println("  bouncerIsOrWillBeShowing(): " + primaryBouncerIsOrWillBeShowing());
         pw.println("  Registered KeyguardViewManagerCallbacks:");
-        pw.println(" refactorKeyguardDismissIntent enabled:"
-                + mFlags.isEnabled(Flags.REFACTOR_KEYGUARD_DISMISS_INTENT));
+        pw.println(" SceneContainerFlag enabled:"
+                + SceneContainerFlag.isEnabled());
         for (KeyguardViewManagerCallback callback : mCallbacks) {
             pw.println("      " + callback);
         }

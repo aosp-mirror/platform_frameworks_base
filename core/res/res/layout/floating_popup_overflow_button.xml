@@ -16,6 +16,7 @@
 */
 -->
 <ImageButton xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:id="@+id/overflow"
     android:layout_width="@dimen/floating_toolbar_menu_image_button_width"
     android:layout_height="@dimen/floating_toolbar_height"
@@ -25,4 +26,4 @@
     android:paddingBottom="@dimen/floating_toolbar_menu_image_button_vertical_padding"
     android:scaleType="centerInside"
     android:background="?attr/actionBarItemBackground"
-    android:tint="?attr/floatingToolbarForegroundColor" />
+    android:tint="?androidprv:attr/materialColorOnSurface" />

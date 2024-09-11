@@ -21,9 +21,9 @@ import android.graphics.drawable.Drawable;
 /**
  * @hide
  */
-interface ConversationAvatarData {
+public interface ConversationAvatarData {
     final class OneToOneConversationAvatarData implements ConversationAvatarData {
-        final Drawable mDrawable;
+        public final Drawable mDrawable;
 
         OneToOneConversationAvatarData(Drawable drawable) {
             mDrawable = drawable;

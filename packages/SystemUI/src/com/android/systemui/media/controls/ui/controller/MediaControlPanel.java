@@ -57,6 +57,7 @@ import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 import android.os.Process;
 import android.os.Trace;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
@@ -109,7 +110,7 @@ import com.android.systemui.media.controls.util.MediaDataUtils;
 import com.android.systemui.media.controls.util.MediaFlags;
 import com.android.systemui.media.controls.util.MediaUiEventLogger;
 import com.android.systemui.media.controls.util.SmallHash;
-import com.android.systemui.media.dialog.MediaOutputDialogFactory;
+import com.android.systemui.media.dialog.MediaOutputDialogManager;
 import com.android.systemui.monet.ColorScheme;
 import com.android.systemui.monet.Style;
 import com.android.systemui.plugins.ActivityStarter;
@@ -118,8 +119,9 @@ import com.android.systemui.res.R;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.surfaceeffects.PaintDrawCallback;
 import com.android.systemui.surfaceeffects.loadingeffect.LoadingEffect;
-import com.android.systemui.surfaceeffects.loadingeffect.LoadingEffect.Companion.AnimationState;
+import com.android.systemui.surfaceeffects.loadingeffect.LoadingEffect.AnimationState;
 import com.android.systemui.surfaceeffects.loadingeffect.LoadingEffectView;
 import com.android.systemui.surfaceeffects.ripple.MultiRippleController;
 import com.android.systemui.surfaceeffects.ripple.MultiRippleView;
@@ -223,7 +225,7 @@ public class MediaControlPanel {
     protected int mUid = Process.INVALID_UID;
     private int mSmartspaceMediaItemsCount;
     private MediaCarouselController mMediaCarouselController;
-    private final MediaOutputDialogFactory mMediaOutputDialogFactory;
+    private final MediaOutputDialogManager mMediaOutputDialogManager;
     private final FalsingManager mFalsingManager;
     private MetadataAnimationHandler mMetadataAnimationHandler;
     private ColorSchemeTransition mColorSchemeTransition;
@@ -264,15 +266,15 @@ public class MediaControlPanel {
     private boolean mWasPlaying = false;
     private boolean mButtonClicked = false;
 
-    private final LoadingEffect.Companion.PaintDrawCallback mNoiseDrawCallback =
-            new LoadingEffect.Companion.PaintDrawCallback() {
+    private final PaintDrawCallback mNoiseDrawCallback =
+            new PaintDrawCallback() {
                 @Override
-                public void onDraw(@NonNull Paint loadingPaint) {
-                    mMediaViewHolder.getLoadingEffectView().draw(loadingPaint);
+                public void onDraw(@NonNull Paint paint) {
+                    mMediaViewHolder.getLoadingEffectView().draw(paint);
                 }
             };
-    private final LoadingEffect.Companion.AnimationStateChangedCallback mStateChangedCallback =
-            new LoadingEffect.Companion.AnimationStateChangedCallback() {
+    private final LoadingEffect.AnimationStateChangedCallback mStateChangedCallback =
+            new LoadingEffect.AnimationStateChangedCallback() {
                 @Override
                 public void onStateChanged(@NonNull AnimationState oldState,
                         @NonNull AnimationState newState) {
@@ -304,7 +306,7 @@ public class MediaControlPanel {
             MediaViewController mediaViewController,
             SeekBarViewModel seekBarViewModel,
             Lazy<MediaDataManager> lazyMediaDataManager,
-            MediaOutputDialogFactory mediaOutputDialogFactory,
+            MediaOutputDialogManager mediaOutputDialogManager,
             MediaCarouselController mediaCarouselController,
             FalsingManager falsingManager,
             SystemClock systemClock,
@@ -324,7 +326,7 @@ public class MediaControlPanel {
         mSeekBarViewModel = seekBarViewModel;
         mMediaViewController = mediaViewController;
         mMediaDataManagerLazy = lazyMediaDataManager;
-        mMediaOutputDialogFactory = mediaOutputDialogFactory;
+        mMediaOutputDialogManager = mediaOutputDialogManager;
         mMediaCarouselController = mediaCarouselController;
         mFalsingManager = falsingManager;
         mSystemClock = systemClock;
@@ -737,8 +739,12 @@ public class MediaControlPanel {
                                     mPackageName, mMediaViewHolder.getSeamlessButton());
                         } else {
                             mLogger.logOpenOutputSwitcher(mUid, mPackageName, mInstanceId);
-                            mMediaOutputDialogFactory.create(mPackageName, true,
-                                    mMediaViewHolder.getSeamlessButton());
+                            mMediaOutputDialogManager.createAndShow(
+                                    mPackageName,
+                                    /* aboveStatusBar */ true,
+                                    mMediaViewHolder.getSeamlessButton(),
+                                    UserHandle.getUserHandleForUid(mUid),
+                                    mToken);
                         }
                     } else {
                         mLogger.logOpenOutputSwitcher(mUid, mPackageName, mInstanceId);
@@ -747,22 +753,31 @@ public class MediaControlPanel {
                             boolean showOverLockscreen = mKeyguardStateController.isShowing()
                                     && mActivityIntentHelper.wouldPendingShowOverLockscreen(
                                         deviceIntent, mLockscreenUserManager.getCurrentUserId());
-                            if (deviceIntent.isActivity() && !showOverLockscreen) {
-                                mActivityStarter.postStartActivityDismissingKeyguard(deviceIntent);
-                            } else {
-                                try {
-                                    BroadcastOptions options = BroadcastOptions.makeBasic();
-                                    options.setInteractive(true);
-                                    options.setPendingIntentBackgroundActivityStartMode(
+                            if (deviceIntent.isActivity()) {
+                                if (!showOverLockscreen) {
+                                    mActivityStarter.postStartActivityDismissingKeyguard(
+                                            deviceIntent);
+                                } else {
+                                    try {
+                                        BroadcastOptions options = BroadcastOptions.makeBasic();
+                                        options.setInteractive(true);
+                                        options.setPendingIntentBackgroundActivityStartMode(
                                             ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
-                                    deviceIntent.send(options.toBundle());
-                                } catch (PendingIntent.CanceledException e) {
-                                    Log.e(TAG, "Device pending intent was canceled");
+                                        deviceIntent.send(options.toBundle());
+                                    } catch (PendingIntent.CanceledException e) {
+                                        Log.e(TAG, "Device pending intent was canceled");
+                                    }
                                 }
+                            } else {
+                                Log.w(TAG, "Device pending intent is not an activity.");
                             }
                         } else {
-                            mMediaOutputDialogFactory.create(mPackageName, true,
-                                    mMediaViewHolder.getSeamlessButton());
+                            mMediaOutputDialogManager.createAndShow(
+                                    mPackageName,
+                                    /* aboveStatusBar */ true,
+                                    mMediaViewHolder.getSeamlessButton(),
+                                    UserHandle.getUserHandleForUid(mUid),
+                                    mToken);
                         }
                     }
                 });
@@ -773,10 +788,11 @@ public class MediaControlPanel {
             if (mKey != null) {
                 closeGuts();
                 if (!mMediaDataManagerLazy.get().dismissMediaData(mKey,
-                        MediaViewController.GUTS_ANIMATION_DURATION + 100)) {
+                        /* delay */ MediaViewController.GUTS_ANIMATION_DURATION + 100,
+                        /* userInitiated */ true)) {
                     Log.w(TAG, "Manager failed to dismiss media " + mKey);
                     // Remove directly from carousel so user isn't stuck with defunct controls
-                    mMediaCarouselController.removePlayer(mKey, false, false);
+                    mMediaCarouselController.removePlayer(mKey, false, false, true);
                 }
             } else {
                 Log.w(TAG, "Dismiss media with null notification. Token uid="
@@ -1306,7 +1322,7 @@ public class MediaControlPanel {
                 TurbulenceNoiseAnimationConfig.DEFAULT_NOISE_SPEED_Z,
                 // Color will be correctly updated in ColorSchemeTransition.
                 /* color= */ mColorSchemeTransition.getAccentPrimary().getCurrentColor(),
-                /* backgroundColor= */ Color.BLACK,
+                /* screenColor= */ Color.BLACK,
                 width,
                 height,
                 TurbulenceNoiseAnimationConfig.DEFAULT_MAX_DURATION_IN_MILLIS,

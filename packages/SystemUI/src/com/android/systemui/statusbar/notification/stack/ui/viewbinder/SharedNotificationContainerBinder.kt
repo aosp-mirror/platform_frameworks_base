@@ -16,23 +16,26 @@
 
 package com.android.systemui.statusbar.notification.stack.ui.viewbinder
 
-import android.animation.Animator
-import android.animation.AnimatorListenerAdapter
 import android.view.View
 import android.view.WindowInsets
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.systemui.Flags.communalHub
+import com.android.systemui.common.ui.view.onApplyWindowInsets
+import com.android.systemui.common.ui.view.onLayoutChanged
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.ui.viewmodel.BurnInParameters
 import com.android.systemui.keyguard.ui.viewmodel.ViewStateAccessor
 import com.android.systemui.lifecycle.repeatWhenAttached
-import com.android.systemui.scene.shared.flag.SceneContainerFlags
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.notification.stack.NotificationStackSizeCalculator
-import com.android.systemui.statusbar.notification.stack.shared.flexiNotifsEnabled
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.SharedNotificationContainerViewModel
+import com.android.systemui.util.kotlin.DisposableHandles
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -41,18 +44,23 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /** Binds the shared notification container to its view-model. */
-object SharedNotificationContainerBinder {
+@SysUISingleton
+class SharedNotificationContainerBinder
+@Inject
+constructor(
+    private val controller: NotificationStackScrollLayoutController,
+    private val notificationStackSizeCalculator: NotificationStackSizeCalculator,
+    private val notificationScrollViewBinder: NotificationScrollViewBinder,
+    @Main private val mainImmediateDispatcher: CoroutineDispatcher,
+) {
 
-    @JvmStatic
     fun bind(
         view: SharedNotificationContainer,
         viewModel: SharedNotificationContainerViewModel,
-        sceneContainerFlags: SceneContainerFlags,
-        controller: NotificationStackScrollLayoutController,
-        notificationStackSizeCalculator: NotificationStackSizeCalculator,
-        @Main mainImmediateDispatcher: CoroutineDispatcher,
     ): DisposableHandle {
-        val disposableHandle =
+        val disposables = DisposableHandles()
+
+        disposables +=
             view.repeatWhenAttached {
                 repeatOnLifecycle(Lifecycle.State.CREATED) {
                     launch {
@@ -75,24 +83,6 @@ object SharedNotificationContainerBinder {
                 }
             }
 
-        // Required to capture keyguard media changes and ensure the notification count is correct
-        val layoutChangeListener =
-            object : View.OnLayoutChangeListener {
-                override fun onLayoutChange(
-                    view: View,
-                    left: Int,
-                    top: Int,
-                    right: Int,
-                    bottom: Int,
-                    oldLeft: Int,
-                    oldTop: Int,
-                    oldRight: Int,
-                    oldBottom: Int
-                ) {
-                    viewModel.notificationStackChanged()
-                }
-            }
-
         val burnInParams = MutableStateFlow(BurnInParameters())
         val viewState =
             ViewStateAccessor(
@@ -103,30 +93,22 @@ object SharedNotificationContainerBinder {
          * For animation sensitive coroutines, immediately run just like applicationScope does
          * instead of doing a post() to the main thread. This extra delay can cause visible jitter.
          */
-        val disposableHandleMainImmediate =
+        disposables +=
             view.repeatWhenAttached(mainImmediateDispatcher) {
                 repeatOnLifecycle(Lifecycle.State.CREATED) {
-                    if (!sceneContainerFlags.flexiNotifsEnabled()) {
-                        launch {
-                            // Only temporarily needed, until flexi notifs go live
-                            viewModel.shadeCollapseFadeIn.collect { fadeIn ->
-                                if (fadeIn) {
-                                    android.animation.ValueAnimator.ofFloat(0f, 1f).apply {
-                                        duration = 250
-                                        addUpdateListener { animation ->
-                                            controller.setMaxAlphaForExpansion(
-                                                animation.getAnimatedFraction()
-                                            )
-                                        }
-                                        addListener(
-                                            object : AnimatorListenerAdapter() {
-                                                override fun onAnimationEnd(animation: Animator) {
-                                                    viewModel.setShadeCollapseFadeInComplete(true)
-                                                }
-                                            }
+                    launch {
+                        // Only temporarily needed, until flexi notifs go live
+                        viewModel.shadeCollapseFadeIn.collect { fadeIn ->
+                            if (fadeIn) {
+                                android.animation.ValueAnimator.ofFloat(0f, 1f).apply {
+                                    duration = 250
+                                    addUpdateListener { animation ->
+                                        controller.setMaxAlphaForKeyguard(
+                                            animation.animatedFraction,
+                                            "SharedNotificationContainerVB (collapseFadeIn)"
                                         )
-                                        start()
                                     }
+                                    start()
                                 }
                             }
                         }
@@ -146,7 +128,7 @@ object SharedNotificationContainerBinder {
                             .collect { controller.setMaxDisplayedNotifications(it) }
                     }
 
-                    if (!sceneContainerFlags.flexiNotifsEnabled()) {
+                    if (!SceneContainerFlag.isEnabled) {
                         launch {
                             viewModel.bounds.collect {
                                 val animate =
@@ -156,48 +138,50 @@ object SharedNotificationContainerBinder {
                         }
                     }
 
-                    launch {
-                        burnInParams
-                            .flatMapLatest { params -> viewModel.translationY(params) }
-                            .collect { y -> controller.setTranslationY(y) }
+                    if (!SceneContainerFlag.isEnabled) {
+                        launch {
+                            burnInParams
+                                .flatMapLatest { params -> viewModel.translationY(params) }
+                                .collect { y -> controller.setTranslationY(y) }
+                        }
                     }
 
                     launch { viewModel.translationX.collect { x -> controller.translationX = x } }
 
-                    if (!sceneContainerFlags.isEnabled()) {
-                        launch {
-                            viewModel.expansionAlpha(viewState).collect {
-                                controller.setMaxAlphaForExpansion(it)
-                            }
+                    launch {
+                        viewModel.keyguardAlpha(viewState).collect {
+                            controller.setMaxAlphaForKeyguard(it, "SharedNotificationContainerVB")
                         }
                     }
-                    launch {
-                        viewModel.glanceableHubAlpha.collect {
-                            controller.setMaxAlphaForGlanceableHub(it)
+
+                    if (communalHub()) {
+                        launch {
+                            viewModel.glanceableHubAlpha.collect {
+                                controller.setMaxAlphaForGlanceableHub(it)
+                            }
                         }
                     }
                 }
             }
 
-        controller.setOnHeightChangedRunnable(Runnable { viewModel.notificationStackChanged() })
-
-        view.setOnApplyWindowInsetsListener { v: View, insets: WindowInsets ->
-            val insetTypes = WindowInsets.Type.systemBars() or WindowInsets.Type.displayCutout()
-            burnInParams.update { current ->
-                current.copy(topInset = insets.getInsetsIgnoringVisibility(insetTypes).top)
-            }
-            insets
+        if (SceneContainerFlag.isEnabled) {
+            disposables += notificationScrollViewBinder.bindWhileAttached()
         }
-        view.addOnLayoutChangeListener(layoutChangeListener)
 
-        return object : DisposableHandle {
-            override fun dispose() {
-                disposableHandle.dispose()
-                disposableHandleMainImmediate.dispose()
-                controller.setOnHeightChangedRunnable(null)
-                view.setOnApplyWindowInsetsListener(null)
-                view.removeOnLayoutChangeListener(layoutChangeListener)
+        controller.setOnHeightChangedRunnable { viewModel.notificationStackChanged() }
+        disposables += DisposableHandle { controller.setOnHeightChangedRunnable(null) }
+
+        disposables +=
+            view.onApplyWindowInsets { _: View, insets: WindowInsets ->
+                val insetTypes = WindowInsets.Type.systemBars() or WindowInsets.Type.displayCutout()
+                burnInParams.update { current ->
+                    current.copy(topInset = insets.getInsetsIgnoringVisibility(insetTypes).top)
+                }
+                insets
             }
-        }
+
+        disposables += view.onLayoutChanged { viewModel.notificationStackChanged() }
+
+        return disposables
     }
 }

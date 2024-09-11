@@ -21,17 +21,19 @@ import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
 import android.app.RemoteInput;
-import android.os.Handler;
 import android.provider.DeviceConfig;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableResources;
 
+import androidx.test.filters.SmallTest;
+
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
-import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.res.R;
 import com.android.systemui.util.DeviceConfigProxyFake;
+import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -43,7 +45,8 @@ import org.junit.runner.RunWith;
 public class SmartReplyConstantsTest extends SysuiTestCase {
     private SmartReplyConstants mConstants;
     private DeviceConfigProxyFake mDeviceConfig;
-    private TestableLooper mTestableLooper;
+    private final FakeSystemClock mFakeSystemClock = new FakeSystemClock();
+    private final FakeExecutor mFakeExecutor = new FakeExecutor(mFakeSystemClock);
 
     @Before
     public void setUp() {
@@ -60,9 +63,8 @@ public class SmartReplyConstantsTest extends SysuiTestCase {
                 2);
         resources.addOverride(
                 R.integer.config_smart_replies_in_notifications_max_num_actions, -1);
-        mTestableLooper = TestableLooper.get(this);
         mConstants = new SmartReplyConstants(
-                new Handler(mTestableLooper.getLooper()),
+                mFakeExecutor,
                 mContext,
                 mDeviceConfig
         );
@@ -210,6 +212,6 @@ public class SmartReplyConstantsTest extends SysuiTestCase {
     private void overrideSetting(String propertyName, String value) {
         mDeviceConfig.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
                 propertyName, value, false /* makeDefault */);
-        mTestableLooper.processAllMessages();
+        mFakeExecutor.runAllReady();
     }
 }

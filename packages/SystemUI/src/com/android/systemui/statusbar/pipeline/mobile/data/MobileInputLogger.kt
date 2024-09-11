@@ -53,6 +53,27 @@ constructor(
         )
     }
 
+    fun logTopLevelServiceStateBroadcastEmergencyOnly(subId: Int, serviceState: ServiceState) {
+        buffer.log(
+            TAG,
+            LogLevel.INFO,
+            {
+                int1 = subId
+                bool1 = serviceState.isEmergencyOnly
+            },
+            { "ACTION_SERVICE_STATE for subId=$int1. ServiceState.isEmergencyOnly=$bool1" }
+        )
+    }
+
+    fun logTopLevelServiceStateBroadcastMissingExtras(subId: Int) {
+        buffer.log(
+            TAG,
+            LogLevel.INFO,
+            { int1 = subId },
+            { "ACTION_SERVICE_STATE for subId=$int1. Intent is missing extras. Ignoring" }
+        )
+    }
+
     fun logOnSignalStrengthsChanged(signalStrength: SignalStrength, subId: Int) {
         buffer.log(
             TAG,
@@ -99,6 +120,15 @@ constructor(
                 bool1 = active
             },
             { "onCarrierNetworkChange: subId=$int1 active=$bool1" },
+        )
+    }
+
+    fun logOnCarrierRoamingNtnModeChanged(active: Boolean) {
+        buffer.log(
+            TAG,
+            LogLevel.INFO,
+            { bool1 = active },
+            { "onCarrierRoamingNtnModeChanged: $bool1" }
         )
     }
 

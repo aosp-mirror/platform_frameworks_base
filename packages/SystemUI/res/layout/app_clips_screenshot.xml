@@ -69,7 +69,7 @@
         tools:minHeight="100dp"
         tools:minWidth="100dp" />
 
-    <com.android.systemui.screenshot.CropView
+    <com.android.systemui.screenshot.scroll.CropView
         android:id="@+id/crop_view"
         android:layout_width="0px"
         android:layout_height="0px"

@@ -21,8 +21,8 @@ import static com.android.systemui.classifier.Classifier.QS_SWIPE_SIDE;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import android.testing.AndroidTestingRunner;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.util.DeviceConfigProxyFake;
@@ -33,7 +33,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class DistanceClassifierTest extends ClassifierTest {
 
     private FalsingDataProvider mDataProvider;

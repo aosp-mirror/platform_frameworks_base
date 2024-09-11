@@ -18,7 +18,6 @@ package com.android.systemui.shade;
 
 import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_BEHAVIOR_CONTROLLED;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_OPTIMIZE_MEASURE;
 
 import static com.android.systemui.statusbar.NotificationRemoteInputManager.ENABLE_REMOTE_INPUT;
@@ -60,7 +59,7 @@ import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.res.R;
-import com.android.systemui.scene.shared.flag.SceneContainerFlags;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.scene.ui.view.WindowRootViewComponent;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
@@ -69,7 +68,6 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
-import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.StatusBarWindowCallback;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -118,7 +116,6 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
     private final AuthController mAuthController;
     private final Lazy<SelectedUserInteractor> mUserInteractor;
     private final Lazy<ShadeInteractor> mShadeInteractorLazy;
-    private final SceneContainerFlags mSceneContainerFlags;
     private final Lazy<CommunalInteractor> mCommunalInteractor;
     private ViewGroup mWindowRootView;
     private LayoutParams mLp;
@@ -133,7 +130,6 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
             mCallbacks = new ArrayList<>();
 
     private final SysuiColorExtractor mColorExtractor;
-    private final ScreenOffAnimationController mScreenOffAnimationController;
     /**
      * Layout params would be aggregated and dispatched all at once if this is > 0.
      *
@@ -161,13 +157,11 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
             SysuiColorExtractor colorExtractor,
             DumpManager dumpManager,
             KeyguardStateController keyguardStateController,
-            ScreenOffAnimationController screenOffAnimationController,
             AuthController authController,
             Lazy<ShadeInteractor> shadeInteractorLazy,
             ShadeWindowLogger logger,
             Lazy<SelectedUserInteractor> userInteractor,
             UserTracker userTracker,
-            SceneContainerFlags sceneContainerFlags,
             Lazy<CommunalInteractor> communalInteractor) {
         mContext = context;
         mWindowRootViewComponentFactory = windowRootViewComponentFactory;
@@ -182,12 +176,10 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         mKeyguardBypassController = keyguardBypassController;
         mBackgroundExecutor = backgroundExecutor;
         mColorExtractor = colorExtractor;
-        mScreenOffAnimationController = screenOffAnimationController;
         // prefix with {slow} to make sure this dumps at the END of the critical section.
         dumpManager.registerCriticalDumpable("{slow}NotificationShadeWindowControllerImpl", this);
         mAuthController = authController;
         mUserInteractor = userInteractor;
-        mSceneContainerFlags = sceneContainerFlags;
         mCommunalInteractor = communalInteractor;
         mLastKeyguardRotationAllowed = mKeyguardStateController.isKeyguardScreenRotationAllowed();
         mLockScreenDisplayTimeout = context.getResources()
@@ -204,7 +196,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
                 .getInteger(R.integer.config_keyguardRefreshRate);
         float actualPreferredRefreshRate = -1;
         if (desiredPreferredRefreshRate > -1) {
-            for (Display.Mode displayMode : context.getDisplay().getSupportedModes()) {
+            for (Display.Mode displayMode : context.getDisplay().getSystemSupportedModes()) {
                 if (Math.abs(displayMode.getRefreshRate() - desiredPreferredRefreshRate) <= .1) {
                     actualPreferredRefreshRate = displayMode.getRefreshRate();
                     break;
@@ -290,13 +282,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         mLp.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
         mLp.privateFlags |= PRIVATE_FLAG_OPTIMIZE_MEASURE;
 
-        // We use BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE here, however, there is special logic in
-        // window manager which disables the transient show behavior.
-        // TODO: Clean this up once that behavior moves into the Shell.
-        mLp.privateFlags |= PRIVATE_FLAG_BEHAVIOR_CONTROLLED;
-        mLp.insetsFlags.behavior = BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
-
-        if (mSceneContainerFlags.isEnabled()) {
+        if (SceneContainerFlag.isEnabled()) {
             // This prevents the appearance and disappearance of the software keyboard (also known
             // as the "IME") from scrolling/panning the window to make room for the keyboard.
             //
@@ -306,6 +292,14 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         }
 
         mWindowManager.addView(mWindowRootView, mLp);
+
+        // We use BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE here, however, there is special logic in
+        // window manager which disables the transient show behavior.
+        // TODO: Clean this up once that behavior moves into the Shell.
+        if (mWindowRootView.getWindowInsetsController() != null) {
+            mWindowRootView.getWindowInsetsController().setSystemBarsBehavior(
+                    BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+        }
 
         mLpChanged.copyFrom(mLp);
         onThemeChanged();
@@ -416,6 +410,12 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         } else {
             mLpChanged.flags &= ~LayoutParams.FLAG_SECURE;
         }
+
+        if (state.bouncerShowing) {
+            mLpChanged.inputFeatures |= LayoutParams.INPUT_FEATURE_SENSITIVE_FOR_PRIVACY;
+        } else {
+            mLpChanged.inputFeatures &= ~LayoutParams.INPUT_FEATURE_SENSITIVE_FOR_PRIVACY;
+        }
     }
 
     protected boolean isDebuggable() {
@@ -437,11 +437,8 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
     private void applyFocusableFlag(NotificationShadeWindowState state) {
         boolean panelFocusable = state.notificationShadeFocusable && state.shadeOrQsExpanded;
         if (state.bouncerShowing && (state.keyguardOccluded || state.keyguardNeedsInput)
-                || ENABLE_REMOTE_INPUT && state.remoteInputActive
-                // Make the panel focusable if we're doing the screen off animation, since the light
-                // reveal scrim is drawing in the panel and should consume touch events so that they
-                // don't go to the app behind.
-                || mScreenOffAnimationController.shouldIgnoreKeyguardTouches()) {
+                || (ENABLE_REMOTE_INPUT && state.remoteInputActive)
+                || state.glanceableHubShowing) {
             mLpChanged.flags &= ~LayoutParams.FLAG_NOT_FOCUSABLE;
             mLpChanged.flags &= ~LayoutParams.FLAG_ALT_FOCUSABLE_IM;
         } else if (state.isKeyguardShowingAndNotOccluded() || panelFocusable) {
@@ -607,6 +604,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
                 state.panelVisible,
                 state.shadeOrQsExpanded,
                 state.notificationShadeFocusable,
+                state.glanceableHubShowing,
                 state.bouncerShowing,
                 state.keyguardFadingAway,
                 state.keyguardGoingAway,
@@ -732,6 +730,12 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
     @Override
     public void setBouncerShowing(boolean showing) {
         mCurrentState.bouncerShowing = showing;
+        apply(mCurrentState);
+    }
+
+    @Override
+    public void setGlanceableHubShowing(boolean showing) {
+        mCurrentState.glanceableHubShowing = showing;
         apply(mCurrentState);
     }
 

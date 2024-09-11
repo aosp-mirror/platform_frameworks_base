@@ -129,15 +129,21 @@ public class AnrTimerTest {
      */
     private class TestAnrTimer extends AnrTimer<TestArg> {
         private TestAnrTimer(Handler h, int key, String tag) {
-            super(h, key, tag, false, new TestInjector());
+            super(h, key, tag, new AnrTimer.Args().injector(new TestInjector()));
         }
 
         TestAnrTimer(Helper helper) {
             this(helper.mHandler, MSG_TIMEOUT, caller());
         }
 
-        void start(TestArg arg, long millis) {
-            start(arg, arg.pid, arg.uid, millis);
+        @Override
+        public int getPid(TestArg arg) {
+            return arg.pid;
+        }
+
+        @Override
+        public int getUid(TestArg arg) {
+            return arg.uid;
         }
 
         // Return the name of method that called the constructor, assuming that this function is

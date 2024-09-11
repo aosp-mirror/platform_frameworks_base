@@ -31,29 +31,39 @@ import com.android.internal.inputmethod.IInputMethodClient;
 import com.android.internal.inputmethod.IRemoteAccessibilityInputConnection;
 import com.android.internal.inputmethod.IRemoteInputConnection;
 import com.android.internal.inputmethod.InputBindResult;
+import com.android.internal.inputmethod.InputMethodInfoSafeList;
 
 /**
- * Public interface to the global input method manager, used by all client
- * applications.
+ * Public interface to the global input method manager, used by all client applications.
+ *
+ * When adding new methods, make sure the associated user can be inferred from the arguments.
+ * Consider passing the associated userId when not already passing a display id or a window token.
  */
 interface IInputMethodManager {
     void addClient(in IInputMethodClient client, in IRemoteInputConnection inputmethod,
             int untrustedDisplayId);
 
-    // TODO: Use ParceledListSlice instead
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
             + "android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)")
     InputMethodInfo getCurrentInputMethodInfoAsUser(int userId);
 
-    // TODO: Use ParceledListSlice instead
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
             + "android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)")
-    List<InputMethodInfo> getInputMethodList(int userId, int directBootAwareness);
+    InputMethodInfoSafeList getInputMethodList(int userId, int directBootAwareness);
 
-    // TODO: Use ParceledListSlice instead
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
             + "android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)")
-    List<InputMethodInfo> getEnabledInputMethodList(int userId);
+    InputMethodInfoSafeList getEnabledInputMethodList(int userId);
+
+    // TODO(b/339761278): Remove after getInputMethodList() is fully deployed.
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
+            + "android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)")
+    List<InputMethodInfo> getInputMethodListLegacy(int userId, int directBootAwareness);
+
+    // TODO(b/339761278): Remove after getEnabledInputMethodList() is fully deployed.
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
+            + "android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)")
+    List<InputMethodInfo> getEnabledInputMethodListLegacy(int userId);
 
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
             + "android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)")

@@ -89,7 +89,7 @@ public class TelephonySubscriptionTracker extends BroadcastReceiver {
 
     @NonNull private final TelephonyManager mTelephonyManager;
     @NonNull private final SubscriptionManager mSubscriptionManager;
-    @NonNull private final CarrierConfigManager mCarrierConfigManager;
+    @Nullable private final CarrierConfigManager mCarrierConfigManager;
 
     @NonNull private final ActiveDataSubscriptionIdListener mActiveDataSubIdListener;
 
@@ -158,8 +158,10 @@ public class TelephonySubscriptionTracker extends BroadcastReceiver {
         mSubscriptionManager.addOnSubscriptionsChangedListener(
                 executor, mSubscriptionChangedListener);
         mTelephonyManager.registerTelephonyCallback(executor, mActiveDataSubIdListener);
-        mCarrierConfigManager.registerCarrierConfigChangeListener(executor,
-                mCarrierConfigChangeListener);
+        if (mCarrierConfigManager != null) {
+            mCarrierConfigManager.registerCarrierConfigChangeListener(executor,
+                    mCarrierConfigChangeListener);
+        }
 
         registerCarrierPrivilegesCallbacks();
     }
@@ -200,7 +202,10 @@ public class TelephonySubscriptionTracker extends BroadcastReceiver {
         mContext.unregisterReceiver(this);
         mSubscriptionManager.removeOnSubscriptionsChangedListener(mSubscriptionChangedListener);
         mTelephonyManager.unregisterTelephonyCallback(mActiveDataSubIdListener);
-        mCarrierConfigManager.unregisterCarrierConfigChangeListener(mCarrierConfigChangeListener);
+        if (mCarrierConfigManager != null) {
+            mCarrierConfigManager.unregisterCarrierConfigChangeListener(
+                    mCarrierConfigChangeListener);
+        }
 
         unregisterCarrierPrivilegesCallbacks();
     }

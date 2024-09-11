@@ -1,10 +1,10 @@
 package com.android.systemui.qs
 
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.ViewGroup
 import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.FrameLayout
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.qs.logging.QSLogger
@@ -16,7 +16,7 @@ import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 @SmallTest
 class QuickQSPanelTest : SysuiTestCase() {
@@ -36,7 +36,7 @@ class QuickQSPanelTest : SysuiTestCase() {
 
         testableLooper.runWithLooper {
             quickQSPanel = QuickQSPanel(mContext, null)
-            quickQSPanel.initialize(qsLogger)
+            quickQSPanel.initialize(qsLogger, true)
 
             quickQSPanel.onFinishInflate()
             // Provides a parent with non-zero size for QSPanel

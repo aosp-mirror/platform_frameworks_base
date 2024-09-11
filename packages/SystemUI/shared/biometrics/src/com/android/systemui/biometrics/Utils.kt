@@ -16,7 +16,6 @@
 package com.android.systemui.biometrics
 
 import android.Manifest
-import android.annotation.IntDef
 import android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC
 import android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC
 import android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_COMPLEX
@@ -26,7 +25,11 @@ import android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX
 import android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_SOMETHING
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.graphics.Insets
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.hardware.biometrics.BiometricManager.Authenticators
 import android.hardware.biometrics.PromptInfo
 import android.hardware.biometrics.SensorPropertiesInternal
@@ -39,14 +42,9 @@ import android.view.WindowMetrics
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityManager
 import com.android.internal.widget.LockPatternUtils
-import java.lang.annotation.Retention
-import java.lang.annotation.RetentionPolicy
+import com.android.systemui.biometrics.shared.model.PromptKind
 
 object Utils {
-    const val CREDENTIAL_PIN = 1
-    const val CREDENTIAL_PATTERN = 2
-    const val CREDENTIAL_PASSWORD = 3
-
     /** Base set of layout flags for fingerprint overlay widgets. */
     const val FINGERPRINT_OVERLAY_LAYOUT_PARAM_FLAGS =
         (WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
@@ -91,17 +89,16 @@ object Utils {
         (promptInfo.authenticators and Authenticators.BIOMETRIC_WEAK) != 0
 
     @JvmStatic
-    @CredentialType
-    fun getCredentialType(utils: LockPatternUtils, userId: Int): Int =
+    fun getCredentialType(utils: LockPatternUtils, userId: Int): PromptKind =
         when (utils.getKeyguardStoredPasswordQuality(userId)) {
-            PASSWORD_QUALITY_SOMETHING -> CREDENTIAL_PATTERN
+            PASSWORD_QUALITY_SOMETHING -> PromptKind.Pattern
             PASSWORD_QUALITY_NUMERIC,
-            PASSWORD_QUALITY_NUMERIC_COMPLEX -> CREDENTIAL_PIN
+            PASSWORD_QUALITY_NUMERIC_COMPLEX -> PromptKind.Pin
             PASSWORD_QUALITY_ALPHABETIC,
             PASSWORD_QUALITY_ALPHANUMERIC,
             PASSWORD_QUALITY_COMPLEX,
-            PASSWORD_QUALITY_MANAGED -> CREDENTIAL_PASSWORD
-            else -> CREDENTIAL_PASSWORD
+            PASSWORD_QUALITY_MANAGED -> PromptKind.Password
+            else -> PromptKind.Password
         }
 
     @JvmStatic
@@ -130,7 +127,25 @@ object Utils {
             ?: Insets.NONE
     }
 
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(CREDENTIAL_PIN, CREDENTIAL_PATTERN, CREDENTIAL_PASSWORD)
-    annotation class CredentialType
+    /** Converts `drawable` to a [Bitmap]. */
+    @JvmStatic
+    fun Drawable?.toBitmap(): Bitmap? {
+        if (this == null) {
+            return null
+        }
+        if (this is BitmapDrawable) {
+            return bitmap
+        }
+        val bitmap: Bitmap =
+            if (intrinsicWidth <= 0 || intrinsicHeight <= 0) {
+                Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
+                // Single color bitmap will be created of 1x1 pixel
+            } else {
+                Bitmap.createBitmap(intrinsicWidth, intrinsicHeight, Bitmap.Config.ARGB_8888)
+            }
+        val canvas = Canvas(bitmap)
+        setBounds(0, 0, canvas.width, canvas.height)
+        draw(canvas)
+        return bitmap
+    }
 }

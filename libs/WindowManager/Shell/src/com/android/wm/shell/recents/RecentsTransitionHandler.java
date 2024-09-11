@@ -22,10 +22,12 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.view.WindowManager.KEYGUARD_VISIBILITY_TRANSIT_FLAGS;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_LOCKED;
+import static android.view.WindowManager.TRANSIT_PIP;
 import static android.view.WindowManager.TRANSIT_SLEEP;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.window.TransitionInfo.FLAG_TRANSLUCENT;
 
+import static com.android.wm.shell.sysui.ShellSharedConstants.KEY_EXTRA_SHELL_CAN_HAND_OFF_ANIMATION;
 import static com.android.wm.shell.util.SplitBounds.KEY_EXTRA_SPLIT_BOUNDS;
 
 import android.annotation.Nullable;
@@ -35,6 +37,7 @@ import android.app.ActivityTaskManager;
 import android.app.IApplicationThread;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -52,13 +55,17 @@ import android.window.PictureInPictureSurfaceTransaction;
 import android.window.TaskSnapshot;
 import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
+import android.window.WindowAnimationState;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
+
+import androidx.annotation.NonNull;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.common.ShellExecutor;
+import com.android.wm.shell.common.pip.PipUtils;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.shared.TransitionUtil;
 import com.android.wm.shell.sysui.ShellInit;
@@ -90,6 +97,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
     private final ArrayList<RecentsMixedHandler> mMixers = new ArrayList<>();
 
     private final HomeTransitionObserver mHomeTransitionObserver;
+    private @Nullable Color mBackgroundColor;
 
     public RecentsTransitionHandler(ShellInit shellInit, Transitions transitions,
             @Nullable RecentTasksController recentTasksController,
@@ -119,6 +127,15 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
     /** Adds the callback for receiving the state change of transition. */
     public void addTransitionStateListener(RecentsTransitionStateListener listener) {
         mStateListeners.add(listener);
+    }
+
+    /**
+     * Sets a background color on the transition root layered behind the outgoing task. {@code null}
+     * may be used to clear any previously set colors to avoid showing a background at all. The
+     * color is always shown at full opacity.
+     */
+    public void setTransitionBackgroundColor(@Nullable Color color) {
+        mBackgroundColor = color;
     }
 
     @VisibleForTesting
@@ -268,6 +285,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
         private IBinder mTransition = null;
         private boolean mKeyguardLocked = false;
         private boolean mWillFinishToHome = false;
+        private Transitions.TransitionHandler mTakeoverHandler = null;
 
         /** The animation is idle, waiting for the user to choose a task to switch to. */
         private static final int STATE_NORMAL = 0;
@@ -384,6 +402,11 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
             }
         }
 
+        /**
+         * Cleans up the recents transition.  This should generally not be called directly
+         * to cancel a transition after it has started, instead callers should call one of
+         * the cancel() methods to ensure that Launcher is notified.
+         */
         void cleanUp() {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
                     "[%d] RecentsController.cleanup", mInstanceId);
@@ -418,7 +441,10 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
                     "[%d] RecentsController.start", mInstanceId);
             if (mListener == null || mTransition == null) {
-                cleanUp();
+                Slog.e(TAG, "Missing listener or transition, hasListener=" + (mListener != null) +
+                        " hasTransition=" + (mTransition != null));
+                cancel("No listener (" + (mListener == null)
+                        + ") or no transition (" + (mTransition == null) + ")");
                 return false;
             }
             // First see if this is a valid recents transition.
@@ -442,7 +468,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
             if (mRecentsTask == null && !hasPausingTasks) {
                 // Recents is already running apparently, so this is a no-op.
                 Slog.e(TAG, "Tried to start recents while it is already running.");
-                cleanUp();
+                cancel("No recents task and no pausing tasks");
                 return false;
             }
 
@@ -465,6 +491,16 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
             final int belowLayers = info.getChanges().size();
             final int middleLayers = info.getChanges().size() * 2;
             final int aboveLayers = info.getChanges().size() * 3;
+
+            // Add a background color to each transition root in this transition.
+            if (mBackgroundColor != null) {
+                info.getChanges().stream()
+                        .mapToInt((change) -> TransitionUtil.rootIndexFor(change, info))
+                        .distinct()
+                        .mapToObj((rootIndex) -> info.getRoot(rootIndex).getLeash())
+                        .forEach((root) -> createBackgroundSurface(t, root, middleLayers));
+            }
+
             for (int i = 0; i < info.getChanges().size(); ++i) {
                 final TransitionInfo.Change change = info.getChanges().get(i);
                 final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
@@ -531,21 +567,35 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                         // Put into the "below" layer space.
                         t.setLayer(change.getLeash(), layer);
                         mOpeningTasks.add(new TaskState(change, null /* leash */));
+                    } else {
+                        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
+                                "  unhandled root taskId=%d", taskInfo.taskId);
                     }
                 } else if (TransitionUtil.isDividerBar(change)) {
                     final RemoteAnimationTarget target = TransitionUtil.newTarget(change,
                             belowLayers - i, info, t, mLeashMap);
                     // Add this as a app and we will separate them on launcher side by window type.
                     apps.add(target);
+                } else {
+                    ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
+                            "  unhandled change taskId=%d",
+                            taskInfo != null ? taskInfo.taskId : -1);
                 }
             }
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
+                    "Applying transaction=%d", t.getId());
             t.apply();
-            Bundle b = new Bundle(1 /*capacity*/);
+
+            mTakeoverHandler = mTransitions.getHandlerForTakeover(mTransition, info);
+
+            Bundle b = new Bundle(2 /*capacity*/);
             b.putParcelable(KEY_EXTRA_SPLIT_BOUNDS,
                     mRecentTasksController.getSplitBoundsForTaskId(closingSplitTaskId));
+            b.putBoolean(KEY_EXTRA_SHELL_CAN_HAND_OFF_ANIMATION, mTakeoverHandler != null);
             try {
                 ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
-                        "[%d] RecentsController.start: calling onAnimationStart", mInstanceId);
+                        "[%d] RecentsController.start: calling onAnimationStart with %d apps",
+                        mInstanceId, apps.size());
                 mListener.onAnimationStart(this,
                         apps.toArray(new RemoteAnimationTarget[apps.size()]),
                         wallpapers.toArray(new RemoteAnimationTarget[wallpapers.size()]),
@@ -558,6 +608,63 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                 cancel("onAnimationStart() failed");
             }
             return true;
+        }
+
+        @Override
+        public void handOffAnimation(
+                RemoteAnimationTarget[] targets, WindowAnimationState[] states) {
+            mExecutor.execute(() -> {
+                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
+                        "[%d] RecentsController.handOffAnimation", mInstanceId);
+
+                if (mTakeoverHandler == null) {
+                    Slog.e(TAG, "Tried to hand off an animation without a valid takeover "
+                            + "handler.");
+                    return;
+                }
+
+                if (targets.length != states.length) {
+                    Slog.e(TAG, "Tried to hand off an animation, but the number of targets "
+                            + "(" + targets.length + ") doesn't match the number of states "
+                            + "(" + states.length + ")");
+                    return;
+                }
+
+                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
+                        "[%d] RecentsController.handOffAnimation: got %d states for %d "
+                                + "changes", mInstanceId, states.length, mInfo.getChanges().size());
+                WindowAnimationState[] updatedStates =
+                        new WindowAnimationState[mInfo.getChanges().size()];
+
+                // Ensure that the ordering of animation states is the same as that of  matching
+                // changes in mInfo. prefixOrderIndex is set up in reverse order to that of the
+                // changes, so that's what we use to get to the correct ordering.
+                for (int i = 0; i < targets.length; i++) {
+                    RemoteAnimationTarget target = targets[i];
+                    updatedStates[updatedStates.length - target.prefixOrderIndex] = states[i];
+                }
+
+                Transitions.TransitionFinishCallback finishCB = mFinishCB;
+                // Reset the callback here, so any stray calls that aren't coming from the new
+                // handler are ignored.
+                mFinishCB = null;
+
+                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
+                        "[%d] RecentsController.handOffAnimation: calling "
+                                + "takeOverAnimation with %d states", mInstanceId,
+                        updatedStates.length);
+                mTakeoverHandler.takeOverAnimation(
+                        mTransition, mInfo, new SurfaceControl.Transaction(),
+                        wct -> {
+                            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
+                                    "[%d] RecentsController.handOffAnimation: finish "
+                                            + "callback", mInstanceId);
+                            // Set the callback once again so we can finish correctly.
+                            mFinishCB = finishCB;
+                            finishInner(true /* toHome */, false /* userLeave */,
+                                    null /* finishCb */);
+                        }, updatedStates);
+            });
         }
 
         /**
@@ -1011,13 +1118,16 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                 }
                 if (mPipTransaction != null && sendUserLeaveHint) {
                     SurfaceControl pipLeash = null;
+                    TransitionInfo.Change pipChange = null;
                     if (mPipTask != null) {
-                        pipLeash = mInfo.getChange(mPipTask).getLeash();
+                        pipChange = mInfo.getChange(mPipTask);
+                        pipLeash = pipChange.getLeash();
                     } else if (mPipTaskId != -1) {
                         // find a task with taskId from #setFinishTaskTransaction()
                         for (TransitionInfo.Change change : mInfo.getChanges()) {
                             if (change.getTaskInfo() != null
                                     && change.getTaskInfo().taskId == mPipTaskId) {
+                                pipChange = change;
                                 pipLeash = change.getLeash();
                                 ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
                                         "RecentsController.finishInner:"
@@ -1036,6 +1146,28 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
                                 "RecentsController.finishInner: PiP transaction %s merged",
                                 mPipTransaction);
+                        if (PipUtils.isPip2ExperimentEnabled()) {
+                            // If this path is triggered, we are in auto-enter PiP flow in gesture
+                            // navigation mode, which means "Recents" transition should be followed
+                            // by a TRANSIT_PIP. Hence, we take the WCT was about to be sent
+                            // to Core to be applied during finishTransition(), we modify it to
+                            // factor in PiP changes, and we send it as a direct startWCT for
+                            // a new TRANSIT_PIP type transition. Recents still sends
+                            // finishTransition() to update visibilities, but with finishWCT=null.
+                            TransitionRequestInfo requestInfo = new TransitionRequestInfo(
+                                    TRANSIT_PIP, null /* triggerTask */, pipChange.getTaskInfo(),
+                                    null /* remote */, null /* displayChange */, 0 /* flags */);
+                            // Use mTransition IBinder token temporarily just to get PipTransition
+                            // to return from its handleRequest(). The actual TRANSIT_PIP will have
+                            // anew token once it arrives into PipTransition#startAnimation().
+                            Pair<Transitions.TransitionHandler, WindowContainerTransaction>
+                                    requestRes = mTransitions.dispatchRequest(mTransition,
+                                            requestInfo, null /* skip */);
+                            wct.merge(requestRes.second, true);
+                            mTransitions.startTransition(TRANSIT_PIP, wct, null /* handler */);
+                            // We need to clear the WCT to send finishWCT=null for Recents.
+                            wct.clear();
+                        }
                     }
                     mPipTaskId = -1;
                     mPipTask = null;
@@ -1057,7 +1189,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
         }
 
         private boolean allAppsAreTranslucent(ArrayList<TaskState> tasks) {
-            if (tasks == null || tasks.isEmpty()) {
+            if (tasks == null) {
                 return false;
             }
             for (int i = tasks.size() - 1; i >= 0; --i) {
@@ -1066,6 +1198,29 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                 }
             }
             return true;
+        }
+
+        private void createBackgroundSurface(SurfaceControl.Transaction transaction,
+                SurfaceControl parent, int layer) {
+            if (mBackgroundColor == null) {
+                return;
+            }
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
+                    "  adding background color to layer=%d", layer);
+            final SurfaceControl background = new SurfaceControl.Builder()
+                    .setName("recents_background")
+                    .setColorLayer()
+                    .setOpaque(true)
+                    .setParent(parent)
+                    .build();
+            transaction.setColor(background, colorToFloatArray(mBackgroundColor));
+            transaction.setLayer(background, layer);
+            transaction.setAlpha(background, 1F);
+            transaction.show(background);
+        }
+
+        private static float[] colorToFloatArray(@NonNull Color color) {
+            return new float[]{color.red(), color.green(), color.blue()};
         }
 
         private void cleanUpPausingOrClosingTask(TaskState task, WindowContainerTransaction wct,

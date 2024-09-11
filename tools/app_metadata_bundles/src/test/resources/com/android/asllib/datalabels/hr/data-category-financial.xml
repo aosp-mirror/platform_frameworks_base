@@ -1,0 +1,10 @@
+<data-labels>
+    <data-shared dataType="financial_data_type_card_bank_account"
+        purposes="analytics" />
+    <data-shared dataType="financial_data_type_purchase_history"
+    purposes="analytics" />
+    <data-shared dataType="financial_data_type_credit_score"
+        purposes="analytics" />
+    <data-shared dataType="financial_data_type_other"
+        purposes="analytics" />
+</data-labels>

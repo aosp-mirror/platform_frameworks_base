@@ -16,8 +16,8 @@
 
 package com.android.wm.shell.compatui;
 
-import static android.app.AppCompatTaskInfo.CAMERA_COMPAT_CONTROL_HIDDEN;
-import static android.app.AppCompatTaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED;
+import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_CONTROL_HIDDEN;
+import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED;
 import static android.view.WindowInsets.Type.navigationBars;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
@@ -34,7 +34,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.app.ActivityManager.RunningTaskInfo;
-import android.app.AppCompatTaskInfo.CameraCompatControlState;
+import android.app.CameraCompatTaskInfo.CameraCompatControlState;
 import android.app.TaskInfo;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -668,6 +668,18 @@ public class CompatUIControllerTest extends ShellTestCase {
         Assert.assertTrue(mController.hasShownUserAspectRatioSettingsButton());
     }
 
+    @Test
+    public void testLetterboxEduLayout_notCreatedWhenLetterboxEducationIsDisabled() {
+        TaskInfo taskInfo = createTaskInfo(DISPLAY_ID, TASK_ID, /* hasSizeCompat= */ true,
+                CAMERA_COMPAT_CONTROL_HIDDEN);
+        taskInfo.appCompatTaskInfo.isLetterboxEducationEnabled = false;
+
+        mController.onCompatInfoChanged(taskInfo, mMockTaskListener);
+
+        verify(mController, never()).createLetterboxEduWindowManager(any(), eq(taskInfo),
+                eq(mMockTaskListener));
+    }
+
     private static TaskInfo createTaskInfo(int displayId, int taskId, boolean hasSizeCompat,
             @CameraCompatControlState int cameraCompatControlState) {
         return createTaskInfo(displayId, taskId, hasSizeCompat, cameraCompatControlState,
@@ -689,10 +701,13 @@ public class CompatUIControllerTest extends ShellTestCase {
         taskInfo.taskId = taskId;
         taskInfo.displayId = displayId;
         taskInfo.appCompatTaskInfo.topActivityInSizeCompat = hasSizeCompat;
-        taskInfo.appCompatTaskInfo.cameraCompatControlState = cameraCompatControlState;
+        taskInfo.appCompatTaskInfo.cameraCompatTaskInfo.cameraCompatControlState =
+                cameraCompatControlState;
         taskInfo.isVisible = isVisible;
         taskInfo.isFocused = isFocused;
         taskInfo.isTopActivityTransparent = isTopActivityTransparent;
+        taskInfo.appCompatTaskInfo.isLetterboxEducationEnabled = true;
+        taskInfo.appCompatTaskInfo.topActivityBoundsLetterboxed = true;
         return taskInfo;
     }
 }

@@ -24,7 +24,6 @@ import android.os.Handler
 import android.os.Looper
 import android.service.quicksettings.Tile
 import android.text.TextUtils
-import android.view.View
 import android.widget.Switch
 import androidx.annotation.VisibleForTesting
 import com.android.internal.jank.InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN
@@ -32,6 +31,7 @@ import com.android.internal.logging.MetricsLogger
 import com.android.systemui.Flags.recordIssueQsTile
 import com.android.systemui.animation.DialogCuj
 import com.android.systemui.animation.DialogTransitionAnimator
+import com.android.systemui.animation.Expandable
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.ActivityStarter
@@ -41,14 +41,18 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.logging.QSLogger
+import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor
 import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.recordissue.IssueRecordingService
+import com.android.systemui.recordissue.IssueRecordingState
 import com.android.systemui.recordissue.RecordIssueDialogDelegate
+import com.android.systemui.recordissue.TraceurMessageSender
 import com.android.systemui.res.R
 import com.android.systemui.screenrecord.RecordingService
 import com.android.systemui.settings.UserContextProvider
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import java.util.concurrent.Executor
 import javax.inject.Inject
 
 class RecordIssueTile
@@ -66,7 +70,11 @@ constructor(
     private val keyguardDismissUtil: KeyguardDismissUtil,
     private val keyguardStateController: KeyguardStateController,
     private val dialogTransitionAnimator: DialogTransitionAnimator,
+    private val panelInteractor: PanelInteractor,
     private val userContextProvider: UserContextProvider,
+    private val traceurMessageSender: TraceurMessageSender,
+    @Background private val bgExecutor: Executor,
+    private val issueRecordingState: IssueRecordingState,
     private val delegateFactory: RecordIssueDialogDelegate.Factory,
 ) :
     QSTileImpl<QSTile.BooleanState>(
@@ -81,7 +89,21 @@ constructor(
         qsLogger
     ) {
 
-    @VisibleForTesting var isRecording: Boolean = false
+    private val onRecordingChangeListener = Runnable { refreshState() }
+
+    override fun handleSetListening(listening: Boolean) {
+        super.handleSetListening(listening)
+        if (listening) {
+            issueRecordingState.addListener(onRecordingChangeListener)
+        } else {
+            issueRecordingState.removeListener(onRecordingChangeListener)
+        }
+    }
+
+    override fun handleDestroy() {
+        super.handleDestroy()
+        bgExecutor.execute { traceurMessageSender.unbindFromTraceur(mContext) }
+    }
 
     override fun getTileLabel(): CharSequence = mContext.getString(R.string.qs_record_issue_label)
 
@@ -100,17 +122,24 @@ constructor(
         }
 
     @VisibleForTesting
-    public override fun handleClick(view: View?) {
-        if (isRecording) {
-            isRecording = false
-            stopScreenRecord()
+    public override fun handleClick(expandable: Expandable?) {
+        if (issueRecordingState.isRecording) {
+            stopIssueRecordingService()
         } else {
-            mUiHandler.post { showPrompt(view) }
+            mUiHandler.post { showPrompt(expandable) }
         }
-        refreshState()
     }
 
-    private fun stopScreenRecord() =
+    private fun startIssueRecordingService() =
+        PendingIntent.getForegroundService(
+                userContextProvider.userContext,
+                RecordingService.REQUEST_CODE,
+                IssueRecordingService.getStartIntent(userContextProvider.userContext),
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            .send(BroadcastOptions.makeBasic().apply { isInteractive = true }.toBundle())
+
+    private fun stopIssueRecordingService() =
         PendingIntent.getService(
                 userContextProvider.userContext,
                 RecordingService.REQUEST_CODE,
@@ -119,24 +148,23 @@ constructor(
             )
             .send(BroadcastOptions.makeBasic().apply { isInteractive = true }.toBundle())
 
-    private fun showPrompt(view: View?) {
+    private fun showPrompt(expandable: Expandable?) {
         val dialog: AlertDialog =
             delegateFactory
                 .create {
-                    isRecording = true
-                    refreshState()
+                    startIssueRecordingService()
+                    dialogTransitionAnimator.disableAllCurrentDialogsExitAnimations()
+                    panelInteractor.collapsePanels()
                 }
                 .createDialog()
         val dismissAction =
             ActivityStarter.OnDismissAction {
                 // We animate from the touched view only if we are not on the keyguard, given
                 // that if we are we will dismiss it which will also collapse the shade.
-                if (view != null && !keyguardStateController.isShowing) {
-                    dialogTransitionAnimator.showFromView(
-                        dialog,
-                        view,
-                        DialogCuj(CUJ_SHADE_DIALOG_OPEN, TILE_SPEC)
-                    )
+                if (expandable != null && !keyguardStateController.isShowing) {
+                    expandable
+                        .dialogTransitionController(DialogCuj(CUJ_SHADE_DIALOG_OPEN, TILE_SPEC))
+                        ?.let { dialogTransitionAnimator.show(dialog, it) } ?: dialog.show()
                 } else {
                     dialog.show()
                 }
@@ -150,7 +178,7 @@ constructor(
     @VisibleForTesting
     public override fun handleUpdateState(qsTileState: QSTile.BooleanState, arg: Any?) {
         qsTileState.apply {
-            if (isRecording) {
+            if (issueRecordingState.isRecording) {
                 value = true
                 state = Tile.STATE_ACTIVE
                 forceExpandIcon = false

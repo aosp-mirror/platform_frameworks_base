@@ -24,8 +24,10 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.spy;
 
+import android.annotation.RequiresPermission;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.Intent;
 import android.os.Looper;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
@@ -72,6 +74,11 @@ public class ActiveSourceActionTest {
             protected void writeStringSystemProperty(String key, String value) {
                 // do nothing
             }
+
+            @Override
+            protected void sendBroadcastAsUser(@RequiresPermission Intent intent) {
+                // do nothing
+            }
         };
 
         Looper looper = mTestLooper.getLooper();
@@ -79,6 +86,8 @@ public class ActiveSourceActionTest {
         mHdmiControlService.setHdmiCecConfig(new FakeHdmiCecConfig(mContextSpy));
         mHdmiControlService.setDeviceConfig(new FakeDeviceConfigWrapper());
         mNativeWrapper = new FakeNativeWrapper();
+        mPhysicalAddress = 0x2000;
+        mNativeWrapper.setPhysicalAddress(mPhysicalAddress);
         HdmiCecController hdmiCecController = HdmiCecController.createWithNativeWrapper(
                 this.mHdmiControlService, mNativeWrapper, mHdmiControlService.getAtomWriter());
         mHdmiControlService.setCecController(hdmiCecController);
@@ -87,8 +96,6 @@ public class ActiveSourceActionTest {
         mHdmiControlService.onBootPhase(PHASE_SYSTEM_SERVICES_READY);
         mPowerManager = new FakePowerManagerWrapper(mContextSpy);
         mHdmiControlService.setPowerManager(mPowerManager);
-        mPhysicalAddress = 0x2000;
-        mNativeWrapper.setPhysicalAddress(mPhysicalAddress);
         mTestLooper.dispatchAll();
     }
 

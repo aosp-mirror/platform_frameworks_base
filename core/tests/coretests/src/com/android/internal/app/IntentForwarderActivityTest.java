@@ -53,6 +53,7 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.Settings;
 
 import androidx.test.InstrumentationRegistry;
@@ -93,6 +94,9 @@ public class IntentForwarderActivityTest {
     private static final String TYPE_PLAIN_TEXT = "text/plain";
 
     private static UserInfo MANAGED_PROFILE_INFO = new UserInfo();
+    private static UserInfo PRIVATE_PROFILE_INFO = new UserInfo(12, "Private", null,
+            UserInfo.FLAG_PROFILE, UserManager.USER_TYPE_PROFILE_PRIVATE);
+    @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     static {
         MANAGED_PROFILE_INFO.id = 10;
@@ -131,6 +135,7 @@ public class IntentForwarderActivityTest {
 
     @Before
     public void setup() {
+
         MockitoAnnotations.initMocks(this);
         mContext = InstrumentationRegistry.getTargetContext();
         sInjector = spy(new TestInjector());
@@ -632,6 +637,55 @@ public class IntentForwarderActivityTest {
                 logMakerCaptor.getValue().getSubtype());
     }
 
+    @Test
+    public void shouldForwardToParent_telephony_privateProfile() throws Exception {
+        mSetFlagsRule.enableFlags(
+                android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE,
+                android.multiuser.Flags.FLAG_ENABLE_PRIVATE_SPACE_FEATURES,
+                android.multiuser.Flags.FLAG_ENABLE_PRIVATE_SPACE_INTENT_REDIRECTION);
+
+        sComponentName = FORWARD_TO_PARENT_COMPONENT_NAME;
+        when(mIPm.canForwardTo(
+                any(Intent.class), nullable(String.class), anyInt(), anyInt())).thenReturn(true);
+
+        List<UserInfo> profiles = new ArrayList<>();
+        profiles.add(CURRENT_USER_INFO);
+        profiles.add(PRIVATE_PROFILE_INFO);
+        when(mUserManager.getProfiles(anyInt())).thenReturn(profiles);
+        when(mUserManager.getProfileParent(anyInt())).thenReturn(CURRENT_USER_INFO);
+        Intent intent = new Intent(mContext, IntentForwarderWrapperActivity.class);
+        intent.setAction(Intent.ACTION_DIAL);
+        IntentForwarderWrapperActivity activity = mActivityRule.launchActivity(intent);
+        verify(mIPm).canForwardTo(any(), any(), anyInt(), anyInt());
+        assertEquals(activity.getStartActivityIntent().getAction(), intent.getAction());
+        assertEquals(activity.getUserIdActivityLaunchedIn(), CURRENT_USER_INFO.id);
+    }
+
+    @Test
+    public void shouldForwardToParent_mms_privateProfile() throws Exception {
+        mSetFlagsRule.enableFlags(
+                android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE,
+                android.multiuser.Flags.FLAG_ENABLE_PRIVATE_SPACE_INTENT_REDIRECTION);
+
+        sComponentName = FORWARD_TO_PARENT_COMPONENT_NAME;
+        when(mIPm.canForwardTo(
+                any(Intent.class), nullable(String.class), anyInt(), anyInt())).thenReturn(true);
+
+        List<UserInfo> profiles = new ArrayList<>();
+        profiles.add(CURRENT_USER_INFO);
+        profiles.add(PRIVATE_PROFILE_INFO);
+        when(mUserManager.getProfiles(anyInt())).thenReturn(profiles);
+        when(mUserManager.getProfileParent(anyInt())).thenReturn(CURRENT_USER_INFO);
+        Intent intent = new Intent(mContext, IntentForwarderWrapperActivity.class);
+        intent.setAction(Intent.ACTION_SEND);
+        intent.setType(TYPE_PLAIN_TEXT);
+        IntentForwarderWrapperActivity activity = mActivityRule.launchActivity(intent);
+        verify(mIPm).canForwardTo(any(), any(), anyInt(), anyInt());
+        assertEquals(activity.getStartActivityIntent().getAction(), intent.getAction());
+        assertEquals(activity.getStartActivityIntent().getType(), intent.getType());
+        assertEquals(activity.getUserIdActivityLaunchedIn(), CURRENT_USER_INFO.id);
+    }
+
     private void setupShouldSkipDisclosureTest() throws RemoteException {
         sComponentName = FORWARD_TO_PARENT_COMPONENT_NAME;
         sActivityName = "MyTestActivity";
@@ -687,6 +741,14 @@ public class IntentForwarderActivityTest {
         @Override
         protected MetricsLogger getMetricsLogger() {
             return mMetricsLogger;
+        }
+
+        Intent getStartActivityIntent() {
+            return mStartActivityIntent;
+        }
+
+        int getUserIdActivityLaunchedIn() {
+            return mUserIdActivityLaunchedIn;
         }
     }
 

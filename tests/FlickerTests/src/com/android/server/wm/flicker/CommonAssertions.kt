@@ -279,12 +279,11 @@ fun LegacyFlickerTest.snapshotStartingWindowLayerCoversExactlyOnApp(
                         subject.isVisible
                 }
             val visibleAreas =
-                snapshotLayers
-                    .mapNotNull { snapshotLayer -> snapshotLayer.layer.visibleRegion }
+                snapshotLayers.mapNotNull { snapshotLayer -> snapshotLayer.layer.visibleRegion }
             val snapshotRegion = RegionSubject(visibleAreas, it.timestamp)
             val appVisibleRegion = it.visibleRegion(component)
             // Verify the size of snapshotRegion covers appVisibleRegion exactly in animation.
-            if (snapshotRegion.region.isNotEmpty && appVisibleRegion.region.isNotEmpty) {
+            if (!snapshotRegion.region.isEmpty && !appVisibleRegion.region.isEmpty) {
                 snapshotRegion.coversExactly(appVisibleRegion.region)
             }
         }

@@ -822,7 +822,18 @@ public class AppWidgetManager {
      *
      * @param appWidgetIds  The AppWidget instances to notify of view data changes.
      * @param viewId        The collection view id.
+     * @deprecated The corresponding API
+     * {@link RemoteViews#setRemoteAdapter(int, Intent)} associated with this method has been
+     * deprecated. Moving forward please use
+     * {@link RemoteViews#setRemoteAdapter(int, android.widget.RemoteViews.RemoteCollectionItems)}
+     * instead to set {@link android.widget.RemoteViews.RemoteCollectionItems} for the remote
+     * adapter and update the widget views by calling {@link #updateAppWidget(int[], RemoteViews)},
+     * {@link #updateAppWidget(int, RemoteViews)},
+     * {@link #updateAppWidget(ComponentName, RemoteViews)},
+     * {@link #partiallyUpdateAppWidget(int[], RemoteViews)},
+     * or {@link #partiallyUpdateAppWidget(int, RemoteViews)}, whichever applicable.
      */
+    @Deprecated
     public void notifyAppWidgetViewDataChanged(int[] appWidgetIds, int viewId) {
         if (mService == null) {
             return;
@@ -873,7 +884,18 @@ public class AppWidgetManager {
      *
      * @param appWidgetId  The AppWidget instance to notify of view data changes.
      * @param viewId       The collection view id.
+     * @deprecated The corresponding API
+     * {@link RemoteViews#setRemoteAdapter(int, Intent)} associated with this method has been
+     * deprecated. Moving forward please use
+     * {@link RemoteViews#setRemoteAdapter(int, android.widget.RemoteViews.RemoteCollectionItems)}
+     * instead to set {@link android.widget.RemoteViews.RemoteCollectionItems} for the remote
+     * adapter and update the widget views by calling {@link #updateAppWidget(int[], RemoteViews)},
+     * {@link #updateAppWidget(int, RemoteViews)},
+     * {@link #updateAppWidget(ComponentName, RemoteViews)},
+     * {@link #partiallyUpdateAppWidget(int[], RemoteViews)},
+     * or {@link #partiallyUpdateAppWidget(int, RemoteViews)}, whichever applicable.
      */
+    @Deprecated
     public void notifyAppWidgetViewDataChanged(int appWidgetId, int viewId) {
         if (mService == null) {
             return;
@@ -1019,6 +1041,7 @@ public class AppWidgetManager {
      */
     public AppWidgetProviderInfo getAppWidgetInfo(int appWidgetId) {
         if (mService == null) {
+            Log.e(TAG, "Service wasn't initialized, appWidgetId=" + appWidgetId);
             return null;
         }
         try {
@@ -1026,6 +1049,9 @@ public class AppWidgetManager {
             if (info != null) {
                 // Converting complex to dp.
                 info.updateDimensions(mDisplayMetrics);
+            } else {
+                Log.e(TAG, "App widget provider info is null. PackageName=" + mPackageName
+                        + " appWidgetId-" + appWidgetId);
             }
             return info;
         } catch (RemoteException e) {
@@ -1362,7 +1388,8 @@ public class AppWidgetManager {
      *
      * @return {@code TRUE} if the launcher supports this feature. Note the API will return without
      *    waiting for the user to respond, so getting {@code TRUE} from this API does *not* mean
-     *    the shortcut is pinned. {@code FALSE} if the launcher doesn't support this feature.
+     *    the shortcut is pinned. {@code FALSE} if the launcher doesn't support this feature or if
+     *    calling app belongs to a user-profile with items restricted on home screen.
      *
      * @see android.content.pm.ShortcutManager#isRequestPinShortcutSupported()
      * @see android.content.pm.ShortcutManager#requestPinShortcut(ShortcutInfo, IntentSender)
@@ -1417,13 +1444,15 @@ public class AppWidgetManager {
      * @see AppWidgetProviderInfo#WIDGET_CATEGORY_HOME_SCREEN
      * @see AppWidgetProviderInfo#WIDGET_CATEGORY_KEYGUARD
      * @see AppWidgetProviderInfo#WIDGET_CATEGORY_SEARCHBOX
+     *
+     * @return true if the call was successful, false if it was rate-limited.
      */
     @FlaggedApi(Flags.FLAG_GENERATED_PREVIEWS)
-    public void setWidgetPreview(@NonNull ComponentName provider,
+    public boolean setWidgetPreview(@NonNull ComponentName provider,
             @AppWidgetProviderInfo.CategoryFlags int widgetCategories,
             @NonNull RemoteViews preview) {
         try {
-            mService.setWidgetPreview(provider, widgetCategories, preview);
+            return mService.setWidgetPreview(provider, widgetCategories, preview);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

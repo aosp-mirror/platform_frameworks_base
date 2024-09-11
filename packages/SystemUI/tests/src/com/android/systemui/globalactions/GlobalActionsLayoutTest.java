@@ -24,11 +24,11 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 
 import android.content.Context;
-import android.testing.AndroidTestingRunner;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.MultiListLayout;
@@ -44,7 +44,7 @@ import java.util.ArrayList;
  * Tests for {@link ListGridLayout}.
  */
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class GlobalActionsLayoutTest extends SysuiTestCase {
 
     private TestLayout mLayout;

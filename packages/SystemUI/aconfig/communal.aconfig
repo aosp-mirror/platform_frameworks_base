@@ -7,3 +7,13 @@ flag {
     description: "Enables the communal hub experience"
     bug: "304584416"
 }
+
+flag {
+    name: "enable_widget_picker_size_filter"
+    namespace: "communal"
+    description: "Enables passing a size filter to the widget picker"
+    bug: "345482907"
+   metadata {
+        purpose: PURPOSE_BUGFIX
+   }
+}

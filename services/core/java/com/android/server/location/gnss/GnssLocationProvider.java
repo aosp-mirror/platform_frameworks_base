@@ -1181,7 +1181,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                         GnssPsdsDownloader.LONG_TERM_PSDS_SERVER_INDEX));
             }
         } else if ("request_power_stats".equals(command)) {
-            mGnssNative.requestPowerStats();
+            mGnssNative.requestPowerStats(Runnable::run, powerStats -> {});
         } else {
             Log.w(TAG, "sendExtraCommand: unknown command " + command);
         }

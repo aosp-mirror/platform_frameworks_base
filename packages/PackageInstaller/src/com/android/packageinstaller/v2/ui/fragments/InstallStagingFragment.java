@@ -20,6 +20,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import androidx.annotation.NonNull;
@@ -29,13 +30,14 @@ import com.android.packageinstaller.R;
 
 public class InstallStagingFragment extends DialogFragment {
 
-    private static final String TAG = InstallStagingFragment.class.getSimpleName();
+    private static final String LOG_TAG = InstallStagingFragment.class.getSimpleName();
     private ProgressBar mProgressBar;
     private AlertDialog mDialog;
 
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
+        Log.i(LOG_TAG, "Creating " + LOG_TAG);
         View dialogView = getLayoutInflater().inflate(R.layout.install_content_view, null);
         dialogView.requireViewById(R.id.staging).setVisibility(View.VISIBLE);
 

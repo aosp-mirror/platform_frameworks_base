@@ -16,6 +16,8 @@
 
 package com.android.settingslib.media;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.media.MediaRoute2Info;
@@ -32,9 +34,9 @@ public class ComplexMediaDevice extends MediaDevice {
     private final String mSummary = "";
 
     ComplexMediaDevice(
-            Context context,
-            MediaRoute2Info info,
-            RouteListingPreference.Item item) {
+            @NonNull Context context,
+            @NonNull MediaRoute2Info info,
+            @Nullable RouteListingPreference.Item item) {
         super(context, info, item);
     }
 

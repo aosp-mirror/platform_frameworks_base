@@ -144,6 +144,24 @@ public final class InputMethodPrivilegedOperations {
     }
 
     /**
+     * Calls {@link IInputMethodPrivilegedOperations#setHandwritingSurfaceNotTouchable(boolean)}.
+     *
+     * @param notTouchable {@code true} to make handwriting surface not-touchable (pass-through).
+     */
+    @AnyThread
+    public void setHandwritingSurfaceNotTouchable(boolean notTouchable) {
+        final IInputMethodPrivilegedOperations ops = mOps.getAndWarnIfNull();
+        if (ops == null) {
+            return;
+        }
+        try {
+            ops.setHandwritingSurfaceNotTouchable(notTouchable);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Calls {@link IInputMethodPrivilegedOperations#createInputContentUriToken(Uri, String,
      * AndroidFuture)}.
      *

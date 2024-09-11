@@ -49,4 +49,5 @@ oneway interface IInputMethodPrivilegedOperations {
     void onStylusHandwritingReady(int requestId, int pid);
     void resetStylusHandwriting(int requestId);
     void switchKeyboardLayoutAsync(int direction);
+    void setHandwritingSurfaceNotTouchable(boolean notTouchable);
 }

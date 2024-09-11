@@ -16,6 +16,8 @@
 
 package com.android.systemui.shade
 
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.View
@@ -26,8 +28,8 @@ import androidx.annotation.IdRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.test.filters.SmallTest
-import com.android.systemui.Flags as AConfigFlags
 import com.android.systemui.Flags.FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX
+import com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.fragments.FragmentHostManager
 import com.android.systemui.fragments.FragmentService
@@ -164,10 +166,10 @@ class NotificationsQSContainerControllerLegacyTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX)
     fun testLargeScreen_updateResources_refactorFlagOff_splitShadeHeightIsSetBasedOnResource() {
         val headerResourceHeight = 20
         val headerHelperHeight = 30
-        mSetFlagsRule.disableFlags(FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX)
         whenever(largeScreenHeaderHelper.getLargeScreenHeaderHeight())
             .thenReturn(headerHelperHeight)
         overrideResource(R.bool.config_use_large_screen_shade_header, true)
@@ -187,10 +189,10 @@ class NotificationsQSContainerControllerLegacyTest : SysuiTestCase() {
     }
 
     @Test
+    @EnableFlags(FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX)
     fun testLargeScreen_updateResources_refactorFlagOn_splitShadeHeightIsSetBasedOnHelper() {
         val headerResourceHeight = 20
         val headerHelperHeight = 30
-        mSetFlagsRule.enableFlags(FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX)
         whenever(largeScreenHeaderHelper.getLargeScreenHeaderHeight())
             .thenReturn(headerHelperHeight)
         overrideResource(R.bool.config_use_large_screen_shade_header, true)
@@ -400,8 +402,8 @@ class NotificationsQSContainerControllerLegacyTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     fun testSplitShadeLayout_isAlignedToGuideline() {
-        mSetFlagsRule.disableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
         enableSplitShade()
         underTest.updateResources()
         assertThat(getConstraintSetLayout(R.id.qs_frame).endToEnd).isEqualTo(R.id.qs_edge_guideline)
@@ -410,8 +412,8 @@ class NotificationsQSContainerControllerLegacyTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     fun testSinglePaneLayout_childrenHaveEqualMargins() {
-        mSetFlagsRule.disableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
         disableSplitShade()
         underTest.updateResources()
         val qsStartMargin = getConstraintSetLayout(R.id.qs_frame).startMargin
@@ -427,8 +429,8 @@ class NotificationsQSContainerControllerLegacyTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     fun testSplitShadeLayout_childrenHaveInsideMarginsOfZero() {
-        mSetFlagsRule.disableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
         enableSplitShade()
         underTest.updateResources()
         assertThat(getConstraintSetLayout(R.id.qs_frame).endMargin).isEqualTo(0)
@@ -445,9 +447,8 @@ class NotificationsQSContainerControllerLegacyTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT, FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX)
     fun testLargeScreenLayout_refactorFlagOff_qsAndNotifsTopMarginIsOfHeaderHeightResource() {
-        mSetFlagsRule.disableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
-        mSetFlagsRule.disableFlags(FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX)
         setLargeScreen()
         val largeScreenHeaderResourceHeight = 100
         val largeScreenHeaderHelperHeight = 200
@@ -468,9 +469,9 @@ class NotificationsQSContainerControllerLegacyTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
+    @EnableFlags(FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX)
     fun testLargeScreenLayout_refactorFlagOn_qsAndNotifsTopMarginIsOfHeaderHeightHelper() {
-        mSetFlagsRule.disableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
-        mSetFlagsRule.enableFlags(FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX)
         setLargeScreen()
         val largeScreenHeaderResourceHeight = 100
         val largeScreenHeaderHelperHeight = 200
@@ -491,8 +492,8 @@ class NotificationsQSContainerControllerLegacyTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     fun testSmallScreenLayout_qsAndNotifsTopMarginIsZero() {
-        mSetFlagsRule.disableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
         setSmallScreen()
         underTest.updateResources()
         assertThat(getConstraintSetLayout(R.id.qs_frame).topMargin).isEqualTo(0)
@@ -512,8 +513,8 @@ class NotificationsQSContainerControllerLegacyTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     fun testSinglePaneShadeLayout_isAlignedToParent() {
-        mSetFlagsRule.disableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
         disableSplitShade()
         underTest.updateResources()
         assertThat(getConstraintSetLayout(R.id.qs_frame).endToEnd)

@@ -20,10 +20,10 @@ package com.android.systemui.keyguard.ui.view.layout.sections
 import android.content.Context
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
-import com.android.systemui.Flags
 import com.android.systemui.deviceentry.ui.binder.UdfpsAccessibilityOverlayBinder
 import com.android.systemui.deviceentry.ui.view.UdfpsAccessibilityOverlay
 import com.android.systemui.deviceentry.ui.viewmodel.DeviceEntryUdfpsAccessibilityOverlayViewModel
+import com.android.systemui.keyguard.KeyguardBottomAreaRefactor
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.res.R
 import javax.inject.Inject
@@ -66,7 +66,7 @@ constructor(
                 ConstraintSet.BOTTOM,
             )
 
-            if (Flags.keyguardBottomAreaRefactor()) {
+            if (KeyguardBottomAreaRefactor.isEnabled) {
                 connect(
                     viewId,
                     ConstraintSet.BOTTOM,

@@ -9,10 +9,18 @@ flag {
 }
 
 flag {
+    name: "enable_location_bypass"
+    namespace: "location"
+    description: "Enable location bypass feature"
+    bug: "301150056"
+}
+
+flag {
     name: "location_bypass"
+    is_exported: true
     namespace: "location"
     description: "Enable location bypass appops behavior"
-    bug: "301150056"
+    bug: "329151785"
 }
 
 flag {
@@ -69,6 +77,16 @@ flag {
     namespace: "location"
     description: "Flag for replacing future elapsedRealtime in JNI"
     bug: "314328533"
+}
+
+flag {
+    name: "subscriptions_changed_listener_thread"
+    namespace: "location"
+    description: "Flag for running onSubscriptionsChangedListener on FgThread"
+    bug: "332451908"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {

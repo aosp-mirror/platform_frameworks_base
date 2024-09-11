@@ -26,8 +26,11 @@
     <string name="profile_name_glasses" msgid="3506504967216601277">"uređaj"</string>
     <string name="summary_glasses" msgid="2872254734959842579">"Ovoj aplikaciji će biti dozvoljeno da pristupa ovim dozvolama na vašem uređaju (<xliff:g id="DEVICE_NAME">%1$s</xliff:g>)"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"Dozvolite da &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; pristupa ovim informacijama sa telefona"</string>
+    <string name="title_app_streaming_with_mirroring" msgid="3364582597581570658">"Želite li da dozvolite da &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; strimuje aplikacije na telefonu?"</string>
+    <string name="summary_app_streaming" msgid="295548145144086753">"%1$s će imati pristup svemu što se vidi ili pušta na telefonu, uključujući zvuk, slike, lozinke i poruke.&lt;br/&gt;&lt;br/&gt;%1$s će moći da strimuje aplikacije dok ne uklonite pristup ovoj dozvoli."</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"Usluge na više uređaja"</string>
     <string name="helper_summary_app_streaming" msgid="2396773196949578425">"<xliff:g id="APP_NAME">%1$s</xliff:g> zahteva dozvolu u ime uređaja <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> za strimovanje aplikacija između uređaja"</string>
+    <string name="helper_summary_app_streaming_with_mirroring" msgid="6138581029144467467">"<xliff:g id="APP_NAME">%1$s</xliff:g> traži dozvolu u ime uređaja <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> da prikazuje i strimuje aplikacije između uređaja"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
     <string name="title_computer" msgid="4693714143506569253">"Dozvolite da &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; pristupa ovim informacijama sa telefona"</string>
@@ -35,6 +38,8 @@
     <string name="helper_title_computer" msgid="4671071173916176037">"Google Play usluge"</string>
     <string name="helper_summary_computer" msgid="8774832742608187072">"<xliff:g id="APP_NAME">%1$s</xliff:g> zahteva dozvolu u ime uređaja <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> za pristup slikama, medijskom sadržaju i obaveštenjima sa telefona"</string>
     <string name="title_nearby_device_streaming" msgid="7269956847378799794">"Želite li da dozvolite da &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; obavi ovu radnju?"</string>
+    <string name="title_nearby_device_streaming_with_mirroring" msgid="242855799919611657">"Želite li da dozvolite da &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; strimuje aplikacije i funkcije sistema na telefonu?"</string>
+    <string name="summary_nearby_device_streaming" msgid="4039565463149145573">"%1$s će imati pristup svemu što se vidi ili pušta na telefonu, uključujući zvuk, slike, informacije o plaćanju, lozinke i poruke.&lt;br/&gt;&lt;br/&gt;%1$s će moći da strimuje aplikacije i funkcije sistema dok ne uklonite pristup ovoj dozvoli."</string>
     <string name="helper_summary_nearby_device_streaming" msgid="2063965070936844876">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> zahteva dozvolu u ime uređaja <xliff:g id="DEVICE_NAME">%2$s</xliff:g> da strimuje aplikacije i druge sistemske funkcije na uređaje u blizini"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"uređaj"</string>
     <string name="summary_generic" msgid="1761976003668044801">"Ova aplikacija će moći da sinhronizuje podatke, poput imena osobe koja upućuje poziv, između telefona i odabranog uređaja"</string>
