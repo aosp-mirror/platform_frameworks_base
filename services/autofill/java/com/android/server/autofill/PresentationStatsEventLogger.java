@@ -842,9 +842,13 @@ public final class PresentationStatsEventLogger {
                     + "event");
             return;
         }
+
         PresentationStatsEventInternal event = mEventInternal.get();
+        boolean ignoreLogging = !event.mIsDatasetAvailable;
+
         if (sVerbose) {
             Slog.v(TAG, "(" + caller + ") "
+                    + (ignoreLogging ? "IGNORING - following event won't be logged: " : "")
                     + "Log AutofillPresentationEventReported:"
                     + " requestId=" + event.mRequestId
                     + " sessionId=" + mSessionId
@@ -907,7 +911,8 @@ public final class PresentationStatsEventLogger {
         }
 
         // TODO(b/234185326): Distinguish empty responses from other no presentation reasons.
-        if (!event.mIsDatasetAvailable) {
+        if (ignoreLogging) {
+            Slog.w(TAG, "Empty dataset. Autofill ignoring log");
             mEventInternal = Optional.empty();
             return;
         }

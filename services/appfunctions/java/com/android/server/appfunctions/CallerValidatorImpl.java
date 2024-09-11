@@ -79,17 +79,20 @@ class CallerValidatorImpl implements CallerValidator {
     // TODO(b/360864791): Add and honor apps that opt-out from EXECUTE_APP_FUNCTIONS caller.
     public boolean verifyCallerCanExecuteAppFunction(
             @NonNull String callerPackageName, @NonNull String targetPackageName) {
+        if (callerPackageName.equals(targetPackageName)) {
+            return true;
+        }
+
         int pid = Binder.getCallingPid();
         int uid = Binder.getCallingUid();
-        boolean hasExecutionPermission =
+        boolean hasTrustedExecutionPermission =
                 mContext.checkPermission(
                                 Manifest.permission.EXECUTE_APP_FUNCTIONS_TRUSTED, pid, uid)
                         == PackageManager.PERMISSION_GRANTED;
-        boolean hasTrustedExecutionPermission =
+        boolean hasExecutionPermission =
                 mContext.checkPermission(Manifest.permission.EXECUTE_APP_FUNCTIONS, pid, uid)
                         == PackageManager.PERMISSION_GRANTED;
-        boolean isSamePackage = callerPackageName.equals(targetPackageName);
-        return hasExecutionPermission || hasTrustedExecutionPermission || isSamePackage;
+        return hasExecutionPermission || hasTrustedExecutionPermission;
     }
 
     @Override

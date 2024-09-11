@@ -299,11 +299,6 @@ android_ravenwood_test {
     auto_gen_config: true,
 }
 
-FLAKY_OR_IGNORED = [
-    "androidx.test.filters.FlakyTest",
-    "org.junit.Ignore",
-]
-
 test_module_config {
     name: "FrameworksCoreTests_Presubmit",
     base: "FrameworksCoreTests",
@@ -312,7 +307,6 @@ test_module_config {
         "device-platinum-tests",
     ],
     include_annotations: ["android.platform.test.annotations.Presubmit"],
-    exclude_annotations: FLAKY_OR_IGNORED,
 }
 
 test_module_config {
@@ -337,7 +331,6 @@ test_module_config {
         "device-platinum-tests",
     ],
     include_filters: ["android.content.ContextTest"],
-    exclude_annotations: FLAKY_OR_IGNORED,
 }
 
 test_module_config {
@@ -348,7 +341,6 @@ test_module_config {
         "device-platinum-tests",
     ],
     include_filters: ["android.app.KeyguardManagerTest"],
-    exclude_annotations: FLAKY_OR_IGNORED,
 }
 
 test_module_config {
@@ -359,7 +351,6 @@ test_module_config {
         "device-platinum-tests",
     ],
     include_filters: ["android.app.PropertyInvalidatedCacheTests"],
-    exclude_annotations: FLAKY_OR_IGNORED,
 }
 
 test_module_config {
@@ -374,7 +365,6 @@ test_module_config {
         "android.content.ComponentCallbacksControllerTest",
         "android.content.ContextWrapperTest",
     ],
-    exclude_annotations: FLAKY_OR_IGNORED,
 }
 
 test_module_config {
@@ -385,7 +375,6 @@ test_module_config {
         "device-platinum-tests",
     ],
     include_filters: ["android.database.sqlite.SQLiteRawStatementTest"],
-    exclude_annotations: FLAKY_OR_IGNORED,
 }
 
 test_module_config {
@@ -397,7 +386,6 @@ test_module_config {
     ],
     include_filters: ["android.net"],
     include_annotations: ["android.platform.test.annotations.Presubmit"],
-    exclude_annotations: FLAKY_OR_IGNORED,
 }
 
 test_module_config {
@@ -510,7 +498,6 @@ test_module_config {
         "device-platinum-tests",
     ],
     include_filters: ["com.android.internal.jank"],
-    exclude_annotations: FLAKY_OR_IGNORED,
 }
 
 test_module_config {
@@ -569,7 +556,6 @@ test_module_config {
         "device-platinum-tests",
     ],
     include_filters: ["com.android.internal.util.LatencyTrackerTest"],
-    exclude_annotations: FLAKY_OR_IGNORED,
 }
 
 test_module_config {
@@ -580,7 +566,6 @@ test_module_config {
         "device-platinum-tests",
     ],
     include_filters: ["android.content.ContentCaptureOptionsTest"],
-    exclude_annotations: FLAKY_OR_IGNORED,
 }
 
 test_module_config {
@@ -602,7 +587,6 @@ test_module_config {
     ],
     include_filters: ["android.content.pm."],
     include_annotations: ["android.platform.test.annotations.Presubmit"],
-    exclude_annotations: FLAKY_OR_IGNORED,
 }
 
 test_module_config {
@@ -614,7 +598,6 @@ test_module_config {
     ],
     include_filters: ["android.content.pm."],
     include_annotations: ["android.platform.test.annotations.Postsubmit"],
-    exclude_annotations: FLAKY_OR_IGNORED,
 }
 
 test_module_config {
@@ -642,7 +625,6 @@ test_module_config {
     ],
     include_filters: ["android.content.res."],
     include_annotations: ["android.platform.test.annotations.Postsubmit"],
-    exclude_annotations: FLAKY_OR_IGNORED,
 }
 
 test_module_config {
@@ -672,7 +654,6 @@ test_module_config {
         "device-platinum-tests",
     ],
     include_filters: ["android.view.contentcapture"],
-    exclude_annotations: FLAKY_OR_IGNORED,
 }
 
 test_module_config {
@@ -683,7 +664,6 @@ test_module_config {
         "device-platinum-tests",
     ],
     include_filters: ["android.view.contentprotection"],
-    exclude_annotations: FLAKY_OR_IGNORED,
 }
 
 test_module_config {
@@ -695,7 +675,6 @@ test_module_config {
     ],
     include_filters: ["com.android.internal.content."],
     include_annotations: ["android.platform.test.annotations.Presubmit"],
-    exclude_annotations: FLAKY_OR_IGNORED,
 }
 
 test_module_config {
@@ -706,21 +685,6 @@ test_module_config {
         "device-platinum-tests",
     ],
     include_filters: ["android.graphics.drawable.IconTest"],
-}
-
-test_module_config {
-    name: "FrameworksCoreTests_accessibility_NO_FLAKES",
-    base: "FrameworksCoreTests",
-    test_suites: [
-        "device-tests",
-        "device-platinum-tests",
-    ],
-    include_filters: [
-        "com.android.internal.accessibility",
-        "android.accessibilityservice",
-        "android.view.accessibility",
-    ],
-    exclude_annotations: ["androidx.test.filters.FlakyTest"],
 }
 
 test_module_config {
@@ -792,7 +756,6 @@ test_module_config {
         "com.android.internal.jank.InteractionJankMonitorTest",
         "com.android.internal.util.LatencyTrackerTest",
     ],
-    exclude_annotations: FLAKY_OR_IGNORED,
 }
 
 test_module_config {
@@ -803,7 +766,6 @@ test_module_config {
         "device-platinum-tests",
     ],
     include_annotations: ["android.platform.test.annotations.PlatinumTest"],
-    exclude_annotations: FLAKY_OR_IGNORED,
 }
 
 test_module_config {
