@@ -3365,6 +3365,8 @@
     <!-- Toast shown when a notification does not support dragging to split [CHAR LIMIT=NONE] -->
     <string name="drag_split_not_supported">This notification does not support dragging to split screen</string>
 
+    <!-- Content description for the location icon in the dream overlay status bar [CHAR LIMIT=NONE] -->
+    <string name="dream_overlay_location_active">Location active</string>
     <!-- Content description for the Wi-Fi off icon in the dream overlay status bar [CHAR LIMIT=NONE] -->
     <string name="dream_overlay_status_bar_wifi_off">Wi\u2011Fi unavailable</string>
     <!-- Content description for the priority mode icon in the dream overlay status bar [CHAR LIMIT=NONE] -->
@@ -3556,6 +3558,9 @@
 
     <!-- Content description for Wi-Fi not available icon on dream [CHAR LIMIT=NONE]-->
     <string name="wifi_unavailable_dream_overlay_content_description">Wi-Fi not available</string>
+
+    <!-- Content description for location in use icon on dream [CHAR LIMIT=NONE] -->
+    <string name="location_active_dream_overlay_content_description">Location active</string>
 
     <!-- Content description for camera blocked icon on dream [CHAR LIMIT=NONE] -->
     <string name="camera_blocked_dream_overlay_content_description">Camera blocked</string>
