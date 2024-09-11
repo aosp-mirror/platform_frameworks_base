@@ -969,7 +969,7 @@
     <string name="relationTypeChild" msgid="9076258911292693601">"Figlio"</string>
     <string name="relationTypeDomesticPartner" msgid="7825306887697559238">"Convivente"</string>
     <string name="relationTypeFather" msgid="3856225062864790596">"Padre"</string>
-    <string name="relationTypeFriend" msgid="3192092625893980574">"Persona amica"</string>
+    <string name="relationTypeFriend" msgid="3192092625893980574">"Amico"</string>
     <string name="relationTypeManager" msgid="2272860813153171857">"Dirigente"</string>
     <string name="relationTypeMother" msgid="2331762740982699460">"Madre"</string>
     <string name="relationTypeParent" msgid="4177920938333039882">"Genitore"</string>

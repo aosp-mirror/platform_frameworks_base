@@ -1398,10 +1398,10 @@
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"USB テザリング ON"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"USB MIDI モード ON"</string>
     <string name="usb_uvc_notification_title" msgid="2030032862673400008">"ウェブカメラとしてデバイスを接続しました"</string>
-    <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB アクセサリが接続されました"</string>
+    <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB アクセサリーが接続されました"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"タップしてその他のオプションを表示します。"</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"接続されているデバイスを充電しています。タップすると、他の項目が表示されます。"</string>
-    <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"アナログのオーディオ アクセサリを検出"</string>
+    <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"アナログのオーディオ アクセサリーを検出"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"接続したデバイスはこのスマートフォンと互換性がありません。タップすると、詳細を確認できます。"</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"USB デバッグが接続されました"</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"無効にするにはここをタップしてください"</string>

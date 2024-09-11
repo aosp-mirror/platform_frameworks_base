@@ -609,8 +609,8 @@
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"‏מאפשרת לאפליקציה להתחבר למכשירי Bluetooth מותאמים"</string>
     <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"‏פרסום במכשירי Bluetooth בקרבת מקום"</string>
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"‏האפליקציה תוכל לפרסם במכשירי Bluetooth בקרבת מקום"</string>
-    <string name="permlab_uwb_ranging" msgid="8141915781475770665">"זיהוי מיקום יחסי בין מכשירי \'תחום רחב סרט\' קרובים"</string>
-    <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"האפליקציה תזהה את המיקום היחסי בין מכשירים קרובים שמשדרים בטכנולוגיה \'תחום רחב סרט\'"</string>
+    <string name="permlab_uwb_ranging" msgid="8141915781475770665">"‏זיהוי מיקום יחסי בין מכשירי Ultra Wideband ‏(UWB) קרובים"</string>
+    <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"‏האפליקציה תזהה את המיקום היחסי בין מכשירים קרובים שמשדרים בטכנולוגיית Ultra Wideband ‏(UWB)"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"‏אינטראקציה עם מכשירי Wi-Fi בקרבת מקום"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"‏האפליקציה תוכל לפרסם במכשירי Wi-Fi בקרבת מקום, להתחבר אליהם ולהעריך את המיקום היחסי שלהם"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"‏פרטים על שירות תשלום מועדף ב-NFC"</string>
