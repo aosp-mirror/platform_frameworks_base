@@ -37,6 +37,7 @@ import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
@@ -53,9 +54,11 @@ import android.app.ActivityManager;
 import android.app.assist.AssistContent;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.PointF;
@@ -187,7 +190,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     @Mock
     private Handler mMockHandler;
     @Mock
-    private Consumer<Uri> mMockOpenInBrowserClickListener;
+    private Consumer<Intent> mMockOpenInBrowserClickListener;
     @Mock
     private AppToWebGenericLinksParser mMockGenericLinksParser;
     @Mock
@@ -242,9 +245,11 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         when(mMockMultiInstanceHelper.supportsMultiInstanceSplit(any()))
                 .thenReturn(false);
         when(mMockPackageManager.getApplicationLabel(any())).thenReturn("applicationLabel");
-        final ActivityInfo activityInfo = new ActivityInfo();
-        activityInfo.applicationInfo = new ApplicationInfo();
+        final ActivityInfo activityInfo = createActivityInfo();
         when(mMockPackageManager.getActivityInfo(any(), anyInt())).thenReturn(activityInfo);
+        final ResolveInfo resolveInfo = new ResolveInfo();
+        resolveInfo.activityInfo = activityInfo;
+        when(mMockPackageManager.resolveActivity(any(), anyInt())).thenReturn(resolveInfo);
         final Display defaultDisplay = mock(Display.class);
         doReturn(defaultDisplay).when(mMockDisplayController).getDisplay(Display.DEFAULT_DISPLAY);
         doReturn(mInsetsState).when(mMockDisplayController).getInsetsState(anyInt());
@@ -771,7 +776,6 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
 
         // Verify handle menu's browser link is set to captured link since menu was opened before
         // captured link expired
-        createHandleMenu(decor);
         verifyHandleMenuCreated(TEST_URI1);
     }
 
@@ -782,7 +786,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         final DesktopModeWindowDecoration decor = createWindowDecoration(
                 taskInfo, TEST_URI1 /* captured link */, null /* web uri */,
                 null /* generic link */);
-        final ArgumentCaptor<Function1<Uri, Unit>> openInBrowserCaptor =
+        final ArgumentCaptor<Function1<Intent, Unit>> openInBrowserCaptor =
                 ArgumentCaptor.forClass(Function1.class);
 
         // Simulate menu opening and clicking open in browser button
@@ -797,7 +801,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 any(),
                 any()
         );
-        openInBrowserCaptor.getValue().invoke(TEST_URI1);
+        openInBrowserCaptor.getValue().invoke(new Intent(Intent.ACTION_MAIN, TEST_URI1));
 
         // Verify handle menu's browser link not set to captured link since link not valid after
         // open in browser clicked
@@ -812,7 +816,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         final DesktopModeWindowDecoration decor = createWindowDecoration(
                 taskInfo, TEST_URI1 /* captured link */, null /* web uri */,
                 null /* generic link */);
-        final ArgumentCaptor<Function1<Uri, Unit>> openInBrowserCaptor =
+        final ArgumentCaptor<Function1<Intent, Unit>> openInBrowserCaptor =
                 ArgumentCaptor.forClass(Function1.class);
         createHandleMenu(decor);
         verify(mMockHandleMenu).show(
@@ -826,9 +830,10 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 any()
         );
 
-        openInBrowserCaptor.getValue().invoke(TEST_URI1);
+        openInBrowserCaptor.getValue().invoke(new Intent(Intent.ACTION_MAIN, TEST_URI1));
 
-        verify(mMockOpenInBrowserClickListener).accept(TEST_URI1);
+        verify(mMockOpenInBrowserClickListener).accept(
+                argThat(intent -> intent.getData() == TEST_URI1));
     }
 
     @Test
@@ -1021,8 +1026,9 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
 
     private void verifyHandleMenuCreated(@Nullable Uri uri) {
         verify(mMockHandleMenuFactory).create(any(), any(), anyInt(), any(), any(),
-                any(), anyBoolean(), anyBoolean(), anyBoolean(), eq(uri), anyInt(),
-                anyInt(), anyInt());
+                any(), anyBoolean(), anyBoolean(), anyBoolean(),
+                argThat(intent -> (uri == null && intent == null) || intent.getData().equals(uri)),
+                anyInt(), anyInt(), anyInt());
     }
 
     private void createMaximizeMenu(DesktopModeWindowDecoration decoration, MaximizeMenu menu) {
@@ -1126,6 +1132,15 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         // Call DesktopModeWindowDecoration#onAssistContentReceived because decor waits to receive
         // {@link AssistContent} before creating the menu
         decor.onAssistContentReceived(mAssistContent);
+    }
+
+    private static ActivityInfo createActivityInfo() {
+        final ApplicationInfo applicationInfo = new ApplicationInfo();
+        applicationInfo.packageName = "DesktopModeWindowDecorationTestPackage";
+        final ActivityInfo activityInfo = new ActivityInfo();
+        activityInfo.applicationInfo = applicationInfo;
+        activityInfo.name = "DesktopModeWindowDecorationTest";
+        return activityInfo;
     }
 
     private static boolean hasNoInputChannelFeature(RelayoutParams params) {
