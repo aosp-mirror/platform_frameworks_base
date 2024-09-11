@@ -44,8 +44,8 @@
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"<xliff:g id="APPLICATION">%1$s</xliff:g> を起動して <xliff:g id="USB_DEVICE">%2$s</xliff:g> を処理しますか？"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"<xliff:g id="APPLICATION">%1$s</xliff:g> を開いて <xliff:g id="USB_DEVICE">%2$s</xliff:g>を利用しますか？\nこのアプリに録音権限は付与されていませんが、この USB デバイスから音声を収集できるようになります。"</string>
     <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"<xliff:g id="APPLICATION">%1$s</xliff:g> を起動して <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> を処理しますか？"</string>
-    <string name="usb_accessory_uri_prompt" msgid="6756649383432542382">"このUSBアクセサリを扱うアプリはインストールされていません。詳細: <xliff:g id="URL">%1$s</xliff:g>"</string>
-    <string name="title_usb_accessory" msgid="1236358027511638648">"USBアクセサリ"</string>
+    <string name="usb_accessory_uri_prompt" msgid="6756649383432542382">"このUSBアクセサリーを扱うアプリはインストールされていません。詳細: <xliff:g id="URL">%1$s</xliff:g>"</string>
+    <string name="title_usb_accessory" msgid="1236358027511638648">"USBアクセサリー"</string>
     <string name="label_view" msgid="6815442985276363364">"表示"</string>
     <string name="always_use_device" msgid="210535878779644679">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> を接続している場合は常に <xliff:g id="APPLICATION">%1$s</xliff:g> を起動する"</string>
     <string name="always_use_accessory" msgid="1977225429341838444">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g> を接続している場合は常に <xliff:g id="APPLICATION">%1$s</xliff:g> を起動する"</string>
@@ -67,8 +67,8 @@
     <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"ワイヤレス デバッグは許可されていません"</string>
     <string name="wifi_debugging_secondary_user_message" msgid="9085779370142222881">"このデバイスに現在ログインしているユーザーはワイヤレス デバッグを ON にできません。この機能を使用するには、管理者ユーザーに切り替えてください。"</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"USB ポート無効"</string>
-    <string name="usb_contaminant_message" msgid="7730476585174719805">"液体やゴミからデバイスを保護するため、USB ポートは無効になっています。アクセサリの検出は行われません。\n\nUSB ポートを再び安全に使用できるようになりましたらお知らせします。"</string>
-    <string name="usb_port_enabled" msgid="531823867664717018">"USB ポートが有効になり、充電器やアクセサリを検出できるようになりました"</string>
+    <string name="usb_contaminant_message" msgid="7730476585174719805">"液体やゴミからデバイスを保護するため、USB ポートは無効になっています。アクセサリーの検出は行われません。\n\nUSB ポートを再び安全に使用できるようになりましたらお知らせします。"</string>
+    <string name="usb_port_enabled" msgid="531823867664717018">"USB ポートが有効になり、充電器やアクセサリーを検出できるようになりました"</string>
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"USB を有効にする"</string>
     <string name="learn_more" msgid="4690632085667273811">"詳細"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"スクリーンショット"</string>
@@ -105,6 +105,7 @@
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"メモに追加"</string>
     <string name="backlinks_include_link" msgid="4562093591148248158">"リンクを含める"</string>
     <string name="backlinks_duplicate_label_format" msgid="558445128952827926">"<xliff:g id="APPNAME">%1$s</xliff:g> <xliff:g id="FREQUENCYCOUNT">(%2$d)</xliff:g>"</string>
+    <string name="backlinks_cross_profile_error" msgid="1355798585727802282">"他のプロファイルからリンクを追加することはできません"</string>
     <string name="screenrecord_title" msgid="4257171601439507792">"スクリーン レコーダー"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"画面の録画を処理しています"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"画面の録画セッション中の通知"</string>
@@ -292,8 +293,7 @@
     <string name="start_dreams" msgid="9131802557946276718">"スクリーン セーバー"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"イーサネット"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"サイレント モード"</string>
-    <!-- no translation found for quick_settings_modes_label (879156359479504244) -->
-    <skip />
+    <string name="quick_settings_modes_label" msgid="879156359479504244">"モード"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"ペア設定されたデバイスがありません"</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"タップしてデバイスを接続または接続解除します"</string>
@@ -434,8 +434,7 @@
     <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"設定を開く"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"その他のデバイス"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"概要を切り替え"</string>
-    <!-- no translation found for zen_modes_dialog_title (8854640808100096934) -->
-    <skip />
+    <string name="zen_modes_dialog_title" msgid="8854640808100096934">"モード"</string>
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"完了"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"設定"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"ON"</string>
@@ -949,7 +948,7 @@
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"取り扱いに関する手順をご覧ください"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"取り扱いに関する手順をご覧ください"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"デバイスを電源から外します"</string>
-    <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"充電ポートの近くにデバイスを置くと、本体が熱くなります。デバイスが充電器や USB アクセサリに接続されている場合は外してください。ケーブルが熱くなっていることもあるので注意してください。"</string>
+    <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"充電ポートの近くにデバイスを置くと、本体が熱くなります。デバイスが充電器や USB アクセサリーに接続されている場合は外してください。ケーブルが熱くなっていることもあるので注意してください。"</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"取り扱いに関する手順をご覧ください"</string>
     <string name="lockscreen_shortcut_left" msgid="1238765178956067599">"左ショートカット"</string>
     <string name="lockscreen_shortcut_right" msgid="4138414674531853719">"右ショートカット"</string>
@@ -1393,18 +1392,12 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"閉じるアイコン"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"開くアイコン"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"または"</string>
-    <!-- no translation found for launch_keyboard_tutorial_notification_title (8849933155160522519) -->
-    <skip />
-    <!-- no translation found for launch_keyboard_tutorial_notification_content (2880339951512757918) -->
-    <skip />
-    <!-- no translation found for launch_touchpad_tutorial_notification_title (2243780062772196901) -->
-    <skip />
-    <!-- no translation found for launch_touchpad_tutorial_notification_content (7931085031240753226) -->
-    <skip />
-    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_title (1940023776496198762) -->
-    <skip />
-    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_content (1780725168171929365) -->
-    <skip />
+    <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"キーボードを使用して移動する"</string>
+    <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"キーボード ショートカットの詳細"</string>
+    <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"タッチパッドを使用して移動する"</string>
+    <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"タッチパッド操作の詳細"</string>
+    <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"キーボードとタッチパッドを使用して移動する"</string>
+    <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"タッチパッド操作やキーボード ショートカットなどの詳細"</string>
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"「戻る」ジェスチャー"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"「ホーム」ジェスチャー"</string>
     <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"アクションキー"</string>
@@ -1444,4 +1437,18 @@
     <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="7513137763024327538">"画面の上部で明るさを大幅に低く設定することで、画面の輝度をさらに下げられるようになりました。\n\nこの設定は暗い場所での操作に最適です。"</string>
     <string name="accessibility_deprecate_extra_dim_dialog_button" msgid="1782147201534669800">"「さらに輝度を下げる」のショートカットを削除する"</string>
     <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="4070696910424515757">"「さらに輝度を下げる」のショートカットを削除しました。明るさを下げるには、通常の明るさのバーを使用してください。"</string>
+    <!-- no translation found for qs_edit_mode_category_connectivity (4559726936546032672) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_accessibility (7969091385071475922) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_utilities (8123080090108420095) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_privacy (6577774443194551775) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_providedByApps (8346112074897919019) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_display (4749511439121053942) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_unknown (509314252124053550) -->
+    <skip />
 </resources>
