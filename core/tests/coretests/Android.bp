@@ -107,10 +107,10 @@ android_test {
     ],
 
     libs: [
-        "android.test.runner",
-        "org.apache.http.legacy",
-        "android.test.base",
-        "android.test.mock",
+        "android.test.runner.stubs",
+        "org.apache.http.legacy.stubs",
+        "android.test.base.stubs",
+        "android.test.mock.stubs",
         "framework",
         "ext",
         "framework-res",
@@ -158,8 +158,8 @@ android_app {
     use_resource_processor: false,
     libs: [
         "framework-res",
-        "android.test.runner",
-        "org.apache.http.legacy",
+        "android.test.runner.stubs",
+        "org.apache.http.legacy.stubs",
     ],
     uses_libs: [
         "android.test.runner",
@@ -225,9 +225,9 @@ android_library {
     ],
 
     libs: [
-        "android.test.runner",
-        "android.test.base",
-        "android.test.mock",
+        "android.test.runner.stubs.system",
+        "android.test.base.stubs.system",
+        "android.test.mock.stubs.system",
         "framework",
         "framework-res",
     ],
@@ -236,8 +236,8 @@ android_library {
 android_ravenwood_test {
     name: "FrameworksCoreTestsRavenwood",
     libs: [
-        "android.test.runner",
-        "android.test.base",
+        "android.test.runner.stubs.system",
+        "android.test.base.stubs.system",
     ],
     static_libs: [
         "core-test-rules", // for libcore.dalvik.system.CloseGuardSupport
