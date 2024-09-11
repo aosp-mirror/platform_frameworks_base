@@ -501,17 +501,12 @@ SkCodec::Result ImageDecoder::decode(void* pixels, size_t rowBytes) {
 SkCodec::Result ImageDecoder::extractGainmap(Bitmap* destination, bool isShared) {
     ATRACE_CALL();
     SkGainmapInfo gainmapInfo;
-    std::unique_ptr<SkStream> gainmapStream;
+    std::unique_ptr<SkAndroidCodec> gainmapCodec;
     {
-        ATRACE_NAME("getAndroidGainmap");
-        if (!mCodec->getAndroidGainmap(&gainmapInfo, &gainmapStream)) {
+        ATRACE_NAME("getGainmapAndroidCodec");
+        if (!mCodec->getGainmapAndroidCodec(&gainmapInfo, &gainmapCodec)) {
             return SkCodec::kSuccess;
         }
-    }
-    auto gainmapCodec = SkAndroidCodec::MakeFromStream(std::move(gainmapStream));
-    if (!gainmapCodec) {
-        ALOGW("Failed to create codec for gainmap stream");
-        return SkCodec::kInvalidInput;
     }
     ImageDecoder decoder{std::move(gainmapCodec)};
     // Gainmap inherits the origin of the containing image
