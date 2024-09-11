@@ -160,6 +160,8 @@ public final class HintManagerService extends SystemService {
     private static final String PROPERTY_SF_ENABLE_CPU_HINT = "debug.sf.enable_adpf_cpu_hint";
     private static final String PROPERTY_HWUI_ENABLE_HINT_MANAGER = "debug.hwui.use_hint_manager";
 
+    private Boolean mFMQUsesIntegratedEventFlag = false;
+
     @VisibleForTesting final IHintManager.Stub mService = new BinderService();
 
     public HintManagerService(Context context) {
@@ -1032,7 +1034,7 @@ public final class HintManagerService extends SystemService {
         @Override
         public IHintSession createHintSessionWithConfig(@NonNull IBinder token,
                 @NonNull int[] tids, long durationNanos, @SessionTag int tag,
-                @Nullable SessionConfig config) {
+                SessionConfig config) {
             if (!isHalSupported()) {
                 throw new UnsupportedOperationException("PowerHAL is not supported!");
             }
@@ -1070,7 +1072,7 @@ public final class HintManagerService extends SystemService {
                         default -> tag = SessionTag.APP;
                     }
                 }
-
+                config.id = -1;
                 Long halSessionPtr = null;
                 if (mConfigCreationSupport.get()) {
                     try {
@@ -1109,7 +1111,7 @@ public final class HintManagerService extends SystemService {
                     }
                 }
 
-                final long sessionId = config != null ? config.id : halSessionPtr;
+                final long sessionId = config.id != -1 ? config.id : halSessionPtr;
                 logPerformanceHintSessionAtom(
                         callingUid, sessionId, durationNanos, tids, tag);
 
@@ -1144,14 +1146,23 @@ public final class HintManagerService extends SystemService {
         }
 
         @Override
-        public ChannelConfig getSessionChannel(IBinder token) {
-            if (mPowerHalVersion < 5 || !adpfUseFmqChannel()) {
+        public @Nullable ChannelConfig getSessionChannel(IBinder token) {
+            if (mPowerHalVersion < 5 || !adpfUseFmqChannel()
+                    || mFMQUsesIntegratedEventFlag) {
                 return null;
             }
             java.util.Objects.requireNonNull(token);
             final int callingTgid = Process.getThreadGroupLeader(Binder.getCallingPid());
             final int callingUid = Binder.getCallingUid();
             ChannelItem item = getOrCreateMappedChannelItem(callingTgid, callingUid, token);
+            // FMQ V1 requires a separate event flag to be passed, and the default no-op
+            // implmenentation in PowerHAL does not return such a shared flag. This helps
+            // avoid using the FMQ on a default impl that does not support it.
+            if (item.getConfig().eventFlagDescriptor == null) {
+                mFMQUsesIntegratedEventFlag = true;
+                closeSessionChannel();
+                return null;
+            }
             return item.getConfig();
         };
 
@@ -1270,8 +1281,14 @@ public final class HintManagerService extends SystemService {
         @VisibleForTesting
         boolean updateHintAllowedByProcState(boolean allowed) {
             synchronized (this) {
-                if (allowed && !mUpdateAllowedByProcState && !mShouldForcePause) resume();
-                if (!allowed && mUpdateAllowedByProcState) pause();
+                if (allowed && !mUpdateAllowedByProcState && !mShouldForcePause) {
+                    Slogf.e(TAG, "ADPF IS GETTING RESUMED? UID: " + mUid + " TAG: " + mTag);
+                    resume();
+                }
+                if (!allowed && mUpdateAllowedByProcState) {
+                    Slogf.e(TAG, "ADPF IS GETTING PAUSED? UID: " + mUid + " TAG: " + mTag);
+                    pause();
+                }
                 mUpdateAllowedByProcState = allowed;
                 return mUpdateAllowedByProcState;
             }
