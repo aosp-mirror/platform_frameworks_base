@@ -57,7 +57,7 @@
     <string name="permission_contacts" msgid="3858319347208004438">"Contactos"</string>
     <string name="permission_calendar" msgid="6805668388691290395">"Calendario"</string>
     <string name="permission_microphone" msgid="2152206421428732949">"Micrófono"</string>
-    <string name="permission_call_logs" msgid="5546761417694586041">"Registros de llamadas"</string>
+    <string name="permission_call_logs" msgid="5546761417694586041">"Llamadas"</string>
     <string name="permission_nearby_devices" msgid="7530973297737123481">"Dispositivos cercanos"</string>
     <string name="permission_media_routing_control" msgid="5498639511586715253">"Cambiar la salida multimedia"</string>
     <string name="permission_storage" msgid="6831099350839392343">"Fotos y contenido multimedia"</string>
