@@ -56,6 +56,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
+import android.hardware.input.KeyGestureEvent;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.util.ArrayMap;
 import android.view.InputDevice;
@@ -226,6 +227,31 @@ class ShortcutKeyTestBase {
 
     void sendKey(int keyCode, boolean longPress) {
         sendKeyCombination(new int[]{keyCode}, 0 /*durationMillis*/, longPress, DEFAULT_DISPLAY);
+    }
+
+    boolean sendKeyGestureEventStart(int gestureType) {
+        return mPhoneWindowManager.sendKeyGestureEvent(
+                new KeyGestureEvent.Builder().setKeyGestureType(gestureType).setAction(
+                        KeyGestureEvent.ACTION_GESTURE_START).build());
+    }
+
+    boolean sendKeyGestureEventComplete(int gestureType) {
+        return mPhoneWindowManager.sendKeyGestureEvent(
+                new KeyGestureEvent.Builder().setKeyGestureType(gestureType).setAction(
+                        KeyGestureEvent.ACTION_GESTURE_COMPLETE).build());
+    }
+
+    boolean sendKeyGestureEventComplete(int gestureType, int modifierState) {
+        return mPhoneWindowManager.sendKeyGestureEvent(
+                new KeyGestureEvent.Builder().setModifierState(modifierState).setKeyGestureType(
+                        gestureType).setAction(KeyGestureEvent.ACTION_GESTURE_COMPLETE).build());
+    }
+
+    boolean sendKeyGestureEventComplete(int keycode, int modifierState, int gestureType) {
+        return mPhoneWindowManager.sendKeyGestureEvent(
+                new KeyGestureEvent.Builder().setKeycodes(new int[]{keycode}).setModifierState(
+                        modifierState).setKeyGestureType(gestureType).setAction(
+                        KeyGestureEvent.ACTION_GESTURE_COMPLETE).build());
     }
 
     /**

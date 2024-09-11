@@ -16,6 +16,8 @@
 
 package com.android.server.policy;
 
+import static android.view.Display.DEFAULT_DISPLAY;
+
 import static com.android.server.policy.PhoneWindowManager.DOUBLE_TAP_HOME_RECENT_SYSTEM_UI;
 import static com.android.server.policy.PhoneWindowManager.LONG_PRESS_HOME_ALL_APPS;
 import static com.android.server.policy.PhoneWindowManager.LONG_PRESS_HOME_ASSIST;
@@ -23,21 +25,21 @@ import static com.android.server.policy.PhoneWindowManager.LONG_PRESS_HOME_NOTIF
 import static com.android.server.policy.PhoneWindowManager.SETTINGS_KEY_BEHAVIOR_NOTIFICATION_PANEL;
 
 import android.hardware.input.KeyGestureEvent;
+import android.os.RemoteException;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
-import android.platform.test.annotations.RequiresFlagsEnabled;
-import android.platform.test.flag.junit.CheckFlagsRule;
-import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.view.KeyEvent;
 
 import androidx.test.filters.MediumTest;
 
 import com.android.internal.annotations.Keep;
 
+import junit.framework.Assert;
+
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -45,10 +47,6 @@ import org.junit.runner.RunWith;
 @MediumTest
 @RunWith(JUnitParamsRunner.class)
 public class KeyGestureEventTests extends ShortcutKeyTestBase {
-
-    @Rule
-    public final CheckFlagsRule mCheckFlagsRule =
-            DeviceFlagsValueProvider.createCheckFlagsRule();
 
     private static final int META_KEY = KeyEvent.KEYCODE_META_LEFT;
     private static final int META_ON = MODIFIER.get(KeyEvent.KEYCODE_META_LEFT);
@@ -149,9 +147,9 @@ public class KeyGestureEventTests extends ShortcutKeyTestBase {
                 {"VOLUME_MUTE key -> Mute Volume", new int[]{KeyEvent.KEYCODE_VOLUME_MUTE},
                         KeyGestureEvent.KEY_GESTURE_TYPE_VOLUME_MUTE,
                         KeyEvent.KEYCODE_VOLUME_MUTE, 0},
-                {"ALL_APPS key -> Open App Drawer in Accessibility mode",
+                {"ALL_APPS key -> Open App Drawer",
                         new int[]{KeyEvent.KEYCODE_ALL_APPS},
-                        KeyGestureEvent.KEY_GESTURE_TYPE_ACCESSIBILITY_ALL_APPS,
+                        KeyGestureEvent.KEY_GESTURE_TYPE_ALL_APPS,
                         KeyEvent.KEYCODE_ALL_APPS, 0},
                 {"SEARCH key -> Launch Search Activity", new int[]{KeyEvent.KEYCODE_SEARCH},
                         KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_SEARCH,
@@ -160,8 +158,8 @@ public class KeyGestureEventTests extends ShortcutKeyTestBase {
                         new int[]{KeyEvent.KEYCODE_LANGUAGE_SWITCH},
                         KeyGestureEvent.KEY_GESTURE_TYPE_LANGUAGE_SWITCH,
                         KeyEvent.KEYCODE_LANGUAGE_SWITCH, 0},
-                {"META key -> Open App Drawer in Accessibility mode", new int[]{META_KEY},
-                        KeyGestureEvent.KEY_GESTURE_TYPE_ACCESSIBILITY_ALL_APPS, META_KEY,
+                {"META key -> Open App Drawer", new int[]{META_KEY},
+                        KeyGestureEvent.KEY_GESTURE_TYPE_ALL_APPS, META_KEY,
                         META_ON},
                 {"Meta + Alt -> Toggle CapsLock", new int[]{META_KEY, ALT_KEY},
                         KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_CAPS_LOCK, ALT_KEY,
@@ -182,12 +180,12 @@ public class KeyGestureEventTests extends ShortcutKeyTestBase {
                         META_ON | CTRL_ON},
                 {"Meta + Ctrl + DPAD_LEFT -> Split screen navigation",
                         new int[]{META_KEY, CTRL_KEY, KeyEvent.KEYCODE_DPAD_LEFT},
-                        KeyGestureEvent.KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION,
+                        KeyGestureEvent.KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION_LEFT,
                         KeyEvent.KEYCODE_DPAD_LEFT,
                         META_ON | CTRL_ON},
                 {"Meta + Ctrl + DPAD_RIGHT -> Split screen navigation",
                         new int[]{META_KEY, CTRL_KEY, KeyEvent.KEYCODE_DPAD_RIGHT},
-                        KeyGestureEvent.KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION,
+                        KeyGestureEvent.KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION_RIGHT,
                         KeyEvent.KEYCODE_DPAD_RIGHT,
                         META_ON | CTRL_ON},
                 {"Meta + L -> Lock Homescreen", new int[]{META_KEY, KeyEvent.KEYCODE_L},
@@ -320,18 +318,18 @@ public class KeyGestureEventTests extends ShortcutKeyTestBase {
                         new int[]{META_KEY, KeyEvent.KEYCODE_H}, LONG_PRESS_HOME_ASSIST,
                         KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_ASSISTANT, KeyEvent.KEYCODE_H,
                         META_ON},
-                {"Long press HOME key -> Open App Drawer in Accessibility mode",
+                {"Long press HOME key -> Open App Drawer",
                         new int[]{KeyEvent.KEYCODE_HOME}, LONG_PRESS_HOME_ALL_APPS,
-                        KeyGestureEvent.KEY_GESTURE_TYPE_ACCESSIBILITY_ALL_APPS,
+                        KeyGestureEvent.KEY_GESTURE_TYPE_ALL_APPS,
                         KeyEvent.KEYCODE_HOME, 0},
-                {"Long press META + ENTER -> Open App Drawer in Accessibility mode",
+                {"Long press META + ENTER -> Open App Drawer",
                         new int[]{META_KEY, KeyEvent.KEYCODE_ENTER}, LONG_PRESS_HOME_ALL_APPS,
-                        KeyGestureEvent.KEY_GESTURE_TYPE_ACCESSIBILITY_ALL_APPS,
+                        KeyGestureEvent.KEY_GESTURE_TYPE_ALL_APPS,
                         KeyEvent.KEYCODE_ENTER, META_ON},
-                {"Long press META + H -> Open App Drawer in Accessibility mode",
+                {"Long press META + H -> Open App Drawer",
                         new int[]{META_KEY, KeyEvent.KEYCODE_H},
                         LONG_PRESS_HOME_ALL_APPS,
-                        KeyGestureEvent.KEY_GESTURE_TYPE_ACCESSIBILITY_ALL_APPS,
+                        KeyGestureEvent.KEY_GESTURE_TYPE_ALL_APPS,
                         KeyEvent.KEYCODE_H, META_ON}};
     }
 
@@ -428,7 +426,7 @@ public class KeyGestureEventTests extends ShortcutKeyTestBase {
     }
 
     @Test
-    @RequiresFlagsEnabled(com.android.server.flags.Flags.FLAG_NEW_BUGREPORT_KEYBOARD_SHORTCUT)
+    @EnableFlags(com.android.server.flags.Flags.FLAG_NEW_BUGREPORT_KEYBOARD_SHORTCUT)
     public void testBugreportShortcutPress() {
         testShortcutInternal("Meta + Ctrl + Del -> Trigger bug report",
                 new int[]{META_KEY, CTRL_KEY, KeyEvent.KEYCODE_DEL},
@@ -443,5 +441,162 @@ public class KeyGestureEventTests extends ShortcutKeyTestBase {
         mPhoneWindowManager.assertKeyGestureCompleted(
                 new int[]{expectedKey}, expectedModifierState, expectedKeyGestureType,
                 "Failed while executing " + testName);
+    }
+
+    @Test
+    public void testKeyGestureRecentApps() {
+        Assert.assertTrue(
+                sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_RECENT_APPS));
+        mPhoneWindowManager.assertShowRecentApps();
+    }
+
+    @Test
+    public void testKeyGestureAppSwitch() {
+        Assert.assertTrue(
+                sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_APP_SWITCH));
+        mPhoneWindowManager.assertToggleRecentApps();
+    }
+
+    @Test
+    public void testKeyGestureLaunchAssistant() {
+        Assert.assertTrue(
+                sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_ASSISTANT));
+        mPhoneWindowManager.assertSearchManagerLaunchAssist();
+    }
+
+    @Test
+    public void testKeyGestureGoHome() {
+        Assert.assertTrue(
+                sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_HOME));
+        mPhoneWindowManager.assertGoToHomescreen();
+    }
+
+    @Test
+    public void testKeyGestureLaunchSystemSettings() {
+        Assert.assertTrue(
+                sendKeyGestureEventComplete(
+                        KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_SYSTEM_SETTINGS));
+        mPhoneWindowManager.assertLaunchSystemSettings();
+    }
+
+    @Test
+    public void testKeyGestureLock() {
+        Assert.assertTrue(
+                sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_LOCK_SCREEN));
+        mPhoneWindowManager.assertLockedAfterAppTransitionFinished();
+    }
+
+    @Test
+    public void testKeyGestureToggleNotificationPanel() throws RemoteException {
+        Assert.assertTrue(
+                sendKeyGestureEventComplete(
+                        KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_NOTIFICATION_PANEL));
+        mPhoneWindowManager.assertTogglePanel();
+    }
+
+    @Test
+    public void testKeyGestureScreenshot() {
+        Assert.assertTrue(
+                sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_TAKE_SCREENSHOT));
+        mPhoneWindowManager.assertTakeScreenshotCalled();
+    }
+
+    @Test
+    public void testKeyGestureTriggerBugReport() throws RemoteException {
+        Assert.assertTrue(
+                sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_TRIGGER_BUG_REPORT));
+        mPhoneWindowManager.assertTakeBugreport(true);
+    }
+
+    @Test
+    public void testKeyGestureBack() {
+        Assert.assertTrue(sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_BACK));
+        mPhoneWindowManager.assertBackEventInjected();
+    }
+
+    @Test
+    public void testKeyGestureMultiWindowNavigation() {
+        Assert.assertTrue(sendKeyGestureEventComplete(
+                KeyGestureEvent.KEY_GESTURE_TYPE_MULTI_WINDOW_NAVIGATION));
+        mPhoneWindowManager.assertMoveFocusedTaskToFullscreen();
+    }
+
+    @Test
+    public void testKeyGestureDesktopMode() {
+        Assert.assertTrue(
+                sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_DESKTOP_MODE));
+        mPhoneWindowManager.assertMoveFocusedTaskToDesktop();
+    }
+
+    @Test
+    public void testKeyGestureSplitscreenNavigation() {
+        Assert.assertTrue(sendKeyGestureEventComplete(
+                KeyGestureEvent.KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION_LEFT));
+        mPhoneWindowManager.assertMoveFocusedTaskToStageSplit(true);
+
+        Assert.assertTrue(sendKeyGestureEventComplete(
+                KeyGestureEvent.KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION_RIGHT));
+        mPhoneWindowManager.assertMoveFocusedTaskToStageSplit(false);
+    }
+
+    @Test
+    public void testKeyGestureSplitscreenFocus() {
+        Assert.assertTrue(sendKeyGestureEventComplete(
+                KeyGestureEvent.KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_LEFT));
+        mPhoneWindowManager.assertSetSplitscreenFocus(true);
+
+        Assert.assertTrue(sendKeyGestureEventComplete(
+                KeyGestureEvent.KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_RIGHT));
+        mPhoneWindowManager.assertSetSplitscreenFocus(false);
+    }
+
+    @Test
+    public void testKeyGestureShortcutHelper() {
+        Assert.assertTrue(sendKeyGestureEventComplete(
+                KeyGestureEvent.KEY_GESTURE_TYPE_OPEN_SHORTCUT_HELPER));
+        mPhoneWindowManager.assertToggleShortcutsMenu();
+    }
+
+    @Test
+    public void testKeyGestureBrightnessChange() {
+        float[] currentBrightness = new float[]{0.1f, 0.05f, 0.0f};
+        float[] newBrightness = new float[]{0.065738f, 0.0275134f, 0.0f};
+
+        for (int i = 0; i < currentBrightness.length; i++) {
+            mPhoneWindowManager.prepareBrightnessDecrease(currentBrightness[i]);
+            Assert.assertTrue(
+                    sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_BRIGHTNESS_DOWN));
+            mPhoneWindowManager.verifyNewBrightness(newBrightness[i]);
+        }
+    }
+
+    @Test
+    public void testKeyGestureRecentAppSwitcher() {
+        Assert.assertTrue(sendKeyGestureEventStart(
+                KeyGestureEvent.KEY_GESTURE_TYPE_RECENT_APPS_SWITCHER));
+        mPhoneWindowManager.assertShowRecentApps();
+
+        Assert.assertTrue(sendKeyGestureEventComplete(
+                KeyGestureEvent.KEY_GESTURE_TYPE_RECENT_APPS_SWITCHER));
+        mPhoneWindowManager.assertHideRecentApps();
+    }
+
+    @Test
+    public void testKeyGestureLanguageSwitch() {
+        Assert.assertTrue(
+                sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_LANGUAGE_SWITCH));
+        mPhoneWindowManager.assertSwitchKeyboardLayout(1, DEFAULT_DISPLAY);
+
+        Assert.assertTrue(
+                sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_LANGUAGE_SWITCH,
+                        KeyEvent.META_SHIFT_ON));
+        mPhoneWindowManager.assertSwitchKeyboardLayout(-1, DEFAULT_DISPLAY);
+    }
+
+    @Test
+    public void testKeyGestureLaunchSearch() {
+        Assert.assertTrue(
+                sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_SEARCH));
+        mPhoneWindowManager.assertLaunchSearch();
     }
 }
