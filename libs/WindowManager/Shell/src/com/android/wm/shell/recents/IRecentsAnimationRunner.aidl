@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.recents;
 
-import android.app.ActivityManager;
 import android.graphics.Rect;
 import android.view.RemoteAnimationTarget;
 import android.window.TaskSnapshot;
