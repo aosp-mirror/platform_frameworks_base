@@ -30,8 +30,11 @@ import com.android.server.input.TouchpadHardwareState;
 public class TouchpadVisualizationView extends View {
     private static final String TAG = "TouchpadVizMain";
     private static final boolean DEBUG = true;
+    private static final float DEFAULT_RES_X = 47f;
+    private static final float DEFAULT_RES_Y = 45f;
 
     private final TouchpadHardwareProperties mTouchpadHardwareProperties;
+    private float mScaleFactor;
 
     TouchpadHardwareState mLatestHardwareState = new TouchpadHardwareState(0, 0, 0, 0,
             new TouchpadFingerState[]{});
@@ -42,6 +45,7 @@ public class TouchpadVisualizationView extends View {
             TouchpadHardwareProperties touchpadHardwareProperties) {
         super(context);
         mTouchpadHardwareProperties = touchpadHardwareProperties;
+        mScaleFactor = 1;
         mOvalPaint = new Paint();
         mOvalPaint.setAntiAlias(true);
         mOvalPaint.setARGB(255, 0, 0, 0);
@@ -77,10 +81,13 @@ public class TouchpadVisualizationView extends View {
                     mTouchpadHardwareProperties.getOrientationMaximum(), 0, 360,
                     touchpadFingerState.getOrientation());
 
-            float newTouchMajor =
-                    touchpadFingerState.getTouchMajor() / mTouchpadHardwareProperties.getResX();
-            float newTouchMinor =
-                    touchpadFingerState.getTouchMinor() / mTouchpadHardwareProperties.getResY();
+            float resX = mTouchpadHardwareProperties.getResX() == 0f ? DEFAULT_RES_X
+                    : mTouchpadHardwareProperties.getResX();
+            float resY = mTouchpadHardwareProperties.getResY() == 0f ? DEFAULT_RES_Y
+                    : mTouchpadHardwareProperties.getResY();
+
+            float newTouchMajor = touchpadFingerState.getTouchMajor() * mScaleFactor / resY;
+            float newTouchMinor = touchpadFingerState.getTouchMinor() * mScaleFactor / resX;
 
             drawOval(canvas, newX, newY, newTouchMajor, newTouchMinor, newAngle, mOvalPaint);
         }
@@ -99,6 +106,15 @@ public class TouchpadVisualizationView extends View {
         mLatestHardwareState = schs;
 
         invalidate();
+    }
+
+    /**
+     * Update the scale factor of the drawings in the view.
+     *
+     * @param scaleFactor the new scale factor
+     */
+    public void updateScaleFactor(float scaleFactor) {
+        mScaleFactor = scaleFactor;
     }
 
     private float translateRange(float rangeBeforeMin, float rangeBeforeMax,
