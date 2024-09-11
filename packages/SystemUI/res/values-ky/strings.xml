@@ -146,9 +146,9 @@
     <string name="issuerecord_title" msgid="286627115110121849">"Маселе жаздыргыч"</string>
     <string name="issuerecord_background_processing_label" msgid="1666840264959336876">"Маселе жаздырылууда"</string>
     <string name="issuerecord_channel_description" msgid="6142326363431474632">"Маселе тууралуу маалымат чогултулуп жатканы жөнүндө учурдагы билдирме"</string>
-    <string name="issuerecord_ongoing_screen_only" msgid="6248206059935015722">"Жаздыруу маселеси"</string>
+    <string name="issuerecord_ongoing_screen_only" msgid="6248206059935015722">"Маселе жазылууда"</string>
     <string name="issuerecord_share_label" msgid="3992657993619876199">"Бөлүшүү"</string>
-    <string name="issuerecord_save_title" msgid="4161043023696751591">"Жаздырылган маселе сакталды"</string>
+    <string name="issuerecord_save_title" msgid="4161043023696751591">"Маселе жаздырылды"</string>
     <string name="issuerecord_save_text" msgid="1205985304551521495">"Көрүү үчүн таптаңыз"</string>
     <string name="issuerecord_save_error" msgid="6913040083446722726">"Жаздырылган маселе сакталган жок"</string>
     <string name="issuerecord_start_error" msgid="3402782952722871190">"Башталбай койду"</string>
@@ -186,6 +186,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Кулпуну жүзүңүз менен ачтыңыз. Улантуу үчүн басыңыз."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Жүз таанылды. Улантуу үчүн басыңыз."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Жүз таанылды. Улантуу үчүн кулпусун ачуу сүрөтчөсүн басыңыз."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"Кулпусун жүзүңүз менен ачтыңыз. Улантуу үчүн таптап коюңуз."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Аныктыгы текшерилди"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Аныктыгын текшерүүнү жокко чыгаруу"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"Дагы параметрлер"</string>
@@ -472,7 +473,7 @@
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Виджет кошуу"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"Бүттү"</string>
     <string name="label_for_button_in_empty_state_cta" msgid="7314975555382055823">"Виджеттерди кошуу"</string>
-    <string name="title_for_empty_state_cta" msgid="6161654421223450530">"Тандалма колдонмолордун виджеттерин планшеттин кулпусун ачпастан эле, ыкчам колдонуңуз."</string>
+    <string name="title_for_empty_state_cta" msgid="6161654421223450530">"Планшет кулпуланып турса да, жакшы көргөн колдонмолордун виджеттери көрүнүп турат."</string>
     <string name="dialog_title_to_allow_any_widget" msgid="1004820948962675644">"Бардык виджеттер кулпуланган экранда көрсөтүлсүнбү?"</string>
     <string name="button_text_to_open_settings" msgid="1987729256950941628">"Параметрлерди ачуу"</string>
     <string name="work_mode_off_title" msgid="5794818421357835873">"Жумуш колдонмолорун иштетесизби?"</string>
@@ -560,7 +561,7 @@
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
     <string name="monitoring_subtitle_network_logging" msgid="2444199331891219596">"Тармактын таржымалы"</string>
     <string name="monitoring_subtitle_ca_certificate" msgid="8588092029755175800">"Тастыктоочу борбордун тастыктамасы"</string>
-    <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Саясаттарды карап көрүү"</string>
+    <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Эрежелерди карап көрүү"</string>
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"Башкаруу элементтерин көрүү"</string>
     <string name="monitoring_description_named_management" msgid="505833016545056036">"Бул түзмөк <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> уюмуна таандык.\n\nАдминистраторуңуз бул түзмөктөгү параметрлерди, корпоративдик ресурстарды пайдалануу мүмкүнчүлүгүн берген параметрлерди жана колдонмолорду, түзмөгүңүзгө байланыштуу маалыматтарды (мисалы, түзмөгүңүздүн жайгашкан жери сыяктуу) көзөмөлдөп башкара алат.\n\nТолугураак маалымат алуу үчүн IT администраторуңузга кайрылыңыз."</string>
     <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"<xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g> бул түзмөк менен байланышкан маалыматты көрүп, колдонмолорду башкарып, анын параметрлерин өзгөртө алат.\n\nЭгер суроолоруңуз болсо, <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g> уюмуна кайрылыңыз."</string>
@@ -1255,7 +1256,7 @@
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="note_task_button_label" msgid="230135078402003532">"Эскертме жазуу"</string>
     <string name="note_task_shortcut_long_label" msgid="7729325091147319409">"Эскертме жазуу (<xliff:g id="NOTE_TAKING_APP">%1$s</xliff:g>)"</string>
-    <string name="audio_sharing_description" msgid="8849060142768870004">"Аудиону бөлүшүү"</string>
+    <string name="audio_sharing_description" msgid="8849060142768870004">"Чогуу угуу"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"Кеңири таратуу"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосунда кабарлоо токтотулсунбу?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"Эгер <xliff:g id="SWITCHAPP">%1$s</xliff:g> колдонмосунда кабарласаңыз же аудионун чыгуусун өзгөртсөңүз, учурдагы кабарлоо токтотулат"</string>

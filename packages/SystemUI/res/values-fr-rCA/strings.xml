@@ -122,7 +122,7 @@
     <string name="screenrecord_stop_label" msgid="72699670052087989">"Arrêter"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Partager"</string>
     <string name="screenrecord_save_title" msgid="1886652605520893850">"Enregistrement sauvegardé"</string>
-    <string name="screenrecord_save_text" msgid="3008973099800840163">"Touchez pour afficher"</string>
+    <string name="screenrecord_save_text" msgid="3008973099800840163">"Touchez ceci pour afficher"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"Erreur d\'enregistrement de l\'écran"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Une erreur s\'est produite lors du démarrage de l\'enregistrement d\'écran"</string>
     <!-- no translation found for screenrecord_stop_dialog_title (2685522129492260887) -->
@@ -148,8 +148,8 @@
     <string name="issuerecord_channel_description" msgid="6142326363431474632">"Notification continue pour une session de collecte d\'un problème"</string>
     <string name="issuerecord_ongoing_screen_only" msgid="6248206059935015722">"Enregistrement du problème"</string>
     <string name="issuerecord_share_label" msgid="3992657993619876199">"Partager"</string>
-    <string name="issuerecord_save_title" msgid="4161043023696751591">"L\'enregistrement du problème a été enregistré"</string>
-    <string name="issuerecord_save_text" msgid="1205985304551521495">"Touchez ici pour afficher l\'enregistrement"</string>
+    <string name="issuerecord_save_title" msgid="4161043023696751591">"Le problème a été enregistré"</string>
+    <string name="issuerecord_save_text" msgid="1205985304551521495">"Touchez ceci pour afficher l\'enregistrement"</string>
     <string name="issuerecord_save_error" msgid="6913040083446722726">"Erreur lors de l\'enregistrement du problème"</string>
     <string name="issuerecord_start_error" msgid="3402782952722871190">"Erreur lors du démarrage de l\'enregistrement du problème"</string>
     <string name="immersive_cling_title" msgid="8372056499315585941">"Affichage plein écran"</string>
@@ -186,6 +186,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Déverr. par reconnaissance faciale. Appuyez pour continuer."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Visage reconnu. Appuyez pour continuer."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Visage reconnu. Appuyez sur Déverrouiller pour continuer."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"Déverrouillé avec le visage. Touchez pour continuer."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Authentifié"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Annuler l\'authentification"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"Plus d\'options"</string>
@@ -300,7 +301,7 @@
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"Les fonctionnalités comme Partage rapide et Localiser mon appareil utilisent le Bluetooth"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Le Bluetooth s\'activera demain matin"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Partager l\'audio"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Partage de l\'audio en cours…"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Partage de l\'audio en cours"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Pile : <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Écouteurs"</string>
@@ -372,7 +373,7 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Enregistrement d\'écran"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Démarrer"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Arrêter"</string>
-    <string name="qs_record_issue_label" msgid="8166290137285529059">"Rapporter le problème"</string>
+    <string name="qs_record_issue_label" msgid="8166290137285529059">"Enregistrer le problème"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"Commencer"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"Arrêter"</string>
     <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"Rapport de bogue"</string>
@@ -381,7 +382,7 @@
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Enregistrement écran"</string>
     <string name="performance" msgid="6552785217174378320">"Performance"</string>
     <string name="user_interface" msgid="3712869377953950887">"Interface utilisateur"</string>
-    <string name="thermal" msgid="6758074791325414831">"Thermique"</string>
+    <string name="thermal" msgid="6758074791325414831">"Chaleur"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Mode Une main"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"Appareils auditifs"</string>
     <string name="quick_settings_hearing_devices_connected" msgid="6519069502397037781">"Actives"</string>
@@ -463,7 +464,7 @@
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"Fermer"</string>
     <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"Ajouter, retirer et réorganiser vos widgets dans cet espace"</string>
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Ajouter plus de widgets"</string>
-    <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Maintenez le doigt pour personnaliser les widgets"</string>
+    <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Appuyez longuement pour personnaliser les widgets"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Personnaliser les widgets"</string>
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"Icône d\'appli pour un widget désactivé"</string>
     <string name="icon_description_for_pending_widget" msgid="8413816401868001755">"Icône d\'appli indiquant qu\'un widget est en cours d\'installation"</string>
@@ -1234,7 +1235,7 @@
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"Modifier le texte copié"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Modifier l\'image copiée"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Envoyer à un appareil à proximité"</string>
-    <string name="clipboard_text_hidden" msgid="7926899867471812305">"Touchez pour afficher"</string>
+    <string name="clipboard_text_hidden" msgid="7926899867471812305">"Touchez ceci pour afficher"</string>
     <string name="clipboard_text_copied" msgid="5100836834278976679">"Texte copié"</string>
     <string name="clipboard_image_copied" msgid="3793365360174328722">"Image copiée"</string>
     <string name="clipboard_content_copied" msgid="144452398567828145">"Contenu copié"</string>

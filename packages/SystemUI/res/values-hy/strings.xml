@@ -122,7 +122,7 @@
     <string name="screenrecord_stop_label" msgid="72699670052087989">"Կանգնեցնել"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Կիսվել"</string>
     <string name="screenrecord_save_title" msgid="1886652605520893850">"Էկրանի տեսագրությունը պահվեց"</string>
-    <string name="screenrecord_save_text" msgid="3008973099800840163">"Հպեք՝ դիտելու համար"</string>
+    <string name="screenrecord_save_text" msgid="3008973099800840163">"Հպեք դիտելու համար"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"Չհաջողվեց պահել էկրանի տեսագրությունը"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Չհաջողվեց սկսել տեսագրումը"</string>
     <!-- no translation found for screenrecord_stop_dialog_title (2685522129492260887) -->
@@ -149,7 +149,7 @@
     <string name="issuerecord_ongoing_screen_only" msgid="6248206059935015722">"Տեսագրում ենք խնդիրը"</string>
     <string name="issuerecord_share_label" msgid="3992657993619876199">"Կիսվել"</string>
     <string name="issuerecord_save_title" msgid="4161043023696751591">"Տեսագրությունը պահվեց"</string>
-    <string name="issuerecord_save_text" msgid="1205985304551521495">"Հպեք՝ դիտելու համար"</string>
+    <string name="issuerecord_save_text" msgid="1205985304551521495">"Հպեք դիտելու համար"</string>
     <string name="issuerecord_save_error" msgid="6913040083446722726">"Չհաջողվեց պահել տեսագրությունը"</string>
     <string name="issuerecord_start_error" msgid="3402782952722871190">"Չհաջողվեց սկսել տեսագրումը"</string>
     <string name="immersive_cling_title" msgid="8372056499315585941">"Լիաէկրան դիտակերպ"</string>
@@ -186,6 +186,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Ապակողպվել է դեմքով։ Սեղմեք շարունակելու համար։"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Դեմքը ճանաչվեց։ Սեղմեք շարունակելու համար։"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Դեմքը ճանաչվեց։ Սեղմեք ապակողպման պատկերակը։"</string>
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"Ապակողպվել է դեմքով։ Հպեք շարունակելու համար:"</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Նույնականացված է"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Չեղարկել իսկորոշումը"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"Լրացուցիչ ընտրանքներ"</string>
@@ -299,7 +300,7 @@
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="3345758139235739006">"Ավտոմատ միացնել վաղը"</string>
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"Bluetooth-ն օգտագործում են, օրինակ, Quick Share և «Գտնել իմ սարքը» գործառույթները"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bluetooth-ը կմիանա վաղն առավոտյան"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Փոխանցել աուդիո"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Փոխանցել աուդիոն"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Աուդիոյի փոխանցում"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Մարտկոցի լիցքը՝ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Աուդիո"</string>
@@ -372,7 +373,7 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Էկրանի տեսագրում"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Սկսել"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Կանգնեցնել"</string>
-    <string name="qs_record_issue_label" msgid="8166290137285529059">"Ձայնագրել"</string>
+    <string name="qs_record_issue_label" msgid="8166290137285529059">"Խնդրի տեսագրում"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"Սկսել"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"Կանգնեցնել"</string>
     <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"Հաղորդում սխալի մասին"</string>
@@ -381,7 +382,7 @@
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Էկրանի տեսագրում"</string>
     <string name="performance" msgid="6552785217174378320">"Արդյունավետություն"</string>
     <string name="user_interface" msgid="3712869377953950887">"Օգտատիրական ինտերֆեյս"</string>
-    <string name="thermal" msgid="6758074791325414831">"Ջերմատեսիլ"</string>
+    <string name="thermal" msgid="6758074791325414831">"Տաքացում"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Մեկ ձեռքի ռեժիմ"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"Լսողական սարքեր"</string>
     <string name="quick_settings_hearing_devices_connected" msgid="6519069502397037781">"Ակտիվ է"</string>
@@ -459,9 +460,9 @@
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Լիցքավորում • Մնացել է <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_action_open_communal_hub" msgid="3081702792413787849">"Վիջեթներ կողպէկրանին"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"Թերթեք ձախ՝ ուղեցույցը գործարկելու համար"</string>
-    <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"Անհատականացնել"</string>
+    <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"Կարգավորել"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"Փակել"</string>
-    <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"Ավելացնել վիջեթներ, ինչպես նաև հեռացնել և վերադասավորել դրանք այս տարածքում"</string>
+    <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"Ավելացրեք, հեռացրեք և դասավորեք վիջեթները այս տարածքում"</string>
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Ավելացնել վիջեթներ"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Երկար սեղմեք՝ վիջեթները հարմարեցնելու համար"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Հարմարեցնել վիջեթները"</string>
@@ -472,7 +473,7 @@
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Ավելացնել վիջեթ"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"Պատրաստ է"</string>
     <string name="label_for_button_in_empty_state_cta" msgid="7314975555382055823">"Ավելացնել վիջեթներ"</string>
-    <string name="title_for_empty_state_cta" msgid="6161654421223450530">"Արագ բացեք հավելվածների ձեր սիրելի վիջեթները առանց ապակողպելու պլանշետը։"</string>
+    <string name="title_for_empty_state_cta" msgid="6161654421223450530">"Հեշտությամբ օգտվեք ձեր սիրելի հավելվածներից, նույնիսկ երբ պլանշետը կողպված է։"</string>
     <string name="dialog_title_to_allow_any_widget" msgid="1004820948962675644">"Թույլատրե՞լ վիջեթների ցուցադրումը կողպէկրանին"</string>
     <string name="button_text_to_open_settings" msgid="1987729256950941628">"Բացել կարգավորումները"</string>
     <string name="work_mode_off_title" msgid="5794818421357835873">"Վերսկսե՞լ աշխ. հավելվածները"</string>
@@ -629,7 +630,7 @@
     <string name="stream_alarm_unavailable" msgid="4059817189292197839">"Հասանելի չէ․ «Չանհանգստացնել» ռեժիմը միացված է"</string>
     <string name="stream_media_unavailable" msgid="6823020894438959853">"Հասանելի չէ․ «Չանհանգստացնել» ռեժիմը միացված է"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s: Հպեք՝ ձայնը միացնելու համար:"</string>
-    <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s: Հպեք՝ թրթռումը միացնելու համար: Մատչելիության ծառայությունների ձայնը կարող է անջատվել:"</string>
+    <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s: Հպեք՝ թրթռոցը միացնելու համար: Մատչելիության ծառայությունների ձայնը կարող է անջատվել:"</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s: Հպեք՝ ձայնն անջատելու համար: Մատչելիության ծառայությունների ձայնը կարող է անջատվել:"</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s։ Հպեք՝ թրթռոցը միացնելու համար։"</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s։ Հպեք՝ ձայնը անջատելու համար։"</string>

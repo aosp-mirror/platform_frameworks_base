@@ -186,6 +186,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Ontgrendeld via gezicht. Druk om door te gaan."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Gezicht herkend. Druk om door te gaan."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Gezicht herkend. Druk op het ontgrendelicoon."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"Ontgrendeld via gezicht. Tik om door te gaan."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Geverifieerd"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Verificatie annuleren"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"Meer opties"</string>
@@ -372,7 +373,7 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Schermopname"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Starten"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Stoppen"</string>
-    <string name="qs_record_issue_label" msgid="8166290137285529059">"Probleem vastleggen"</string>
+    <string name="qs_record_issue_label" msgid="8166290137285529059">"Probleem opnemen"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"Starten"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"Stoppen"</string>
     <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"Bugrapport"</string>
@@ -593,7 +594,7 @@
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Instellingen"</string>
     <string name="volume_panel_captioning_title" msgid="5984936949147684357">"Live ondertiteling"</string>
     <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"Volume verlaagd naar een veiliger niveau"</string>
-    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"Het hoofdtelefoonvolume is langer dan de aanbevolen tijd hoog geweest"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"Het koptelefoonvolume is langer dan de aanbevolen tijd hoog geweest"</string>
     <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"Het hoofdtelefoonvolume overschrijdt de veiligheidslimiet voor deze week"</string>
     <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"Blijven luisteren"</string>
     <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"Volume omlaag"</string>

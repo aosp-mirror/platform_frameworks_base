@@ -186,6 +186,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"ফেসের সাহায্যে আনলক করা হয়েছে। চালিয়ে যেতে প্রেস করুন।"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"ফেস শনাক্ত করা হয়েছে। চালিয়ে যেতে প্রেস করুন।"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"ফেস শনাক্ত করা হয়েছে। চালিয়ে যেতে আনলক আইকন প্রেস করুন।"</string>
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"ফেসের সাহায্যে আনলক করা হয়েছে। চালিয়ে যেতে ট্যাপ করুন।"</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"প্রমাণীকৃত"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"যাচাইকরণ বাতিল করুন"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"আরও বিকল্প"</string>
@@ -472,7 +473,7 @@
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"উইজেট যোগ করুন"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"হয়ে গেছে"</string>
     <string name="label_for_button_in_empty_state_cta" msgid="7314975555382055823">"উইজেট যোগ করুন"</string>
-    <string name="title_for_empty_state_cta" msgid="6161654421223450530">"নিজের ট্যাবলেট আনলক বা করেই আপনার প্রিয় অ্যাপ উইজেটে দ্রুত অ্যাক্সেস পান।"</string>
+    <string name="title_for_empty_state_cta" msgid="6161654421223450530">"নিজের ট্যাবলেট আনলক না করেই আপনার প্রিয় অ্যাপ উইজেটে দ্রুত অ্যাক্সেস পান।"</string>
     <string name="dialog_title_to_allow_any_widget" msgid="1004820948962675644">"লক স্ক্রিনে যেকোনও উইজেটকে অনুমতি দেবেন?"</string>
     <string name="button_text_to_open_settings" msgid="1987729256950941628">"সেটিংস খুলুন"</string>
     <string name="work_mode_off_title" msgid="5794818421357835873">"অফিসের অ্যাপ আনপজ করতে চান?"</string>
@@ -556,7 +557,7 @@
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"<xliff:g id="VPN_APP">%1$s</xliff:g>-এর মাধ্যমে আপনার ব্যক্তিগত অ্যাপ ইন্টারনেটের সাথে কানেক্ট করা আছে"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"<xliff:g id="VPN_APP">%1$s</xliff:g>-এর মাধ্যমে এই ডিভাইস ইন্টারনেটের সাথে কানেক্ট করা আছে"</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"এই ডিভাইস <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> দিয়েছে"</string>
-    <string name="monitoring_title_device_owned" msgid="7029691083837606324">"ডিভাইসের পরিচালনা"</string>
+    <string name="monitoring_title_device_owned" msgid="7029691083837606324">"ডিভাইস ম্যানেজমেন্ট"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
     <string name="monitoring_subtitle_network_logging" msgid="2444199331891219596">"নেটওয়ার্ক লগিং"</string>
     <string name="monitoring_subtitle_ca_certificate" msgid="8588092029755175800">"CA সার্টিফিকেট"</string>

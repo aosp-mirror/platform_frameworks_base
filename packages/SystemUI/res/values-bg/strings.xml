@@ -186,6 +186,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Отключено с лице. Натиснете, за да продължите."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Лицето бе разпознато. Натиснете, за да продължите."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Лицето бе разпознато. Продължете чрез иконата за отключване."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"Отключено с лице. Докоснете, за да продължите."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Удостоверено"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Анулиране на удостоверяването"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"Още опции"</string>
@@ -381,7 +382,7 @@
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Запис на екрана"</string>
     <string name="performance" msgid="6552785217174378320">"Ефективност"</string>
     <string name="user_interface" msgid="3712869377953950887">"Потребителски интерфейс"</string>
-    <string name="thermal" msgid="6758074791325414831">"Термално"</string>
+    <string name="thermal" msgid="6758074791325414831">"Температура"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Режим за работа с една ръка"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"Слухови апарати"</string>
     <string name="quick_settings_hearing_devices_connected" msgid="6519069502397037781">"Активно"</string>
@@ -459,7 +460,7 @@
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Зарежда се • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> до пълно зареждане"</string>
     <string name="accessibility_action_open_communal_hub" msgid="3081702792413787849">"Приспособления на заключения екран"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"Прекарайте пръст наляво, за да стартирате общия урок"</string>
-    <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"Персонализиране"</string>
+    <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"Персонализи­ране"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"Отхвърляне"</string>
     <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"Добавяйте, премахвайте и пренареждайте приспособленията си в тази област"</string>
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Добавете още приспособления"</string>

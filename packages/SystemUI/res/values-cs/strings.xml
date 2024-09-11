@@ -186,6 +186,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Odemknuto obličejem. Pokračujte stisknutím."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Obličej rozpoznán. Pokračujte stisknutím."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Obličej rozpoznán. Klepněte na ikonu odemknutí."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"Odemknuto obličejem. Pokračujte klepnutím."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Ověřeno"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Zrušit ověření"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"Další možnosti"</string>
@@ -381,7 +382,7 @@
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Záznam obrazovky"</string>
     <string name="performance" msgid="6552785217174378320">"Výkon"</string>
     <string name="user_interface" msgid="3712869377953950887">"Uživatelské rozhraní"</string>
-    <string name="thermal" msgid="6758074791325414831">"Termovize"</string>
+    <string name="thermal" msgid="6758074791325414831">"Teplota"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Režim jedné ruky"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"Naslouchátka"</string>
     <string name="quick_settings_hearing_devices_connected" msgid="6519069502397037781">"Aktivní"</string>

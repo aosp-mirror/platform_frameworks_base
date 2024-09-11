@@ -186,6 +186,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"മുഖം ഉപയോഗിച്ച് അൺലോക്ക് ചെയ്‌തു. തുടരാൻ അമർത്തുക."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"മുഖം തിരിച്ചറിഞ്ഞു. തുടരാൻ അമർത്തുക."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"മുഖം തിരിച്ചറിഞ്ഞു. തുടരാൻ അൺലോക്ക് ഐക്കൺ അമർത്തുക."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"മുഖം വഴി അൺലോക്കുചെയ്തു. തുടരാൻ ടാപ്പ് ചെയ്യുക."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"പരിശോധിച്ചുറപ്പിച്ചു"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"പരിശോധിച്ചുറപ്പിക്കൽ റദ്ദാക്കുക"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"കൂടുതൽ ഓപ്‌ഷനുകൾ"</string>
@@ -461,7 +462,7 @@
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"കമ്മ്യൂണൽ ട്യൂട്ടോറിയൽ ആരംഭിക്കാൻ ഇടത്തോട്ട് സ്വൈപ്പ് ചെയ്യുക"</string>
     <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"ഇഷ്‌ടാനുസൃതമാക്കുക"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"ഡിസ്‌മിസ് ചെയ്യുക"</string>
-    <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"ഈ സ്‌പെയ്‌സിൽ നിങ്ങളുടെ വിജറ്റുകൾ ചേർക്കുക, നീക്കം ചെയ്യുക, പുനഃക്രമീകരിക്കുക"</string>
+    <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"വിജറ്റുകൾ ചേർക്കുക, നീക്കം ചെയ്യുക, പുനഃക്രമീകരിക്കുക"</string>
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"കൂടുതൽ വിജറ്റുകൾ ചേർക്കുക"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"വിജറ്റുകൾ ഇഷ്ടാനുസൃതമാക്കാൻ ദീർഘനേരം അമർത്തുക"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"വിജറ്റുകൾ ഇഷ്ടാനുസൃതമാക്കുക"</string>

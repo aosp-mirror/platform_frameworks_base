@@ -186,6 +186,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Desbloqueado com o rosto. Prima para continuar."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Rosto reconhecido. Prima para continuar."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Rosto reconhecido. Prima ícone de desbloqueio para continuar"</string>
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"Desbloqueado com o rosto. Toque para continuar."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Autenticado"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Cancelar autenticação"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"Mais opções"</string>
@@ -376,7 +377,7 @@
     <string name="qs_record_issue_start" msgid="2979831312582567056">"Iniciar"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"Parar"</string>
     <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"Relatório de erro"</string>
-    <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"Que parte do dispositivo foi afetada?"</string>
+    <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"Que experiência com o dispositivo foi afetada?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"Selecione o tipo de problema"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Gravação de ecrã"</string>
     <string name="performance" msgid="6552785217174378320">"Desempenho"</string>
@@ -439,7 +440,7 @@
     <string name="keyguard_retry" msgid="886802522584053523">"Deslize rapidamente para cima para tentar novamente."</string>
     <string name="accesssibility_keyguard_retry" msgid="8880238862712870676">"Deslize para cima para tentar o Desbloqueio facial novamente"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Desbloquear para utilizar o NFC"</string>
-    <string name="do_disclosure_generic" msgid="4896482821974707167">"Este dispositivo pertence à sua entidade."</string>
+    <string name="do_disclosure_generic" msgid="4896482821974707167">"Este dispositivo pertence à sua organização."</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"Este dispositivo pertence à entidade <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>."</string>
     <string name="do_financed_disclosure_with_name" msgid="6723004643314467864">"Este dispositivo foi fornecido por <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>."</string>
     <string name="phone_hint" msgid="6682125338461375925">"Deslize rapid. a partir do ícone para aceder ao telemóvel"</string>
@@ -543,7 +544,7 @@
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Este dispositivo foi fornecido pela <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>."</string>
     <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"Este dispositivo pertence à sua organização e está ligado à Internet através da app <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"Este dispositivo pertence à organização <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> e está ligado à Internet através da app <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Este dispositivo pertence à sua entidade."</string>
+    <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Este dispositivo pertence à sua organização."</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Este dispositivo pertence à entidade <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>."</string>
     <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"Este dispositivo pertence à sua organização e está ligado à Internet através de VPNs"</string>
     <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"Este dispositivo pertence à organização <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> e está ligado à Internet através de VPNs"</string>
@@ -556,15 +557,15 @@
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"As suas apps pessoais estão ligadas à Internet através da app <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"Este dispositivo está ligado à Internet através da app <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"Este dispositivo foi fornecido pela <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>."</string>
-    <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Gestão de dispositivos"</string>
+    <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Gestão do dispositivo"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
     <string name="monitoring_subtitle_network_logging" msgid="2444199331891219596">"Registos de rede"</string>
     <string name="monitoring_subtitle_ca_certificate" msgid="8588092029755175800">"Certificados da AC"</string>
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Ver Políticas"</string>
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"Ver controlos"</string>
-    <string name="monitoring_description_named_management" msgid="505833016545056036">"Este dispositivo pertence à entidade <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nO administrador de TI pode monitorizar e gerir as definições, o acesso empresarial, as apps, os dados associados ao dispositivo e as informações de localização do mesmo.\n\nContacte o administrador de TI para obter mais informações."</string>
+    <string name="monitoring_description_named_management" msgid="505833016545056036">"Este dispositivo pertence à entidade <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nO administrador de TI pode monitorizar e gerir as definições, o acesso empresarial, as apps, os dados associados ao dispositivo e as informações de localização do mesmo.\n\nContacte o administrador de TI para mais informações."</string>
     <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"A <xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g> pode conseguir aceder aos dados associados a este dispositivo, gerir apps e alterar as definições do mesmo.\n\nSe tiver perguntas, contacte a <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g>."</string>
-    <string name="monitoring_description_management" msgid="4308879039175729014">"Este dispositivo pertence à sua entidade.\n\nO administrador de TI pode monitorizar e gerir as definições, o acesso empresarial, as apps, os dados associados ao dispositivo e as informações de localização do mesmo.\n\nContacte o administrador de TI para obter mais informações."</string>
+    <string name="monitoring_description_management" msgid="4308879039175729014">"Este dispositivo pertence à sua organização.\n\nO administrador de TI pode monitorizar e gerir as definições, o acesso empresarial, as apps, os dados associados ao dispositivo e as informações de localização do mesmo.\n\nContacte o administrador de TI para mais informações."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"A sua entidade instalou uma autoridade de certificação neste dispositivo. O tráfego da sua rede segura pode ser monitorizado ou alterado."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"A sua entidade instalou uma autoridade de certificação no seu perfil de trabalho. O tráfego da sua rede segura pode ser monitorizado ou alterado."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Está instalada uma autoridade de certificação neste dispositivo. O tráfego da sua rede segura pode ser monitorizado ou alterado."</string>

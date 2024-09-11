@@ -143,12 +143,12 @@
     <string name="cast_to_other_device_stop_dialog_message_specific_app" msgid="4891536209254041850">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; қолданбасының контентін трансляциялауды тоқтатасыз."</string>
     <string name="cast_to_other_device_stop_dialog_button" msgid="6420183747435521834">"Трансляцияны тоқтату"</string>
     <string name="close_dialog_button" msgid="4749497706540104133">"Жабу"</string>
-    <string name="issuerecord_title" msgid="286627115110121849">"Мәселені жазу құралы"</string>
+    <string name="issuerecord_title" msgid="286627115110121849">"Ақау жазу құралы"</string>
     <string name="issuerecord_background_processing_label" msgid="1666840264959336876">"Мәселе жазбасы өңделіп жатыр"</string>
     <string name="issuerecord_channel_description" msgid="6142326363431474632">"Мәселе туралы дерек жинау сеансына арналған ағымдағы хабарландыру"</string>
-    <string name="issuerecord_ongoing_screen_only" msgid="6248206059935015722">"Мәселе жазылып жатыр"</string>
+    <string name="issuerecord_ongoing_screen_only" msgid="6248206059935015722">"Ақау жазылып жатыр"</string>
     <string name="issuerecord_share_label" msgid="3992657993619876199">"Бөлісу"</string>
-    <string name="issuerecord_save_title" msgid="4161043023696751591">"Мәселе жазбасы сақталды"</string>
+    <string name="issuerecord_save_title" msgid="4161043023696751591">"Ақау жазбасы сақталды."</string>
     <string name="issuerecord_save_text" msgid="1205985304551521495">"Көру үшін түртіңіз."</string>
     <string name="issuerecord_save_error" msgid="6913040083446722726">"Мәселе жазбасын сақтау кезінде қате шықты."</string>
     <string name="issuerecord_start_error" msgid="3402782952722871190">"Мәселені жазуды бастау кезінде қате шықты."</string>
@@ -186,6 +186,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Бетпен ашылды. Жалғастыру үшін басыңыз."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Бет танылды. Жалғастыру үшін басыңыз."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Бет танылды. Жалғастыру үшін құлыпты ашу белгішесін басыңыз."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"Бетпен ашылды. Жалғастыру үшін түртіңіз."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Аутентификацияланған"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Аутентификациядан бас тарту"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"Қосымша опциялар"</string>
@@ -300,7 +301,7 @@
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"Quick Share және Find My Device сияқты функциялар Bluetooth-ты пайдаланады."</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bluetooth ертең таңертең қосылады."</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Аудионы бөлісу"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Аудио бөлісіліп жатыр"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Аудио беріліп жатыр"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Батарея деңгейі: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Aудио"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Гарнитура"</string>
@@ -461,7 +462,7 @@
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"Ортақ оқулықты ашу үшін солға қарай сырғытыңыз."</string>
     <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"Бейімдеу"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"Жабу"</string>
-    <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"Осы бөлмеде виджеттер қосыңыз, оларды өшіріңіз және ретін өзгертіңіз."</string>
+    <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"Осында виджеттерді қосып, оларды реттеуге болады."</string>
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Басқа виджеттер қосыңыз."</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Виджеттерді бейімдеу үшін ұзақ басып тұрыңыз."</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Виджеттерді реттеу"</string>
@@ -1255,7 +1256,7 @@
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="note_task_button_label" msgid="230135078402003532">"Ескертпе жазу"</string>
     <string name="note_task_shortcut_long_label" msgid="7729325091147319409">"Ескертпе жазу, <xliff:g id="NOTE_TAKING_APP">%1$s</xliff:g>"</string>
-    <string name="audio_sharing_description" msgid="8849060142768870004">"Аудио бөлісу"</string>
+    <string name="audio_sharing_description" msgid="8849060142768870004">"Аудио беріліп жатыр"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"Таратуда"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"<xliff:g id="APP_NAME">%1$s</xliff:g> қолданбасын таратуды тоқтатасыз ба?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> қолданбасын таратсаңыз немесе аудио шығысын өзгертсеңіз, қазіргі тарату сеансы тоқтайды."</string>

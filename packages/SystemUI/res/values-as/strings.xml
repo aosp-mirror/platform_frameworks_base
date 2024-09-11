@@ -186,6 +186,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"মুখাৱয়বৰ জৰিয়তে আনলক কৰা হৈছে। অব্যাহত ৰাখিবলৈ টিপক।"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"মুখাৱয়ব চিনাক্ত কৰা হৈছে। অব্যাহত ৰাখিবলৈ টিপক।"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"মুখাৱয়ব চিনাক্ত কৰা হৈছে। অব্যাহত ৰাখিবলৈ আনলক কৰক চিহ্নটোত টিপক।"</string>
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"মুখাৱয়বৰ জৰিয়তে আনলক কৰা হৈছে। অব্যাহত ৰাখিবলৈ টিপক।"</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"বিশ্বাসযোগ্যতা প্ৰমাণীকৰণ কৰা হ’ল"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"বিশ্বাসযোগ্যতা প্ৰমাণীকৰণ বাতিল কৰক"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"অধিক বিকল্প"</string>
@@ -461,7 +462,7 @@
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"সম্প্ৰদায় সম্পৰ্কীয় নিৰ্দেশনা আৰম্ভ কৰিবলৈ বাওঁফালে ছোৱাইপ কৰক"</string>
     <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"কাষ্টমাইজ কৰক"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"অগ্ৰাহ্য কৰক"</string>
-    <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"এই স্পেচটোত আপোনাৰ ৱিজেটসমূহ যোগ দিয়ক, আঁতৰাওক আৰু সেইসমূহৰ ক্ৰম সলনি কৰক"</string>
+    <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"এই স্পে’চটোত আপোনাৰ ৱিজেটসমূহ যোগ দিয়ক, আঁতৰাওক আৰু সেইসমূহৰ ক্ৰম সলনি কৰক"</string>
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"অধিক ৱিজেট যোগ দিয়ক"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"ৱিজেট কাষ্টমাইজ কৰিবলৈ দীঘলীয়াকৈ টিপক"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"ৱিজেট কাষ্টমাইজ কৰক"</string>
