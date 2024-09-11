@@ -564,8 +564,7 @@
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmes et rappels"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Autorisez cette appli à créer des alarmes et à programmer des actions urgentes. Cela permet à l’appli de s\'exécuter en arrière-plan, ce qui peut nécessiter plus de pile.\n\nSi cette autorisation est désactivée, les alarmes existantes et les événements en temps réel programmés par cette appli ne fonctionneront pas."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"horaire, alarme, rappel, horloge"</string>
-    <!-- no translation found for zen_mode_do_not_disturb_name (6798711401734798283) -->
-    <skip />
+    <string name="zen_mode_do_not_disturb_name" msgid="6798711401734798283">"Ne pas déranger"</string>
     <string name="zen_mode_settings_title" msgid="7374070457626419755">"Ne pas déranger"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Activer"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Activer le mode Ne pas déranger"</string>
