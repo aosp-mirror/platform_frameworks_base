@@ -40,6 +40,7 @@ import android.graphics.Point
 import android.graphics.PointF
 import android.graphics.Rect
 import android.os.Binder
+import android.os.Bundle
 import android.os.Handler
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
@@ -2934,6 +2935,108 @@ class DesktopTasksControllerTest : ShellTestCase() {
         eq(task2.configuration.windowConfiguration.bounds))
     // Does not remove wallpaper activity, as desktop still has visible desktop tasks
     assertThat(wctArgument.value.hierarchyOps).isEmpty()
+  }
+
+  @Test
+  @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MULTI_INSTANCE_FEATURES)
+  fun newWindow_fromFullscreenOpensInSplit() {
+    setUpLandscapeDisplay()
+    val task = setUpFullscreenTask()
+    val optionsCaptor = ArgumentCaptor.forClass(Bundle::class.java)
+    runOpenNewWindow(task)
+    verify(splitScreenController)
+      .startIntent(any(), anyInt(), any(), any(),
+        optionsCaptor.capture(), anyOrNull())
+    assertThat(ActivityOptions.fromBundle(optionsCaptor.value).launchWindowingMode)
+      .isEqualTo(WINDOWING_MODE_MULTI_WINDOW)
+  }
+
+  @Test
+  @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MULTI_INSTANCE_FEATURES)
+  fun newWindow_fromSplitOpensInSplit() {
+    setUpLandscapeDisplay()
+    val task = setUpSplitScreenTask()
+    val optionsCaptor = ArgumentCaptor.forClass(Bundle::class.java)
+    runOpenNewWindow(task)
+    verify(splitScreenController)
+      .startIntent(
+        any(), anyInt(), any(), any(),
+        optionsCaptor.capture(), anyOrNull()
+      )
+    assertThat(ActivityOptions.fromBundle(optionsCaptor.value).launchWindowingMode)
+      .isEqualTo(WINDOWING_MODE_MULTI_WINDOW)
+  }
+
+  @Test
+  @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MULTI_INSTANCE_FEATURES)
+  fun newWindow_fromFreeformAddsNewWindow() {
+    setUpLandscapeDisplay()
+    val task = setUpFreeformTask()
+    val wctCaptor = ArgumentCaptor.forClass(WindowContainerTransaction::class.java)
+    runOpenNewWindow(task)
+    verify(transitions).startTransition(anyInt(), wctCaptor.capture(), anyOrNull())
+    assertThat(ActivityOptions.fromBundle(wctCaptor.value.hierarchyOps[0].launchOptions)
+      .launchWindowingMode).isEqualTo(WINDOWING_MODE_FREEFORM)
+  }
+
+  private fun runOpenNewWindow(task: RunningTaskInfo) {
+    markTaskVisible(task)
+    task.baseActivity = mock(ComponentName::class.java)
+    task.isFocused = true
+    runningTasks.add(task)
+    controller.openNewWindow(task)
+  }
+
+  @Test
+  @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MULTI_INSTANCE_FEATURES)
+  fun openInstance_fromFullscreenOpensInSplit() {
+    setUpLandscapeDisplay()
+    val task = setUpFullscreenTask()
+    val taskToRequest = setUpFreeformTask()
+    val optionsCaptor = ArgumentCaptor.forClass(Bundle::class.java)
+    runOpenInstance(task, taskToRequest.taskId)
+    verify(splitScreenController)
+      .startTask(anyInt(), anyInt(), optionsCaptor.capture(), anyOrNull())
+    assertThat(ActivityOptions.fromBundle(optionsCaptor.value).launchWindowingMode)
+      .isEqualTo(WINDOWING_MODE_MULTI_WINDOW)
+  }
+
+  @Test
+  @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MULTI_INSTANCE_FEATURES)
+  fun openInstance_fromSplitOpensInSplit() {
+    setUpLandscapeDisplay()
+    val task = setUpSplitScreenTask()
+    val taskToRequest = setUpFreeformTask()
+    val optionsCaptor = ArgumentCaptor.forClass(Bundle::class.java)
+    runOpenInstance(task, taskToRequest.taskId)
+    verify(splitScreenController)
+      .startTask(anyInt(), anyInt(), optionsCaptor.capture(), anyOrNull())
+    assertThat(ActivityOptions.fromBundle(optionsCaptor.value).launchWindowingMode)
+      .isEqualTo(WINDOWING_MODE_MULTI_WINDOW)
+  }
+
+  @Test
+  @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MULTI_INSTANCE_FEATURES)
+  fun openInstance_fromFreeformAddsNewWindow() {
+    setUpLandscapeDisplay()
+    val task = setUpFreeformTask()
+    val taskToRequest = setUpFreeformTask()
+    val wctCaptor = ArgumentCaptor.forClass(WindowContainerTransaction::class.java)
+    runOpenInstance(task, taskToRequest.taskId)
+    verify(transitions).startTransition(anyInt(), wctCaptor.capture(), anyOrNull())
+    assertThat(ActivityOptions.fromBundle(wctCaptor.value.hierarchyOps[0].launchOptions)
+      .launchWindowingMode).isEqualTo(WINDOWING_MODE_FREEFORM)
+  }
+
+  private fun runOpenInstance(
+    callingTask: RunningTaskInfo,
+    requestedTaskId: Int
+  ) {
+    markTaskVisible(callingTask)
+    callingTask.baseActivity = mock(ComponentName::class.java)
+    callingTask.isFocused = true
+    runningTasks.add(callingTask)
+    controller.openInstance(callingTask, requestedTaskId)
   }
 
   @Test
