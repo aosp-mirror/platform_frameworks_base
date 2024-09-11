@@ -66,7 +66,7 @@ class SceneTransitionLayoutStateTest {
         val state = MutableSceneTransitionLayoutStateImpl(SceneA, SceneTransitions.Empty)
         state.startTransitionImmediately(
             animationScope = backgroundScope,
-            transition(from = SceneA, to = SceneB)
+            transition(from = SceneA, to = SceneB),
         )
 
         assertThat(state.isTransitioning()).isTrue()
@@ -137,20 +137,20 @@ class SceneTransitionLayoutStateTest {
         sourceFrom: SceneKey? = SceneA,
         sourceTo: SceneKey? = SceneB,
         targetFrom: SceneKey? = SceneC,
-        targetTo: SceneKey = SceneD
+        targetTo: SceneKey = SceneD,
     ): Pair<MutableSceneTransitionLayoutStateImpl, MutableSceneTransitionLayoutStateImpl> {
         val parentState = MutableSceneTransitionLayoutState(parentInitialScene)
         val link =
             listOf(
                 StateLink(
                     parentState,
-                    listOf(StateLink.TransitionLink(sourceFrom, sourceTo, targetFrom, targetTo))
+                    listOf(StateLink.TransitionLink(sourceFrom, sourceTo, targetFrom, targetTo)),
                 )
             )
         val childState = MutableSceneTransitionLayoutState(childInitialScene, stateLinks = link)
         return Pair(
             parentState as MutableSceneTransitionLayoutStateImpl,
-            childState as MutableSceneTransitionLayoutStateImpl
+            childState as MutableSceneTransitionLayoutStateImpl,
         )
     }
 
@@ -179,7 +179,7 @@ class SceneTransitionLayoutStateTest {
             listOf(
                 StateLink(
                     parentParentState,
-                    listOf(StateLink.TransitionLink(SceneC, SceneD, SceneB, SceneC))
+                    listOf(StateLink.TransitionLink(SceneC, SceneD, SceneB, SceneC)),
                 )
             )
         val parentState =
@@ -189,7 +189,7 @@ class SceneTransitionLayoutStateTest {
             listOf(
                 StateLink(
                     parentState,
-                    listOf(StateLink.TransitionLink(SceneA, SceneB, SceneC, SceneD))
+                    listOf(StateLink.TransitionLink(SceneA, SceneB, SceneC, SceneD)),
                 )
             )
         val childState =
@@ -300,11 +300,7 @@ class SceneTransitionLayoutStateTest {
 
         // Specific transition from A to B.
         assertThat(
-                state.setTargetScene(
-                    SceneB,
-                    animationScope = this,
-                    transitionKey = transitionkey,
-                )
+                state.setTargetScene(SceneB, animationScope = this, transitionKey = transitionkey)
             )
             .isNotNull()
         assertThat(state.currentTransition?.transformationSpec?.transformations).hasSize(2)
@@ -315,7 +311,7 @@ class SceneTransitionLayoutStateTest {
         val state = MutableSceneTransitionLayoutStateImpl(SceneA, SceneTransitions.Empty)
         state.startTransitionImmediately(
             animationScope = backgroundScope,
-            transition(from = SceneA, to = SceneB, current = { SceneA }, progress = { 0.2f })
+            transition(from = SceneA, to = SceneB, current = { SceneA }, progress = { 0.2f }),
         )
         assertThat(state.isTransitioning()).isTrue()
 
@@ -334,7 +330,7 @@ class SceneTransitionLayoutStateTest {
         val state = MutableSceneTransitionLayoutStateImpl(SceneA, SceneTransitions.Empty)
         state.startTransitionImmediately(
             animationScope = backgroundScope,
-            transition(from = SceneA, to = SceneB, progress = { 0.8f })
+            transition(from = SceneA, to = SceneB, progress = { 0.8f }),
         )
         assertThat(state.isTransitioning()).isTrue()
 
@@ -381,8 +377,8 @@ class SceneTransitionLayoutStateTest {
                 from = SceneA,
                 to = SceneB,
                 current = { currentScene },
-                progress = { progress }
-            )
+                progress = { progress },
+            ),
         )
         assertThat(state.isTransitioning()).isTrue()
 
@@ -445,11 +441,7 @@ class SceneTransitionLayoutStateTest {
         progress: () -> Float,
         sceneTransitions: SceneTransitions,
     ): MutableSceneTransitionLayoutStateImpl {
-        val state =
-            MutableSceneTransitionLayoutStateImpl(
-                SceneA,
-                sceneTransitions,
-            )
+        val state = MutableSceneTransitionLayoutStateImpl(SceneA, sceneTransitions)
         state.startTransitionImmediately(
             animationScope = backgroundScope,
             transition(
@@ -457,7 +449,7 @@ class SceneTransitionLayoutStateTest {
                 to = SceneB,
                 progress = progress,
                 orientation = Orientation.Vertical,
-            )
+            ),
         )
         assertThat(state.isTransitioning()).isTrue()
         return state
@@ -472,7 +464,7 @@ class SceneTransitionLayoutStateTest {
                 sceneTransitions =
                     transitions {
                         overscroll(SceneB, Orientation.Vertical) { fade(TestElements.Foo) }
-                    }
+                    },
             )
         val transition = assertThat(state.transitionState).isSceneTransition()
         assertThat(transition).hasNoOverscrollSpec()
@@ -503,7 +495,7 @@ class SceneTransitionLayoutStateTest {
                 sceneTransitions =
                     transitions {
                         overscroll(SceneA, Orientation.Vertical) { fade(TestElements.Foo) }
-                    }
+                    },
             )
 
         val transition = assertThat(state.transitionState).isSceneTransition()
@@ -532,7 +524,7 @@ class SceneTransitionLayoutStateTest {
         val state =
             startOverscrollableTransistionFromAtoB(
                 progress = { progress.value },
-                sceneTransitions = transitions {}
+                sceneTransitions = transitions {},
             )
 
         val transition = assertThat(state.transitionState).isSceneTransition()
