@@ -3141,14 +3141,6 @@ public class IntentFilter implements Parcelable {
             for (int i = 0; i < N; i++) {
                 mUriRelativeFilterGroups.add(new UriRelativeFilterGroup(source));
             }
-            if (source.dataAvail() > 0) {
-                Log.e(TAG, "Parcel data not fully consumed after completed reading"
-                        + " UriRelativeFilterGroup data");
-            }
-        }
-        if (source.dataAvail() > 0) {
-            Log.e(TAG, "Parcel data not fully consumed when unparceling intent filter",
-                    new Exception());
         }
     }
 
