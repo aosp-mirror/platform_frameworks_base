@@ -30,13 +30,17 @@ import static android.os.VibrationAttributes.USAGE_UNKNOWN;
 
 import android.annotation.Nullable;
 import android.content.res.Resources;
+import android.os.SystemProperties;
 import android.os.VibrationAttributes;
 import android.os.Vibrator;
 import android.os.Vibrator.VibrationIntensity;
 import android.util.IndentingPrintWriter;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.io.PrintWriter;
 import java.util.Arrays;
+import java.util.function.Function;
 
 /**
  * List of device-specific internal vibration configuration loaded from platform config.xml.
@@ -48,6 +52,37 @@ import java.util.Arrays;
  * @hide
  */
 public class VibrationConfig {
+
+    /**
+     * The default gain to be applied between vibration scale levels.
+     *
+     * <p>Scale levels are defined as the difference between the user vibration intensity setting
+     * and the device default config for each usage. The intensity values are defined as one of
+     * Vibrator.VIBRATION_INTENSITY_*.
+     *
+     * <p>A user setting HIGH set on a device with default value LOW will cause the vibration
+     * intensity to be scaled up 2 levels, i.e. scale with a factor of gain^2. A system with 3
+     * intensities LOW, MEDIUM and HIGH has the following 5 scale levels:
+     *
+     * <ol>
+     *     <li>VERY_HIGH: user(HIGH) - device(LOW)
+     *     <li>HIGH: user(HIGH) - device(MEDIUM) / user(MEDIUM) - device(LOW)
+     *     <li>NONE: user == device
+     *     <li>LOW: user(MEDIUM) - device(HIGH) / user(LOW) - device(MEDIUM)
+     *     <li>VERY_LOW: user(LOW) - device(HIGH)
+     * </ol>
+     *
+     * <p>A device will only ever apply 3 out of these 5 levels based on the default intensity
+     * config set for each usage (e.g. config_default[Alarm|Ring|Notification]VibrationIntensity).
+     *
+     * <p>This value must be greater than 1. The {@link #DEFAULT_SCALE_LEVEL_GAIN} will be used if
+     * this property is undefined or invalid.
+     *
+     * @hide
+     */
+    @VisibleForTesting
+    static final String SCALE_LEVEL_GAIN_SYSTEM_PROPERTY =
+            "vendor.vibrator.scale.level.gain";
 
     /**
      * Hardcoded default scale level gain to be applied between each scale level to define their
@@ -69,7 +104,7 @@ public class VibrationConfig {
     private final int mRampDownDurationMs;
     private final int mRequestVibrationParamsTimeoutMs;
     private final int[] mRequestVibrationParamsForUsages;
-
+    private final float mDefaultVibrationScaleLevelGain;
     private final boolean mIgnoreVibrationsOnWirelessCharger;
 
     @VibrationIntensity
@@ -89,8 +124,18 @@ public class VibrationConfig {
 
     /** @hide */
     public VibrationConfig(@Nullable Resources resources) {
-        mDefaultVibrationAmplitude = resources.getInteger(
-                com.android.internal.R.integer.config_defaultVibrationAmplitude);
+        this(resources, SystemProperties::get);
+    }
+
+    /** @hide */
+    @VisibleForTesting
+    public VibrationConfig(@Nullable Resources resources,
+            Function<String, String> systemPropertiesGetter) {
+        mDefaultVibrationAmplitude = loadInteger(resources,
+                com.android.internal.R.integer.config_defaultVibrationAmplitude,
+                DEFAULT_AMPLITUDE);
+        mDefaultVibrationScaleLevelGain = loadFloat(systemPropertiesGetter,
+                SCALE_LEVEL_GAIN_SYSTEM_PROPERTY, DEFAULT_SCALE_LEVEL_GAIN);
         mHapticChannelMaxVibrationAmplitude = loadFloat(resources,
                 com.android.internal.R.dimen.config_hapticChannelMaxVibrationAmplitude);
         mRampDownDurationMs = loadInteger(resources,
@@ -135,6 +180,15 @@ public class VibrationConfig {
         return res != null ? res.getFloat(resId) : 0f;
     }
 
+    private static float loadFloat(Function<String, String> systemPropertiesGetter,
+            String propertyKey, float defaultValue) {
+        try {
+            return Float.parseFloat(systemPropertiesGetter.apply(propertyKey));
+        } catch (Exception e) {
+            return defaultValue;
+        }
+    }
+
     private static int loadInteger(@Nullable Resources res, int resId, int defaultValue) {
         return res != null ? res.getInteger(resId) : defaultValue;
     }
@@ -176,8 +230,10 @@ public class VibrationConfig {
      * for each level.
      */
     public float getDefaultVibrationScaleLevelGain() {
-        // TODO(b/356407380): add device config for this
-        return DEFAULT_SCALE_LEVEL_GAIN;
+        if (mDefaultVibrationScaleLevelGain <= 1) {
+            return DEFAULT_SCALE_LEVEL_GAIN;
+        }
+        return mDefaultVibrationScaleLevelGain;
     }
 
     /**
@@ -270,6 +326,7 @@ public class VibrationConfig {
         return "VibrationConfig{"
                 + "mIgnoreVibrationsOnWirelessCharger=" + mIgnoreVibrationsOnWirelessCharger
                 + ", mDefaultVibrationAmplitude=" + mDefaultVibrationAmplitude
+                + ", mDefaultVibrationScaleLevelGain=" + mDefaultVibrationScaleLevelGain
                 + ", mHapticChannelMaxVibrationAmplitude=" + mHapticChannelMaxVibrationAmplitude
                 + ", mRampStepDurationMs=" + mRampStepDurationMs
                 + ", mRampDownDurationMs=" + mRampDownDurationMs
@@ -296,6 +353,7 @@ public class VibrationConfig {
         pw.increaseIndent();
         pw.println("ignoreVibrationsOnWirelessCharger = " + mIgnoreVibrationsOnWirelessCharger);
         pw.println("defaultVibrationAmplitude = " + mDefaultVibrationAmplitude);
+        pw.println("defaultVibrationScaleLevelGain = " + mDefaultVibrationScaleLevelGain);
         pw.println("hapticChannelMaxAmplitude = " + mHapticChannelMaxVibrationAmplitude);
         pw.println("rampStepDurationMs = " + mRampStepDurationMs);
         pw.println("rampDownDurationMs = " + mRampDownDurationMs);
