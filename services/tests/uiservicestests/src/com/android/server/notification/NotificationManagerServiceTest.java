@@ -1255,7 +1255,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         info.resizeMode = RESIZE_MODE_RESIZEABLE;
         ResolveInfo ri = new ResolveInfo();
         ri.activityInfo = info;
-        when(mPackageManagerClient.resolveActivity(any(), anyInt())).thenReturn(ri);
+        when(mPackageManagerClient.resolveActivityAsUser(any(), anyInt(), anyInt())).thenReturn(ri);
 
         return new Notification.BubbleMetadata.Builder(
                 mActivityIntent,
