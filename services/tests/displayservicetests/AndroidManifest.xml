@@ -39,6 +39,10 @@
                  android:testOnly="true">
         <uses-library android:name="android.test.mock" android:required="true" />
         <uses-library android:name="android.test.runner" />
+        <activity android:name="com.android.server.display.SimpleActivity"
+                  android:exported="true" />
+        <activity android:name="com.android.server.display.SimpleActivity2"
+                  android:exported="true" />
     </application>
 
     <instrumentation

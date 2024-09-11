@@ -30,6 +30,7 @@ android_test {
         "src/**/*.kt",
 
         "test-apps/SuspendTestApp/src/**/*.java",
+        "test-apps/DisplayManagerTestApp/src/**/*.java",
     ],
 
     kotlincflags: [
@@ -134,6 +135,7 @@ android_test {
     },
 
     data: [
+        ":DisplayManagerTestApp",
         ":SimpleServiceTestApp1",
         ":SimpleServiceTestApp2",
         ":SimpleServiceTestApp3",
