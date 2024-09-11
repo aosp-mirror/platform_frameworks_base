@@ -68,6 +68,7 @@ import android.location.LocationManager;
 import android.location.LocationRequest;
 import android.location.LocationResult;
 import android.location.LocationResult.BadLocationException;
+import android.location.flags.Flags;
 import android.location.provider.ProviderProperties;
 import android.location.provider.ProviderRequest;
 import android.location.util.identity.CallerIdentity;
@@ -310,6 +311,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     private String mC2KServerHost;
     private int mC2KServerPort;
     private boolean mSuplEsEnabled = false;
+    private boolean mNiSuplMessageListenerRegistered = false;
 
     private final LocationExtras mLocationExtras = new LocationExtras();
     private final NetworkTimeHelper mNetworkTimeHelper;
@@ -386,6 +388,10 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             if (DEBUG) Log.d(TAG, "SIM MCC/MNC is still not available");
             // Reload gnss config for no SIM case
             mGnssConfiguration.reloadGpsProperties();
+        }
+        if (Flags.enableNiSuplMessageInjectionByCarrierConfig()) {
+            updateNiSuplMessageListenerRegistration(
+                    mGnssConfiguration.isNiSuplMessageInjectionEnabled());
         }
     }
 
@@ -532,28 +538,9 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         intentFilter.addAction(TelephonyManager.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED);
         mContext.registerReceiver(mIntentReceiver, intentFilter, null, mHandler);
 
-        if (mNetworkConnectivityHandler.isNativeAgpsRilSupported()
-                && mGnssConfiguration.isNiSuplMessageInjectionEnabled()) {
-            // Listen to WAP PUSH NI SUPL message.
-            // See User Plane Location Protocol Candidate Version 3.0,
-            // OMA-TS-ULP-V3_0-20110920-C, Section 8.3 OMA Push.
-            intentFilter = new IntentFilter();
-            intentFilter.addAction(Intents.WAP_PUSH_RECEIVED_ACTION);
-            try {
-                intentFilter.addDataType("application/vnd.omaloc-supl-init");
-            } catch (IntentFilter.MalformedMimeTypeException e) {
-                Log.w(TAG, "Malformed SUPL init mime type");
-            }
-            mContext.registerReceiver(mIntentReceiver, intentFilter, null, mHandler);
-
-            // Listen to MT SMS NI SUPL message.
-            // See User Plane Location Protocol Candidate Version 3.0,
-            // OMA-TS-ULP-V3_0-20110920-C, Section 8.4 MT SMS.
-            intentFilter = new IntentFilter();
-            intentFilter.addAction(Intents.DATA_SMS_RECEIVED_ACTION);
-            intentFilter.addDataScheme("sms");
-            intentFilter.addDataAuthority("localhost", "7275");
-            mContext.registerReceiver(mIntentReceiver, intentFilter, null, mHandler);
+        if (!Flags.enableNiSuplMessageInjectionByCarrierConfig()) {
+            updateNiSuplMessageListenerRegistration(
+                    mGnssConfiguration.isNiSuplMessageInjectionEnabled());
         }
 
         mNetworkConnectivityHandler.registerNetworkCallbacks();
@@ -592,6 +579,20 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                 case TelephonyManager.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED:
                     subscriptionOrCarrierConfigChanged();
                     break;
+            }
+        }
+    };
+
+    private BroadcastReceiver mNiSuplIntentReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (DEBUG) Log.d(TAG, "receive broadcast intent, action: " + action);
+            if (action == null) {
+                return;
+            }
+
+            switch (action) {
                 case Intents.WAP_PUSH_RECEIVED_ACTION:
                 case Intents.DATA_SMS_RECEIVED_ACTION:
                     injectSuplInit(intent);
@@ -1442,6 +1443,46 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         mGnssMetrics.logSvStatus(gnssStatus);
     }
 
+    private void updateNiSuplMessageListenerRegistration(boolean shouldRegister) {
+        if (!mNetworkConnectivityHandler.isNativeAgpsRilSupported()) {
+            return;
+        }
+        if (mNiSuplMessageListenerRegistered == shouldRegister) {
+            return;
+        }
+
+        // WAP PUSH NI SUPL message intent filter.
+        // See User Plane Location Protocol Candidate Version 3.0,
+        // OMA-TS-ULP-V3_0-20110920-C, Section 8.3 OMA Push.
+        IntentFilter wapPushNiIntentFilter = new IntentFilter();
+        wapPushNiIntentFilter.addAction(Intents.WAP_PUSH_RECEIVED_ACTION);
+        try {
+            wapPushNiIntentFilter
+                .addDataType("application/vnd.omaloc-supl-init");
+        } catch (IntentFilter.MalformedMimeTypeException e) {
+            Log.w(TAG, "Malformed SUPL init mime type");
+        }
+
+        // MT SMS NI SUPL message intent filter.
+        // See User Plane Location Protocol Candidate Version 3.0,
+        // OMA-TS-ULP-V3_0-20110920-C, Section 8.4 MT SMS.
+        IntentFilter mtSmsNiIntentFilter = new IntentFilter();
+        mtSmsNiIntentFilter.addAction(Intents.DATA_SMS_RECEIVED_ACTION);
+        mtSmsNiIntentFilter.addDataScheme("sms");
+        mtSmsNiIntentFilter.addDataAuthority("localhost", "7275");
+
+        if (shouldRegister) {
+            mContext.registerReceiver(mNiSuplIntentReceiver,
+                    wapPushNiIntentFilter, null, mHandler);
+            mContext.registerReceiver(mNiSuplIntentReceiver,
+                    mtSmsNiIntentFilter, null, mHandler);
+            mNiSuplMessageListenerRegistered = true;
+        } else {
+            mContext.unregisterReceiver(mNiSuplIntentReceiver);
+            mNiSuplMessageListenerRegistered = false;
+        }
+    }
+
     private void restartLocationRequest() {
         if (DEBUG) Log.d(TAG, "restartLocationRequest");
         setStarted(false);
@@ -1631,6 +1672,10 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         if (dumpAll) {
             mNetworkTimeHelper.dump(pw);
             pw.println("mSupportsPsds=" + mSupportsPsds);
+            if (Flags.enableNiSuplMessageInjectionByCarrierConfig()) {
+                pw.println("mNiSuplMessageListenerRegistered="
+                        + mNiSuplMessageListenerRegistered);
+            }
             pw.println(
                     "PsdsServerConfigured=" + mGnssConfiguration.isLongTermPsdsServerConfigured());
             pw.println("native internal state: ");
