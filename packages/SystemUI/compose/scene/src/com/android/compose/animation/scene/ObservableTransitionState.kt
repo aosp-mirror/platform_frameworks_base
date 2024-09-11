@@ -206,6 +206,17 @@ sealed interface ObservableTransitionState {
             (from == null || this.fromContent == from) &&
             (to == null || this.toContent == to)
     }
+
+    /** Whether we are transitioning from [content] to [other], or from [other] to [content]. */
+    fun isTransitioningBetween(content: ContentKey, other: ContentKey): Boolean {
+        return isTransitioning(from = content, to = other) ||
+            isTransitioning(from = other, to = content)
+    }
+
+    /** Whether we are transitioning from or to [content]. */
+    fun isTransitioningFromOrTo(content: ContentKey): Boolean {
+        return isTransitioning(from = content) || isTransitioning(to = content)
+    }
 }
 
 /**
