@@ -2276,6 +2276,14 @@ public class InputManagerService extends IInputManager.Stub
 
     // Native callback.
     @SuppressWarnings("unused")
+    private void notifyTouchpadGestureInfo(int type, int deviceId) {
+        if (mTouchpadDebugViewController != null) {
+            mTouchpadDebugViewController.updateTouchpadGestureInfo(type, deviceId);
+        }
+    }
+
+    // Native callback.
+    @SuppressWarnings("unused")
     private void notifySwitch(long whenNanos, int switchValues, int switchMask) {
         if (DEBUG) {
             Slog.d(TAG, "notifySwitch: values=" + Integer.toHexString(switchValues)
