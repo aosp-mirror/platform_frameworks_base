@@ -41,7 +41,6 @@ import androidx.concurrent.futures.CallbackToFutureAdapter;
 import androidx.exifinterface.media.ExifInterface;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.flags.FeatureFlags;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
@@ -94,12 +93,10 @@ public class ImageExporter {
     private final ContentResolver mResolver;
     private CompressFormat mCompressFormat = CompressFormat.PNG;
     private int mQuality = 100;
-    private final FeatureFlags mFlags;
 
     @Inject
-    public ImageExporter(ContentResolver resolver, FeatureFlags flags) {
+    public ImageExporter(ContentResolver resolver) {
         mResolver = resolver;
-        mFlags = flags;
     }
 
     /**
@@ -161,7 +158,7 @@ public class ImageExporter {
         ZonedDateTime captureTime = ZonedDateTime.now(ZoneId.systemDefault());
         return export(executor,
                 new Task(mResolver, requestId, bitmap, captureTime, mCompressFormat,
-                        mQuality, /* publish */ true, owner, mFlags,
+                        mQuality, /* publish */ true, owner,
                         createFilename(captureTime, mCompressFormat, displayId)));
     }
 
@@ -184,7 +181,7 @@ public class ImageExporter {
                         bitmap,
                         ZonedDateTime.now(ZoneId.systemDefault()),
                         format,
-                        mQuality, /* publish */ true, owner, mFlags,
+                        mQuality, /* publish */ true, owner,
                         createSystemFileDisplayName(fileName, format),
                         true /* allowOverwrite */));
     }
@@ -199,7 +196,7 @@ public class ImageExporter {
     public ListenableFuture<Result> export(Executor executor, UUID requestId, Bitmap bitmap,
             ZonedDateTime captureTime, UserHandle owner, int displayId) {
         return export(executor, new Task(mResolver, requestId, bitmap, captureTime, mCompressFormat,
-                mQuality, /* publish */ true, owner, mFlags,
+                mQuality, /* publish */ true, owner,
                 createFilename(captureTime, mCompressFormat, displayId)));
     }
 
@@ -213,7 +210,7 @@ public class ImageExporter {
     ListenableFuture<Result> export(Executor executor, UUID requestId, Bitmap bitmap,
             ZonedDateTime captureTime, UserHandle owner, String fileName) {
         return export(executor, new Task(mResolver, requestId, bitmap, captureTime, mCompressFormat,
-                mQuality, /* publish */ true, owner, mFlags,
+                mQuality, /* publish */ true, owner,
                 createSystemFileDisplayName(fileName, mCompressFormat)));
     }
 
@@ -275,7 +272,6 @@ public class ImageExporter {
         private final UserHandle mOwner;
         private final String mFileName;
         private final boolean mPublish;
-        private final FeatureFlags mFlags;
 
         /**
          * This variable specifies the behavior when a file to be exported has a same name and
@@ -288,14 +284,14 @@ public class ImageExporter {
 
         Task(ContentResolver resolver, UUID requestId, Bitmap bitmap, ZonedDateTime captureTime,
                 CompressFormat format, int quality, boolean publish, UserHandle owner,
-                FeatureFlags flags, String fileName) {
-            this(resolver, requestId, bitmap, captureTime, format, quality, publish, owner, flags,
+                String fileName) {
+            this(resolver, requestId, bitmap, captureTime, format, quality, publish, owner,
                     fileName, false /* allowOverwrite */);
         }
 
         Task(ContentResolver resolver, UUID requestId, Bitmap bitmap, ZonedDateTime captureTime,
                 CompressFormat format, int quality, boolean publish, UserHandle owner,
-                FeatureFlags flags, String fileName, boolean allowOverwrite) {
+                String fileName, boolean allowOverwrite) {
             mResolver = resolver;
             mRequestId = requestId;
             mBitmap = bitmap;
@@ -305,7 +301,6 @@ public class ImageExporter {
             mOwner = owner;
             mFileName = fileName;
             mPublish = publish;
-            mFlags = flags;
             mAllowOverwrite = allowOverwrite;
         }
 
@@ -320,7 +315,7 @@ public class ImageExporter {
                     start = Instant.now();
                 }
 
-                uri = createEntry(mResolver, mFormat, mCaptureTime, mFileName, mOwner, mFlags,
+                uri = createEntry(mResolver, mFormat, mCaptureTime, mFileName, mOwner,
                         mAllowOverwrite);
                 throwIfInterrupted();
 
@@ -365,7 +360,7 @@ public class ImageExporter {
     }
 
     private static Uri createEntry(ContentResolver resolver, CompressFormat format,
-            ZonedDateTime time, String fileName, UserHandle owner, FeatureFlags flags,
+            ZonedDateTime time, String fileName, UserHandle owner,
             boolean allowOverwrite) throws ImageExportException {
         Trace.beginSection("ImageExporter_createEntry");
         try {
