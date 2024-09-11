@@ -18,6 +18,7 @@
 package com.android.systemui.keyguard.domain.interactor
 
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
+import com.android.systemui.bouncer.shared.flag.ComposeBouncerFlags
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
@@ -32,6 +33,7 @@ import com.android.systemui.scene.domain.resolver.NotifShadeSceneFamilyResolver
 import com.android.systemui.scene.domain.resolver.QuickSettingsSceneFamilyResolver
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.util.kotlin.Utils.Companion.sampleFilter
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
@@ -44,6 +46,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNot
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.stateIn
@@ -58,12 +61,14 @@ constructor(
     transitionInteractor: KeyguardTransitionInteractor,
     val dismissInteractor: KeyguardDismissInteractor,
     @Application private val applicationScope: CoroutineScope,
-    sceneInteractor: SceneInteractor,
-    deviceEntryInteractor: DeviceEntryInteractor,
-    quickSettingsSceneFamilyResolver: QuickSettingsSceneFamilyResolver,
-    notifShadeSceneFamilyResolver: NotifShadeSceneFamilyResolver,
+    sceneInteractor: dagger.Lazy<SceneInteractor>,
+    deviceEntryInteractor: dagger.Lazy<DeviceEntryInteractor>,
+    quickSettingsSceneFamilyResolver: dagger.Lazy<QuickSettingsSceneFamilyResolver>,
+    notifShadeSceneFamilyResolver: dagger.Lazy<NotifShadeSceneFamilyResolver>,
     powerInteractor: PowerInteractor,
     alternateBouncerInteractor: AlternateBouncerInteractor,
+    keyguardInteractor: dagger.Lazy<KeyguardInteractor>,
+    shadeInteractor: dagger.Lazy<ShadeInteractor>,
 ) {
     val dismissAction: Flow<DismissAction> = repository.dismissAction
 
@@ -98,15 +103,31 @@ constructor(
      * device is unlocked. Else, false.
      */
     private val isOnShadeWhileUnlocked: Flow<Boolean> =
-        combine(
-                sceneInteractor.currentScene,
-                deviceEntryInteractor.isUnlocked,
-            ) { scene, isUnlocked ->
-                isUnlocked &&
-                    (quickSettingsSceneFamilyResolver.includesScene(scene) ||
-                        notifShadeSceneFamilyResolver.includesScene(scene))
+        if (SceneContainerFlag.isEnabled) {
+            combine(
+                    sceneInteractor.get().currentScene,
+                    deviceEntryInteractor.get().isUnlocked,
+                ) { scene, isUnlocked ->
+                    isUnlocked &&
+                        (quickSettingsSceneFamilyResolver.get().includesScene(scene) ||
+                            notifShadeSceneFamilyResolver.get().includesScene(scene))
+                }
+                .distinctUntilChanged()
+        } else if (ComposeBouncerFlags.isOnlyComposeBouncerEnabled()) {
+            shadeInteractor.get().isAnyExpanded.sample(
+                keyguardInteractor.get().isKeyguardDismissible
+            ) { isAnyExpanded, isKeyguardDismissible ->
+                isAnyExpanded && isKeyguardDismissible
             }
-            .distinctUntilChanged()
+        } else {
+            flow {
+                error(
+                    "This should not be used when both SceneContainerFlag " +
+                        "and ComposeBouncerFlag are disabled"
+                )
+            }
+        }
+
     val executeDismissAction: Flow<() -> KeyguardDone> =
         merge(
                 finishedTransitionToGone,

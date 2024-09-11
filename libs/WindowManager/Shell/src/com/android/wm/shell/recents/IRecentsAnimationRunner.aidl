@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-package android.view;
+package com.android.wm.shell.recents;
 
 import android.app.ActivityManager;
 import android.graphics.Rect;
 import android.view.RemoteAnimationTarget;
-import android.view.IRecentsAnimationController;
 import android.window.TaskSnapshot;
 import android.os.Bundle;
+
+import com.android.wm.shell.recents.IRecentsAnimationController;
 
 /**
  * Interface that is used to callback from window manager to the process that runs a recents
@@ -55,7 +56,6 @@ oneway interface IRecentsAnimationRunner {
      * @param minimizedHomeBounds Specifies the bounds of the minimized home app, will be
      *                            {@code null} if the device is not currently in split screen
      */
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void onAnimationStart(in IRecentsAnimationController controller,
             in RemoteAnimationTarget[] apps, in RemoteAnimationTarget[] wallpapers,
             in Rect homeContentInsets, in Rect minimizedHomeBounds, in Bundle extras) = 2;

@@ -23,6 +23,7 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
 import android.os.IInterface
+import android.text.TextUtils
 import android.util.Log
 import com.android.settingslib.bluetooth.BluetoothUtils
 import com.android.settingslib.bluetooth.CachedBluetoothDevice
@@ -84,6 +85,10 @@ class DeviceSettingServiceConnection(
                 }
                 setAction(intentAction)
             }
+
+        fun isValid(): Boolean {
+            return !TextUtils.isEmpty(packageName) && !TextUtils.isEmpty(intentAction)
+        }
     }
 
     private var isServiceEnabled =
@@ -96,7 +101,8 @@ class DeviceSettingServiceConnection(
                     } else if (allStatus.all { it is ServiceConnectionStatus.Connected }) {
                         allStatus
                             .filterIsInstance<
-                                ServiceConnectionStatus.Connected<IDeviceSettingsProviderService>
+                                ServiceConnectionStatus.Connected<
+                                        IDeviceSettingsProviderService>
                             >()
                             .all { it.service.serviceStatus?.enabled == true }
                     } else {
@@ -215,6 +221,7 @@ class DeviceSettingServiceConnection(
                     )
                 }
             }
+            ?.filter { it.isValid() }
             ?.distinct()
             ?.associateBy(
                 { it },

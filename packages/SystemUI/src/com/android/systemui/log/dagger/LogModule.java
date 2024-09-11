@@ -382,6 +382,16 @@ public class LogModule {
         return factory.create("MediaLog", 20);
     }
 
+    /**
+     * Provides a buffer for media device changes
+     */
+    @Provides
+    @SysUISingleton
+    @MediaDeviceLog
+    public static LogBuffer providesMediaDeviceLogBuffer(LogBufferFactory factory) {
+        return factory.create("MediaDeviceLog", 50);
+    }
+
     /** Allows logging buffers to be tweaked via adb on debug builds but not on prod builds. */
     @Provides
     @SysUISingleton

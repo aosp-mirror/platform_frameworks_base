@@ -142,6 +142,10 @@
       "host": true
     },
     {
+      "name": "RavenwoodCoreTest",
+      "host": true
+    },
+    {
       "name": "RavenwoodMinimumTest",
       "host": true
     },

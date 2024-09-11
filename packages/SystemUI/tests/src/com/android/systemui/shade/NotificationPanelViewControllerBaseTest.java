@@ -431,7 +431,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mFakeKeyguardRepository,
                 mKeyguardTransitionInteractor,
                 mPowerInteractor,
-                mShadeRepository,
                 new FakeUserSetupRepository(),
                 mock(UserSwitcherInteractor.class),
                 new ShadeInteractorLegacyImpl(
@@ -447,8 +446,8 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                                 () -> mLargeScreenHeaderHelper
                         ),
                         mShadeRepository
-                )
-        );
+                ),
+                mKosmos.getShadeModeInteractor());
         SystemClock systemClock = new FakeSystemClock();
         mStatusBarStateController = new StatusBarStateControllerImpl(
                 mUiEventLogger,

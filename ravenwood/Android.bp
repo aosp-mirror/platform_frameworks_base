@@ -94,6 +94,9 @@ java_library {
     libs: [
         "ravenwood-runtime-common-ravenwood",
     ],
+    static_libs: [
+        "framework-annotations-lib", // should it be "libs" instead?
+    ],
     visibility: ["//visibility:private"],
 }
 
@@ -126,9 +129,9 @@ java_library {
     ],
     libs: [
         "framework-minus-apex.ravenwood",
-        "ravenwood-junit",
         "ravenwood-helper-libcore-runtime",
     ],
+    sdk_version: "core_current",
     visibility: ["//visibility:private"],
 }
 
@@ -162,6 +165,8 @@ java_library {
         "services.core.ravenwood",
         "junit",
         "framework-annotations-lib",
+        "ravenwood-helper-framework-runtime",
+        "ravenwood-helper-libcore-runtime",
     ],
     sdk_version: "core_current",
     visibility: ["//frameworks/base"],

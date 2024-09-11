@@ -20,6 +20,7 @@ import android.os.UserHandle
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.qs.instanceIdSequenceFake
 import com.android.systemui.qs.pipeline.shared.TileSpec
+import com.android.systemui.qs.shared.model.TileCategory
 import com.android.systemui.qs.tiles.base.viewmodel.QSTileViewModelFactory
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfig
 import com.android.systemui.qs.tiles.viewmodel.QSTileState
@@ -47,6 +48,7 @@ val Kosmos.customTileViewModelFactory: QSTileViewModelFactory.Component by
                         tileSpec,
                         QSTileUIConfig.Empty,
                         instanceIdSequenceFake.newInstanceId(),
+                        category = TileCategory.PROVIDED_BY_APP,
                     )
                 object : QSTileViewModel {
                     override val state: StateFlow<QSTileState?> =

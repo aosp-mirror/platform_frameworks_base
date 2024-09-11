@@ -18,6 +18,7 @@ package android.platform.test.ravenwood;
 
 import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_EMPTY_RESOURCES_APK;
 import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_RESOURCE_APK;
+import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_VERBOSE_LOGGING;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -26,6 +27,7 @@ import android.app.ActivityManager;
 import android.app.Instrumentation;
 import android.app.ResourcesManager;
 import android.content.res.Resources;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.HandlerThread;
@@ -36,6 +38,8 @@ import android.view.DisplayAdjustments;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.ravenwood.common.RavenwoodRuntimeException;
+import com.android.ravenwood.common.SneakyThrow;
 import com.android.server.LocalServices;
 
 import org.junit.runner.Description;
@@ -52,14 +56,25 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
-public class RavenwoodRuleImpl {
+/**
+ * Responsible for initializing and de-initializing the environment, according to a
+ * {@link RavenwoodConfig}.
+ */
+public class RavenwoodRuntimeEnvironmentController {
+    private static final String TAG = "RavenwoodRuntimeEnvironmentController";
+
+    private RavenwoodRuntimeEnvironmentController() {
+    }
+
     private static final String MAIN_THREAD_NAME = "RavenwoodMain";
 
     /**
      * When enabled, attempt to dump all thread stacks just before we hit the
      * overall Tradefed timeout, to aid in debugging deadlocks.
      */
-    private static final boolean ENABLE_TIMEOUT_STACKS = false;
+    private static final boolean ENABLE_TIMEOUT_STACKS =
+            "1".equals(System.getenv("RAVENWOOD_ENABLE_TIMEOUT_STACKS"));
+
     private static final int TIMEOUT_MILLIS = 9_000;
 
     private static final ScheduledExecutorService sTimeoutExecutor =
@@ -67,10 +82,13 @@ public class RavenwoodRuleImpl {
 
     private static ScheduledFuture<?> sPendingTimeout;
 
+    private static long sOriginalIdentityToken = -1;
+
     /**
      * When enabled, attempt to detect uncaught exceptions from background threads.
      */
-    private static final boolean ENABLE_UNCAUGHT_EXCEPTION_DETECTION = false;
+    private static final boolean ENABLE_UNCAUGHT_EXCEPTION_DETECTION =
+            "1".equals(System.getenv("RAVENWOOD_ENABLE_UNCAUGHT_EXCEPTION_DETECTION"));
 
     /**
      * When set, an unhandled exception was discovered (typically on a background thread), and we
@@ -85,23 +103,59 @@ public class RavenwoodRuleImpl {
                 sPendingUncaughtException.compareAndSet(null, throwable);
             };
 
-    public static void init(RavenwoodRule rule) throws IOException {
+    // TODO: expose packCallingIdentity function in libbinder and use it directly
+    // See: packCallingIdentity in frameworks/native/libs/binder/IPCThreadState.cpp
+    private static long packBinderIdentityToken(
+            boolean hasExplicitIdentity, int callingUid, int callingPid) {
+        long res = ((long) callingUid << 32) | callingPid;
+        if (hasExplicitIdentity) {
+            res |= (0x1 << 30);
+        } else {
+            res &= ~(0x1 << 30);
+        }
+        return res;
+    }
+
+    private static RavenwoodConfig sConfig;
+
+    /**
+     * Initialize the environment.
+     */
+    public static void init(RavenwoodConfig config) throws IOException {
+        if (RAVENWOOD_VERBOSE_LOGGING) {
+            Log.i(TAG, "init() called here", new RuntimeException("STACKTRACE"));
+        }
+        try {
+            initInner(config);
+        } catch (Exception th) {
+            Log.e(TAG, "init() failed", th);
+            reset();
+            SneakyThrow.sneakyThrow(th);
+        }
+    }
+
+    private static void initInner(RavenwoodConfig config) throws IOException {
+        if (sConfig != null) {
+            throw new RavenwoodRuntimeException("Internal error: init() called without reset()");
+        }
+        sConfig = config;
         if (ENABLE_UNCAUGHT_EXCEPTION_DETECTION) {
             maybeThrowPendingUncaughtException(false);
             Thread.setDefaultUncaughtExceptionHandler(sUncaughtExceptionHandler);
         }
 
-        android.os.Process.init$ravenwood(rule.mUid, rule.mPid);
-        android.os.Binder.init$ravenwood();
-        setSystemProperties(rule.mSystemProperties);
+        android.os.Process.init$ravenwood(config.mUid, config.mPid);
+        sOriginalIdentityToken = Binder.clearCallingIdentity();
+        Binder.restoreCallingIdentity(packBinderIdentityToken(false, config.mUid, config.mPid));
+        setSystemProperties(config.mSystemProperties);
 
         ServiceManager.init$ravenwood();
         LocalServices.removeAllServicesForTest();
 
-        ActivityManager.init$ravenwood(rule.mCurrentUser);
+        ActivityManager.init$ravenwood(config.mCurrentUser);
 
         final HandlerThread main;
-        if (rule.mProvideMainThread) {
+        if (config.mProvideMainThread) {
             main = new HandlerThread(MAIN_THREAD_NAME);
             main.start();
             Looper.setMainLooperForTest(main.getLooper());
@@ -125,21 +179,22 @@ public class RavenwoodRuleImpl {
                     emptyPaths, emptyPaths, emptyPaths,
                     emptyPaths, null, null,
                     new DisplayAdjustments().getCompatibilityInfo(),
-                    RavenwoodRuleImpl.class.getClassLoader(), null);
+                    RavenwoodRuntimeEnvironmentController.class.getClassLoader(), null);
 
             assertNotNull(ret);
             return ret;
         };
 
-        rule.mContext = new RavenwoodContext(rule.mPackageName, main, resourcesSupplier);
-        rule.mInstrumentation = new Instrumentation();
-        rule.mInstrumentation.basicInit(rule.mContext);
-        InstrumentationRegistry.registerInstance(rule.mInstrumentation, Bundle.EMPTY);
+        config.mContext = new RavenwoodContext(config.mPackageName, main, resourcesSupplier);
+        config.mInstrumentation = new Instrumentation();
+        config.mInstrumentation.basicInit(config.mContext);
+        InstrumentationRegistry.registerInstance(config.mInstrumentation, Bundle.EMPTY);
 
-        RavenwoodSystemServer.init(rule);
+        RavenwoodSystemServer.init(config);
 
         if (ENABLE_TIMEOUT_STACKS) {
-            sPendingTimeout = sTimeoutExecutor.schedule(RavenwoodRuleImpl::dumpStacks,
+            sPendingTimeout = sTimeoutExecutor.schedule(
+                    RavenwoodRuntimeEnvironmentController::dumpStacks,
                     TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
         }
 
@@ -148,21 +203,33 @@ public class RavenwoodRuleImpl {
         Objects.requireNonNull(Build.VERSION.SDK);
     }
 
-    public static void reset(RavenwoodRule rule) {
+    /**
+     * De-initialize.
+     */
+    public static void reset() {
+        if (RAVENWOOD_VERBOSE_LOGGING) {
+            Log.i(TAG, "reset() called here", new RuntimeException("STACKTRACE"));
+        }
+        if (sConfig == null) {
+            throw new RavenwoodRuntimeException("Internal error: reset() already called");
+        }
+        var config = sConfig;
+        sConfig = null;
+
         if (ENABLE_TIMEOUT_STACKS) {
             sPendingTimeout.cancel(false);
         }
 
-        RavenwoodSystemServer.reset(rule);
+        RavenwoodSystemServer.reset(config);
 
         InstrumentationRegistry.registerInstance(null, Bundle.EMPTY);
-        rule.mInstrumentation = null;
-        if (rule.mContext != null) {
-            ((RavenwoodContext) rule.mContext).cleanUp();
+        config.mInstrumentation = null;
+        if (config.mContext != null) {
+            ((RavenwoodContext) config.mContext).cleanUp();
         }
-        rule.mContext = null;
+        config.mContext = null;
 
-        if (rule.mProvideMainThread) {
+        if (config.mProvideMainThread) {
             Looper.getMainLooper().quit();
             Looper.clearMainLooperForTest();
         }
@@ -173,7 +240,7 @@ public class RavenwoodRuleImpl {
         ServiceManager.reset$ravenwood();
 
         setSystemProperties(RavenwoodSystemProperties.DEFAULT_VALUES);
-        android.os.Binder.reset$ravenwood();
+        Binder.restoreCallingIdentity(sOriginalIdentityToken);
         android.os.Process.reset$ravenwood();
 
         ResourcesManager.setInstance(null); // Better structure needed.

@@ -26,6 +26,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.Text
+import com.android.systemui.common.ui.compose.toAnnotatedString
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
@@ -42,6 +43,7 @@ import com.android.systemui.qs.pipeline.data.repository.fakeMinimumTilesReposito
 import com.android.systemui.qs.pipeline.domain.interactor.currentTilesInteractor
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.qsTileFactory
+import com.android.systemui.qs.shared.model.TileCategory
 import com.android.systemui.qs.tiles.impl.alarm.qsAlarmTileConfig
 import com.android.systemui.qs.tiles.impl.battery.qsBatterySaverTileConfig
 import com.android.systemui.qs.tiles.impl.flashlight.qsFlashlightTileConfig
@@ -190,7 +192,7 @@ class EditModeViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
                     .forEach {
                         val data = getEditTileData(it.tileSpec)
 
-                        assertThat(it.label).isEqualTo(data.label)
+                        assertThat(it.label).isEqualTo(data.label.toAnnotatedString(context))
                         assertThat(it.icon).isEqualTo(data.icon)
                         assertThat(it.appName).isNull()
                     }
@@ -224,15 +226,19 @@ class EditModeViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
 
                 // service1
                 val model1 = tiles!!.first { it.tileSpec == TileSpec.create(component1) }
-                assertThat(model1.label).isEqualTo(Text.Loaded(tileService1))
-                assertThat(model1.appName).isEqualTo(Text.Loaded(appName1))
+                assertThat(model1.label)
+                    .isEqualTo(Text.Loaded(tileService1).toAnnotatedString(context))
+                assertThat(model1.appName)
+                    .isEqualTo(Text.Loaded(appName1).toAnnotatedString(context))
                 assertThat(model1.icon)
                     .isEqualTo(Icon.Loaded(drawable1, ContentDescription.Loaded(tileService1)))
 
                 // service2
                 val model2 = tiles!!.first { it.tileSpec == TileSpec.create(component2) }
-                assertThat(model2.label).isEqualTo(Text.Loaded(tileService2))
-                assertThat(model2.appName).isEqualTo(Text.Loaded(appName2))
+                assertThat(model2.label)
+                    .isEqualTo(Text.Loaded(tileService2).toAnnotatedString(context))
+                assertThat(model2.appName)
+                    .isEqualTo(Text.Loaded(appName2).toAnnotatedString(context))
                 assertThat(model2.icon)
                     .isEqualTo(Icon.Loaded(drawable2, ContentDescription.Loaded(tileService2)))
             }
@@ -559,7 +565,8 @@ class EditModeViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
                 tileSpec = this,
                 icon = Icon.Resource(R.drawable.star_on, ContentDescription.Loaded(spec)),
                 label = Text.Loaded(spec),
-                appName = null
+                appName = null,
+                category = TileCategory.UNKNOWN,
             )
         }
 
@@ -570,6 +577,7 @@ class EditModeViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
                     Icon.Resource(uiConfig.iconRes, ContentDescription.Resource(uiConfig.labelRes)),
                 label = Text.Resource(uiConfig.labelRes),
                 appName = null,
+                category = category,
             )
         }
 

@@ -24,9 +24,7 @@ import com.android.systemui.surfaceeffects.ripple.RippleShader
 import com.android.systemui.surfaceeffects.ripple.RippleView
 import kotlin.math.pow
 
-/**
- * An expanding ripple effect for the media tap-to-transfer receiver chip.
- */
+/** An expanding ripple effect for the media tap-to-transfer receiver chip. */
 class ReceiverChipRippleView(context: Context?, attrs: AttributeSet?) : RippleView(context, attrs) {
 
     // Indicates whether the ripple started expanding.
@@ -46,24 +44,34 @@ class ReceiverChipRippleView(context: Context?, attrs: AttributeSet?) : RippleVi
     }
 
     /** Used to animate out the ripple. No-op if the ripple was never started via [startRipple]. */
-    fun collapseRipple(onAnimationEnd: Runnable? = null) {
+    fun collapseRipple(logger: MediaTttReceiverLogger, onAnimationEnd: Runnable? = null) {
         if (!isStarted) {
             return // Ignore if ripple is not started yet.
         }
         duration = DEFAULT_DURATION
         // Reset all listeners to animator.
         animator.removeAllListeners()
-        animator.addListener(object : AnimatorListenerAdapter() {
-            override fun onAnimationEnd(animation: Animator) {
-                onAnimationEnd?.run()
-                isStarted = false
+        animator.addListener(
+            object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator) {
+                    animation?.let {
+                        visibility = GONE
+                        logger.logRippleAnimationEnd(id)
+                    }
+                    onAnimationEnd?.run()
+                    isStarted = false
+                }
             }
-        })
+        )
         animator.reverse()
     }
 
     // Expands the ripple to cover full screen.
-    fun expandToFull(newHeight: Float, onAnimationEnd: Runnable? = null) {
+    fun expandToFull(
+        newHeight: Float,
+        logger: MediaTttReceiverLogger,
+        onAnimationEnd: Runnable? = null
+    ) {
         if (!isStarted) {
             return
         }
@@ -85,13 +93,18 @@ class ReceiverChipRippleView(context: Context?, attrs: AttributeSet?) : RippleVi
             rippleShader.time = now.toFloat()
             invalidate()
         }
-        animator.addListener(object : AnimatorListenerAdapter() {
-            override fun onAnimationEnd(animation: Animator) {
-                animation?.let { visibility = GONE }
-                onAnimationEnd?.run()
-                isStarted = false
+        animator.addListener(
+            object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator) {
+                    animation?.let {
+                        visibility = GONE
+                        logger.logRippleAnimationEnd(id)
+                    }
+                    onAnimationEnd?.run()
+                    isStarted = false
+                }
             }
-        })
+        )
         animator.start()
     }
 

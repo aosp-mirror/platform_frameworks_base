@@ -761,14 +761,22 @@ public final class NotificationChannel implements Parcelable {
         this.mVibrationEnabled = effect != null;
         this.mVibrationEffect = effect;
         if (Flags.notifChannelCropVibrationEffects() && effect != null) {
-            // Try converting to a vibration pattern and trimming that array. If not convertible
-            // to a pattern directly, try trimming the vibration effect if possible and storing
-            // that version instead.
             long[] pattern = effect.computeCreateWaveformOffOnTimingsOrNull();
             if (pattern != null) {
-                setVibrationPattern(pattern);
+                // If this effect has an equivalent pattern, AND the pattern needs to be truncated
+                // due to being too long, we delegate to setVibrationPattern to re-generate the
+                // effect as well. Otherwise, we use the effect (already set above) and converted
+                // pattern directly.
+                if (pattern.length > MAX_VIBRATION_LENGTH) {
+                    setVibrationPattern(pattern);
+                } else {
+                    this.mVibrationPattern = pattern;
+                }
             } else {
+                // If not convertible to a pattern directly, try trimming the vibration effect if
+                // possible and storing that version instead.
                 this.mVibrationEffect = getTrimmedVibrationEffect(mVibrationEffect);
+                this.mVibrationPattern = null;
             }
         } else {
             this.mVibrationPattern =

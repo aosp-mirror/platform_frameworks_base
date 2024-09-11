@@ -554,6 +554,14 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         verify(mWm.mWindowContextListenerController, never()).registerWindowContainerListener(any(),
                 any(), any(), anyInt(), any(), anyBoolean());
 
+        // Even if the given display id is INVALID_DISPLAY, the specified params.token should be
+        // able to map the corresponding display.
+        final int result = mWm.addWindow(
+                session, new TestIWindow(), params, View.VISIBLE, INVALID_DISPLAY,
+                UserHandle.USER_SYSTEM, WindowInsets.Type.defaultVisible(), null, new InsetsState(),
+                new InsetsSourceControl.Array(), new Rect(), new float[1]);
+        assertThat(result).isAtLeast(WindowManagerGlobal.ADD_OKAY);
+
         assertTrue(parentWin.hasChild());
         assertTrue(parentWin.isAttached());
         session.binderDied();

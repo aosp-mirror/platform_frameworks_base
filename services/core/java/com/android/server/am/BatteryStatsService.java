@@ -1122,7 +1122,11 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                     throw new UnsupportedOperationException("Unknown tagId=" + atomTag);
             }
             final byte[] statsProto = bus.getStatsProto();
-
+            try {
+                bus.close();
+            } catch (IOException e) {
+                Slog.w(TAG, "Failure close BatteryUsageStats", e);
+            }
             data.add(FrameworkStatsLog.buildStatsEvent(atomTag, statsProto));
 
             return StatsManager.PULL_SUCCESS;

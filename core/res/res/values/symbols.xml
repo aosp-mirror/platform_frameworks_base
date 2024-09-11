@@ -5601,4 +5601,6 @@
 
   <!-- Fingerprint loe notification string -->
   <java-symbol type="string" name="fingerprint_loe_notification_msg" />
+
+  <java-symbol type="bool" name="config_enableViewGroupScalingFading"/>
 </resources>

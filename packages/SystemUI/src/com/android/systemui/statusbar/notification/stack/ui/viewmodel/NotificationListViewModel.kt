@@ -32,6 +32,7 @@ import com.android.systemui.statusbar.notification.stack.domain.interactor.Notif
 import com.android.systemui.statusbar.policy.domain.interactor.UserSetupInteractor
 import com.android.systemui.statusbar.policy.domain.interactor.ZenModeInteractor
 import com.android.systemui.util.kotlin.FlowDumperImpl
+import com.android.systemui.util.kotlin.combine
 import com.android.systemui.util.kotlin.sample
 import com.android.systemui.util.ui.AnimatableEvent
 import com.android.systemui.util.ui.AnimatedValue
@@ -120,6 +121,7 @@ constructor(
      * This essentially corresponds to having the view set to INVISIBLE.
      */
     val shouldHideFooterView: Flow<Boolean> by lazy {
+        SceneContainerFlag.assertInLegacyMode()
         if (FooterViewRefactor.isUnexpectedlyInLegacyMode()) {
             flowOf(false)
         } else {
@@ -143,6 +145,7 @@ constructor(
      * be hidden by another condition (see [shouldHideFooterView] above).
      */
     val shouldIncludeFooterView: Flow<AnimatedValue<Boolean>> by lazy {
+        SceneContainerFlag.assertInLegacyMode()
         if (FooterViewRefactor.isUnexpectedlyInLegacyMode()) {
             flowOf(AnimatedValue.NotAnimating(false))
         } else {
@@ -203,6 +206,76 @@ constructor(
                 }
                 .toAnimatedValueFlow()
                 .dumpWhileCollecting("shouldIncludeFooterView")
+                .flowOn(bgDispatcher)
+        }
+    }
+
+    // This flow replaces shouldHideFooterView+shouldIncludeFooterView in flexiglass.
+    val shouldShowFooterView: Flow<AnimatedValue<Boolean>> by lazy {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) {
+            flowOf(AnimatedValue.NotAnimating(false))
+        } else {
+            combine(
+                    activeNotificationsInteractor.areAnyNotificationsPresent,
+                    userSetupInteractor.isUserSetUp,
+                    notificationStackInteractor.isShowingOnLockscreen,
+                    shadeInteractor.isQsFullscreen,
+                    remoteInputInteractor.isRemoteInputActive,
+                    shadeInteractor.shadeExpansion.map { it < 0.5f }.distinctUntilChanged(),
+                ) {
+                    hasNotifications,
+                    isUserSetUp,
+                    isShowingOnLockscreen,
+                    qsFullScreen,
+                    isRemoteInputActive,
+                    shadeLessThanHalfwayExpanded ->
+                    when {
+                        !hasNotifications -> VisibilityChange.DISAPPEAR_WITH_ANIMATION
+                        // Hide the footer until the user setup is complete, to prevent access
+                        // to settings (b/193149550).
+                        !isUserSetUp -> VisibilityChange.DISAPPEAR_WITH_ANIMATION
+                        // Do not show the footer if the lockscreen is visible (incl. AOD),
+                        // except if the shade is opened on top. See also b/219680200.
+                        // Do not animate, as that makes the footer appear briefly when
+                        // transitioning between the shade and keyguard.
+                        isShowingOnLockscreen -> VisibilityChange.DISAPPEAR_WITHOUT_ANIMATION
+                        // Do not show the footer if quick settings are fully expanded (except
+                        // for the foldable split shade view). See b/201427195 && b/222699879.
+                        qsFullScreen -> VisibilityChange.DISAPPEAR_WITH_ANIMATION
+                        // Hide the footer if remote input is active (i.e. user is replying to a
+                        // notification). See b/75984847.
+                        isRemoteInputActive -> VisibilityChange.DISAPPEAR_WITH_ANIMATION
+                        // If the shade is not expanded enough, the footer shouldn't be visible.
+                        shadeLessThanHalfwayExpanded -> VisibilityChange.DISAPPEAR_WITH_ANIMATION
+                        else -> VisibilityChange.APPEAR_WITH_ANIMATION
+                    }
+                }
+                .distinctUntilChanged(
+                    // Equivalent unless visibility changes
+                    areEquivalent = { a: VisibilityChange, b: VisibilityChange ->
+                        a.visible == b.visible
+                    }
+                )
+                // Should we animate the visibility change?
+                .sample(
+                    // TODO(b/322167853): This check is currently duplicated in FooterViewModel,
+                    //  but instead it should be a field in ShadeAnimationInteractor.
+                    combine(
+                            shadeInteractor.isShadeFullyExpanded,
+                            shadeInteractor.isShadeTouchable,
+                            ::Pair
+                        )
+                        .onStart { emit(Pair(false, false)) }
+                ) { visibilityChange, (isShadeFullyExpanded, animationsEnabled) ->
+                    // Animate if the shade is interactive, but NOT on the lockscreen. Having
+                    // animations enabled while on the lockscreen makes the footer appear briefly
+                    // when transitioning between the shade and keyguard.
+                    val shouldAnimate =
+                        isShadeFullyExpanded && animationsEnabled && visibilityChange.canAnimate
+                    AnimatableEvent(visibilityChange.visible, shouldAnimate)
+                }
+                .toAnimatedValueFlow()
+                .dumpWhileCollecting("shouldShowFooterView")
                 .flowOn(bgDispatcher)
         }
     }

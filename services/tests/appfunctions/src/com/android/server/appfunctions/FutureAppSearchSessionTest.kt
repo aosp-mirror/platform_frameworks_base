@@ -16,10 +16,13 @@
 package com.android.server.appfunctions
 
 import android.app.appfunctions.AppFunctionRuntimeMetadata
+import android.app.appfunctions.AppFunctionRuntimeMetadata.APP_FUNCTION_RUNTIME_NAMESPACE
 import android.app.appfunctions.AppFunctionRuntimeMetadata.createAppFunctionRuntimeSchema
 import android.app.appfunctions.AppFunctionRuntimeMetadata.createParentAppFunctionRuntimeSchema
+import android.app.appsearch.AppSearchBatchResult
 import android.app.appsearch.AppSearchManager
 import android.app.appsearch.PutDocumentsRequest
+import android.app.appsearch.RemoveByDocumentIdRequest
 import android.app.appsearch.SearchSpec
 import android.app.appsearch.SetSchemaRequest
 import androidx.test.platform.app.InstrumentationRegistry
@@ -42,7 +45,7 @@ class FutureAppSearchSessionTest {
     fun clearData() {
         val searchContext = AppSearchManager.SearchContext.Builder(TEST_DB).build()
         FutureAppSearchSession(appSearchManager, testExecutor, searchContext).use {
-            val setSchemaRequest = SetSchemaRequest.Builder().build()
+            val setSchemaRequest = SetSchemaRequest.Builder().setForceOverride(true).build()
             it.setSchema(setSchemaRequest)
         }
     }
@@ -55,7 +58,7 @@ class FutureAppSearchSessionTest {
                 SetSchemaRequest.Builder()
                     .addSchemas(
                         createParentAppFunctionRuntimeSchema(),
-                        createAppFunctionRuntimeSchema(TEST_PACKAGE_NAME)
+                        createAppFunctionRuntimeSchema(TEST_PACKAGE_NAME),
                     )
                     .build()
 
@@ -73,7 +76,7 @@ class FutureAppSearchSessionTest {
                 SetSchemaRequest.Builder()
                     .addSchemas(
                         createParentAppFunctionRuntimeSchema(),
-                        createAppFunctionRuntimeSchema(TEST_PACKAGE_NAME)
+                        createAppFunctionRuntimeSchema(TEST_PACKAGE_NAME),
                     )
                     .build()
             val schema = session.setSchema(setSchemaRequest)
@@ -92,6 +95,40 @@ class FutureAppSearchSessionTest {
     }
 
     @Test
+    fun remove() {
+        val searchContext = AppSearchManager.SearchContext.Builder(TEST_DB).build()
+        FutureAppSearchSession(appSearchManager, testExecutor, searchContext).use { session ->
+            val setSchemaRequest =
+                SetSchemaRequest.Builder()
+                    .addSchemas(
+                        createParentAppFunctionRuntimeSchema(),
+                        createAppFunctionRuntimeSchema(TEST_PACKAGE_NAME),
+                    )
+                    .build()
+            val schema = session.setSchema(setSchemaRequest)
+            assertThat(schema.get()).isNotNull()
+            val appFunctionRuntimeMetadata =
+                AppFunctionRuntimeMetadata.Builder(TEST_PACKAGE_NAME, TEST_FUNCTION_ID, "").build()
+            val putDocumentsRequest: PutDocumentsRequest =
+                PutDocumentsRequest.Builder()
+                    .addGenericDocuments(appFunctionRuntimeMetadata)
+                    .build()
+            val putResult = session.put(putDocumentsRequest)
+            assertThat(putResult.get().isSuccess).isTrue()
+            val removeDocumentRequest =
+                RemoveByDocumentIdRequest.Builder(APP_FUNCTION_RUNTIME_NAMESPACE)
+                    .addIds(appFunctionRuntimeMetadata.id)
+                    .build()
+
+            val removeResult: AppSearchBatchResult<String, Void> =
+                session.remove(removeDocumentRequest).get()
+
+            assertThat(removeResult).isNotNull()
+            assertThat(removeResult.isSuccess).isTrue()
+        }
+    }
+
+    @Test
     fun search() {
         val searchContext = AppSearchManager.SearchContext.Builder(TEST_DB).build()
         FutureAppSearchSession(appSearchManager, testExecutor, searchContext).use { session ->
@@ -99,7 +136,7 @@ class FutureAppSearchSessionTest {
                 SetSchemaRequest.Builder()
                     .addSchemas(
                         createParentAppFunctionRuntimeSchema(),
-                        createAppFunctionRuntimeSchema(TEST_PACKAGE_NAME)
+                        createAppFunctionRuntimeSchema(TEST_PACKAGE_NAME),
                     )
                     .build()
             val schema = session.setSchema(setSchemaRequest)
@@ -119,6 +156,39 @@ class FutureAppSearchSessionTest {
                 searchResult.get().nextPage.get().stream().map { it.genericDocument }.toList()
             assertThat(genericDocs).hasSize(1)
             val foundAppFunctionRuntimeMetadata = AppFunctionRuntimeMetadata(genericDocs[0])
+            assertThat(foundAppFunctionRuntimeMetadata.functionId).isEqualTo(TEST_FUNCTION_ID)
+        }
+    }
+
+    @Test
+    fun getByDocumentId() {
+        val searchContext = AppSearchManager.SearchContext.Builder(TEST_DB).build()
+        FutureAppSearchSession(appSearchManager, testExecutor, searchContext).use { session ->
+            val setSchemaRequest =
+                SetSchemaRequest.Builder()
+                    .addSchemas(
+                        createParentAppFunctionRuntimeSchema(),
+                        createAppFunctionRuntimeSchema(TEST_PACKAGE_NAME),
+                    )
+                    .build()
+            val schema = session.setSchema(setSchemaRequest)
+            val appFunctionRuntimeMetadata =
+                AppFunctionRuntimeMetadata.Builder(TEST_PACKAGE_NAME, TEST_FUNCTION_ID, "").build()
+            val putDocumentsRequest: PutDocumentsRequest =
+                PutDocumentsRequest.Builder()
+                    .addGenericDocuments(appFunctionRuntimeMetadata)
+                    .build()
+            val putResult = session.put(putDocumentsRequest)
+
+            val genricDocument =
+                session
+                    .getByDocumentId(
+                        /* documentId= */ "${TEST_PACKAGE_NAME}/${TEST_FUNCTION_ID}",
+                        APP_FUNCTION_RUNTIME_NAMESPACE,
+                    )
+                    .get()
+
+            val foundAppFunctionRuntimeMetadata = AppFunctionRuntimeMetadata(genricDocument)
             assertThat(foundAppFunctionRuntimeMetadata.functionId).isEqualTo(TEST_FUNCTION_ID)
         }
     }

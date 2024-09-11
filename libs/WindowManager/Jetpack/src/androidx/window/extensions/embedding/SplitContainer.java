@@ -86,6 +86,25 @@ class SplitContainer {
         }
     }
 
+    /** This is only used when restoring it from a {@link ParcelableSplitContainerData}. */
+    SplitContainer(@NonNull ParcelableSplitContainerData parcelableData,
+            @NonNull SplitController splitController, @NonNull SplitRule splitRule) {
+        mParcelableData = parcelableData;
+        mPrimaryContainer = splitController.getContainer(parcelableData.getPrimaryContainerToken());
+        mSecondaryContainer = splitController.getContainer(
+                parcelableData.getSecondaryContainerToken());
+        mSplitRule = splitRule;
+        mDefaultSplitAttributes = splitRule.getDefaultSplitAttributes();
+        mCurrentSplitAttributes = mDefaultSplitAttributes;
+
+        if (shouldFinishPrimaryWithSecondary(splitRule)) {
+            mSecondaryContainer.addContainerToFinishOnExit(mPrimaryContainer);
+        }
+        if (shouldFinishSecondaryWithPrimary(splitRule)) {
+            mPrimaryContainer.addContainerToFinishOnExit(mSecondaryContainer);
+        }
+    }
+
     void setPrimaryContainer(@NonNull TaskFragmentContainer primaryContainer) {
         if (!mParcelableData.mIsPrimaryContainerMutable) {
             throw new IllegalStateException("Cannot update primary TaskFragmentContainer");

@@ -19,6 +19,7 @@ package com.android.systemui.accessibility.qs
 import com.android.systemui.Flags
 import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.pipeline.shared.TileSpec
+import com.android.systemui.qs.shared.model.TileCategory
 import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.qs.tiles.ColorCorrectionTile
 import com.android.systemui.qs.tiles.ColorInversionTile
@@ -179,6 +180,7 @@ interface QSAccessibilityModule {
                         labelRes = R.string.quick_settings_color_correction_label,
                     ),
                 instanceId = uiEventLogger.getNewInstanceId(),
+                category = TileCategory.ACCESSIBILITY,
             )
 
         /** Inject ColorCorrectionTile into tileViewModelMap in QSModule */
@@ -210,6 +212,7 @@ interface QSAccessibilityModule {
                         labelRes = R.string.quick_settings_inversion_label,
                     ),
                 instanceId = uiEventLogger.getNewInstanceId(),
+                category = TileCategory.ACCESSIBILITY,
             )
 
         /** Inject ColorInversionTile into tileViewModelMap in QSModule */
@@ -241,6 +244,7 @@ interface QSAccessibilityModule {
                         labelRes = R.string.quick_settings_font_scaling_label,
                     ),
                 instanceId = uiEventLogger.getNewInstanceId(),
+                category = TileCategory.DISPLAY,
             )
 
         /** Inject FontScaling Tile into tileViewModelMap in QSModule */
@@ -272,6 +276,7 @@ interface QSAccessibilityModule {
                         labelRes = com.android.internal.R.string.reduce_bright_colors_feature_name,
                     ),
                 instanceId = uiEventLogger.getNewInstanceId(),
+                category = TileCategory.DISPLAY,
             )
 
         @Provides
@@ -286,6 +291,7 @@ interface QSAccessibilityModule {
                         labelRes = R.string.quick_settings_hearing_devices_label,
                     ),
                 instanceId = uiEventLogger.getNewInstanceId(),
+                category = TileCategory.ACCESSIBILITY,
             )
 
         /**
@@ -322,6 +328,7 @@ interface QSAccessibilityModule {
                         labelRes = R.string.quick_settings_onehanded_label,
                     ),
                 instanceId = uiEventLogger.getNewInstanceId(),
+                category = TileCategory.ACCESSIBILITY,
             )
 
         /** Inject One Handed Mode Tile into tileViewModelMap in QSModule. */
@@ -355,6 +362,7 @@ interface QSAccessibilityModule {
                         labelRes = R.string.quick_settings_night_display_label,
                     ),
                 instanceId = uiEventLogger.getNewInstanceId(),
+                category = TileCategory.DISPLAY,
             )
 
         /**
