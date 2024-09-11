@@ -203,7 +203,7 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"管理员已将该设备开放给个人使用"</string>
     <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"私密空间已移除"</string>
     <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"贵组织不允许在此受管设备上使用私密空间。"</string>
-    <string name="network_logging_notification_title" msgid="554983187553845004">"设备为受管理设备"</string>
+    <string name="network_logging_notification_title" msgid="554983187553845004">"设备受到管理"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"贵单位会管理该设备，且可能会监控网络流量。点按即可了解详情。"</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"应用可以访问您的位置信息"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"详情请与您的 IT 管理员联系"</string>

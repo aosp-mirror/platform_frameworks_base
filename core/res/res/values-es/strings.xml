@@ -1752,7 +1752,7 @@
     <string name="color_correction_feature_name" msgid="7975133554160979214">"Corrección de color"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Modo Una mano"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Atenuación extra"</string>
-    <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Dispositivos auditivos"</string>
+    <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Audífonos"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Al mantener pulsadas las teclas de volumen, se ha activado <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Se han mantenido pulsadas las teclas de volumen. Se ha desactivado <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Suelta las teclas de volumen. Para activar <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, mantén pulsadas las dos teclas de volumen de nuevo durante 3 segundos."</string>
@@ -2383,13 +2383,13 @@
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"No se puede proyectar a la pantalla"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Usa otro cable y vuelve a intentarlo"</string>
     <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"Tu dispositivo está demasiado caliente y no puede proyectar a la pantalla hasta que se enfríe"</string>
-    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
-    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"La función Dual Screen está activada"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Pantalla dual"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"La función Pantalla dual está activada"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> está usando ambas pantallas para mostrar contenido"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"El dispositivo está demasiado caliente"</string>
-    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Dual Screen no está disponible porque el teléfono se está calentando demasiado"</string>
-    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screen no está disponible"</string>
-    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Dual Screen no está disponible porque la función Ahorro de batería está activada. Puedes desactivarla en Ajustes."</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Pantalla dual no está disponible porque el teléfono se está calentando demasiado"</string>
+    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Pantalla dual no está disponible"</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Pantalla dual no está disponible porque la función Ahorro de batería está activada. Puedes desactivarla en Ajustes."</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"Ir a Ajustes"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Desactivar"</string>
     <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g> configurado"</string>

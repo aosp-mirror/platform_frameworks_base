@@ -203,7 +203,7 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Erabilera pertsonalerako utzi du gailua administratzaileak"</string>
     <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"Kendu egin da eremu pribatua"</string>
     <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"Zure erakundeak ez ditu onartzen eremu pribatuak kudeatutako gailu honetan."</string>
-    <string name="network_logging_notification_title" msgid="554983187553845004">"Jabeak kudeatzen du gailua"</string>
+    <string name="network_logging_notification_title" msgid="554983187553845004">"Gailua kudeatuta dago"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Erakundeak kudeatzen du gailua eta baliteke sareko trafikoa gainbegiratzea. Sakatu hau xehetasunak ikusteko."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"Aplikazioek zure kokapena atzi dezakete"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"Informazio gehiago lortzeko, jo IKT saileko administratzailearengana"</string>
@@ -252,7 +252,7 @@
     <string name="shutdown_confirm_question" msgid="796151167261608447">"Itzali egin nahi duzu?"</string>
     <string name="reboot_safemode_title" msgid="5853949122655346734">"Berrabiarazi modu seguruan"</string>
     <string name="reboot_safemode_confirm" msgid="1658357874737219624">"Modu seguruan berrabiarazi nahi duzu? Instalatutako hirugarrenen aplikazioak desgaituko dira. Berriro berrabiarazi ondoren leheneratuko dira."</string>
-    <string name="recent_tasks_title" msgid="8183172372995396653">"Azkenak"</string>
+    <string name="recent_tasks_title" msgid="8183172372995396653">"Azkenaldikoak"</string>
     <string name="no_recent_tasks" msgid="9063946524312275906">"Ez dago azkenaldian erabilitako aplikaziorik."</string>
     <string name="global_actions" product="tablet" msgid="4412132498517933867">"Tabletaren aukerak"</string>
     <string name="global_actions" product="tv" msgid="3871763739487450369">"Android TV gailuaren aukerak"</string>
@@ -1332,7 +1332,7 @@
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"Alarma-soinuak"</string>
     <string name="ringtone_picker_title_notification" msgid="6387191794719608122">"Jakinarazpen-soinuak"</string>
     <string name="ringtone_unknown" msgid="5059495249862816475">"Ezezaguna"</string>
-    <string name="wifi_available_sign_in" msgid="381054692557675237">"Hasi saioa Wi-Fi sarean"</string>
+    <string name="wifi_available_sign_in" msgid="381054692557675237">"Hasi saioa wifi-sarean"</string>
     <string name="network_available_sign_in" msgid="1520342291829283114">"Hasi saioa sarean"</string>
     <!-- no translation found for network_available_sign_in_detailed (7520423801613396556) -->
     <skip />

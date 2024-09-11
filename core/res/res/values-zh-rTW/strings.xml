@@ -1405,7 +1405,7 @@
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"此外接裝置與這支手機不相容。輕觸即可瞭解詳情。"</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"已連接 USB 偵錯工具"</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"輕觸即可關閉 USB 偵錯功能"</string>
-    <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"選取這個選項以停用 USB 偵錯功能。"</string>
+    <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"選取這個選項以停用 USB 偵錯功能"</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"無線偵錯已連線"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"輕觸即可關閉無線偵錯功能"</string>
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"選取即可停用無線偵錯功能。"</string>

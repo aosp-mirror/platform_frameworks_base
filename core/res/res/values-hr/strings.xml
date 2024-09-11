@@ -204,7 +204,7 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Administrator je ustupio uređaj za osobnu upotrebu"</string>
     <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"Privatni prostor je uklonjen"</string>
     <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"Vaša organizacija ne dopušta privatne prostore na ovom upravljanom uređaju."</string>
-    <string name="network_logging_notification_title" msgid="554983187553845004">"Uređaj je upravljan"</string>
+    <string name="network_logging_notification_title" msgid="554983187553845004">"Uređajem se upravlja"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Vaša organizacija upravlja ovim uređajem i može nadzirati mrežni promet. Dodirnite za pojedinosti."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"Aplikacije mogu pristupiti vašoj lokaciji"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"Obratite se IT administratoru da biste saznali više"</string>
