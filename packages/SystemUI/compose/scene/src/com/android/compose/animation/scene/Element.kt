@@ -828,15 +828,21 @@ private fun shouldPlaceElement(
 
     // Don't place the element in this content if this content is not part of the current element
     // transition.
-    if (content != transition.fromContent && content != transition.toContent) {
+    val isReplacingOverlay = transition is TransitionState.Transition.ReplaceOverlay
+    if (
+        content != transition.fromContent &&
+            content != transition.toContent &&
+            (!isReplacingOverlay || content != transition.currentScene)
+    ) {
         return false
     }
 
     // Place the element if it is not shared.
-    if (
-        transition.fromContent !in element.stateByContent ||
-            transition.toContent !in element.stateByContent
-    ) {
+    var copies = 0
+    if (transition.fromContent in element.stateByContent) copies++
+    if (transition.toContent in element.stateByContent) copies++
+    if (isReplacingOverlay && transition.currentScene in element.stateByContent) copies++
+    if (copies <= 1) {
         return true
     }
 
@@ -1269,9 +1275,10 @@ private inline fun <T> computeValue(
 
     // If we are replacing an overlay and the element is both in a single overlay and in the current
     // scene, interpolate the state of the element using the current scene as the other scene.
+    var currentSceneState: Element.State? = null
     if (!isSharedElement && transition is TransitionState.Transition.ReplaceOverlay) {
-        val currentSceneState = element.stateByContent[transition.currentScene]
-        if (currentSceneState != null) {
+        currentSceneState = element.stateByContent[transition.currentScene]
+        if (currentSceneState != null && isSharedElementEnabled(element.key, transition)) {
             return interpolateSharedElement(
                 transition = transition,
                 contentValue = contentValue,
@@ -1290,6 +1297,8 @@ private inline fun <T> computeValue(
             when {
                 isSharedElement && currentContent == fromContent -> fromState
                 isSharedElement -> toState
+                currentSceneState != null && currentContent == transition.currentScene ->
+                    currentSceneState
                 else -> fromState ?: toState
             }
         )
@@ -1409,7 +1418,13 @@ private inline fun <T> computeValue(
     val rangeProgress = transformation.range?.progress(progress) ?: progress
 
     // Interpolate between the value at rest and the value before entering/after leaving.
-    val isEntering = content == toContent
+    val isEntering =
+        when {
+            content == toContent -> true
+            content == fromContent -> false
+            content == transition.currentScene -> toState == null
+            else -> content == toContent
+        }
     return if (isEntering) {
         lerp(targetValue, idleValue, rangeProgress)
     } else {

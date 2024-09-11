@@ -654,6 +654,85 @@ class OverlayTest {
     }
 
     @Test
+    fun replaceAnimation_elementInCurrentSceneAndOneOverlay_sharedElementDisabled() {
+        rule.testReplaceOverlayTransition(
+            currentSceneContent = {
+                Box(Modifier.size(width = 180.dp, height = 120.dp)) {
+                    Foo(width = 60.dp, height = 40.dp)
+                }
+            },
+            fromContent = {},
+            fromAlignment = Alignment.TopStart,
+            toContent = { Foo(width = 100.dp, height = 80.dp) },
+            transition = {
+                // 4 frames of animation
+                spec = tween(4 * 16, easing = LinearEasing)
+
+                // Scale Foo to/from size 0 in each content instead of sharing it.
+                sharedElement(TestElements.Foo, enabled = false)
+                scaleSize(TestElements.Foo, width = 0f, height = 0f)
+            },
+        ) {
+            before {
+                rule
+                    .onNode(isElement(TestElements.Foo, content = SceneA))
+                    .assertSizeIsEqualTo(60.dp, 40.dp)
+                    .assertPositionInRootIsEqualTo(0.dp, 0.dp)
+                rule.onNode(isElement(TestElements.Foo, content = OverlayA)).assertDoesNotExist()
+                rule.onNode(isElement(TestElements.Foo, content = OverlayB)).assertDoesNotExist()
+            }
+
+            at(16) {
+                rule
+                    .onNode(isElement(TestElements.Foo, content = SceneA))
+                    .assertSizeIsEqualTo(45.dp, 30.dp)
+                    .assertPositionInRootIsEqualTo(0.dp, 0.dp)
+                rule.onNode(isElement(TestElements.Foo, content = OverlayA)).assertDoesNotExist()
+                rule
+                    .onNode(isElement(TestElements.Foo, content = OverlayB))
+                    .assertSizeIsEqualTo(25.dp, 20.dp)
+                    .assertPositionInRootIsEqualTo(((180 - 25) / 2f).dp, ((120 - 20) / 2f).dp)
+            }
+
+            at(32) {
+                rule
+                    .onNode(isElement(TestElements.Foo, content = SceneA))
+                    .assertSizeIsEqualTo(30.dp, 20.dp)
+                    .assertPositionInRootIsEqualTo(0.dp, 0.dp)
+                rule.onNode(isElement(TestElements.Foo, content = OverlayA)).assertDoesNotExist()
+                rule
+                    .onNode(isElement(TestElements.Foo, content = OverlayB))
+                    .assertSizeIsEqualTo(50.dp, 40.dp)
+                    .assertPositionInRootIsEqualTo(((180 - 50) / 2f).dp, ((120 - 40) / 2f).dp)
+            }
+
+            at(48) {
+                rule
+                    .onNode(isElement(TestElements.Foo, content = SceneA))
+                    .assertSizeIsEqualTo(15.dp, 10.dp)
+                    .assertPositionInRootIsEqualTo(0.dp, 0.dp)
+                rule.onNode(isElement(TestElements.Foo, content = OverlayA)).assertDoesNotExist()
+                rule
+                    .onNode(isElement(TestElements.Foo, content = OverlayB))
+                    .assertSizeIsEqualTo(75.dp, 60.dp)
+                    .assertPositionInRootIsEqualTo(((180 - 75) / 2f).dp, ((120 - 60) / 2f).dp)
+            }
+
+            after {
+                rule
+                    .onNode(isElement(TestElements.Foo, content = SceneA))
+                    .assertExists()
+                    .assertIsNotDisplayed()
+                rule.onNode(isElement(TestElements.Foo, content = OverlayA)).assertDoesNotExist()
+                rule
+                    .onNode(isElement(TestElements.Foo, content = OverlayB))
+                    .assertSizeIsEqualTo(100.dp, 80.dp)
+                    .assertPositionInRootIsEqualTo(40.dp, 20.dp)
+            }
+        }
+    }
+
+    @Test
     fun overscrollingOverlay_movableElementNotInOverlay() {
         val state =
             rule.runOnUiThread {
