@@ -77,9 +77,8 @@ public class TouchpadVisualizationView extends View {
                     mTouchpadHardwareProperties.getBottom(), 0, getHeight(),
                     touchpadFingerState.getPositionY());
 
-            float newAngle = -translateRange(mTouchpadHardwareProperties.getOrientationMinimum(),
-                    mTouchpadHardwareProperties.getOrientationMaximum(), 0, 360,
-                    touchpadFingerState.getOrientation());
+            float newAngle = translateRange(0, mTouchpadHardwareProperties.getOrientationMaximum(),
+                    0, 90, touchpadFingerState.getOrientation());
 
             float resX = mTouchpadHardwareProperties.getResX() == 0f ? DEFAULT_RES_X
                     : mTouchpadHardwareProperties.getResX();
