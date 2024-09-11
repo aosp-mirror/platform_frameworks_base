@@ -664,22 +664,31 @@ class CommunalInteractorTest : SysuiTestCase() {
         testScope.runTest {
             // Verify default is false
             val isCommunalShowing by collectLastValue(underTest.isCommunalShowing)
-            runCurrent()
-            assertThat(isCommunalShowing).isFalse()
-
-            // Verify scene changes without the flag doesn't have any impact
-            underTest.changeScene(CommunalScenes.Communal, "test")
-            runCurrent()
             assertThat(isCommunalShowing).isFalse()
 
             // Verify scene changes (with the flag) to communal sets the value to true
             sceneInteractor.changeScene(Scenes.Communal, loggingReason = "")
-            runCurrent()
             assertThat(isCommunalShowing).isTrue()
 
             // Verify scene changes (with the flag) to lockscreen sets the value to false
             sceneInteractor.changeScene(Scenes.Lockscreen, loggingReason = "")
-            runCurrent()
+            assertThat(isCommunalShowing).isFalse()
+        }
+
+    @Test
+    @EnableSceneContainer
+    fun isCommunalShowing_whenSceneContainerEnabledAndChangeToLegacyScene() =
+        testScope.runTest {
+            // Verify default is false
+            val isCommunalShowing by collectLastValue(underTest.isCommunalShowing)
+            assertThat(isCommunalShowing).isFalse()
+
+            // Verify legacy scene change still makes communal show
+            underTest.changeScene(CommunalScenes.Communal, "test")
+            assertThat(isCommunalShowing).isTrue()
+
+            // Verify legacy scene change to blank makes communal hidden
+            underTest.changeScene(CommunalScenes.Blank, "test")
             assertThat(isCommunalShowing).isFalse()
         }
 
