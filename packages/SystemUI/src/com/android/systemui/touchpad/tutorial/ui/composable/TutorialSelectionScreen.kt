@@ -41,7 +41,7 @@ import com.android.systemui.res.R
 fun TutorialSelectionScreen(
     onBackTutorialClicked: () -> Unit,
     onHomeTutorialClicked: () -> Unit,
-    onActionKeyTutorialClicked: () -> Unit,
+    onRecentAppsTutorialClicked: () -> Unit,
     onDoneButtonClicked: () -> Unit,
 ) {
     Column(
@@ -55,7 +55,7 @@ fun TutorialSelectionScreen(
         TutorialSelectionButtons(
             onBackTutorialClicked = onBackTutorialClicked,
             onHomeTutorialClicked = onHomeTutorialClicked,
-            onActionKeyTutorialClicked = onActionKeyTutorialClicked,
+            onRecentAppsTutorialClicked = onRecentAppsTutorialClicked,
             modifier = Modifier.padding(60.dp)
         )
         DoneButton(
@@ -69,7 +69,7 @@ fun TutorialSelectionScreen(
 private fun TutorialSelectionButtons(
     onBackTutorialClicked: () -> Unit,
     onHomeTutorialClicked: () -> Unit,
-    onActionKeyTutorialClicked: () -> Unit,
+    onRecentAppsTutorialClicked: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -90,8 +90,8 @@ private fun TutorialSelectionButtons(
             modifier = Modifier.weight(1f)
         )
         TutorialButton(
-            text = stringResource(R.string.touchpad_tutorial_action_key_button),
-            onClick = onActionKeyTutorialClicked,
+            text = stringResource(R.string.touchpad_tutorial_recent_apps_gesture_button),
+            onClick = onRecentAppsTutorialClicked,
             color = MaterialTheme.colorScheme.tertiary,
             modifier = Modifier.weight(1f)
         )

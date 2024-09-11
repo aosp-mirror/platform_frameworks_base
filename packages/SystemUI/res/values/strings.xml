@@ -3724,8 +3724,8 @@
     <string name="touchpad_tutorial_back_gesture_button">Back gesture</string>
     <!-- Label for button opening tutorial for back gesture on touchpad [CHAR LIMIT=NONE] -->
     <string name="touchpad_tutorial_home_gesture_button">Home gesture</string>
-    <!-- Label for button opening tutorial on using Action key from keyboard [CHAR LIMIT=NONE] -->
-    <string name="touchpad_tutorial_action_key_button">Action key</string>
+    <!-- Label for button opening tutorial for "view recent apps" gesture on touchpad [CHAR LIMIT=NONE] -->
+    <string name="touchpad_tutorial_recent_apps_gesture_button">View recent apps</string>
     <!-- Label for button finishing touchpad tutorial [CHAR LIMIT=NONE] -->
     <string name="touchpad_tutorial_done_button">Done</string>
     <!-- BACK GESTURE -->
@@ -3747,6 +3747,15 @@ Action + ESC for this.</string>
     <string name="touchpad_home_gesture_success_title">Nice!</string>
     <!-- Text shown to the user after they complete home gesture tutorial [CHAR LIMIT=NONE] -->
     <string name="touchpad_home_gesture_success_body">You completed the go home gesture.</string>
+    <!-- RECENT APPS GESTURE -->
+    <!-- Touchpad recent apps gesture action name in tutorial [CHAR LIMIT=NONE] -->
+    <string name="touchpad_recent_apps_gesture_action_title">View recent apps</string>
+    <!-- Touchpad recent apps gesture guidance in gestures tutorial [CHAR LIMIT=NONE] -->
+    <string name="touchpad_recent_apps_gesture_guidance">Swipe up and hold using three fingers on your touchpad.</string>
+    <!-- Screen title after recent apps gesture was done successfully [CHAR LIMIT=NONE] -->
+    <string name="touchpad_recent_apps_gesture_success_title">Great job!</string>
+    <!-- Text shown to the user after they complete recent apps gesture tutorial [CHAR LIMIT=NONE] -->
+    <string name="touchpad_recent_apps_gesture_success_body">You completed the view recent apps gesture.</string>
 
     <!-- KEYBOARD TUTORIAL-->
     <!-- Action key tutorial title [CHAR LIMIT=NONE] -->
