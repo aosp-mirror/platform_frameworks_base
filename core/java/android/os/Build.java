@@ -17,6 +17,7 @@
 package android.os;
 
 import android.Manifest;
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -28,6 +29,7 @@ import android.app.Application;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.ravenwood.annotation.RavenwoodKeepWholeClass;
+import android.sdk.Flags;
 import android.sysprop.DeviceProperties;
 import android.sysprop.SocProperties;
 import android.sysprop.TelephonyProperties;
@@ -399,10 +401,33 @@ public class Build {
          * device. This value never changes while a device is booted, but it may
          * increase when the hardware manufacturer provides an OTA update.
          * <p>
+         * Together with {@link SDK_MINOR_INT}, this constant defines the
+         * <pre>major.minor</pre> version of Android. <pre>SDK_INT</pre> is
+         * increased and <pre>SDK_MINOR_INT</pre> is set to 0 on new Android
+         * dessert releases. Between these, Android may also release so called
+         * minor releases where <pre>SDK_INT</pre> remains unchanged and
+         * <pre>SDK_MINOR_INT</pre> is increased. Minor releases can add new
+         * APIs, and have stricter guarantees around backwards compatibility
+         * (e.g. no changes gated by <pre>targetSdkVersion</pre>) compared to
+         * major releases.
+         * <p>
          * Possible values are defined in {@link Build.VERSION_CODES}.
          */
         public static final int SDK_INT = SystemProperties.getInt(
                 "ro.build.version.sdk", 0);
+
+        /**
+         * The minor SDK version of the software currently running on this hardware
+         * device. This value never changes while a device is booted, but it may
+         * increase when the hardware manufacturer provides an OTA update.
+         * <p>
+         * Together with {@link SDK_INT}, this constant defines the
+         * <pre>major.minor</pre> version of Android. See {@link SDK_INT} for
+         * more information.
+         */
+        @FlaggedApi(Flags.FLAG_MAJOR_MINOR_VERSIONING_SCHEME)
+        public static final int SDK_MINOR_INT = SystemProperties.getInt(
+                "ro.build.version.sdk_minor", 0);
 
         /**
          * The SDK version of the software that <em>initially</em> shipped on
