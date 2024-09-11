@@ -186,6 +186,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"已使用面孔解鎖。按下即可繼續操作。"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"已識別面孔。按下即可繼續操作。"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"已識別面孔。按解鎖圖示即可繼續。"</string>
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"已使用面孔解鎖，輕按即可繼續。"</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"驗證咗"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"取消驗證"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"更多選項"</string>
@@ -454,14 +455,14 @@
     <string name="interruption_level_alarms_twoline" msgid="2045067991335708767">"僅限\n鬧鐘"</string>
     <string name="keyguard_indication_charging_time_wireless" msgid="577856646141738675">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • 無線充電中 • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>後充滿電"</string>
     <string name="keyguard_indication_charging_time" msgid="6492711711891071502">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • 充電中 • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>後充滿電"</string>
-    <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • 快速充電中 • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>後充滿電"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • 快速充電中 • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>後完成充電"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • 慢速充電中 • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>後充滿電"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • 充電中 • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>後充滿電"</string>
     <string name="accessibility_action_open_communal_hub" msgid="3081702792413787849">"上鎖畫面上的小工具"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"向左滑動即可開始共用教學課程"</string>
     <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"自訂"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"關閉"</string>
-    <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"增、移除小工具，以及調整小工具在此空間中的位置"</string>
+    <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"在這個空間新增或移除小工具，以及調整小工具的位置"</string>
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"新增更多小工具"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"長按即可自訂小工具"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"自訂小工具"</string>

@@ -119,7 +119,7 @@
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Merekam layar"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Merekam layar dan audio"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"Tampilkan lokasi sentuhan pada layar"</string>
-    <string name="screenrecord_stop_label" msgid="72699670052087989">"Stop"</string>
+    <string name="screenrecord_stop_label" msgid="72699670052087989">"Berhenti"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Bagikan"</string>
     <string name="screenrecord_save_title" msgid="1886652605520893850">"Rekaman layar disimpan"</string>
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Ketuk untuk melihat"</string>
@@ -186,6 +186,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Kunci dibuka dengan wajah. Tekan untuk melanjutkan."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Wajah dikenali. Tekan untuk melanjutkan."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Wajah dikenali. Tekan ikon buka kunci untuk melanjutkan."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"Kunci dibuka dengan wajah. Ketuk untuk melanjutkan."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Diautentikasi"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Batalkan Autentikasi"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"Opsi Lainnya"</string>
@@ -287,14 +288,14 @@
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Jangan Ganggu"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Perangkat yang disandingkan tak tersedia"</string>
-    <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"Ketuk untuk memulai atau menghentikan koneksi perangkat"</string>
+    <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"Ketuk untuk mulai atau berhenti menghubungkan perangkat"</string>
     <string name="pair_new_bluetooth_devices" msgid="4601767620843349645">"Sambungkan perangkat baru"</string>
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"Lihat semua"</string>
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Gunakan Bluetooth"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Terhubung"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"Berbagi Audio"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Disimpan"</string>
-    <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"putuskan koneksi"</string>
+    <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"berhenti hubungkan"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"aktifkan"</string>
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="3345758139235739006">"Aktifkan otomatis besok"</string>
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"Fitur seperti Quick Share dan Temukan Perangkat Saya menggunakan Bluetooth"</string>
@@ -372,16 +373,16 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Perekam layar"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Mulai"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Berhenti"</string>
-    <string name="qs_record_issue_label" msgid="8166290137285529059">"Mencatat Masalah"</string>
+    <string name="qs_record_issue_label" msgid="8166290137285529059">"Rekam Masalah"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"Mulai"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"Berhenti"</string>
     <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"Laporan Bug"</string>
-    <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"Hal apa yang terpengaruh?"</string>
+    <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"Apa jenis masalah yang Anda alami pada perangkat?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"Pilih jenis masalah"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Perekaman layar"</string>
     <string name="performance" msgid="6552785217174378320">"Performa"</string>
     <string name="user_interface" msgid="3712869377953950887">"Antarmuka Pengguna"</string>
-    <string name="thermal" msgid="6758074791325414831">"Termal"</string>
+    <string name="thermal" msgid="6758074791325414831">"Panas"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Mode satu tangan"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"Alat bantu dengar"</string>
     <string name="quick_settings_hearing_devices_connected" msgid="6519069502397037781">"Aktif"</string>
@@ -750,7 +751,7 @@
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Enter"</string>
     <string name="keyboard_key_backspace" msgid="4095278312039628074">"Backspace"</string>
     <string name="keyboard_key_media_play_pause" msgid="8389984232732277478">"Play/Pause"</string>
-    <string name="keyboard_key_media_stop" msgid="1509943745250377699">"Stop"</string>
+    <string name="keyboard_key_media_stop" msgid="1509943745250377699">"Berhenti"</string>
     <string name="keyboard_key_media_next" msgid="8502476691227914952">"Next"</string>
     <string name="keyboard_key_media_previous" msgid="5637875709190955351">"Previous"</string>
     <string name="keyboard_key_media_rewind" msgid="3450387734224327577">"Rewind"</string>
@@ -915,8 +916,8 @@
     <string name="tuner_circle" msgid="5270591778160525693">"Lingkaran"</string>
     <string name="tuner_plus" msgid="4130366441154416484">"Plus"</string>
     <string name="tuner_minus" msgid="5258518368944598545">"Minus"</string>
-    <string name="tuner_left" msgid="5758862558405684490">"Kiri"</string>
-    <string name="tuner_right" msgid="8247571132790812149">"Kanan"</string>
+    <string name="tuner_left" msgid="5758862558405684490">"Kiri (L)"</string>
+    <string name="tuner_right" msgid="8247571132790812149">"Kanan (R)"</string>
     <string name="tuner_menu" msgid="363690665924769420">"Menu"</string>
     <string name="tuner_app" msgid="6949280415826686972">"Aplikasi <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="notification_channel_alerts" msgid="3385787053375150046">"Notifikasi"</string>

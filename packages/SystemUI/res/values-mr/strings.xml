@@ -186,6 +186,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"चेहऱ्याने अनलॉक केले आहे. पुढे सुरू ठेवण्यासाठी प्रेस करा."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"चेहरा ओळखला आहे. पुढे सुरू ठेवण्यासाठी प्रेस करा."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"चेहरा ओळखला आहे. पुढे सुरू ठेवण्यासाठी अनलॉक करा आयकन प्रेस करा."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"चेहऱ्याने अनलॉक केले आहे. सुरू ठेवण्यासाठी टॅप करा."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"ऑथेंटिकेशन केलेले"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"ऑथेंटिकेशन रद्द करा"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"अधिक पर्याय"</string>
@@ -568,7 +569,7 @@
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"आपल्या संस्थेने या डिव्हाइसवर प्रमाणपत्र अधिकार इंस्टॉल केला आहे. आपल्या सुरक्षित नेटवर्क रहदारीचे परीक्षण केले जाऊ शकते किंवा ती सुधारली जाऊ शकते."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"आपल्या संस्थेने आपल्या कार्य प्रोफाइलवर प्रमाणपत्र अधिकार इंस्टॉल केला आहे. आपल्या सुरक्षित नेटवर्क रहदारीचे परीक्षण केले जाऊ शकते किंवा ती सुधारली जाऊ शकते."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"या डिव्हाइसवर प्रमाणपत्र अधिकार इंस्टॉल केला आहे. आपल्या सुरक्षित नेटवर्क रहदारीचे परीक्षण केले जाऊ शकते किंवा ती सुधारली जाऊ शकते."</string>
-    <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"आपल्या प्रशासकाने नेटवर्क लॉगिंग सुरू केले आहे, जे आपल्या डिव्हाइसवरील रहदारीचे परीक्षण करते."</string>
+    <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"तुमच्या ॲडमिनने नेटवर्क लॉगिंग सुरू केले आहे, जे तुमच्या डिव्हाइसवरील रहदारीचे परीक्षण करते."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"तुमच्या ॲडमिनने नेटवर्क लॉग इन सुरू केले आहे, जे तुमच्या कार्य प्रोफाइलमधील रहदारीचे निरीक्षण करत असले तरी तुमच्या वैयक्तिक प्रोफाइलमधील रहदारीचे निरीक्षण करत नाही."</string>
     <string name="monitoring_description_named_vpn" msgid="8220190039787149671">"हे डिव्हाइस <xliff:g id="VPN_APP">%1$s</xliff:g> द्वारे इंटरनेटशी कनेक्ट केलेले आहे. ईमेल आणि ब्राउझिंग डेटाच्या समावेशासह, तुमची नेटवर्क अ‍ॅक्टिव्हिटी तुमच्या VPN पुरवठादाराला दिसते."</string>
     <string name="monitoring_description_managed_device_named_vpn" msgid="7693648349547785255">"हे डिव्हाइस <xliff:g id="VPN_APP">%1$s</xliff:g> द्वारे इंटरनेटशी कनेक्ट केलेले आहे. ईमेल आणि ब्राउझिंग डेटाच्या समावेशासह, तुमची नेटवर्क अ‍ॅक्टिव्हिटी तुमच्या आयटी ॲडमिनला दिसते."</string>

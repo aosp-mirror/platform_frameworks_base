@@ -186,6 +186,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Odklenjeno z obrazom. Pritisnite za nadaljevanje."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Obraz je prepoznan. Pritisnite za nadaljevanje."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Obraz je prepoznan. Za nadaljevanje pritisnite ikono za odklepanje."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"Odklenjeno z obrazom. Dotaknite se, če želite nadaljevati."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Preverjena pristnost"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Prekliči preverjanje pristnosti"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"Več možnosti"</string>
@@ -381,7 +382,7 @@
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Snemanje zaslona"</string>
     <string name="performance" msgid="6552785217174378320">"Učinkovitost delovanja"</string>
     <string name="user_interface" msgid="3712869377953950887">"Uporabniški vmesnik"</string>
-    <string name="thermal" msgid="6758074791325414831">"Toplotno"</string>
+    <string name="thermal" msgid="6758074791325414831">"Toplota"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Enoročni način"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"Slušni pripomočki"</string>
     <string name="quick_settings_hearing_devices_connected" msgid="6519069502397037781">"Aktivno"</string>
@@ -637,7 +638,7 @@
     <string name="volume_panel_spatial_audio_title" msgid="3367048857932040660">"Prostorski zvok"</string>
     <string name="volume_panel_spatial_audio_off" msgid="4177490084606772989">"Izklopljeno"</string>
     <string name="volume_panel_spatial_audio_fixed" msgid="3136080137827746046">"Fiksno"</string>
-    <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"Spremljanje položaja glave"</string>
+    <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"Spremljanje premikov glave"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Dotaknite se, če želite spremeniti način zvonjenja."</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"izklop zvoka"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"vklop zvoka"</string>

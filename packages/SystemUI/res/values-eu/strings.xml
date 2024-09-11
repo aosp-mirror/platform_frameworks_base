@@ -186,6 +186,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Aurpegiaren bidez desblokeatu da. Sakatu aurrera egiteko."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Ezagutu da aurpegia. Sakatu aurrera egiteko."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Ezagutu da aurpegia. Aurrera egiteko, sakatu desblokeatzeko ikonoa."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"Aurpegiaren bidez desblokeatu da. Sakatu hau aurrera egiteko."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Autentifikatuta"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Utzi bertan behera autentifikazioa"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"Aukera gehiago"</string>
@@ -372,7 +373,7 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Pantaila-grabaketa"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Hasi"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Gelditu"</string>
-    <string name="qs_record_issue_label" msgid="8166290137285529059">"Arazo bat dago grabaketarekin"</string>
+    <string name="qs_record_issue_label" msgid="8166290137285529059">"Grabatu arazoa"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"Hasi"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"Gelditu"</string>
     <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"Akatsen txostena"</string>
@@ -1156,7 +1157,7 @@
     <string name="select_conversation_text" msgid="3376048251434956013">"Sakatu elkarrizketa bat orri nagusian gehitzeko"</string>
     <string name="no_conversations_text" msgid="5354115541282395015">"Azkenaldiko elkarrizketak agertuko dira hemen"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Lehentasunezko elkarrizketak"</string>
-    <string name="recent_conversations" msgid="8531874684782574622">"Azken elkarrizketak"</string>
+    <string name="recent_conversations" msgid="8531874684782574622">"Azkenaldiko elkarrizketak"</string>
     <string name="days_timestamp" msgid="5821854736213214331">"Duela <xliff:g id="DURATION">%1$s</xliff:g> egun"</string>
     <string name="one_week_timestamp" msgid="4925600765473875590">"Duela astebete"</string>
     <string name="two_weeks_timestamp" msgid="9111801081871962155">"Duela bi aste"</string>
@@ -1180,7 +1181,7 @@
     <string name="status_before_loading" msgid="1500477307859631381">"Laster agertuko da edukia"</string>
     <string name="missed_call" msgid="4228016077700161689">"Dei galdua"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
-    <string name="people_tile_description" msgid="8154966188085545556">"Ikusi azken mezuak, dei galduak eta egoerei buruzko informazio eguneratua"</string>
+    <string name="people_tile_description" msgid="8154966188085545556">"Ikusi azkenaldiko mezuak, dei galduak eta egoerei buruzko informazio eguneratua"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Elkarrizketa"</string>
     <string name="paused_by_dnd" msgid="7856941866433556428">"Ez molestatzeko moduak pausatu du"</string>
     <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g> erabiltzaileak mezu bat bidali du: <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>

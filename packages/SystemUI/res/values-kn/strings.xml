@@ -45,7 +45,7 @@
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> ಅನ್ನು ನಿಯಂತ್ರಿಸಲು <xliff:g id="APPLICATION">%1$s</xliff:g> ಅನ್ನು ತೆರೆಯುವುದೇ?\nಈ ಆ್ಯಪ್‌ಗೆ ರೆಕಾರ್ಡ್ ಅನುಮತಿಯನ್ನು ನೀಡಲಾಗಿಲ್ಲ, ಆದರೆ ಈ USB ಸಾಧನದ ಮೂಲಕ ಆಡಿಯೊವನ್ನು ಸೆರೆಹಿಡಿಯಬಹುದು."</string>
     <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g> ಅನ್ನು ನಿರ್ವಹಿಸಲು <xliff:g id="APPLICATION">%1$s</xliff:g> ಅನ್ನು ತೆರೆಯುವುದೇ?"</string>
     <string name="usb_accessory_uri_prompt" msgid="6756649383432542382">"ಆಪ್‌ಗಳು USB ಪರಿಕರದಲ್ಲಿ ಕಾರ್ಯನಿರ್ವಹಿಸುವುದಿಲ್ಲ. ಆ ಬಗ್ಗೆ <xliff:g id="URL">%1$s</xliff:g> ನಲ್ಲಿ ಇನ್ನಷ್ಟು ತಿಳಿಯಿರಿ"</string>
-    <string name="title_usb_accessory" msgid="1236358027511638648">"USB ಪರಿಕರ"</string>
+    <string name="title_usb_accessory" msgid="1236358027511638648">"USB ಆ್ಯಕ್ಸೆಸರಿ"</string>
     <string name="label_view" msgid="6815442985276363364">"ವೀಕ್ಷಿಸು"</string>
     <string name="always_use_device" msgid="210535878779644679">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> ಸಂಪರ್ಕಗೊಂಡಾಗ ಯಾವಾಗಲೂ <xliff:g id="APPLICATION">%1$s</xliff:g> ಅನ್ನು ತೆರೆಯಿರಿ"</string>
     <string name="always_use_accessory" msgid="1977225429341838444">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g> ಸಂಪರ್ಕಗೊಂಡಾಗ ಯಾವಾಗಲೂ <xliff:g id="APPLICATION">%1$s</xliff:g> ಅನ್ನು ತೆರೆಯಿರಿ"</string>
@@ -74,8 +74,8 @@
     <string name="global_action_screenshot" msgid="2760267567509131654">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್"</string>
     <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"ಎಕ್ಸ್‌ಟೆಂಡ್ ಅನ್‌ಲಾಕ್ ಅನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"ಚಿತ್ರವನ್ನು ಕಳುಹಿಸಲಾಗಿದೆ"</string>
-    <string name="screenshot_saving_title" msgid="2298349784913287333">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಉಳಿಸಲಾಗುತ್ತಿದೆ…"</string>
-    <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"ಉದ್ಯೋಗ ಪ್ರೊಫೈಲ್‌ಗೆ ಸ್ಕ್ರೀನ್‌ಶಾಟ್‌ ಉಳಿಸಲಾಗುತ್ತಿದೆ…"</string>
+    <string name="screenshot_saving_title" msgid="2298349784913287333">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಸೇವ್ ಮಾಡಲಾಗುತ್ತಿದೆ…"</string>
+    <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"ಉದ್ಯೋಗ ಪ್ರೊಫೈಲ್‌ಗೆ ಸ್ಕ್ರೀನ್‌ಶಾಟ್‌ ಸೇವ್ ಮಾಡಲಾಗುತ್ತಿದೆ…"</string>
     <string name="screenshot_saving_private_profile" msgid="8934706048497093297">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್‌ ಅನ್ನು ಖಾಸಗಿ ಪ್ರೊಫೈಲ್‌ಗೆ ಸೇವ್‌ ಮಾಡಲಾಗುತ್ತಿದೆ"</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್‌ ಅನ್ನು ಸೇವ್ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಅನ್ನು ಉಳಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ"</string>
@@ -186,6 +186,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"ಮುಖವನ್ನು ಬಳಸಿ ಅನ್‌ಲಾಕ್ ಮಾಡಲಾಗಿದೆ. ಮುಂದುವರಿಯಲು ಒತ್ತಿ."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"ಮುಖ ಗುರುತಿಸಲಾಗಿದೆ. ಮುಂದುವರಿಯಲು ಒತ್ತಿ."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"ಮುಖ ಗುರುತಿಸಲಾಗಿದೆ. ಮುಂದುವರಿಯಲು ಅನ್‌ಲಾಕ್ ಐಕಾನ್ ಅನ್ನು ಒತ್ತಿ."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"ಮುಖವನ್ನು ಬಳಸಿ ಅನ್‌ಲಾಕ್ ಮಾಡಲಾಗಿದೆ. ಮುಂದುವರಿಯಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"ದೃಢೀಕರಿಸಲಾಗಿದೆ"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"ದೃಢೀಕರಣವನ್ನು ರದ್ದುಗೊಳಿಸಿ"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"ಇನ್ನಷ್ಟು ಆಯ್ಕೆಗಳು"</string>
@@ -445,7 +446,7 @@
     <string name="phone_hint" msgid="6682125338461375925">"ಫೋನ್‌ಗಾಗಿ ಐಕಾನ್‌ನಿಂದ ಸ್ವೈಪ್ ಮಾಡಿ"</string>
     <string name="voice_hint" msgid="7476017460191291417">"ಧ್ವನಿ ಸಹಾಯಕ್ಕಾಗಿ ಐಕಾನ್‌ನಿಂದ ಸ್ವೈಪ್ ಮಾಡಿ"</string>
     <string name="camera_hint" msgid="4519495795000658637">"ಕ್ಯಾಮರಾಗಾಗಿ ಐಕಾನ್‌ನಿಂದ ಸ್ವೈಪ್ ಮಾಡಿ"</string>
-    <string name="interruption_level_none_with_warning" msgid="8394434073508145437">"ಒಟ್ಟು ಮೌನ. ಇದು ಪರದೆ ರೀಡರ್ ಅನ್ನು ಮೌನವಾಗಿರಿಸುತ್ತದೆ."</string>
+    <string name="interruption_level_none_with_warning" msgid="8394434073508145437">"ಒಟ್ಟು ಮೌನ. ಇದು ಸ್ಕ್ರೀನ್ ರೀಡರ್ ಅನ್ನು ಮೌನವಾಗಿರಿಸುತ್ತದೆ."</string>
     <string name="interruption_level_none" msgid="219484038314193379">"ಸಂಪೂರ್ಣ ನಿಶ್ಯಬ್ಧ"</string>
     <string name="interruption_level_priority" msgid="661294280016622209">"ಆದ್ಯತೆ ಮಾತ್ರ"</string>
     <string name="interruption_level_alarms" msgid="2457850481335846959">"ಅಲಾರಮ್‌ಗಳು ಮಾತ್ರ"</string>

@@ -186,6 +186,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Ξεκλείδωμα με αναγνώριση προσώπου. Πατήστε για συνέχεια."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Το πρόσωπο αναγνωρίστηκε. Πατήστε για συνέχεια."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Το πρόσωπο αναγνωρ. Πατήστε το εικον. ξεκλειδ. για συνέχεια."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"Ξεκλείδωμα με αναγνώριση προσώπου. Πατήστε για συνέχεια."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Ολοκληρώθηκε ο έλεγχος ταυτότητας"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Ακύρωση ελέγχου ταυτότητας"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"Περισσότερες επιλογές"</string>
@@ -372,7 +373,7 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Εγγραφή οθόνης"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Έναρξη"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Διακοπή"</string>
-    <string name="qs_record_issue_label" msgid="8166290137285529059">"Εγγραφή προβλήματος"</string>
+    <string name="qs_record_issue_label" msgid="8166290137285529059">"Εγγραφή προβλ."</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"Έναρξη"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"Διακοπή"</string>
     <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"Αναφορά σφάλματος"</string>

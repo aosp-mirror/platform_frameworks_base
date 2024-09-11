@@ -186,6 +186,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"ચહેરા દ્વારા અનલૉક કર્યું. આગળ વધવા માટે દબાવો."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"ચહેરો ઓળખ્યો. આગળ વધવા માટે દબાવો."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"ચહેરો ઓળખ્યો. આગળ વધવા \'અનલૉક કરો\' આઇકન દબાવો."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"ચહેરા દ્વારા અનલૉક કર્યું. ચાલુ રાખવા માટે ટૅપ કરો."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"પ્રમાણિત"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"પ્રમાણીકરણ રદ કરો"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"વધુ વિકલ્પો"</string>
@@ -369,7 +370,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC અક્ષમ કરેલ છે"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC સક્ષમ કરેલ છે"</string>
-    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"સ્ક્રીન રેકૉર્ડ"</string>
+    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"સ્ક્રીન રેકોર્ડ"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"શરૂ કરો"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"રોકો"</string>
     <string name="qs_record_issue_label" msgid="8166290137285529059">"રેકોર્ડિંગમાં સમસ્યા"</string>
@@ -461,7 +462,7 @@
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"કૉમ્યુનલ ટ્યૂટૉરિઅલ શરૂ કરવા માટે ડાબે સ્વાઇપ કરો"</string>
     <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"કસ્ટમાઇઝ કરો"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"છોડી દો"</string>
-    <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"આ સ્પેસમાં તમારા વિજેટ ઉમેરો, તેને કાઢી નાખો અને ફરી તેને ક્રમમાં ગોઠવો"</string>
+    <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"આ સ્પેસમાં તમારા વિજેટ ઉમેરો, કાઢી નાખો અને ફરીથી ક્રમમાં ગોઠવો"</string>
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"વધુ વિજેટ ઉમેરો"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"વિજેટ કસ્ટમાઇઝ કરવા માટે થોડીવાર દબાવી રાખો"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"વિજેટ કસ્ટમાઇઝ કરો"</string>
@@ -562,13 +563,13 @@
     <string name="monitoring_subtitle_ca_certificate" msgid="8588092029755175800">"CA પ્રમાણપત્રો"</string>
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"પૉલિસીઓ જુઓ"</string>
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"નિયંત્રણો જુઓ"</string>
-    <string name="monitoring_description_named_management" msgid="505833016545056036">"આ ડિવાઇસ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>ની માલિકીનું છે.\n\nતમારા IT વ્યવસ્થાપક સેટિંગ, કૉર્પોરેટ ઍક્સેસ, ઍપ, તમારા ડિવાઇસ સાથે સંકળાયેલો ડેટા અને તમારા ડિવાઇસની સ્થાન માહિતીનું નિરીક્ષણ તેમજ તેને મેનેજ કરી શકે છે.\n\nવધુ માહિતી માટે, તમારા IT વ્યવસ્થાપકનો સંપર્ક કરો."</string>
+    <string name="monitoring_description_named_management" msgid="505833016545056036">"આ ડિવાઇસ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>ની માલિકીનું છે.\n\nતમારા IT ઍડમિન સેટિંગ, કૉર્પોરેટ ઍક્સેસ, ઍપ, તમારા ડિવાઇસ સાથે સંકળાયેલો ડેટા અને તમારા ડિવાઇસની લોકેશનની માહિતીને મૉનિટર તેમજ તેને મેનેજ કરી શકે છે.\n\nવધુ માહિતી માટે, તમારા IT ઍડમિનનો સંપર્ક કરો."</string>
     <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"<xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g> આ ડિવાઇસ સાથે સંકળાયેલો ડેટા ઍક્સેસ કરી શકશે અને ઍપ મેનેજ કરી શકશે તેમજ આ ડિવાઇસના સેટિંગ બદલી શકશે.\n\nજો તમને કોઈ પ્રશ્ન હોય, તો <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g>નો સંપર્ક કરો."</string>
     <string name="monitoring_description_management" msgid="4308879039175729014">"આ ડિવાઇસ તમારી સંસ્થાની માલિકીનું છે.\n\nતમારા IT વ્યવસ્થાપક સેટિંગ, કૉર્પોરેટ ઍક્સેસ, ઍપ, તમારા ડિવાઇસ સાથે સંકળાયેલો ડેટા અને તમારા ડિવાઇસની સ્થાન માહિતીનું નિરીક્ષણ તેમજ તેને મેનેજ કરી શકે છે.\n\nવધુ માહિતી માટે, તમારા IT વ્યવસ્થાપકનો સંપર્ક કરો."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"તમારી સંસ્થાએ આ ઉપકરણ પર પ્રમાણપત્ર સત્તાધિકારી ઇન્સ્ટૉલ કર્યું છે. તમારા સુરક્ષિત નેટવર્ક ટ્રાફિકનું નિયમન થઈ શકે છે અથવા તેમાં ફેરફાર કરવામાં આવી શકે છે."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"તમારી સંસ્થાએ તમારી કાર્ય પ્રોફાઇલમાં પ્રમાણપત્ર સત્તાધિકારી ઇન્સ્ટૉલ કર્યું છે. તમારા સુરક્ષિત નેટવર્ક ટ્રાફિકનું નિયમન થઈ શકે છે અથવા તેમાં ફેરફાર કરવામાં આવી શકે છે."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"આ ઉપકરણ પર પ્રમાણપત્ર સત્તાધિકારી ઇન્સ્ટૉલ કરેલ છે. તમારા સુરક્ષિત નેટવર્ક ટ્રાફિકનું નિયમન થઈ શકે છે અથવા તેમાં ફેરફાર કરવામાં આવી શકે છે."</string>
-    <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"તમારા વ્યવસ્થાપકે નેટવર્ક લૉગિંગ ચાલુ કર્યું છે, જે તમારા ઉપકરણ પર નેટવર્ક ટ્રાફિકનું નિયમન કરે છે."</string>
+    <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"તમારા ઍડમિને નેટવર્ક લૉગિંગ ચાલુ કર્યું છે, જે તમારા ડિવાઇસ પર નેટવર્ક ટ્રાફિક મૉનિટર કરે છે."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"તમારા વ્યવસ્થાપકે નેટવર્ક લૉગ ઇન ચાલુ કર્યું છે, જે તમારી વ્યક્તિગત પ્રોફાઇલમાં નહીં, પરંતુ ઑફિસની પ્રોફાઇલમાં ટ્રાફિકનું નિરીક્ષણ કરે છે."</string>
     <string name="monitoring_description_named_vpn" msgid="8220190039787149671">"આ ડિવાઇસ <xliff:g id="VPN_APP">%1$s</xliff:g> મારફતે ઇન્ટરનેટ સાથે કનેક્ટેડ છે. ઇમેઇલ અને બ્રાઉઝિંગ ડેટા સહિતની તમારી નેટવર્ક પ્રવૃત્તિને VPN પ્રદાતા જોઈ શકે છે."</string>
     <string name="monitoring_description_managed_device_named_vpn" msgid="7693648349547785255">"આ ડિવાઇસ <xliff:g id="VPN_APP">%1$s</xliff:g> મારફતે ઇન્ટરનેટ સાથે કનેક્ટેડ છે. ઇમેઇલ અને બ્રાઉઝિંગ ડેટા સહિતની તમારી નેટવર્ક પ્રવૃત્તિ, તમારા IT ઍડમિન જોઈ શકે છે."</string>
@@ -1183,7 +1184,7 @@
     <string name="people_tile_description" msgid="8154966188085545556">"તાજેતરના મેસેજ, ચૂકી ગયેલા કૉલ અને સ્ટેટસ અપડેટ જુઓ"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"વાતચીત"</string>
     <string name="paused_by_dnd" msgid="7856941866433556428">"\'ખલેલ પાડશો નહીં\'ની સુવિધા દ્વારા થોભાવેલું"</string>
-    <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g> દ્વારા કોઈ સંદેશ મોકલવામાં આવ્યો: <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>
+    <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g> દ્વારા કોઈ મેસેજ મોકલવામાં આવ્યો: <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> દ્વારા કોઈ છબી મોકલવામાં આવી"</string>
     <string name="new_status_content_description" msgid="6046637888641308327">"<xliff:g id="NAME">%1$s</xliff:g> દ્વારા નવી સ્ટેટસ અપડેટ પોસ્ટ કરવામાં આવી: <xliff:g id="STATUS">%2$s</xliff:g>"</string>
     <string name="person_available" msgid="2318599327472755472">"ઉપલબ્ધ છે"</string>

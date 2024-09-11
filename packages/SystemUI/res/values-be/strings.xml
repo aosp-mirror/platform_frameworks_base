@@ -50,8 +50,8 @@
     <string name="always_use_device" msgid="210535878779644679">"Заўсёды адкрываць <xliff:g id="APPLICATION">%1$s</xliff:g>, калі падключана прылада <xliff:g id="USB_DEVICE">%2$s</xliff:g>"</string>
     <string name="always_use_accessory" msgid="1977225429341838444">"Заўсёды адкрываць <xliff:g id="APPLICATION">%1$s</xliff:g>, калі падключаны аксесуар <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>"</string>
     <string name="usb_debugging_title" msgid="8274884945238642726">"Дазволіць адладку па USB?"</string>
-    <string name="usb_debugging_message" msgid="5794616114463921773">"Адбiтак ключа RSA на гэтым камп\'ютары:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
-    <string name="usb_debugging_always" msgid="4003121804294739548">"Заўсёды дазваляць з гэтага камп\'ютара"</string>
+    <string name="usb_debugging_message" msgid="5794616114463921773">"Адбiтак ключа RSA на гэтым камп’ютары:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
+    <string name="usb_debugging_always" msgid="4003121804294739548">"Заўсёды дазваляць з гэтага камп’ютара"</string>
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Дазволіць"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"Адладка па USB забаронена"</string>
     <string name="usb_debugging_secondary_user_message" msgid="1888835696965417845">"Карыстальнік, які зараз увайшоў у гэтую прыладу, не можа ўключыць адладку цераз USB. Каб выкарыстоўваць гэтую функцыю, пераключыцеся на адміністратара."</string>
@@ -186,6 +186,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Разблакіравана распазнаваннем твару. Націсніце для працягу."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Твар распазнаны. Націсніце для працягу."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Твар распазнаны. Для працягу націсніце значок разблакіроўкі."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"Твар распазнаны. Націсніце, каб працягнуць."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Распазнана"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Скасаваць аўтэнтыфікацыю"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"Іншыя варыянты"</string>
@@ -463,7 +464,7 @@
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"Закрыць"</string>
     <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"Дадаць ці выдаліць віджэты ў гэтай вобласці або змяніць іх парадак"</string>
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Дадаць іншыя віджэты"</string>
-    <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Доўга націскайце, каб наладзіць віджэты"</string>
+    <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Націсніце і ўтрымлівайце, каб наладзіць віджэты"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Наладзіць віджэты"</string>
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"Значок праграмы для адключанага віджэта"</string>
     <string name="icon_description_for_pending_widget" msgid="8413816401868001755">"Значок праграмы для віджэта ў працэсе ўсталявання"</string>
@@ -709,10 +710,10 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Стан:&lt;/b&gt; Пераведзена ў рэжым \"Без гуку\""</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Стан:&lt;/b&gt; Ацэнена як важнае"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Стан:&lt;/b&gt; Ацэнена як няважнае"</string>
-    <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"З\'яўляецца ўверсе раздзела размоў і паказвае на экране блакіроўкі відарыс профілю"</string>
+    <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"З’яўляецца ўверсе раздзела размоў і паказвае на экране блакіроўкі відарыс профілю"</string>
     <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"З’яўляецца ўверсе раздзела размоў як усплывальнае апавяшчэнне, якое паказвае на экране блакіроўкі відарыс профілю"</string>
-    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"З\'яўляецца ўверсе раздзела размоў, перарывае рэжым \"Не турбаваць\" і паказвае на экране блакіроўкі відарыс профілю"</string>
-    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"З\'яўляецца ўверсе раздзела размоў як усплывальнае апавяшчэнне, якое перарывае рэжым \"Не турбаваць\" і паказвае на экране блакіроўкі відарыс профілю"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"З’яўляецца ўверсе раздзела размоў, перарывае рэжым \"Не турбаваць\" і паказвае на экране блакіроўкі відарыс профілю"</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"З’яўляецца ўверсе раздзела размоў як усплывальнае апавяшчэнне, якое перарывае рэжым \"Не турбаваць\" і паказвае на экране блакіроўкі відарыс профілю"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Прыярытэт"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> не падтрымлівае функцыі размовы"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Гэтыя апавяшчэнні нельга змяніць."</string>
@@ -1023,7 +1024,7 @@
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Каб часова схаваць кнопку, перамясціце яе на край"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Адрабіць"</string>
     <string name="accessibility_floating_button_hidden_notification_title" msgid="4115036997406994799">"Кнопка спецыяльных магчымасцей схавана"</string>
-    <string name="accessibility_floating_button_hidden_notification_text" msgid="1457021647040915658">"Калі вы хочаце, каб яна з\'явілася, націсніце на апавяшчэнне"</string>
+    <string name="accessibility_floating_button_hidden_notification_text" msgid="1457021647040915658">"Калі вы хочаце, каб яна з’явілася, націсніце на апавяшчэнне"</string>
     <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"Выдалены ярлык <xliff:g id="FEATURE_NAME">%s</xliff:g>"</string>
     <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{Выдалены # ярлык}one{Выдалены # ярлык}few{Выдалена # ярлыкі}many{Выдалена # ярлыкоў}other{Выдалена # ярлыка}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Перамясціць лявей і вышэй"</string>

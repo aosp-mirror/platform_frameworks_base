@@ -146,9 +146,9 @@
     <string name="issuerecord_title" msgid="286627115110121849">"ایشو ریکارڈر"</string>
     <string name="issuerecord_background_processing_label" msgid="1666840264959336876">"ایشو ریکارڈنگ پروسیس ہو رہی ہے"</string>
     <string name="issuerecord_channel_description" msgid="6142326363431474632">"ایشو کلیکشن سیشن کے لیے جاری اطلاع"</string>
-    <string name="issuerecord_ongoing_screen_only" msgid="6248206059935015722">"ریکارڈنگ ایشو"</string>
+    <string name="issuerecord_ongoing_screen_only" msgid="6248206059935015722">"مسئلہ ریکارڈ ہو رہا ہے"</string>
     <string name="issuerecord_share_label" msgid="3992657993619876199">"اشتراک کریں"</string>
-    <string name="issuerecord_save_title" msgid="4161043023696751591">"ایشو ریکارڈنگ محفوظ ہو گئی"</string>
+    <string name="issuerecord_save_title" msgid="4161043023696751591">"مسئلے کی ریکارڈنگ محفوظ ہو گئی"</string>
     <string name="issuerecord_save_text" msgid="1205985304551521495">"دیکھنے کیلئے تھپتھپائیں"</string>
     <string name="issuerecord_save_error" msgid="6913040083446722726">"ایشو ریکارڈنگ محفوظ کرنے میں خرابی"</string>
     <string name="issuerecord_start_error" msgid="3402782952722871190">"ایشو ریکارڈنگ شروع کرنے میں خرابی"</string>
@@ -186,6 +186,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"چہرے سے انلاک کیا گیا۔ جاری رکھنے کے لیے دبائیں۔"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"چہرے کی شناخت ہو گئی۔ جاری رکھنے کے لیے دبائیں۔"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"چہرے کی شناخت ہو گئی۔ جاری رکھنے کیلئے انلاک آئیکن دبائیں۔"</string>
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"چہرے سے غیر مقفل کیا گیا۔ جاری رکھنے کیلئے تھپتھپائیں۔"</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"تصدیق کردہ"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"تصدیق کو منسوخ کریں"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"مزید اختیارات"</string>

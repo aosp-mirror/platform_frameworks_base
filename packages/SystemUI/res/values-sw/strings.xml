@@ -120,7 +120,7 @@
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Inarekodi skrini na sauti"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"Onyesha sehemu za kugusa kwenye skrini"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"Acha"</string>
-    <string name="screenrecord_share_label" msgid="5025590804030086930">"Shiriki"</string>
+    <string name="screenrecord_share_label" msgid="5025590804030086930">"Tuma"</string>
     <string name="screenrecord_save_title" msgid="1886652605520893850">"Imehifadhi rekodi ya skrini"</string>
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Gusa ili uangalie"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"Hitilafu imetokea wakati wa kuhifadhi rekodi ya skrini"</string>
@@ -186,6 +186,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Imefunguliwa kwa kutumia uso wako. Bonyeza ili uendelee."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Uso umetambuliwa. Bonyeza ili uendelee."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Uso umetambuliwa. Bonyeza aikoni ya kufungua ili uendelee."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"Imefunguliwa kwa kutumia uso wako. Gusa ili uendelee."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Umethibitishwa"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Ghairi Uthibitishaji"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"Chaguo Zaidi"</string>
