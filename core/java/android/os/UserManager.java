@@ -3697,9 +3697,13 @@ public class UserManager {
      * @hide
      */
     @TestApi
+    @UserHandleAware(
+            requiresAnyOfPermissionsIfNotCaller = {
+                    android.Manifest.permission.MANAGE_USERS,
+                    android.Manifest.permission.INTERACT_ACROSS_USERS})
     public int getMainDisplayIdAssignedToUser() {
         try {
-            return mService.getMainDisplayIdAssignedToUser();
+            return mService.getMainDisplayIdAssignedToUser(mUserId);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
