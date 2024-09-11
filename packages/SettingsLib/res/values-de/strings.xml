@@ -564,8 +564,7 @@
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Wecker und Erinnerungen"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Dieser App erlauben, Wecker zu stellen und zeitgebundene Aktionen zu planen. Dadurch läuft die App im Hintergrund. Dies kann den Akkuverbrauch erhöhen. \n\nWenn diese Berechtigung deaktiviert ist, funktionieren bereits gestellte Wecker und zeitgebundene Ereignisse, die von dieser App geplant sind, nicht wie erwartet."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"planen, Wecker, Erinnerung, Uhr"</string>
-    <!-- no translation found for zen_mode_do_not_disturb_name (6798711401734798283) -->
-    <skip />
+    <string name="zen_mode_do_not_disturb_name" msgid="6798711401734798283">"Bitte nicht stören"</string>
     <string name="zen_mode_settings_title" msgid="7374070457626419755">"Bitte nicht stören"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Aktivieren"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"„Bitte nicht stören“ aktivieren"</string>
