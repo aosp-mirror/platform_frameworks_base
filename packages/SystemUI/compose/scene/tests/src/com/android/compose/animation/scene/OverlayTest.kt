@@ -664,7 +664,7 @@ class OverlayTest {
                         overscroll(OverlayA, orientation = Orientation.Horizontal) {
                             translate(ElementKey("elementThatDoesNotExist"), x = 10.dp)
                         }
-                    }
+                    },
                 )
             }
 
