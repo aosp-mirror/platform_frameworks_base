@@ -50,7 +50,8 @@ sealed interface ObservableTransitionState {
     fun currentOverlays(): Flow<Set<OverlayKey>> {
         return when (this) {
             is Idle -> flowOf(currentOverlays)
-            is Transition -> currentOverlays
+            is Transition.ChangeScene -> flowOf(currentOverlays)
+            is Transition.OverlayTransition -> currentOverlays
         }
     }
 
@@ -64,7 +65,6 @@ sealed interface ObservableTransitionState {
     sealed class Transition(
         val fromContent: ContentKey,
         val toContent: ContentKey,
-        val currentOverlays: Flow<Set<OverlayKey>>,
         val progress: Flow<Float>,
 
         /**
@@ -105,7 +105,7 @@ sealed interface ObservableTransitionState {
             val fromScene: SceneKey,
             val toScene: SceneKey,
             val currentScene: Flow<SceneKey>,
-            currentOverlays: Set<OverlayKey>,
+            val currentOverlays: Set<OverlayKey>,
             progress: Flow<Float>,
             isInitiatedByUserInput: Boolean,
             isUserInputOngoing: Flow<Boolean>,
@@ -115,7 +115,31 @@ sealed interface ObservableTransitionState {
             Transition(
                 fromScene,
                 toScene,
-                flowOf(currentOverlays),
+                progress,
+                isInitiatedByUserInput,
+                isUserInputOngoing,
+                previewProgress,
+                isInPreviewStage,
+            )
+
+        /**
+         * A transition that is animating one or more overlays and for which [currentOverlays] will
+         * change over the course of the transition.
+         */
+        sealed class OverlayTransition(
+            fromContent: ContentKey,
+            toContent: ContentKey,
+            val currentScene: SceneKey,
+            val currentOverlays: Flow<Set<OverlayKey>>,
+            progress: Flow<Float>,
+            isInitiatedByUserInput: Boolean,
+            isUserInputOngoing: Flow<Boolean>,
+            previewProgress: Flow<Float>,
+            isInPreviewStage: Flow<Boolean>,
+        ) :
+            Transition(
+                fromContent,
+                toContent,
                 progress,
                 isInitiatedByUserInput,
                 isUserInputOngoing,
@@ -128,7 +152,7 @@ sealed interface ObservableTransitionState {
             val overlay: OverlayKey,
             fromContent: ContentKey,
             toContent: ContentKey,
-            val currentScene: SceneKey,
+            currentScene: SceneKey,
             currentOverlays: Flow<Set<OverlayKey>>,
             progress: Flow<Float>,
             isInitiatedByUserInput: Boolean,
@@ -136,9 +160,10 @@ sealed interface ObservableTransitionState {
             previewProgress: Flow<Float>,
             isInPreviewStage: Flow<Boolean>,
         ) :
-            Transition(
+            OverlayTransition(
                 fromContent,
                 toContent,
+                currentScene,
                 currentOverlays,
                 progress,
                 isInitiatedByUserInput,
@@ -151,7 +176,7 @@ sealed interface ObservableTransitionState {
         class ReplaceOverlay(
             val fromOverlay: OverlayKey,
             val toOverlay: OverlayKey,
-            val currentScene: SceneKey,
+            currentScene: SceneKey,
             currentOverlays: Flow<Set<OverlayKey>>,
             progress: Flow<Float>,
             isInitiatedByUserInput: Boolean,
@@ -159,9 +184,10 @@ sealed interface ObservableTransitionState {
             previewProgress: Flow<Float>,
             isInPreviewStage: Flow<Boolean>,
         ) :
-            Transition(
+            OverlayTransition(
                 fromOverlay,
                 toOverlay,
+                currentScene,
                 currentOverlays,
                 progress,
                 isInitiatedByUserInput,
