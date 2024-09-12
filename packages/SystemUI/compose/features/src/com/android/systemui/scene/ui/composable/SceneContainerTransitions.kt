@@ -6,6 +6,7 @@ import com.android.compose.animation.scene.TransitionKey
 import com.android.compose.animation.scene.transitions
 import com.android.systemui.bouncer.ui.composable.Bouncer
 import com.android.systemui.notifications.ui.composable.Notifications
+import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.TransitionKeys.SlightlyFasterShadeCollapse
 import com.android.systemui.scene.shared.model.TransitionKeys.ToSplitShade
@@ -20,7 +21,11 @@ import com.android.systemui.scene.ui.composable.transitions.lockscreenToGoneTran
 import com.android.systemui.scene.ui.composable.transitions.lockscreenToQuickSettingsTransition
 import com.android.systemui.scene.ui.composable.transitions.lockscreenToShadeTransition
 import com.android.systemui.scene.ui.composable.transitions.lockscreenToSplitShadeTransition
+import com.android.systemui.scene.ui.composable.transitions.notificationsShadeToQuickSettingsShadeTransition
 import com.android.systemui.scene.ui.composable.transitions.shadeToQuickSettingsTransition
+import com.android.systemui.scene.ui.composable.transitions.toNotificationsShadeTransition
+import com.android.systemui.scene.ui.composable.transitions.toQuickSettingsShadeTransition
+import com.android.systemui.shade.ui.composable.OverlayShade
 import com.android.systemui.shade.ui.composable.Shade
 
 /**
@@ -74,6 +79,14 @@ val SceneContainerTransitions = transitions {
     from(Scenes.Lockscreen, to = Scenes.Gone) { lockscreenToGoneTransition() }
     from(Scenes.Shade, to = Scenes.QuickSettings) { shadeToQuickSettingsTransition() }
 
+    // Overlay transitions
+
+    to(Overlays.NotificationsShade) { toNotificationsShadeTransition() }
+    to(Overlays.QuickSettingsShade) { toQuickSettingsShadeTransition() }
+    from(Overlays.NotificationsShade, Overlays.QuickSettingsShade) {
+        notificationsShadeToQuickSettingsShadeTransition()
+    }
+
     // Scene overscroll
 
     overscrollDisabled(Scenes.Gone, Orientation.Vertical)
@@ -90,5 +103,11 @@ val SceneContainerTransitions = transitions {
             Notifications.Elements.NotificationStackPlaceholder,
             y = Shade.Dimensions.ScrimOverscrollLimit,
         )
+    }
+    overscroll(Overlays.NotificationsShade, Orientation.Vertical) {
+        translate(OverlayShade.Elements.Panel, y = OverlayShade.Dimensions.OverscrollLimit)
+    }
+    overscroll(Overlays.QuickSettingsShade, Orientation.Vertical) {
+        translate(OverlayShade.Elements.Panel, y = OverlayShade.Dimensions.OverscrollLimit)
     }
 }
