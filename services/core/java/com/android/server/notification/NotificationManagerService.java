@@ -51,6 +51,7 @@ import static android.app.NotificationChannel.NEWS_ID;
 import static android.app.NotificationChannel.PROMOTIONS_ID;
 import static android.app.NotificationChannel.RECS_ID;
 import static android.app.NotificationChannel.SOCIAL_MEDIA_ID;
+import static android.app.NotificationChannel.SYSTEM_RESERVED_IDS;
 import static android.app.NotificationManager.ACTION_APP_BLOCK_STATE_CHANGED;
 import static android.app.NotificationManager.ACTION_AUTOMATIC_ZEN_RULE_STATUS_CHANGED;
 import static android.app.NotificationManager.ACTION_CONSOLIDATED_NOTIFICATION_POLICY_CHANGED;
@@ -109,6 +110,7 @@ import static android.service.notification.Adjustment.TYPE_NEWS;
 import static android.service.notification.Adjustment.TYPE_PROMOTION;
 import static android.service.notification.Adjustment.TYPE_SOCIAL_MEDIA;
 import static android.service.notification.Flags.callstyleCallbackApi;
+import static android.service.notification.Flags.notificationClassification;
 import static android.service.notification.Flags.notificationForceGrouping;
 import static android.service.notification.Flags.redactSensitiveNotificationsBigTextStyle;
 import static android.service.notification.Flags.redactSensitiveNotificationsFromUntrustedListeners;
@@ -4404,6 +4406,15 @@ public class NotificationManagerService extends SystemService {
             final int callingUser = UserHandle.getUserId(callingUid);
             if (NotificationChannel.DEFAULT_CHANNEL_ID.equals(channelId)) {
                 throw new IllegalArgumentException("Cannot delete default channel");
+            }
+            if (notificationClassification()) {
+                // Check for all reserved channels, but do not throw because it's a common
+                // preexisting pattern for apps to (try to) delete all channels that don't match
+                //  their current desired channel structure
+                if (SYSTEM_RESERVED_IDS.contains(channelId)) {
+                    Log.v(TAG, "Package " + pkg + " cannot delete a reserved channel");
+                    return;
+                }
             }
             enforceDeletingChannelHasNoFgService(pkg, callingUser, channelId);
             enforceDeletingChannelHasNoUserInitiatedJob(pkg, callingUser, channelId);
