@@ -309,8 +309,10 @@ class MovableElementTest {
             TestContentScope {
                 Element(TestElements.Foo, Modifier.size(200.dp)) {
                     content {
-                        Box(Modifier.testTag("bottomEnd").align(Alignment.BottomEnd))
-                        Box(Modifier.testTag("matchParentSize").matchParentSize())
+                        Box {
+                            Box(Modifier.testTag("bottomEnd").align(Alignment.BottomEnd))
+                            Box(Modifier.testTag("matchParentSize").matchParentSize())
+                        }
                     }
                 }
             }
@@ -327,8 +329,10 @@ class MovableElementTest {
             TestContentScope(currentScene = SceneA) {
                 MovableElement(key, Modifier.size(200.dp)) {
                     content {
-                        Box(Modifier.testTag("bottomEnd").align(Alignment.BottomEnd))
-                        Box(Modifier.testTag("matchParentSize").matchParentSize())
+                        Box {
+                            Box(Modifier.testTag("bottomEnd").align(Alignment.BottomEnd))
+                            Box(Modifier.testTag("matchParentSize").matchParentSize())
+                        }
                     }
                 }
             }
