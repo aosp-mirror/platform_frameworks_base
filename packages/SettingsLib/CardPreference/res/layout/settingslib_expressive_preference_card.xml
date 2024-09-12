@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (C) 2024 The Android Open Source Project
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+         http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/SettingsLibCardStyle">
+
+    <LinearLayout
+        android:id="@+id/card_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:baselineAligned="false"
+        android:minHeight="@dimen/settingslib_expressive_space_large3"
+        android:paddingStart="@dimen/settingslib_expressive_space_small1"
+        android:paddingEnd="@dimen/settingslib_expressive_space_small1"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <LinearLayout
+            android:id="@+id/icon_frame"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="@dimen/settingslib_expressive_space_medium3"
+            android:minHeight="@dimen/settingslib_expressive_space_medium3"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@android:id/icon"
+                android:src="@drawable/settingslib_arrow_drop_down"
+                android:layout_width="@dimen/settingslib_expressive_space_medium3"
+                android:layout_height="@dimen/settingslib_expressive_space_medium3"
+                android:scaleType="centerInside"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/text_container"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingHorizontal="@dimen/settingslib_expressive_space_small1"
+            android:paddingVertical="@dimen/settingslib_expressive_space_small2"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@android:id/title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hyphenationFrequency="normalFast"
+                android:lineBreakWordStyle="phrase"
+                android:textAppearance="@style/TextAppearance.CardTitle.SettingsLib"/>
+
+            <TextView
+                android:id="@android:id/summary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hyphenationFrequency="normalFast"
+                android:lineBreakWordStyle="phrase"
+                android:textAppearance="@style/TextAppearance.CardSummary.SettingsLib"/>
+
+        </LinearLayout>
+
+        <ImageView
+            android:id="@android:id/closeButton"
+            android:layout_width="@dimen/settingslib_expressive_space_medium4"
+            android:layout_height="@dimen/settingslib_expressive_space_medium4"
+            android:padding="@dimen/settingslib_expressive_space_extrasmall4"
+            android:layout_gravity="center"
+            android:src="@drawable/settingslib_expressive_icon_close"
+            android:background="?android:attr/selectableItemBackground" />
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>
