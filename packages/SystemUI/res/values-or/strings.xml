@@ -105,6 +105,8 @@
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"ନୋଟରେ ଯୋଗ କରନ୍ତୁ"</string>
     <string name="backlinks_include_link" msgid="4562093591148248158">"ଲିଙ୍କକୁ ଅନ୍ତର୍ଭୁକ୍ତ କରନ୍ତୁ"</string>
     <string name="backlinks_duplicate_label_format" msgid="558445128952827926">"<xliff:g id="APPNAME">%1$s</xliff:g> <xliff:g id="FREQUENCYCOUNT">(%2$d)</xliff:g>"</string>
+    <!-- no translation found for backlinks_cross_profile_error (1355798585727802282) -->
+    <skip />
     <string name="screenrecord_title" msgid="4257171601439507792">"ସ୍କ୍ରିନ ରେକର୍ଡର"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"ସ୍କ୍ରିନ ରେକର୍ଡିଂର ପ୍ରକ୍ରିୟାକରଣ"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ଏକ ସ୍କ୍ରି‍ନ୍‍ ରେକର୍ଡ୍‍ ସେସନ୍‍ ପାଇଁ ଚାଲୁଥିବା ବିଜ୍ଞପ୍ତି"</string>
@@ -292,8 +294,7 @@
     <string name="start_dreams" msgid="9131802557946276718">"ସ୍କ୍ରିନ୍‌ ସେଭର୍‌"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"ଇଥରନେଟ୍‌"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ"</string>
-    <!-- no translation found for quick_settings_modes_label (879156359479504244) -->
-    <skip />
+    <string name="quick_settings_modes_label" msgid="879156359479504244">"ମୋଡ"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"ବ୍ଲୁଟୁଥ"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"ପେୟାର୍‍ ହୋଇଥିବା କୌଣସି ଡିଭାଇସ୍ ଉପଲବ୍ଧ ନାହିଁ"</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"ଏକ ଡିଭାଇସ କନେକ୍ଟ କିମ୍ବା ଡିସକନେକ୍ଟ କରିବାକୁ ଟାପ କରନ୍ତୁ"</string>
@@ -434,8 +435,7 @@
     <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"ସେଟିଂସ ଖୋଲନ୍ତୁ"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"ଅନ୍ୟ ଡିଭାଇସ୍"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"ସଂକ୍ଷିପ୍ତ ବିବରଣୀକୁ ଟୋଗଲ୍ କରନ୍ତୁ"</string>
-    <!-- no translation found for zen_modes_dialog_title (8854640808100096934) -->
-    <skip />
+    <string name="zen_modes_dialog_title" msgid="8854640808100096934">"ମୋଡ"</string>
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"ହୋଇଗଲା"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"ସେଟିଂସ"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"ଚାଲୁ ଅଛି"</string>
@@ -653,7 +653,7 @@
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"ଏହି ଆପକୁ ଅନପିନ କରିବାକୁ, \"ବ୍ୟାକ\" ଏବଂ \"ହୋମ\" ବଟନକୁ ସ୍ପର୍ଶ କରି ଦବାଇ ଧରନ୍ତୁ"</string>
     <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"ଏହି ଆପକୁ ଅନପିନ୍ କରିବାକୁ, ଉପରକୁ ସ୍ୱାଇପ୍ କରି ଧରି ରଖନ୍ତୁ"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"ବୁଝିଗଲି"</string>
-    <string name="screen_pinning_negative" msgid="6882816864569211666">"ନାହିଁ, ଥାଉ"</string>
+    <string name="screen_pinning_negative" msgid="6882816864569211666">"ନା, ଧନ୍ୟବାଦ"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"ଆପ୍ ପିନ୍ କରାଯାଇଛି"</string>
     <string name="screen_pinning_exit" msgid="4553787518387346893">"ଆପ୍ ଅନପିନ୍ କରାଯାଇଛି"</string>
     <string name="stream_voice_call" msgid="7468348170702375660">"କଲ କରନ୍ତୁ"</string>
@@ -1393,18 +1393,12 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"ଆଇକନକୁ ସଙ୍କୁଚିତ କରନ୍ତୁ"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"ଆଇକନକୁ ବିସ୍ତାର କରନ୍ତୁ"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"କିମ୍ବା"</string>
-    <!-- no translation found for launch_keyboard_tutorial_notification_title (8849933155160522519) -->
-    <skip />
-    <!-- no translation found for launch_keyboard_tutorial_notification_content (2880339951512757918) -->
-    <skip />
-    <!-- no translation found for launch_touchpad_tutorial_notification_title (2243780062772196901) -->
-    <skip />
-    <!-- no translation found for launch_touchpad_tutorial_notification_content (7931085031240753226) -->
-    <skip />
-    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_title (1940023776496198762) -->
-    <skip />
-    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_content (1780725168171929365) -->
-    <skip />
+    <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"ଆପଣଙ୍କ କୀବୋର୍ଡ ବ୍ୟବହାର କରି ନାଭିଗେଟ କରନ୍ତୁ"</string>
+    <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"କୀବୋର୍ଡ ସର୍ଟକଟଗୁଡ଼ିକ ବିଷୟରେ ଜାଣନ୍ତୁ"</string>
+    <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"ଆପଣଙ୍କ ଟଚପେଡ ବ୍ୟବହାର କରି ନାଭିଗେଟ କରନ୍ତୁ"</string>
+    <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"ଟଚପେଡର ଜେଶ୍ଚରଗୁଡ଼ିକ ବିଷୟରେ ଜାଣନ୍ତୁ"</string>
+    <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"ଆପଣଙ୍କ କୀବୋର୍ଡ ଏବଂ ଟଚପେଡ ବ୍ୟବହାର କରି ନାଭିଗେଟ କରନ୍ତୁ"</string>
+    <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"ଟଚପେଡ ଜେଶ୍ଚର, କୀବୋର୍ଡ ସର୍ଟକଟ ଏବଂ ଆହୁରି ଅନେକ କିଛି ବିଷୟରେ ଜାଣନ୍ତୁ"</string>
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"ବେକ ଜେଶ୍ଚର"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"ହୋମ ଜେଶ୍ଚର"</string>
     <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"ଆକ୍ସନ କୀ"</string>
@@ -1444,4 +1438,18 @@
     <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="7513137763024327538">"ବର୍ତ୍ତମାନ ଆପଣ ଆପଣଙ୍କ ସ୍କ୍ରିନର ଶୀର୍ଷରୁ ଉଜ୍ଜ୍ୱଳତାର ଲେଭେଲ ହ୍ରାସ କରି ସ୍କ୍ରିନକୁ ଅତିରିକ୍ତ ଡିମ କରିପାରିବେ।\n\nଆପଣ ଏକ ଡାର୍କ ପରିବେଶରେ ଥିଲେ ଏହା ସବୁଠାରୁ ଭଲ କାମ କରେ।"</string>
     <string name="accessibility_deprecate_extra_dim_dialog_button" msgid="1782147201534669800">"ଅତିରିକ୍ତ ଡିମ ସର୍ଟକଟକୁ କାଢ଼ି ଦିଅନ୍ତୁ"</string>
     <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="4070696910424515757">"ଅତିରିକ୍ତ ଡିମର ସର୍ଟକଟ କାଢ଼ି ଦିଆଯାଇଛି। ଆପଣଙ୍କ ଉଜ୍ଜ୍ୱଳତା ହ୍ରାସ କରିବା ପାଇଁ ନିୟମିତ ଉଜ୍ଜ୍ୱଳତା ବାର ବ୍ୟବହାର କରନ୍ତୁ।"</string>
+    <!-- no translation found for qs_edit_mode_category_connectivity (4559726936546032672) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_accessibility (7969091385071475922) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_utilities (8123080090108420095) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_privacy (6577774443194551775) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_providedByApps (8346112074897919019) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_display (4749511439121053942) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_unknown (509314252124053550) -->
+    <skip />
 </resources>

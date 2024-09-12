@@ -21,6 +21,8 @@ import android.app.appfunctions.AppFunctionRuntimeMetadata.createAppFunctionRunt
 import android.app.appfunctions.AppFunctionRuntimeMetadata.createParentAppFunctionRuntimeSchema
 import android.app.appsearch.AppSearchBatchResult
 import android.app.appsearch.AppSearchManager
+import android.app.appsearch.GenericDocument
+import android.app.appsearch.GetByDocumentIdRequest
 import android.app.appsearch.PutDocumentsRequest
 import android.app.appsearch.RemoveByDocumentIdRequest
 import android.app.appsearch.SearchSpec
@@ -44,16 +46,16 @@ class FutureAppSearchSessionTest {
     @After
     fun clearData() {
         val searchContext = AppSearchManager.SearchContext.Builder(TEST_DB).build()
-        FutureAppSearchSession(appSearchManager, testExecutor, searchContext).use {
+        FutureAppSearchSessionImpl(appSearchManager, testExecutor, searchContext).use {
             val setSchemaRequest = SetSchemaRequest.Builder().setForceOverride(true).build()
-            it.setSchema(setSchemaRequest)
+            it.setSchema(setSchemaRequest).get()
         }
     }
 
     @Test
     fun setSchema() {
         val searchContext = AppSearchManager.SearchContext.Builder(TEST_DB).build()
-        FutureAppSearchSession(appSearchManager, testExecutor, searchContext).use { session ->
+        FutureAppSearchSessionImpl(appSearchManager, testExecutor, searchContext).use { session ->
             val setSchemaRequest =
                 SetSchemaRequest.Builder()
                     .addSchemas(
@@ -71,7 +73,7 @@ class FutureAppSearchSessionTest {
     @Test
     fun put() {
         val searchContext = AppSearchManager.SearchContext.Builder(TEST_DB).build()
-        FutureAppSearchSession(appSearchManager, testExecutor, searchContext).use { session ->
+        FutureAppSearchSessionImpl(appSearchManager, testExecutor, searchContext).use { session ->
             val setSchemaRequest =
                 SetSchemaRequest.Builder()
                     .addSchemas(
@@ -97,7 +99,7 @@ class FutureAppSearchSessionTest {
     @Test
     fun remove() {
         val searchContext = AppSearchManager.SearchContext.Builder(TEST_DB).build()
-        FutureAppSearchSession(appSearchManager, testExecutor, searchContext).use { session ->
+        FutureAppSearchSessionImpl(appSearchManager, testExecutor, searchContext).use { session ->
             val setSchemaRequest =
                 SetSchemaRequest.Builder()
                     .addSchemas(
@@ -131,7 +133,7 @@ class FutureAppSearchSessionTest {
     @Test
     fun search() {
         val searchContext = AppSearchManager.SearchContext.Builder(TEST_DB).build()
-        FutureAppSearchSession(appSearchManager, testExecutor, searchContext).use { session ->
+        FutureAppSearchSessionImpl(appSearchManager, testExecutor, searchContext).use { session ->
             val setSchemaRequest =
                 SetSchemaRequest.Builder()
                     .addSchemas(
@@ -163,7 +165,7 @@ class FutureAppSearchSessionTest {
     @Test
     fun getByDocumentId() {
         val searchContext = AppSearchManager.SearchContext.Builder(TEST_DB).build()
-        FutureAppSearchSession(appSearchManager, testExecutor, searchContext).use { session ->
+        FutureAppSearchSessionImpl(appSearchManager, testExecutor, searchContext).use { session ->
             val setSchemaRequest =
                 SetSchemaRequest.Builder()
                     .addSchemas(
@@ -171,24 +173,24 @@ class FutureAppSearchSessionTest {
                         createAppFunctionRuntimeSchema(TEST_PACKAGE_NAME),
                     )
                     .build()
-            val schema = session.setSchema(setSchemaRequest)
+            session.setSchema(setSchemaRequest).get()
             val appFunctionRuntimeMetadata =
                 AppFunctionRuntimeMetadata.Builder(TEST_PACKAGE_NAME, TEST_FUNCTION_ID, "").build()
             val putDocumentsRequest: PutDocumentsRequest =
                 PutDocumentsRequest.Builder()
                     .addGenericDocuments(appFunctionRuntimeMetadata)
                     .build()
-            val putResult = session.put(putDocumentsRequest)
+            session.put(putDocumentsRequest)
+            val getRequest =
+                GetByDocumentIdRequest.Builder(APP_FUNCTION_RUNTIME_NAMESPACE)
+                    .addIds(appFunctionRuntimeMetadata.id)
+                    .build()
 
-            val genricDocument =
-                session
-                    .getByDocumentId(
-                        /* documentId= */ "${TEST_PACKAGE_NAME}/${TEST_FUNCTION_ID}",
-                        APP_FUNCTION_RUNTIME_NAMESPACE,
-                    )
-                    .get()
+            val genericDocument: GenericDocument? =
+                session.getByDocumentId(getRequest).get().successes[appFunctionRuntimeMetadata.id]
 
-            val foundAppFunctionRuntimeMetadata = AppFunctionRuntimeMetadata(genricDocument)
+            assertThat(genericDocument).isNotNull()
+            val foundAppFunctionRuntimeMetadata = AppFunctionRuntimeMetadata(genericDocument!!)
             assertThat(foundAppFunctionRuntimeMetadata.functionId).isEqualTo(TEST_FUNCTION_ID)
         }
     }

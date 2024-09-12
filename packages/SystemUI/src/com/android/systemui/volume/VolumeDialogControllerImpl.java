@@ -391,11 +391,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     }
 
     public void notifyVisible(boolean visible) {
-        if (Flags.useVolumeController()) {
-            mVolumeControllerAdapter.notifyVolumeControllerVisible(visible);
-        } else {
-            mWorker.obtainMessage(W.NOTIFY_VISIBLE, visible ? 1 : 0, 0).sendToTarget();
-        }
+        mWorker.obtainMessage(W.NOTIFY_VISIBLE, visible ? 1 : 0, 0).sendToTarget();
     }
 
     public void userActivity() {
@@ -457,7 +453,11 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     }
 
     private void onNotifyVisibleW(boolean visible) {
-        mAudio.notifyVolumeControllerVisible(mVolumeController, visible);
+        if (Flags.useVolumeController()) {
+            mVolumeControllerAdapter.notifyVolumeControllerVisible(visible);
+        } else {
+            mAudio.notifyVolumeControllerVisible(mVolumeController, visible);
+        }
         if (!visible) {
             if (updateActiveStreamW(-1)) {
                 mCallbacks.onStateChanged(mState);

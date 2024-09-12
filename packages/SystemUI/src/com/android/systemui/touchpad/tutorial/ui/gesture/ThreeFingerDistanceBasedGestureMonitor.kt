@@ -25,8 +25,12 @@ interface GestureDonePredicate {
     fun wasGestureDone(startX: Float, startY: Float, endX: Float, endY: Float): Boolean
 }
 
-/** Common implementation for all three-finger gesture monitors */
-class ThreeFingerGestureMonitor(
+/**
+ * Common implementation for three-finger gesture monitors that are only distance-based. E.g. recent
+ * apps gesture is not only distance-based because it requires going over threshold distance and
+ * slowing down the movement.
+ */
+class ThreeFingerDistanceBasedGestureMonitor(
     override val gestureDistanceThresholdPx: Int,
     override val gestureStateChangedCallback: (GestureState) -> Unit,
     private val donePredicate: GestureDonePredicate

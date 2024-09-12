@@ -585,7 +585,7 @@ fun interface UserActionDistance {
      */
     fun UserActionDistanceScope.absoluteDistance(
         fromSceneSize: IntSize,
-        orientation: Orientation
+        orientation: Orientation,
     ): Float
 }
 

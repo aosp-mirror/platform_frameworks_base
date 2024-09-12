@@ -73,8 +73,7 @@
     <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"收合「<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>」"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"「<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>」設定"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"關閉對話框"</string>
-    <!-- no translation found for bubble_fullscreen_text (1006758103218086231) -->
-    <skip />
+    <string name="bubble_fullscreen_text" msgid="1006758103218086231">"移至全螢幕"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"不要以對話框形式顯示對話"</string>
     <string name="bubbles_user_education_title" msgid="2112319053732691899">"透過對話框來聊天"</string>
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"新的對話會以浮動圖示或對話框形式顯示。輕觸即可開啟對話框，拖曳則可移動對話框。"</string>

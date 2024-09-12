@@ -49,10 +49,7 @@ sealed class ContentKey(debugName: String, identity: Any) : Key(debugName, ident
 }
 
 /** Key for a scene. */
-class SceneKey(
-    debugName: String,
-    identity: Any = Object(),
-) : ContentKey(debugName, identity) {
+class SceneKey(debugName: String, identity: Any = Object()) : ContentKey(debugName, identity) {
     override val testTag: String = "scene:$debugName"
 
     /** The unique [ElementKey] identifying this scene's root element. */
@@ -64,10 +61,7 @@ class SceneKey(
 }
 
 /** Key for an overlay. */
-class OverlayKey(
-    debugName: String,
-    identity: Any = Object(),
-) : ContentKey(debugName, identity) {
+class OverlayKey(debugName: String, identity: Any = Object()) : ContentKey(debugName, identity) {
     override val testTag: String = "overlay:$debugName"
 
     override fun toString(): String {

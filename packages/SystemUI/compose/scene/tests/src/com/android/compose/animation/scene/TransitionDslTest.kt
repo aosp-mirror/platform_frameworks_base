@@ -62,7 +62,7 @@ class TransitionDslTest {
             .comparingElementsUsing(
                 Correspondence.transforming<TransitionSpecImpl, Pair<ContentKey?, ContentKey?>>(
                     { it?.from to it?.to },
-                    "has (from, to) equal to"
+                    "has (from, to) equal to",
                 )
             )
             .containsExactly(
@@ -111,7 +111,7 @@ class TransitionDslTest {
                 fractionRange(
                     start = 0.1f,
                     end = 0.8f,
-                    easing = CubicBezierEasing(0.1f, 0.1f, 0f, 1f)
+                    easing = CubicBezierEasing(0.1f, 0.1f, 0f, 1f),
                 ) {
                     fade(TestElements.Foo)
                 }
@@ -126,11 +126,7 @@ class TransitionDslTest {
                 TransformationRange(start = 0.1f, end = 0.8f),
                 TransformationRange(start = 0.2f, end = TransformationRange.BoundUnspecified),
                 TransformationRange(start = TransformationRange.BoundUnspecified, end = 0.9f),
-                TransformationRange(
-                    start = 0.1f,
-                    end = 0.8f,
-                    CubicBezierEasing(0.1f, 0.1f, 0f, 1f)
-                ),
+                TransformationRange(start = 0.1f, end = 0.8f, CubicBezierEasing(0.1f, 0.1f, 0f, 1f)),
             )
     }
 
@@ -146,7 +142,7 @@ class TransitionDslTest {
                 timestampRange(
                     startMillis = 100,
                     endMillis = 300,
-                    easing = CubicBezierEasing(0.1f, 0.1f, 0f, 1f)
+                    easing = CubicBezierEasing(0.1f, 0.1f, 0f, 1f),
                 ) {
                     fade(TestElements.Foo)
                 }
@@ -164,7 +160,7 @@ class TransitionDslTest {
                 TransformationRange(
                     start = 100 / 500f,
                     end = 300 / 500f,
-                    easing = CubicBezierEasing(0.1f, 0.1f, 0f, 1f)
+                    easing = CubicBezierEasing(0.1f, 0.1f, 0f, 1f),
                 ),
             )
     }
@@ -200,7 +196,7 @@ class TransitionDslTest {
                 preview = { fractionRange(start = 0.1f, end = 0.8f) { fade(TestElements.Foo) } },
                 reversePreview = {
                     fractionRange(start = 0.5f, end = 0.6f) { fade(TestElements.Foo) }
-                }
+                },
             ) {
                 spec = tween(500)
                 fractionRange(start = 0.1f, end = 0.8f) { fade(TestElements.Foo) }
@@ -226,9 +222,7 @@ class TransitionDslTest {
 
         assertThat(previewTransformations)
             .comparingElementsUsing(TRANSFORMATION_RANGE)
-            .containsExactly(
-                TransformationRange(start = 0.5f, end = 0.6f),
-            )
+            .containsExactly(TransformationRange(start = 0.5f, end = 0.6f))
     }
 
     @Test
@@ -237,7 +231,7 @@ class TransitionDslTest {
             from(
                 TestScenes.SceneA,
                 to = TestScenes.SceneB,
-                preview = { fractionRange(start = 0.1f, end = 0.8f) { fade(TestElements.Foo) } }
+                preview = { fractionRange(start = 0.1f, end = 0.8f) { fade(TestElements.Foo) } },
             ) {
                 spec = tween(500)
                 fractionRange(start = 0.1f, end = 0.8f) { fade(TestElements.Foo) }
@@ -251,7 +245,7 @@ class TransitionDslTest {
             transitions.transitionSpec(
                 from = TestScenes.SceneA,
                 to = TestScenes.SceneB,
-                key = TransitionKey.PredictiveBack
+                key = TransitionKey.PredictiveBack,
             )
 
         val transformations = transitionSpec.transformationSpec().transformations
@@ -267,9 +261,7 @@ class TransitionDslTest {
 
         assertThat(previewTransformations)
             .comparingElementsUsing(TRANSFORMATION_RANGE)
-            .containsExactly(
-                TransformationRange(start = 0.1f, end = 0.8f),
-            )
+            .containsExactly(TransformationRange(start = 0.1f, end = 0.8f))
     }
 
     @Test
@@ -339,7 +331,7 @@ class TransitionDslTest {
         private val TRANSFORMATION_RANGE =
             Correspondence.transforming<Transformation, TransformationRange?>(
                 { it?.range },
-                "has range equal to"
+                "has range equal to",
             )
     }
 }

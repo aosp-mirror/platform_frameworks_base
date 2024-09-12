@@ -16,15 +16,23 @@
 
 package com.android.systemui.education.domain.interactor
 
+import android.os.SystemProperties
 import com.android.systemui.contextualeducation.GestureType
 import com.android.systemui.contextualeducation.GestureType.ALL_APPS
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.education.dagger.ContextualEducationModule.EduClock
 import com.android.systemui.inputdevice.data.repository.UserInputDeviceRepository
 import com.android.systemui.inputdevice.tutorial.data.repository.DeviceType
 import com.android.systemui.inputdevice.tutorial.data.repository.DeviceType.KEYBOARD
 import com.android.systemui.inputdevice.tutorial.data.repository.DeviceType.TOUCHPAD
+import com.android.systemui.inputdevice.tutorial.data.repository.TutorialSchedulerRepository
+import java.time.Clock
 import javax.inject.Inject
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -47,12 +55,24 @@ constructor(
     @Background private val backgroundScope: CoroutineScope,
     private val contextualEducationInteractor: ContextualEducationInteractor,
     private val inputDeviceRepository: UserInputDeviceRepository,
+    private val tutorialRepository: TutorialSchedulerRepository,
+    @EduClock private val clock: Clock,
 ) : KeyboardTouchpadEduStatsInteractor {
+
+    companion object {
+        val initialDelayDuration: Duration
+            get() =
+                SystemProperties.getLong(
+                        "persist.contextual_edu.initial_delay_sec",
+                        /* defaultValue= */ 72.hours.inWholeSeconds
+                    )
+                    .toDuration(DurationUnit.SECONDS)
+    }
 
     override fun incrementSignalCount(gestureType: GestureType) {
         backgroundScope.launch {
             val targetDevice = getTargetDevice(gestureType)
-            if (isTargetDeviceConnected(targetDevice)) {
+            if (isTargetDeviceConnected(targetDevice) && hasInitialDelayElapsed(targetDevice)) {
                 contextualEducationInteractor.incrementSignalCount(gestureType)
             }
         }
@@ -65,12 +85,10 @@ constructor(
     }
 
     private suspend fun isTargetDeviceConnected(deviceType: DeviceType): Boolean {
-        if (deviceType == KEYBOARD) {
-            return inputDeviceRepository.isAnyKeyboardConnectedForUser.first().isConnected
-        } else if (deviceType == TOUCHPAD) {
-            return inputDeviceRepository.isAnyTouchpadConnectedForUser.first().isConnected
+        return when (deviceType) {
+            KEYBOARD -> inputDeviceRepository.isAnyKeyboardConnectedForUser.first().isConnected
+            TOUCHPAD -> inputDeviceRepository.isAnyTouchpadConnectedForUser.first().isConnected
         }
-        return false
     }
 
     /**
@@ -83,4 +101,11 @@ constructor(
             ALL_APPS -> KEYBOARD
             else -> TOUCHPAD
         }
+
+    private suspend fun hasInitialDelayElapsed(deviceType: DeviceType): Boolean {
+        val oobeLaunchTime = tutorialRepository.launchTime(deviceType) ?: return false
+        return clock
+            .instant()
+            .isAfter(oobeLaunchTime.plusSeconds(initialDelayDuration.inWholeSeconds))
+    }
 }

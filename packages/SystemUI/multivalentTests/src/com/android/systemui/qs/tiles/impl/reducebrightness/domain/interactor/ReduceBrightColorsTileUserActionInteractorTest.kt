@@ -19,12 +19,15 @@ package com.android.systemui.qs.tiles.impl.reducebrightness.domain.interactor
 import android.platform.test.annotations.EnabledOnRavenwood
 import android.platform.test.annotations.RequiresFlagsDisabled
 import android.platform.test.annotations.RequiresFlagsEnabled
+import android.platform.test.flag.junit.CheckFlagsRule
+import android.platform.test.flag.junit.DeviceFlagsValueProvider
 import android.provider.Settings
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.R
 import com.android.server.display.feature.flags.Flags
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.accessibility.extradim.ExtraDimDialogManager
 import com.android.systemui.accessibility.reduceBrightColorsController
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.qs.tiles.base.actions.FakeQSTileIntentUserInputHandler
@@ -33,8 +36,14 @@ import com.android.systemui.qs.tiles.base.interactor.QSTileInputTestKtx
 import com.android.systemui.qs.tiles.impl.reducebrightness.domain.model.ReduceBrightColorsTileModel
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mock
+import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.verify
 
 @SmallTest
 @EnabledOnRavenwood
@@ -45,21 +54,34 @@ class ReduceBrightColorsTileUserActionInteractorTest : SysuiTestCase() {
     private val inputHandler = FakeQSTileIntentUserInputHandler()
     private val controller = kosmos.reduceBrightColorsController
 
-    private val underTest =
-        ReduceBrightColorsTileUserActionInteractor(
-            context.resources,
-            inputHandler,
-            controller,
-        )
+    @Mock private lateinit var mExtraDimDialogManager: ExtraDimDialogManager
 
-    private val underTestEvenDimmerEnabled =
-        ReduceBrightColorsTileUserActionInteractor(
-            context.orCreateTestableResources
-                .apply { addOverride(R.bool.config_evenDimmerEnabled, true) }
-                .resources,
-            inputHandler,
-            controller,
-        )
+    @get:Rule val checkFlagsRule: CheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule()
+
+    private lateinit var underTest: ReduceBrightColorsTileUserActionInteractor
+    private lateinit var underTestEvenDimmerEnabled: ReduceBrightColorsTileUserActionInteractor
+
+    @Before
+    fun setup() {
+        MockitoAnnotations.initMocks(this)
+        underTest =
+            ReduceBrightColorsTileUserActionInteractor(
+                context.resources,
+                inputHandler,
+                controller,
+                mExtraDimDialogManager,
+            )
+
+        underTestEvenDimmerEnabled =
+            ReduceBrightColorsTileUserActionInteractor(
+                context.orCreateTestableResources
+                    .apply { addOverride(R.bool.config_evenDimmerEnabled, true) }
+                    .resources,
+                inputHandler,
+                controller,
+                mExtraDimDialogManager,
+            )
+    }
 
     @Test
     @RequiresFlagsDisabled(Flags.FLAG_EVEN_DIMMER)
@@ -142,9 +164,7 @@ class ReduceBrightColorsTileUserActionInteractorTest : SysuiTestCase() {
             QSTileInputTestKtx.longClick(ReduceBrightColorsTileModel(enabled))
         )
 
-        QSTileIntentUserInputHandlerSubject.assertThat(inputHandler).handledOneIntentInput {
-            assertThat(it.intent.action).isEqualTo(Settings.ACTION_DISPLAY_SETTINGS)
-        }
+        verify(mExtraDimDialogManager).dismissKeyguardIfNeededAndShowDialog(anyOrNull())
     }
 
     @Test
@@ -155,9 +175,6 @@ class ReduceBrightColorsTileUserActionInteractorTest : SysuiTestCase() {
         underTestEvenDimmerEnabled.handleInput(
             QSTileInputTestKtx.longClick(ReduceBrightColorsTileModel(enabled))
         )
-
-        QSTileIntentUserInputHandlerSubject.assertThat(inputHandler).handledOneIntentInput {
-            assertThat(it.intent.action).isEqualTo(Settings.ACTION_DISPLAY_SETTINGS)
-        }
+        verify(mExtraDimDialogManager).dismissKeyguardIfNeededAndShowDialog(anyOrNull())
     }
 }

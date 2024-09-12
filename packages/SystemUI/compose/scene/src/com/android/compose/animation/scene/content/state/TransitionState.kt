@@ -184,7 +184,7 @@ sealed interface TransitionState {
 
             private fun computeCurrentOverlays(
                 include: OverlayKey,
-                exclude: OverlayKey
+                exclude: OverlayKey,
             ): Set<OverlayKey> {
                 return buildSet {
                     addAll(currentOverlaysWhenTransitionStarted)
@@ -336,9 +336,7 @@ sealed interface TransitionState {
             return specForCurrentScene.transformationSpec.transformations.isNotEmpty()
         }
 
-        internal open fun interruptionProgress(
-            layoutImpl: SceneTransitionLayoutImpl,
-        ): Float {
+        internal open fun interruptionProgress(layoutImpl: SceneTransitionLayoutImpl): Float {
             if (!layoutImpl.state.enableInterruptions) {
                 return 0f
             }

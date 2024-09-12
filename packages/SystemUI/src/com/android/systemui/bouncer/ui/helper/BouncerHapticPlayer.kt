@@ -23,25 +23,28 @@ import com.android.systemui.Flags
 //noinspection CleanArchitectureDependencyViolation: Data layer only referenced for this enum class
 import com.google.android.msdl.data.model.MSDLToken
 import com.google.android.msdl.domain.MSDLPlayer
+import javax.inject.Inject
 
-/** A helper object to deliver haptic feedback in bouncer interactions. */
-object BouncerHapticHelper {
+/**
+ * A helper class to deliver haptic feedback in bouncer interactions.
+ *
+ * @param[msdlPlayer] The [MSDLPlayer] used to deliver MSDL feedback.
+ */
+class BouncerHapticPlayer @Inject constructor(private val msdlPlayer: dagger.Lazy<MSDLPlayer>) {
 
-    private val authInteractionProperties = AuthInteractionProperties()
+    private val authInteractionProperties by
+        lazy(LazyThreadSafetyMode.NONE) { AuthInteractionProperties() }
+
+    val isEnabled: Boolean
+        get() = Flags.msdlFeedback()
 
     /**
      * Deliver MSDL feedback as a result of authenticating through a bouncer.
      *
      * @param[authenticationSucceeded] Whether the authentication was successful or not.
-     * @param[player] The [MSDLPlayer] that delivers the correct feedback.
      */
-    fun playMSDLAuthenticationFeedback(
-        authenticationSucceeded: Boolean,
-        player: MSDLPlayer?,
-    ) {
-        if (player == null || !Flags.msdlFeedback()) {
-            return
-        }
+    fun playAuthenticationFeedback(authenticationSucceeded: Boolean) {
+        if (!isEnabled) return
 
         val token =
             if (authenticationSucceeded) {
@@ -49,7 +52,7 @@ object BouncerHapticHelper {
             } else {
                 MSDLToken.FAILURE
             }
-        player.playToken(token, authInteractionProperties)
+        msdlPlayer.get().playToken(token, authInteractionProperties)
     }
 
     /**
@@ -57,17 +60,29 @@ object BouncerHapticHelper {
      * MSDL feedback using a [MSDLPlayer], or fallback to a default haptic feedback using the
      * [View.performHapticFeedback] API and a [View].
      *
-     * @param[player] [MSDLPlayer] for MSDL feedback.
      * @param[view] A [View] for default haptic feedback using [View.performHapticFeedback]
      */
-    fun playPatternDotFeedback(player: MSDLPlayer?, view: View?) {
-        if (player == null || !Flags.msdlFeedback()) {
+    fun playPatternDotFeedback(view: View?) {
+        if (!isEnabled) {
             view?.performHapticFeedback(
                 HapticFeedbackConstants.VIRTUAL_KEY,
                 HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING,
             )
         } else {
-            player.playToken(MSDLToken.DRAG_INDICATOR)
+            msdlPlayer.get().playToken(MSDLToken.DRAG_INDICATOR)
         }
     }
+
+    /** Deliver MSDL feedback when the delete key of the pin bouncer is pressed */
+    fun playDeleteKeyPressFeedback() = msdlPlayer.get().playToken(MSDLToken.KEYPRESS_DELETE)
+
+    /**
+     * Deliver MSDL feedback when the delete key of the pin bouncer is long-pressed
+     *
+     * @return whether MSDL feedback is allowed to play.
+     */
+    fun playDeleteKeyLongPressedFeedback() = msdlPlayer.get().playToken(MSDLToken.LONG_PRESS)
+
+    /** Deliver MSDL feedback when a numpad key is pressed on the pin bouncer */
+    fun playNumpadKeyFeedback() = msdlPlayer.get().playToken(MSDLToken.KEYPRESS_STANDARD)
 }

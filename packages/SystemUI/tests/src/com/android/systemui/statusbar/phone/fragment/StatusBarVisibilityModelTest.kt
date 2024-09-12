@@ -39,7 +39,8 @@ class StatusBarVisibilityModelTest : SysuiTestCase() {
             StatusBarVisibilityModel(
                 showClock = true,
                 showNotificationIcons = true,
-                showOngoingActivityChip = true,
+                showPrimaryOngoingActivityChip = true,
+                showSecondaryOngoingActivityChip = true,
                 showSystemInfo = true,
             )
 
@@ -75,17 +76,19 @@ class StatusBarVisibilityModelTest : SysuiTestCase() {
     }
 
     @Test
-    fun createModelFromFlags_ongoingCallChipNotDisabled_showOngoingActivityChipTrue() {
+    fun createModelFromFlags_ongoingCallChipNotDisabled_showOngoingActivityChipsTrue() {
         val result = createModelFromFlags(disabled1 = 0, disabled2 = 0)
 
-        assertThat(result.showOngoingActivityChip).isTrue()
+        assertThat(result.showPrimaryOngoingActivityChip).isTrue()
+        assertThat(result.showSecondaryOngoingActivityChip).isTrue()
     }
 
     @Test
-    fun createModelFromFlags_ongoingCallChipDisabled_showOngoingActivityChipFalse() {
+    fun createModelFromFlags_ongoingCallChipDisabled_showOngoingActivityChipsFalse() {
         val result = createModelFromFlags(disabled1 = DISABLE_ONGOING_CALL_CHIP, disabled2 = 0)
 
-        assertThat(result.showOngoingActivityChip).isFalse()
+        assertThat(result.showPrimaryOngoingActivityChip).isFalse()
+        assertThat(result.showSecondaryOngoingActivityChip).isFalse()
     }
 
     @Test

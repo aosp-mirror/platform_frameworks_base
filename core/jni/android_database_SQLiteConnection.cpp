@@ -70,11 +70,14 @@ struct SQLiteConnection {
     // Open flags.
     // Must be kept in sync with the constants defined in SQLiteDatabase.java.
     enum {
+        // LINT.IfChange
         OPEN_READWRITE          = 0x00000000,
         OPEN_READONLY           = 0x00000001,
         OPEN_READ_MASK          = 0x00000001,
         NO_LOCALIZED_COLLATORS  = 0x00000010,
+        NO_DOUBLE_QUOTED_STRS   = 0x00000020,
         CREATE_IF_NECESSARY     = 0x10000000,
+        // LINT.ThenChange(/core/java/android/database/sqlite/SQLiteDatabase.java)
     };
 
     sqlite3* const db;
@@ -153,6 +156,18 @@ static jlong nativeOpen(JNIEnv* env, jclass clazz, jstring pathStr, jint openFla
             throw_sqlite3_exception(env, db, "Cannot set lookaside");
             sqlite3_close(db);
             return 0;
+        }
+    }
+
+    // Disallow double-quoted string literals if the proper flag is set.
+    if ((openFlags & SQLiteConnection::NO_DOUBLE_QUOTED_STRS) != 0) {
+        void *setting = 0;
+        int err = 0;
+        if ((err = sqlite3_db_config(db, SQLITE_DBCONFIG_DQS_DDL, 0, setting)) != SQLITE_OK) {
+            ALOGE("failed to configure SQLITE_DBCONFIG_DQS_DDL: %d", err);
+        }
+        if ((err = sqlite3_db_config(db, SQLITE_DBCONFIG_DQS_DML, 0, setting)) != SQLITE_OK) {
+            ALOGE("failed to configure SQLITE_DBCONFIG_DQS_DML: %d", err);
         }
     }
 

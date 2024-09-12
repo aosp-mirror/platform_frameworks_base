@@ -35,11 +35,13 @@ import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.classifier.FalsingCollectorFake
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.haptics.msdl.bouncerHapticPlayer
 import com.android.systemui.keyboard.data.repository.FakeKeyboardRepository
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.DevicePostureController
 import com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POSTURE_HALF_OPENED
 import com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POSTURE_OPENED
+import com.android.systemui.testKosmos
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
@@ -107,6 +109,8 @@ class KeyguardPinViewControllerTest : SysuiTestCase() {
 
     @Captor lateinit var postureCallbackCaptor: ArgumentCaptor<DevicePostureController.Callback>
 
+    private val kosmos = testKosmos()
+
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
@@ -151,8 +155,8 @@ class KeyguardPinViewControllerTest : SysuiTestCase() {
             mSelectedUserInteractor,
             uiEventLogger,
             keyguardKeyboardInteractor,
-            null,
-            mUserActivityNotifier
+            kosmos.bouncerHapticPlayer,
+            mUserActivityNotifier,
         )
     }
 
