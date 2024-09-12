@@ -331,6 +331,8 @@ public class RootWindowContainerTests extends WindowTestsBase {
         final WindowProcessController proc = mSystemServicesTestRule.addProcess(
                 activity.packageName, activity.processName,
                 6789 /* pid */, activity.info.applicationInfo.uid);
+        mAtm.mInternal.preBindApplication(proc, proc.mInfo);
+        assertTrue(proc.registeredForActivityConfigChanges());
         assertFalse(proc.mHasEverAttached);
         try {
             mRootWindowContainer.attachApplication(proc);
