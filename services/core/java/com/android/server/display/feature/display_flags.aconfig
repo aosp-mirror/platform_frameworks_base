@@ -341,3 +341,11 @@ flag {
       purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "enable_battery_stats_for_all_displays"
+    namespace: "display_manager"
+    description: "Flag to enable battery stats for all displays."
+    bug: "366112793"
+    is_fixed_read_only: true
+}

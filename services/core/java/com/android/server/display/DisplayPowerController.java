@@ -536,7 +536,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         mLastBrightnessEvent = new BrightnessEvent(mDisplayId);
         mTempBrightnessEvent = new BrightnessEvent(mDisplayId);
 
-        if (mDisplayId == Display.DEFAULT_DISPLAY) {
+        if (flags.isBatteryStatsEnabledForAllDisplays()) {
+            mBatteryStats = BatteryStatsService.getService();
+        } else if (mDisplayId == Display.DEFAULT_DISPLAY) {
             mBatteryStats = BatteryStatsService.getService();
         } else {
             mBatteryStats = null;
@@ -2791,8 +2793,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 screenState, mDisplayStatsId, reason);
         if (mBatteryStats != null) {
             try {
-                // TODO(multi-display): make this multi-display
-                mBatteryStats.noteScreenState(/* displayId= */ 0, screenState, reason);
+                mBatteryStats.noteScreenState(mDisplayId, screenState, reason);
             } catch (RemoteException e) {
                 // same process
             }
@@ -2807,7 +2808,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 int brightnessInt = mFlags.isBrightnessIntRangeUserPerceptionEnabled()
                         ? BrightnessSynchronizer.brightnessFloatToIntSetting(mContext, brightness)
                         : BrightnessSynchronizer.brightnessFloatToInt(brightness);
-                mBatteryStats.noteScreenBrightness(brightnessInt);
+                mBatteryStats.noteScreenBrightness(mDisplayId, brightnessInt);
             } catch (RemoteException e) {
                 // same process
             }

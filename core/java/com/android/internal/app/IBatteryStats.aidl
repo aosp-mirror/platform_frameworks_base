@@ -146,7 +146,7 @@ interface IBatteryStats {
     @EnforcePermission("UPDATE_DEVICE_STATS")
     void noteScreenState(int displayId, int state, int reason);
     @EnforcePermission("UPDATE_DEVICE_STATS")
-    void noteScreenBrightness(int brightness);
+    void noteScreenBrightness(int displayId, int brightness);
     @EnforcePermission("UPDATE_DEVICE_STATS")
     void noteUserActivity(int uid, int event);
     @EnforcePermission("UPDATE_DEVICE_STATS")

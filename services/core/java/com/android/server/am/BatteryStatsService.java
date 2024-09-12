@@ -1855,7 +1855,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
     @Override
     @EnforcePermission(UPDATE_DEVICE_STATS)
-    public void noteScreenBrightness(final int brightness) {
+    public void noteScreenBrightness(final int displayId, final int brightness) {
         super.noteScreenBrightness_enforcePermission();
 
         synchronized (mLock) {
@@ -1863,7 +1863,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             final long uptime = SystemClock.uptimeMillis();
             mHandler.post(() -> {
                 synchronized (mStats) {
-                    mStats.noteScreenBrightnessLocked(0, brightness, elapsedRealtime, uptime);
+                    mStats.noteScreenBrightnessLocked(
+                            displayId, brightness, elapsedRealtime, uptime);
                 }
             });
         }
