@@ -181,6 +181,17 @@ flag {
 }
 
 flag {
+  name: "update_dims_when_window_shown"
+  namespace: "windowing_frontend"
+  description: "Check if we need to update dim layers when a new window draws the first frame"
+  bug: "327332488"
+  is_fixed_read_only: true
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
     name: "release_snapshot_aggressively"
     namespace: "windowing_frontend"
     description: "Actively release task snapshot memory"

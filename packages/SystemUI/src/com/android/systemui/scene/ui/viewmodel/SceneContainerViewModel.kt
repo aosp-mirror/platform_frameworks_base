@@ -77,7 +77,7 @@ constructor(
             source =
                 shadeInteractor.shadeMode.map {
                     if (it is ShadeMode.Dual) splitEdgeDetector else DefaultEdgeDetector
-                }
+                },
         )
 
     override suspend fun onActivated(): Nothing {
@@ -163,10 +163,8 @@ constructor(
             when (toScene) {
                 Scenes.Bouncer -> Classifier.BOUNCER_UNLOCK
                 Scenes.Gone -> Classifier.UNLOCK
-                Scenes.NotificationsShade -> Classifier.NOTIFICATION_DRAG_DOWN
                 Scenes.Shade -> Classifier.NOTIFICATION_DRAG_DOWN
                 Scenes.QuickSettings -> Classifier.QUICK_SETTINGS
-                Scenes.QuickSettingsShade -> Classifier.QUICK_SETTINGS
                 else -> null
             }
 
@@ -200,7 +198,7 @@ constructor(
      * resolution target.
      */
     fun resolveSceneFamilies(
-        actionResultMap: Map<UserAction, UserActionResult>,
+        actionResultMap: Map<UserAction, UserActionResult>
     ): Map<UserAction, UserActionResult> {
         return actionResultMap.mapValues { (_, actionResult) ->
             when (actionResult) {
@@ -259,7 +257,7 @@ constructor(
     @AssistedFactory
     interface Factory {
         fun create(
-            motionEventHandlerReceiver: (MotionEventHandler?) -> Unit,
+            motionEventHandlerReceiver: (MotionEventHandler?) -> Unit
         ): SceneContainerViewModel
     }
 }

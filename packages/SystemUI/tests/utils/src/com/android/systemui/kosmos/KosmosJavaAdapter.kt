@@ -36,6 +36,7 @@ import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryUdfpsInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteractor
 import com.android.systemui.globalactions.domain.interactor.globalActionsInteractor
+import com.android.systemui.haptics.msdl.bouncerHapticPlayer
 import com.android.systemui.haptics.msdl.fakeMSDLPlayer
 import com.android.systemui.haptics.qs.qsLongPressEffect
 import com.android.systemui.jank.interactionJankMonitor
@@ -158,4 +159,5 @@ class KosmosJavaAdapter() {
     val sceneContainerOcclusionInteractor by lazy { kosmos.sceneContainerOcclusionInteractor }
     val msdlPlayer by lazy { kosmos.fakeMSDLPlayer }
     val shadeModeInteractor by lazy { kosmos.shadeModeInteractor }
+    val bouncerHapticHelper by lazy { kosmos.bouncerHapticPlayer }
 }

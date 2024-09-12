@@ -52,6 +52,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.assertPositionInRootIsEqualTo
 import androidx.compose.ui.test.assertTopPositionInRootIsEqualTo
+import androidx.compose.ui.test.hasParent
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -229,11 +230,7 @@ class ElementTest {
                     scene(SceneA) {
                         Box(Modifier.size(layoutSize)) {
                             // Transformed element
-                            Element(
-                                TestElements.Bar,
-                                elementSize,
-                                elementOffset,
-                            )
+                            Element(TestElements.Bar, elementSize, elementOffset)
                         }
                     }
                     scene(SceneB) { Box(Modifier.size(layoutSize)) }
@@ -534,10 +531,7 @@ class ElementTest {
                 scene(SceneA) {
                     // The pages are full-size and beyondBoundsPageCount is 0, so at rest only one
                     // page should be composed.
-                    HorizontalPager(
-                        pagerState,
-                        beyondViewportPageCount = 0,
-                    ) { page ->
+                    HorizontalPager(pagerState, beyondViewportPageCount = 0) { page ->
                         when (page) {
                             0 -> Box(Modifier.element(TestElements.Foo).fillMaxSize())
                             1 -> Box(Modifier.fillMaxSize())
@@ -606,7 +600,7 @@ class ElementTest {
                 scaleSize(TestElements.Foo, width = 2f, height = 0.5f)
                 translate(TestElements.Foo, x = 10.dp, y = 10.dp)
                 fade(TestElements.Foo)
-            }
+            },
         ) {
             before { assertThat(fooCompositions).isEqualTo(1) }
             at(16) { assertThat(fooCompositions).isEqualTo(1) }
@@ -627,7 +621,7 @@ class ElementTest {
                         from(SceneA, to = SceneB) {
                             scaleSize(TestElements.Foo, width = 2f, height = 2f)
                         }
-                    }
+                    },
                 )
             }
 
@@ -676,13 +670,13 @@ class ElementTest {
             touchSlop = LocalViewConfiguration.current.touchSlop
             SceneTransitionLayout(
                 state = state,
-                modifier = Modifier.size(layoutWidth, layoutHeight)
+                modifier = Modifier.size(layoutWidth, layoutHeight),
             ) {
                 scene(key = SceneA, userActions = mapOf(Swipe.Down to SceneB)) {
                     animateContentFloatAsState(
                         value = animatedFloatRange.start,
                         key = TestValues.Value1,
-                        false
+                        false,
                     )
                     Spacer(Modifier.fillMaxSize())
                 }
@@ -691,7 +685,7 @@ class ElementTest {
                         animateContentFloatAsState(
                             value = animatedFloatRange.endInclusive,
                             key = TestValues.Value1,
-                            canOverflow = false
+                            canOverflow = false,
                         )
                     Spacer(Modifier.element(TestElements.Foo).fillMaxSize())
                     LaunchedEffect(Unit) {
@@ -786,7 +780,7 @@ class ElementTest {
                                 progressConverter = ProgressConverter.linear()
                                 translate(TestElements.Foo, y = overscrollTranslateY)
                             }
-                        }
+                        },
                 )
                     as MutableSceneTransitionLayoutStateImpl
             }
@@ -795,7 +789,7 @@ class ElementTest {
             touchSlop = LocalViewConfiguration.current.touchSlop
             SceneTransitionLayout(
                 state = state,
-                modifier = Modifier.size(layoutWidth, layoutHeight)
+                modifier = Modifier.size(layoutWidth, layoutHeight),
             ) {
                 scene(SceneA) { Spacer(Modifier.fillMaxSize()) }
                 scene(SceneB, userActions = mapOf(Swipe.Up to SceneA)) {
@@ -804,7 +798,7 @@ class ElementTest {
                             // A scrollable that does not consume the scroll gesture
                             .scrollable(
                                 rememberScrollableState(consumeScrollDelta = { 0f }),
-                                Orientation.Vertical
+                                Orientation.Vertical,
                             )
                             .fillMaxSize()
                     ) {
@@ -869,18 +863,18 @@ class ElementTest {
             touchSlop = LocalViewConfiguration.current.touchSlop
             SceneTransitionLayout(
                 state = state,
-                modifier = Modifier.size(layoutWidth, layoutHeight)
+                modifier = Modifier.size(layoutWidth, layoutHeight),
             ) {
                 scene(
                     SceneA,
-                    userActions = mapOf(Swipe(SwipeDirection.Down, pointerCount = 2) to SceneB)
+                    userActions = mapOf(Swipe(SwipeDirection.Down, pointerCount = 2) to SceneB),
                 ) {
                     Box(
                         Modifier
                             // A scrollable that does not consume the scroll gesture
                             .scrollable(
                                 rememberScrollableState(consumeScrollDelta = { 0f }),
-                                Orientation.Vertical
+                                Orientation.Vertical,
                             )
                             .fillMaxSize()
                     ) {
@@ -1203,7 +1197,7 @@ class ElementTest {
                                 startsOutsideLayoutBounds = false,
                             )
                         }
-                    }
+                    },
                 )
             }
 
@@ -1621,7 +1615,7 @@ class ElementTest {
             rule.runOnUiThread {
                 MutableSceneTransitionLayoutStateImpl(
                     SceneA,
-                    transitions { overscrollDisabled(SceneA, Orientation.Horizontal) }
+                    transitions { overscrollDisabled(SceneA, Orientation.Horizontal) },
                 )
             }
 
@@ -1644,7 +1638,7 @@ class ElementTest {
                     from = SceneA,
                     to = SceneB,
                     progress = { -1f },
-                    orientation = Orientation.Horizontal
+                    orientation = Orientation.Horizontal,
                 )
             )
         }
@@ -1666,7 +1660,7 @@ class ElementTest {
             rule.runOnUiThread {
                 MutableSceneTransitionLayoutStateImpl(
                     SceneA,
-                    transitions { from(SceneA, to = SceneB) { fade(TestElements.Foo) } }
+                    transitions { from(SceneA, to = SceneB) { fade(TestElements.Foo) } },
                 )
             }
 
@@ -1730,7 +1724,7 @@ class ElementTest {
             rule.runOnUiThread {
                 MutableSceneTransitionLayoutStateImpl(
                     SceneA,
-                    transitions { from(SceneA, to = SceneB) { fade(TestElements.Foo) } }
+                    transitions { from(SceneA, to = SceneB) { fade(TestElements.Foo) } },
                 )
             }
 
@@ -1781,7 +1775,7 @@ class ElementTest {
                     transitions {
                         overscrollDisabled(SceneA, Orientation.Horizontal)
                         overscrollDisabled(SceneB, Orientation.Horizontal)
-                    }
+                    },
                 )
             }
 
@@ -1830,7 +1824,7 @@ class ElementTest {
                     transitions {
                         overscrollDisabled(SceneA, Orientation.Horizontal)
                         overscrollDisabled(SceneB, Orientation.Horizontal)
-                    }
+                    },
                 )
             }
 
@@ -1886,7 +1880,7 @@ class ElementTest {
                             progressConverter = ProgressConverter.linear()
                             translate(TestElements.Foo, y = 15.dp)
                         }
-                    }
+                    },
                 )
             }
 
@@ -2053,7 +2047,7 @@ class ElementTest {
                         from(SceneB, to = SceneC) {
                             scaleSize(TestElements.Foo, width = 2f, height = 3f)
                         }
-                    }
+                    },
                 )
             }
 
@@ -2171,7 +2165,7 @@ class ElementTest {
             rule.runOnIdle {
                 MutableSceneTransitionLayoutStateImpl(
                     SceneA,
-                    transitions { overscrollDisabled(SceneA, Orientation.Horizontal) }
+                    transitions { overscrollDisabled(SceneA, Orientation.Horizontal) },
                 )
             }
 
@@ -2231,7 +2225,7 @@ class ElementTest {
                             // In B => A, Foo is shared.
                             sharedElement(TestElements.Foo, enabled = true)
                         }
-                    }
+                    },
                 )
             }
 
@@ -2363,7 +2357,7 @@ class ElementTest {
                 },
                 previewProgress = 0.5f,
                 progress = 0f,
-                isInPreviewStage = true
+                isInPreviewStage = true,
             )
 
         // verify that preview transition for exiting elements is halfway played from
@@ -2419,7 +2413,7 @@ class ElementTest {
                 },
                 previewProgress = 0.5f,
                 progress = 0.5f,
-                isInPreviewStage = false
+                isInPreviewStage = false,
             )
 
         // verify that exiting elements remain in the preview-end state if no further transition is
@@ -2459,13 +2453,13 @@ class ElementTest {
         transition: TransitionBuilder.() -> Unit,
         progress: Float = 0f,
         previewProgress: Float = 0.5f,
-        isInPreviewStage: Boolean = true
+        isInPreviewStage: Boolean = true,
     ): SceneTransitionLayoutImpl {
         val state =
             rule.runOnIdle {
                 MutableSceneTransitionLayoutStateImpl(
                     from,
-                    transitions { from(from, to = to, preview = preview, builder = transition) }
+                    transitions { from(from, to = to, preview = preview, builder = transition) },
                 )
             }
 
@@ -2489,10 +2483,40 @@ class ElementTest {
                 to = to,
                 progress = { progress },
                 previewProgress = { previewProgress },
-                isInPreviewStage = { isInPreviewStage }
+                isInPreviewStage = { isInPreviewStage },
             )
         scope.launch { state.startTransition(bToA) }
         rule.waitForIdle()
         return layoutImpl
+    }
+
+    @Test
+    fun elementComposableShouldPropagateMinConstraints() {
+        val contentTestTag = "content"
+        val movable = MovableElementKey("movable", contents = setOf(SceneA))
+        rule.setContent {
+            TestContentScope(currentScene = SceneA) {
+                Column {
+                    Element(TestElements.Foo, Modifier.size(40.dp)) {
+                        content {
+                            // Modifier.size() sets a preferred size and this should be ignored
+                            // because of the previously set 40dp size.
+                            Box(Modifier.testTag(contentTestTag).size(20.dp))
+                        }
+                    }
+
+                    MovableElement(movable, Modifier.size(40.dp)) {
+                        content { Box(Modifier.testTag(contentTestTag).size(20.dp)) }
+                    }
+                }
+            }
+        }
+
+        rule
+            .onNode(hasTestTag(contentTestTag) and hasParent(isElement(TestElements.Foo)))
+            .assertSizeIsEqualTo(40.dp)
+        rule
+            .onNode(hasTestTag(contentTestTag) and hasParent(isElement(movable)))
+            .assertSizeIsEqualTo(40.dp)
     }
 }

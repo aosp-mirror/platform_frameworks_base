@@ -564,8 +564,7 @@
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Оятқыштар мен еске салғыштар"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Бұл қолданбаға оятқыштарды орнатуға және уақытқа байланысты әрекеттерді жоспарлауға рұқсат береді. Мұндайда қолданба фондық режимде жұмыс істейді, сондықтан батарея шығыны артуы мүмкін.\n\nБұл рұқсат өшірулі болса, осы қолданбада жоспарланған ағымдағы оятқыштар мен уақытқа байланысты іс-шаралар жұмыс істемейді."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"кесте, оятқыш, еске салғыш, сағат"</string>
-    <!-- no translation found for zen_mode_do_not_disturb_name (6798711401734798283) -->
-    <skip />
+    <string name="zen_mode_do_not_disturb_name" msgid="6798711401734798283">"Мазаламау"</string>
     <string name="zen_mode_settings_title" msgid="7374070457626419755">"Мазаламау"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Қосу"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Мазаламау режимін қосу"</string>

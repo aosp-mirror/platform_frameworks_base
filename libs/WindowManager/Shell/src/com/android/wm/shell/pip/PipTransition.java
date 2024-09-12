@@ -1102,6 +1102,8 @@ public class PipTransition extends PipTransitionController {
             return;
         }
 
+        // NOTE(b/365300020): Legacy enter PiP path, clear the swipe state.
+        mPipTransitionState.setInSwipePipToHomeTransition(false);
         final int enterAnimationType = mEnterAnimationType;
         if (enterAnimationType == ANIM_TYPE_ALPHA) {
             startTransaction.setAlpha(leash, 0f);

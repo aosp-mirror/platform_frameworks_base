@@ -27,8 +27,8 @@ android_test {
     name: "DataIdleTest",
     platform_apis: true,
     libs: [
-        "android.test.runner",
-        "android.test.base",
+        "android.test.runner.stubs.system",
+        "android.test.base.stubs.system",
     ],
     static_libs: ["junit"],
     srcs: ["src/**/*.java"],

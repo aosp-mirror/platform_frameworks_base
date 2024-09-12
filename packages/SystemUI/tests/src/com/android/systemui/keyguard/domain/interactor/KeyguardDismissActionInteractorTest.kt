@@ -226,11 +226,7 @@ class KeyguardDismissActionInteractorTest : SysuiTestCase() {
             assertThat(resetDismissAction).isNull()
 
             kosmos.setSceneTransition(
-                Transition(
-                    from = Scenes.Bouncer,
-                    to = Scenes.NotificationsShade,
-                    progress = flowOf(1f),
-                )
+                Transition(from = Scenes.Bouncer, to = Scenes.Shade, progress = flowOf(1f))
             )
             assertThat(resetDismissAction).isNull()
         }

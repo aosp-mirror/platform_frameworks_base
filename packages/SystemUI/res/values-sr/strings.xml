@@ -105,6 +105,7 @@
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Додај у белешку"</string>
     <string name="backlinks_include_link" msgid="4562093591148248158">"Уврсти линк"</string>
     <string name="backlinks_duplicate_label_format" msgid="558445128952827926">"<xliff:g id="APPNAME">%1$s</xliff:g> <xliff:g id="FREQUENCYCOUNT">(%2$d)</xliff:g>"</string>
+    <string name="backlinks_cross_profile_error" msgid="1355798585727802282">"Не можете да додате линкове са других профила"</string>
     <string name="screenrecord_title" msgid="4257171601439507792">"Снимач екрана"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Обрађујемо видео снимка екрана"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Обавештење о сесији снимања екрана је активно"</string>
@@ -292,8 +293,7 @@
     <string name="start_dreams" msgid="9131802557946276718">"Чувар екрана"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"Етернет"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Не узнемиравај"</string>
-    <!-- no translation found for quick_settings_modes_label (879156359479504244) -->
-    <skip />
+    <string name="quick_settings_modes_label" msgid="879156359479504244">"Режими"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Није доступан ниједан упарени уређај"</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"Додирните да бисте повезали уређај или прекинули везу"</string>
@@ -434,8 +434,7 @@
     <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"Отвори Подешавања"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Други уређај"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Укључи/искључи преглед"</string>
-    <!-- no translation found for zen_modes_dialog_title (8854640808100096934) -->
-    <skip />
+    <string name="zen_modes_dialog_title" msgid="8854640808100096934">"Режими"</string>
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"Готово"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"Подешавања"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"Укључено"</string>
@@ -488,7 +487,7 @@
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"Одбаци"</string>
     <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"Додајте, уклоните и преуредите виџете овде"</string>
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Додајте још виџета"</string>
-    <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Дуги притисак за прилагођавање виџета"</string>
+    <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Дуго притисните за прилагођавање виџета"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Прилагоди виџете"</string>
     <string name="unlock_reason_to_customize_widgets" msgid="5011909432460546033">"Откључајте да бисте прилагодили виџете"</string>
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"Икона апликације за онемогућен виџет"</string>
@@ -1393,18 +1392,12 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Икона за скупљање"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Икона за проширивање"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"или"</string>
-    <!-- no translation found for launch_keyboard_tutorial_notification_title (8849933155160522519) -->
-    <skip />
-    <!-- no translation found for launch_keyboard_tutorial_notification_content (2880339951512757918) -->
-    <skip />
-    <!-- no translation found for launch_touchpad_tutorial_notification_title (2243780062772196901) -->
-    <skip />
-    <!-- no translation found for launch_touchpad_tutorial_notification_content (7931085031240753226) -->
-    <skip />
-    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_title (1940023776496198762) -->
-    <skip />
-    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_content (1780725168171929365) -->
-    <skip />
+    <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Крећите се помоћу тастатуре"</string>
+    <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Сазнајте више о тастерским пречицама"</string>
+    <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Крећите се помоћу тачпеда"</string>
+    <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"Научите покрете за тачпед"</string>
+    <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"Крећите се помоћу тастатуре и тачпeда"</string>
+    <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"Научите покрете за тачпед, тастерске пречице и друго"</string>
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Покрет за враћање"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Покрет за почетну страницу"</string>
     <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"Тастер радњи"</string>
@@ -1444,4 +1437,18 @@
     <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="7513137763024327538">"Сада можете додатно да затамните екран смањивањем нивоа осветљености при врху екрана. \n\nОво најбоље функционише када сте у тамном окружењу."</string>
     <string name="accessibility_deprecate_extra_dim_dialog_button" msgid="1782147201534669800">"Уклони пречицу за додатно затамњивање"</string>
     <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="4070696910424515757">"Уклоњена је пречица за додатно затамњивање. Да бисте смањили осветљеност, користите уобичајену траку за осветљеност."</string>
+    <!-- no translation found for qs_edit_mode_category_connectivity (4559726936546032672) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_accessibility (7969091385071475922) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_utilities (8123080090108420095) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_privacy (6577774443194551775) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_providedByApps (8346112074897919019) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_display (4749511439121053942) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_unknown (509314252124053550) -->
+    <skip />
 </resources>

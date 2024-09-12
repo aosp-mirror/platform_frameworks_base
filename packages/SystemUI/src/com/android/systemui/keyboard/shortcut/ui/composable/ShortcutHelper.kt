@@ -736,14 +736,13 @@ private fun CategoryItemTwoPane(
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
 
-    Surface(
+    SelectableShortcutSurface(
         selected = selected,
         onClick = onClick,
         modifier =
             Modifier.semantics { role = Role.Tab }
                 .heightIn(min = 64.dp)
                 .fillMaxWidth()
-                .focusable(interactionSource = interactionSource)
                 .outlineFocusModifier(
                     isFocused = isFocused,
                     focusColor = MaterialTheme.colorScheme.secondary,
@@ -752,6 +751,7 @@ private fun CategoryItemTwoPane(
                 ),
         shape = RoundedCornerShape(28.dp),
         color = colors.containerColor(selected).value,
+        interactionSource = interactionSource
     ) {
         Row(Modifier.padding(horizontal = 24.dp), verticalAlignment = Alignment.CenterVertically) {
             ShortcutCategoryIcon(
@@ -860,14 +860,12 @@ private fun ShortcutsSearchBar(onQueryChange: (String) -> Unit) {
 private fun KeyboardSettings(horizontalPadding: Dp, verticalPadding: Dp, onClick: () -> Unit) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
-    Surface(
+    ClickableShortcutSurface(
         onClick = onClick,
         shape = RoundedCornerShape(24.dp),
         color = Color.Transparent,
-        modifier =
-            Modifier.semantics { role = Role.Button }
-                .fillMaxWidth()
-                .focusable(interactionSource = interactionSource)
+        modifier = Modifier.semantics { role = Role.Button }.fillMaxWidth(),
+        interactionSource = interactionSource
     ) {
         Row(
             modifier =

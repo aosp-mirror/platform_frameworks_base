@@ -263,7 +263,7 @@ internal class ElementNode(
     @ExperimentalComposeUiApi
     override fun MeasureScope.measure(
         measurable: Measurable,
-        constraints: Constraints
+        constraints: Constraints,
     ): MeasureResult {
         check(isLookingAhead)
 
@@ -344,7 +344,7 @@ internal class ElementNode(
 
     private fun ApproachMeasureScope.doNotPlace(
         measurable: Measurable,
-        constraints: Constraints
+        constraints: Constraints,
     ): MeasureResult {
         recursivelyClearPlacementValues()
         stateInContent.lastSize = Element.SizeUnspecified
@@ -355,7 +355,7 @@ internal class ElementNode(
 
     private fun ApproachMeasureScope.placeNormally(
         measurable: Measurable,
-        constraints: Constraints
+        constraints: Constraints,
     ): MeasureResult {
         val placeable = measurable.measure(constraints)
         stateInContent.lastSize = placeable.size()
@@ -670,10 +670,7 @@ private fun prepareInterruption(
  * Reconcile the state of [element] in the formContent and toContent of [transition] so that the
  * values before interruption have their expected values, taking shared transitions into account.
  */
-private fun reconcileStates(
-    element: Element,
-    transition: TransitionState.Transition,
-) {
+private fun reconcileStates(element: Element, transition: TransitionState.Transition) {
     val fromContentState = element.stateByContent[transition.fromContent] ?: return
     val toContentState = element.stateByContent[transition.toContent] ?: return
     if (!isSharedElementEnabled(element.key, transition)) {
@@ -831,15 +828,21 @@ private fun shouldPlaceElement(
 
     // Don't place the element in this content if this content is not part of the current element
     // transition.
-    if (content != transition.fromContent && content != transition.toContent) {
+    val isReplacingOverlay = transition is TransitionState.Transition.ReplaceOverlay
+    if (
+        content != transition.fromContent &&
+            content != transition.toContent &&
+            (!isReplacingOverlay || content != transition.currentScene)
+    ) {
         return false
     }
 
     // Place the element if it is not shared.
-    if (
-        transition.fromContent !in element.stateByContent ||
-            transition.toContent !in element.stateByContent
-    ) {
+    var copies = 0
+    if (transition.fromContent in element.stateByContent) copies++
+    if (transition.toContent in element.stateByContent) copies++
+    if (isReplacingOverlay && transition.currentScene in element.stateByContent) copies++
+    if (copies <= 1) {
         return true
     }
 
@@ -1139,7 +1142,7 @@ private fun ContentDrawScope.getDrawScale(
                             Offset.Unspecified
                         } else {
                             a.pivot.specifiedOrCenter() - b.pivot.specifiedOrCenter()
-                        }
+                        },
                 )
             },
             add = { a, b, bProgress ->
@@ -1151,9 +1154,9 @@ private fun ContentDrawScope.getDrawScale(
                             Offset.Unspecified
                         } else {
                             a.pivot.specifiedOrCenter() + b.pivot.specifiedOrCenter() * bProgress
-                        }
+                        },
                 )
-            }
+            },
         )
 
     stateInContent.lastScale = interruptedScale
@@ -1272,9 +1275,10 @@ private inline fun <T> computeValue(
 
     // If we are replacing an overlay and the element is both in a single overlay and in the current
     // scene, interpolate the state of the element using the current scene as the other scene.
+    var currentSceneState: Element.State? = null
     if (!isSharedElement && transition is TransitionState.Transition.ReplaceOverlay) {
-        val currentSceneState = element.stateByContent[transition.currentScene]
-        if (currentSceneState != null) {
+        currentSceneState = element.stateByContent[transition.currentScene]
+        if (currentSceneState != null && isSharedElementEnabled(element.key, transition)) {
             return interpolateSharedElement(
                 transition = transition,
                 contentValue = contentValue,
@@ -1293,6 +1297,8 @@ private inline fun <T> computeValue(
             when {
                 isSharedElement && currentContent == fromContent -> fromState
                 isSharedElement -> toState
+                currentSceneState != null && currentContent == transition.currentScene ->
+                    currentSceneState
                 else -> fromState ?: toState
             }
         )
@@ -1371,7 +1377,7 @@ private inline fun <T> computeValue(
             lerp(
                 lerp(previewTargetValue, targetValueOrNull ?: idleValue, previewRangeProgress),
                 idleValue,
-                transformation?.range?.progress(transition.progress) ?: transition.progress
+                transformation?.range?.progress(transition.progress) ?: transition.progress,
             )
         } else {
             if (targetValueOrNull == null) {
@@ -1384,7 +1390,7 @@ private inline fun <T> computeValue(
                 lerp(
                     lerp(idleValue, previewTargetValue, previewRangeProgress),
                     targetValueOrNull,
-                    transformation.range?.progress(transition.progress) ?: transition.progress
+                    transformation.range?.progress(transition.progress) ?: transition.progress,
                 )
             }
         }
@@ -1399,14 +1405,7 @@ private inline fun <T> computeValue(
 
     val idleValue = contentValue(contentState)
     val targetValue =
-        transformation.transform(
-            layoutImpl,
-            content,
-            element,
-            contentState,
-            transition,
-            idleValue,
-        )
+        transformation.transform(layoutImpl, content, element, contentState, transition, idleValue)
 
     // Make sure we don't read progress if values are the same and we don't need to interpolate, so
     // we don't invalidate the phase where this is read.
@@ -1419,7 +1418,13 @@ private inline fun <T> computeValue(
     val rangeProgress = transformation.range?.progress(progress) ?: progress
 
     // Interpolate between the value at rest and the value before entering/after leaving.
-    val isEntering = content == toContent
+    val isEntering =
+        when {
+            content == toContent -> true
+            content == fromContent -> false
+            content == transition.currentScene -> toState == null
+            else -> content == toContent
+        }
     return if (isEntering) {
         lerp(targetValue, idleValue, rangeProgress)
     } else {
@@ -1433,7 +1438,7 @@ private inline fun <T> interpolateSharedElement(
     fromState: Element.State,
     toState: Element.State,
     isSpecified: (T) -> Boolean,
-    lerp: (T, T, Float) -> T
+    lerp: (T, T, Float) -> T,
 ): T {
     val start = contentValue(fromState)
     val end = contentValue(toState)

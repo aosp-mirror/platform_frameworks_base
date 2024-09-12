@@ -108,7 +108,7 @@ constructor(
             .transition(
                 edge = Edge.create(from = KeyguardState.LOCKSCREEN, to = Scenes.Gone),
                 edgeWithoutSceneContainer =
-                    Edge.create(from = KeyguardState.LOCKSCREEN, to = KeyguardState.GONE)
+                    Edge.create(from = KeyguardState.LOCKSCREEN, to = KeyguardState.GONE),
             )
             .map<TransitionStep, Boolean?> {
                 true // Make the surface visible during LS -> GONE transitions.
@@ -162,7 +162,7 @@ constructor(
                 .collect {
                     startTransitionTo(
                         KeyguardState.PRIMARY_BOUNCER,
-                        ownerReason = "#listenForLockscreenToPrimaryBouncer"
+                        ownerReason = "#listenForLockscreenToPrimaryBouncer",
                     )
                 }
         }
@@ -238,7 +238,7 @@ constructor(
                                             getDefaultAnimatorForTransitionsToState(
                                                     KeyguardState.LOCKSCREEN
                                                 )
-                                                .apply { duration = 0 }
+                                                .apply { duration = 0 },
                                     )
                                 )
                             }
@@ -249,6 +249,8 @@ constructor(
                         if (
                             // Use currentTransitionInfo to decide whether to start the transition.
                             currentTransitionInfo.to == KeyguardState.LOCKSCREEN &&
+                                shadeExpansion > 0f &&
+                                shadeExpansion < 1f &&
                                 shadeRepository.legacyShadeTracking.value &&
                                 !isKeyguardUnlocked &&
                                 statusBarState == KEYGUARD
@@ -257,7 +259,7 @@ constructor(
                                 startTransitionTo(
                                     toState = KeyguardState.PRIMARY_BOUNCER,
                                     animator = null, // transition will be manually controlled,
-                                    ownerReason = "#listenForLockscreenToPrimaryBouncerDragging"
+                                    ownerReason = "#listenForLockscreenToPrimaryBouncerDragging",
                                 )
                         }
                     }

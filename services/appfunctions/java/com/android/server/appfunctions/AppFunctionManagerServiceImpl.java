@@ -16,6 +16,8 @@
 
 package com.android.server.appfunctions;
 
+import static com.android.server.appfunctions.AppFunctionExecutors.THREAD_POOL_EXECUTOR;
+
 import android.annotation.NonNull;
 import android.app.appfunctions.ExecuteAppFunctionAidlRequest;
 import android.app.appfunctions.ExecuteAppFunctionResponse;
@@ -51,14 +53,7 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
     public AppFunctionManagerServiceImpl(@NonNull Context context) {
         this(
                 new RemoteServiceCallerImpl<>(
-                        context,
-                        IAppFunctionService.Stub::asInterface,
-                        new ThreadPoolExecutor(
-                                /* corePoolSize= */ Runtime.getRuntime().availableProcessors(),
-                                /* maxConcurrency= */ Runtime.getRuntime().availableProcessors(),
-                                /* keepAliveTime= */ 0L,
-                                /* unit= */ TimeUnit.SECONDS,
-                                /* workQueue= */ new LinkedBlockingQueue<>())),
+                        context, IAppFunctionService.Stub::asInterface, THREAD_POOL_EXECUTOR),
                 new CallerValidatorImpl(context),
                 new ServiceHelperImpl(context),
                 new ServiceConfigImpl());
@@ -124,39 +119,47 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
             return;
         }
 
-        if (!mCallerValidator.verifyCallerCanExecuteAppFunction(
-                validatedCallingPackage, targetPackageName)) {
-            safeExecuteAppFunctionCallback.onResult(
-                    ExecuteAppFunctionResponse.newFailure(
-                            ExecuteAppFunctionResponse.RESULT_DENIED,
-                            "Caller does not have permission to execute the appfunction",
-                            /* extras= */ null));
-            return;
-        }
-
-        Intent serviceIntent =
-                mInternalServiceHelper.resolveAppFunctionService(targetPackageName, targetUser);
-        if (serviceIntent == null) {
-            safeExecuteAppFunctionCallback.onResult(
-                    ExecuteAppFunctionResponse.newFailure(
-                            ExecuteAppFunctionResponse.RESULT_INTERNAL_ERROR,
-                            "Cannot find the target service.",
-                            /* extras= */ null));
-            return;
-        }
-
-        final long token = Binder.clearCallingIdentity();
-        try {
-            bindAppFunctionServiceUnchecked(
-                    requestInternal,
-                    serviceIntent,
-                    targetUser,
-                    safeExecuteAppFunctionCallback,
-                    /* bindFlags= */ Context.BIND_AUTO_CREATE,
-                    /* timeoutInMillis= */ mServiceConfig.getExecuteAppFunctionTimeoutMillis());
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
+        mCallerValidator
+                .verifyCallerCanExecuteAppFunction(
+                        validatedCallingPackage,
+                        targetPackageName,
+                        requestInternal.getClientRequest().getFunctionIdentifier())
+                .thenAccept(
+                        canExecute -> {
+                            if (!canExecute) {
+                                safeExecuteAppFunctionCallback.onResult(
+                                        ExecuteAppFunctionResponse.newFailure(
+                                                ExecuteAppFunctionResponse.RESULT_DENIED,
+                                                "Caller does not have permission to execute the"
+                                                        + " appfunction",
+                                                /* extras= */ null));
+                                return;
+                            }
+                            Intent serviceIntent =
+                                    mInternalServiceHelper.resolveAppFunctionService(
+                                            targetPackageName, targetUser);
+                            if (serviceIntent == null) {
+                                safeExecuteAppFunctionCallback.onResult(
+                                        ExecuteAppFunctionResponse.newFailure(
+                                                ExecuteAppFunctionResponse.RESULT_INTERNAL_ERROR,
+                                                "Cannot find the target service.",
+                                                /* extras= */ null));
+                                return;
+                            }
+                            final long token = Binder.clearCallingIdentity();
+                            try {
+                                bindAppFunctionServiceUnchecked(
+                                        requestInternal,
+                                        serviceIntent,
+                                        targetUser,
+                                        safeExecuteAppFunctionCallback,
+                                        /* bindFlags= */ Context.BIND_AUTO_CREATE,
+                                        /* timeoutInMillis= */ mServiceConfig
+                                                .getExecuteAppFunctionTimeoutMillis());
+                            } finally {
+                                Binder.restoreCallingIdentity(token);
+                            }
+                        });
     }
 
     private void bindAppFunctionServiceUnchecked(

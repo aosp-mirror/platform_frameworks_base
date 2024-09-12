@@ -41,7 +41,7 @@ import org.junit.runners.Parameterized
  * Transitions: From A launch a trampoline Activity T, T launches secondary Activity B and finishes
  * itself, end up in split A|B.
  *
- * To run this test: `atest FlickerTestsOther:OpenTrampolineActivityTest`
+ * To run this test: `atest FlickerTestsActivityEmbedding:OpenTrampolineActivityTest`
  */
 @FlakyTest(bugId = 341209752)
 @RequiresDevice

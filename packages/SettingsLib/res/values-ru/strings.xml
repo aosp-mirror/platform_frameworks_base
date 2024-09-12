@@ -81,7 +81,7 @@
     <string name="speed_label_fast" msgid="2677719134596044051">"Быстрая"</string>
     <string name="speed_label_very_fast" msgid="8215718029533182439">"Очень быстрая"</string>
     <string name="wifi_passpoint_expired" msgid="6540867261754427561">"Срок действия истек"</string>
-    <string name="preference_summary_default_combination" msgid="2644094566845577901">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
+    <string name="preference_summary_default_combination" msgid="2644094566845577901">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="bluetooth_disconnected" msgid="7739366554710388701">"Нет подключения"</string>
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Отключение..."</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"Подключение..."</string>
@@ -564,8 +564,7 @@
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Будильники и напоминания"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Вы можете разрешить этому приложению устанавливать будильники и планировать запуск действий в определенное время. В этом случае оно будет работать в фоновом режиме и быстрее расходовать заряд батареи.\n\nЕсли отключить это разрешение, текущие будильники и созданные приложением события перестанут запускаться."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"установить, будильник, напоминание, часы"</string>
-    <!-- no translation found for zen_mode_do_not_disturb_name (6798711401734798283) -->
-    <skip />
+    <string name="zen_mode_do_not_disturb_name" msgid="6798711401734798283">"Не беспокоить"</string>
     <string name="zen_mode_settings_title" msgid="7374070457626419755">"Не беспокоить"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Включить"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Включите режим \"Не беспокоить\""</string>

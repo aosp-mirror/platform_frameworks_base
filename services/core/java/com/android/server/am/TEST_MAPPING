@@ -94,12 +94,7 @@
   ],
   "postsubmit": [
     {
-      "name": "FrameworksServicesTests",
-      "options": [
-        {
-          "include-filter": "com.android.server.am."
-        }
-      ]
+      "name": "FrameworksServicesTests_android_server_am"
     },
     {
       "name": "CtsAppDataIsolationHostTestCases"

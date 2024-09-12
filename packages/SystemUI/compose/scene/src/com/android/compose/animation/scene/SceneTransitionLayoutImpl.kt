@@ -253,7 +253,7 @@ internal class SceneTransitionLayoutImpl(
                     key: OverlayKey,
                     userActions: Map<UserAction, UserActionResult>,
                     alignment: Alignment,
-                    content: @Composable (ContentScope.() -> Unit)
+                    content: @Composable (ContentScope.() -> Unit),
                 ) {
                     overlaysDefined = true
                     overlaysToRemove.remove(key)
@@ -291,7 +291,7 @@ internal class SceneTransitionLayoutImpl(
     private fun resolveUserActions(
         key: ContentKey,
         userActions: Map<UserAction, UserActionResult>,
-        layoutDirection: LayoutDirection
+        layoutDirection: LayoutDirection,
     ): Map<UserAction.Resolved, UserActionResult> {
         return userActions
             .mapKeys { it.key.resolve(layoutDirection) }

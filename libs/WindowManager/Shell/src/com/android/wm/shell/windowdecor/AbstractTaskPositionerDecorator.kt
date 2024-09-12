@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.server.input.debug;
+package com.android.wm.shell.windowdecor
 
-import android.content.Context;
-import android.view.View;
-
-public class TouchpadVisualisationView extends View {
-    public TouchpadVisualisationView(Context context) {
-        super(context);
-    }
-}
+/**
+ * Abstract decorator for a [TaskPositioner].
+ */
+abstract class AbstractTaskPositionerDecorator(
+    private val taskPositioner: TaskPositioner
+) : TaskPositioner by taskPositioner

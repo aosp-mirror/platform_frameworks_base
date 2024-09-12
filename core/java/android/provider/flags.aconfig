@@ -43,3 +43,12 @@ flag {
         purpose: PURPOSE_FEATURE
     }
 }
+
+# OWNER = liefuliu
+flag {
+    name: "new_default_account_api_enabled"
+    is_exported: true
+    namespace: "contacts"
+    description: "Enable the new ContactsContract Default Account APIs."
+    bug: "359957527"
+}

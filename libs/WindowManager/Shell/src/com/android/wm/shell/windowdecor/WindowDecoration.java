@@ -530,7 +530,14 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
      * Checks if task has entered/exited immersive mode and requires a change in caption visibility.
      */
     private void updateCaptionVisibility(View rootView) {
-        mIsCaptionVisible = mIsStatusBarVisible && !mIsKeyguardVisibleAndOccluded;
+        // Caption should always be visible in freeform mode. When not in freeform, align with the
+        // status bar except when showing over keyguard (where it should not shown).
+        //  TODO(b/356405803): Investigate how it's possible for the status bar visibility to be
+        //   false while a freeform window is open if the status bar is always forcibly-shown. It
+        //   may be that the InsetsState (from which |mIsStatusBarVisible| is set) still contains
+        //   an invisible insets source in immersive cases even if the status bar is shown?
+        mIsCaptionVisible = mTaskInfo.isFreeform()
+                || (mIsStatusBarVisible && !mIsKeyguardVisibleAndOccluded);
         setCaptionVisibility(rootView, mIsCaptionVisible);
     }
 
