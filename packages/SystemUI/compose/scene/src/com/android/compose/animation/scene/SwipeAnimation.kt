@@ -27,8 +27,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.IntSize
 import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.animation.scene.content.state.TransitionState.HasOverscrollProperties.Companion.DistanceUnspecified
+import com.android.compose.nestedscroll.SuspendedValue
+import kotlinx.coroutines.CancellationException
 import kotlin.math.absoluteValue
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.withTimeout
 
 internal fun createSwipeAnimation(
     layoutState: MutableSceneTransitionLayoutStateImpl,
@@ -321,7 +324,7 @@ internal class SwipeAnimation<T : ContentKey>(
         initialVelocity: Float,
         targetContent: T,
         spec: AnimationSpec<Float>? = null,
-    ): Float {
+    ): SuspendedValue<Float> {
         check(!isAnimatingOffset()) { "SwipeAnimation.animateOffset() can only be called once" }
 
         val initialProgress = progress
@@ -360,7 +363,7 @@ internal class SwipeAnimation<T : ContentKey>(
             currentContent = targetContent
         }
 
-        val startProgress =
+        val initialOffset =
             if (contentTransition.previewTransformationSpec != null && targetContent == toContent) {
                 0f
             } else {
@@ -368,7 +371,7 @@ internal class SwipeAnimation<T : ContentKey>(
             }
 
         val animatable =
-            Animatable(startProgress, OffsetVisibilityThreshold).also { offsetAnimation = it }
+            Animatable(initialOffset, OffsetVisibilityThreshold).also { offsetAnimation = it }
 
         check(isAnimatingOffset())
 
@@ -379,7 +382,7 @@ internal class SwipeAnimation<T : ContentKey>(
         if (skipAnimation) {
             // Unblock the job.
             offsetAnimationRunnable.complete(null)
-            return 0f
+            return { 0f }
         }
 
         val isTargetGreater = targetOffset > animatable.value
@@ -390,6 +393,8 @@ internal class SwipeAnimation<T : ContentKey>(
             spec
                 ?: contentTransition.transformationSpec.swipeSpec
                 ?: layoutState.transitions.defaultSwipeSpec
+
+        val velocityConsumed = CompletableDeferred<Float>()
 
         offsetAnimationRunnable.complete {
             try {
@@ -427,11 +432,13 @@ internal class SwipeAnimation<T : ContentKey>(
                 }
             } catch (_: SnapException) {
                 /* Ignore. */
+            } finally {
+                // The animation consumed the whole available velocity
+                velocityConsumed.complete(initialVelocity)
             }
         }
 
-        // This animation always consumes the whole available velocity
-        return initialVelocity
+        return { velocityConsumed.await() }
     }
 
     /** An exception thrown during the animation to stop it immediately. */
