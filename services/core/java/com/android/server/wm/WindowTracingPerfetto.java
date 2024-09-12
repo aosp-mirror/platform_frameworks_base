@@ -32,19 +32,21 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 class WindowTracingPerfetto extends WindowTracing {
     private static final String TAG = "WindowTracing";
+    private static final String PRODUCTION_DATA_SOURCE_NAME = "android.windowmanager";
 
     private final AtomicInteger mCountSessionsOnFrame = new AtomicInteger();
     private final AtomicInteger mCountSessionsOnTransaction = new AtomicInteger();
-    private final WindowTracingDataSource mDataSource = new WindowTracingDataSource(this);
+    private final WindowTracingDataSource mDataSource;
 
     WindowTracingPerfetto(WindowManagerService service, Choreographer choreographer) {
-        this(service, choreographer, service.mGlobalLock);
+        this(service, choreographer, service.mGlobalLock, PRODUCTION_DATA_SOURCE_NAME);
     }
 
     @VisibleForTesting
     WindowTracingPerfetto(WindowManagerService service, Choreographer choreographer,
-            WindowManagerGlobalLock globalLock) {
+            WindowManagerGlobalLock globalLock, String dataSourceName) {
         super(service, choreographer, globalLock);
+        mDataSource = new WindowTracingDataSource(this, dataSourceName);
     }
 
     @Override
