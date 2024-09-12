@@ -30,6 +30,7 @@ import android.app.admin.DevicePolicyManager;
 import android.app.appsearch.AppSearchBatchResult;
 import android.app.appsearch.AppSearchManager;
 import android.app.appsearch.AppSearchManager.SearchContext;
+import android.app.appsearch.AppSearchResult;
 import android.app.appsearch.GenericDocument;
 import android.app.appsearch.GetByDocumentIdRequest;
 import android.content.Context;
@@ -38,8 +39,9 @@ import android.os.Binder;
 import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
-import java.util.Objects;
+
 import com.android.internal.infra.AndroidFuture;
+import java.util.Objects;
 
 /* Validates that caller has the correct privilege to call an AppFunctionManager Api. */
 class CallerValidatorImpl implements CallerValidator {
@@ -144,7 +146,14 @@ class CallerValidatorImpl implements CallerValidator {
         if (result.isSuccess()) {
             return result.getSuccesses().get(documentId);
         }
-        throw new IllegalArgumentException("No document in the result for id: " + documentId);
+
+        AppSearchResult<GenericDocument> failedResult = result.getFailures().get(documentId);
+        throw new AppSearchException(
+                failedResult.getResultCode(),
+                "Unable to retrieve document with id: "
+                        + documentId
+                        + " due to "
+                        + failedResult.getErrorMessage());
     }
 
     private static boolean getRestrictCallersWithExecuteAppFunctionsProperty(
