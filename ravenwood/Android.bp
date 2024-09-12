@@ -5,6 +5,10 @@ package {
     // to get the below license kinds:
     //   SPDX-license-identifier-Apache-2.0
     default_applicable_licenses: ["frameworks_base_license"],
+
+    // OWNER: g/ravenwood
+    // Bug component: 25698
+    default_team: "trendy_team_framework_backstage_power",
 }
 
 filegroup {
