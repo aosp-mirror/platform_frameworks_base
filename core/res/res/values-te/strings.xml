@@ -1746,8 +1746,7 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"ఒక యాప్ అనుమతి రిక్వెస్ట్‌కు అడ్డు తగులుతోంది కాబట్టి మీ సమాధానం వెరిఫై చేయడం సాధ్యం కాదు."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"ఫీచర్‌ని ఉపయోగించడం ప్రారంభించడానికి, దాన్ని ట్యాప్ చేయండి:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"యాక్సెసిబిలిటీ బటన్‌తో ఉపయోగించడానికి ఫీచర్లను ఎంచుకోండి"</string>
-    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
-    <skip />
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2245540598834891500">"వాల్యూమ్ కీల షార్ట్‌కట్‌తో ఉపయోగించడానికి ఫీచర్లను ఎంచుకోండి"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> ఆఫ్ చేయబడింది"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"షార్ట్‌కట్‌లను ఎడిట్ చేయండి"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"పూర్తయింది"</string>

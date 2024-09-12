@@ -43,6 +43,7 @@ import com.android.keyguard.KeyguardAbsKeyInputView.KeyDownListener;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.bouncer.ui.helper.BouncerHapticPlayer;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.flags.FakeFeatureFlags;
@@ -96,6 +97,8 @@ public class KeyguardAbsKeyInputViewControllerTest extends SysuiTestCase {
     private UserActivityNotifier mUserActivityNotifier;
     private KeyguardAbsKeyInputViewController mKeyguardAbsKeyInputViewController;
     private KosmosJavaAdapter mKosmosJavaAdapter = new KosmosJavaAdapter(this);
+    private final BouncerHapticPlayer mBouncerHapticPlayer =
+            mKosmosJavaAdapter.getBouncerHapticHelper();
     private final FakeMSDLPlayer mMSDLPlayer = mKosmosJavaAdapter.getMsdlPlayer();
 
     @Before
@@ -119,8 +122,8 @@ public class KeyguardAbsKeyInputViewControllerTest extends SysuiTestCase {
         return new KeyguardAbsKeyInputViewController(mAbsKeyInputView,
                 mKeyguardUpdateMonitor, mSecurityMode, mLockPatternUtils, mKeyguardSecurityCallback,
                 mKeyguardMessageAreaControllerFactory, mLatencyTracker, mFalsingCollector,
-                mEmergencyButtonController, mFeatureFlags, mSelectedUserInteractor, mMSDLPlayer,
-                mUserActivityNotifier) {
+                mEmergencyButtonController, mFeatureFlags, mSelectedUserInteractor,
+                mBouncerHapticPlayer, mUserActivityNotifier) {
             @Override
             void resetState() {
             }

@@ -101,15 +101,12 @@ fun ComposeContentTestRule.testTransition(
             runOnUiThread {
                 MutableSceneTransitionLayoutState(
                     fromScene,
-                    transitions { from(fromScene, to = toScene, builder = transition) }
+                    transitions { from(fromScene, to = toScene, builder = transition) },
                 )
             },
         to = toScene,
         transitionLayout = { state ->
-            SceneTransitionLayout(
-                state,
-                layoutModifier,
-            ) {
+            SceneTransitionLayout(state, layoutModifier) {
                 scene(fromScene, content = fromSceneContent)
                 scene(toScene, content = toSceneContent)
             }
@@ -212,14 +209,14 @@ fun ComposeContentTestRule.testReplaceOverlayTransition(
 data class TransitionRecordingSpec(
     val recordBefore: Boolean = true,
     val recordAfter: Boolean = true,
-    val timeSeriesCapture: TimeSeriesCaptureScope<SemanticsNodeInteractionsProvider>.() -> Unit
+    val timeSeriesCapture: TimeSeriesCaptureScope<SemanticsNodeInteractionsProvider>.() -> Unit,
 )
 
 /** Captures the feature using [capture] on the [element]. */
 fun TimeSeriesCaptureScope<SemanticsNodeInteractionsProvider>.featureOfElement(
     element: ElementKey,
     capture: FeatureCapture<SemanticsNode, *>,
-    name: String = "${element.debugName}_${capture.name}"
+    name: String = "${element.debugName}_${capture.name}",
 ) {
     feature(isElement(element), capture, name)
 }
@@ -238,7 +235,7 @@ fun MotionTestRule<ComposeToolkit>.recordTransition(
         toolkit.composeContentTestRule.runOnUiThread {
             MutableSceneTransitionLayoutState(
                 fromScene,
-                transitions { from(fromScene, to = toScene, builder = transition) }
+                transitions { from(fromScene, to = toScene, builder = transition) },
             )
         }
 
@@ -250,10 +247,7 @@ fun MotionTestRule<ComposeToolkit>.recordTransition(
                 }
             }
 
-            SceneTransitionLayout(
-                state,
-                layoutModifier,
-            ) {
+            SceneTransitionLayout(state, layoutModifier) {
                 scene(fromScene, content = fromSceneContent)
                 scene(toScene, content = toSceneContent)
             }
@@ -264,8 +258,8 @@ fun MotionTestRule<ComposeToolkit>.recordTransition(
             },
             recordBefore = recordingSpec.recordBefore,
             recordAfter = recordingSpec.recordAfter,
-            timeSeriesCapture = recordingSpec.timeSeriesCapture
-        )
+            timeSeriesCapture = recordingSpec.timeSeriesCapture,
+        ),
     )
 }
 
@@ -302,7 +296,7 @@ fun ComposeContentTestRule.testTransition(
         object : TransitionTestAssertionScope {
             override fun onElement(
                 element: ElementKey,
-                scene: SceneKey?
+                scene: SceneKey?,
             ): SemanticsNodeInteraction {
                 return onNode(isElement(element, scene))
             }

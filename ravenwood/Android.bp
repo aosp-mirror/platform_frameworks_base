@@ -159,7 +159,7 @@ java_library {
         "ravenwood-runtime-common",
     ],
     libs: [
-        "android.test.mock",
+        "android.test.mock.impl",
         "framework-minus-apex.ravenwood",
         "ravenwood-framework",
         "services.core.ravenwood",
@@ -168,7 +168,6 @@ java_library {
         "ravenwood-helper-framework-runtime",
         "ravenwood-helper-libcore-runtime",
     ],
-    sdk_version: "core_current",
     visibility: ["//frameworks/base"],
     jarjar_rules: ":ravenwood-services-jarjar-rules",
 }

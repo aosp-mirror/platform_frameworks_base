@@ -18,6 +18,7 @@ package com.android.systemui.accessibility.extradim
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.plugins.ActivityStarter
 import javax.inject.Provider
 import org.junit.Before
@@ -41,10 +42,12 @@ class ExtraDimDialogManagerTest : SysuiTestCase() {
 
     @Mock private lateinit var activityStarter: ActivityStarter
     @Mock private lateinit var dialogProvider: Provider<ExtraDimDialogDelegate>
+    @Mock private lateinit var dialogTransitionAnimator: DialogTransitionAnimator
 
     @Before
     fun setUp() {
-        extraDimDialogManager = ExtraDimDialogManager(dialogProvider, activityStarter)
+        extraDimDialogManager =
+            ExtraDimDialogManager(dialogProvider, activityStarter, dialogTransitionAnimator)
     }
 
     @Test
@@ -56,7 +59,7 @@ class ExtraDimDialogManagerTest : SysuiTestCase() {
                 /* cancelAction= */ eq(null),
                 /* dismissShade= */ eq(false),
                 /* afterKeyguardGone= */ eq(true),
-                /* deferred= */ eq(false)
+                /* deferred= */ eq(false),
             )
     }
 }

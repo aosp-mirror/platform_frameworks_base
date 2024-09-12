@@ -408,9 +408,26 @@ final class DisplayRotationCompatPolicy implements CameraStateMonitor.CameraComp
 
     private void recomputeConfigurationForCameraCompatIfNeeded(
             @NonNull ActivityRecord activityRecord) {
-        if (activityRecord.mAppCompatController.getAppCompatCameraOverrides()
-                .shouldRecomputeConfigurationForCameraCompat()) {
+        if (shouldRecomputeConfigurationForCameraCompat(activityRecord)) {
             activityRecord.recomputeConfiguration();
         }
+    }
+
+    /**
+     * @return {@code true} if the configuration needs to be recomputed after a camera state update.
+     */
+    private boolean shouldRecomputeConfigurationForCameraCompat(
+            @NonNull ActivityRecord activityRecord) {
+        final AppCompatCameraOverrides overrides = activityRecord.mAppCompatController
+                .getAppCompatCameraOverrides();
+        return overrides.isOverrideOrientationOnlyForCameraEnabled()
+                || overrides.isCameraCompatSplitScreenAspectRatioAllowed()
+                || shouldOverrideMinAspectRatio(activityRecord);
+    }
+
+    private boolean shouldOverrideMinAspectRatio(@NonNull ActivityRecord activityRecord) {
+        return activityRecord.mAppCompatController.getAppCompatCameraOverrides()
+                .isOverrideMinAspectRatioForCameraEnabled()
+                        && isCameraActive(activityRecord, /* mustBeFullscreen= */ true);
     }
 }

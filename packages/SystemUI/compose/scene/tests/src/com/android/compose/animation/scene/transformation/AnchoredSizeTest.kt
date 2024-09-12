@@ -57,7 +57,7 @@ class AnchoredSizeTest {
             transition = {
                 spec = tween(16 * 4, easing = LinearEasing)
                 anchoredSize(TestElements.Bar, TestElements.Foo)
-            }
+            },
         )
     }
 
@@ -73,7 +73,7 @@ class AnchoredSizeTest {
                 // Scale during 4 frames.
                 spec = tween(16 * 4, easing = LinearEasing)
                 anchoredSize(TestElements.Bar, TestElements.Foo)
-            }
+            },
         )
     }
 
@@ -103,7 +103,7 @@ class AnchoredSizeTest {
             transition = {
                 spec = tween(16 * 4, easing = LinearEasing)
                 anchoredSize(TestElements.Bar, TestElements.Foo, anchorWidth = false)
-            }
+            },
         )
     }
 

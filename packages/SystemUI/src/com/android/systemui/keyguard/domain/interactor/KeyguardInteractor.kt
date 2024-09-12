@@ -39,6 +39,7 @@ import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
 import com.android.systemui.keyguard.shared.model.KeyguardState.DOZING
+import com.android.systemui.keyguard.shared.model.KeyguardState.GLANCEABLE_HUB
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.shared.model.KeyguardState.OCCLUDED
@@ -167,10 +168,7 @@ constructor(
      * but not vice-versa. Also accounts for [isDreamingWithOverlay]
      */
     val isDreaming: StateFlow<Boolean> =
-        merge(
-                repository.isDreaming,
-                repository.isDreamingWithOverlay,
-            )
+        merge(repository.isDreaming, repository.isDreamingWithOverlay)
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.Eagerly,
@@ -242,7 +240,7 @@ constructor(
                     .map { it == 1f }
                     .onStart { emit(false) }
                     .distinctUntilChanged(),
-                repository.topClippingBounds
+                repository.topClippingBounds,
             ) { isGone, topClippingBounds ->
                 if (!isGone) {
                     emit(topClippingBounds)
@@ -287,11 +285,10 @@ constructor(
 
     /** Whether camera is launched over keyguard. */
     val isSecureCameraActive: Flow<Boolean> by lazy {
-        combine(
+        combine(isKeyguardVisible, primaryBouncerShowing, onCameraLaunchDetected) {
                 isKeyguardVisible,
-                primaryBouncerShowing,
-                onCameraLaunchDetected,
-            ) { isKeyguardVisible, isPrimaryBouncerShowing, cameraLaunchEvent ->
+                isPrimaryBouncerShowing,
+                cameraLaunchEvent ->
                 when {
                     isKeyguardVisible -> false
                     isPrimaryBouncerShowing -> false
@@ -328,15 +325,17 @@ constructor(
                 keyguardTransitionInteractor.currentKeyguardState,
                 keyguardTransitionInteractor.transitionState,
                 isKeyguardDismissible,
+                keyguardTransitionInteractor.isFinishedIn(Scenes.Communal, GLANCEABLE_HUB),
             )
-            .filter { (_, _, _, step, _) -> !step.transitionState.isTransitioning() }
+            .filter { (_, _, _, step, _, _) -> !step.transitionState.isTransitioning() }
             .transform {
                 (
                     legacyShadeExpansion,
                     statusBarState,
                     currentKeyguardState,
                     step,
-                    isKeyguardDismissible) ->
+                    isKeyguardDismissible,
+                    onGlanceableHub) ->
                 if (
                     statusBarState == StatusBarState.KEYGUARD &&
                         isKeyguardDismissible &&
@@ -344,7 +343,9 @@ constructor(
                         legacyShadeExpansion != 1f
                 ) {
                     emit(MathUtils.constrainedMap(0f, 1f, 0.95f, 1f, legacyShadeExpansion))
-                } else if (legacyShadeExpansion == 0f || legacyShadeExpansion == 1f) {
+                } else if (
+                    (legacyShadeExpansion == 0f || legacyShadeExpansion == 1f) && !onGlanceableHub
+                ) {
                     // Resets alpha state
                     emit(1f)
                 }

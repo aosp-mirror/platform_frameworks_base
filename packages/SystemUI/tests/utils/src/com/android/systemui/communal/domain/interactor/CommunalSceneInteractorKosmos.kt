@@ -20,6 +20,7 @@ import com.android.systemui.communal.data.repository.communalSceneRepository
 import com.android.systemui.communal.shared.log.communalSceneLogger
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.scene.domain.interactor.sceneInteractor
 
 val Kosmos.communalSceneInteractor: CommunalSceneInteractor by
     Kosmos.Fixture {
@@ -27,5 +28,6 @@ val Kosmos.communalSceneInteractor: CommunalSceneInteractor by
             applicationScope = applicationCoroutineScope,
             repository = communalSceneRepository,
             logger = communalSceneLogger,
+            sceneInteractor = sceneInteractor,
         )
     }

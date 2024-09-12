@@ -47,8 +47,7 @@ import java.util.function.Supplier;
  * If the drag is resizing the task, we resize the veil instead.
  * If the drag is repositioning, we update in the typical manner.
  */
-public class VeiledResizeTaskPositioner implements DragPositioningCallback,
-        TaskDragResizer, Transitions.TransitionHandler {
+public class VeiledResizeTaskPositioner implements TaskPositioner, Transitions.TransitionHandler {
 
     private DesktopModeWindowDecoration mDesktopWindowDecoration;
     private ShellTaskOrganizer mTaskOrganizer;

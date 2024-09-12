@@ -41,9 +41,9 @@ class MetadataSyncAdapterTest {
     @After
     fun clearData() {
         val searchContext = SearchContext.Builder(TEST_DB).build()
-        FutureAppSearchSession(appSearchManager, testExecutor, searchContext).use {
+        FutureAppSearchSessionImpl(appSearchManager, testExecutor, searchContext).use {
             val setSchemaRequest = SetSchemaRequest.Builder().setForceOverride(true).build()
-            it.setSchema(setSchemaRequest)
+            it.setSchema(setSchemaRequest).get()
         }
     }
 
@@ -61,7 +61,7 @@ class MetadataSyncAdapterTest {
                 .build()
         val putDocumentsRequest: PutDocumentsRequest =
             PutDocumentsRequest.Builder().addGenericDocuments(functionRuntimeMetadata).build()
-        FutureAppSearchSession(appSearchManager, testExecutor, searchContext).use {
+        FutureAppSearchSessionImpl(appSearchManager, testExecutor, searchContext).use {
             val setSchemaResponse = it.setSchema(setSchemaRequest).get()
             assertThat(setSchemaResponse).isNotNull()
             val appSearchBatchResult = it.put(putDocumentsRequest).get()
@@ -71,7 +71,7 @@ class MetadataSyncAdapterTest {
         val metadataSyncAdapter =
             MetadataSyncAdapter(
                 testExecutor,
-                FutureAppSearchSession(appSearchManager, testExecutor, searchContext),
+                FutureAppSearchSessionImpl(appSearchManager, testExecutor, searchContext),
             )
         val packageToFunctionIdMap =
             metadataSyncAdapter.getPackageToFunctionIdMap(
@@ -111,7 +111,7 @@ class MetadataSyncAdapterTest {
                     functionRuntimeMetadata3,
                 )
                 .build()
-        FutureAppSearchSession(appSearchManager, testExecutor, searchContext).use {
+        FutureAppSearchSessionImpl(appSearchManager, testExecutor, searchContext).use {
             val setSchemaResponse = it.setSchema(setSchemaRequest).get()
             assertThat(setSchemaResponse).isNotNull()
             val appSearchBatchResult = it.put(putDocumentsRequest).get()
@@ -121,7 +121,7 @@ class MetadataSyncAdapterTest {
         val metadataSyncAdapter =
             MetadataSyncAdapter(
                 testExecutor,
-                FutureAppSearchSession(appSearchManager, testExecutor, searchContext),
+                FutureAppSearchSessionImpl(appSearchManager, testExecutor, searchContext),
             )
         val packageToFunctionIdMap =
             metadataSyncAdapter.getPackageToFunctionIdMap(

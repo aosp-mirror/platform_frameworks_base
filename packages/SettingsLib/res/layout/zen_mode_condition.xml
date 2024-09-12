@@ -52,6 +52,7 @@
             android:ellipsize="end"
             android:textAlignment="viewStart"
             android:maxLines="1"
+            android:scrollbars="none"
             android:textColor="?android:attr/textColorSecondary"
             android:textSize="14sp"/>
 
