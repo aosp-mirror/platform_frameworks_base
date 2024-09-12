@@ -22,6 +22,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressAutoDoc;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.app.ActivityThread;
@@ -401,33 +402,42 @@ public class Build {
          * device. This value never changes while a device is booted, but it may
          * increase when the hardware manufacturer provides an OTA update.
          * <p>
-         * Together with {@link SDK_MINOR_INT}, this constant defines the
-         * <pre>major.minor</pre> version of Android. <pre>SDK_INT</pre> is
-         * increased and <pre>SDK_MINOR_INT</pre> is set to 0 on new Android
-         * dessert releases. Between these, Android may also release so called
-         * minor releases where <pre>SDK_INT</pre> remains unchanged and
-         * <pre>SDK_MINOR_INT</pre> is increased. Minor releases can add new
-         * APIs, and have stricter guarantees around backwards compatibility
-         * (e.g. no changes gated by <pre>targetSdkVersion</pre>) compared to
-         * major releases.
+         * This constant records the major version of Android. Use {@link
+         * SDK_INT_FULL} if you need to consider the minor version of Android
+         * as well.
          * <p>
          * Possible values are defined in {@link Build.VERSION_CODES}.
+         * @see #SDK_INT_FULL
          */
         public static final int SDK_INT = SystemProperties.getInt(
                 "ro.build.version.sdk", 0);
 
         /**
-         * The minor SDK version of the software currently running on this hardware
-         * device. This value never changes while a device is booted, but it may
-         * increase when the hardware manufacturer provides an OTA update.
+         * The major and minor SDK version of the software currently running on
+         * this hardware device. This value never changes while a device is
+         * booted, but it may increase when the hardware manufacturer provides
+         * an OTA update.
          * <p>
-         * Together with {@link SDK_INT}, this constant defines the
-         * <pre>major.minor</pre> version of Android. See {@link SDK_INT} for
-         * more information.
+         * <code>SDK_INT</code> is increased on new Android dessert releases,
+         * also called major releases. Between these, Android may also release
+         * minor releases where <code>SDK_INT</code> remains unchanged. Minor
+         * releases can add new APIs, and have stricter guarantees around
+         * backwards compatibility (e.g. no changes gated by
+         * <code>targetSdkVersion</code>) compared to major releases.
+         * <p>
+         * <code>SDK_INT_FULL</code> is increased on every release.
+         * <p>
+         * Possible values are defined in {@link
+         * android.os.Build.VERSION_CODES_FULL}.
          */
         @FlaggedApi(Flags.FLAG_MAJOR_MINOR_VERSIONING_SCHEME)
-        public static final int SDK_MINOR_INT = SystemProperties.getInt(
-                "ro.build.version.sdk_minor", 0);
+        public static final int SDK_INT_FULL;
+
+        static {
+            SDK_INT_FULL = VERSION_CODES_FULL.SDK_INT_MULTIPLIER
+                * SystemProperties.getInt("ro.build.version.sdk", 0)
+                + SystemProperties.getInt("ro.build.version.sdk_minor", 0);
+        }
 
         /**
          * The SDK version of the software that <em>initially</em> shipped on
@@ -1261,6 +1271,25 @@ public class Build {
          * Vanilla Ice Cream.
          */
         public static final int VANILLA_ICE_CREAM = 35;
+    }
+
+    /**
+     * Enumeration of the currently known SDK major and minor version codes.
+     * The numbers increase for every release, and are guaranteed to be ordered
+     * by the release date of each release. The actual values should be
+     * considered an implementation detail, and the current encoding scheme may
+     * change in the future.
+     *
+     * @see android.os.Build.VERSION#SDK_INT_FULL
+     */
+    @FlaggedApi(Flags.FLAG_MAJOR_MINOR_VERSIONING_SCHEME)
+    @SuppressLint("AcronymName")
+    public static class VERSION_CODES_FULL {
+        private VERSION_CODES_FULL() {}
+
+        // Use the last 5 digits for the minor version. This allows the
+        // minor version to be set to CUR_DEVELOPMENT.
+        private static final int SDK_INT_MULTIPLIER = 100000;
     }
 
     /**
