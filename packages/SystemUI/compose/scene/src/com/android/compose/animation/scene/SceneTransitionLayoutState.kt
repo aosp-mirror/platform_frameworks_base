@@ -176,6 +176,35 @@ sealed interface MutableSceneTransitionLayoutState : SceneTransitionLayoutState 
         animationScope: CoroutineScope,
         transitionKey: TransitionKey? = null,
     )
+
+    /**
+     * Instantly start a [transition], running it in [animationScope].
+     *
+     * This call returns immediately and [transition] will be the [currentTransition] of this
+     * [MutableSceneTransitionLayoutState].
+     *
+     * @see startTransition
+     */
+    fun startTransitionImmediately(
+        animationScope: CoroutineScope,
+        transition: TransitionState.Transition,
+        chain: Boolean = true,
+    ): Job
+
+    /**
+     * Start a new [transition].
+     *
+     * If [chain] is `true`, then the transitions will simply be added to [currentTransitions] and
+     * will run in parallel to the current transitions. If [chain] is `false`, then the list of
+     * [currentTransitions] will be cleared and [transition] will be the only running transition.
+     *
+     * If any transition is currently ongoing, it will be interrupted and forced to animate to its
+     * current state by calling [TransitionState.Transition.freezeAndAnimateToCurrentState].
+     *
+     * This method returns when [transition] is done running, i.e. when the call to
+     * [run][TransitionState.Transition.run] returns.
+     */
+    suspend fun startTransition(transition: TransitionState.Transition, chain: Boolean = true)
 }
 
 /**
@@ -313,18 +342,10 @@ internal class MutableSceneTransitionLayoutStateImpl(
         )
     }
 
-    /**
-     * Instantly start a [transition], running it in [animationScope].
-     *
-     * This call returns immediately and [transition] will be the [currentTransition] of this
-     * [MutableSceneTransitionLayoutState].
-     *
-     * @see startTransition
-     */
-    internal fun startTransitionImmediately(
+    override fun startTransitionImmediately(
         animationScope: CoroutineScope,
         transition: TransitionState.Transition,
-        chain: Boolean = true,
+        chain: Boolean,
     ): Job {
         // Note that we start with UNDISPATCHED so that startTransition() is called directly and
         // transition becomes the current [transitionState] right after this call.
@@ -335,23 +356,7 @@ internal class MutableSceneTransitionLayoutStateImpl(
         }
     }
 
-    /**
-     * Start a new [transition].
-     *
-     * If [chain] is `true`, then the transitions will simply be added to [currentTransitions] and
-     * will run in parallel to the current transitions. If [chain] is `false`, then the list of
-     * [currentTransitions] will be cleared and [transition] will be the only running transition.
-     *
-     * If any transition is currently ongoing, it will be interrupted and forced to animate to its
-     * current state.
-     *
-     * This method returns when [transition] is done running, i.e. when the call to
-     * [run][TransitionState.Transition.run] returns.
-     */
-    internal suspend fun startTransition(
-        transition: TransitionState.Transition,
-        chain: Boolean = true,
-    ) {
+    override suspend fun startTransition(transition: TransitionState.Transition, chain: Boolean) {
         checkThread()
 
         try {
