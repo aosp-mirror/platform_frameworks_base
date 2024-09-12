@@ -50,6 +50,8 @@ public final class BroadcastRadioService {
 
     private final Object mLock = new Object();
 
+    private final RadioServiceUserController mUserController;
+
     @GuardedBy("mLock")
     private int mNextModuleId;
 
@@ -75,7 +77,8 @@ public final class BroadcastRadioService {
                     moduleId = mNextModuleId;
                 }
 
-                RadioModule radioModule = RadioModule.tryLoadingModule(moduleId, serviceName);
+                RadioModule radioModule = RadioModule.tryLoadingModule(moduleId, serviceName,
+                        mUserController);
                 if (radioModule == null) {
                     return;
                 }
@@ -123,8 +126,9 @@ public final class BroadcastRadioService {
         }
     };
 
-    public BroadcastRadioService(int nextModuleId) {
+    public BroadcastRadioService(int nextModuleId, RadioServiceUserController userController) {
         mNextModuleId = nextModuleId;
+        mUserController = Objects.requireNonNull(userController, "User controller can not be null");
         try {
             IServiceManager manager = IServiceManager.getService();
             if (manager == null) {
@@ -138,8 +142,10 @@ public final class BroadcastRadioService {
     }
 
     @VisibleForTesting
-    BroadcastRadioService(int nextModuleId, IServiceManager manager) {
+    BroadcastRadioService(int nextModuleId, IServiceManager manager,
+            RadioServiceUserController userController) {
         mNextModuleId = nextModuleId;
+        mUserController = Objects.requireNonNull(userController, "User controller can not be null");
         Objects.requireNonNull(manager, "Service manager cannot be null");
         try {
             manager.registerForNotifications(IBroadcastRadio.kInterfaceName, "", mServiceListener);
@@ -171,7 +177,7 @@ public final class BroadcastRadioService {
     public ITuner openSession(int moduleId, @Nullable RadioManager.BandConfig legacyConfig,
             boolean withAudio, @NonNull ITunerCallback callback) throws RemoteException {
         Slogf.v(TAG, "Open HIDL 2.0 session with module id " + moduleId);
-        if (!RadioServiceUserController.isCurrentOrSystemUser()) {
+        if (!mUserController.isCurrentOrSystemUser()) {
             Slogf.e(TAG, "Cannot open tuner on HAL 2.0 client for non-current user");
             throw new IllegalStateException("Cannot open session for non-current user");
         }
