@@ -29,7 +29,6 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.R;
 import com.android.internal.logging.MetricsLogger;
-import com.android.systemui.accessibility.extradim.ExtraDimDialogManager;
 import com.android.systemui.animation.Expandable;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -56,7 +55,6 @@ public class ReduceBrightColorsTile extends QSTileImpl<QSTile.BooleanState>
     private final ReduceBrightColorsController mReduceBrightColorsController;
     private boolean mIsListening;
     private final boolean mInUpgradeMode;
-    private final ExtraDimDialogManager mExtraDimDialogManager;
 
     @Inject
     public ReduceBrightColorsTile(
@@ -70,14 +68,12 @@ public class ReduceBrightColorsTile extends QSTileImpl<QSTile.BooleanState>
             MetricsLogger metricsLogger,
             StatusBarStateController statusBarStateController,
             ActivityStarter activityStarter,
-            QSLogger qsLogger,
-            ExtraDimDialogManager extraDimDialogManager
+            QSLogger qsLogger
     ) {
         super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
         mReduceBrightColorsController = reduceBrightColorsController;
         mReduceBrightColorsController.observe(getLifecycle(), this);
-        mExtraDimDialogManager = extraDimDialogManager;
 
         mInUpgradeMode = reduceBrightColorsController.isInUpgradeMode(mContext.getResources());
         mIsAvailable = isAvailable || mInUpgradeMode;
@@ -106,24 +102,19 @@ public class ReduceBrightColorsTile extends QSTileImpl<QSTile.BooleanState>
 
     private boolean goToEvenDimmer() {
         if (mInUpgradeMode) {
+            mHost.removeTile(getTileSpec());
+            mIsAvailable = false;
             return true;
         }
         return false;
     }
 
     @Override
-    protected void handleLongClick(@Nullable Expandable expandable) {
-        if (goToEvenDimmer()) {
-            mExtraDimDialogManager.dismissKeyguardIfNeededAndShowDialog(expandable);
-        } else {
-            super.handleLongClick(expandable);
-        }
-    }
-
-    @Override
     protected void handleClick(@Nullable Expandable expandable) {
+
         if (goToEvenDimmer()) {
-            mExtraDimDialogManager.dismissKeyguardIfNeededAndShowDialog(expandable);
+            mActivityStarter.postStartActivityDismissingKeyguard(
+                    new Intent(Settings.ACTION_DISPLAY_SETTINGS), 0);
         } else {
             mReduceBrightColorsController.setReduceBrightColorsActivated(!mState.value);
         }
@@ -153,6 +144,11 @@ public class ReduceBrightColorsTile extends QSTileImpl<QSTile.BooleanState>
 
     @Override
     public void onActivated(boolean activated) {
+        refreshState();
+    }
+
+    @Override
+    public void onFeatureEnabledChanged(boolean enabled) {
         refreshState();
     }
 }
