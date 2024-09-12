@@ -16,20 +16,28 @@
 
 package com.android.server.wm;
 
+import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_LANDSCAPE_DEVICE_IN_LANDSCAPE;
+import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_LANDSCAPE_DEVICE_IN_PORTRAIT;
+import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_NONE;
+import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_PORTRAIT_DEVICE_IN_LANDSCAPE;
+import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_PORTRAIT_DEVICE_IN_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LOCKED;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_NOSENSOR;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.content.res.Configuration.ORIENTATION_UNDEFINED;
+import static android.view.Surface.ROTATION_0;
+import static android.view.Surface.ROTATION_180;
 
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.CameraCompatTaskInfo;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.view.DisplayInfo;
+import android.view.Surface;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.ProtoLog;
@@ -172,11 +180,35 @@ final class CameraCompatFreeformPolicy implements CameraStateMonitor.CameraCompa
     }
 
     private static int getCameraCompatMode(@NonNull ActivityRecord topActivity) {
-        return switch (topActivity.getRequestedConfigurationOrientation()) {
-            case ORIENTATION_PORTRAIT -> CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_PORTRAIT;
-            case ORIENTATION_LANDSCAPE -> CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_LANDSCAPE;
-            default -> CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_NONE;
-        };
+        final int appOrientation = topActivity.getRequestedConfigurationOrientation();
+        // It is very important to check the original (actual) display rotation, and not the
+        // sandboxed rotation that camera compat treatment sets.
+        final DisplayInfo displayInfo = topActivity.mWmService.mDisplayManagerInternal
+                .getDisplayInfo(topActivity.getDisplayId());
+        // This treatment targets only devices with portrait natural orientation, which most tablets
+        // have.
+        // TODO(b/365725400): handle landscape natural orientation.
+        if (displayInfo.getNaturalHeight() > displayInfo.getNaturalWidth()) {
+            if (appOrientation == ORIENTATION_PORTRAIT) {
+                if (isDisplayRotationPortrait(displayInfo.rotation)) {
+                    return CAMERA_COMPAT_FREEFORM_PORTRAIT_DEVICE_IN_PORTRAIT;
+                } else {
+                    return CAMERA_COMPAT_FREEFORM_PORTRAIT_DEVICE_IN_LANDSCAPE;
+                }
+            } else if (appOrientation == ORIENTATION_LANDSCAPE) {
+                if (isDisplayRotationPortrait(displayInfo.rotation)) {
+                    return CAMERA_COMPAT_FREEFORM_LANDSCAPE_DEVICE_IN_PORTRAIT;
+                } else {
+                    return CAMERA_COMPAT_FREEFORM_LANDSCAPE_DEVICE_IN_LANDSCAPE;
+                }
+            }
+        }
+
+        return CAMERA_COMPAT_FREEFORM_NONE;
+    }
+
+    private static boolean isDisplayRotationPortrait(@Surface.Rotation int displayRotation) {
+        return displayRotation == ROTATION_0 || displayRotation == ROTATION_180;
     }
 
     /**
