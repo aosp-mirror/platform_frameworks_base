@@ -25,10 +25,7 @@
             ]
         },
         {
-            "name": "FrameworksServicesTests",
-            "options": [
-                {"include-filter": "com.android.server.job"}
-            ]
+            "name": "FrameworksServicesTests_com_android_server_job"
         },
         {
             "name": "CtsHostsideNetworkPolicyTests",
