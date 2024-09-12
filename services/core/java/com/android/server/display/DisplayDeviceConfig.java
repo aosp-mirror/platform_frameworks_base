@@ -796,7 +796,6 @@ public class DisplayDeviceConfig {
     private DensityMapping mDensityMapping;
     private String mLoadedFrom = null;
 
-
     // Represents the auto-brightness brightening light debounce.
     private long mAutoBrightnessBrighteningLightDebounce =
             INVALID_AUTO_BRIGHTNESS_LIGHT_DEBOUNCE;
@@ -1686,7 +1685,6 @@ public class DisplayDeviceConfig {
                 + "\n"
                 + "mLuxThrottlingData=" + mLuxThrottlingData
                 + ", mHbmData=" + mHbmData
-
                 + ", mThermalBrightnessThrottlingDataMapByThrottlingId="
                 + mThermalBrightnessThrottlingDataMapByThrottlingId
                 + "\n"
