@@ -16,8 +16,8 @@
 
 package android.libcore;
 
-import androidx.benchmark.BenchmarkState;
-import androidx.benchmark.junit4.BenchmarkRule;
+import android.perftests.utils.BenchmarkState;
+import android.perftests.utils.PerfStatusReporter;
 
 import androidx.test.filters.LargeTest;
 
@@ -42,8 +42,7 @@ import java.util.zip.ZipOutputStream;
 @RunWith(JUnitParamsRunner.class)
 @LargeTest
 public class ZipFilePerfTest {
-    @Rule
-    public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
+    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
     private File mFile;
 
@@ -66,7 +65,7 @@ public class ZipFilePerfTest {
     @Parameters(method = "getData")
     public void timeZipFileOpen(int numEntries) throws Exception {
         setUp(numEntries);
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             ZipFile zf = new ZipFile(mFile);
             state.pauseTiming();

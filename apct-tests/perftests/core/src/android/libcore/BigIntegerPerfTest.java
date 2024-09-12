@@ -16,8 +16,8 @@
 
 package android.libcore;
 
-import androidx.benchmark.BenchmarkState;
-import androidx.benchmark.junit4.BenchmarkRule;
+import android.perftests.utils.BenchmarkState;
+import android.perftests.utils.PerfStatusReporter;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -38,8 +38,7 @@ import java.math.BigInteger;
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class BigIntegerPerfTest {
-    @Rule
-    public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
+    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
     // A simple sum of products computation, mostly so we can check timing in the
     // absence of any division. Computes the sum from 1 to n of ((10^prec) << 30) + 1)^2,
@@ -62,7 +61,7 @@ public class BigIntegerPerfTest {
     // Execute the above rep times, optionally timing it.
     @Test
     public void repeatInner() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             for (int i = 10; i <= 10_000; i *= 10) {
                 inner(100, i);
@@ -86,7 +85,7 @@ public class BigIntegerPerfTest {
     // Check results for equality, and print one, to compaare against reference.
     @Test
     public void repeatHarmonic1000() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             for (int i = 5; i <= 5_000; i *= 10) {
                 BigInteger refRes = harmonic1000(i);
@@ -107,7 +106,7 @@ public class BigIntegerPerfTest {
     // us to time and check it for consistency as well.
     @Test
     public void repeatToString() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             for (int i = 5; i <= 5_000; i *= 10) {
                 BigInteger refRes = harmonic1000(i);
@@ -147,7 +146,7 @@ public class BigIntegerPerfTest {
     // to compare to reference.
     @Test
     public void repeatEApprox() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             for (int i = 10; i <= 10_000; i *= 10) {
                 BigInteger refRes = eApprox(100_000, i);
@@ -166,7 +165,7 @@ public class BigIntegerPerfTest {
     // Test / time modPow()
     @Test
     public void repeatModPow() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             for (int i = 5; i <= 500; i *= 10) {
                 BigInteger odd1 = BigInteger.TEN.pow(i / 2).add(BigInteger.ONE);
@@ -199,7 +198,7 @@ public class BigIntegerPerfTest {
     // Test / time modInverse()
     @Test
     public void repeatModInverse() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             for (int i = 10; i <= 10_000; i *= 10) {
                 BigInteger odd1 = BigInteger.TEN.pow(i / 2).add(BigInteger.ONE);
