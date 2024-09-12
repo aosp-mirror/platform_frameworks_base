@@ -56,7 +56,7 @@ class SharedElementTest {
             transition = {
                 spec = tween(16 * 4, easing = LinearEasing)
                 // Elements should be shared by default.
-            }
+            },
         ) {
             before {
                 onElement(TestElements.Foo).assertPositionInRootIsEqualTo(10.dp, 50.dp)

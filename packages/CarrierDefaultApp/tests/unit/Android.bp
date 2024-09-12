@@ -25,8 +25,8 @@ android_test {
     name: "CarrierDefaultAppUnitTests",
     certificate: "platform",
     libs: [
-        "android.test.runner",
-        "android.test.base",
+        "android.test.runner.stubs.system",
+        "android.test.base.stubs.system",
         "SlicePurchaseController",
     ],
     static_libs: [

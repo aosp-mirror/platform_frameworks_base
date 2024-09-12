@@ -19,6 +19,7 @@ package com.android.systemui.education.domain.interactor
 import android.hardware.input.InputManager
 import com.android.systemui.education.data.repository.fakeEduClock
 import com.android.systemui.inputdevice.data.repository.UserInputDeviceRepository
+import com.android.systemui.inputdevice.tutorial.tutorialSchedulerRepository
 import com.android.systemui.keyboard.data.repository.keyboardRepository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testDispatcher
@@ -57,6 +58,8 @@ var Kosmos.keyboardTouchpadEduStatsInteractor by
                     keyboardRepository,
                     touchpadRepository,
                     userRepository
-                )
+                ),
+            tutorialSchedulerRepository,
+            fakeEduClock
         )
     }

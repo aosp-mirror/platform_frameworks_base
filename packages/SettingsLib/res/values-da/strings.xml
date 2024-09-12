@@ -564,8 +564,7 @@
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmer og påmindelser"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Tillad, at denne app indstiller alarmer og planlægger tidsbestemte handlinger. Appen vil køre i baggrunden, hvor den muligvis bruger mere batteri.\n\nHvis denne tilladelse er deaktiveret, vil eksisterende alarmer og tidsbestemte handlinger, der er planlagt af denne app, ikke fungere."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"planlæg, alarm, påmindelse, ur"</string>
-    <!-- no translation found for zen_mode_do_not_disturb_name (6798711401734798283) -->
-    <skip />
+    <string name="zen_mode_do_not_disturb_name" msgid="6798711401734798283">"Forstyr ikke"</string>
     <string name="zen_mode_settings_title" msgid="7374070457626419755">"Forstyr ikke"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Aktivér"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Aktivér Forstyr ikke"</string>

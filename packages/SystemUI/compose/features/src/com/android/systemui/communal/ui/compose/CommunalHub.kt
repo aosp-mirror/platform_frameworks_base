@@ -19,7 +19,9 @@ package com.android.systemui.communal.ui.compose
 import android.content.Context
 import android.content.res.Configuration
 import android.graphics.drawable.Icon
+import android.os.SystemClock
 import android.util.SizeF
+import android.view.MotionEvent
 import android.widget.FrameLayout
 import android.widget.RemoteViews
 import androidx.annotation.VisibleForTesting
@@ -40,6 +42,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -1389,17 +1392,35 @@ private fun TutorialContent(modifier: Modifier = Modifier) {
 @Composable
 private fun Umo(viewModel: BaseCommunalViewModel, modifier: Modifier = Modifier) {
     AndroidView(
-        modifier = modifier,
-        factory = {
-            viewModel.mediaHost.hostView.layoutParams =
-                FrameLayout.LayoutParams(
-                    FrameLayout.LayoutParams.MATCH_PARENT,
-                    FrameLayout.LayoutParams.MATCH_PARENT
-                )
+        modifier =
+            modifier.pointerInput(Unit) {
+                detectHorizontalDragGestures { change, _ ->
+                    change.consume()
+                    val upTime = SystemClock.uptimeMillis()
+                    val event =
+                        MotionEvent.obtain(
+                            upTime,
+                            upTime,
+                            MotionEvent.ACTION_MOVE,
+                            change.position.x,
+                            change.position.y,
+                            0
+                        )
+                    viewModel.mediaHost.hostView.dispatchTouchEvent(event)
+                    event.recycle()
+                }
+            },
+        factory = { _ ->
+            viewModel.mediaHost.hostView.apply {
+                layoutParams =
+                    FrameLayout.LayoutParams(
+                        FrameLayout.LayoutParams.MATCH_PARENT,
+                        FrameLayout.LayoutParams.MATCH_PARENT
+                    )
+            }
             viewModel.mediaHost.hostView
         },
-        // For reusing composition in lazy lists.
-        onReset = {},
+        onReset = {}
     )
 }
 

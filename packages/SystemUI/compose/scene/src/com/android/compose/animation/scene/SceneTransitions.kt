@@ -50,7 +50,7 @@ internal constructor(
     private val transitionCache =
         mutableMapOf<
             ContentKey,
-            MutableMap<ContentKey, MutableMap<TransitionKey?, TransitionSpecImpl>>
+            MutableMap<ContentKey, MutableMap<TransitionKey?, TransitionSpecImpl>>,
         >()
 
     private val overscrollCache =
@@ -70,7 +70,7 @@ internal constructor(
     private fun findSpec(
         from: ContentKey,
         to: ContentKey,
-        key: TransitionKey?
+        key: TransitionKey?,
     ): TransitionSpecImpl {
         val spec = transition(from, to, key) { it.from == from && it.to == to }
         if (spec != null) {
@@ -250,7 +250,7 @@ internal class TransitionSpecImpl(
     override val to: ContentKey?,
     private val previewTransformationSpec: (() -> TransformationSpecImpl)? = null,
     private val reversePreviewTransformationSpec: (() -> TransformationSpecImpl)? = null,
-    private val transformationSpec: () -> TransformationSpecImpl
+    private val transformationSpec: () -> TransformationSpecImpl,
 ) : TransitionSpec {
     override fun reversed(): TransitionSpecImpl {
         return TransitionSpecImpl(
@@ -265,9 +265,9 @@ internal class TransitionSpecImpl(
                     progressSpec = reverse.progressSpec,
                     swipeSpec = reverse.swipeSpec,
                     distance = reverse.distance,
-                    transformations = reverse.transformations.map { it.reversed() }
+                    transformations = reverse.transformations.map { it.reversed() },
                 )
-            }
+            },
         )
     }
 
@@ -382,11 +382,7 @@ internal class TransformationSpecImpl(
         return ElementTransformations(shared, offset, size, drawScale, alpha)
     }
 
-    private fun throwIfNotNull(
-        previous: Transformation?,
-        element: ElementKey,
-        name: String,
-    ) {
+    private fun throwIfNotNull(previous: Transformation?, element: ElementKey, name: String) {
         if (previous != null) {
             error("$element has multiple $name transformations")
         }

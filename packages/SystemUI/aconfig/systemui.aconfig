@@ -247,13 +247,6 @@ flag {
 }
 
 flag {
-    name: "haptic_brightness_slider"
-    namespace: "systemui"
-    description: "Adds haptic feedback to the brightness slider."
-    bug: "296467915"
-}
-
-flag {
     name: "unfold_animation_background_progress"
     namespace: "systemui"
     description: "Moves unfold animation progress calculation to a background thread"

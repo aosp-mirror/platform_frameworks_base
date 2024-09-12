@@ -109,7 +109,7 @@ static jlong createHintSessionWithConfig(JNIEnv* env, int32_t tgid, int32_t uid,
         return session_ptr;
     } else if (result.isUnsupported()) {
         throwUnsupported(env, result.errorMessage());
-        return -1;
+        return 0;
     }
     throwFailed(env, result.errorMessage());
     return 0;
@@ -190,7 +190,7 @@ static jlong nativeCreateHintSessionWithConfig(JNIEnv* env, jclass /* clazz */, 
     hal::SessionConfig config;
     jlong out = createHintSessionWithConfig(env, tgid, uid, std::move(threadIds), durationNanos,
                                             sessionTag, config);
-    if (out <= 0) {
+    if (out == 0) {
         return out;
     }
     static jclass configClass = env->FindClass("android/hardware/power/SessionConfig");

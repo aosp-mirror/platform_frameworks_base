@@ -32,6 +32,7 @@ class MediaTttReceiverRippleController
 constructor(
     private val context: Context,
     private val windowManager: WindowManager,
+    private val mediaTttReceiverLogger: MediaTttReceiverLogger,
 ) {
 
     private var maxRippleWidth: Float = 0f
@@ -90,12 +91,12 @@ constructor(
     /** Expands the ripple to cover the screen. */
     fun expandToSuccessState(rippleView: ReceiverChipRippleView, onAnimationEnd: Runnable?) {
         layoutRipple(rippleView, isFullScreen = true)
-        rippleView.expandToFull(maxRippleHeight, onAnimationEnd)
+        rippleView.expandToFull(maxRippleHeight, mediaTttReceiverLogger, onAnimationEnd)
     }
 
     /** Collapses the ripple. */
     fun collapseRipple(rippleView: ReceiverChipRippleView, onAnimationEnd: Runnable? = null) {
-        rippleView.collapseRipple(onAnimationEnd)
+        rippleView.collapseRipple(mediaTttReceiverLogger, onAnimationEnd)
     }
 
     private fun layoutRipple(rippleView: ReceiverChipRippleView, isFullScreen: Boolean = false) {

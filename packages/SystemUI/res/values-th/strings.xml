@@ -105,6 +105,7 @@
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"เพิ่มลงในโน้ต"</string>
     <string name="backlinks_include_link" msgid="4562093591148248158">"รวมลิงก์"</string>
     <string name="backlinks_duplicate_label_format" msgid="558445128952827926">"<xliff:g id="APPNAME">%1$s</xliff:g> <xliff:g id="FREQUENCYCOUNT">(%2$d)</xliff:g>"</string>
+    <string name="backlinks_cross_profile_error" msgid="1355798585727802282">"เพิ่มลิงก์จากโปรไฟล์อื่นไม่ได้"</string>
     <string name="screenrecord_title" msgid="4257171601439507792">"โปรแกรมบันทึกหน้าจอ"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"กำลังประมวลผลการอัดหน้าจอ"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"การแจ้งเตือนต่อเนื่องสำหรับเซสชันการบันทึกหน้าจอ"</string>
@@ -292,8 +293,7 @@
     <string name="start_dreams" msgid="9131802557946276718">"ภาพพักหน้าจอ"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"อีเทอร์เน็ต"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"ห้ามรบกวน"</string>
-    <!-- no translation found for quick_settings_modes_label (879156359479504244) -->
-    <skip />
+    <string name="quick_settings_modes_label" msgid="879156359479504244">"โหมด"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"บลูทูธ"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"ไม่มีอุปกรณ์ที่จับคู่ที่สามารถใช้ได้"</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"แตะเพื่อเชื่อมต่อหรือยกเลิกการเชื่อมต่ออุปกรณ์"</string>
@@ -434,8 +434,7 @@
     <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"เปิดการตั้งค่า"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"อุปกรณ์อื่น"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"สลับภาพรวม"</string>
-    <!-- no translation found for zen_modes_dialog_title (8854640808100096934) -->
-    <skip />
+    <string name="zen_modes_dialog_title" msgid="8854640808100096934">"โหมด"</string>
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"เสร็จสิ้น"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"การตั้งค่า"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"เปิด"</string>
@@ -1393,18 +1392,12 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"ไอคอนยุบ"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"ไอคอนขยาย"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"หรือ"</string>
-    <!-- no translation found for launch_keyboard_tutorial_notification_title (8849933155160522519) -->
-    <skip />
-    <!-- no translation found for launch_keyboard_tutorial_notification_content (2880339951512757918) -->
-    <skip />
-    <!-- no translation found for launch_touchpad_tutorial_notification_title (2243780062772196901) -->
-    <skip />
-    <!-- no translation found for launch_touchpad_tutorial_notification_content (7931085031240753226) -->
-    <skip />
-    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_title (1940023776496198762) -->
-    <skip />
-    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_content (1780725168171929365) -->
-    <skip />
+    <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"ไปยังส่วนต่างๆ โดยใช้แป้นพิมพ์"</string>
+    <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"ดูข้อมูลเกี่ยวกับแป้นพิมพ์ลัด"</string>
+    <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"ไปยังส่วนต่างๆ โดยใช้ทัชแพด"</string>
+    <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"ดูข้อมูลเกี่ยวกับท่าทางสัมผัสของทัชแพด"</string>
+    <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"ไปยังส่วนต่างๆ โดยใช้แป้นพิมพ์และทัชแพด"</string>
+    <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"ดูข้อมูลเกี่ยวกับท่าทางสัมผัสของทัชแพด แป้นพิมพ์ลัด และอื่นๆ"</string>
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"ท่าทางสัมผัสสำหรับย้อนกลับ"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"ท่าทางสัมผัสสำหรับหน้าแรก"</string>
     <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"ปุ่มดำเนินการ"</string>
@@ -1444,4 +1437,18 @@
     <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="7513137763024327538">"ตอนนี้คุณสามารถหรี่แสงหน้าจอเพิ่มเติมได้โดยลดระดับความสว่างจากด้านบนของหน้าจอมากขึ้น\n\nฟีเจอร์นี้จะทำงานได้ดีเมื่อคุณอยู่ในที่มืด"</string>
     <string name="accessibility_deprecate_extra_dim_dialog_button" msgid="1782147201534669800">"นำทางลัดหรี่แสงเพิ่มเติมออก"</string>
     <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="4070696910424515757">"นำทางลัดหรี่แสงเพิ่มเติมออกแล้ว หากต้องการลดความสว่าง ให้ใช้แถบความสว่างปกติ"</string>
+    <!-- no translation found for qs_edit_mode_category_connectivity (4559726936546032672) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_accessibility (7969091385071475922) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_utilities (8123080090108420095) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_privacy (6577774443194551775) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_providedByApps (8346112074897919019) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_display (4749511439121053942) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_unknown (509314252124053550) -->
+    <skip />
 </resources>

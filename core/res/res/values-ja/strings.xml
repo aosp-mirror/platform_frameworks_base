@@ -1400,10 +1400,10 @@
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"USB テザリング ON"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"USB MIDI モード ON"</string>
     <string name="usb_uvc_notification_title" msgid="2030032862673400008">"ウェブカメラとしてデバイスを接続しました"</string>
-    <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB アクセサリが接続されました"</string>
+    <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB アクセサリーが接続されました"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"タップしてその他のオプションを表示します。"</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"接続されているデバイスを充電しています。タップすると、他の項目が表示されます。"</string>
-    <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"アナログのオーディオ アクセサリを検出"</string>
+    <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"アナログのオーディオ アクセサリーを検出"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"接続したデバイスはこのスマートフォンと互換性がありません。タップすると、詳細を確認できます。"</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"USB デバッグが接続されました"</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"無効にするにはここをタップしてください"</string>
@@ -1746,8 +1746,7 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"権限のリクエストを遮っているアプリがあるため、同意の回答を確認できません。"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"使用を開始する機能をタップ:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"ユーザー補助機能ボタンで使用する機能の選択"</string>
-    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
-    <skip />
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2245540598834891500">"音量ボタンのショートカットで使用する機能の選択"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> はオフになっています"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"ショートカットの編集"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"完了"</string>
