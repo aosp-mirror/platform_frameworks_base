@@ -26,7 +26,6 @@ import android.app.appsearch.GetSchemaResponse;
 import android.app.appsearch.PutDocumentsRequest;
 import android.app.appsearch.RemoveByDocumentIdRequest;
 import android.app.appsearch.SearchResult;
-import android.app.appsearch.SearchResults;
 import android.app.appsearch.SearchSpec;
 import android.app.appsearch.SetSchemaRequest;
 import android.app.appsearch.SetSchemaResponse;
@@ -36,8 +35,6 @@ import com.android.internal.infra.AndroidFuture;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.Executor;
 
 /** A future API wrapper of {@link AppSearchSession} APIs. */
 public interface FutureAppSearchSession extends Closeable {
@@ -88,29 +85,15 @@ public interface FutureAppSearchSession extends Closeable {
             @NonNull String queryExpression, @NonNull SearchSpec searchSpec);
 
     /** A future API wrapper of {@link android.app.appsearch.SearchResults}. */
-    class FutureSearchResults {
-        private final SearchResults mSearchResults;
-        private final Executor mExecutor;
+    interface FutureSearchResults {
 
-        public FutureSearchResults(
-                @NonNull SearchResults searchResults, @NonNull Executor executor) {
-            mSearchResults = Objects.requireNonNull(searchResults);
-            mExecutor = Objects.requireNonNull(executor);
-        }
-
-        public AndroidFuture<List<SearchResult>> getNextPage() {
-            AndroidFuture<AppSearchResult<List<SearchResult>>> nextPageFuture =
-                    new AndroidFuture<>();
-
-            mSearchResults.getNextPage(mExecutor, nextPageFuture::complete);
-            return nextPageFuture.thenApply(
-                    result -> {
-                        if (result.isSuccess()) {
-                            return result.getResultValue();
-                        } else {
-                            throw new RuntimeException(failedResultToException(result));
-                        }
-                    });
-        }
+        /**
+         * Retrieves the next page of {@link SearchResult} objects from the {@link AppSearchSession}
+         * database.
+         *
+         * <p>Continue calling this method to access results until it returns an empty list,
+         * signifying there are no more results.
+         */
+        AndroidFuture<List<SearchResult>> getNextPage();
     }
 }
