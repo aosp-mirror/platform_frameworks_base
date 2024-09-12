@@ -1211,7 +1211,7 @@ public class ShellTransitionTests extends ShellTestCase {
                         mTransactionPool, createTestDisplayController(), mMainExecutor,
                         mMainHandler, mAnimExecutor, mock(HomeTransitionObserver.class));
         final RecentsTransitionHandler recentsHandler =
-                new RecentsTransitionHandler(shellInit, transitions,
+                new RecentsTransitionHandler(shellInit, mock(ShellTaskOrganizer.class), transitions,
                         mock(RecentTasksController.class), mock(HomeTransitionObserver.class));
         transitions.replaceDefaultHandlerForTest(mDefaultHandler);
         shellInit.init();
