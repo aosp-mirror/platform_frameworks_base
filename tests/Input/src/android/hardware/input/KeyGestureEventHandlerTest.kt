@@ -19,7 +19,7 @@ package android.hardware.input
 import android.content.Context
 import android.content.ContextWrapper
 import android.os.Handler
-import android.os.HandlerExecutor
+import android.os.IBinder
 import android.os.test.TestLooper
 import android.platform.test.annotations.Presubmit
 import android.platform.test.flag.junit.SetFlagsRule
@@ -42,14 +42,14 @@ import kotlin.test.assertNull
 import kotlin.test.fail
 
 /**
- * Tests for [InputManager.KeyGestureEventListener].
+ * Tests for [InputManager.KeyGestureEventHandler].
  *
  * Build/Install/Run:
- * atest InputTests:KeyGestureEventListenerTest
+ * atest InputTests:KeyGestureEventHandlerTest
  */
 @Presubmit
 @RunWith(MockitoJUnitRunner::class)
-class KeyGestureEventListenerTest {
+class KeyGestureEventHandlerTest {
 
     companion object {
         const val DEVICE_ID = 1
@@ -59,14 +59,19 @@ class KeyGestureEventListenerTest {
             .setModifierState(KeyEvent.META_META_ON or KeyEvent.META_META_LEFT_ON)
             .setKeyGestureType(KeyGestureEvent.KEY_GESTURE_TYPE_HOME)
             .build()
+        val BACK_GESTURE_EVENT = KeyGestureEvent.Builder()
+            .setDeviceId(DEVICE_ID)
+            .setKeycodes(intArrayOf(KeyEvent.KEYCODE_DEL))
+            .setModifierState(KeyEvent.META_META_ON or KeyEvent.META_META_LEFT_ON)
+            .setKeyGestureType(KeyGestureEvent.KEY_GESTURE_TYPE_BACK)
+            .build()
     }
 
     @get:Rule
     val rule = SetFlagsRule()
 
     private val testLooper = TestLooper()
-    private val executor = HandlerExecutor(Handler(testLooper.looper))
-    private var registeredListener: IKeyGestureEventListener? = null
+    private var registeredListener: IKeyGestureHandler? = null
     private lateinit var context: Context
     private lateinit var inputManager: InputManager
     private lateinit var inputManagerGlobalSession: InputManagerGlobal.TestSession
@@ -82,28 +87,28 @@ class KeyGestureEventListenerTest {
         `when`(context.getSystemService(Mockito.eq(Context.INPUT_SERVICE)))
                 .thenReturn(inputManager)
 
-        // Handle key gesture event listener registration.
+        // Handle key gesture handler registration.
         doAnswer {
-            val listener = it.getArgument(0) as IKeyGestureEventListener
+            val listener = it.getArgument(0) as IKeyGestureHandler
             if (registeredListener != null &&
                     registeredListener!!.asBinder() != listener.asBinder()) {
-                // There can only be one registered key gesture event listener per process.
+                // There can only be one registered key gesture handler per process.
                 fail("Trying to register a new listener when one already exists")
             }
             registeredListener = listener
             null
-        }.`when`(iInputManagerMock).registerKeyGestureEventListener(any())
+        }.`when`(iInputManagerMock).registerKeyGestureHandler(any())
 
-        // Handle key gesture event listener being unregistered.
+        // Handle key gesture handler being unregistered.
         doAnswer {
-            val listener = it.getArgument(0) as IKeyGestureEventListener
+            val listener = it.getArgument(0) as IKeyGestureHandler
             if (registeredListener == null ||
                     registeredListener!!.asBinder() != listener.asBinder()) {
                 fail("Trying to unregister a listener that is not registered")
             }
             registeredListener = null
             null
-        }.`when`(iInputManagerMock).unregisterKeyGestureEventListener(any())
+        }.`when`(iInputManagerMock).unregisterKeyGestureHandler(any())
     }
 
     @After
@@ -113,7 +118,7 @@ class KeyGestureEventListenerTest {
         }
     }
 
-    private fun notifyKeyGestureEvent(event: KeyGestureEvent) {
+    private fun handleKeyGestureEvent(event: KeyGestureEvent) {
         val eventToSend = AidlKeyGestureEvent()
         eventToSend.deviceId = event.deviceId
         eventToSend.keycodes = event.keycodes
@@ -122,84 +127,110 @@ class KeyGestureEventListenerTest {
         eventToSend.action = event.action
         eventToSend.displayId = event.displayId
         eventToSend.flags = event.flags
-        registeredListener!!.onKeyGestureEvent(eventToSend)
+        registeredListener!!.handleKeyGesture(eventToSend, null)
     }
 
     @Test
-    fun testListenerHasCorrectGestureNotified() {
+    fun testHandlerHasCorrectGestureNotified() {
         var callbackCount = 0
 
         // Add a key gesture event listener
-        inputManager.registerKeyGestureEventListener(executor) {
-            event: KeyGestureEvent ->
+        inputManager.registerKeyGestureEventHandler(KeyGestureHandler { event, _ ->
             assertEquals(HOME_GESTURE_EVENT, event)
             callbackCount++
-        }
+            true
+        })
 
-        // Notifying key gesture event will notify the listener.
-        notifyKeyGestureEvent(HOME_GESTURE_EVENT)
-        testLooper.dispatchNext()
+        // Request handling for key gesture event will notify the handler.
+        handleKeyGestureEvent(HOME_GESTURE_EVENT)
         assertEquals(1, callbackCount)
     }
 
     @Test
-    fun testAddingListenersRegistersInternalCallbackListener() {
+    fun testAddingHandlersRegistersInternalCallbackHandler() {
         // Set up two callbacks.
-        val callback1 = InputManager.KeyGestureEventListener { _ -> }
-        val callback2 = InputManager.KeyGestureEventListener { _ -> }
+        val callback1 = KeyGestureHandler { _, _ -> false }
+        val callback2 = KeyGestureHandler { _, _ -> false }
 
         assertNull(registeredListener)
 
-        // Adding the listener should register the callback with InputManagerService.
-        inputManager.registerKeyGestureEventListener(executor, callback1)
+        // Adding the handler should register the callback with InputManagerService.
+        inputManager.registerKeyGestureEventHandler(callback1)
         assertNotNull(registeredListener)
 
-        // Adding another listener should not register new internal listener.
+        // Adding another handler should not register new internal listener.
         val currListener = registeredListener
-        inputManager.registerKeyGestureEventListener(executor, callback2)
+        inputManager.registerKeyGestureEventHandler(callback2)
         assertEquals(currListener, registeredListener)
     }
 
     @Test
-    fun testRemovingListenersUnregistersInternalCallbackListener() {
+    fun testRemovingHandlersUnregistersInternalCallbackHandler() {
         // Set up two callbacks.
-        val callback1 = InputManager.KeyGestureEventListener { _ -> }
-        val callback2 = InputManager.KeyGestureEventListener { _ -> }
+        val callback1 = KeyGestureHandler { _, _ -> false }
+        val callback2 = KeyGestureHandler { _, _ -> false }
 
-        inputManager.registerKeyGestureEventListener(executor, callback1)
-        inputManager.registerKeyGestureEventListener(executor, callback2)
+        inputManager.registerKeyGestureEventHandler(callback1)
+        inputManager.registerKeyGestureEventHandler(callback2)
 
-        // Only removing all listeners should remove the internal callback
-        inputManager.unregisterKeyGestureEventListener(callback1)
+        // Only removing all handlers should remove the internal callback
+        inputManager.unregisterKeyGestureEventHandler(callback1)
         assertNotNull(registeredListener)
-        inputManager.unregisterKeyGestureEventListener(callback2)
+        inputManager.unregisterKeyGestureEventHandler(callback2)
         assertNull(registeredListener)
     }
 
     @Test
-    fun testMultipleListeners() {
+    fun testMultipleHandlers() {
         // Set up two callbacks.
         var callbackCount1 = 0
         var callbackCount2 = 0
-        val callback1 = InputManager.KeyGestureEventListener { _ -> callbackCount1++ }
-        val callback2 = InputManager.KeyGestureEventListener { _ -> callbackCount2++ }
+        // Handler 1 captures all home gestures
+        val callback1 = KeyGestureHandler { event, _ ->
+            callbackCount1++
+            event.keyGestureType == KeyGestureEvent.KEY_GESTURE_TYPE_HOME
+        }
+        // Handler 2 captures all gestures
+        val callback2 = KeyGestureHandler { _, _ ->
+            callbackCount2++
+            true
+        }
 
-        // Add both key gesture event listeners
-        inputManager.registerKeyGestureEventListener(executor, callback1)
-        inputManager.registerKeyGestureEventListener(executor, callback2)
+        // Add both key gesture event handlers
+        inputManager.registerKeyGestureEventHandler(callback1)
+        inputManager.registerKeyGestureEventHandler(callback2)
 
-        // Notifying key gesture event, should notify both the callbacks.
-        notifyKeyGestureEvent(HOME_GESTURE_EVENT)
-        testLooper.dispatchAll()
+        // Request handling for key gesture event, should notify callbacks in order. So, only the
+        // first handler should receive a callback since it captures the event.
+        handleKeyGestureEvent(HOME_GESTURE_EVENT)
         assertEquals(1, callbackCount1)
-        assertEquals(1, callbackCount2)
+        assertEquals(0, callbackCount2)
 
-        inputManager.unregisterKeyGestureEventListener(callback2)
-        // Notifying key gesture event, should still trigger callback1 but not
-        // callback2.
-        notifyKeyGestureEvent(HOME_GESTURE_EVENT)
-        testLooper.dispatchAll()
+        // Second handler should receive the event since the first handler doesn't capture the event
+        handleKeyGestureEvent(BACK_GESTURE_EVENT)
         assertEquals(2, callbackCount1)
         assertEquals(1, callbackCount2)
+
+        inputManager.unregisterKeyGestureEventHandler(callback1)
+        // Request handling for key gesture event, should still trigger callback2 but not callback1.
+        handleKeyGestureEvent(HOME_GESTURE_EVENT)
+        assertEquals(2, callbackCount1)
+        assertEquals(2, callbackCount2)
+    }
+
+    inner class KeyGestureHandler(
+        private var handler: (event: KeyGestureEvent, token: IBinder?) -> Boolean
+    ) : InputManager.KeyGestureEventHandler {
+
+        override fun handleKeyGestureEvent(
+            event: KeyGestureEvent,
+            focusedToken: IBinder?
+        ): Boolean {
+            return handler(event, focusedToken)
+        }
+
+        override fun isKeyGestureSupported(gestureType: Int): Boolean {
+            return true
+        }
     }
 }
