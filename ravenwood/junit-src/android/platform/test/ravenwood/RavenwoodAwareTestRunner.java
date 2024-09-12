@@ -193,6 +193,8 @@ public final class RavenwoodAwareTestRunner extends Runner implements Filterable
      */
     public RavenwoodAwareTestRunner(Class<?> testClass) {
         try {
+            performGlobalInitialization();
+
             mTestClass = new TestClass(testClass);
 
             Log.v(TAG, "RavenwoodAwareTestRunner starting for " + testClass.getCanonicalName());
@@ -259,6 +261,13 @@ public final class RavenwoodAwareTestRunner extends Runner implements Filterable
         }
     }
 
+    private void performGlobalInitialization() {
+        if (!isOnRavenwood()) {
+            return;
+        }
+        RavenwoodAwareTestRunnerHook.performGlobalInitialization();
+    }
+
     /**
      * Run the bare minimum setup to initialize the wrapped runner.
      */
@@ -267,7 +276,6 @@ public final class RavenwoodAwareTestRunner extends Runner implements Filterable
         if (!isOnRavenwood()) {
             return;
         }
-        // DO NOT USE android.util.Log before calling onRunnerInitializing().
 
         RavenwoodAwareTestRunnerHook.onRunnerInitializing(this, mTestClass);
 

@@ -35,6 +35,12 @@ public class RavenwoodAwareTestRunnerHook {
     }
 
     /**
+     * Called before any code starts. Internally it will only initialize the environment once.
+     */
+    public static void performGlobalInitialization() {
+    }
+
+    /**
      * Called when a runner starts, before the inner runner gets a chance to run.
      */
     public static void onRunnerInitializing(RavenwoodAwareTestRunner runner, TestClass testClass) {
