@@ -16,9 +16,9 @@
 
 package com.android.systemui.bluetooth.qsdialog.dagger
 
-import com.android.settingslib.bluetooth.BluetoothUtils
 import com.android.settingslib.bluetooth.LocalBluetoothManager
 import com.android.settingslib.flags.Flags
+import com.android.settingslib.volume.data.repository.AudioSharingRepository as SettingsLibAudioSharingRepository
 import com.android.systemui.bluetooth.qsdialog.ActiveMediaDeviceItemFactory
 import com.android.systemui.bluetooth.qsdialog.AudioSharingDeviceItemActionInteractorImpl
 import com.android.systemui.bluetooth.qsdialog.AudioSharingInteractor
@@ -52,6 +52,7 @@ interface AudioSharingModule {
         @SysUISingleton
         fun provideAudioSharingRepository(
             localBluetoothManager: LocalBluetoothManager?,
+            settingsLibAudioSharingRepository: SettingsLibAudioSharingRepository,
             @Background backgroundDispatcher: CoroutineDispatcher,
         ): AudioSharingRepository =
             if (
@@ -59,7 +60,11 @@ interface AudioSharingModule {
                     Flags.audioSharingQsDialogImprovement() &&
                     localBluetoothManager != null
             ) {
-                AudioSharingRepositoryImpl(localBluetoothManager, backgroundDispatcher)
+                AudioSharingRepositoryImpl(
+                    localBluetoothManager,
+                    settingsLibAudioSharingRepository,
+                    backgroundDispatcher,
+                )
             } else {
                 AudioSharingRepositoryEmptyImpl()
             }
@@ -67,10 +72,11 @@ interface AudioSharingModule {
         @Provides
         @SysUISingleton
         fun provideAudioSharingInteractor(
+            localBluetoothManager: LocalBluetoothManager?,
             impl: Lazy<AudioSharingInteractorImpl>,
             emptyImpl: Lazy<AudioSharingInteractorEmptyImpl>,
         ): AudioSharingInteractor =
-            if (BluetoothUtils.isAudioSharingEnabled()) {
+            if (Flags.enableLeAudioSharing() && localBluetoothManager != null) {
                 impl.get()
             } else {
                 emptyImpl.get()
@@ -79,10 +85,11 @@ interface AudioSharingModule {
         @Provides
         @SysUISingleton
         fun provideDeviceItemActionInteractor(
+            localBluetoothManager: LocalBluetoothManager?,
             audioSharingImpl: Lazy<AudioSharingDeviceItemActionInteractorImpl>,
             impl: Lazy<DeviceItemActionInteractorImpl>,
         ): DeviceItemActionInteractor =
-            if (BluetoothUtils.isAudioSharingEnabled()) {
+            if (Flags.enableLeAudioSharing() && localBluetoothManager != null) {
                 audioSharingImpl.get()
             } else {
                 impl.get()
@@ -94,7 +101,7 @@ interface AudioSharingModule {
             localBluetoothManager: LocalBluetoothManager?
         ): List<DeviceItemFactory> = buildList {
             add(ActiveMediaDeviceItemFactory())
-            if (BluetoothUtils.isAudioSharingEnabled()) {
+            if (Flags.enableLeAudioSharing() && localBluetoothManager != null) {
                 add(AudioSharingMediaDeviceItemFactory(localBluetoothManager))
                 add(AvailableAudioSharingMediaDeviceItemFactory(localBluetoothManager))
             }
@@ -105,9 +112,11 @@ interface AudioSharingModule {
 
         @Provides
         @SysUISingleton
-        fun provideDeviceItemDisplayPriority(): List<DeviceItemType> = buildList {
+        fun provideDeviceItemDisplayPriority(
+            localBluetoothManager: LocalBluetoothManager?
+        ): List<DeviceItemType> = buildList {
             add(DeviceItemType.ACTIVE_MEDIA_BLUETOOTH_DEVICE)
-            if (BluetoothUtils.isAudioSharingEnabled()) {
+            if (Flags.enableLeAudioSharing() && localBluetoothManager != null) {
                 add(DeviceItemType.AUDIO_SHARING_MEDIA_BLUETOOTH_DEVICE)
                 add(DeviceItemType.AVAILABLE_AUDIO_SHARING_MEDIA_BLUETOOTH_DEVICE)
             }

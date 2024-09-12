@@ -20,15 +20,18 @@ import com.android.settingslib.bluetooth.BluetoothUtils
 import com.android.settingslib.bluetooth.CachedBluetoothDevice
 import com.android.settingslib.bluetooth.LocalBluetoothManager
 import com.android.settingslib.bluetooth.onPlaybackStarted
-import com.android.settingslib.volume.data.repository.AudioSharingRepository as SettingsLibAudioSharingRepository
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.withContext
 
@@ -47,36 +50,60 @@ interface AudioSharingInteractor {
     suspend fun switchActive(cachedBluetoothDevice: CachedBluetoothDevice)
 
     suspend fun startAudioSharing()
+
+    suspend fun audioSharingAvailable(): Boolean
 }
 
 @SysUISingleton
+@OptIn(ExperimentalCoroutinesApi::class)
 class AudioSharingInteractorImpl
 @Inject
 constructor(
     private val localBluetoothManager: LocalBluetoothManager?,
     private val audioSharingRepository: AudioSharingRepository,
-    settingsLibAudioSharingRepository: SettingsLibAudioSharingRepository,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
 ) : AudioSharingInteractor {
 
-    override val isAudioSharingOn = settingsLibAudioSharingRepository.inAudioSharing
+    override val isAudioSharingOn: Flow<Boolean> =
+        flow { emit(audioSharingAvailable()) }
+            .flatMapLatest { isEnabled ->
+                if (isEnabled) {
+                    audioSharingRepository.inAudioSharing
+                } else {
+                    flowOf(false)
+                }
+            }
+            .flowOn(backgroundDispatcher)
 
-    override val audioSourceStateUpdate = audioSharingRepository.audioSourceStateUpdate
+    override val audioSourceStateUpdate =
+        isAudioSharingOn
+            .flatMapLatest {
+                if (it) {
+                    audioSharingRepository.audioSourceStateUpdate
+                } else {
+                    emptyFlow()
+                }
+            }
+            .flowOn(backgroundDispatcher)
 
     override suspend fun handleAudioSourceWhenReady() {
         withContext(backgroundDispatcher) {
-            audioSharingRepository.leAudioBroadcastProfile?.let { profile ->
-                isAudioSharingOn
-                    .mapNotNull { audioSharingOn ->
-                        if (audioSharingOn) {
-                            // onPlaybackStarted could emit multiple times during one audio sharing
-                            // session, we only perform add source on the first time
-                            profile.onPlaybackStarted.firstOrNull()
-                        } else {
-                            null
+            if (audioSharingAvailable()) {
+                audioSharingRepository.leAudioBroadcastProfile?.let { profile ->
+                    isAudioSharingOn
+                        .mapNotNull { audioSharingOn ->
+                            if (audioSharingOn) {
+                                // onPlaybackStarted could emit multiple times during one
+                                // audio sharing session, we only perform add source on the
+                                // first time
+                                profile.onPlaybackStarted.firstOrNull()
+                            } else {
+                                null
+                            }
                         }
-                    }
-                    .collect { audioSharingRepository.addSource() }
+                        .flowOn(backgroundDispatcher)
+                        .collect { audioSharingRepository.addSource() }
+                }
             }
         }
     }
@@ -85,19 +112,34 @@ constructor(
         cachedBluetoothDevice: CachedBluetoothDevice
     ): Boolean {
         return withContext(backgroundDispatcher) {
-            BluetoothUtils.isAvailableAudioSharingMediaBluetoothDevice(
-                cachedBluetoothDevice,
-                localBluetoothManager
-            )
+            if (audioSharingAvailable()) {
+                BluetoothUtils.isAvailableAudioSharingMediaBluetoothDevice(
+                    cachedBluetoothDevice,
+                    localBluetoothManager,
+                )
+            } else {
+                false
+            }
         }
     }
 
     override suspend fun switchActive(cachedBluetoothDevice: CachedBluetoothDevice) {
+        if (!audioSharingAvailable()) {
+            return
+        }
         audioSharingRepository.setActive(cachedBluetoothDevice)
     }
 
     override suspend fun startAudioSharing() {
+        if (!audioSharingAvailable()) {
+            return
+        }
         audioSharingRepository.startAudioSharing()
+    }
+
+    // TODO(b/367965193): Move this after flags rollout
+    override suspend fun audioSharingAvailable(): Boolean {
+        return audioSharingRepository.audioSharingAvailable()
     }
 }
 
@@ -116,4 +158,6 @@ class AudioSharingInteractorEmptyImpl @Inject constructor() : AudioSharingIntera
     override suspend fun switchActive(cachedBluetoothDevice: CachedBluetoothDevice) {}
 
     override suspend fun startAudioSharing() {}
+
+    override suspend fun audioSharingAvailable(): Boolean = false
 }

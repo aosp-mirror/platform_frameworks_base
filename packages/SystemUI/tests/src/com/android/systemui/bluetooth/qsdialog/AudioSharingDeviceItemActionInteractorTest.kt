@@ -78,7 +78,7 @@ class AudioSharingDeviceItemActionInteractorTest : SysuiTestCase() {
                 deviceName = DEVICE_NAME,
                 connectionSummary = DEVICE_CONNECTION_SUMMARY,
                 iconWithDescription = null,
-                background = null
+                background = null,
             )
         connectedAudioSharingMediaDeviceItem =
             DeviceItem(
@@ -87,7 +87,7 @@ class AudioSharingDeviceItemActionInteractorTest : SysuiTestCase() {
                 deviceName = DEVICE_NAME,
                 connectionSummary = DEVICE_CONNECTION_SUMMARY,
                 iconWithDescription = null,
-                background = null
+                background = null,
             )
         actionInteractorImpl = kosmos.audioSharingDeviceItemActionInteractorImpl
     }
@@ -102,6 +102,7 @@ class AudioSharingDeviceItemActionInteractorTest : SysuiTestCase() {
     fun testOnClick_connectedAudioSharingMediaDevice_flagOn_createDialog() {
         with(kosmos) {
             testScope.runTest {
+                bluetoothTileDialogAudioSharingRepository.setAudioSharingAvailable(true)
                 actionInteractorImpl.onClick(connectedAudioSharingMediaDeviceItem, dialog)
                 verify(dialogTransitionAnimator)
                     .showFromDialog(any(), any(), eq(null), anyBoolean())
@@ -114,13 +115,14 @@ class AudioSharingDeviceItemActionInteractorTest : SysuiTestCase() {
     fun testOnClick_connectedAudioSharingMediaDevice_flagOff_shouldLaunchSettings() {
         with(kosmos) {
             testScope.runTest {
+                bluetoothTileDialogAudioSharingRepository.setAudioSharingAvailable(true)
                 whenever(cachedBluetoothDevice.device).thenReturn(bluetoothDevice)
                 actionInteractorImpl.onClick(connectedAudioSharingMediaDeviceItem, dialog)
                 verify(activityStarter)
                     .postStartActivityDismissingKeyguard(
                         ArgumentMatchers.any(),
                         ArgumentMatchers.anyInt(),
-                        ArgumentMatchers.any()
+                        ArgumentMatchers.any(),
                     )
                 verify(dialogTransitionAnimator, never())
                     .showFromDialog(any(), any(), eq(null), anyBoolean())
@@ -132,13 +134,14 @@ class AudioSharingDeviceItemActionInteractorTest : SysuiTestCase() {
     fun testOnClick_inAudioSharing_clickedDeviceHasSource_shouldNotLaunchSettings() {
         with(kosmos) {
             testScope.runTest {
+                bluetoothTileDialogAudioSharingRepository.setAudioSharingAvailable(true)
                 whenever(cachedBluetoothDevice.uiAccessibleProfiles)
                     .thenReturn(listOf(leAudioProfile))
                 whenever(BluetoothUtils.isBroadcasting(ArgumentMatchers.any())).thenReturn(true)
                 whenever(
                         BluetoothUtils.hasConnectedBroadcastSource(
                             ArgumentMatchers.any(),
-                            ArgumentMatchers.any()
+                            ArgumentMatchers.any(),
                         )
                     )
                     .thenReturn(true)
@@ -148,7 +151,7 @@ class AudioSharingDeviceItemActionInteractorTest : SysuiTestCase() {
                     .postStartActivityDismissingKeyguard(
                         ArgumentMatchers.any(),
                         ArgumentMatchers.anyInt(),
-                        ArgumentMatchers.any()
+                        ArgumentMatchers.any(),
                     )
             }
         }
@@ -158,6 +161,7 @@ class AudioSharingDeviceItemActionInteractorTest : SysuiTestCase() {
     fun testOnClick_inAudioSharing_clickedDeviceNoSource_shouldLaunchSettings() {
         with(kosmos) {
             testScope.runTest {
+                bluetoothTileDialogAudioSharingRepository.setAudioSharingAvailable(true)
                 whenever(cachedBluetoothDevice.device).thenReturn(bluetoothDevice)
                 whenever(cachedBluetoothDevice.uiAccessibleProfiles)
                     .thenReturn(listOf(leAudioProfile))
@@ -166,7 +170,7 @@ class AudioSharingDeviceItemActionInteractorTest : SysuiTestCase() {
                 whenever(
                         BluetoothUtils.hasConnectedBroadcastSource(
                             ArgumentMatchers.any(),
-                            ArgumentMatchers.any()
+                            ArgumentMatchers.any(),
                         )
                     )
                     .thenReturn(false)
@@ -176,7 +180,7 @@ class AudioSharingDeviceItemActionInteractorTest : SysuiTestCase() {
                     .postStartActivityDismissingKeyguard(
                         ArgumentMatchers.any(),
                         ArgumentMatchers.anyInt(),
-                        ArgumentMatchers.any()
+                        ArgumentMatchers.any(),
                     )
             }
         }

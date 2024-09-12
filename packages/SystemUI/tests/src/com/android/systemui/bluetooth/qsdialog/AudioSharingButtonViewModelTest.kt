@@ -26,17 +26,15 @@ import com.android.settingslib.bluetooth.CachedBluetoothDevice
 import com.android.settingslib.bluetooth.LocalBluetoothManager
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.lifecycle.activateIn
 import com.android.systemui.res.R
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.whenever
-import com.android.systemui.volume.data.repository.audioSharingRepository as SettingsLibAudioSharingRepository
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -51,8 +49,7 @@ import org.mockito.Mock
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 class AudioSharingButtonViewModelTest : SysuiTestCase() {
     private val kosmos = testKosmos()
-    private val testDispatcher = UnconfinedTestDispatcher()
-    private val testScope = TestScope(testDispatcher)
+    private val testScope = kosmos.testScope
     private val bluetoothState = MutableStateFlow(false)
     private val deviceItemUpdate: MutableSharedFlow<List<DeviceItem>> = MutableSharedFlow()
     @Mock private lateinit var cachedBluetoothDevice: CachedBluetoothDevice
@@ -89,6 +86,9 @@ class AudioSharingButtonViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val actual by
                 collectLastValue(audioSharingButtonViewModel.audioSharingButtonStateUpdate)
+            kosmos.bluetoothTileDialogAudioSharingRepository.setAudioSharingAvailable(true)
+
+            runCurrent()
 
             assertThat(actual).isEqualTo(AudioSharingButtonState.Gone)
         }
@@ -99,6 +99,7 @@ class AudioSharingButtonViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val actual by
                 collectLastValue(audioSharingButtonViewModel.audioSharingButtonStateUpdate)
+            kosmos.bluetoothTileDialogAudioSharingRepository.setAudioSharingAvailable(true)
             bluetoothState.value = true
             runCurrent()
 
@@ -111,17 +112,19 @@ class AudioSharingButtonViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val actual by
                 collectLastValue(audioSharingButtonViewModel.audioSharingButtonStateUpdate)
+            kosmos.bluetoothTileDialogAudioSharingRepository.setAudioSharingAvailable(true)
             bluetoothState.value = true
+            runCurrent()
             deviceItemUpdate.emit(listOf())
-            kosmos.SettingsLibAudioSharingRepository.setInAudioSharing(true)
-
+            runCurrent()
+            kosmos.bluetoothTileDialogAudioSharingRepository.setInAudioSharing(true)
             runCurrent()
 
             assertThat(actual)
                 .isEqualTo(
                     AudioSharingButtonState.Visible(
                         R.string.quick_settings_bluetooth_audio_sharing_button_sharing,
-                        isActive = true
+                        isActive = true,
                     )
                 )
         }
@@ -130,18 +133,19 @@ class AudioSharingButtonViewModelTest : SysuiTestCase() {
     @Test
     fun testButtonStateUpdate_hasSource_returnGone() {
         testScope.runTest {
+            val actual by
+                collectLastValue(audioSharingButtonViewModel.audioSharingButtonStateUpdate)
+            kosmos.bluetoothTileDialogAudioSharingRepository.setAudioSharingAvailable(true)
             whenever(deviceItem.cachedBluetoothDevice).thenReturn(cachedBluetoothDevice)
             whenever(
                     BluetoothUtils.hasConnectedBroadcastSource(
                         cachedBluetoothDevice,
-                        localBluetoothManager
+                        localBluetoothManager,
                     )
                 )
                 .thenReturn(true)
-
-            val actual by
-                collectLastValue(audioSharingButtonViewModel.audioSharingButtonStateUpdate)
             bluetoothState.value = true
+            runCurrent()
             deviceItemUpdate.emit(listOf(deviceItem))
             runCurrent()
 
@@ -152,19 +156,20 @@ class AudioSharingButtonViewModelTest : SysuiTestCase() {
     @Test
     fun testButtonStateUpdate_hasActiveDevice_returnAudioSharing() {
         testScope.runTest {
+            val actual by
+                collectLastValue(audioSharingButtonViewModel.audioSharingButtonStateUpdate)
+            kosmos.bluetoothTileDialogAudioSharingRepository.setAudioSharingAvailable(true)
             whenever(deviceItem.cachedBluetoothDevice).thenReturn(cachedBluetoothDevice)
             whenever(
                     BluetoothUtils.hasConnectedBroadcastSource(
                         cachedBluetoothDevice,
-                        localBluetoothManager
+                        localBluetoothManager,
                     )
                 )
                 .thenReturn(false)
             whenever(BluetoothUtils.isActiveLeAudioDevice(cachedBluetoothDevice)).thenReturn(true)
-
-            val actual by
-                collectLastValue(audioSharingButtonViewModel.audioSharingButtonStateUpdate)
             bluetoothState.value = true
+            runCurrent()
             deviceItemUpdate.emit(listOf(deviceItem))
             runCurrent()
 
@@ -172,7 +177,7 @@ class AudioSharingButtonViewModelTest : SysuiTestCase() {
                 .isEqualTo(
                     AudioSharingButtonState.Visible(
                         R.string.quick_settings_bluetooth_audio_sharing_button,
-                        isActive = false
+                        isActive = false,
                     )
                 )
         }

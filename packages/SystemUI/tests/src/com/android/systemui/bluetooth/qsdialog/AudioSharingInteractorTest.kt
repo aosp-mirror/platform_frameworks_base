@@ -22,9 +22,9 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.settingslib.bluetooth.LocalBluetoothLeBroadcast
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
-import com.android.systemui.volume.data.repository.audioSharingRepository
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
@@ -59,9 +59,89 @@ class AudioSharingInteractorTest : SysuiTestCase() {
     }
 
     @Test
+    fun testIsAudioSharingOn_flagOff_false() =
+        with(kosmos) {
+            testScope.runTest {
+                bluetoothTileDialogAudioSharingRepository.setAudioSharingAvailable(false)
+                val value by collectLastValue(underTest.isAudioSharingOn)
+                runCurrent()
+
+                assertThat(value).isFalse()
+            }
+        }
+
+    @Test
+    fun testIsAudioSharingOn_flagOn_notInAudioSharing_false() =
+        with(kosmos) {
+            testScope.runTest {
+                bluetoothTileDialogAudioSharingRepository.setAudioSharingAvailable(true)
+                bluetoothTileDialogAudioSharingRepository.setInAudioSharing(false)
+                val value by collectLastValue(underTest.isAudioSharingOn)
+                runCurrent()
+
+                assertThat(value).isFalse()
+            }
+        }
+
+    @Test
+    fun testIsAudioSharingOn_flagOn_inAudioSharing_true() =
+        with(kosmos) {
+            testScope.runTest {
+                bluetoothTileDialogAudioSharingRepository.setAudioSharingAvailable(true)
+                bluetoothTileDialogAudioSharingRepository.setInAudioSharing(true)
+                val value by collectLastValue(underTest.isAudioSharingOn)
+                runCurrent()
+
+                assertThat(value).isTrue()
+            }
+        }
+
+    @Test
+    fun testAudioSourceStateUpdate_notInAudioSharing_returnEmpty() =
+        with(kosmos) {
+            testScope.runTest {
+                bluetoothTileDialogAudioSharingRepository.setAudioSharingAvailable(true)
+                bluetoothTileDialogAudioSharingRepository.setInAudioSharing(false)
+                val value by collectLastValue(underTest.audioSourceStateUpdate)
+                runCurrent()
+
+                assertThat(value).isNull()
+            }
+        }
+
+    @Test
+    fun testAudioSourceStateUpdate_inAudioSharing_returnUnit() =
+        with(kosmos) {
+            testScope.runTest {
+                bluetoothTileDialogAudioSharingRepository.setAudioSharingAvailable(true)
+                bluetoothTileDialogAudioSharingRepository.setInAudioSharing(true)
+                val value by collectLastValue(underTest.audioSourceStateUpdate)
+                runCurrent()
+                bluetoothTileDialogAudioSharingRepository.emitAudioSourceStateUpdate()
+                runCurrent()
+
+                assertThat(value).isNull()
+            }
+        }
+
+    @Test
+    fun testHandleAudioSourceWhenReady_flagOff_sourceNotAdded() =
+        with(kosmos) {
+            testScope.runTest {
+                bluetoothTileDialogAudioSharingRepository.setAudioSharingAvailable(false)
+                val job = launch { underTest.handleAudioSourceWhenReady() }
+                runCurrent()
+
+                assertThat(bluetoothTileDialogAudioSharingRepository.sourceAdded).isFalse()
+                job.cancel()
+            }
+        }
+
+    @Test
     fun testHandleAudioSourceWhenReady_noProfile_sourceNotAdded() =
         with(kosmos) {
             testScope.runTest {
+                bluetoothTileDialogAudioSharingRepository.setAudioSharingAvailable(true)
                 bluetoothTileDialogAudioSharingRepository.setLeAudioBroadcastProfile(null)
                 val job = launch { underTest.handleAudioSourceWhenReady() }
                 runCurrent()
@@ -75,7 +155,8 @@ class AudioSharingInteractorTest : SysuiTestCase() {
     fun testHandleAudioSourceWhenReady_hasProfileButAudioSharingOff_sourceNotAdded() =
         with(kosmos) {
             testScope.runTest {
-                audioSharingRepository.setInAudioSharing(false)
+                bluetoothTileDialogAudioSharingRepository.setInAudioSharing(false)
+                bluetoothTileDialogAudioSharingRepository.setAudioSharingAvailable(true)
                 bluetoothTileDialogAudioSharingRepository.setLeAudioBroadcastProfile(
                     localBluetoothLeBroadcast
                 )
@@ -91,7 +172,8 @@ class AudioSharingInteractorTest : SysuiTestCase() {
     fun testHandleAudioSourceWhenReady_audioSharingOnButNoPlayback_sourceNotAdded() =
         with(kosmos) {
             testScope.runTest {
-                audioSharingRepository.setInAudioSharing(true)
+                bluetoothTileDialogAudioSharingRepository.setInAudioSharing(true)
+                bluetoothTileDialogAudioSharingRepository.setAudioSharingAvailable(true)
                 bluetoothTileDialogAudioSharingRepository.setLeAudioBroadcastProfile(
                     localBluetoothLeBroadcast
                 )
@@ -110,7 +192,8 @@ class AudioSharingInteractorTest : SysuiTestCase() {
     fun testHandleAudioSourceWhenReady_audioSharingOnAndPlaybackStarts_sourceAdded() =
         with(kosmos) {
             testScope.runTest {
-                audioSharingRepository.setInAudioSharing(true)
+                bluetoothTileDialogAudioSharingRepository.setInAudioSharing(true)
+                bluetoothTileDialogAudioSharingRepository.setAudioSharingAvailable(true)
                 bluetoothTileDialogAudioSharingRepository.setLeAudioBroadcastProfile(
                     localBluetoothLeBroadcast
                 )

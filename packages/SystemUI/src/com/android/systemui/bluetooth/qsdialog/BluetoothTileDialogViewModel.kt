@@ -28,7 +28,6 @@ import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.logging.UiEventLogger
-import com.android.settingslib.bluetooth.BluetoothUtils
 import com.android.settingslib.bluetooth.LocalBluetoothLeBroadcast
 import com.android.settingslib.flags.Flags.audioSharingQsDialogImprovement
 import com.android.systemui.Prefs
@@ -106,7 +105,7 @@ constructor(
                     expandable?.dialogTransitionController(
                         DialogCuj(
                             InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN,
-                            INTERACTION_JANK_TAG
+                            INTERACTION_JANK_TAG,
                         )
                     )
                 controller?.let {
@@ -121,7 +120,7 @@ constructor(
                 // stop the progress bar.
                 combine(
                         deviceItemInteractor.deviceItemUpdate,
-                        deviceItemInteractor.showSeeAllUpdate
+                        deviceItemInteractor.showSeeAllUpdate,
                     ) { deviceItem, showSeeAll ->
                         updateDialogUiJob?.cancel()
                         updateDialogUiJob = launch {
@@ -131,7 +130,7 @@ constructor(
                                     deviceItem,
                                     showSeeAll,
                                     showPairNewDevice =
-                                        bluetoothStateInteractor.isBluetoothEnabled()
+                                        bluetoothStateInteractor.isBluetoothEnabled(),
                                 )
                                 animateProgressBar(dialog, false)
                             }
@@ -145,13 +144,13 @@ constructor(
                         deviceItemInteractor.deviceItemUpdateRequest,
                         bluetoothDeviceMetadataInteractor.metadataUpdate,
                         if (
-                            BluetoothUtils.isAudioSharingEnabled() &&
+                            audioSharingInteractor.audioSharingAvailable() &&
                                 audioSharingQsDialogImprovement()
                         ) {
                             audioSharingInteractor.audioSourceStateUpdate
                         } else {
                             emptyFlow()
-                        }
+                        },
                     )
                     .onEach {
                         dialogDelegate.animateProgressBar(dialog, true)
@@ -159,13 +158,13 @@ constructor(
                         updateDeviceItemJob = launch {
                             deviceItemInteractor.updateDeviceItems(
                                 context,
-                                DeviceFetchTrigger.BLUETOOTH_CALLBACK_RECEIVED
+                                DeviceFetchTrigger.BLUETOOTH_CALLBACK_RECEIVED,
                             )
                         }
                     }
                     .launchIn(this)
 
-                if (BluetoothUtils.isAudioSharingEnabled()) {
+                if (audioSharingInteractor.audioSharingAvailable()) {
                     if (audioSharingQsDialogImprovement()) {
                         launch { audioSharingInteractor.handleAudioSourceWhenReady() }
                     }
@@ -179,7 +178,7 @@ constructor(
                                             dialog,
                                             VISIBLE,
                                             context.getString(it.resId),
-                                            it.isActive
+                                            it.isActive,
                                         )
                                     }
                                     is AudioSharingButtonState.Gone -> {
@@ -187,7 +186,7 @@ constructor(
                                             dialog,
                                             GONE,
                                             label = null,
-                                            isActive = false
+                                            isActive = false,
                                         )
                                     }
                                 }
@@ -204,13 +203,13 @@ constructor(
                         dialogDelegate.onBluetoothStateUpdated(
                             dialog,
                             it,
-                            UiProperties.build(it, isAutoOnToggleFeatureAvailable())
+                            UiProperties.build(it, isAutoOnToggleFeatureAvailable()),
                         )
                         updateDeviceItemJob?.cancel()
                         updateDeviceItemJob = launch {
                             deviceItemInteractor.updateDeviceItems(
                                 context,
-                                DeviceFetchTrigger.BLUETOOTH_STATE_CHANGE_RECEIVED
+                                DeviceFetchTrigger.BLUETOOTH_STATE_CHANGE_RECEIVED,
                             )
                         }
                     }
@@ -252,7 +251,7 @@ constructor(
                                 dialog,
                                 it,
                                 if (it) R.string.turn_on_bluetooth_auto_info_enabled
-                                else R.string.turn_on_bluetooth_auto_info_disabled
+                                else R.string.turn_on_bluetooth_auto_info_disabled,
                             )
                         }
                         .launchIn(this)
@@ -274,18 +273,18 @@ constructor(
             withContext(backgroundDispatcher) {
                 sharedPreferences.getInt(
                     CONTENT_HEIGHT_PREF_KEY,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
                 )
             }
 
         return bluetoothDialogDelegateFactory.create(
             UiProperties.build(
                 bluetoothStateInteractor.isBluetoothEnabled(),
-                isAutoOnToggleFeatureAvailable()
+                isAutoOnToggleFeatureAvailable(),
             ),
             cachedContentHeight,
             this@BluetoothTileDialogViewModel,
-            { cancelJob() }
+            { cancelJob() },
         )
     }
 
@@ -297,7 +296,7 @@ constructor(
                     EXTRA_SHOW_FRAGMENT_ARGUMENTS,
                     Bundle().apply {
                         putString("device_address", deviceItem.cachedBluetoothDevice.address)
-                    }
+                    },
                 )
             }
         startSettingsActivity(intent, view)
@@ -321,7 +320,7 @@ constructor(
                     EXTRA_SHOW_FRAGMENT_ARGUMENTS,
                     Bundle().apply {
                         putBoolean(LocalBluetoothLeBroadcast.EXTRA_START_LE_AUDIO_SHARING, true)
-                    }
+                    },
                 )
             }
         startSettingsActivity(intent, view)
@@ -367,7 +366,7 @@ constructor(
         companion object {
             internal fun build(
                 isBluetoothEnabled: Boolean,
-                isAutoOnToggleFeatureAvailable: Boolean
+                isAutoOnToggleFeatureAvailable: Boolean,
             ) =
                 UiProperties(
                     subTitleResId = getSubtitleResId(isBluetoothEnabled),
@@ -377,7 +376,7 @@ constructor(
                     scrollViewMinHeightResId =
                         if (isAutoOnToggleFeatureAvailable)
                             R.dimen.bluetooth_dialog_scroll_view_min_height_with_auto_on
-                        else R.dimen.bluetooth_dialog_scroll_view_min_height
+                        else R.dimen.bluetooth_dialog_scroll_view_min_height,
                 )
         }
     }

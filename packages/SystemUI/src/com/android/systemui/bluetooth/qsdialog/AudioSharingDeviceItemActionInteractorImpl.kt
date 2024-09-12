@@ -43,6 +43,7 @@ class AudioSharingDeviceItemActionInteractorImpl
 @Inject
 constructor(
     private val activityStarter: ActivityStarter,
+    private val audioSharingInteractor: AudioSharingInteractor,
     private val dialogTransitionAnimator: DialogTransitionAnimator,
     private val localBluetoothManager: LocalBluetoothManager?,
     @Main private val mainDispatcher: CoroutineDispatcher,
@@ -55,6 +56,9 @@ constructor(
 
     override suspend fun onClick(deviceItem: DeviceItem, dialog: SystemUIDialog) {
         withContext(backgroundDispatcher) {
+            if (!audioSharingInteractor.audioSharingAvailable()) {
+                return@withContext deviceItemActionInteractorImpl.onClick(deviceItem, dialog)
+            }
             val inAudioSharing = BluetoothUtils.isBroadcasting(localBluetoothManager)
             logger.logDeviceClickInAudioSharingWhenEnabled(inAudioSharing)
 
@@ -72,7 +76,7 @@ constructor(
                         launchSettings(deviceItem.cachedBluetoothDevice.device, dialog)
                         logger.logLaunchSettingsCriteriaMatched(
                             "AvailableAudioSharingDeviceClicked",
-                            deviceItem
+                            deviceItem,
                         )
                     }
                     uiEventLogger.log(
@@ -99,13 +103,13 @@ constructor(
 
     private fun inSharingAndDeviceNoSource(
         inAudioSharing: Boolean,
-        deviceItem: DeviceItem
+        deviceItem: DeviceItem,
     ): Boolean {
         return inAudioSharing &&
             deviceItem.isMediaDevice &&
             !BluetoothUtils.hasConnectedBroadcastSource(
                 deviceItem.cachedBluetoothDevice,
-                localBluetoothManager
+                localBluetoothManager,
             )
     }
 
@@ -116,14 +120,14 @@ constructor(
                     EXTRA_SHOW_FRAGMENT_ARGUMENTS,
                     Bundle().apply {
                         putParcelable(LocalBluetoothLeBroadcast.EXTRA_BLUETOOTH_DEVICE, device)
-                    }
+                    },
                 )
             }
         intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK
         activityStarter.postStartActivityDismissingKeyguard(
             intent,
             0,
-            dialogTransitionAnimator.createActivityTransitionController(dialog)
+            dialogTransitionAnimator.createActivityTransitionController(dialog),
         )
     }
 

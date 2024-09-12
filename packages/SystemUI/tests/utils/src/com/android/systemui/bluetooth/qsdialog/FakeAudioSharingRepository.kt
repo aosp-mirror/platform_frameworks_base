@@ -19,9 +19,17 @@ package com.android.systemui.bluetooth.qsdialog
 import com.android.settingslib.bluetooth.CachedBluetoothDevice
 import com.android.settingslib.bluetooth.LocalBluetoothLeBroadcast
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 class FakeAudioSharingRepository : AudioSharingRepository {
+    private var mutableAvailable: Boolean = false
+
+    private val mutableInAudioSharing: MutableStateFlow<Boolean> = MutableStateFlow(false)
+
+    private val mutableAudioSourceStateUpdate = MutableSharedFlow<Unit>()
+
     var sourceAdded: Boolean = false
         private set
 
@@ -30,7 +38,11 @@ class FakeAudioSharingRepository : AudioSharingRepository {
     override val leAudioBroadcastProfile: LocalBluetoothLeBroadcast?
         get() = profile
 
-    override val audioSourceStateUpdate: Flow<Unit> = emptyFlow()
+    override val audioSourceStateUpdate: Flow<Unit> = mutableAudioSourceStateUpdate
+
+    override val inAudioSharing: StateFlow<Boolean> = mutableInAudioSharing
+
+    override suspend fun audioSharingAvailable(): Boolean = mutableAvailable
 
     override suspend fun addSource() {
         sourceAdded = true
@@ -40,7 +52,19 @@ class FakeAudioSharingRepository : AudioSharingRepository {
 
     override suspend fun startAudioSharing() {}
 
+    fun setAudioSharingAvailable(available: Boolean) {
+        mutableAvailable = available
+    }
+
+    fun setInAudioSharing(state: Boolean) {
+        mutableInAudioSharing.value = state
+    }
+
     fun setLeAudioBroadcastProfile(leAudioBroadcastProfile: LocalBluetoothLeBroadcast?) {
         profile = leAudioBroadcastProfile
+    }
+
+    fun emitAudioSourceStateUpdate() {
+        mutableAudioSourceStateUpdate.tryEmit(Unit)
     }
 }

@@ -26,6 +26,7 @@ val Kosmos.audioSharingDeviceItemActionInteractorImpl: AudioSharingDeviceItemAct
     Kosmos.Fixture {
         AudioSharingDeviceItemActionInteractorImpl(
             activityStarter,
+            audioSharingInteractor,
             dialogTransitionAnimator,
             localBluetoothManager,
             testDispatcher,
