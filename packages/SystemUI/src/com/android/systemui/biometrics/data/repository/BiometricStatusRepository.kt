@@ -39,6 +39,7 @@ import com.android.systemui.biometrics.shared.model.AuthenticationReason
 import com.android.systemui.biometrics.shared.model.AuthenticationReason.SettingsOperations
 import com.android.systemui.biometrics.shared.model.AuthenticationState
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
+import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.shared.model.AcquiredFingerprintAuthenticationStatus
@@ -48,7 +49,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
@@ -85,7 +85,7 @@ constructor(
      *   onAcquired in [FingerprintManager.EnrollmentCallback] and [FaceManager.EnrollmentCallback]
      */
     private val authenticationState: Flow<AuthenticationState> =
-        callbackFlow {
+        conflatedCallbackFlow {
                 val updateAuthenticationState = { state: AuthenticationState ->
                     Log.d(TAG, "authenticationState updated: $state")
                     trySendWithFailureLogging(state, TAG, "Error sending AuthenticationState state")
@@ -169,9 +169,7 @@ constructor(
                         }
                     }
 
-                updateAuthenticationState(
-                    AuthenticationState.Idle(requestReason = AuthenticationReason.NotRunning)
-                )
+                updateAuthenticationState(AuthenticationState.Idle(AuthenticationReason.NotRunning))
                 biometricManager?.registerAuthenticationStateListener(authenticationStateListener)
                 awaitClose {
                     biometricManager?.unregisterAuthenticationStateListener(
@@ -182,32 +180,23 @@ constructor(
             .distinctUntilChanged()
             .shareIn(applicationScope, started = SharingStarted.Eagerly, replay = 1)
 
-    private val fingerprintAuthenticationState: Flow<AuthenticationState> =
+    override val fingerprintAuthenticationReason: Flow<AuthenticationReason> =
         authenticationState
             .filter {
-                it.biometricSourceType == null ||
-                    it.biometricSourceType == BiometricSourceType.FINGERPRINT
-            }
-            .onEach { Log.d(TAG, "fingerprintAuthenticationState updated: $it") }
-
-    private val fingerprintRunningState: Flow<AuthenticationState> =
-        fingerprintAuthenticationState
-            .filter {
                 it is AuthenticationState.Idle ||
-                    it is AuthenticationState.Started ||
-                    it is AuthenticationState.Stopped
+                    (it is AuthenticationState.Started &&
+                        it.biometricSourceType == BiometricSourceType.FINGERPRINT) ||
+                    (it is AuthenticationState.Stopped &&
+                        it.biometricSourceType == BiometricSourceType.FINGERPRINT)
             }
-            .onEach { Log.d(TAG, "fingerprintRunningState updated: $it") }
-
-    override val fingerprintAuthenticationReason: Flow<AuthenticationReason> =
-        fingerprintRunningState
             .map { it.requestReason }
             .onEach { Log.d(TAG, "fingerprintAuthenticationReason updated: $it") }
 
     override val fingerprintAcquiredStatus: Flow<FingerprintAuthenticationStatus> =
-        fingerprintAuthenticationState.filterIsInstance<AuthenticationState.Acquired>().map {
-            AcquiredFingerprintAuthenticationStatus(it.requestReason, it.acquiredInfo)
-        }
+        authenticationState
+            .filterIsInstance<AuthenticationState.Acquired>()
+            .filter { it.biometricSourceType == BiometricSourceType.FINGERPRINT }
+            .map { AcquiredFingerprintAuthenticationStatus(it.requestReason, it.acquiredInfo) }
 
     companion object {
         private const val TAG = "BiometricStatusRepositoryImpl"

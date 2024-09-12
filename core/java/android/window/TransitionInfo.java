@@ -205,7 +205,7 @@ public final class TransitionInfo implements Parcelable {
             FLAG_SYNC,
             FLAG_CONFIG_AT_END,
             FLAG_FIRST_CUSTOM
-    }, flag = true)
+    })
     public @interface ChangeFlags {}
 
     private final @TransitionType int mType;

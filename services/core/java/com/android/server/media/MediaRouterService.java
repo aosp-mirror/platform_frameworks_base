@@ -443,12 +443,6 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     // Binder call
     @Override
-    @RequiresPermission(
-            anyOf = {
-                Manifest.permission.MEDIA_ROUTING_CONTROL,
-                Manifest.permission.MEDIA_CONTENT_CONTROL
-            },
-            conditional = true)
     public void updateScanningStateWithRouter2(
             IMediaRouter2 router, @ScanningState int scanningState) {
         mService2.updateScanningState(router, scanningState);

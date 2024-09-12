@@ -19,7 +19,6 @@ package com.android.systemui.screenshot
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.screenshot.ui.viewmodel.PreviewAction
 import com.android.systemui.screenshot.ui.viewmodel.ScreenshotViewModel
 import java.util.UUID
 import kotlin.test.Test
@@ -36,7 +35,7 @@ class ScreenshotActionsControllerTest : SysuiTestCase() {
     private val screenshotData = mock<ScreenshotData>()
     private val actionExecutor = mock<ActionExecutor>()
     private val viewModel = mock<ScreenshotViewModel>()
-    private val previewAction = PreviewAction("description", onClick = {})
+    private val onClick = mock<() -> Unit>()
 
     private lateinit var actionsController: ScreenshotActionsController
     private lateinit var fakeActionsProvider1: FakeActionsProvider
@@ -44,7 +43,6 @@ class ScreenshotActionsControllerTest : SysuiTestCase() {
     private val actionsProviderFactory =
         object : ScreenshotActionsProvider.Factory {
             var isFirstCall = true
-
             override fun create(
                 requestId: UUID,
                 request: ScreenshotData,
@@ -71,16 +69,16 @@ class ScreenshotActionsControllerTest : SysuiTestCase() {
     @Test
     fun setPreview_onCurrentScreenshot_updatesViewModel() {
         actionsController.setCurrentScreenshot(screenshotData)
-        fakeActionsProvider1.callPreview(previewAction)
+        fakeActionsProvider1.callPreview(onClick)
 
-        verify(viewModel).setPreviewAction(previewAction)
+        verify(viewModel).setPreviewAction(onClick)
     }
 
     @Test
     fun setPreview_onNonCurrentScreenshot_doesNotUpdateViewModel() {
         actionsController.setCurrentScreenshot(screenshotData)
         actionsController.setCurrentScreenshot(screenshotData)
-        fakeActionsProvider1.callPreview(previewAction)
+        fakeActionsProvider1.callPreview(onClick)
 
         verify(viewModel, never()).setPreviewAction(any())
     }
@@ -89,8 +87,8 @@ class ScreenshotActionsControllerTest : SysuiTestCase() {
         private val actionsCallback: ScreenshotActionsController.ActionsCallback
     ) : ScreenshotActionsProvider {
 
-        fun callPreview(previewAction: PreviewAction) {
-            actionsCallback.providePreviewAction(previewAction)
+        fun callPreview(onClick: () -> Unit) {
+            actionsCallback.providePreviewAction(onClick)
         }
 
         override fun onScrollChipReady(onClick: Runnable) {}

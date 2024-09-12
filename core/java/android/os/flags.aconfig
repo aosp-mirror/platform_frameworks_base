@@ -76,6 +76,14 @@ flag {
 }
 
 flag {
+    name: "ordered_broadcast_multiple_permissions"
+    is_exported: true
+    namespace: "bluetooth"
+    description: "Guards the Context.sendOrderedBroadcastMultiplePermissions API"
+    bug: "345802719"
+}
+
+flag {
     name: "battery_saver_supported_check_api"
     is_exported: true
     namespace: "backstage_power"

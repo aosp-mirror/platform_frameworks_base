@@ -288,6 +288,9 @@ public class StateSet {
             case R.attr.state_activated:
                 sb.append("A ");
                 break;
+            case R.attr.state_hovered:
+                sb.append("H ");
+                break;
             }
         }
 

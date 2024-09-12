@@ -38,6 +38,9 @@ non_updatable_exportable_droidstubs {
         "android-non-updatable-stubs-defaults",
         "module-classpath-stubs-defaults",
     ],
+    // Use full Android API not just the non-updatable API as the latter is incomplete
+    // and can result in incorrect behavior.
+    previous_api: ":android.api.combined.public.latest",
     check_api: {
         current: {
             api_file: ":non-updatable-current.txt",
@@ -118,6 +121,9 @@ non_updatable_exportable_droidstubs {
         "module-classpath-stubs-defaults",
     ],
     flags: priv_apps,
+    // Use full Android API not just the non-updatable API as the latter is incomplete
+    // and can result in incorrect behavior.
+    previous_api: ":android.api.combined.system.latest",
     check_api: {
         current: {
             api_file: ":non-updatable-system-current.txt",
@@ -178,6 +184,9 @@ non_updatable_exportable_droidstubs {
         "module-classpath-stubs-defaults",
     ],
     flags: test + priv_apps_in_stubs,
+    // Use full Android API not just the non-updatable API as the latter is incomplete
+    // and can result in incorrect behavior.
+    previous_api: ":android.api.combined.test.latest",
     check_api: {
         current: {
             api_file: ":non-updatable-test-current.txt",
@@ -257,6 +266,9 @@ non_updatable_exportable_droidstubs {
         "module-classpath-stubs-defaults",
     ],
     flags: priv_apps_in_stubs + module_libs,
+    // Use full Android API not just the non-updatable API as the latter is incomplete
+    // and can result in incorrect behavior.
+    previous_api: ":android.api.combined.module-lib.latest",
     check_api: {
         current: {
             api_file: ":non-updatable-module-lib-current.txt",
@@ -571,6 +583,9 @@ java_api_library {
     ],
     defaults: ["android-non-updatable_everything_from_text_defaults"],
     full_api_surface_stub: "android_stubs_current.from-text",
+    // Use full Android API not just the non-updatable API as the latter is incomplete
+    // and can result in incorrect behavior.
+    previous_api: ":android.api.combined.public.latest",
 }
 
 java_api_library {
@@ -582,6 +597,9 @@ java_api_library {
     ],
     defaults: ["android-non-updatable_everything_from_text_defaults"],
     full_api_surface_stub: "android_system_stubs_current.from-text",
+    // Use full Android API not just the non-updatable API as the latter is incomplete
+    // and can result in incorrect behavior.
+    previous_api: ":android.api.combined.system.latest",
 }
 
 java_api_library {
@@ -594,6 +612,9 @@ java_api_library {
     ],
     defaults: ["android-non-updatable_everything_from_text_defaults"],
     full_api_surface_stub: "android_test_stubs_current.from-text",
+    // Use full Android API not just the non-updatable API as the latter is incomplete
+    // and can result in incorrect behavior.
+    previous_api: ":android.api.combined.test.latest",
 }
 
 java_api_library {
@@ -606,6 +627,9 @@ java_api_library {
     ],
     defaults: ["android-non-updatable_everything_from_text_defaults"],
     full_api_surface_stub: "android_module_lib_stubs_current_full.from-text",
+    // Use full Android API not just the non-updatable API as the latter is incomplete
+    // and can result in incorrect behavior.
+    previous_api: ":android.api.combined.module-lib.latest",
 }
 
 // This module generates a stub jar that is a union of the test and module lib
@@ -622,6 +646,8 @@ java_api_library {
     ],
     defaults: ["android-non-updatable_everything_from_text_defaults"],
     full_api_surface_stub: "android_test_module_lib_stubs_current.from-text",
+
+    // No need to specify previous_api as this is not used for compiling against.
 
     // This module is only used for hiddenapi, and other modules should not
     // depend on this module.
@@ -922,6 +948,7 @@ java_defaults {
         "i18n.module.public.api.stubs.source.system.api.contribution",
         "i18n.module.public.api.stubs.source.module_lib.api.contribution",
     ],
+    previous_api: ":android.api.combined.module-lib.latest",
 }
 
 // Java API library definitions per API surface

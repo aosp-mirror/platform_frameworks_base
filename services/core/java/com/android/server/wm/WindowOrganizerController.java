@@ -610,16 +610,10 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "Apply window transaction, syncId=%d", syncId);
         mService.deferWindowLayout();
         mService.mTaskSupervisor.setDeferRootVisibilityUpdate(true /* deferUpdate */);
-        boolean deferTransitionReady = false;
-        if (transition != null && !t.isEmpty()) {
-            if (transition.isCollecting()) {
-                deferTransitionReady = true;
-                transition.deferTransitionReady();
-            } else if (Flags.alwaysDeferTransitionWhenApplyWct()) {
-                Slog.w(TAG, "Transition is not collecting when applyTransaction."
-                        + " transition=" + transition + " state=" + transition.getState());
-                transition = null;
-            }
+        final boolean shouldDeferTransitionReady = transition != null && !t.isEmpty()
+                && (transition.isCollecting() || Flags.alwaysDeferTransitionWhenApplyWct());
+        if (shouldDeferTransitionReady) {
+            transition.deferTransitionReady();
         }
         try {
             final ArraySet<WindowContainer<?>> haveConfigChanges = new ArraySet<>();
@@ -773,7 +767,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 mService.mWindowManager.mWindowPlacerLocked.requestTraversal();
             }
         } finally {
-            if (deferTransitionReady) {
+            if (shouldDeferTransitionReady) {
                 transition.continueTransitionReady();
             }
             mService.mTaskSupervisor.setDeferRootVisibilityUpdate(false /* deferUpdate */);

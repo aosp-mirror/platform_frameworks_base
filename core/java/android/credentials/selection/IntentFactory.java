@@ -232,17 +232,7 @@ public class IntentFactory {
                             oemComponentName,
                             PackageManager.ComponentInfoFlags.of(
                                     PackageManager.MATCH_SYSTEM_ONLY));
-                    boolean oemComponentEnabled = info.enabled;
-                    int runtimeComponentEnabledState = context.getPackageManager()
-                          .getComponentEnabledSetting(oemComponentName);
-                    if (runtimeComponentEnabledState == PackageManager
-                          .COMPONENT_ENABLED_STATE_ENABLED) {
-                          oemComponentEnabled = true;
-                    } else if (runtimeComponentEnabledState == PackageManager
-                          .COMPONENT_ENABLED_STATE_DISABLED) {
-                        oemComponentEnabled = false;
-                    }
-                    if (oemComponentEnabled && info.exported) {
+                    if (info.enabled && info.exported) {
                         intentResultBuilder.setOemUiUsageStatus(IntentCreationResult
                                 .OemUiUsageStatus.SUCCESS);
                         Slog.i(TAG,

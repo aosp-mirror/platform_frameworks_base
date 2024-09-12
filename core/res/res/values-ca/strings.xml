@@ -157,7 +157,7 @@
     <string name="scCellularNetworkSecurityTitle" msgid="7752521808690294384">"Seguretat de xarxes mòbils"</string>
     <string name="scCellularNetworkSecuritySummary" msgid="7042036754550545005">"Encriptació, notificacions de xarxes sense encriptació"</string>
     <string name="scIdentifierDisclosureIssueTitle" msgid="2898888825129970328">"S\'ha accedit a l\'identificador de dispositiu"</string>
-    <string name="scIdentifierDisclosureIssueSummaryNotification" msgid="3699930821270580416">"A les <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>, una xarxa propera ha registrat l\'ID únic del dispositiu (IMSI or IMEI) amb la SIM de <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g>"</string>
+    <string name="scIdentifierDisclosureIssueSummaryNotification" msgid="3699930821270580416">"A les <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>, una xarxa propera ha registrat l\'identificador únic del teu dispositiu (IMSI or IMEI) mentre s\'utilitzava la SIM de <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g>"</string>
     <string name="scIdentifierDisclosureIssueSummary" msgid="7283387338827749276">"A les <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>, una xarxa propera ha registrat l\'identificador únic del teu dispositiu (IMSI or IMEI) mentre s\'utilitzava la SIM de <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g>.\n\nAixò vol dir que s\'han registrat la teva ubicació, activitat o identitat. Tot i ser una pràctica habitual, pot suposar un problema per a aquelles persones preocupades per la privadesa."</string>
     <string name="scNullCipherIssueEncryptedTitle" msgid="234717016411824969">"T\'has connectat a la xarxa encriptada <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
     <string name="scNullCipherIssueEncryptedSummary" msgid="8577510708842150475">"La connexió SIM de <xliff:g id="NETWORK_NAME">%1$s</xliff:g> ara és més segura"</string>
@@ -1884,7 +1884,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"El PIN és massa curt. Ha de tenir quatre dígits com a mínim."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Torna-ho a provar més tard"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Mode de pantalla completa"</string>
-    <string name="immersive_cling_description" msgid="2896205051090870978">"Per sortir, llisca cap avall des de la part superior de la pantalla"</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Entesos"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Gira per a una millor visualització"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Obre <xliff:g id="NAME">%s</xliff:g> en pantalla completa per a una millor visualització"</string>
@@ -2411,19 +2412,19 @@
     <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"Espai privat"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"S\'ha amagat contingut sensible de les notificacions"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
-    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Contingut de l\'aplicació amagat de la compartició de pantalla per seguretat"</string>
+    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Contingut de l\'aplicació amagat de la compartició de pantalla per motius de seguretat"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"S\'ha connectat automàticament a un satèl·lit"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Pots enviar i rebre missatges sense una xarxa mòbil o Wi‑Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Obre Missatges"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Com funciona"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Pendent..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Torna a configurar Desbloqueig amb empremta digital"</string>
-    <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> ja no es pot reconèixer."</string>
-    <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> i <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> ja no es poden reconèixer."</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="1824812666549916586">"<xliff:g id="FINGERPRINT">%s</xliff:g> ja no es pot reconèixer. Torna a configurar Desbloqueig amb empremta digital."</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="5974657382960155099">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> i <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> ja no es poden reconèixer. Torna a configurar Desbloqueig amb empremta digital."</string>
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"<xliff:g id="FINGERPRINT">%s</xliff:g> no funcionava correctament i s\'ha suprimit"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> i <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> no funcionaven correctament i s\'han suprimit"</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> no funcionava correctament i s\'ha suprimit. Torna a configurar-la per desbloquejar el telèfon amb l\'empremta digital."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> i <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> no funcionaven correctament i s\'han suprimit. Torna a configurar-les per desbloquejar el telèfon amb l\'empremta digital."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Torna a configurar Desbloqueig facial"</string>
-    <string name="face_dangling_notification_msg" msgid="746235263598985384">"El teu model facial ja no es pot reconèixer. Torna a configurar Desbloqueig facial."</string>
+    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"El teu model facial no funcionava correctament i s\'ha suprimit. Torna a configurar-lo per desbloquejar el telèfon amb la cara."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Configura"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Ara no"</string>
 </resources>

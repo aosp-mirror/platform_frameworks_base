@@ -517,11 +517,11 @@
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"препознавање физичких активности"</string>
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Ова апликација може да препозна физичке активности."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"снимање фотографија и видеа"</string>
-    <string name="permdesc_camera" msgid="5240801376168647151">"Ова апликација може да снима слике и видео помоћу камере док се апликација користи."</string>
-    <string name="permlab_backgroundCamera" msgid="7549917926079731681">"да снима слике и видео у позадини"</string>
+    <string name="permdesc_camera" msgid="5240801376168647151">"Ова апликација може да снима слике и видео снимке помоћу камере док се апликација користи."</string>
+    <string name="permlab_backgroundCamera" msgid="7549917926079731681">"да снима слике и видео снимке у позадини"</string>
     <string name="permdesc_backgroundCamera" msgid="1615291686191138250">"Ова апликација може да снима фотографије и видео снимке помоћу камере у било ком тренутку."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"Дозволите некој апликацији или услузи да приступа камерама система да би снимала слике и видео снимке"</string>
-    <string name="permdesc_systemCamera" msgid="5938360914419175986">"Ова привилегована системска апликација може да снима слике и видео помоћу камере система у било ком тренутку. Апликација треба да има и дозволу android.permission.CAMERA"</string>
+    <string name="permdesc_systemCamera" msgid="5938360914419175986">"Ова привилегована системска апликација може да снима слике и видео снимке помоћу камере система у било ком тренутку. Апликација треба да има и дозволу android.permission.CAMERA"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Дозволите апликацији или услузи да добија повратне позиве о отварању или затварању уређаја са камером."</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Ова апликација може да добија повратне позиве када се било који уређај са камером отвара или затвара (помоћу неке апликације)."</string>
     <string name="permlab_cameraHeadlessSystemUser" msgid="680194666834500050">"Дозволите апликацији или услузи да приступа камери као корисник система без графичког корисничког интерфејса."</string>
@@ -643,7 +643,7 @@
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Дозвољава апликацији да чита локације из медијске колекције."</string>
     <string name="biometric_app_setting_name" msgid="3339209978734534457">"Користите биометрију"</string>
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Користите биометрију или откључавање екрана"</string>
-    <string name="biometric_dialog_default_title" msgid="55026799173208210">"Потврдите идентитет"</string>
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"Потврдите свој идентитет"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Користите биометријски податак да бисте наставили"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"Користите биометријски податак или откључавање екрана да бисте наставили"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Биометријски хардвер није доступан"</string>
@@ -1884,7 +1884,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN је прекратак. Мора да има бар 4 цифре."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Пробајте поново касније"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Приказује се цео екран"</string>
-    <string name="immersive_cling_description" msgid="2896205051090870978">"Да бисте затворили, превуците надоле од врха екрана"</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Важи"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Ротирајте ради бољег приказа"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Отворите апликацију <xliff:g id="NAME">%s</xliff:g> преко целог екрана да бисте боље видели"</string>
@@ -2418,12 +2419,12 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Принцип рада"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"На чекању..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Поново подесите откључавање отиском прста"</string>
-    <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> више не може да се препозна."</string>
-    <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> и <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> више не могу да се препознају."</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="1824812666549916586">"<xliff:g id="FINGERPRINT">%s</xliff:g> више не може да се препозна. Поново подесите откључавање отиском прста."</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="5974657382960155099">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> и <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> више не могу да се препознају. Поново подесите откључавање отиском прста."</string>
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"<xliff:g id="FINGERPRINT">%s</xliff:g> није функционисао и избрисали смо га"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> и <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> нису функционисали и избрисали смо их"</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> није функционисао и избрисали смо га. Поново га подесите да бисте телефон откључавали отиском прста."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> и <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> нису функционисали и избрисали смо их. Поново их подесите да бисте телефон откључавали отиском прста."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Поново подесите откључавање лицем"</string>
-    <string name="face_dangling_notification_msg" msgid="746235263598985384">"Ваш модел лица више не може да се препозна. Поново подесите откључавање лицем."</string>
+    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"Ваш модел лица није функционисао и избрисали смо га. Поново га подесите да бисте телефон откључавали лицем."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Подеси"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Не сада"</string>
 </resources>

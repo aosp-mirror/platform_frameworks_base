@@ -5981,6 +5981,10 @@
     <string name="accessibility_system_action_hardware_a11y_shortcut_label">Accessibility Shortcut</string>
     <!-- Label for dismissing the notification shade [CHAR LIMIT=NONE] -->
     <string name="accessibility_system_action_dismiss_notification_shade">Dismiss Notification Shade</string>
+     <!-- Label for menu action [CHAR LIMIT=NONE] -->
+    <string name="accessibility_system_action_menu_label">Menu</string>
+     <!-- Label for media play/pause action [CHAR LIMIT=NONE] -->
+    <string name="accessibility_system_action_media_play_pause_label">Media Play/Pause</string>
     <!-- Label for Dpad up action [CHAR LIMIT=NONE] -->
     <string name="accessibility_system_action_dpad_up_label">Dpad Up</string>
     <!-- Label for Dpad down action [CHAR LIMIT=NONE] -->
@@ -6499,17 +6503,17 @@ ul.</string>
     <!-- Fingerprint dangling notification title -->
     <string name="fingerprint_dangling_notification_title">Set up Fingerprint Unlock again</string>
     <!-- Fingerprint dangling notification content for only 1 fingerprint deleted -->
-    <string name="fingerprint_dangling_notification_msg_1"><xliff:g id="fingerprint">%s</xliff:g> can no longer be recognized.</string>
+    <string name="fingerprint_dangling_notification_msg_1"><xliff:g id="fingerprint">%s</xliff:g> wasn\'t working well and was deleted</string>
     <!-- Fingerprint dangling notification content for more than 1 fingerprints deleted -->
-    <string name="fingerprint_dangling_notification_msg_2"><xliff:g id="fingerprint">%1$s</xliff:g> and <xliff:g id="fingerprint">%2$s</xliff:g> can no longer be recognized.</string>
+    <string name="fingerprint_dangling_notification_msg_2"><xliff:g id="fingerprint">%1$s</xliff:g> and <xliff:g id="fingerprint">%2$s</xliff:g> weren\'t working well and were deleted</string>
     <!-- Fingerprint dangling notification content for only 1 fingerprint deleted and no fingerprint left-->
-    <string name="fingerprint_dangling_notification_msg_all_deleted_1"><xliff:g id="fingerprint">%s</xliff:g> can no longer be recognized. Set up Fingerprint Unlock again.</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1"><xliff:g id="fingerprint">%s</xliff:g> wasn\'t working well and was deleted. Set it up again to unlock your phone with fingerprint.</string>
     <!-- Fingerprint dangling notification content for more than 1 fingerprints deleted and no fingerprint left  -->
-    <string name="fingerprint_dangling_notification_msg_all_deleted_2"><xliff:g id="fingerprint">%1$s</xliff:g> and <xliff:g id="fingerprint">%2$s</xliff:g> can no longer be recognized. Set up Fingerprint Unlock again.</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2"><xliff:g id="fingerprint">%1$s</xliff:g> and <xliff:g id="fingerprint">%2$s</xliff:g> weren\'t working well and were deleted. Set them up again to unlock your phone with your fingerprint.</string>
     <!-- Face dangling notification title -->
     <string name="face_dangling_notification_title">Set up Face Unlock again</string>
     <!-- Face dangling notification content -->
-    <string name="face_dangling_notification_msg">Your face model can no longer be recognized. Set up Face Unlock again.</string>
+    <string name="face_dangling_notification_msg">Your face model wasn\'t working well and was deleted. Set it up again to unlock your phone with face.</string>
     <!-- Biometric dangling notification "set up" action button -->
     <string name="biometric_dangling_notification_action_set_up">Set up</string>
     <!-- Biometric dangling notification "Not now" action button -->

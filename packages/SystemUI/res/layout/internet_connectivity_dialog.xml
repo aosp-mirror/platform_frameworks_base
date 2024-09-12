@@ -170,7 +170,8 @@
                         android:layout_height="28dp"
                         android:layout_marginStart="7dp"
                         android:layout_marginEnd="16dp"
-                        android:layout_gravity="center_vertical"/>
+                        android:layout_gravity="center_vertical"
+                        android:background="?android:attr/textColorSecondary"/>
 
                     <FrameLayout
                         android:layout_width="@dimen/settingslib_switch_track_width"

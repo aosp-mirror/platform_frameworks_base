@@ -478,7 +478,7 @@ func createApiContributionDefaults(ctx android.LoadHookContext, modules []string
 		props.Api_contributions = transformArray(
 			modules, "", fmt.Sprintf(".stubs.source%s.api.contribution", apiSuffix))
 		props.Defaults_visibility = []string{"//visibility:public"}
-		props.Previous_api = proptools.StringPtr(":android.api.public.latest")
+		props.Previous_api = proptools.StringPtr(":android.api.combined." + sdkKind.String() + ".latest")
 		ctx.CreateModule(java.DefaultsFactory, &props)
 	}
 }

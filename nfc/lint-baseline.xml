@@ -210,4 +210,59 @@
             column="23"/>
     </issue>
 
+    <issue
+        id="FlaggedApi"
+        message="Method `PollingFrame()` is a flagged API and should be inside an `if (Flags.nfcReadPollingLoop())` check (or annotate the surrounding method `handleMessage` with `@FlaggedApi(Flags.FLAG_NFC_READ_POLLING_LOOP) to transfer requirement to caller`)"
+        errorLine1="                        pollingFrames.add(new PollingFrame(frame));"
+        errorLine2="                                          ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/nfc/java/android/nfc/cardemulation/HostApduService.java"
+            line="335"
+            column="43"/>
+    </issue>
+
+    <issue
+        id="FlaggedApi"
+        message="Method `processPollingFrames()` is a flagged API and should be inside an `if (Flags.nfcReadPollingLoop())` check (or annotate the surrounding method `handleMessage` with `@FlaggedApi(Flags.FLAG_NFC_READ_POLLING_LOOP) to transfer requirement to caller`)"
+        errorLine1="                    processPollingFrames(pollingFrames);"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/nfc/java/android/nfc/cardemulation/HostApduService.java"
+            line="337"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="FlaggedApi"
+        message="Method `NfcOemExtension()` is a flagged API and should be inside an `if (Flags.nfcOemExtension())` check (or annotate the surrounding method `NfcAdapter` with `@FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION) to transfer requirement to caller`)"
+        errorLine1="        mNfcOemExtension = new NfcOemExtension(mContext, this);"
+        errorLine2="                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/nfc/java/android/nfc/NfcAdapter.java"
+            line="895"
+            column="28"/>
+    </issue>
+
+    <issue
+        id="FlaggedApi"
+        message="Method `onVendorNciResponse()` is a flagged API and should be inside an `if (Flags.nfcVendorCmd())` check (or annotate the surrounding method `onVendorResponseReceived` with `@FlaggedApi(Flags.FLAG_NFC_VENDOR_CMD) to transfer requirement to caller`)"
+        errorLine1="                    executor.execute(() -> callback.onVendorNciResponse(gid, oid, payload));"
+        errorLine2="                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/nfc/java/android/nfc/NfcVendorNciCallbackListener.java"
+            line="88"
+            column="44"/>
+    </issue>
+
+    <issue
+        id="FlaggedApi"
+        message="Method `onVendorNciNotification()` is a flagged API and should be inside an `if (Flags.nfcVendorCmd())` check (or annotate the surrounding method `onVendorNotificationReceived` with `@FlaggedApi(Flags.FLAG_NFC_VENDOR_CMD) to transfer requirement to caller`)"
+        errorLine1="                    executor.execute(() -> callback.onVendorNciNotification(gid, oid, payload));"
+        errorLine2="                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/nfc/java/android/nfc/NfcVendorNciCallbackListener.java"
+            line="106"
+            column="44"/>
+    </issue>
+
 </issues>

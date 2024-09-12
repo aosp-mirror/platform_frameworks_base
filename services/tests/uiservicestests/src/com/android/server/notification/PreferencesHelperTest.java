@@ -180,7 +180,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ThreadLocalRandom;
 
 @SmallTest
@@ -479,34 +478,6 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         when(mPm.getApplicationInfoAsUser(eq(packageName), anyInt(), anyInt()))
                 .thenReturn(new ApplicationInfo());
         when(mPm.getPackageUidAsUser(eq(packageName), anyInt())).thenReturn(uid);
-    }
-
-    private static void testThreadSafety(Runnable operationToTest, int nThreads,
-            int nRunsPerThread) throws Exception {
-        final CountDownLatch startLatch = new CountDownLatch(1);
-        final CountDownLatch doneLatch = new CountDownLatch(nThreads);
-
-        for (int i = 0; i < nThreads; i++) {
-            Runnable threadRunnable = () -> {
-                try {
-                    startLatch.await();
-                    for (int j = 0; j < nRunsPerThread; j++) {
-                        operationToTest.run();
-                    }
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } finally {
-                    doneLatch.countDown();
-                }
-            };
-            new Thread(threadRunnable, "Test Thread #" + i).start();
-        }
-
-        // Ready set go
-        startLatch.countDown();
-
-        // Wait for all test threads to be done.
-        doneLatch.await();
     }
 
     @Test
@@ -6071,35 +6042,6 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         assertEquals(1, actual.getChannels().size());
         assertEquals(1, actual.getChannels().stream().filter(c -> c.getId().equals("id3")).count());
         assertEquals(0, actual.getChannels().stream().filter(c -> c.getId().equals("id2")).count());
-    }
-
-    @Test
-    public void testRestoredWithoutUid_threadSafety() throws Exception {
-        when(mPm.getPackageUidAsUser(anyString(), anyInt())).thenReturn(UNKNOWN_UID);
-        when(mPm.getApplicationInfoAsUser(anyString(), anyInt(), anyInt())).thenThrow(
-                new PackageManager.NameNotFoundException());
-        when(mClock.millis()).thenReturn(System.currentTimeMillis());
-        testThreadSafety(() -> {
-            String id = "id";
-            String xml = "<ranking version=\"1\">\n"
-                    + "<package name=\"" + Thread.currentThread()+ "\" show_badge=\"true\">\n"
-                    + "<channel id=\"" + id + "\" name=\"name\" importance=\"2\" "
-                    + "show_badge=\"true\" />\n"
-                    + "</package>\n"
-                    + "<package name=\"" + PKG_P + "\" show_badge=\"true\">\n"
-                    + "</package>\n"
-                    + "</ranking>\n";
-
-            try {
-                loadByteArrayXml(xml.getBytes(), true, USER_SYSTEM);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-
-            // trigger a removal from the list
-            mXmlHelper.onPackagesChanged(true, USER_SYSTEM, new String[]{PKG_P},
-                    new int[]{UNKNOWN_UID});
-        }, 20, 50);
     }
 
     private static NotificationChannel cloneChannel(NotificationChannel original) {

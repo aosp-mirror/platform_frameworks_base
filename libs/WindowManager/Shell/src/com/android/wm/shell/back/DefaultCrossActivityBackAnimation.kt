@@ -16,15 +16,18 @@
 package com.android.wm.shell.back
 
 import android.content.Context
+import android.view.Choreographer
 import android.view.SurfaceControl
 import android.window.BackEvent
 import com.android.wm.shell.R
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.animation.Interpolators
+import com.android.wm.shell.shared.annotations.ShellMainThread
 import javax.inject.Inject
 import kotlin.math.max
 
 /** Class that defines cross-activity animation. */
+@ShellMainThread
 class DefaultCrossActivityBackAnimation
 @Inject
 constructor(
@@ -36,7 +39,8 @@ constructor(
         context,
         background,
         rootTaskDisplayAreaOrganizer,
-        SurfaceControl.Transaction()
+        SurfaceControl.Transaction(),
+        Choreographer.getInstance()
     ) {
 
     private val postCommitInterpolator = Interpolators.EMPHASIZED

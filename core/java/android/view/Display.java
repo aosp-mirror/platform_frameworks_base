@@ -2344,6 +2344,8 @@ public final class Display {
          * SurfaceControl.DisplayMode
          * @hide
          */
+        @SuppressWarnings("UnflaggedApi") // For testing only
+        @TestApi
         public boolean isSynthetic() {
             return mIsSynthetic;
         }

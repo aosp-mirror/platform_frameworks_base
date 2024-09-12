@@ -364,7 +364,7 @@ public class ContextualSearchManagerService extends SystemService {
     }
 
     @RequiresPermission(android.Manifest.permission.START_TASKS_FROM_RECENTS)
-    private int invokeContextualSearchIntent(Intent launchIntent, final int userId) {
+    private int invokeContextualSearchIntent(Intent launchIntent) {
         // Contextual search starts with a frozen screen - so we launch without
         // any system animations or starting window.
         final ActivityOptions opts = ActivityOptions.makeCustomTaskAnimation(mContext,
@@ -372,7 +372,7 @@ public class ContextualSearchManagerService extends SystemService {
         opts.setDisableStartingWindow(true);
         return mAtmInternal.startActivityWithScreenshot(launchIntent,
                 mContext.getPackageName(), Binder.getCallingUid(), Binder.getCallingPid(), null,
-                opts.toBundle(), userId);
+                opts.toBundle(), Binder.getCallingUserHandle().getIdentifier());
     }
 
     private void enforcePermission(@NonNull final String func) {
@@ -446,8 +446,6 @@ public class ContextualSearchManagerService extends SystemService {
             synchronized (this) {
                 if (DEBUG_USER) Log.d(TAG, "startContextualSearch");
                 enforcePermission("startContextualSearch");
-                final int callingUserId = Binder.getCallingUserHandle().getIdentifier();
-
                 mAssistDataRequester.cancel();
                 // Creates a new CallbackToken at mToken and an expiration handler.
                 issueToken();
@@ -457,7 +455,7 @@ public class ContextualSearchManagerService extends SystemService {
                 Binder.withCleanCallingIdentity(() -> {
                     Intent launchIntent = getContextualSearchIntent(entrypoint, mToken);
                     if (launchIntent != null) {
-                        int result = invokeContextualSearchIntent(launchIntent, callingUserId);
+                        int result = invokeContextualSearchIntent(launchIntent);
                         if (DEBUG_USER) Log.d(TAG, "Launch result: " + result);
                     }
                 });

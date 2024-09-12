@@ -125,7 +125,7 @@
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"אודיו של מדיה"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"שיחות טלפון"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"העברת קבצים"</string>
-    <string name="bluetooth_profile_hid" msgid="2969922922664315866">"מכשיר לקליטת נתונים"</string>
+    <string name="bluetooth_profile_hid" msgid="2969922922664315866">"התקן קלט"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"גישה לאינטרנט"</string>
     <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"אישור גישה אל אנשי הקשר והיסטוריית השיחות"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"המידע הזה ישמש למשל כדי להשמיע התראות על שיחות נכנסות"</string>
@@ -196,7 +196,7 @@
     <string name="launch_defaults_some" msgid="3631650616557252926">"הוגדרו כמה ברירות מחדל"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"לא הוגדרו ברירות מחדל"</string>
     <string name="tts_settings" msgid="8130616705989351312">"הגדרות טקסט לדיבור"</string>
-    <string name="tts_settings_title" msgid="7602210956640483039">"פלט של המרת טקסט לדיבור"</string>
+    <string name="tts_settings_title" msgid="7602210956640483039">"המרת טקסט לדיבור"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"קצב דיבור"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"המהירות שבה הטקסט נאמר"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"גובה צליל"</string>
@@ -207,7 +207,7 @@
     <string name="tts_default_lang_summary" msgid="9042620014800063470">"הגדרת קול ספציפי לשפה עבור הטקסט הנאמר"</string>
     <string name="tts_play_example_title" msgid="1599468547216481684">"האזנה לדוגמה"</string>
     <string name="tts_play_example_summary" msgid="634044730710636383">"הפעלת הדגמה קצרה של סינתזת דיבור"</string>
-    <string name="tts_install_data_title" msgid="1829942496472751703">"התקנת נתונים שנאספים בזיהוי קולי"</string>
+    <string name="tts_install_data_title" msgid="1829942496472751703">"התקנת נתוני קול"</string>
     <string name="tts_install_data_summary" msgid="3608874324992243851">"התקנת הנתונים הקוליים הדרושים לסינתזת דיבור"</string>
     <string name="tts_engine_security_warning" msgid="3372432853837988146">"ייתכן שמנוע סינתזת דיבור זה יכול לאסוף את כל הטקסט המדובר, כולל נתונים אישיים כגון סיסמאות ומספרי כרטיסי אשראי. הוא מגיע מהמנוע <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g>. להפוך את השימוש במנוע סינתזת דיבור זה לפעיל?"</string>
     <string name="tts_engine_network_required" msgid="8722087649733906851">"שפה זו דורשת חיבור רשת פעיל עבור פלט טקסט לדיבור."</string>

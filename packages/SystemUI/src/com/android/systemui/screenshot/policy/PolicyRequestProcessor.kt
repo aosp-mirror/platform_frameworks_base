@@ -99,7 +99,7 @@ class PolicyRequestProcessor(
                         original,
                         updates.component,
                         updates.owner,
-                        type.displayId,
+                        type.displayId
                     )
             }
         return updated
@@ -120,7 +120,6 @@ class PolicyRequestProcessor(
         return replaceWithScreenshot(
             original = original,
             componentName = topMainRootTask?.topActivity ?: defaultComponent,
-            taskId = topMainRootTask?.taskId,
             owner = defaultOwner,
             displayId = original.displayId
         )
@@ -145,12 +144,11 @@ class PolicyRequestProcessor(
         )
     }
 
-    private suspend fun replaceWithScreenshot(
+    suspend fun replaceWithScreenshot(
         original: ScreenshotData,
         componentName: ComponentName?,
         owner: UserHandle?,
         displayId: Int,
-        taskId: Int? = null,
     ): ScreenshotData {
         Log.i(TAG, "Capturing screenshot: $componentName / $owner")
         val screenshot = captureDisplay(displayId)
@@ -159,8 +157,7 @@ class PolicyRequestProcessor(
             bitmap = screenshot,
             userHandle = owner,
             topComponent = componentName,
-            screenBounds = Rect(0, 0, screenshot?.width ?: 0, screenshot?.height ?: 0),
-            taskId = taskId ?: -1,
+            screenBounds = Rect(0, 0, screenshot?.width ?: 0, screenshot?.height ?: 0)
         )
     }
 

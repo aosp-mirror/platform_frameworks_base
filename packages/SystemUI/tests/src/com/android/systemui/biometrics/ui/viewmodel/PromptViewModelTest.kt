@@ -36,7 +36,6 @@ import android.hardware.biometrics.PromptContentViewWithMoreOptionsButton
 import android.hardware.biometrics.PromptInfo
 import android.hardware.biometrics.PromptVerticalListContentView
 import android.hardware.face.FaceSensorPropertiesInternal
-import android.hardware.fingerprint.FingerprintManager
 import android.hardware.fingerprint.FingerprintSensorProperties
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal
 import android.platform.test.annotations.EnableFlags
@@ -115,7 +114,6 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     @JvmField @Rule var mockitoRule = MockitoJUnit.rule()
 
     @Mock private lateinit var lockPatternUtils: LockPatternUtils
-    @Mock private lateinit var fingerprintManager: FingerprintManager
     @Mock private lateinit var authController: AuthController
     @Mock private lateinit var selectedUserInteractor: SelectedUserInteractor
     @Mock private lateinit var udfpsUtils: UdfpsUtils
@@ -204,7 +202,6 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
                 context,
                 authController,
                 selectedUserInteractor,
-                fingerprintManager,
                 testScope.backgroundScope
             )
         biometricStatusRepository = FakeBiometricStatusRepository()

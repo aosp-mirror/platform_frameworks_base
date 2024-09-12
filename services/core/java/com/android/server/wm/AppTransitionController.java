@@ -256,8 +256,7 @@ public class AppTransitionController {
             tmpCloseApps = new ArraySet<>(mDisplayContent.mClosingApps);
             if (mDisplayContent.mAtmService.mBackNavigationController
                     .removeIfContainsBackAnimationTargets(tmpOpenApps, tmpCloseApps)) {
-                mDisplayContent.mAtmService.mBackNavigationController
-                        .clearBackAnimations(false /* cancel */);
+                mDisplayContent.mAtmService.mBackNavigationController.clearBackAnimations();
             }
         }
 

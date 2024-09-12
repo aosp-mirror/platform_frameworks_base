@@ -652,6 +652,16 @@ public class ContextWrapper extends Context {
                 resultReceiver, scheduler, initialCode, initialData, initialExtras);
     }
 
+    /** @hide */
+    @Override
+    public void sendOrderedBroadcastAsUserMultiplePermissions(Intent intent, UserHandle user,
+            @Nullable String[] receiverPermission, int appOp, @Nullable Bundle options,
+            @Nullable BroadcastReceiver resultReceiver, @Nullable Handler scheduler,
+            int initialCode, @Nullable String initialData, @Nullable Bundle initialExtras) {
+        mBase.sendOrderedBroadcastAsUserMultiplePermissions(intent, user, receiverPermission, appOp,
+                options, resultReceiver, scheduler, initialCode, initialData, initialExtras);
+    }
+
     @Override
     public void sendOrderedBroadcast(@RequiresPermission @NonNull Intent intent,
             @Nullable String receiverPermission, @Nullable String receiverAppOp,
@@ -659,6 +669,17 @@ public class ContextWrapper extends Context {
             int initialCode, @Nullable String initialData, @Nullable Bundle initialExtras) {
         mBase.sendOrderedBroadcast(intent, receiverPermission, receiverAppOp, resultReceiver,
                 scheduler, initialCode, initialData, initialExtras);
+    }
+
+    /** @hide */
+    @Override
+    public void sendOrderedBroadcastMultiplePermissions(
+            @NonNull Intent intent, @NonNull String[] receiverPermissions,
+            @Nullable String receiverAppOp, @Nullable BroadcastReceiver resultReceiver,
+            @Nullable Handler scheduler, int initialCode, @Nullable String initialData,
+            @Nullable Bundle initialExtras, @Nullable Bundle options) {
+        mBase.sendOrderedBroadcastMultiplePermissions(intent, receiverPermissions, receiverAppOp,
+                resultReceiver, scheduler, initialCode, initialData, initialExtras, options);
     }
 
     @Override
@@ -932,7 +953,8 @@ public class ContextWrapper extends Context {
     }
 
     @Override
-    public @Nullable Object getSystemService(String name) {
+    // TODO(b/347269120): Re-add @Nullable
+    public Object getSystemService(String name) {
         return mBase.getSystemService(name);
     }
 

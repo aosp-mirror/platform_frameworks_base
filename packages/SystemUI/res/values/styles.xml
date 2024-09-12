@@ -192,10 +192,11 @@
 
     <style name="TextAppearance.AuthCredential.LogoDescription" parent="TextAppearance.Material3.LabelLarge" >
         <item name="android:fontFamily">@*android:string/config_bodyFontFamilyMedium</item>
+        <item name="android:ellipsize">marquee</item>
         <item name="android:gravity">@integer/biometric_dialog_text_gravity</item>
-        <item name="android:maxLines">1</item>
+        <item name="android:marqueeRepeatLimit">1</item>
+        <item name="android:singleLine">true</item>
         <item name="android:textColor">?androidprv:attr/materialColorOnSurfaceVariant</item>
-        <item name="android:ellipsize">end</item>
     </style>
 
     <style name="TextAppearance.AuthCredential.Title" parent="TextAppearance.Material3.HeadlineSmall" >
@@ -1314,7 +1315,7 @@
         <item name="android:background">?android:attr/selectableItemBackground</item>
     </style>
 
-    <style name="MainSwitch.Settingslib" parent="@android:style/Theme.DeviceDefault.DayNight">
+    <style name="MainSwitch.Settingslib" parent="@android:style/Theme.DeviceDefault">
         <item name="android:switchMinWidth">@dimen/settingslib_min_switch_width</item>
     </style>
 
@@ -1357,7 +1358,6 @@
 
     <style name="InternetDialog.NetworkTitle.Active">
         <item name="android:textAppearance">@style/TextAppearance.InternetDialog.Active</item>
-        <item name="android:textColor">?androidprv:attr/materialColorOnPrimaryContainer</item>
     </style>
 
     <style name="InternetDialog.NetworkSummary">
@@ -1370,28 +1370,23 @@
     <style name="InternetDialog.NetworkSummary.Active">
         <item name="android:textAppearance">@style/TextAppearance.InternetDialog.Secondary.Active
         </item>
-        <item name="android:textColor">?androidprv:attr/materialColorOnPrimaryContainer</item>
     </style>
 
     <style name="TextAppearance.InternetDialog">
         <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
         <item name="android:textSize">16sp</item>
-        <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
         <item name="android:textDirection">locale</item>
     </style>
 
     <style name="TextAppearance.InternetDialog.Secondary">
         <item name="android:textSize">14sp</item>
-        <item name="android:textColor">?androidprv:attr/materialColorOnSurfaceVariant</item>
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
     </style>
 
-    <style name="TextAppearance.InternetDialog.Active">
-        <item name="android:textColor">?androidprv:attr/materialColorOnPrimaryContainer</item>
-    </style>
+    <style name="TextAppearance.InternetDialog.Active"/>
 
-    <style name="TextAppearance.InternetDialog.Secondary.Active">
-        <item name="android:textColor">?androidprv:attr/materialColorOnPrimaryContainer</item>
-    </style>
+    <style name="TextAppearance.InternetDialog.Secondary.Active"/>
 
     <style name="FgsManagerDialogTitle">
         <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
@@ -1427,32 +1422,17 @@
         <item name="android:orientation">horizontal</item>
         <item name="android:focusable">true</item>
         <item name="android:clickable">true</item>
-        <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
-    </style>
-
-    <style name="BluetoothTileDialog.Device.Active">
-        <item name="android:textColor">?androidprv:attr/materialColorOnPrimaryContainer</item>
     </style>
 
     <style name="BluetoothTileDialog.DeviceName">
         <item name="android:textSize">14sp</item>
         <item name="android:textAppearance">@style/TextAppearance.Dialog.Title</item>
-        <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
     </style>
 
     <style name="BluetoothTileDialog.DeviceSummary">
         <item name="android:ellipsize">end</item>
         <item name="android:maxLines">2</item>
         <item name="android:textAppearance">@style/TextAppearance.Dialog.Body.Message</item>
-        <item name="android:textColor">?androidprv:attr/materialColorOnSurfaceVariant</item>
-    </style>
-
-    <style name="BluetoothTileDialog.DeviceName.Active">
-        <item name="android:textColor">?androidprv:attr/materialColorOnPrimaryContainer</item>
-    </style>
-
-    <style name="BluetoothTileDialog.DeviceSummary.Active">
-        <item name="android:textColor">?androidprv:attr/materialColorOnPrimaryContainer</item>
     </style>
 
     <style name="BroadcastDialog">

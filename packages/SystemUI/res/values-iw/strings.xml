@@ -107,7 +107,7 @@
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"מתבצע עיבוד של הקלטת מסך"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"התראה מתמשכת לסשן הקלטת מסך"</string>
     <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"להתחיל את ההקלטה?"</string>
-    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"‏בזמן ההקלטה, תהיה ל-Android גישה לכל מה שמופיע במסך שלך או מופעל במכשיר שלך. מומלץ להיזהר עם סיסמאות, פרטי תשלום, הודעות, תמונות, אודיו וסרטונים."</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"‏בזמן ההקלטה, תהיה ל-Android גישה לכל מה שמופיע במסך שלך או מנוגן במכשיר שלך. מומלץ להיזהר עם סיסמאות, פרטי תשלום, הודעות, תמונות, אודיו וסרטונים."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"‏בזמן הקלטה של אפליקציה, תהיה ל-Android גישה לכל מה שגלוי באפליקציה או מופעל מהאפליקציה. כדאי להיזהר עם סיסמאות, פרטי תשלום, הודעות, תמונות, אודיו וסרטונים."</string>
     <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"התחלת ההקלטה"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"הקלטת אודיו"</string>
@@ -129,20 +129,22 @@
     <skip />
     <!-- no translation found for screenrecord_stop_dialog_message (1926783607059442889) -->
     <skip />
-    <string name="screenrecord_stop_dialog_message_specific_app" msgid="5285148796772616326">"‏ההקלטה של &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; תיפסק"</string>
-    <string name="screenrecord_stop_dialog_button" msgid="2883812564938194350">"הפסקת ההקלטה"</string>
-    <string name="share_to_app_stop_dialog_title" msgid="9212915050910250438">"להפסיק את שיתוף המסך?"</string>
+    <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
+    <skip />
+    <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
+    <skip />
     <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
     <skip />
-    <string name="share_to_app_stop_dialog_message_specific_app" msgid="124371406810544777">"‏השיתוף של &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; יופסק"</string>
-    <string name="share_to_app_stop_dialog_button" msgid="6334056916284230217">"הפסקת השיתוף"</string>
+    <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
+    <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
     <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
     <skip />
-    <string name="cast_to_other_device_stop_dialog_message_specific_app" msgid="4891536209254041850">"‏הפעלת ה-Cast‏ של &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; תיפסק"</string>
-    <string name="cast_to_other_device_stop_dialog_button" msgid="6420183747435521834">"‏הפסקת ה-Cast"</string>
-    <string name="close_dialog_button" msgid="4749497706540104133">"סגירה"</string>
+    <!-- no translation found for cast_to_other_device_stop_dialog_button (6420183747435521834) -->
+    <skip />
+    <!-- no translation found for close_dialog_button (4749497706540104133) -->
+    <skip />
     <string name="issuerecord_title" msgid="286627115110121849">"בעיה במכשיר ההקלטה"</string>
     <string name="issuerecord_background_processing_label" msgid="1666840264959336876">"מתבצע עיבוד של בעיית ההקלטה"</string>
     <string name="issuerecord_channel_description" msgid="6142326363431474632">"התראה מתמשכת לסשן איסוף הבעיה"</string>
@@ -153,7 +155,8 @@
     <string name="issuerecord_save_error" msgid="6913040083446722726">"שגיאה בשמירה של בעיית ההקלטה"</string>
     <string name="issuerecord_start_error" msgid="3402782952722871190">"שגיאה בהפעלה של בעיית ההקלטה"</string>
     <string name="immersive_cling_title" msgid="8372056499315585941">"צפייה במסך מלא"</string>
-    <string name="immersive_cling_description" msgid="2717426731830851921">"כדי לצאת, מחליקים למטה מהחלק העליון של המסך"</string>
+    <!-- no translation found for immersive_cling_description (2717426731830851921) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="3076681691468978568">"הבנתי"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"חזרה"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"בית"</string>
@@ -186,7 +189,6 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"הנעילה בוטלה באמצעות זיהוי הפנים. יש ללחוץ כדי להמשיך."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"הפנים זוהו. יש ללחוץ כדי להמשיך."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"הפנים זוהו. להמשך יש ללחוץ על סמל ביטול הנעילה."</string>
-    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"הנעילה בוטלה באמצעות זיהוי הפנים. צריך להקיש כדי להמשיך."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"מאומת"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"ביטול האימות"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"אפשרויות נוספות"</string>
@@ -213,17 +215,17 @@
     <string name="biometric_re_enroll_dialog_cancel" msgid="93760939407091417">"לא עכשיו"</string>
     <string name="biometric_re_enroll_notification_content" msgid="8685925877186288180">"הפעולה הזו נדרשת כדי לשפר את האבטחה והביצועים"</string>
     <string name="fingerprint_re_enroll_notification_title" msgid="4539432429683916604">"הגדרה חוזרת של \'ביטול הנעילה בטביעת אצבע\'"</string>
-    <string name="fingerprint_re_enroll_notification_name" msgid="630798657797645704">"פתיחה בטביעת אצבע"</string>
+    <string name="fingerprint_re_enroll_notification_name" msgid="630798657797645704">"ביטול הנעילה בטביעת אצבע"</string>
     <string name="fingerprint_re_enroll_dialog_title" msgid="3526033128113925780">"הגדרת \'ביטול הנעילה בטביעת אצבע\'"</string>
     <string name="fingerprint_re_enroll_dialog_content" msgid="4866561176695984879">"כדי להגדיר שוב את התכונה \'ביטול הנעילה בטביעת אצבע\', עליך למחוק את התבניות והמודלים הנוכחיים של טביעת האצבע.\n\nאחרי המחיקה יהיה צורך להגדיר שוב את \'ביטול הנעילה בטביעת אצבע\' כדי להשתמש בטביעת האצבע לביטול הנעילה של הטלפון ולאמת את זהותך."</string>
     <string name="fingerprint_re_enroll_dialog_content_singular" msgid="3083663339787381218">"כדי להגדיר שוב את התכונה \'ביטול הנעילה בטביעת אצבע\', עליך למחוק את התבניות והמודל הנוכחיים של טביעת האצבע.\n\nאחרי המחיקה יהיה צורך להגדיר שוב את \'ביטול הנעילה בטביעת אצבע\' כדי להשתמש בטביעת האצבע לביטול הנעילה של הטלפון ולאמת את זהותך."</string>
     <string name="fingerprint_reenroll_failure_dialog_content" msgid="4733768492747300666">"לא ניתן להגדיר ביטול נעילה בטביעת אצבע. יש לעבור להגדרות כדי לנסות שוב."</string>
     <string name="face_re_enroll_notification_title" msgid="1850838867718410520">"הגדרה חוזרת של \'פתיחה ע\"י זיהוי הפנים\'"</string>
-    <string name="face_re_enroll_notification_name" msgid="7384545252206120659">"פתיחה בזיהוי פנים"</string>
+    <string name="face_re_enroll_notification_name" msgid="7384545252206120659">"פתיחה ע\"י זיהוי הפנים"</string>
     <string name="face_re_enroll_dialog_title" msgid="6392173708176069994">"להגדרת התכונה \'פתיחה ע\"י זיהוי הפנים\'"</string>
     <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"כדי להגדיר שוב את התכונה \'פתיחה ע\"י זיהוי הפנים\', עליך למחוק את התבנית הנוכחית לזיהוי הפנים.\n\nיהיה צורך להגדיר את התכונה הזו שוב כדי להשתמש בזיהוי הפנים לביטול הנעילה של הטלפון."</string>
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"לא ניתן להגדיר פתיחה ע\"י זיהוי הפנים. צריך לעבור להגדרות כדי לנסות שוב."</string>
-    <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"צריך לגעת בחיישן טביעות האצבע"</string>
+    <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"יש לגעת בחיישן טביעות האצבע"</string>
     <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"להמשך יש ללחוץ על סמל ביטול הנעילה"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="5542430577183894219">"הפנים לא זוהו. צריך להשתמש בטביעת אצבע במקום."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
@@ -297,11 +299,14 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"נשמר"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"ניתוק"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"הפעלה"</string>
-    <string name="turn_on_bluetooth_auto_tomorrow" msgid="3345758139235739006">"הפעלה אוטומטית מחר"</string>
+    <!-- no translation found for turn_on_bluetooth_auto_tomorrow (3345758139235739006) -->
+    <skip />
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"‏תכונות כמו \'שיתוף מהיר\' ו\'איפה המכשיר שלי\' משתמשות ב-Bluetooth"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"‏חיבור ה-Bluetooth יופעל מחר בבוקר"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"שיתוף האודיו"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"מתבצע שיתוף של האודיו"</string>
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button (7545274861795853838) -->
+    <skip />
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_sharing (3069309588231072128) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> סוללה"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"אודיו"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"אוזניות"</string>
@@ -946,8 +951,8 @@
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"מצב \'נא לא להפריע\' הופעל על ידי אפליקציה או על ידי כלל אוטומטי."</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"אפליקציות שפועלות ברקע"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"אפשר להקיש לקבלת פרטים על צריכה של נתונים וסוללה"</string>
-    <string name="mobile_data_disable_title" msgid="5366476131671617790">"לכבות את השימוש בחבילת הגלישה?"</string>
-    <string name="mobile_data_disable_message" msgid="8604966027899770415">"‏לא תהיה לך גישה לנתונים או לאינטרנט דרך <xliff:g id="CARRIER">%s</xliff:g>. אפשר יהיה לגשת לאינטרנט רק דרך Wi-Fi."</string>
+    <string name="mobile_data_disable_title" msgid="5366476131671617790">"לכבות את חבילת הגלישה?"</string>
+    <string name="mobile_data_disable_message" msgid="8604966027899770415">"‏לא תהיה לך גישה לנתונים או לאינטרנט באמצעות <xliff:g id="CARRIER">%s</xliff:g>. אינטרנט יהיה זמין רק באמצעות Wi-Fi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"הספק שלך"</string>
     <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"לחזור אל <xliff:g id="CARRIER">%s</xliff:g>?"</string>
     <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"לא תתבצע החלפה אוטומטית של חבילת הגלישה על סמך זמינות"</string>
@@ -1192,7 +1197,6 @@
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"יש להקיש כדי להציג מידע נוסף"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"לא הוגדרה"</string>
     <string name="accessibility_bouncer" msgid="5896923685673320070">"הזנת קוד נעילת המסך"</string>
-    <string name="accessibility_side_fingerprint_indicator_label" msgid="1673807833352363712">"צריך לגעת בחיישן טביעות האצבע. זה הלחצן הקצר יותר בצד של הטלפון"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"חיישן טביעות אצבע"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"אימות"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"הזנת מכשיר"</string>
@@ -1343,10 +1347,14 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"סמל הכיווץ"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"סמל ההרחבה"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"או"</string>
-    <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"תנועת חזרה"</string>
-    <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"תנועת חזרה למסך הבית"</string>
-    <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"מקש הפעולה"</string>
-    <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"סיום"</string>
+    <!-- no translation found for touchpad_tutorial_back_gesture_button (2746834288077265946) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_home_gesture_button (7640544867625955304) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_action_key_button (3220074511852927267) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_done_button (176168488821755503) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"התאורה האחורית במקלדת"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"‏רמה %1$d מתוך %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"שליטה במכשירים"</string>

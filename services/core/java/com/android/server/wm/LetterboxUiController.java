@@ -785,18 +785,16 @@ final class LetterboxUiController {
     }
 
     void updateLetterboxSurfaceIfNeeded(WindowState winHint) {
-        updateLetterboxSurfaceIfNeeded(winHint, mActivityRecord.getSyncTransaction(),
-                mActivityRecord.getPendingTransaction());
+        updateLetterboxSurfaceIfNeeded(winHint, mActivityRecord.getSyncTransaction());
     }
 
-    void updateLetterboxSurfaceIfNeeded(WindowState winHint, @NonNull Transaction t,
-            @NonNull Transaction inputT) {
+    void updateLetterboxSurfaceIfNeeded(WindowState winHint, Transaction t) {
         if (shouldNotLayoutLetterbox(winHint)) {
             return;
         }
         layoutLetterboxIfNeeded(winHint);
         if (mLetterbox != null && mLetterbox.needsApplySurfaceChanges()) {
-            mLetterbox.applySurfaceChanges(t, inputT);
+            mLetterbox.applySurfaceChanges(t);
         }
     }
 

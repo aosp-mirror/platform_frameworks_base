@@ -1060,10 +1060,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         final boolean isInstallDpcPackagesPermissionGranted = (snapshot.checkUidPermission(
                 android.Manifest.permission.INSTALL_DPC_PACKAGES, mInstallerUid)
                 == PackageManager.PERMISSION_GRANTED);
-        // Also query the package uid for archived packages, so that the user confirmation
-        // dialog can be displayed for updating archived apps.
-        final int targetPackageUid = snapshot.getPackageUid(packageName,
-                PackageManager.MATCH_ARCHIVED_PACKAGES, userId);
+        final int targetPackageUid = snapshot.getPackageUid(packageName, 0, userId);
         final boolean isUpdate = targetPackageUid != -1 || isApexSession();
         final InstallSourceInfo existingInstallSourceInfo = isUpdate
                 ? snapshot.getInstallSourceInfo(packageName, userId)

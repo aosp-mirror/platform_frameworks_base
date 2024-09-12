@@ -163,7 +163,7 @@
     <string name="scNullCipherIssueEncryptedTitle" msgid="234717016411824969">"Połączono z szyfrowaną siecią <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
     <string name="scNullCipherIssueEncryptedSummary" msgid="8577510708842150475">"Połączenie przy użyciu karty SIM w sieci <xliff:g id="NETWORK_NAME">%1$s</xliff:g> jest teraz bezpieczniejsze"</string>
     <string name="scNullCipherIssueNonEncryptedTitle" msgid="3978071464929453915">"Połączono z niezaszyfrowaną siecią"</string>
-    <string name="scNullCipherIssueNonEncryptedSummaryNotification" msgid="7386936934128110388">"Gdy korzystasz z karty SIM w sieci <xliff:g id="NETWORK_NAME">%1$s</xliff:g>, połączenia, SMS-y i dane są bardziej narażone na ataki"</string>
+    <string name="scNullCipherIssueNonEncryptedSummaryNotification" msgid="7386936934128110388">"Gdy korzystasz z karty SIM w sieci <xliff:g id="NETWORK_NAME">%1$s</xliff:g>, połączenia, wiadomości i dane są bardziej narażone na ataki"</string>
     <string name="scNullCipherIssueNonEncryptedSummary" msgid="5093428974513703253">"Połączenia, wiadomości i dane są obecnie bardziej podatne na ataki podczas korzystania z karty SIM <xliff:g id="NETWORK_NAME">%1$s</xliff:g>.\n\nGdy połączenie zostanie ponownie zaszyfrowane, otrzymasz kolejne powiadomienie."</string>
     <string name="scNullCipherIssueActionSettings" msgid="5888857706424639946">"Ustawienia bezpieczeństwa sieci komórkowej"</string>
     <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"Więcej informacji"</string>
@@ -1885,7 +1885,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN jest za krótki. Musi mieć co najmniej 4 cyfry."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Spróbuj ponownie później"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Włączony pełny ekran"</string>
-    <string name="immersive_cling_description" msgid="2896205051090870978">"Aby zamknąć, przesuń palcem w dół z góry ekranu"</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"OK"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Obróć, aby lepiej widzieć"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Otwórz aplikację <xliff:g id="NAME">%s</xliff:g> na pełnym ekranie, aby lepiej widzieć"</string>
@@ -2419,12 +2420,12 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Jak to działa"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Oczekiwanie…"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Skonfiguruj ponownie odblokowywanie odciskiem palca"</string>
-    <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"Ten odcisk palca (<xliff:g id="FINGERPRINT">%s</xliff:g>) nie jest już rozpoznawany."</string>
-    <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"Te odciski palców (<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> i <xliff:g id="FINGERPRINT_1">%2$s</xliff:g>) nie są już rozpoznawane."</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="1824812666549916586">"Ten odcisk palca (<xliff:g id="FINGERPRINT">%s</xliff:g>) nie jest już rozpoznawany. Skonfiguruj ponownie odblokowywanie odciskiem palca."</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="5974657382960155099">"Te odciski palców (<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> i <xliff:g id="FINGERPRINT_1">%2$s</xliff:g>) nie są już rozpoznawane. Skonfiguruj ponownie odblokowywanie odciskiem palca."</string>
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"Odcisk palca <xliff:g id="FINGERPRINT">%s</xliff:g> nie sprawdzał się dobrze i został usunięty"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"Odciski palców <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> i <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> nie sprawdzały się dobrze i zostały usunięte"</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"Odcisk palca <xliff:g id="FINGERPRINT">%s</xliff:g> nie sprawdzał się dobrze i został usunięty. Skonfiguruj go ponownie, aby odblokowywać telefon odciskiem palca."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"Odciski palca <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> i <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> nie sprawdzały się dobrze i zostały usunięte. Skonfiguruj je ponownie, aby odblokowywać telefon odciskiem palca."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Skonfiguruj ponownie rozpoznawanie twarzy"</string>
-    <string name="face_dangling_notification_msg" msgid="746235263598985384">"Model Twojej twarzy nie jest już rozpoznawany. Skonfiguruj ponownie rozpoznawanie twarzy."</string>
+    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"Twój model twarzy nie sprawdzał się dobrze i został usunięty. Skonfiguruj go ponownie, aby odblokowywać telefon za pomocą skanu twarzy."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Skonfiguruj"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Nie teraz"</string>
 </resources>

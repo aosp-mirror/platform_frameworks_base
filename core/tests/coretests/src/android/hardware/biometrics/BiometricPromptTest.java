@@ -16,6 +16,7 @@
 
 package android.hardware.biometrics;
 
+import static android.hardware.biometrics.BiometricPrompt.MAX_LOGO_DESCRIPTION_CHARACTER_NUMBER;
 import static android.hardware.biometrics.PromptContentViewWithMoreOptionsButton.MAX_DESCRIPTION_CHARACTER_NUMBER;
 import static android.hardware.biometrics.PromptVerticalListContentView.MAX_EACH_ITEM_CHARACTER_NUMBER;
 import static android.hardware.biometrics.PromptVerticalListContentView.MAX_ITEM_NUMBER;
@@ -115,7 +116,19 @@ public class BiometricPromptTest {
                 () -> new BiometricPrompt.Builder(mContext).setLogoDescription(null)
         );
 
-        assertThat(e).hasMessageThat().isEqualTo("Logo description passed in can not be null");
+        assertThat(e).hasMessageThat().contains(
+                "Logo description passed in can not be null or exceed");
+    }
+
+    @Test
+    public void testLogoDescription_charLimit() {
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                () -> new BiometricPrompt.Builder(mContext).setLogoDescription(
+                        generateRandomString(MAX_LOGO_DESCRIPTION_CHARACTER_NUMBER + 1))
+        );
+
+        assertThat(e).hasMessageThat().contains(
+                "Logo description passed in can not be null or exceed");
     }
 
     @Test

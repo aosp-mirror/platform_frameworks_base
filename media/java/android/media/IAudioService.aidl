@@ -305,8 +305,6 @@ interface IAudioService {
 
     boolean isStreamAffectedByMute(int streamType);
 
-    boolean isStreamMutableByUi(int streamType);
-
     void disableSafeMediaVolume(String callingPackage);
 
     oneway void lowerVolumeToRs1(String callingPackage);

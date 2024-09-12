@@ -568,8 +568,7 @@ public class SpatializerHelper {
             updatedDevice = new AdiDeviceState(canonicalDeviceType, ada.getInternalType(),
                     ada.getAddress());
             initSAState(updatedDevice);
-            mDeviceBroker.addOrUpdateDeviceSAStateInInventory(
-                    updatedDevice, true /*syncInventory*/);
+            mDeviceBroker.addOrUpdateDeviceSAStateInInventory(updatedDevice);
         }
         if (updatedDevice != null) {
             onRoutingUpdated();
@@ -724,7 +723,7 @@ public class SpatializerHelper {
                     new AdiDeviceState(canonicalDeviceType, ada.getInternalType(),
                             ada.getAddress());
             initSAState(deviceState);
-            mDeviceBroker.addOrUpdateDeviceSAStateInInventory(deviceState, true /*syncInventory*/);
+            mDeviceBroker.addOrUpdateDeviceSAStateInInventory(deviceState);
             mDeviceBroker.postPersistAudioDeviceSettings();
             logDeviceState(deviceState, "addWirelessDeviceIfNew"); // may be updated later.
         }

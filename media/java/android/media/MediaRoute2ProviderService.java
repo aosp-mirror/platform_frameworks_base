@@ -475,25 +475,9 @@ public abstract class MediaRoute2ProviderService extends Service {
      */
     public final void notifyRoutes(@NonNull Collection<MediaRoute2Info> routes) {
         Objects.requireNonNull(routes, "routes must not be null");
-        List<MediaRoute2Info> sanitizedRoutes = new ArrayList<>(routes.size());
-
-        for (MediaRoute2Info route : routes) {
-            if (route.isSystemRouteType()) {
-                Log.w(
-                        TAG,
-                        "Attempting to add a system route type from a non-system route "
-                                + "provider. Overriding type to TYPE_UNKNOWN. Route: "
-                                + route);
-                sanitizedRoutes.add(
-                        new MediaRoute2Info.Builder(route)
-                                .setType(MediaRoute2Info.TYPE_UNKNOWN)
-                                .build());
-            } else {
-                sanitizedRoutes.add(route);
-            }
-        }
-
-        mProviderInfo = new MediaRoute2ProviderInfo.Builder().addRoutes(sanitizedRoutes).build();
+        mProviderInfo = new MediaRoute2ProviderInfo.Builder()
+                .addRoutes(routes)
+                .build();
         schedulePublishState();
     }
 

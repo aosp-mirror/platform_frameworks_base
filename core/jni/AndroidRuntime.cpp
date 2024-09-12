@@ -148,6 +148,7 @@ extern int register_android_os_HwParcel(JNIEnv *env);
 extern int register_android_os_HwRemoteBinder(JNIEnv *env);
 extern int register_android_os_NativeHandle(JNIEnv *env);
 extern int register_android_os_ServiceManager(JNIEnv *env);
+extern int register_android_os_ServiceManagerNative(JNIEnv* env);
 extern int register_android_os_MessageQueue(JNIEnv* env);
 extern int register_android_os_Parcel(JNIEnv* env);
 extern int register_android_os_PerformanceHintManager(JNIEnv* env);
@@ -1544,6 +1545,7 @@ static const RegJNIRec gRegJNI[] = {
         REG_JNI(register_android_os_HwRemoteBinder),
         REG_JNI(register_android_os_NativeHandle),
         REG_JNI(register_android_os_ServiceManager),
+        REG_JNI(register_android_os_ServiceManagerNative),
         REG_JNI(register_android_os_storage_StorageManager),
         REG_JNI(register_android_service_DataLoaderService),
         REG_JNI(register_android_view_DisplayEventReceiver),

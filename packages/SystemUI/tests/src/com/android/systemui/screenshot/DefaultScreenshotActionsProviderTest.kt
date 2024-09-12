@@ -24,7 +24,6 @@ import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.screenshot.ui.viewmodel.PreviewAction
 import com.google.common.truth.Truth.assertThat
 import java.util.UUID
 import kotlin.test.Test
@@ -61,9 +60,9 @@ class DefaultScreenshotActionsProviderTest : SysuiTestCase() {
     fun previewActionAccessed_beforeScreenshotCompleted_doesNothing() {
         actionsProvider = createActionsProvider()
 
-        val previewActionCaptor = argumentCaptor<PreviewAction>()
+        val previewActionCaptor = argumentCaptor<() -> Unit>()
         verify(actionsCallback).providePreviewAction(previewActionCaptor.capture())
-        previewActionCaptor.firstValue.onClick.invoke()
+        previewActionCaptor.firstValue.invoke()
         verifyNoMoreInteractions(actionExecutor)
     }
 
@@ -103,14 +102,14 @@ class DefaultScreenshotActionsProviderTest : SysuiTestCase() {
     fun actionAccessed_whilePending_launchesMostRecentAction() = runTest {
         actionsProvider = createActionsProvider()
 
-        val previewActionCaptor = argumentCaptor<PreviewAction>()
+        val previewActionCaptor = argumentCaptor<() -> Unit>()
         verify(actionsCallback).providePreviewAction(previewActionCaptor.capture())
         val actionButtonCaptor = argumentCaptor<() -> Unit>()
         verify(actionsCallback, times(2))
             .provideActionButton(any(), any(), actionButtonCaptor.capture())
 
         actionButtonCaptor.firstValue.invoke()
-        previewActionCaptor.firstValue.onClick.invoke()
+        previewActionCaptor.firstValue.invoke()
         actionButtonCaptor.secondValue.invoke()
         actionsProvider.setCompletedScreenshot(validResult)
 

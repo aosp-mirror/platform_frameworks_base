@@ -81,7 +81,7 @@
     <string name="speed_label_fast" msgid="2677719134596044051">"Rápida"</string>
     <string name="speed_label_very_fast" msgid="8215718029533182439">"Muy rápida"</string>
     <string name="wifi_passpoint_expired" msgid="6540867261754427561">"Caducada"</string>
-    <string name="preference_summary_default_combination" msgid="2644094566845577901">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
+    <string name="preference_summary_default_combination" msgid="2644094566845577901">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="bluetooth_disconnected" msgid="7739366554710388701">"Desconectado"</string>
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Desconectando…"</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"Estableciendo conexión…"</string>
@@ -386,7 +386,7 @@
     <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"Hacer parpadear las vistas dentro de las ventanas cuando se dibujan"</string>
     <string name="show_hw_layers_updates" msgid="5268370750002509767">"Ver actualizaciones de capas de hardware"</string>
     <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"Hacer parpadear las capas de hardware en verde cuando se actualizan"</string>
-    <string name="debug_hw_overdraw" msgid="8944851091008756796">"Depurar sobredibujos de GPU"</string>
+    <string name="debug_hw_overdraw" msgid="8944851091008756796">"Depurar overdraw de GPU"</string>
     <string name="disable_overlays" msgid="4206590799671557143">"Inhabilitar superposiciones de hardware"</string>
     <string name="disable_overlays_summary" msgid="1954852414363338166">"Usa siempre la GPU para componer pantallas"</string>
     <string name="simulate_color_space" msgid="1206503300335835151">"Simular espacio de color"</string>
@@ -414,7 +414,7 @@
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"Simular pantallas secundarias"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"Aplicaciones"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"No mantener actividades"</string>
-    <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Destruir actividades cuando el usuario salga de ellas"</string>
+    <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Destruye actividades cuando el usuario deja de usarlas"</string>
     <string name="app_process_limit_title" msgid="8361367869453043007">"Límitar procesos en segundo plano"</string>
     <string name="show_all_anrs" msgid="9160563836616468726">"Mostrar ANR en segundo plano"</string>
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Muestra un cuadro de diálogo que informa de que la aplicación no responde en aplicaciones en segundo plano"</string>
@@ -615,7 +615,7 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Usuario"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Perfil restringido"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"¿Añadir nuevo usuario?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"Puedes compartir este dispositivo si creas más usuarios. Cada uno tendrá su propio espacio y podrá personalizarlo con aplicaciones, un fondo de pantalla y más. Los usuarios también pueden ajustar opciones del dispositivo, como la conexión Wi‑Fi, que afectan a todos los usuarios.\n\nCuando añadas un usuario, tendrá que configurar su espacio.\n\nCualquier usuario puede actualizar aplicaciones de todos los usuarios. Es posible que no se transfieran los servicios y opciones de accesibilidad al nuevo usuario."</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Puedes compartir este dispositivo si creas más usuarios. Cada uno tendrá su propio espacio y podrá personalizarlo con aplicaciones, un fondo de pantalla y mucho más. Los usuarios también pueden ajustar opciones del dispositivo, como la conexión Wi‑Fi, que afectan a todos los usuarios.\n\nCuando añadas un usuario, tendrá que configurar su espacio.\n\nCualquier usuario puede actualizar aplicaciones de todos los usuarios. Es posible que no se transfieran los servicios y opciones de accesibilidad al nuevo usuario."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Al añadir un nuevo usuario, dicha persona debe configurar su espacio.\n\nCualquier usuario puede actualizar las aplicaciones del resto de los usuarios."</string>
     <string name="user_grant_admin_title" msgid="5157031020083343984">"¿Convertir a este usuario en administrador?"</string>
     <string name="user_grant_admin_message" msgid="1673791931033486709">"Los administradores tienen privilegios especiales que otros usuarios no tienen. Los administradores pueden gestionar todos los usuarios, actualizar o restablecer este dispositivo, modificar los ajustes, ver todas las aplicaciones instaladas y conceder o revocar privilegios de administrador a otros usuarios."</string>
@@ -633,7 +633,7 @@
     <string name="user_need_lock_message" msgid="4311424336209509301">"Para poder crear un perfil restringido, debes configurar una pantalla de bloqueo que proteja tus aplicaciones y datos personales."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Establecer bloqueo"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"Cambiar a <xliff:g id="USER_NAME">%s</xliff:g>"</string>
-    <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Creando usuario…"</string>
+    <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Creando nuevo usuario…"</string>
     <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"Creando nuevo invitado…"</string>
     <string name="add_user_failed" msgid="4809887794313944872">"No se ha podido crear el usuario"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"No se ha podido crear un nuevo invitado"</string>

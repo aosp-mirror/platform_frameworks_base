@@ -1380,7 +1380,7 @@
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"Ativar serviço móvel"</string>
     <string name="install_carrier_app_notification_text" msgid="2781317581274192728">"Baixe o app da operadora para ativar seu novo chip"</string>
     <string name="install_carrier_app_notification_text_app_name" msgid="4086877327264106484">"Baixe o app <xliff:g id="APP_NAME">%1$s</xliff:g> para ativar seu novo chip"</string>
-    <string name="install_carrier_app_notification_button" msgid="6257740533102594290">"Baixar o app"</string>
+    <string name="install_carrier_app_notification_button" msgid="6257740533102594290">"Fazer download do app"</string>
     <string name="carrier_app_notification_title" msgid="5815477368072060250">"Novo chip inserido"</string>
     <string name="carrier_app_notification_text" msgid="6567057546341958637">"Toque para configurar"</string>
     <string name="time_picker_dialog_title" msgid="9053376764985220821">"Definir hora"</string>
@@ -1884,7 +1884,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"O PIN é curto demais. Deve ter pelo menos 4 dígitos."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Tente novamente mais tarde"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Visualização em tela cheia"</string>
-    <string name="immersive_cling_description" msgid="2896205051090870978">"Para sair, deslize de cima para baixo na tela"</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Entendi"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Gire a tela para ter uma visualização melhor"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Abra o app <xliff:g id="NAME">%s</xliff:g> em tela cheia para ter uma melhor visualização"</string>
@@ -2411,19 +2412,19 @@
     <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"Espaço privado"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"Conteúdo de notificação sensível oculto"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
-    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Conteúdo oculto no compartilhamento de tela por segurança"</string>
+    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Conteúdo do app oculto no compartilhamento de tela por motivos de segurança"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Conectado automaticamente ao satélite"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Você pode enviar e receber mensagens sem um dispositivo móvel ou uma rede Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Abrir o app Mensagens"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Como funciona"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Pendente…"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Configurar o Desbloqueio por impressão digital de novo"</string>
-    <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"A impressão digital <xliff:g id="FINGERPRINT">%s</xliff:g> não é mais reconhecida."</string>
-    <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"As impressões digitais <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> e <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> não são mais reconhecidas."</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="1824812666549916586">"A impressão digital <xliff:g id="FINGERPRINT">%s</xliff:g> não é mais reconhecida. Configure o \"Desbloqueio por impressão digital\" de novo."</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="5974657382960155099">"As impressões digitais <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> e <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> não são mais reconhecidas. Configure o \"Desbloqueio por impressão digital\" de novo."</string>
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"A impressão digital <xliff:g id="FINGERPRINT">%s</xliff:g> não estava funcionando bem e foi excluída"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"As impressões digitais <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> e <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> não estavam funcionando bem e foram excluídas"</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"A impressão digital <xliff:g id="FINGERPRINT">%s</xliff:g> não estava funcionando bem e foi excluída. Configure de novo para desbloquear o smartphone com a impressão digital."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"As impressões digitais <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> e <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> não estavam funcionando bem e foram excluídas. Configure de novo para desbloquear o smartphone com a impressão digital."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Configure o Desbloqueio facial de novo"</string>
-    <string name="face_dangling_notification_msg" msgid="746235263598985384">"Seu modelo de rosto não é mais reconhecido. Configure o \"Desbloqueio facial\" de novo."</string>
+    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"Seu modelo de rosto não estava funcionando bem e foi excluído. Configure de novo para desbloquear o smartphone com o rosto."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Configuração"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Agora não"</string>
 </resources>

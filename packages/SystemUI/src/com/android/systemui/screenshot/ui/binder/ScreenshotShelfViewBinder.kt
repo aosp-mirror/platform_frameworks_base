@@ -128,9 +128,8 @@ constructor(private val buttonViewBinder: ActionButtonViewBinder) {
                         }
                     }
                     launch {
-                        viewModel.previewAction.collect { action ->
-                            previewView.setOnClickListener { action?.onClick?.invoke() }
-                            previewView.contentDescription = action?.contentDescription
+                        viewModel.previewAction.collect { onClick ->
+                            previewView.setOnClickListener { onClick?.invoke() }
                         }
                     }
                     launch {

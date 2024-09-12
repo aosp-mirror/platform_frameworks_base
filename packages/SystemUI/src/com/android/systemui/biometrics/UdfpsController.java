@@ -270,7 +270,6 @@ public class UdfpsController implements DozeReceiver, Dumpable {
         @Override
         public void showUdfpsOverlay(long requestId, int sensorId, int reason,
                 @NonNull IUdfpsOverlayControllerCallback callback) {
-            mUdfpsOverlayInteractor.setRequestId(requestId);
             mFgExecutor.execute(() -> UdfpsController.this.showUdfpsOverlay(
                     new UdfpsControllerOverlay(
                         mContext,
@@ -404,15 +403,6 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                     new CancellationSignal(),
                     handler::post,
                     authenticationCallback);
-        }
-
-        /**
-         * Debug to run setIgnoreDisplayTouches
-         */
-        public void debugSetIgnoreDisplayTouches(boolean ignoreTouch) {
-            final long requestId = (mOverlay != null) ? mOverlay.getRequestId() : 0L;
-            UdfpsController.this.mFingerprintManager.setIgnoreDisplayTouches(
-                    requestId, mSensorProps.sensorId, ignoreTouch);
         }
     }
 
@@ -568,12 +558,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                 Log.w(TAG, "onTouch down received without a preceding up");
             }
             mActivePointerId = MotionEvent.INVALID_POINTER_ID;
-
-            // It's possible on some devices to get duplicate touches from both doze and the
-            // normal touch listener. Don't reset the down in this case to avoid duplicate downs
-            if (!mIsAodInterruptActive) {
-                mOnFingerDown = false;
-            }
+            mOnFingerDown = false;
         } else if (!DeviceEntryUdfpsRefactor.isEnabled()) {
             if ((mLockscreenShadeTransitionController.getQSDragProgress() != 0f
                     && !mAlternateBouncerInteractor.isVisibleState())

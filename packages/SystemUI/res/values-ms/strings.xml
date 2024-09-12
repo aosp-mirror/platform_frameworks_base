@@ -107,7 +107,7 @@
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Memproses rakaman skrin"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Pemberitahuan breterusan untuk sesi rakaman skrin"</string>
     <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"Mulakan Rakaman?"</string>
-    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Semasa anda merakam, Android boleh mengakses apa-apa sahaja yang kelihatan pada skrin atau dimainkan pada peranti anda. Oleh hal yang demikian, berhati-hati apabila memasukkan kata laluan, butiran pembayaran, mesej, foto, audio dan video."</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Apabila anda merakam, Android boleh mengakses apa-apa sahaja yang kelihatan pada skrin anda atau dimainkan pada peranti anda. Oleh hal yang demikian, berhati-hati apabila memasukkan kata laluan, butiran pembayaran, mesej, foto, audio dan video."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Semasa anda merakam apl, Android boleh mengakses apa-apa sahaja yang ditunjukkan atau dimainkan pada apl itu. Oleh hal yang demikian, berhati-hati ketika memasukkan kata laluan, butiran pembayaran, mesej, foto, audio dan video."</string>
     <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Mulakan rakaman"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Rakam audio"</string>
@@ -129,20 +129,22 @@
     <skip />
     <!-- no translation found for screenrecord_stop_dialog_message (1926783607059442889) -->
     <skip />
-    <string name="screenrecord_stop_dialog_message_specific_app" msgid="5285148796772616326">"Anda akan berhenti merakam &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
-    <string name="screenrecord_stop_dialog_button" msgid="2883812564938194350">"Hentikan rakaman"</string>
-    <string name="share_to_app_stop_dialog_title" msgid="9212915050910250438">"Hentikan perkongsian skrin?"</string>
+    <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
+    <skip />
+    <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
+    <skip />
     <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
     <skip />
-    <string name="share_to_app_stop_dialog_message_specific_app" msgid="124371406810544777">"Anda akan berhenti berkongsi &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
-    <string name="share_to_app_stop_dialog_button" msgid="6334056916284230217">"Hentikan perkongsian"</string>
+    <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
+    <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
     <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
     <skip />
-    <string name="cast_to_other_device_stop_dialog_message_specific_app" msgid="4891536209254041850">"Anda akan berhenti menghantar &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
-    <string name="cast_to_other_device_stop_dialog_button" msgid="6420183747435521834">"Hentikan penghantaran"</string>
-    <string name="close_dialog_button" msgid="4749497706540104133">"Tutup"</string>
+    <!-- no translation found for cast_to_other_device_stop_dialog_button (6420183747435521834) -->
+    <skip />
+    <!-- no translation found for close_dialog_button (4749497706540104133) -->
+    <skip />
     <string name="issuerecord_title" msgid="286627115110121849">"Perakam Masalah"</string>
     <string name="issuerecord_background_processing_label" msgid="1666840264959336876">"Memproses rakaman masalah"</string>
     <string name="issuerecord_channel_description" msgid="6142326363431474632">"Pemberitahuan sedang berlangsung untuk sesi pengumpulan masalah"</string>
@@ -153,7 +155,8 @@
     <string name="issuerecord_save_error" msgid="6913040083446722726">"Ralat menyimpan rakaman masalah"</string>
     <string name="issuerecord_start_error" msgid="3402782952722871190">"Ralat memulakan rakaman masalah"</string>
     <string name="immersive_cling_title" msgid="8372056499315585941">"Melihat skrin penuh"</string>
-    <string name="immersive_cling_description" msgid="2717426731830851921">"Untuk keluar, leret ke bawah daripada bahagian atas skrin anda"</string>
+    <!-- no translation found for immersive_cling_description (2717426731830851921) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="3076681691468978568">"OK"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Kembali"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Rumah"</string>
@@ -186,7 +189,6 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Dibuka kunci dengan wajah. Tekan untuk meneruskan."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Wajah dicam. Tekan untuk meneruskan."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Wajah dicam. Tekan ikon buka kunci untuk meneruskan."</string>
-    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"Dibuka kunci dengan wajah. Ketik untuk meneruskan proses."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Disahkan"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Batalkan Pengesahan"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"Lagi Pilihan"</string>
@@ -297,11 +299,14 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Disimpan"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"putuskan sambungan"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"aktifkan"</string>
-    <string name="turn_on_bluetooth_auto_tomorrow" msgid="3345758139235739006">"Hidupkan secara automatik pada hari esok"</string>
+    <!-- no translation found for turn_on_bluetooth_auto_tomorrow (3345758139235739006) -->
+    <skip />
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"Ciri seperti Quick Share dan Find My Device menggunakan Bluetooth"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bluetooth akan dihidupkan esok pagi"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Kongsi audio"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Perkongsian audio"</string>
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button (7545274861795853838) -->
+    <skip />
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_sharing (3069309588231072128) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> bateri"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Set Kepala"</string>
@@ -373,11 +378,11 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Rakam skrin"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Mula"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Berhenti"</string>
-    <string name="qs_record_issue_label" msgid="8166290137285529059">"Rekodkan Masalah"</string>
+    <string name="qs_record_issue_label" msgid="8166290137285529059">"Rekodkan masalah"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"Mula"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"Hentikan"</string>
     <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"Laporan Pepijat"</string>
-    <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"Apakah pengalaman peranti yang terjejas?"</string>
+    <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"Pengalaman peranti yang manakah yang terjejas?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"Pilih jenis masalah"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Rakam skrin"</string>
     <string name="performance" msgid="6552785217174378320">"Prestasi"</string>
@@ -1192,7 +1197,6 @@
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Ketik untuk mendapatkan maklumat lanjut"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Tiada penggera"</string>
     <string name="accessibility_bouncer" msgid="5896923685673320070">"masukkan kunci skrin"</string>
-    <string name="accessibility_side_fingerprint_indicator_label" msgid="1673807833352363712">"Sentuh penderia cap jari. Penderia cap jari ialah butang yang lebih pendek di sisi telefon"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Penderia cap jari"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"sahkan"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"akses peranti"</string>
@@ -1343,10 +1347,14 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Kuncupkan ikon"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Kembangkan ikon"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"atau"</string>
-    <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Gerak isyarat kembali"</string>
-    <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Gerak isyarat pergi ke laman utama"</string>
-    <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"Kekunci tindakan"</string>
-    <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Selesai"</string>
+    <!-- no translation found for touchpad_tutorial_back_gesture_button (2746834288077265946) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_home_gesture_button (7640544867625955304) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_action_key_button (3220074511852927267) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_done_button (176168488821755503) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Cahaya latar papan kekunci"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Tahap %1$d daripada %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Kawalan Rumah"</string>

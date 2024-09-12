@@ -22,6 +22,7 @@ import com.android.settingslib.volume.data.repository.AudioRepository
 import com.android.settingslib.volume.shared.model.AudioStream
 import com.android.settingslib.volume.shared.model.AudioStreamModel
 import com.android.settingslib.volume.shared.model.RingerMode
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -41,7 +42,6 @@ class FakeAudioRepository : AudioRepository {
 
     private val models: MutableMap<AudioStream, MutableStateFlow<AudioStreamModel>> = mutableMapOf()
     private val lastAudibleVolumes: MutableMap<AudioStream, Int> = mutableMapOf()
-    private val deviceCategories: MutableMap<String, Int> = mutableMapOf()
 
     private fun getAudioStreamModelState(
         audioStream: AudioStream
@@ -60,7 +60,7 @@ class FakeAudioRepository : AudioRepository {
             )
         }
 
-    override fun getAudioStream(audioStream: AudioStream): StateFlow<AudioStreamModel> =
+    override fun getAudioStream(audioStream: AudioStream): Flow<AudioStreamModel> =
         getAudioStreamModelState(audioStream).asStateFlow()
 
     override suspend fun setVolume(audioStream: AudioStream, volume: Int) {
@@ -102,13 +102,5 @@ class FakeAudioRepository : AudioRepository {
 
     override suspend fun setRingerMode(audioStream: AudioStream, mode: RingerMode) {
         mutableRingerMode.value = mode
-    }
-
-    fun setBluetoothAudioDeviceCategory(bluetoothAddress: String, category: Int) {
-        deviceCategories[bluetoothAddress] = category
-    }
-
-    override suspend fun getBluetoothAudioDeviceCategory(bluetoothAddress: String): Int {
-        return deviceCategories[bluetoothAddress] ?: AudioManager.AUDIO_DEVICE_CATEGORY_UNKNOWN
     }
 }

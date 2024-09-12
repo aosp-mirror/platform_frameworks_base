@@ -685,6 +685,15 @@ public final class PresentationStatsEventLogger {
     }
 
     /**
+     * Set how many views are filtered from fill because they are not in current session
+     */
+    public void maybeSetFilteredFillableViewsCount(int filteredViewsCount) {
+        mEventInternal.ifPresent(event -> {
+            event.mFilteredFillabaleViewCount = filteredViewsCount;
+        });
+    }
+
+    /**
      * Set views_filled_failure_count using failure count as long as mEventInternal
      * presents.
      */
@@ -780,6 +789,7 @@ public final class PresentationStatsEventLogger {
                     + " mAppPackageUid=" + mCallingAppUid
                     + " mIsCredentialRequest=" + event.mIsCredentialRequest
                     + " mWebviewRequestedCredential=" + event.mWebviewRequestedCredential
+                    + " mFilteredFillabaleViewCount=" + event.mFilteredFillabaleViewCount
                     + " mViewFillableTotalCount=" + event.mViewFillableTotalCount
                     + " mViewFillFailureCount=" + event.mViewFillFailureCount
                     + " mFocusedId=" + event.mFocusedId
@@ -836,6 +846,7 @@ public final class PresentationStatsEventLogger {
                 mCallingAppUid,
                 event.mIsCredentialRequest,
                 event.mWebviewRequestedCredential,
+                event.mFilteredFillabaleViewCount,
                 event.mViewFillableTotalCount,
                 event.mViewFillFailureCount,
                 event.mFocusedId,
@@ -884,6 +895,7 @@ public final class PresentationStatsEventLogger {
         int mFieldClassificationRequestId = DEFAULT_VALUE_INT;
         boolean mIsCredentialRequest = false;
         boolean mWebviewRequestedCredential = false;
+        int mFilteredFillabaleViewCount = DEFAULT_VALUE_INT;
         int mViewFillableTotalCount = DEFAULT_VALUE_INT;
         int mViewFillFailureCount = DEFAULT_VALUE_INT;
         int mFocusedId = DEFAULT_VALUE_INT;

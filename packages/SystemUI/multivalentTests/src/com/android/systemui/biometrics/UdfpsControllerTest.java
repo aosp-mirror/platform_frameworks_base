@@ -1284,41 +1284,6 @@ public class UdfpsControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void onAodDownAndDownTouchReceived() throws RemoteException {
-        final NormalizedTouchData touchData = new NormalizedTouchData(0, 0f, 0f, 0f, 0f, 0f, 0L,
-                0L);
-        final TouchProcessorResult processorResultDown =
-                new TouchProcessorResult.ProcessedTouch(InteractionEvent.DOWN,
-                        -1 /* pointerId */, touchData);
-
-        mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, mOpticalProps.sensorId,
-                BiometricRequestConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
-        mFgExecutor.runAllReady();
-
-        verify(mUdfpsView).setOnTouchListener(mTouchListenerCaptor.capture());
-
-        // WHEN fingerprint is requested because of AOD interrupt
-        // GIVEN there's been an AoD interrupt
-        when(mKeyguardUpdateMonitor.isFingerprintDetectionRunning()).thenReturn(true);
-        mScreenObserver.onScreenTurnedOn();
-        mUdfpsController.onAodInterrupt(0, 0, 0, 0);
-        mFgExecutor.runAllReady();
-
-        // and an ACTION_DOWN is received and touch is within sensor
-        when(mSinglePointerTouchProcessor.processTouch(any(), anyInt(), any())).thenReturn(
-                processorResultDown);
-        MotionEvent firstDownEvent = MotionEvent.obtain(0, 0, ACTION_DOWN, 0, 0, 0);
-        mTouchListenerCaptor.getValue().onTouch(mUdfpsView, firstDownEvent);
-        mBiometricExecutor.runAllReady();
-        firstDownEvent.recycle();
-
-        // THEN the touch is only processed once
-        verify(mFingerprintManager).onPointerDown(anyLong(), anyInt(), anyInt(),
-                anyFloat(), anyFloat(), anyFloat(), anyFloat(), anyFloat(), anyLong(), anyLong(),
-                anyBoolean());
-    }
-
-    @Test
     public void onTouch_pilferPointerWhenAltBouncerShowing()
             throws RemoteException {
         final Pair<TouchProcessorResult, TouchProcessorResult> touchProcessorResult =

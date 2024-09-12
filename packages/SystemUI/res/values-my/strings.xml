@@ -106,7 +106,7 @@
     <string name="screenrecord_title" msgid="4257171601439507792">"ဖန်သားပြင်ရိုက်ကူးစက်"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"စကရင်ရိုက်ကူးမှု အပြီးသတ်နေသည်"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ဖန်သားပြင် ရိုက်ကူးသည့် စက်ရှင်အတွက် ဆက်တိုက်လာနေသော အကြောင်းကြားချက်"</string>
-    <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"ရုပ်သံဖမ်းခြင်း စတင်မလား။"</string>
+    <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"ရိုက်သံဖမ်းခြင်း စတင်မလား။"</string>
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"ရုပ်သံဖမ်းနေစဉ် Android သည် သင့်ဖန်သားပြင်တွင် မြင်နိုင်သည့် (သို့) သင့်စက်တွင် ဖွင့်ထားသည့် အရာအားလုံးကို တွေ့နိုင်သည်။ စကားဝှက်၊ ငွေပေးချေမှု အချက်အလက်၊ မက်ဆေ့ဂျ်၊ ဓာတ်ပုံ၊ အသံနှင့် ဗီဒီယိုကဲ့သို့ အရာများကို ဂရုစိုက်ပါ။"</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"အက်ပ်တစ်ခုကို ရုပ်သံဖမ်းနေစဉ် Android သည် ယင်းအက်ပ်တွင် ပြထားသည့် (သို့) ဖွင့်ထားသည့် အရာအားလုံးကို တွေ့နိုင်သည်။ ထို့ကြောင့် စကားဝှက်၊ ငွေပေးချေမှု အချက်အလက်၊ မက်ဆေ့ဂျ်၊ ဓာတ်ပုံ၊ အသံနှင့် ဗီဒီယိုကဲ့သို့ အရာများကို ဂရုစိုက်ပါ။"</string>
     <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"ရုပ်သံ စဖမ်းရန်"</string>
@@ -129,20 +129,22 @@
     <skip />
     <!-- no translation found for screenrecord_stop_dialog_message (1926783607059442889) -->
     <skip />
-    <string name="screenrecord_stop_dialog_message_specific_app" msgid="5285148796772616326">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ၏ အကြောင်းအရာ ရိုက်ကူးခြင်းကို ရပ်ပါမည်"</string>
-    <string name="screenrecord_stop_dialog_button" msgid="2883812564938194350">"ရိုက်ကူးမှု ရပ်ရန်"</string>
-    <string name="share_to_app_stop_dialog_title" msgid="9212915050910250438">"ဖန်သားပြင်မျှဝေခြင်း ရပ်မလား။"</string>
+    <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
+    <skip />
+    <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
+    <skip />
     <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
     <skip />
-    <string name="share_to_app_stop_dialog_message_specific_app" msgid="124371406810544777">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ၏ အကြောင်းအရာ မျှဝေခြင်းကို ရပ်ပါမည်"</string>
-    <string name="share_to_app_stop_dialog_button" msgid="6334056916284230217">"မျှဝေခြင်း ရပ်ရန်"</string>
+    <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
+    <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
     <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
     <skip />
-    <string name="cast_to_other_device_stop_dialog_message_specific_app" msgid="4891536209254041850">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ၏ အကြောင်းအရာ ကာစ်လုပ်ခြင်းကို ရပ်ပါမည်"</string>
-    <string name="cast_to_other_device_stop_dialog_button" msgid="6420183747435521834">"ကာစ် ရပ်ရန်"</string>
-    <string name="close_dialog_button" msgid="4749497706540104133">"ပိတ်ရန်"</string>
+    <!-- no translation found for cast_to_other_device_stop_dialog_button (6420183747435521834) -->
+    <skip />
+    <!-- no translation found for close_dialog_button (4749497706540104133) -->
+    <skip />
     <string name="issuerecord_title" msgid="286627115110121849">"ပြဿနာရိုက်ကူးစနစ်"</string>
     <string name="issuerecord_background_processing_label" msgid="1666840264959336876">"ပြဿနာရိုက်ကူးမှု လုပ်နေသည်"</string>
     <string name="issuerecord_channel_description" msgid="6142326363431474632">"ပြဿနာစုစည်းခြင်း စက်ရှင်အတွက် လုပ်ဆောင်နေဆဲ အကြောင်းကြားချက်"</string>
@@ -153,7 +155,8 @@
     <string name="issuerecord_save_error" msgid="6913040083446722726">"ပြဿနာရိုက်ကူးမှုကို သိမ်း၍မရပါ"</string>
     <string name="issuerecord_start_error" msgid="3402782952722871190">"ပြဿနာရိုက်ကူးမှုကို စတင်၍မရပါ"</string>
     <string name="immersive_cling_title" msgid="8372056499315585941">"ဖန်သားပြင်အပြည့် ကြည့်နေသည်"</string>
-    <string name="immersive_cling_description" msgid="2717426731830851921">"ထွက်ရန် သင့်ဖန်သားပြင်ထိပ်မှ အောက်သို့ ပွတ်ဆွဲပါ"</string>
+    <!-- no translation found for immersive_cling_description (2717426731830851921) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="3076681691468978568">"နားလည်ပြီ"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"နောက်သို့"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"ပင်မစာမျက်နှာ"</string>
@@ -186,7 +189,6 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"မျက်နှာဖြင့် ဖွင့်ထားသည်။ ရှေ့ဆက်ရန် နှိပ်ပါ။"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"မျက်နှာ မှတ်မိသည်။ ရှေ့ဆက်ရန် နှိပ်ပါ။"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"မျက်နှာ မှတ်မိသည်။ ရှေ့ဆက်ရန် လော့ခ်ဖွင့်သင်္ကေတကို နှိပ်ပါ။"</string>
-    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"မျက်နှာဖြင့် ဖွင့်ထားသည်။ ဆက်လုပ်ရန် တို့ပါ။"</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"အထောက်အထားစိစစ်ပြီးပြီ"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"အထောက်အထားစိစစ်ခြင်းကို ပယ်ဖျက်ရန်"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"နောက်ထပ်ရွေးစရာများ"</string>
@@ -297,11 +299,14 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"သိမ်းထားသည်"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"ချိတ်ဆက်မှုဖြုတ်ရန်"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"စသုံးရန်"</string>
-    <string name="turn_on_bluetooth_auto_tomorrow" msgid="3345758139235739006">"မနက်ဖြန် အလိုအလျောက်ဖွင့်ရန်"</string>
+    <!-- no translation found for turn_on_bluetooth_auto_tomorrow (3345758139235739006) -->
+    <skip />
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"‘အမြန် မျှဝေပါ’ နှင့် Find My Device ကဲ့သို့ တူးလ်များသည် ဘလူးတုသ်သုံးသည်"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"မနက်ဖြန်နံနက်တွင် ဘလူးတုသ် ပွင့်ပါမည်"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"အသံမျှဝေရန်"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"အသံမျှဝေနေသည်"</string>
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button (7545274861795853838) -->
+    <skip />
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_sharing (3069309588231072128) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> ဘက်ထရီ"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"အသံ"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"မိုက်ခွက်ပါနားကြပ်"</string>
@@ -775,7 +780,7 @@
     <string name="keyboard_shortcut_join" msgid="3578314570034512676">"သို့မဟုတ်"</string>
     <string name="keyboard_shortcut_clear_text" msgid="6631051796030377857">"ရှာဖွေစာလုံး ရှင်းထုတ်ရန်"</string>
     <string name="keyboard_shortcut_search_list_title" msgid="4271769465397671138">"လက်ကွက်ဖြတ်လမ်းများ"</string>
-    <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"ဖြတ်လမ်းများ ရှာရန်"</string>
+    <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"ဖြတ်လမ်းလင့်ခ်များ ရှာပါ"</string>
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"ဖြတ်လမ်းလင့်ခ် မတွေ့ပါ"</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"စနစ်"</string>
     <string name="keyboard_shortcut_search_category_input" msgid="5440558509904296233">"စာရိုက်ခြင်း"</string>
@@ -1192,7 +1197,6 @@
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"နောက်ထပ်အချက်အလက်များအတွက် တို့ပါ"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"နှိုးစက်ပေးမထားပါ"</string>
     <string name="accessibility_bouncer" msgid="5896923685673320070">"ဖန်သားပြင်လော့ခ် ထည့်ရန်"</string>
-    <string name="accessibility_side_fingerprint_indicator_label" msgid="1673807833352363712">"လက်ဗွေ အာရုံခံကိရိယာကို တို့ပါ။ ၎င်းသည် ဖုန်းဘေးရှိ ခလုတ်အတို ဖြစ်သည်"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"လက်ဗွေ အာရုံခံကိရိယာ"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"အထောက်အထားစိစစ်ရန်"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"စက်ပစ္စည်းသို့ ဝင်ရန်"</string>
@@ -1343,10 +1347,14 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"လျှော့ပြရန် သင်္ကေတ"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"ပိုပြရန် သင်္ကေတ"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"သို့မဟုတ်"</string>
-    <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"နောက်သို့ လက်ဟန်"</string>
-    <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"ပင်မစာမျက်နှာ လက်ဟန်"</string>
-    <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"လုပ်ဆောင်ချက်ကီး"</string>
-    <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"ပြီးပြီ"</string>
+    <!-- no translation found for touchpad_tutorial_back_gesture_button (2746834288077265946) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_home_gesture_button (7640544867625955304) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_action_key_button (3220074511852927267) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_done_button (176168488821755503) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"ကီးဘုတ်နောက်မီး"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"အဆင့် %2$d အနက် %1$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"အိမ်ထိန်းချုပ်မှုများ"</string>

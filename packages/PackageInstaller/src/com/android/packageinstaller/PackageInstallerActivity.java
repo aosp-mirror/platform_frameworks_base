@@ -330,8 +330,7 @@ public class PackageInstallerActivity extends Activity {
             // data we still want to count it as "installed".
             mAppInfo = mPm.getApplicationInfo(pkgName,
                     PackageManager.MATCH_UNINSTALLED_PACKAGES);
-            // If the package is archived, treat it as update case.
-            if (!mAppInfo.isArchived && (mAppInfo.flags & ApplicationInfo.FLAG_INSTALLED) == 0) {
+            if ((mAppInfo.flags&ApplicationInfo.FLAG_INSTALLED) == 0) {
                 mAppInfo = null;
             }
         } catch (NameNotFoundException e) {

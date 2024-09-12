@@ -129,20 +129,22 @@
     <skip />
     <!-- no translation found for screenrecord_stop_dialog_message (1926783607059442889) -->
     <skip />
-    <string name="screenrecord_stop_dialog_message_specific_app" msgid="5285148796772616326">"আপুনি &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ৰেকৰ্ড কৰা বন্ধ কৰিব"</string>
-    <string name="screenrecord_stop_dialog_button" msgid="2883812564938194350">"ৰেকৰ্ডিং বন্ধ কৰক"</string>
-    <string name="share_to_app_stop_dialog_title" msgid="9212915050910250438">"স্ক্ৰীন শ্বেয়াৰ কৰা বন্ধ কৰিবনে?"</string>
+    <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
+    <skip />
+    <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
+    <skip />
     <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
     <skip />
-    <string name="share_to_app_stop_dialog_message_specific_app" msgid="124371406810544777">"আপুনি &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; শ্বেয়াৰ কৰা বন্ধ কৰিব"</string>
-    <string name="share_to_app_stop_dialog_button" msgid="6334056916284230217">"শ্বেয়াৰ কৰা বন্ধ কৰক"</string>
+    <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
+    <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
     <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
     <skip />
-    <string name="cast_to_other_device_stop_dialog_message_specific_app" msgid="4891536209254041850">"আপুনি &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; কাষ্ট কৰা বন্ধ কৰিব"</string>
-    <string name="cast_to_other_device_stop_dialog_button" msgid="6420183747435521834">"কাষ্ট বন্ধ কৰক"</string>
-    <string name="close_dialog_button" msgid="4749497706540104133">"বন্ধ কৰক"</string>
+    <!-- no translation found for cast_to_other_device_stop_dialog_button (6420183747435521834) -->
+    <skip />
+    <!-- no translation found for close_dialog_button (4749497706540104133) -->
+    <skip />
     <string name="issuerecord_title" msgid="286627115110121849">"সমস্যা ৰেকৰ্ডাৰ"</string>
     <string name="issuerecord_background_processing_label" msgid="1666840264959336876">"সমস্যা ৰেকৰ্ড কৰি থকা হৈছে"</string>
     <string name="issuerecord_channel_description" msgid="6142326363431474632">"সমস্যা সংগ্ৰহ কৰা এটা ছেশ্বনৰ বাবে চলিত জাননী"</string>
@@ -153,7 +155,8 @@
     <string name="issuerecord_save_error" msgid="6913040083446722726">"সমস্যাৰ ৰেকৰ্ডিং ছেভ কৰাত আসোঁৱাহ"</string>
     <string name="issuerecord_start_error" msgid="3402782952722871190">"সমস্যাৰ ৰেকৰ্ডিং আৰম্ভ কৰোঁতে আসোঁৱাহ হৈছে"</string>
     <string name="immersive_cling_title" msgid="8372056499315585941">"পূৰ্ণ স্ক্ৰীনত চাই আছে"</string>
-    <string name="immersive_cling_description" msgid="2717426731830851921">"বাহিৰ হ’বলৈ, আপোনাৰ স্ক্ৰীনখনৰ একেবাৰে ওপৰৰ পৰা তললৈ ছোৱাইপ কৰক"</string>
+    <!-- no translation found for immersive_cling_description (2717426731830851921) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="3076681691468978568">"বুজি পালোঁ"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"উভতি যাওক"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"গৃহ পৃষ্ঠাৰ বুটাম"</string>
@@ -186,7 +189,6 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"মুখাৱয়বৰ জৰিয়তে আনলক কৰা হৈছে। অব্যাহত ৰাখিবলৈ টিপক।"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"মুখাৱয়ব চিনাক্ত কৰা হৈছে। অব্যাহত ৰাখিবলৈ টিপক।"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"মুখাৱয়ব চিনাক্ত কৰা হৈছে। অব্যাহত ৰাখিবলৈ আনলক কৰক চিহ্নটোত টিপক।"</string>
-    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"মুখাৱয়বৰ জৰিয়তে আনলক কৰা হৈছে। অব্যাহত ৰাখিবলৈ টিপক।"</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"বিশ্বাসযোগ্যতা প্ৰমাণীকৰণ কৰা হ’ল"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"বিশ্বাসযোগ্যতা প্ৰমাণীকৰণ বাতিল কৰক"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"অধিক বিকল্প"</string>
@@ -297,11 +299,14 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"ছেভ কৰা হৈছে"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"সংযোগ বিচ্ছিন্ন কৰক"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"সক্ৰিয় কৰক"</string>
-    <string name="turn_on_bluetooth_auto_tomorrow" msgid="3345758139235739006">"কাইলৈ স্বয়ংক্ৰিয়ভাৱে অন কৰক"</string>
+    <!-- no translation found for turn_on_bluetooth_auto_tomorrow (3345758139235739006) -->
+    <skip />
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"Quick Share আৰু Find My Deviceৰ দৰে সুবিধাসমূহে ব্লুটুথ ব্যৱহাৰ কৰে"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"কাইলৈ পুৱা ব্লুটুথ অন হ’ব"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"অডিঅ’ শ্বেয়াৰ কৰক"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"অডিঅ’ শ্বেয়াৰ কৰি থকা হৈছে"</string>
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button (7545274861795853838) -->
+    <skip />
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_sharing (3069309588231072128) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"বেটাৰী <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"অডিঅ’"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"হেডছেট"</string>
@@ -1192,7 +1197,6 @@
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"অধিক তথ্যৰ বাবে টিপক"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"কোনো এলাৰ্ম ছেট কৰা হোৱা নাই"</string>
     <string name="accessibility_bouncer" msgid="5896923685673320070">"স্ক্ৰীন লকটো দিয়ক"</string>
-    <string name="accessibility_side_fingerprint_indicator_label" msgid="1673807833352363712">"ফিংগাৰপ্ৰিণ্ট ছেন্সৰটো স্পৰ্শ কৰক। এইটো হৈছে আপোনাৰ ফ’নটোৰ কাষৰফালে থকা চুটি বুটামটো"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"ফিংগাৰপ্ৰিণ্ট ছেন্সৰ"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"বিশ্বাসযোগ্যতা প্ৰমাণ কৰক"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"ডিভাইচ আনলক কৰক"</string>
@@ -1343,10 +1347,14 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"সংকোচন কৰাৰ চিহ্ন"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"বিস্তাৰ কৰাৰ চিহ্ন"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"অথবা"</string>
-    <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"উভতি যাওক নিৰ্দেশ"</string>
-    <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"গৃহ স্ক্ৰীনলৈ যোৱাৰ নিৰ্দেশ"</string>
-    <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"কাৰ্য কী"</string>
-    <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"হ’ল"</string>
+    <!-- no translation found for touchpad_tutorial_back_gesture_button (2746834288077265946) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_home_gesture_button (7640544867625955304) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_action_key_button (3220074511852927267) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_done_button (176168488821755503) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"কীব’ৰ্ডৰ বেকলাইট"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%2$dৰ %1$d স্তৰ"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"ঘৰৰ সা-সৰঞ্জামৰ নিয়ন্ত্ৰণ"</string>

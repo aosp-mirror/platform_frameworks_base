@@ -642,7 +642,7 @@
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Permite que a aplicación lea as localizacións da túa colección multimedia."</string>
     <string name="biometric_app_setting_name" msgid="3339209978734534457">"Utilizar desbloqueo biométrico"</string>
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Utilizar desbloqueo biométrico ou credencial do dispositivo"</string>
-    <string name="biometric_dialog_default_title" msgid="55026799173208210">"Verifica a túa identidade"</string>
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"Verifica que es ti"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Para continuar, utiliza o desbloqueo biométrico"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"Para continuar, utiliza o desbloqueo biométrico ou o bloqueo de pantalla"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"O hardware biométrico non está dispoñible"</string>
@@ -1883,7 +1883,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"O PIN é demasiado curto. Debe conter polo menos 4 díxitos."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Téntao de novo máis tarde"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Vendo pantalla completa"</string>
-    <string name="immersive_cling_description" msgid="2896205051090870978">"Para saír, pasa o dedo cara abaixo desde a parte superior da pantalla"</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Entendido"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Xira a pantalla para que se vexa mellor"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Abre <xliff:g id="NAME">%s</xliff:g> en pantalla completa para unha mellor visualización"</string>
@@ -2410,19 +2411,19 @@
     <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"Espazo privado"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"Contido confidencial da notificación oculto"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
-    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Por seguranza, ocultouse o contido da aplicación na pantalla compartida"</string>
+    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Por motivos de seguranza, ocultouse o contido da aplicación para que no se mostre na pantalla compartida"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Conexión automática ao satélite"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Podes enviar e recibir mensaxes sen unha rede de telefonía móbil ou wifi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Abrir Mensaxes"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Como funciona?"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Pendente..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Configura de novo o desbloqueo dactilar"</string>
-    <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> xa non se recoñece."</string>
-    <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> e <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> xa non se recoñecen."</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="1824812666549916586">"<xliff:g id="FINGERPRINT">%s</xliff:g> xa non se recoñece. Configura de novo o desbloqueo dactilar."</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="5974657382960155099">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> e <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> xa non se recoñecen. Configura de novo o desbloqueo dactilar."</string>
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"A <xliff:g id="FINGERPRINT">%s</xliff:g> non funcionaba correctamente, polo que se eliminou"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"As impresións dixitais <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> e <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> non funcionaban correctamente, polo que se eliminaron"</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"A <xliff:g id="FINGERPRINT">%s</xliff:g> non funcionaba correctamente, polo que se eliminou. Configúraa de novo para desbloquear o teléfono usando a impresión dixital."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"As impresións dixitais <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> e <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> non funcionaban correctamente, polo que se eliminaron. Configúraas de novo para desbloquear o teléfono usando a impresión dixital."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Configura de novo o desbloqueo facial"</string>
-    <string name="face_dangling_notification_msg" msgid="746235263598985384">"Xa non se recoñece o teu modelo facial. Configura de novo o desbloqueo facial."</string>
+    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"O teu modelo facial non funcionaba correctamente, polo que se eliminou. Configúrao de novo para desbloquear o teléfono usando a cara."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Configurar"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Agora non"</string>
 </resources>

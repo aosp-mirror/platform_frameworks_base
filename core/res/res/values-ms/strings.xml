@@ -642,7 +642,7 @@
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Membenarkan apl membaca lokasi daripada koleksi media anda."</string>
     <string name="biometric_app_setting_name" msgid="3339209978734534457">"Gunakan biometrik"</string>
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Gunakan biometrik atau kunci skrin"</string>
-    <string name="biometric_dialog_default_title" msgid="55026799173208210">"Sahkan diri anda"</string>
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"Sahkan itu anda"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Gunakan biometrik anda untuk meneruskan"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"Gunakan biometrik atau kunci skrin anda untuk meneruskan pengesahan"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Perkakasan biometrik tidak tersedia"</string>
@@ -1436,7 +1436,7 @@
     <string name="alert_windows_notification_channel_group_name" msgid="6063891141815714246">"Paparkan di atas apl lain"</string>
     <string name="alert_windows_notification_channel_name" msgid="3437528564303192620">"<xliff:g id="NAME">%s</xliff:g> dipaparkan di atas apl lain"</string>
     <string name="alert_windows_notification_title" msgid="6331662751095228536">"<xliff:g id="NAME">%s</xliff:g> dipaparkan di atas apl lain"</string>
-    <string name="alert_windows_notification_message" msgid="6538171456970725333">"Jika anda tidak mahu <xliff:g id="NAME">%s</xliff:g> menggunakan ciri ini, ketik untuk membuka tetapan dan matikan ciri tersebut."</string>
+    <string name="alert_windows_notification_message" msgid="6538171456970725333">"Jika anda tidak mahu <xliff:g id="NAME">%s</xliff:g> menggunakan ciri ini, ketik untuk membuka tetapan dan matikannya."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="7805857234839123780">"Matikan"</string>
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"Menyemak <xliff:g id="NAME">%s</xliff:g>…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"Menyemak kandungan semasa"</string>
@@ -1883,7 +1883,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN terlalu pendek. Mesti sekurang-kurangnya 4 angka."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Cuba sebentar lagi"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Melihat skrin penuh"</string>
-    <string name="immersive_cling_description" msgid="2896205051090870978">"Untuk keluar, leret ke bawah daripada bahagian atas skrin anda"</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Faham"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Putar untuk mendapatkan paparan yang lebih baik"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Buka <xliff:g id="NAME">%s</xliff:g> dalam skrin penuh untuk mendapatkan paparan yang lebih baik"</string>
@@ -2417,12 +2418,12 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Cara ciri ini berfungsi"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Belum selesai..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Sediakan Buka Kunci Cap Jari sekali lagi"</string>
-    <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> tidak dapat dicam lagi."</string>
-    <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> dan <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> tidak dapat dicam lagi."</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="1824812666549916586">"<xliff:g id="FINGERPRINT">%s</xliff:g> tidak dapat dicam lagi. Sediakan semula Buka Kunci Cap Jari."</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="5974657382960155099">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> dan <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> tidak dapat dicam lagi. Sediakan semula Buka Kunci Cap Jari."</string>
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"<xliff:g id="FINGERPRINT">%s</xliff:g> tidak berfungsi dengan baik dan telah dipadamkan"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> dan <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> tidak berfungsi dengan baik dan telah dipadamkan"</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> tidak berfungsi dengan baik dan telah dipadamkan. Sediakan cap jari sekali lagi untuk membuka kunci telefon anda menggunakan cap jari."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> dan <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> tidak berfungsi dengan baik dan telah dipadamkan. Sediakan kedua-dua cap jari tersebut sekali lagi untuk membuka kunci telefon anda menggunakan cap jari anda."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Sediakan semula Buka Kunci Wajah"</string>
-    <string name="face_dangling_notification_msg" msgid="746235263598985384">"Model wajah anda tidak dapat dicam lagi. Sediakan semula Buka Kunci Wajah."</string>
+    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"Model wajah anda tidak berfungsi dengan baik dan telah dipadamkan. Sediakan model wajah sekali lagi untuk membuka kunci telefon anda menggunakan wajah."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Sediakan"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Bukan sekarang"</string>
 </resources>

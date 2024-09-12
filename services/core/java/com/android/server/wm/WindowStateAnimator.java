@@ -63,7 +63,6 @@ import android.view.animation.AnimationUtils;
 
 import com.android.internal.protolog.common.LogLevel;
 import com.android.internal.protolog.common.ProtoLog;
-import com.android.window.flags.Flags;
 import com.android.server.policy.WindowManagerPolicy;
 
 import java.io.PrintWriter;
@@ -375,13 +374,9 @@ class WindowStateAnimator {
             ProtoLog.i(WM_SHOW_SURFACE_ALLOC, "SURFACE DESTROY: %s. %s",
                     mWin, new RuntimeException().fillInStackTrace());
             destroySurface(t);
-            if (Flags.ensureWallpaperInTransitions()) {
-                if (mWallpaperControllerLocked.isWallpaperTarget(mWin)) {
-                    mWin.requestUpdateWallpaperIfNeeded();
-                }
-            } else {
-                mWallpaperControllerLocked.hideWallpapers(mWin);
-            }
+            // Don't hide wallpaper if we're deferring the surface destroy
+            // because of a surface change.
+            mWallpaperControllerLocked.hideWallpapers(mWin);
         } catch (RuntimeException e) {
             Slog.w(TAG, "Exception thrown when destroying Window " + this
                     + " surface " + mSurfaceController + " session " + mSession + ": "
@@ -436,9 +431,7 @@ class WindowStateAnimator {
 
         if (!w.isOnScreen()) {
             hide(t, "prepareSurfaceLocked");
-            if (!w.mIsWallpaper || !Flags.ensureWallpaperInTransitions()) {
-                mWallpaperControllerLocked.hideWallpapers(w);
-            }
+            mWallpaperControllerLocked.hideWallpapers(w);
 
             // If we are waiting for this window to handle an orientation change. If this window is
             // really hidden (gone for layout), there is no point in still waiting for it.

@@ -34,8 +34,8 @@ constructor(
     alternateBouncerInteractor: AlternateBouncerInteractor,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
 ) {
-    private val deviceSupportsAlternateBouncer: Flow<Boolean> =
-        alternateBouncerInteractor.alternateBouncerSupported
+    val canShowAlternateBouncer: Flow<Boolean> = alternateBouncerInteractor.canShowAlternateBouncer
+
     private val isTransitioningToOrFromOrShowingAlternateBouncer: Flow<Boolean> =
         keyguardTransitionInteractor
             .transitionValue(KeyguardState.ALTERNATE_BOUNCER)
@@ -43,8 +43,8 @@ constructor(
             .distinctUntilChanged()
 
     val alternateBouncerWindowRequired: Flow<Boolean> =
-        deviceSupportsAlternateBouncer.flatMapLatest { deviceSupportsAlternateBouncer ->
-            if (deviceSupportsAlternateBouncer) {
+        canShowAlternateBouncer.flatMapLatest { canShowAlternateBouncer ->
+            if (canShowAlternateBouncer) {
                 isTransitioningToOrFromOrShowingAlternateBouncer
             } else {
                 flowOf(false)

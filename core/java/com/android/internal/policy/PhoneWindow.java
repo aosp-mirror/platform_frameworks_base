@@ -2501,9 +2501,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if (mEdgeToEdgeEnforced) {
             getAttributes().privateFlags |= PRIVATE_FLAG_EDGE_TO_EDGE_ENFORCED;
             mDecorFitsSystemWindows = false;
-            mStatusBarColor = Color.TRANSPARENT;
-            mNavigationBarDividerColor = Color.TRANSPARENT;
-            // mNavigationBarColor is not reset here because it might be used to draw the scrim.
         }
         if (CompatChanges.isChangeEnabled(OVERRIDE_LAYOUT_IN_DISPLAY_CUTOUT_MODE)
                 && !a.getBoolean(R.styleable.Window_windowOptOutEdgeToEdgeEnforcement,

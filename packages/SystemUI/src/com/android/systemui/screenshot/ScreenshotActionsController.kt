@@ -18,7 +18,6 @@ package com.android.systemui.screenshot
 
 import android.app.assist.AssistContent
 import com.android.systemui.screenshot.ui.viewmodel.ActionButtonAppearance
-import com.android.systemui.screenshot.ui.viewmodel.PreviewAction
 import com.android.systemui.screenshot.ui.viewmodel.ScreenshotViewModel
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -85,9 +84,9 @@ constructor(
     }
 
     inner class ActionsCallback(private val screenshotId: UUID) {
-        fun providePreviewAction(previewAction: PreviewAction) {
+        fun providePreviewAction(onClick: () -> Unit) {
             if (screenshotId == currentScreenshotId) {
-                viewModel.setPreviewAction(previewAction)
+                viewModel.setPreviewAction(onClick)
             }
         }
 

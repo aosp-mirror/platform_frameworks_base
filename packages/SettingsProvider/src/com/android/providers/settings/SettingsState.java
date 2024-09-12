@@ -765,13 +765,6 @@ final class SettingsState {
         }
     }
 
-    @NonNull
-    public Map<String, AconfigdFlagInfo> getAconfigDefaultFlags() {
-        synchronized (mLock) {
-            return mAconfigDefaultFlags;
-        }
-    }
-
     // The settings provider must hold its lock when calling here.
     public Setting getSettingLocked(String name) {
         if (TextUtils.isEmpty(name)) {

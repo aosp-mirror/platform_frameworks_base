@@ -67,7 +67,7 @@
     <string name="kg_bio_too_many_attempts_pattern" msgid="736884689355181602">"Demasiados intentos, se necesita el patrón"</string>
     <string name="kg_unlock_with_pin_or_fp" msgid="5635161174698729890">"Desbloquea con PIN o huella digital"</string>
     <string name="kg_unlock_with_password_or_fp" msgid="2251295907826814237">"Desbloquea con contraseña o huella digital"</string>
-    <string name="kg_unlock_with_pattern_or_fp" msgid="2391870539909135046">"Desbloquea con tu patrón o huella digital"</string>
+    <string name="kg_unlock_with_pattern_or_fp" msgid="2391870539909135046">"Desbloquea con patrón o huella digital"</string>
     <string name="kg_prompt_after_dpm_lock" msgid="6002804765868345917">"Por política del trabajo, se ha bloqueado el dispositivo para mayor seguridad"</string>
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"Se necesita el PIN después del bloqueo"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"Se necesita la contraseña después del bloqueo"</string>

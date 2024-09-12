@@ -55,8 +55,7 @@ internal abstract class DeviceItemFactory {
             type: DeviceItemType,
             connectionSummary: String,
             background: Int,
-            actionAccessibilityLabel: String,
-            isActive: Boolean
+            actionAccessibilityLabel: String
         ): DeviceItem {
             return DeviceItem(
                 type = type,
@@ -69,8 +68,7 @@ internal abstract class DeviceItemFactory {
                     },
                 background = background,
                 isEnabled = !cachedDevice.isBusy,
-                actionAccessibilityLabel = actionAccessibilityLabel,
-                isActive = isActive
+                actionAccessibilityLabel = actionAccessibilityLabel
             )
         }
     }
@@ -93,8 +91,7 @@ internal open class ActiveMediaDeviceItemFactory : DeviceItemFactory() {
             DeviceItemType.ACTIVE_MEDIA_BLUETOOTH_DEVICE,
             cachedDevice.connectionSummary ?: "",
             backgroundOn,
-            context.getString(actionAccessibilityLabelDisconnect),
-            isActive = true
+            context.getString(actionAccessibilityLabelDisconnect)
         )
     }
 }
@@ -119,8 +116,7 @@ internal class AudioSharingMediaDeviceItemFactory(
             cachedDevice.connectionSummary.takeUnless { it.isNullOrEmpty() }
                 ?: context.getString(audioSharing),
             if (cachedDevice.isBusy) backgroundOffBusy else backgroundOn,
-            "",
-            isActive = !cachedDevice.isBusy
+            ""
         )
     }
 }
@@ -154,8 +150,7 @@ internal open class AvailableMediaDeviceItemFactory : DeviceItemFactory() {
             cachedDevice.connectionSummary.takeUnless { it.isNullOrEmpty() }
                 ?: context.getString(connected),
             if (cachedDevice.isBusy) backgroundOffBusy else backgroundOff,
-            context.getString(actionAccessibilityLabelActivate),
-            isActive = false
+            context.getString(actionAccessibilityLabelActivate)
         )
     }
 }
@@ -193,8 +188,7 @@ internal class ConnectedDeviceItemFactory : DeviceItemFactory() {
             cachedDevice.connectionSummary.takeUnless { it.isNullOrEmpty() }
                 ?: context.getString(connected),
             if (cachedDevice.isBusy) backgroundOffBusy else backgroundOff,
-            context.getString(actionAccessibilityLabelDisconnect),
-            isActive = false
+            context.getString(actionAccessibilityLabelDisconnect)
         )
     }
 }
@@ -222,8 +216,7 @@ internal open class SavedDeviceItemFactory : DeviceItemFactory() {
             cachedDevice.connectionSummary.takeUnless { it.isNullOrEmpty() }
                 ?: context.getString(saved),
             if (cachedDevice.isBusy) backgroundOffBusy else backgroundOff,
-            context.getString(actionAccessibilityLabelActivate),
-            isActive = false
+            context.getString(actionAccessibilityLabelActivate)
         )
     }
 }

@@ -188,7 +188,7 @@
   </string-array>
   <string-array name="tile_states_hearing_devices">
     <item msgid="1235334096484287173">"ಲಭ್ಯವಿಲ್ಲ"</item>
-    <item msgid="3079622119444911877">"ಆಫ್"</item>
+    <item msgid="3079622119444911877">"ಆಫ್ ಆಗಿದೆ"</item>
     <item msgid="3028994095749238254">"ಆನ್"</item>
   </string-array>
 </resources>

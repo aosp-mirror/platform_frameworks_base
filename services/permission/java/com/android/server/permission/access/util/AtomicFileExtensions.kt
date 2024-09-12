@@ -47,8 +47,9 @@ inline fun AtomicFile.readWithReserveCopy(block: (FileInputStream) -> Unit) {
 /** Write to actual file and reserve file. */
 @Throws(IOException::class)
 inline fun AtomicFile.writeWithReserveCopy(block: (FileOutputStream) -> Unit) {
-    writeInlined(block)
     val reserveFile = File(baseFile.parentFile, baseFile.name + ".reservecopy")
+    reserveFile.delete()
+    writeInlined(block)
     try {
         FileInputStream(baseFile).use { inputStream ->
             FileOutputStream(reserveFile).use { outputStream ->

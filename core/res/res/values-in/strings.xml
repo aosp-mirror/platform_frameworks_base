@@ -1883,7 +1883,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN terlalu pendek. Minimal 4 digit."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Coba lagi nanti"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Melihat layar penuh"</string>
-    <string name="immersive_cling_description" msgid="2896205051090870978">"Untuk keluar, geser ke bawah dari bagian atas layar"</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Mengerti"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Putar posisi layar untuk mendapatkan tampilan yang lebih baik"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Buka <xliff:g id="NAME">%s</xliff:g> dalam layar penuh untuk mendapatkan tampilan yang lebih baik"</string>
@@ -2410,19 +2411,19 @@
     <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"Ruang privasi"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"Konten notifikasi sensitif disembunyikan"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
-    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Konten aplikasi disembunyikan dari berbagi layar karena alasan keamanan"</string>
+    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Konten aplikasi disembunyikan dari berbagi layar untuk alasan keamanan"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Menghubungkan otomatis ke satelit"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Anda dapat mengirim dan menerima pesan tanpa jaringan seluler atau Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Buka Message"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Cara kerjanya"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Tertunda..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Siapkan Buka dengan Sidik Jari lagi"</string>
-    <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> tidak dapat dikenali lagi."</string>
-    <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> dan <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> tidak dapat dikenali lagi."</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="1824812666549916586">"<xliff:g id="FINGERPRINT">%s</xliff:g> tidak dapat dikenali lagi. Siapkan Buka dengan Sidik Jari lagi."</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="5974657382960155099">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> dan <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> tidak dapat dikenali lagi. Siapkan Buka dengan Sidik Jari lagi."</string>
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"<xliff:g id="FINGERPRINT">%s</xliff:g> tidak berfungsi dengan baik dan telah dihapus"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> dan <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> tidak berfungsi dengan baik dan telah dihapus"</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> tidak berfungsi dengan baik dan telah dihapus. Siapkan lagi untuk membuka kunci ponsel Anda dengan sidik jari."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> dan <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> tidak berfungsi dengan baik dan telah dihapus. Siapkan lagi untuk membuka kunci ponsel Anda dengan sidik jari."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Siapkan Buka dengan Wajah lagi"</string>
-    <string name="face_dangling_notification_msg" msgid="746235263598985384">"Model wajah Anda tidak dapat dikenali lagi. Siapkan Buka dengan Wajah lagi."</string>
+    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"Model wajah Anda tidak berfungsi dengan baik dan telah dihapus. Siapkan lagi untuk membuka kunci ponsel Anda dengan wajah."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Penyiapan"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Lain kali"</string>
 </resources>

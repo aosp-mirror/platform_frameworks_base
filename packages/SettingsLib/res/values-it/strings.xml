@@ -85,7 +85,7 @@
     <string name="bluetooth_disconnected" msgid="7739366554710388701">"Disconnesso"</string>
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Disconnessione…"</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"Connessione…"</string>
-    <string name="bluetooth_connected" msgid="8065345572198502293">"Connessione a <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected" msgid="8065345572198502293">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> Connesso"</string>
     <string name="bluetooth_pairing" msgid="4269046942588193600">"Accoppiamento in corso…"</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> connesso (telefono escluso)"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> connesso (contenuti multimediali esclusi)"</string>
@@ -143,9 +143,9 @@
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Collegato al server di trasferimento file"</string>
     <string name="bluetooth_map_profile_summary_connected" msgid="4141725591784669181">"Connesso alla mappa"</string>
     <string name="bluetooth_sap_profile_summary_connected" msgid="1280297388033001037">"Collegato al SAP"</string>
-    <string name="bluetooth_opp_profile_summary_not_connected" msgid="3959741824627764954">"Non connesso al server di trasferimento file"</string>
+    <string name="bluetooth_opp_profile_summary_not_connected" msgid="3959741824627764954">"Non collegato al server di trasferimento file"</string>
     <string name="bluetooth_hid_profile_summary_connected" msgid="3923653977051684833">"Connesso a dispositivo di input"</string>
-    <string name="bluetooth_pan_user_profile_summary_connected" msgid="380469653827505727">"Connesso per internet"</string>
+    <string name="bluetooth_pan_user_profile_summary_connected" msgid="380469653827505727">"Connesso a dispositivo per accesso Internet"</string>
     <string name="bluetooth_pan_nap_profile_summary_connected" msgid="3744773111299503493">"Connessione Internet locale condivisa con dispositivo"</string>
     <string name="bluetooth_pan_profile_summary_use_for" msgid="7422039765025340313">"Usa per accesso a Internet"</string>
     <string name="bluetooth_map_profile_summary_use_for" msgid="4453622103977592583">"Utilizza per la mappa"</string>
@@ -459,9 +459,9 @@
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"Imposta l\'implementazione di WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"La selezione non è più valida. Riprova."</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"Modalità colori immagini"</string>
-    <string name="picture_color_mode_desc" msgid="151780973768136200">"Usa sRGB"</string>
+    <string name="picture_color_mode_desc" msgid="151780973768136200">"Use sRGB"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"Disattivato"</string>
-    <string name="daltonizer_mode_monochromacy" msgid="362060873835885014">"Monocromatismo"</string>
+    <string name="daltonizer_mode_monochromacy" msgid="362060873835885014">"Monocromìa"</string>
     <string name="daltonizer_mode_deuteranomaly" msgid="3507284319584683963">"Deuteranomalìa (rosso-verde)"</string>
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomalìa (rosso-verde)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomalìa (blu-giallo)"</string>
@@ -592,7 +592,7 @@
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"Connessione tramite eARC"</string>
     <string name="tv_media_transfer_default" msgid="5403053145185843843">"TV predefinita"</string>
     <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"Uscita HDMI"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"Altoparlanti interni"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"Speaker interni"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Problema di connessione. Spegni e riaccendi il dispositivo"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Dispositivo audio cablato"</string>
     <string name="help_label" msgid="3528360748637781274">"Guida e feedback"</string>

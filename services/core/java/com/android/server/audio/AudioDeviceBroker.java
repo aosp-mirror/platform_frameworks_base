@@ -783,6 +783,14 @@ public class AudioDeviceBroker {
         return isDeviceActiveForCommunication(AudioDeviceInfo.TYPE_BLUETOOTH_SCO);
     }
 
+    /*package*/ boolean isBluetoothBleHeadsetActive() {
+        return isDeviceActiveForCommunication(AudioDeviceInfo.TYPE_BLE_HEADSET);
+    }
+
+    /*package*/ boolean isBluetoothBleSpeakerActive() {
+        return isDeviceActiveForCommunication(AudioDeviceInfo.TYPE_BLE_SPEAKER);
+    }
+
     /*package*/ boolean isDeviceConnected(@NonNull AudioDeviceAttributes device) {
         synchronized (mDeviceStateLock) {
             return mDeviceInventory.isDeviceConnected(device);
@@ -2791,13 +2799,12 @@ public class AudioDeviceBroker {
         return mDeviceInventory.getImmutableDeviceInventory();
     }
 
-    void addOrUpdateDeviceSAStateInInventory(AdiDeviceState deviceState, boolean syncInventory) {
-        mDeviceInventory.addOrUpdateDeviceSAStateInInventory(deviceState, syncInventory);
+    void addOrUpdateDeviceSAStateInInventory(AdiDeviceState deviceState) {
+        mDeviceInventory.addOrUpdateDeviceSAStateInInventory(deviceState);
     }
 
-    void addOrUpdateBtAudioDeviceCategoryInInventory(
-            AdiDeviceState deviceState, boolean syncInventory) {
-        mDeviceInventory.addOrUpdateAudioDeviceCategoryInInventory(deviceState, syncInventory);
+    void addOrUpdateBtAudioDeviceCategoryInInventory(AdiDeviceState deviceState) {
+        mDeviceInventory.addOrUpdateAudioDeviceCategoryInInventory(deviceState);
     }
 
     @Nullable

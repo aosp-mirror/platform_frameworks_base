@@ -1883,7 +1883,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN码太短，至少应包含4位数字。"</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"稍后重试"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"目前处于全屏模式"</string>
-    <string name="immersive_cling_description" msgid="2896205051090870978">"若要退出，请从屏幕顶部向下滑动"</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"知道了"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"旋转可改善预览效果"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"在全屏模式下打开“<xliff:g id="NAME">%s</xliff:g>”可改善预览效果"</string>
@@ -2410,19 +2411,19 @@
     <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"私密空间"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"已隐藏敏感通知内容"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
-    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"为安全起见，屏幕共享画面已隐藏此应用的内容"</string>
+    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"为安全起见而在屏幕共享画面中处于隐藏状态的应用内容"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"自动连接到卫星"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"您无需使用移动网络或 WLAN 网络便能收发消息"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"打开“信息”应用"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"运作方式"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"待归档…"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"重新设置指纹解锁功能"</string>
-    <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"系统无法再识别<xliff:g id="FINGERPRINT">%s</xliff:g>。"</string>
-    <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"系统无法再识别<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>和<xliff:g id="FINGERPRINT_1">%2$s</xliff:g>。"</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="1824812666549916586">"系统无法再识别<xliff:g id="FINGERPRINT">%s</xliff:g>。请重新设置指纹解锁功能。"</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="5974657382960155099">"系统无法再识别<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>和<xliff:g id="FINGERPRINT_1">%2$s</xliff:g>。请重新设置指纹解锁功能。"</string>
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"“<xliff:g id="FINGERPRINT">%s</xliff:g>”无法正常使用，已被删除"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"“<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>”和“<xliff:g id="FINGERPRINT_1">%2$s</xliff:g>”无法正常使用，已被删除"</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"“<xliff:g id="FINGERPRINT">%s</xliff:g>”无法正常使用，系统已将其删除。如要通过指纹解锁功能来解锁手机，请重新设置。"</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"“<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>”和“<xliff:g id="FINGERPRINT_1">%2$s</xliff:g>”无法正常使用，系统已将它们删除。如要通过指纹解锁功能来解锁手机，请重新设置。"</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"重新设置“人脸解锁”功能"</string>
-    <string name="face_dangling_notification_msg" msgid="746235263598985384">"系统无法再识别您的脸部模型。请重新设置人脸解锁功能。"</string>
+    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"您的脸部模型无法正常使用，系统已将其删除。如要通过人脸解锁功能来解锁手机，请重新设置。"</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"设置"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"以后再说"</string>
 </resources>
