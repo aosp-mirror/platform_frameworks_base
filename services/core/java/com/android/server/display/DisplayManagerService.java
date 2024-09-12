@@ -570,6 +570,10 @@ public final class DisplayManagerService extends SystemService {
     private final DisplayNotificationManager mDisplayNotificationManager;
     private final ExternalDisplayStatsService mExternalDisplayStatsService;
 
+    // Manages the relative placement of extended displays
+    @Nullable
+    private final DisplayTopologyCoordinator mDisplayTopologyCoordinator;
+
     /**
      * Applications use {@link android.view.Display#getRefreshRate} and
      * {@link android.view.Display.Mode#getRefreshRate} to know what is the display refresh rate.
@@ -643,6 +647,11 @@ public final class DisplayManagerService extends SystemService {
         mDisplayNotificationManager = new DisplayNotificationManager(mFlags, mContext,
                 mExternalDisplayStatsService);
         mExternalDisplayPolicy = new ExternalDisplayPolicy(new ExternalDisplayPolicyInjector());
+        if (mFlags.isDisplayTopologyEnabled()) {
+            mDisplayTopologyCoordinator = new DisplayTopologyCoordinator();
+        } else {
+            mDisplayTopologyCoordinator = null;
+        }
     }
 
     public void setupSchedulerPolicies() {
@@ -3429,9 +3438,13 @@ public final class DisplayManagerService extends SystemService {
             mSmallAreaDetectionController.dump(pw);
         }
 
+        if (mDisplayTopologyCoordinator != null) {
+            pw.println();
+            mDisplayTopologyCoordinator.dump(pw);
+        }
+
         pw.println();
         mFlags.dump(pw);
-
     }
 
     private static float[] getFloatArray(TypedArray array) {
