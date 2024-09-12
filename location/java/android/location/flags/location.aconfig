@@ -116,4 +116,7 @@ flag {
     description: "Flag for enabling NI SUPL message injection by carrier config"
     bug: "242105192"
     is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }
