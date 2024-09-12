@@ -1177,6 +1177,29 @@ class DraggableHandlerTest {
     }
 
     @Test
+    fun emptyOverscrollAbortsSettleAnimationAndExposeTheConsumedVelocity() = runGestureTest {
+        // Overscrolling on scene B does nothing.
+        layoutState.transitions = transitions { overscrollDisabled(SceneB, Orientation.Vertical) }
+
+        // Swipe up to scene B at progress = 200%.
+        val middle = Offset(SCREEN_SIZE / 2f, SCREEN_SIZE / 2f)
+        val dragController = onDragStarted(startedPosition = middle, overSlop = up(0.99f))
+        assertTransition(fromScene = SceneA, toScene = SceneB, progress = 0.99f)
+
+        // Release the finger.
+        dragController.onDragStoppedAnimateNow(
+            velocity = -velocityThreshold,
+            onAnimationStart = { assertTransition(fromScene = SceneA, toScene = SceneB) },
+            onAnimationEnd = { consumedVelocity ->
+                // Our progress value was 0.99f and it is coerced in `[0..1]` (overscrollDisabled).
+                // Some of the velocity will be used for animation, but not all of it.
+                assertThat(consumedVelocity).isLessThan(0f)
+                assertThat(consumedVelocity).isGreaterThan(-velocityThreshold)
+            },
+        )
+    }
+
+    @Test
     fun overscroll_releaseBetween0And100Percent_up() = runGestureTest {
         // Make scene B overscrollable.
         layoutState.transitions = transitions {

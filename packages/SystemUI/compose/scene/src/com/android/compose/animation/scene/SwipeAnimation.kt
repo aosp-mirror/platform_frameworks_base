@@ -28,10 +28,8 @@ import androidx.compose.ui.unit.IntSize
 import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.animation.scene.content.state.TransitionState.HasOverscrollProperties.Companion.DistanceUnspecified
 import com.android.compose.nestedscroll.SuspendedValue
-import kotlinx.coroutines.CancellationException
 import kotlin.math.absoluteValue
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.withTimeout
 
 internal fun createSwipeAnimation(
     layoutState: MutableSceneTransitionLayoutStateImpl,
@@ -425,6 +423,9 @@ internal class SwipeAnimation<T : ContentKey>(
                             // Immediately stop this transition if we are bouncing on a content that
                             // does not bounce.
                             if (!contentTransition.isWithinProgressRange(progress)) {
+                                // We are no longer able to consume the velocity, the rest can be
+                                // consumed by another component in the hierarchy.
+                                velocityConsumed.complete(initialVelocity - velocity)
                                 throw SnapException()
                             }
                         }
@@ -433,8 +434,10 @@ internal class SwipeAnimation<T : ContentKey>(
             } catch (_: SnapException) {
                 /* Ignore. */
             } finally {
-                // The animation consumed the whole available velocity
-                velocityConsumed.complete(initialVelocity)
+                if (!velocityConsumed.isCompleted) {
+                    // The animation consumed the whole available velocity
+                    velocityConsumed.complete(initialVelocity)
+                }
             }
         }
 
