@@ -43,22 +43,6 @@ object Scenes {
     @JvmField val Lockscreen = SceneKey("lockscreen")
 
     /**
-     * The notifications shade scene primarily shows a scrollable list of notifications as an
-     * overlay UI.
-     *
-     * It's used only in the dual shade configuration, where there are two separate shades: one for
-     * notifications (this scene) and another for [QuickSettingsShade].
-     *
-     * It's not used in the single/accordion configuration (swipe down once to reveal the shade,
-     * swipe down again the to expand quick settings) or in the "split" shade configuration (on
-     * large screens or unfolded foldables, where notifications and quick settings are shown
-     * side-by-side in their own columns).
-     */
-    @Deprecated("The notifications shade scene has been replaced by an overlay")
-    @JvmField
-    val NotificationsShade = SceneKey("notifications_shade")
-
-    /**
      * The quick settings scene shows the quick setting tiles.
      *
      * This scene is used for single/accordion configuration (swipe down once to reveal the shade,
