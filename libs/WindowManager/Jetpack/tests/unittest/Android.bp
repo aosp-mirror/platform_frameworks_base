@@ -62,3 +62,10 @@ android_test {
         enabled: false,
     },
 }
+
+test_module_config {
+    name: "WMJetpackUnitTests_Presubmit",
+    base: "WMJetpackUnitTests",
+    test_suites: ["device-tests"],
+    include_annotations: ["android.platform.test.annotations.Presubmit"],
+}
