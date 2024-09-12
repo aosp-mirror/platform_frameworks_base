@@ -189,13 +189,13 @@ public class WallpaperDataParser {
 
                         String comp = parser.getAttributeValue(null, "component");
                         if (removeNextWallpaperComponent()) {
-                            wallpaperToParse.wallpaperComponent = comp != null
+                            wallpaperToParse.setComponent(comp != null
                                     ? ComponentName.unflattenFromString(comp)
-                                    : null;
-                            if (wallpaperToParse.wallpaperComponent == null
-                                    || "android".equals(wallpaperToParse.wallpaperComponent
+                                    : null);
+                            if (wallpaperToParse.getComponent() == null
+                                    || "android".equals(wallpaperToParse.getComponent()
                                     .getPackageName())) {
-                                wallpaperToParse.wallpaperComponent = mImageWallpaper;
+                                wallpaperToParse.setComponent(mImageWallpaper);
                             }
                         } else {
                             wallpaperToParse.nextWallpaperComponent = comp != null
@@ -219,7 +219,7 @@ public class WallpaperDataParser {
                             Slog.v(TAG, "primaryColors:" + wallpaper.primaryColors);
                             Slog.v(TAG, "mName:" + wallpaper.name);
                             if (removeNextWallpaperComponent()) {
-                                Slog.v(TAG, "mWallpaperComponent:" + wallpaper.wallpaperComponent);
+                                Slog.v(TAG, "mWallpaperComponent:" + wallpaper.getComponent());
                             } else {
                                 Slog.v(TAG, "mNextWallpaperComponent:"
                                         + wallpaper.nextWallpaperComponent);
@@ -340,7 +340,7 @@ public class WallpaperDataParser {
                 getAttributeInt(parser, "totalCropTop", 0),
                 getAttributeInt(parser, "totalCropRight", 0),
                 getAttributeInt(parser, "totalCropBottom", 0));
-        ComponentName componentName = removeNextWallpaperComponent() ? wallpaper.wallpaperComponent
+        ComponentName componentName = removeNextWallpaperComponent() ? wallpaper.getComponent()
                 : wallpaper.nextWallpaperComponent;
         if (multiCrop() && mImageWallpaper.equals(componentName)) {
             wallpaper.mCropHints = new SparseArray<>();
@@ -480,7 +480,7 @@ public class WallpaperDataParser {
         out.startTag(null, tag);
         out.attributeInt(null, "id", wallpaper.wallpaperId);
 
-        if (multiCrop() && mImageWallpaper.equals(wallpaper.wallpaperComponent)) {
+        if (multiCrop() && mImageWallpaper.equals(wallpaper.getComponent())) {
             if (wallpaper.mCropHints == null) {
                 Slog.e(TAG, "cropHints should not be null when saved");
                 wallpaper.mCropHints = new SparseArray<>();
@@ -580,10 +580,10 @@ public class WallpaperDataParser {
         }
 
         out.attribute(null, "name", wallpaper.name);
-        if (wallpaper.wallpaperComponent != null
-                && !wallpaper.wallpaperComponent.equals(mImageWallpaper)) {
+        if (wallpaper.getComponent() != null
+                && !wallpaper.getComponent().equals(mImageWallpaper)) {
             out.attribute(null, "component",
-                    wallpaper.wallpaperComponent.flattenToShortString());
+                    wallpaper.getComponent().flattenToShortString());
         }
 
         if (wallpaper.allowBackup) {
