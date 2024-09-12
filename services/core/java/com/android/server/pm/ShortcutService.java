@@ -169,7 +169,7 @@ import java.util.stream.Collectors;
 public class ShortcutService extends IShortcutService.Stub {
     static final String TAG = "ShortcutService";
 
-    static final boolean DEBUG = false; // STOPSHIP if true
+    static final boolean DEBUG = Build.IS_DEBUGGABLE; // STOPSHIP if true
     static final boolean DEBUG_LOAD = false; // STOPSHIP if true
     static final boolean DEBUG_PROCSTATE = false; // STOPSHIP if true
     static final boolean DEBUG_REBOOT = Build.IS_DEBUGGABLE;
@@ -3206,6 +3206,11 @@ public class ShortcutService extends IShortcutService.Stub {
         public void pinShortcuts(int launcherUserId,
                 @NonNull String callingPackage, @NonNull String packageName,
                 @NonNull List<String> shortcutIds, int userId) {
+            if (DEBUG) {
+                Slog.v(TAG, "pinShortcuts: " + callingPackage + ", with userId=" + launcherUserId
+                        + ", is trying to pin shortcuts from " + packageName
+                        + " with userId=" + userId);
+            }
             // Calling permission must be checked by LauncherAppsImpl.
             Preconditions.checkStringNotEmpty(packageName, "packageName");
             Objects.requireNonNull(shortcutIds, "shortcutIds");
@@ -3230,6 +3235,11 @@ public class ShortcutService extends IShortcutService.Stub {
                                     && !si.isDeclaredInManifest(),
                             ShortcutInfo.CLONE_REMOVE_NON_KEY_INFO,
                             callingPackage, launcherUserId, false);
+                } else {
+                    if (DEBUG) {
+                        Slog.w(TAG, "specified package " + packageName + ", with userId=" + userId
+                        + ", doesn't exist.");
+                    }
                 }
                 // Get list of shortcuts that will get unpinned.
                 ArraySet<String> oldPinnedIds = launcher.getPinnedShortcutIds(packageName, userId);
@@ -5448,6 +5458,17 @@ public class ShortcutService extends IShortcutService.Stub {
      */
     private List<ShortcutInfo> prepareChangedShortcuts(ArraySet<String> changedIds,
             ArraySet<String> newIds, List<ShortcutInfo> deletedList, final ShortcutPackage ps) {
+        if (DEBUG) {
+            Slog.v(TAG, "prepareChangedShortcuts: "
+                + " changedIds=" + (changedIds == null
+                        ? "n/a" : changedIds.stream().collect(Collectors.joining(", ", "[", "]")))
+                + " newIds=" + (newIds == null
+                        ? "n/a" : newIds.stream().collect(Collectors.joining(", ", "[", "]")))
+                + " deletedList=" + (deletedList == null
+                        ? "n/a" : deletedList.stream().map(ShortcutInfo::getId).collect(
+                                Collectors.joining(", ", "[", "]")))
+                + " ps=" + (ps == null ? "n/a" : ps.getPackageName()));
+        }
         if (ps == null) {
             // This can happen when package restore is not finished yet.
             return null;
