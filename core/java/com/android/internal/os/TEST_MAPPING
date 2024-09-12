@@ -49,12 +49,7 @@
   ],
   "postsubmit": [
     {
-      "name": "PowerStatsTests",
-      "options": [
-        {
-          "include-filter": "com.android.server.power.stats.BstatsCpuTimesValidationTest"
-        }
-      ],
+      "name": "PowerStatsTests_stats_bstatscputimesvalidationtest",
       "file_patterns": [
         "Kernel[^/]*\\.java"
       ]
