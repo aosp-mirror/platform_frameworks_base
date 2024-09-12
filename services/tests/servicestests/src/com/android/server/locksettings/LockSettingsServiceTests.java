@@ -17,6 +17,7 @@
 package com.android.server.locksettings;
 
 import static android.Manifest.permission.CONFIGURE_FACTORY_RESET_PROTECTION;
+import static android.security.Flags.FLAG_CLEAR_STRONG_AUTH_ON_ADD_PRIMARY_CREDENTIAL;
 import static android.security.Flags.FLAG_REPORT_PRIMARY_AUTH_ATTEMPTS;
 
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
@@ -46,6 +47,10 @@ import android.os.UserHandle;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.RequiresFlagsDisabled;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.service.gatekeeper.GateKeeperResponse;
 import android.text.TextUtils;
@@ -71,6 +76,8 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
     @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
     @Before
     public void setUp() {
@@ -258,6 +265,34 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
     }
 
     @Test
+    @RequiresFlagsEnabled(FLAG_CLEAR_STRONG_AUTH_ON_ADD_PRIMARY_CREDENTIAL)
+    public void setLockCredential_forPrimaryUser_clearsStrongAuthWhenFlagIsOn()
+            throws Exception {
+        setCredential(PRIMARY_USER_ID, newPassword("password"));
+
+        verify(mStrongAuth).reportUnlock(PRIMARY_USER_ID);
+    }
+
+    @Test
+    @RequiresFlagsDisabled(FLAG_CLEAR_STRONG_AUTH_ON_ADD_PRIMARY_CREDENTIAL)
+    public void setLockCredential_forPrimaryUser_leavesStrongAuthWhenFlagIsOff()
+            throws Exception {
+        setCredential(PRIMARY_USER_ID, newPassword("password"));
+
+        verify(mStrongAuth, never()).reportUnlock(anyInt());
+    }
+
+    @Test
+    public void setLockCredential_forPrimaryUserWithCredential_leavesStrongAuth() throws Exception {
+        setCredential(PRIMARY_USER_ID, newPassword("password"));
+        reset(mStrongAuth);
+
+        setCredential(PRIMARY_USER_ID, newPassword("password2"), newPassword("password"));
+
+        verify(mStrongAuth, never()).reportUnlock(anyInt());
+    }
+
+    @Test
     public void testSetLockCredential_forProfileWithSeparateChallenge_sendsCredentials()
             throws Exception {
         setCredential(MANAGED_PROFILE_USER_ID, newPattern("12345"));
@@ -275,6 +310,28 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
         verify(mRecoverableKeyStoreManager)
                 .lockScreenSecretChanged(CREDENTIAL_TYPE_PASSWORD, "newPassword".getBytes(),
                         MANAGED_PROFILE_USER_ID);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(FLAG_CLEAR_STRONG_AUTH_ON_ADD_PRIMARY_CREDENTIAL)
+    public void setLockCredential_profileWithNewSeparateChallenge_clearsStrongAuthWhenFlagIsOn()
+            throws Exception {
+        mService.setSeparateProfileChallengeEnabled(MANAGED_PROFILE_USER_ID, true, null);
+
+        setCredential(MANAGED_PROFILE_USER_ID, newPattern("12345"));
+
+        verify(mStrongAuth).reportUnlock(MANAGED_PROFILE_USER_ID);
+    }
+
+    @Test
+    @RequiresFlagsDisabled(FLAG_CLEAR_STRONG_AUTH_ON_ADD_PRIMARY_CREDENTIAL)
+    public void setLockCredential_profileWithNewSeparateChallenge_leavesStrongAuthWhenFlagIsOff()
+            throws Exception {
+        mService.setSeparateProfileChallengeEnabled(MANAGED_PROFILE_USER_ID, true, null);
+
+        setCredential(MANAGED_PROFILE_USER_ID, newPattern("12345"));
+
+        verify(mStrongAuth, never()).reportUnlock(anyInt());
     }
 
     @Test
@@ -303,6 +360,67 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
         verify(mRecoverableKeyStoreManager)
                 .lockScreenSecretChanged(CREDENTIAL_TYPE_PASSWORD, newCredential.getCredential(),
                         MANAGED_PROFILE_USER_ID);
+    }
+
+
+    @Test
+    public void setLockCredential_primaryWithUnifiedProfileAndCredential_leavesStrongAuthForBoth()
+            throws Exception {
+        final LockscreenCredential oldCredential = newPassword("oldPassword");
+        final LockscreenCredential newCredential = newPassword("newPassword");
+        setCredential(PRIMARY_USER_ID, oldCredential);
+        mService.setSeparateProfileChallengeEnabled(MANAGED_PROFILE_USER_ID, false, null);
+        reset(mStrongAuth);
+
+        setCredential(PRIMARY_USER_ID, newCredential, oldCredential);
+
+        verify(mStrongAuth, never()).reportUnlock(anyInt());
+    }
+
+    @Test
+    @RequiresFlagsEnabled(FLAG_CLEAR_STRONG_AUTH_ON_ADD_PRIMARY_CREDENTIAL)
+    public void setLockCredential_primaryWithUnifiedProfile_clearsStrongAuthForBothWhenFlagIsOn()
+            throws Exception {
+        final LockscreenCredential credential = newPassword("oldPassword");
+        setCredential(PRIMARY_USER_ID, credential);
+        mService.setSeparateProfileChallengeEnabled(MANAGED_PROFILE_USER_ID, false, null);
+        clearCredential(PRIMARY_USER_ID, credential);
+        reset(mStrongAuth);
+
+        setCredential(PRIMARY_USER_ID, credential);
+
+        verify(mStrongAuth).reportUnlock(PRIMARY_USER_ID);
+        verify(mStrongAuth).reportUnlock(MANAGED_PROFILE_USER_ID);
+    }
+
+    @Test
+    @RequiresFlagsDisabled(FLAG_CLEAR_STRONG_AUTH_ON_ADD_PRIMARY_CREDENTIAL)
+    public void setLockCredential_primaryWithUnifiedProfile_leavesStrongAuthForBothWhenFlagIsOff()
+            throws Exception {
+        final LockscreenCredential credential = newPassword("oldPassword");
+        setCredential(PRIMARY_USER_ID, credential);
+        mService.setSeparateProfileChallengeEnabled(MANAGED_PROFILE_USER_ID, false, null);
+        clearCredential(PRIMARY_USER_ID, credential);
+        reset(mStrongAuth);
+
+        setCredential(PRIMARY_USER_ID, credential);
+
+        verify(mStrongAuth, never()).reportUnlock(anyInt());
+    }
+
+
+    @Test
+    public void setLockCredential_primaryWithUnifiedProfileWithCredential_leavesStrongAuthForBoth()
+            throws Exception {
+        final LockscreenCredential oldCredential = newPassword("oldPassword");
+        final LockscreenCredential newCredential = newPassword("newPassword");
+        setCredential(PRIMARY_USER_ID, oldCredential);
+        mService.setSeparateProfileChallengeEnabled(MANAGED_PROFILE_USER_ID, false, null);
+        reset(mStrongAuth);
+
+        setCredential(PRIMARY_USER_ID, newCredential, oldCredential);
+
+        verify(mStrongAuth, never()).reportUnlock(anyInt());
     }
 
     @Test
@@ -340,6 +458,18 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
         mService.clearRecordedFrpNotificationData();
         clearCredential(PRIMARY_USER_ID, newPassword("password"));
         checkRecordedFrpNotificationIntent();
+    }
+
+    @Test
+    public void clearLockCredential_primaryWithUnifiedProfile_leavesStrongAuthForBoth()
+            throws Exception {
+        setCredential(PRIMARY_USER_ID, newPassword("password"));
+        mService.setSeparateProfileChallengeEnabled(MANAGED_PROFILE_USER_ID, false, null);
+        reset(mStrongAuth);
+
+        clearCredential(PRIMARY_USER_ID, newPassword("password"));
+
+        verify(mStrongAuth, never()).reportUnlock(anyInt());
     }
 
     @Test
