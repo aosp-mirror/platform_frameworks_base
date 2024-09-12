@@ -31,16 +31,23 @@ import com.android.compose.animation.scene.TransitionBuilder
 import com.android.compose.animation.scene.TransitionRecordingSpec
 import com.android.compose.animation.scene.featureOfElement
 import com.android.compose.animation.scene.recordTransition
+import org.junit.ClassRule
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import platform.test.motion.compose.ComposeFeatureCaptures
 import platform.test.motion.compose.createComposeMotionTestRule
 import platform.test.motion.testing.createGoldenPathManager
+import platform.test.screenshot.ResetDeviceEmulationRule
 
 @RunWith(AndroidJUnit4::class)
 @MotionTest
 class AnchoredSizeTest {
+
+    companion object {
+        @JvmField @ClassRule val cleanupRule: ResetDeviceEmulationRule = ResetDeviceEmulationRule()
+    }
+
     private val goldenPaths =
         createGoldenPathManager("frameworks/base/packages/SystemUI/compose/scene/tests/goldens")
 
