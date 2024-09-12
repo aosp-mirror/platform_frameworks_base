@@ -318,8 +318,9 @@ public class SystemImpl implements SystemInterface {
             if (webviewPinQuota <= 0) {
                 break;
             }
-            int bytesPinned = pinnerService.pinFile(apk, webviewPinQuota, appInfo, PIN_GROUP);
-            webviewPinQuota -= bytesPinned;
+            PinnerService.PinnedFile pf = pinnerService.pinFile(
+                    apk, webviewPinQuota, appInfo, PIN_GROUP, /*pinOptimizedDeps=*/true);
+            webviewPinQuota -= pf.bytesPinned;
         }
     }
 

@@ -3464,6 +3464,7 @@
   <java-symbol type="integer" name="config_pinnerHomePinBytes" />
   <java-symbol type="bool" name="config_pinnerAssistantApp" />
   <java-symbol type="integer" name="config_pinnerWebviewPinBytes" />
+  <java-symbol type="integer" name="config_pinnerMaxPinnedMemoryPercentage" />
 
   <java-symbol type="string" name="config_doubleTouchGestureEnableFile" />
 

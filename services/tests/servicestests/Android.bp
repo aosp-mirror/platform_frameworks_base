@@ -50,6 +50,7 @@ android_test {
         "services.credentials",
         "services.devicepolicy",
         "services.flags",
+        "com.android.server.flags.services-aconfig-java",
         "services.net",
         "services.people",
         "services.usage",
@@ -78,6 +79,7 @@ android_test {
         // TODO: remove once Android migrates to JUnit 4.12,
         // which provides assertThrows
         "testng",
+        "flag-junit",
         "junit",
         "junit-params",
         "ActivityContext",
