@@ -1976,6 +1976,14 @@
     <dimen name="backlight_indicator_step_small_radius">4dp</dimen>
     <dimen name="backlight_indicator_step_large_radius">28dp</dimen>
 
+    <!-- Touchpad gestures tutorial-->
+    <!-- This value is in unit of dp/ms
+        TriggerSwipeUpTouchTracker (which is base for gesture tutorial implementation) uses value
+        of 0.5dp but from manual testing it's too high and doesn't really feel like it's forcing
+        slowing down. Also for tutorial it should be fine to lean to the side of being more strict
+        rather than not strict enough and not teaching user the proper gesture as a result.-->
+    <dimen name="touchpad_recent_apps_gesture_velocity_threshold">0.05dp</dimen>
+
     <!-- Broadcast dialog -->
     <dimen name="broadcast_dialog_title_img_margin_top">18dp</dimen>
     <dimen name="broadcast_dialog_title_text_size">24sp</dimen>
