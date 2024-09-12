@@ -1628,9 +1628,9 @@ public class ThermalManagerService extends SystemService {
         long mInactivityThresholdMillis = INACTIVITY_THRESHOLD_MILLIS;
 
         void updateThresholds() {
-            synchronized (mSamples) {
-                List<TemperatureThreshold> thresholds =
+            List<TemperatureThreshold> thresholds =
                         mHalWrapper.getTemperatureThresholds(true, Temperature.TYPE_SKIN);
+            synchronized (mSamples) {
                 if (Flags.allowThermalHeadroomThresholds()) {
                     Arrays.fill(mHeadroomThresholds, Float.NaN);
                 }
