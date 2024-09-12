@@ -95,3 +95,10 @@ test_module_config_host {
     test_suites: ["device-tests"],
     include_filters: ["com.android.server.pm.test.OverlayActorVisibilityTest"],
 }
+
+test_module_config_host {
+    name: "PackageManagerServiceHostTests_android_server_pm_Presubmit",
+    base: "PackageManagerServiceHostTests",
+    test_suites: ["device-tests"],
+    include_annotations: ["android.platform.test.annotations.Presubmit"],
+}
