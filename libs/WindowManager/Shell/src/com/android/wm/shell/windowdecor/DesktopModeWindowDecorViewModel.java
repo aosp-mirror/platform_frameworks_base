@@ -41,6 +41,7 @@ import static com.android.wm.shell.desktopmode.DesktopModeVisualIndicator.Indica
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_UNDEFINED;
 
 import android.annotation.NonNull;
@@ -1103,8 +1104,22 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                         // If we are entering split select, handle will no longer be visible and
                         // should not be receiving any input.
                         if (resultType == TO_SPLIT_LEFT_INDICATOR
-                                || resultType != TO_SPLIT_RIGHT_INDICATOR) {
+                                || resultType == TO_SPLIT_RIGHT_INDICATOR) {
                             relevantDecor.disposeStatusBarInputLayer();
+                            // We should also dispose the other split task's input layer if
+                            // applicable.
+                            final int splitPosition = mSplitScreenController
+                                    .getSplitPosition(relevantDecor.mTaskInfo.taskId);
+                            if (splitPosition != SPLIT_POSITION_UNDEFINED) {
+                                final int oppositePosition =
+                                        splitPosition == SPLIT_POSITION_TOP_OR_LEFT
+                                                ? SPLIT_POSITION_BOTTOM_OR_RIGHT
+                                                : SPLIT_POSITION_TOP_OR_LEFT;
+                                final RunningTaskInfo oppositeTaskInfo =
+                                        mSplitScreenController.getTaskInfo(oppositePosition);
+                                mWindowDecorByTaskId.get(oppositeTaskInfo.taskId)
+                                        .disposeStatusBarInputLayer();
+                            }
                         }
                         mMoveToDesktopAnimator = null;
                         return;
