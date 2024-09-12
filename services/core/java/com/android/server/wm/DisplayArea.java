@@ -47,6 +47,7 @@ import android.window.IDisplayAreaOrganizer;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.ProtoLog;
 import com.android.server.policy.WindowManagerPolicy;
+import com.android.window.flags.Flags;
 
 import java.io.PrintWriter;
 import java.util.Comparator;
@@ -54,6 +55,7 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+
 /**
  * Container for grouping WindowContainer below DisplayContent.
  *
@@ -833,11 +835,14 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
         void prepareSurfaces() {
             mDimmer.resetDimStates();
             super.prepareSurfaces();
-            final Rect dimBounds = mDimmer.getDimBounds();
-            if (dimBounds != null) {
-                // Bounds need to be relative, as the dim layer is a child.
-                getBounds(dimBounds);
-                dimBounds.offsetTo(0 /* newLeft */, 0 /* newTop */);
+            Rect dimBounds = null;
+            if (!Flags.useTasksDimOnly()) {
+                dimBounds = mDimmer.getDimBounds();
+                if (dimBounds != null) {
+                    // Bounds need to be relative, as the dim layer is a child.
+                    getBounds(dimBounds);
+                    dimBounds.offsetTo(0 /* newLeft */, 0 /* newTop */);
+                }
             }
 
             // If SystemUI is dragging for recents, we want to reset the dim state so any dim layer
@@ -847,7 +852,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
                 mDimmer.resetDimStates();
             }
 
-            if (dimBounds != null) {
+            if (mDimmer.hasDimState()) {
                 if (mDimmer.updateDims(getSyncTransaction())) {
                     scheduleAnimation();
                 }
