@@ -120,10 +120,4 @@ object SceneFamilies {
      * resolves to can depend on dual / split / single shade settings.
      */
     @JvmField val NotifShade = SceneKey(debugName = "scene_family_notif_shade")
-
-    /**
-     * The scene that contains the full QuickSettings (not to be confused with Quick-QuickSettings).
-     * The specific scene it resolves to can depend on dual / split / single shade settings.
-     */
-    @JvmField val QuickSettings = SceneKey(debugName = "scene_family_quick_settings")
 }

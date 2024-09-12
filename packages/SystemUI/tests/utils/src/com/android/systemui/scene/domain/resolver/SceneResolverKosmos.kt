@@ -32,7 +32,6 @@ val Kosmos.sceneFamilyResolvers: Map<SceneKey, SceneResolver>
         mapOf(
             SceneFamilies.Home to homeSceneFamilyResolver,
             SceneFamilies.NotifShade to notifShadeSceneFamilyResolver,
-            SceneFamilies.QuickSettings to quickSettingsSceneFamilyResolver,
         )
 
 val Kosmos.homeSceneFamilyResolver by
@@ -47,14 +46,6 @@ val Kosmos.homeSceneFamilyResolver by
 val Kosmos.notifShadeSceneFamilyResolver by
     Kosmos.Fixture {
         NotifShadeSceneFamilyResolver(
-            applicationScope = applicationCoroutineScope,
-            shadeModeInteractor = shadeModeInteractor,
-        )
-    }
-
-val Kosmos.quickSettingsSceneFamilyResolver by
-    Kosmos.Fixture {
-        QuickSettingsSceneFamilyResolver(
             applicationScope = applicationCoroutineScope,
             shadeModeInteractor = shadeModeInteractor,
         )
