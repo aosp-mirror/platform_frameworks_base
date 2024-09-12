@@ -186,6 +186,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"මුහුණ මගින් අගුලු හරින ලදි. ඉදිරියට යාමට ඔබන්න."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"මුහුණ හඳුනා ගන්නා ලදි. ඉදිරියට යාමට ඔබන්න."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"මුහුණ හඳුනා ගන්නා ලදි. ඉදිරියට යාමට අගුලු හැරීමේ නිරූපකය ඔබන්න."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"මුහුණ මගින් අගුළු හරින ලදි. ඉදිරියට යාමට තට්ටු කරන්න."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"සත්‍යාපනය විය"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"සත්‍යාපනය අවලංගු කරන්න"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"තවත් විකල්ප"</string>

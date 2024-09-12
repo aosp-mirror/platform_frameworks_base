@@ -203,8 +203,8 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"ব্যক্তিগত কাজের জন্য অ্যাডমিন এই ডিভাইস ব্যবহার করার অনুমতি দেয়নি"</string>
     <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"প্রাইভেট স্পেস সরিয়ে দেওয়া হয়েছে"</string>
     <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"এই ম্যানেজ করা ডিভাইসে আপনার সংস্থা প্রাইভেট স্পেসের অনুমতি দেয় না।"</string>
-    <string name="network_logging_notification_title" msgid="554983187553845004">"ডিভাইসটি পরিচালনা করা হচ্ছে"</string>
-    <string name="network_logging_notification_text" msgid="1327373071132562512">"আপনার প্রতিষ্ঠান এই ডিভাইসটি পরিচালনা করে এবং এটির নেটওয়ার্ক ট্রাফিকের উপরে নজর রাখতে পারে। বিশদ বিবরণের জন্য ট্যাপ করুন।,"</string>
+    <string name="network_logging_notification_title" msgid="554983187553845004">"ডিভাইসটি ম্যানেজ করা হচ্ছে"</string>
+    <string name="network_logging_notification_text" msgid="1327373071132562512">"আপনার প্রতিষ্ঠান এই ডিভাইসটি ম্যানেজ করে এবং এটির নেটওয়ার্ক ট্রাফিকের উপরে নজর রাখতে পারে। বিশদ বিবরণের জন্য ট্যাপ করুন।"</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"অ্যাপগুলি আপনার লোকেশন অ্যাক্সেস করতে পারবে"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"আরও জানতে আইটি অ্যাডমিনের সাথে যোগাযোগ করুন"</string>
     <string name="geofencing_service" msgid="3826902410740315456">"জিওফেন্সিং সার্ভিস"</string>

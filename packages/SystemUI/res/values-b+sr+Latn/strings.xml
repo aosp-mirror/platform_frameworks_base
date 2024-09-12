@@ -186,6 +186,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Otključano je licem. Pritisnite da biste nastavili."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Lice je prepoznato. Pritisnite da biste nastavili."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Lice prepoznato. Pritisnite ikonu otključavanja za nastavak."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"Otključano je licem. Dodirnite da biste nastavili."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Identitet je potvrđen"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Otkažite potvrdu identiteta"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"Još opcija"</string>
@@ -461,9 +462,9 @@
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"Prevucite ulevo da biste započeli zajednički vodič"</string>
     <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"Prilagodite"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"Odbaci"</string>
-    <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"Dodajte, uklonite i preuredite vidžete u ovom prostoru"</string>
+    <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"Dodajte, uklonite i preuredite vidžete ovde"</string>
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Dodajte još vidžeta"</string>
-    <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Dugi pritisak za prilagođavanje vidžeta"</string>
+    <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Dugo pritisnite za prilagođavanje vidžeta"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Prilagodi vidžete"</string>
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"Ikona aplikacije za onemogućen vidžet"</string>
     <string name="icon_description_for_pending_widget" msgid="8413816401868001755">"Ikona aplikacije za vidžet koji se instalira"</string>

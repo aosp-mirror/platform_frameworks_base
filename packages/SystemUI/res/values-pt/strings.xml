@@ -186,6 +186,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Desbloqueado pelo rosto. Pressione para continuar."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Rosto reconhecido. Pressione para continuar."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Rosto reconhecido. Pressione o ícone para continuar."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"Desbloqueado pelo rosto. Toque para continuar."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Autenticado"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Cancelar autenticação"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"Mais opções"</string>
@@ -381,7 +382,7 @@
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Gravação de tela"</string>
     <string name="performance" msgid="6552785217174378320">"Desempenho"</string>
     <string name="user_interface" msgid="3712869377953950887">"Interface do usuário"</string>
-    <string name="thermal" msgid="6758074791325414831">"Térmico"</string>
+    <string name="thermal" msgid="6758074791325414831">"Temperatura"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Modo uma mão"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"Aparelhos auditivos"</string>
     <string name="quick_settings_hearing_devices_connected" msgid="6519069502397037781">"Ativos"</string>
@@ -472,7 +473,7 @@
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Adicionar widget"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"Concluído"</string>
     <string name="label_for_button_in_empty_state_cta" msgid="7314975555382055823">"Adicionar widgets"</string>
-    <string name="title_for_empty_state_cta" msgid="6161654421223450530">"Tenha acesso rápido aos widgets de seus apps favoritos sem desbloquear o tablet."</string>
+    <string name="title_for_empty_state_cta" msgid="6161654421223450530">"Acesse os widgets dos seus apps favoritos sem desbloquear o tablet."</string>
     <string name="dialog_title_to_allow_any_widget" msgid="1004820948962675644">"Permitir qualquer widget na tela de bloqueio?"</string>
     <string name="button_text_to_open_settings" msgid="1987729256950941628">"Abrir as configurações"</string>
     <string name="work_mode_off_title" msgid="5794818421357835873">"Reativar apps de trabalho?"</string>
@@ -617,7 +618,7 @@
     <string name="stream_ring" msgid="7550670036738697526">"Toques"</string>
     <string name="stream_music" msgid="2188224742361847580">"Mídia"</string>
     <string name="stream_alarm" msgid="16058075093011694">"Alarme"</string>
-    <string name="stream_notification" msgid="7930294049046243939">"Notificação"</string>
+    <string name="stream_notification" msgid="7930294049046243939">"Notificações"</string>
     <string name="stream_bluetooth_sco" msgid="6234562365528664331">"Bluetooth"</string>
     <string name="stream_dtmf" msgid="7322536356554673067">"Multifrequência de dois tons"</string>
     <string name="stream_accessibility" msgid="3873610336741987152">"Acessibilidade"</string>

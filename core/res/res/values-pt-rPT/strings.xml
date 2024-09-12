@@ -205,7 +205,7 @@
     <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"Espaço privado removido"</string>
     <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"A sua organização não permite espaços privados neste dispositivo gerido."</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"O dispositivo é gerido"</string>
-    <string name="network_logging_notification_text" msgid="1327373071132562512">"A sua entidade gere este dispositivo e pode monitorizar o tráfego de rede. Toque para obter mais detalhes."</string>
+    <string name="network_logging_notification_text" msgid="1327373071132562512">"A sua entidade gere este dispositivo e pode monitorizar o tráfego de rede. Toque para ver mais detalhes."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"As apps podem aceder à sua localização"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"Contacte o administrador de TI para saber mais."</string>
     <string name="geofencing_service" msgid="3826902410740315456">"Serviço de geofencing"</string>

@@ -525,7 +525,7 @@
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Այս հավելվածը կարող է հետզանգեր ստանալ՝ ցանկացած տեսախցիկի բացվելու (կնշվի բացող հավելվածը) և փակվելու դեպքում։"</string>
     <string name="permlab_cameraHeadlessSystemUser" msgid="680194666834500050">"Թույլատրել հավելվածին կամ ծառայությանը օգտագործել որպես միջերեսի համակարգային օգտատեր։"</string>
     <string name="permdesc_cameraHeadlessSystemUser" msgid="6963163319710996412">"Այս հավելվածին ձեր տեսախցիկը հասանելի է որպես առանց միջերեսի համակարգային օգտատեր։"</string>
-    <string name="permlab_vibrate" msgid="8596800035791962017">"կառավարել թրթռումը"</string>
+    <string name="permlab_vibrate" msgid="8596800035791962017">"կառավարել թրթռոցը"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Թույլ է տալիս հավելվածին կառավարել թրթռոցը:"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Հավելվածին թույլ է տալիս օգտագործել սարքի թրթռալու ռեժիմը։"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"ուղղակիորեն զանգել հեռախոսահամարներին"</string>
@@ -2414,7 +2414,7 @@
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Անվտանգության նկատառումներով՝ բովանդակությունը թաքցվել է ցուցադրումից"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Ավտոմատ միացել է արբանյակին"</string>
-    <string name="satellite_notification_summary" msgid="5207364139430767162">"Դուք կարող եք ուղարկել և ստանալ հաղորդագրություններ՝ առանց բջջային կամ Wi-Fi կապի"</string>
+    <string name="satellite_notification_summary" msgid="5207364139430767162">"Դուք կարող եք հաղորդագրություններ ուղարկել և ստանալ առանց բջջային կամ Wi-Fi կապի"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Բացել Messages-ը"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Ինչպես է դա աշխատում"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Առկախ է…"</string>

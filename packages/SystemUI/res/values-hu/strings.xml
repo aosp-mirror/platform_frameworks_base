@@ -146,7 +146,7 @@
     <string name="issuerecord_title" msgid="286627115110121849">"Problémafelvevő"</string>
     <string name="issuerecord_background_processing_label" msgid="1666840264959336876">"Problémafelvétel feldolgozása…"</string>
     <string name="issuerecord_channel_description" msgid="6142326363431474632">"Folyamatban lévő értesítés egy problémagyűjtési munkamenethez"</string>
-    <string name="issuerecord_ongoing_screen_only" msgid="6248206059935015722">"Problémafelvétel folyamatban…"</string>
+    <string name="issuerecord_ongoing_screen_only" msgid="6248206059935015722">"Probléma rögzítése folyamatban…"</string>
     <string name="issuerecord_share_label" msgid="3992657993619876199">"Megosztás"</string>
     <string name="issuerecord_save_title" msgid="4161043023696751591">"Problémafelvétel mentve"</string>
     <string name="issuerecord_save_text" msgid="1205985304551521495">"Koppintson a megtekintéshez"</string>
@@ -186,6 +186,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Zárolás arccal feloldva. Koppintson a folytatáshoz."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Arc felismerve. Koppintson a folytatáshoz."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Arc felismerve. A folytatáshoz koppintson a Feloldásra."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"Zárolás arccal feloldva. Koppintson a folytatáshoz."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Hitelesítve"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Hitelesítés megszakítása"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"További lehetőségek"</string>

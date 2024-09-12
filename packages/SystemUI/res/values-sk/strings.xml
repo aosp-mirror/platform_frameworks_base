@@ -186,6 +186,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Odomknuté tvárou. Pokračujte stlačením."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Tvár bola rozpoznaná. Pokračujte stlačením."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Tvár bola rozpoznaná. Pokračujte stlačením ikony odomknutia"</string>
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"Odomknuté tvárou. Pokračujte klepnutím."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Overené"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Zrušiť overenie"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"Ďalšie možnosti"</string>
@@ -372,7 +373,7 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Rekordér obrazovky"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Začať"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Ukončiť"</string>
-    <string name="qs_record_issue_label" msgid="8166290137285529059">"Nahrať problém"</string>
+    <string name="qs_record_issue_label" msgid="8166290137285529059">"Zaznamenať problém"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"Začať"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"Zastavte"</string>
     <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"Hlásenie chyby"</string>
@@ -381,7 +382,7 @@
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Rekordér obrazovky"</string>
     <string name="performance" msgid="6552785217174378320">"Výkon"</string>
     <string name="user_interface" msgid="3712869377953950887">"Používateľské rozhranie"</string>
-    <string name="thermal" msgid="6758074791325414831">"Termálne"</string>
+    <string name="thermal" msgid="6758074791325414831">"Teplota"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Režim jednej ruky"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"Načúvacie zariadenia"</string>
     <string name="quick_settings_hearing_devices_connected" msgid="6519069502397037781">"Aktívne"</string>
@@ -461,7 +462,7 @@
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"Potiahnutím doľava spustite komunitný návod"</string>
     <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"Prispôsobiť"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"Zavrieť"</string>
-    <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"Pridávajte aj odstraňujte miniaplikácie a meňte ich poradie v tomto priestore"</string>
+    <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"Tu pridávajte, odstraňujte a presúvajte miniaplikácie"</string>
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Pridať ďalšie miniaplikácie"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Miniaplikácie prispôsobíte dlhým stlačením"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Prispôsobiť miniaplikácie"</string>
@@ -556,7 +557,7 @@
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"Vaše osobné aplikácie sú k internetu pripojené prostredníctvom aplikácie <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"Toto zariadenie je k internetu pripojené prostredníctvom aplikácie <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"Toto zariadenie poskytuje <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
-    <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Správa zariadení"</string>
+    <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Správa zariadenia"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
     <string name="monitoring_subtitle_network_logging" msgid="2444199331891219596">"Zapisovanie do denníka siete"</string>
     <string name="monitoring_subtitle_ca_certificate" msgid="8588092029755175800">"Certifikáty CA"</string>
@@ -568,7 +569,7 @@
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Organizácia nainštalovala pre toto zariadenie certifikačnú autoritu. Zabezpečená sieťová premávka môže byť sledovaná či upravená."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Organizácia nainštalovala pre váš pracovný profil certifikačnú autoritu. Zabezpečená sieťová premávka môže byť sledovaná či upravená."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"V tomto zariadení je nainštalovaná certifikačná autorita. Zabezpečená sieťová premávka môže byť sledovaná či upravená."</string>
-    <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Správca aktivoval zapisovanie do denníka siete, ktoré sleduje premávku na vašom zariadení."</string>
+    <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Správca aktivoval zapisovanie do denníka siete, ktoré sleduje sieťovú premávku na vašom zariadení."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Správca aktivoval zapisovanie do denníka siete, ktoré sleduje premávku vo vašom pracovnom profile, ale nie osobnom."</string>
     <string name="monitoring_description_named_vpn" msgid="8220190039787149671">"Toto zariadenie je pripojené na internet prostredníctvom aplikácie <xliff:g id="VPN_APP">%1$s</xliff:g>. Vaša sieťová aktivita, ako sú e‑maily a dáta prehliadania, je viditeľná pre poskytovateľa siete VPN."</string>
     <string name="monitoring_description_managed_device_named_vpn" msgid="7693648349547785255">"Toto zariadenie je k internetu pripojené prostredníctvom aplikácie <xliff:g id="VPN_APP">%1$s</xliff:g>. Vašu aktivitu v sieti vrátane e‑mailov a dát prehliadania vidí váš správca IT."</string>

@@ -204,7 +204,7 @@
     <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"ପ୍ରାଇଭେଟ ସ୍ପେସ କାଢ଼ି ଦିଆଯାଇଛି"</string>
     <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"ଆପଣଙ୍କ ସଂସ୍ଥା ଏହି ପରିଚାଳିତ ଡିଭାଇସରେ ପ୍ରାଇଭେଟ ସ୍ପେସକୁ ଅନୁମତି ଦିଏ ନାହିଁ।"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"ଡିଭାଇସକୁ ପରିଚାଳନା କରାଯାଉଛି"</string>
-    <string name="network_logging_notification_text" msgid="1327373071132562512">"ଆପଣଙ୍କ ସଂସ୍ଥା ଏହି ଡିଭାଇସକୁ ପରିଚାଳନା କରନ୍ତି ଏବଂ ନେଟୱର୍କ ଟ୍ରାଫିକ୍‍ ନୀରିକ୍ଷଣ କରନ୍ତି। ବିବରଣୀ ପାଇଁ ଟାପ୍‍ କରନ୍ତୁ।"</string>
+    <string name="network_logging_notification_text" msgid="1327373071132562512">"ଆପଣଙ୍କ ସଂସ୍ଥା ଏହି ଡିଭାଇସକୁ ପରିଚାଳନା କରେ ଏବଂ ନେଟୱାର୍କ ଟ୍ରାଫିକକୁ ମନିଟର କରିପାରେ। ବିବରଣୀ ପାଇଁ ଟାପ କରନ୍ତୁ।"</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"ଆପଗୁଡ଼ିକ ଆପଣଙ୍କ ଲୋକେସନକୁ ଆକ୍ସେସ୍ କରିପାରିବ"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"ଅଧିକ ଜାଣିବାକୁ ଆପଣଙ୍କ IT ଆଡମିନଙ୍କ ସହ କଣ୍ଟାକ୍ଟ କରନ୍ତୁ"</string>
     <string name="geofencing_service" msgid="3826902410740315456">"ଜିଓଫେନସିଂ ସେବା"</string>
@@ -1665,7 +1665,7 @@
     <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"ଡିଭାଇସରେ ସ୍କ୍ରିନ୍‍ କାଷ୍ଟ କରନ୍ତୁ"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"ଡିଭାଇସ୍‍ ଖୋଜାଯାଉଛି…"</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"ସେଟିଂସ୍"</string>
-    <string name="media_route_controller_disconnect" msgid="7362617572732576959">"ବିଚ୍ଛିନ୍ନ କରନ୍ତୁ"</string>
+    <string name="media_route_controller_disconnect" msgid="7362617572732576959">"ଡିସକନେକ୍ଟ କରନ୍ତୁ"</string>
     <string name="media_route_status_scanning" msgid="8045156315309594482">"ସ୍କାନ୍‌ କରୁଛି…"</string>
     <string name="media_route_status_connecting" msgid="5845597961412010540">"ସଂଯୋଗ କରୁଛି..."</string>
     <string name="media_route_status_available" msgid="1477537663492007608">"ଉପଲବ୍ଧ"</string>
@@ -1998,7 +1998,7 @@
     <string name="work_mode_off_title" msgid="6367463960165135829">"ୱାର୍କ ଆପ୍ସକୁ ପୁଣି ଚାଲୁ କରିବେ?"</string>
     <string name="work_mode_turn_on" msgid="5316648862401307800">"ପୁଣି ଚାଲୁ କରନ୍ତୁ"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"ଜରୁରୀକାଳୀନ"</string>
-    <string name="set_up_screen_lock_title" msgid="8346083801616474030">"ଏକ ସ୍କ୍ରିନ୍ ଲକ୍ ସେଟ୍ କରନ୍ତୁ"</string>
+    <string name="set_up_screen_lock_title" msgid="8346083801616474030">"ଏକ ସ୍କ୍ରିନ ଲକ ସେଟ କରନ୍ତୁ"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"ସ୍କ୍ରିନ ଲକ ସେଟ କରନ୍ତୁ"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"ଆପଣଙ୍କ ପ୍ରାଇଭେଟ ସ୍ପେସ ବ୍ୟବହାର କରିବାକୁ ଏହି ଡିଭାଇସରେ ଏକ ସ୍କ୍ରିନ ଲକ ସେଟ କରନ୍ତୁ"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"ଆପ୍ ଉପଲବ୍ଧ ନାହିଁ"</string>

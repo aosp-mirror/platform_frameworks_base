@@ -203,7 +203,7 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Admin melepaskan perangkat untuk penggunaan pribadi"</string>
     <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"Ruang privasi dihapus"</string>
     <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"Organisasi Anda tidak mengizinkan adanya ruang privasi di perangkat terkelola ini."</string>
-    <string name="network_logging_notification_title" msgid="554983187553845004">"Perangkat ini ada yang mengelola"</string>
+    <string name="network_logging_notification_title" msgid="554983187553845004">"Ini adalah perangkat terkelola"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Organisasi mengelola perangkat ini dan mungkin memantau traffic jaringan. Ketuk untuk melihat detailnya."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"Aplikasi dapat mengakses lokasi Anda"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"Hubungi admin IT untuk mempelajari lebih lanjut"</string>
@@ -1665,7 +1665,7 @@
     <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Transmisi layar ke perangkat"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"Menelusuri perangkat…"</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"Setelan"</string>
-    <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Putuskan koneksi"</string>
+    <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Berhenti hubungkan"</string>
     <string name="media_route_status_scanning" msgid="8045156315309594482">"Memindai..."</string>
     <string name="media_route_status_connecting" msgid="5845597961412010540">"Menghubungkan..."</string>
     <string name="media_route_status_available" msgid="1477537663492007608">"Tersedia"</string>

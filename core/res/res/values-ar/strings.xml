@@ -2423,12 +2423,12 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"طريقة العمل"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"بانتظار الإزالة من الأرشيف…"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"إعادة إعداد ميزة \"فتح الجهاز ببصمة الإصبع\""</string>
-    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"هناك مشكلة في <xliff:g id="FINGERPRINT">%s</xliff:g> وتم حذفها"</string>
-    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"هناك مشكلة في <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> و<xliff:g id="FINGERPRINT_1">%2$s</xliff:g> وتم حذفهما"</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"هناك مشكلة في <xliff:g id="FINGERPRINT">%s</xliff:g> وتم حذفها. يُرجى إعدادها مرة أخرى لفتح قفل هاتفك باستخدام بصمة الإصبع."</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"هناك مشكلة في <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> و<xliff:g id="FINGERPRINT_1">%2$s</xliff:g> وتم حذفهما. يُرجى إعادة إعدادهما لفتح قفل هاتفك باستخدام بصمة الإصبع."</string>
+    <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"لا يمكن بعد الآن التعرّف على \"<xliff:g id="FINGERPRINT">%s</xliff:g>\"."</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"لا يمكن بعد الآن التعرّف على \"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>\" و\"<xliff:g id="FINGERPRINT_1">%2$s</xliff:g>\"."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="1824812666549916586">"لا يمكن بعد الآن التعرّف على \"<xliff:g id="FINGERPRINT">%s</xliff:g>\". يجب ضبط ميزة \"فتح الجهاز ببصمة الإصبع\" مجددًا."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="5974657382960155099">"لا يمكن بعد الآن التعرّف على \"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>\" و\"<xliff:g id="FINGERPRINT_1">%2$s</xliff:g>\". يجب ضبط ميزة \"فتح الجهاز ببصمة الإصبع\" مجددًا."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"إعادة إعداد ميزة \"فتح الجهاز ببصمة الوجه\""</string>
-    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"هناك مشكلة في نموذج الوجه الخاص بك وتم حذفه. يُرجى إعداده مرة أخرى لفتح قفل هاتفك باستخدام وجهك."</string>
+    <string name="face_dangling_notification_msg" msgid="746235263598985384">"لا يمكن بعد الآن التعرّف على نموذج الوجه الخاص بك. يجب ضبط ميزة \"فتح الجهاز ببصمة الوجه\" مجددًا."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"إعداد"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"لاحقًا"</string>
 </resources>
