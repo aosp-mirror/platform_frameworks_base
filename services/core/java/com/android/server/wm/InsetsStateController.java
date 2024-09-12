@@ -380,7 +380,6 @@ class InsetsStateController {
         if (android.view.inputmethod.Flags.refactorInsetsController()) {
             notifyInsetsChanged();
             mDisplayContent.updateSystemGestureExclusion();
-            mDisplayContent.updateKeepClearAreas();
             mDisplayContent.getDisplayPolicy().updateSystemBarAttributes();
         }
     }
