@@ -186,6 +186,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Отклучено со лик. Притиснете за да продолжите."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Лицето е препознаено. Притиснете за да продолжите."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Лицето е препознаено. Притиснете ја иконата за отклучување за да продолжите."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"Отклучено со лик. Допрете за да продолжите."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Проверена"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Откажување автентикација"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"Повеќе опции"</string>
@@ -381,7 +382,7 @@
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Снимање екран"</string>
     <string name="performance" msgid="6552785217174378320">"Изведба"</string>
     <string name="user_interface" msgid="3712869377953950887">"Кориснички интерфејс"</string>
-    <string name="thermal" msgid="6758074791325414831">"Термално"</string>
+    <string name="thermal" msgid="6758074791325414831">"Прегревање"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Режим со една рака"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"Слушни апарати"</string>
     <string name="quick_settings_hearing_devices_connected" msgid="6519069502397037781">"Активно"</string>
@@ -468,7 +469,7 @@
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"Икона за апликација за оневозможен виџет"</string>
     <string name="icon_description_for_pending_widget" msgid="8413816401868001755">"Икона за апликација за виџет што се инсталира"</string>
     <string name="edit_widget" msgid="9030848101135393954">"Изменување виџети"</string>
-    <string name="button_to_remove_widget" msgid="3948204829181214098">"Отстранува"</string>
+    <string name="button_to_remove_widget" msgid="3948204829181214098">"Отстрани"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Додајте виџет"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"Готово"</string>
     <string name="label_for_button_in_empty_state_cta" msgid="7314975555382055823">"Додајте виџети"</string>

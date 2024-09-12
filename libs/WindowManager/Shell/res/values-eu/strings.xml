@@ -76,7 +76,7 @@
     <string name="bubbles_user_education_manage" msgid="3460756219946517198">"Aplikazioaren burbuilak desaktibatzeko, sakatu Kudeatu"</string>
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"Ados"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"Ez dago azkenaldiko burbuilarik"</string>
-    <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"Azken burbuilak eta baztertutakoak agertuko dira hemen"</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"Azkenaldiko burbuilak eta baztertutakoak agertuko dira hemen"</string>
     <string name="bubble_bar_education_stack_title" msgid="2486903590422497245">"Txateatu burbuilak erabilita"</string>
     <string name="bubble_bar_education_stack_text" msgid="2446934610817409820">"Elkarrizketa berriak ikono gisa agertzen dira pantailaren beheko izkinan. Zabaltzeko, saka itzazu. Baztertzeko, aldiz, arrasta itzazu."</string>
     <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"Kontrolatu burbuilak edonoiz"</string>

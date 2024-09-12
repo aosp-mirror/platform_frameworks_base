@@ -149,7 +149,7 @@
     <string name="issuerecord_ongoing_screen_only" msgid="6248206059935015722">"ରେକର୍ଡିଂରେ ସମସ୍ୟା"</string>
     <string name="issuerecord_share_label" msgid="3992657993619876199">"ସେୟାର କରନ୍ତୁ"</string>
     <string name="issuerecord_save_title" msgid="4161043023696751591">"ସମସ୍ୟାର ରେକର୍ଡିଂକୁ ସେଭ କରାଯାଇଛି"</string>
-    <string name="issuerecord_save_text" msgid="1205985304551521495">"ଦେଖିବାକୁ ଟାପ୍ କରନ୍ତୁ"</string>
+    <string name="issuerecord_save_text" msgid="1205985304551521495">"ଭ୍ୟୁ କରିବାକୁ ଟାପ କରନ୍ତୁ"</string>
     <string name="issuerecord_save_error" msgid="6913040083446722726">"ସମସ୍ୟାର ରେକର୍ଡିଂ କରିବାରେ ତ୍ରୁଟି"</string>
     <string name="issuerecord_start_error" msgid="3402782952722871190">"ସମସ୍ୟାର ରେକର୍ଡିଂ ଆରମ୍ଭ କରିବାରେ ତ୍ରୁଟି"</string>
     <string name="immersive_cling_title" msgid="8372056499315585941">"ପୂର୍ଣ୍ଣ ସ୍କ୍ରିନରେ ଦେଖିବା"</string>
@@ -186,6 +186,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"ଫେସ ମାଧ୍ୟମରେ ଅନଲକ କରାଯାଇଛି। ଜାରି ରଖିବାକୁ ଦବାନ୍ତୁ।"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"ଫେସ ଚିହ୍ନଟ କରାଯାଇଛି। ଜାରି ରଖିବାକୁ ଦବାନ୍ତୁ।"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"ଫେସ ଚିହ୍ନଟ କରାଯାଇଛି। ଜାରି ରଖିବାକୁ ଅନଲକ ଆଇକନ ଦବାନ୍ତୁ।"</string>
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"ଫେସ ମାଧ୍ୟମରେ ଅନଲକ କରାଯାଇଛି। ଜାରି ରଖିବାକୁ ଟାପ କରନ୍ତୁ।"</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"ପ୍ରାମାଣିକତା ହୋଇଛି"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"ପ୍ରମାଣୀକରଣକୁ ବାତିଲ କରନ୍ତୁ"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"ଅଧିକ ବିକଳ୍ପ"</string>
@@ -222,7 +223,7 @@
     <string name="face_re_enroll_dialog_title" msgid="6392173708176069994">"ଫେସ ଅନଲକ ସେଟ ଅପ କରନ୍ତୁ"</string>
     <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"ଫେସ ଅନଲକ ପୁଣି ସେଟ ଅପ କରିବାକୁ ଆପଣଙ୍କ ବର୍ତ୍ତମାନର ଫେସ ମଡେଲ ଡିଲିଟ ହୋଇଯିବ।\n\nଆପଣଙ୍କ ଫୋନକୁ ଅନଲକ କରିବା ପାଇଁ ଆପଣଙ୍କ ଫେସ ବ୍ୟବହାର କରିବାକୁ ଆପଣଙ୍କୁ ଏହି ଫିଚର ପୁଣି ସେଟ ଅପ କରିବାକୁ ହେବ।"</string>
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"ଫେସ ଅନଲକ ସେଟ ଅପ କରାଯାଇପାରିଲା ନାହିଁ। ପୁଣି ଚେଷ୍ଟା କରିବା ପାଇଁ ସେଟିଂସକୁ ଯାଆନ୍ତୁ।"</string>
-    <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"ଟିପଚିହ୍ନ ସେନସର୍‌କୁ ଛୁଅଁନ୍ତୁ"</string>
+    <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"ଟିପଚିହ୍ନ ସେନସରକୁ ସ୍ପର୍ଶ କରନ୍ତୁ"</string>
     <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"ଜାରି ରଖିବାକୁ ଅନଲକ ଆଇକନ ଦବାନ୍ତୁ"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="5542430577183894219">"ଫେସ ଚିହ୍ନଟ କରାଯାଇନାହିଁ। ଟିପଚିହ୍ନ ବ୍ୟବହାର କରନ୍ତୁ।"</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
@@ -375,7 +376,7 @@
     <string name="qs_record_issue_label" msgid="8166290137285529059">"ସମସ୍ୟାର ରେକର୍ଡ କରନ୍ତୁ"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"ଆରମ୍ଭ କରନ୍ତୁ"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"ବନ୍ଦ କରନ୍ତୁ"</string>
-    <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"ବଗ୍‌ ରିପୋର୍ଟ୍‌"</string>
+    <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"ବଗ ରିପୋର୍ଟ"</string>
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"ଆପଣଙ୍କ ଡିଭାଇସ ଅନୁଭୂତିର କେଉଁ ଅଂଶ ପ୍ରଭାବିତ ହୋଇଛି?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"ସମସ୍ୟାର ପ୍ରକାର ଚୟନ କରନ୍ତୁ"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"ସ୍କ୍ରିନ ରେକର୍ଡ"</string>
@@ -560,7 +561,7 @@
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
     <string name="monitoring_subtitle_network_logging" msgid="2444199331891219596">"ନେଟୱାର୍କ ଲଗିଂ"</string>
     <string name="monitoring_subtitle_ca_certificate" msgid="8588092029755175800">"CA ସର୍ଟିଫିକେଟ୍‌"</string>
-    <string name="monitoring_button_view_policies" msgid="3869724835853502410">"ପଲିସୀ ଦେଖନ୍ତୁ"</string>
+    <string name="monitoring_button_view_policies" msgid="3869724835853502410">"ନୀତିଗୁଡ଼ିକୁ ଭ୍ୟୁ କରନ୍ତୁ"</string>
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକୁ ଦେଖନ୍ତୁ"</string>
     <string name="monitoring_description_named_management" msgid="505833016545056036">"ଏହି ଡିଭାଇସଟି <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>ର ଅଟେ।\n\nଆପଣଙ୍କ IT ଆଡମିନ ସେଟିଂସ, କର୍ପୋରେଟ ଆକ୍ସେସ, ଆପ୍ସ, ଆପଣଙ୍କ ଡିଭାଇସ ସହ ସମ୍ବନ୍ଧିତ ଡାଟା ଏବଂ ଆପଣଙ୍କ ଡିଭାଇସର ଲୋକେସନ ସୂଚନାକୁ ନିରୀକ୍ଷଣ ଏବଂ ପରିଚାଳନା କରିପାରିବେ।\n\nଅଧିକ ସୂଚନା ପାଇଁ, ଆପଣଙ୍କ IT ଆଡମିନଙ୍କ ସହ କଣ୍ଟାକ୍ଟ କରନ୍ତୁ।"</string>
     <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"<xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g> ଏହି ଡିଭାଇସ ସହ ସମ୍ବନ୍ଧିତ ଡାଟା ଆକ୍ସେସ କରିବା, ଆପଗୁଡ଼ିକୁ ପରିଚାଳନା କରିବା ଏବଂ ଏହି ଡିଭାଇସର ସେଟିଂସ ବଦଳାଇବାକୁ ସକ୍ଷମ ହୋଇପାରେ।\n\nଯଦି ଆପଣଙ୍କର କିଛି ପ୍ରଶ୍ନ ଅଛି, ତେବେ <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g> ସହ କଣ୍ଟାକ୍ଟ କରନ୍ତୁ।"</string>
@@ -568,7 +569,7 @@
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"ଏହି ଡିଭାଇସରେ ଆପଣଙ୍କ ସଂସ୍ଥା ଏକ ସର୍ଟିଫିକେଟ୍‍ ଅଥରିଟି ଇନଷ୍ଟଲ୍‍ କରିଛନ୍ତି। ଆପଣଙ୍କ ସୁରକ୍ଷିତ ନେଟୱର୍କ ଟ୍ରାଫିକ୍‍ ନୀରିକ୍ଷଣ କିମ୍ବା ସଂଶୋଧନ କରାଯାଇ ପାରେ।"</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"ଆପଣଙ୍କ ୱର୍କ ପ୍ରୋଫାଇଲରେ ଆପଣଙ୍କ ସଂସ୍ଥା ଏକ ସର୍ଟିଫିକେଟ୍‍ ଅଥରିଟି ଇନଷ୍ଟଲ୍‍ କରିଛନ୍ତି। ଆପଣଙ୍କ ସୁରକ୍ଷିତ ନେଟୱର୍କ ଟ୍ରାଫିକ୍‍ ନୀରିକ୍ଷଣ କିମ୍ବା ସଂଶୋଧନ କରାଯାଇ ପାରେ।"</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"ଏହି ଡିଭାଇସରେ ଏକ ସର୍ଟିଫିକେଟ୍‍ ଅଥରିଟି ଇନଷ୍ଟଲ୍‍ କରାଯାଇଛି। ଆପଣଙ୍କ ସୁରକ୍ଷିତ ନେଟୱର୍କ ଟ୍ରାଫିକ୍‍ ନୀରିକ୍ଷଣ କିମ୍ବା ସଂଶୋଧନ କରାଯାଇ ପାରେ।"</string>
-    <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"ଆପଣଙ୍କ ଆଡମିନ୍‍ ନେଟୱର୍କ ଲଗଇନ୍‍ କରିବା ଅନ୍‍ କରିଛନ୍ତି, ଯାହା ଆପଣଙ୍କ ଡିଭାଇସରେ ଟ୍ରାଫିକ୍‍ ନୀରିକ୍ଷଣ କରେ।"</string>
+    <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"ଆପଣଙ୍କ ଆଡମିନ ନେଟୱାର୍କ ଲଗିଂ ଚାଲୁ କରିଛନ୍ତି, ଯାହା ଆପଣଙ୍କ ଡିଭାଇସରେ ଟ୍ରାଫିକ ନୀରିକ୍ଷଣ କରେ।"</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"ଆପଣଙ୍କ ଆଡମିନ୍ ନେଟୱାର୍କ ଲଗିଂ ଚାଲୁ କରିଛନ୍ତି, ଯାହା ଆପଣଙ୍କ ୱାର୍କ ପ୍ରୋଫାଇଲରେ ଟ୍ରାଫିକ୍ ନିରୀକ୍ଷଣ କରେ କିନ୍ତୁ ଆପଣଙ୍କ ବ୍ୟକ୍ତିଗତ ପ୍ରୋଫାଇଲରେ ନୁହେଁ।"</string>
     <string name="monitoring_description_named_vpn" msgid="8220190039787149671">"ଏହି ଡିଭାଇସ <xliff:g id="VPN_APP">%1$s</xliff:g> ମାଧ୍ୟମରେ ଇଣ୍ଟରନେଟ ସହ କନେକ୍ଟ ହୋଇଛି। ଇମେଲ ଏବଂ ବ୍ରାଉଜିଂ ଡାଟା ସମେତ, ଆପଣଙ୍କ ନେଟୱାର୍କ କାର୍ଯ୍ୟକଳାପ VPN ପ୍ରଦାନକାରୀଙ୍କୁ ଦେଖାଯାଉଛି।"</string>
     <string name="monitoring_description_managed_device_named_vpn" msgid="7693648349547785255">"ଏହି ଡିଭାଇସ <xliff:g id="VPN_APP">%1$s</xliff:g> ମାଧ୍ୟମରେ ଇଣ୍ଟରନେଟ ସହ କନେକ୍ଟ ଅଛି। ଇମେଲ ଏବଂ ବ୍ରାଉଜିଂ ଡାଟା ସମେତ, ଆପଣଙ୍କ ନେଟୱାର୍କ କାର୍ଯ୍ୟକଳାପ ଆପଣଙ୍କର IT ଆଡମିନଙ୍କୁ ଦୃଶ୍ୟମାନ ହୋଇଥାଏ।"</string>
@@ -609,7 +610,7 @@
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"ଏହି ଆପକୁ ଅନପିନ କରିବାକୁ, \"ବ୍ୟାକ\" ଏବଂ \"ହୋମ\" ବଟନକୁ ସ୍ପର୍ଶ କରି ଦବାଇ ଧରନ୍ତୁ"</string>
     <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"ଏହି ଆପକୁ ଅନପିନ୍ କରିବାକୁ, ଉପରକୁ ସ୍ୱାଇପ୍ କରି ଧରି ରଖନ୍ତୁ"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"ବୁଝିଗଲି"</string>
-    <string name="screen_pinning_negative" msgid="6882816864569211666">"ନାହିଁ, ଥାଉ"</string>
+    <string name="screen_pinning_negative" msgid="6882816864569211666">"ନା, ଧନ୍ୟବାଦ"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"ଆପ୍ ପିନ୍ କରାଯାଇଛି"</string>
     <string name="screen_pinning_exit" msgid="4553787518387346893">"ଆପ୍ ଅନପିନ୍ କରାଯାଇଛି"</string>
     <string name="stream_voice_call" msgid="7468348170702375660">"କଲ କରନ୍ତୁ"</string>

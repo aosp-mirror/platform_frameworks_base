@@ -19,7 +19,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="4811759950673118541">"UI systemu"</string>
+    <string name="app_label" msgid="4811759950673118541">"Interfejs systemu"</string>
     <string name="battery_low_title" msgid="5319680173344341779">"Włączyć Oszczędzanie baterii?"</string>
     <string name="battery_low_description" msgid="3282977755476423966">"Masz już tylko <xliff:g id="PERCENTAGE">%s</xliff:g> baterii. Oszczędzanie baterii uruchamia ciemny motyw, ogranicza aktywność w tle i opóźnia powiadomienia."</string>
     <string name="battery_low_intro" msgid="5148725009653088790">"Oszczędzanie baterii uruchamia ciemny motyw, ogranicza aktywność w tle i opóźnia powiadomienia."</string>
@@ -186,6 +186,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Odblokowano rozpoznawaniem twarzy. Kliknij, aby kontynuować."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Twarz rozpoznana. Kliknij, aby kontynuować."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Twarz rozpoznana. Aby kontynuować, kliknij ikonę odblokowywania."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"Odblokowano skanem twarzy. Kliknij, aby przejść dalej."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Uwierzytelniono"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Anuluj uwierzytelnianie"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"Więcej opcji"</string>
@@ -369,19 +370,19 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"Komunikacja NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"Komunikacja NFC jest wyłączona"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"Komunikacja NFC jest włączona"</string>
-    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Nagrywanie ekranu"</string>
+    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Nagraj ekran"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Rozpocznij"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Zatrzymaj"</string>
     <string name="qs_record_issue_label" msgid="8166290137285529059">"Zarejestruj problem"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"Rozpocznij"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"Zatrzymaj"</string>
-    <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"Raport o błędzie"</string>
+    <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"Zgłoś błąd"</string>
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"Którego aspektu korzystania z urządzenia dotyczył problem?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"Wybierz typ problemu"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Nagrywanie ekranu"</string>
     <string name="performance" msgid="6552785217174378320">"Wydajność"</string>
     <string name="user_interface" msgid="3712869377953950887">"Interfejs"</string>
-    <string name="thermal" msgid="6758074791325414831">"Termografia"</string>
+    <string name="thermal" msgid="6758074791325414831">"Temperatura"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Tryb jednej ręki"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"Urządzenia słuchowe"</string>
     <string name="quick_settings_hearing_devices_connected" msgid="6519069502397037781">"Aktywne"</string>

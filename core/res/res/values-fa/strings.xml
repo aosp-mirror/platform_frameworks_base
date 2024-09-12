@@ -1057,19 +1057,19 @@
     <string name="lockscreen_access_pattern_cell_added_verbose" msgid="2931364927622563465">"سلول <xliff:g id="CELL_INDEX">%1$s</xliff:g> اضافه شد"</string>
     <string name="lockscreen_access_pattern_detected" msgid="3931150554035194012">"الگو کامل شد"</string>
     <string name="lockscreen_access_pattern_area" msgid="1288780416685002841">"ناحیه الگو"</string>
-    <string name="keyguard_accessibility_widget_changed" msgid="7298011259508200234">"‏%1$s. ابزارک %2$d از %3$d."</string>
-    <string name="keyguard_accessibility_add_widget" msgid="8245795023551343672">"ابزارک اضافه کنید."</string>
+    <string name="keyguard_accessibility_widget_changed" msgid="7298011259508200234">"‏%1$s. ابزاره %2$d از %3$d."</string>
+    <string name="keyguard_accessibility_add_widget" msgid="8245795023551343672">"ابزاره اضافه کنید."</string>
     <string name="keyguard_accessibility_widget_empty_slot" msgid="544239307077644480">"خالی"</string>
     <string name="keyguard_accessibility_unlock_area_expanded" msgid="7768634718706488951">"منطقه بازگشایی گسترده شد."</string>
     <string name="keyguard_accessibility_unlock_area_collapsed" msgid="4729922043778400434">"منطقه بازگشایی کوچک شد."</string>
-    <string name="keyguard_accessibility_widget" msgid="6776892679715699875">"ابزارک <xliff:g id="WIDGET_INDEX">%1$s</xliff:g>."</string>
+    <string name="keyguard_accessibility_widget" msgid="6776892679715699875">"ابزاره <xliff:g id="WIDGET_INDEX">%1$s</xliff:g>."</string>
     <string name="keyguard_accessibility_user_selector" msgid="1466067610235696600">"انتخابگر کاربر"</string>
     <string name="keyguard_accessibility_status" msgid="6792745049712397237">"وضعیت"</string>
     <string name="keyguard_accessibility_camera" msgid="7862557559464986528">"دوربین"</string>
     <string name="keygaurd_accessibility_media_controls" msgid="2267379779900620614">"کنترل‌های رسانه"</string>
-    <string name="keyguard_accessibility_widget_reorder_start" msgid="7066213328912939191">"مرتب سازی مجدد ابزارک آغاز شد."</string>
-    <string name="keyguard_accessibility_widget_reorder_end" msgid="1083806817600593490">"مرتب‌سازی مجدد ابزارک به پایان رسید."</string>
-    <string name="keyguard_accessibility_widget_deleted" msgid="1509738950119878705">"ابزارک <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> حذف شد.‍"</string>
+    <string name="keyguard_accessibility_widget_reorder_start" msgid="7066213328912939191">"مرتب سازی مجدد ابزاره آغاز شد."</string>
+    <string name="keyguard_accessibility_widget_reorder_end" msgid="1083806817600593490">"مرتب‌سازی مجدد ابزاره به پایان رسید."</string>
+    <string name="keyguard_accessibility_widget_deleted" msgid="1509738950119878705">"ابزاره <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> حذف شد.‍"</string>
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"گسترده کردن منطقه بازگشایی شده."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"باز کردن قفل با کشیدن انگشت روی صفحه."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"باز کردن قفل با الگو."</string>
@@ -1183,7 +1183,7 @@
     <string name="copyUrl" msgid="6229645005987260230">"‏کپی URL"</string>
     <string name="selectTextMode" msgid="3225108910999318778">"انتخاب متن"</string>
     <string name="undo" msgid="3175318090002654673">"لغو"</string>
-    <string name="redo" msgid="7231448494008532233">"بازانجام"</string>
+    <string name="redo" msgid="7231448494008532233">"ازنو انجام دادن"</string>
     <string name="autofill" msgid="511224882647795296">"تکمیل خودکار"</string>
     <string name="textSelectionCABTitle" msgid="5151441579532476940">"انتخاب متن"</string>
     <string name="addToDictionary" msgid="8041821113480950096">"افزودن به واژه‌نامه"</string>
@@ -1501,7 +1501,7 @@
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"پُرسمان همه بسته‌ها"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"به برنامه اجازه می‌دهد همه بسته‌های نصب‌شده را ببیند."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"برای کنترل بزرگ‌نمایی، دو بار تک‌ضرب بزنید"</string>
-    <string name="gadget_host_error_inflating" msgid="2449961590495198720">"افزودن ابزارک انجام نشد."</string>
+    <string name="gadget_host_error_inflating" msgid="2449961590495198720">"افزودن ابزاره انجام نشد."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"برو"</string>
     <string name="ime_action_search" msgid="4501435960587287668">"جستجو"</string>
     <string name="ime_action_send" msgid="8456843745664334138">"ارسال"</string>
@@ -2382,13 +2382,13 @@
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"قرینه‌سازی روی نمایشگر ممکن نبود"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"از کابل دیگری استفاده کنید و دوباره امتحان کنید"</string>
     <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"دستگاه بسیار گرم است و تا زمانی‌که خنک نشود نمی‌تواند محتوا را روی نمایشگر قرینه‌سازی کند."</string>
-    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"‫Dual screen"</string>
-    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"‏‫Dual Screen روشن است"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"صفحه‌نمایش دوگانه"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"‫«صفحه‌نمایش دوگانه» روشن است"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"‫<xliff:g id="APP_NAME">%1$s</xliff:g> از هر دو نمایشگر برای نمایش محتوا استفاده می‌کند"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"دستگاه بیش‌ازحد گرم شده است"</string>
-    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"‏‫Dual Screen دردسترس نیست زیرا تلفن بیش‌ازحد گرم شده است"</string>
-    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"‏Dual Screen دردسترس نیست"</string>
-    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"‏Dual Screen دردسترس نیست چون «بهینه‌سازی باتری» روشن است. می‌توانید این ویژگی را در «تنظیمات» خاموش کنید."</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"‫«صفحه‌نمایش دوگانه» دردسترس نیست زیرا تلفن بیش‌ازحد گرم شده است"</string>
+    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"«صفحه‌نمایش دوگانه» دردسترس نیست"</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"«صفحه‌نمایش دوگانه» دردسترس نیست چون «بهینه‌سازی باتری» روشن است. می‌توانید این ویژگی را در «تنظیمات» خاموش کنید."</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"رفتن به تنظیمات"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"خاموش کردن"</string>
     <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"‫<xliff:g id="DEVICE_NAME">%s</xliff:g> پیکربندی شد"</string>

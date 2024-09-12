@@ -42,8 +42,8 @@ android_test {
         "test/src/**/*.java",
     ],
     libs: [
-        "android.test.base",
-        "android.test.runner",
+        "android.test.base.stubs.system",
+        "android.test.runner.stubs.system",
     ],
     static_libs: [
         "androidx.test.core",

@@ -346,6 +346,9 @@ class MultiPointerDraggableTest {
 
         continueDraggingDown()
         assertThat(stopped).isTrue()
+
+        // Complete the gesture
+        rule.onRoot().performTouchInput { up() }
     }
 
     @Test

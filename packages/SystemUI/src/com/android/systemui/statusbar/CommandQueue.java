@@ -62,6 +62,7 @@ import android.view.accessibility.Flags;
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
+import com.android.internal.annotations.KeepForWeakReference;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.statusbar.IAddTileResultCallback;
 import com.android.internal.statusbar.IStatusBar;
@@ -191,10 +192,10 @@ public class CommandQueue extends IStatusBar.Stub implements
     private static final String SHOW_IME_SWITCHER_KEY = "showImeSwitcherKey";
 
     private final Object mLock = new Object();
-    private ArrayList<Callbacks> mCallbacks = new ArrayList<>();
-    private Handler mHandler = new H(Looper.getMainLooper());
+    private final ArrayList<Callbacks> mCallbacks = new ArrayList<>();
+    private final Handler mHandler = new H(Looper.getMainLooper());
     /** A map of display id - disable flag pair */
-    private SparseArray<Pair<Integer, Integer>> mDisplayDisabled = new SparseArray<>();
+    private final SparseArray<Pair<Integer, Integer>> mDisplayDisabled = new SparseArray<>();
     /**
      * The last ID of the display where IME window for which we received setImeWindowStatus
      * event.
@@ -204,6 +205,21 @@ public class CommandQueue extends IStatusBar.Stub implements
     private final @Nullable CommandRegistry mRegistry;
     private final @Nullable DumpHandler mDumpHandler;
     private final @Nullable Lazy<PowerInteractor> mPowerInteractor;
+
+    @KeepForWeakReference
+    private final DisplayTracker.Callback mDisplayTrackerCallback = new DisplayTracker.Callback() {
+        @Override
+        public void onDisplayRemoved(int displayId) {
+            synchronized (mLock) {
+                mDisplayDisabled.remove(displayId);
+            }
+            // This callback is registered with {@link #mHandler} that already posts to run on
+            // main thread, so it is safe to dispatch directly.
+            for (int i = mCallbacks.size() - 1; i >= 0; i--) {
+                mCallbacks.get(i).onDisplayRemoved(displayId);
+            }
+        }
+    };
 
     /**
      * These methods are called back on the main thread.
@@ -574,19 +590,8 @@ public class CommandQueue extends IStatusBar.Stub implements
         mDisplayTracker = displayTracker;
         mRegistry = registry;
         mDumpHandler = dumpHandler;
-        mDisplayTracker.addDisplayChangeCallback(new DisplayTracker.Callback() {
-            @Override
-            public void onDisplayRemoved(int displayId) {
-                synchronized (mLock) {
-                    mDisplayDisabled.remove(displayId);
-                }
-                // This callback is registered with {@link #mHandler} that already posts to run on
-                // main thread, so it is safe to dispatch directly.
-                for (int i = mCallbacks.size() - 1; i >= 0; i--) {
-                    mCallbacks.get(i).onDisplayRemoved(displayId);
-                }
-            }
-        }, new HandlerExecutor(mHandler));
+        mDisplayTracker.addDisplayChangeCallback(mDisplayTrackerCallback,
+                new HandlerExecutor(mHandler));
         // We always have default display.
         setDisabled(mDisplayTracker.getDefaultDisplayId(), DISABLE_NONE, DISABLE2_NONE);
         mPowerInteractor = powerInteractor;

@@ -164,7 +164,7 @@
     <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Не спалучана з прыладай <xliff:g id="DEVICE_NAME">%1$s</xliff:g> з-за няправільнага PIN-кода або ключа доступу."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Не магу размаўляць з прыладай <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Злучэнне адхілена прыладай <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Камп\'ютар"</string>
+    <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Камп’ютар"</string>
     <string name="bluetooth_talkback_headset" msgid="3406852564400882682">"Гарнітура"</string>
     <string name="bluetooth_talkback_phone" msgid="868393783858123880">"Тэлефон"</string>
     <string name="bluetooth_talkback_imaging" msgid="8781682986822514331">"Прылада апрацоўкі відарысаў"</string>
@@ -343,10 +343,10 @@
     <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"Перадача даных мабільнай сувязі заўсёды актыўная, нават калі актыўная сетка Wi‑Fi (для хуткага пераключэння паміж сеткамі)."</string>
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Выкарыстоўваць апаратнае паскарэнне ў рэжыме мадэма пры наяўнасці"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"Дазволіць адладку па USB?"</string>
-    <string name="adb_warning_message" msgid="8145270656419669221">"Адладка па USB прызначана толькі для мэт распрацоўкі. Яна можа выкарыстоўвацца, каб капіраваць даныя паміж камп\'ютарам і прыладай, усталёўваць праграмы на прыладзе без папярэдняга апавяшчэння і чытаць даныя журнала."</string>
+    <string name="adb_warning_message" msgid="8145270656419669221">"Адладка па USB прызначана толькі для мэт распрацоўкі. Яна можа выкарыстоўвацца, каб капіраваць даныя паміж камп’ютарам і прыладай, усталёўваць праграмы на прыладзе без папярэдняга апавяшчэння і чытаць даныя журнала."</string>
     <string name="adbwifi_warning_title" msgid="727104571653031865">"Дазволіць адладку па Wi-Fi?"</string>
     <string name="adbwifi_warning_message" msgid="8005936574322702388">"Адладка па Wi-Fi прызначана толькі для мэт распрацоўкі. Яна можа выкарыстоўвацца, каб капіраваць даныя паміж камп’ютарам і прыладай, усталёўваць праграмы на прыладзе без апавяшчэння і чытаць даныя журнала."</string>
-    <string name="adb_keys_warning_message" msgid="2968555274488101220">"Скасаваць доступ да адладкі па USB з усіх камп\'ютараў, на якiх вы уваходзiлi ў сiстэму?"</string>
+    <string name="adb_keys_warning_message" msgid="2968555274488101220">"Скасаваць доступ да адладкі па USB з усіх камп’ютараў, на якiх вы уваходзiлi ў сiстэму?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"Дазволiць налады распрацоўшчыка?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"Гэтыя налады прызначаны толькi для распрацоўшыкаў. Яны могуць выклікаць збоi прылад i ўсталяваных на iх прыкладанняў, а таксама перашкаджаць iх працы."</string>
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Праверце праграмы па USB"</string>

@@ -81,7 +81,7 @@
     <string name="speed_label_fast" msgid="2677719134596044051">"Быстрая"</string>
     <string name="speed_label_very_fast" msgid="8215718029533182439">"Очень быстрая"</string>
     <string name="wifi_passpoint_expired" msgid="6540867261754427561">"Срок действия истек"</string>
-    <string name="preference_summary_default_combination" msgid="2644094566845577901">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
+    <string name="preference_summary_default_combination" msgid="2644094566845577901">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="bluetooth_disconnected" msgid="7739366554710388701">"Нет подключения"</string>
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Отключение..."</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"Подключение..."</string>
@@ -616,7 +616,7 @@
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Профиль с огр. доступом"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Добавить пользователя?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Если этим устройством пользуются сразу несколько человек, для каждого из них можно создать профиль – отдельное пространство с выбранными приложениями, обоями и т. д. Новый пользователь настраивает его сам.\n\nИз профиля можно поменять и общие настройки устройства, например сеть Wi-Fi.\n\nОбновлять общие приложения могут все, однако специальные возможности настраиваются индивидуально."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"После создания профиля его потребуется настроить.\n\nЛюбой пользователь устройства может обновлять приложения для всех аккаунтов."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"Новому пользователю потребуется настроить свой профиль.\n\nЛюбой пользователь может обновлять приложения для всех остальных."</string>
     <string name="user_grant_admin_title" msgid="5157031020083343984">"Назначить этого пользователя администратором?"</string>
     <string name="user_grant_admin_message" msgid="1673791931033486709">"У администраторов права шире, чем у других пользователей. Администратор может управлять аккаунтами всех пользователей, обновлять ПО на устройстве, менять и сбрасывать его настройки, просматривать установленные приложения, а также предоставлять и отзывать права администратора."</string>
     <string name="user_grant_admin_button" msgid="5441486731331725756">"Назначить администратором"</string>
