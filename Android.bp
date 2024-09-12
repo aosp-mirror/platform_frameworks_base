@@ -426,6 +426,7 @@ java_defaults {
         "modules-utils-expresslog",
         "perfetto_trace_javastream_protos_jarjar",
         "libaconfig_java_proto_nano",
+        "aconfig_device_paths_java",
     ],
 }
 
