@@ -1115,10 +1115,8 @@ class AppIdPermissionPolicy : SchemePolicy() {
     }
 
     private fun MutateStateScope.inheritImplicitPermissionStates(appId: Int, userId: Int) {
-        var targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT
         val implicitPermissions = MutableIndexedSet<String>()
         forEachPackageInAppId(appId) {
-            targetSdkVersion = targetSdkVersion.coerceAtMost(it.androidPackage!!.targetSdkVersion)
             implicitPermissions += it.androidPackage!!.implicitPermissions
         }
         implicitPermissions.forEachIndexed implicitPermissions@{ _, implicitPermissionName ->
@@ -1155,10 +1153,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
                     newFlags = newFlags or (sourceFlags and PermissionFlags.MASK_RUNTIME)
                 }
             }
-            if (
-                targetSdkVersion >= Build.VERSION_CODES.M &&
-                    implicitPermissionName in NO_IMPLICIT_FLAG_PERMISSIONS
-            ) {
+            if (implicitPermissionName in RETAIN_IMPLICIT_FLAGS_PERMISSIONS) {
                 newFlags = newFlags andInv PermissionFlags.IMPLICIT
             } else {
                 newFlags = newFlags or PermissionFlags.IMPLICIT
@@ -1787,7 +1782,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
         private const val PLATFORM_PACKAGE_NAME = "android"
 
         // A set of permissions that we don't want to revoke when they are no longer implicit.
-        private val NO_IMPLICIT_FLAG_PERMISSIONS =
+        private val RETAIN_IMPLICIT_FLAGS_PERMISSIONS =
             indexedSetOf(
                 Manifest.permission.ACCESS_MEDIA_LOCATION,
                 Manifest.permission.ACTIVITY_RECOGNITION,

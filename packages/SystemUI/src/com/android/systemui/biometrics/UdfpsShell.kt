@@ -75,8 +75,6 @@ class UdfpsShell @Inject constructor(commandRegistry: CommandRegistry) : Command
             simFingerUp()
         } else if (args.size == 1 && args[0] == "biometricPrompt") {
             launchBiometricPrompt()
-        } else if (args.size == 2 && args[0] == "setIgnoreDisplayTouches") {
-            setIgnoreDisplayTouches(args[1].toBoolean())
         } else {
             invalidCommand(pw)
         }
@@ -186,11 +184,6 @@ class UdfpsShell @Inject constructor(commandRegistry: CommandRegistry) : Command
             )
         udfpsOverlayController?.debugOnTouch(upEvent)
         upEvent?.recycle()
-    }
-
-    @VisibleForTesting
-    fun setIgnoreDisplayTouches(ignoreTouches: Boolean) {
-        udfpsOverlayController?.debugSetIgnoreDisplayTouches(ignoreTouches)
     }
 
     private fun obtainMotionEvent(

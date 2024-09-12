@@ -256,7 +256,6 @@ constructor(
                 it.cancel()
                 null
             }
-        mOverlayStateController.setExitAnimationsRunning(false)
     }
 
     private fun blurAnimator(

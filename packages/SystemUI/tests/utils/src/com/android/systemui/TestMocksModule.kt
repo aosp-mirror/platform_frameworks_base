@@ -18,7 +18,6 @@ package com.android.systemui
 import android.app.ActivityManager
 import android.app.admin.DevicePolicyManager
 import android.app.trust.TrustManager
-import android.hardware.fingerprint.FingerprintManager
 import android.os.UserManager
 import android.service.notification.NotificationListenerService
 import android.util.DisplayMetrics
@@ -95,7 +94,6 @@ data class TestMocksModule(
     @get:Provides val deviceProvisionedController: DeviceProvisionedController = mock(),
     @get:Provides val dozeParameters: DozeParameters = mock(),
     @get:Provides val dumpManager: DumpManager = mock(),
-    @get:Provides val fingerprintManager: FingerprintManager = mock(),
     @get:Provides val headsUpManager: HeadsUpManager = mock(),
     @get:Provides val guestResumeSessionReceiver: GuestResumeSessionReceiver = mock(),
     @get:Provides val keyguardBypassController: KeyguardBypassController = mock(),

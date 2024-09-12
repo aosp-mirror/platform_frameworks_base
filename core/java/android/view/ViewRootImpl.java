@@ -126,7 +126,6 @@ import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodCl
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 import static com.android.window.flags.Flags.activityWindowInfoFlag;
 import static com.android.window.flags.Flags.enableBufferTransformHintFromDisplay;
-import static com.android.window.flags.Flags.insetsControlChangedItem;
 import static com.android.window.flags.Flags.setScPropertiesInClient;
 import static com.android.window.flags.Flags.windowSessionRelayoutInfo;
 import static com.android.text.flags.Flags.disableHandwritingInitiatorForIme;
@@ -1267,6 +1266,7 @@ public final class ViewRootImpl implements ViewParent,
         mDensity = context.getResources().getDisplayMetrics().densityDpi;
         mNoncompatDensity = context.getResources().getDisplayMetrics().noncompatDensityDpi;
         mFallbackEventHandler = new PhoneFallbackEventHandler(context);
+        // TODO(b/222696368): remove getSfInstance usage and use vsyncId for transactions
         mChoreographer = Choreographer.getInstance();
         mInsetsController = new InsetsController(new ViewRootInsetsControllerHost(this));
         mImeBackAnimationController = new ImeBackAnimationController(this, mInsetsController);
@@ -4405,7 +4405,7 @@ public final class ViewRootImpl implements ViewParent,
         if (mAppStartInfoTimestampsFlagValue && !mAppStartTrackingStarted) {
             mAppStartTrackingStarted = true;
             Transaction transaction = new Transaction();
-            transaction.addTransactionCompletedListener(mSimpleExecutor,
+            transaction.addTransactionCompletedListener(mExecutor,
                     new Consumer<TransactionStats>() {
                         @Override
                         public void accept(TransactionStats transactionStats) {
@@ -11417,13 +11417,8 @@ public final class ViewRootImpl implements ViewParent,
         @Override
         public void insetsControlChanged(InsetsState insetsState,
                 InsetsSourceControl.Array activeControls) {
-            final boolean isFromInsetsControlChangeItem;
-            if (insetsControlChangedItem()) {
-                isFromInsetsControlChangeItem = mIsFromTransactionItem;
-                mIsFromTransactionItem = false;
-            } else {
-                isFromInsetsControlChangeItem = false;
-            }
+            final boolean isFromInsetsControlChangeItem = mIsFromTransactionItem;
+            mIsFromTransactionItem = false;
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor == null) {
                 if (isFromInsetsControlChangeItem) {

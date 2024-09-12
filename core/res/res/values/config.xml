@@ -3015,7 +3015,7 @@
     <bool name="config_syncstorageengine_masterSyncAutomatically">true</bool>
 
     <!--  Maximum number of supported users -->
-    <integer name="config_multiuserMaximumUsers">1</integer>
+    <integer name="config_multiuserMaximumUsers">4</integer>
 
     <!-- Maximum number of users we allow to be running at a time -->
     <integer name="config_multiuserMaxRunningUsers">3</integer>
@@ -5806,6 +5806,9 @@
 
     <!-- The action name for the default profcollect report uploader app. -->
     <string name="config_defaultProfcollectReportUploaderAction" translatable="false"></string>
+
+    <!-- Names of packages excluded by Profcollect onCameraOpened observer. -->
+    <string-array name="config_profcollectOnCameraOpenedSkipPackages" translatable="false"></string-array>
 
     <!-- The default value used for RawContacts.ACCOUNT_NAME when contacts are inserted without this
          column set. These contacts are stored locally on the device and will not be removed even

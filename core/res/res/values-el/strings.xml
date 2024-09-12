@@ -1435,7 +1435,7 @@
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="alert_windows_notification_channel_group_name" msgid="6063891141815714246">"Εμφάνιση πάνω σε άλλες εφαρμογές"</string>
     <string name="alert_windows_notification_channel_name" msgid="3437528564303192620">"Η εφαρμογή <xliff:g id="NAME">%s</xliff:g> προβάλλεται πάνω από άλλες εφαρμογές"</string>
-    <string name="alert_windows_notification_title" msgid="6331662751095228536">"Η εφαρ. <xliff:g id="NAME">%s</xliff:g> επικαλύπτει άλλες"</string>
+    <string name="alert_windows_notification_title" msgid="6331662751095228536">"Η εφαρμογή <xliff:g id="NAME">%s</xliff:g> επικαλύπτει άλλες"</string>
     <string name="alert_windows_notification_message" msgid="6538171456970725333">"Εάν δεν θέλετε να χρησιμοποιείται αυτή η λειτουργία από την εφαρμογή <xliff:g id="NAME">%s</xliff:g>, πατήστε για να ανοίξετε τις ρυθμίσεις και απενεργοποιήστε την."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="7805857234839123780">"Απενεργοποίηση"</string>
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"Έλεγχος <xliff:g id="NAME">%s</xliff:g>…"</string>
@@ -1883,7 +1883,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"Το PIN είναι υπερβολικά μικρό. Πρέπει να έχει μέγεθος τουλάχιστον 4 χαρακτήρων."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Δοκιμάστε ξανά αργότερα"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Προβολή σε πλήρη οθόνη"</string>
-    <string name="immersive_cling_description" msgid="2896205051090870978">"Για έξοδο, σύρετε προς τα κάτω από το επάνω μέρος της οθόνης"</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Το κατάλαβα"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Περιστρέψτε την οθόνη για καλύτερη προβολή"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Ανοίξτε την εφαρμογή <xliff:g id="NAME">%s</xliff:g> σε πλήρη οθόνη για καλύτερη προβολή"</string>
@@ -2107,7 +2108,7 @@
     <string name="popup_window_default_title" msgid="6907717596694826919">"Αναδυόμενο παράθυρο"</string>
     <string name="slice_more_content" msgid="3377367737876888459">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="shortcut_restored_on_lower_version" msgid="9206301954024286063">"Η έκδοση εφαρμογής υποβαθμίστηκε ή δεν είναι συμβατή με αυτήν τη συντόμευση"</string>
-    <string name="shortcut_restore_not_supported" msgid="4763198938588468400">"Δεν ήταν δυνατή η επαναφορά της συντόμευσης, επειδή η εφαρμογή δεν υποστηρίζει τη δημιουργία αντιγράφου ασφαλείας και την επαναφορά"</string>
+    <string name="shortcut_restore_not_supported" msgid="4763198938588468400">"Δεν ήταν δυνατή η επαναφορά της συντόμευσης, επειδή η εφαρμογή δεν υποστηρίζει τη δημιουργία αντιγράφων ασφαλείας και την επαναφορά"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="579345304221605479">"Δεν ήταν δυνατή η επαναφορά της συντόμευσης, λόγω αναντιστοιχίας της υπογραφής εφαρμογής"</string>
     <string name="shortcut_restore_unknown_issue" msgid="2478146134395982154">"Δεν ήταν δυνατή η επαναφορά της συντόμευσης"</string>
     <string name="shortcut_disabled_reason_unknown" msgid="753074793553599166">"Η συντόμευση είναι απενεργοποιημένη"</string>
@@ -2417,12 +2418,12 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Πώς λειτουργεί"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Σε εκκρεμότητα…"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Επαναρρύθμιση λειτουργίας Ξεκλείδωμα με δακτυλικό αποτύπωμα"</string>
-    <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"Δεν είναι πλέον δυνατή η αναγνώριση του <xliff:g id="FINGERPRINT">%s</xliff:g>."</string>
-    <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"Δεν είναι πλέον δυνατή η αναγνώριση του <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> και του <xliff:g id="FINGERPRINT_1">%2$s</xliff:g>."</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="1824812666549916586">"Δεν είναι πλέον δυνατή η αναγνώριση του <xliff:g id="FINGERPRINT">%s</xliff:g>. Ρυθμίστε ξανά τη λειτουργία Ξεκλείδωμα με δακτυλικό αποτύπωμα."</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="5974657382960155099">"Δεν είναι πλέον δυνατή η αναγνώριση του <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> και του <xliff:g id="FINGERPRINT_1">%2$s</xliff:g>. Ρυθμίστε ξανά τη λειτουργία Ξεκλείδωμα με δακτυλικό αποτύπωμα."</string>
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"Το δακτυλικό αποτύπωμα <xliff:g id="FINGERPRINT">%s</xliff:g> δεν λειτουργούσε καλά και διαγράφηκε"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"Τα δακτυλικά αποτυπώματα <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> και <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> δεν λειτουργούσαν καλά και διαγράφηκαν"</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"Το δακτυλικό αποτύπωμα <xliff:g id="FINGERPRINT">%s</xliff:g> δεν λειτουργούσε καλά και διαγράφηκε. Ρυθμίστε το ξανά για να ξεκλειδώνετε το τηλέφωνο με το δακτυλικό αποτύπωμά σας."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"Τα δακτυλικά αποτυπώματα <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> και <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> δεν λειτουργούσαν καλά και διαγράφηκαν. Ρυθμίστε τα ξανά για να ξεκλειδώνετε το τηλέφωνο με το δακτυλικό αποτύπωμά σας."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Επαναρρύθμιση λειτουργίας Ξεκλείδωμα με το πρόσωπο"</string>
-    <string name="face_dangling_notification_msg" msgid="746235263598985384">"Δεν είναι πλέον δυνατή η αναγνώριση του μοντέλου προσώπου σας. Ρυθμίστε ξανά τη λειτουργία Ξεκλείδωμα με το πρόσωπο."</string>
+    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"Το μοντέλο προσώπου δεν λειτουργούσε καλά και διαγράφηκε. Ρυθμίστε το ξανά για να ξεκλειδώνετε το τηλέφωνο με το πρόσωπό σας."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Ρύθμιση"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Όχι τώρα"</string>
 </resources>

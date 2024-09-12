@@ -129,20 +129,22 @@
     <skip />
     <!-- no translation found for screenrecord_stop_dialog_message (1926783607059442889) -->
     <skip />
-    <string name="screenrecord_stop_dialog_message_specific_app" msgid="5285148796772616326">"ਤੁਸੀਂ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ਨੂੰ ਰਿਕਾਰਡ ਕਰਨਾ ਬੰਦ ਕਰ ਦੇਵੋਗੇ"</string>
-    <string name="screenrecord_stop_dialog_button" msgid="2883812564938194350">"ਰਿਕਾਰਡਿੰਗ ਬੰਦ ਕਰੋ"</string>
-    <string name="share_to_app_stop_dialog_title" msgid="9212915050910250438">"ਕੀ ਸਕ੍ਰੀਨ ਨੂੰ ਸਾਂਝਾ ਕਰਨਾ ਬੰਦ ਕਰਨਾ ਹੈ?"</string>
+    <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
+    <skip />
+    <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
+    <skip />
     <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
     <skip />
-    <string name="share_to_app_stop_dialog_message_specific_app" msgid="124371406810544777">"ਤੁਸੀਂ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ਨੂੰ ਸਾਂਝਾ ਕਰਨਾ ਬੰਦ ਕਰ ਦੇਵੋਗੇ"</string>
-    <string name="share_to_app_stop_dialog_button" msgid="6334056916284230217">"ਸਾਂਝਾਕਰਨ ਬੰਦ ਕਰੋ"</string>
+    <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
+    <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
     <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
     <skip />
-    <string name="cast_to_other_device_stop_dialog_message_specific_app" msgid="4891536209254041850">"ਤੁਸੀਂ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ਨੂੰ ਕਾਸਟ ਕਰਨਾ ਬੰਦ ਕਰ ਦੇਵੋਗੇ"</string>
-    <string name="cast_to_other_device_stop_dialog_button" msgid="6420183747435521834">"ਕਾਸਟ ਕਰਨਾ ਬੰਦ ਕਰੋ"</string>
-    <string name="close_dialog_button" msgid="4749497706540104133">"ਬੰਦ ਕਰੋ"</string>
+    <!-- no translation found for cast_to_other_device_stop_dialog_button (6420183747435521834) -->
+    <skip />
+    <!-- no translation found for close_dialog_button (4749497706540104133) -->
+    <skip />
     <string name="issuerecord_title" msgid="286627115110121849">"ਸਮੱਸਿਆ ਰਿਕਾਰਡਰ"</string>
     <string name="issuerecord_background_processing_label" msgid="1666840264959336876">"ਸਮੱਸਿਆ ਰਿਕਾਰਡਿੰਗ ਪ੍ਰਕਿਰਿਆ-ਅਧੀਨ ਹੈ"</string>
     <string name="issuerecord_channel_description" msgid="6142326363431474632">"ਸਮੱਸਿਆ ਬਾਰੇ ਜਾਣਕਾਰੀ ਇਕੱਤਰ ਕਰਨ ਵਾਲੇ ਸੈਸ਼ਨ ਸੰਬੰਧੀ ਨਿਰੰਤਰ ਸੂਚਨਾ"</string>
@@ -153,7 +155,8 @@
     <string name="issuerecord_save_error" msgid="6913040083446722726">"ਸਮੱਸਿਆ ਰਿਕਾਰਡਿੰਗ ਰੱਖਿਅਤ ਕਰਨ ਵੇਲੇ ਗੜਬੜ ਹੋ ਗਈ"</string>
     <string name="issuerecord_start_error" msgid="3402782952722871190">"ਸਮੱਸਿਆ ਰਿਕਾਰਡਿੰਗ ਨੂੰ ਸ਼ੁਰੂ ਕਰਨ ਵੇਲੇ ਗੜਬੜ ਹੋ ਗਈ"</string>
     <string name="immersive_cling_title" msgid="8372056499315585941">"ਪੂਰੀ ਸਕ੍ਰੀਨ \'ਤੇ ਦੇਖਿਆ ਜਾ ਰਿਹਾ ਹੈ"</string>
-    <string name="immersive_cling_description" msgid="2717426731830851921">"ਬਾਹਰ ਜਾਣ ਲਈ, ਆਪਣੀ ਸਕ੍ਰੀਨ ਦੇ ਸਿਖਰ ਤੋਂ ਹੇਠਾਂ ਵੱਲ ਸਵਾਈਪ ਕਰੋ"</string>
+    <!-- no translation found for immersive_cling_description (2717426731830851921) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="3076681691468978568">"ਸਮਝ ਲਿਆ"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"ਪਿੱਛੇ"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"ਘਰ"</string>
@@ -186,7 +189,6 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"ਚਿਹਰੇ ਰਾਹੀਂ ਅਣਲਾਕ ਕੀਤਾ ਗਿਆ। ਜਾਰੀ ਰੱਖਣ ਲਈ ਦਬਾਓ।"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"ਚਿਹਰੇ ਦੀ ਪਛਾਣ ਹੋਈ। ਜਾਰੀ ਰੱਖਣ ਲਈ ਦਬਾਓ।"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"ਚਿਹਰੇ ਦੀ ਪਛਾਣ ਹੋਈ। ਜਾਰੀ ਰੱਖਣ ਲਈ \'ਅਣਲਾਕ ਕਰੋ\' ਪ੍ਰਤੀਕ ਨੂੰ ਦਬਾਓ।"</string>
-    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"ਚਿਹਰੇ ਰਾਹੀਂ ਅਣਲਾਕ ਕੀਤਾ ਗਿਆ। ਜਾਰੀ ਰੱਖਣ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"ਪ੍ਰਮਾਣਿਤ ਹੋਇਆ"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"ਪ੍ਰਮਾਣੀਕਰਨ ਰੱਦ ਕਰੋ"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"ਹੋਰ ਵਿਕਲਪ"</string>
@@ -297,11 +299,14 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"ਰੱਖਿਅਤ ਕੀਤਾ ਗਿਆ"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"ਡਿਸਕਨੈਕਟ ਕਰੋ"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"ਕਿਰਿਆਸ਼ੀਲ ਕਰੋ"</string>
-    <string name="turn_on_bluetooth_auto_tomorrow" msgid="3345758139235739006">"ਕੱਲ੍ਹ ਨੂੰ ਸਵੈਚਲਿਤ ਤੌਰ \'ਤੇ ਚਾਲੂ ਹੋ ਜਾਵੇਗਾ"</string>
+    <!-- no translation found for turn_on_bluetooth_auto_tomorrow (3345758139235739006) -->
+    <skip />
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"ਕਵਿੱਕ ਸ਼ੇਅਰ ਅਤੇ Find My Device ਵਰਗੀਆਂ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਬਲੂਟੁੱਥ ਵਰਤਦੀਆਂ ਹਨ"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"ਬਲੂਟੁੱਥ ਕੱਲ੍ਹ ਸਵੇਰੇ ਚਾਲੂ ਹੋ ਜਾਵੇਗਾ"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"ਆਡੀਓ ਨੂੰ ਸਾਂਝਾ ਕਰੋ"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"ਆਡੀਓ ਨੂੰ ਸਾਂਝਾ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ"</string>
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button (7545274861795853838) -->
+    <skip />
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_sharing (3069309588231072128) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> ਬੈਟਰੀ"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"ਆਡੀਓ"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"ਹੈੱਡਸੈੱਟ"</string>
@@ -581,7 +586,7 @@
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"ਇਸ ਡੀਵਾਈਸ ਦਾ ਪ੍ਰਬੰਧਨ ਤੁਹਾਡੇ ਮਾਂ-ਪਿਓ ਵੱਲੋਂ ਕੀਤਾ ਜਾਂਦਾ ਹੈ। ਤੁਹਾਡੇ ਮਾਂ-ਪਿਓ ਤੁਹਾਡੀਆਂ ਐਪਾਂ ਦੀ ਵਰਤੋਂ, ਤੁਹਾਡੇ ਟਿਕਾਣੇ ਅਤੇ ਤੁਹਾਡੇ ਸਕ੍ਰੀਨ ਸਮੇਂ ਵਰਗੀ ਜਾਣਕਾਰੀ ਨੂੰ ਦੇਖ ਅਤੇ ਉਸਦਾ ਪ੍ਰਬੰਧਨ ਕਰ ਸਕਦੇ ਹਨ।"</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"ਟਰੱਸਟ-ਏਜੰਟ ਵੱਲੋਂ ਅਣਲਾਕ ਰੱਖਿਆ ਗਿਆ"</string>
-    <string name="kg_prompt_after_adaptive_auth_lock" msgid="2587481497846342760">"ਬਹੁਤ ਵਾਰੀ ਪ੍ਰਮਾਣੀਕਰਨ ਦੀਆਂ ਕੋਸ਼ਿਸ਼ਾਂ ਕਰਨ ਕਰਕੇ ਡੀਵਾਈਸ ਲਾਕ ਹੋ ਗਿਆ ਸੀ"</string>
+    <string name="kg_prompt_after_adaptive_auth_lock" msgid="2587481497846342760">"ਡੀਵਾਈਸ ਲਾਕ ਕੀਤਾ ਗਿਆ ਸੀ, ਬਹੁਤ ਸਾਰੀਆਂ ਪ੍ਰਮਾਣੀਕਰਨ ਕੋਸ਼ਿਸ਼ਾਂ ਕੀਤੀਆਂ ਗਈਆਂ"</string>
     <string name="keyguard_indication_after_adaptive_auth_lock" msgid="2323400645470712787">"ਡੀਵਾਈਸ ਲਾਕ ਹੈ\nਪ੍ਰਮਾਣੀਕਰਨ ਅਸਫਲ ਰਿਹਾ"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"ਧੁਨੀ ਸੈਟਿੰਗਾਂ"</string>
@@ -1192,7 +1197,6 @@
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"ਹੋਰ ਜਾਣਕਾਰੀ ਲਈ ਟੈਪ ਕਰੋ"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"ਕੋਈ ਅਲਾਰਮ ਸੈੱਟ ਨਹੀਂ"</string>
     <string name="accessibility_bouncer" msgid="5896923685673320070">"ਸਕ੍ਰੀਨ ਲਾਕ ਦਾਖਲ ਕਰੋ"</string>
-    <string name="accessibility_side_fingerprint_indicator_label" msgid="1673807833352363712">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਸੈਂਸਰ ਨੂੰ ਸਪਰਸ਼ ਕਰੋ। ਇਹ ਫ਼ੋਨ ਦੇ ਇੱਕ ਪਾਸੇ ਦਿੱਤਾ ਛੋਟਾ ਜਿਹਾ ਬਟਨ ਹੈ"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਸੈਂਸਰ"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"ਪ੍ਰਮਾਣਿਤ ਕਰੋ"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"ਡੀਵਾਈਸ ਵਿੱਚ ਦਾਖਲ ਹੋਵੋ"</string>
@@ -1343,10 +1347,14 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"ਪ੍ਰਤੀਕ ਨੂੰ ਸਮੇਟੋ"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"ਪ੍ਰਤੀਕ ਦਾ ਵਿਸਤਾਰ ਕਰੋ"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"ਜਾਂ"</string>
-    <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"ਪਿੱਛੇ ਜਾਣ ਦਾ ਇਸ਼ਾਰਾ"</string>
-    <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"ਹੋਮ \'ਤੇ ਜਾਣ ਦਾ ਇਸ਼ਾਰਾ"</string>
-    <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"ਕਾਰਵਾਈ ਕੁੰਜੀ"</string>
-    <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"ਹੋ ਗਿਆ"</string>
+    <!-- no translation found for touchpad_tutorial_back_gesture_button (2746834288077265946) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_home_gesture_button (7640544867625955304) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_action_key_button (3220074511852927267) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_done_button (176168488821755503) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"ਕੀ-ਬੋਰਡ ਬੈਕਲਾਈਟ"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%2$d ਵਿੱਚੋਂ %1$d ਪੱਧਰ"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"ਹੋਮ ਕੰਟਰੋਲ"</string>

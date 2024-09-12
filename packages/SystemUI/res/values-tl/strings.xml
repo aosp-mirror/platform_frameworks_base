@@ -129,20 +129,22 @@
     <skip />
     <!-- no translation found for screenrecord_stop_dialog_message (1926783607059442889) -->
     <skip />
-    <string name="screenrecord_stop_dialog_message_specific_app" msgid="5285148796772616326">"Hihinto ka sa pag-record ng &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
-    <string name="screenrecord_stop_dialog_button" msgid="2883812564938194350">"Huminto sa pag-record"</string>
-    <string name="share_to_app_stop_dialog_title" msgid="9212915050910250438">"Ihinto ang pagbabahagi ng screen?"</string>
+    <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
+    <skip />
+    <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
+    <skip />
     <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
     <skip />
-    <string name="share_to_app_stop_dialog_message_specific_app" msgid="124371406810544777">"Hihinto ka sa pagbabahagi ng &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
-    <string name="share_to_app_stop_dialog_button" msgid="6334056916284230217">"Ihinto ang pagbabahagi"</string>
+    <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
+    <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
     <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
     <skip />
-    <string name="cast_to_other_device_stop_dialog_message_specific_app" msgid="4891536209254041850">"Hihinto ka sa pag-cast ng &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
-    <string name="cast_to_other_device_stop_dialog_button" msgid="6420183747435521834">"Ihinto ang pag-cast"</string>
-    <string name="close_dialog_button" msgid="4749497706540104133">"Isara"</string>
+    <!-- no translation found for cast_to_other_device_stop_dialog_button (6420183747435521834) -->
+    <skip />
+    <!-- no translation found for close_dialog_button (4749497706540104133) -->
+    <skip />
     <string name="issuerecord_title" msgid="286627115110121849">"Recorder ng Isyu"</string>
     <string name="issuerecord_background_processing_label" msgid="1666840264959336876">"Pinoproseso: recording ng isyu"</string>
     <string name="issuerecord_channel_description" msgid="6142326363431474632">"Kasalukuyang notification para sa session ng pangongolekta ng isyu"</string>
@@ -153,7 +155,8 @@
     <string name="issuerecord_save_error" msgid="6913040083446722726">"Nagkaroon ng error sa pag-save ng recording ng isyu"</string>
     <string name="issuerecord_start_error" msgid="3402782952722871190">"Nagkaroon ng error sa pagsisimula ng pag-record ng isyu"</string>
     <string name="immersive_cling_title" msgid="8372056499315585941">"Nanonood sa full screen"</string>
-    <string name="immersive_cling_description" msgid="2717426731830851921">"Para lumabas, mag-swipe pababa mula sa itaas ng iyong screen"</string>
+    <!-- no translation found for immersive_cling_description (2717426731830851921) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="3076681691468978568">"OK"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Bumalik"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Home"</string>
@@ -186,7 +189,6 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Na-unlock gamit ang mukha. Pindutin para magpatuloy."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Nakilala ang mukha. Pindutin para magpatuloy."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Nakilala ang mukha. Pindutin ang unlock para magpatuloy."</string>
-    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"Na-unlock gamit ang mukha. I-tap para magpatuloy."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Na-authenticate"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Kanselahin ang Pag-authenticate"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"Higit Pang Opsyon"</string>
@@ -297,11 +299,14 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Na-save"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"idiskonekta"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"i-activate"</string>
-    <string name="turn_on_bluetooth_auto_tomorrow" msgid="3345758139235739006">"Awtomatikong i-on bukas"</string>
+    <!-- no translation found for turn_on_bluetooth_auto_tomorrow (3345758139235739006) -->
+    <skip />
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"Gumagamit ng Bluetooth ang mga feature tulad ng Quick Share at Hanapin ang Aking Device"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Mag-o-on ang Bluetooth bukas ng umaga"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Ibahagi ang audio"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Ibinabahagi ang audio"</string>
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button (7545274861795853838) -->
+    <skip />
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_sharing (3069309588231072128) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> na baterya"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Headset"</string>
@@ -1192,7 +1197,6 @@
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"I-tap para sa higit pang impormasyon"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Walang alarm"</string>
     <string name="accessibility_bouncer" msgid="5896923685673320070">"ilagay ang lock ng screen"</string>
-    <string name="accessibility_side_fingerprint_indicator_label" msgid="1673807833352363712">"Pindutin ang sensor para sa fingerprint. Ito ang mas maikling button sa gilid ng telepono"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Sensor para sa fingerprint"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"i-authenticate"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"ilagay ang device"</string>
@@ -1343,10 +1347,14 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"I-collapse ang icon"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"I-expand ang icon"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"o"</string>
-    <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Galaw para bumalik"</string>
-    <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Galaw para sa Home"</string>
-    <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"Action key"</string>
-    <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Tapos na"</string>
+    <!-- no translation found for touchpad_tutorial_back_gesture_button (2746834288077265946) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_home_gesture_button (7640544867625955304) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_action_key_button (3220074511852927267) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_done_button (176168488821755503) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Backlight ng keyboard"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Level %1$d sa %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Mga Home Control"</string>

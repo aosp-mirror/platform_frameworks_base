@@ -16,9 +16,9 @@
 
 package android.platform.coverage
 
+import com.android.tools.metalava.model.CallableItem
 import com.android.tools.metalava.model.ClassItem
 import com.android.tools.metalava.model.Item
-import com.android.tools.metalava.model.MethodItem
 import com.android.tools.metalava.model.text.ApiFile
 import java.io.File
 import java.io.FileWriter
@@ -40,24 +40,24 @@ fun main(args: Array<String>) {
 
 fun extractFlaggedApisFromClass(
     classItem: ClassItem,
-    methods: List<MethodItem>,
+    callables: List<CallableItem>,
     packageName: String,
     builder: FlagApiMap.Builder
 ) {
-    if (methods.isEmpty()) return
+    if (callables.isEmpty()) return
     val classFlag = getClassFlag(classItem)
-    for (method in methods) {
-        val methodFlag = getFlagAnnotation(method) ?: classFlag
+    for (callable in callables) {
+        val callableFlag = getFlagAnnotation(callable) ?: classFlag
         val api =
             JavaMethod.newBuilder()
                 .setPackageName(packageName)
                 .setClassName(classItem.fullName())
-                .setMethodName(method.name())
-        for (param in method.parameters()) {
+                .setMethodName(callable.name())
+        for (param in callable.parameters()) {
             api.addParameters(param.type().toTypeString())
         }
-        if (methodFlag != null) {
-            addFlaggedApi(builder, api, methodFlag)
+        if (callableFlag != null) {
+            addFlaggedApi(builder, api, callableFlag)
         }
     }
 }
@@ -75,10 +75,10 @@ fun addFlaggedApi(builder: FlagApiMap.Builder, api: JavaMethod.Builder, flag: St
 fun getClassFlag(classItem: ClassItem): String? {
     var classFlag = getFlagAnnotation(classItem)
     var cur = classItem
-    // If a class is not an inner class, use its @FlaggedApi annotation value.
+    // If a class is not a nested class, use its @FlaggedApi annotation value.
     // Otherwise, use the flag value of the closest outer class that is annotated by @FlaggedApi.
-    while (cur.isInnerClass() && classFlag == null) {
-        cur = cur.parent() as ClassItem
+    while (classFlag == null) {
+        cur = cur.containingClass() ?: break
         classFlag = getFlagAnnotation(cur)
     }
     return classFlag

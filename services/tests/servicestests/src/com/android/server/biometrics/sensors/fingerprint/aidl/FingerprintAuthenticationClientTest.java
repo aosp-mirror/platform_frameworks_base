@@ -406,6 +406,8 @@ public class FingerprintAuthenticationClientTest {
         mContextInjector.getValue().accept(opContext);
 
         verify(mHal).onContextChanged(same(opContext));
+        verify(mHal, times(2)).setIgnoreDisplayTouches(
+                opContext.operationState.getFingerprintOperationState().isHardwareIgnoringTouches);
 
         client.stopHalOperation();
 

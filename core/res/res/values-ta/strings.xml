@@ -1523,7 +1523,7 @@
     <string name="forward_intent_to_work" msgid="3620262405636021151">"பணிக் கணக்கில் பயன்பாட்டைப் பயன்படுத்துகிறீர்கள்"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"உள்ளீட்டு முறை"</string>
     <string name="sync_binding_label" msgid="469249309424662147">"ஒத்திசை"</string>
-    <string name="accessibility_binding_label" msgid="1974602776545801715">"மாற்றுத்திறன் வசதி"</string>
+    <string name="accessibility_binding_label" msgid="1974602776545801715">"அணுகல்தன்மை"</string>
     <string name="wallpaper_binding_label" msgid="1197440498000786738">"வால்பேப்பர்"</string>
     <string name="chooser_wallpaper" msgid="3082405680079923708">"வால்பேப்பரை மாற்று"</string>
     <string name="notification_listener_binding_label" msgid="2702165274471499713">"அறிவிப்புகளைக் கண்காணிக்கும் சேவை"</string>
@@ -1883,7 +1883,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"பின் மிகவும் சிறியதாக உள்ளது. குறைந்தது 4 இலக்கங்கள் இருக்க வேண்டும்."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"மீண்டும் முயற்சிக்கவும்"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"முழுத் திரையில் காட்டுகிறது"</string>
-    <string name="immersive_cling_description" msgid="2896205051090870978">"வெளியேற, உங்கள் திரையின் மேலிருந்து கீழ்நோக்கி ஸ்வைப் செய்யவும்"</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"புரிந்தது"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"சிறந்த காட்சிக்கு சுழற்றுங்கள்"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"சிறந்த காட்சிக்கு, <xliff:g id="NAME">%s</xliff:g> ஆப்ஸை முழுத்திரைப் பயன்முறையில் திறக்கவும்"</string>
@@ -2053,7 +2054,7 @@
     <string name="app_category_news" msgid="1172762719574964544">"செய்திகளும் பத்திரிகைகளும்"</string>
     <string name="app_category_maps" msgid="6395725487922533156">"வரைபடங்களும் வழிசெலுத்தலும்"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"உற்பத்தித்திறன்"</string>
-    <string name="app_category_accessibility" msgid="6643521607848547683">"மாற்றுத்திறன் வசதி"</string>
+    <string name="app_category_accessibility" msgid="6643521607848547683">"அணுகல்தன்மை"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"சாதனச் சேமிப்பகம்"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"USB பிழைதிருத்தம்"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"மணி"</string>
@@ -2417,12 +2418,12 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"இது செயல்படும் விதம்"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"நிலுவையிலுள்ளது..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"கைரேகை அன்லாக் அம்சத்தை மீண்டும் அமையுங்கள்"</string>
-    <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g>ஐ இனி அடையாளம் காண முடியாது."</string>
-    <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>, <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> ஆகியவற்றை இனி அடையாளம் காண முடியாது."</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="1824812666549916586">"<xliff:g id="FINGERPRINT">%s</xliff:g>ஐ இனி அடையாளம் காண முடியாது. கைரேகை அன்லாக் அம்சத்தை மீண்டும் அமையுங்கள்."</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="5974657382960155099">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>, <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> ஆகியவற்றை இனி அடையாளம் காண முடியாது. கைரேகை அன்லாக் அம்சத்தை மீண்டும் அமையுங்கள்."</string>
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"<xliff:g id="FINGERPRINT">%s</xliff:g> சரியாகச் செயல்படவில்லை என்பதால் அது நீக்கப்பட்டது"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> மற்றும் <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> சரியாகச் செயல்படவில்லை என்பதால் அவை நீக்கப்பட்டன"</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> சரியாகச் செயல்படவில்லை என்பதால் அது நீக்கபட்டது. கைரேகை மூலம் உங்கள் மொபைலை அன்லாக் செய்ய அதை மீண்டும் அமையுங்கள்."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> மற்றும் <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> சரியாகச் செயல்படவில்லை என்பதால் அவை நீக்கப்பட்டன. கைரேகை மூலம் உங்கள் மொபைலை அன்லாக் செய்ய அவற்றை மீண்டும் அமையுங்கள்."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"\'முகம் காட்டித் திறத்தல்\' அம்சத்தை மீண்டும் அமையுங்கள்"</string>
-    <string name="face_dangling_notification_msg" msgid="746235263598985384">"உங்கள் முகத் தோற்றப் பதிவை இனி அடையாளம் காண முடியாது. முகம் காட்டித் திறத்தல் அம்சத்தை மீண்டும் அமையுங்கள்."</string>
+    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"உங்கள் முகத் தோற்றப் பதிவு சரியாகச் செயல்படவில்லை என்பதால் அது நீக்கப்பட்டது. உங்கள் முகத்தைப் பயன்படுத்தி மொபைலை அன்லாக் செய்ய அதை மீண்டும் அமையுங்கள்."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"அமை"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"இப்போது வேண்டாம்"</string>
 </resources>

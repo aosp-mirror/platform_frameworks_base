@@ -683,14 +683,15 @@ public final class UserManagerServiceTest {
         UserInfo privateProfileUser =
                 mSpiedUms.createProfileForUserEvenWhenDisallowedWithThrow(PRIVATE_PROFILE_NAME,
                         USER_TYPE_PROFILE_PRIVATE, 0, mainUser, null);
-        Mockito.doNothing().when(mSpiedUms).scheduleAlarmToAutoLockPrivateSpace(
-                eq(privateProfileUser.getUserHandle().getIdentifier()), anyLong());
+        Mockito.doNothing().when(mSpiedUms).scheduleMessageToAutoLockPrivateSpace(
+                eq(privateProfileUser.getUserHandle().getIdentifier()), any(),
+                anyLong());
 
 
-        mSpiedUms.maybeScheduleAlarmToAutoLockPrivateSpace();
+        mSpiedUms.maybeScheduleMessageToAutoLockPrivateSpace();
 
-        Mockito.verify(mSpiedUms).scheduleAlarmToAutoLockPrivateSpace(
-                eq(privateProfileUser.getUserHandle().getIdentifier()), anyLong());
+        Mockito.verify(mSpiedUms).scheduleMessageToAutoLockPrivateSpace(
+                eq(privateProfileUser.getUserHandle().getIdentifier()), any(), anyLong());
     }
 
     @Test

@@ -1883,7 +1883,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN अति छोटो भयो। कम्तीमा ४ अङ्क हुन आवश्यक छ।"</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"पछि पुनः प्रयास गर्नुहोस्"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"पूरा पर्दा हेर्दै"</string>
-    <string name="immersive_cling_description" msgid="2896205051090870978">"यहाँबाट बाहिरिन स्क्रिनको सिरानबाट तलतिर स्वाइप गर्नुहोस्"</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"बुझेँ"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"अझ राम्रो दृश्य हेर्न चाहनुहुन्छ भने रोटेट गर्नुहोस्"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"अझ राम्रो दृश्य हेर्न चाहनुहुन्छ भने <xliff:g id="NAME">%s</xliff:g> खोल्नुहोस्"</string>
@@ -2417,12 +2418,12 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"यसले काम गर्ने तरिका"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"विचाराधीन..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"फिंगरप्रिन्ट अनलक फेरि सेटअप गर्नुहोस्"</string>
-    <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> अब पहिचान गर्न सकिँदैन।"</string>
-    <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> र <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> अब पहिचान गर्न सकिँदैन।"</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="1824812666549916586">"<xliff:g id="FINGERPRINT">%s</xliff:g> अब पहिचान गर्न सकिँदैन। फिंगरप्रिन्ट अनलक फेरि सेटअप गर्नुहोस्।"</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="5974657382960155099">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> र <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> अब पहिचान गर्न सकिँदैन। फिंगरप्रिन्ट अनलक फेरि सेटअप गर्नुहोस्।"</string>
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"राम्ररी काम नगरिरहेको हुनाले <xliff:g id="FINGERPRINT">%s</xliff:g> मेटाइएको छ"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"राम्ररी काम नगरिरहेका हुनाले <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> र <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> मेटाइएका छन्"</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> ले काम गरिरहेको थिएन र त्यसलाई मेटाइयो। फिंगरप्रिन्ट प्रयोग गरी आफ्नो फोन अनलक गर्न त्यसलाई फेरि सेट अप गर्नुहोस्।"</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> र <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> ले राम्ररी काम गरिरहेका थिएनन् र तिनलाई मेटाइयो। फिंगरप्रिन्ट प्रयोग गरी आफ्नो फोन अनलक गर्न तिनलाई फेरि सेट अप गर्नुहोस्।"</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"फेस अनलक फेरि सेटअप गर्नुहोस्"</string>
-    <string name="face_dangling_notification_msg" msgid="746235263598985384">"तपाईंको फेस मोडेल अब पहिचान गर्न सकिँदैन। फेस अनलक फेरि सेटअप गर्नुहोस्।"</string>
+    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"तपाईंको फेस मोडेलले राम्ररी काम गरिरहेको थिएन र त्यसलाई मेटाइयो। अनुहार प्रयोग गरी आफ्नो फोन अनलक गर्न फेस मोडेल फेरि सेट अप गर्नुहोस्।"</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"सेटअप गर्नुहोस्"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"अहिले होइन"</string>
 </resources>

@@ -129,20 +129,22 @@
     <skip />
     <!-- no translation found for screenrecord_stop_dialog_message (1926783607059442889) -->
     <skip />
-    <string name="screenrecord_stop_dialog_message_specific_app" msgid="5285148796772616326">"Zaustavićete snimanje za: &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
-    <string name="screenrecord_stop_dialog_button" msgid="2883812564938194350">"Zaustavi snimanje"</string>
-    <string name="share_to_app_stop_dialog_title" msgid="9212915050910250438">"Želite da zaustavite deljenje ekrana?"</string>
+    <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
+    <skip />
+    <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
+    <skip />
     <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
     <skip />
-    <string name="share_to_app_stop_dialog_message_specific_app" msgid="124371406810544777">"Zaustavićete deljenje za: &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
-    <string name="share_to_app_stop_dialog_button" msgid="6334056916284230217">"Zaustavi deljenje"</string>
+    <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
+    <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
     <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
     <skip />
-    <string name="cast_to_other_device_stop_dialog_message_specific_app" msgid="4891536209254041850">"Zaustavićete prebacivanje za: &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
-    <string name="cast_to_other_device_stop_dialog_button" msgid="6420183747435521834">"Zaustavi prebacivanje"</string>
-    <string name="close_dialog_button" msgid="4749497706540104133">"Zatvori"</string>
+    <!-- no translation found for cast_to_other_device_stop_dialog_button (6420183747435521834) -->
+    <skip />
+    <!-- no translation found for close_dialog_button (4749497706540104133) -->
+    <skip />
     <string name="issuerecord_title" msgid="286627115110121849">"Snimač problema"</string>
     <string name="issuerecord_background_processing_label" msgid="1666840264959336876">"Obrađuje se snimak problema"</string>
     <string name="issuerecord_channel_description" msgid="6142326363431474632">"obaveštenje o aktivnosti u toku za sesiju prikupljanja podataka o problemu"</string>
@@ -153,7 +155,8 @@
     <string name="issuerecord_save_error" msgid="6913040083446722726">"Greška pri čuvanju snimka problema"</string>
     <string name="issuerecord_start_error" msgid="3402782952722871190">"Greška pri pokretanju snimanja problema"</string>
     <string name="immersive_cling_title" msgid="8372056499315585941">"Prikazuje se ceo ekran"</string>
-    <string name="immersive_cling_description" msgid="2717426731830851921">"Da biste zatvorili, prevucite nadole od vrha ekrana"</string>
+    <!-- no translation found for immersive_cling_description (2717426731830851921) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="3076681691468978568">"Važi"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Nazad"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Početna"</string>
@@ -186,7 +189,6 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Otključano je licem. Pritisnite da biste nastavili."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Lice je prepoznato. Pritisnite da biste nastavili."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Lice prepoznato. Pritisnite ikonu otključavanja za nastavak."</string>
-    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"Otključano je licem. Dodirnite da biste nastavili."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Identitet je potvrđen"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Otkažite potvrdu identiteta"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"Još opcija"</string>
@@ -297,11 +299,14 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Sačuvano"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"prekinite vezu"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"aktivirajte"</string>
-    <string name="turn_on_bluetooth_auto_tomorrow" msgid="3345758139235739006">"Automatski uključi sutra"</string>
+    <!-- no translation found for turn_on_bluetooth_auto_tomorrow (3345758139235739006) -->
+    <skip />
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"Funkcije kao što su Quick Share i Pronađi moj uređaj koriste Bluetooth"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bluetooth će se uključiti sutra ujutru"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Deli zvuk"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Deli se zvuk"</string>
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button (7545274861795853838) -->
+    <skip />
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_sharing (3069309588231072128) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Nivo baterije je <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Slušalice"</string>
@@ -1192,7 +1197,6 @@
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Dodirnite za više informacija"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Nije podešen"</string>
     <string name="accessibility_bouncer" msgid="5896923685673320070">"unesite otključavanje ekrana"</string>
-    <string name="accessibility_side_fingerprint_indicator_label" msgid="1673807833352363712">"Dodirnite senzor za otisak prsta. To je kraće dugme na bočnoj strani telefona"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Senzor za otisak prsta"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"potvrdite identitet"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"unesite uređaj"</string>
@@ -1343,10 +1347,14 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Ikona za skupljanje"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Ikona za proširivanje"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"ili"</string>
-    <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Pokret za vraćanje"</string>
-    <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Pokret za početnu stranicu"</string>
-    <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"Taster radnji"</string>
-    <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Gotovo"</string>
+    <!-- no translation found for touchpad_tutorial_back_gesture_button (2746834288077265946) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_home_gesture_button (7640544867625955304) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_action_key_button (3220074511852927267) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_done_button (176168488821755503) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Pozadinsko osvetljenje tastature"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%1$d. nivo od %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Kontrole za dom"</string>

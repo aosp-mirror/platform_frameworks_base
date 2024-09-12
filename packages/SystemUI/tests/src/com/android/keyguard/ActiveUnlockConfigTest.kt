@@ -28,7 +28,6 @@ import android.provider.Settings.Secure.ACTIVE_UNLOCK_ON_BIOMETRIC_FAIL
 import android.provider.Settings.Secure.ACTIVE_UNLOCK_ON_FACE_ACQUIRE_INFO
 import android.provider.Settings.Secure.ACTIVE_UNLOCK_ON_FACE_ERRORS
 import android.provider.Settings.Secure.ACTIVE_UNLOCK_ON_UNLOCK_INTENT
-import android.provider.Settings.Secure.ACTIVE_UNLOCK_ON_UNLOCK_INTENT_LEGACY
 import android.provider.Settings.Secure.ACTIVE_UNLOCK_ON_UNLOCK_INTENT_WHEN_BIOMETRIC_ENROLLED
 import android.provider.Settings.Secure.ACTIVE_UNLOCK_ON_WAKE
 import android.provider.Settings.Secure.ACTIVE_UNLOCK_WAKEUPS_CONSIDERED_UNLOCK_INTENTS
@@ -41,7 +40,6 @@ import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.settings.FakeSettings
-import dagger.Lazy
 import java.io.PrintWriter
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -53,6 +51,7 @@ import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
+import dagger.Lazy
 
 @SmallTest
 class ActiveUnlockConfigTest : SysuiTestCase() {
@@ -112,48 +111,6 @@ class ActiveUnlockConfigTest : SysuiTestCase() {
                 ActiveUnlockConfig.ActiveUnlockRequestOrigin.WAKE
             )
         )
-        assertFalse(
-                activeUnlockConfig.shouldAllowActiveUnlockFromOrigin(
-                        ActiveUnlockConfig.ActiveUnlockRequestOrigin.UNLOCK_INTENT_LEGACY
-                )
-        )
-        assertTrue(
-            activeUnlockConfig.shouldAllowActiveUnlockFromOrigin(
-                ActiveUnlockConfig.ActiveUnlockRequestOrigin.UNLOCK_INTENT
-            )
-        )
-        assertTrue(
-            activeUnlockConfig.shouldAllowActiveUnlockFromOrigin(
-                ActiveUnlockConfig.ActiveUnlockRequestOrigin.BIOMETRIC_FAIL
-            )
-        )
-    }
-
-    @Test
-    fun onUnlockIntentLegacySettingChanged() {
-        // GIVEN no active unlock settings enabled
-        assertFalse(
-            activeUnlockConfig.shouldAllowActiveUnlockFromOrigin(
-                ActiveUnlockConfig.ActiveUnlockRequestOrigin.UNLOCK_INTENT_LEGACY
-            )
-        )
-
-        // WHEN unlock on unlock intent legacy is allowed
-        secureSettings.putIntForUser(ACTIVE_UNLOCK_ON_UNLOCK_INTENT_LEGACY, 1, currentUser)
-        updateSetting(secureSettings.getUriFor(ACTIVE_UNLOCK_ON_UNLOCK_INTENT_LEGACY))
-
-        // THEN active unlock triggers allowed on unlock_intent_legacy, unlock_intent,
-        // AND biometric fail
-        assertFalse(
-            activeUnlockConfig.shouldAllowActiveUnlockFromOrigin(
-                ActiveUnlockConfig.ActiveUnlockRequestOrigin.WAKE
-            )
-        )
-        assertTrue(
-            activeUnlockConfig.shouldAllowActiveUnlockFromOrigin(
-                ActiveUnlockConfig.ActiveUnlockRequestOrigin.UNLOCK_INTENT_LEGACY
-            )
-        )
         assertTrue(
             activeUnlockConfig.shouldAllowActiveUnlockFromOrigin(
                 ActiveUnlockConfig.ActiveUnlockRequestOrigin.UNLOCK_INTENT
@@ -175,19 +132,14 @@ class ActiveUnlockConfigTest : SysuiTestCase() {
             )
         )
 
-        // WHEN unlock on unlock intent is allowed
+        // WHEN unlock on biometric failed is allowed
         secureSettings.putIntForUser(ACTIVE_UNLOCK_ON_UNLOCK_INTENT, 1, currentUser)
         updateSetting(secureSettings.getUriFor(ACTIVE_UNLOCK_ON_UNLOCK_INTENT))
 
-        // THEN active unlock triggers allowed on: unlock intent AND biometric failure
+        // THEN active unlock triggers allowed on: biometric failure ONLY
         assertFalse(
             activeUnlockConfig.shouldAllowActiveUnlockFromOrigin(
                 ActiveUnlockConfig.ActiveUnlockRequestOrigin.WAKE
-            )
-        )
-        assertFalse(
-            activeUnlockConfig.shouldAllowActiveUnlockFromOrigin(
-                ActiveUnlockConfig.ActiveUnlockRequestOrigin.UNLOCK_INTENT_LEGACY
             )
         )
         assertTrue(
@@ -228,11 +180,6 @@ class ActiveUnlockConfigTest : SysuiTestCase() {
         assertFalse(
             activeUnlockConfig.shouldAllowActiveUnlockFromOrigin(
                 ActiveUnlockConfig.ActiveUnlockRequestOrigin.WAKE
-            )
-        )
-        assertFalse(
-            activeUnlockConfig.shouldAllowActiveUnlockFromOrigin(
-                ActiveUnlockConfig.ActiveUnlockRequestOrigin.UNLOCK_INTENT_LEGACY
             )
         )
         assertFalse(

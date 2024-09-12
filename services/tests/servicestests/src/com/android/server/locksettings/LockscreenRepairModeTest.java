@@ -19,6 +19,8 @@ package com.android.server.locksettings;
 import static com.android.internal.widget.LockPatternUtils.USER_REPAIR_MODE;
 import static com.android.internal.widget.LockPatternUtils.VERIFY_FLAG_WRITE_REPAIR_MODE_PW;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 
@@ -197,6 +199,27 @@ public class LockscreenRepairModeTest extends BaseLockSettingsServiceTests {
         assertEquals(VerifyCredentialResponse.RESPONSE_ERROR,
                 mService.verifyCredential(newPin("5678"), USER_REPAIR_MODE, 0 /* flags */)
                         .getResponseCode());
+    }
+
+    @Test
+    public void writeRepairModeCredential_noLock() {
+        assertThat(mService.writeRepairModeCredential(PRIMARY_USER_ID)).isFalse();
+    }
+
+    @Test
+    public void writeRepairModeCredential_hasLock() {
+        mService.setLockCredential(newPin("1234"), nonePassword(), PRIMARY_USER_ID);
+        assertThat(mService.writeRepairModeCredential(PRIMARY_USER_ID)).isTrue();
+    }
+
+    @Test
+    public void writeRepairModeCredential_verifyRepairModeUser() {
+        mService.setLockCredential(newPin("1234"), nonePassword(), PRIMARY_USER_ID);
+        mService.writeRepairModeCredential(PRIMARY_USER_ID);
+        setRepairModeActive(true);
+
+        var response = mService.verifyCredential(newPin("1234"), USER_REPAIR_MODE, 0);
+        assertThat(response.isMatched()).isTrue();
     }
 
     private void setRepairModeActive(boolean active) {

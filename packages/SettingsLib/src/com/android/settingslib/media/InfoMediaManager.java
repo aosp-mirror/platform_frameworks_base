@@ -671,7 +671,7 @@ public abstract class InfoMediaManager {
     // MediaRoute2Info.getType was made public on API 34, but exists since API 30.
     @SuppressWarnings("NewApi")
     @VisibleForTesting
-    void addMediaDevice(@NonNull MediaRoute2Info route, @NonNull RoutingSessionInfo activeSession) {
+    void addMediaDevice(MediaRoute2Info route, RoutingSessionInfo activeSession) {
         final int deviceType = route.getType();
         MediaDevice mediaDevice = null;
         switch (deviceType) {
@@ -711,13 +711,8 @@ public abstract class InfoMediaManager {
             case TYPE_HEARING_AID:
             case TYPE_BLUETOOTH_A2DP:
             case TYPE_BLE_HEADSET:
-                if (route.getAddress() == null) {
-                    Log.e(TAG, "Ignoring bluetooth route with no set address: " + route);
-                    break;
-                }
                 final BluetoothDevice device =
-                        BluetoothAdapter.getDefaultAdapter()
-                                .getRemoteDevice(route.getAddress());
+                        BluetoothAdapter.getDefaultAdapter().getRemoteDevice(route.getAddress());
                 final CachedBluetoothDevice cachedDevice =
                         mBluetoothManager.getCachedDeviceManager().findDevice(device);
                 if (cachedDevice != null) {

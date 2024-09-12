@@ -1883,7 +1883,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"I-PIN yimfushane kakhulu. Okungenani kumele ibe namadijithi angu-4."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Zama futhi emva kwesikhathi"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Ukubuka isikrini esigcwele"</string>
-    <string name="immersive_cling_description" msgid="2896205051090870978">"Ukuze uphume, swayiphela phansi kusukela phezulu esikrinini sakho"</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Ngiyitholile"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Zungezisa ukuze uthole ukubuka okungcono"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Vula i-<xliff:g id="NAME">%s</xliff:g> kusikrini esigcwele ngokubuka okungcono"</string>
@@ -2417,12 +2418,12 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Indlela esebenza ngayo"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Ilindile..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Setha Ukuvula ngesigxivizo somunwe futhi"</string>
-    <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"I-<xliff:g id="FINGERPRINT">%s</xliff:g> angeke isaziwa."</string>
-    <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"I-<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> kanye ne-<xliff:g id="FINGERPRINT_1">%2$s</xliff:g> angeke isaziwa."</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="1824812666549916586">"I-<xliff:g id="FINGERPRINT">%s</xliff:g> angeke isaziwa. Setha Ukuvula Ngesigxivizo Somunwe futhi."</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="5974657382960155099">"I-<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> kanye ne-<xliff:g id="FINGERPRINT_1">%2$s</xliff:g> angeke isaziwa. Setha Ukuvula Ngesigxivizo Somunwe futhi."</string>
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"I-<xliff:g id="FINGERPRINT">%s</xliff:g> ibingasebenzi kahle futhi isuliwe"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"I-<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> kanye ne-<xliff:g id="FINGERPRINT_1">%2$s</xliff:g> ibingasebenzi kahle futhi isuliwe"</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"I-<xliff:g id="FINGERPRINT">%s</xliff:g> ibingasebenzi kahle futhi isuliwe. Phinde uyisethe ukuze uvule ifoni yakho ngesigxivizo somunwe."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"I-<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> kanye ne-<xliff:g id="FINGERPRINT_1">%2$s</xliff:g> ibingasebenzi kahle futhi isuliwe. Phinde uyisethe ukuze uvule ifoni yakho ngesigxivizo somunwe wakho"</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Setha Ukuvula Ngobuso futhi"</string>
-    <string name="face_dangling_notification_msg" msgid="746235263598985384">"Imodeli yobuso yakho angeke isabonwa. Setha Ukuvula Ngobuso futhi."</string>
+    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"Imodeli yobuso yakho ibingasebenzi kahle futhi isuliwe. Phinde uyisethe ukuze uvule ifoni yakho ngobuso."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Setha"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Hhayi manje"</string>
 </resources>

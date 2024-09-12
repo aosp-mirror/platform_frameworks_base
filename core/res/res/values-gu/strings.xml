@@ -1433,7 +1433,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"ભાષા અને લેઆઉટ પસંદ કરવા માટે ટૅપ કરો"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="alert_windows_notification_channel_group_name" msgid="6063891141815714246">"અન્ય ઍપની ઉપર ડિસ્પ્લે કરો"</string>
+    <string name="alert_windows_notification_channel_group_name" msgid="6063891141815714246">"અન્ય ઍપથી ઉપર બતાવો"</string>
     <string name="alert_windows_notification_channel_name" msgid="3437528564303192620">"<xliff:g id="NAME">%s</xliff:g> અન્ય ઍપ્લિકેશનોની ઉપર પ્રદર્શિત થઈ રહ્યું છે"</string>
     <string name="alert_windows_notification_title" msgid="6331662751095228536">"<xliff:g id="NAME">%s</xliff:g> અન્ય ઍપ્લિકેશનો પર દેખાઈ છે"</string>
     <string name="alert_windows_notification_message" msgid="6538171456970725333">"જો તમે નથી ઇચ્છતા કે <xliff:g id="NAME">%s</xliff:g> આ સુવિધાનો ઉપયોગ કરે, તો સેટિંગ ખોલવા માટે ટૅપ કરો અને તેને બંધ કરો."</string>
@@ -1883,7 +1883,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"પિન ખૂબ નાનો છે. ઓછામાં ઓછો 4 અંકનો હોવો આવશ્યક છે."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"પછી ફરી પ્રયાસ કરો"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"પૂર્ણ સ્ક્રીન પર જુઓ"</string>
-    <string name="immersive_cling_description" msgid="2896205051090870978">"બહાર નીકળવા માટે, તમારી સ્ક્રીનની સૌથી ઉપરથી નીચેની તરફ સ્વાઇપ કરો"</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"સમજાઈ ગયું"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"બહેતર વ્યૂ માટે ફેરવો"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"બહેતર વ્યૂ માટે, પૂર્ણ સ્ક્રીનમાં <xliff:g id="NAME">%s</xliff:g> ખોલો"</string>
@@ -2417,12 +2418,12 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"તેની કામ કરવાની રીત"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"બાકી..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"ફિંગરપ્રિન્ટ અનલૉક સુવિધાનું ફરી સેટઅપ કરો"</string>
-    <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"હવે <xliff:g id="FINGERPRINT">%s</xliff:g> ઓળખી શકાતી નથી."</string>
-    <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"હવે <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> અને <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> ઓળખી શકાતી નથી."</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="1824812666549916586">"હવે <xliff:g id="FINGERPRINT">%s</xliff:g> ઓળખી શકાતી નથી. ફિંગરપ્રિન્ટ અનલૉક સુવિધાનું ફરી સેટઅપ કરો."</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="5974657382960155099">"હવે <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> અને <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> ઓળખી શકાતી નથી. ફિંગરપ્રિન્ટ અનલૉક સુવિધાનું ફરી સેટઅપ કરો."</string>
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"<xliff:g id="FINGERPRINT">%s</xliff:g> યોગ્ય રીતે કામ કરતી ન હતી અને તેને ડિલીટ કરવામાં આવી હતી"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> અને <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> યોગ્ય રીતે કામ કરતી ન હતી અને તેને ડિલીટ કરવામાં આવી હતી"</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> બરાબર કામ કરતી ન હતી અને તેને ડિલીટ કરવામાં આવી હતી. તમારા ફોનને ફિંગરપ્રિન્ટ વડે અનલૉક કરવા માટે, તેનું ફરીથી સેટઅપ કરો."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> અને <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> બરાબર કામ કરતી ન હતી અને તેને ડિલીટ કરવામાં આવી હતી. તમારા ફોનને તમારી ફિંગરપ્રિન્ટ વડે અનલૉક કરવા માટે, તેનું ફરીથી સેટઅપ કરો."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"ફેસ અનલૉક સુવિધાનું ફરી સેટઅપ કરો"</string>
-    <string name="face_dangling_notification_msg" msgid="746235263598985384">"હવે તમારા ચહેરાનું મૉડલ ઓળખી શકાતું નથી. ફેસ અનલૉક સુવિધાનું ફરી સેટઅપ કરો."</string>
+    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"તમારા ચહેરાનું મૉડલ બરાબર કામ કરતું ન હતું અને તેને ડિલીટ કરવામાં આવ્યું હતું. તમારા ફોનને ચહેરા વડે અનલૉક કરવા માટે, તેનું ફરીથી સેટઅપ કરો."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"સેટઅપ કરો"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"હમણાં નહીં"</string>
 </resources>

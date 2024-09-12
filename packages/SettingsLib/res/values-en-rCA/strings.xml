@@ -653,7 +653,7 @@
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Exit guest mode?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"This will delete apps and data from the current guest session"</string>
     <string name="grant_admin" msgid="4323199171790522574">"Yes, make them an admin"</string>
-    <string name="not_grant_admin" msgid="3557849576157702485">"No, don\'t make them an admin"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"No, dont make them an admin"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Exit"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Save guest activity?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"You can save activity from the current session or delete all apps and data"</string>

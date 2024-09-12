@@ -1318,7 +1318,7 @@
     <string name="volume_call" msgid="7625321655265747433">"Sauti ya simu inayoendelea"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"Sauti ya simu inayoendelea ya Bluetooth"</string>
     <string name="volume_alarm" msgid="4486241060751798448">"Sauti ya kengele"</string>
-    <string name="volume_notification" msgid="6864412249031660057">"Sauti ya arifa"</string>
+    <string name="volume_notification" msgid="6864412249031660057">"Sauti ya notisi"</string>
     <string name="volume_unknown" msgid="4041914008166576293">"Kiwango"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"Sauti ya Bluetooth"</string>
     <string name="volume_icon_description_ringer" msgid="2187800636867423459">"Sauti ya toni mlio"</string>
@@ -1883,7 +1883,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN ni fupi mno. Lazima iwe angalau tarakimu 4."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Jaribu tena baadaye"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Unatazama skrini nzima"</string>
-    <string name="immersive_cling_description" msgid="2896205051090870978">"Telezesha kidole chini kutoka sehemu ya juu ya skrini yako ili ufunge"</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Nimeelewa"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Zungusha ili upate mwonekano bora"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Fungua <xliff:g id="NAME">%s</xliff:g> kwenye skrini nzima ili uone maudhui kwa urahisi"</string>
@@ -2417,12 +2418,12 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Utaratibu wake"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Inashughulikiwa..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Weka tena mipangilio ya Kufungua kwa Alama ya Kidole"</string>
-    <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> haitambuliki tena."</string>
-    <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> na <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> havitambuliki tena."</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="1824812666549916586">"<xliff:g id="FINGERPRINT">%s</xliff:g> haitambuliki tena. Weka tena mipangilio ya Kufungua kwa Alama ya Kidole."</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="5974657382960155099">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> na <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> havitambuliki tena. Weka tena mipangilio ya Kufungua kwa Alama ya Kidole."</string>
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"Alama ya <xliff:g id="FINGERPRINT">%s</xliff:g> ilikuwa na hitilafu na imefutwa"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"Alama za <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> na <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> zilikuwa na hitilafu na zimefutwa"</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"Alama ya <xliff:g id="FINGERPRINT">%s</xliff:g> ilikuwa na hitilafu na imefutwa. Iweke tena ili ufungue simu yako kwa alama ya kidole."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"Alama za <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> na <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> zilikuwa na hitilafu na zimefutwa. Ziweke tena ili ufungue simu yako kwa alama ya kidole."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Weka tena mipangilio ya Kufungua kwa Uso"</string>
-    <string name="face_dangling_notification_msg" msgid="746235263598985384">"Muundo wa uso wako hautambuliki tena. Weka tena mipangilio ya Kufungua kwa Uso."</string>
+    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"Muundo wako wa uso ulikuwa na hitilafu na umefutwa. Uweke tena ili ufungue simu yako kwa uso."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Weka mipangilio"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Si sasa"</string>
 </resources>

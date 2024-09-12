@@ -104,7 +104,6 @@ public class SaferIntentUtils {
     @Disabled
     private static final long ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS = 161252188;
 
-    @Nullable
     private static ParsedMainComponent infoToComponent(
             ComponentInfo info, ComponentResolverApi resolver, boolean isReceiver) {
         if (info instanceof ActivityInfo) {
@@ -187,7 +186,7 @@ public class SaferIntentUtils {
         }
 
         boolean isChangeEnabled(long changeId) {
-            return platformCompat == null || platformCompat.isChangeEnabledByUidInternalNoLogging(
+            return platformCompat == null || platformCompat.isChangeEnabledByUidInternal(
                     changeId, callingUid);
         }
 
@@ -234,8 +233,7 @@ public class SaferIntentUtils {
                 }
                 final ParsedMainComponent comp = infoToComponent(
                         resolveInfo.getComponentInfo(), resolver, args.isReceiver);
-                if (comp != null && !comp.getIntents().isEmpty()
-                        && args.intent.getAction() == null) {
+                if (!comp.getIntents().isEmpty() && args.intent.getAction() == null) {
                     match = false;
                 }
             } else if (c instanceof IntentFilter) {

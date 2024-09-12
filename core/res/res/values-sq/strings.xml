@@ -1883,7 +1883,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN-i është shumë i shkurtër. Duhet të jetë të paktën 4 shifra."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Provo sërish më vonë"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Po shikon ekranin e plotë"</string>
-    <string name="immersive_cling_description" msgid="2896205051090870978">"Për të dalë, rrëshqit shpejt poshtë nga kreu i ekranit"</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"E kuptova"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Rrotullo për një pamje më të mirë"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Hape <xliff:g id="NAME">%s</xliff:g> në ekran të plotë për pamje më të mirë"</string>
@@ -2417,12 +2418,12 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Si funksionon"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Në pritje..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Konfiguro përsëri \"Shkyçjen me gjurmën e gishtit\""</string>
-    <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> nuk mund të njihet më."</string>
-    <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> dhe <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> nuk mund të njihen më."</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="1824812666549916586">"<xliff:g id="FINGERPRINT">%s</xliff:g> nuk mund të njihet më. Konfiguro përsëri \"Shkyçjen me gjurmën e gishtit\"."</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="5974657382960155099">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> dhe <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> nuk mund të njihen më. Konfiguro përsëri \"Shkyçjen me gjurmën e gishtit\"."</string>
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"<xliff:g id="FINGERPRINT">%s</xliff:g> nuk po funksiononte mirë dhe u fshi"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> dhe <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> nuk po funksiononin mirë dhe u fshinë"</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> nuk po funksiononte mirë dhe u fshi. Konfiguroje përsëri për ta shkyçur telefonin tënd me gjurmën e gishtit."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> dhe <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> nuk po funksiononin mirë dhe u fshinë. Konfiguroji përsëri për ta shkyçur telefonin tënd me gjurmën e gishtit."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Konfiguro \"Shkyçjen me fytyrë\" përsëri"</string>
-    <string name="face_dangling_notification_msg" msgid="746235263598985384">"Modeli yt i fytyrës nuk mund të njihet më. Konfiguro \"Shkyçjen me fytyrë\" përsëri."</string>
+    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"Modeli yt i fytyrës nuk po funksiononte mirë dhe u fshi. Konfiguroje përsëri për ta shkyçur telefonin tënd me fytyrën."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Konfiguro"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Jo tani"</string>
 </resources>

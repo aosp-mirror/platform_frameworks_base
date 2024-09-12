@@ -129,20 +129,22 @@
     <skip />
     <!-- no translation found for screenrecord_stop_dialog_message (1926783607059442889) -->
     <skip />
-    <string name="screenrecord_stop_dialog_message_specific_app" msgid="5285148796772616326">"Dejarás de grabar &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
-    <string name="screenrecord_stop_dialog_button" msgid="2883812564938194350">"Detener grabación"</string>
-    <string name="share_to_app_stop_dialog_title" msgid="9212915050910250438">"¿Dejar de compartir pantalla?"</string>
+    <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
+    <skip />
+    <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
+    <skip />
     <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
     <skip />
-    <string name="share_to_app_stop_dialog_message_specific_app" msgid="124371406810544777">"Dejarás de compartir &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
-    <string name="share_to_app_stop_dialog_button" msgid="6334056916284230217">"Dejar de compartir"</string>
+    <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
+    <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
     <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
     <skip />
-    <string name="cast_to_other_device_stop_dialog_message_specific_app" msgid="4891536209254041850">"Dejarás de enviar &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
-    <string name="cast_to_other_device_stop_dialog_button" msgid="6420183747435521834">"Dejar de enviar contenido"</string>
-    <string name="close_dialog_button" msgid="4749497706540104133">"Cerrar"</string>
+    <!-- no translation found for cast_to_other_device_stop_dialog_button (6420183747435521834) -->
+    <skip />
+    <!-- no translation found for close_dialog_button (4749497706540104133) -->
+    <skip />
     <string name="issuerecord_title" msgid="286627115110121849">"Grabadora de problemas"</string>
     <string name="issuerecord_background_processing_label" msgid="1666840264959336876">"Procesando grabación de problema"</string>
     <string name="issuerecord_channel_description" msgid="6142326363431474632">"Notificación continua de una sesión de obtención de datos del problema"</string>
@@ -153,7 +155,8 @@
     <string name="issuerecord_save_error" msgid="6913040083446722726">"No se ha podido guardar la grabación del problema"</string>
     <string name="issuerecord_start_error" msgid="3402782952722871190">"No se ha podido iniciar la grabación del problema"</string>
     <string name="immersive_cling_title" msgid="8372056499315585941">"Visualización en pantalla completa"</string>
-    <string name="immersive_cling_description" msgid="2717426731830851921">"Para salir, desliza hacia abajo desde la parte superior de la pantalla"</string>
+    <!-- no translation found for immersive_cling_description (2717426731830851921) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="3076681691468978568">"Entendido"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Atrás"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Inicio"</string>
@@ -186,7 +189,6 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Desbloqueado con la cara. Pulsa para continuar."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Cara reconocida. Pulsa para continuar."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Cara reconocida. Pulsa el icono de desbloquear para continuar."</string>
-    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"Desbloqueado con la cara. Toca para continuar."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Se ha autenticado"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Cancelar autenticación"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"Más opciones"</string>
@@ -239,7 +241,7 @@
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Porcentaje de batería desconocido."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"Conectado a <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"Conectado a <xliff:g id="CAST">%s</xliff:g>."</string>
-    <string name="accessibility_not_connected" msgid="4061305616351042142">"No conectado."</string>
+    <string name="accessibility_not_connected" msgid="4061305616351042142">"No conectado"</string>
     <string name="data_connection_roaming" msgid="375650836665414797">"Roaming"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"Desactivados"</string>
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"Modo Avión"</string>
@@ -297,11 +299,14 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Guardado"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"desconectar"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"activar"</string>
-    <string name="turn_on_bluetooth_auto_tomorrow" msgid="3345758139235739006">"Activar automáticamente mañana"</string>
+    <!-- no translation found for turn_on_bluetooth_auto_tomorrow (3345758139235739006) -->
+    <skip />
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"Las funciones como Quick Share y Encontrar mi dispositivo usan Bluetooth"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"El Bluetooth se activará mañana por la mañana"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Compartir audio"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Compartiendo audio"</string>
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button (7545274861795853838) -->
+    <skip />
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_sharing (3069309588231072128) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> de batería"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Auriculares"</string>
@@ -382,7 +387,7 @@
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Grabar pantalla"</string>
     <string name="performance" msgid="6552785217174378320">"Rendimiento"</string>
     <string name="user_interface" msgid="3712869377953950887">"Interfaz de usuario"</string>
-    <string name="thermal" msgid="6758074791325414831">"Temperatura"</string>
+    <string name="thermal" msgid="6758074791325414831">"Térmico"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Modo Una mano"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"Audífonos"</string>
     <string name="quick_settings_hearing_devices_connected" msgid="6519069502397037781">"Activos"</string>
@@ -487,15 +492,15 @@
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Cambiar de usuario"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"menú desplegable"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Se eliminarán todas las aplicaciones y datos de esta sesión."</string>
-    <string name="guest_wipe_session_title" msgid="7147965814683990944">"¡Te damos la bienvenida de nuevo a la sesión de invitados!"</string>
+    <string name="guest_wipe_session_title" msgid="7147965814683990944">"¡Hola de nuevo, invitado!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"¿Quieres continuar con tu sesión?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Volver a empezar"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Sí, continuar"</string>
     <string name="guest_notification_app_name" msgid="2110425506754205509">"Modo Invitado"</string>
     <string name="guest_notification_session_active" msgid="5567273684713471450">"Estás en modo Invitado"</string>
-    <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"Si añades un nuevo usuario, saldrás del modo Invitado y se eliminarán todas las aplicaciones y los datos de la sesión de invitado actual."</string>
+    <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"Si añades un nuevo usuario, saldrás del modo Invitado y se eliminarán todas las aplicaciones y datos de la sesión de invitado actual."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Has alcanzado el límite de usuarios"</string>
-    <string name="user_limit_reached_message" msgid="1070703858915935796">"{count,plural, =1{Solo se puede crear 1 usuario.}many{Puedes añadir # usuarios como máximo.}other{Puedes añadir # usuarios como máximo.}}"</string>
+    <string name="user_limit_reached_message" msgid="1070703858915935796">"{count,plural, =1{Solo se puede crear un usuario.}many{Puedes añadir # usuarios como máximo.}other{Puedes añadir # usuarios como máximo.}}"</string>
     <string name="user_remove_user_title" msgid="9124124694835811874">"¿Quitar usuario?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"Se eliminarán todas las aplicaciones y datos de este usuario."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Quitar"</string>
@@ -670,7 +675,7 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Desbloquear para usar"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Se ha producido un problema al obtener tus tarjetas. Inténtalo de nuevo más tarde."</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Ajustes de pantalla de bloqueo"</string>
-    <string name="qr_code_scanner_title" msgid="1938155688725760702">"Escáner QR"</string>
+    <string name="qr_code_scanner_title" msgid="1938155688725760702">"Escáner de códigos QR"</string>
     <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"Actualizando"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Perfil de trabajo"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Modo Avión"</string>
@@ -1036,7 +1041,7 @@
     <string name="accessibility_floating_button_action_remove_menu" msgid="6730432848162552135">"Quitar"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"activar/desactivar"</string>
     <string name="accessibility_floating_button_action_edit" msgid="1688227814600463987">"Editar"</string>
-    <string name="quick_controls_title" msgid="6839108006171302273">"Control disposit."</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"Control de dispositivos"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Elige una aplicación para añadir controles"</string>
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# control añadido.}many{# controles añadidos.}other{# controles añadidos.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Quitado"</string>
@@ -1192,7 +1197,6 @@
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Toca la pantalla para consultar más información"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Ninguna puesta"</string>
     <string name="accessibility_bouncer" msgid="5896923685673320070">"Poner bloqueo de pantalla"</string>
-    <string name="accessibility_side_fingerprint_indicator_label" msgid="1673807833352363712">"Toca el sensor de huellas digitales. Es el botón más pequeño del lateral del teléfono."</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Sensor de huellas digitales"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"autenticarte"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"acceder al dispositivo"</string>
@@ -1202,7 +1206,7 @@
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Datos móviles"</string>
     <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Conectado"</string>
-    <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Conectada temporalmente"</string>
+    <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Conectado temporalmente"</string>
     <string name="mobile_data_poor_connection" msgid="819617772268371434">"Conexión inestable"</string>
     <string name="mobile_data_off_summary" msgid="3663995422004150567">"Los datos móviles no se conectarán automáticamente"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"Sin conexión"</string>
@@ -1221,7 +1225,7 @@
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> quiere añadir el siguiente recuadro a ajustes rápidos"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Añadir recuadro"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"No añadir recuadro"</string>
-    <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Seleccionar usuario"</string>
+    <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Selecciona un usuario"</string>
     <string name="fgs_manager_footer_label" msgid="8276763570622288231">"{count,plural, =1{# aplicación activa}many{# aplicaciones activas}other{# aplicaciones activas}}"</string>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Información nueva"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aplicaciones activas"</string>
@@ -1244,7 +1248,7 @@
     <string name="clipboard_image_preview" msgid="2156475174343538128">"Vista previa de la imagen"</string>
     <string name="clipboard_edit" msgid="4500155216174011640">"editar"</string>
     <string name="add" msgid="81036585205287996">"Añadir"</string>
-    <string name="manage_users" msgid="1823875311934643849">"Gestionar usuarios"</string>
+    <string name="manage_users" msgid="1823875311934643849">"Gest. usuarios"</string>
     <string name="drag_split_not_supported" msgid="7173481676120546121">"Esta notificación no se puede arrastrar a la pantalla dividida"</string>
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Wi‑Fi no disponible"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Modo prioritario"</string>
@@ -1343,10 +1347,14 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Icono de contraer"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Icono de desplegar"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"o"</string>
-    <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Gesto para volver"</string>
-    <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Gesto para ir al inicio"</string>
-    <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"Tecla de acción"</string>
-    <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Hecho"</string>
+    <!-- no translation found for touchpad_tutorial_back_gesture_button (2746834288077265946) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_home_gesture_button (7640544867625955304) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_action_key_button (3220074511852927267) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_done_button (176168488821755503) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Retroiluminación del teclado"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Nivel %1$d de %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Controles de la casa"</string>

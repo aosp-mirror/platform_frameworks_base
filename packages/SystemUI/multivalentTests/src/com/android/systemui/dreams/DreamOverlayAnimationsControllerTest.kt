@@ -84,7 +84,7 @@ class DreamOverlayAnimationsControllerTest : SysuiTestCase() {
         verify(mockAnimator, atLeastOnce()).addListener(captor.capture())
 
         captor.allValues.forEach { it.onAnimationEnd(mockAnimator) }
-        verify(stateController, times(2)).setExitAnimationsRunning(false)
+        verify(stateController).setExitAnimationsRunning(false)
     }
 
     @Test
@@ -153,11 +153,5 @@ class DreamOverlayAnimationsControllerTest : SysuiTestCase() {
                 it.animatedValue == -DREAM_IN_TRANSLATION_Y_DISTANCE.toFloat()
             }
         )
-    }
-
-    @Test
-    fun testCancelAnimations_clearsExitAnimationsRunning() {
-        controller.cancelAnimations()
-        verify(stateController).setExitAnimationsRunning(false)
     }
 }

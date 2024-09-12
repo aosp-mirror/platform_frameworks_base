@@ -36,7 +36,6 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -49,20 +48,6 @@ class AudioVolumeInteractorTest : SysuiTestCase() {
 
     private val underTest: AudioVolumeInteractor =
         with(kosmos) { AudioVolumeInteractor(audioRepository, notificationsSoundPolicyInteractor) }
-
-    @Before
-    fun setUp() =
-        with(kosmos) {
-            audioRepository.setAudioStreamModel(
-                audioRepository.getAudioStream(audioStream).value.copy(isAffectedByMute = true)
-            )
-            audioRepository.setAudioStreamModel(
-                audioRepository
-                    .getAudioStream(AudioStream(AudioManager.STREAM_RING))
-                    .value
-                    .copy(isAffectedByMute = true)
-            )
-        }
 
     @Test
     fun setMuted_mutesStream() {
@@ -209,14 +194,10 @@ class AudioVolumeInteractorTest : SysuiTestCase() {
             testScope.runTest {
                 val audioStreamModel by collectLastValue(underTest.getAudioStream(audioStream))
                 audioRepository.setAudioStreamModel(
-                    audioStreamModel!!.copy(isAffectedByMute = false, isMuted = false)
+                    audioStreamModel!!.copy(isAffectedByMute = false)
                 )
 
-                underTest.setMuted(audioStream, true)
-                runCurrent()
-
                 assertThat(audioStreamModel!!.isAffectedByMute).isFalse()
-                assertThat(audioStreamModel!!.isMuted).isFalse()
             }
         }
     }

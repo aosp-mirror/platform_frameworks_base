@@ -606,12 +606,12 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"এপ্‌টোক নিকটৱৰ্তী ব্লুটুথ ডিভাইচ বিচাৰি উলিয়াবলৈ আৰু সেইসমূহৰ সৈতে পেয়াৰ কৰিবলৈ অনুমতি দিয়ে"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"পেয়াৰ কৰা ব্লুটুথ ডিভাইচৰ সৈতে সংযোগ কৰক"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"এপ্‌টোক পেয়াৰ কৰা ব্লুটুথ ডিভাইচৰ সৈতে সংযোগ কৰিবলৈ অনুমতি দিয়ে"</string>
-    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"নিকটৱৰ্তী ব্লুটুথ ডিভাইচত বিজ্ঞাপন প্ৰচাৰাভিযান কৰা"</string>
-    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"এপ্‌টোক নিকটৱৰ্তী ব্লুটুথ ডিভাইচত বিজ্ঞাপন প্ৰচাৰাভিযান কৰিবলৈ দিয়ে"</string>
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"নিকটৱৰ্তী ব্লুটুথ ডিভাইচত বিজ্ঞাপন প্ৰচাৰ কৰা"</string>
+    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"এপ্‌টোক নিকটৱৰ্তী ব্লুটুথ ডিভাইচত বিজ্ঞাপন প্ৰচাৰ কৰিবলৈ দিয়ে"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"নিকটৱৰ্তী আল্ট্ৰা-ৱাইডবেণ্ড ডিভাইচৰ মাজৰ আপেক্ষিক স্থান নিৰ্ধাৰণ কৰক"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"এপ্‌টোক নিকটৱৰ্তী আল্ট্ৰা-ৱাইডবেণ্ড ডিভাইচসমূহৰ মাজৰ আপেক্ষিক স্থান নিৰ্ধাৰণ কৰিবলৈ অনুমতি দিয়ক"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"নিকটৱৰ্তী ৱাই-ফাই ডিভাইচসমূহৰ সৈতে ভাব বিনিময় কৰক"</string>
-    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"এপ্‌টোক বিজ্ঞাপন প্ৰচাৰাভিযান কৰিবলৈ, সংযোগ কৰিবলৈ আৰু নিকটৱৰ্তী ৱাই-ফাই ডিভাইচৰ আপেক্ষিক স্থান নিৰ্ধাৰণ কৰিবলৈ অনুমতি দিয়ে"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"এপ্‌টোক বিজ্ঞাপন প্ৰচাৰ কৰিবলৈ, সংযোগ কৰিবলৈ আৰু নিকটৱৰ্তী ৱাই-ফাই ডিভাইচৰ আপেক্ষিক স্থান নিৰ্ধাৰণ কৰিবলৈ অনুমতি দিয়ে"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"অগ্ৰাধিকাৰ দিয়া NFC পৰিশোধ সেৱাৰ তথ্য"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"এপ্‌টোক অগ্ৰাধিকাৰ দিয়া nfc পৰিশোধ সেৱাৰ পঞ্জীকৃত সহায়কসমূহ আৰু পৰিশোধ কৰিব লগা লক্ষ্যস্থান দৰে তথ্য পাবলৈ অনুমতি দিয়ে।"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"নিয়েৰ ফিল্ড কমিউনিকেশ্বন নিয়ন্ত্ৰণ কৰক"</string>
@@ -1883,7 +1883,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"পিনটো অতি চুটি। কমেও ৪টা সংখ্যাৰ হ\'ব লাগিব।"</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"পাছত আকৌ চেষ্টা কৰক"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"স্ক্ৰীন পূৰ্ণৰূপত চাই আছে"</string>
-    <string name="immersive_cling_description" msgid="2896205051090870978">"বাহিৰ হ’বলৈ, আপোনাৰ স্ক্ৰীনখনৰ একেবাৰে ওপৰৰ পৰা তললৈ ছোৱাইপ কৰক"</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"বুজি পালোঁ"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"ভালকৈ চাবলৈ ঘূৰাওক"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"ভালকৈ চাবলৈ <xliff:g id="NAME">%s</xliff:g> পূৰ্ণ স্ক্ৰীনত খোলক"</string>
@@ -2417,12 +2418,12 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"ই কেনেকৈ কাম কৰে"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"বিবেচনাধীন হৈ আছে..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"ফিংগাৰপ্ৰিণ্ট আনলক পুনৰ ছেট আপ কৰক"</string>
-    <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> আৰু চিনাক্ত কৰিব নোৱাৰি।"</string>
-    <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> আৰু <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> আৰু চিনাক্ত কৰিব নোৱাৰি।"</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="1824812666549916586">"<xliff:g id="FINGERPRINT">%s</xliff:g> আৰু চিনাক্ত কৰিব নোৱাৰি। ফিংগাৰপ্ৰিণ্ট আনলক পুনৰ ছেট আপ কৰক।"</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="5974657382960155099">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> আৰু <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> আৰু চিনাক্ত কৰিব নোৱাৰি। ফিংগাৰপ্ৰিণ্ট আনলক পুনৰ ছেট আপ কৰক।"</string>
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"<xliff:g id="FINGERPRINT">%s</xliff:g>এ ভালদৰে কাম কৰা নাছিল আৰু সেইটো মচি পেলোৱা হৈছে"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> আৰু <xliff:g id="FINGERPRINT_1">%2$s</xliff:g>এ ভালদৰে কাম কৰা নাছিল আৰু সেয়া মচি পেলোৱা হৈছে"</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g>এ ভালদৰে কাম কৰা নাছিল আৰু সেইটো মচি পেলোৱা হৈছে। ফিংগাৰপ্ৰিণ্টৰ জৰিয়তে আপোনাৰ ফ’নটো আনলক কৰিবলৈ এইটো পুনৰ ছেট আপ কৰক।"</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> আৰু <xliff:g id="FINGERPRINT_1">%2$s</xliff:g>এ ভালদৰে কাম কৰা নাছিল আৰু সেয়া মচি পেলোৱা হৈছে। ফিংগাৰপ্ৰিণ্টৰ জৰিয়তে আপোনাৰ ফ’নটো আনলক কৰিবলৈ সেয়া পুনৰ ছেট আপ কৰক।"</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"ফে’চ আনলক পুনৰ ছেট আপ কৰক"</string>
-    <string name="face_dangling_notification_msg" msgid="746235263598985384">"আপোনাৰ মুখাৱয়বৰ মডেলটো আৰু চিনাক্ত কৰিব নোৱাৰি। ফে’চ আনলক পুনৰ ছেট আপ কৰক।"</string>
+    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"আপোনাৰ মুখাৱয়বৰ মডেলটোৱে ভালদৰে কাম কৰা নাছিল আৰু সেইটো মচি পেলোৱা হৈছে। মুখাৱয়বৰ জৰিয়তে আপোনাৰ ফ’নটো আনলক কৰিবলৈ এইটো পুনৰ ছেট আপ কৰক।"</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"ছেট আপ কৰক"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"এতিয়া নহয়"</string>
 </resources>

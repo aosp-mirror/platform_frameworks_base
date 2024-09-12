@@ -209,7 +209,7 @@
     <string name="location_changed_notification_text" msgid="7158423339982706912">"Контактирајте со IT-администраторот за да дознаете повеќе"</string>
     <string name="geofencing_service" msgid="3826902410740315456">"Услуга за виртуелна географска граница"</string>
     <string name="country_detector" msgid="7023275114706088854">"Детектор на земја"</string>
-    <string name="location_service" msgid="2439187616018455546">"Локациска услуга"</string>
+    <string name="location_service" msgid="2439187616018455546">"Услуга за локација"</string>
     <string name="gnss_service" msgid="8907781262179951385">"Услуга GNSS"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Услуга за известување од сензорот"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Услуга за самрак"</string>
@@ -498,9 +498,9 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"пристапи кон наредби на давателот на дополнителна локација"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Овозможува апликацијата да пристапи кон дополнителни наредби на давател на локација. Ова може да овозможи апликацијата да го попечи функционирањето на GPS или други извори на локација."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"пристап до прецизната локација само во преден план"</string>
-    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Апликацијава може да ја добие вашата прецизна локација од „Локациските услуги“ кога се користи. „Локациските услуги“ за уредот мора да се вклучени ако сакате апликацијата да ја добие локацијата. Ова може да го зголеми користењето на батеријата."</string>
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Апликацијава може да ја добие вашата прецизна локација од „Услугите според локација“ кога се користи. „Услугите според локација“ за уредот мора да се вклучени ако сакате апликацијата да ја добие локацијата. Ова може да го зголеми користењето на батеријата."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"пристап до приближната локација само во преден план"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Апликацијава може да ја добие вашата приближна локација од „Локациските услуги“ кога се користи. „Локациските услуги“ за уредот мора да се вклучени ако сакате апликацијата да ја добие локацијата."</string>
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Апликацијава може да ја добие вашата приближна локација од „Услугите според локација“ кога се користи. „Услугите според локација“ за уредот мора да се вклучени ако сакате апликацијата да ја добие локацијата."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"пристап до локацијата во заднина"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"Апликацијава може да пристапува до локацијата во секое време, дури и кога не се користи."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"менува аудио поставки"</string>
@@ -1242,7 +1242,7 @@
     <string name="alwaysUse" msgid="3153558199076112903">"Користи ја стандардно за ова дејство."</string>
     <string name="use_a_different_app" msgid="4987790276170972776">"Користи различна апликација"</string>
     <string name="clearDefaultHintMsg" msgid="1325866337702524936">"Избриши ги стандардните вредности во Системски поставки &gt; Апликации &gt; Преземено."</string>
-    <string name="chooseActivity" msgid="8563390197659779956">"Изберете дејство"</string>
+    <string name="chooseActivity" msgid="8563390197659779956">"Избери дејство"</string>
     <string name="chooseUsbActivity" msgid="2096269989990986612">"Изберете апликација за USB-уредот"</string>
     <string name="noApplications" msgid="1186909265235544019">"Нема апликации што можат да го извршат ова дејство."</string>
     <string name="aerr_application" msgid="4090916809370389109">"<xliff:g id="APPLICATION">%1$s</xliff:g> запре"</string>
@@ -1310,7 +1310,7 @@
     <string name="dump_heap_text" msgid="1692649033835719336">"Процесот <xliff:g id="PROC">%1$s</xliff:g> го надмина ограничувањето за меморија од <xliff:g id="SIZE">%2$s</xliff:g>. Слика од меморијата ви е достапна за споделување со програмерот. Бидете внимателни: оваа слика од меморијата може да ги содржи сите лични информации до коишто апликацијата има пристап."</string>
     <string name="dump_heap_system_text" msgid="6805155514925350849">"Процесот <xliff:g id="PROC">%1$s</xliff:g> го надмина ограничувањето за меморија од <xliff:g id="SIZE">%2$s</xliff:g>. Слика од меморијата ви е достапна за споделување. Бидете внимателни: оваа слика од меморијата може да содржи чувствителни лични информации до коишто процесот има пристап, што може да вклучуваат работи што сте ги напишале."</string>
     <string name="dump_heap_ready_text" msgid="5849618132123045516">"Слика од меморијата на <xliff:g id="PROC">%1$s</xliff:g> ви е достапна за споделување. Бидете внимателни: оваа слика од меморијата можеби ги содржи сите чувствителни лични информации до коишто процесот има пристап, што може да вклучуваат работи што сте ги напишале."</string>
-    <string name="sendText" msgid="493003724401350724">"Изберете дејство за текст"</string>
+    <string name="sendText" msgid="493003724401350724">"Избери дејство за текст"</string>
     <string name="volume_ringtone" msgid="134784084629229029">"Јачина на звук на ѕвонче"</string>
     <string name="volume_music" msgid="7727274216734955095">"Јачина на звук за аудио/видео"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="2614142915948898228">"Се репродуцира преку Bluetooth"</string>
@@ -1883,7 +1883,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN кодот е премногу краток. Мора да има најмалку 4 цифри."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Обиди се повторно подоцна"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Се прикажува на цел екран"</string>
-    <string name="immersive_cling_description" msgid="2896205051090870978">"За да излезете, повлечете надолу од горниот дел на екранот"</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Сфатив"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Ротирајте за подобар приказ"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"За подобар приказ, отворете ја апликацијата <xliff:g id="NAME">%s</xliff:g> на цел екран"</string>
@@ -2417,12 +2418,12 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Дознајте како функционира"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Во фаза на чекање…"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Поставете „Отклучување со отпечаток“ повторно"</string>
-    <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> веќе не може да се препознае."</string>
-    <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> и <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> веќе не може да се препознаат."</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="1824812666549916586">"<xliff:g id="FINGERPRINT">%s</xliff:g> веќе не може да се препознае. Поставете „Отклучување со отпечаток“ повторно."</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="5974657382960155099">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> и <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> веќе не може да се препознаат. Поставете „Отклучување со отпечаток“ повторно."</string>
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"<xliff:g id="FINGERPRINT">%s</xliff:g> не функционираше добро, па се избриша"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> и <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> не функционираа добро, па се избришаа"</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> не функционираше добро, па се избриша. Поставете го повторно за да го отклучувате телефонот со отпечаток."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> и <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> не функционираа добро, па се избришаа. Поставете ги повторно за да го отклучувате телефонот со отпечаток."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Поставете „Отклучување со лик“ повторно"</string>
-    <string name="face_dangling_notification_msg" msgid="746235263598985384">"Вашиот модел на лик веќе не може да се препознае. Поставете „Отклучување со лик“ повторно."</string>
+    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"Вашиот модел на лик не функционираше добро, па се избриша. Поставете го повторно за да го отклучите телефонот со лик."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Поставете"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Не сега"</string>
 </resources>

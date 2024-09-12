@@ -316,7 +316,7 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3233402355917446304">"ਬਲੂਟੁੱਥ ਆਡੀਓ LDAC ਕੋਡੇਕ: ਪਲੇਬੈਕ ਕੁਆਲਿਟੀ"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7274396574659784285">"ਬਲੂਟੁੱਥ ਆਡੀਓ LDAC\nਕੋਡੇਕ ਚੋਣ ਨੂੰ ਟ੍ਰਿਗਰ ਕਰੋ: ਪਲੇਬੈਕ ਕੁਆਲਿਟੀ"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"ਸਟ੍ਰੀਮਿੰਗ: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
-    <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"ਪ੍ਰਾਈਵੇਟ DNS"</string>
+    <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"ਨਿੱਜੀ DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"ਨਿੱਜੀ DNS ਮੋਡ ਚੁਣੋ"</string>
     <string name="private_dns_mode_off" msgid="7065962499349997041">"ਬੰਦ"</string>
     <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"ਸਵੈਚਲਿਤ"</string>
@@ -407,7 +407,7 @@
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"GPU ਡੀਬੱਗ ਤਹਿਆਂ ਚਾਲੂ ਕਰੋ"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"ਡੀਬੱਗ ਐਪਾਂ ਲਈ GPU ਡੀਬੱਗ ਤਹਿਆਂ ਨੂੰ ਲੋਡ ਹੋਣ ਦਿਓ"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"ਵਰਬੋਸ ਵਿਕਰੇਤਾ ਲੌਗਿੰਗ ਚਾਲੂ ਕਰੋ"</string>
-    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"ਬੱਗ ਰਿਪੋਰਟਾਂ ਵਿੱਚ ਵਧੀਕ ਡੀਵਾਈਸ ਮੁਤਾਬਕ ਵਿਕਰੇਤਾ ਲੌਗ ਸ਼ਾਮਲ ਕਰੋ, ਜਿਨ੍ਹਾਂ ਵਿੱਚ ਪ੍ਰਾਈਵੇਟ ਜਾਣਕਾਰੀ, ਬੈਟਰੀ ਦੀ ਵਧੇਰੇ ਵਰਤੋਂ ਅਤੇ/ਜਾਂ ਜ਼ਿਆਦਾ ਸਟੋਰੇਜ ਸ਼ਾਮਲ ਹੋ ਸਕਦੀ ਹੈ।"</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"ਬੱਗ ਰਿਪੋਰਟਾਂ ਵਿੱਚ ਵਧੀਕ ਡੀਵਾਈਸ ਨਾਲ ਸੰਬੰਧਿਤ ਵਿਕਰੇਤਾ ਲੌਗ ਸ਼ਾਮਲ ਕਰੋ, ਜਿਨ੍ਹਾਂ ਵਿੱਚ ਨਿੱਜੀ ਜਾਣਕਾਰੀ, ਬੈਟਰੀ ਦੀ ਵਧੇਰੇ ਵਰਤੋਂ, ਅਤੇ/ਜਾਂ ਵਧੇਰੀ ਸਟੋਰੇਜ ਸ਼ਾਮਲ ਹੋ ਸਕਦੀ ਹੈ।"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"ਵਿੰਡੋ ਐਨੀਮੇਸ਼ਨ ਸਕੇਲ"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"ਟ੍ਰਾਂਜ਼ਿਸ਼ਨ ਐਨੀਮੇਸ਼ਨ ਸਕੇਲ"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"ਐਨੀਮੇਟਰ ਮਿਆਦ ਸਕੇਲ"</string>

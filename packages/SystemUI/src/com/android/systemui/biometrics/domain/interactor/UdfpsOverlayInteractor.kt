@@ -17,7 +17,6 @@
 package com.android.systemui.biometrics.domain.interactor
 
 import android.content.Context
-import android.hardware.fingerprint.FingerprintManager
 import android.util.Log
 import android.view.MotionEvent
 import com.android.systemui.biometrics.AuthController
@@ -47,7 +46,6 @@ constructor(
     @Application private val context: Context,
     private val authController: AuthController,
     private val selectedUserInteractor: SelectedUserInteractor,
-    private val fingerprintManager: FingerprintManager?,
     @Application scope: CoroutineScope
 ) {
     private fun calculateIconSize(): Int {
@@ -72,25 +70,8 @@ constructor(
         return isUdfpsEnrolled && isWithinOverlayBounds
     }
 
-    private var _requestId = MutableStateFlow(0L)
-
-    /** RequestId of current AcquisitionClient */
-    val requestId: StateFlow<Long> = _requestId.asStateFlow()
-
-    fun setRequestId(requestId: Long) {
-        _requestId.value = requestId
-    }
-
     /** Sets whether Udfps overlay should handle touches */
     fun setHandleTouches(shouldHandle: Boolean = true) {
-        if (authController.isUltrasonicUdfpsSupported
-                && shouldHandle != _shouldHandleTouches.value) {
-            fingerprintManager?.setIgnoreDisplayTouches(
-                requestId.value,
-                authController.udfpsProps!!.get(0).sensorId,
-                !shouldHandle
-            )
-        }
         _shouldHandleTouches.value = shouldHandle
     }
 

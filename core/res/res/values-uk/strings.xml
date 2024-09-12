@@ -158,7 +158,7 @@
     <string name="scCellularNetworkSecurityTitle" msgid="7752521808690294384">"Безпека мобільної мережі"</string>
     <string name="scCellularNetworkSecuritySummary" msgid="7042036754550545005">"Шифрування, сповіщення для незашифрованих мереж"</string>
     <string name="scIdentifierDisclosureIssueTitle" msgid="2898888825129970328">"Отримано доступ до ідентифікатора пристрою"</string>
-    <string name="scIdentifierDisclosureIssueSummaryNotification" msgid="3699930821270580416">"О <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>, коли ви використали SIM-карту <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g>, мережа поблизу зафіксувала унікальний ідентифікатор вашого пристрою (IMSI або IMEI)"</string>
+    <string name="scIdentifierDisclosureIssueSummaryNotification" msgid="3699930821270580416">"О <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g> у мережі поблизу зафіксовано унікальний ідентифікатор вашого пристрою (IMSI або IMEI) під час використання вашої SIM-карти <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g>"</string>
     <string name="scIdentifierDisclosureIssueSummary" msgid="7283387338827749276">"О <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g> у мережі поблизу зафіксовано унікальний ідентифікатор вашого пристрою (IMSI або IMEI) під час використання вашої SIM-карти <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g>.\n\nЦе означає, що було зареєстровано ваше місцезнаходження, дії чи особу. Це звичайна практика, але може виявитися проблемою для людей, для яких важлива конфіденційність."</string>
     <string name="scNullCipherIssueEncryptedTitle" msgid="234717016411824969">"Підключено до зашифрованої мережі <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
     <string name="scNullCipherIssueEncryptedSummary" msgid="8577510708842150475">"Тепер з’єднання SIM-карти <xliff:g id="NETWORK_NAME">%1$s</xliff:g> краще захищене"</string>
@@ -1885,7 +1885,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN-код закороткий. Має бути принаймні 4 цифри."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Спробуйте пізніше"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Перегляд на весь екран"</string>
-    <string name="immersive_cling_description" msgid="2896205051090870978">"Щоб вийти, проведіть пальцем униз від верхнього краю екрана"</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"OK"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Оберніть для кращого огляду"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Для кращого огляду відкрийте додаток <xliff:g id="NAME">%s</xliff:g> на весь екран"</string>
@@ -2419,12 +2420,12 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Як це працює"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Обробка…"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Налаштуйте розблокування відбитком пальця повторно"</string>
-    <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"Відбиток пальця <xliff:g id="FINGERPRINT">%s</xliff:g> більше не розпізнається."</string>
-    <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"Відбитки пальців <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> і <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> більше не розпізнаються."</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="1824812666549916586">"Відбиток пальця <xliff:g id="FINGERPRINT">%s</xliff:g> більше не розпізнається. Налаштуйте розблокування відбитком пальця повторно."</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="5974657382960155099">"Відбитки пальців <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> і <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> більше не розпізнаються. Налаштуйте розблокування відбитком пальця повторно."</string>
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"Відбиток \"<xliff:g id="FINGERPRINT">%s</xliff:g>\" працював неналежним чином, і його видалено"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"Відбитки \"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>\" і \"<xliff:g id="FINGERPRINT_1">%2$s</xliff:g>\" працювали неналежним чином, і їх видалено"</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"Відбиток \"<xliff:g id="FINGERPRINT">%s</xliff:g>\" працював неналежним чином, і його видалено. Налаштуйте його ще раз, щоб розблоковувати телефон за допомогою відбитка пальця."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"Відбитки \"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>\" і \"<xliff:g id="FINGERPRINT_1">%2$s</xliff:g>\" працювали неналежним чином, і їх видалено. Налаштуйте їх ще раз, щоб розблоковувати телефон за допомогою відбитка пальця."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Налаштуйте фейс-контроль повторно"</string>
-    <string name="face_dangling_notification_msg" msgid="746235263598985384">"Модель вашого обличчя більше не розпізнається. Налаштуйте фейс-контроль повторно."</string>
+    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"Модель обличчя працювала неналежним чином, і її видалено. Налаштуйте її ще раз, щоб розблоковувати телефон за допомогою фейс-контролю."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Налаштувати"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Не зараз"</string>
 </resources>

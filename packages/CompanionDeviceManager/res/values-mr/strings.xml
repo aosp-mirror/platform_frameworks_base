@@ -41,7 +41,9 @@
     <string name="helper_summary_computer" msgid="8774832742608187072">"तुमच्या फोनमधील फोटो, मीडिया आणि सूचना ॲक्सेस करण्यासाठी <xliff:g id="APP_NAME">%1$s</xliff:g> हे तुमच्या <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> च्या वतीने परवानगीची विनंती करत आहे"</string>
     <string name="title_nearby_device_streaming" msgid="7269956847378799794">"&lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; ला ही कृती करण्याची अनुमती द्यायची आहे का?"</string>
     <string name="title_nearby_device_streaming_with_mirroring" msgid="242855799919611657">"&lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; ला तुमच्या फोनची अ‍ॅप्स आणि सिस्टीमची वैशिष्ट्ये स्ट्रीम करण्याची अनुमती द्यायची आहे का?"</string>
-    <string name="summary_nearby_device_streaming" msgid="4039565463149145573">"%1$s ला ऑडिओ, फोटो, पेमेंट माहिती, पासवर्ड आणि मेसेज यांसह तुमच्या फोनवर दिसणाऱ्या किंवा प्ले होणाऱ्या सर्व गोष्टींचा अ‍ॅक्सेस असेल.&lt;br/&gt;&lt;br/&gt;तुम्ही या परवानगीचा अ‍ॅक्सेस काढून टाकेपर्यंत %1$s हे ॲप्स आणि सिस्टीमची वैशिष्ट्ये स्ट्रीम करू शकेल."</string>
+    <!-- String.format failed for translation -->
+    <!-- no translation found for summary_nearby_device_streaming (4039565463149145573) -->
+    <skip />
     <string name="helper_summary_nearby_device_streaming" msgid="2063965070936844876">"<xliff:g id="APP_NAME">%1$s</xliff:g> हे जवळपासच्या डिव्हाइसवर अ‍ॅप्स आणि इतर सिस्टीम वैशिष्‍ट्ये स्ट्रीम करण्यासाठी तुमच्या <xliff:g id="DEVICE_NAME">%2$s</xliff:g> च्या वतीने परवानगीची विनंती करा"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"डिव्हाइस"</string>
     <string name="summary_generic" msgid="1761976003668044801">"हे ॲप तुमचा फोन आणि निवडलेल्या डिव्‍हाइसदरम्यान कॉल करत असलेल्‍या एखाद्या व्यक्तीचे नाव यासारखी माहिती सिंक करू शकेल"</string>

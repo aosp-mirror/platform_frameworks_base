@@ -839,13 +839,6 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider {
                                     + "Disallowed route: "
                                     + route);
                 }
-
-                if (route.isSystemRouteType()) {
-                    throw new SecurityException(
-                            "Only the system is allowed to publish routes with system route types. "
-                                    + "Disallowed route: "
-                                    + route);
-                }
             }
 
             Connection connection = mConnectionRef.get();

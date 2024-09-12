@@ -129,20 +129,22 @@
     <skip />
     <!-- no translation found for screenrecord_stop_dialog_message (1926783607059442889) -->
     <skip />
-    <string name="screenrecord_stop_dialog_message_specific_app" msgid="5285148796772616326">"คุณจะหยุดการบันทึก &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
-    <string name="screenrecord_stop_dialog_button" msgid="2883812564938194350">"หยุดบันทึก"</string>
-    <string name="share_to_app_stop_dialog_title" msgid="9212915050910250438">"หยุดแชร์หน้าจอไหม"</string>
+    <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
+    <skip />
+    <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
+    <skip />
     <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
     <skip />
-    <string name="share_to_app_stop_dialog_message_specific_app" msgid="124371406810544777">"คุณจะหยุดการแชร์ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
-    <string name="share_to_app_stop_dialog_button" msgid="6334056916284230217">"หยุดแชร์"</string>
+    <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
+    <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
     <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
     <skip />
-    <string name="cast_to_other_device_stop_dialog_message_specific_app" msgid="4891536209254041850">"คุณจะหยุดการแคสต์ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
-    <string name="cast_to_other_device_stop_dialog_button" msgid="6420183747435521834">"หยุดแคสต์"</string>
-    <string name="close_dialog_button" msgid="4749497706540104133">"ปิด"</string>
+    <!-- no translation found for cast_to_other_device_stop_dialog_button (6420183747435521834) -->
+    <skip />
+    <!-- no translation found for close_dialog_button (4749497706540104133) -->
+    <skip />
     <string name="issuerecord_title" msgid="286627115110121849">"โปรแกรมบันทึกปัญหา"</string>
     <string name="issuerecord_background_processing_label" msgid="1666840264959336876">"กำลังประมวลผลการบันทึกปัญหา"</string>
     <string name="issuerecord_channel_description" msgid="6142326363431474632">"การแจ้งเตือนต่อเนื่องสำหรับเซสชันการรวบรวมปัญหา"</string>
@@ -153,7 +155,8 @@
     <string name="issuerecord_save_error" msgid="6913040083446722726">"เกิดข้อผิดพลาดในการบันทึกไฟล์บันทึกปัญหา"</string>
     <string name="issuerecord_start_error" msgid="3402782952722871190">"เกิดข้อผิดพลาดในการเริ่มบันทึกปัญหา"</string>
     <string name="immersive_cling_title" msgid="8372056499315585941">"กำลังดูแบบเต็มหน้าจอ"</string>
-    <string name="immersive_cling_description" msgid="2717426731830851921">"หากต้องการออก ให้ปัดลงจากด้านบนของหน้าจอ"</string>
+    <!-- no translation found for immersive_cling_description (2717426731830851921) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="3076681691468978568">"รับทราบ"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"กลับ"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"หน้าแรก"</string>
@@ -186,7 +189,6 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"ปลดล็อกด้วยใบหน้าแล้ว กดเพื่อดำเนินการต่อ"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"จดจำใบหน้าได้ กดเพื่อดำเนินการต่อ"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"จดจำใบหน้าได้ กดไอคอนปลดล็อกเพื่อดำเนินการต่อ"</string>
-    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"ปลดล็อกด้วยใบหน้าแล้ว แตะเพื่อดำเนินการต่อ"</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"ตรวจสอบสิทธิ์แล้ว"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"ยกเลิกการตรวจสอบสิทธิ์"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"ตัวเลือกเพิ่มเติม"</string>
@@ -297,11 +299,14 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"บันทึกแล้ว"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"ยกเลิกการเชื่อมต่อ"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"เปิดใช้งาน"</string>
-    <string name="turn_on_bluetooth_auto_tomorrow" msgid="3345758139235739006">"เปิดอัตโนมัติในวันพรุ่งนี้"</string>
+    <!-- no translation found for turn_on_bluetooth_auto_tomorrow (3345758139235739006) -->
+    <skip />
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"ฟีเจอร์ต่างๆ เช่น Quick Share และ \"หาอุปกรณ์ของฉัน\" ใช้บลูทูธ"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"บลูทูธจะเปิดพรุ่งนี้เช้า"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"แชร์เสียง"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"กำลังแชร์เสียง"</string>
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button (7545274861795853838) -->
+    <skip />
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_sharing (3069309588231072128) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"แบตเตอรี่ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"เสียง"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"ชุดหูฟัง"</string>
@@ -373,7 +378,7 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"บันทึกหน้าจอ"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"เริ่ม"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"หยุด"</string>
-    <string name="qs_record_issue_label" msgid="8166290137285529059">"บันทึกปัญหา"</string>
+    <string name="qs_record_issue_label" msgid="8166290137285529059">"ปัญหาการบันทึก"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"เริ่ม"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"หยุด"</string>
     <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"รายงานข้อบกพร่อง"</string>
@@ -1192,7 +1197,6 @@
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"แตะดูข้อมูลเพิ่มเติม"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"ไม่มีการตั้งปลุก"</string>
     <string name="accessibility_bouncer" msgid="5896923685673320070">"ป้อนข้อมูลการล็อกหน้าจอ"</string>
-    <string name="accessibility_side_fingerprint_indicator_label" msgid="1673807833352363712">"แตะเซ็นเซอร์ลายนิ้วมือ ซึ่งเป็นปุ่มสั้นๆ ที่อยู่ด้านข้างโทรศัพท์"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"เซ็นเซอร์ลายนิ้วมือ"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"ตรวจสอบสิทธิ์"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"เข้าถึงอุปกรณ์"</string>
@@ -1343,10 +1347,14 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"ไอคอนยุบ"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"ไอคอนขยาย"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"หรือ"</string>
-    <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"ท่าทางสัมผัสสำหรับย้อนกลับ"</string>
-    <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"ท่าทางสัมผัสสำหรับหน้าแรก"</string>
-    <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"ปุ่มดำเนินการ"</string>
-    <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"เสร็จสิ้น"</string>
+    <!-- no translation found for touchpad_tutorial_back_gesture_button (2746834288077265946) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_home_gesture_button (7640544867625955304) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_action_key_button (3220074511852927267) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_done_button (176168488821755503) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"ไฟแบ็กไลต์ของแป้นพิมพ์"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"ระดับที่ %1$d จาก %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"ระบบควบคุมอุปกรณ์สมาร์ทโฮม"</string>

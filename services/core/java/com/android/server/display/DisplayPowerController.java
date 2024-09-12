@@ -1565,9 +1565,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             // even if they range changes what it means in absolute terms.
             mDisplayBrightnessController.updateScreenBrightnessSetting(
                     MathUtils.constrain(unthrottledBrightnessState,
-                            clampedState.getMinBrightness(), clampedState.getMaxBrightness()),
-                    Math.min(mBrightnessRangeController.getCurrentBrightnessMax(),
-                            clampedState.getMaxBrightness()));
+                            clampedState.getMinBrightness(), clampedState.getMaxBrightness()));
         }
 
         // The current brightness to use has been calculated at this point, and HbmController should
@@ -2457,20 +2455,12 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
     @Override
     public void setBrightness(float brightness) {
-        // After HBMController and NBMController migration to Clampers framework
-        // currentBrightnessMax should be taken from clampers controller
-        // TODO(b/263362199)
-        mDisplayBrightnessController.setBrightness(clampScreenBrightness(brightness),
-                mBrightnessRangeController.getCurrentBrightnessMax());
+        mDisplayBrightnessController.setBrightness(clampScreenBrightness(brightness));
     }
 
     @Override
     public void setBrightness(float brightness, int userSerial) {
-        // After HBMController and NBMController migration to Clampers framework
-        // currentBrightnessMax should be taken from clampers controller
-        // TODO(b/263362199)
-        mDisplayBrightnessController.setBrightness(clampScreenBrightness(brightness), userSerial,
-                mBrightnessRangeController.getCurrentBrightnessMax());
+        mDisplayBrightnessController.setBrightness(clampScreenBrightness(brightness), userSerial);
     }
 
     @Override

@@ -54,6 +54,8 @@
     <string name="keyboard_layout_thai_pattachote" msgid="2547992342794252205">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‎‏‏‎‏‎‏‏‏‎‎‎‏‎‎‏‎‎‏‏‎‎‎‏‎‎‏‎‎‏‏‎‎‏‎‏‎‏‎‏‎‏‎‏‎‏‎‏‏‏‏‏‎‏‎‏‏‎‏‎Thai (Pattachote)‎‏‎‎‏‎"</string>
     <string name="keyboard_layout_serbian_latin" msgid="3128791759390046571">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‎‏‏‎‏‏‎‏‎‏‏‏‎‏‏‎‎‏‏‏‎‎‎‎‏‏‏‎‎‏‏‎‎‏‎‏‎‎‏‏‏‎‎‏‏‏‏‏‎‎‏‎‏‏‎‏‎‏‏‎Serbian (Latin)‎‏‎‎‏‎"</string>
     <string name="keyboard_layout_montenegrin_latin" msgid="1467832503378949945">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‏‎‎‎‏‎‏‏‏‏‎‏‏‎‎‏‎‎‏‏‏‏‎‎‎‏‎‏‎‎‎‏‎‎‏‏‎‏‎‏‏‎‎‏‎‏‏‎‏‏‏‎‎‏‏‏‎‎‏‎Montenegrin (Latin)‎‏‎‎‏‎"</string>
-    <string name="keyboard_layout_serbian_cyrillic" msgid="7013541044323542196">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‎‎‏‎‏‎‏‎‏‎‏‎‎‎‏‏‎‏‎‎‏‏‎‏‎‏‏‏‎‏‎‎‏‎‎‏‎‎‎‎‏‏‎‏‏‏‎‎‏‎‎‏‎‏‏‎‏‎‎‎Serbian (Cyrillic)‎‏‎‎‏‎"</string>
-    <string name="keyboard_layout_montenegrin_cyrillic" msgid="2391253952894077421">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‎‎‏‎‎‏‎‏‏‏‏‎‏‏‏‎‎‎‎‏‏‎‎‏‏‎‎‏‏‏‏‏‏‏‎‎‎‎‎‎‎‎‎‎‎‎‎‏‎‎‏‏‏‏‎‏‏‎‏‎Montenegrin (Cyrillic)‎‏‎‎‏‎"</string>
+    <!-- no translation found for keyboard_layout_serbian_cyrillic (7013541044323542196) -->
+    <skip />
+    <!-- no translation found for keyboard_layout_montenegrin_cyrillic (2391253952894077421) -->
+    <skip />
 </resources>

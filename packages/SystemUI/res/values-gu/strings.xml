@@ -129,20 +129,22 @@
     <skip />
     <!-- no translation found for screenrecord_stop_dialog_message (1926783607059442889) -->
     <skip />
-    <string name="screenrecord_stop_dialog_message_specific_app" msgid="5285148796772616326">"તમે &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ને રેકોર્ડ કરવાનું બંધ કરશો"</string>
-    <string name="screenrecord_stop_dialog_button" msgid="2883812564938194350">"રેકોર્ડિંગ રોકો"</string>
-    <string name="share_to_app_stop_dialog_title" msgid="9212915050910250438">"સ્ક્રીન શેર કરવાનું રોકીએ?"</string>
+    <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
+    <skip />
+    <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
+    <skip />
     <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
     <skip />
-    <string name="share_to_app_stop_dialog_message_specific_app" msgid="124371406810544777">"તમે &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ને શેર કરવાનું બંધ કરશો"</string>
-    <string name="share_to_app_stop_dialog_button" msgid="6334056916284230217">"શેર કરવાનું રોકો"</string>
+    <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
+    <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
     <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
     <skip />
-    <string name="cast_to_other_device_stop_dialog_message_specific_app" msgid="4891536209254041850">"તમે &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ને કાસ્ટ કરવાનું બંધ કરશો"</string>
-    <string name="cast_to_other_device_stop_dialog_button" msgid="6420183747435521834">"કાસ્ટ કરવાનું રોકો"</string>
-    <string name="close_dialog_button" msgid="4749497706540104133">"બંધ કરો"</string>
+    <!-- no translation found for cast_to_other_device_stop_dialog_button (6420183747435521834) -->
+    <skip />
+    <!-- no translation found for close_dialog_button (4749497706540104133) -->
+    <skip />
     <string name="issuerecord_title" msgid="286627115110121849">"સમસ્યા રેકોર્ડર"</string>
     <string name="issuerecord_background_processing_label" msgid="1666840264959336876">"સમસ્યા રેકોર્ડિંગ ચાલુ છે"</string>
     <string name="issuerecord_channel_description" msgid="6142326363431474632">"કોઈ સમસ્યા સંગ્રહના સત્ર માટે ચાલુ નોટિફિકેશન"</string>
@@ -153,7 +155,8 @@
     <string name="issuerecord_save_error" msgid="6913040083446722726">"સમસ્યા રેકોર્ડિંગને સાચવવામાં ભૂલ આવી"</string>
     <string name="issuerecord_start_error" msgid="3402782952722871190">"સમસ્યા રેકોર્ડિંગને શરૂ કરવામાં ભૂલ આવી"</string>
     <string name="immersive_cling_title" msgid="8372056499315585941">"પૂર્ણ સ્ક્રીન જોઈ રહ્યાં છે"</string>
-    <string name="immersive_cling_description" msgid="2717426731830851921">"બહાર નીકળવા માટે, તમારી સ્ક્રીનની સૌથી ઉપરથી નીચેની તરફ સ્વાઇપ કરો"</string>
+    <!-- no translation found for immersive_cling_description (2717426731830851921) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="3076681691468978568">"સમજાઈ ગયું"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"પાછળ"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"હોમ"</string>
@@ -186,7 +189,6 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"ચહેરા દ્વારા અનલૉક કર્યું. આગળ વધવા માટે દબાવો."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"ચહેરો ઓળખ્યો. આગળ વધવા માટે દબાવો."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"ચહેરો ઓળખ્યો. આગળ વધવા \'અનલૉક કરો\' આઇકન દબાવો."</string>
-    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"ચહેરા દ્વારા અનલૉક કર્યું. ચાલુ રાખવા માટે ટૅપ કરો."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"પ્રમાણિત"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"પ્રમાણીકરણ રદ કરો"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"વધુ વિકલ્પો"</string>
@@ -297,11 +299,14 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"સાચવેલું"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"ડિસ્કનેક્ટ કરો"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"સક્રિય કરો"</string>
-    <string name="turn_on_bluetooth_auto_tomorrow" msgid="3345758139235739006">"આવતીકાલે ઑટોમૅટિક રીતે ચાલુ કરો"</string>
+    <!-- no translation found for turn_on_bluetooth_auto_tomorrow (3345758139235739006) -->
+    <skip />
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"ક્વિક શેર અને Find My Device જેવી સુવિધાઓ બ્લૂટૂથનો ઉપયોગ કરે છે"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"બ્લૂટૂથ આવતીકાલે સવારે ચાલુ થશે"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"ઑડિયો શેર કરો"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"ઑડિયો શેર કરી રહ્યાં છીએ"</string>
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button (7545274861795853838) -->
+    <skip />
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_sharing (3069309588231072128) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> બૅટરી"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"ઑડિયો"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"હૅડસેટ"</string>
@@ -1192,7 +1197,6 @@
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"વધુ માહિતી માટે ટૅપ કરો"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"કોઈ અલાર્મ સેટ નથી"</string>
     <string name="accessibility_bouncer" msgid="5896923685673320070">"સ્ક્રીન લૉક દાખલ કરો"</string>
-    <string name="accessibility_side_fingerprint_indicator_label" msgid="1673807833352363712">"ફિંગરપ્રિન્ટ સેન્સરને ટચ કરો. ફોનની બાજુમાં આવેલું આ કોઈ નાનું બટન છે"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"ફિંગરપ્રિન્ટ સેન્સર"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"ખાતરી કરો"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"ડિવાઇસ અનલૉક કરો"</string>
@@ -1343,10 +1347,14 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"\'નાનું કરો\'નું આઇકન"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"\'મોટું કરો\'નું આઇકન"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"અથવા"</string>
-    <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"પાછળ જવાનો સંકેત"</string>
-    <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"હોમ સ્ક્રીન પર જવાનો સંકેત"</string>
-    <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"ઍક્શન કી"</string>
-    <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"થઈ ગયું"</string>
+    <!-- no translation found for touchpad_tutorial_back_gesture_button (2746834288077265946) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_home_gesture_button (7640544867625955304) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_action_key_button (3220074511852927267) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_done_button (176168488821755503) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"કીબોર્ડની બૅકલાઇટ"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%2$dમાંથી %1$d લેવલ"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"ઘરેલું સાધનોના નિયંત્રણો"</string>

@@ -1883,7 +1883,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN kod juda qisqa, kamida 4 ta raqam kiriting."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Keyinroq urinib ko‘ring"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Butun ekranli rejim"</string>
-    <string name="immersive_cling_description" msgid="2896205051090870978">"Chiqish uchun ekranning tepasidan pastga suring"</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"OK"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Yaxshiroq koʻrish uchun kamerani buring"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Yaxshiroq koʻrish uchun butun ekranda <xliff:g id="NAME">%s</xliff:g> ilovasini oching"</string>
@@ -2417,12 +2418,12 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Ishlash tartibi"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Kutilmoqda..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Barmoq izi bilan ochish funksiyasini qayta sozlang"</string>
-    <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> endi tanilmaydi."</string>
-    <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> va <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> endi tanilmaydi."</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="1824812666549916586">"<xliff:g id="FINGERPRINT">%s</xliff:g> endi tanilmaydi. Barmoq izi bilan ochishni qayta sozlang."</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="5974657382960155099">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> va <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> endi tanilmaydi. Barmoq izi bilan ochishni qayta sozlang."</string>
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"<xliff:g id="FINGERPRINT">%s</xliff:g> yaxshi ishlamadi va oʻchirib tashlandi."</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> va <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> yaxshi ishlamadi va oʻchirib tashlandi."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> yaxshi ishlamadi va oʻchirib tashlandi. Telefonni barmoq izi bilan ochish uchun uni qayta sozlang."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> va <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> yaxshi ishlamadi va oʻchirib tashlandi. Telefonni barmoq izi bilan ochish uchun ularni qayta sozlang."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Yuz bilan ochishni qayta sozlash"</string>
-    <string name="face_dangling_notification_msg" msgid="746235263598985384">"Yuzingiz modeli endi tanilmaydi. Yuz bilan ochishni qayta sozlang."</string>
+    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"Yuzingiz mobeli yaxshi ishlamadi va oʻchirib tashlandi. Telefonni yuz bilan ochish uchun uni qayta sozlang."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Sozlash"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Hozir emas"</string>
 </resources>

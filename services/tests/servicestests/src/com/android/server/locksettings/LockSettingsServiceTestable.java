@@ -196,11 +196,6 @@ public class LockSettingsServiceTestable extends LockSettingsService {
     }
 
     @Override
-    void setKeystorePassword(byte[] password, int userHandle) {
-
-    }
-
-    @Override
     void initKeystoreSuperKeys(int userId, SyntheticPassword sp, boolean allowExisting) {
     }
 

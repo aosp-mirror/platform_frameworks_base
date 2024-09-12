@@ -21,6 +21,7 @@ java_library_static {
         ":services.net-sources",
     ],
     static_libs: [
+        "modules-utils-build_system",
         "netd-client",
         "networkstack-client",
         "net-utils-services-common",

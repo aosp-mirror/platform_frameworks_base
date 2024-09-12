@@ -28,9 +28,6 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import java.util.concurrent.CopyOnWriteArrayList
-import java.util.concurrent.atomic.AtomicInteger
-
-private const val INVALID_ROTATION = -1
 
 /**
  * Allows to subscribe to rotation changes. Updates are provided for the display associated to
@@ -48,7 +45,7 @@ constructor(
     private val listeners = CopyOnWriteArrayList<RotationListener>()
 
     private val displayListener = RotationDisplayListener()
-    private val lastRotation = AtomicInteger(INVALID_ROTATION)
+    private var lastRotation: Int? = null
 
     override fun addCallback(listener: RotationListener) {
         bgHandler.post {
@@ -64,7 +61,7 @@ constructor(
             listeners -= listener
             if (listeners.isEmpty()) {
                 unsubscribeToRotation()
-                lastRotation.set(INVALID_ROTATION)
+                lastRotation = null
             }
         }
     }
@@ -103,8 +100,9 @@ constructor(
 
                 if (displayId == display.displayId) {
                     val currentRotation = display.rotation
-                    if (lastRotation.compareAndSet(lastRotation.get(), currentRotation)) {
+                    if (lastRotation == null || lastRotation != currentRotation) {
                         listeners.forEach { it.onRotationChanged(currentRotation) }
+                        lastRotation = currentRotation
                     }
                 }
             } finally {

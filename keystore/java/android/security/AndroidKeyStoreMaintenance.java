@@ -17,7 +17,6 @@
 package android.security;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceSpecificException;
@@ -104,29 +103,6 @@ public class AndroidKeyStoreMaintenance {
             return 0;
         } catch (ServiceSpecificException e) {
             Log.e(TAG, "onUserRemoved failed", e);
-            return e.errorCode;
-        } catch (Exception e) {
-            Log.e(TAG, "Can not connect to keystore", e);
-            return SYSTEM_ERROR;
-        }
-    }
-
-    /**
-     * Informs Keystore 2.0 about changing user's password
-     *
-     * @param userId   - Android user id of the user
-     * @param password - a secret derived from the synthetic password provided by the
-     *                 LockSettingsService
-     * @return 0 if successful or a {@code ResponseCode}
-     * @hide
-     */
-    public static int onUserPasswordChanged(int userId, @Nullable byte[] password) {
-        StrictMode.noteDiskWrite();
-        try {
-            getService().onUserPasswordChanged(userId, password);
-            return 0;
-        } catch (ServiceSpecificException e) {
-            Log.e(TAG, "onUserPasswordChanged failed", e);
             return e.errorCode;
         } catch (Exception e) {
             Log.e(TAG, "Can not connect to keystore", e);

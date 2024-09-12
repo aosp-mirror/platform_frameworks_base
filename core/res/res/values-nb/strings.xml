@@ -264,16 +264,16 @@
     <string name="global_action_emergency" msgid="1387617624177105088">"Nødssituasjon"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"Feilrapport"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Avslutt økten"</string>
-    <string name="global_action_screenshot" msgid="2610053466156478564">"Skjermbilde"</string>
+    <string name="global_action_screenshot" msgid="2610053466156478564">"Skjermdump"</string>
     <string name="bugreport_title" msgid="8549990811777373050">"Feilrapport"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"Informasjon om tilstanden til enheten din samles inn og sendes som en e-post. Det tar litt tid fra du starter feilrapporten til e-posten er klar, så vær tålmodig."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"Interaktiv rapport"</string>
-    <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"Bruk dette alternativet i de fleste tilfeller. Da kan du spore fremgangen for rapporten, skrive inn flere detaljer om problemet samt ta skjermbilder. Noen deler som tar lang tid å behandle, blir kanskje utelatt."</string>
+    <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"Bruk dette alternativet i de fleste tilfeller. Da kan du spore fremgangen for rapporten, skrive inn flere detaljer om problemet samt ta skjermdumper. Noen deler som tar lang tid å behandle, blir kanskje utelatt."</string>
     <string name="bugreport_option_full_title" msgid="7681035745950045690">"Fullstendig rapport"</string>
-    <string name="bugreport_option_full_summary" msgid="1975130009258435885">"Bruk dette alternativet for minst mulig forstyrrelse på systemet når enheten din er treg eller ikke svarer, eller når du trenger alle rapportdelene. Det tas ikke noen skjermbilde, og du kan ikke legge til flere detaljer."</string>
-    <string name="bugreport_countdown" msgid="6418620521782120755">"{count,plural, =1{Tar skjermbilde for feilrapporten om # sekund.}other{Tar skjermbilde for feilrapporten om # sekunder.}}"</string>
-    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"En skjermbilde er tatt med feilrapporten"</string>
-    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"Kunne ikke ta skjermbilde med feilrapporten"</string>
+    <string name="bugreport_option_full_summary" msgid="1975130009258435885">"Bruk dette alternativet for minst mulig forstyrrelse på systemet når enheten din er treg eller ikke svarer, eller når du trenger alle rapportdelene. Det tas ikke noen skjermdump, og du kan ikke legge til flere detaljer."</string>
+    <string name="bugreport_countdown" msgid="6418620521782120755">"{count,plural, =1{Tar skjermdump for feilrapporten om # sekund.}other{Tar skjermdump for feilrapporten om # sekunder.}}"</string>
+    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"En skjermdump er tatt med feilrapporten"</string>
+    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"Kunne ikke ta skjermdump med feilrapporten"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Stillemodus"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"Lyden er av"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"Lyden er på"</string>
@@ -359,8 +359,8 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Kan trykke, sveipe, klype og gjøre andre bevegelser."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Bevegelser på fingeravtrykkssensor"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Kan fange inn bevegelser som utføres på enhetens fingeravtrykkssensor."</string>
-    <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Ta skjermbilde"</string>
-    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Kan ikke ta et skjermbilde av skjermen."</string>
+    <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Ta skjermdump"</string>
+    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Kan ikke ta en skjermdump av skjermen."</string>
     <string name="dream_preview_title" msgid="5570751491996100804">"Forhåndsvisning, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="dream_accessibility_action_click" msgid="7392398629967797805">"lukk"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"deaktivere eller endre statusfeltet"</string>
@@ -509,8 +509,8 @@
     <string name="permdesc_recordAudio" msgid="5857246765327514062">"Denne appen kan ta opp lyd med mikrofonen mens den er i bruk."</string>
     <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"ta opp lyd i bakgrunnen"</string>
     <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"Denne appen kan når som helst ta opp lyd med mikrofonen."</string>
-    <string name="permlab_detectScreenCapture" msgid="4447042362828799433">"registrere skjermbilder av appvinduer"</string>
-    <string name="permdesc_detectScreenCapture" msgid="3485784917960342284">"Denne appen varsles hvis det tas skjermbilder mens appen er i bruk."</string>
+    <string name="permlab_detectScreenCapture" msgid="4447042362828799433">"registrere skjermdumper av appvinduer"</string>
+    <string name="permdesc_detectScreenCapture" msgid="3485784917960342284">"Denne appen varsles hvis det tas skjermdumper mens appen er i bruk."</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"sende kommandoer til SIM-kortet"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"Lar appen sende kommandoer til SIM-kortet. Dette er veldig farlig."</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"gjenkjenn fysisk aktivitet"</string>
@@ -1883,7 +1883,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN-koden er for kort. Den må bestå av minst fire sifre."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Prøv på nytt senere"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Visning i fullskjerm"</string>
-    <string name="immersive_cling_description" msgid="2896205051090870978">"For å gå ut, sveip ned fra toppen av skjermen"</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Skjønner"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Roter for å få en bedre visning"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Åpne <xliff:g id="NAME">%s</xliff:g> i fullskjerm for å se bedre"</string>
@@ -2185,7 +2186,7 @@
     <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"Hurtiginnstillinger"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Dialogboks for å slå av/på"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Låseskjerm"</string>
-    <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Skjermbilde"</string>
+    <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Skjermdump"</string>
     <string name="accessibility_system_action_headset_hook_label" msgid="8524691721287425468">"Hook for hodetelefoner"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"Tilgjengelighetssnarvei på skjermen"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Velger for tilgjengelighetssnarvei på skjermen"</string>
@@ -2417,12 +2418,12 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Slik fungerer det"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Venter …"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Konfigurer opplåsingen med fingeravtrykk på nytt"</string>
-    <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> gjenkjennes ikke lenger."</string>
-    <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> og <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> gjenkjennes ikke lenger."</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="1824812666549916586">"<xliff:g id="FINGERPRINT">%s</xliff:g> gjenkjennes ikke lenger. Konfigurer opplåsing med fingeravtrykk på nytt."</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="5974657382960155099">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> og <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> gjenkjennes ikke lenger. Konfigurer opplåsing med fingeravtrykk på nytt."</string>
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"<xliff:g id="FINGERPRINT">%s</xliff:g> fungerte ikke skikkelig og ble slettet"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> og <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> fungerte ikke skikkelig og ble slettet"</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> fungerte ikke skikkelig og ble slettet. Du kan konfigurere det på nytt for å låse opp telefonen med fingeravtrykket."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> og <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> fungerte ikke skikkelig og ble slettet. Du kan konfigurere dem på nytt for å låse opp telefonen med fingeravtrykket."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Konfigurer ansiktslåsen på nytt"</string>
-    <string name="face_dangling_notification_msg" msgid="746235263598985384">"Ansiktsmodellen din gjenkjennes ikke lenger. Konfigurer ansiktslåsen på nytt."</string>
+    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"Ansiktsmodellen din fungerte ikke skikkelig og ble slettet. Du kan konfigurere den på nytt for å låse opp telefonen med ansiktet."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Konfigurer"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Ikke nå"</string>
 </resources>

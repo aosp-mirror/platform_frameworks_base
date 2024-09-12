@@ -28,7 +28,6 @@ import android.provider.Settings.Secure.ACTIVE_UNLOCK_ON_BIOMETRIC_FAIL
 import android.provider.Settings.Secure.ACTIVE_UNLOCK_ON_FACE_ACQUIRE_INFO
 import android.provider.Settings.Secure.ACTIVE_UNLOCK_ON_FACE_ERRORS
 import android.provider.Settings.Secure.ACTIVE_UNLOCK_ON_UNLOCK_INTENT
-import android.provider.Settings.Secure.ACTIVE_UNLOCK_ON_UNLOCK_INTENT_LEGACY
 import android.provider.Settings.Secure.ACTIVE_UNLOCK_ON_UNLOCK_INTENT_WHEN_BIOMETRIC_ENROLLED
 import android.provider.Settings.Secure.ACTIVE_UNLOCK_ON_WAKE
 import android.provider.Settings.Secure.ACTIVE_UNLOCK_WAKEUPS_CONSIDERED_UNLOCK_INTENTS
@@ -87,12 +86,6 @@ class ActiveUnlockConfig @Inject constructor(
          * Trigger ActiveUnlock when the assistant is triggered.
          */
         ASSISTANT,
-        /**
-         * Trigger ActiveUnlock on legacy unlock intents. This includes tapping on the empty space
-         * of the notification shadse when face auth is enrolled and re-trying face auth on the
-         * primary bouncer.
-         */
-        UNLOCK_INTENT_LEGACY,
     }
 
     /**
@@ -106,7 +99,6 @@ class ActiveUnlockConfig @Inject constructor(
     }
 
     private var requestActiveUnlockOnWakeup = false
-    private var requestActiveUnlockOnUnlockIntentLegacy = false
     private var requestActiveUnlockOnUnlockIntent = false
     private var requestActiveUnlockOnBioFail = false
 
@@ -118,8 +110,6 @@ class ActiveUnlockConfig @Inject constructor(
 
     private val settingsObserver = object : ContentObserver(handler) {
         private val wakeUri = secureSettings.getUriFor(ACTIVE_UNLOCK_ON_WAKE)
-        private val unlockIntentLegacyUri =
-            secureSettings.getUriFor(ACTIVE_UNLOCK_ON_UNLOCK_INTENT_LEGACY)
         private val unlockIntentUri = secureSettings.getUriFor(ACTIVE_UNLOCK_ON_UNLOCK_INTENT)
         private val bioFailUri = secureSettings.getUriFor(ACTIVE_UNLOCK_ON_BIOMETRIC_FAIL)
         private val faceErrorsUri = secureSettings.getUriFor(ACTIVE_UNLOCK_ON_FACE_ERRORS)
@@ -172,15 +162,6 @@ class ActiveUnlockConfig @Inject constructor(
             if (selfChange || uris.contains(wakeUri)) {
                 requestActiveUnlockOnWakeup = secureSettings.getIntForUser(
                         ACTIVE_UNLOCK_ON_WAKE, 0, selectedUserInteractor.getSelectedUserId()) == 1
-            }
-
-            if (selfChange || uris.contains(unlockIntentLegacyUri)) {
-                requestActiveUnlockOnUnlockIntentLegacy =
-                    secureSettings.getIntForUser(
-                        ACTIVE_UNLOCK_ON_UNLOCK_INTENT_LEGACY,
-                        0,
-                        selectedUserInteractor.getSelectedUserId()
-                    ) == 1
             }
 
             if (selfChange || uris.contains(unlockIntentUri)) {
@@ -276,7 +257,7 @@ class ActiveUnlockConfig @Inject constructor(
      */
     fun isActiveUnlockEnabled(): Boolean {
         return requestActiveUnlockOnWakeup || requestActiveUnlockOnUnlockIntent ||
-            requestActiveUnlockOnBioFail || requestActiveUnlockOnUnlockIntentLegacy
+                requestActiveUnlockOnBioFail
     }
 
     /**
@@ -318,18 +299,15 @@ class ActiveUnlockConfig @Inject constructor(
     fun shouldAllowActiveUnlockFromOrigin(requestOrigin: ActiveUnlockRequestOrigin): Boolean {
         return when (requestOrigin) {
             ActiveUnlockRequestOrigin.WAKE -> requestActiveUnlockOnWakeup
-            ActiveUnlockRequestOrigin.UNLOCK_INTENT_LEGACY ->
-                requestActiveUnlockOnUnlockIntentLegacy
+
             ActiveUnlockRequestOrigin.UNLOCK_INTENT ->
-                requestActiveUnlockOnUnlockIntent ||
-                    requestActiveUnlockOnUnlockIntentLegacy ||
-                    requestActiveUnlockOnWakeup ||
-                    (shouldRequestActiveUnlockOnUnlockIntentFromBiometricEnrollment())
+                requestActiveUnlockOnUnlockIntent || requestActiveUnlockOnWakeup ||
+                        (shouldRequestActiveUnlockOnUnlockIntentFromBiometricEnrollment())
+
             ActiveUnlockRequestOrigin.BIOMETRIC_FAIL ->
-                requestActiveUnlockOnBioFail ||
-                    requestActiveUnlockOnUnlockIntentLegacy ||
-                    requestActiveUnlockOnUnlockIntent ||
-                    requestActiveUnlockOnWakeup
+                requestActiveUnlockOnBioFail || requestActiveUnlockOnUnlockIntent ||
+                        requestActiveUnlockOnWakeup
+
             ActiveUnlockRequestOrigin.ASSISTANT -> isActiveUnlockEnabled()
         }
     }
@@ -367,9 +345,6 @@ class ActiveUnlockConfig @Inject constructor(
     override fun dump(pw: PrintWriter, args: Array<out String>) {
         pw.println("Settings:")
         pw.println("   requestActiveUnlockOnWakeup=$requestActiveUnlockOnWakeup")
-        pw.println(
-            "   requestActiveUnlockOnUnlockIntentLegacy=$requestActiveUnlockOnUnlockIntentLegacy"
-        )
         pw.println("   requestActiveUnlockOnUnlockIntent=$requestActiveUnlockOnUnlockIntent")
         pw.println("   requestActiveUnlockOnBioFail=$requestActiveUnlockOnBioFail")
 

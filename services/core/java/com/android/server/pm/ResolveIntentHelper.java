@@ -126,12 +126,10 @@ final class ResolveIntentHelper {
                     userId, resolveForStart, /*allowDynamicSplits*/ true);
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
 
-            if (resolveForStart) {
-                var args = new SaferIntentUtils.IntentArgs(intent, resolvedType,
-                        false /* isReceiver */, true, filterCallingUid, callingPid);
-                args.platformCompat = mPlatformCompat;
-                SaferIntentUtils.filterNonExportedComponents(args, query);
-            }
+            var args = new SaferIntentUtils.IntentArgs(intent, resolvedType,
+                    false /* isReceiver */, resolveForStart, filterCallingUid, callingPid);
+            args.platformCompat = mPlatformCompat;
+            SaferIntentUtils.filterNonExportedComponents(args, query);
 
             final boolean queryMayBeFiltered =
                     UserHandle.getAppId(filterCallingUid) >= Process.FIRST_APPLICATION_UID

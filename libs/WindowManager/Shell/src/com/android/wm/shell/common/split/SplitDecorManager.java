@@ -269,9 +269,7 @@ public class SplitDecorManager extends WindowlessWindowManager {
 
         if (update) {
             if (immediately) {
-                t.setAlpha(mBackgroundLeash, showVeil ? 1f : 0f);
                 t.setVisibility(mBackgroundLeash, showVeil);
-                t.setAlpha(mIconLeash, showVeil ? 1f : 0f);
                 t.setVisibility(mIconLeash, showVeil);
             } else {
                 startFadeAnimation(showVeil, false, null);

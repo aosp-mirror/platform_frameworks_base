@@ -501,9 +501,9 @@ final class InstallPackageHelper {
             mPm.setUpCustomResolverActivity(pkg, pkgSetting);
         }
 
-        // When upgrading a package, clear the app metadata file path for the new package.
-        if (oldPkgSetting != null
-                && oldPkgSetting.getLastUpdateTime() < pkgSetting.getLastUpdateTime()) {
+        // When upgrading a package, pkgSetting is copied from oldPkgSetting. Clear the app
+        // metadata file path for the new package.
+        if (oldPkgSetting != null) {
             pkgSetting.setAppMetadataFilePath(null);
             pkgSetting.setAppMetadataSource(APP_METADATA_SOURCE_UNKNOWN);
         }
@@ -2504,13 +2504,13 @@ final class InstallPackageHelper {
         Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
     }
 
-    private void setAccessRestrictedSettingsMode(String pkgName, int appId, int userId, int mode) {
+    private void enableRestrictedSettings(String pkgName, int appId, int userId) {
         final AppOpsManager appOpsManager = mPm.mContext.getSystemService(AppOpsManager.class);
         final int uid = UserHandle.getUid(userId, appId);
         appOpsManager.setMode(AppOpsManager.OP_ACCESS_RESTRICTED_SETTINGS,
                 uid,
                 pkgName,
-                mode);
+                AppOpsManager.MODE_ERRORED);
     }
 
     /**
@@ -2888,21 +2888,8 @@ final class InstallPackageHelper {
                 mPm.notifyPackageChanged(packageName, request.getAppId());
             }
 
-            // Set the OP_ACCESS_RESTRICTED_SETTINGS op, which is used by ECM (see {@link
-            // EnhancedConfirmationManager}) as a persistent state denoting whether an app is
-            // currently guarded by ECM, not guarded by ECM, or (in Android V+) that this should
-            // be decided later.
-            if (android.permission.flags.Flags.enhancedConfirmationModeApisEnabled()
-                    && android.security.Flags.extendEcmToAllSettings()) {
-                final int appId = request.getAppId();
-                mPm.mHandler.post(() -> {
-                    for (int userId : firstUserIds) {
-                        // MODE_DEFAULT means that the app's guardedness will be decided lazily
-                        setAccessRestrictedSettingsMode(packageName, appId, userId,
-                                AppOpsManager.MODE_DEFAULT);
-                    }
-                });
-            } else {
+            if (!android.permission.flags.Flags.enhancedConfirmationModeApisEnabled()
+                    || !android.security.Flags.extendEcmToAllSettings()) {
                 // Apply restricted settings on potentially dangerous packages. Needs to happen
                 // after appOpsManager is notified of the new package
                 if (request.getPackageSource() == PackageInstaller.PACKAGE_SOURCE_LOCAL_FILE
@@ -2911,9 +2898,7 @@ final class InstallPackageHelper {
                     final int appId = request.getAppId();
                     mPm.mHandler.post(() -> {
                         for (int userId : firstUserIds) {
-                            // MODE_ERRORED means that the app is explicitly guarded
-                            setAccessRestrictedSettingsMode(packageName, appId, userId,
-                                    AppOpsManager.MODE_ERRORED);
+                            enableRestrictedSettings(packageName, appId, userId);
                         }
                     });
                 }
@@ -4568,7 +4553,7 @@ final class InstallPackageHelper {
                             PackageManagerException.INTERNAL_ERROR_SYSTEM_OVERLAY_STATIC);
                 }
             } else {
-                if ((scanFlags & SCAN_AS_VENDOR) != 0) {
+                if ((scanFlags & (SCAN_AS_VENDOR | SCAN_AS_ODM)) != 0) {
                     if (pkg.getTargetSdkVersion() < ScanPackageUtils.getVendorPartitionVersion()) {
                         Slog.w(TAG, "System overlay " + pkg.getPackageName()
                                 + " targets an SDK below the required SDK level of vendor"

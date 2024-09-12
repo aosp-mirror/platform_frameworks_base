@@ -161,6 +161,5 @@ constructor(
             TASK_FRAGMENT_TRANSIT_CLOSE,
             false
         )
-        organizer.unregisterOrganizer()
     }
 }

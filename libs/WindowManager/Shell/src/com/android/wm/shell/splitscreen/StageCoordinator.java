@@ -2659,10 +2659,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                         && displayChange.getStartRotation() != displayChange.getEndRotation()) {
                     mSplitLayout.setFreezeDividerWindow(true);
                 }
-                if (request.getRemoteTransition() != null) {
-                    mSplitTransitions.setRemotePassThroughTransition(transition,
-                            request.getRemoteTransition());
-                }
                 // Still want to monitor everything while in split-screen, so return non-null.
                 return new WindowContainerTransaction();
             } else {
@@ -2989,13 +2985,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 notifySplitAnimationFinished();
                 return true;
             }
-        } else if (mSplitTransitions.isPendingPassThrough(transition)) {
-            ProtoLog.d(WM_SHELL_SPLIT_SCREEN,
-                    "startAnimation: passThrough transition=%d", info.getDebugId());
-            mSplitTransitions.mPendingRemotePassthrough.mRemoteHandler.startAnimation(transition,
-                    info, startTransaction, finishTransaction, finishCallback);
-            notifySplitAnimationFinished();
-            return true;
         }
 
         return startPendingAnimation(transition, info, startTransaction, finishTransaction,

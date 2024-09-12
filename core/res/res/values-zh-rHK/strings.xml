@@ -1883,7 +1883,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN 碼太短，至少必須為 4 位數。"</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"稍後再試"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"開啟全螢幕"</string>
-    <string name="immersive_cling_description" msgid="2896205051090870978">"如要離開，請從螢幕頂部向下滑動"</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"知道了"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"旋轉以改善預覽效果"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"以全螢幕模式開啟「<xliff:g id="NAME">%s</xliff:g>」，以改善預覽效果"</string>
@@ -2417,12 +2418,12 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"運作方式"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"待處理…"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"重新設定「指紋解鎖」功能"</string>
-    <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"無法再辨識<xliff:g id="FINGERPRINT">%s</xliff:g>。"</string>
-    <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"無法再辨識<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>和<xliff:g id="FINGERPRINT_1">%2$s</xliff:g>。"</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="1824812666549916586">"無法再辨識<xliff:g id="FINGERPRINT">%s</xliff:g>。請重新設定「指紋解鎖」功能。"</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="5974657382960155099">"無法再辨識<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>和<xliff:g id="FINGERPRINT_1">%2$s</xliff:g>。請重新設定「指紋解鎖」功能。"</string>
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"由於「<xliff:g id="FINGERPRINT">%s</xliff:g>」無法正常運作，因此系統已將其刪除"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"由於「<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>」和「<xliff:g id="FINGERPRINT_1">%2$s</xliff:g>」無法正常運作，因此系統已將其刪除。"</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"由於「<xliff:g id="FINGERPRINT">%s</xliff:g>」無法正常運作，因此系統已將其刪除。請重新設定，才能使用指紋解鎖手機。"</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"由於「<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>」和「<xliff:g id="FINGERPRINT_1">%2$s</xliff:g>」無法正常運作，因此系統已將其刪除。請重新設定，才能使用指紋解鎖手機。"</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"重新設定「面孔解鎖」功能"</string>
-    <string name="face_dangling_notification_msg" msgid="746235263598985384">"無法再辨識你的面部模型。請重新設定「面孔解鎖」功能。"</string>
+    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"由於面部模型無法正常運作，因此系統已將其刪除。請重新設定，才能使用面孔解鎖手機。"</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"設定"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"暫時不要"</string>
 </resources>

@@ -2790,9 +2790,8 @@ public class AppOpsService extends IAppOpsService.Stub {
      * have information on them.
      */
     private static boolean isOpAllowedForUid(int uid) {
-        int appId = UserHandle.getAppId(uid);
         return Flags.runtimePermissionAppopsMappingEnabled()
-                && (appId == Process.ROOT_UID || appId == Process.SYSTEM_UID);
+                && (uid == Process.ROOT_UID || uid == Process.SYSTEM_UID);
     }
 
     @Override

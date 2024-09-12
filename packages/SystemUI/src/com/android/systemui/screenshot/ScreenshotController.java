@@ -101,7 +101,7 @@ import javax.inject.Provider;
 /**
  * Controls the state and flow for screenshots.
  */
-public class ScreenshotController implements ScreenshotHandler {
+public class ScreenshotController {
     private static final String TAG = logTag(ScreenshotController.class);
 
     /**
@@ -351,8 +351,7 @@ public class ScreenshotController implements ScreenshotHandler {
         mShowUIOnExternalDisplay = showUIOnExternalDisplay;
     }
 
-    @Override
-    public void handleScreenshot(ScreenshotData screenshot, Consumer<Uri> finisher,
+    void handleScreenshot(ScreenshotData screenshot, Consumer<Uri> finisher,
             RequestCallback requestCallback) {
         Assert.isMainThread();
 

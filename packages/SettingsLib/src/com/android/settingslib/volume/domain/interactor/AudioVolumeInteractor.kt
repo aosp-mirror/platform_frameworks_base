@@ -61,10 +61,6 @@ class AudioVolumeInteractor(
     }
 
     suspend fun setMuted(audioStream: AudioStream, isMuted: Boolean) {
-        val streamModel = getAudioStream(audioStream).first()
-        if (!streamModel.isAffectedByMute) {
-            return
-        }
         if (audioStream.value == AudioManager.STREAM_RING) {
             val mode =
                 if (isMuted) AudioManager.RINGER_MODE_VIBRATE else AudioManager.RINGER_MODE_NORMAL

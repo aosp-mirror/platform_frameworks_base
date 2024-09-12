@@ -40,7 +40,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
@@ -169,9 +168,7 @@ constructor(
                     keyguardInteractor.isKeyguardGoingAway.filter { it }.map {}, // map to Unit
                     keyguardInteractor.isKeyguardOccluded.flatMapLatest { keyguardOccluded ->
                         if (keyguardOccluded) {
-                            primaryBouncerInteractor.keyguardAuthenticatedBiometricsHandled.drop(
-                                1
-                            ) // drop the initial state
+                            primaryBouncerInteractor.keyguardAuthenticatedBiometricsHandled
                         } else {
                             emptyFlow()
                         }

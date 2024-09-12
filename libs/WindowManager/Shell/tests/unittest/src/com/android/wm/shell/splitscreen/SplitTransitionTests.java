@@ -50,10 +50,8 @@ import static org.mockito.Mockito.verify;
 import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.os.IBinder;
-import android.os.RemoteException;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
-import android.window.IRemoteTransition;
 import android.window.RemoteTransition;
 import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
@@ -324,32 +322,6 @@ public class SplitTransitionTests extends ShellTestCase {
         mStageCoordinator.onRecentsInSplitAnimationFinish(commitWCT,
                 mock(SurfaceControl.Transaction.class));
         assertFalse(mStageCoordinator.isSplitScreenVisible());
-    }
-
-    @Test
-    @UiThreadTest
-    public void testRemotePassThroughInvoked() throws RemoteException {
-        RemoteTransition remoteWrapper = mock(RemoteTransition.class);
-        IRemoteTransition remoteTransition = mock(IRemoteTransition.class);
-        IBinder remoteBinder = mock(IBinder.class);
-        doReturn(remoteBinder).when(remoteTransition).asBinder();
-        doReturn(remoteTransition).when(remoteWrapper).getRemoteTransition();
-
-        TransitionRequestInfo request = new TransitionRequestInfo(TRANSIT_CHANGE, null,
-                remoteWrapper);
-        IBinder transition = mock(IBinder.class);
-        mMainStage.activate(new WindowContainerTransaction(), false);
-        mStageCoordinator.handleRequest(transition, request);
-        TransitionInfo info = new TransitionInfoBuilder(TRANSIT_CHANGE, 0)
-                .build();
-        boolean accepted = mStageCoordinator.startAnimation(transition, info,
-                mock(SurfaceControl.Transaction.class),
-                mock(SurfaceControl.Transaction.class),
-                mock(Transitions.TransitionFinishCallback.class));
-        assertTrue(accepted);
-
-        verify(remoteTransition, times(1)).startAnimation(any(),
-                any(), any(), any());
     }
 
     @Test

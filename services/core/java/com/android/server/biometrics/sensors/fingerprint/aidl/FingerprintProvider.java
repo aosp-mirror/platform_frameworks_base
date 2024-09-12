@@ -790,19 +790,6 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
     }
 
     @Override
-    public void setIgnoreDisplayTouches(long requestId, int sensorId, boolean ignoreTouches) {
-        mFingerprintSensors.get(sensorId).getScheduler().getCurrentClientIfMatches(
-                requestId, (client) -> {
-                    if (!(client instanceof Udfps)) {
-                        Slog.e(getTag(),
-                                "setIgnoreDisplayTouches received during client: " + client);
-                        return;
-                    }
-                    ((Udfps) client).setIgnoreDisplayTouches(ignoreTouches);
-                });
-    }
-
-    @Override
     public void onPowerPressed() {
         for (int i = 0; i < mFingerprintSensors.size(); i++) {
             final Sensor sensor = mFingerprintSensors.valueAt(i);

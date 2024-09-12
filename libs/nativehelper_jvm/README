@@ -1,0 +1,2 @@
+libnativehelper_jvm is a JVM-compatible version of libnativehelper.
+It should be used instead of libnativehelper whenever a host library is meant to run on a JVM.

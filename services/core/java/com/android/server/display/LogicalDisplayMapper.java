@@ -389,15 +389,11 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
         // Retrieve the layout for this particular state.
         final Layout layout = mDeviceStateToLayoutMap.get(deviceState);
         if (layout == null) {
-            // TODO(b/352019542): remove the log once b/345960547 is fixed.
-            Slog.d(TAG, "Cannot get layout for given state:" + deviceState);
             return null;
         }
         // Retrieve the details of the given display within this layout.
         Layout.Display display = layout.getById(displayId);
         if (display == null) {
-            // TODO(b/352019542): remove the log once b/345960547 is fixed.
-            Slog.d(TAG, "Cannot get display for given layout:" + layout);
             return null;
         }
         // Retrieve the display info for the display that matches the display id.

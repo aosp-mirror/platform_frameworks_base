@@ -37,7 +37,6 @@ import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.android.internal.R as InternalR
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.res.R
@@ -368,7 +367,6 @@ internal constructor(
             private val nameView = view.requireViewById<TextView>(R.id.bluetooth_device_name)
             private val summaryView = view.requireViewById<TextView>(R.id.bluetooth_device_summary)
             private val iconView = view.requireViewById<ImageView>(R.id.bluetooth_device_icon)
-            private val iconGear = view.requireViewById<ImageView>(R.id.gear_icon_image)
             private val gearView = view.requireViewById<View>(R.id.gear_icon)
 
             internal fun bind(
@@ -382,36 +380,6 @@ internal constructor(
                         mutableDeviceItemClick.tryEmit(item)
                         uiEventLogger.log(BluetoothTileDialogUiEvent.DEVICE_CLICKED)
                     }
-
-                    // updating icon colors
-                    val tintColor =
-                        com.android.settingslib.Utils.getColorAttr(
-                                context,
-                                if (item.isActive) InternalR.attr.materialColorOnPrimaryContainer
-                                else InternalR.attr.materialColorOnSurface
-                            )
-                            .defaultColor
-
-                    // update icons
-                    iconView.apply {
-                        item.iconWithDescription?.let {
-                            setImageDrawable(it.first.apply { mutate()?.setTint(tintColor) })
-                            contentDescription = it.second
-                        }
-                    }
-
-                    iconGear.apply { drawable?.let { it.mutate()?.setTint(tintColor) } }
-
-                    // update text styles
-                    nameView.setTextAppearance(
-                        if (item.isActive) R.style.BluetoothTileDialog_DeviceName_Active
-                        else R.style.BluetoothTileDialog_DeviceName
-                    )
-                    summaryView.setTextAppearance(
-                        if (item.isActive) R.style.BluetoothTileDialog_DeviceSummary_Active
-                        else R.style.BluetoothTileDialog_DeviceSummary
-                    )
-
                     accessibilityDelegate =
                         object : AccessibilityDelegate() {
                             override fun onInitializeAccessibilityNodeInfo(
@@ -430,7 +398,12 @@ internal constructor(
                 }
                 nameView.text = item.deviceName
                 summaryView.text = item.connectionSummary
-
+                iconView.apply {
+                    item.iconWithDescription?.let {
+                        setImageDrawable(it.first)
+                        contentDescription = it.second
+                    }
+                }
                 gearView.setOnClickListener {
                     deviceItemOnClickCallback.onDeviceItemGearClicked(item, it)
                 }

@@ -129,20 +129,22 @@
     <skip />
     <!-- no translation found for screenrecord_stop_dialog_message (1926783607059442889) -->
     <skip />
-    <string name="screenrecord_stop_dialog_message_specific_app" msgid="5285148796772616326">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; grabatzeari utziko diozu"</string>
-    <string name="screenrecord_stop_dialog_button" msgid="2883812564938194350">"Utzi grabatzeari"</string>
-    <string name="share_to_app_stop_dialog_title" msgid="9212915050910250438">"Pantaila partekatzeari utzi nahi diozu?"</string>
+    <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
+    <skip />
+    <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
+    <skip />
     <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
     <skip />
-    <string name="share_to_app_stop_dialog_message_specific_app" msgid="124371406810544777">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; partekatzeari utziko diozu"</string>
-    <string name="share_to_app_stop_dialog_button" msgid="6334056916284230217">"Utzi partekatzeari"</string>
+    <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
+    <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
     <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
     <skip />
-    <string name="cast_to_other_device_stop_dialog_message_specific_app" msgid="4891536209254041850">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; igortzeari utziko diozu"</string>
-    <string name="cast_to_other_device_stop_dialog_button" msgid="6420183747435521834">"Utzi igortzeari"</string>
-    <string name="close_dialog_button" msgid="4749497706540104133">"Itxi"</string>
+    <!-- no translation found for cast_to_other_device_stop_dialog_button (6420183747435521834) -->
+    <skip />
+    <!-- no translation found for close_dialog_button (4749497706540104133) -->
+    <skip />
     <string name="issuerecord_title" msgid="286627115110121849">"Arazo-grabagailua"</string>
     <string name="issuerecord_background_processing_label" msgid="1666840264959336876">"Arazoaren grabaketa prozesatzen"</string>
     <string name="issuerecord_channel_description" msgid="6142326363431474632">"Arazo bat biltzeko saio baten aktibo dagoen jakinarazpena"</string>
@@ -153,7 +155,8 @@
     <string name="issuerecord_save_error" msgid="6913040083446722726">"Errore bat gertatu da arazoa grabatzean"</string>
     <string name="issuerecord_start_error" msgid="3402782952722871190">"Errore bat gertatu da arazoa grabatzen hastean"</string>
     <string name="immersive_cling_title" msgid="8372056499315585941">"Pantaila osoa ikusgai"</string>
-    <string name="immersive_cling_description" msgid="2717426731830851921">"Irteteko, pasatu hatza pantailaren goialdetik beherantz"</string>
+    <!-- no translation found for immersive_cling_description (2717426731830851921) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="3076681691468978568">"Ados"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Atzera"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Hasiera"</string>
@@ -186,7 +189,6 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Aurpegiaren bidez desblokeatu da. Sakatu aurrera egiteko."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Ezagutu da aurpegia. Sakatu aurrera egiteko."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Ezagutu da aurpegia. Aurrera egiteko, sakatu desblokeatzeko ikonoa."</string>
-    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"Aurpegiaren bidez desblokeatu da. Sakatu hau aurrera egiteko."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Autentifikatuta"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Utzi bertan behera autentifikazioa"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"Aukera gehiago"</string>
@@ -297,11 +299,14 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Gordeta"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"deskonektatu"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"aktibatu"</string>
-    <string name="turn_on_bluetooth_auto_tomorrow" msgid="3345758139235739006">"Aktibatu automatikoki bihar"</string>
+    <!-- no translation found for turn_on_bluetooth_auto_tomorrow (3345758139235739006) -->
+    <skip />
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"Quick Share, Bilatu nire gailua eta beste eginbide batzuek Bluetootha erabiltzen dute"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bihar goizean aktibatuko da Bluetootha"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Partekatu audioa"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Audioa partekatzen"</string>
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button (7545274861795853838) -->
+    <skip />
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_sharing (3069309588231072128) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Bateria: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Audioa"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Entzungailua"</string>
@@ -581,7 +586,7 @@
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Zure gurasoak kudeatzen du gailua. Zure gurasoak gailuko informazioa ikusi eta kudea dezake; besteak beste, zer aplikazio erabiltzen dituzun, zure kokapena zein den eta pantaila aurrean zenbat eta noiz egoten zaren."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPNa"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"TrustAgent bidez desblokeatuta"</string>
-    <string name="kg_prompt_after_adaptive_auth_lock" msgid="2587481497846342760">"Blokeatu egin da gailua. Autentifikatzeko saiakera gehiegi egin dira."</string>
+    <string name="kg_prompt_after_adaptive_auth_lock" msgid="2587481497846342760">"Blokeatu egin da gailua. Autentifikatze-saiakera gehiegi egin dira."</string>
     <string name="keyguard_indication_after_adaptive_auth_lock" msgid="2323400645470712787">"Gailua blokeatuta dago\nEzin izan da autentifikatu"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"Soinuaren ezarpenak"</string>
@@ -938,7 +943,7 @@
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> - <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g> (<xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>)"</string>
     <string name="wifi_is_off" msgid="5389597396308001471">"Wifi-konexioa desaktibatuta dago"</string>
-    <string name="bt_is_off" msgid="7436344904889461591">"Bluetootha desaktibatuta dago"</string>
+    <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth bidezko konexioa desaktibatuta dago"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"Ez molestatzeko modua desaktibatuta dago"</string>
     <string name="dnd_is_on" msgid="7009368176361546279">"Aktibatuta dago ez molestatzeko modua"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"Ez molestatzeko modua aktibatu du arau automatiko batek (<xliff:g id="ID_1">%s</xliff:g>)."</string>
@@ -1192,7 +1197,6 @@
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Informazio gehiago lortzeko, sakatu hau"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Alarmarik ez"</string>
     <string name="accessibility_bouncer" msgid="5896923685673320070">"erabili pantailaren blokeoa"</string>
-    <string name="accessibility_side_fingerprint_indicator_label" msgid="1673807833352363712">"Ukitu hatz-marken sentsorea. Telefonoaren albo batean dagoen botoi laburra da."</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Hatz-marken sentsorea"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"autentifikatu"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"sartu gailuan"</string>
@@ -1316,7 +1320,7 @@
     <string name="dismiss_dialog" msgid="2195508495854675882">"Baztertu"</string>
     <string name="connected_display_icon_desc" msgid="6373560639989971997">"Konektatutako pantaila"</string>
     <string name="privacy_dialog_title" msgid="7839968133469098311">"Mikrofonoa eta kamera"</string>
-    <string name="privacy_dialog_summary" msgid="2458769652125995409">"Aplikazioen azkenaldiko erabilera"</string>
+    <string name="privacy_dialog_summary" msgid="2458769652125995409">"Aplikazioen azken erabilera"</string>
     <string name="privacy_dialog_more_button" msgid="7610604080293562345">"Ikusi azkenaldiko sarbidea"</string>
     <string name="privacy_dialog_done_button" msgid="4504330708531434263">"Eginda"</string>
     <string name="privacy_dialog_expand_action" msgid="9129262348628331377">"Zabaldu eta erakutsi aukerak"</string>
@@ -1343,10 +1347,14 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Tolesteko ikonoa"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Zabaltzeko ikonoa"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"edo"</string>
-    <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Atzera egiteko keinua"</string>
-    <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Orri nagusira joateko keinua"</string>
-    <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"Ekintza-tekla"</string>
-    <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Eginda"</string>
+    <!-- no translation found for touchpad_tutorial_back_gesture_button (2746834288077265946) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_home_gesture_button (7640544867625955304) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_action_key_button (3220074511852927267) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_done_button (176168488821755503) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Teklatuaren hondoko argia"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%1$d/%2$d maila"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Etxeko gailuen kontrola"</string>

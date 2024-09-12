@@ -20,7 +20,6 @@ import static android.os.InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 import static android.view.SurfaceControl.HIDDEN;
 import static android.window.TaskConstants.TASK_CHILD_LAYER_LETTERBOX_BACKGROUND;
 
-import android.annotation.NonNull;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -210,18 +209,16 @@ public class Letterbox {
         return false;
     }
 
-    /** Applies surface changes such as colour, window crop, position and input info. */
-    public void applySurfaceChanges(@NonNull SurfaceControl.Transaction t,
-            @NonNull SurfaceControl.Transaction inputT) {
+    public void applySurfaceChanges(SurfaceControl.Transaction t) {
         if (useFullWindowSurface()) {
-            mFullWindowSurface.applySurfaceChanges(t, inputT);
+            mFullWindowSurface.applySurfaceChanges(t);
 
             for (LetterboxSurface surface : mSurfaces) {
                 surface.remove();
             }
         } else {
             for (LetterboxSurface surface : mSurfaces) {
-                surface.applySurfaceChanges(t, inputT);
+                surface.applySurfaceChanges(t);
             }
 
             mFullWindowSurface.remove();
@@ -421,8 +418,7 @@ public class Letterbox {
             return Math.max(0, mLayoutFrameGlobal.height());
         }
 
-        public void applySurfaceChanges(@NonNull SurfaceControl.Transaction t,
-                @NonNull SurfaceControl.Transaction inputT) {
+        public void applySurfaceChanges(SurfaceControl.Transaction t) {
             if (!needsApplySurfaceChanges()) {
                 // Nothing changed.
                 return;
@@ -450,7 +446,7 @@ public class Letterbox {
             }
             if (mSurface != null && mInputInterceptor != null) {
                 mInputInterceptor.updateTouchableRegion(mSurfaceFrameRelative);
-                inputT.setInputWindowInfo(mSurface, mInputInterceptor.mWindowHandle);
+                t.setInputWindowInfo(mSurface, mInputInterceptor.mWindowHandle);
             }
         }
 

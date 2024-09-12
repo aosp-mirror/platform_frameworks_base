@@ -17,7 +17,6 @@
 package com.android.systemui.biometrics.domain.interactor
 
 import android.graphics.Rect
-import android.hardware.fingerprint.FingerprintManager
 import android.view.MotionEvent
 import android.view.Surface
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -52,7 +51,6 @@ class UdfpsOverlayInteractorTest : SysuiTestCase() {
 
     private lateinit var testScope: TestScope
 
-    @Mock private lateinit var fingerprintManager: FingerprintManager
     @Mock private lateinit var authController: AuthController
     @Captor private lateinit var authControllerCallback: ArgumentCaptor<AuthController.Callback>
 
@@ -113,7 +111,6 @@ class UdfpsOverlayInteractorTest : SysuiTestCase() {
                 context,
                 authController,
                 selectedUserInteractor,
-                fingerprintManager,
                 testScope.backgroundScope
             )
         testScope.runCurrent()

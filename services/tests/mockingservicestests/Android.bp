@@ -53,6 +53,7 @@ android_test {
         "mockingservicestests-utils-mockito",
         "mockito-target-extended-minus-junit4",
         "platform-compat-test-rules",
+        "platform-parametric-runner-lib",
         "platform-test-annotations",
         "PlatformProperties",
         "service-blobstore",

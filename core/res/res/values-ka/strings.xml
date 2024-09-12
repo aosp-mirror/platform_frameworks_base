@@ -1883,7 +1883,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN ძალიან მოკლეა. უნდა შედგებოდეს სულ ცოტა 4 ციფრისგან."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"სცადეთ მოგვიანებით"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"სრულ ეკრანზე ნახვა"</string>
-    <string name="immersive_cling_description" msgid="2896205051090870978">"თქვენი ეკრანის ზემოდან გადაფურცლეთ ქვემოთ, რათა გამოხვიდეთ"</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"გასაგებია"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"შეატრიალეთ უკეთესი ხედისთვის"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"გახსენით <xliff:g id="NAME">%s</xliff:g> სრულ ეკრანზე უკეთესი ხედისთვის"</string>
@@ -2410,19 +2411,19 @@
     <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"კერძო სივრცე"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"სენსიტიური შეტყობინების კონტენტი დამალულია"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
-    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"ეკრანის გაზიარებისას აპის კონტენტი დამალულია უსაფრთხოების მიზნით"</string>
+    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"ეკრანის გაზიარებიდან აპის კონტენტი დამალულია უსაფრთხოების მიზნით"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"სატელიტთან ავტომატურად დაკავშირებულია"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"შეგიძლიათ გაგზავნოთ და მიიღოთ შეტყობინებები მობილური ან Wi-Fi ქსელის გარეშე"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages-ის გახსნა"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"მუშაობის პრინციპი"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"მომლოდინე..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"ანაბეჭდით განბლოკვის ხელახლა დაყენება"</string>
-    <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g>-ის ამოცნობა ვეღარ ხერხდება."</string>
-    <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>-ისა და <xliff:g id="FINGERPRINT_1">%2$s</xliff:g>-ის ამოცნობა ვეღარ ხერხდება."</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="1824812666549916586">"<xliff:g id="FINGERPRINT">%s</xliff:g>-ის ამოცნობა ვეღარ ხერხდება. დააყენეთ ანაბეჭდით განბლოკვა ხელახლა."</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="5974657382960155099">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>-ისა და <xliff:g id="FINGERPRINT_1">%2$s</xliff:g>-ის ამოცნობა ვეღარ ხერხდება. დააყენეთ ანაბეჭდით განბლოკვა ხელახლა."</string>
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"<xliff:g id="FINGERPRINT">%s</xliff:g> კარგად არ მუშაობდა და წაიშალა"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> და <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> კარგად არ მუშაობდნენ და წაიშალა"</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> კარგად არ მუშაობდა და წაიშალა. თავიდან დააყენეთ, რათა თქვენი ტელეფონი თითის ანაბეჭდის საშუალებით განბლოკოთ."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> და <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> კარგად არ მუშაობდნენ და წაიშალა. თავიდან დააყენეთ, რათა თქვენი ტელეფონი თითის ანაბეჭდის საშუალებით განბლოკოთ."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"დააყენეთ სახით განბლოკვა ხელახლა"</string>
-    <string name="face_dangling_notification_msg" msgid="746235263598985384">"თქვენი სახის მოდელის ამოცნობა ვეღარ ხერხდება. დააყენეთ სახით განბლოკვა ხელახლა."</string>
+    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"თქვენი სახის მოდელი კარგად არ მუშაობდა და წაიშალა. თავიდან დააყენეთ, რათა თქვენი ტელეფონი სახის საშუალებით განბლოკოთ."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"დაყენება"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"ახლა არა"</string>
 </resources>

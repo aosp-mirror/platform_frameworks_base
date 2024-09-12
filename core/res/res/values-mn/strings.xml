@@ -312,7 +312,7 @@
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Батарей, дата ашиглалтын талаар дэлгэрэнгүйг харахын тулд товшино уу"</string>
     <string name="foreground_service_multiple_separator" msgid="5002287361849863168">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="8974401416068943888">"Аюулгүй горим"</string>
-    <string name="android_system_label" msgid="5974767339591067210">"Android систем"</string>
+    <string name="android_system_label" msgid="5974767339591067210">"Андройд систем"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Хувийн профайл руу сэлгэх"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Ажлын профайл руу сэлгэх"</string>
     <string name="user_owner_app_label" msgid="1553595155465750298">"Хувийн <xliff:g id="APP_NAME">%1$s</xliff:g> руу сэлгэх"</string>
@@ -1883,7 +1883,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"ПИН хэт богино байна. Хамгийн багадаа 4 цифртэй байх ёстой."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Дараа дахин оролдоно уу"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Бүтэн дэлгэцээр үзэж байна"</string>
-    <string name="immersive_cling_description" msgid="2896205051090870978">"Гарахын тулд дэлгэцийнхээ дээд талаас доош шударна уу"</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Ойлголоо"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Харагдах байдлыг сайжруулах бол эргүүлнэ үү"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Харагдах байдлыг сайжруулах бол <xliff:g id="NAME">%s</xliff:g>-г бүтэн дэлгэцээр нээнэ үү"</string>
@@ -2410,19 +2411,19 @@
     <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"Хаалттай орон зай"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"Эмзэг мэдэгдлийн контентыг нуусан"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
-    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Аюулгүй байдлын үүднээс аппын контентыг дэлгэц хуваалцахаас нуусан"</string>
+    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Аюулгүй байдлын улмаас аппын контентыг дэлгэц хуваалцахаас нуусан"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Хиймэл дагуулд автоматаар холбогдсон"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Та мобайл эсвэл Wi-Fi сүлжээгүйгээр мессеж илгээх болон хүлээн авах боломжтой"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Мессежийг нээх"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Энэ хэрхэн ажилладаг вэ?"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Хүлээгдэж буй..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Хурууны хээгээр түгжээ тайлахыг дахин тохируулна уу"</string>
-    <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g>-г цаашид таних боломжгүй."</string>
-    <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> болон <xliff:g id="FINGERPRINT_1">%2$s</xliff:g>-г цаашид таних боломжгүй."</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="1824812666549916586">"<xliff:g id="FINGERPRINT">%s</xliff:g>-г цаашид таних боломжгүй. Хурууны хээгээр түгжээ тайлахыг дахин тохируулна уу."</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="5974657382960155099">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> болон <xliff:g id="FINGERPRINT_1">%2$s</xliff:g>-г цаашид таних боломжгүй. Хурууны хээгээр түгжээ тайлахыг дахин тохируулна уу."</string>
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"<xliff:g id="FINGERPRINT">%s</xliff:g> сайн ажиллахгүй байсан тул хурууны хээг устгасан"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> болон <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> сайн ажиллахгүй байсан тул эдгээр хурууны хээг устгасан"</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> сайн ажиллахгүй байсан тул үүнийг устгасан. Утасныхаа түгжээг хурууны хээгээр тайлахын тулд хурууны хээг дахин тохируулна уу."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>, <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> сайн ажиллахгүй байсан тул эдгээрийг устгасан. Утасныхаа түгжээг хурууныхаа хээгээр тайлахын тулд хоёр хурууны хээг дахин тохируулна уу."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Царайгаар түгжээ тайлахыг дахин тохируулна уу"</string>
-    <string name="face_dangling_notification_msg" msgid="746235263598985384">"Таны нүүрний загварыг цаашид таних боломжгүй. Царайгаар түгжээ тайлахыг дахин тохируулна уу."</string>
+    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"Таны нүүрний загвар сайн ажиллахгүй байсан бөгөөд үүнийг устгасан. Утасныхаа түгжээг царайгаар тайлахын тулд нүүрний загварыг дахин тохируулна уу."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Тохируулах"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Одоо биш"</string>
 </resources>

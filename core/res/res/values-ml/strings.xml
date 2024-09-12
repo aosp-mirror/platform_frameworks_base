@@ -1883,7 +1883,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"പിൻ തീരെ ചെറുതാണ്. 4 അക്കമെങ്കിലും ഉണ്ടായിരിക്കണം."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"പിന്നീട് വീണ്ടും ശ്രമിക്കുക"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"പൂർണ്ണ സ്‌ക്രീനിൽ കാണുന്നു"</string>
-    <string name="immersive_cling_description" msgid="2896205051090870978">"പുറത്ത് കടക്കാൻ, സ്‌ക്രീനിന്റെ മുകളിൽ നിന്ന് താഴോട്ട് സ്വൈപ്പ് ചെയ്യുക"</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"മനസ്സിലായി"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"മികച്ച കാഴ്‌ചയ്‌ക്കായി റൊട്ടേറ്റ് ചെയ്യുക"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"മികച്ച കാഴ്‌‌ചയ്ക്ക് പൂർണ്ണ സ്‌ക്രീനിൽ <xliff:g id="NAME">%s</xliff:g> തുറക്കുക"</string>
@@ -2410,19 +2411,19 @@
     <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"സ്വകാര്യ സ്പേസ്"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"സൂക്ഷ്‌മമായി കൈകാര്യം ചെയ്യേണ്ട അറിയിപ്പ് ഉള്ളടക്കം മറച്ചിരിക്കുന്നു"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
-    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"സുരക്ഷയ്ക്കായി സ്ക്രീൻ പങ്കിടലിൽ നിന്ന് ആപ്പ് ഉള്ളടക്കം മറച്ചിരിക്കുന്നു"</string>
+    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"ആപ്പ് ഉള്ളടക്കം, അതിന്റെ സുരക്ഷയ്ക്കായി സ്ക്രീൻ പങ്കിടലിൽ നിന്ന് മറച്ചിരിക്കുന്നു"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"സാറ്റലൈറ്റിലേക്ക് സ്വയമേവ കണക്റ്റ് ചെയ്തു"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"മൊബൈലോ വൈഫൈ നെറ്റ്‌വർക്കോ ഇല്ലാതെ തന്നെ സന്ദേശങ്ങൾ അയയ്‌ക്കാനും സ്വീകരിക്കാനും നിങ്ങൾക്ക് കഴിയും"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages തുറക്കുക"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"ഇത് പ്രവർത്തിക്കുന്നത് എങ്ങനെയാണ്"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"തീർപ്പാക്കിയിട്ടില്ല..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"ഫിംഗർപ്രിന്റ് അൺലോക്ക് വീണ്ടും സജ്ജീകരിക്കുക"</string>
-    <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> ഇനി തിരിച്ചറിയാനാകില്ല."</string>
-    <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>, <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> എന്നിവ ഇനി തിരിച്ചറിയാനാകില്ല."</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="1824812666549916586">"<xliff:g id="FINGERPRINT">%s</xliff:g> ഇനി തിരിച്ചറിയാനാകില്ല. ഫിംഗർപ്രിന്റ് അൺലോക്ക് വീണ്ടും സജ്ജീകരിക്കുക."</string>
-    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="5974657382960155099">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>, <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> എന്നിവ ഇനി തിരിച്ചറിയാനാകില്ല. ഫിംഗർപ്രിന്റ് അൺലോക്ക് വീണ്ടും സജ്ജീകരിക്കുക."</string>
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"<xliff:g id="FINGERPRINT">%s</xliff:g> ശരിയായി പ്രവർത്തിക്കാത്തതിനാൽ അത് ഇല്ലാതാക്കി"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>, <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> എന്നിവ ശരിയായി പ്രവർത്തിക്കാത്തതിനാൽ അവ ഇല്ലാതാക്കി"</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> ശരിയായി പ്രവർത്തിക്കാത്തതിനാൽ അത് ഇല്ലാതാക്കി. നിങ്ങളുടെ ഫിംഗർപ്രിന്റ് ഉപയോഗിച്ച് ഫോൺ അൺലോക്ക് ചെയ്യുന്നതിനായി വീണ്ടും സജ്ജീകരിക്കുക."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>, <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> എന്നിവ ശരിയായി പ്രവർത്തിക്കാത്തതിനാൽ അവ ഇല്ലാതാക്കി. നിങ്ങളുടെ ഫിംഗർപ്രിന്റ് ഉപയോഗിച്ച് ഫോൺ അൺലോക്ക് ചെയ്യുന്നതിനായി അവ വീണ്ടും സജ്ജീകരിക്കുക."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"ഫെയ്‌സ് അൺലോക്ക് വീണ്ടും സജ്ജീകരിക്കുക"</string>
-    <string name="face_dangling_notification_msg" msgid="746235263598985384">"നിങ്ങളുടെ മുഖ മോഡൽ ഇനി തിരിച്ചറിയാനാകില്ല. ഫെയ്‌സ് അൺലോക്ക് വീണ്ടും സജ്ജീകരിക്കുക."</string>
+    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"നിങ്ങളുടെ മുഖ മോഡൽ ശരിയായി പ്രവർത്തിക്കാത്തതിനാൽ അത് ഇല്ലാതാക്കി. നിങ്ങളുടെ മുഖം ഉപയോഗിച്ച് ഫോൺ അൺലോക്ക് ചെയ്യുന്നതിനായി വീണ്ടും സജ്ജീകരിക്കുക."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"സജ്ജീകരിക്കുക"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"ഇപ്പോൾ വേണ്ട"</string>
 </resources>

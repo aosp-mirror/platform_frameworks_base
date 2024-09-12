@@ -91,10 +91,18 @@ public class LmkdConnection {
     @GuardedBy("mLmkdSocketLock")
     private LocalSocket mLmkdSocket = null;
 
-    // socket I/O streams
-    @GuardedBy("mLmkdSocketLock")
+    // mutex to synchronize socket output stream with socket creation/destruction
+    private final Object mLmkdOutputStreamLock = new Object();
+
+    // socket output stream
+    @GuardedBy("mLmkdOutputStreamLock")
     private OutputStream mLmkdOutputStream = null;
-    @GuardedBy("mLmkdSocketLock")
+
+    // mutex to synchronize socket input stream with socket creation/destruction
+    private final Object mLmkdInputStreamLock = new Object();
+
+    // socket input stream
+    @GuardedBy("mLmkdInputStreamLock")
     private InputStream mLmkdInputStream = null;
 
     // buffer to store incoming data
@@ -148,9 +156,13 @@ public class LmkdConnection {
                 return false;
             }
             // connection established
-            mLmkdSocket = socket;
-            mLmkdOutputStream = ostream;
-            mLmkdInputStream = istream;
+            synchronized(mLmkdOutputStreamLock) {
+                synchronized(mLmkdInputStreamLock) {
+                    mLmkdSocket = socket;
+                    mLmkdOutputStream = ostream;
+                    mLmkdInputStream = istream;
+                }
+            }
             mMsgQueue.addOnFileDescriptorEventListener(mLmkdSocket.getFileDescriptor(),
                 EVENT_INPUT | EVENT_ERROR,
                 new MessageQueue.OnFileDescriptorEventListener() {
@@ -177,7 +189,13 @@ public class LmkdConnection {
                 mMsgQueue.removeOnFileDescriptorEventListener(
                         mLmkdSocket.getFileDescriptor());
                 IoUtils.closeQuietly(mLmkdSocket);
-                mLmkdSocket = null;
+                synchronized(mLmkdOutputStreamLock) {
+                    synchronized(mLmkdInputStreamLock) {
+                        mLmkdOutputStream = null;
+                        mLmkdInputStream = null;
+                        mLmkdSocket = null;
+                    }
+                }
             }
             // wake up reply waiters if any
             synchronized (mReplyBufLock) {
@@ -262,24 +280,33 @@ public class LmkdConnection {
     }
 
     private boolean write(ByteBuffer buf) {
-        synchronized (mLmkdSocketLock) {
-            try {
-                mLmkdOutputStream.write(buf.array(), 0, buf.position());
-            } catch (IOException ex) {
-                return false;
+        boolean result = false;
+
+        synchronized(mLmkdOutputStreamLock) {
+            if (mLmkdOutputStream != null) {
+                try {
+                    mLmkdOutputStream.write(buf.array(), 0, buf.position());
+                    result = true;
+                } catch (IOException ex) {
+                }
             }
-            return true;
         }
+
+        return result;
     }
 
     private int read(ByteBuffer buf) {
-        synchronized (mLmkdSocketLock) {
-            try {
-                return mLmkdInputStream.read(buf.array(), 0, buf.array().length);
-            } catch (IOException ex) {
+        int result = -1;
+
+        synchronized(mLmkdInputStreamLock) {
+            if (mLmkdInputStream != null) {
+                try {
+                    result = mLmkdInputStream.read(buf.array(), 0, buf.array().length);
+                } catch (IOException ex) {
+                }
             }
-            return -1;
         }
+        return result;
     }
 
     /**

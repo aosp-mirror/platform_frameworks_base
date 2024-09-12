@@ -19,6 +19,7 @@ import android.content.Context
 import android.graphics.Rect
 import android.graphics.RectF
 import android.util.MathUtils
+import android.view.Choreographer
 import android.view.SurfaceControl
 import android.view.animation.Animation
 import android.view.animation.Transformation
@@ -30,23 +31,27 @@ import com.android.internal.policy.TransitionAnimation
 import com.android.internal.protolog.common.ProtoLog
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.protolog.ShellProtoLogGroup
+import com.android.wm.shell.shared.annotations.ShellMainThread
 import javax.inject.Inject
 import kotlin.math.max
 import kotlin.math.min
 
 /** Class that handles customized predictive cross activity back animations. */
+@ShellMainThread
 class CustomCrossActivityBackAnimation(
     context: Context,
     background: BackAnimationBackground,
     rootTaskDisplayAreaOrganizer: RootTaskDisplayAreaOrganizer,
     transaction: SurfaceControl.Transaction,
+    choreographer: Choreographer,
     private val customAnimationLoader: CustomAnimationLoader
 ) :
     CrossActivityBackAnimation(
         context,
         background,
         rootTaskDisplayAreaOrganizer,
-        transaction
+        transaction,
+        choreographer
     ) {
 
     private var enterAnimation: Animation? = null
@@ -65,6 +70,7 @@ class CustomCrossActivityBackAnimation(
         background,
         rootTaskDisplayAreaOrganizer,
         SurfaceControl.Transaction(),
+        Choreographer.getInstance(),
         CustomAnimationLoader(
             TransitionAnimation(context, false /* debug */, "CustomCrossActivityBackAnimation")
         )

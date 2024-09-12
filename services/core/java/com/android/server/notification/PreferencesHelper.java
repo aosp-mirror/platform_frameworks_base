@@ -189,12 +189,9 @@ public class PreferencesHelper implements RankingConfig {
         int USER_LOCKED_BUBBLE = 0x00000002;
     }
 
-    private final Object mLock = new Object();
     // pkg|uid => PackagePreferences
-    @GuardedBy("mLock")
     private final ArrayMap<String, PackagePreferences> mPackagePreferences = new ArrayMap<>();
     // pkg|userId => PackagePreferences
-    @GuardedBy("mLock")
     private final ArrayMap<String, PackagePreferences> mRestoredWithoutUids = new ArrayMap<>();
 
     private final Context mContext;
@@ -266,7 +263,7 @@ public class PreferencesHelper implements RankingConfig {
                     Settings.Global.REVIEW_PERMISSIONS_NOTIFICATION_STATE,
                     NotificationManagerService.REVIEW_NOTIF_STATE_SHOULD_SHOW);
         }
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
                 tag = parser.getName();
                 if (type == XmlPullParser.END_TAG && TAG_RANKING.equals(tag)) {
@@ -488,7 +485,6 @@ public class PreferencesHelper implements RankingConfig {
                 DEFAULT_BUBBLE_PREFERENCE, mClock.millis());
     }
 
-    @GuardedBy("mLock")
     private PackagePreferences getOrCreatePackagePreferencesLocked(String pkg,
             @UserIdInt int userId, int uid, int importance, int priority, int visibility,
             boolean showBadge, int bubblePreference, long creationTime) {
@@ -620,7 +616,7 @@ public class PreferencesHelper implements RankingConfig {
             notifPermissions = mPermissionHelper.getNotificationPermissionValues(userId);
         }
 
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             final int N = mPackagePreferences.size();
             for (int i = 0; i < N; i++) {
                 final PackagePreferences r = mPackagePreferences.valueAt(i);
@@ -629,10 +625,11 @@ public class PreferencesHelper implements RankingConfig {
                 }
                 writePackageXml(r, out, notifPermissions, forBackup);
             }
-
-            if (Flags.persistIncompleteRestoreData() && !forBackup) {
-                final int M = mRestoredWithoutUids.size();
-                for (int i = 0; i < M; i++) {
+        }
+        if (Flags.persistIncompleteRestoreData() && !forBackup) {
+            synchronized (mRestoredWithoutUids) {
+                final int N = mRestoredWithoutUids.size();
+                for (int i = 0; i < N; i++) {
                     final PackagePreferences r = mRestoredWithoutUids.valueAt(i);
                     writePackageXml(r, out, notifPermissions, false);
                 }
@@ -735,7 +732,7 @@ public class PreferencesHelper implements RankingConfig {
      */
     public void setBubblesAllowed(String pkg, int uid, int bubblePreference) {
         boolean changed;
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             PackagePreferences p = getOrCreatePackagePreferencesLocked(pkg, uid);
             changed = p.bubblePreference != bubblePreference;
             p.bubblePreference = bubblePreference;
@@ -755,20 +752,20 @@ public class PreferencesHelper implements RankingConfig {
      */
     @Override
     public int getBubblePreference(String pkg, int uid) {
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             return getOrCreatePackagePreferencesLocked(pkg, uid).bubblePreference;
         }
     }
 
     public int getAppLockedFields(String pkg, int uid) {
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             return getOrCreatePackagePreferencesLocked(pkg, uid).lockedAppFields;
         }
     }
 
     @Override
     public boolean canShowBadge(String packageName, int uid) {
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             return getOrCreatePackagePreferencesLocked(packageName, uid).showBadge;
         }
     }
@@ -776,7 +773,7 @@ public class PreferencesHelper implements RankingConfig {
     @Override
     public void setShowBadge(String packageName, int uid, boolean showBadge) {
         boolean changed = false;
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             PackagePreferences pkgPrefs = getOrCreatePackagePreferencesLocked(packageName, uid);
             if (pkgPrefs.showBadge != showBadge) {
                 pkgPrefs.showBadge = showBadge;
@@ -789,28 +786,28 @@ public class PreferencesHelper implements RankingConfig {
     }
 
     public boolean isInInvalidMsgState(String packageName, int uid) {
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             PackagePreferences r = getOrCreatePackagePreferencesLocked(packageName, uid);
             return r.hasSentInvalidMessage && !r.hasSentValidMessage;
         }
     }
 
     public boolean hasUserDemotedInvalidMsgApp(String packageName, int uid) {
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             PackagePreferences r = getOrCreatePackagePreferencesLocked(packageName, uid);
             return isInInvalidMsgState(packageName, uid) ? r.userDemotedMsgApp : false;
         }
     }
 
     public void setInvalidMsgAppDemoted(String packageName, int uid, boolean isDemoted) {
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             PackagePreferences r = getOrCreatePackagePreferencesLocked(packageName, uid);
             r.userDemotedMsgApp = isDemoted;
         }
     }
 
     public boolean setInvalidMessageSent(String packageName, int uid) {
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             PackagePreferences r = getOrCreatePackagePreferencesLocked(packageName, uid);
             boolean valueChanged = r.hasSentInvalidMessage == false;
             r.hasSentInvalidMessage = true;
@@ -820,7 +817,7 @@ public class PreferencesHelper implements RankingConfig {
     }
 
     public boolean setValidMessageSent(String packageName, int uid) {
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             PackagePreferences r = getOrCreatePackagePreferencesLocked(packageName, uid);
             boolean valueChanged = r.hasSentValidMessage == false;
             r.hasSentValidMessage = true;
@@ -831,7 +828,7 @@ public class PreferencesHelper implements RankingConfig {
 
     @VisibleForTesting
     boolean hasSentInvalidMsg(String packageName, int uid) {
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             PackagePreferences r = getOrCreatePackagePreferencesLocked(packageName, uid);
             return r.hasSentInvalidMessage;
         }
@@ -839,7 +836,7 @@ public class PreferencesHelper implements RankingConfig {
 
     @VisibleForTesting
     boolean hasSentValidMsg(String packageName, int uid) {
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             PackagePreferences r = getOrCreatePackagePreferencesLocked(packageName, uid);
             return r.hasSentValidMessage;
         }
@@ -847,7 +844,7 @@ public class PreferencesHelper implements RankingConfig {
 
     @VisibleForTesting
     boolean didUserEverDemoteInvalidMsgApp(String packageName, int uid) {
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             PackagePreferences r = getOrCreatePackagePreferencesLocked(packageName, uid);
             return r.userDemotedMsgApp;
         }
@@ -855,7 +852,7 @@ public class PreferencesHelper implements RankingConfig {
 
     /** Sets whether this package has sent a notification with valid bubble metadata. */
     public boolean setValidBubbleSent(String packageName, int uid) {
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             PackagePreferences r = getOrCreatePackagePreferencesLocked(packageName, uid);
             boolean valueChanged = !r.hasSentValidBubble;
             r.hasSentValidBubble = true;
@@ -864,14 +861,14 @@ public class PreferencesHelper implements RankingConfig {
     }
 
     boolean hasSentValidBubble(String packageName, int uid) {
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             PackagePreferences r = getOrCreatePackagePreferencesLocked(packageName, uid);
             return r.hasSentValidBubble;
         }
     }
 
     boolean isImportanceLocked(String pkg, int uid) {
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             PackagePreferences r = getOrCreatePackagePreferencesLocked(pkg, uid);
             return r.fixedImportance || r.defaultAppLockedImportance;
         }
@@ -882,7 +879,7 @@ public class PreferencesHelper implements RankingConfig {
         if (groupId == null) {
             return false;
         }
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             PackagePreferences r = getOrCreatePackagePreferencesLocked(packageName, uid);
             NotificationChannelGroup group = r.groups.get(groupId);
             if (group == null) {
@@ -893,13 +890,13 @@ public class PreferencesHelper implements RankingConfig {
     }
 
     int getPackagePriority(String pkg, int uid) {
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             return getOrCreatePackagePreferencesLocked(pkg, uid).priority;
         }
     }
 
     int getPackageVisibility(String pkg, int uid) {
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             return getOrCreatePackagePreferencesLocked(pkg, uid).visibility;
         }
     }
@@ -914,7 +911,7 @@ public class PreferencesHelper implements RankingConfig {
             throw new IllegalArgumentException("group.getName() can't be empty");
         }
         boolean needsDndChange = false;
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             PackagePreferences r = getOrCreatePackagePreferencesLocked(pkg, uid);
             if (r == null) {
                 throw new IllegalArgumentException("Invalid package");
@@ -968,7 +965,7 @@ public class PreferencesHelper implements RankingConfig {
                 && channel.getImportance() <= IMPORTANCE_MAX, "Invalid importance level");
 
         boolean needsPolicyFileChange = false, wasUndeleted = false, needsDndChange = false;
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             PackagePreferences r = getOrCreatePackagePreferencesLocked(pkg, uid);
             if (r == null) {
                 throw new IllegalArgumentException("Invalid package");
@@ -1112,7 +1109,7 @@ public class PreferencesHelper implements RankingConfig {
 
     void unlockNotificationChannelImportance(String pkg, int uid, String updatedChannelId) {
         Objects.requireNonNull(updatedChannelId);
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             PackagePreferences r = getOrCreatePackagePreferencesLocked(pkg, uid);
             if (r == null) {
                 throw new IllegalArgumentException("Invalid package");
@@ -1134,7 +1131,7 @@ public class PreferencesHelper implements RankingConfig {
         Objects.requireNonNull(updatedChannel.getId());
         boolean changed = false;
         boolean needsDndChange = false;
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             PackagePreferences r = getOrCreatePackagePreferencesLocked(pkg, uid);
             if (r == null) {
                 throw new IllegalArgumentException("Invalid package");
@@ -1309,7 +1306,7 @@ public class PreferencesHelper implements RankingConfig {
             String channelId, String conversationId, boolean returnParentIfNoConversationChannel,
             boolean includeDeleted) {
         Preconditions.checkNotNull(pkg);
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             PackagePreferences r = getOrCreatePackagePreferencesLocked(pkg, uid);
             if (r == null) {
                 return null;
@@ -1350,7 +1347,7 @@ public class PreferencesHelper implements RankingConfig {
         Preconditions.checkNotNull(pkg);
         Preconditions.checkNotNull(conversationId);
         List<NotificationChannel> channels = new ArrayList<>();
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             PackagePreferences r = getOrCreatePackagePreferencesLocked(pkg, uid);
             if (r == null) {
                 return channels;
@@ -1370,7 +1367,7 @@ public class PreferencesHelper implements RankingConfig {
             int callingUid, boolean fromSystemOrSystemUi) {
         boolean deletedChannel = false;
         boolean channelBypassedDnd = false;
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             PackagePreferences r = getPackagePreferencesLocked(pkg, uid);
             if (r == null) {
                 return false;
@@ -1406,7 +1403,7 @@ public class PreferencesHelper implements RankingConfig {
     public void permanentlyDeleteNotificationChannel(String pkg, int uid, String channelId) {
         Objects.requireNonNull(pkg);
         Objects.requireNonNull(channelId);
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             PackagePreferences r = getPackagePreferencesLocked(pkg, uid);
             if (r == null) {
                 return;
@@ -1418,7 +1415,7 @@ public class PreferencesHelper implements RankingConfig {
     @Override
     public void permanentlyDeleteNotificationChannels(String pkg, int uid) {
         Objects.requireNonNull(pkg);
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             PackagePreferences r = getPackagePreferencesLocked(pkg, uid);
             if (r == null) {
                 return;
@@ -1449,7 +1446,7 @@ public class PreferencesHelper implements RankingConfig {
                 boolean fixed = mPermissionHelper.isPermissionFixed(
                         pi.packageName, user.getUserHandle().getIdentifier());
                 if (fixed) {
-                    synchronized (mLock) {
+                    synchronized (mPackagePreferences) {
                         PackagePreferences p = getOrCreatePackagePreferencesLocked(
                                 pi.packageName, pi.applicationInfo.uid);
                         p.fixedImportance = true;
@@ -1464,7 +1461,7 @@ public class PreferencesHelper implements RankingConfig {
 
     public void updateDefaultApps(int userId, ArraySet<String> toRemove,
             ArraySet<Pair<String, Integer>> toAdd) {
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             for (PackagePreferences p : mPackagePreferences.values()) {
                 if (userId == UserHandle.getUserId(p.uid)) {
                     if (toRemove != null && toRemove.contains(p.pkg)) {
@@ -1494,7 +1491,7 @@ public class PreferencesHelper implements RankingConfig {
     public NotificationChannelGroup getNotificationChannelGroupWithChannels(String pkg,
             int uid, String groupId, boolean includeDeleted) {
         Objects.requireNonNull(pkg);
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             PackagePreferences r = getPackagePreferencesLocked(pkg, uid);
             if (r == null || groupId == null || !r.groups.containsKey(groupId)) {
                 return null;
@@ -1517,7 +1514,7 @@ public class PreferencesHelper implements RankingConfig {
     public NotificationChannelGroup getNotificationChannelGroup(String groupId, String pkg,
             int uid) {
         Objects.requireNonNull(pkg);
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             PackagePreferences r = getPackagePreferencesLocked(pkg, uid);
             if (r == null) {
                 return null;
@@ -1531,7 +1528,7 @@ public class PreferencesHelper implements RankingConfig {
             boolean includeBlocked, Set<String> activeChannelFilter) {
         Objects.requireNonNull(pkg);
         Map<String, NotificationChannelGroup> groups = new ArrayMap<>();
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             PackagePreferences r = getPackagePreferencesLocked(pkg, uid);
             if (r == null) {
                 return ParceledListSlice.emptyList();
@@ -1578,7 +1575,7 @@ public class PreferencesHelper implements RankingConfig {
             String groupId, int callingUid, boolean fromSystemOrSystemUi) {
         List<NotificationChannel> deletedChannels = new ArrayList<>();
         boolean groupBypassedDnd = false;
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             PackagePreferences r = getPackagePreferencesLocked(pkg, uid);
             if (r == null || TextUtils.isEmpty(groupId)) {
                 return deletedChannels;
@@ -1610,7 +1607,7 @@ public class PreferencesHelper implements RankingConfig {
     public Collection<NotificationChannelGroup> getNotificationChannelGroups(String pkg,
             int uid) {
         List<NotificationChannelGroup> groups = new ArrayList<>();
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             PackagePreferences r = getPackagePreferencesLocked(pkg, uid);
             if (r == null) {
                 return groups;
@@ -1621,7 +1618,7 @@ public class PreferencesHelper implements RankingConfig {
     }
 
     public NotificationChannelGroup getGroupForChannel(String pkg, int uid, String channelId) {
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             PackagePreferences p = getPackagePreferencesLocked(pkg, uid);
             if (p != null) {
                 NotificationChannel nc = p.channels.get(channelId);
@@ -1640,7 +1637,7 @@ public class PreferencesHelper implements RankingConfig {
 
     public ArrayList<ConversationChannelWrapper> getConversations(IntArray userIds,
             boolean onlyImportant) {
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             ArrayList<ConversationChannelWrapper> conversations = new ArrayList<>();
             for (PackagePreferences p : mPackagePreferences.values()) {
                 if (userIds.binarySearch(UserHandle.getUserId(p.uid)) >= 0) {
@@ -1684,7 +1681,7 @@ public class PreferencesHelper implements RankingConfig {
 
     public ArrayList<ConversationChannelWrapper> getConversations(String pkg, int uid) {
         Objects.requireNonNull(pkg);
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             PackagePreferences r = getPackagePreferencesLocked(pkg, uid);
             if (r == null) {
                 return new ArrayList<>();
@@ -1726,7 +1723,7 @@ public class PreferencesHelper implements RankingConfig {
     public @NonNull List<String> deleteConversations(String pkg, int uid,
             Set<String> conversationIds, int callingUid, boolean fromSystemOrSystemUi) {
         List<String> deletedChannelIds = new ArrayList<>();
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             PackagePreferences r = getPackagePreferencesLocked(pkg, uid);
             if (r == null) {
                 return deletedChannelIds;
@@ -1759,7 +1756,7 @@ public class PreferencesHelper implements RankingConfig {
             boolean includeDeleted) {
         Objects.requireNonNull(pkg);
         List<NotificationChannel> channels = new ArrayList<>();
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             PackagePreferences r = getPackagePreferencesLocked(pkg, uid);
             if (r == null) {
                 return ParceledListSlice.emptyList();
@@ -1781,7 +1778,7 @@ public class PreferencesHelper implements RankingConfig {
     public ParceledListSlice<NotificationChannel> getNotificationChannelsBypassingDnd(String pkg,
             int uid) {
         List<NotificationChannel> channels = new ArrayList<>();
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             final PackagePreferences r = mPackagePreferences.get(
                     packagePreferencesKey(pkg, uid));
             if (r != null) {
@@ -1802,7 +1799,7 @@ public class PreferencesHelper implements RankingConfig {
      * upgrades.
      */
     public boolean onlyHasDefaultChannel(String pkg, int uid) {
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             PackagePreferences r = getOrCreatePackagePreferencesLocked(pkg, uid);
             if (r.channels.size() == 1
                     && r.channels.containsKey(NotificationChannel.DEFAULT_CHANNEL_ID)) {
@@ -1815,7 +1812,7 @@ public class PreferencesHelper implements RankingConfig {
     public int getDeletedChannelCount(String pkg, int uid) {
         Objects.requireNonNull(pkg);
         int deletedCount = 0;
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             PackagePreferences r = getPackagePreferencesLocked(pkg, uid);
             if (r == null) {
                 return deletedCount;
@@ -1834,7 +1831,7 @@ public class PreferencesHelper implements RankingConfig {
     public int getBlockedChannelCount(String pkg, int uid) {
         Objects.requireNonNull(pkg);
         int blockedCount = 0;
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             PackagePreferences r = getPackagePreferencesLocked(pkg, uid);
             if (r == null) {
                 return blockedCount;
@@ -1877,7 +1874,7 @@ public class PreferencesHelper implements RankingConfig {
         ArraySet<Pair<String, Integer>> candidatePkgs = new ArraySet<>();
 
         final IntArray currentUserIds = mUserProfiles.getCurrentProfileIds();
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             final int numPackagePreferences = mPackagePreferences.size();
             for (int i = 0; i < numPackagePreferences; i++) {
                 final PackagePreferences r = mPackagePreferences.valueAt(i);
@@ -1946,7 +1943,7 @@ public class PreferencesHelper implements RankingConfig {
      * considered for sentiment adjustments (and thus never show a blocking helper).
      */
     public void setAppImportanceLocked(String packageName, int uid) {
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             PackagePreferences prefs = getOrCreatePackagePreferencesLocked(packageName, uid);
             if ((prefs.lockedAppFields & LockableAppFields.USER_LOCKED_IMPORTANCE) != 0) {
                 return;
@@ -1962,7 +1959,7 @@ public class PreferencesHelper implements RankingConfig {
      * Returns the delegate for a given package, if it's allowed by the package and the user.
      */
     public @Nullable String getNotificationDelegate(String sourcePkg, int sourceUid) {
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             PackagePreferences prefs = getPackagePreferencesLocked(sourcePkg, sourceUid);
 
             if (prefs == null || prefs.delegate == null) {
@@ -1980,7 +1977,7 @@ public class PreferencesHelper implements RankingConfig {
      */
     public void setNotificationDelegate(String sourcePkg, int sourceUid,
             String delegatePkg, int delegateUid) {
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             PackagePreferences prefs = getOrCreatePackagePreferencesLocked(sourcePkg, sourceUid);
             prefs.delegate = new Delegate(delegatePkg, delegateUid, true);
         }
@@ -1990,7 +1987,7 @@ public class PreferencesHelper implements RankingConfig {
      * Used by an app to turn off its notification delegate.
      */
     public void revokeNotificationDelegate(String sourcePkg, int sourceUid) {
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             PackagePreferences prefs = getPackagePreferencesLocked(sourcePkg, sourceUid);
             if (prefs != null && prefs.delegate != null) {
                 prefs.delegate.mEnabled = false;
@@ -2004,7 +2001,7 @@ public class PreferencesHelper implements RankingConfig {
      */
     public boolean isDelegateAllowed(String sourcePkg, int sourceUid,
             String potentialDelegatePkg, int potentialDelegateUid) {
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             PackagePreferences prefs = getPackagePreferencesLocked(sourcePkg, sourceUid);
 
             return prefs != null && prefs.isValidDelegate(potentialDelegatePkg,
@@ -2050,25 +2047,24 @@ public class PreferencesHelper implements RankingConfig {
         pw.println("per-package config version: " + XML_VERSION);
 
         pw.println("PackagePreferences:");
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             dumpPackagePreferencesLocked(pw, prefix, filter, mPackagePreferences, pkgPermissions);
-            pw.println("Restored without uid:");
-            dumpPackagePreferencesLocked(pw, prefix, filter, mRestoredWithoutUids, null);
         }
+        pw.println("Restored without uid:");
+        dumpPackagePreferencesLocked(pw, prefix, filter, mRestoredWithoutUids, null);
     }
 
     public void dump(ProtoOutputStream proto,
             @NonNull NotificationManagerService.DumpFilter filter,
             ArrayMap<Pair<Integer, String>, Pair<Boolean, Boolean>> pkgPermissions) {
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             dumpPackagePreferencesLocked(proto, RankingHelperProto.RECORDS, filter,
                     mPackagePreferences, pkgPermissions);
-            dumpPackagePreferencesLocked(proto, RankingHelperProto.RECORDS_RESTORED_WITHOUT_UID,
-                    filter, mRestoredWithoutUids, null);
         }
+        dumpPackagePreferencesLocked(proto, RankingHelperProto.RECORDS_RESTORED_WITHOUT_UID, filter,
+                mRestoredWithoutUids, null);
     }
 
-    @GuardedBy("mLock")
     private void dumpPackagePreferencesLocked(PrintWriter pw, String prefix,
             @NonNull NotificationManagerService.DumpFilter filter,
             ArrayMap<String, PackagePreferences> packagePreferences,
@@ -2253,7 +2249,7 @@ public class PreferencesHelper implements RankingConfig {
             pkgsWithPermissionsToHandle = pkgPermissions.keySet();
         }
         int pulledEvents = 0;
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             for (int i = 0; i < mPackagePreferences.size(); i++) {
                 if (pulledEvents > NOTIFICATION_PREFERENCES_PULL_LIMIT) {
                     break;
@@ -2333,7 +2329,7 @@ public class PreferencesHelper implements RankingConfig {
      * {@link StatsEvent}.
      */
     public void pullPackageChannelPreferencesStats(List<StatsEvent> events) {
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             int totalChannelsPulled = 0;
             for (int i = 0; i < mPackagePreferences.size(); i++) {
                 if (totalChannelsPulled > NOTIFICATION_CHANNEL_PULL_LIMIT) {
@@ -2369,7 +2365,7 @@ public class PreferencesHelper implements RankingConfig {
      * {@link StatsEvent}.
      */
     public void pullPackageChannelGroupPreferencesStats(List<StatsEvent> events) {
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             int totalGroupsPulled = 0;
             for (int i = 0; i < mPackagePreferences.size(); i++) {
                 if (totalGroupsPulled > NOTIFICATION_CHANNEL_GROUP_PULL_LIMIT) {
@@ -2398,12 +2394,10 @@ public class PreferencesHelper implements RankingConfig {
             ArrayMap<Pair<Integer, String>, Pair<Boolean, Boolean>> pkgPermissions) {
         JSONObject ranking = new JSONObject();
         JSONArray PackagePreferencess = new JSONArray();
-        synchronized (mLock) {
-            try {
-                ranking.put("noUid", mRestoredWithoutUids.size());
-            } catch (JSONException e) {
-                // pass
-            }
+        try {
+            ranking.put("noUid", mRestoredWithoutUids.size());
+        } catch (JSONException e) {
+            // pass
         }
 
         // Track data that we've handled from the permissions-based list
@@ -2412,7 +2406,7 @@ public class PreferencesHelper implements RankingConfig {
             pkgsWithPermissionsToHandle = pkgPermissions.keySet();
         }
 
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             final int N = mPackagePreferences.size();
             for (int i = 0; i < N; i++) {
                 final PackagePreferences r = mPackagePreferences.valueAt(i);
@@ -2518,7 +2512,7 @@ public class PreferencesHelper implements RankingConfig {
     }
 
     public Map<Integer, String> getPackageBans() {
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             final int N = mPackagePreferences.size();
             ArrayMap<Integer, String> packageBans = new ArrayMap<>(N);
             for (int i = 0; i < N; i++) {
@@ -2577,7 +2571,7 @@ public class PreferencesHelper implements RankingConfig {
 
     private Map<String, Integer> getPackageChannels() {
         ArrayMap<String, Integer> packageChannels = new ArrayMap<>();
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             for (int i = 0; i < mPackagePreferences.size(); i++) {
                 final PackagePreferences r = mPackagePreferences.valueAt(i);
                 int channelCount = 0;
@@ -2593,7 +2587,7 @@ public class PreferencesHelper implements RankingConfig {
     }
 
     public void onUserRemoved(int userId) {
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             int N = mPackagePreferences.size();
             for (int i = N - 1; i >= 0; i--) {
                 PackagePreferences PackagePreferences = mPackagePreferences.valueAt(i);
@@ -2605,7 +2599,7 @@ public class PreferencesHelper implements RankingConfig {
     }
 
     protected void onLocaleChanged(Context context, int userId) {
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             int N = mPackagePreferences.size();
             for (int i = 0; i < N; i++) {
                 PackagePreferences PackagePreferences = mPackagePreferences.valueAt(i);
@@ -2634,24 +2628,22 @@ public class PreferencesHelper implements RankingConfig {
             for (int i = 0; i < size; i++) {
                 final String pkg = pkgList[i];
                 final int uid = uidList[i];
-                synchronized (mLock) {
+                synchronized (mPackagePreferences) {
                     mPackagePreferences.remove(packagePreferencesKey(pkg, uid));
-                    mRestoredWithoutUids.remove(unrestoredPackageKey(pkg, changeUserId));
                 }
+                mRestoredWithoutUids.remove(unrestoredPackageKey(pkg, changeUserId));
                 updated = true;
             }
         } else {
             for (String pkg : pkgList) {
-                try {
-                    // Package install
-                    int uid = mPm.getPackageUidAsUser(pkg, changeUserId);
-                    PackagePermission p = null;
-                    synchronized (mLock) {
-                        final PackagePreferences r =
-                                mRestoredWithoutUids.get(unrestoredPackageKey(pkg, changeUserId));
-                        if (r != null) {
-                            r.uid = uid;
-                            mRestoredWithoutUids.remove(unrestoredPackageKey(pkg, changeUserId));
+                // Package install
+                final PackagePreferences r =
+                        mRestoredWithoutUids.get(unrestoredPackageKey(pkg, changeUserId));
+                if (r != null) {
+                    try {
+                        r.uid = mPm.getPackageUidAsUser(r.pkg, changeUserId);
+                        mRestoredWithoutUids.remove(unrestoredPackageKey(pkg, changeUserId));
+                        synchronized (mPackagePreferences) {
                             mPackagePreferences.put(packagePreferencesKey(r.pkg, r.uid), r);
 
                             // Try to restore any unrestored sound resources
@@ -2673,29 +2665,32 @@ public class PreferencesHelper implements RankingConfig {
                                     channel.setSound(restoredUri, channel.getAudioAttributes());
                                 }
                             }
-
-                            if (r.migrateToPm) {
-                                p = new PackagePermission(
+                        }
+                        if (r.migrateToPm) {
+                            try {
+                                PackagePermission p = new PackagePermission(
                                         r.pkg, UserHandle.getUserId(r.uid),
                                         r.importance != IMPORTANCE_NONE,
                                         hasUserConfiguredSettings(r));
+                                mPermissionHelper.setNotificationPermission(p);
+                            } catch (Exception e) {
+                                Slog.e(TAG, "could not migrate setting for " + r.pkg, e);
                             }
-                            updated = true;
                         }
+                        updated = true;
+                    } catch (Exception e) {
+                        Slog.e(TAG, "could not restore " + r.pkg, e);
                     }
-                    if (p != null) {
-                        mPermissionHelper.setNotificationPermission(p);
-                    }
-                } catch (Exception e) {
-                    Slog.e(TAG, "could not restore " + pkg, e);
                 }
                 // Package upgrade
                 try {
-                    PackagePreferences fullPackagePreferences = getPackagePreferencesLocked(pkg,
-                            mPm.getPackageUidAsUser(pkg, changeUserId));
-                    if (fullPackagePreferences != null) {
-                        updated |= createDefaultChannelIfNeededLocked(fullPackagePreferences);
-                        updated |= deleteDefaultChannelIfNeededLocked(fullPackagePreferences);
+                    synchronized (mPackagePreferences) {
+                        PackagePreferences fullPackagePreferences = getPackagePreferencesLocked(pkg,
+                                mPm.getPackageUidAsUser(pkg, changeUserId));
+                        if (fullPackagePreferences != null) {
+                            updated |= createDefaultChannelIfNeededLocked(fullPackagePreferences);
+                            updated |= deleteDefaultChannelIfNeededLocked(fullPackagePreferences);
+                        }
                     }
                 } catch (PackageManager.NameNotFoundException e) {
                 }
@@ -2709,7 +2704,7 @@ public class PreferencesHelper implements RankingConfig {
     }
 
     public void clearData(String pkg, int uid) {
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             PackagePreferences p = getPackagePreferencesLocked(pkg, uid);
             if (p != null) {
                 p.channels = new ArrayMap<>();
@@ -2896,7 +2891,7 @@ public class PreferencesHelper implements RankingConfig {
     }
 
     public void unlockAllNotificationChannels() {
-        synchronized (mLock) {
+        synchronized (mPackagePreferences) {
             final int numPackagePreferences = mPackagePreferences.size();
             for (int i = 0; i < numPackagePreferences; i++) {
                 final PackagePreferences r = mPackagePreferences.valueAt(i);
@@ -2913,7 +2908,7 @@ public class PreferencesHelper implements RankingConfig {
                     PackageManager.PackageInfoFlags.of(PackageManager.MATCH_ALL),
                     user.getUserHandle().getIdentifier());
             for (PackageInfo pi : packages) {
-                synchronized (mLock) {
+                synchronized (mPackagePreferences) {
                     PackagePreferences p = getOrCreatePackagePreferencesLocked(
                             pi.packageName, pi.applicationInfo.uid);
                     if (p.migrateToPm && p.uid != UNKNOWN_UID) {
