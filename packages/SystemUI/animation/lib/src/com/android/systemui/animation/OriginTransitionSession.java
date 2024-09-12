@@ -24,11 +24,14 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Log;
 import android.window.IRemoteTransition;
 import android.window.RemoteTransition;
 
+import com.android.systemui.animation.OriginRemoteTransition.TransitionPlayer;
 import com.android.systemui.animation.shared.IOriginTransitions;
 
 import java.lang.annotation.Retention;
@@ -182,6 +185,7 @@ public class OriginTransitionSession {
         @Nullable private final IOriginTransitions mOriginTransitions;
         @Nullable private Supplier<IRemoteTransition> mEntryTransitionSupplier;
         @Nullable private Supplier<IRemoteTransition> mExitTransitionSupplier;
+        private Handler mHandler = new Handler(Looper.getMainLooper());
         private String mName;
         @Nullable private Predicate<RemoteTransition> mIntentStarter;
 
@@ -259,9 +263,45 @@ public class OriginTransitionSession {
             return this;
         }
 
+        /** Add an origin entry transition to the builder. */
+        public Builder withEntryTransition(
+                UIComponent entryOrigin, TransitionPlayer entryPlayer, long entryDuration) {
+            mEntryTransitionSupplier =
+                    () ->
+                            new OriginRemoteTransition(
+                                    mContext,
+                                    /* isEntry= */ true,
+                                    entryOrigin,
+                                    entryPlayer,
+                                    entryDuration,
+                                    mHandler);
+            return this;
+        }
+
         /** Add an exit transition to the builder. */
         public Builder withExitTransition(IRemoteTransition transition) {
             mExitTransitionSupplier = () -> transition;
+            return this;
+        }
+
+        /** Add an origin exit transition to the builder. */
+        public Builder withExitTransition(
+                UIComponent exitTarget, TransitionPlayer exitPlayer, long exitDuration) {
+            mExitTransitionSupplier =
+                    () ->
+                            new OriginRemoteTransition(
+                                    mContext,
+                                    /* isEntry= */ false,
+                                    exitTarget,
+                                    exitPlayer,
+                                    exitDuration,
+                                    mHandler);
+            return this;
+        }
+
+        /** Supply a handler where transition callbacks will run. */
+        public Builder withHandler(Handler handler) {
+            mHandler = handler;
             return this;
         }
 
