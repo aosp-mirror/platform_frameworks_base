@@ -31,6 +31,7 @@ import android.os.Binder;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Slog;
+import android.app.appsearch.AppSearchResult;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.appfunctions.RemoteServiceCaller.RunServiceCallCallback;
@@ -81,6 +82,17 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
         final SafeOneTimeExecuteAppFunctionCallback safeExecuteAppFunctionCallback =
                 new SafeOneTimeExecuteAppFunctionCallback(executeAppFunctionCallback);
 
+        try {
+            executeAppFunctionInternal(requestInternal, safeExecuteAppFunctionCallback);
+        } catch (Exception e) {
+            safeExecuteAppFunctionCallback.onResult(mapExceptionToExecuteAppFunctionResponse(e));
+        }
+    }
+
+    private void executeAppFunctionInternal(
+            ExecuteAppFunctionAidlRequest requestInternal,
+            SafeOneTimeExecuteAppFunctionCallback safeExecuteAppFunctionCallback) {
+
         String validatedCallingPackage;
         UserHandle targetUser;
         try {
@@ -119,7 +131,7 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
             return;
         }
 
-        mCallerValidator
+        var unused = mCallerValidator
                 .verifyCallerCanExecuteAppFunction(
                         validatedCallingPackage,
                         targetPackageName,
@@ -159,6 +171,12 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
                             } finally {
                                 Binder.restoreCallingIdentity(token);
                             }
+                        })
+                .exceptionally(
+                        ex -> {
+                            safeExecuteAppFunctionCallback.onResult(
+                                    mapExceptionToExecuteAppFunctionResponse(ex));
+                            return null;
                         });
     }
 
@@ -234,5 +252,38 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
                             "Failed to bind the AppFunctionService.",
                             /* extras= */ null));
         }
+    }
+
+    private ExecuteAppFunctionResponse mapExceptionToExecuteAppFunctionResponse(Throwable e) {
+        if (e instanceof AppSearchException) {
+            AppSearchException appSearchException = (AppSearchException) e;
+            return ExecuteAppFunctionResponse.newFailure(
+                    mapAppSearchResultFailureCodeToExecuteAppFunctionResponse(
+                            appSearchException.getResultCode()),
+                    appSearchException.getMessage(),
+                    /* extras= */ null);
+        }
+
+        return ExecuteAppFunctionResponse.newFailure(
+                ExecuteAppFunctionResponse.RESULT_INTERNAL_ERROR,
+                e.getMessage(),
+                /* extras= */ null);
+    }
+
+    private int mapAppSearchResultFailureCodeToExecuteAppFunctionResponse(int resultCode) {
+        if (resultCode == AppSearchResult.RESULT_OK) {
+            throw new IllegalArgumentException(
+                    "This method can only be used to convert failure result codes.");
+        }
+
+        switch (resultCode) {
+            case AppSearchResult.RESULT_NOT_FOUND:
+                return ExecuteAppFunctionResponse.RESULT_INVALID_ARGUMENT;
+            case AppSearchResult.RESULT_INVALID_ARGUMENT:
+            case AppSearchResult.RESULT_INTERNAL_ERROR:
+            case AppSearchResult.RESULT_SECURITY_ERROR:
+                // fall-through
+        }
+        return ExecuteAppFunctionResponse.RESULT_INTERNAL_ERROR;
     }
 }
