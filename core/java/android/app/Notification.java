@@ -2807,7 +2807,7 @@ public class Notification implements Parcelable
             ArrayList<Person> people = extras.getParcelableArrayList(EXTRA_PEOPLE_LIST);
             if (people != null && !people.isEmpty()) {
                 for (Person p : people) {
-                    visitor.accept(p.getIconUri());
+                    p.visitUris(visitor);
                 }
             }
 
@@ -2826,19 +2826,14 @@ public class Notification implements Parcelable
             // Notification Listeners might use directly (without the isStyle check).
             final Person person = extras.getParcelable(EXTRA_MESSAGING_PERSON);
             if (person != null) {
-                visitor.accept(person.getIconUri());
+                person.visitUris(visitor);
             }
 
             final Parcelable[] messages = extras.getParcelableArray(EXTRA_MESSAGES);
             if (!ArrayUtils.isEmpty(messages)) {
                 for (MessagingStyle.Message message : MessagingStyle.Message
                         .getMessagesFromBundleArray(messages)) {
-                    visitor.accept(message.getDataUri());
-
-                    Person senderPerson = message.getSenderPerson();
-                    if (senderPerson != null) {
-                        visitor.accept(senderPerson.getIconUri());
-                    }
+                    message.visitUris(visitor);
                 }
             }
 
@@ -2846,12 +2841,7 @@ public class Notification implements Parcelable
             if (!ArrayUtils.isEmpty(historic)) {
                 for (MessagingStyle.Message message : MessagingStyle.Message
                         .getMessagesFromBundleArray(historic)) {
-                    visitor.accept(message.getDataUri());
-
-                    Person senderPerson = message.getSenderPerson();
-                    if (senderPerson != null) {
-                        visitor.accept(senderPerson.getIconUri());
-                    }
+                    message.visitUris(visitor);
                 }
             }
 
@@ -2860,7 +2850,7 @@ public class Notification implements Parcelable
             // Extras for CallStyle (same reason for visiting without checking isStyle).
             Person callPerson = extras.getParcelable(EXTRA_CALL_PERSON);
             if (callPerson != null) {
-                visitor.accept(callPerson.getIconUri());
+                callPerson.visitUris(visitor);
             }
             visitIconUri(visitor, extras.getParcelable(EXTRA_VERIFICATION_ICON));
         }
@@ -8624,6 +8614,18 @@ public class Notification implements Parcelable
                     bundles[i] = messages.get(i).toBundle();
                 }
                 return bundles;
+            }
+
+            /**
+             * See {@link Notification#visitUris(Consumer)}.
+             *
+             * @hide
+             */
+            public void visitUris(@NonNull Consumer<Uri> visitor) {
+                visitor.accept(getDataUri());
+                if (mSender != null) {
+                    mSender.visitUris(visitor);
+                }
             }
 
             /**
