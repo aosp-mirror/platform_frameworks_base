@@ -49,6 +49,7 @@ import com.android.settingslib.spa.gallery.preference.PreferenceMainPageProvider
 import com.android.settingslib.spa.gallery.preference.PreferencePageProvider
 import com.android.settingslib.spa.gallery.preference.SwitchPreferencePageProvider
 import com.android.settingslib.spa.gallery.preference.TwoTargetSwitchPreferencePageProvider
+import com.android.settingslib.spa.gallery.preference.ZeroStatePreferencePageProvider
 import com.android.settingslib.spa.gallery.scaffold.PagerMainPageProvider
 import com.android.settingslib.spa.gallery.scaffold.SearchScaffoldPageProvider
 import com.android.settingslib.spa.gallery.scaffold.SuwScaffoldPageProvider
@@ -83,6 +84,7 @@ class GallerySpaEnvironment(context: Context) : SpaEnvironment(context) {
                 MainSwitchPreferencePageProvider,
                 ListPreferencePageProvider,
                 TwoTargetSwitchPreferencePageProvider,
+                ZeroStatePreferencePageProvider,
                 ArgumentPageProvider,
                 SliderPageProvider,
                 SpinnerPageProvider,

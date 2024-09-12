@@ -63,6 +63,7 @@ dependencies {
     api("androidx.navigation:navigation-compose:2.8.0-rc01")
     api("com.github.PhilJay:MPAndroidChart:v3.1.0-alpha")
     api("com.google.android.material:material:1.11.0")
+    api("androidx.graphics:graphics-shapes-android:1.0.1")
     debugApi("androidx.compose.ui:ui-tooling:$jetpackComposeVersion")
     implementation("com.airbnb.android:lottie-compose:6.4.0")
 
