@@ -25,6 +25,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardDismissTransition
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.time.FakeSystemClock
+import com.android.wm.shell.keyguard.KeyguardTransitions
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -46,6 +47,7 @@ class WindowManagerLockscreenVisibilityManagerTest : SysuiTestCase() {
     @Mock private lateinit var keyguardSurfaceBehindAnimator: KeyguardSurfaceBehindParamsApplier
     @Mock
     private lateinit var keyguardDismissTransitionInteractor: KeyguardDismissTransitionInteractor
+    @Mock private lateinit var keyguardTransitions: KeyguardTransitions
 
     @Before
     fun setUp() {
@@ -59,6 +61,7 @@ class WindowManagerLockscreenVisibilityManagerTest : SysuiTestCase() {
                 keyguardStateController = keyguardStateController,
                 keyguardSurfaceBehindAnimator = keyguardSurfaceBehindAnimator,
                 keyguardDismissTransitionInteractor = keyguardDismissTransitionInteractor,
+                keyguardTransitions = keyguardTransitions,
             )
     }
 

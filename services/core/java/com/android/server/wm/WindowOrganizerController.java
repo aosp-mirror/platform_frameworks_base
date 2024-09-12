@@ -1802,8 +1802,8 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             int displayId = keyguardState.getDisplayId();
             boolean keyguardShowing = keyguardState.getKeyguardShowing();
             boolean aodShowing = keyguardState.getAodShowing();
+            mService.mKeyguardController.setKeyguardShown(displayId, keyguardShowing, aodShowing);
         }
-        // TODO: At the moment, this does nothing.
         return effects;
     }
 
