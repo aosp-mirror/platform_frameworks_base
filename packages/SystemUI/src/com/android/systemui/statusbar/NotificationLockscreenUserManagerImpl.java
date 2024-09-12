@@ -62,11 +62,13 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.deviceentry.domain.interactor.DeviceUnlockedInteractor;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlagsClassic;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.recents.OverviewProxyService;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
@@ -286,6 +288,8 @@ public class NotificationLockscreenUserManagerImpl implements
     protected ContentObserver mLockscreenSettingsObserver;
     protected ContentObserver mSettingsObserver;
 
+    private final Lazy<DeviceUnlockedInteractor> mDeviceUnlockedInteractorLazy;
+
     @Inject
     public NotificationLockscreenUserManagerImpl(Context context,
             BroadcastDispatcher broadcastDispatcher,
@@ -305,7 +309,8 @@ public class NotificationLockscreenUserManagerImpl implements
             SecureSettings secureSettings,
             DumpManager dumpManager,
             LockPatternUtils lockPatternUtils,
-            FeatureFlagsClassic featureFlags) {
+            FeatureFlagsClassic featureFlags,
+            Lazy<DeviceUnlockedInteractor> deviceUnlockedInteractorLazy) {
         mContext = context;
         mMainExecutor = mainExecutor;
         mBackgroundExecutor = backgroundExecutor;
@@ -325,6 +330,7 @@ public class NotificationLockscreenUserManagerImpl implements
         mSecureSettings = secureSettings;
         mKeyguardStateController = keyguardStateController;
         mFeatureFlags = featureFlags;
+        mDeviceUnlockedInteractorLazy = deviceUnlockedInteractorLazy;
 
         mLockScreenUris.add(SHOW_LOCKSCREEN);
         mLockScreenUris.add(SHOW_PRIVATE_LOCKSCREEN);
@@ -748,8 +754,13 @@ public class NotificationLockscreenUserManagerImpl implements
         // camera on the keyguard has a state of SHADE but the keyguard is still showing.
         final boolean showingKeyguard = mState != StatusBarState.SHADE
                 || mKeyguardStateController.isShowing();
-        final boolean devicePublic = showingKeyguard && mKeyguardStateController.isMethodSecure();
-
+        final boolean devicePublic;
+        if (SceneContainerFlag.isEnabled()) {
+            devicePublic = !mDeviceUnlockedInteractorLazy.get()
+                    .getDeviceUnlockStatus().getValue().isUnlocked();
+        } else {
+            devicePublic = showingKeyguard && mKeyguardStateController.isMethodSecure();
+        }
 
         // Look for public mode users. Users are considered public in either case of:
         //   - device keyguard is shown in secure mode;
