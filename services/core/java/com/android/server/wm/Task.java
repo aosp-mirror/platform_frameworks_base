@@ -3806,6 +3806,9 @@ class Task extends TaskFragment {
             sb.append(" aI=");
             sb.append(affinityIntent.getComponent().flattenToShortString());
         }
+        sb.append(" isResizeable=").append(isResizeable());
+        sb.append(" minWidth=").append(mMinWidth);
+        sb.append(" minHeight=").append(mMinHeight);
         sb.append('}');
         return stringName = sb.toString();
     }

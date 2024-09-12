@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.wm.utils;
-
-import static com.android.server.wm.utils.DesktopModeFlagsUtil.ToggleOverride.OVERRIDE_UNSET;
+package android.window.flags;
 
 import android.annotation.Nullable;
 import android.content.Context;
@@ -28,18 +26,18 @@ import com.android.window.flags.Flags;
 import java.util.function.Supplier;
 
 /**
- * Util to check desktop mode flags state.
+ * Checks desktop mode flag state.
  *
- * This utility is used to allow developer option toggles to override flags related to desktop
- * windowing.
+ * <p>This enum provides a centralized way to control the behavior of flags related to desktop
+ * windowing features which are aiming for developer preview before their release. It allows
+ * developer option to override the default behavior of these flags.
  *
- * Computes whether Desktop Windowing related flags should be enabled by using the aconfig flag
- * value and the developer option override state (if applicable).
+ * <p>NOTE: Flags should only be added to this enum when they have received Product and UX
+ * alignment that the feature is ready for developer preview, otherwise just do a flag check.
  *
- * This is a partial copy of {@link com.android.wm.shell.shared.desktopmode.DesktopModeFlags} which
- * is to be used in WM core.
+ * @hide
  */
-public enum DesktopModeFlagsUtil {
+public enum DesktopModeFlags {
     // All desktop mode related flags to be overridden by developer option toggle will be added here
     DESKTOP_WINDOWING_MODE(
             Flags::enableDesktopWindowingMode, /* shouldOverrideByDevOption= */ true),
@@ -55,7 +53,7 @@ public enum DesktopModeFlagsUtil {
     // be refreshed only on reboots as overridden state is expected to take effect on reboots.
     private static ToggleOverride sCachedToggleOverride;
 
-    DesktopModeFlagsUtil(Supplier<Boolean> flagFunction, boolean shouldOverrideByDevOption) {
+    DesktopModeFlags(Supplier<Boolean> flagFunction, boolean shouldOverrideByDevOption) {
         this.mFlagFunction = flagFunction;
         this.mShouldOverrideByDevOption = shouldOverrideByDevOption;
     }
@@ -101,13 +99,13 @@ public enum DesktopModeFlagsUtil {
         int settingValue = Settings.Global.getInt(
                 context.getContentResolver(),
                 Settings.Global.DEVELOPMENT_OVERRIDE_DESKTOP_MODE_FEATURES,
-                OVERRIDE_UNSET.getSetting()
+                ToggleOverride.OVERRIDE_UNSET.getSetting()
         );
-        return ToggleOverride.fromSetting(settingValue, OVERRIDE_UNSET);
+        return ToggleOverride.fromSetting(settingValue, ToggleOverride.OVERRIDE_UNSET);
     }
 
     /** Override state of desktop mode developer option toggle. */
-    enum ToggleOverride {
+    private enum ToggleOverride {
         OVERRIDE_UNSET,
         OVERRIDE_OFF,
         OVERRIDE_ON;

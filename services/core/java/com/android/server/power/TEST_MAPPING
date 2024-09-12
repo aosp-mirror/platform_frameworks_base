@@ -30,10 +30,7 @@
       ]
     },
     {
-      "name": "FrameworksServicesTests",
-      "options": [
-        {"include-filter": "com.android.server.power"}
-      ]
+      "name": "FrameworksServicesTests_android_server_power"
     },
     {
       "name": "PowerServiceTests",

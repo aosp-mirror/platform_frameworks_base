@@ -16,7 +16,6 @@
 
 package com.android.systemui.qs.tiles.impl.reducebrightness.domain.interactor
 
-import android.platform.test.annotations.EnabledOnRavenwood
 import android.platform.test.annotations.RequiresFlagsDisabled
 import android.platform.test.annotations.RequiresFlagsEnabled
 import android.platform.test.flag.junit.CheckFlagsRule
@@ -46,7 +45,6 @@ import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.verify
 
 @SmallTest
-@EnabledOnRavenwood
 @RunWith(AndroidJUnit4::class)
 class ReduceBrightColorsTileUserActionInteractorTest : SysuiTestCase() {
 

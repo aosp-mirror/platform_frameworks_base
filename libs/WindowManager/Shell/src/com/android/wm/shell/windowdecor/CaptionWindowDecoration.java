@@ -56,6 +56,7 @@ import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
 import com.android.wm.shell.windowdecor.extension.TaskInfoKt;
+import com.android.wm.shell.windowdecor.viewhost.WindowDecorViewHostSupplier;
 
 /**
  * Defines visuals and behaviors of a window decoration of a caption bar and shadows. It works with
@@ -88,8 +89,10 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
             Handler handler,
             @ShellBackgroundThread ShellExecutor bgExecutor,
             Choreographer choreographer,
-            SyncTransactionQueue syncQueue) {
-        super(context, userContext, displayController, taskOrganizer, taskInfo, taskSurface);
+            SyncTransactionQueue syncQueue,
+            WindowDecorViewHostSupplier windowDecorViewHostSupplier) {
+        super(context, userContext, displayController, taskOrganizer, taskInfo, taskSurface,
+                windowDecorViewHostSupplier);
         mHandler = handler;
         mBgExecutor = bgExecutor;
         mChoreographer = choreographer;

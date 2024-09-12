@@ -6222,6 +6222,47 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 .isEqualTo(IMPORTANCE_LOW);
     }
 
+    @Test
+    @EnableFlags(FLAG_NOTIFICATION_CLASSIFICATION)
+    public void testNotificationBundles_appsCannotUpdate() {
+        // do something that triggers settings creation for an app
+        mHelper.setShowBadge(PKG_O, UID_O, true);
+
+        NotificationChannel fromApp =
+                new NotificationChannel(NEWS_ID, "The best channel", IMPORTANCE_HIGH);
+        mHelper.createNotificationChannel(PKG_O, UID_O, fromApp, true, false, UID_O, false);
+
+        assertThat(mHelper.getNotificationChannel(PKG_O, UID_O, NEWS_ID, false).getImportance())
+                .isEqualTo(IMPORTANCE_LOW);
+    }
+
+    @Test
+    @EnableFlags(FLAG_NOTIFICATION_CLASSIFICATION)
+    public void testNotificationBundles_osCanAllowToBypassDnd() {
+        // do something that triggers settings creation for an app
+        mHelper.setShowBadge(PKG_O, UID_O, true);
+
+        NotificationChannel fromApp =
+                new NotificationChannel(NEWS_ID, "The best channel", IMPORTANCE_HIGH);
+        mHelper.createNotificationChannel(PKG_O, UID_O, fromApp, true, false, UID_O, false);
+    }
+
+    @Test
+    @EnableFlags(FLAG_NOTIFICATION_CLASSIFICATION)
+    public void testUnDeleteBundleChannelsOnLoadIfNotUserChange() throws Exception {
+        mHelper.setShowBadge(PKG_P, UID_P, true);
+        // the public create/update methods should prevent this, so take advantage of the fact that
+        // the object is in the same process
+        mHelper.getNotificationChannel(PKG_P, UID_P, SOCIAL_MEDIA_ID, true).setDeleted(true);
+
+        ByteArrayOutputStream baos = writeXmlAndPurge(PKG_N_MR1, UID_N_MR1, false,
+                UserHandle.USER_ALL, SOCIAL_MEDIA_ID);
+
+        loadStreamXml(baos, false, UserHandle.USER_ALL);
+
+        assertThat(mXmlHelper.getNotificationChannel(PKG_P, UID_P, SOCIAL_MEDIA_ID, true).
+                isDeleted()).isFalse();
+    }
 
     @Test
     public void testRestoredWithoutUid_threadSafety() throws Exception {

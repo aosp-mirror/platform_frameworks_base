@@ -45,7 +45,6 @@ import com.android.systemui.deviceentry.shared.model.DeviceUnlockSource
 import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.domain.interactor.KeyguardEnabledInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.WindowManagerLockscreenVisibilityInteractor
 import com.android.systemui.model.SceneContainerPlugin
 import com.android.systemui.model.SysUiState
@@ -55,6 +54,7 @@ import com.android.systemui.plugins.FalsingManager.FalsingBeliefListener
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.power.shared.model.WakeSleepReason
 import com.android.systemui.scene.data.model.asIterable
+import com.android.systemui.scene.data.model.sceneStackOf
 import com.android.systemui.scene.domain.interactor.SceneBackInteractor
 import com.android.systemui.scene.domain.interactor.SceneContainerOcclusionInteractor
 import com.android.systemui.scene.domain.interactor.SceneInteractor
@@ -118,7 +118,6 @@ constructor(
     private val deviceUnlockedInteractor: DeviceUnlockedInteractor,
     private val bouncerInteractor: BouncerInteractor,
     private val keyguardInteractor: KeyguardInteractor,
-    private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val sysUiState: SysUiState,
     @DisplayId private val displayId: Int,
     private val sceneLogger: SceneLogger,
@@ -281,6 +280,8 @@ constructor(
         applicationScope.launch {
             sceneInteractor.currentScene.collectLatest { currentScene ->
                 if (currentScene == Scenes.Lockscreen) {
+                    // Wait for the screen to be on
+                    powerInteractor.isAwake.first { it }
                     // Wait for surface to become visible
                     windowMgrLockscreenVisInteractor.surfaceBehindVisibility.first { it }
                     // Make sure the device is actually unlocked before force-changing the scene
@@ -419,7 +420,20 @@ constructor(
                                         " didn't need to be left open"
                             } else {
                                 val prevScene = previousScene.value
-                                (prevScene ?: Scenes.Gone) to
+                                val targetScene = prevScene ?: Scenes.Gone
+                                if (targetScene != Scenes.Gone) {
+                                    sceneBackInteractor.updateBackStack { stack ->
+                                        val list = stack.asIterable().toMutableList()
+                                        check(list.last() == Scenes.Lockscreen) {
+                                            "The bottommost/last SceneKey of the back stack isn't" +
+                                                " the Lockscreen scene like expected. The back" +
+                                                " stack is $stack."
+                                        }
+                                        list[list.size - 1] = Scenes.Gone
+                                        sceneStackOf(*list.toTypedArray())
+                                    }
+                                }
+                                targetScene to
                                     "device was unlocked with primary bouncer showing," +
                                         " from sceneKey=$prevScene"
                             }

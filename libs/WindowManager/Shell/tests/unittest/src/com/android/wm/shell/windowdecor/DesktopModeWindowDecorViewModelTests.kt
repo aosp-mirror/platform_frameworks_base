@@ -98,6 +98,7 @@ import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.transition.Transitions
 import com.android.wm.shell.windowdecor.DesktopModeWindowDecorViewModel.DesktopModeKeyguardChangeListener
 import com.android.wm.shell.windowdecor.DesktopModeWindowDecorViewModel.DesktopModeOnInsetsChangedListener
+import com.android.wm.shell.windowdecor.viewhost.WindowDecorViewHostSupplier
 import java.util.Optional
 import java.util.function.Consumer
 import java.util.function.Supplier
@@ -181,6 +182,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     @Mock private lateinit var mockTaskPositionerFactory:
             DesktopModeWindowDecorViewModel.TaskPositionerFactory
     @Mock private lateinit var mockTaskPositioner: TaskPositioner
+    @Mock private lateinit var mockWindowDecorViewHostSupplier: WindowDecorViewHostSupplier<*>
     private lateinit var spyContext: TestableContext
 
     private val transactionFactory = Supplier<SurfaceControl.Transaction> {
@@ -230,6 +232,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
                 mockGenericLinksParser,
                 mockAssistContentRequester,
                 mockMultiInstanceHelper,
+                mockWindowDecorViewHostSupplier,
                 mockDesktopModeWindowDecorFactory,
                 mockInputMonitorFactory,
                 transactionFactory,
@@ -1197,7 +1200,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         whenever(
             mockDesktopModeWindowDecorFactory.create(
                 any(), any(), any(), any(), any(), eq(task), any(), any(), any(), any(), any(),
-                any(), any(), any(), any())
+                any(), any(), any(), any(), any())
         ).thenReturn(decoration)
         decoration.mTaskInfo = task
         whenever(decoration.isFocused).thenReturn(task.isFocused)

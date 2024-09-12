@@ -99,6 +99,7 @@ import static android.service.notification.Adjustment.TYPE_NEWS;
 import static android.service.notification.Condition.SOURCE_CONTEXT;
 import static android.service.notification.Condition.SOURCE_USER_ACTION;
 import static android.service.notification.Condition.STATE_TRUE;
+import static android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION;
 import static android.service.notification.Flags.FLAG_NOTIFICATION_FORCE_GROUPING;
 import static android.service.notification.Flags.FLAG_REDACT_SENSITIVE_NOTIFICATIONS_FROM_UNTRUSTED_LISTENERS;
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_ALERTING;
@@ -4412,11 +4413,29 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 eq(mTestNotificationChannel.getId()), anyBoolean()))
                 .thenReturn(mTestNotificationChannel);
         when(mPreferencesHelper.deleteNotificationChannel(eq(mPkg), anyInt(),
-                eq(mTestNotificationChannel.getId()),  anyInt(), anyBoolean())).thenReturn(true);
+                eq(mTestNotificationChannel.getId()), anyInt(), anyBoolean())).thenReturn(true);
         reset(mListeners);
         mBinderService.deleteNotificationChannel(mPkg, mTestNotificationChannel.getId());
         verify(mListeners, times(1)).notifyNotificationChannelChanged(eq(mPkg),
                 eq(Process.myUserHandle()), eq(mTestNotificationChannel),
+                eq(NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_DELETED));
+    }
+
+    @Test
+    @EnableFlags(FLAG_NOTIFICATION_CLASSIFICATION)
+    public void testAppsCannotDeleteBundleChannel() throws Exception {
+        when(mCompanionMgr.getAssociations(mPkg, mUserId))
+                .thenReturn(singletonList(mock(AssociationInfo.class)));
+        mService.setPreferencesHelper(mPreferencesHelper);
+        when(mPreferencesHelper.getNotificationChannel(eq(mPkg), anyInt(),
+                eq(NEWS_ID), anyBoolean()))
+                .thenReturn(mTestNotificationChannel);
+        when(mPreferencesHelper.deleteNotificationChannel(eq(mPkg), anyInt(),
+                eq(NEWS_ID), anyInt(), anyBoolean())).thenReturn(true);
+        reset(mListeners);
+        mBinderService.deleteNotificationChannel(mPkg, NEWS_ID);
+        verify(mListeners, never()).notifyNotificationChannelChanged(eq(mPkg),
+                eq(Process.myUserHandle()), any(),
                 eq(NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_DELETED));
     }
 

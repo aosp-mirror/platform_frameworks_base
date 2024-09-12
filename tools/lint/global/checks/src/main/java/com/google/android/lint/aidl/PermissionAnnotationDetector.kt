@@ -43,7 +43,13 @@ class PermissionAnnotationDetector : AidlImplementationDetector() {
       interfaceName: String,
       body: UBlockExpression
     ) {
+        if (!isSystemServicePath(context)) return
+
         if (context.evaluator.isAbstract(node)) return
+
+        val fullyQualifiedInterfaceName =
+            getContainingAidlInterfaceQualified(context, node) ?: return
+        if (exemptAidlInterfaces.contains(fullyQualifiedInterfaceName)) return
 
         if (AIDL_PERMISSION_ANNOTATIONS.any { node.hasAnnotation(it) }) return
 
@@ -80,8 +86,7 @@ class PermissionAnnotationDetector : AidlImplementationDetector() {
             implementation = Implementation(
                 PermissionAnnotationDetector::class.java,
                 Scope.JAVA_FILE_SCOPE
-            ),
-            enabledByDefault = false
+            )
         )
     }
 }

@@ -26,3 +26,10 @@ android_test {
     instrumentation_for: "Shell",
     certificate: "platform",
 }
+
+test_module_config {
+    name: "ShellTests_android_server_os",
+    base: "ShellTests",
+    test_suites: ["device-tests"],
+    exclude_annotations: ["androidx.test.filters.LargeTest"],
+}
