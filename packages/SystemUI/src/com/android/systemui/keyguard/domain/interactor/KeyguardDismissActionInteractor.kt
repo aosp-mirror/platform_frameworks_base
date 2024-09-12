@@ -29,7 +29,6 @@ import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.scene.domain.interactor.SceneInteractor
-import com.android.systemui.scene.domain.resolver.NotifShadeSceneFamilyResolver
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
@@ -63,7 +62,6 @@ constructor(
     @Application private val applicationScope: CoroutineScope,
     sceneInteractor: Lazy<SceneInteractor>,
     deviceUnlockedInteractor: Lazy<DeviceUnlockedInteractor>,
-    notifShadeSceneFamilyResolver: Lazy<NotifShadeSceneFamilyResolver>,
     powerInteractor: PowerInteractor,
     alternateBouncerInteractor: AlternateBouncerInteractor,
     shadeInteractor: Lazy<ShadeInteractor>,
@@ -107,8 +105,7 @@ constructor(
                     deviceUnlockedInteractor.get().deviceUnlockStatus,
                 ) { scene, unlockStatus ->
                     unlockStatus.isUnlocked &&
-                        (scene == Scenes.QuickSettings ||
-                            notifShadeSceneFamilyResolver.get().includesScene(scene))
+                        (scene == Scenes.QuickSettings || scene == Scenes.Shade)
                 }
                 .distinctUntilChanged()
         } else if (ComposeBouncerFlags.isOnlyComposeBouncerEnabled()) {

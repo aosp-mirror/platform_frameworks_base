@@ -114,10 +114,4 @@ object SceneFamilies {
      * depending on whether the device is unlocked and has been entered.
      */
     @JvmField val Home = SceneKey(debugName = "scene_family_home")
-
-    /**
-     * The scene that contains the full, interactive notification shade. The specific scene it
-     * resolves to can depend on dual / split / single shade settings.
-     */
-    @JvmField val NotifShade = SceneKey(debugName = "scene_family_notif_shade")
 }
