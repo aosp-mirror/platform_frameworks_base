@@ -2489,6 +2489,12 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     this::onTransitionStateChanged
             );
         }
+
+        // start() can be invoked in the middle of user switching, so check for this state and issue
+        // the call manually as that important event was missed.
+        if (mUserTracker.isUserSwitching()) {
+            handleUserSwitching(mUserTracker.getUserId(), () -> {});
+        }
     }
 
     @VisibleForTesting

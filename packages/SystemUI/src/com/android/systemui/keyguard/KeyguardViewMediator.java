@@ -1689,6 +1689,12 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                     });
             mJavaAdapter.alwaysCollectFlow(communalViewModel.getTransitionFromOccludedEnded(),
                     getFinishedCallbackConsumer());
+
+            // System ready can be invoked in the middle of user switching, so check for this state
+            // and issue the call manually as that important event was missed.
+            if (mUserTracker.isUserSwitching()) {
+                mUpdateCallback.onUserSwitching(mUserTracker.getUserId());
+            }
         }
         // Most services aren't available until the system reaches the ready state, so we
         // send it here when the device first boots.
