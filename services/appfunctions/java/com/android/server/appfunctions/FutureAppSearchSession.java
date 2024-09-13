@@ -75,7 +75,7 @@ public interface FutureAppSearchSession extends Closeable {
      * AppSearchSession} database.
      */
     AndroidFuture<AppSearchBatchResult<String, GenericDocument>> getByDocumentId(
-            GetByDocumentIdRequest getRequest);
+            @NonNull GetByDocumentIdRequest getRequest);
 
     /**
      * Retrieves documents from the open {@link AppSearchSession} that match a given query string
