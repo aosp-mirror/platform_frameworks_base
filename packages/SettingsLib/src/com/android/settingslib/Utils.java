@@ -520,8 +520,6 @@ public class Utils {
 
         if (android.webkit.Flags.updateServiceIpcWrapper()) {
             if (pm.hasSystemFeature(PackageManager.FEATURE_WEBVIEW)) {
-                // WebViewUpdateManager.getInstance() will not return null on devices with
-                // FEATURE_WEBVIEW.
                 provider = WebViewUpdateManager.getInstance().getDefaultWebViewPackage();
             }
         } else {
