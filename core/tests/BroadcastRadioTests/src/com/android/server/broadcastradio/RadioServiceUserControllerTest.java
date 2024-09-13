@@ -41,6 +41,7 @@ public final class RadioServiceUserControllerTest extends ExtendedRadioMockitoTe
 
     private static final int USER_ID_1 = 11;
     private static final int USER_ID_2 = 12;
+    private RadioServiceUserController mUserController;
 
     @Mock
     private UserHandle mUserHandleMock;
@@ -55,6 +56,7 @@ public final class RadioServiceUserControllerTest extends ExtendedRadioMockitoTe
     public void setUp() {
         doReturn(mUserHandleMock).when(() -> Binder.getCallingUserHandle());
         doReturn(USER_ID_1).when(() -> ActivityManager.getCurrentUser());
+        mUserController = new RadioServiceUserControllerImpl();
     }
 
     @Test
@@ -62,7 +64,7 @@ public final class RadioServiceUserControllerTest extends ExtendedRadioMockitoTe
         when(mUserHandleMock.getIdentifier()).thenReturn(USER_ID_1);
 
         assertWithMessage("Current user")
-                .that(RadioServiceUserController.isCurrentOrSystemUser()).isTrue();
+                .that(mUserController.isCurrentOrSystemUser()).isTrue();
     }
 
     @Test
@@ -70,7 +72,7 @@ public final class RadioServiceUserControllerTest extends ExtendedRadioMockitoTe
         when(mUserHandleMock.getIdentifier()).thenReturn(USER_ID_2);
 
         assertWithMessage("Non-current user")
-                .that(RadioServiceUserController.isCurrentOrSystemUser()).isFalse();
+                .that(mUserController.isCurrentOrSystemUser()).isFalse();
     }
 
     @Test
@@ -79,7 +81,7 @@ public final class RadioServiceUserControllerTest extends ExtendedRadioMockitoTe
         when(mUserHandleMock.getIdentifier()).thenReturn(UserHandle.USER_SYSTEM);
 
         assertWithMessage("System user")
-                .that(RadioServiceUserController.isCurrentOrSystemUser()).isTrue();
+                .that(mUserController.isCurrentOrSystemUser()).isTrue();
     }
 
     @Test
@@ -88,13 +90,13 @@ public final class RadioServiceUserControllerTest extends ExtendedRadioMockitoTe
         doThrow(new RuntimeException()).when(ActivityManager::getCurrentUser);
 
         assertWithMessage("User when activity manager fails")
-                .that(RadioServiceUserController.isCurrentOrSystemUser()).isFalse();
+                .that(mUserController.isCurrentOrSystemUser()).isFalse();
     }
 
     @Test
     public void getCurrentUser() {
         assertWithMessage("Current user")
-                .that(RadioServiceUserController.getCurrentUser()).isEqualTo(USER_ID_1);
+                .that(mUserController.getCurrentUser()).isEqualTo(USER_ID_1);
     }
 
     @Test
@@ -103,6 +105,6 @@ public final class RadioServiceUserControllerTest extends ExtendedRadioMockitoTe
         doThrow(new RuntimeException()).when(ActivityManager::getCurrentUser);
 
         assertWithMessage("Current user when activity manager fails")
-                .that(RadioServiceUserController.getCurrentUser()).isEqualTo(UserHandle.USER_NULL);
+                .that(mUserController.getCurrentUser()).isEqualTo(UserHandle.USER_NULL);
     }
 }
