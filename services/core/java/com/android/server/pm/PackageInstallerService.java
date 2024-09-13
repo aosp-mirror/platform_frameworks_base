@@ -856,8 +856,9 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                     params.appPackageName, SYSTEM_UID);
             if (ps != null
                     && PackageArchiver.isArchived(ps.getUserStateOrDefault(userId))
-                    && PackageArchiver.getResponsibleInstallerPackage(ps)
-                            .equals(requestedInstallerPackageName)) {
+                    && TextUtils.equals(
+                        PackageArchiver.getResponsibleInstallerPackage(ps),
+                        requestedInstallerPackageName)) {
                 params.installFlags |= PackageManager.INSTALL_UNARCHIVE;
             }
         }
