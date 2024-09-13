@@ -134,7 +134,7 @@ class HandleMenuTest : ShellTestCase() {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_ENABLE_ADDITIONAL_WINDOWS_ABOVE_STATUS_BAR)
+    @EnableFlags(Flags.FLAG_ENABLE_HANDLE_INPUT_FIX)
     fun testFullscreenMenuUsesSystemViewContainer() {
         createTaskInfo(WINDOWING_MODE_FULLSCREEN, SPLIT_POSITION_UNDEFINED)
         val handleMenu = createAndShowHandleMenu(SPLIT_POSITION_UNDEFINED)
@@ -146,7 +146,7 @@ class HandleMenuTest : ShellTestCase() {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_ENABLE_ADDITIONAL_WINDOWS_ABOVE_STATUS_BAR)
+    @EnableFlags(Flags.FLAG_ENABLE_HANDLE_INPUT_FIX)
     fun testFreeformMenu_usesViewHostViewContainer() {
         createTaskInfo(WINDOWING_MODE_FREEFORM, SPLIT_POSITION_UNDEFINED)
         handleMenu = createAndShowHandleMenu(SPLIT_POSITION_UNDEFINED)
@@ -157,7 +157,7 @@ class HandleMenuTest : ShellTestCase() {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_ENABLE_ADDITIONAL_WINDOWS_ABOVE_STATUS_BAR)
+    @EnableFlags(Flags.FLAG_ENABLE_HANDLE_INPUT_FIX)
     fun testSplitLeftMenu_usesSystemViewContainer() {
         createTaskInfo(WINDOWING_MODE_MULTI_WINDOW, SPLIT_POSITION_TOP_OR_LEFT)
         handleMenu = createAndShowHandleMenu(SPLIT_POSITION_TOP_OR_LEFT)
@@ -172,7 +172,7 @@ class HandleMenuTest : ShellTestCase() {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_ENABLE_ADDITIONAL_WINDOWS_ABOVE_STATUS_BAR)
+    @EnableFlags(Flags.FLAG_ENABLE_HANDLE_INPUT_FIX)
     fun testSplitRightMenu_usesSystemViewContainer() {
         createTaskInfo(WINDOWING_MODE_MULTI_WINDOW, SPLIT_POSITION_BOTTOM_OR_RIGHT)
         handleMenu = createAndShowHandleMenu(SPLIT_POSITION_BOTTOM_OR_RIGHT)
