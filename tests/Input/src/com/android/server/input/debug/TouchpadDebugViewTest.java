@@ -85,8 +85,8 @@ public class TouchpadDebugViewTest {
         when(mWindowManager.getCurrentWindowMetrics()).thenReturn(mWindowMetrics);
 
         mTouchpadDebugView = new TouchpadDebugView(mTestableContext, TOUCHPAD_DEVICE_ID,
-                new TouchpadHardwareProperties.Builder(500f, 500f, 500f,
-                        500f, 0f, 0f, -5f, 5f, (short) 10, true,
+                new TouchpadHardwareProperties.Builder(0f, 0f, 500f,
+                        500f, 45f, 47f, -4f, 5f, (short) 10, true,
                         true).build());
 
         mTouchpadDebugView.measure(
