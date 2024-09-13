@@ -142,6 +142,10 @@ object SystemFeaturesGenerator {
 
         // TODO(b/203143243): Add validation of build vs runtime values to ensure consistency.
         JavaFile.builder(outputClassName.packageName(), classBuilder.build())
+            .indent("    ")
+            .skipJavaLangImports(true)
+            .addFileComment("This file is auto-generated. DO NOT MODIFY.\n")
+            .addFileComment("Args: ${args.joinToString(" \\\n           ")}")
             .build()
             .writeTo(System.out)
     }
@@ -178,6 +182,7 @@ object SystemFeaturesGenerator {
             val methodBuilder =
                 MethodSpec.methodBuilder(methodName)
                     .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                    .addJavadoc("Check for ${feature.name}.\n\n@hide")
                     .returns(Boolean::class.java)
                     .addParameter(CONTEXT_CLASS, "context")
 
@@ -228,6 +233,7 @@ object SystemFeaturesGenerator {
             MethodSpec.methodBuilder("maybeHasFeature")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addAnnotation(ClassName.get("android.annotation", "Nullable"))
+                .addJavadoc("@hide")
                 .returns(Boolean::class.javaObjectType) // Use object type for nullability
                 .addParameter(String::class.java, "featureName")
                 .addParameter(Int::class.java, "version")
