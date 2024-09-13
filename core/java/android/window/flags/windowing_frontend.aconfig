@@ -144,6 +144,13 @@ flag {
 }
 
 flag {
+  name: "universal_resizable_by_default"
+  namespace: "windowing_frontend"
+  description: "The orientation, aspect ratio, resizability of activity will follow system behavior by default"
+  bug: "357141415"
+}
+
+flag {
   name: "respect_non_top_visible_fixed_orientation"
   namespace: "windowing_frontend"
   description: "If top activity is not opaque, respect the fixed orientation of activity behind it"
