@@ -20,3 +20,15 @@ android_library {
     ],
     kotlincflags: ["-Xjvm-default=all"],
 }
+
+android_library {
+    name: "SettingsLibIpc-testutils",
+    srcs: ["testutils/**/*.kt"],
+    static_libs: [
+        "Robolectric_all-target_upstream",
+        "SettingsLibIpc",
+        "androidx.test.core",
+        "flag-junit",
+        "kotlinx-coroutines-android",
+    ],
+}
