@@ -45,8 +45,8 @@ android_test {
     ],
 
     libs: [
-        "android.test.base",
-        "android.test.runner",
+        "android.test.base.stubs.system",
+        "android.test.runner.stubs.system",
     ],
 
     certificate: "platform",
