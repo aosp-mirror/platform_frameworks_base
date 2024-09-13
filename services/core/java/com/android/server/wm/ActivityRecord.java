@@ -2641,7 +2641,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return true;
         }
         // Only do transfer after transaction has done when starting window exist.
-        if (mStartingData != null && mStartingData.mWaitForSyncTransactionCommit) {
+        if (mStartingData != null && mStartingData.mWaitForSyncTransactionCommitCount > 0) {
             mStartingData.mRemoveAfterTransaction = AFTER_TRANSACTION_COPY_TO_CLIENT;
             return true;
         }
@@ -2804,9 +2804,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     @Override
     void waitForSyncTransactionCommit(ArraySet<WindowContainer> wcAwaitingCommit) {
+        // Only add once per transition.
+        final boolean added = wcAwaitingCommit.contains(this);
         super.waitForSyncTransactionCommit(wcAwaitingCommit);
-        if (mStartingData != null) {
-            mStartingData.mWaitForSyncTransactionCommit = true;
+        if (!added && mStartingData != null) {
+            mStartingData.mWaitForSyncTransactionCommitCount++;
         }
     }
 
@@ -2817,7 +2819,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return;
         }
         final StartingData lastData = mStartingData;
-        lastData.mWaitForSyncTransactionCommit = false;
+        lastData.mWaitForSyncTransactionCommitCount--;
         if (lastData.mRemoveAfterTransaction == AFTER_TRANSACTION_REMOVE_DIRECTLY) {
             removeStartingWindowAnimation(lastData.mPrepareRemoveAnimation);
         } else if (lastData.mRemoveAfterTransaction == AFTER_TRANSACTION_COPY_TO_CLIENT) {
@@ -2847,7 +2849,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final boolean animate;
         final boolean hasImeSurface;
         if (mStartingData != null) {
-            if (mStartingData.mWaitForSyncTransactionCommit
+            if (mStartingData.mWaitForSyncTransactionCommitCount > 0
                     || mSyncState != SYNC_STATE_NONE) {
                 mStartingData.mRemoveAfterTransaction = AFTER_TRANSACTION_REMOVE_DIRECTLY;
                 mStartingData.mPrepareRemoveAnimation = prepareAnimation;
