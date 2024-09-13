@@ -934,9 +934,9 @@ android_robolectric_test {
         "androidx.compose.runtime_runtime",
     ],
     libs: [
-        "android.test.runner",
-        "android.test.base",
-        "android.test.mock",
+        "android.test.runner.stubs.system",
+        "android.test.base.stubs.system",
+        "android.test.mock.stubs.system",
         "truth",
     ],
 
