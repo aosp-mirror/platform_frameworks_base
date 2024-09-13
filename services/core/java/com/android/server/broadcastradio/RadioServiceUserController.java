@@ -37,4 +37,12 @@ public interface RadioServiceUserController {
      * @return foreground user id.
      */
     int getCurrentUser();
+
+    /**
+     * Get id of the user handle assigned to the process that sent the binder transaction that is
+     * being processed
+     *
+     * @return Id of the user handle
+     */
+    int getCallingUserId();
 }

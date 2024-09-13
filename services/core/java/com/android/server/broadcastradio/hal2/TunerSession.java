@@ -26,7 +26,6 @@ import android.hardware.radio.ITuner;
 import android.hardware.radio.ProgramList;
 import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
-import android.os.Binder;
 import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -71,9 +70,9 @@ final class TunerSession extends ITuner.Stub {
             RadioServiceUserController userController) {
         mModule = Objects.requireNonNull(module);
         mHwSession = Objects.requireNonNull(hwSession);
-        mUserId = Binder.getCallingUserHandle().getIdentifier();
         mCallback = Objects.requireNonNull(callback);
         mUserController = Objects.requireNonNull(userController, "User controller can not be null");
+        mUserId = mUserController.getCallingUserId();
         mEventLogger = new RadioEventLogger(TAG, TUNER_EVENT_LOGGER_QUEUE_SIZE);
     }
 
