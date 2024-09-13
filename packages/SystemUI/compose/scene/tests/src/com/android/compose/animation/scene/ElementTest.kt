@@ -2519,4 +2519,65 @@ class ElementTest {
             .onNode(hasTestTag(contentTestTag) and hasParent(isElement(movable)))
             .assertSizeIsEqualTo(40.dp)
     }
+
+    @Test
+    fun placeAllCopies() {
+        val foo = ElementKey("Foo", placeAllCopies = true)
+
+        @Composable
+        fun SceneScope.Foo(size: Dp, modifier: Modifier = Modifier) {
+            Box(modifier.element(foo).size(size))
+        }
+
+        rule.testTransition(
+            fromSceneContent = { Box(Modifier.size(100.dp)) { Foo(size = 10.dp) } },
+            toSceneContent = {
+                Box(Modifier.size(100.dp)) {
+                    Foo(size = 50.dp, Modifier.align(Alignment.BottomEnd))
+                }
+            },
+            transition = { spec = tween(4 * 16, easing = LinearEasing) },
+        ) {
+            before {
+                onElement(foo, SceneA)
+                    .assertSizeIsEqualTo(10.dp)
+                    .assertPositionInRootIsEqualTo(0.dp, 0.dp)
+                onElement(foo, SceneB).assertDoesNotExist()
+            }
+
+            at(16) {
+                onElement(foo, SceneA)
+                    .assertSizeIsEqualTo(20.dp)
+                    .assertPositionInRootIsEqualTo(12.5.dp, 12.5.dp)
+                onElement(foo, SceneB)
+                    .assertSizeIsEqualTo(20.dp)
+                    .assertPositionInRootIsEqualTo(12.5.dp, 12.5.dp)
+            }
+
+            at(32) {
+                onElement(foo, SceneA)
+                    .assertSizeIsEqualTo(30.dp)
+                    .assertPositionInRootIsEqualTo(25.dp, 25.dp)
+                onElement(foo, SceneB)
+                    .assertSizeIsEqualTo(30.dp)
+                    .assertPositionInRootIsEqualTo(25.dp, 25.dp)
+            }
+
+            at(48) {
+                onElement(foo, SceneA)
+                    .assertSizeIsEqualTo(40.dp)
+                    .assertPositionInRootIsEqualTo(37.5.dp, 37.5.dp)
+                onElement(foo, SceneB)
+                    .assertSizeIsEqualTo(40.dp)
+                    .assertPositionInRootIsEqualTo(37.5.dp, 37.5.dp)
+            }
+
+            after {
+                onElement(foo, SceneA).assertDoesNotExist()
+                onElement(foo, SceneB)
+                    .assertSizeIsEqualTo(50.dp)
+                    .assertPositionInRootIsEqualTo(50.dp, 50.dp)
+            }
+        }
+    }
 }

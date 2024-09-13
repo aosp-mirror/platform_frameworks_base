@@ -79,6 +79,16 @@ open class ElementKey(
      * or compose MovableElements.
      */
     open val contentPicker: ElementContentPicker = DefaultElementContentPicker,
+
+    /**
+     * Whether we should place all copies of this element when it is shared.
+     *
+     * This should usually be false, but it can be useful when sharing a container that has a
+     * different content in different scenes/overlays. That way the container will have the same
+     * size and position in all scenes/overlays but all different contents will be placed and
+     * visible on screen.
+     */
+    val placeAllCopies: Boolean = false,
 ) : Key(debugName, identity), ElementMatcher {
     @VisibleForTesting
     // TODO(b/240432457): Make internal once PlatformComposeSceneTransitionLayoutTestsUtils can
