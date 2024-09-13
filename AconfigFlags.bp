@@ -25,6 +25,7 @@ aconfig_declarations_group {
         "android.app.appfunctions.flags-aconfig-java",
         "android.app.contextualsearch.flags-aconfig-java",
         "android.app.flags-aconfig-java",
+        "android.app.jank.flags-aconfig-java",
         "android.app.ondeviceintelligence-aconfig-java",
         "android.app.smartspace.flags-aconfig-java",
         "android.app.supervision.flags-aconfig-java",
@@ -1604,5 +1605,19 @@ aconfig_declarations {
 java_aconfig_library {
     name: "interaction_jank_monitor_flags_lib",
     aconfig_declarations: "interaction_jank_monitor_flags",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// App Jank
+aconfig_declarations {
+    name: "android.app.jank.flags-aconfig",
+    package: "android.app.jank",
+    container: "system",
+    srcs: ["core/java/android/app/jank/flags.aconfig"],
+}
+
+java_aconfig_library {
+    name: "android.app.jank.flags-aconfig-java",
+    aconfig_declarations: "android.app.jank.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
