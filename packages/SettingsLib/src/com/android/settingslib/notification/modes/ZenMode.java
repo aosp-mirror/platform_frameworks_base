@@ -241,10 +241,6 @@ public class ZenMode implements Parcelable {
                         formattedTime);
             }
         }
-        // TODO: b/333527800 - For TYPE_SCHEDULE_TIME rules we could do the same; however
-        //   according to the snoozing discussions the mode may or may not end at the scheduled
-        //   time if manually activated. When we resolve that point, we could calculate end time
-        //   for these modes as well.
 
         return getTriggerDescription();
     }
