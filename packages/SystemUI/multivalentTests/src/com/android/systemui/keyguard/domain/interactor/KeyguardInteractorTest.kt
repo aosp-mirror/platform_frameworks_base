@@ -29,15 +29,21 @@ import com.android.systemui.common.ui.data.repository.fakeConfigurationRepositor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.flags.EnableSceneContainer
-import com.android.systemui.keyguard.data.repository.fakeCommandQueue
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.data.repository.keyguardRepository
 import com.android.systemui.keyguard.shared.model.CameraLaunchType
 import com.android.systemui.keyguard.shared.model.DozeStateModel
 import com.android.systemui.keyguard.shared.model.DozeTransitionModel
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
+import com.android.systemui.keyguard.shared.model.KeyguardState.DOZING
+import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.keyguard.shared.model.TransitionState
+import com.android.systemui.keyguard.shared.model.TransitionState.FINISHED
+import com.android.systemui.keyguard.shared.model.TransitionState.RUNNING
+import com.android.systemui.keyguard.shared.model.TransitionState.STARTED
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
@@ -67,12 +73,11 @@ class KeyguardInteractorTest : SysuiTestCase() {
     private val testScope = kosmos.testScope
     private val repository by lazy { kosmos.fakeKeyguardRepository }
     private val sceneInteractor by lazy { kosmos.sceneInteractor }
-    private val fromGoneTransitionInteractor by lazy { kosmos.fromGoneTransitionInteractor }
-    private val commandQueue by lazy { kosmos.fakeCommandQueue }
     private val configRepository by lazy { kosmos.fakeConfigurationRepository }
     private val bouncerRepository by lazy { kosmos.keyguardBouncerRepository }
     private val shadeRepository by lazy { kosmos.shadeRepository }
     private val powerInteractor by lazy { kosmos.powerInteractor }
+    private val keyguardRepository by lazy { kosmos.keyguardRepository }
     private val keyguardTransitionRepository by lazy { kosmos.fakeKeyguardTransitionRepository }
 
     private val transitionState: MutableStateFlow<ObservableTransitionState> =
@@ -178,8 +183,8 @@ class KeyguardInteractorTest : SysuiTestCase() {
             assertThat(dismissAlpha).isEqualTo(1f)
 
             keyguardTransitionRepository.sendTransitionSteps(
-                from = KeyguardState.AOD,
-                to = KeyguardState.LOCKSCREEN,
+                from = AOD,
+                to = LOCKSCREEN,
                 testScope,
             )
 
@@ -204,8 +209,8 @@ class KeyguardInteractorTest : SysuiTestCase() {
             assertThat(dismissAlpha.size).isEqualTo(1)
 
             keyguardTransitionRepository.sendTransitionSteps(
-                from = KeyguardState.AOD,
-                to = KeyguardState.LOCKSCREEN,
+                from = AOD,
+                to = LOCKSCREEN,
                 testScope,
             )
 
@@ -233,13 +238,13 @@ class KeyguardInteractorTest : SysuiTestCase() {
             keyguardTransitionRepository.sendTransitionSteps(
                 listOf(
                     TransitionStep(
-                        from = KeyguardState.AOD,
+                        from = AOD,
                         to = KeyguardState.GONE,
                         value = 0f,
-                        transitionState = TransitionState.STARTED,
+                        transitionState = STARTED,
                     ),
                     TransitionStep(
-                        from = KeyguardState.AOD,
+                        from = AOD,
                         to = KeyguardState.GONE,
                         value = 0.1f,
                         transitionState = TransitionState.RUNNING,
@@ -269,7 +274,7 @@ class KeyguardInteractorTest : SysuiTestCase() {
             shadeRepository.setLegacyShadeExpansion(0f)
 
             keyguardTransitionRepository.sendTransitionSteps(
-                from = KeyguardState.AOD,
+                from = AOD,
                 to = KeyguardState.GONE,
                 testScope,
             )
@@ -291,8 +296,8 @@ class KeyguardInteractorTest : SysuiTestCase() {
             shadeRepository.setLegacyShadeExpansion(0f)
 
             keyguardTransitionRepository.sendTransitionSteps(
-                from = KeyguardState.AOD,
-                to = KeyguardState.LOCKSCREEN,
+                from = AOD,
+                to = LOCKSCREEN,
                 testScope,
             )
 
@@ -313,8 +318,8 @@ class KeyguardInteractorTest : SysuiTestCase() {
             shadeRepository.setLegacyShadeExpansion(1f)
 
             keyguardTransitionRepository.sendTransitionSteps(
-                from = KeyguardState.AOD,
-                to = KeyguardState.LOCKSCREEN,
+                from = AOD,
+                to = LOCKSCREEN,
                 testScope,
             )
 
@@ -337,13 +342,13 @@ class KeyguardInteractorTest : SysuiTestCase() {
             keyguardTransitionRepository.sendTransitionSteps(
                 listOf(
                     TransitionStep(
-                        from = KeyguardState.AOD,
+                        from = AOD,
                         to = KeyguardState.GONE,
                         value = 0f,
-                        transitionState = TransitionState.STARTED,
+                        transitionState = STARTED,
                     ),
                     TransitionStep(
-                        from = KeyguardState.AOD,
+                        from = AOD,
                         to = KeyguardState.GONE,
                         value = 0.1f,
                         transitionState = TransitionState.RUNNING,
@@ -435,4 +440,63 @@ class KeyguardInteractorTest : SysuiTestCase() {
             runCurrent()
             assertThat(isAnimate).isFalse()
         }
+
+    @Test
+    @EnableSceneContainer
+    fun dozeAmount_updatedByAodTransitionWhenAodEnabled() =
+        testScope.runTest {
+            val dozeAmount by collectLastValue(underTest.dozeAmount)
+
+            keyguardRepository.setAodAvailable(true)
+
+            sendTransitionStep(TransitionStep(to = AOD, value = 0f, transitionState = STARTED))
+            assertThat(dozeAmount).isEqualTo(0f)
+
+            sendTransitionStep(TransitionStep(to = AOD, value = 0.5f, transitionState = RUNNING))
+            assertThat(dozeAmount).isEqualTo(0.5f)
+
+            sendTransitionStep(TransitionStep(to = AOD, value = 1f, transitionState = FINISHED))
+            assertThat(dozeAmount).isEqualTo(1f)
+
+            sendTransitionStep(TransitionStep(AOD, LOCKSCREEN, 0f, STARTED))
+            assertThat(dozeAmount).isEqualTo(1f)
+
+            sendTransitionStep(TransitionStep(AOD, LOCKSCREEN, 0.5f, RUNNING))
+            assertThat(dozeAmount).isEqualTo(0.5f)
+
+            sendTransitionStep(TransitionStep(AOD, LOCKSCREEN, 1f, FINISHED))
+            assertThat(dozeAmount).isEqualTo(0f)
+        }
+
+    @Test
+    @EnableSceneContainer
+    fun dozeAmount_updatedByDozeTransitionWhenAodDisabled() =
+        testScope.runTest {
+            val dozeAmount by collectLastValue(underTest.dozeAmount)
+
+            keyguardRepository.setAodAvailable(false)
+
+            sendTransitionStep(TransitionStep(to = DOZING, value = 0f, transitionState = STARTED))
+            assertThat(dozeAmount).isEqualTo(0f)
+
+            sendTransitionStep(TransitionStep(to = DOZING, value = 0.5f, transitionState = RUNNING))
+            assertThat(dozeAmount).isEqualTo(0.5f)
+
+            sendTransitionStep(TransitionStep(to = DOZING, value = 1f, transitionState = FINISHED))
+            assertThat(dozeAmount).isEqualTo(1f)
+
+            sendTransitionStep(TransitionStep(DOZING, LOCKSCREEN, 0f, STARTED))
+            assertThat(dozeAmount).isEqualTo(1f)
+
+            sendTransitionStep(TransitionStep(DOZING, LOCKSCREEN, 0.5f, RUNNING))
+            assertThat(dozeAmount).isEqualTo(0.5f)
+
+            sendTransitionStep(TransitionStep(DOZING, LOCKSCREEN, 1f, FINISHED))
+            assertThat(dozeAmount).isEqualTo(0f)
+        }
+
+    private suspend fun sendTransitionStep(step: TransitionStep) {
+        keyguardTransitionRepository.sendTransitionStep(step)
+        testScope.runCurrent()
+    }
 }

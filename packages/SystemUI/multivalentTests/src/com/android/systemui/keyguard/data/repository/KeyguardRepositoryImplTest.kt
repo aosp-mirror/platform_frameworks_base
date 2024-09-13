@@ -31,6 +31,7 @@ import com.android.systemui.doze.DozeMachine
 import com.android.systemui.doze.DozeTransitionCallback
 import com.android.systemui.doze.DozeTransitionListener
 import com.android.systemui.dreams.DreamOverlayCallbackController
+import com.android.systemui.flags.DisableSceneContainer
 import com.android.systemui.keyguard.shared.model.BiometricUnlockMode
 import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
 import com.android.systemui.keyguard.shared.model.DozeStateModel
@@ -288,6 +289,7 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableSceneContainer
     fun dozeAmount() =
         testScope.runTest {
             val values = mutableListOf<Float>()
