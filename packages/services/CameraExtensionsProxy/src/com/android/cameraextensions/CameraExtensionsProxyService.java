@@ -1620,7 +1620,7 @@ public class CameraExtensionsProxyService extends Service {
                 }
                 ret.outputConfigs.add(entry);
             }
-            if (Flags.extension10Bit() && EFV_SUPPORTED) {
+            if (EFV_SUPPORTED) {
                 ret.colorSpace = sessionConfig.getColorSpace();
             } else {
                 ret.colorSpace = ColorSpaceProfiles.UNSPECIFIED;
@@ -2596,7 +2596,7 @@ public class CameraExtensionsProxyService extends Service {
 
     private static CameraOutputConfig getCameraOutputConfig(Camera2OutputConfigImpl output) {
         CameraOutputConfig ret = new CameraOutputConfig();
-        if (Flags.extension10Bit() && EFV_SUPPORTED) {
+        if (EFV_SUPPORTED) {
             ret.dynamicRangeProfile = output.getDynamicRangeProfile();
         } else {
             ret.dynamicRangeProfile = DynamicRangeProfiles.STANDARD;
