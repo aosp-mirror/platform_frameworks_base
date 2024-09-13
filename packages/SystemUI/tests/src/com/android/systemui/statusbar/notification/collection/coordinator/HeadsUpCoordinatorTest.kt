@@ -43,7 +43,7 @@ import com.android.systemui.statusbar.notification.interruption.NotificationInte
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderWrapper.FullScreenIntentDecisionImpl
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionDecisionProvider
 import com.android.systemui.statusbar.notification.row.NotifBindPipeline.BindCallback
-import com.android.systemui.statusbar.phone.HeadsUpManagerPhone
+import com.android.systemui.statusbar.notification.HeadsUpManagerPhone
 import com.android.systemui.statusbar.phone.NotificationGroupTestHelper
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener
 import com.android.systemui.util.concurrency.FakeExecutor

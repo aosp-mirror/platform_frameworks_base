@@ -19,6 +19,8 @@ class SkStreamRewindable;
 
 class Movie : public SkRefCnt {
 public:
+    using MSec = uint32_t; // millisecond duration
+
     /** Try to create a movie from the stream. If the stream format is not
         supported, return NULL.
     */
@@ -36,7 +38,7 @@ public:
     */
     static Movie* DecodeMemory(const void* data, size_t length);
 
-    SkMSec  duration();
+    MSec    duration();
     int     width();
     int     height();
     int     isOpaque();
@@ -46,21 +48,21 @@ public:
         bitmap/frame from the previous state (i.e. true means you need to
         redraw).
     */
-    bool setTime(SkMSec);
+    bool setTime(MSec);
 
     // return the right bitmap for the current time code
     const SkBitmap& bitmap();
 
 protected:
     struct Info {
-        SkMSec  fDuration;
+        MSec    fDuration;
         int     fWidth;
         int     fHeight;
         bool    fIsOpaque;
     };
 
     virtual bool onGetInfo(Info*) = 0;
-    virtual bool onSetTime(SkMSec) = 0;
+    virtual bool onSetTime(MSec) = 0;
     virtual bool onGetBitmap(SkBitmap*) = 0;
 
     // visible for subclasses
@@ -68,7 +70,7 @@ protected:
 
 private:
     Info        fInfo;
-    SkMSec      fCurrTime;
+    MSec        fCurrTime;
     SkBitmap    fBitmap;
     bool        fNeedBitmap;
 

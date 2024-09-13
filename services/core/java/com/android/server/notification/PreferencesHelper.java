@@ -22,6 +22,7 @@ import static android.app.NotificationChannel.PLACEHOLDER_CONVERSATION_ID;
 import static android.app.NotificationChannel.PROMOTIONS_ID;
 import static android.app.NotificationChannel.RECS_ID;
 import static android.app.NotificationChannel.SOCIAL_MEDIA_ID;
+import static android.app.NotificationChannel.SYSTEM_RESERVED_IDS;
 import static android.app.NotificationChannel.USER_LOCKED_IMPORTANCE;
 import static android.app.NotificationManager.BUBBLE_PREFERENCE_ALL;
 import static android.app.NotificationManager.BUBBLE_PREFERENCE_NONE;
@@ -439,6 +440,12 @@ public class PreferencesHelper implements RankingConfig {
                 }
                 channel.setImportanceLockedByCriticalDeviceFunction(
                         r.defaultAppLockedImportance || r.fixedImportance);
+
+                if (notificationClassification()) {
+                    if (SYSTEM_RESERVED_IDS.contains(id) && channel.isDeleted() ) {
+                        channel.setDeleted(false);
+                    }
+                }
 
                 if (isShortcutOk(channel) && isDeletionOk(channel)) {
                     r.channels.put(id, channel);
@@ -1022,6 +1029,11 @@ public class PreferencesHelper implements RankingConfig {
             }
             if (NotificationChannel.DEFAULT_CHANNEL_ID.equals(channel.getId())) {
                 throw new IllegalArgumentException("Reserved id");
+            }
+            // Only the user can update bundle channel settings
+            if (notificationClassification() && !fromSystemOrSystemUi
+                    && SYSTEM_RESERVED_IDS.contains(channel.getId())) {
+                return false;
             }
             NotificationChannel existing = r.channels.get(channel.getId());
             if (existing != null && fromTargetApp) {

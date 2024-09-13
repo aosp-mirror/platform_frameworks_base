@@ -38,8 +38,7 @@ class RecentAppsGestureMonitorTest : SysuiTestCase() {
 
     companion object {
         const val THRESHOLD_VELOCITY_PX_PER_MS = 0.1f
-        // multiply by 1000 to get px per ms instead of px per s which is unit used by velocity
-        // tracker
+        // multiply by 1000 to get px/ms instead of px/s which is unit used by velocity tracker
         const val SLOW = THRESHOLD_VELOCITY_PX_PER_MS * 1000 - 1
         const val FAST = THRESHOLD_VELOCITY_PX_PER_MS * 1000 + 1
     }

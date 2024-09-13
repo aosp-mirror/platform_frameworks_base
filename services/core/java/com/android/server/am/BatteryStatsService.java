@@ -1018,7 +1018,9 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         if (Flags.addBatteryUsageStatsSliceAtom()) {
             statsManager.setPullAtomCallback(
                     FrameworkStatsLog.BATTERY_USAGE_STATS_PER_UID,
-                    null, // use default PullAtomMetadata values
+                    new StatsManager.PullAtomMetadata.Builder()
+                            .setTimeoutMillis(3_000L)
+                            .build(),
                     DIRECT_EXECUTOR,
                     pullAtomCallback);
         }
@@ -1098,14 +1100,11 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                                     DEVICE_CONFIG_NAMESPACE,
                                     MIN_CONSUMED_POWER_THRESHOLD_KEY,
                                     0);
-                    final long sessionStart = 0;
-                    final long sessionEnd = System.currentTimeMillis();
                     final BatteryUsageStatsQuery query =
                             new BatteryUsageStatsQuery.Builder()
                                     .setMaxStatsAgeMs(0)
                                     .includeProcessStateData()
                                     .includeVirtualUids()
-                                    .aggregateSnapshots(sessionStart, sessionEnd)
                                     .setMinConsumedPowerThreshold(minConsumedPowerThreshold)
                                     .build();
                     bus = getBatteryUsageStats(List.of(query)).get(0);

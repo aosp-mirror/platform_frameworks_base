@@ -181,7 +181,7 @@ constructor(
         }
         .stateIn(
             scope = applicationScope,
-            started = SharingStarted.WhileSubscribed(),
+            started = SharingStarted.Eagerly,
             initialValue =
                 KeyguardQuickAffordanceViewModel(
                     slotId = KeyguardQuickAffordancePosition.BOTTOM_START.toSlotId()
@@ -202,7 +202,7 @@ constructor(
         }
         .stateIn(
             scope = applicationScope,
-            started = SharingStarted.WhileSubscribed(),
+            started = SharingStarted.Eagerly,
             initialValue =
                 KeyguardQuickAffordanceViewModel(
                     slotId = KeyguardQuickAffordancePosition.BOTTOM_END.toSlotId()

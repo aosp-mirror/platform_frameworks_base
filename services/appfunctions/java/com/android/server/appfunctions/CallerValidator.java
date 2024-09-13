@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.os.UserHandle;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.infra.AndroidFuture;
 
 /**
  * Interface for validating that the caller has the correct privilege to call an AppFunctionManager
@@ -65,10 +66,13 @@ public interface CallerValidator {
      *
      * @param callerPackageName The calling package (as previously validated).
      * @param targetPackageName The package that owns the app function to execute.
+     * @param functionId The id of the app function to execute.
      * @return Whether the caller can execute the specified app function.
      */
-    boolean verifyCallerCanExecuteAppFunction(
-            @NonNull String callerPackageName, @NonNull String targetPackageName);
+    AndroidFuture<Boolean> verifyCallerCanExecuteAppFunction(
+            @NonNull String callerPackageName,
+            @NonNull String targetPackageName,
+            @NonNull String functionId);
 
     /**
      * Checks if the user is organization managed.
