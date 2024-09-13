@@ -5339,6 +5339,19 @@ public class NotificationStackScrollLayout
         updateDismissBehavior();
     }
 
+    @Override
+    public void setShowingStackOnLockscreen(boolean showingStackOnLockscreen) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
+        mAmbientState.setShowingStackOnLockscreen(showingStackOnLockscreen);
+    }
+
+    @Override
+    public void setAlphaForLockscreenFadeIn(float alphaForLockscreenFadeIn) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
+        mAmbientState.setLockscreenStackFadeInProgress(alphaForLockscreenFadeIn);
+        requestChildrenUpdate();
+    }
+
     void setUpcomingStatusBarState(int upcomingStatusBarState) {
         FooterViewRefactor.assertInLegacyMode();
         mUpcomingStatusBarState = upcomingStatusBarState;

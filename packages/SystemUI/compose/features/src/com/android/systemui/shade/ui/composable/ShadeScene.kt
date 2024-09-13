@@ -296,7 +296,7 @@ private fun SceneScope.SingleShade(
 
     val shouldPunchHoleBehindScrim =
         layoutState.isTransitioningBetween(Scenes.Gone, Scenes.Shade) ||
-            layoutState.isTransitioningBetween(Scenes.Lockscreen, Scenes.Shade)
+            layoutState.isTransitioning(from = Scenes.Lockscreen, to = Scenes.Shade)
     // Media is visible and we are in landscape on a small height screen
     val mediaInRow = isMediaVisible && isLandscape
     val mediaOffset by
