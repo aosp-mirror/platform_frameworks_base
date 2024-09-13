@@ -31,7 +31,7 @@ public final class RadioServiceUserControllerImpl implements RadioServiceUserCon
      */
     @Override
     public boolean isCurrentOrSystemUser() {
-        int callingUser = Binder.getCallingUserHandle().getIdentifier();
+        int callingUser = getCallingUserId();
         return callingUser == getCurrentUser() || callingUser == UserHandle.USER_SYSTEM;
     }
 
@@ -50,5 +50,13 @@ public final class RadioServiceUserControllerImpl implements RadioServiceUserCon
             Binder.restoreCallingIdentity(identity);
         }
         return userId;
+    }
+
+    /**
+     * @see RadioServiceUserController#getCallingUserId()
+     */
+    @Override
+    public int getCallingUserId() {
+        return Binder.getCallingUserHandle().getIdentifier();
     }
 }

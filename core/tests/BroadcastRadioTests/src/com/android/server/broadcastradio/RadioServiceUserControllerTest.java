@@ -19,18 +19,18 @@ package com.android.server.broadcastradio;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doThrow;
 
-import static com.google.common.truth.Truth.assertWithMessage;
-
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
-import android.app.compat.CompatChanges;
 import android.os.Binder;
 import android.os.UserHandle;
 
 import com.android.dx.mockito.inline.extended.StaticMockitoSessionBuilder;
 
+import com.google.common.truth.Expect;
+
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
 
@@ -46,10 +46,12 @@ public final class RadioServiceUserControllerTest extends ExtendedRadioMockitoTe
     @Mock
     private UserHandle mUserHandleMock;
 
+    @Rule
+    public final Expect expect = Expect.create();
+
     @Override
     protected void initializeSession(StaticMockitoSessionBuilder builder) {
-        builder.spyStatic(ActivityManager.class).spyStatic(Binder.class)
-                .spyStatic(CompatChanges.class);
+        builder.spyStatic(ActivityManager.class).spyStatic(Binder.class);
     }
 
     @Before
@@ -63,7 +65,7 @@ public final class RadioServiceUserControllerTest extends ExtendedRadioMockitoTe
     public void isCurrentOrSystemUser_forCurrentUser_returnsFalse() {
         when(mUserHandleMock.getIdentifier()).thenReturn(USER_ID_1);
 
-        assertWithMessage("Current user")
+        expect.withMessage("Current user")
                 .that(mUserController.isCurrentOrSystemUser()).isTrue();
     }
 
@@ -71,7 +73,7 @@ public final class RadioServiceUserControllerTest extends ExtendedRadioMockitoTe
     public void isCurrentOrSystemUser_forNonCurrentUser_returnsFalse() {
         when(mUserHandleMock.getIdentifier()).thenReturn(USER_ID_2);
 
-        assertWithMessage("Non-current user")
+        expect.withMessage("Non-current user")
                 .that(mUserController.isCurrentOrSystemUser()).isFalse();
     }
 
@@ -80,7 +82,7 @@ public final class RadioServiceUserControllerTest extends ExtendedRadioMockitoTe
         when(mUserHandleMock.getIdentifier()).thenReturn(USER_ID_1);
         when(mUserHandleMock.getIdentifier()).thenReturn(UserHandle.USER_SYSTEM);
 
-        assertWithMessage("System user")
+        expect.withMessage("System user")
                 .that(mUserController.isCurrentOrSystemUser()).isTrue();
     }
 
@@ -89,13 +91,13 @@ public final class RadioServiceUserControllerTest extends ExtendedRadioMockitoTe
         when(mUserHandleMock.getIdentifier()).thenReturn(USER_ID_1);
         doThrow(new RuntimeException()).when(ActivityManager::getCurrentUser);
 
-        assertWithMessage("User when activity manager fails")
+        expect.withMessage("User when activity manager fails")
                 .that(mUserController.isCurrentOrSystemUser()).isFalse();
     }
 
     @Test
     public void getCurrentUser() {
-        assertWithMessage("Current user")
+        expect.withMessage("Current user")
                 .that(mUserController.getCurrentUser()).isEqualTo(USER_ID_1);
     }
 
@@ -104,7 +106,15 @@ public final class RadioServiceUserControllerTest extends ExtendedRadioMockitoTe
         when(mUserHandleMock.getIdentifier()).thenReturn(USER_ID_1);
         doThrow(new RuntimeException()).when(ActivityManager::getCurrentUser);
 
-        assertWithMessage("Current user when activity manager fails")
+        expect.withMessage("Current user when activity manager fails")
                 .that(mUserController.getCurrentUser()).isEqualTo(UserHandle.USER_NULL);
+    }
+
+    @Test
+    public void getCallingUserId() {
+        when(mUserHandleMock.getIdentifier()).thenReturn(USER_ID_1);
+
+        expect.withMessage("Calling user id")
+                .that(mUserController.getCallingUserId()).isEqualTo(USER_ID_1);
     }
 }

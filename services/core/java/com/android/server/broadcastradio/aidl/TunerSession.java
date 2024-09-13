@@ -70,9 +70,9 @@ final class TunerSession extends ITuner.Stub {
             RadioServiceUserController userController) {
         mModule = Objects.requireNonNull(radioModule, "radioModule cannot be null");
         mService = Objects.requireNonNull(service, "service cannot be null");
-        mUserId = Binder.getCallingUserHandle().getIdentifier();
         mCallback = Objects.requireNonNull(callback, "callback cannot be null");
         mUserController = Objects.requireNonNull(userController, "User controller can not be null");
+        mUserId = mUserController.getCallingUserId();
         mUid = Binder.getCallingUid();
         mLogger = new RadioEventLogger(TAG, TUNER_EVENT_LOGGER_QUEUE_SIZE);
     }

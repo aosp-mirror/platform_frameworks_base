@@ -49,12 +49,10 @@ import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
 import android.hardware.radio.RadioTuner;
 import android.hardware.radio.UniqueProgramIdentifier;
-import android.os.Binder;
 import android.os.DeadObjectException;
 import android.os.ParcelableException;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
-import android.os.UserHandle;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -147,8 +145,6 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
 
     // Mocks
     @Mock
-    private UserHandle mUserHandleMock;
-    @Mock
     private IBroadcastRadio mBroadcastRadioMock;
     private android.hardware.radio.ITunerCallback[] mAidlTunerCallbackMocks;
     @Mock
@@ -171,7 +167,7 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
 
     @Override
     protected void initializeSession(StaticMockitoSessionBuilder builder) {
-        builder.spyStatic(CompatChanges.class).spyStatic(Binder.class);
+        builder.spyStatic(CompatChanges.class);
     }
 
     @Before
@@ -182,8 +178,7 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
 
         doReturn(true).when(() -> CompatChanges.isChangeEnabled(
                 eq(ConversionUtils.RADIO_U_VERSION_REQUIRED), anyInt()));
-        doReturn(USER_ID_1).when(mUserHandleMock).getIdentifier();
-        doReturn(mUserHandleMock).when(() -> Binder.getCallingUserHandle());
+        doReturn(USER_ID_1).when(mUserControllerMock).getCallingUserId();
         doReturn(true).when(mUserControllerMock).isCurrentOrSystemUser();
         doReturn(USER_ID_1).when(mUserControllerMock).getCurrentUser();
 
