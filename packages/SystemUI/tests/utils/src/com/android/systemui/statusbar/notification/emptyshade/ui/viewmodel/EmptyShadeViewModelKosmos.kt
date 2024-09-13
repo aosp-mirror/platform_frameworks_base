@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.emptyshade.ui.viewmodel
 
+import android.content.applicationContext
 import com.android.systemui.dump.dumpManager
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.shared.notifications.domain.interactor.notificationSettingsInteractor
@@ -25,6 +26,7 @@ import com.android.systemui.statusbar.policy.domain.interactor.zenModeInteractor
 val Kosmos.emptyShadeViewModel by
     Kosmos.Fixture {
         EmptyShadeViewModel(
+            applicationContext,
             zenModeInteractor,
             seenNotificationsInteractor,
             notificationSettingsInteractor,

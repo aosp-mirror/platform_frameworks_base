@@ -39,12 +39,15 @@ import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
 
 import kotlin.Unit;
 
+import java.util.Objects;
+
 public class EmptyShadeView extends StackScrollerDecorView implements LaunchableView {
 
     private TextView mEmptyText;
     private TextView mEmptyFooterText;
 
-    private @StringRes int mText = R.string.empty_shade_text;
+    private @StringRes int mTextId = R.string.empty_shade_text;
+    private String mTextString;
 
     private @DrawableRes int mFooterIcon;
     private @StringRes int mFooterText;
@@ -62,7 +65,9 @@ public class EmptyShadeView extends StackScrollerDecorView implements Launchable
         super(context, attrs);
         mSize = getResources().getDimensionPixelSize(
                 R.dimen.notifications_unseen_footer_icon_size);
-        if (!ModesEmptyShadeFix.isEnabled()) {
+        if (ModesEmptyShadeFix.isEnabled()) {
+            mTextString = getContext().getString(R.string.empty_shade_text);
+        } else {
             // These will be set by the binder when appropriate if ModesEmptyShadeFix is on.
             mFooterIcon = R.drawable.ic_friction_lock_closed;
             mFooterText = R.string.unlock_to_see_notif_text;
@@ -97,7 +102,11 @@ public class EmptyShadeView extends StackScrollerDecorView implements Launchable
         super.onConfigurationChanged(newConfig);
         mSize = getResources().getDimensionPixelSize(
                 R.dimen.notifications_unseen_footer_icon_size);
-        mEmptyText.setText(mText);
+        if (ModesEmptyShadeFix.isEnabled()) {
+            mEmptyText.setText(mTextString);
+        } else {
+            mEmptyText.setText(mTextId);
+        }
         mEmptyFooterText.setVisibility(mFooterVisibility);
         setFooterText(mFooterText);
         setFooterIcon(mFooterIcon);
@@ -122,11 +131,18 @@ public class EmptyShadeView extends StackScrollerDecorView implements Launchable
 
     /** Set the resource ID for the main text shown by the view. */
     public void setText(@StringRes int text) {
-        if (ModesEmptyShadeFix.isEnabled() && mText == text) {
-            return; // nothing to change
+        ModesEmptyShadeFix.assertInLegacyMode();
+        mTextId = text;
+        mEmptyText.setText(mTextId);
+    }
+
+    /** Set the string for the main text shown by the view. */
+    public void setText(String text) {
+        if (ModesEmptyShadeFix.isUnexpectedlyInLegacyMode() || Objects.equals(mTextString, text)) {
+            return;
         }
-        mText = text;
-        mEmptyText.setText(mText);
+        mTextString = text;
+        mEmptyText.setText(text);
     }
 
     /** Visibility for the footer (the additional icon+text shown below the main text). */
@@ -173,7 +189,7 @@ public class EmptyShadeView extends StackScrollerDecorView implements Launchable
     @StringRes
     public int getTextResource() {
         ModesEmptyShadeFix.assertInLegacyMode();
-        return mText;
+        return mTextId;
     }
 
     /** Get resource ID for footer text. */

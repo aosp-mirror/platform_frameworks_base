@@ -16,17 +16,20 @@
 
 package com.android.systemui.statusbar.notification.emptyshade.ui.viewmodel
 
+import android.app.Flags
 import android.app.NotificationManager.Policy
+import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.FlagsParameterization
 import android.provider.Settings
+import android.service.notification.ZenPolicy.VISUAL_EFFECT_NOTIFICATION_LIST
 import androidx.test.filters.SmallTest
 import com.android.settingslib.notification.data.repository.updateNotificationPolicy
+import com.android.settingslib.notification.modes.TestModeBuilder
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.andSceneContainer
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.res.R
 import com.android.systemui.statusbar.notification.data.repository.activeNotificationListRepository
 import com.android.systemui.statusbar.notification.emptyshade.shared.ModesEmptyShadeFix
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
@@ -117,6 +120,7 @@ class EmptyShadeViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
 
     @Test
     @EnableFlags(ModesEmptyShadeFix.FLAG_NAME)
+    @DisableFlags(Flags.FLAG_MODES_UI, Flags.FLAG_MODES_API)
     fun text_changesWhenNotifsHiddenInShade() =
         testScope.runTest {
             val text by collectLastValue(underTest.text)
@@ -127,7 +131,7 @@ class EmptyShadeViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             zenModeRepository.updateZenMode(Settings.Global.ZEN_MODE_OFF)
             runCurrent()
 
-            assertThat(text).isEqualTo(R.string.empty_shade_text)
+            assertThat(text).isEqualTo("No notifications")
 
             zenModeRepository.updateNotificationPolicy(
                 suppressedVisualEffects = Policy.SUPPRESSED_EFFECT_NOTIFICATION_LIST
@@ -135,7 +139,54 @@ class EmptyShadeViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             zenModeRepository.updateZenMode(Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS)
             runCurrent()
 
-            assertThat(text).isEqualTo(R.string.dnd_suppressing_shade_text)
+            assertThat(text).isEqualTo("Notifications paused by Do Not Disturb")
+        }
+
+    @Test
+    @EnableFlags(ModesEmptyShadeFix.FLAG_NAME, Flags.FLAG_MODES_UI, Flags.FLAG_MODES_API)
+    fun text_reflectsModesHidingNotifications() =
+        testScope.runTest {
+            val text by collectLastValue(underTest.text)
+
+            assertThat(text).isEqualTo("No notifications")
+
+            zenModeRepository.addMode(
+                TestModeBuilder()
+                    .setId("Do not disturb")
+                    .setName("Do not disturb")
+                    .setActive(true)
+                    .setVisualEffect(VISUAL_EFFECT_NOTIFICATION_LIST, /* allowed= */ false)
+                    .build()
+            )
+            runCurrent()
+            assertThat(text).isEqualTo("Notifications paused by Do not disturb")
+
+            zenModeRepository.addMode(
+                TestModeBuilder()
+                    .setId("Work")
+                    .setName("Work")
+                    .setActive(true)
+                    .setVisualEffect(VISUAL_EFFECT_NOTIFICATION_LIST, /* allowed= */ false)
+                    .build()
+            )
+            runCurrent()
+            assertThat(text).isEqualTo("Notifications paused by Do not disturb and one other mode")
+
+            zenModeRepository.addMode(
+                TestModeBuilder()
+                    .setId("Gym")
+                    .setName("Gym")
+                    .setActive(true)
+                    .setVisualEffect(VISUAL_EFFECT_NOTIFICATION_LIST, /* allowed= */ false)
+                    .build()
+            )
+            runCurrent()
+            assertThat(text).isEqualTo("Notifications paused by Do not disturb and 2 other modes")
+
+            zenModeRepository.deactivateMode("Do not disturb")
+            zenModeRepository.deactivateMode("Work")
+            runCurrent()
+            assertThat(text).isEqualTo("Notifications paused by Gym")
         }
 
     @Test
