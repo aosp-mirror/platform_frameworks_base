@@ -22,6 +22,7 @@ import android.annotation.StringRes;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.View;
@@ -29,12 +30,16 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
+import com.android.systemui.animation.LaunchableView;
+import com.android.systemui.animation.LaunchableViewDelegate;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.emptyshade.shared.ModesEmptyShadeFix;
 import com.android.systemui.statusbar.notification.row.StackScrollerDecorView;
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
 
-public class EmptyShadeView extends StackScrollerDecorView {
+import kotlin.Unit;
+
+public class EmptyShadeView extends StackScrollerDecorView implements LaunchableView {
 
     private TextView mEmptyText;
     private TextView mEmptyFooterText;
@@ -47,6 +52,12 @@ public class EmptyShadeView extends StackScrollerDecorView {
     private @Visibility int mFooterVisibility = View.GONE;
     private int mSize;
 
+    private LaunchableViewDelegate mLaunchableViewDelegate = new LaunchableViewDelegate(this,
+            visibility -> {
+                super.setVisibility(visibility);
+                return Unit.INSTANCE;
+            });
+
     public EmptyShadeView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mSize = getResources().getDimensionPixelSize(
@@ -56,6 +67,29 @@ public class EmptyShadeView extends StackScrollerDecorView {
             mFooterIcon = R.drawable.ic_friction_lock_closed;
             mFooterText = R.string.unlock_to_see_notif_text;
         }
+    }
+
+    @Override
+    public void setVisibility(int visibility) {
+        mLaunchableViewDelegate.setVisibility(visibility);
+    }
+
+    @Override
+    public void setShouldBlockVisibilityChanges(boolean block) {
+        /* check if */ ModesEmptyShadeFix.isUnexpectedlyInLegacyMode();
+        mLaunchableViewDelegate.setShouldBlockVisibilityChanges(block);
+    }
+
+    @Override
+    public void onActivityLaunchAnimationEnd() {
+        /* check if */ ModesEmptyShadeFix.isUnexpectedlyInLegacyMode();
+    }
+
+    @Override
+    @NonNull
+    public Rect getPaddingForLaunchAnimation() {
+        /* check if */ ModesEmptyShadeFix.isUnexpectedlyInLegacyMode();
+        return new Rect();
     }
 
     @Override

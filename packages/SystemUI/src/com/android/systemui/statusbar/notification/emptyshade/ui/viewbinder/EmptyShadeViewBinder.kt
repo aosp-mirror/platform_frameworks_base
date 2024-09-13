@@ -31,15 +31,12 @@ object EmptyShadeViewBinder {
     ) = coroutineScope {
         launch { viewModel.text.collect { view.setText(it) } }
 
-        // TODO(b/308591475): The view needs to implement LaunchableView for this to work.
-        if (false) {
-            launch {
-                viewModel.tappingShouldLaunchHistory.collect { shouldLaunchHistory ->
-                    if (shouldLaunchHistory) {
-                        view.setOnClickListener(launchNotificationHistory)
-                    } else {
-                        view.setOnClickListener(launchNotificationSettings)
-                    }
+        launch {
+            viewModel.tappingShouldLaunchHistory.collect { shouldLaunchHistory ->
+                if (shouldLaunchHistory) {
+                    view.setOnClickListener(launchNotificationHistory)
+                } else {
+                    view.setOnClickListener(launchNotificationSettings)
                 }
             }
         }

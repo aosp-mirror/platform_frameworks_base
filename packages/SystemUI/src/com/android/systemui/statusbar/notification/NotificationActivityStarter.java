@@ -37,7 +37,10 @@ public interface NotificationActivityStarter {
     void startNotificationGutsIntent(Intent intent, int appUid,
             ExpandableNotificationRow row);
 
-    /** Called when the user clicks "Manage" or "History" in the Shade. */
+    /**
+     * Called when the user clicks "Manage" or "History" in the Shade, or the "No notifications"
+     * text.
+     */
     void startHistoryIntent(View view, boolean showHistory);
 
     /** Called when the user succeed to drop notification to proper target view. */
