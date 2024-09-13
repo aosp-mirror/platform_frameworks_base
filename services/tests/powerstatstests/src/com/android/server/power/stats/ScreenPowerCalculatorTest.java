@@ -61,7 +61,8 @@ public class ScreenPowerCalculatorTest {
         mStatsRule.initMeasuredEnergyStatsLocked();
         BatteryStatsImpl batteryStats = mStatsRule.getBatteryStats();
 
-        batteryStats.noteScreenStateLocked(0, Display.STATE_ON, 0, 0, 0);
+        batteryStats.noteScreenStateLocked(0, Display.STATE_ON, Display.STATE_REASON_UNKNOWN,
+                0, 0, 0);
         batteryStats.updateDisplayEnergyConsumerStatsLocked(new long[]{0},
                 new int[]{Display.STATE_ON}, 0);
         setProcState(APP_UID1, ActivityManager.PROCESS_STATE_TOP, true,
@@ -79,7 +80,7 @@ public class ScreenPowerCalculatorTest {
         batteryStats.updateDisplayEnergyConsumerStatsLocked(new long[]{300_000_000},
                 new int[]{Display.STATE_ON}, 60 * MINUTE_IN_MS);
 
-        batteryStats.noteScreenStateLocked(0, Display.STATE_OFF,
+        batteryStats.noteScreenStateLocked(0, Display.STATE_OFF, Display.STATE_REASON_UNKNOWN,
                 80 * MINUTE_IN_MS, 80 * MINUTE_IN_MS, 80 * MINUTE_IN_MS);
         setProcState(APP_UID2, ActivityManager.PROCESS_STATE_TOP_SLEEPING, false,
                 80 * MINUTE_IN_MS, 80 * MINUTE_IN_MS);
@@ -150,8 +151,10 @@ public class ScreenPowerCalculatorTest {
 
         final int[] screenStates = new int[]{Display.STATE_ON, Display.STATE_OFF};
 
-        batteryStats.noteScreenStateLocked(0, screenStates[0], 0, 0, 0);
-        batteryStats.noteScreenStateLocked(1, screenStates[1], 0, 0, 0);
+        batteryStats.noteScreenStateLocked(0, screenStates[0], Display.STATE_REASON_UNKNOWN,
+                0, 0, 0);
+        batteryStats.noteScreenStateLocked(1, screenStates[1], Display.STATE_REASON_UNKNOWN,
+                0, 0, 0);
         batteryStats.noteScreenBrightnessLocked(0, 255, 0, 0);
         setProcState(APP_UID1, ActivityManager.PROCESS_STATE_TOP, true, 0, 0);
         batteryStats.updateDisplayEnergyConsumerStatsLocked(new long[]{300, 400}, screenStates, 0);
@@ -166,10 +169,10 @@ public class ScreenPowerCalculatorTest {
 
         screenStates[0] = Display.STATE_OFF;
         screenStates[1] = Display.STATE_ON;
-        batteryStats.noteScreenStateLocked(0, screenStates[0],
+        batteryStats.noteScreenStateLocked(0, screenStates[0], Display.STATE_REASON_UNKNOWN,
                 80 * MINUTE_IN_MS, 80 * MINUTE_IN_MS, 80 * MINUTE_IN_MS);
-        batteryStats.noteScreenStateLocked(1, screenStates[1], 80 * MINUTE_IN_MS,
-                80 * MINUTE_IN_MS, 80 * MINUTE_IN_MS);
+        batteryStats.noteScreenStateLocked(1, screenStates[1], Display.STATE_REASON_UNKNOWN,
+                80 * MINUTE_IN_MS, 80 * MINUTE_IN_MS, 80 * MINUTE_IN_MS);
         batteryStats.updateDisplayEnergyConsumerStatsLocked(new long[]{600_000_000, 500},
                 screenStates, 80 * MINUTE_IN_MS);
 
@@ -178,8 +181,8 @@ public class ScreenPowerCalculatorTest {
         batteryStats.noteScreenBrightnessLocked(1, 75, 98 * MINUTE_IN_MS, 98 * MINUTE_IN_MS);
 
         screenStates[1] = Display.STATE_OFF;
-        batteryStats.noteScreenStateLocked(1, screenStates[1], 110 * MINUTE_IN_MS,
-                110 * MINUTE_IN_MS, 110 * MINUTE_IN_MS);
+        batteryStats.noteScreenStateLocked(1, screenStates[1], Display.STATE_REASON_UNKNOWN,
+                110 * MINUTE_IN_MS, 110 * MINUTE_IN_MS, 110 * MINUTE_IN_MS);
         batteryStats.updateDisplayEnergyConsumerStatsLocked(new long[]{700, 800_000_000},
                 screenStates, 110 * MINUTE_IN_MS);
 
@@ -240,7 +243,8 @@ public class ScreenPowerCalculatorTest {
     public void testPowerProfileBasedModel() {
         BatteryStatsImpl batteryStats = mStatsRule.getBatteryStats();
 
-        batteryStats.noteScreenStateLocked(0, Display.STATE_ON, 0, 0, 0);
+        batteryStats.noteScreenStateLocked(0, Display.STATE_ON, Display.STATE_REASON_UNKNOWN,
+                0, 0, 0);
         batteryStats.noteScreenBrightnessLocked(0, 255, 0, 0);
         setProcState(APP_UID1, ActivityManager.PROCESS_STATE_TOP, true,
                 0, 0);
@@ -253,7 +257,7 @@ public class ScreenPowerCalculatorTest {
         setProcState(APP_UID2, ActivityManager.PROCESS_STATE_TOP, true,
                 20 * MINUTE_IN_MS, 20 * MINUTE_IN_MS);
 
-        batteryStats.noteScreenStateLocked(0, Display.STATE_OFF,
+        batteryStats.noteScreenStateLocked(0, Display.STATE_OFF, Display.STATE_REASON_UNKNOWN,
                 80 * MINUTE_IN_MS, 80 * MINUTE_IN_MS, 80 * MINUTE_IN_MS);
         setProcState(APP_UID2, ActivityManager.PROCESS_STATE_TOP_SLEEPING, false,
                 80 * MINUTE_IN_MS, 80 * MINUTE_IN_MS);
@@ -313,8 +317,10 @@ public class ScreenPowerCalculatorTest {
 
         BatteryStatsImpl batteryStats = mStatsRule.getBatteryStats();
 
-        batteryStats.noteScreenStateLocked(0, Display.STATE_ON, 0, 0, 0);
-        batteryStats.noteScreenStateLocked(1, Display.STATE_OFF, 0, 0, 0);
+        batteryStats.noteScreenStateLocked(0, Display.STATE_ON, Display.STATE_REASON_UNKNOWN,
+                0, 0, 0);
+        batteryStats.noteScreenStateLocked(1, Display.STATE_OFF, Display.STATE_REASON_UNKNOWN,
+                0, 0, 0);
         batteryStats.noteScreenBrightnessLocked(0, 255, 0, 0);
         setProcState(APP_UID1, ActivityManager.PROCESS_STATE_TOP, true,
                 0, 0);
@@ -327,16 +333,16 @@ public class ScreenPowerCalculatorTest {
         setProcState(APP_UID2, ActivityManager.PROCESS_STATE_TOP, true,
                 20 * MINUTE_IN_MS, 20 * MINUTE_IN_MS);
 
-        batteryStats.noteScreenStateLocked(0, Display.STATE_OFF,
+        batteryStats.noteScreenStateLocked(0, Display.STATE_OFF, Display.STATE_REASON_UNKNOWN,
                 80 * MINUTE_IN_MS, 80 * MINUTE_IN_MS, 80 * MINUTE_IN_MS);
-        batteryStats.noteScreenStateLocked(1, Display.STATE_ON, 80 * MINUTE_IN_MS,
-                80 * MINUTE_IN_MS, 80 * MINUTE_IN_MS);
+        batteryStats.noteScreenStateLocked(1, Display.STATE_ON, Display.STATE_REASON_UNKNOWN,
+                80 * MINUTE_IN_MS, 80 * MINUTE_IN_MS, 80 * MINUTE_IN_MS);
         batteryStats.noteScreenBrightnessLocked(1, 20, 80 * MINUTE_IN_MS, 80 * MINUTE_IN_MS);
 
         batteryStats.noteScreenBrightnessLocked(1, 250, 86 * MINUTE_IN_MS, 86 * MINUTE_IN_MS);
         batteryStats.noteScreenBrightnessLocked(1, 75, 98 * MINUTE_IN_MS, 98 * MINUTE_IN_MS);
-        batteryStats.noteScreenStateLocked(1, Display.STATE_OFF, 110 * MINUTE_IN_MS,
-                110 * MINUTE_IN_MS, 110 * MINUTE_IN_MS);
+        batteryStats.noteScreenStateLocked(1, Display.STATE_OFF, Display.STATE_REASON_UNKNOWN,
+                110 * MINUTE_IN_MS, 110 * MINUTE_IN_MS, 110 * MINUTE_IN_MS);
 
         setProcState(APP_UID2, ActivityManager.PROCESS_STATE_TOP_SLEEPING, false,
                 110 * MINUTE_IN_MS, 110 * MINUTE_IN_MS);
