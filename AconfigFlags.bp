@@ -74,6 +74,7 @@ aconfig_declarations_group {
         "android.view.inputmethod.flags-aconfig-java",
         "android.webkit.flags-aconfig-java",
         "android.widget.flags-aconfig-java",
+        "art_exported_aconfig_flags_lib",
         "backstage_power_flags_lib",
         "backup_flags_lib",
         "camera_platform_flags_core_java_lib",
@@ -131,6 +132,14 @@ java_defaults {
     name: "framework-minus-apex-aconfig-java-defaults",
     sdk_version: "core_platform",
     libs: ["fake_device_config"],
+}
+
+// ART
+java_aconfig_library {
+    name: "art_exported_aconfig_flags_lib",
+    aconfig_declarations: "art-aconfig-flags",
+    mode: "exported",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
 // Camera
