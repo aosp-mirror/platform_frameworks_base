@@ -25,7 +25,7 @@ import com.android.systemui.authentication.shared.model.AuthenticationMethodMode
 import com.android.systemui.bouncer.data.repository.fakeKeyguardBouncerRepository
 import com.android.systemui.bouncer.domain.interactor.alternateBouncerInteractor
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
+import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteractor
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.shared.model.DismissAction
@@ -79,12 +79,11 @@ class KeyguardDismissActionInteractorTest : SysuiTestCase() {
                 dismissInteractor = dismissInteractor,
                 applicationScope = testScope.backgroundScope,
                 sceneInteractor = { kosmos.sceneInteractor },
-                deviceEntryInteractor = { kosmos.deviceEntryInteractor },
+                deviceUnlockedInteractor = { kosmos.deviceUnlockedInteractor },
                 quickSettingsSceneFamilyResolver = { kosmos.quickSettingsSceneFamilyResolver },
                 notifShadeSceneFamilyResolver = { kosmos.notifShadeSceneFamilyResolver },
                 powerInteractor = kosmos.powerInteractor,
                 alternateBouncerInteractor = kosmos.alternateBouncerInteractor,
-                keyguardInteractor = { kosmos.keyguardInteractor },
                 shadeInteractor = { kosmos.shadeInteractor },
             )
     }
