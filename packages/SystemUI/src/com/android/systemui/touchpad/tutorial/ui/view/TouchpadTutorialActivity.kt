@@ -27,10 +27,17 @@ import androidx.compose.runtime.getValue
 import androidx.lifecycle.Lifecycle.State.STARTED
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.theme.PlatformTheme
+import com.android.systemui.inputdevice.tutorial.InputDeviceTutorialLogger
+import com.android.systemui.inputdevice.tutorial.InputDeviceTutorialLogger.TutorialContext
+import com.android.systemui.inputdevice.tutorial.ui.composable.ActionKeyTutorialScreen
 import com.android.systemui.touchpad.tutorial.ui.composable.BackGestureTutorialScreen
+import com.android.systemui.touchpad.tutorial.ui.composable.HomeGestureTutorialScreen
+import com.android.systemui.touchpad.tutorial.ui.composable.RecentAppsGestureTutorialScreen
 import com.android.systemui.touchpad.tutorial.ui.composable.TutorialSelectionScreen
+import com.android.systemui.touchpad.tutorial.ui.viewmodel.Screen.ACTION_KEY
 import com.android.systemui.touchpad.tutorial.ui.viewmodel.Screen.BACK_GESTURE
 import com.android.systemui.touchpad.tutorial.ui.viewmodel.Screen.HOME_GESTURE
+import com.android.systemui.touchpad.tutorial.ui.viewmodel.Screen.RECENT_APPS_GESTURE
 import com.android.systemui.touchpad.tutorial.ui.viewmodel.Screen.TUTORIAL_SELECTION
 import com.android.systemui.touchpad.tutorial.ui.viewmodel.TouchpadTutorialViewModel
 import javax.inject.Inject
@@ -39,6 +46,7 @@ class TouchpadTutorialActivity
 @Inject
 constructor(
     private val viewModelFactory: TouchpadTutorialViewModel.Factory,
+    private val logger: InputDeviceTutorialLogger,
 ) : ComponentActivity() {
 
     private val vm by viewModels<TouchpadTutorialViewModel>(factoryProducer = { viewModelFactory })
@@ -46,9 +54,17 @@ constructor(
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContent { PlatformTheme { TouchpadTutorialScreen(vm) { finish() } } }
+        setContent {
+            PlatformTheme { TouchpadTutorialScreen(vm, closeTutorial = ::finishTutorial) }
+        }
         // required to handle 3+ fingers on touchpad
         window.addPrivateFlags(WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY)
+        window.addPrivateFlags(WindowManager.LayoutParams.PRIVATE_FLAG_ALLOW_ACTION_KEY_EVENTS)
+    }
+
+    private fun finishTutorial() {
+        logger.logCloseTutorial(TutorialContext.TOUCHPAD_TUTORIAL)
+        finish()
     }
 
     override fun onResume() {
@@ -70,7 +86,7 @@ fun TouchpadTutorialScreen(vm: TouchpadTutorialViewModel, closeTutorial: () -> U
             TutorialSelectionScreen(
                 onBackTutorialClicked = { vm.goTo(BACK_GESTURE) },
                 onHomeTutorialClicked = { vm.goTo(HOME_GESTURE) },
-                onActionKeyTutorialClicked = {},
+                onRecentAppsTutorialClicked = { vm.goTo(RECENT_APPS_GESTURE) },
                 onDoneButtonClicked = closeTutorial
             )
         BACK_GESTURE ->
@@ -78,6 +94,20 @@ fun TouchpadTutorialScreen(vm: TouchpadTutorialViewModel, closeTutorial: () -> U
                 onDoneButtonClicked = { vm.goTo(TUTORIAL_SELECTION) },
                 onBack = { vm.goTo(TUTORIAL_SELECTION) },
             )
-        HOME_GESTURE -> {}
+        HOME_GESTURE ->
+            HomeGestureTutorialScreen(
+                onDoneButtonClicked = { vm.goTo(TUTORIAL_SELECTION) },
+                onBack = { vm.goTo(TUTORIAL_SELECTION) },
+            )
+        RECENT_APPS_GESTURE ->
+            RecentAppsGestureTutorialScreen(
+                onDoneButtonClicked = { vm.goTo(TUTORIAL_SELECTION) },
+                onBack = { vm.goTo(TUTORIAL_SELECTION) },
+            )
+        ACTION_KEY -> // TODO(b/358105049) move action key tutorial to OOBE flow
+        ActionKeyTutorialScreen(
+                onDoneButtonClicked = { vm.goTo(TUTORIAL_SELECTION) },
+                onBack = { vm.goTo(TUTORIAL_SELECTION) },
+            )
     }
 }

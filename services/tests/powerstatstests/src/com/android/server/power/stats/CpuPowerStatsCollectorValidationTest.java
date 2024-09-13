@@ -130,7 +130,7 @@ public class CpuPowerStatsCollectorValidationTest {
         boolean inCpuSection = false;
         for (int i = 0; i < lines.length; i++) {
             if (!inCpuSection) {
-                if (lines[i].startsWith("CpuPowerStatsCollector")) {
+                if (lines[i].startsWith("cpu (1)")) {
                     inCpuSection = true;
                 }
             } else if (lines[i].startsWith(" ")) {

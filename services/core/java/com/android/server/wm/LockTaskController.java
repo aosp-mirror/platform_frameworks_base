@@ -659,7 +659,7 @@ public class LockTaskController {
                 StatusBarManagerInternal statusBarManager = LocalServices.getService(
                         StatusBarManagerInternal.class);
                 if (statusBarManager != null) {
-                    statusBarManager.showScreenPinningRequest(task.mTaskId);
+                    statusBarManager.showScreenPinningRequest(task.mTaskId, task.mUserId);
                 }
                 return;
             } else if (mLockTaskModeState == LOCK_TASK_MODE_PINNED) {

@@ -55,7 +55,7 @@ public class DisplayRotationImmersiveAppCompatPolicyTests extends WindowTestsBas
 
     private DisplayRotationImmersiveAppCompatPolicy mPolicy;
 
-    private LetterboxConfiguration mMockLetterboxConfiguration;
+    private AppCompatConfiguration mMockAppCompatConfiguration;
     private ActivityRecord mMockActivityRecord;
     private Task mMockTask;
     private WindowState mMockWindowState;
@@ -77,15 +77,15 @@ public class DisplayRotationImmersiveAppCompatPolicyTests extends WindowTestsBas
         doReturn(mMockActivityRecord).when(mDisplayContent).topRunningActivity();
         when(mDisplayContent.getIgnoreOrientationRequest()).thenReturn(true);
 
-        mMockLetterboxConfiguration = mock(LetterboxConfiguration.class);
-        when(mMockLetterboxConfiguration.isDisplayRotationImmersiveAppCompatPolicyEnabled())
+        mMockAppCompatConfiguration = mock(AppCompatConfiguration.class);
+        when(mMockAppCompatConfiguration.isDisplayRotationImmersiveAppCompatPolicyEnabled())
                 .thenReturn(true);
-        when(mMockLetterboxConfiguration
+        when(mMockAppCompatConfiguration
                 .isDisplayRotationImmersiveAppCompatPolicyEnabledAtBuildTime())
                     .thenReturn(true);
 
         mPolicy = DisplayRotationImmersiveAppCompatPolicy.createIfNeeded(
-                mMockLetterboxConfiguration, createDisplayRotationMock(),
+                mMockAppCompatConfiguration, createDisplayRotationMock(),
                 mDisplayContent);
     }
 
@@ -206,7 +206,7 @@ public class DisplayRotationImmersiveAppCompatPolicyTests extends WindowTestsBas
 
     @Test
     public void testRotationChoiceEnforcedOnly_featureFlagDisabled_lockNotEnforced() {
-        when(mMockLetterboxConfiguration.isDisplayRotationImmersiveAppCompatPolicyEnabled())
+        when(mMockAppCompatConfiguration.isDisplayRotationImmersiveAppCompatPolicyEnabled())
                 .thenReturn(false);
 
         assertIsRotationLockEnforcedReturnsFalseForAllRotations();

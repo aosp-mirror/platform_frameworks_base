@@ -159,7 +159,7 @@ class BackupRestoreStorageManagerTest {
 
         verify(keyedObserver).onKeyChanged("key", DataChangeReason.RESTORE)
         verify(anyKeyObserver).onKeyChanged(null, DataChangeReason.RESTORE)
-        verify(observer).onChanged(DataChangeReason.RESTORE)
+        verify(observer).onChanged(fileStorage, DataChangeReason.RESTORE)
         if (isRobolectric()) {
             Shadows.shadowOf(BackupManager(application)).apply {
                 assertThat(isDataChanged).isFalse()
@@ -187,7 +187,7 @@ class BackupRestoreStorageManagerTest {
         }
 
         fileStorage.notifyChange(DataChangeReason.UPDATE)
-        verify(observer).onChanged(DataChangeReason.UPDATE)
+        verify(observer).onChanged(fileStorage, DataChangeReason.UPDATE)
         verify(keyedObserver, never()).onKeyChanged(any(), any())
         verify(anyKeyObserver, never()).onKeyChanged(any(), any())
         reset(observer)
@@ -197,7 +197,7 @@ class BackupRestoreStorageManagerTest {
         }
 
         keyedStorage.notifyChange("key", DataChangeReason.DELETE)
-        verify(observer, never()).onChanged(any())
+        verify(observer, never()).onChanged(any(), any())
         verify(keyedObserver).onKeyChanged("key", DataChangeReason.DELETE)
         verify(anyKeyObserver).onKeyChanged("key", DataChangeReason.DELETE)
         backupManager?.apply {
@@ -209,7 +209,7 @@ class BackupRestoreStorageManagerTest {
         // backup manager is not notified for restore event
         fileStorage.notifyChange(DataChangeReason.RESTORE)
         keyedStorage.notifyChange("key", DataChangeReason.RESTORE)
-        verify(observer).onChanged(DataChangeReason.RESTORE)
+        verify(observer).onChanged(fileStorage, DataChangeReason.RESTORE)
         verify(keyedObserver).onKeyChanged("key", DataChangeReason.RESTORE)
         verify(anyKeyObserver).onKeyChanged("key", DataChangeReason.RESTORE)
         backupManager?.apply {
@@ -225,7 +225,10 @@ class BackupRestoreStorageManagerTest {
     }
 
     private class FileStorage(override val name: String) :
-        BackupRestoreFileStorage(getApplicationContext(), "file"), Observable by DataObservable()
+        BackupRestoreFileStorage(getApplicationContext(), "file"), ObservableDelegation {
+
+        override val observableDelegate: Observable = DataObservable(this)
+    }
 
     private class DummyBackupAgentHelper : BackupAgentHelper() {
         val backupHelpers = mutableMapOf<String, BackupHelper>()

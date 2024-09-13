@@ -31,10 +31,12 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.plugins.activityStarter
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.settings.userTracker
+import com.android.systemui.statusbar.phone.fakeManagedProfileController
 import com.android.systemui.user.data.repository.fakeUserRepository
 import com.android.systemui.util.mockito.mock
 
@@ -42,6 +44,7 @@ val Kosmos.communalInteractor by Fixture {
     CommunalInteractor(
         applicationScope = applicationCoroutineScope,
         bgDispatcher = testDispatcher,
+        bgScope = testScope.backgroundScope,
         broadcastDispatcher = broadcastDispatcher,
         communalSceneInteractor = communalSceneInteractor,
         widgetRepository = communalWidgetRepository,
@@ -59,6 +62,7 @@ val Kosmos.communalInteractor by Fixture {
         sceneInteractor = sceneInteractor,
         logBuffer = logcatLogBuffer("CommunalInteractor"),
         tableLogBuffer = mock(),
+        managedProfileController = fakeManagedProfileController
     )
 }
 

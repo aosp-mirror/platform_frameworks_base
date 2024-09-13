@@ -84,6 +84,7 @@ public class SurfaceControlViewHostSyncTest extends Activity implements SurfaceH
         content.addView(enableSyncButton,
                 new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
                         ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.RIGHT | Gravity.BOTTOM));
+        content.setFitsSystemWindows(true);
         setContentView(content);
 
         mSv.setZOrderOnTop(false);

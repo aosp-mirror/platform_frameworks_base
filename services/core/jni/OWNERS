@@ -27,7 +27,8 @@ per-file com_android_server_power_stats_* = file:/BATTERY_STATS_OWNERS
 per-file com_android_server_security_* = file:/core/java/android/security/OWNERS
 per-file com_android_server_tv_* = file:/media/java/android/media/tv/OWNERS
 per-file com_android_server_vibrator_* = file:/services/core/java/com/android/server/vibrator/OWNERS
-per-file com_android_server_am_CachedAppOptimizer.cpp = timmurray@google.com, edgararriaga@google.com, dualli@google.com, carmenjackson@google.com, philipcuadra@google.com
+per-file com_android_server_am_CachedAppOptimizer.cpp = file:/PERFORMANCE_OWNERS
+per-file com_android_server_am_Freezer.cpp = file:/PERFORMANCE_OWNERS
 per-file com_android_server_companion_virtual_InputController.cpp = file:/services/companion/java/com/android/server/companion/virtual/OWNERS
 
 # Memory

@@ -37,7 +37,6 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.os.Vibrator;
 import android.util.Log;
 
 import com.android.internal.R;
@@ -47,9 +46,9 @@ public class BackgroundUserSoundNotifier {
 
     private static final boolean DEBUG = false;
     private static final String LOG_TAG = BackgroundUserSoundNotifier.class.getSimpleName();
-    public static final String BUSN_CHANNEL_ID = "bg_user_sound_channel";
-    public static final String BUSN_CHANNEL_NAME = "BackgroundUserSound";
-    private static final String ACTION_MUTE_SOUND = "com.android.server.ACTION_MUTE_BG_USER";
+    private static final String BUSN_CHANNEL_ID = "bg_user_sound_channel";
+    private static final String BUSN_CHANNEL_NAME = "BackgroundUserSound";
+    public static final String ACTION_MUTE_SOUND = "com.android.server.ACTION_MUTE_BG_USER";
     private static final String EXTRA_NOTIFICATION_ID = "com.android.server.EXTRA_CLIENT_UID";
     private static final String EXTRA_CURRENT_USER_ID = "com.android.server.EXTRA_CURRENT_USER_ID";
     private static final String ACTION_SWITCH_USER = "com.android.server.ACTION_SWITCH_TO_USER";
@@ -70,6 +69,7 @@ public class BackgroundUserSoundNotifier {
         mUserManager = mSystemUserContext.getSystemService(UserManager.class);
         NotificationChannel channel = new NotificationChannel(BUSN_CHANNEL_ID, BUSN_CHANNEL_NAME,
                 NotificationManager.IMPORTANCE_HIGH);
+        channel.setSound(null, null);
         mNotificationManager.createNotificationChannel(channel);
         setupFocusControlAudioPolicy();
     }
@@ -144,6 +144,7 @@ public class BackgroundUserSoundNotifier {
                                     -1) + "  current user id " + intent.getIntExtra(
                                     EXTRA_CURRENT_USER_ID, -1));
                 }
+                mUserWithNotification = -1;
                 mNotificationManager.cancelAsUser(LOG_TAG, notificationId,
                         UserHandle.of(intent.getIntExtra(EXTRA_CURRENT_USER_ID, -1)));
                 if (ACTION_MUTE_SOUND.equals(intent.getAction())) {
@@ -158,10 +159,6 @@ public class BackgroundUserSoundNotifier {
                                 }
                             }
                         }
-                    }
-                    Vibrator vibrator = mSystemUserContext.getSystemService(Vibrator.class);
-                    if (vibrator != null && vibrator.isVibrating()) {
-                        vibrator.cancel();
                     }
                 } else if (ACTION_SWITCH_USER.equals(intent.getAction())) {
                     service.switchUser(intent.getIntExtra(Intent.EXTRA_USER_ID, -1));
@@ -237,19 +234,25 @@ public class BackgroundUserSoundNotifier {
         final Notification.Action switchUser = new Notification.Action.Builder(null,
                 fgContext.getString(R.string.bg_user_sound_notification_button_switch_user),
                 switchIntent).build();
-        return new Notification.Builder(mSystemUserContext, BUSN_CHANNEL_ID)
+        Notification.Builder notificationBuilder = new Notification.Builder(mSystemUserContext,
+                BUSN_CHANNEL_ID)
                 .setSmallIcon(icon)
                 .setTicker(title)
+                .setCategory(Notification.CATEGORY_REMINDER)
                 .setWhen(0)
                 .setOngoing(true)
                 .setColor(fgContext.getColor(R.color.system_notification_accent_color))
                 .setContentTitle(title)
                 .setContentIntent(muteIntent)
                 .setAutoCancel(true)
-                .setActions(mute, switchUser)
-                .setContentText(fgContext.getString(R.string.bg_user_sound_notification_message))
-                .setVisibility(Notification.VISIBILITY_PUBLIC)
-                .build();
+                .setVisibility(Notification.VISIBILITY_PUBLIC);
+        if (mUserManager.isUserSwitcherEnabled() && (mUserManager.getUserSwitchability(
+                UserHandle.of(fgContext.getUserId())) == UserManager.SWITCHABILITY_STATUS_OK)) {
+            notificationBuilder.setActions(mute, switchUser);
+        } else {
+            notificationBuilder.setActions(mute);
+        }
+        return notificationBuilder.build();
     }
 }
 

@@ -16,10 +16,12 @@
 
 package com.android.settingslib.notification.data.repository
 
+import android.app.AutomaticZenRule
 import android.app.NotificationManager
 import android.provider.Settings
 import com.android.settingslib.notification.modes.TestModeBuilder
 import com.android.settingslib.notification.modes.ZenMode
+import java.time.Duration
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -35,10 +37,13 @@ class FakeZenModeRepository : ZenModeRepository {
     override val globalZenMode: StateFlow<Int>
         get() = mutableZenMode.asStateFlow()
 
-    private val mutableModesFlow: MutableStateFlow<List<ZenMode>> =
-        MutableStateFlow(listOf(TestModeBuilder.EXAMPLE))
+    private val mutableModesFlow: MutableStateFlow<List<ZenMode>> = MutableStateFlow(listOf())
     override val modes: Flow<List<ZenMode>>
         get() = mutableModesFlow.asStateFlow()
+
+    override fun getModes(): List<ZenMode> = mutableModesFlow.value
+
+    private val activeModesDurations = mutableMapOf<String, Duration?>()
 
     init {
         updateNotificationPolicy()
@@ -52,18 +57,63 @@ class FakeZenModeRepository : ZenModeRepository {
         mutableZenMode.value = zenMode
     }
 
-    fun addMode(id: String, active: Boolean = false) {
-        mutableModesFlow.value += newMode(id, active)
+    fun addModes(zenModes: List<ZenMode>) {
+        mutableModesFlow.value += zenModes
+    }
+
+    fun addMode(mode: ZenMode) {
+        mutableModesFlow.value += mode
+    }
+
+    fun addMode(id: String, @AutomaticZenRule.Type type: Int = AutomaticZenRule.TYPE_UNKNOWN,
+        active: Boolean = false) {
+        mutableModesFlow.value += newMode(id, type, active)
     }
 
     fun removeMode(id: String) {
         mutableModesFlow.value = mutableModesFlow.value.filter { it.id != id }
     }
 
+    fun getMode(id: String): ZenMode? {
+        return mutableModesFlow.value.find { it.id == id }
+    }
+
+    override fun activateMode(zenMode: ZenMode, duration: Duration?) {
+        activateMode(zenMode.id)
+        activeModesDurations[zenMode.id] = duration
+    }
+
+    fun getModeActiveDuration(id: String): Duration? {
+        if (!activeModesDurations.containsKey(id)) {
+            throw IllegalArgumentException(
+                "mode $id not manually activated, you need to call activateMode"
+            )
+        }
+        return activeModesDurations[id]
+    }
+
+    override fun deactivateMode(zenMode: ZenMode) {
+        deactivateMode(zenMode.id)
+    }
+
+    fun activateMode(id: String) {
+        updateModeActiveState(id = id, isActive = true)
+    }
+
     fun deactivateMode(id: String) {
-        val oldMode = mutableModesFlow.value.find { it.id == id } ?: return
-        removeMode(id)
-        mutableModesFlow.value += TestModeBuilder(oldMode).setActive(false).build()
+        updateModeActiveState(id = id, isActive = false)
+        activeModesDurations.remove(id)
+    }
+
+    // Update the active state while maintaining the mode's position in the list
+    private fun updateModeActiveState(id: String, isActive: Boolean) {
+        val modes = mutableModesFlow.value.toMutableList()
+        val index = modes.indexOfFirst { it.id == id }
+        if (index < 0) {
+            throw IllegalArgumentException("mode $id not found")
+        }
+        modes[index] = TestModeBuilder(modes[index]).setActive(isActive).build()
+        mutableModesFlow.value = modes
     }
 }
 
@@ -83,8 +133,9 @@ fun FakeZenModeRepository.updateNotificationPolicy(
             suppressedVisualEffects,
             state,
             priorityConversationSenders,
-        ))
+        )
+    )
 
-private fun newMode(id: String, active: Boolean = false): ZenMode {
-    return TestModeBuilder().setId(id).setName("Mode $id").setActive(active).build()
+private fun newMode(id: String, @AutomaticZenRule.Type type: Int, active: Boolean): ZenMode {
+    return TestModeBuilder().setId(id).setName("Mode $id").setType(type).setActive(active).build()
 }

@@ -17,7 +17,6 @@
 package com.android.systemui.shade
 
 import android.view.MotionEvent
-import androidx.compose.ui.Alignment
 import com.android.systemui.assist.AssistManager
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
@@ -25,7 +24,6 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.scene.shared.model.TransitionKeys.OpenBottomShade
 import com.android.systemui.scene.shared.model.TransitionKeys.SlightlyFasterShadeCollapse
 import com.android.systemui.shade.ShadeController.ShadeVisibilityListener
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
@@ -76,7 +74,7 @@ constructor(
         scope.launch {
             shadeInteractor.isAnyExpanded.collect {
                 if (!it) {
-                    runPostCollapseActions()
+                    withContext(mainDispatcher) { runPostCollapseActions() }
                 }
             }
         }
@@ -93,17 +91,14 @@ constructor(
     }
 
     override fun instantCollapseShade() {
-        sceneInteractor.snapToScene(
-            SceneFamilies.Home,
-            "hide shade",
-        )
+        sceneInteractor.snapToScene(SceneFamilies.Home, "hide shade")
     }
 
     override fun animateCollapseShade(
         flags: Int,
         force: Boolean,
         delayed: Boolean,
-        speedUpFactor: Float
+        speedUpFactor: Float,
     ) {
         if (!force && !shadeInteractor.isAnyExpanded.value) {
             runPostCollapseActions()
@@ -149,7 +144,7 @@ constructor(
         if (shadeInteractor.isAnyExpanded.value) {
             commandQueue.animateCollapsePanels(
                 CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL,
-                true /* force */
+                true, /* force */
             )
             assistManagerLazy.get().hideAssist()
         }
@@ -174,19 +169,11 @@ constructor(
     }
 
     override fun expandToNotifications() {
-        sceneInteractor.changeScene(
-            SceneFamilies.NotifShade,
-            "ShadeController.animateExpandShade",
-            OpenBottomShade.takeIf { shadeInteractor.shadeAlignment == Alignment.BottomEnd }
-        )
+        shadeInteractor.expandNotificationShade("ShadeController.animateExpandShade")
     }
 
     override fun expandToQs() {
-        sceneInteractor.changeScene(
-            SceneFamilies.QuickSettings,
-            "ShadeController.animateExpandQs",
-            OpenBottomShade.takeIf { shadeInteractor.shadeAlignment == Alignment.BottomEnd }
-        )
+        shadeInteractor.expandQuickSettingsShade("ShadeController.animateExpandQs")
     }
 
     override fun setVisibilityListener(listener: ShadeVisibilityListener) {

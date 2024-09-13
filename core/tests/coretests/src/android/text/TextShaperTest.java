@@ -21,8 +21,8 @@ import static com.google.common.truth.Truth.assertWithMessage;
 import android.graphics.fonts.Font;
 import android.graphics.fonts.FontFileUtil;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

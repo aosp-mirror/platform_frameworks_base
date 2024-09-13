@@ -35,8 +35,6 @@ import javax.xml.parsers.ParserConfigurationException;
 
 @RunWith(JUnit4.class)
 public class DataLabelsTest {
-    private static final long DEFAULT_VERSION = 2L;
-
     private static final String DATA_LABELS_HR_PATH = "com/android/asllib/datalabels/hr";
     private static final String DATA_LABELS_OD_PATH = "com/android/asllib/datalabels/od";
 

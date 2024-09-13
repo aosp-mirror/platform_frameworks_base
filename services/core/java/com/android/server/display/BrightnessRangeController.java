@@ -16,6 +16,7 @@
 
 package com.android.server.display;
 
+import android.annotation.Nullable;
 import android.hardware.display.BrightnessInfo;
 import android.os.Handler;
 import android.os.IBinder;
@@ -60,7 +61,7 @@ class BrightnessRangeController {
         mModeChangeCallback = modeChangeCallback;
         mHdrClamper = hdrClamper;
         mNormalBrightnessModeController = normalBrightnessModeController;
-        mUseHdrClamper = flags.isHdrClamperEnabled();
+        mUseHdrClamper = flags.isHdrClamperEnabled() && !flags.useNewHdrBrightnessModifier();
         mUseNbmController = flags.isNbmControllerEnabled();
         if (mUseNbmController) {
             mNormalBrightnessModeController.resetNbmData(
@@ -92,7 +93,7 @@ class BrightnessRangeController {
         return mHbmController.getNormalBrightnessMax();
     }
 
-    void loadFromConfig(HighBrightnessModeMetadata hbmMetadata, IBinder token,
+    void loadFromConfig(@Nullable HighBrightnessModeMetadata hbmMetadata, IBinder token,
             DisplayDeviceInfo info, DisplayDeviceConfig displayDeviceConfig) {
         applyChanges(
                 () -> mNormalBrightnessModeController.resetNbmData(

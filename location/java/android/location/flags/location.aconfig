@@ -2,6 +2,27 @@ package: "android.location.flags"
 container: "system"
 
 flag {
+    name: "deprecate_provider_request_apis"
+    namespace: "location"
+    description: "Deprecates LocationManager ProviderChanged APIs"
+    bug: "361811782"
+}
+
+flag {
+    name: "keep_gnss_stationary_throttling"
+    namespace: "location"
+    description: "Keeps stationary throttling for the GNSS provider even if the disable_stationary_throttling flag is true."
+    bug: "354000147"
+}
+
+flag {
+    name: "disable_stationary_throttling"
+    namespace: "location"
+    description: "Disables stationary throttling for all providers"
+    bug: "354000147"
+}
+
+flag {
     name: "new_geocoder"
     namespace: "location"
     description: "Flag for new Geocoder APIs"
@@ -87,4 +108,15 @@ flag {
     namespace: "location"
     description: "Flag for GNSS configuration from resource"
     bug: "317734846"
+}
+
+flag {
+    name: "enable_ni_supl_message_injection_by_carrier_config"
+    namespace: "location"
+    description: "Flag for enabling NI SUPL message injection by carrier config"
+    bug: "242105192"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }

@@ -43,7 +43,7 @@ import com.android.systemui.statusbar.notification.interruption.NotificationInte
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderWrapper.FullScreenIntentDecisionImpl
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionDecisionProvider
 import com.android.systemui.statusbar.notification.row.NotifBindPipeline.BindCallback
-import com.android.systemui.statusbar.phone.HeadsUpManagerPhone
+import com.android.systemui.statusbar.notification.HeadsUpManagerPhone
 import com.android.systemui.statusbar.phone.NotificationGroupTestHelper
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener
 import com.android.systemui.util.concurrency.FakeExecutor
@@ -108,30 +108,31 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
     private val executor = FakeExecutor(systemClock)
     private val huns: ArrayList<NotificationEntry> = ArrayList()
     private lateinit var helper: NotificationGroupTestHelper
+
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         helper = NotificationGroupTestHelper(mContext)
-        coordinator = HeadsUpCoordinator(
-            logger,
-            systemClock,
-            headsUpManager,
-            headsUpViewBinder,
-            visualInterruptionDecisionProvider,
-            remoteInputManager,
-            launchFullScreenIntentProvider,
-            flags,
-            headerController,
-            executor)
+        coordinator =
+            HeadsUpCoordinator(
+                logger,
+                systemClock,
+                headsUpManager,
+                headsUpViewBinder,
+                visualInterruptionDecisionProvider,
+                remoteInputManager,
+                launchFullScreenIntentProvider,
+                flags,
+                headerController,
+                executor
+            )
         coordinator.attach(notifPipeline)
 
         // capture arguments:
         collectionListener = withArgCaptor {
             verify(notifPipeline).addCollectionListener(capture())
         }
-        notifPromoter = withArgCaptor {
-            verify(notifPipeline).addPromoter(capture())
-        }
+        notifPromoter = withArgCaptor { verify(notifPipeline).addPromoter(capture()) }
         notifLifetimeExtender = withArgCaptor {
             verify(notifPipeline).addNotificationLifetimeExtender(capture())
         }
@@ -141,9 +142,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         beforeFinalizeFilterListener = withArgCaptor {
             verify(notifPipeline).addOnBeforeFinalizeFilterListener(capture())
         }
-        onHeadsUpChangedListener = withArgCaptor {
-            verify(headsUpManager).addListener(capture())
-        }
+        onHeadsUpChangedListener = withArgCaptor { verify(headsUpManager).addListener(capture()) }
         actionPressListener = withArgCaptor {
             verify(remoteInputManager).addActionPressListener(capture())
         }
@@ -187,8 +186,8 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         assertTrue(notifLifetimeExtender.maybeExtendLifetime(entry, 0))
         executor.advanceClockToLast()
         executor.runAllReady()
-        verify(headsUpManager, times(0)).removeNotification(anyString(), eq(false))
-        verify(headsUpManager, times(1)).removeNotification(anyString(), eq(true))
+        verify(headsUpManager, times(0)).removeNotification(anyString(), eq(false), anyString())
+        verify(headsUpManager, times(1)).removeNotification(anyString(), eq(true), anyString())
     }
 
     @Test
@@ -203,8 +202,8 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         executor.advanceClockToLast()
         executor.runAllReady()
         assertTrue(notifLifetimeExtender.maybeExtendLifetime(entry, 0))
-        verify(headsUpManager, times(0)).removeNotification(anyString(), eq(false))
-        verify(headsUpManager, times(0)).removeNotification(anyString(), eq(true))
+        verify(headsUpManager, times(0)).removeNotification(anyString(), eq(false), anyString())
+        verify(headsUpManager, times(0)).removeNotification(anyString(), eq(true), anyString())
     }
 
     @Test
@@ -217,7 +216,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         notifLifetimeExtender.cancelLifetimeExtension(entry)
         executor.advanceClockToLast()
         executor.runAllReady()
-        verify(headsUpManager, times(0)).removeNotification(anyString(), any())
+        verify(headsUpManager, never()).removeNotification(anyString(), any(), anyString())
     }
 
     @Test
@@ -227,14 +226,14 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
 
         whenever(headsUpManager.canRemoveImmediately(anyString())).thenReturn(false)
         whenever(headsUpManager.getEarliestRemovalTime(anyString())).thenReturn(1000L)
-        assertTrue(notifLifetimeExtender.maybeExtendLifetime(entry, /* reason = */ 0))
+        assertTrue(notifLifetimeExtender.maybeExtendLifetime(entry, /* reason= */ 0))
 
         actionPressListener.accept(entry)
         executor.runAllReady()
         verify(endLifetimeExtension, times(1)).onEndLifetimeExtension(notifLifetimeExtender, entry)
 
-        collectionListener.onEntryRemoved(entry, /* reason = */ 0)
-        verify(headsUpManager, times(1)).removeNotification(eq(entry.key), any())
+        collectionListener.onEntryRemoved(entry, /* reason= */ 0)
+        verify(headsUpManager, times(1)).removeNotification(eq(entry.key), any(), anyString())
     }
 
     @Test
@@ -248,8 +247,8 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         whenever(headsUpManager.canRemoveImmediately(anyString())).thenReturn(true)
         assertFalse(notifLifetimeExtender.maybeExtendLifetime(entry, 0))
 
-        collectionListener.onEntryRemoved(entry, /* reason = */ 0)
-        verify(headsUpManager, times(1)).removeNotification(eq(entry.key), any())
+        collectionListener.onEntryRemoved(entry, /* reason= */ 0)
+        verify(headsUpManager, times(1)).removeNotification(eq(entry.key), any(), anyString())
     }
 
     @Test
@@ -261,8 +260,8 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         addHUN(entry)
         executor.advanceClockToLast()
         executor.runAllReady()
-        verify(headsUpManager, times(0)).removeNotification(anyString(), eq(false))
-        verify(headsUpManager, times(0)).removeNotification(anyString(), eq(true))
+        verify(headsUpManager, never()).removeNotification(anyString(), eq(false), anyString())
+        verify(headsUpManager, never()).removeNotification(anyString(), eq(true), anyString())
     }
 
     @Test
@@ -273,8 +272,8 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         assertTrue(notifLifetimeExtender.maybeExtendLifetime(entry, 0))
         executor.advanceClockToLast()
         executor.runAllReady()
-        verify(headsUpManager, times(1)).removeNotification(anyString(), eq(false))
-        verify(headsUpManager, times(0)).removeNotification(anyString(), eq(true))
+        verify(headsUpManager, times(1)).removeNotification(anyString(), eq(false), anyString())
+        verify(headsUpManager, never()).removeNotification(anyString(), eq(true), anyString())
     }
 
     @Test
@@ -326,9 +325,8 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
 
         // THEN only promote the current HUN, mEntry
         assertTrue(notifPromoter.shouldPromoteToTopLevel(entry))
-        assertFalse(notifPromoter.shouldPromoteToTopLevel(NotificationEntryBuilder()
-            .setPkg("test-package2")
-            .build()))
+        val testPackage2 = NotificationEntryBuilder().setPkg("test-package2").build()
+        assertFalse(notifPromoter.shouldPromoteToTopLevel(testPackage2))
     }
 
     @Test
@@ -338,9 +336,9 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
 
         // THEN only section the current HUN, mEntry
         assertTrue(notifSectioner.isInSection(entry))
-        assertFalse(notifSectioner.isInSection(NotificationEntryBuilder()
-            .setPkg("test-package")
-            .build()))
+        assertFalse(
+            notifSectioner.isInSection(NotificationEntryBuilder().setPkg("test-package").build())
+        )
     }
 
     @Test
@@ -350,10 +348,12 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
 
         // THEN only the current HUN, mEntry, should be lifetimeExtended
         assertTrue(notifLifetimeExtender.maybeExtendLifetime(entry, /* cancellationReason */ 0))
-        assertFalse(notifLifetimeExtender.maybeExtendLifetime(
-            NotificationEntryBuilder()
-                .setPkg("test-package")
-                .build(), /* cancellationReason */ 0))
+        assertFalse(
+            notifLifetimeExtender.maybeExtendLifetime(
+                NotificationEntryBuilder().setPkg("test-package").build(),
+                /* reason= */ 0
+            )
+        )
     }
 
     @Test
@@ -366,8 +366,9 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         beforeFinalizeFilterListener.onBeforeFinalizeFilter(listOf(entry))
         verify(headsUpManager, never()).showNotification(entry)
         withArgCaptor<BindCallback> {
-            verify(headsUpViewBinder).bindHeadsUpView(eq(entry), capture())
-        }.onBindFinished(entry)
+                verify(headsUpViewBinder).bindHeadsUpView(eq(entry), capture())
+            }
+            .onBindFinished(entry)
 
         // THEN we tell the HeadsUpManager to show the notification
         verify(headsUpManager).showNotification(entry)
@@ -430,7 +431,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         whenever(remoteInputManager.isSpinning(any())).thenReturn(false)
 
         // THEN heads up manager should remove the entry
-        verify(headsUpManager).removeNotification(entry.key, false)
+        verify(headsUpManager).removeNotification(eq(entry.key), eq(false), anyString())
     }
 
     private fun addHUN(entry: NotificationEntry) {
@@ -545,19 +546,22 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         collectionListener.onEntryAdded(groupSibling1)
         collectionListener.onEntryAdded(groupSibling2)
 
-        val beforeTransformGroup = GroupEntryBuilder()
-            .setSummary(groupSummary)
-            .setChildren(listOf(groupSibling1, groupPriority, groupSibling2))
-            .build()
+        val beforeTransformGroup =
+            GroupEntryBuilder()
+                .setSummary(groupSummary)
+                .setChildren(listOf(groupSibling1, groupPriority, groupSibling2))
+                .build()
         beforeTransformGroupsListener.onBeforeTransformGroups(listOf(beforeTransformGroup))
         verify(headsUpViewBinder, never()).bindHeadsUpView(any(), any())
 
-        val afterTransformGroup = GroupEntryBuilder()
-            .setSummary(groupSummary)
-            .setChildren(listOf(groupSibling1, groupSibling2))
-            .build()
-        beforeFinalizeFilterListener
-            .onBeforeFinalizeFilter(listOf(groupPriority, afterTransformGroup))
+        val afterTransformGroup =
+            GroupEntryBuilder()
+                .setSummary(groupSummary)
+                .setChildren(listOf(groupSibling1, groupSibling2))
+                .build()
+        beforeFinalizeFilterListener.onBeforeFinalizeFilter(
+            listOf(groupPriority, afterTransformGroup)
+        )
 
         verify(headsUpViewBinder, never()).bindHeadsUpView(eq(groupSummary), any())
         finishBind(groupPriority)
@@ -583,19 +587,22 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         collectionListener.onEntryUpdated(groupSibling1)
         collectionListener.onEntryUpdated(groupSibling2)
 
-        val beforeTransformGroup = GroupEntryBuilder()
-            .setSummary(groupSummary)
-            .setChildren(listOf(groupSibling1, groupPriority, groupSibling2))
-            .build()
+        val beforeTransformGroup =
+            GroupEntryBuilder()
+                .setSummary(groupSummary)
+                .setChildren(listOf(groupSibling1, groupPriority, groupSibling2))
+                .build()
         beforeTransformGroupsListener.onBeforeTransformGroups(listOf(beforeTransformGroup))
         verify(headsUpViewBinder, never()).bindHeadsUpView(any(), any())
 
-        val afterTransformGroup = GroupEntryBuilder()
-            .setSummary(groupSummary)
-            .setChildren(listOf(groupSibling1, groupSibling2))
-            .build()
-        beforeFinalizeFilterListener
-            .onBeforeFinalizeFilter(listOf(groupPriority, afterTransformGroup))
+        val afterTransformGroup =
+            GroupEntryBuilder()
+                .setSummary(groupSummary)
+                .setChildren(listOf(groupSibling1, groupSibling2))
+                .build()
+        beforeFinalizeFilterListener.onBeforeFinalizeFilter(
+            listOf(groupPriority, afterTransformGroup)
+        )
 
         verify(headsUpViewBinder, never()).bindHeadsUpView(eq(groupSummary), any())
         finishBind(groupPriority)
@@ -618,19 +625,22 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         collectionListener.onEntryUpdated(groupSummary)
         collectionListener.onEntryUpdated(groupPriority)
 
-        val beforeTransformGroup = GroupEntryBuilder()
-            .setSummary(groupSummary)
-            .setChildren(listOf(groupSibling1, groupPriority, groupSibling2))
-            .build()
+        val beforeTransformGroup =
+            GroupEntryBuilder()
+                .setSummary(groupSummary)
+                .setChildren(listOf(groupSibling1, groupPriority, groupSibling2))
+                .build()
         beforeTransformGroupsListener.onBeforeTransformGroups(listOf(beforeTransformGroup))
         verify(headsUpViewBinder, never()).bindHeadsUpView(any(), any())
 
-        val afterTransformGroup = GroupEntryBuilder()
-            .setSummary(groupSummary)
-            .setChildren(listOf(groupSibling1, groupSibling2))
-            .build()
-        beforeFinalizeFilterListener
-            .onBeforeFinalizeFilter(listOf(groupPriority, afterTransformGroup))
+        val afterTransformGroup =
+            GroupEntryBuilder()
+                .setSummary(groupSummary)
+                .setChildren(listOf(groupSibling1, groupSibling2))
+                .build()
+        beforeFinalizeFilterListener.onBeforeFinalizeFilter(
+            listOf(groupPriority, afterTransformGroup)
+        )
 
         verify(headsUpViewBinder, never()).bindHeadsUpView(eq(groupSummary), any())
         finishBind(groupPriority)
@@ -654,19 +664,22 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         collectionListener.onEntryUpdated(groupSibling1)
         collectionListener.onEntryUpdated(groupSibling2)
 
-        val beforeTransformGroup = GroupEntryBuilder()
-            .setSummary(groupSummary)
-            .setChildren(listOf(groupSibling1, groupPriority, groupSibling2))
-            .build()
+        val beforeTransformGroup =
+            GroupEntryBuilder()
+                .setSummary(groupSummary)
+                .setChildren(listOf(groupSibling1, groupPriority, groupSibling2))
+                .build()
         beforeTransformGroupsListener.onBeforeTransformGroups(listOf(beforeTransformGroup))
         verify(headsUpViewBinder, never()).bindHeadsUpView(any(), any())
 
-        val afterTransformGroup = GroupEntryBuilder()
-            .setSummary(groupSummary)
-            .setChildren(listOf(groupSibling1, groupSibling2))
-            .build()
-        beforeFinalizeFilterListener
-            .onBeforeFinalizeFilter(listOf(groupPriority, afterTransformGroup))
+        val afterTransformGroup =
+            GroupEntryBuilder()
+                .setSummary(groupSummary)
+                .setChildren(listOf(groupSibling1, groupSibling2))
+                .build()
+        beforeFinalizeFilterListener.onBeforeFinalizeFilter(
+            listOf(groupPriority, afterTransformGroup)
+        )
 
         finishBind(groupSummary)
         verify(headsUpViewBinder, never()).bindHeadsUpView(eq(groupPriority), any())
@@ -688,10 +701,11 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         collectionListener.onEntryAdded(groupSummary)
         collectionListener.onEntryAdded(groupSibling1)
         collectionListener.onEntryAdded(groupSibling2)
-        val groupEntry = GroupEntryBuilder()
-            .setSummary(groupSummary)
-            .setChildren(listOf(groupSibling1, groupSibling2))
-            .build()
+        val groupEntry =
+            GroupEntryBuilder()
+                .setSummary(groupSummary)
+                .setChildren(listOf(groupSibling1, groupSibling2))
+                .build()
         beforeTransformGroupsListener.onBeforeTransformGroups(listOf(groupEntry))
         verify(headsUpViewBinder, never()).bindHeadsUpView(any(), any())
         beforeFinalizeFilterListener.onBeforeFinalizeFilter(listOf(groupEntry))
@@ -708,16 +722,16 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
     @Test
     fun testNoTransferTwoChildAlert_withGroupAlertAll() {
         setShouldHeadsUp(groupSummary)
-        whenever(notifPipeline.allNotifs)
-            .thenReturn(listOf(groupSummary, groupChild1, groupChild2))
+        whenever(notifPipeline.allNotifs).thenReturn(listOf(groupSummary, groupChild1, groupChild2))
 
         collectionListener.onEntryAdded(groupSummary)
         collectionListener.onEntryAdded(groupChild1)
         collectionListener.onEntryAdded(groupChild2)
-        val groupEntry = GroupEntryBuilder()
-            .setSummary(groupSummary)
-            .setChildren(listOf(groupChild1, groupChild2))
-            .build()
+        val groupEntry =
+            GroupEntryBuilder()
+                .setSummary(groupSummary)
+                .setChildren(listOf(groupChild1, groupChild2))
+                .build()
         beforeTransformGroupsListener.onBeforeTransformGroups(listOf(groupEntry))
         verify(headsUpViewBinder, never()).bindHeadsUpView(any(), any())
         beforeFinalizeFilterListener.onBeforeFinalizeFilter(listOf(groupEntry))
@@ -742,10 +756,11 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         collectionListener.onEntryAdded(groupSummary)
         collectionListener.onEntryAdded(groupChild1)
         collectionListener.onEntryAdded(groupChild2)
-        val groupEntry = GroupEntryBuilder()
-            .setSummary(groupSummary)
-            .setChildren(listOf(groupChild1, groupChild2))
-            .build()
+        val groupEntry =
+            GroupEntryBuilder()
+                .setSummary(groupSummary)
+                .setChildren(listOf(groupChild1, groupChild2))
+                .build()
         beforeTransformGroupsListener.onBeforeTransformGroups(listOf(groupEntry))
         verify(headsUpViewBinder, never()).bindHeadsUpView(any(), any())
         beforeFinalizeFilterListener.onBeforeFinalizeFilter(listOf(groupEntry))
@@ -1045,9 +1060,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
             .thenReturn(DecisionImpl.of(should))
     }
 
-    private fun setDefaultShouldFullScreen(
-        originalDecision: FullScreenIntentDecision
-    ) {
+    private fun setDefaultShouldFullScreen(originalDecision: FullScreenIntentDecision) {
         val provider = visualInterruptionDecisionProvider
         whenever(provider.makeUnloggedFullScreenIntentDecision(any())).thenAnswer {
             val entry: NotificationEntry = it.getArgument(0)
@@ -1059,11 +1072,8 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         entry: NotificationEntry,
         originalDecision: FullScreenIntentDecision
     ) {
-        whenever(
-            visualInterruptionDecisionProvider.makeUnloggedFullScreenIntentDecision(entry)
-        ).thenAnswer {
-            FullScreenIntentDecisionImpl(entry, originalDecision)
-        }
+        whenever(visualInterruptionDecisionProvider.makeUnloggedFullScreenIntentDecision(entry))
+            .thenAnswer { FullScreenIntentDecisionImpl(entry, originalDecision) }
     }
 
     private fun verifyLoggedFullScreenIntentDecision(
@@ -1089,7 +1099,8 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
     private fun finishBind(entry: NotificationEntry) {
         verify(headsUpManager, never()).showNotification(entry)
         withArgCaptor<BindCallback> {
-            verify(headsUpViewBinder).bindHeadsUpView(eq(entry), capture())
-        }.onBindFinished(entry)
+                verify(headsUpViewBinder).bindHeadsUpView(eq(entry), capture())
+            }
+            .onBindFinished(entry)
     }
 }

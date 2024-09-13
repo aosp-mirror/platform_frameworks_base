@@ -1378,6 +1378,61 @@ public final class InputManager {
     }
 
     /**
+     * Registers a key gesture event listener for {@link KeyGestureEvent} being triggered.
+     *
+     * @param executor an executor on which the callback will be called
+     * @param listener the {@link KeyGestureEventListener}
+     * @throws IllegalArgumentException if {@code listener} has already been registered previously.
+     * @throws NullPointerException     if {@code listener} or {@code executor} is null.
+     * @hide
+     * @see #unregisterKeyGestureEventListener(KeyGestureEventListener)
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_KEY_GESTURES)
+    public void registerKeyGestureEventListener(@NonNull Executor executor,
+            @NonNull KeyGestureEventListener listener) throws IllegalArgumentException {
+        mGlobal.registerKeyGestureEventListener(executor, listener);
+    }
+
+    /**
+     * Unregisters a previously added key gesture event listener.
+     *
+     * @param listener the {@link KeyGestureEventListener}
+     * @hide
+     * @see #registerKeyGestureEventListener(Executor, KeyGestureEventListener)
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_KEY_GESTURES)
+    public void unregisterKeyGestureEventListener(@NonNull KeyGestureEventListener listener) {
+        mGlobal.unregisterKeyGestureEventListener(listener);
+    }
+
+    /**
+     * Registers a key gesture event handler for {@link KeyGestureEvent} handling.
+     *
+     * @param handler the {@link KeyGestureEventHandler}
+     * @throws IllegalArgumentException if {@code handler} has already been registered previously.
+     * @throws NullPointerException     if {@code handler} or {@code executor} is null.
+     * @hide
+     * @see #unregisterKeyGestureEventHandler(KeyGestureEventHandler)
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_KEY_GESTURES)
+    public void registerKeyGestureEventHandler(@NonNull KeyGestureEventHandler handler)
+            throws IllegalArgumentException {
+        mGlobal.registerKeyGestureEventHandler(handler);
+    }
+
+    /**
+     * Unregisters a previously added key gesture event handler.
+     *
+     * @param handler the {@link KeyGestureEventHandler}
+     * @hide
+     * @see #registerKeyGestureEventHandler(KeyGestureEventHandler)
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_KEY_GESTURES)
+    public void unregisterKeyGestureEventHandler(@NonNull KeyGestureEventHandler handler) {
+        mGlobal.unregisterKeyGestureEventHandler(handler);
+    }
+
+    /**
      * A callback used to be notified about battery state changes for an input device. The
      * {@link #onBatteryStateChanged(int, long, BatteryState)} method will be called once after the
      * listener is successfully registered to provide the initial battery state of the device.
@@ -1477,5 +1532,52 @@ public final class InputManager {
          * @param state the new sticky modifier state, never null.
          */
         void onStickyModifierStateChanged(@NonNull StickyModifierState state);
+    }
+
+    /**
+     * A callback used to notify about key gesture event on completion.
+     *
+     * @see #registerKeyGestureEventListener(Executor, KeyGestureEventListener)
+     * @see #unregisterKeyGestureEventListener(KeyGestureEventListener)
+     * @hide
+     */
+    public interface KeyGestureEventListener {
+        /**
+         * Called when a key gesture event occurs.
+         *
+         * @param event the gesture event that occurred.
+         */
+        void onKeyGestureEvent(@NonNull KeyGestureEvent event);
+    }
+
+    /**
+     * A callback used to notify about key gesture event start, complete and cancel. Unlike
+     * {@see KeyGestureEventListener} which is to listen to successfully handled key gestures, this
+     * interface allows system components to register handler for handling key gestures.
+     *
+     * @see #registerKeyGestureEventHandler(KeyGestureEventHandler)
+     * @see #unregisterKeyGestureEventHandler(KeyGestureEventHandler)
+     *
+     * <p> NOTE: All callbacks will occur on system main and input threads, so the caller needs
+     * to move time-consuming operations to appropriate handler threads.
+     * @hide
+     */
+    public interface KeyGestureEventHandler {
+        /**
+         * Called when a key gesture event starts, is completed, or is cancelled. If a handler
+         * returns {@code true}, it implies that the handler intends to handle the key gesture and
+         * only this handler will receive the future events for this key gesture.
+         *
+         * @param event the gesture event
+         */
+        boolean handleKeyGestureEvent(@NonNull KeyGestureEvent event,
+                @Nullable IBinder focusedToken);
+
+        /**
+         * Called to identify if a particular gesture is of interest to a handler.
+         *
+         * NOTE: If no active handler supports certain gestures, the gestures will not be captured.
+         */
+        boolean isKeyGestureSupported(@KeyGestureEvent.KeyGestureType int gestureType);
     }
 }

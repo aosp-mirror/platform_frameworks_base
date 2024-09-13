@@ -16,12 +16,20 @@
 
 package com.android.systemui.statusbar.policy.domain.interactor
 
+import android.content.testableContext
+import com.android.settingslib.notification.modes.zenIconLoader
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
+import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.shared.notifications.data.repository.notificationSettingsRepository
 import com.android.systemui.statusbar.policy.data.repository.zenModeRepository
 
 val Kosmos.zenModeInteractor by Fixture {
     ZenModeInteractor(
-        repository = zenModeRepository,
+        context = testableContext,
+        zenModeRepository = zenModeRepository,
+        notificationSettingsRepository = notificationSettingsRepository,
+        bgDispatcher = testDispatcher,
+        iconLoader = zenIconLoader,
     )
 }

@@ -27,7 +27,7 @@ import com.android.systemui.keyguard.KeyguardBottomAreaRefactor
 import com.android.systemui.keyguard.KeyguardWmStateRefactor
 import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.shared.ComposeLockscreen
-import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRefactor
+import com.android.systemui.statusbar.notification.shared.NotificationThrottleHun
 import com.android.systemui.statusbar.phone.PredictiveBackSysUiFlag
 
 /** Helper for reading or using the scene container flag state. */
@@ -43,7 +43,7 @@ object SceneContainerFlag {
                 KeyguardBottomAreaRefactor.isEnabled &&
                 KeyguardWmStateRefactor.isEnabled &&
                 MigrateClocksToBlueprint.isEnabled &&
-                NotificationsHeadsUpRefactor.isEnabled &&
+                NotificationThrottleHun.isEnabled &&
                 PredictiveBackSysUiFlag.isEnabled &&
                 DeviceEntryUdfpsRefactor.isEnabled
 
@@ -59,7 +59,7 @@ object SceneContainerFlag {
             KeyguardBottomAreaRefactor.token,
             KeyguardWmStateRefactor.token,
             MigrateClocksToBlueprint.token,
-            NotificationsHeadsUpRefactor.token,
+            NotificationThrottleHun.token,
             PredictiveBackSysUiFlag.token,
             DeviceEntryUdfpsRefactor.token,
             // NOTE: Changes should also be made in isEnabled and @EnableSceneContainer

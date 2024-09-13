@@ -20,6 +20,7 @@ import android.animation.ValueAnimator
 import android.util.MathUtils
 import com.android.app.animation.Interpolators
 import com.android.app.tracing.coroutines.launch
+import com.android.systemui.Flags.communalSceneKtfRefactor
 import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
@@ -90,7 +91,9 @@ constructor(
         listenForLockscreenToPrimaryBouncerDragging()
         listenForLockscreenToAlternateBouncer()
         listenForLockscreenTransitionToCamera()
-        listenForLockscreenToGlanceableHub()
+        if (!communalSceneKtfRefactor()) {
+            listenForLockscreenToGlanceableHub()
+        }
     }
 
     /**
@@ -105,7 +108,7 @@ constructor(
             .transition(
                 edge = Edge.create(from = KeyguardState.LOCKSCREEN, to = Scenes.Gone),
                 edgeWithoutSceneContainer =
-                    Edge.create(from = KeyguardState.LOCKSCREEN, to = KeyguardState.GONE)
+                    Edge.create(from = KeyguardState.LOCKSCREEN, to = KeyguardState.GONE),
             )
             .map<TransitionStep, Boolean?> {
                 true // Make the surface visible during LS -> GONE transitions.
@@ -131,16 +134,12 @@ constructor(
                 .filterRelevantKeyguardState()
                 .sampleCombine(
                     internalTransitionInteractor.currentTransitionInfoInternal,
-                    finishedKeyguardState,
+                    transitionInteractor.isFinishedIn(KeyguardState.LOCKSCREEN),
                     keyguardInteractor.isActiveDreamLockscreenHosted,
                 )
                 .collect {
-                    (
-                        isAbleToDream,
-                        transitionInfo,
-                        finishedKeyguardState,
-                        isActiveDreamLockscreenHosted) ->
-                    val isOnLockscreen = finishedKeyguardState == KeyguardState.LOCKSCREEN
+                    (isAbleToDream, transitionInfo, isOnLockscreen, isActiveDreamLockscreenHosted)
+                    ->
                     val isTransitionInterruptible =
                         transitionInfo.to == KeyguardState.LOCKSCREEN &&
                             !invalidFromStates.contains(transitionInfo.from)
@@ -163,7 +162,7 @@ constructor(
                 .collect {
                     startTransitionTo(
                         KeyguardState.PRIMARY_BOUNCER,
-                        ownerReason = "#listenForLockscreenToPrimaryBouncer"
+                        ownerReason = "#listenForLockscreenToPrimaryBouncer",
                     )
                 }
         }
@@ -186,7 +185,7 @@ constructor(
         scope.launch("$TAG#listenForLockscreenToPrimaryBouncerDragging") {
             shadeRepository.legacyShadeExpansion
                 .sampleCombine(
-                    startedKeyguardTransitionStep,
+                    transitionInteractor.startedKeyguardTransitionStep,
                     internalTransitionInteractor.currentTransitionInfoInternal,
                     keyguardInteractor.statusBarState,
                     keyguardInteractor.isKeyguardDismissible,
@@ -239,7 +238,7 @@ constructor(
                                             getDefaultAnimatorForTransitionsToState(
                                                     KeyguardState.LOCKSCREEN
                                                 )
-                                                .apply { duration = 0 }
+                                                .apply { duration = 0 },
                                     )
                                 )
                             }
@@ -250,6 +249,8 @@ constructor(
                         if (
                             // Use currentTransitionInfo to decide whether to start the transition.
                             currentTransitionInfo.to == KeyguardState.LOCKSCREEN &&
+                                shadeExpansion > 0f &&
+                                shadeExpansion < 1f &&
                                 shadeRepository.legacyShadeTracking.value &&
                                 !isKeyguardUnlocked &&
                                 statusBarState == KEYGUARD
@@ -258,7 +259,7 @@ constructor(
                                 startTransitionTo(
                                     toState = KeyguardState.PRIMARY_BOUNCER,
                                     animator = null, // transition will be manually controlled,
-                                    ownerReason = "#listenForLockscreenToPrimaryBouncerDragging"
+                                    ownerReason = "#listenForLockscreenToPrimaryBouncerDragging",
                                 )
                         }
                     }
@@ -273,7 +274,6 @@ constructor(
     }
 
     private fun listenForLockscreenToGone() {
-        // TODO(b/336576536): Check if adaptation for scene framework is needed
         if (SceneContainerFlag.isEnabled) return
         if (KeyguardWmStateRefactor.isEnabled) return
         scope.launch("$TAG#listenForLockscreenToGone") {
@@ -289,7 +289,6 @@ constructor(
     }
 
     private fun listenForLockscreenToGoneDragging() {
-        // TODO(b/336576536): Check if adaptation for scene framework is needed
         if (SceneContainerFlag.isEnabled) return
         if (KeyguardWmStateRefactor.isEnabled) {
             // When the refactor is enabled, we no longer use isKeyguardGoingAway.
@@ -297,7 +296,9 @@ constructor(
                 swipeToDismissInteractor.dismissFling
                     .filterNotNull()
                     .filterRelevantKeyguardState()
-                    .collect { _ -> startTransitionTo(KeyguardState.GONE) }
+                    .collect { _ ->
+                        startTransitionTo(KeyguardState.GONE, ownerReason = "dismissFling != null")
+                    }
             }
         }
     }
@@ -331,7 +332,7 @@ constructor(
             listenForSleepTransition(
                 modeOnCanceledFromStartedStep = { startedStep ->
                     if (
-                        transitionInteractor.asleepKeyguardState.value == KeyguardState.AOD &&
+                        keyguardInteractor.asleepKeyguardState.value == KeyguardState.AOD &&
                             startedStep.from == KeyguardState.AOD
                     ) {
                         TransitionModeOnCanceled.REVERSE
@@ -348,7 +349,6 @@ constructor(
      * keyguard transition.
      */
     private fun listenForLockscreenToGlanceableHub() {
-        // TODO(b/336576536): Check if adaptation for scene framework is needed
         if (SceneContainerFlag.isEnabled) return
         if (!communalSettingsInteractor.isCommunalFlagEnabled()) {
             return
@@ -391,7 +391,7 @@ constructor(
         val TO_DOZING_DURATION = 500.milliseconds
         val TO_DREAMING_DURATION = 933.milliseconds
         val TO_DREAMING_HOSTED_DURATION = 933.milliseconds
-        val TO_OCCLUDED_DURATION = 450.milliseconds
+        val TO_OCCLUDED_DURATION = 550.milliseconds
         val TO_AOD_DURATION = 500.milliseconds
         val TO_AOD_FOLD_DURATION = 1100.milliseconds
         val TO_PRIMARY_BOUNCER_DURATION = DEFAULT_DURATION

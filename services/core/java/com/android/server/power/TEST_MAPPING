@@ -8,11 +8,7 @@
       ]
     },
     {
-      "name": "FrameworksMockingServicesTests",
-      "options": [
-        {"include-filter": "com.android.server.power"},
-        {"exclude-annotation": "androidx.test.filters.FlakyTest"}
-      ]
+      "name": "FrameworksMockingServicesTests_android_server_power_Presubmit"
     },
     {
       "name": "PowerServiceTests",
@@ -34,10 +30,7 @@
       ]
     },
     {
-      "name": "FrameworksServicesTests",
-      "options": [
-        {"include-filter": "com.android.server.power"}
-      ]
+      "name": "FrameworksServicesTests_android_server_power"
     },
     {
       "name": "PowerServiceTests",

@@ -22,6 +22,7 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.content.pm.ActivityInfo.Config;
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -30,6 +31,7 @@ import java.lang.annotation.RetentionPolicy;
  * Container for a dynamically typed data value.  Primarily used with
  * {@link android.content.res.Resources} for holding resource values.
  */
+@RavenwoodKeepWholeClass
 public class TypedValue {
     /** The value contains no data. */
     public static final int TYPE_NULL = 0x00;
@@ -65,10 +67,11 @@ public class TypedValue {
     /** The <var>data</var> field holds a number that was
      *  originally specified in hexadecimal (0xn). */
     public static final int TYPE_INT_HEX = 0x11;
-    /** The <var>data</var> field holds 0 or 1 that was originally
-     *  specified as "false" or "true". */
+    /**
+     * {@link #data} holds 0 to represent {@code false}, or a value different from 0 to represent
+     * {@code true}.
+     */
     public static final int TYPE_INT_BOOLEAN = 0x12;
-
     /** Identifies the start of integer values that were specified as
      *  color constants (starting with '#'). */
     public static final int TYPE_FIRST_COLOR_INT = 0x1c;
@@ -826,4 +829,3 @@ public class TypedValue {
         return sb.toString();
     }
 }
-

@@ -57,6 +57,7 @@ import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.ambient.touch.dagger.InputSessionComponent;
 import com.android.systemui.kosmos.KosmosJavaAdapter;
+import com.android.systemui.log.LogBufferHelperKt;
 import com.android.systemui.shared.system.InputChannelCompat;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.display.DisplayHelper;
@@ -153,7 +154,8 @@ public class TouchMonitorTest extends SysuiTestCase {
             when(mWindowManager.getMaximumWindowMetrics()).thenReturn(mWindowMetrics);
             mMonitor = new TouchMonitor(mExecutor, mBackgroundExecutor, mLifecycleRegistry,
                     mInputFactory, mDisplayHelper, mKosmos.getConfigurationInteractor(),
-                    handlers, mIWindowManager,  0);
+                    handlers, mIWindowManager, 0, "TouchMonitorTest",
+                    LogBufferHelperKt.logcatLogBuffer("TouchMonitorTest"));
             clearInvocations(mLifecycleRegistry);
             mMonitor.init();
 
@@ -708,6 +710,45 @@ public class TouchMonitorTest extends SysuiTestCase {
                 .collect(Collectors.toCollection(HashSet::new)), mKosmos);
         environment.destroyMonitor();
         environment.verifyLifecycleObserversUnregistered();
+    }
+
+    @Test
+    public void testDestroy_cleansUpHandler() {
+        final TouchHandler touchHandler = createTouchHandler();
+
+        final Environment environment = new Environment(Stream.of(touchHandler)
+                .collect(Collectors.toCollection(HashSet::new)), mKosmos);
+        environment.destroyMonitor();
+        verify(touchHandler).onDestroy();
+    }
+
+    @Test
+    public void testLastSessionPop_createsNewInputSession() {
+        final TouchHandler touchHandler = createTouchHandler();
+
+        final TouchHandler.TouchSession.Callback callback =
+                Mockito.mock(TouchHandler.TouchSession.Callback.class);
+
+        final Environment environment = new Environment(Stream.of(touchHandler)
+                .collect(Collectors.toCollection(HashSet::new)), mKosmos);
+
+        final InputEvent initialEvent = Mockito.mock(InputEvent.class);
+        environment.publishInputEvent(initialEvent);
+
+        final TouchHandler.TouchSession session = captureSession(touchHandler);
+        session.registerCallback(callback);
+
+        // Clear invocations on input session and factory.
+        clearInvocations(environment.mInputFactory);
+        clearInvocations(environment.mInputSession);
+
+        // Pop only active touch session.
+        session.pop();
+        environment.executeAll();
+
+        // Verify that input session disposed and new session requested from factory.
+        verify(environment.mInputSession).dispose();
+        verify(environment.mInputFactory).create(any(), any(), any(), anyBoolean());
     }
 
     private GestureDetector.OnGestureListener registerGestureListener(TouchHandler handler) {

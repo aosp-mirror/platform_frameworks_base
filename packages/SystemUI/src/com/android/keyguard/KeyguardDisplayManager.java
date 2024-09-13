@@ -287,7 +287,7 @@ public class KeyguardDisplayManager {
     /**
      * Helper used to receive device state info from {@link DeviceStateManager}.
      */
-    static class DeviceStateHelper implements DeviceStateManager.DeviceStateCallback {
+    public static class DeviceStateHelper implements DeviceStateManager.DeviceStateCallback {
 
         @Nullable
         private final DisplayAddress.Physical mRearDisplayPhysicalAddress;

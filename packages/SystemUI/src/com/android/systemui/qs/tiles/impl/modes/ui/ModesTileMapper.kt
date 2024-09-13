@@ -17,13 +17,15 @@
 package com.android.systemui.qs.tiles.impl.modes.ui
 
 import android.content.res.Resources
-import com.android.systemui.common.shared.model.Icon
+import android.icu.text.MessageFormat
+import android.widget.Button
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataToStateMapper
 import com.android.systemui.qs.tiles.impl.modes.domain.model.ModesTileModel
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfig
 import com.android.systemui.qs.tiles.viewmodel.QSTileState
 import com.android.systemui.res.R
+import java.util.Locale
 import javax.inject.Inject
 
 class ModesTileMapper
@@ -34,30 +36,34 @@ constructor(
 ) : QSTileDataToStateMapper<ModesTileModel> {
     override fun map(config: QSTileConfig, data: ModesTileModel): QSTileState =
         QSTileState.build(resources, theme, config.uiConfig) {
-            iconRes =
+            iconRes = data.iconResId
+            icon = { data.icon }
+            activationState =
                 if (data.isActivated) {
-                    R.drawable.qs_dnd_icon_on
+                    QSTileState.ActivationState.ACTIVE
                 } else {
-                    R.drawable.qs_dnd_icon_off
+                    QSTileState.ActivationState.INACTIVE
                 }
-            val icon =
-                Icon.Loaded(
-                    resources.getDrawable(iconRes!!, theme),
-                    contentDescription = null,
-                )
-            this.icon = { icon }
-            if (data.isActivated) {
-                activationState = QSTileState.ActivationState.ACTIVE
-                secondaryLabel = "Some modes enabled idk" // TODO(b/346519570)
-            } else {
-                activationState = QSTileState.ActivationState.INACTIVE
-                secondaryLabel = "Off" // TODO(b/346519570)
-            }
-            contentDescription = label
+            secondaryLabel = getModesStatus(data, resources)
+            contentDescription = "$label. $secondaryLabel"
             supportedActions =
                 setOf(
                     QSTileState.UserAction.CLICK,
                     QSTileState.UserAction.LONG_CLICK,
                 )
+            sideViewIcon = QSTileState.SideViewIcon.Chevron
+            expandedAccessibilityClass = Button::class
         }
+
+    private fun getModesStatus(data: ModesTileModel, resources: Resources): String {
+        val msgFormat =
+            MessageFormat(resources.getString(R.string.zen_mode_active_modes), Locale.getDefault())
+        val count = data.activeModes.count()
+        val args: MutableMap<String, Any> = HashMap()
+        args["count"] = count
+        if (count >= 1) {
+            args["mode"] = data.activeModes[0]
+        }
+        return msgFormat.format(args)
+    }
 }

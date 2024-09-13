@@ -19,6 +19,7 @@ package com.android.keyguard;
 import static com.android.internal.util.LatencyTracker.ACTION_CHECK_CREDENTIAL;
 import static com.android.internal.util.LatencyTracker.ACTION_CHECK_CREDENTIAL_UNLOCKED;
 import static com.android.keyguard.KeyguardAbsKeyInputView.MINIMUM_PASSWORD_LENGTH_BEFORE_REPORT;
+import static com.android.systemui.Flags.notifyPasswordTextViewUserActivityInBackground;
 
 import android.content.res.ColorStateList;
 import android.os.AsyncTask;
@@ -34,6 +35,7 @@ import com.android.internal.widget.LockscreenCredential;
 import com.android.keyguard.EmergencyButtonController.EmergencyButtonCallback;
 import com.android.keyguard.KeyguardAbsKeyInputView.KeyDownListener;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
+import com.android.systemui.bouncer.ui.helper.BouncerHapticPlayer;
 import com.android.systemui.classifier.FalsingClassifier;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.flags.FeatureFlags;
@@ -50,6 +52,7 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
     private final LatencyTracker mLatencyTracker;
     private final FalsingCollector mFalsingCollector;
     private final EmergencyButtonController mEmergencyButtonController;
+    private final UserActivityNotifier mUserActivityNotifier;
     private CountDownTimer mCountdownTimer;
     private boolean mDismissing;
     protected AsyncTask<?, ?, ?> mPendingLockCheck;
@@ -81,14 +84,18 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
             KeyguardMessageAreaController.Factory messageAreaControllerFactory,
             LatencyTracker latencyTracker, FalsingCollector falsingCollector,
             EmergencyButtonController emergencyButtonController,
-            FeatureFlags featureFlags, SelectedUserInteractor selectedUserInteractor) {
+            FeatureFlags featureFlags, SelectedUserInteractor selectedUserInteractor,
+            BouncerHapticPlayer bouncerHapticPlayer,
+            UserActivityNotifier userActivityNotifier) {
         super(view, securityMode, keyguardSecurityCallback, emergencyButtonController,
-                messageAreaControllerFactory, featureFlags, selectedUserInteractor);
+                messageAreaControllerFactory, featureFlags, selectedUserInteractor,
+                bouncerHapticPlayer);
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mLockPatternUtils = lockPatternUtils;
         mLatencyTracker = latencyTracker;
         mFalsingCollector = falsingCollector;
         mEmergencyButtonController = emergencyButtonController;
+        mUserActivityNotifier = userActivityNotifier;
     }
 
     abstract void resetState();
@@ -178,6 +185,9 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
     void onPasswordChecked(int userId, boolean matched, int timeoutMs, boolean isValidPassword) {
         boolean dismissKeyguard = mSelectedUserInteractor.getSelectedUserId() == userId;
         if (matched) {
+            mBouncerHapticPlayer.playAuthenticationFeedback(
+                    /* authenticationSucceeded = */true
+            );
             getKeyguardSecurityCallback().reportUnlockAttempt(userId, true, 0);
             if (dismissKeyguard) {
                 mDismissing = true;
@@ -185,6 +195,9 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
                 getKeyguardSecurityCallback().dismiss(true, userId, getSecurityMode());
             }
         } else {
+            mBouncerHapticPlayer.playAuthenticationFeedback(
+                    /* authenticationSucceeded = */false
+            );
             mView.resetPasswordText(true /* animate */, false /* announce deletion if no match */);
             if (isValidPassword) {
                 getKeyguardSecurityCallback().reportUnlockAttempt(userId, false, timeoutMs);
@@ -280,6 +293,9 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
         getKeyguardSecurityCallback().userActivity();
         getKeyguardSecurityCallback().onUserInput();
         mMessageAreaController.setMessage("");
+        if (notifyPasswordTextViewUserActivityInBackground()) {
+            mUserActivityNotifier.notifyUserActivity();
+        }
     }
 
     @Override

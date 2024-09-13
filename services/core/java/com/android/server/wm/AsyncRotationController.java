@@ -174,11 +174,6 @@ class AsyncRotationController extends FadeAnimationController implements Consume
                 mNavBarToken = w.mToken;
                 // Do not animate movable navigation bar (e.g. 3-buttons mode).
                 if (navigationBarCanMove) return;
-                // Or when the navigation bar is currently controlled by recents animation.
-                final RecentsAnimationController recents = mService.getRecentsAnimationController();
-                if (recents != null && recents.isNavigationBarAttachedToApp()) {
-                    return;
-                }
             } else if (navigationBarCanMove || mTransitionOp == OP_CHANGE_MAY_SEAMLESS
                     || mDisplayContent.mTransitionController.mNavigationBarAttachedToApp) {
                 action = Operation.ACTION_SEAMLESS;

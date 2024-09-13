@@ -171,11 +171,8 @@ public class RecordingController
         mMediaProjectionMetricsLogger.notifyProjectionInitiated(
                 getHostUid(), SessionCreationSource.SYSTEM_UI_SCREEN_RECORDER);
 
-        return (flags.isEnabled(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING)
-                ? mScreenRecordPermissionDialogDelegateFactory
-                    .create(this, getHostUserHandle(), getHostUid(), onStartRecordingClicked)
-                : mScreenRecordDialogFactory
-                    .create(this, onStartRecordingClicked))
+        return mScreenRecordPermissionDialogDelegateFactory
+                .create(this, getHostUserHandle(), getHostUid(), onStartRecordingClicked)
                 .createDialog();
     }
 

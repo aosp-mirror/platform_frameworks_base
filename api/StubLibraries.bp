@@ -563,8 +563,12 @@ java_library {
 
 java_defaults {
     name: "android-non-updatable_from_text_defaults",
+    defaults: ["android-non-updatable-stubs-libs-defaults"],
     static_libs: ["framework-res-package-jar"],
     libs: ["stub-annotations"],
+    sdk_version: "none",
+    system_modules: "none",
+    previous_api: ":android.api.public.latest",
 }
 
 java_defaults {
@@ -582,10 +586,10 @@ java_api_library {
         "api-stubs-docs-non-updatable.api.contribution",
     ],
     defaults: ["android-non-updatable_everything_from_text_defaults"],
-    full_api_surface_stub: "android_stubs_current.from-text",
     // Use full Android API not just the non-updatable API as the latter is incomplete
     // and can result in incorrect behavior.
     previous_api: ":android.api.combined.public.latest",
+    libs: ["all-modules-public-stubs"],
 }
 
 java_api_library {
@@ -596,10 +600,10 @@ java_api_library {
         "system-api-stubs-docs-non-updatable.api.contribution",
     ],
     defaults: ["android-non-updatable_everything_from_text_defaults"],
-    full_api_surface_stub: "android_system_stubs_current.from-text",
     // Use full Android API not just the non-updatable API as the latter is incomplete
     // and can result in incorrect behavior.
     previous_api: ":android.api.combined.system.latest",
+    libs: ["all-modules-system-stubs"],
 }
 
 java_api_library {
@@ -611,10 +615,10 @@ java_api_library {
         "test-api-stubs-docs-non-updatable.api.contribution",
     ],
     defaults: ["android-non-updatable_everything_from_text_defaults"],
-    full_api_surface_stub: "android_test_stubs_current.from-text",
     // Use full Android API not just the non-updatable API as the latter is incomplete
     // and can result in incorrect behavior.
     previous_api: ":android.api.combined.test.latest",
+    libs: ["all-modules-system-stubs"],
 }
 
 java_api_library {
@@ -625,8 +629,10 @@ java_api_library {
         "system-api-stubs-docs-non-updatable.api.contribution",
         "module-lib-api-stubs-docs-non-updatable.api.contribution",
     ],
-    defaults: ["android-non-updatable_everything_from_text_defaults"],
-    full_api_surface_stub: "android_module_lib_stubs_current_full.from-text",
+    defaults: [
+        "module-classpath-java-defaults",
+        "android-non-updatable_everything_from_text_defaults",
+    ],
     // Use full Android API not just the non-updatable API as the latter is incomplete
     // and can result in incorrect behavior.
     previous_api: ":android.api.combined.module-lib.latest",
@@ -644,14 +650,16 @@ java_api_library {
         "test-api-stubs-docs-non-updatable.api.contribution",
         "module-lib-api-stubs-docs-non-updatable.api.contribution",
     ],
-    defaults: ["android-non-updatable_everything_from_text_defaults"],
-    full_api_surface_stub: "android_test_module_lib_stubs_current.from-text",
+    defaults: [
+        "module-classpath-java-defaults",
+        "android-non-updatable_everything_from_text_defaults",
+    ],
 
     // No need to specify previous_api as this is not used for compiling against.
-
     // This module is only used for hiddenapi, and other modules should not
     // depend on this module.
     visibility: ["//visibility:private"],
+    libs: ["all-modules-system-stubs"],
 }
 
 java_defaults {
@@ -665,7 +673,7 @@ java_defaults {
 }
 
 java_library {
-    name: "android_stubs_current.from-source",
+    name: "android_stubs_current",
     static_libs: [
         "all-modules-public-stubs",
         "android-non-updatable.stubs",
@@ -675,7 +683,7 @@ java_library {
 }
 
 java_library {
-    name: "android_stubs_current_exportable.from-source",
+    name: "android_stubs_current_exportable",
     static_libs: [
         "all-modules-public-stubs-exportable",
         "android-non-updatable.stubs.exportable",
@@ -685,7 +693,7 @@ java_library {
 }
 
 java_library {
-    name: "android_system_stubs_current.from-source",
+    name: "android_system_stubs_current",
     static_libs: [
         "all-modules-system-stubs",
         "android-non-updatable.stubs.system",
@@ -698,7 +706,7 @@ java_library {
 }
 
 java_library {
-    name: "android_system_stubs_current_exportable.from-source",
+    name: "android_system_stubs_current_exportable",
     static_libs: [
         "all-modules-system-stubs-exportable",
         "android-non-updatable.stubs.exportable.system",
@@ -722,7 +730,7 @@ java_library {
 }
 
 java_library {
-    name: "android_test_stubs_current.from-source",
+    name: "android_test_stubs_current",
     static_libs: [
         // Updatable modules do not have test APIs, but we want to include their SystemApis, like we
         // include the SystemApi of framework-non-updatable-sources.
@@ -739,7 +747,7 @@ java_library {
 }
 
 java_library {
-    name: "android_test_stubs_current_exportable.from-source",
+    name: "android_test_stubs_current_exportable",
     static_libs: [
         // Updatable modules do not have test APIs, but we want to include their SystemApis, like we
         // include the SystemApi of framework-non-updatable-sources.
@@ -760,7 +768,7 @@ java_library {
 
 // This module does not need to be copied to dist
 java_library {
-    name: "android_test_frameworks_core_stubs_current.from-source",
+    name: "android_test_frameworks_core_stubs_current",
     static_libs: [
         "all-updatable-modules-system-stubs",
         "android-non-updatable.stubs.test",
@@ -772,7 +780,7 @@ java_library {
 }
 
 java_library {
-    name: "android_module_lib_stubs_current.from-source",
+    name: "android_module_lib_stubs_current",
     defaults: [
         "android.jar_defaults",
     ],
@@ -785,7 +793,7 @@ java_library {
 }
 
 java_library {
-    name: "android_module_lib_stubs_current_exportable.from-source",
+    name: "android_module_lib_stubs_current_exportable",
     defaults: [
         "android.jar_defaults",
         "android_stubs_dists_default",
@@ -801,20 +809,20 @@ java_library {
 }
 
 java_library {
-    name: "android_system_server_stubs_current.from-source",
+    name: "android_system_server_stubs_current",
     defaults: [
         "android.jar_defaults",
     ],
     srcs: [":services-non-updatable-stubs"],
     installable: false,
     static_libs: [
-        "android_module_lib_stubs_current.from-source",
+        "android_module_lib_stubs_current",
     ],
     visibility: ["//frameworks/base/services"],
 }
 
 java_library {
-    name: "android_system_server_stubs_current_exportable.from-source",
+    name: "android_system_server_stubs_current_exportable",
     defaults: [
         "android.jar_defaults",
         "android_stubs_dists_default",
@@ -822,7 +830,7 @@ java_library {
     srcs: [":services-non-updatable-stubs{.exportable}"],
     installable: false,
     static_libs: [
-        "android_module_lib_stubs_current_exportable.from-source",
+        "android_module_lib_stubs_current_exportable",
     ],
     dist: {
         dir: "apistubs/android/system-server",
@@ -882,7 +890,7 @@ java_genrule {
     cmd: "rm -f $(genDir)/framework.aidl.merged && " +
         "for i in $(in); do " +
         "  rm -f $(genDir)/framework.aidl.tmp && " +
-        "  $(location sdkparcelables) $$i $(genDir)/framework.aidl.tmp && " +
+        "  $(location sdkparcelables) $$i $(genDir)/framework.aidl.tmp --guarantee_stable && " +
         "  cat $(genDir)/framework.aidl.tmp >> $(genDir)/framework.aidl.merged; " +
         "done && " +
         "sort -u $(genDir)/framework.aidl.merged > $(out)",
@@ -895,215 +903,6 @@ java_genrule {
         ],
         dir: "apistubs/android/private",
     },
-}
-
-//
-// Java API defaults and libraries for single tree build
-//
-
-java_defaults {
-    name: "stub-annotation-defaults",
-    libs: [
-        "stub-annotations",
-    ],
-    static_libs: [
-        // stub annotations do not contribute to the API surfaces but are statically
-        // linked in the stubs for API surfaces (see frameworks/base/StubLibraries.bp).
-        // This is because annotation processors insist on loading the classes for any
-        // annotations found, thus should exist inside android.jar.
-        "private-stub-annotations-jar",
-    ],
-    is_stubs_module: true,
-}
-
-// Listing of API domains contribution and dependencies per API surfaces
-java_defaults {
-    name: "android_test_stubs_current_contributions",
-    api_surface: "test",
-    api_contributions: [
-        "framework-virtualization.stubs.source.test.api.contribution",
-        "framework-location.stubs.source.test.api.contribution",
-    ],
-}
-
-java_defaults {
-    name: "android_test_frameworks_core_stubs_current_contributions",
-    api_surface: "test",
-    api_contributions: [
-        "test-api-stubs-docs-non-updatable.api.contribution",
-    ],
-}
-
-java_defaults {
-    name: "android_module_lib_stubs_current_contributions",
-    api_surface: "module-lib",
-    api_contributions: [
-        "api-stubs-docs-non-updatable.api.contribution",
-        "system-api-stubs-docs-non-updatable.api.contribution",
-        "module-lib-api-stubs-docs-non-updatable.api.contribution",
-        "art.module.public.api.stubs.source.api.contribution",
-        "art.module.public.api.stubs.source.system.api.contribution",
-        "art.module.public.api.stubs.source.module_lib.api.contribution",
-        "i18n.module.public.api.stubs.source.api.contribution",
-        "i18n.module.public.api.stubs.source.system.api.contribution",
-        "i18n.module.public.api.stubs.source.module_lib.api.contribution",
-    ],
-    previous_api: ":android.api.combined.module-lib.latest",
-}
-
-// Java API library definitions per API surface
-java_api_library {
-    name: "android_stubs_current.from-text",
-    api_surface: "public",
-    defaults: [
-        // This module is dynamically created at frameworks/base/api/api.go
-        // instead of being written out, in order to minimize edits in the codebase
-        // when there is a change in the list of modules.
-        // that contributes to an api surface.
-        "android_stubs_current_contributions",
-        "stub-annotation-defaults",
-    ],
-    api_contributions: [
-        "api-stubs-docs-non-updatable.api.contribution",
-    ],
-    visibility: ["//visibility:public"],
-    enable_validation: false,
-    stubs_type: "everything",
-}
-
-java_api_library {
-    name: "android_system_stubs_current.from-text",
-    api_surface: "system",
-    defaults: [
-        "android_stubs_current_contributions",
-        "android_system_stubs_current_contributions",
-        "stub-annotation-defaults",
-    ],
-    api_contributions: [
-        "api-stubs-docs-non-updatable.api.contribution",
-        "system-api-stubs-docs-non-updatable.api.contribution",
-    ],
-    visibility: ["//visibility:public"],
-    enable_validation: false,
-    stubs_type: "everything",
-}
-
-java_api_library {
-    name: "android_test_stubs_current.from-text",
-    api_surface: "test",
-    defaults: [
-        "android_stubs_current_contributions",
-        "android_system_stubs_current_contributions",
-        "android_test_stubs_current_contributions",
-        "stub-annotation-defaults",
-    ],
-    api_contributions: [
-        "api-stubs-docs-non-updatable.api.contribution",
-        "system-api-stubs-docs-non-updatable.api.contribution",
-        "test-api-stubs-docs-non-updatable.api.contribution",
-    ],
-    visibility: ["//visibility:public"],
-    enable_validation: false,
-    stubs_type: "everything",
-}
-
-java_api_library {
-    name: "android_test_frameworks_core_stubs_current.from-text",
-    api_surface: "test",
-    defaults: [
-        "android_stubs_current_contributions",
-        "android_system_stubs_current_contributions",
-        "android_test_frameworks_core_stubs_current_contributions",
-    ],
-    libs: [
-        "stub-annotations",
-    ],
-    api_contributions: [
-        "api-stubs-docs-non-updatable.api.contribution",
-        "system-api-stubs-docs-non-updatable.api.contribution",
-    ],
-    enable_validation: false,
-    stubs_type: "everything",
-}
-
-java_api_library {
-    name: "android_module_lib_stubs_current_full.from-text",
-    api_surface: "module-lib",
-    defaults: [
-        "android_stubs_current_contributions",
-        "android_system_stubs_current_contributions",
-        "android_module_lib_stubs_current_contributions_full",
-    ],
-    libs: [
-        "stub-annotations",
-    ],
-    api_contributions: [
-        "api-stubs-docs-non-updatable.api.contribution",
-        "system-api-stubs-docs-non-updatable.api.contribution",
-        "module-lib-api-stubs-docs-non-updatable.api.contribution",
-    ],
-    visibility: ["//visibility:public"],
-    enable_validation: false,
-    stubs_type: "everything",
-}
-
-java_api_library {
-    name: "android_module_lib_stubs_current.from-text",
-    api_surface: "module-lib",
-    defaults: [
-        "android_module_lib_stubs_current_contributions",
-    ],
-    libs: [
-        "android_module_lib_stubs_current_full.from-text",
-        "stub-annotations",
-    ],
-    visibility: ["//visibility:public"],
-    enable_validation: false,
-    stubs_type: "everything",
-}
-
-java_api_library {
-    name: "android_test_module_lib_stubs_current.from-text",
-    api_surface: "module-lib",
-    defaults: [
-        "android_stubs_current_contributions",
-        "android_system_stubs_current_contributions",
-        "android_test_stubs_current_contributions",
-        "android_module_lib_stubs_current_contributions",
-    ],
-    libs: [
-        "android_module_lib_stubs_current_full.from-text",
-        "stub-annotations",
-    ],
-    api_contributions: [
-        "test-api-stubs-docs-non-updatable.api.contribution",
-    ],
-
-    // This module is only used to build android-non-updatable.stubs.test_module_lib
-    // and other modules should not depend on this module.
-    visibility: [
-        "//visibility:private",
-    ],
-    enable_validation: false,
-    stubs_type: "everything",
-}
-
-java_api_library {
-    name: "android_system_server_stubs_current.from-text",
-    api_surface: "system-server",
-    api_contributions: [
-        "services-non-updatable-stubs.api.contribution",
-    ],
-    libs: [
-        "android_module_lib_stubs_current.from-text",
-        "stub-annotations",
-    ],
-    static_libs: [
-        "android_module_lib_stubs_current.from-text",
-    ],
-    visibility: ["//visibility:public"],
-    enable_validation: false,
-    stubs_type: "everything",
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -1345,4 +1144,5 @@ java_library {
         ":hwbinder-stubs-docs",
     ],
     visibility: ["//visibility:public"],
+    is_stubs_module: true,
 }

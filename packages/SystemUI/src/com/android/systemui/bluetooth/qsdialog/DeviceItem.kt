@@ -38,6 +38,7 @@ import com.android.settingslib.bluetooth.CachedBluetoothDevice
 enum class DeviceItemType {
     ACTIVE_MEDIA_BLUETOOTH_DEVICE,
     AUDIO_SHARING_MEDIA_BLUETOOTH_DEVICE,
+    AVAILABLE_AUDIO_SHARING_MEDIA_BLUETOOTH_DEVICE,
     AVAILABLE_MEDIA_BLUETOOTH_DEVICE,
     CONNECTED_BLUETOOTH_DEVICE,
     SAVED_BLUETOOTH_DEVICE,
@@ -52,4 +53,5 @@ data class DeviceItem(
     val background: Int? = null,
     var isEnabled: Boolean = true,
     var actionAccessibilityLabel: String = "",
+    var isActive: Boolean = false
 )

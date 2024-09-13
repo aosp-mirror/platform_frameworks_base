@@ -8,7 +8,7 @@
     <string name="a11y_settings_label" msgid="3977714687248445050">"הגדרות נגישות"</string>
     <string name="power_label" msgid="7699720321491287839">"הפעלה"</string>
     <string name="power_utterance" msgid="7444296686402104807">"אפשרויות הפעלה"</string>
-    <string name="recent_apps_label" msgid="6583276995616385847">"אפליקציות אחרונות"</string>
+    <string name="recent_apps_label" msgid="6583276995616385847">"אפליקציות שהיו בשימוש לאחרונה"</string>
     <string name="lockscreen_label" msgid="648347953557887087">"מסך נעילה"</string>
     <string name="quick_settings_label" msgid="2999117381487601865">"הגדרות מהירות"</string>
     <string name="notifications_label" msgid="6829741046963013567">"התראות"</string>

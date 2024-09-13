@@ -56,12 +56,17 @@ public class ZoneInfoDbTimeZoneProviderEventPreProcessor
         // enables immediate failover to a secondary provider, one that might provide valid IDs for
         // the same location, which should provide better behavior than just ignoring the event.
         if (hasInvalidZones(event)) {
-            TimeZoneProviderStatus providerStatus = new TimeZoneProviderStatus.Builder(
-                    event.getTimeZoneProviderStatus())
-                    .setTimeZoneResolutionOperationStatus(OPERATION_STATUS_FAILED)
-                    .build();
-            return TimeZoneProviderEvent.createUncertainEvent(
-                    event.getCreationElapsedMillis(), providerStatus);
+            TimeZoneProviderStatus providerStatus = event.getTimeZoneProviderStatus();
+            TimeZoneProviderStatus.Builder providerStatusBuilder;
+            if (providerStatus != null) {
+                providerStatusBuilder = new TimeZoneProviderStatus.Builder(providerStatus);
+            } else {
+                providerStatusBuilder = new TimeZoneProviderStatus.Builder();
+            }
+            return TimeZoneProviderEvent.createUncertainEvent(event.getCreationElapsedMillis(),
+                    providerStatusBuilder
+                            .setTimeZoneResolutionOperationStatus(OPERATION_STATUS_FAILED)
+                            .build());
         }
 
         return event;

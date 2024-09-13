@@ -65,6 +65,7 @@
     <uses-permission android:name="com.android.voicemail.permission.ADD_VOICEMAIL" />
     <uses-permission android:name="android.permission.WRITE_EMBEDDED_SUBSCRIPTIONS" />
     <uses-permission android:name="android.permission.GET_PROCESS_STATE_AND_OOM_SCORE" />
+    <uses-permission android:name="android.permission.READ_DROPBOX_DATA" />
     <uses-permission android:name="android.permission.READ_LOGS" />
     <uses-permission android:name="android.permission.BRIGHTNESS_SLIDER_USAGE" />
     <uses-permission android:name="android.permission.ACCESS_AMBIENT_LIGHT_STATS" />
@@ -939,6 +940,13 @@
 
     <!-- Permission required for CTS test - FileIntegrityManagerTest -->
     <uses-permission android:name="android.permission.SETUP_FSVERITY" />
+
+    <!-- Permissions required for CTS test - AppFunctionManagerTest -->
+    <uses-permission android:name="android.permission.EXECUTE_APP_FUNCTIONS_TRUSTED" />
+    <uses-permission android:name="android.permission.EXECUTE_APP_FUNCTIONS" />
+
+    <!-- Permission required for CTS test - CtsNfcTestCases -->
+    <uses-permission android:name="android.permission.NFC_SET_CONTROLLER_ALWAYS_ON" />
 
     <application
         android:label="@string/app_label"

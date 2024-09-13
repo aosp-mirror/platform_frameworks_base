@@ -19,6 +19,7 @@ package android.view;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.view.InsetsSource.FLAG_FORCE_CONSUMING;
+import static android.view.InsetsSource.FLAG_FORCE_CONSUMING_OPAQUE_CAPTION_BAR;
 import static android.view.InsetsSource.ID_IME;
 import static android.view.InsetsSource.SIDE_BOTTOM;
 import static android.view.InsetsSource.SIDE_TOP;
@@ -54,12 +55,17 @@ import static org.junit.Assert.assertTrue;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.os.Parcel;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.util.SparseIntArray;
 import android.view.WindowInsets.Type;
 
-import androidx.test.runner.AndroidJUnit4;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
+import com.android.window.flags.Flags;
+
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -77,6 +83,9 @@ import java.util.List;
 @Presubmit
 @RunWith(AndroidJUnit4.class)
 public class InsetsStateTest {
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     private static final int ID_STATUS_BAR = InsetsSource.createId(
             null /* owner */, 0 /* index */, statusBars());
@@ -853,5 +862,20 @@ public class InsetsStateTest {
                 insets.getBoundingRects(Type.tappableElement())
         );
 
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION_ALWAYS)
+    public void testCalculateInsets_forceConsumingCaptionBar() {
+        mState.getOrCreateSource(ID_CAPTION_BAR, captionBar())
+                .setFrame(new Rect(0, 0, 100, 100))
+                .setVisible(true)
+                .setFlags(FLAG_FORCE_CONSUMING_OPAQUE_CAPTION_BAR);
+
+        final WindowInsets insets = mState.calculateInsets(new Rect(0, 0, 1000, 1000), null, false,
+                SOFT_INPUT_ADJUST_RESIZE, 0, 0, TYPE_APPLICATION, ACTIVITY_TYPE_UNDEFINED,
+                new SparseIntArray());
+
+        assertTrue(insets.isForceConsumingOpaqueCaptionBar());
     }
 }

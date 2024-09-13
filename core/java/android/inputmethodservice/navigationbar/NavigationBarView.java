@@ -216,7 +216,11 @@ public final class NavigationBarView extends FrameLayout {
                 oldConfig.getLayoutDirection() != mConfiguration.getLayoutDirection();
 
         if (densityChange || dirChange) {
-            mImeSwitcherIcon = getDrawable(com.android.internal.R.drawable.ic_ime_switcher);
+            final int switcherResId = Flags.imeSwitcherRevamp()
+                    ? com.android.internal.R.drawable.ic_ime_switcher_new
+                    : com.android.internal.R.drawable.ic_ime_switcher;
+
+            mImeSwitcherIcon = getDrawable(switcherResId);
         }
         if (orientationChange || densityChange || dirChange) {
             mBackIcon = getBackDrawable();

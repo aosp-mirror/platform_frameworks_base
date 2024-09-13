@@ -1195,6 +1195,8 @@
     <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"Paroļu laukā netiek atbalstīta rokraksta funkcija."</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Atpakaļ"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Pārslēgt ievades metodi"</string>
+    <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"Atvērt ievades metodes atlasītāju"</string>
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"Iestatījumi"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Paliek maz brīvas vietas"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Dažas sistēmas funkcijas var nedarboties."</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Sistēmai pietrūkst vietas. Atbrīvojiet vismaz 250 MB vietas un restartējiet ierīci."</string>
@@ -1412,10 +1414,8 @@
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"Atlasiet, lai atspējotu bezvadu atkļūdošanu."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Drošības pārbaudes režīms ir iespējots"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Lai atspējotu drošības pārbaudes režīmu, veiciet rūpnīcas datu atiestatīšanu."</string>
-    <!-- no translation found for wrong_hsum_configuration_notification_title (7212758829332714385) -->
-    <skip />
-    <!-- no translation found for wrong_hsum_configuration_notification_message (5353475441480684381) -->
-    <skip />
+    <string name="wrong_hsum_configuration_notification_title" msgid="7212758829332714385">"Nepareiza bezgalvas sistēmas lietotāja režīma būvējuma konfigurācija"</string>
+    <string name="wrong_hsum_configuration_notification_message" msgid="5353475441480684381">"Šīs ierīces bezgalvas sistēmas lietotāja režīma stāvoklis atšķiras no tā būvējuma konfigurācijas. Lūdzu, atiestatiet ierīcē rūpnīcas datus."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"Seriālā konsole ir iespējota"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"Tiek ietekmēta veiktspēja. Lai atspējotu, pārbaudiet operētājsistēmu ielādes rīku."</string>
     <string name="mte_override_notification_title" msgid="4731115381962792944">"Eksperimentālais paplašinājums MTE iespējots"</string>
@@ -1431,6 +1431,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"KOPĪGOT"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"NORAIDĪT"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Ievades metodes izvēle"</string>
+    <string name="input_method_language_settings" msgid="8069089418056819437">"Valodas iestatījumi"</string>
     <string name="show_ime" msgid="6406112007347443383">"Paturēt ekrānā, kamēr ir aktīva fiziskā tastatūra"</string>
     <string name="hardware" msgid="3611039921284836033">"Izmantojiet ekrāna tastatūru"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Jākonfigurē <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
@@ -1746,7 +1747,8 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"Kāda lietotne padara atļaujas pieprasījumu nesaprotamu, tāpēc nevar verificēt jūsu atbildi."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Pieskarieties funkcijai, lai sāktu to izmantot"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Izvēlieties funkcijas, ko izmantot ar pieejamības pogu"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Izvēlieties funkcijas, ko izmantot ar skaļuma pogu saīsni"</string>
+    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
+    <skip />
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Pakalpojums <xliff:g id="SERVICE_NAME">%s</xliff:g> ir izslēgts."</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Rediģēt īsinājumtaustiņus"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Gatavs"</string>
@@ -1760,12 +1762,9 @@
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Turējāt nospiestas skaļuma pogas. Pakalpojums <xliff:g id="SERVICE_NAME">%1$s</xliff:g> tika ieslēgts."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Turējāt nospiestas skaļuma pogas. Pakalpojums <xliff:g id="SERVICE_NAME">%1$s</xliff:g> tika izslēgts."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Atlaidiet skaļuma pogas. Lai ieslēgtu pakalpojumu <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, vēlreiz nospiediet un trīs sekundes turiet nospiestas abas skaļuma pogas."</string>
-    <!-- no translation found for accessibility_button_prompt_text (6105393217162198616) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_prompt_text (6452246951969541792) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_3finger_prompt_text (77745752309056152) -->
-    <skip />
+    <string name="accessibility_button_prompt_text" msgid="6105393217162198616">"Izvēlieties funkciju"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="6452246951969541792">"Izvēlieties funkciju"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="77745752309056152">"Izvēlieties funkciju"</string>
     <string name="accessibility_button_instructional_text" msgid="6831154884557881996">"Funkcija tiks atvērta, kad nākamreiz pieskarsieties pieejamības pogai."</string>
     <string name="accessibility_gesture_instructional_text" msgid="4133877896011098550">"Funkcija tiks atvērta, kad nākamreiz izmantosiet šo saīsni. Velciet augšup ar diviem pirkstiem no ekrāna apakšdaļas un ātri atlaidiet."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="1124458279366968154">"Funkcija tiks atvērta, kad nākamreiz izmantosiet šo saīsni. Velciet augšup ar trim pirkstiem no ekrāna apakšdaļas un ātri atlaidiet."</string>
@@ -1891,8 +1890,7 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN ir pārāk īss. Tam ir jābūt vismaz 4 ciparus garam."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Vēlāk mēģiniet vēlreiz."</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Skatīšanās pilnekrāna režīmā"</string>
-    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
-    <skip />
+    <string name="immersive_cling_description" msgid="2896205051090870978">"Lai izietu, velciet lejup no ekrāna augšdaļas."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Labi"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Lai uzlabotu skatu, pagrieziet ekrānu."</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Labākam skatam atveriet lietotni <xliff:g id="NAME">%s</xliff:g> pilnekrāna režīmā."</string>
@@ -2428,6 +2426,8 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Drošības nolūkos lietotnes saturs kopīgotajā ekrānā ir paslēpts"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Automātiski izveidots savienojums ar satelītu"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Varat sūtīt un saņemt ziņojumus bez mobilā vai Wi-Fi tīkla."</string>
+    <string name="satellite_notification_manual_title" msgid="1097504441849466279">"Vai izmantot satelīta ziņojumapmaiņu?"</string>
+    <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Sūtiet un saņemiet ziņojumus bez mobilā vai Wi‑Fi tīkla."</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Atvērt lietotni Ziņojumi"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Darbības principi"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Gaida…"</string>
@@ -2444,22 +2444,14 @@
     <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"Mainīt lietotāju"</string>
     <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"Izslēgt skaņu"</string>
     <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"Pieskarieties, lai izslēgtu skaņu"</string>
-    <!-- no translation found for keyboard_shortcut_group_applications_browser (6535007304687100909) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_contacts (2750702518068326356) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_email (4229037666415353683) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_sms (3523799286376321137) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_music (2051507523525651067) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_calendar (3571770335653387606) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_calculator (6753209559716091507) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_maps (7950000659522589471) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications (3010389163951364798) -->
-    <skip />
+    <string name="keyboard_shortcut_group_applications_browser" msgid="6535007304687100909">"Pārlūkprogramma"</string>
+    <string name="keyboard_shortcut_group_applications_contacts" msgid="2750702518068326356">"Kontaktpersonas"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="4229037666415353683">"E-pasts"</string>
+    <string name="keyboard_shortcut_group_applications_sms" msgid="3523799286376321137">"Īsziņas"</string>
+    <string name="keyboard_shortcut_group_applications_music" msgid="2051507523525651067">"Mūzika"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="3571770335653387606">"Kalendārs"</string>
+    <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"Kalkulators"</string>
+    <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"Maps"</string>
+    <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"Lietojumprogrammas"</string>
+    <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"Jūsu pirkstu nospiedumus vairs nevar atpazīt. Vēlreiz iestatiet autorizāciju ar pirksta nospiedumu."</string>
 </resources>

@@ -22,13 +22,12 @@ package com.android.systemui.statusbar.notification.collection
  * The [modifier] function will be passed an instance of a NotificationEntryBuilder. Any
  * modifications made to the builder will be applied to the [entry].
  */
-inline fun modifyEntry(
-    entry: NotificationEntry,
+inline fun NotificationEntry.modifyEntry(
     crossinline modifier: NotificationEntryBuilder.() -> Unit
 ) {
-    val builder = NotificationEntryBuilder(entry)
+    val builder = NotificationEntryBuilder(this)
     modifier(builder)
-    builder.apply(entry)
+    builder.apply(this)
 }
 
 fun getAttachState(entry: ListEntry): ListAttachState {

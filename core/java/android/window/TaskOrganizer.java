@@ -24,7 +24,6 @@ import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.app.ActivityManager;
-import android.app.CameraCompatTaskInfo.CameraCompatControlState;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.view.SurfaceControl;
@@ -246,20 +245,6 @@ public class TaskOrganizer extends WindowOrganizer {
     public void restartTaskTopActivityProcessIfVisible(@NonNull WindowContainerToken task) {
         try {
             mTaskOrganizerController.restartTaskTopActivityProcessIfVisible(task);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Updates a state of camera compat control for stretched issues in the viewfinder.
-     * @hide
-     */
-    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
-    public void updateCameraCompatControlState(@NonNull WindowContainerToken task,
-            @CameraCompatControlState int state) {
-        try {
-            mTaskOrganizerController.updateCameraCompatControlState(task, state);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

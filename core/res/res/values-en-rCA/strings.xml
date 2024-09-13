@@ -1194,6 +1194,8 @@
     <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"Handwriting is not supported in password fields"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Back"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Switch input method"</string>
+    <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"Open input method picker"</string>
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"Settings"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Storage space running out"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Some system functions may not work"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Not enough storage for the system. Make sure you have 250MB of free space and restart."</string>
@@ -1428,6 +1430,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"SHARE"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"DECLINE"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Choose input method"</string>
+    <string name="input_method_language_settings" msgid="8069089418056819437">"Language Settings"</string>
     <string name="show_ime" msgid="6406112007347443383">"Keep it on screen while physical keyboard is active"</string>
     <string name="hardware" msgid="3611039921284836033">"Use on-screen keyboard"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Configure <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
@@ -1743,7 +1746,7 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"An app is obscuring the permission request so your response cannot be verified."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Tap a feature to start using it:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Choose features to use with the accessibility button"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Choose features to use with the volume key shortcut"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2245540598834891500">"Choose features to use with the volume keys shortcut"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> has been turned off"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Edit shortcuts"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Done"</string>
@@ -2421,6 +2424,8 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"App content hidden from screen share for security"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Auto connected to satellite"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"You can send and receive messages without a mobile or Wi-Fi network"</string>
+    <string name="satellite_notification_manual_title" msgid="1097504441849466279">"Use satellite messaging?"</string>
+    <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Send and receive messages without a mobile or Wi-Fi network"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Open Messages"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"How it works"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Pending..."</string>
@@ -2446,4 +2451,5 @@
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"Calculator"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"Maps"</string>
     <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"Applications"</string>
+    <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"Your fingerprints can no longer be recognized. Set up Fingerprint Unlock again."</string>
 </resources>

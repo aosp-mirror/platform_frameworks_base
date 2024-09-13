@@ -20,10 +20,12 @@ import android.content.ContentResolver
 import android.content.Context
 import android.media.AudioManager
 import com.android.settingslib.bluetooth.LocalBluetoothManager
+import com.android.settingslib.flags.Flags
 import com.android.settingslib.notification.domain.interactor.NotificationsSoundPolicyInteractor
 import com.android.settingslib.volume.data.repository.AudioRepository
 import com.android.settingslib.volume.data.repository.AudioRepositoryImpl
 import com.android.settingslib.volume.data.repository.AudioSharingRepository
+import com.android.settingslib.volume.data.repository.AudioSharingRepositoryEmptyImpl
 import com.android.settingslib.volume.data.repository.AudioSharingRepositoryImpl
 import com.android.settingslib.volume.domain.interactor.AudioModeInteractor
 import com.android.settingslib.volume.domain.interactor.AudioVolumeInteractor
@@ -68,24 +70,29 @@ interface AudioModule {
                 coroutineContext,
                 coroutineScope,
                 volumeLogger,
+                com.android.systemui.Flags.useVolumeController(),
             )
 
         @Provides
         @SysUISingleton
         fun provideAudioSharingRepository(
-            @Application context: Context,
             contentResolver: ContentResolver,
             localBluetoothManager: LocalBluetoothManager?,
             @Application coroutineScope: CoroutineScope,
             @Background coroutineContext: CoroutineContext,
+            volumeLogger: VolumeLogger
         ): AudioSharingRepository =
-            AudioSharingRepositoryImpl(
-                context,
-                contentResolver,
-                localBluetoothManager,
-                coroutineScope,
-                coroutineContext
-            )
+            if (Flags.enableLeAudioSharing() && localBluetoothManager != null) {
+                AudioSharingRepositoryImpl(
+                    contentResolver,
+                    localBluetoothManager,
+                    coroutineScope,
+                    coroutineContext,
+                    volumeLogger
+                )
+            } else {
+                AudioSharingRepositoryEmptyImpl()
+            }
 
         @Provides
         @SysUISingleton

@@ -22,9 +22,10 @@ import android.testing.TestableLooper.RunWithLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.classifier.falsingManager
-import com.android.systemui.haptics.vibratorHelper
+import com.android.systemui.animation.ActivityTransitionAnimator
+import com.android.systemui.haptics.fakeVibratorHelper
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.log.core.FakeLogBuffer
 import com.android.systemui.qs.qsTileFactory
 import com.android.systemui.statusbar.policy.keyguardStateController
 import com.android.systemui.testKosmos
@@ -49,9 +50,10 @@ class QSLongPressEffectTest : SysuiTestCase() {
 
     @Rule @JvmField val mMockitoRule: MockitoRule = MockitoJUnit.rule()
     private val kosmos = testKosmos()
-    private val vibratorHelper = kosmos.vibratorHelper
+    private val vibratorHelper = kosmos.fakeVibratorHelper
     private val qsTile = kosmos.qsTileFactory.createTile("Test Tile")
     @Mock private lateinit var callback: QSLongPressEffect.Callback
+    @Mock private lateinit var controller: ActivityTransitionAnimator.Controller
 
     private val effectDuration = 400
     private val lowTickDuration = 12
@@ -71,7 +73,7 @@ class QSLongPressEffectTest : SysuiTestCase() {
             QSLongPressEffect(
                 vibratorHelper,
                 kosmos.keyguardStateController,
-                kosmos.falsingManager,
+                FakeLogBuffer.Factory.create(),
             )
         longPressEffect.callback = callback
         longPressEffect.qsTile = qsTile
@@ -108,6 +110,26 @@ class QSLongPressEffectTest : SysuiTestCase() {
         // THEN the effect moves to the TIMEOUT_WAIT state
         assertThat(longPressEffect.state).isEqualTo(QSLongPressEffect.State.TIMEOUT_WAIT)
     }
+
+    @Test
+    fun onActionDown_whileClicked_startsWait() =
+        testWhileInState(QSLongPressEffect.State.CLICKED) {
+            // GIVEN an action down event occurs
+            longPressEffect.handleActionDown()
+
+            // THEN the effect moves to the TIMEOUT_WAIT state
+            assertThat(longPressEffect.state).isEqualTo(QSLongPressEffect.State.TIMEOUT_WAIT)
+        }
+
+    @Test
+    fun onActionDown_whileLongClicked_startsWait() =
+        testWhileInState(QSLongPressEffect.State.LONG_CLICKED) {
+            // GIVEN an action down event occurs
+            longPressEffect.handleActionDown()
+
+            // THEN the effect moves to the TIMEOUT_WAIT state
+            assertThat(longPressEffect.state).isEqualTo(QSLongPressEffect.State.TIMEOUT_WAIT)
+        }
 
     @Test
     fun onActionCancel_whileWaiting_goesIdle() =
@@ -218,8 +240,9 @@ class QSLongPressEffectTest : SysuiTestCase() {
             // GIVEN that the animation completes
             longPressEffect.handleAnimationComplete()
 
-            // THEN the effect ends in the idle state.
+            // THEN the effect ends in the idle state and the reversed callback is used.
             assertThat(longPressEffect.state).isEqualTo(QSLongPressEffect.State.IDLE)
+            verify(callback, times(1)).onEffectFinishedReversing()
         }
 
     @Test
@@ -301,13 +324,12 @@ class QSLongPressEffectTest : SysuiTestCase() {
     }
 
     @Test
-    fun getStateForClick_withFalseTapWhenLocked_returnsIdle() {
+    fun getStateForClick_whenKeyguardsIsShowing_returnsIdle() {
         // GIVEN an active tile
         qsTile.state?.state = Tile.STATE_ACTIVE
 
-        // GIVEN that the device is locked and a false tap is detected
-        whenever(kosmos.keyguardStateController.isUnlocked).thenReturn(false)
-        kosmos.falsingManager.setFalseTap(true)
+        // GIVEN that the keyguard is showing
+        whenever(kosmos.keyguardStateController.isShowing).thenReturn(true)
 
         // WHEN determining the state of a click action
         val clickState = longPressEffect.getStateForClick()
@@ -321,9 +343,8 @@ class QSLongPressEffectTest : SysuiTestCase() {
         // GIVEN an active tile
         qsTile.state?.state = Tile.STATE_ACTIVE
 
-        // GIVEN that the device is locked and a false tap is not detected
-        whenever(kosmos.keyguardStateController.isUnlocked).thenReturn(false)
-        kosmos.falsingManager.setFalseTap(false)
+        // GIVEN that the keyguard is not showing
+        whenever(kosmos.keyguardStateController.isShowing).thenReturn(false)
 
         // WHEN determining the state of a click action
         val clickState = longPressEffect.getStateForClick()
@@ -337,9 +358,8 @@ class QSLongPressEffectTest : SysuiTestCase() {
         // GIVEN that the tile is null
         longPressEffect.qsTile = null
 
-        // GIVEN that the device is locked and a false tap is not detected
-        whenever(kosmos.keyguardStateController.isUnlocked).thenReturn(false)
-        kosmos.falsingManager.setFalseTap(false)
+        // GIVEN that the keyguard is not showing
+        whenever(kosmos.keyguardStateController.isShowing).thenReturn(false)
 
         // WHEN determining the state of a click action
         val clickState = longPressEffect.getStateForClick()
@@ -347,6 +367,23 @@ class QSLongPressEffectTest : SysuiTestCase() {
         // THEN the state is IDLE
         assertThat(clickState).isEqualTo(QSLongPressEffect.State.IDLE)
     }
+
+    @Test
+    fun onLongClickTransitionCancelled_whileInLongClickState_reversesEffect() =
+        testWhileInState(QSLongPressEffect.State.LONG_CLICKED) {
+            // GIVEN a transition controller delegate
+            val delegate = longPressEffect.createTransitionControllerDelegate(controller)
+
+            // WHEN the activity launch animation is cancelled
+            val newOccludedState = false
+            delegate.onTransitionAnimationCancelled(newOccludedState)
+
+            // THEN the effect reverses and ends in RUNNING_BACKWARDS_FROM_CANCEL
+            assertThat(longPressEffect.state)
+                .isEqualTo(QSLongPressEffect.State.RUNNING_BACKWARDS_FROM_CANCEL)
+            verify(callback, times(1)).onReverseAnimator(false)
+            verify(controller).onTransitionAnimationCancelled(newOccludedState)
+        }
 
     private fun testWithScope(initialize: Boolean = true, test: suspend TestScope.() -> Unit) =
         with(kosmos) {

@@ -169,6 +169,14 @@ public class LogModule {
         return factory.create("NotifRemoteInputLog", 50 /* maxSize */, false /* systrace */);
     }
 
+    /** Provides a logging buffer for all logs related to notification visual stability. */
+    @Provides
+    @SysUISingleton
+    @VisualStabilityLog
+    public static LogBuffer provideVisualStabilityLogBuffer(LogBufferFactory factory) {
+        return factory.create("VisualStabilityLog", 50 /* maxSize */, false /* systrace */);
+    }
+
     /** Provides a logging buffer for all logs related to keyguard media controller. */
     @Provides
     @SysUISingleton
@@ -374,6 +382,16 @@ public class LogModule {
         return factory.create("MediaLog", 20);
     }
 
+    /**
+     * Provides a buffer for media device changes
+     */
+    @Provides
+    @SysUISingleton
+    @MediaDeviceLog
+    public static LogBuffer providesMediaDeviceLogBuffer(LogBufferFactory factory) {
+        return factory.create("MediaDeviceLog", 50);
+    }
+
     /** Allows logging buffers to be tweaked via adb on debug builds but not on prod builds. */
     @Provides
     @SysUISingleton
@@ -560,6 +578,16 @@ public class LogModule {
     }
 
     /**
+     * Provides a {@link LogBuffer} for keyguard quick affordances-related logs.
+     */
+    @Provides
+    @SysUISingleton
+    @KeyguardQuickAffordancesLog
+    public static LogBuffer provideKeyguardQuickAffordancesLogBuffer(LogBufferFactory factory) {
+        return factory.create("KeyguardQuickAffordancesLog", 100);
+    }
+
+    /**
      * Provides a {@link LogBuffer} for keyguard transition animation logs.
      */
     @Provides
@@ -597,6 +625,16 @@ public class LogModule {
     @CommunalLog
     public static LogBuffer provideCommunalLogBuffer(LogBufferFactory factory) {
         return factory.create("CommunalLog", 250);
+    }
+
+    /**
+     * Provides a {@link LogBuffer} for communal touch-handling logs.
+     */
+    @Provides
+    @SysUISingleton
+    @CommunalTouchLog
+    public static LogBuffer provideCommunalTouchLogBuffer(LogBufferFactory factory) {
+        return factory.create("CommunalTouchLog", 250);
     }
 
     /**
@@ -642,6 +680,14 @@ public class LogModule {
         return factory.create("KeyboardLog", 50);
     }
 
+    /** Provides a {@link LogBuffer} for the input devices tutorial. */
+    @Provides
+    @SysUISingleton
+    @InputDeviceTutorialLog
+    public static LogBuffer provideInputDeviceTutorialLogBuffer(LogBufferFactory factory) {
+        return factory.create("InputDeviceTutorialLog", 50);
+    }
+
     /** Provides a {@link LogBuffer} for {@link PackageChangeRepository} */
     @Provides
     @SysUISingleton
@@ -680,5 +726,13 @@ public class LogModule {
     @VolumeLog
     public static LogBuffer provideVolumeLogBuffer(LogBufferFactory factory) {
         return factory.create("VolumeLog", 50);
+    }
+
+    /** Provides a {@link LogBuffer} for use by long touch event handlers. */
+    @Provides
+    @SysUISingleton
+    @LongPressTouchLog
+    public static LogBuffer providesLongPressTouchLog(LogBufferFactory factory) {
+        return factory.create("LongPressViewLog", 200);
     }
 }

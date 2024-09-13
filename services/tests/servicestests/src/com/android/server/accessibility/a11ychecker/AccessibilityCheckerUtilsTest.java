@@ -16,22 +16,22 @@
 
 package com.android.server.accessibility.a11ychecker;
 
+import static com.android.server.accessibility.a11ychecker.TestUtils.QUALIFIED_TEST_ACTIVITY_NAME;
 import static com.android.server.accessibility.a11ychecker.TestUtils.TEST_A11Y_SERVICE_CLASS_NAME;
 import static com.android.server.accessibility.a11ychecker.TestUtils.TEST_A11Y_SERVICE_SOURCE_PACKAGE_NAME;
-import static com.android.server.accessibility.a11ychecker.TestUtils.TEST_A11Y_SERVICE_SOURCE_VERSION_CODE;
 import static com.android.server.accessibility.a11ychecker.TestUtils.TEST_ACTIVITY_NAME;
 import static com.android.server.accessibility.a11ychecker.TestUtils.TEST_APP_PACKAGE_NAME;
-import static com.android.server.accessibility.a11ychecker.TestUtils.TEST_APP_VERSION_CODE;
-import static com.android.server.accessibility.a11ychecker.TestUtils.TEST_WINDOW_TITLE;
+import static com.android.server.accessibility.a11ychecker.TestUtils.createResult;
 import static com.android.server.accessibility.a11ychecker.TestUtils.getMockPackageManagerWithInstalledApps;
 
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.when;
 
+import android.accessibility.AccessibilityCheckClass;
+import android.accessibility.AccessibilityCheckResultType;
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
-import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import androidx.test.runner.AndroidJUnit4;
@@ -89,20 +89,23 @@ public class AccessibilityCheckerUtilsTest {
                         AccessibilityCheckResult.AccessibilityCheckResultType.NOT_RUN, null, 5,
                         null);
 
-        Set<A11yCheckerProto.AccessibilityCheckResultReported> atoms =
-                AccessibilityCheckerUtils.processResults(
-                        mockNodeInfo,
-                        List.of(result1, result2, result3, result4),
-                        null,
+
+        AndroidAccessibilityCheckerResult.Builder resultBuilder =
+                AccessibilityCheckerUtils.getCommonResultBuilder(mockNodeInfo, null,
                         mMockPackageManager,
                         new ComponentName(TEST_A11Y_SERVICE_SOURCE_PACKAGE_NAME,
                                 TEST_A11Y_SERVICE_CLASS_NAME));
+        Set<AndroidAccessibilityCheckerResult> results =
+                AccessibilityCheckerUtils.processResults(mockNodeInfo,
+                        List.of(result1, result2, result3, result4), resultBuilder);
 
-        assertThat(atoms).containsExactly(
-                createAtom(A11yCheckerProto.AccessibilityCheckClass.SPEAKABLE_TEXT_PRESENT_CHECK,
-                        A11yCheckerProto.AccessibilityCheckResultType.WARNING, 1),
-                createAtom(A11yCheckerProto.AccessibilityCheckClass.TOUCH_TARGET_SIZE_CHECK,
-                        A11yCheckerProto.AccessibilityCheckResultType.ERROR, 2)
+        assertThat(results).containsExactly(
+                createResult("TargetNode", "",
+                        AccessibilityCheckClass.SPEAKABLE_TEXT_PRESENT_CHECK,
+                        AccessibilityCheckResultType.WARNING_CHECK_RESULT_TYPE, 1),
+                createResult("TargetNode", "",
+                        AccessibilityCheckClass.TOUCH_TARGET_SIZE_CHECK,
+                        AccessibilityCheckResultType.ERROR_CHECK_RESULT_TYPE, 2)
         );
     }
 
@@ -126,27 +129,28 @@ public class AccessibilityCheckerUtilsTest {
                         TouchTargetSizeCheck.class,
                         AccessibilityCheckResult.AccessibilityCheckResultType.ERROR, null, 2, null);
 
-        Set<A11yCheckerProto.AccessibilityCheckResultReported> atoms =
-                AccessibilityCheckerUtils.processResults(
-                        mockNodeInfo,
-                        List.of(result1, result2),
-                        null,
+        AndroidAccessibilityCheckerResult.Builder resultBuilder =
+                AccessibilityCheckerUtils.getCommonResultBuilder(mockNodeInfo, null,
                         mMockPackageManager,
                         new ComponentName(TEST_A11Y_SERVICE_SOURCE_PACKAGE_NAME,
                                 TEST_A11Y_SERVICE_CLASS_NAME));
+        Set<AndroidAccessibilityCheckerResult> results =
+                AccessibilityCheckerUtils.processResults(mockNodeInfo,
+                        List.of(result1, result2), resultBuilder);
 
-        assertThat(atoms).isEmpty();
+        assertThat(results).isEmpty();
     }
 
     @Test
-    public void getActivityName_hasWindowStateChangedEvent_returnsActivityName() {
-        AccessibilityEvent accessibilityEvent =
-                AccessibilityEvent.obtain(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
-        accessibilityEvent.setPackageName(TEST_APP_PACKAGE_NAME);
-        accessibilityEvent.setClassName(TEST_ACTIVITY_NAME);
-
+    public void getActivityName_hasValidActivityClassName_returnsActivityName() {
         assertThat(AccessibilityCheckerUtils.getActivityName(mMockPackageManager,
-                accessibilityEvent)).isEqualTo("MainActivity");
+                TEST_APP_PACKAGE_NAME, QUALIFIED_TEST_ACTIVITY_NAME)).isEqualTo(TEST_ACTIVITY_NAME);
+    }
+
+    @Test
+    public void getActivityName_hasInvalidActivityClassName_returnsActivityName() {
+        assertThat(AccessibilityCheckerUtils.getActivityName(mMockPackageManager,
+                TEST_APP_PACKAGE_NAME, "com.NonActivityClass")).isEmpty();
     }
 
     // Makes sure the AccessibilityHierarchyCheck class to enum mapping is up to date with the
@@ -162,26 +166,6 @@ public class AccessibilityCheckerUtilsTest {
 
         assertThat(AccessibilityCheckerUtils.CHECK_CLASS_TO_ENUM_MAP.keySet())
                 .containsExactlyElementsIn(latestCheckClasses);
-    }
-
-
-    private static A11yCheckerProto.AccessibilityCheckResultReported createAtom(
-            A11yCheckerProto.AccessibilityCheckClass checkClass,
-            A11yCheckerProto.AccessibilityCheckResultType resultType,
-            int resultId) {
-        return A11yCheckerProto.AccessibilityCheckResultReported.newBuilder()
-                .setPackageName(TEST_APP_PACKAGE_NAME)
-                .setAppVersionCode(TEST_APP_VERSION_CODE)
-                .setUiElementPath(TEST_APP_PACKAGE_NAME + ":TargetNode")
-                .setWindowTitle(TEST_WINDOW_TITLE)
-                .setActivityName("")
-                .setSourceComponentName(new ComponentName(TEST_A11Y_SERVICE_SOURCE_PACKAGE_NAME,
-                        TEST_A11Y_SERVICE_CLASS_NAME).flattenToString())
-                .setSourceVersionCode(TEST_A11Y_SERVICE_SOURCE_VERSION_CODE)
-                .setResultCheckClass(checkClass)
-                .setResultType(resultType)
-                .setResultId(resultId)
-                .build();
     }
 
 }

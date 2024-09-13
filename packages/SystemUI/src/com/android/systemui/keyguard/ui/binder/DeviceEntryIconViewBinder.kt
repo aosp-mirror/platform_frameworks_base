@@ -19,6 +19,7 @@ package com.android.systemui.keyguard.ui.binder
 
 import android.annotation.SuppressLint
 import android.content.res.ColorStateList
+import android.util.Log
 import android.util.StateSet
 import android.view.HapticFeedbackConstants
 import android.view.View
@@ -74,15 +75,31 @@ object DeviceEntryIconViewBinder {
         val bgView = view.bgView
         longPressHandlingView.listener =
             object : LongPressHandlingView.Listener {
-                override fun onLongPressDetected(view: View, x: Int, y: Int) {
-                    if (falsingManager.isFalseLongTap(FalsingManager.LOW_PENALTY)) {
+                override fun onLongPressDetected(
+                    view: View,
+                    x: Int,
+                    y: Int,
+                    isA11yAction: Boolean
+                ) {
+                    if (
+                        !isA11yAction && falsingManager.isFalseLongTap(FalsingManager.LOW_PENALTY)
+                    ) {
+                        Log.d(
+                            TAG,
+                            "Long press rejected because it is not a11yAction " +
+                                "and it is a falseLongTap"
+                        )
                         return
                     }
                     vibratorHelper.performHapticFeedback(
                         view,
                         HapticFeedbackConstants.CONFIRM,
                     )
-                    applicationScope.launch { viewModel.onUserInteraction() }
+                    applicationScope.launch {
+                        view.clearFocus()
+                        view.clearAccessibilityFocus()
+                        viewModel.onUserInteraction()
+                    }
                 }
             }
 
@@ -95,6 +112,7 @@ object DeviceEntryIconViewBinder {
                     launch("$TAG#viewModel.isVisible") {
                         viewModel.isVisible.collect { isVisible ->
                             longPressHandlingView.isInvisible = !isVisible
+                            view.isClickable = isVisible
                         }
                     }
                     launch("$TAG#viewModel.isLongPressEnabled") {
@@ -131,7 +149,11 @@ object DeviceEntryIconViewBinder {
                                         view,
                                         HapticFeedbackConstants.CONFIRM,
                                     )
-                                    applicationScope.launch { viewModel.onUserInteraction() }
+                                    applicationScope.launch {
+                                        view.clearFocus()
+                                        view.clearAccessibilityFocus()
+                                        viewModel.onUserInteraction()
+                                    }
                                 }
                             } else {
                                 view.setOnClickListener(null)

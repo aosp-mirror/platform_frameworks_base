@@ -39,13 +39,23 @@ public class ZoneInfoDbTimeZoneProviderEventPreProcessorTest {
 
     private static final long ARBITRARY_TIME_MILLIS = 11223344;
 
+    private final List<String> mNonExistingTimeZones = Arrays.asList(
+            "SystemV/HST10", "Atlantic/Atlantis", "EUROPE/LONDON", "Etc/GMT-5:30");
     private final ZoneInfoDbTimeZoneProviderEventPreProcessor mPreProcessor =
             new ZoneInfoDbTimeZoneProviderEventPreProcessor();
+
+    private static final TimeZoneProviderStatus ARBITRARY_TIME_ZONE_PROVIDER_STATUS =
+            new TimeZoneProviderStatus.Builder()
+                    .setConnectivityDependencyStatus(DEPENDENCY_STATUS_OK)
+                    .setLocationDetectionDependencyStatus(DEPENDENCY_STATUS_OK)
+                    .setTimeZoneResolutionOperationStatus(OPERATION_STATUS_OK)
+                    .build();
 
     @Test
     public void timeZoneIdsFromZoneInfoDbAreValid() {
         for (String timeZone : TimeZone.getAvailableIDs()) {
-            TimeZoneProviderEvent event = timeZoneProviderEvent(timeZone);
+            TimeZoneProviderEvent event = timeZoneProviderEvent(timeZone,
+                    ARBITRARY_TIME_ZONE_PROVIDER_STATUS);
             assertWithMessage("Time zone %s should be supported", timeZone)
                     .that(mPreProcessor.preProcess(event)).isEqualTo(event);
         }
@@ -53,11 +63,9 @@ public class ZoneInfoDbTimeZoneProviderEventPreProcessorTest {
 
     @Test
     public void eventWithNonExistingZones_areMappedToUncertainEvent() {
-        List<String> nonExistingTimeZones = Arrays.asList(
-                "SystemV/HST10", "Atlantic/Atlantis", "EUROPE/LONDON", "Etc/GMT-5:30");
-
-        for (String timeZone : nonExistingTimeZones) {
-            TimeZoneProviderEvent event = timeZoneProviderEvent(timeZone);
+        for (String timeZone : mNonExistingTimeZones) {
+            TimeZoneProviderEvent event = timeZoneProviderEvent(timeZone,
+                    ARBITRARY_TIME_ZONE_PROVIDER_STATUS);
 
             TimeZoneProviderStatus expectedProviderStatus =
                     new TimeZoneProviderStatus.Builder(event.getTimeZoneProviderStatus())
@@ -73,14 +81,31 @@ public class ZoneInfoDbTimeZoneProviderEventPreProcessorTest {
         }
     }
 
-    private static TimeZoneProviderEvent timeZoneProviderEvent(String... timeZoneIds) {
-        TimeZoneProviderStatus providerStatus = new TimeZoneProviderStatus.Builder()
-                .setLocationDetectionDependencyStatus(DEPENDENCY_STATUS_OK)
-                .setConnectivityDependencyStatus(DEPENDENCY_STATUS_OK)
-                .setTimeZoneResolutionOperationStatus(OPERATION_STATUS_OK)
-                .build();
+    @Test
+    public void eventWithNullProviderStatus_areMappedToUncertainEvent() {
+        for (String timeZone : mNonExistingTimeZones) {
+            TimeZoneProviderEvent eventWithNullStatus = timeZoneProviderEvent(timeZone,
+                    /* providerStatus= */ null);
+
+            TimeZoneProviderStatus expectedProviderStatus =
+                    new TimeZoneProviderStatus.Builder()
+                            .setTimeZoneResolutionOperationStatus(OPERATION_STATUS_FAILED)
+                            .build();
+
+            TimeZoneProviderEvent expectedResultEvent =
+                    TimeZoneProviderEvent.createUncertainEvent(
+                            eventWithNullStatus.getCreationElapsedMillis(),
+                            expectedProviderStatus);
+            assertWithMessage(timeZone + " with null time zone provider status")
+                    .that(mPreProcessor.preProcess(eventWithNullStatus))
+                    .isEqualTo(expectedResultEvent);
+        }
+    }
+
+    private static TimeZoneProviderEvent timeZoneProviderEvent(String timeZoneId,
+            TimeZoneProviderStatus providerStatus) {
         TimeZoneProviderSuggestion suggestion = new TimeZoneProviderSuggestion.Builder()
-                .setTimeZoneIds(Arrays.asList(timeZoneIds))
+                .setTimeZoneIds(Arrays.asList(timeZoneId))
                 .setElapsedRealtimeMillis(ARBITRARY_TIME_MILLIS)
                 .build();
         return TimeZoneProviderEvent.createSuggestionEvent(

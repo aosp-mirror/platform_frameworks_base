@@ -20,8 +20,9 @@ import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_B
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BUBBLES_EXPANDED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BUBBLES_MANAGE_MENU_EXPANDED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_DIALOG_SHOWING;
-import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_FREEFORM_ACTIVE_IN_DESKTOP_MODE;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_DISABLE_GESTURE_PIP_ANIMATING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_DISABLE_GESTURE_SPLIT_INVOCATION;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_FREEFORM_ACTIVE_IN_DESKTOP_MODE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_ONE_HANDED_ACTIVE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_QUICK_SETTINGS_EXPANDED;
@@ -33,7 +34,8 @@ import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.inputmethodservice.InputMethodService;
-import android.os.IBinder;
+import android.inputmethodservice.InputMethodService.BackDispositionMode;
+import android.inputmethodservice.InputMethodService.ImeWindowVisibility;
 import android.util.Log;
 import android.view.Display;
 import android.view.KeyEvent;
@@ -58,7 +60,6 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.kotlin.JavaAdapter;
-import com.android.wm.shell.common.desktopmode.DesktopModeTransitionSource;
 import com.android.wm.shell.desktopmode.DesktopMode;
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
 import com.android.wm.shell.onehanded.OneHanded;
@@ -66,7 +67,9 @@ import com.android.wm.shell.onehanded.OneHandedEventCallback;
 import com.android.wm.shell.onehanded.OneHandedTransitionCallback;
 import com.android.wm.shell.onehanded.OneHandedUiEventLogger;
 import com.android.wm.shell.pip.Pip;
+import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.recents.RecentTasks;
+import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource;
 import com.android.wm.shell.splitscreen.SplitScreen;
 import com.android.wm.shell.sysui.ShellInterface;
 
@@ -249,7 +252,25 @@ public final class WMShell implements
                 pip.showPictureInPictureMenu();
             }
         });
+        pip.registerPipTransitionCallback(
+                new PipTransitionController.PipTransitionCallback() {
+                    @Override
+                    public void onPipTransitionStarted(int direction, Rect pipBounds) {
+                        mSysUiState.setFlag(SYSUI_STATE_DISABLE_GESTURE_PIP_ANIMATING, true)
+                                .commitUpdate(mDisplayTracker.getDefaultDisplayId());
+                    }
 
+                    @Override
+                    public void onPipTransitionFinished(int direction) {
+                        mSysUiState.setFlag(SYSUI_STATE_DISABLE_GESTURE_PIP_ANIMATING, false)
+                                .commitUpdate(mDisplayTracker.getDefaultDisplayId());
+                    }
+
+                    @Override
+                    public void onPipTransitionCanceled(int direction) {
+                        // No op.
+                    }
+                }, mSysUiMainExecutor);
         mSysUiState.addCallback(sysUiStateFlag -> {
             mIsSysUiStateValid = (sysUiStateFlag & INVALID_SYSUI_STATE_MASK) == 0;
             pip.onSystemUiStateChanged(mIsSysUiStateValid, sysUiStateFlag);
@@ -262,6 +283,11 @@ public final class WMShell implements
             @Override
             public void onFinishedWakingUp() {
                 splitScreen.onFinishedWakingUp();
+            }
+
+            @Override
+            public void onStartedGoingToSleep() {
+                splitScreen.onStartedGoingToSleep();
             }
         });
         mCommandQueue.addCallback(new CommandQueue.Callbacks() {
@@ -354,8 +380,8 @@ public final class WMShell implements
             }
 
             @Override
-            public void setImeWindowStatus(int displayId, IBinder token, int vis,
-                    int backDisposition, boolean showImeSwitcher) {
+            public void setImeWindowStatus(int displayId, @ImeWindowVisibility int vis,
+                    @BackDispositionMode int backDisposition, boolean showImeSwitcher) {
                 if (displayId == mDisplayTracker.getDefaultDisplayId()
                         && (vis & InputMethodService.IME_VISIBLE) != 0) {
                     oneHanded.stopOneHanded(

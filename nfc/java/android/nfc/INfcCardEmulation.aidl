@@ -48,6 +48,7 @@ interface INfcCardEmulation
     boolean setServiceEnabledForCategoryOther(int userHandle, in ComponentName app, boolean status);
     boolean isDefaultPaymentRegistered();
 
-    boolean overrideRoutingTable(int userHandle, String protocol, String technology);
-    boolean recoverRoutingTable(int userHandle);
+    void overrideRoutingTable(int userHandle, String protocol, String technology, in String pkg);
+    void recoverRoutingTable(int userHandle);
+    boolean isEuiccSupported();
 }

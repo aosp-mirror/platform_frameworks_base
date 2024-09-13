@@ -43,6 +43,7 @@ import android.view.inputmethod.Flags;
 import android.view.inputmethod.ImeTracker;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.inputmethod.ImeTracing;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -296,27 +297,35 @@ public class InsetsSourceConsumer {
 
     @VisibleForTesting(visibility = PACKAGE)
     public boolean applyLocalVisibilityOverride() {
+        if (Flags.refactorInsetsController()) {
+            if (mType == WindowInsets.Type.ime()) {
+                ImeTracing.getInstance().triggerClientDump(
+                        "ImeInsetsSourceConsumer#applyLocalVisibilityOverride",
+                        mController.getHost().getInputMethodManager(), null /* icProto */);
+            }
+        }
         final InsetsSource source = mState.peekSource(mId);
         if (source == null) {
             return false;
         }
         final boolean requestedVisible = (mController.getRequestedVisibleTypes() & mType) != 0;
 
+        // If we don't have control or the leash (in case of the IME), we enforce the
+        // visibility to be hidden, as otherwise we would let the app know too early.
+        if (mSourceControl == null) {
+            if (DEBUG) {
+                Log.d(TAG, TextUtils.formatSimple(
+                        "applyLocalVisibilityOverride: No control in %s for type %s, "
+                                + "requestedVisible=%s",
+                        mController.getHost().getRootViewTitle(),
+                        WindowInsets.Type.toString(mType), requestedVisible));
+            }
+            return false;
+        }
         if (Flags.refactorInsetsController()) {
-            // If we don't have control or the leash (in case of the IME), we enforce the
-            // visibility to be hidden, as otherwise we would let the app know too early.
-            if (mSourceControl == null) {
-                if (DEBUG) {
-                    Log.d(TAG, TextUtils.formatSimple(
-                            "applyLocalVisibilityOverride: No control in %s for type %s, "
-                                    + "requestedVisible=%s",
-                            mController.getHost().getRootViewTitle(),
-                            WindowInsets.Type.toString(mType), requestedVisible));
-                }
-                return false;
-                // TODO(b/323136120) add a flag to the control, to define whether a leash is needed
-            } else if (mId != InsetsSource.ID_IME_CAPTION_BAR
-                    && mSourceControl.getLeash() == null) {
+            // TODO(b/323136120) add a flag to the control, to define whether a leash is
+            //  needed and make it generic for all types
+            if (mId == InsetsSource.ID_IME && mSourceControl.getLeash() == null) {
                 if (DEBUG) {
                     Log.d(TAG, TextUtils.formatSimple(
                             "applyLocalVisibilityOverride: Set the source visibility to false, as"
@@ -329,16 +338,6 @@ public class InsetsSourceConsumer {
                 // only if it was visible before and is now hidden, we want to notify about the
                 // changed state
                 return wasVisible;
-            }
-        } else {
-            // If we don't have control, we are not able to change the visibility.
-            if (mSourceControl == null) {
-                if (DEBUG) {
-                    Log.d(TAG, "applyLocalVisibilityOverride: No control in "
-                            + mController.getHost().getRootViewTitle()
-                            + " requestedVisible=" + requestedVisible);
-                }
-                return false;
             }
         }
         if (source.isVisible() == requestedVisible) {
@@ -396,6 +395,14 @@ public class InsetsSourceConsumer {
      */
     public void removeSurface() {
         // no-op for types that always return ShowResult#SHOW_IMMEDIATELY.
+        if (Flags.refactorInsetsController()) {
+            if (mType == WindowInsets.Type.ime()) {
+                final IBinder window = mController.getHost().getWindowToken();
+                if (window != null) {
+                    mController.getHost().getInputMethodManager().removeImeSurface(window);
+                }
+            }
+        }
     }
 
     @VisibleForTesting(visibility = PACKAGE)

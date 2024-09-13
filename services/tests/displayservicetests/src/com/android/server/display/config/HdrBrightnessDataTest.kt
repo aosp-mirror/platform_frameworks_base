@@ -16,6 +16,7 @@
 
 package com.android.server.display.config
 
+import android.os.PowerManager
 import android.util.Spline.createSpline
 import androidx.test.filters.SmallTest
 import com.android.server.display.DisplayBrightnessState
@@ -27,7 +28,7 @@ import org.junit.Test
 class HdrBrightnessDataTest {
 
     @Test
-    fun `test HdrBrightnessData default configuration`() {
+    fun testHdrBrightnessData_defaultConfiguration() {
         val displayConfiguration = createDisplayConfiguration {
             hdrBrightnessConfig(
                 brightnessDecreaseDebounceMillis = "3000",
@@ -42,7 +43,7 @@ class HdrBrightnessDataTest {
             )
         }
 
-        val hdrBrightnessData = HdrBrightnessData.loadConfig(displayConfiguration)
+        val hdrBrightnessData = HdrBrightnessData.loadConfig(displayConfiguration) { 0.6f }
         assertThat(hdrBrightnessData).isNotNull()
 
         assertThat(hdrBrightnessData!!.brightnessDecreaseDebounceMillis).isEqualTo(3000)
@@ -54,6 +55,7 @@ class HdrBrightnessDataTest {
         assertThat(hdrBrightnessData.maxBrightnessLimits).containsEntry(500f, 0.6f)
         assertThat(hdrBrightnessData.maxBrightnessLimits).containsEntry(600f, 0.7f)
 
+        assertThat(hdrBrightnessData.hbmTransitionPoint).isEqualTo(PowerManager.BRIGHTNESS_MAX)
         assertThat(hdrBrightnessData.minimumHdrPercentOfScreenForNbm).isEqualTo(
             HDR_PERCENT_OF_SCREEN_REQUIRED_DEFAULT
         )
@@ -62,10 +64,11 @@ class HdrBrightnessDataTest {
         )
         assertThat(hdrBrightnessData.allowInLowPowerMode).isFalse()
         assertThat(hdrBrightnessData.sdrToHdrRatioSpline).isNull()
+        assertThat(hdrBrightnessData.highestHdrSdrRatio).isEqualTo(1)
     }
 
     @Test
-    fun `test HdrBrightnessData fallback configuration`() {
+    fun testHdrBrightnessData_fallbackConfiguration() {
         val displayConfiguration = createDisplayConfiguration {
             hdrBrightnessConfig(
                 minimumHdrPercentOfScreenForNbm = null,
@@ -75,32 +78,38 @@ class HdrBrightnessDataTest {
             )
             highBrightnessMode(
                 minimumHdrPercentOfScreen = "0.2",
-                sdrHdrRatioMap = listOf(Pair("2.0", "4.0"), Pair("5.0", "8.0"))
+                sdrHdrRatioMap = listOf(Pair("2.0", "4.0"), Pair("5.0", "7.0"))
             )
         }
 
-        val hdrBrightnessData = HdrBrightnessData.loadConfig(displayConfiguration)
+        val transitionPoint = 0.6f
+        val hdrBrightnessData =
+            HdrBrightnessData.loadConfig(displayConfiguration) { transitionPoint }
         assertThat(hdrBrightnessData).isNotNull()
 
-        assertThat(hdrBrightnessData!!.minimumHdrPercentOfScreenForNbm).isEqualTo(0.2f)
+        assertThat(hdrBrightnessData!!.hbmTransitionPoint).isEqualTo(transitionPoint)
+        assertThat(hdrBrightnessData.minimumHdrPercentOfScreenForNbm).isEqualTo(0.2f)
         assertThat(hdrBrightnessData.minimumHdrPercentOfScreenForHbm).isEqualTo(0.2f)
         assertThat(hdrBrightnessData.allowInLowPowerMode).isFalse()
 
-        val expectedSpline = createSpline(floatArrayOf(2.0f, 5.0f), floatArrayOf(4.0f, 8.0f))
+        val expectedSpline = createSpline(floatArrayOf(2.0f, 5.0f), floatArrayOf(4.0f, 7.0f))
         assertThat(hdrBrightnessData.sdrToHdrRatioSpline.toString())
             .isEqualTo(expectedSpline.toString())
+        assertThat(hdrBrightnessData.highestHdrSdrRatio).isEqualTo(7)
     }
 
     @Test
-    fun `test HdrBrightnessData fallback configuration no hdrBrightnessConfig`() {
+    fun testHdrBrightnessData_fallbackConfiguration_noHdrBrightnessConfig() {
         val displayConfiguration = createDisplayConfiguration {
             highBrightnessMode(
                 minimumHdrPercentOfScreen = "0.2",
-                sdrHdrRatioMap = listOf(Pair("2.0", "4.0"), Pair("5.0", "8.0"))
+                sdrHdrRatioMap = listOf(Pair("2.0", "4.0"), Pair("5.0", "7.0"))
             )
         }
 
-        val hdrBrightnessData = HdrBrightnessData.loadConfig(displayConfiguration)
+        val transitionPoint = 0.6f
+        val hdrBrightnessData =
+            HdrBrightnessData.loadConfig(displayConfiguration) { transitionPoint }
         assertThat(hdrBrightnessData).isNotNull()
 
         assertThat(hdrBrightnessData!!.brightnessDecreaseDebounceMillis).isEqualTo(0)
@@ -112,47 +121,53 @@ class HdrBrightnessDataTest {
 
         assertThat(hdrBrightnessData.maxBrightnessLimits).hasSize(0)
 
+        assertThat(hdrBrightnessData.hbmTransitionPoint).isEqualTo(transitionPoint)
         assertThat(hdrBrightnessData.minimumHdrPercentOfScreenForNbm).isEqualTo(0.2f)
         assertThat(hdrBrightnessData.minimumHdrPercentOfScreenForHbm).isEqualTo(0.2f)
         assertThat(hdrBrightnessData.allowInLowPowerMode).isFalse()
 
-        val expectedSpline = createSpline(floatArrayOf(2.0f, 5.0f), floatArrayOf(4.0f, 8.0f))
+        val expectedSpline = createSpline(floatArrayOf(2.0f, 5.0f), floatArrayOf(4.0f, 7.0f))
         assertThat(hdrBrightnessData.sdrToHdrRatioSpline.toString())
             .isEqualTo(expectedSpline.toString())
+        assertThat(hdrBrightnessData.highestHdrSdrRatio).isEqualTo(7)
     }
 
     @Test
-    fun `test HdrBrightnessData configuration no configuration`() {
+    fun testHdrBrightnessData_emptyConfiguration() {
         val displayConfiguration = createDisplayConfiguration()
 
-        val hdrBrightnessData = HdrBrightnessData.loadConfig(displayConfiguration)
+        val hdrBrightnessData = HdrBrightnessData.loadConfig(displayConfiguration) { 0.6f }
         assertThat(hdrBrightnessData).isNull()
     }
 
     @Test
-    fun `test HdrBrightnessData real configuration`() {
+    fun testHdrBrightnessData_realConfiguration() {
         val displayConfiguration = createDisplayConfiguration {
             hdrBrightnessConfig(
                 minimumHdrPercentOfScreenForNbm = "0.3",
                 minimumHdrPercentOfScreenForHbm = "0.6",
                 allowInLowPowerMode = "true",
-                sdrHdrRatioMap = listOf(Pair("3.0", "5.0"), Pair("6.0", "8.0"))
+                sdrHdrRatioMap = listOf(Pair("3.0", "5.0"), Pair("6.0", "7.0"))
             )
             highBrightnessMode(
                 minimumHdrPercentOfScreen = "0.2",
-                sdrHdrRatioMap = listOf(Pair("2.0", "4.0"), Pair("5.0", "8.0"))
+                sdrHdrRatioMap = listOf(Pair("2.0", "4.0"), Pair("5.0", "7.5"))
             )
         }
 
-        val hdrBrightnessData = HdrBrightnessData.loadConfig(displayConfiguration)
+        val transitionPoint = 0.6f
+        val hdrBrightnessData =
+            HdrBrightnessData.loadConfig(displayConfiguration) { transitionPoint }
         assertThat(hdrBrightnessData).isNotNull()
 
-        assertThat(hdrBrightnessData!!.minimumHdrPercentOfScreenForNbm).isEqualTo(0.3f)
+        assertThat(hdrBrightnessData!!.hbmTransitionPoint).isEqualTo(transitionPoint)
+        assertThat(hdrBrightnessData.minimumHdrPercentOfScreenForNbm).isEqualTo(0.3f)
         assertThat(hdrBrightnessData.minimumHdrPercentOfScreenForHbm).isEqualTo(0.6f)
         assertThat(hdrBrightnessData.allowInLowPowerMode).isTrue()
 
-        val expectedSpline = createSpline(floatArrayOf(3.0f, 6.0f), floatArrayOf(5.0f, 8.0f))
+        val expectedSpline = createSpline(floatArrayOf(3.0f, 6.0f), floatArrayOf(5.0f, 7.0f))
         assertThat(hdrBrightnessData.sdrToHdrRatioSpline.toString())
             .isEqualTo(expectedSpline.toString())
+        assertThat(hdrBrightnessData.highestHdrSdrRatio).isEqualTo(7)
     }
 }

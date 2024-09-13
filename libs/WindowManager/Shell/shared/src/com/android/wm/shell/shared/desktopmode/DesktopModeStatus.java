@@ -24,6 +24,8 @@ import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.window.flags.Flags;
 
+import java.io.PrintWriter;
+
 /**
  * Constants for desktop mode feature
  */
@@ -70,6 +72,10 @@ public class DesktopModeStatus {
     private static final boolean ENFORCE_DEVICE_RESTRICTIONS = SystemProperties.getBoolean(
             "persist.wm.debug.desktop_mode_enforce_device_restrictions", true);
 
+    private static final boolean USE_APP_TO_WEB_BUILD_TIME_GENERIC_LINKS =
+            SystemProperties.getBoolean(
+                    "persist.wm.debug.use_app_to_web_build_time_generic_links", true);
+
     /** Whether the desktop density override is enabled. */
     public static final boolean DESKTOP_DENSITY_OVERRIDE_ENABLED =
             SystemProperties.getBoolean("persist.wm.debug.desktop_mode_density_enabled", false);
@@ -85,20 +91,15 @@ public class DesktopModeStatus {
     private static final int DESKTOP_DENSITY_MAX = 1000;
 
     /**
-     * Default value for {@code MAX_TASK_LIMIT}.
-     */
-    @VisibleForTesting
-    public static final int DEFAULT_MAX_TASK_LIMIT = 4;
-
-    // TODO(b/335131008): add a config-overlay field for the max number of tasks in Desktop Mode
-    /**
-     * Flag declaring the maximum number of Tasks to show in Desktop Mode at any one time.
+     * Sysprop declaring the maximum number of Tasks to show in Desktop Mode at any one time.
      *
-     * <p> The limit does NOT affect Picture-in-Picture, Bubbles, or System Modals (like a screen
+     * <p>If it is not defined, then {@code R.integer.config_maxDesktopWindowingActiveTasks} is
+     * used.
+     *
+     * <p>The limit does NOT affect Picture-in-Picture, Bubbles, or System Modals (like a screen
      * recording window, or Bluetooth pairing window).
      */
-    private static final int MAX_TASK_LIMIT = SystemProperties.getInt(
-            "persist.wm.debug.desktop_max_task_limit", DEFAULT_MAX_TASK_LIMIT);
+    private static final String MAX_TASK_LIMIT_SYS_PROP = "persist.wm.debug.desktop_max_task_limit";
 
     /**
      * Return {@code true} if veiled resizing is active. If false, fluid resizing is used.
@@ -135,8 +136,9 @@ public class DesktopModeStatus {
     /**
      * Return the maximum limit on the number of Tasks to show in Desktop Mode at any one time.
      */
-    public static int getMaxTaskLimit() {
-        return MAX_TASK_LIMIT;
+    public static int getMaxTaskLimit(@NonNull Context context) {
+        return SystemProperties.getInt(MAX_TASK_LIMIT_SYS_PROP,
+                context.getResources().getInteger(R.integer.config_maxDesktopWindowingActiveTasks));
     }
 
     /**
@@ -176,6 +178,13 @@ public class DesktopModeStatus {
     }
 
     /**
+     * Returns {@code true} if the app-to-web feature is using the build-time generic links list.
+     */
+    public static boolean useAppToWebBuildTimeGenericLinks() {
+        return USE_APP_TO_WEB_BUILD_TIME_GENERIC_LINKS;
+    }
+
+    /**
      * Return {@code true} if the override desktop density is enabled.
      */
     private static boolean isDesktopDensityOverrideEnabled() {
@@ -195,5 +204,20 @@ public class DesktopModeStatus {
      */
     private static boolean isDeviceEligibleForDesktopMode(@NonNull Context context) {
         return !enforceDeviceRestrictions() || isDesktopModeSupported(context);
+    }
+
+    /** Dumps DesktopModeStatus flags and configs. */
+    public static void dump(PrintWriter pw, String prefix, Context context) {
+        String innerPrefix = prefix + "  ";
+        pw.print(prefix); pw.println(TAG);
+        pw.print(innerPrefix); pw.print("maxTaskLimit="); pw.println(getMaxTaskLimit(context));
+
+        pw.print(innerPrefix); pw.print("maxTaskLimit config override=");
+        pw.println(context.getResources().getInteger(
+                R.integer.config_maxDesktopWindowingActiveTasks));
+
+        SystemProperties.Handle maxTaskLimitHandle = SystemProperties.find(MAX_TASK_LIMIT_SYS_PROP);
+        pw.print(innerPrefix); pw.print("maxTaskLimit sysprop=");
+        pw.println(maxTaskLimitHandle == null ? "null" : maxTaskLimitHandle.getInt(/* def= */ -1));
     }
 }

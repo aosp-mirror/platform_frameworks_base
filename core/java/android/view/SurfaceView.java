@@ -325,17 +325,62 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
 
     private String mTag = TAG;
 
-    private final ISurfaceControlViewHostParent mSurfaceControlViewHostParent =
-            new ISurfaceControlViewHostParent.Stub() {
+    private static class SurfaceControlViewHostParent extends ISurfaceControlViewHostParent.Stub {
+
+        /**
+         * mSurfaceView is set in {@link #attach} and cleared in {@link #detach} to prevent
+         * temporary memory leaks. The remote process's ISurfaceControlViewHostParent binder
+         * reference extends this object's lifetime. If mSurfaceView is not cleared in
+         * {@link #detach}, then the SurfaceView and anything it references will not be promptly
+         * garbage collected.
+         */
+        @Nullable
+        private SurfaceView mSurfaceView;
+
+        void attach(SurfaceView sv) {
+            synchronized (this) {
+                try {
+                    sv.mSurfacePackage.getRemoteInterface().attachParentInterface(this);
+                    mSurfaceView = sv;
+                } catch (RemoteException e) {
+                    Log.d(TAG, "Failed to attach parent interface to SCVH. Likely SCVH is alraedy "
+                            + "dead.");
+                }
+            }
+        }
+
+        void detach() {
+            synchronized (this) {
+                if (mSurfaceView == null) {
+                    return;
+                }
+                try {
+                    mSurfaceView.mSurfacePackage.getRemoteInterface().attachParentInterface(null);
+                } catch (RemoteException e) {
+                    Log.d(TAG, "Failed to remove parent interface from SCVH. Likely SCVH is "
+                            + "already dead");
+                }
+                mSurfaceView = null;
+            }
+        }
+
         @Override
         public void updateParams(WindowManager.LayoutParams[] childAttrs) {
-            mEmbeddedWindowParams.clear();
-            mEmbeddedWindowParams.addAll(Arrays.asList(childAttrs));
+            SurfaceView sv;
+            synchronized (this) {
+                sv = mSurfaceView;
+            }
+            if (sv == null) {
+                return;
+            }
 
-            if (isAttachedToWindow()) {
-                runOnUiThread(() -> {
-                    if (mParent != null) {
-                        mParent.recomputeViewAttributes(SurfaceView.this);
+            sv.mEmbeddedWindowParams.clear();
+            sv.mEmbeddedWindowParams.addAll(Arrays.asList(childAttrs));
+
+            if (sv.isAttachedToWindow()) {
+                sv.runOnUiThread(() -> {
+                    if (sv.mParent != null) {
+                        sv.mParent.recomputeViewAttributes(sv);
                     }
                 });
             }
@@ -343,39 +388,45 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
 
         @Override
         public void forwardBackKeyToParent(@NonNull KeyEvent keyEvent) {
-                runOnUiThread(() -> {
-                    if (!isAttachedToWindow() || keyEvent.getKeyCode() != KeyEvent.KEYCODE_BACK) {
-                        return;
-                    }
-                    final ViewRootImpl vri = getViewRootImpl();
-                    if (vri == null) {
-                        return;
-                    }
-                    final InputManager inputManager = mContext.getSystemService(InputManager.class);
-                    if (inputManager == null) {
-                        return;
-                    }
-                    // Check that the event was created recently.
-                    final long timeDiff = SystemClock.uptimeMillis() - keyEvent.getEventTime();
-                    if (timeDiff > FORWARD_BACK_KEY_TOLERANCE_MS) {
-                        Log.e(TAG, "Ignore the input event that exceed the tolerance time, "
-                                + "exceed " + timeDiff + "ms");
-                        return;
-                    }
-                    if (inputManager.verifyInputEvent(keyEvent) == null) {
-                        Log.e(TAG, "Received invalid input event");
-                        return;
-                    }
-                    try {
-                        vri.processingBackKey(true);
-                        vri.enqueueInputEvent(keyEvent, null /* receiver */, 0 /* flags */,
-                                true /* processImmediately */);
-                    } finally {
-                        vri.processingBackKey(false);
-                    }
-                });
+            SurfaceView sv;
+            synchronized (this) {
+                sv = mSurfaceView;
+            }
+            if (sv == null) {
+                return;
+            }
+
+            sv.runOnUiThread(() -> {
+                if (!sv.isAttachedToWindow() || keyEvent.getKeyCode() != KeyEvent.KEYCODE_BACK) {
+                    return;
+                }
+                final ViewRootImpl vri = sv.getViewRootImpl();
+                if (vri == null) {
+                    return;
+                }
+                final InputManager inputManager = sv.mContext.getSystemService(InputManager.class);
+                if (inputManager == null) {
+                    return;
+                }
+                // Check that the event was created recently.
+                final long timeDiff = SystemClock.uptimeMillis() - keyEvent.getEventTime();
+                if (timeDiff > FORWARD_BACK_KEY_TOLERANCE_MS) {
+                    Log.e(TAG, "Ignore the input event that exceed the tolerance time, "
+                            + "exceed " + timeDiff + "ms");
+                    return;
+                }
+                if (inputManager.verifyInputEvent(keyEvent) == null) {
+                    Log.e(TAG, "Received invalid input event");
+                    return;
+                }
+                vri.enqueueInputEvent(keyEvent, null /* receiver */, 0 /* flags */,
+                        true /* processImmediately */);
+            });
         }
-    };
+    }
+
+    private final SurfaceControlViewHostParent mSurfaceControlViewHostParent =
+            new SurfaceControlViewHostParent();
 
     private final boolean mRtDrivenClipping = Flags.clipSurfaceviews();
 
@@ -935,13 +986,8 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
             }
 
             if (mSurfacePackage != null) {
-                try {
-                    mSurfacePackage.getRemoteInterface().attachParentInterface(null);
-                    mEmbeddedWindowParams.clear();
-                } catch (RemoteException e) {
-                    Log.d(TAG, "Failed to remove parent interface from SCVH. Likely SCVH is "
-                            + "already dead");
-                }
+                mSurfaceControlViewHostParent.detach();
+                mEmbeddedWindowParams.clear();
                 if (releaseSurfacePackage) {
                     mSurfacePackage.release();
                     mSurfacePackage = null;
@@ -2072,12 +2118,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
             applyTransactionOnVriDraw(transaction);
         }
         mSurfacePackage = p;
-        try {
-            mSurfacePackage.getRemoteInterface().attachParentInterface(
-                    mSurfaceControlViewHostParent);
-        } catch (RemoteException e) {
-            Log.d(TAG, "Failed to attach parent interface to SCVH. Likely SCVH is already dead.");
-        }
+        mSurfaceControlViewHostParent.attach(this);
 
         if (isFocused()) {
             requestEmbeddedFocus(true);

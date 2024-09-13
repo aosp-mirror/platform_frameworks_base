@@ -6,7 +6,6 @@ import com.android.compose.animation.scene.TransitionKey
 import com.android.systemui.communal.shared.model.CommunalScenes
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -25,11 +24,10 @@ class FakeCommunalSceneRepository(
 ) : CommunalSceneRepository {
 
     override fun changeScene(toScene: SceneKey, transitionKey: TransitionKey?) =
-        snapToScene(toScene, 0)
+        snapToScene(toScene)
 
-    override fun snapToScene(toScene: SceneKey, delayMillis: Long) {
+    override fun snapToScene(toScene: SceneKey) {
         applicationScope.launch {
-            delay(delayMillis)
             currentScene.value = toScene
             _transitionState.value = flowOf(ObservableTransitionState.Idle(toScene))
         }

@@ -24,31 +24,25 @@ import static android.hardware.input.KeyboardLayoutSelectionResult.layoutSelecti
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.role.RoleManager;
-import android.content.Intent;
 import android.hardware.input.KeyboardLayout;
 import android.hardware.input.KeyboardLayoutSelectionResult.LayoutSelectionCriteria;
 import android.icu.util.ULocale;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
-import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 import android.view.InputDevice;
-import android.view.KeyEvent;
 import android.view.inputmethod.InputMethodSubtype;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.KeyboardConfiguredProto.KeyboardLayoutConfig;
 import com.android.internal.os.KeyboardConfiguredProto.RepeatedKeyboardLayoutConfig;
 import com.android.internal.util.FrameworkStatsLog;
-import com.android.server.policy.ModifierShortcutManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * Collect Keyboard metrics
@@ -66,336 +60,26 @@ public final class KeyboardMetricsCollector {
     @VisibleForTesting
     public static final String DEFAULT_LANGUAGE_TAG = "None";
 
-    public enum KeyboardLogEvent {
-        UNSPECIFIED(
-                FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__UNSPECIFIED,
-                "INVALID_KEYBOARD_EVENT"),
-        HOME(FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__HOME,
-                "HOME"),
-        RECENT_APPS(
-                FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__RECENT_APPS,
-                "RECENT_APPS"),
-        BACK(FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__BACK,
-                "BACK"),
-        APP_SWITCH(
-                FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__APP_SWITCH,
-                "APP_SWITCH"),
-        LAUNCH_ASSISTANT(
-                FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__LAUNCH_ASSISTANT,
-                "LAUNCH_ASSISTANT"),
-        LAUNCH_VOICE_ASSISTANT(
-                FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__LAUNCH_VOICE_ASSISTANT,
-                "LAUNCH_VOICE_ASSISTANT"),
-        LAUNCH_SYSTEM_SETTINGS(
-                FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__LAUNCH_SYSTEM_SETTINGS,
-                "LAUNCH_SYSTEM_SETTINGS"),
-        TOGGLE_NOTIFICATION_PANEL(
-                FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__TOGGLE_NOTIFICATION_PANEL,
-                "TOGGLE_NOTIFICATION_PANEL"),
-        TOGGLE_TASKBAR(
-                FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__TOGGLE_TASKBAR,
-                "TOGGLE_TASKBAR"),
-        TAKE_SCREENSHOT(
-                FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__TAKE_SCREENSHOT,
-                "TAKE_SCREENSHOT"),
-        OPEN_SHORTCUT_HELPER(
-                FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__OPEN_SHORTCUT_HELPER,
-                "OPEN_SHORTCUT_HELPER"),
-        BRIGHTNESS_UP(
-                FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__BRIGHTNESS_UP,
-                "BRIGHTNESS_UP"),
-        BRIGHTNESS_DOWN(
-                FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__BRIGHTNESS_DOWN,
-                "BRIGHTNESS_DOWN"),
-        KEYBOARD_BACKLIGHT_UP(
-                FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__KEYBOARD_BACKLIGHT_UP,
-                "KEYBOARD_BACKLIGHT_UP"),
-        KEYBOARD_BACKLIGHT_DOWN(
-                FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__KEYBOARD_BACKLIGHT_DOWN,
-                "KEYBOARD_BACKLIGHT_DOWN"),
-        KEYBOARD_BACKLIGHT_TOGGLE(
-                FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__KEYBOARD_BACKLIGHT_TOGGLE,
-                "KEYBOARD_BACKLIGHT_TOGGLE"),
-        VOLUME_UP(
-                FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__VOLUME_UP,
-                "VOLUME_UP"),
-        VOLUME_DOWN(
-                FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__VOLUME_DOWN,
-                "VOLUME_DOWN"),
-        VOLUME_MUTE(
-                FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__VOLUME_MUTE,
-                "VOLUME_MUTE"),
-        ALL_APPS(
-                FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__ALL_APPS,
-                "ALL_APPS"),
-        LAUNCH_SEARCH(
-                FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__LAUNCH_SEARCH,
-                "LAUNCH_SEARCH"),
-        LANGUAGE_SWITCH(
-                FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__LANGUAGE_SWITCH,
-                "LANGUAGE_SWITCH"),
-        ACCESSIBILITY_ALL_APPS(
-                FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__ACCESSIBILITY_ALL_APPS,
-                "ACCESSIBILITY_ALL_APPS"),
-        TOGGLE_CAPS_LOCK(
-                FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__TOGGLE_CAPS_LOCK,
-                "TOGGLE_CAPS_LOCK"),
-        SYSTEM_MUTE(
-                FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__SYSTEM_MUTE,
-                "SYSTEM_MUTE"),
-        SPLIT_SCREEN_NAVIGATION(
-                FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__SPLIT_SCREEN_NAVIGATION,
-                "SPLIT_SCREEN_NAVIGATION"),
-
-        CHANGE_SPLITSCREEN_FOCUS(
-                FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__CHANGE_SPLITSCREEN_FOCUS,
-                "CHANGE_SPLITSCREEN_FOCUS"),
-        TRIGGER_BUG_REPORT(
-                FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__TRIGGER_BUG_REPORT,
-                "TRIGGER_BUG_REPORT"),
-        LOCK_SCREEN(
-                FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__LOCK_SCREEN,
-                "LOCK_SCREEN"),
-        OPEN_NOTES(
-                FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__OPEN_NOTES,
-                "OPEN_NOTES"),
-        TOGGLE_POWER(
-                FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__TOGGLE_POWER,
-                "TOGGLE_POWER"),
-        SYSTEM_NAVIGATION(
-                FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__SYSTEM_NAVIGATION,
-                "SYSTEM_NAVIGATION"),
-        SLEEP(FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__SLEEP,
-                "SLEEP"),
-        WAKEUP(FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__WAKEUP,
-                "WAKEUP"),
-        MEDIA_KEY(
-                FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__MEDIA_KEY,
-                "MEDIA_KEY"),
-        LAUNCH_DEFAULT_BROWSER(
-                FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__LAUNCH_DEFAULT_BROWSER,
-                "LAUNCH_DEFAULT_BROWSER"),
-        LAUNCH_DEFAULT_EMAIL(
-                FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__LAUNCH_DEFAULT_EMAIL,
-                "LAUNCH_DEFAULT_EMAIL"),
-        LAUNCH_DEFAULT_CONTACTS(
-                FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__LAUNCH_DEFAULT_CONTACTS,
-                "LAUNCH_DEFAULT_CONTACTS"),
-        LAUNCH_DEFAULT_CALENDAR(
-                FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__LAUNCH_DEFAULT_CALENDAR,
-                "LAUNCH_DEFAULT_CALENDAR"),
-        LAUNCH_DEFAULT_CALCULATOR(
-                FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__LAUNCH_DEFAULT_CALCULATOR,
-                "LAUNCH_DEFAULT_CALCULATOR"),
-        LAUNCH_DEFAULT_MUSIC(
-                FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__LAUNCH_DEFAULT_MUSIC,
-                "LAUNCH_DEFAULT_MUSIC"),
-        LAUNCH_DEFAULT_MAPS(
-                FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__LAUNCH_DEFAULT_MAPS,
-                "LAUNCH_DEFAULT_MAPS"),
-        LAUNCH_DEFAULT_MESSAGING(
-                FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__LAUNCH_DEFAULT_MESSAGING,
-                "LAUNCH_DEFAULT_MESSAGING"),
-        LAUNCH_DEFAULT_GALLERY(
-                FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__LAUNCH_DEFAULT_GALLERY,
-                "LAUNCH_DEFAULT_GALLERY"),
-        LAUNCH_DEFAULT_FILES(
-                FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__LAUNCH_DEFAULT_FILES,
-                "LAUNCH_DEFAULT_FILES"),
-        LAUNCH_DEFAULT_WEATHER(
-                FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__LAUNCH_DEFAULT_WEATHER,
-                "LAUNCH_DEFAULT_WEATHER"),
-        LAUNCH_DEFAULT_FITNESS(
-                FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__LAUNCH_DEFAULT_FITNESS,
-                "LAUNCH_DEFAULT_FITNESS"),
-        LAUNCH_APPLICATION_BY_PACKAGE_NAME(
-                FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__LAUNCH_APPLICATION_BY_PACKAGE_NAME,
-                "LAUNCH_APPLICATION_BY_PACKAGE_NAME"),
-        DESKTOP_MODE(
-                FrameworkStatsLog
-                        .KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__DESKTOP_MODE,
-                "DESKTOP_MODE"),
-        MULTI_WINDOW_NAVIGATION(FrameworkStatsLog
-                .KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__MULTI_WINDOW_NAVIGATION,
-                "MULTIWINDOW_NAVIGATION");
-
-
-        private final int mValue;
-        private final String mName;
-
-        private static final SparseArray<KeyboardLogEvent> VALUE_TO_ENUM_MAP = new SparseArray<>();
-
-        static {
-            for (KeyboardLogEvent type : KeyboardLogEvent.values()) {
-                VALUE_TO_ENUM_MAP.put(type.mValue, type);
-            }
-        }
-
-        KeyboardLogEvent(int enumValue, String enumName) {
-            mValue = enumValue;
-            mName = enumName;
-        }
-
-        public int getIntValue() {
-            return mValue;
-        }
-
-        /**
-         * Convert int value to corresponding KeyboardLogEvent enum. If can't find any matching
-         * value will return {@code null}
-         */
-        @Nullable
-        public static KeyboardLogEvent from(int value) {
-            return VALUE_TO_ENUM_MAP.get(value);
-        }
-
-        /**
-         * Find KeyboardLogEvent corresponding to volume up/down/mute key events.
-         */
-        @Nullable
-        public static KeyboardLogEvent getVolumeEvent(int keycode) {
-            switch (keycode) {
-                case KeyEvent.KEYCODE_VOLUME_DOWN:
-                    return VOLUME_DOWN;
-                case KeyEvent.KEYCODE_VOLUME_UP:
-                    return VOLUME_UP;
-                case KeyEvent.KEYCODE_VOLUME_MUTE:
-                    return VOLUME_MUTE;
-                default:
-                    return null;
-            }
-        }
-
-        /**
-         * Find KeyboardLogEvent corresponding to brightness up/down key events.
-         */
-        @Nullable
-        public static KeyboardLogEvent getBrightnessEvent(int keycode) {
-            switch (keycode) {
-                case KeyEvent.KEYCODE_BRIGHTNESS_DOWN:
-                    return BRIGHTNESS_DOWN;
-                case KeyEvent.KEYCODE_BRIGHTNESS_UP:
-                    return BRIGHTNESS_UP;
-                default:
-                    return null;
-            }
-        }
-
-        /**
-         * Find KeyboardLogEvent corresponding to intent filter category. Returns
-         * {@code null if no matching event found}
-         */
-        @Nullable
-        public static KeyboardLogEvent getLogEventFromIntent(Intent intent) {
-            Intent selectorIntent = intent.getSelector();
-            if (selectorIntent != null) {
-                Set<String> selectorCategories = selectorIntent.getCategories();
-                if (selectorCategories != null && !selectorCategories.isEmpty()) {
-                    for (String intentCategory : selectorCategories) {
-                        KeyboardLogEvent logEvent = getEventFromSelectorCategory(intentCategory);
-                        if (logEvent == null) {
-                            continue;
-                        }
-                        return logEvent;
-                    }
-                }
-            }
-
-            // The shortcut may be targeting a system role rather than using an intent selector,
-            // so check for that.
-            String role = intent.getStringExtra(ModifierShortcutManager.EXTRA_ROLE);
-            if (!TextUtils.isEmpty(role)) {
-                return getLogEventFromRole(role);
-            }
-
-            Set<String> intentCategories = intent.getCategories();
-            if (intentCategories == null || intentCategories.isEmpty()
-                    || !intentCategories.contains(Intent.CATEGORY_LAUNCHER)) {
-                return null;
-            }
-            if (intent.getComponent() == null) {
-                return null;
-            }
-
-            // TODO(b/280423320): Add new field package name associated in the
-            //  KeyboardShortcutEvent atom and log it accordingly.
-            return LAUNCH_APPLICATION_BY_PACKAGE_NAME;
-        }
-
-        @Nullable
-        private static KeyboardLogEvent getEventFromSelectorCategory(String category) {
-            switch (category) {
-                case Intent.CATEGORY_APP_BROWSER:
-                    return LAUNCH_DEFAULT_BROWSER;
-                case Intent.CATEGORY_APP_EMAIL:
-                    return LAUNCH_DEFAULT_EMAIL;
-                case Intent.CATEGORY_APP_CONTACTS:
-                    return LAUNCH_DEFAULT_CONTACTS;
-                case Intent.CATEGORY_APP_CALENDAR:
-                    return LAUNCH_DEFAULT_CALENDAR;
-                case Intent.CATEGORY_APP_CALCULATOR:
-                    return LAUNCH_DEFAULT_CALCULATOR;
-                case Intent.CATEGORY_APP_MUSIC:
-                    return LAUNCH_DEFAULT_MUSIC;
-                case Intent.CATEGORY_APP_MAPS:
-                    return LAUNCH_DEFAULT_MAPS;
-                case Intent.CATEGORY_APP_MESSAGING:
-                    return LAUNCH_DEFAULT_MESSAGING;
-                case Intent.CATEGORY_APP_GALLERY:
-                    return LAUNCH_DEFAULT_GALLERY;
-                case Intent.CATEGORY_APP_FILES:
-                    return LAUNCH_DEFAULT_FILES;
-                case Intent.CATEGORY_APP_WEATHER:
-                    return LAUNCH_DEFAULT_WEATHER;
-                case Intent.CATEGORY_APP_FITNESS:
-                    return LAUNCH_DEFAULT_FITNESS;
-                default:
-                    return null;
-            }
-        }
-
-        /**
-         * Find KeyboardLogEvent corresponding to the provide system role name.
-         * Returns {@code null} if no matching event found.
-         */
-        @Nullable
-        private static KeyboardLogEvent getLogEventFromRole(String role) {
-            if (RoleManager.ROLE_BROWSER.equals(role)) {
-                return LAUNCH_DEFAULT_BROWSER;
-            } else if (RoleManager.ROLE_SMS.equals(role)) {
-                return LAUNCH_DEFAULT_MESSAGING;
-            } else {
-                Log.w(TAG, "Keyboard shortcut to launch "
-                        + role + " not supported for logging");
-                return null;
-            }
-        }
-    }
+    private static final int INVALID_SYSTEMS_EVENT = FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__UNSPECIFIED;
 
     /**
      * Log keyboard system shortcuts for the proto
      * {@link com.android.os.input.KeyboardSystemsEventReported}
      * defined in "stats/atoms/input/input_extension_atoms.proto"
      */
-    public static void logKeyboardSystemsEventReportedAtom(@Nullable InputDevice inputDevice,
-            @Nullable KeyboardLogEvent keyboardSystemEvent, int modifierState, int... keyCodes) {
-        // Logging Keyboard system event only for an external HW keyboard. We should not log events
-        // for virtual keyboards or internal Key events.
-        if (inputDevice == null || inputDevice.isVirtual() || !inputDevice.isFullKeyboard()) {
-            return;
-        }
-        if (keyboardSystemEvent == null) {
-            Slog.w(TAG, "Invalid keyboard event logging, keycode = " + Arrays.toString(keyCodes)
-                    + ", modifier state = " + modifierState);
+    public static void logKeyboardSystemsEventReportedAtom(@NonNull InputDevice inputDevice,
+            int[] keycodes, int modifierState, int systemsEvent) {
+        if (systemsEvent == INVALID_SYSTEMS_EVENT || inputDevice.isVirtual()
+                || !inputDevice.isFullKeyboard()) {
             return;
         }
         FrameworkStatsLog.write(FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED,
                 inputDevice.getVendorId(), inputDevice.getProductId(),
-                keyboardSystemEvent.getIntValue(), keyCodes, modifierState,
-                inputDevice.getDeviceBus());
+                systemsEvent, keycodes, modifierState, inputDevice.getDeviceBus());
 
         if (DEBUG) {
-            Slog.d(TAG, "Logging Keyboard system event: " + keyboardSystemEvent.mName);
+            Slog.d(TAG, "Logging Keyboard system event: " + modifierState + " + " + Arrays.toString(
+                    keycodes) + " -> " + systemsEvent);
         }
     }
 

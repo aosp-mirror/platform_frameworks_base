@@ -16,13 +16,13 @@
 
 package com.android.settingslib.mobile.dataservice;
 
-import java.util.List;
-
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
+
+import java.util.List;
 
 @Dao
 public interface UiccInfoDao {
@@ -33,14 +33,6 @@ public interface UiccInfoDao {
     @Query("SELECT * FROM " + DataServiceUtils.UiccInfoData.TABLE_NAME + " ORDER BY "
             + DataServiceUtils.UiccInfoData.COLUMN_ID)
     LiveData<List<UiccInfoEntity>> queryAllUiccInfos();
-
-    @Query("SELECT * FROM " + DataServiceUtils.UiccInfoData.TABLE_NAME + " WHERE "
-            + DataServiceUtils.UiccInfoData.COLUMN_ID + " = :subId")
-    LiveData<UiccInfoEntity> queryUiccInfoById(String subId);
-
-    @Query("SELECT * FROM " + DataServiceUtils.UiccInfoData.TABLE_NAME + " WHERE "
-            + DataServiceUtils.UiccInfoData.COLUMN_IS_EUICC + " = :isEuicc")
-    LiveData<List<UiccInfoEntity>> queryUiccInfosByEuicc(boolean isEuicc);
 
     @Query("SELECT COUNT(*) FROM " + DataServiceUtils.UiccInfoData.TABLE_NAME)
     int count();

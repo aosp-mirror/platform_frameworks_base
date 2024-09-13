@@ -26,9 +26,9 @@ import android.view.ViewDebug.CanvasProvider;
 import android.view.ViewDebug.HardwareCanvasProvider;
 import android.view.ViewDebug.SoftwareCanvasProvider;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 import androidx.test.rule.ActivityTestRule;
-import androidx.test.runner.AndroidJUnit4;
 
 import com.android.frameworks.coretests.R;
 

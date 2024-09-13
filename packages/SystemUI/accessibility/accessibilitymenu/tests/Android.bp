@@ -24,13 +24,14 @@ android_test {
     use_resource_processor: true,
     certificate: "platform",
     libs: [
-        "android.test.runner",
-        "android.test.base",
+        "android.test.runner.stubs.system",
+        "android.test.base.stubs.system",
     ],
     static_libs: [
         "androidx.test.core",
         "androidx.test.runner",
         "androidx.test.ext.junit",
+        "com_android_a11y_menu_flags_lib",
         "compatibility-device-util-axt",
         "platform-test-annotations",
         "truth",

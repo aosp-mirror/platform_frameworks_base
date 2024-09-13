@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.graphics.PointF;
 import android.hardware.display.DisplayViewport;
+import android.hardware.input.KeyGestureEvent;
 import android.os.IBinder;
 import android.view.InputChannel;
 import android.view.inputmethod.InputMethodSubtype;
@@ -227,4 +228,16 @@ public abstract class InputManagerInternal {
      *     since boot.
      */
     public abstract int getLastUsedInputDeviceId();
+
+    /**
+     * Notify key gesture was completed by the user.
+     *
+     * @param deviceId the device ID of the keyboard using which the event was completed
+     * @param keycodes the keys pressed for the event
+     * @param modifierState the modifier state
+     * @param event the gesture event that was completed
+     *
+     */
+    public abstract void notifyKeyGestureCompleted(int deviceId, int[] keycodes, int modifierState,
+            @KeyGestureEvent.KeyGestureType int event);
 }

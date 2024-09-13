@@ -1,9 +1,8 @@
-class com/android/hoststubgen/test/tinyframework/TinyFrameworkForTextPolicy	stub
-  field stub	stub
-  field keep	keep
+class com/android/hoststubgen/test/tinyframework/TinyFrameworkForTextPolicy	keep
+  field stub	keep
   # field remove	remove # Implicitly remove
-  method <init>	()V	            stub
-  method addOne	(I)I	        stub
+  method <init>	()V	            keep
+  method addOne	(I)I	        keep
   method addOneInner	(I)I	keep
   method toBeRemoved	(Ljava/lang/String;)V	remove
   method addTwo	(I)I	        @addTwo_host
@@ -11,28 +10,38 @@ class com/android/hoststubgen/test/tinyframework/TinyFrameworkForTextPolicy	stub
   method nativeAddThree	(I)I	@addThree_host
   # method addThree_host	(I)I	# used as a substitute
   method unsupportedMethod	()Ljava/lang/String;	throw
-  method visibleButUsesUnsupportedMethod	()Ljava/lang/String;	stub
+  method visibleButUsesUnsupportedMethod	()Ljava/lang/String;	keep
+  method toBeIgnoredObj	()Ljava/lang/String;	ignore
+  method toBeIgnoredV	()V	ignore
+  method toBeIgnoredZ	()Z	ignore
+  method toBeIgnoredB	()B	ignore
+  method toBeIgnoredC	()C	ignore
+  method toBeIgnoredS	()S	ignore
+  method toBeIgnoredI	()I	ignore
+  method toBeIgnoredL	()L	ignore
+  method toBeIgnoredF	()F	ignore
+  method toBeIgnoredD	()D	ignore
 
 # Class load hook
 class com/android/hoststubgen/test/tinyframework/TinyFrameworkForTextPolicy	~com.android.hoststubgen.test.tinyframework.TinyFrameworkClassLoadHook.onClassLoaded
 
 # Heuristics rule: Stub all the AIDL classes.
-class :aidl stubclass
+class :aidl keepclass
 
 # Heuristics rule: Stub all the R classes.
-class :r stubclass
+class :r keepclass
 
 # Default is "remove", so let's put all the base classes / interfaces in the stub first.
-class com.android.hoststubgen.test.tinyframework.subclasstest.C1 stub
-class com.android.hoststubgen.test.tinyframework.subclasstest.C2 stub
-class com.android.hoststubgen.test.tinyframework.subclasstest.C3 stub
-class com.android.hoststubgen.test.tinyframework.subclasstest.CA stub
-class com.android.hoststubgen.test.tinyframework.subclasstest.CB stub
-class com.android.hoststubgen.test.tinyframework.subclasstest.I1 stub
-class com.android.hoststubgen.test.tinyframework.subclasstest.I2 stub
-class com.android.hoststubgen.test.tinyframework.subclasstest.I3 stub
-class com.android.hoststubgen.test.tinyframework.subclasstest.IA stub
-class com.android.hoststubgen.test.tinyframework.subclasstest.IB stub
+class com.android.hoststubgen.test.tinyframework.subclasstest.C1 keep
+class com.android.hoststubgen.test.tinyframework.subclasstest.C2 keep
+class com.android.hoststubgen.test.tinyframework.subclasstest.C3 keep
+class com.android.hoststubgen.test.tinyframework.subclasstest.CA keep
+class com.android.hoststubgen.test.tinyframework.subclasstest.CB keep
+class com.android.hoststubgen.test.tinyframework.subclasstest.I1 keep
+class com.android.hoststubgen.test.tinyframework.subclasstest.I2 keep
+class com.android.hoststubgen.test.tinyframework.subclasstest.I3 keep
+class com.android.hoststubgen.test.tinyframework.subclasstest.IA keep
+class com.android.hoststubgen.test.tinyframework.subclasstest.IB keep
 
 # Then define inheritance based policies.
 class *com.android.hoststubgen.test.tinyframework.subclasstest.C1 keep
@@ -40,3 +49,27 @@ class *com.android.hoststubgen.test.tinyframework.subclasstest.CA remove
 
 class *com.android.hoststubgen.test.tinyframework.subclasstest.I1 keep
 class *com.android.hoststubgen.test.tinyframework.subclasstest.IA remove
+
+# Test package directive
+package com.android.hoststubgen.test.tinyframework.packagetest keep
+class com.android.hoststubgen.test.tinyframework.packagetest.B remove
+class com.android.hoststubgen.test.tinyframework.packagetest.sub.B remove
+# The following rules are the same as above
+# class com.android.hoststubgen.test.tinyframework.packagetest.A keep
+# class com.android.hoststubgen.test.tinyframework.packagetest.sub.A keep
+
+# Used to test method call replacement.
+class com.android.hoststubgen.test.tinyframework.TinyFrameworkMethodCallReplace keepclass
+  method originalAdd (II)I @com.android.hoststubgen.test.tinyframework.TinyFrameworkMethodCallReplace$ReplaceTo.add
+
+# Used to test method call replacement.
+# Note because java.lang.Thread is _not_ within the tiny-framework jar, the policy ("keep")
+# doesn't realy matter.
+class java.lang.Thread keep
+  method start ()V @com.android.hoststubgen.test.tinyframework.TinyFrameworkMethodCallReplace$ReplaceTo.startThread
+
+
+# "rename" takes a type internal name, so '/'s is used as a separator.
+# The leading / in the prefix is not needed (it'll be stripped), but it's added to make
+# sure the stripping works.
+rename ^.*/TinyFrameworkToBeRenamed$ /rename_prefix/

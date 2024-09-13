@@ -27,6 +27,7 @@ import com.android.internal.logging.UiEventLogger
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
@@ -47,7 +48,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -67,14 +67,13 @@ constructor(
     broadcastDispatcher: BroadcastDispatcher,
     private val accessibilityManager: AccessibilityManagerWrapper,
     private val pulsingGestureListener: PulsingGestureListener,
+    private val faceAuthInteractor: DeviceEntryFaceAuthInteractor,
 ) {
     /** Whether the long-press handling feature should be enabled. */
     val isLongPressHandlingEnabled: StateFlow<Boolean> =
         if (isFeatureEnabled()) {
                 combine(
-                    transitionInteractor.finishedKeyguardState.map {
-                        it == KeyguardState.LOCKSCREEN
-                    },
+                    transitionInteractor.isFinishedIn(KeyguardState.LOCKSCREEN),
                     repository.isQuickSettingsVisible,
                 ) { isFullyTransitionedToLockScreen, isQuickSettingsVisible ->
                     isFullyTransitionedToLockScreen && !isQuickSettingsVisible
@@ -129,13 +128,17 @@ constructor(
         }
     }
 
-    /** Notifies that the user has long-pressed on the lock screen. */
-    fun onLongPress() {
+    /**
+     * Notifies that the user has long-pressed on the lock screen.
+     *
+     * @param isA11yAction: Whether the action was performed as an a11y action
+     */
+    fun onLongPress(isA11yAction: Boolean = false) {
         if (!isLongPressHandlingEnabled.value) {
             return
         }
 
-        if (featureFlags.isEnabled(Flags.LOCK_SCREEN_LONG_PRESS_DIRECT_TO_WPP)) {
+        if (isA11yAction) {
             showSettings()
         } else {
             showMenu()
@@ -171,6 +174,7 @@ constructor(
     /** Notifies that the lockscreen has been clicked at position [x], [y]. */
     fun onClick(x: Float, y: Float) {
         pulsingGestureListener.onSingleTapUp(x, y)
+        faceAuthInteractor.onNotificationPanelClicked()
     }
 
     /** Notifies that the lockscreen has been double clicked. */

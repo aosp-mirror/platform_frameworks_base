@@ -442,20 +442,24 @@ public class ApplicationExitInfoTest {
                 IMPORTANCE_FOREGROUND_SERVICE,       // importance
                 null);                               // description
 
-        // Case 4: Create a process from another package with kill from lmkd
+        /*
+         * Case 4: Create a process from another package with kill from lmkd
+         * We expect LMKD's reported RSS to be the process' last seen RSS.
+         */
         final int app2UidUser2 = 1010234;
         final int app2PidUser2 = 12348;
         final long app2Pss1 = 54321;
         final long app2Rss1 = 65432;
+        final long lmkd_reported_rss = 43215;
         final String app2ProcessName = "com.android.test.stub2:process";
         final String app2PackageName = "com.android.test.stub2";
 
         sleep(1);
         final long now4 = System.currentTimeMillis();
-        doReturn(new Pair<Long, Object>(now4, Integer.valueOf(0)))
+        doReturn(null)
                 .when(mAppExitInfoTracker.mAppExitInfoSourceZygote)
                 .remove(anyInt(), anyInt());
-        doReturn(new Pair<Long, Object>(now4, null))
+        doReturn(new Pair<Long, Object>(now4, Long.valueOf(lmkd_reported_rss)))
                 .when(mAppExitInfoTracker.mAppExitInfoSourceLmkd)
                 .remove(anyInt(), anyInt());
 
@@ -490,7 +494,7 @@ public class ApplicationExitInfoTest {
                 null,                                     // subReason
                 0,                                        // status
                 app2Pss1,                                 // pss
-                app2Rss1,                                 // rss
+                lmkd_reported_rss,                        // rss
                 IMPORTANCE_CACHED,                        // importance
                 null);                                    // description
 
@@ -498,6 +502,11 @@ public class ApplicationExitInfoTest {
         list.clear();
         mAppExitInfoTracker.getExitInfo(null, app2UidUser2, 0, 0, list);
         assertEquals(1, list.size());
+
+        info = list.get(0);
+
+        // Verify the AppExitInfo has the LMKD reported RSS
+        assertEquals(lmkd_reported_rss, info.getRss());
 
         // Case 5: App native crash
         final int app3UidUser2 = 1010345;
@@ -599,7 +608,7 @@ public class ApplicationExitInfoTest {
                 null,                                     // subReason
                 0,                                        // status
                 app2Pss1,                                 // pss
-                app2Rss1,                                 // rss
+                lmkd_reported_rss,                        // rss
                 IMPORTANCE_CACHED,                        // importance
                 null);                                    // description
 

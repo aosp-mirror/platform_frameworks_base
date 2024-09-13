@@ -14,7 +14,7 @@ android_test {
     },
     // Include some source files directly to be able to access package members
     srcs: ["src/**/*.java"],
-    libs: ["android.test.runner"],
+    libs: ["android.test.runner.stubs.system"],
     static_libs: [
         "junit",
         "androidx.test.rules",
@@ -24,6 +24,7 @@ android_test {
         "flickerlib-parsers",
         "perfetto_trace_java_protos",
         "flickerlib-trace_processor_shell",
+        "ravenwood-junit",
     ],
     java_resource_dirs: ["res"],
     certificate: "platform",
@@ -39,6 +40,7 @@ android_ravenwood_test {
         "platform-test-annotations",
     ],
     srcs: [
+        "src/com/android/internal/graphics/ColorUtilsTest.java",
         "src/com/android/internal/util/ParcellingTests.java",
     ],
     auto_gen_config: true,

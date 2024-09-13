@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.chips.call.ui.viewmodel
 
 import android.view.View
 import com.android.internal.jank.InteractionJankMonitor
+import com.android.systemui.Flags
 import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
@@ -57,14 +58,26 @@ constructor(
         interactor.ongoingCallState
             .map { state ->
                 when (state) {
-                    is OngoingCallModel.NoCall -> OngoingActivityChipModel.Hidden
+                    is OngoingCallModel.NoCall -> OngoingActivityChipModel.Hidden()
                     is OngoingCallModel.InCall -> {
+                        val icon =
+                            if (
+                                Flags.statusBarCallChipNotificationIcon() &&
+                                    state.notificationIconView != null
+                            ) {
+                                OngoingActivityChipModel.ChipIcon.StatusBarView(
+                                    state.notificationIconView
+                                )
+                            } else {
+                                OngoingActivityChipModel.ChipIcon.SingleColorIcon(phoneIcon)
+                            }
+
                         // This block mimics OngoingCallController#updateChip.
                         if (state.startTimeMs <= 0L) {
                             // If the start time is invalid, don't show a timer and show just an
                             // icon. See b/192379214.
                             OngoingActivityChipModel.Shown.IconOnly(
-                                icon = phoneIcon,
+                                icon = icon,
                                 colors = ColorsModel.Themed,
                                 getOnClickListener(state),
                             )
@@ -73,7 +86,7 @@ constructor(
                                 state.startTimeMs - systemClock.currentTimeMillis() +
                                     systemClock.elapsedRealtime()
                             OngoingActivityChipModel.Shown.Timer(
-                                icon = phoneIcon,
+                                icon = icon,
                                 colors = ColorsModel.Themed,
                                 startTimeMs = startTimeInElapsedRealtime,
                                 getOnClickListener(state),
@@ -82,7 +95,7 @@ constructor(
                     }
                 }
             }
-            .stateIn(scope, SharingStarted.WhileSubscribed(), OngoingActivityChipModel.Hidden)
+            .stateIn(scope, SharingStarted.WhileSubscribed(), OngoingActivityChipModel.Hidden())
 
     private fun getOnClickListener(state: OngoingCallModel.InCall): View.OnClickListener? {
         if (state.intent == null) {

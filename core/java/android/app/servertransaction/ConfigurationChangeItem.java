@@ -16,6 +16,8 @@
 
 package android.app.servertransaction;
 
+import static java.util.Objects.requireNonNull;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ClientTransactionHandler;
@@ -27,12 +29,20 @@ import java.util.Objects;
 
 /**
  * App configuration change message.
+ *
  * @hide
  */
 public class ConfigurationChangeItem extends ClientTransactionItem {
 
-    private Configuration mConfiguration;
-    private int mDeviceId;
+    @NonNull
+    private final Configuration mConfiguration;
+
+    private final int mDeviceId;
+
+    public ConfigurationChangeItem(@NonNull Configuration config, int deviceId) {
+        mConfiguration = new Configuration(config);
+        mDeviceId = deviceId;
+    }
 
     @Override
     public void preExecute(@NonNull ClientTransactionHandler client) {
@@ -46,55 +56,31 @@ public class ConfigurationChangeItem extends ClientTransactionItem {
         client.handleConfigurationChanged(mConfiguration, mDeviceId);
     }
 
-    // ObjectPoolItem implementation
-
-    private ConfigurationChangeItem() {}
-
-    /** Obtain an instance initialized with provided params. */
-    public static ConfigurationChangeItem obtain(@NonNull Configuration config, int deviceId) {
-        ConfigurationChangeItem instance = ObjectPool.obtain(ConfigurationChangeItem.class);
-        if (instance == null) {
-            instance = new ConfigurationChangeItem();
-        }
-        instance.mConfiguration = new Configuration(config);
-        instance.mDeviceId = deviceId;
-
-        return instance;
-    }
-
-    @Override
-    public void recycle() {
-        mConfiguration = null;
-        mDeviceId = 0;
-        ObjectPool.recycle(this);
-    }
-
-
     // Parcelable implementation
 
-    /** Write to Parcel. */
+    /** Writes to Parcel. */
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeTypedObject(mConfiguration, flags);
         dest.writeInt(mDeviceId);
     }
 
-    /** Read from Parcel. */
+    /** Reads from Parcel. */
     private ConfigurationChangeItem(Parcel in) {
-        mConfiguration = in.readTypedObject(Configuration.CREATOR);
+        mConfiguration = requireNonNull(in.readTypedObject(Configuration.CREATOR));
         mDeviceId = in.readInt();
     }
 
     public static final @android.annotation.NonNull Creator<ConfigurationChangeItem> CREATOR =
-            new Creator<ConfigurationChangeItem>() {
-        public ConfigurationChangeItem createFromParcel(Parcel in) {
-            return new ConfigurationChangeItem(in);
-        }
+            new Creator<>() {
+                public ConfigurationChangeItem createFromParcel(Parcel in) {
+                    return new ConfigurationChangeItem(in);
+                }
 
-        public ConfigurationChangeItem[] newArray(int size) {
-            return new ConfigurationChangeItem[size];
-        }
-    };
+                public ConfigurationChangeItem[] newArray(int size) {
+                    return new ConfigurationChangeItem[size];
+                }
+            };
 
     @Override
     public boolean equals(@Nullable Object o) {

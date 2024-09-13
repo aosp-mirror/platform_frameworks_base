@@ -33,7 +33,7 @@ class FakeUserTracker(
     private var _userHandle: UserHandle = UserHandle.of(_userId),
     private var _userInfo: UserInfo = mock(),
     private var _userProfiles: List<UserInfo> = emptyList(),
-    userContentResolver: ContentResolver = MockContentResolver(),
+    userContentResolverProvider: () -> ContentResolver = { MockContentResolver() },
     userContext: Context = mock(),
     private val onCreateCurrentUserContext: (Context) -> Context = { mock() },
 ) : UserTracker {
@@ -41,14 +41,19 @@ class FakeUserTracker(
 
     override val userId: Int
         get() = _userId
+
     override val userHandle: UserHandle
         get() = _userHandle
+
     override val userInfo: UserInfo
         get() = _userInfo
+
     override val userProfiles: List<UserInfo>
         get() = _userProfiles
 
-    override val userContentResolver: ContentResolver = userContentResolver
+    // userContentResolver is lazy because Ravenwood doesn't support MockContentResolver()
+    // and we still want to allow people use this class for tests that don't use it.
+    override val userContentResolver: ContentResolver by lazy { userContentResolverProvider() }
     override val userContext: Context = userContext
 
     override fun addCallback(callback: UserTracker.Callback, executor: Executor) {

@@ -16,122 +16,65 @@
 
 package com.android.systemui.touchpad.tutorial.ui.composable
 
-import androidx.activity.compose.BackHandler
-import androidx.annotation.StringRes
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.ExperimentalComposeUiApi
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.pointer.pointerInteropFilter
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
+import com.airbnb.lottie.compose.rememberLottieDynamicProperties
+import com.android.compose.theme.LocalAndroidColorScheme
+import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialScreenConfig
+import com.android.systemui.inputdevice.tutorial.ui.composable.rememberColorFilterProperty
 import com.android.systemui.res.R
-import com.android.systemui.touchpad.tutorial.ui.gesture.TouchpadGesture.BACK
-import com.android.systemui.touchpad.tutorial.ui.gesture.TouchpadGestureHandler
+import com.android.systemui.touchpad.tutorial.ui.gesture.BackGestureMonitor
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun BackGestureTutorialScreen(
     onDoneButtonClicked: () -> Unit,
     onBack: () -> Unit,
 ) {
-    BackHandler(onBack = onBack)
-    var gestureDone by remember { mutableStateOf(false) }
-    val swipeDistanceThresholdPx =
-        with(LocalContext.current) {
-            resources.getDimensionPixelSize(
-                com.android.internal.R.dimen.system_gestures_distance_threshold
-            )
-        }
-    val gestureHandler =
-        remember(swipeDistanceThresholdPx) {
-            TouchpadGestureHandler(BACK, swipeDistanceThresholdPx, onDone = { gestureDone = true })
-        }
-    Box(
-        modifier =
-            Modifier.fillMaxSize()
-                // we need to use pointerInteropFilter because some info about touchpad gestures is
-                // only available in MotionEvent
-                .pointerInteropFilter(onTouchEvent = gestureHandler::onMotionEvent)
-    ) {
-        GestureTutorialContent(gestureDone, onDoneButtonClicked)
-    }
-}
-
-@Composable
-private fun GestureTutorialContent(gestureDone: Boolean, onDoneButtonClicked: () -> Unit) {
-    Column(
-        verticalArrangement = Arrangement.Center,
-        modifier =
-            Modifier.fillMaxSize()
-                .background(color = MaterialTheme.colorScheme.surfaceContainer)
-                .padding(start = 48.dp, top = 124.dp, end = 48.dp, bottom = 48.dp)
-    ) {
-        Row(modifier = Modifier.fillMaxWidth().weight(1f)) {
-            TutorialDescription(
-                titleTextId =
-                    if (gestureDone) R.string.touchpad_tutorial_gesture_done
-                    else R.string.touchpad_back_gesture_action_title,
-                bodyTextId = R.string.touchpad_back_gesture_guidance,
-                modifier = Modifier.weight(1f)
-            )
-            Spacer(modifier = Modifier.width(76.dp))
-            TutorialAnimation(modifier = Modifier.weight(1f).padding(top = 24.dp))
-        }
-        DoneButton(onDoneButtonClicked = onDoneButtonClicked)
-    }
-}
-
-@Composable
-fun TutorialDescription(
-    @StringRes titleTextId: Int,
-    @StringRes bodyTextId: Int,
-    modifier: Modifier = Modifier
-) {
-    Column(verticalArrangement = Arrangement.Top, modifier = modifier) {
-        Text(text = stringResource(id = titleTextId), style = MaterialTheme.typography.displayLarge)
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(text = stringResource(id = bodyTextId), style = MaterialTheme.typography.bodyLarge)
-    }
-}
-
-@Composable
-fun TutorialAnimation(modifier: Modifier = Modifier) {
-    // below are just placeholder images, will be substituted by animations soon
-    Column(modifier = modifier.fillMaxWidth()) {
-        Image(
-            painter = painterResource(id = R.drawable.placeholder_touchpad_tablet_back_gesture),
-            contentDescription =
-                stringResource(
-                    id = R.string.touchpad_back_gesture_screen_animation_content_description
+    val screenConfig =
+        TutorialScreenConfig(
+            colors = rememberScreenColors(),
+            strings =
+                TutorialScreenConfig.Strings(
+                    titleResId = R.string.touchpad_back_gesture_action_title,
+                    bodyResId = R.string.touchpad_back_gesture_guidance,
+                    titleSuccessResId = R.string.touchpad_back_gesture_success_title,
+                    bodySuccessResId = R.string.touchpad_back_gesture_success_body
                 ),
-            modifier = Modifier.fillMaxWidth()
+            animations =
+                TutorialScreenConfig.Animations(
+                    educationResId = R.raw.trackpad_back_edu,
+                    successResId = R.raw.trackpad_back_success
+                )
         )
-        Spacer(modifier = Modifier.height(24.dp))
-        Image(
-            painter = painterResource(id = R.drawable.placeholder_touchpad_back_gesture),
-            contentDescription =
-                stringResource(id = R.string.touchpad_back_gesture_animation_content_description),
-            modifier = Modifier.fillMaxWidth()
+    val gestureMonitorProvider =
+        DistanceBasedGestureMonitorProvider(
+            monitorFactory = { distanceThresholdPx, gestureStateCallback ->
+                BackGestureMonitor(distanceThresholdPx, gestureStateCallback)
+            }
         )
-    }
+    GestureTutorialScreen(screenConfig, gestureMonitorProvider, onDoneButtonClicked, onBack)
+}
+
+@Composable
+private fun rememberScreenColors(): TutorialScreenConfig.Colors {
+    val onTertiary = LocalAndroidColorScheme.current.onTertiary
+    val onTertiaryFixed = LocalAndroidColorScheme.current.onTertiaryFixed
+    val onTertiaryFixedVariant = LocalAndroidColorScheme.current.onTertiaryFixedVariant
+    val tertiaryFixedDim = LocalAndroidColorScheme.current.tertiaryFixedDim
+    val dynamicProperties =
+        rememberLottieDynamicProperties(
+            rememberColorFilterProperty(".tertiaryFixedDim", tertiaryFixedDim),
+            rememberColorFilterProperty(".onTertiaryFixed", onTertiaryFixed),
+            rememberColorFilterProperty(".onTertiary", onTertiary),
+            rememberColorFilterProperty(".onTertiaryFixedVariant", onTertiaryFixedVariant)
+        )
+    val screenColors =
+        remember(dynamicProperties) {
+            TutorialScreenConfig.Colors(
+                background = onTertiaryFixed,
+                title = tertiaryFixedDim,
+                animationColors = dynamicProperties,
+            )
+        }
+    return screenColors
 }

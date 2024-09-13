@@ -54,6 +54,7 @@ import android.os.ShellCallback;
 import android.os.ShellCommand;
 import android.os.SystemClock;
 import android.os.Temperature;
+import android.os.Trace;
 import android.util.ArrayMap;
 import android.util.EventLog;
 import android.util.Slog;
@@ -247,6 +248,7 @@ public class ThermalManagerService extends SystemService {
 
     private void setStatusLocked(int newStatus) {
         if (newStatus != mStatus) {
+            Trace.traceCounter(Trace.TRACE_TAG_POWER, "ThermalManagerService.status", newStatus);
             mStatus = newStatus;
             notifyStatusListenersLocked();
         }
@@ -1626,9 +1628,9 @@ public class ThermalManagerService extends SystemService {
         long mInactivityThresholdMillis = INACTIVITY_THRESHOLD_MILLIS;
 
         void updateThresholds() {
-            synchronized (mSamples) {
-                List<TemperatureThreshold> thresholds =
+            List<TemperatureThreshold> thresholds =
                         mHalWrapper.getTemperatureThresholds(true, Temperature.TYPE_SKIN);
+            synchronized (mSamples) {
                 if (Flags.allowThermalHeadroomThresholds()) {
                     Arrays.fill(mHeadroomThresholds, Float.NaN);
                 }
@@ -1644,8 +1646,7 @@ public class ThermalManagerService extends SystemService {
                         if (Flags.allowThermalHeadroomThresholds()) {
                             for (int severity = ThrottlingSeverity.LIGHT;
                                     severity <= ThrottlingSeverity.SHUTDOWN; severity++) {
-                                if (severity != ThrottlingSeverity.SEVERE
-                                        && threshold.hotThrottlingThresholds.length > severity) {
+                                if (threshold.hotThrottlingThresholds.length > severity) {
                                     updateHeadroomThreshold(severity,
                                             threshold.hotThrottlingThresholds[severity],
                                             severeThreshold);

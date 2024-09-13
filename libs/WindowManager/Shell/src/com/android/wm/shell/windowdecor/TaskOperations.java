@@ -23,6 +23,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.content.Context;
 import android.hardware.input.InputManager;
+import android.os.IBinder;
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.InputDevice;
@@ -84,13 +85,17 @@ class TaskOperations {
         }
     }
 
-    void minimizeTask(WindowContainerToken taskToken) {
-        WindowContainerTransaction wct = new WindowContainerTransaction();
+    IBinder minimizeTask(WindowContainerToken taskToken) {
+        return minimizeTask(taskToken, new WindowContainerTransaction());
+    }
+
+    IBinder minimizeTask(WindowContainerToken taskToken, WindowContainerTransaction wct) {
         wct.reorder(taskToken, false);
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            mTransitionStarter.startMinimizedModeTransition(wct);
+            return mTransitionStarter.startMinimizedModeTransition(wct);
         } else {
             mSyncQueue.queue(wct);
+            return null;
         }
     }
 

@@ -14,17 +14,20 @@
  * limitations under the License.
  */
 
+package com.android.systemui.communal.widgets
+
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.communal.domain.interactor.communalSceneInteractor
 import com.android.systemui.communal.shared.model.CommunalScenes
-import com.android.systemui.communal.widgets.CommunalTransitionAnimatorController
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -34,6 +37,7 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 
+@ExperimentalCoroutinesApi
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class CommunalTransitionAnimatorControllerTest : SysuiTestCase() {
@@ -66,13 +70,13 @@ class CommunalTransitionAnimatorControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun animationCancelled_launchingWidgetStateIsClearedAndSceneIsNotChanged() {
+    fun animationCancelled_launchingWidgetStateIsCleared() {
         with(kosmos) {
             testScope.runTest {
                 val launching by collectLastValue(communalSceneInteractor.isLaunchingWidget)
                 val scene by collectLastValue(communalSceneInteractor.currentScene)
 
-                communalSceneInteractor.changeScene(CommunalScenes.Communal)
+                communalSceneInteractor.changeScene(CommunalScenes.Communal, "test")
                 Truth.assertThat(scene).isEqualTo(CommunalScenes.Communal)
                 communalSceneInteractor.setIsLaunchingWidget(true)
                 assertTrue(launching!!)
@@ -81,9 +85,12 @@ class CommunalTransitionAnimatorControllerTest : SysuiTestCase() {
                 assertTrue(launching!!)
                 verify(controller).onIntentStarted(willAnimate = true)
 
+                underTest.onTransitionAnimationStart(isExpandingFullyAbove = true)
+                assertTrue(launching!!)
+                verify(controller).onTransitionAnimationStart(isExpandingFullyAbove = true)
+
                 underTest.onTransitionAnimationCancelled(newKeyguardOccludedState = true)
                 assertFalse(launching!!)
-                Truth.assertThat(scene).isEqualTo(CommunalScenes.Communal)
                 verify(controller).onTransitionAnimationCancelled(newKeyguardOccludedState = true)
             }
         }
@@ -96,7 +103,7 @@ class CommunalTransitionAnimatorControllerTest : SysuiTestCase() {
                 val launching by collectLastValue(communalSceneInteractor.isLaunchingWidget)
                 val scene by collectLastValue(communalSceneInteractor.currentScene)
 
-                communalSceneInteractor.changeScene(CommunalScenes.Communal)
+                communalSceneInteractor.changeScene(CommunalScenes.Communal, "test")
                 Truth.assertThat(scene).isEqualTo(CommunalScenes.Communal)
                 communalSceneInteractor.setIsLaunchingWidget(true)
                 assertTrue(launching!!)
@@ -104,6 +111,12 @@ class CommunalTransitionAnimatorControllerTest : SysuiTestCase() {
                 underTest.onIntentStarted(willAnimate = true)
                 assertTrue(launching!!)
                 verify(controller).onIntentStarted(willAnimate = true)
+
+                underTest.onTransitionAnimationStart(isExpandingFullyAbove = true)
+                assertTrue(launching!!)
+                verify(controller).onTransitionAnimationStart(isExpandingFullyAbove = true)
+
+                testScope.advanceTimeBy(ActivityTransitionAnimator.TIMINGS.totalDuration)
 
                 underTest.onTransitionAnimationEnd(isExpandingFullyAbove = true)
                 assertFalse(launching!!)

@@ -50,15 +50,16 @@ import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.UserHandle;
 import android.util.ArraySet;
 import android.view.InputChannel;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.ImeTracker;
 import android.window.ImeOnBackInvokedDispatcher;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.internal.compat.IPlatformCompat;
+import com.android.internal.inputmethod.DirectBootAwareness;
 import com.android.internal.inputmethod.IInputMethod;
 import com.android.internal.inputmethod.IInputMethodClient;
 import com.android.internal.inputmethod.IInputMethodSession;
@@ -127,7 +128,7 @@ public class InputMethodManagerServiceTestBase {
     protected Context mContext;
     protected MockitoSession mMockingSession;
     protected int mTargetSdkVersion;
-    protected int mCallingUserId;
+    protected int mUserId;
     protected EditorInfo mEditorInfo;
     protected IInputMethodInvoker mMockInputMethodInvoker;
     protected InputMethodManagerService mInputMethodManagerService;
@@ -161,14 +162,15 @@ public class InputMethodManagerServiceTestBase {
                         .spyStatic(InputMethodUtils.class)
                         .mockStatic(ServiceManager.class)
                         .spyStatic(AdditionalSubtypeMapRepository.class)
+                        .spyStatic(AdditionalSubtypeUtils.class)
                         .startMocking();
 
-        mContext = spy(InstrumentationRegistry.getInstrumentation().getContext());
+        mContext = spy(InstrumentationRegistry.getInstrumentation().getTargetContext());
 
         mTargetSdkVersion = mContext.getApplicationInfo().targetSdkVersion;
         mIsLargeScreen = mContext.getResources().getConfiguration()
                 .isLayoutSizeAtLeast(Configuration.SCREENLAYOUT_SIZE_LARGE);
-        mCallingUserId = UserHandle.getCallingUserId();
+        mUserId = mContext.getUserId();
         mEditorInfo = new EditorInfo();
         mEditorInfo.packageName = TEST_EDITOR_PKG_NAME;
 
@@ -200,7 +202,7 @@ public class InputMethodManagerServiceTestBase {
         // Injecting and mocked InputMethodBindingController and InputMethod.
         mMockInputMethodInvoker = IInputMethodInvoker.create(mMockInputMethod);
         mInputManagerGlobalSession = InputManagerGlobal.createTestSession(mMockIInputManager);
-        when(mMockInputMethodBindingController.getUserId()).thenReturn(mCallingUserId);
+        when(mMockInputMethodBindingController.getUserId()).thenReturn(mUserId);
         synchronized (ImfLock.class) {
             when(mMockInputMethodBindingController.getCurMethod())
                     .thenReturn(mMockInputMethodInvoker);
@@ -220,7 +222,7 @@ public class InputMethodManagerServiceTestBase {
                 .thenReturn(new int[] {0});
         when(mMockUserManagerInternal.getUserIds()).thenReturn(new int[] {0});
         when(mMockActivityManagerInternal.isSystemReady()).thenReturn(true);
-        when(mMockActivityManagerInternal.getCurrentUserId()).thenReturn(mCallingUserId);
+        when(mMockActivityManagerInternal.getCurrentUserId()).thenReturn(mUserId);
         when(mMockPackageManagerInternal.getPackageUid(anyString(), anyLong(), anyInt()))
                 .thenReturn(Binder.getCallingUid());
         when(mMockPackageManagerInternal.isSameApp(anyString(), anyLong(), anyInt(), anyInt()))
@@ -235,6 +237,7 @@ public class InputMethodManagerServiceTestBase {
 
         // The background writer thread in AdditionalSubtypeMapRepository should be stubbed out.
         doNothing().when(AdditionalSubtypeMapRepository::startWriterThread);
+        doReturn(AdditionalSubtypeMap.EMPTY_MAP).when(() -> AdditionalSubtypeUtils.load(anyInt()));
 
         mServiceThread =
                 new ServiceThread(
@@ -258,6 +261,11 @@ public class InputMethodManagerServiceTestBase {
                 unusedUserId -> mMockInputMethodBindingController);
         spyOn(mInputMethodManagerService);
 
+        synchronized (ImfLock.class) {
+            doReturn(true).when(mInputMethodManagerService).setImeVisibilityOnFocusedWindowClient(
+                    anyBoolean(), any(UserData.class), any(ImeTracker.Token.class));
+        }
+
         // Start a InputMethodManagerService.Lifecycle to publish and manage the lifecycle of
         // InputMethodManagerService, which is closer to the real situation.
         InputMethodManagerService.Lifecycle lifecycle =
@@ -266,6 +274,22 @@ public class InputMethodManagerServiceTestBase {
         // Public local InputMethodManagerService.
         LocalServices.removeServiceForTest(InputMethodManagerInternal.class);
         lifecycle.onStart();
+
+        final var userData = mInputMethodManagerService.getUserData(mUserId);
+
+        // Certain tests rely on TEST_IME_ID that is installed with AndroidTest.xml.
+        // TODO(b/352615651): Consider just synthesizing test InputMethodInfo then injecting it.
+        AdditionalSubtypeMapRepository.initializeIfNecessary(mUserId);
+        final var rawMethodMap = InputMethodManagerService.queryRawInputMethodServiceMap(mContext,
+                mUserId);
+        userData.mRawInputMethodMap.set(rawMethodMap);
+        final var settings = InputMethodSettings.create(rawMethodMap.toInputMethodMap(
+                AdditionalSubtypeMap.EMPTY_MAP, DirectBootAwareness.AUTO, true /* userUnlocked */),
+                mUserId);
+        InputMethodSettingsRepository.put(mUserId, settings);
+
+        // Emulate that the user initialization is done.
+        userData.mBackgroundLoadLatch.countDown();
 
         // After this boot phase, services can broadcast Intents.
         lifecycle.onBootPhase(SystemService.PHASE_ACTIVITY_MANAGER_READY);
@@ -277,6 +301,8 @@ public class InputMethodManagerServiceTestBase {
 
     @After
     public void tearDown() {
+        InputMethodSettingsRepository.remove(mUserId);
+
         if (mInputMethodManagerService != null) {
             mInputMethodManagerService.mInputMethodDeviceConfigs.destroy();
         }
@@ -327,12 +353,20 @@ public class InputMethodManagerServiceTestBase {
                         anyInt() /* flags */, any() /* resultReceiver */);
     }
 
+    protected void verifySetImeVisibility(boolean setVisible, boolean invoked) {
+        synchronized (ImfLock.class) {
+            verify(mInputMethodManagerService,
+                    times(invoked ? 1 : 0)).setImeVisibilityOnFocusedWindowClient(eq(setVisible),
+                    any(UserData.class), any(ImeTracker.Token.class));
+        }
+    }
+
     protected void createSessionForClient(IInputMethodClient client) {
         synchronized (ImfLock.class) {
             ClientState cs = mInputMethodManagerService.getClientStateLocked(client);
             cs.mCurSession = new InputMethodManagerService.SessionState(cs,
-                    mMockInputMethodInvoker, mMockInputMethodSession, mock(
-                    InputChannel.class));
+                    mMockInputMethodInvoker, mMockInputMethodSession, mock(InputChannel.class),
+                    mUserId);
         }
     }
 }

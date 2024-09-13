@@ -525,7 +525,7 @@
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Այս հավելվածը կարող է հետզանգեր ստանալ՝ ցանկացած տեսախցիկի բացվելու (կնշվի բացող հավելվածը) և փակվելու դեպքում։"</string>
     <string name="permlab_cameraHeadlessSystemUser" msgid="680194666834500050">"Թույլատրել հավելվածին կամ ծառայությանը օգտագործել որպես միջերեսի համակարգային օգտատեր։"</string>
     <string name="permdesc_cameraHeadlessSystemUser" msgid="6963163319710996412">"Այս հավելվածին ձեր տեսախցիկը հասանելի է որպես առանց միջերեսի համակարգային օգտատեր։"</string>
-    <string name="permlab_vibrate" msgid="8596800035791962017">"կառավարել թրթռումը"</string>
+    <string name="permlab_vibrate" msgid="8596800035791962017">"կառավարել թրթռոցը"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Թույլ է տալիս հավելվածին կառավարել թրթռոցը:"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Հավելվածին թույլ է տալիս օգտագործել սարքի թրթռալու ռեժիմը։"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"ուղղակիորեն զանգել հեռախոսահամարներին"</string>
@@ -1194,6 +1194,8 @@
     <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"Ձեռագիր ներածումը չի աջակցվում գաղտնաբառերի դաշտերում"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Հետ"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Փոխել ներածման եղանակը"</string>
+    <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"Բացել ներածման եղանակի ընտրիչը"</string>
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"Կարգավորումներ"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Հիշողությունը սպառվում է"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Որոշ գործառույթներ կարող են չաշխատել"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Համակարգի համար բավարար հիշողություն չկա: Համոզվեք, որ ունեք 250ՄԲ ազատ տարածություն և վերագործարկեք:"</string>
@@ -1428,6 +1430,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"ՏՐԱՄԱԴՐԵԼ"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"ՄԵՐԺԵԼ"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Ընտրեք ներածման եղանակը"</string>
+    <string name="input_method_language_settings" msgid="8069089418056819437">"Լեզվի կարգավորումներ"</string>
     <string name="show_ime" msgid="6406112007347443383">"Պահել էկրանին, երբ ֆիզիկական ստեղնաշարն ակտիվ է"</string>
     <string name="hardware" msgid="3611039921284836033">"Օգտագործել էկրանային ստեղնաշար"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Կարգավորեք <xliff:g id="DEVICE_NAME">%s</xliff:g> սարքը"</string>
@@ -1743,7 +1746,8 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"Հավելվածը թաքցնում է թույլտվության հայտը, ուստի ձեր պատասխանը հնարավոր չէ ստուգել։"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Ընտրեք՝ որ գործառույթն օգտագործել"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Ընտրեք գործառույթները, որոնք կբացվեն «Հատուկ գործառույթներ» կոճակի միջոցով"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Ընտրեք գործառույթները, որոնք կբացվեն ձայնի կարգավորման կոճակի միջոցով"</string>
+    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
+    <skip />
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> ծառայությունն անջատված է"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Փոփոխել դյուրանցումները"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Պատրաստ է"</string>
@@ -2420,7 +2424,9 @@
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Անվտանգության նկատառումներով՝ բովանդակությունը թաքցվել է ցուցադրումից"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Ավտոմատ միացել է արբանյակին"</string>
-    <string name="satellite_notification_summary" msgid="5207364139430767162">"Դուք կարող եք ուղարկել և ստանալ հաղորդագրություններ՝ առանց բջջային կամ Wi-Fi կապի"</string>
+    <string name="satellite_notification_summary" msgid="5207364139430767162">"Դուք կարող եք հաղորդագրություններ ուղարկել և ստանալ առանց բջջային կամ Wi-Fi կապի"</string>
+    <string name="satellite_notification_manual_title" msgid="1097504441849466279">"Օգտագործե՞լ արբանյակային հաղորդագրումը"</string>
+    <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Ուղարկեք և ստացեք հաղորդագրություններ առանց բջջային կամ Wi-Fi ցանցի"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Բացել Messages-ը"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Ինչպես է դա աշխատում"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Առկախ է…"</string>
@@ -2433,26 +2439,18 @@
     <string name="face_dangling_notification_msg" msgid="746235263598985384">"Ձեր դեմքի նմուշն այլևս չի կարող ճանաչվել։ Նորից կարգավորեք դեմքով ապակողպումը։"</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Կարգավորել"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Ոչ հիմա"</string>
-    <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"<xliff:g id="USER_NAME">%s</xliff:g>-ի զարթուցիչ"</string>
+    <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"«<xliff:g id="USER_NAME">%s</xliff:g>» օգտատիրոջ զարթուցիչ"</string>
     <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"Անցնել մյուս հաշիվ"</string>
     <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"Անտեսել"</string>
     <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"Հպեք՝ ձայնն անջատելու համար"</string>
-    <!-- no translation found for keyboard_shortcut_group_applications_browser (6535007304687100909) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_contacts (2750702518068326356) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_email (4229037666415353683) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_sms (3523799286376321137) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_music (2051507523525651067) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_calendar (3571770335653387606) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_calculator (6753209559716091507) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_maps (7950000659522589471) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications (3010389163951364798) -->
-    <skip />
+    <string name="keyboard_shortcut_group_applications_browser" msgid="6535007304687100909">"Դիտարկիչ"</string>
+    <string name="keyboard_shortcut_group_applications_contacts" msgid="2750702518068326356">"Կոնտակտներ"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="4229037666415353683">"Էլփոստ"</string>
+    <string name="keyboard_shortcut_group_applications_sms" msgid="3523799286376321137">"SMS"</string>
+    <string name="keyboard_shortcut_group_applications_music" msgid="2051507523525651067">"Երաժշտություն"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="3571770335653387606">"Օրացույց"</string>
+    <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"Հաշվիչ"</string>
+    <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"Քարտեզներ"</string>
+    <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"Հավելվածներ"</string>
+    <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"Ձեր մատնահետքերն այլևս չեն կարող ճանաչվել։ Նորից կարգավորեք մատնահետքով ապակողպումը։"</string>
 </resources>

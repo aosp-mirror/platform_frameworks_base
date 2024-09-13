@@ -26,6 +26,7 @@ import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.graphics.Region;
+import android.hardware.input.InputManager;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.os.SystemClock;
@@ -45,9 +46,11 @@ import android.view.accessibility.AccessibilityEvent;
 
 import com.android.server.LocalServices;
 import com.android.server.accessibility.gestures.TouchExplorer;
+import com.android.server.accessibility.magnification.FullScreenMagnificationController;
 import com.android.server.accessibility.magnification.FullScreenMagnificationGestureHandler;
 import com.android.server.accessibility.magnification.FullScreenMagnificationVibrationHelper;
 import com.android.server.accessibility.magnification.MagnificationGestureHandler;
+import com.android.server.accessibility.magnification.MouseEventHandler;
 import com.android.server.accessibility.magnification.WindowMagnificationGestureHandler;
 import com.android.server.accessibility.magnification.WindowMagnificationPromptController;
 import com.android.server.policy.WindowManagerPolicy;
@@ -55,6 +58,7 @@ import com.android.server.policy.WindowManagerPolicy;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.StringJoiner;
 
 /**
@@ -63,7 +67,6 @@ import java.util.StringJoiner;
  *
  * NOTE: This class has to be created and poked only from the main thread.
  */
-@SuppressWarnings("MissingPermissionAnnotation")
 class AccessibilityInputFilter extends InputFilter implements EventStreamTransformation {
 
     private static final String TAG = AccessibilityInputFilter.class.getSimpleName();
@@ -746,6 +749,7 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
 
         if ((mEnabledFeatures & FLAG_FEATURE_MOUSE_KEYS) != 0) {
             mMouseKeysInterceptor = new MouseKeysInterceptor(mAms,
+                    Objects.requireNonNull(mContext.getSystemService(InputManager.class)),
                     Looper.myLooper(),
                     Display.DEFAULT_DISPLAY);
             addFirstEventHandler(Display.DEFAULT_DISPLAY, mMouseKeysInterceptor);
@@ -864,15 +868,21 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
                     TYPE_MAGNIFICATION_OVERLAY, null /* options */);
             FullScreenMagnificationVibrationHelper fullScreenMagnificationVibrationHelper =
                     new FullScreenMagnificationVibrationHelper(uiContext);
-            magnificationGestureHandler = new FullScreenMagnificationGestureHandler(uiContext,
-                    mAms.getMagnificationController().getFullScreenMagnificationController(),
-                    mAms.getTraceManager(),
-                    mAms.getMagnificationController(),
-                    detectControlGestures,
-                    detectTwoFingerTripleTap,
-                    triggerable,
-                    new WindowMagnificationPromptController(displayContext, mUserId), displayId,
-                    fullScreenMagnificationVibrationHelper);
+            FullScreenMagnificationController controller =
+                    mAms.getMagnificationController().getFullScreenMagnificationController();
+            magnificationGestureHandler =
+                    new FullScreenMagnificationGestureHandler(
+                            uiContext,
+                            controller,
+                            mAms.getTraceManager(),
+                            mAms.getMagnificationController(),
+                            detectControlGestures,
+                            detectTwoFingerTripleTap,
+                            triggerable,
+                            new WindowMagnificationPromptController(displayContext, mUserId),
+                            displayId,
+                            fullScreenMagnificationVibrationHelper,
+                            new MouseEventHandler(controller));
         }
         return magnificationGestureHandler;
     }

@@ -633,7 +633,7 @@ public class SoundDoseHelper {
     }
 
     /*package*/ void enforceSafeMediaVolume(String caller) {
-        AudioService.VolumeStreamState streamState = mAudioService.getVssVolumeForStream(
+        AudioService.VolumeStreamState streamState = mAudioService.getVssForStreamOrDefault(
                 AudioSystem.STREAM_MUSIC);
 
         for (int i = 0; i < mSafeMediaVolumeDevices.size(); ++i)  {
@@ -665,7 +665,7 @@ public class SoundDoseHelper {
     @GuardedBy("mSafeMediaVolumeStateLock")
     private boolean checkSafeMediaVolume_l(int streamType, int index, int device) {
         return (mSafeMediaVolumeState == SAFE_MEDIA_VOLUME_ACTIVE)
-                    && (AudioService.mStreamVolumeAlias[streamType] == AudioSystem.STREAM_MUSIC)
+                    && (AudioService.sStreamVolumeAlias.get(streamType) == AudioSystem.STREAM_MUSIC)
                     && safeDevicesContains(device)
                     && (index > safeMediaVolumeIndex(device));
     }
@@ -900,20 +900,26 @@ public class SoundDoseHelper {
 
         try {
             if (!isAbsoluteVolume) {
-                mLogger.enqueue(
-                        SoundDoseEvent.getAbsVolumeAttenuationEvent(/*attenuation=*/0.f, device));
+                if (mSafeMediaVolumeDevices.indexOfKey(device) >= 0) {
+                    mLogger.enqueue(SoundDoseEvent.getAbsVolumeAttenuationEvent(/*attenuation=*/0.f,
+                            device));
+                }
                 // remove any possible previous attenuation
                 soundDose.updateAttenuation(/* attenuationDB= */0.f, device);
 
                 return;
             }
 
-            if (AudioService.mStreamVolumeAlias[streamType] == AudioSystem.STREAM_MUSIC
+            if (AudioService.sStreamVolumeAlias.get(streamType) == AudioSystem.STREAM_MUSIC
                     && safeDevicesContains(device)) {
                 float attenuationDb = -AudioSystem.getStreamVolumeDB(AudioSystem.STREAM_MUSIC,
                         (newIndex + 5) / 10, device);
-                mLogger.enqueue(
-                        SoundDoseEvent.getAbsVolumeAttenuationEvent(attenuationDb, device));
+
+                if (mSafeMediaVolumeDevices.indexOfKey(device) >= 0) {
+                    mLogger.enqueue(
+                            SoundDoseEvent.getAbsVolumeAttenuationEvent(attenuationDb, device));
+                }
+
                 soundDose.updateAttenuation(attenuationDb, device);
             }
         } catch (RemoteException e) {

@@ -17,7 +17,8 @@
 package android.view;
 
 import static android.os.IInputConstants.INVALID_INPUT_EVENT_ID;
-import static android.view.InputDevice.SOURCE_TOUCHSCREEN;
+import static android.view.InputDevice.SOURCE_CLASS_POINTER;
+import static android.view.InputDevice.SOURCE_CLASS_POSITION;
 
 /**
  * Process input events and assign input event id to a specific frame.
@@ -64,17 +65,18 @@ public class InputEventAssigner {
     public int processEvent(InputEvent event) {
         if (event instanceof MotionEvent) {
             MotionEvent motionEvent = (MotionEvent) event;
-            if (motionEvent.isFromSource(SOURCE_TOUCHSCREEN)) {
+            if (motionEvent.isFromSource(SOURCE_CLASS_POINTER) || motionEvent.isFromSource(
+                    SOURCE_CLASS_POSITION)) {
                 final int action = motionEvent.getActionMasked();
                 if (action == MotionEvent.ACTION_DOWN) {
                     mHasUnprocessedDown = true;
                     mDownEventId = event.getId();
                 }
-                if (mHasUnprocessedDown && action == MotionEvent.ACTION_MOVE) {
-                    return mDownEventId;
-                }
                 if (action == MotionEvent.ACTION_CANCEL || action == MotionEvent.ACTION_UP) {
                     mHasUnprocessedDown = false;
+                }
+                if (mHasUnprocessedDown) {
+                    return mDownEventId;
                 }
             }
         }

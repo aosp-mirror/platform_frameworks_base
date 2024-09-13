@@ -18,23 +18,16 @@ package com.android.systemui.statusbar.pipeline.shared.ui.binder
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
-import android.content.res.ColorStateList
-import android.graphics.drawable.GradientDrawable
 import android.view.View
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.Flags
-import com.android.systemui.common.ui.binder.IconViewBinder
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
-import com.android.systemui.statusbar.chips.ui.binder.ChipChronometerBinder
+import com.android.systemui.statusbar.chips.ui.binder.OngoingActivityChipBinder
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
-import com.android.systemui.statusbar.chips.ui.view.ChipBackgroundContainer
-import com.android.systemui.statusbar.chips.ui.view.ChipChronometer
 import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor
 import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.CollapsedStatusBarViewModel
 import javax.inject.Inject
@@ -87,53 +80,49 @@ class CollapsedStatusBarViewBinderImpl @Inject constructor() : CollapsedStatusBa
                     }
                 }
 
-                if (Flags.statusBarScreenSharingChips()) {
-                    val chipView: View = view.requireViewById(R.id.ongoing_activity_chip)
-                    val chipContext = chipView.context
-                    val chipIconView: ImageView =
-                        chipView.requireViewById(R.id.ongoing_activity_chip_icon)
-                    val chipTimeView: ChipChronometer =
-                        chipView.requireViewById(R.id.ongoing_activity_chip_time)
-                    val chipTextView: TextView =
-                        chipView.requireViewById(R.id.ongoing_activity_chip_text)
-                    val chipBackgroundView =
-                        chipView.requireViewById<ChipBackgroundContainer>(
-                            R.id.ongoing_activity_chip_background
-                        )
+                if (Flags.statusBarScreenSharingChips() && !Flags.statusBarRonChips()) {
+                    val primaryChipView: View =
+                        view.requireViewById(R.id.ongoing_activity_chip_primary)
                     launch {
-                        viewModel.ongoingActivityChip.collect { chipModel ->
-                            when (chipModel) {
-                                is OngoingActivityChipModel.Shown -> {
-                                    // Data
-                                    IconViewBinder.bindNullable(chipModel.icon, chipIconView)
-                                    setChipMainContent(chipModel, chipTextView, chipTimeView)
-                                    chipView.setOnClickListener(chipModel.onClickListener)
-
-                                    // Accessibility
-                                    setChipAccessibility(chipModel, chipView)
-
-                                    // Colors
-                                    val textColor = chipModel.colors.text(chipContext)
-                                    chipIconView.imageTintList = ColorStateList.valueOf(textColor)
-                                    chipTimeView.setTextColor(textColor)
-                                    chipTextView.setTextColor(textColor)
-                                    (chipBackgroundView.background as GradientDrawable).color =
-                                        chipModel.colors.background(chipContext)
-
-                                    // Notify listeners
+                        viewModel.primaryOngoingActivityChip.collect { primaryChipModel ->
+                            OngoingActivityChipBinder.bind(primaryChipModel, primaryChipView)
+                            when (primaryChipModel) {
+                                is OngoingActivityChipModel.Shown ->
                                     listener.onOngoingActivityStatusChanged(
-                                        hasOngoingActivity = true
+                                        hasPrimaryOngoingActivity = true,
+                                        hasSecondaryOngoingActivity = false,
+                                        shouldAnimate = true,
                                     )
-                                }
-                                is OngoingActivityChipModel.Hidden -> {
-                                    // The Chronometer should be stopped to prevent leaks -- see
-                                    // b/192243808 and [Chronometer.start].
-                                    chipTimeView.stop()
+                                is OngoingActivityChipModel.Hidden ->
                                     listener.onOngoingActivityStatusChanged(
-                                        hasOngoingActivity = false
+                                        hasPrimaryOngoingActivity = false,
+                                        hasSecondaryOngoingActivity = false,
+                                        shouldAnimate = primaryChipModel.shouldAnimate,
                                     )
-                                }
                             }
+                        }
+                    }
+                }
+
+                if (Flags.statusBarScreenSharingChips() && Flags.statusBarRonChips()) {
+                    val primaryChipView: View =
+                        view.requireViewById(R.id.ongoing_activity_chip_primary)
+                    val secondaryChipView: View =
+                        view.requireViewById(R.id.ongoing_activity_chip_secondary)
+                    launch {
+                        viewModel.ongoingActivityChips.collect { chips ->
+                            OngoingActivityChipBinder.bind(chips.primary, primaryChipView)
+                            // TODO(b/364653005): Don't show the secondary chip if there isn't
+                            // enough space for it.
+                            OngoingActivityChipBinder.bind(chips.secondary, secondaryChipView)
+                            listener.onOngoingActivityStatusChanged(
+                                hasPrimaryOngoingActivity =
+                                    chips.primary is OngoingActivityChipModel.Shown,
+                                hasSecondaryOngoingActivity =
+                                    chips.secondary is OngoingActivityChipModel.Shown,
+                                // TODO(b/364653005): Figure out the animation story here.
+                                shouldAnimate = true,
+                            )
                         }
                     }
                 }
@@ -145,81 +134,6 @@ class CollapsedStatusBarViewBinderImpl @Inject constructor() : CollapsedStatusBa
                         }
                     }
                 }
-            }
-        }
-    }
-
-    private fun setChipMainContent(
-        chipModel: OngoingActivityChipModel.Shown,
-        chipTextView: TextView,
-        chipTimeView: ChipChronometer,
-    ) {
-        when (chipModel) {
-            is OngoingActivityChipModel.Shown.Countdown -> {
-                chipTextView.text = chipModel.secondsUntilStarted.toString()
-                chipTextView.visibility = View.VISIBLE
-
-                // The Chronometer should be stopped to prevent leaks -- see b/192243808 and
-                // [Chronometer.start].
-                chipTimeView.stop()
-                chipTimeView.visibility = View.GONE
-            }
-            is OngoingActivityChipModel.Shown.Timer -> {
-                ChipChronometerBinder.bind(chipModel.startTimeMs, chipTimeView)
-                chipTimeView.visibility = View.VISIBLE
-
-                chipTextView.visibility = View.GONE
-            }
-            is OngoingActivityChipModel.Shown.IconOnly -> {
-                chipTextView.visibility = View.GONE
-                // The Chronometer should be stopped to prevent leaks -- see b/192243808 and
-                // [Chronometer.start].
-                chipTimeView.stop()
-                chipTimeView.visibility = View.GONE
-            }
-        }
-        updateChipTextPadding(chipModel, chipTextView, chipTimeView)
-    }
-
-    private fun updateChipTextPadding(
-        chipModel: OngoingActivityChipModel.Shown,
-        chipTextView: TextView,
-        chipTimeView: ChipChronometer,
-    ) {
-        val requiresPadding = chipModel.icon != null
-        if (requiresPadding) {
-            chipTextView.addChipTextPaddingStart()
-            chipTimeView.addChipTextPaddingStart()
-        } else {
-            chipTextView.removeChipTextPaddingStart()
-            chipTimeView.removeChipTextPaddingStart()
-        }
-    }
-
-    private fun View.addChipTextPaddingStart() {
-        this.setPaddingRelative(
-            this.context.resources.getDimensionPixelSize(
-                R.dimen.ongoing_activity_chip_icon_text_padding
-            ),
-            paddingTop,
-            paddingEnd,
-            paddingBottom,
-        )
-    }
-
-    private fun View.removeChipTextPaddingStart() {
-        this.setPaddingRelative(/* start= */ 0, paddingTop, paddingEnd, paddingBottom)
-    }
-
-    private fun setChipAccessibility(chipModel: OngoingActivityChipModel.Shown, chipView: View) {
-        when (chipModel) {
-            is OngoingActivityChipModel.Shown.Countdown -> {
-                // Set as assertive so talkback will announce the countdown
-                chipView.accessibilityLiveRegion = View.ACCESSIBILITY_LIVE_REGION_ASSERTIVE
-            }
-            is OngoingActivityChipModel.Shown.Timer,
-            is OngoingActivityChipModel.Shown.IconOnly -> {
-                chipView.accessibilityLiveRegion = View.ACCESSIBILITY_LIVE_REGION_NONE
             }
         }
     }
@@ -266,8 +180,17 @@ interface StatusBarVisibilityChangeListener {
     /** Called when a transition from lockscreen to dream has started. */
     fun onTransitionFromLockscreenToDreamStarted()
 
-    /** Called when the status of the ongoing activity chip (active or not active) has changed. */
-    fun onOngoingActivityStatusChanged(hasOngoingActivity: Boolean)
+    /**
+     * Called when the status of the ongoing activity chip (active or not active) has changed.
+     *
+     * @param shouldAnimate true if the chip should animate in/out, and false if the chip should
+     *   immediately appear/disappear.
+     */
+    fun onOngoingActivityStatusChanged(
+        hasPrimaryOngoingActivity: Boolean,
+        hasSecondaryOngoingActivity: Boolean,
+        shouldAnimate: Boolean,
+    )
 
     /**
      * Called when the scene state has changed such that the home status bar is newly allowed or no

@@ -1537,9 +1537,14 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * be made, and for firing pre-capture flash pulses to estimate
      * scene brightness and required final capture flash power, when
      * the flash is enabled.</p>
-     * <p>Normally, this entry should be set to START for only a
-     * single request, and the application should wait until the
-     * sequence completes before starting a new one.</p>
+     * <p>Flash is enabled during precapture sequence when:</p>
+     * <ul>
+     * <li>AE mode is ON_ALWAYS_FLASH</li>
+     * <li>AE mode is ON_AUTO_FLASH and the scene is deemed too dark without flash, or</li>
+     * <li>AE mode is ON and flash mode is TORCH or SINGLE</li>
+     * </ul>
+     * <p>Normally, this entry should be set to START for only single request, and the
+     * application should wait until the sequence completes before starting a new one.</p>
      * <p>When a precapture metering sequence is finished, the camera device
      * may lock the auto-exposure routine internally to be able to accurately expose the
      * subsequent still capture image (<code>{@link CaptureRequest#CONTROL_CAPTURE_INTENT android.control.captureIntent} == STILL_CAPTURE</code>).
@@ -2705,6 +2710,13 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * in {@link CameraCharacteristics#FLASH_SINGLE_STRENGTH_DEFAULT_LEVEL android.flash.singleStrengthDefaultLevel}.
      * If {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} is set to any of <code>ON_AUTO_FLASH</code>, <code>ON_ALWAYS_FLASH</code>,
      * <code>ON_AUTO_FLASH_REDEYE</code>, <code>ON_EXTERNAL_FLASH</code> values, then the strengthLevel will be ignored.</p>
+     * <p>When AE mode is ON and flash mode is TORCH or SINGLE, the application should make sure
+     * the AE mode, flash mode, and flash strength level remain the same between precapture
+     * trigger request and final capture request. The flash strength level being set during
+     * precapture sequence is used by the camera device as a reference. The actual strength
+     * may be less, and the auto-exposure routine makes sure proper conversions of sensor
+     * exposure time and sensitivities between precapture and final capture for the specified
+     * strength level.</p>
      * <p><b>Range of valid values:</b><br>
      * <code>[1-{@link CameraCharacteristics#FLASH_TORCH_STRENGTH_MAX_LEVEL android.flash.torchStrengthMaxLevel}]</code> when the {@link CaptureRequest#FLASH_MODE android.flash.mode} is
      * set to TORCH;

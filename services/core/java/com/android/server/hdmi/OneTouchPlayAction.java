@@ -54,7 +54,9 @@ final class OneTouchPlayAction extends HdmiCecFeatureAction {
 
     // The maximum number of times we send <Give Device Power Status> before we give up.
     // We wait up to RESPONSE_TIMEOUT_MS * LOOP_COUNTER_MAX = 20 seconds.
-    private static final int LOOP_COUNTER_MAX = 10;
+    // Every 3 timeouts we send a <Text View On> in case the TV missed it and ignored it.
+    @VisibleForTesting
+    static final int LOOP_COUNTER_MAX = 10;
 
     private final int mTargetAddress;
     private final boolean mIsCec20;
@@ -181,6 +183,7 @@ final class OneTouchPlayAction extends HdmiCecFeatureAction {
         if (cmd.getOpcode() == Constants.MESSAGE_REPORT_POWER_STATUS) {
             int status = cmd.getParams()[0];
             if (status == HdmiControlManager.POWER_STATUS_ON) {
+                HdmiLogger.debug("TV's power status is on. Action finished successfully");
                 // If the device is still the active source, send the <Active Source> message
                 // again.
                 maySendActiveSource();
@@ -199,6 +202,12 @@ final class OneTouchPlayAction extends HdmiCecFeatureAction {
         switch (state) {
             case STATE_WAITING_FOR_REPORT_POWER_STATUS:
                 if (mPowerStatusCounter++ < LOOP_COUNTER_MAX) {
+                    if (mPowerStatusCounter % 3 == 0) {
+                        HdmiLogger.debug("Retry sending <Text View On> in case the TV "
+                                + "missed the message.");
+                        sendCommand(HdmiCecMessageBuilder.buildTextViewOn(getSourceAddress(),
+                                mTargetAddress));
+                    }
                     queryDevicePowerStatus();
                     addTimer(mState, HdmiConfig.TIMEOUT_MS);
                 } else {

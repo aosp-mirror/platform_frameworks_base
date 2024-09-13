@@ -16,9 +16,6 @@
 
 package android.hardware.biometrics;
 
-import static android.hardware.biometrics.BiometricPrompt.MAX_LOGO_DESCRIPTION_CHARACTER_NUMBER;
-import static android.hardware.biometrics.PromptContentViewWithMoreOptionsButton.MAX_DESCRIPTION_CHARACTER_NUMBER;
-import static android.hardware.biometrics.PromptVerticalListContentView.MAX_EACH_ITEM_CHARACTER_NUMBER;
 import static android.hardware.biometrics.PromptVerticalListContentView.MAX_ITEM_NUMBER;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -117,30 +114,7 @@ public class BiometricPromptTest {
                 () -> new BiometricPrompt.Builder(mContext).setLogoDescription(null)
         );
 
-        assertThat(e).hasMessageThat().contains(
-                "Logo description passed in can not be null or exceed");
-    }
-
-    @Test
-    public void testLogoDescription_charLimit() {
-        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
-                () -> new BiometricPrompt.Builder(mContext).setLogoDescription(
-                        generateRandomString(MAX_LOGO_DESCRIPTION_CHARACTER_NUMBER + 1))
-        );
-
-        assertThat(e).hasMessageThat().contains(
-                "Logo description passed in can not be null or exceed");
-    }
-
-    @Test
-    public void testMoreOptionsButton_descriptionCharLimit() {
-        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
-                () -> new PromptContentViewWithMoreOptionsButton.Builder().setDescription(
-                        generateRandomString(MAX_DESCRIPTION_CHARACTER_NUMBER + 1))
-        );
-
-        assertThat(e).hasMessageThat().contains(
-                "The character number of description exceeds ");
+        assertThat(e).hasMessageThat().isEqualTo("Logo description passed in can not be null");
     }
 
     @Test
@@ -168,29 +142,6 @@ public class BiometricPromptTest {
 
         assertThat(e).hasMessageThat().contains(
                 "The listener of more options button on prompt content must be set");
-    }
-
-    @Test
-    public void testVerticalList_descriptionCharLimit() {
-        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
-                () -> new PromptVerticalListContentView.Builder().setDescription(
-                        generateRandomString(MAX_DESCRIPTION_CHARACTER_NUMBER + 1))
-        );
-
-        assertThat(e).hasMessageThat().contains(
-                "The character number of description exceeds ");
-    }
-
-    @Test
-    public void testVerticalList_itemCharLimit() {
-        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
-                () -> new PromptVerticalListContentView.Builder().addListItem(
-                        new PromptContentItemBulletedText(
-                                generateRandomString(MAX_EACH_ITEM_CHARACTER_NUMBER + 1)))
-        );
-
-        assertThat(e).hasMessageThat().contains(
-                "The character number of list item exceeds ");
     }
 
     @Test

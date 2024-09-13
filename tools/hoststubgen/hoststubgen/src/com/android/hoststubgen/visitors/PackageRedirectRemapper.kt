@@ -20,6 +20,18 @@ import org.objectweb.asm.commons.Remapper
 
 /**
  * A [Remapper] for `--package-redirect`
+ *
+ * This is a feature to update all calls to specific packages to another package, which allows
+ * implementing a class in a different package, when the original package isn't allowed to modify.
+ *
+ * For example, using this, we can implement `dalvik.*` APIs in a separate package, and update
+ * all calls to the `dalvik` package to a different package.
+ *
+ * For this purpose, we don't expect the "renamed-from" classes to be in the target jar,
+ * so we don't apply the remapper to them. (The exclusion happens at the callsite of this class)
+ *
+ * TODO: Currently it's not used. Maybe remove, or just unify with the other remapper feature
+ * with TextFileFilterPolicyParser.kt.
  */
 class PackageRedirectRemapper(
         packageRedirects: List<Pair<String, String>>,

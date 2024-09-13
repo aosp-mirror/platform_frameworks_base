@@ -52,9 +52,6 @@
 -keep public class com.android.server.utils.Slogf { *; }
 
 # Referenced in wear-service
-# HIDL interfaces
--keep public class android.hidl.base.** { *; }
--keep public class android.hidl.manager.** { *; }
 -keep public class com.android.server.wm.WindowManagerInternal { *; }
 
 # JNI keep rules
@@ -107,8 +104,23 @@
 -keep,allowoptimization,allowaccessmodification class com.android.server.SystemService { *; }
 -keep,allowoptimization,allowaccessmodification class com.android.server.SystemService$TargetUser { *; }
 -keep,allowoptimization,allowaccessmodification class com.android.server.usage.StorageStatsManagerLocal { *; }
--keep,allowoptimization,allowaccessmodification class com.android.internal.util.** { *; }
--keep,allowoptimization,allowaccessmodification class android.os.** { *; }
+
+# Prevent optimizations of any statically linked code that may shadow code in
+# the bootclasspath. See also StrictJavaPackagesTest for details on exceptions.
+# TODO(b/222468116): Resolve such collisions in the build system.
+-keep public class android.gsi.** { *; }
+-keep public class android.hidl.base.** { *; }
+-keep public class android.hidl.manager.** { *; }
+-keep public class android.os.** { *; }
+-keep public class com.android.internal.util.** { *; }
+-keep public class com.android.modules.utils.build.** { *; }
+# Also suppress related duplicate type warnings for the above kept classes.
+-dontwarn android.gsi.**
+-dontwarn android.hidl.base.**
+-dontwarn android.hidl.manager.**
+-dontwarn android.os.**
+-dontwarn com.android.internal.util.**
+-dontwarn com.android.modules.utils.build.**
 
 # CoverageService guards optional jacoco class references with a runtime guard, so we can safely
 # suppress build-time warnings.

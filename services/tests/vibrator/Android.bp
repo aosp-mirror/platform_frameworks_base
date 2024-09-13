@@ -16,10 +16,10 @@ android_test {
     ],
 
     libs: [
-        "android.hardware.vibrator-V2-java",
-        "android.test.mock",
-        "android.test.base",
-        "android.test.runner",
+        "android.hardware.vibrator-V3-java",
+        "android.test.mock.stubs.system",
+        "android.test.base.stubs.system",
+        "android.test.runner.stubs.system",
     ],
 
     static_libs: [
@@ -36,7 +36,7 @@ android_test {
         "platform-test-annotations",
         "service-permission.stubs.system_server",
         "services.core",
-        "flag-junit",
+        "TestParameterInjector",
     ],
     jni_libs: ["libdexmakerjvmtiagent"],
     platform_apis: true,

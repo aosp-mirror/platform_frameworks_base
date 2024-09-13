@@ -20,14 +20,20 @@ import static android.content.pm.ActivityInfo.OVERRIDE_ANY_ORIENTATION;
 import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_COMPAT_IGNORE_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED;
 import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_COMPAT_IGNORE_REQUESTED_ORIENTATION;
 import static android.content.pm.ActivityInfo.OVERRIDE_LANDSCAPE_ORIENTATION_TO_REVERSE_LANDSCAPE;
+import static android.content.pm.ActivityInfo.OVERRIDE_RESPECT_REQUESTED_ORIENTATION;
 import static android.content.pm.ActivityInfo.OVERRIDE_UNDEFINED_ORIENTATION_TO_NOSENSOR;
 import static android.content.pm.ActivityInfo.OVERRIDE_UNDEFINED_ORIENTATION_TO_PORTRAIT;
+import static android.content.pm.ActivityInfo.OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION;
+import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_DISPLAY_ORIENTATION_OVERRIDE;
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_IGNORING_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED;
+import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_ORIENTATION_OVERRIDE;
 import static android.view.WindowManager.PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION;
 
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.AppCompatUtils.asLazy;
+import static com.android.server.wm.AppCompatUtils.isChangeEnabled;
 
 import android.annotation.NonNull;
 
@@ -54,12 +60,16 @@ class AppCompatOrientationOverrides {
     private final OptPropFactory.OptProp mIgnoreRequestedOrientationOptProp;
     @NonNull
     private final OptPropFactory.OptProp mAllowIgnoringOrientationRequestWhenLoopDetectedOptProp;
+    @NonNull
+    private final OptPropFactory.OptProp mAllowOrientationOverrideOptProp;
+    @NonNull
+    private final OptPropFactory.OptProp mAllowDisplayOrientationOverrideOptProp;
 
     @NonNull
     final OrientationOverridesState mOrientationOverridesState;
 
     AppCompatOrientationOverrides(@NonNull ActivityRecord activityRecord,
-            @NonNull LetterboxConfiguration letterboxConfiguration,
+            @NonNull AppCompatConfiguration appCompatConfiguration,
             @NonNull OptPropFactory optPropBuilder,
             @NonNull AppCompatCameraOverrides appCompatCameraOverrides) {
         mActivityRecord = activityRecord;
@@ -67,18 +77,33 @@ class AppCompatOrientationOverrides {
         mOrientationOverridesState = new OrientationOverridesState(mActivityRecord,
                 System::currentTimeMillis);
         final BooleanSupplier isPolicyForIgnoringRequestedOrientationEnabled = asLazy(
-                letterboxConfiguration::isPolicyForIgnoringRequestedOrientationEnabled);
+                appCompatConfiguration::isPolicyForIgnoringRequestedOrientationEnabled);
         mIgnoreRequestedOrientationOptProp = optPropBuilder.create(
                 PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION,
                 isPolicyForIgnoringRequestedOrientationEnabled);
         mAllowIgnoringOrientationRequestWhenLoopDetectedOptProp = optPropBuilder.create(
                 PROPERTY_COMPAT_ALLOW_IGNORING_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED,
                 isPolicyForIgnoringRequestedOrientationEnabled);
+        mAllowOrientationOverrideOptProp = optPropBuilder.create(
+                PROPERTY_COMPAT_ALLOW_ORIENTATION_OVERRIDE);
+        mAllowDisplayOrientationOverrideOptProp = optPropBuilder.create(
+                PROPERTY_COMPAT_ALLOW_DISPLAY_ORIENTATION_OVERRIDE,
+                () -> mActivityRecord.mDisplayContent != null
+                        && mActivityRecord.getTask() != null
+                        && mActivityRecord.mDisplayContent.getIgnoreOrientationRequest()
+                        && !mActivityRecord.getTask().inMultiWindowMode()
+                        && mActivityRecord.mDisplayContent.getNaturalOrientation()
+                            == ORIENTATION_LANDSCAPE
+        );
     }
 
     boolean shouldEnableIgnoreOrientationRequest() {
         return mIgnoreRequestedOrientationOptProp.shouldEnableWithOverrideAndProperty(
                 isCompatChangeEnabled(OVERRIDE_ENABLE_COMPAT_IGNORE_REQUESTED_ORIENTATION));
+    }
+
+    boolean isOverrideRespectRequestedOrientationEnabled() {
+        return isChangeEnabled(mActivityRecord, OVERRIDE_RESPECT_REQUESTED_ORIENTATION);
     }
 
     /**
@@ -113,6 +138,26 @@ class AppCompatOrientationOverrides {
     }
 
     /**
+     * Whether should fix display orientation to landscape natural orientation when a task is
+     * fullscreen and the display is ignoring orientation requests.
+     *
+     * <p>This treatment is enabled when the following conditions are met:
+     * <ul>
+     *     <li>Opt-out component property isn't enabled
+     *     <li>Opt-in per-app override is enabled
+     *     <li>Task is in fullscreen.
+     *     <li>{@link DisplayContent#getIgnoreOrientationRequest} is enabled
+     *     <li>Natural orientation of the display is landscape.
+     * </ul>
+     */
+    boolean shouldUseDisplayLandscapeNaturalOrientation() {
+        return mAllowDisplayOrientationOverrideOptProp
+                .shouldEnableWithOptInOverrideAndOptOutProperty(
+                        isChangeEnabled(mActivityRecord,
+                                OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION));
+    }
+
+    /**
      * Sets whether an activity is relaunching after the app has called {@link
      * android.app.Activity#setRequestedOrientation}.
      */
@@ -123,6 +168,10 @@ class AppCompatOrientationOverrides {
 
     boolean getIsRelaunchingAfterRequestedOrientationChanged() {
         return mOrientationOverridesState.mIsRelaunchingAfterRequestedOrientationChanged;
+    }
+
+    boolean isAllowOrientationOverrideOptOut() {
+        return mAllowOrientationOverrideOptProp.isFalse();
     }
 
     @VisibleForTesting

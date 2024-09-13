@@ -30,9 +30,9 @@ import androidx.dynamicanimation.animation.DynamicAnimation;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Flags;
-import com.android.wm.shell.common.bubbles.DismissCircleView;
-import com.android.wm.shell.common.bubbles.DismissView;
-import com.android.wm.shell.common.magnetictarget.MagnetizedObject;
+import com.android.wm.shell.shared.bubbles.DismissCircleView;
+import com.android.wm.shell.shared.bubbles.DismissView;
+import com.android.wm.shell.shared.magnetictarget.MagnetizedObject;
 
 import java.util.Map;
 import java.util.Objects;

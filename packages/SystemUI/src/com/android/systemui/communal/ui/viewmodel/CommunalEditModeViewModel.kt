@@ -18,22 +18,29 @@ package com.android.systemui.communal.ui.viewmodel
 
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
+import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Resources
+import android.os.UserHandle
 import android.util.Log
+import android.view.accessibility.AccessibilityEvent
+import android.view.accessibility.AccessibilityManager
 import androidx.activity.result.ActivityResultLauncher
 import com.android.internal.logging.UiEventLogger
-import com.android.systemui.Flags.enableWidgetPickerSizeFilter
+import com.android.systemui.communal.dagger.CommunalModule.Companion.LAUNCHER_PACKAGE
 import com.android.systemui.communal.data.model.CommunalWidgetCategories
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
-import com.android.systemui.communal.domain.interactor.CommunalPrefsInteractor
 import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
 import com.android.systemui.communal.domain.model.CommunalContentModel
+import com.android.systemui.communal.shared.log.CommunalMetricsLogger
 import com.android.systemui.communal.shared.log.CommunalUiEvent
 import com.android.systemui.communal.shared.model.EditModeState
+import com.android.systemui.communal.widgets.WidgetConfigurator
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
@@ -71,7 +78,11 @@ constructor(
     private val uiEventLogger: UiEventLogger,
     @CommunalLog logBuffer: LogBuffer,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
-    private val communalPrefsInteractor: CommunalPrefsInteractor,
+    private val metricsLogger: CommunalMetricsLogger,
+    @Application private val context: Context,
+    private val accessibilityManager: AccessibilityManager,
+    private val packageManager: PackageManager,
+    @Named(LAUNCHER_PACKAGE) private val launcherPackage: String,
 ) : BaseCommunalViewModel(communalSceneInteractor, communalInteractor, mediaHost) {
 
     private val logger = Logger(logBuffer, "CommunalEditModeViewModel")
@@ -82,10 +93,10 @@ constructor(
         communalSceneInteractor.editModeState.map { it == EditModeState.SHOWING }
 
     val showDisclaimer: Flow<Boolean> =
-        allOf(isCommunalContentVisible, not(communalPrefsInteractor.isDisclaimerDismissed))
+        allOf(isCommunalContentVisible, not(communalInteractor.isDisclaimerDismissed))
 
     fun onDisclaimerDismissed() {
-        communalPrefsInteractor.setDisclaimerDismissed()
+        communalInteractor.setDisclaimerDismissed()
     }
 
     /**
@@ -113,10 +124,27 @@ constructor(
     override val reorderingWidgets: StateFlow<Boolean>
         get() = _reorderingWidgets
 
-    override fun onDeleteWidget(id: Int) = communalInteractor.deleteWidget(id)
+    override fun onAddWidget(
+        componentName: ComponentName,
+        user: UserHandle,
+        rank: Int?,
+        configurator: WidgetConfigurator?
+    ) {
+        communalInteractor.addWidget(componentName, user, rank, configurator)
+        metricsLogger.logAddWidget(componentName.flattenToString(), rank)
+    }
 
-    override fun onReorderWidgets(widgetIdToPriorityMap: Map<Int, Int>) =
-        communalInteractor.updateWidgetOrder(widgetIdToPriorityMap)
+    override fun onDeleteWidget(
+        id: Int,
+        componentName: ComponentName,
+        rank: Int,
+    ) {
+        communalInteractor.deleteWidget(id)
+        metricsLogger.logRemoveWidget(componentName.flattenToString(), rank)
+    }
+
+    override fun onReorderWidgets(widgetIdToRankMap: Map<Int, Int>) =
+        communalInteractor.updateWidgetOrder(widgetIdToRankMap)
 
     override fun onReorderWidgetStart() {
         // Clear selection status
@@ -135,12 +163,30 @@ constructor(
         uiEventLogger.log(CommunalUiEvent.COMMUNAL_HUB_REORDER_WIDGET_CANCEL)
     }
 
+    override fun onNewWidgetAdded(provider: AppWidgetProviderInfo) {
+        if (!accessibilityManager.isEnabled) {
+            return
+        }
+
+        // Send an accessibility announcement for the newly added widget
+        val widgetLabel = provider.loadLabel(packageManager)
+        val announcementText =
+            context.getString(
+                R.string.accessibility_announcement_communal_widget_added,
+                widgetLabel
+            )
+        accessibilityManager.sendAccessibilityEvent(
+            AccessibilityEvent(AccessibilityEvent.TYPE_ANNOUNCEMENT).apply {
+                contentDescription = announcementText
+            }
+        )
+    }
+
     val isIdleOnCommunal: StateFlow<Boolean> = communalInteractor.isIdleOnCommunal
 
     /** Launch the widget picker activity using the given {@link ActivityResultLauncher}. */
     suspend fun onOpenWidgetPicker(
         resources: Resources,
-        packageManager: PackageManager,
         activityLauncher: ActivityResultLauncher<Intent>
     ): Boolean =
         withContext(backgroundDispatcher) {
@@ -151,7 +197,7 @@ constructor(
                 ) {
                     it.providerInfo
                 }
-            getWidgetPickerActivityIntent(resources, packageManager, excludeList)?.let {
+            getWidgetPickerActivityIntent(resources, excludeList)?.let {
                 try {
                     activityLauncher.launch(it)
                     return@withContext true
@@ -164,28 +210,18 @@ constructor(
 
     private fun getWidgetPickerActivityIntent(
         resources: Resources,
-        packageManager: PackageManager,
         excludeList: ArrayList<AppWidgetProviderInfo>
     ): Intent? {
-        val packageName =
-            getLauncherPackageName(packageManager)
-                ?: run {
-                    Log.e(TAG, "Couldn't resolve launcher package name")
-                    return@getWidgetPickerActivityIntent null
-                }
-
         return Intent(Intent.ACTION_PICK).apply {
-            setPackage(packageName)
-            if (enableWidgetPickerSizeFilter()) {
-                putExtra(
-                    EXTRA_DESIRED_WIDGET_WIDTH,
-                    resources.getDimensionPixelSize(R.dimen.communal_widget_picker_desired_width)
-                )
-                putExtra(
-                    EXTRA_DESIRED_WIDGET_HEIGHT,
-                    resources.getDimensionPixelSize(R.dimen.communal_widget_picker_desired_height)
-                )
-            }
+            setPackage(launcherPackage)
+            putExtra(
+                EXTRA_DESIRED_WIDGET_WIDTH,
+                resources.getDimensionPixelSize(R.dimen.communal_widget_picker_desired_width)
+            )
+            putExtra(
+                EXTRA_DESIRED_WIDGET_HEIGHT,
+                resources.getDimensionPixelSize(R.dimen.communal_widget_picker_desired_height)
+            )
             putExtra(
                 AppWidgetManager.EXTRA_CATEGORY_FILTER,
                 CommunalWidgetCategories.defaultCategories
@@ -204,18 +240,16 @@ constructor(
         }
     }
 
-    private fun getLauncherPackageName(packageManager: PackageManager): String? {
-        return packageManager
-            .resolveActivity(
-                Intent(Intent.ACTION_MAIN).also { it.addCategory(Intent.CATEGORY_HOME) },
-                PackageManager.MATCH_DEFAULT_ONLY
-            )
-            ?.activityInfo
-            ?.packageName
-    }
-
     /** Sets whether edit mode is currently open */
     fun setEditModeOpen(isOpen: Boolean) = communalInteractor.setEditModeOpen(isOpen)
+
+    /**
+     * Sets whether the edit mode activity is currently showing.
+     *
+     * See [CommunalInteractor.editActivityShowing] for more info.
+     */
+    fun setEditActivityShowing(showing: Boolean) =
+        communalInteractor.setEditActivityShowing(showing)
 
     /** Called when exiting the edit mode, before transitioning back to the communal scene. */
     fun cleanupEditModeState() {

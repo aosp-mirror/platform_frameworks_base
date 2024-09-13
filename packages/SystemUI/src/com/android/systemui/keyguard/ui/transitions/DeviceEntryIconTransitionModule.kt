@@ -18,6 +18,7 @@ package com.android.systemui.keyguard.ui.transitions
 import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerToAodTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerToDozingTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerToGoneTransitionViewModel
+import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerToLockscreenTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerToOccludedTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerToPrimaryBouncerTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.AodToGoneTransitionViewModel
@@ -45,6 +46,7 @@ import com.android.systemui.keyguard.ui.viewmodel.LockscreenToGoneTransitionView
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenToOccludedTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenToPrimaryBouncerTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.OccludedToAodTransitionViewModel
+import com.android.systemui.keyguard.ui.viewmodel.OccludedToDozingTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.OccludedToGlanceableHubTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.OccludedToLockscreenTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.OffToLockscreenTransitionViewModel
@@ -76,6 +78,12 @@ abstract class DeviceEntryIconTransitionModule {
     @IntoSet
     abstract fun alternateBouncerToGone(
         impl: AlternateBouncerToGoneTransitionViewModel
+    ): DeviceEntryIconTransition
+
+    @Binds
+    @IntoSet
+    abstract fun alternateBouncerToLockscreen(
+        impl: AlternateBouncerToLockscreenTransitionViewModel
     ): DeviceEntryIconTransition
 
     @Binds
@@ -195,6 +203,12 @@ abstract class DeviceEntryIconTransitionModule {
     @Binds
     @IntoSet
     abstract fun occludedToAod(impl: OccludedToAodTransitionViewModel): DeviceEntryIconTransition
+
+    @Binds
+    @IntoSet
+    abstract fun occludedToDozing(
+        impl: OccludedToDozingTransitionViewModel
+    ): DeviceEntryIconTransition
 
     @Binds
     @IntoSet

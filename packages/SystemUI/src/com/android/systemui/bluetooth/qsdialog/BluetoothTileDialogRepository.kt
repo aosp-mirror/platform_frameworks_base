@@ -24,7 +24,7 @@ import javax.inject.Inject
 
 /** Repository to get CachedBluetoothDevices for the Bluetooth Dialog. */
 @SysUISingleton
-internal class BluetoothTileDialogRepository
+class BluetoothTileDialogRepository
 @Inject
 constructor(
     private val localBluetoothManager: LocalBluetoothManager?,

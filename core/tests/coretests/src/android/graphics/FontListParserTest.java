@@ -16,16 +16,16 @@
 
 package android.graphics;
 
+import static android.graphics.fonts.FontFamily.Builder.VARIABLE_FONT_FAMILY_TYPE_NONE;
+import static android.graphics.fonts.FontFamily.Builder.VARIABLE_FONT_FAMILY_TYPE_SINGLE_FONT_WGHT_ITAL;
+import static android.graphics.fonts.FontFamily.Builder.VARIABLE_FONT_FAMILY_TYPE_SINGLE_FONT_WGHT_ONLY;
+import static android.graphics.fonts.FontFamily.Builder.VARIABLE_FONT_FAMILY_TYPE_TWO_FONTS_WGHT;
 import static android.graphics.fonts.FontStyle.FONT_SLANT_ITALIC;
 import static android.graphics.fonts.FontStyle.FONT_SLANT_UPRIGHT;
 import static android.graphics.fonts.FontStyle.FONT_WEIGHT_NORMAL;
 import static android.text.FontConfig.FontFamily.VARIANT_COMPACT;
 import static android.text.FontConfig.FontFamily.VARIANT_DEFAULT;
 import static android.text.FontConfig.FontFamily.VARIANT_ELEGANT;
-import static android.graphics.fonts.FontFamily.Builder.VARIABLE_FONT_FAMILY_TYPE_NONE;
-import static android.graphics.fonts.FontFamily.Builder.VARIABLE_FONT_FAMILY_TYPE_SINGLE_FONT_WGHT_ONLY;
-import static android.graphics.fonts.FontFamily.Builder.VARIABLE_FONT_FAMILY_TYPE_SINGLE_FONT_WGHT_ITAL;
-import static android.graphics.fonts.FontFamily.Builder.VARIABLE_FONT_FAMILY_TYPE_TWO_FONTS_WGHT;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -38,8 +38,8 @@ import android.os.LocaleList;
 import android.text.FontConfig;
 import android.util.Xml;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

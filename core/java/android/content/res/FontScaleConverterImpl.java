@@ -17,6 +17,7 @@
 package android.content.res;
 
 import android.annotation.NonNull;
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
 import android.util.MathUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -33,6 +34,7 @@ import java.util.Arrays;
  */
 // Needs to be public so the Kotlin test can see it
 @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+@RavenwoodKeepWholeClass
 public class FontScaleConverterImpl implements FontScaleConverter {
 
     /** @hide */

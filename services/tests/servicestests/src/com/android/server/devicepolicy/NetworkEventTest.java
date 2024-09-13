@@ -66,7 +66,7 @@ public class NetworkEventTest extends DpmTestBase {
                 any(UserHandle.class));
         mDpmTestable = new DevicePolicyManagerServiceTestable(getServices(), mSpiedDpmMockContext);
         setUpPackageManagerForAdmin(admin1, DpmMockContext.CALLER_UID);
-        mDpmTestable.setActiveAdmin(admin1, true, DpmMockContext.CALLER_USER_HANDLE);
+        mDpmTestable.setActiveAdmin(admin1, true, DpmMockContext.CALLER_USER_HANDLE, null);
     }
 
     @Test

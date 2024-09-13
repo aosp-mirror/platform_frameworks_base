@@ -19,14 +19,13 @@ package com.android.server.inputmethod;
 import android.annotation.AnyThread;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
-import android.util.SparseArray;
-
-import com.android.internal.annotations.GuardedBy;
 
 final class InputMethodSettingsRepository {
-    @GuardedBy("ImfLock.class")
+    private static final Object sMutationLock = new Object();
+
     @NonNull
-    private static final SparseArray<InputMethodSettings> sPerUserMap = new SparseArray<>();
+    private static volatile ImmutableSparseArray<InputMethodSettings> sPerUserMap =
+            ImmutableSparseArray.empty();
 
     /**
      * Not intended to be instantiated.
@@ -35,7 +34,7 @@ final class InputMethodSettingsRepository {
     }
 
     @NonNull
-    @GuardedBy("ImfLock.class")
+    @AnyThread
     static InputMethodSettings get(@UserIdInt int userId) {
         final InputMethodSettings obj = sPerUserMap.get(userId);
         if (obj != null) {
@@ -44,15 +43,17 @@ final class InputMethodSettingsRepository {
         return InputMethodSettings.createEmptyMap(userId);
     }
 
-    @GuardedBy("ImfLock.class")
+    @AnyThread
     static void put(@UserIdInt int userId, @NonNull InputMethodSettings obj) {
-        sPerUserMap.put(userId, obj);
+        synchronized (sMutationLock) {
+            sPerUserMap = sPerUserMap.cloneWithPutOrSelf(userId, obj);
+        }
     }
 
     @AnyThread
     static void remove(@UserIdInt int userId) {
-        synchronized (ImfLock.class) {
-            sPerUserMap.remove(userId);
+        synchronized (sMutationLock) {
+            sPerUserMap = sPerUserMap.cloneWithRemoveOrSelf(userId);
         }
     }
 }

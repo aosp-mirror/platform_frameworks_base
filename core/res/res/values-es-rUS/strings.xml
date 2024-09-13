@@ -272,7 +272,7 @@
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"Usa esta opción en la mayoría de los casos. Te permite realizar un seguimiento del progreso del informe, ingresar más detalles acerca del problema y tomar capturas de pantalla. Es posible que se omitan secciones menos usadas cuyos informes demoran más en completarse."</string>
     <string name="bugreport_option_full_title" msgid="7681035745950045690">"Informe completo"</string>
     <string name="bugreport_option_full_summary" msgid="1975130009258435885">"Usa esta opción para reducir al mínimo la interferencia del sistema cuando tu dispositivo no responde o funciona muy lento, o cuando necesitas todas las secciones del informe. No permite ingresar más detalles ni tomar capturas de pantalla adicionales."</string>
-    <string name="bugreport_countdown" msgid="6418620521782120755">"{count,plural, =1{Se tomará una captura de pantalla para el informe de errores en # segundo.}many{Se tomará una captura de pantalla para el informe de errores en # segundos.}other{Se tomará una captura de pantalla para el informe de errores en # segundos.}}"</string>
+    <string name="bugreport_countdown" msgid="6418620521782120755">"{count,plural, =1{Se tomará una captura de pantalla para el informe de errores en # segundo.}many{Se tomará una captura de pantalla para el informe de errores en # de segundos.}other{Se tomará una captura de pantalla para el informe de errores en # segundos.}}"</string>
     <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"Se tomó la captura de pantalla con el informe de errores"</string>
     <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"No se pudo tomar la captura de pantalla con el informe de errores"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Modo silencioso"</string>
@@ -292,7 +292,7 @@
     <string name="notification_channel_security" msgid="8516754650348238057">"Seguridad"</string>
     <string name="notification_channel_car_mode" msgid="2123919247040988436">"Modo auto"</string>
     <string name="notification_channel_account" msgid="6436294521740148173">"Estado de la cuenta"</string>
-    <string name="notification_channel_developer" msgid="1691059964407549150">"Mensajes de programadores"</string>
+    <string name="notification_channel_developer" msgid="1691059964407549150">"Mensajes de desarrolladores"</string>
     <string name="notification_channel_developer_important" msgid="7197281908918789589">"Mensajes importantes de desarrolladores"</string>
     <string name="notification_channel_updates" msgid="7907863984825495278">"Actualizaciones"</string>
     <string name="notification_channel_network_status" msgid="2127687368725272809">"Estado de la red"</string>
@@ -966,7 +966,7 @@
     <string name="relationTypeCustom" msgid="282938315217441351">"Personalizado"</string>
     <string name="relationTypeAssistant" msgid="4057605157116589315">"Asistente"</string>
     <string name="relationTypeBrother" msgid="7141662427379247820">"Hermano"</string>
-    <string name="relationTypeChild" msgid="9076258911292693601">"Hijo"</string>
+    <string name="relationTypeChild" msgid="9076258911292693601">"Hijo o hija"</string>
     <string name="relationTypeDomesticPartner" msgid="7825306887697559238">"Pareja de hecho"</string>
     <string name="relationTypeFather" msgid="3856225062864790596">"Padre"</string>
     <string name="relationTypeFriend" msgid="3192092625893980574">"Amigo"</string>
@@ -1127,7 +1127,7 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> desea activar la exploración táctil. Cuando esta función esté activada, podrás escuchar o ver descripciones del contenido seleccionado o usar gestos para interactuar con el dispositivo."</string>
     <string name="oneMonthDurationPast" msgid="4538030857114635777">"Hace 1 mes."</string>
     <string name="beforeOneMonthDurationPast" msgid="8315149541372065392">"Anterior a 1 mes atrás"</string>
-    <string name="last_num_days" msgid="2393660431490280537">"{count,plural, =1{Último # día}many{Últimos # días}other{Últimos # días}}"</string>
+    <string name="last_num_days" msgid="2393660431490280537">"{count,plural, =1{Último # día}many{Últimos # de días}other{Últimos # días}}"</string>
     <string name="last_month" msgid="1528906781083518683">"Último mes"</string>
     <string name="older" msgid="1645159827884647400">"Antiguos"</string>
     <string name="preposition_for_date" msgid="2780767868832729599">"activado <xliff:g id="DATE">%s</xliff:g>"</string>
@@ -1155,11 +1155,11 @@
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"en <xliff:g id="COUNT">%d</xliff:g> d"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"en <xliff:g id="COUNT">%d</xliff:g> años"</string>
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{Hace # minuto}many{Hace # minutos}other{Hace # minutos}}"</string>
-    <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{Hace # hora}many{Hace # horas}other{Hace # horas}}"</string>
-    <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{Hace # día}many{Hace # días}other{Hace # días}}"</string>
+    <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{Hace # hora}many{Hace # de horas}other{Hace # horas}}"</string>
+    <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{Hace # día}many{Hace # de días}other{Hace # días}}"</string>
     <string name="duration_years_relative" msgid="8731202348869424370">"{count,plural, =1{Hace # año}many{Hace # años}other{Hace # años}}"</string>
-    <string name="duration_minutes_relative_future" msgid="5259574171747708115">"{count,plural, =1{# minuto}many{# minutos}other{# minutos}}"</string>
-    <string name="duration_hours_relative_future" msgid="6670440478481140565">"{count,plural, =1{# hora}many{# horas}other{# horas}}"</string>
+    <string name="duration_minutes_relative_future" msgid="5259574171747708115">"{count,plural, =1{# minuto}many{# de minutos}other{# minutos}}"</string>
+    <string name="duration_hours_relative_future" msgid="6670440478481140565">"{count,plural, =1{# hora}many{# horas}other{# horas}}"</string>
     <string name="duration_days_relative_future" msgid="8870658635774250746">"{count,plural, =1{# día}many{# días}other{# días}}"</string>
     <string name="duration_years_relative_future" msgid="8855853883925918380">"{count,plural, =1{# año}many{# años}other{# años}}"</string>
     <string name="VideoView_error_title" msgid="5750686717225068016">"Problemas de video"</string>
@@ -1195,6 +1195,8 @@
     <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"La Escritura a mano no está disponible en campos de contraseñas"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Atrás"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Cambiar método de entrada"</string>
+    <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"Abrir selector de método de entrada"</string>
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"Configuración"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Queda poco espacio de almacenamiento"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Es posible que algunas funciones del sistema no estén disponibles."</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"No hay espacio suficiente para el sistema. Asegúrate de que haya 250 MB libres y reinicia el dispositivo."</string>
@@ -1429,6 +1431,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"COMPARTIR"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"RECHAZAR"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Selecciona el método de entrada"</string>
+    <string name="input_method_language_settings" msgid="8069089418056819437">"Configuración del idioma"</string>
     <string name="show_ime" msgid="6406112007347443383">"Mientras el teclado físico está activo"</string>
     <string name="hardware" msgid="3611039921284836033">"Usar teclado en pantalla"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Configura <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
@@ -1473,7 +1476,7 @@
     <string name="ext_media_seamless_action" msgid="8837030226009268080">"Cambiar salida"</string>
     <string name="ext_media_missing_title" msgid="3209472091220515046">"Falta <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_missing_message" msgid="4408988706227922909">"Vuelve a insertar dispositivo"</string>
-    <string name="ext_media_move_specific_title" msgid="8492118544775964250">"Transfiriendo la aplicación <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_move_specific_title" msgid="8492118544775964250">"Moviendo <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_move_title" msgid="2682741525619033637">"Transfiriendo los datos"</string>
     <string name="ext_media_move_success_title" msgid="4901763082647316767">"Se transfirió el contenido"</string>
     <string name="ext_media_move_success_message" msgid="9159542002276982979">"Se transfirió el contenido a <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1527,7 +1530,7 @@
     <string name="input_method_binding_label" msgid="1166731601721983656">"Método de entrada"</string>
     <string name="sync_binding_label" msgid="469249309424662147">"Sincronización"</string>
     <string name="accessibility_binding_label" msgid="1974602776545801715">"Accesibilidad"</string>
-    <string name="wallpaper_binding_label" msgid="1197440498000786738">"Papel tapiz"</string>
+    <string name="wallpaper_binding_label" msgid="1197440498000786738">"Fondo de pantalla"</string>
     <string name="chooser_wallpaper" msgid="3082405680079923708">"Cambiar fondo de pantalla"</string>
     <string name="notification_listener_binding_label" msgid="2702165274471499713">"Agente de escucha de notificaciones"</string>
     <string name="vr_listener_binding_label" msgid="8013112996671206429">"Procesador de realidad virtual"</string>
@@ -1536,7 +1539,7 @@
     <string name="vpn_title" msgid="5906991595291514182">"VPN activada"</string>
     <string name="vpn_title_long" msgid="6834144390504619998">"VPN está activado por <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="vpn_text" msgid="2275388920267251078">"Pulsa para gestionar la red."</string>
-    <string name="vpn_text_long" msgid="278540576806169831">"Conectado a <xliff:g id="SESSION">%s</xliff:g>. Pulsa para gestionar la red."</string>
+    <string name="vpn_text_long" msgid="278540576806169831">"Se estableció conexión con <xliff:g id="SESSION">%s</xliff:g>. Presiona para administrar la red."</string>
     <string name="vpn_lockdown_connecting" msgid="6096725311950342607">"Estableciendo conexión con la VPN siempre activada..."</string>
     <string name="vpn_lockdown_connected" msgid="2853127976590658469">"Se estableció conexión con la VPN siempre activada."</string>
     <string name="vpn_lockdown_disconnected" msgid="5573611651300764955">"Desconectado de la VPN siempre activa"</string>
@@ -1744,7 +1747,8 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"Una app está cubriendo la solicitud de permiso, por lo que no se puede verificar tu respuesta."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Presiona una función para comenzar a usarla:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Selecciona las funciones a utilizar con el botón de accesibilidad"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Selecciona las funciones a usar con las teclas de volumen"</string>
+    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
+    <skip />
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Se desactivó <xliff:g id="SERVICE_NAME">%s</xliff:g>"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Editar accesos directos"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Listo"</string>
@@ -1915,14 +1919,14 @@
     <string name="data_saver_description" msgid="4995164271550590517">"Para reducir el uso de datos, el modo Ahorro de datos evita que algunas apps envíen y reciban datos en segundo plano. La app que estés usando podrá acceder a los datos, pero con menor frecuencia. De esta forma, por ejemplo, las imágenes no se mostrarán hasta que las presiones."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"¿Deseas activar Ahorro de datos?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Activar"</string>
-    <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{Por un minuto (hasta {formattedTime})}many{Por # minutos (hasta {formattedTime})}other{Por # minutos (hasta {formattedTime})}}"</string>
+    <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{Por un minuto (hasta la(s) {formattedTime})}many{Por # de minutos (hasta la(s) {formattedTime})}other{Por # minutos (hasta la(s) {formattedTime})}}"</string>
     <string name="zen_mode_duration_minutes_summary_short" msgid="1187553788355486950">"{count,plural, =1{Durante 1 min (hasta {formattedTime})}many{Durante # min (hasta {formattedTime})}other{Durante # min (hasta {formattedTime})}}"</string>
     <string name="zen_mode_duration_hours_summary" msgid="3866333100793277211">"{count,plural, =1{Durante 1 hora (hasta {formattedTime})}many{Durante # horas (hasta {formattedTime})}other{Durante # horas (hasta {formattedTime})}}"</string>
     <string name="zen_mode_duration_hours_summary_short" msgid="687919813833347945">"{count,plural, =1{Durante 1 h (hasta {formattedTime})}many{Durante # h (hasta {formattedTime})}other{Durante # h (hasta {formattedTime})}}"</string>
-    <string name="zen_mode_duration_minutes" msgid="2340007982276569054">"{count,plural, =1{Durante un minuto}many{Durante # minutos}other{Durante # minutos}}"</string>
-    <string name="zen_mode_duration_minutes_short" msgid="2435756450204526554">"{count,plural, =1{Durante 1 min}many{Durante # min}other{Durante # min}}"</string>
-    <string name="zen_mode_duration_hours" msgid="7841806065034711849">"{count,plural, =1{Durante 1 hora}many{Durante # horas}other{Durante # horas}}"</string>
-    <string name="zen_mode_duration_hours_short" msgid="3666949653933099065">"{count,plural, =1{Durante 1 h}many{Durante # h}other{Durante # h}}"</string>
+    <string name="zen_mode_duration_minutes" msgid="2340007982276569054">"{count,plural, =1{Durante un minuto}many{Durante # de minutos}other{Durante # minutos}}"</string>
+    <string name="zen_mode_duration_minutes_short" msgid="2435756450204526554">"{count,plural, =1{Durante 1 min}many{Durante # de min}other{Durante # min}}"</string>
+    <string name="zen_mode_duration_hours" msgid="7841806065034711849">"{count,plural, =1{Durante 1 hora}many{Durante # de horas}other{Durante # horas}}"</string>
+    <string name="zen_mode_duration_hours_short" msgid="3666949653933099065">"{count,plural, =1{Durante 1 h}many{Durante # de h}other{Durante # h}}"</string>
     <string name="zen_mode_until_next_day" msgid="1403042784161725038">"Hasta las <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"Hasta la(s) <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Hasta la hora <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (próxima alarma)"</string>
@@ -2422,6 +2426,8 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Se ocultó el contenido de la app durante el uso compartido de la pantalla por motivos de seguridad"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Conexión automática a satélite"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Puedes enviar y recibir mensajes incluso si no tienes conexión a una red móvil o Wi-Fi"</string>
+    <string name="satellite_notification_manual_title" msgid="1097504441849466279">"¿Quieres usar la mensajería satelital?"</string>
+    <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Envía y recibe mensajes sin una red móvil ni Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Abrir Mensajes"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Cómo funciona"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Pendiente…"</string>
@@ -2434,26 +2440,18 @@
     <string name="face_dangling_notification_msg" msgid="746235263598985384">"Ya no se puede reconocer tu modelo de rostro. Vuelve a configurar el Desbloqueo facial."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Configurar"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Ahora no"</string>
-    <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"Alarma para <xliff:g id="USER_NAME">%s</xliff:g>"</string>
+    <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"Alarma para: <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"Cambiar de usuario"</string>
     <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"Silenciar"</string>
     <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"Presiona para silenciar el sonido"</string>
-    <!-- no translation found for keyboard_shortcut_group_applications_browser (6535007304687100909) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_contacts (2750702518068326356) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_email (4229037666415353683) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_sms (3523799286376321137) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_music (2051507523525651067) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_calendar (3571770335653387606) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_calculator (6753209559716091507) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_maps (7950000659522589471) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications (3010389163951364798) -->
-    <skip />
+    <string name="keyboard_shortcut_group_applications_browser" msgid="6535007304687100909">"Navegador"</string>
+    <string name="keyboard_shortcut_group_applications_contacts" msgid="2750702518068326356">"Contactos"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="4229037666415353683">"Correo electrónico"</string>
+    <string name="keyboard_shortcut_group_applications_sms" msgid="3523799286376321137">"SMS"</string>
+    <string name="keyboard_shortcut_group_applications_music" msgid="2051507523525651067">"Música"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="3571770335653387606">"Calendario"</string>
+    <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"Calculadora"</string>
+    <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"Maps"</string>
+    <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"Aplicaciones"</string>
+    <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"Ya no se pueden reconocer tus huellas dactilares. Vuelve a configurar el Desbloqueo con huellas dactilares."</string>
 </resources>

@@ -1194,6 +1194,8 @@
     <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"Handskrift er ekki studd í reitum fyrir aðgangsorð"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Til baka"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Skipta um innfærsluaðferð"</string>
+    <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"Opna val á innfærsluaðferð"</string>
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"Stillingar"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Geymslurýmið er senn á þrotum"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Sumir kerfiseiginleikar kunna að vera óvirkir"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Ekki nægt geymslurými fyrir kerfið. Gakktu úr skugga um að 250 MB séu laus og endurræstu."</string>
@@ -1428,6 +1430,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"DEILA"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"HAFNA"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Veldu innsláttaraðferð"</string>
+    <string name="input_method_language_settings" msgid="8069089418056819437">"Tungumálastillingar"</string>
     <string name="show_ime" msgid="6406112007347443383">"Halda því á skjánum meðan vélbúnaðarlyklaborðið er virkt"</string>
     <string name="hardware" msgid="3611039921284836033">"Nota skjályklaborð"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Stilla <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
@@ -1743,7 +1746,7 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"Forrit er að fela heimildarbeiðnina svo ekki er hægt að staðfesta svarið þitt."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Ýttu á eiginleika til að byrja að nota hann:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Veldu eiginleika sem á að nota með aðgengishnappinum"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Veldu eiginleika sem á að nota með flýtileið hljóðstyrkstakka"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2245540598834891500">"Veldu eiginleika sem á að nota með flýtileið hljóðstyrkstakka"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Slökkt hefur verið á <xliff:g id="SERVICE_NAME">%s</xliff:g>"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Breyta flýtileiðum"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Lokið"</string>
@@ -2421,6 +2424,8 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Efni forrits falið í skjádeilingu af öryggisástæðum"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Tengdist sjálfkrafa við gervihnött"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Þú getur sent og móttekið skilaboð án tengingar við farsímakerfi eða Wi-Fi"</string>
+    <string name="satellite_notification_manual_title" msgid="1097504441849466279">"Nota skilaboð í gegnum gervihnött?"</string>
+    <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Senda og fá skilaboð án tengingar við farsímakerfi eða Wi-Fi-net"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Opna Messages"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Svona virkar þetta"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Í bið…"</string>
@@ -2433,26 +2438,18 @@
     <string name="face_dangling_notification_msg" msgid="746235263598985384">"Ekki er hægt að bera kennsl á andlitslíkanið þitt lengur. Settu upp andlitskenni aftur."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Setja upp"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Ekki núna"</string>
-    <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"Viðvörun fyrir <xliff:g id="USER_NAME">%s</xliff:g>"</string>
+    <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"Viðvörun fyrir: <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"Skipta um notanda"</string>
     <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"Þagga"</string>
     <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"Ýttu til að þagga hljóð"</string>
-    <!-- no translation found for keyboard_shortcut_group_applications_browser (6535007304687100909) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_contacts (2750702518068326356) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_email (4229037666415353683) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_sms (3523799286376321137) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_music (2051507523525651067) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_calendar (3571770335653387606) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_calculator (6753209559716091507) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_maps (7950000659522589471) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications (3010389163951364798) -->
-    <skip />
+    <string name="keyboard_shortcut_group_applications_browser" msgid="6535007304687100909">"Vafri"</string>
+    <string name="keyboard_shortcut_group_applications_contacts" msgid="2750702518068326356">"Tengiliðir"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="4229037666415353683">"Tölvupóstur"</string>
+    <string name="keyboard_shortcut_group_applications_sms" msgid="3523799286376321137">"SMS"</string>
+    <string name="keyboard_shortcut_group_applications_music" msgid="2051507523525651067">"Tónlist"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="3571770335653387606">"Dagatal"</string>
+    <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"Reiknivél"</string>
+    <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"Kort"</string>
+    <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"Forrit"</string>
+    <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"Ekki er lengur hægt að bera kennsl á fingraförin þín. Settu fingrafarskenni upp aftur."</string>
 </resources>

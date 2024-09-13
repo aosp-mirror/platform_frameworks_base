@@ -19,65 +19,55 @@ package com.android.server.inputmethod;
 import android.annotation.AnyThread;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
-import android.util.SparseArray;
 
-import com.android.internal.annotations.GuardedBy;
-
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
 import java.util.function.IntFunction;
 
 final class UserDataRepository {
 
-    private final ReentrantReadWriteLock mUserDataLock = new ReentrantReadWriteLock();
+    private final Object mMutationLock = new Object();
 
-    @GuardedBy("mUserDataLock")
-    private final SparseArray<UserData> mUserData = new SparseArray<>();
+    @NonNull
+    private volatile ImmutableSparseArray<UserData> mUserData = ImmutableSparseArray.empty();
 
+    @NonNull
     private final IntFunction<InputMethodBindingController> mBindingControllerFactory;
+    @NonNull
+    private final IntFunction<ImeVisibilityStateComputer> mVisibilityStateComputerFactory;
 
     @AnyThread
     @NonNull
     UserData getOrCreate(@UserIdInt int userId) {
-        mUserDataLock.writeLock().lock();
-        try {
-            UserData userData = mUserData.get(userId);
-            if (userData == null) {
-                userData = new UserData(userId, mBindingControllerFactory.apply(userId));
-                mUserData.put(userId, userData);
-            }
+        // Do optimistic read first for optimization.
+        final var userData = mUserData.get(userId);
+        if (userData != null) {
             return userData;
-        } finally {
-            mUserDataLock.writeLock().unlock();
+        }
+        // Note that the below line can be called concurrently. Here we assume that
+        // instantiating UserData for the same user multiple times would have no side effect.
+        final var newUserData = new UserData(userId, mBindingControllerFactory.apply(userId),
+                mVisibilityStateComputerFactory.apply(userId));
+        synchronized (mMutationLock) {
+            mUserData = mUserData.cloneWithPutOrSelf(userId, newUserData);
+            return newUserData;
         }
     }
 
     @AnyThread
     void forAllUserData(Consumer<UserData> consumer) {
-        final SparseArray<UserData> copiedArray;
-        mUserDataLock.readLock().lock();
-        try {
-            copiedArray = mUserData.clone();
-        } finally {
-            mUserDataLock.readLock().unlock();
-        }
-        for (int i = 0; i < copiedArray.size(); i++) {
-            consumer.accept(copiedArray.valueAt(i));
-        }
+        mUserData.forEach(consumer);
     }
 
-    UserDataRepository(
-            @NonNull IntFunction<InputMethodBindingController> bindingControllerFactory) {
+    UserDataRepository(@NonNull IntFunction<InputMethodBindingController> bindingControllerFactory,
+            @NonNull IntFunction<ImeVisibilityStateComputer> visibilityStateComputerFactory) {
         mBindingControllerFactory = bindingControllerFactory;
+        mVisibilityStateComputerFactory = visibilityStateComputerFactory;
     }
 
     @AnyThread
     void remove(@UserIdInt int userId) {
-        mUserDataLock.writeLock().lock();
-        try {
-            mUserData.remove(userId);
-        } finally {
-            mUserDataLock.writeLock().unlock();
+        synchronized (mMutationLock) {
+            mUserData = mUserData.cloneWithRemoveOrSelf(userId);
         }
     }
 }

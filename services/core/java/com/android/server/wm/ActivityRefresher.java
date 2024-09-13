@@ -75,7 +75,7 @@ class ActivityRefresher {
         }
 
         final boolean cycleThroughStop =
-                mWmService.mLetterboxConfiguration
+                mWmService.mAppCompatConfiguration
                         .isCameraCompatRefreshCycleThroughStopEnabled()
                         && !activity.mAppCompatController.getAppCompatCameraOverrides()
                             .shouldRefreshActivityViaPauseForCameraCompat();
@@ -84,9 +84,9 @@ class ActivityRefresher {
         ProtoLog.v(WM_DEBUG_STATES,
                 "Refreshing activity for freeform camera compatibility treatment, "
                         + "activityRecord=%s", activity);
-        final RefreshCallbackItem refreshCallbackItem = RefreshCallbackItem.obtain(
-                activity.token, cycleThroughStop ? ON_STOP : ON_PAUSE);
-        final ResumeActivityItem resumeActivityItem = ResumeActivityItem.obtain(
+        final RefreshCallbackItem refreshCallbackItem =
+                new RefreshCallbackItem(activity.token, cycleThroughStop ? ON_STOP : ON_PAUSE);
+        final ResumeActivityItem resumeActivityItem = new ResumeActivityItem(
                 activity.token, /* isForward */ false, /* shouldSendCompatFakeFocus */ false);
         try {
             activity.mAtmService.getLifecycleManager().scheduleTransactionAndLifecycleItems(
@@ -114,7 +114,7 @@ class ActivityRefresher {
 
     private boolean shouldRefreshActivity(@NonNull ActivityRecord activity,
             @NonNull Configuration newConfig, @NonNull Configuration lastReportedConfig) {
-        return mWmService.mLetterboxConfiguration.isCameraCompatRefreshEnabled()
+        return mWmService.mAppCompatConfiguration.isCameraCompatRefreshEnabled()
                 && activity.mAppCompatController.getAppCompatOverrides()
                     .getAppCompatCameraOverrides().shouldRefreshActivityForCameraCompat()
                 && ArrayUtils.find(mEvaluators.toArray(), evaluator ->

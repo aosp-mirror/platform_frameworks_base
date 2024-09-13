@@ -30,6 +30,7 @@ import android.provider.Settings
 import com.android.settingslib.flags.Flags
 import com.android.settingslib.notification.modes.ZenMode
 import com.android.settingslib.notification.modes.ZenModesBackend
+import java.time.Duration
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
@@ -57,6 +58,12 @@ interface ZenModeRepository {
 
     /** A list of all existing priority modes. */
     val modes: Flow<List<ZenMode>>
+
+    fun getModes(): List<ZenMode>
+
+    fun activateMode(zenMode: ZenMode, duration: Duration? = null)
+
+    fun deactivateMode(zenMode: ZenMode)
 }
 
 @SuppressLint("SharedFlowCreation")
@@ -177,5 +184,22 @@ class ZenModeRepositoryImpl(
         } else {
             flowOf(emptyList())
         }
+    }
+
+    /**
+     * Gets the current list of [ZenMode] instances according to the backend.
+     *
+     * This is necessary, and cannot be supplanted by making [modes] a StateFlow, because it will be
+     * called whenever we know or suspect that [modes] may not have caught up to the latest data
+     * (such as right after a user switch).
+     */
+    override fun getModes(): List<ZenMode> = backend.modes
+
+    override fun activateMode(zenMode: ZenMode, duration: Duration?) {
+        backend.activateMode(zenMode, duration)
+    }
+
+    override fun deactivateMode(zenMode: ZenMode) {
+        backend.deactivateMode(zenMode)
     }
 }

@@ -41,8 +41,8 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.Flags;
 import android.view.accessibility.IAccessibilityManager;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
-import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.accessibility.TestUtils;
 import com.android.internal.accessibility.common.ShortcutConstants;

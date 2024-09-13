@@ -16,6 +16,8 @@
 
 package android.widget;
 
+import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -23,50 +25,48 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyChar;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import android.app.Activity;
 import android.app.PendingIntent;
 import android.app.RemoteAction;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.Icon;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.view.ContextMenu;
 import android.view.MenuItem;
 import android.view.textclassifier.TextClassification;
 
-import androidx.test.annotation.UiThreadTest;
-import androidx.test.filters.MediumTest;
-import androidx.test.rule.ActivityTestRule;
-import androidx.test.runner.AndroidJUnit4;
-
-import com.android.frameworks.coretests.R;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.verification.VerificationMode;
 
 /**
  * TextViewTest tests {@link TextView}.
  */
 @RunWith(AndroidJUnit4.class)
-@MediumTest
 public class TextViewContextMenuTest {
     private static final String INTENT_ACTION_MOCK_ACTION_TEXT_CLASSIFICATION =
             "android.text.coretest.textclassifiation";
     private static final String ACTION_TITLE = "ACTION_TITLE";
     private static final String ACTION_DESCRIPTION = "ACTION_DESCRIPTION";
-
-    @Rule
-    public final ActivityTestRule<TextViewContextMenuActivity> mActivityRule =
-            new ActivityTestRule<>(TextViewContextMenuActivity.class);
 
     // Setup MenuItem mock with chaining.
     private MenuItem newMockMenuItem() {
@@ -81,43 +81,43 @@ public class TextViewContextMenuTest {
         return mockItem;
     }
 
-    private RemoteAction createRemoteAction() {
+    private RemoteAction createRemoteAction(Context context) {
         Intent intent = new Intent(INTENT_ACTION_MOCK_ACTION_TEXT_CLASSIFICATION)
-                .setPackage(mActivity.getPackageName());
-        PendingIntent pIntent = PendingIntent.getBroadcast(mActivity, 0, intent,
+                .setPackage(context.getPackageName());
+        PendingIntent pIntent = PendingIntent.getBroadcast(context, 0, intent,
                 PendingIntent.FLAG_MUTABLE);
         return new RemoteAction(
-                Icon.createWithResource(mActivity, android.R.drawable.btn_star),
+                Icon.createWithResource(context, android.R.drawable.btn_star),
                 ACTION_TITLE, ACTION_DESCRIPTION, pIntent);
     }
 
-    private Activity mActivity;
     private SelectionActionModeHelper mMockHelper;
-    private Editor.AssistantCallbackHelper mCallbackHelper;
+
+    @ClassRule public static final SetFlagsRule.ClassRule SET_FLAGS_CLASS_RULE =
+            new SetFlagsRule.ClassRule();
+    @Rule public final SetFlagsRule mSetFlagsRule = SET_FLAGS_CLASS_RULE.createSetFlagsRule();
 
     @Before
     public void setUp() {
-        mActivity = mActivityRule.getActivity();
-        EditText et = mActivity.findViewById(R.id.editText);
-
         mMockHelper = mock(SelectionActionModeHelper.class);
-        mCallbackHelper = et.getEditorForTesting().new AssistantCallbackHelper(mMockHelper);
     }
 
-    @UiThreadTest
     @Test
     public void testNoMenuInteraction_noTextClassification() {
         when(mMockHelper.getTextClassification()).thenReturn(null);
         ContextMenu menu = mock(ContextMenu.class);
-        mCallbackHelper.updateAssistMenuItems(menu, null);
+        EditText et = new EditText(getInstrumentation().getContext());
+        Editor.AssistantCallbackHelper cbh =
+                et.getEditorForTesting().new AssistantCallbackHelper(mMockHelper);
+        cbh.updateAssistMenuItems(menu, null);
         verifyNoMoreInteractions(menu);
     }
 
-    @UiThreadTest
     @Test
     public void testAddMenuForTextClassification() {
         // Setup
-        RemoteAction action = createRemoteAction();
+        Context context = getInstrumentation().getContext();
+        RemoteAction action = createRemoteAction(context);
         TextClassification classification = new TextClassification.Builder()
                 .addAction(action).build();
         when(mMockHelper.getTextClassification()).thenReturn(classification);
@@ -127,7 +127,10 @@ public class TextViewContextMenuTest {
         when(menu.add(anyInt(), anyInt(), anyInt(), any())).thenReturn(mockMenuItem);
 
         // Execute
-        mCallbackHelper.updateAssistMenuItems(menu, null);
+        EditText et = new EditText(context);
+        Editor.AssistantCallbackHelper cbh =
+                et.getEditorForTesting().new AssistantCallbackHelper(mMockHelper);
+        cbh.updateAssistMenuItems(menu, null);
 
         // Verify
         ArgumentCaptor<Integer> idCaptor = ArgumentCaptor.forClass(Integer.class);
@@ -140,14 +143,14 @@ public class TextViewContextMenuTest {
         verify(mockMenuItem, times(1)).setContentDescription(eq(ACTION_DESCRIPTION));
     }
 
-    @UiThreadTest
     @Test
     public void testAddMenuForLegacyTextClassification() {
         // Setup
+        Context context = getInstrumentation().getContext();
         Intent intent = new Intent(INTENT_ACTION_MOCK_ACTION_TEXT_CLASSIFICATION)
-                .setPackage(mActivity.getPackageName());
+                .setPackage(context.getPackageName());
         TextClassification classification = new TextClassification.Builder()
-                .setIcon(mActivity.getResources().getDrawable(android.R.drawable.star_on))
+                .setIcon(context.getResources().getDrawable(android.R.drawable.star_on))
                 .setLabel(ACTION_TITLE)
                 .setIntent(intent)
                 .build();
@@ -158,7 +161,10 @@ public class TextViewContextMenuTest {
         when(menu.add(anyInt(), anyInt(), anyInt(), any())).thenReturn(mockMenuItem);
 
         // Execute
-        mCallbackHelper.updateAssistMenuItems(menu, null);
+        EditText et = new EditText(context);
+        Editor.AssistantCallbackHelper cbh =
+                et.getEditorForTesting().new AssistantCallbackHelper(mMockHelper);
+        cbh.updateAssistMenuItems(menu, null);
 
         // Verify
         ArgumentCaptor<Integer> idCaptor = ArgumentCaptor.forClass(Integer.class);
@@ -170,7 +176,6 @@ public class TextViewContextMenuTest {
         assertThat(titleCaptor.getValue().toString()).isEqualTo(ACTION_TITLE);
     }
 
-    @UiThreadTest
     @Test
     public void testAdjustIconSpaces() {
         GradientDrawable gd = new GradientDrawable();
@@ -193,9 +198,8 @@ public class TextViewContextMenuTest {
         when(menu.getItem(1)).thenReturn(mockNoIconMenu);
         when(menu.getItem(2)).thenReturn(mockNoIconMenu2);
 
-
         // Execute the test method
-        EditText et = mActivity.findViewById(R.id.editText);
+        EditText et = new EditText(getInstrumentation().getContext());
         Editor editor = et.getEditorForTesting();
         editor.adjustIconSpacing(menu);
 
@@ -215,7 +219,6 @@ public class TextViewContextMenuTest {
         assertThat(paddingDrawable2).isSameInstanceAs(paddingDrawable);
     }
 
-    @UiThreadTest
     @Test
     public void testAdjustIconSpacesNoIconCase() {
         // Setup mocks
@@ -232,12 +235,196 @@ public class TextViewContextMenuTest {
         when(menu.getItem(1)).thenReturn(mockNoIconMenu2);
 
         // Execute the test method
-        EditText et = mActivity.findViewById(R.id.editText);
+        EditText et = new EditText(getInstrumentation().getContext());
         Editor editor = et.getEditorForTesting();
         editor.adjustIconSpacing(menu);
 
         // Verify
         verify(mockNoIconMenu, times(0)).setIcon(any());
         verify(mockNoIconMenu2, times(0)).setIcon(any());
+    }
+
+    @Test
+    @DisableFlags(com.android.text.flags.Flags.FLAG_CONTEXT_MENU_HIDE_UNAVAILABLE_ITEMS)
+    public void testAutofillMenuItemEnabledWhenNoTextSelected() {
+        ContextMenu menu = mock(ContextMenu.class);
+        MenuItem mockMenuItem = newMockMenuItem();
+        when(menu.add(anyInt(), anyInt(), anyInt(), anyInt())).thenReturn(mockMenuItem);
+        MenuItem mockAutofillMenuItem = newMockMenuItem();
+        when(menu.add(anyInt(), eq(TextView.ID_AUTOFILL), anyInt(), anyInt()))
+                .thenReturn(mockAutofillMenuItem);
+
+        EditText et = spy(new EditText(getInstrumentation().getContext()));
+        doReturn(true).when(et).canRequestAutofill();
+        doReturn(null).when(et).getSelectedText();
+
+        Editor editor = new Editor(et);
+        editor.setTextContextMenuItems(menu);
+
+        verify(menu).add(anyInt(), eq(TextView.ID_AUTOFILL), anyInt(), anyInt());
+        verify(mockAutofillMenuItem).setEnabled(true);
+    }
+
+    @Test
+    @DisableFlags(com.android.text.flags.Flags.FLAG_CONTEXT_MENU_HIDE_UNAVAILABLE_ITEMS)
+    public void testAutofillMenuItemNotEnabledWhenTextSelected() {
+        ContextMenu menu = mock(ContextMenu.class);
+        MenuItem mockMenuItem = newMockMenuItem();
+        when(menu.add(anyInt(), anyInt(), anyInt(), anyInt())).thenReturn(mockMenuItem);
+        MenuItem mockAutofillMenuItem = newMockMenuItem();
+        when(menu.add(anyInt(), eq(TextView.ID_AUTOFILL), anyInt(), anyInt()))
+                .thenReturn(mockAutofillMenuItem);
+
+        EditText et = spy(new EditText(getInstrumentation().getContext()));
+        doReturn(true).when(et).canRequestAutofill();
+        doReturn("test").when(et).getSelectedText();
+        Editor editor = new Editor(et);
+        editor.setTextContextMenuItems(menu);
+
+        verify(menu).add(anyInt(), eq(TextView.ID_AUTOFILL), anyInt(), anyInt());
+        verify(mockAutofillMenuItem).setEnabled(false);
+    }
+
+    private interface EditTextSetup {
+        void run(EditText et);
+    }
+
+    private void verifyMenuItemNotAdded(EditTextSetup setup, int id, VerificationMode times) {
+        ContextMenu menu = mock(ContextMenu.class);
+        MenuItem mockMenuItem = newMockMenuItem();
+        when(menu.add(anyInt(), anyInt(), anyInt(), anyInt())).thenReturn(mockMenuItem);
+        EditText et = spy(new EditText(getInstrumentation().getContext()));
+        setup.run(et);
+        Editor editor = new Editor(et);
+        editor.setTextContextMenuItems(menu);
+        verify(menu, times).add(anyInt(), eq(id), anyInt(), anyInt());
+    }
+
+    @Test
+    @EnableFlags(com.android.text.flags.Flags.FLAG_CONTEXT_MENU_HIDE_UNAVAILABLE_ITEMS)
+    public void testContextMenuUndoNotAddedWhenUnavailable() {
+        verifyMenuItemNotAdded((spy) -> doReturn(false).when(spy).canUndo(),
+                TextView.ID_UNDO, never());
+    }
+
+    @Test
+    @EnableFlags(com.android.text.flags.Flags.FLAG_CONTEXT_MENU_HIDE_UNAVAILABLE_ITEMS)
+    public void testContextMenuUndoAddedWhenAvailable() {
+        verifyMenuItemNotAdded((spy) -> doReturn(true).when(spy).canUndo(), TextView.ID_UNDO,
+                times(1));
+    }
+
+    @Test
+    @EnableFlags(com.android.text.flags.Flags.FLAG_CONTEXT_MENU_HIDE_UNAVAILABLE_ITEMS)
+    public void testContextMenuRedoNotAddedWhenUnavailable() {
+        verifyMenuItemNotAdded((spy) -> doReturn(false).when(spy).canRedo(), TextView.ID_REDO,
+                never());
+    }
+
+    @Test
+    @EnableFlags(com.android.text.flags.Flags.FLAG_CONTEXT_MENU_HIDE_UNAVAILABLE_ITEMS)
+    public void testContextMenuRedoAddedWhenUnavailable() {
+        verifyMenuItemNotAdded((spy) -> doReturn(true).when(spy).canRedo(), TextView.ID_REDO,
+                times(1));
+    }
+
+    @Test
+    @EnableFlags(com.android.text.flags.Flags.FLAG_CONTEXT_MENU_HIDE_UNAVAILABLE_ITEMS)
+    public void testContextMenuCutNotAddedWhenUnavailable() {
+        verifyMenuItemNotAdded((spy) -> doReturn(false).when(spy).canCut(), TextView.ID_CUT,
+                never());
+    }
+
+    @Test
+    @EnableFlags(com.android.text.flags.Flags.FLAG_CONTEXT_MENU_HIDE_UNAVAILABLE_ITEMS)
+    public void testContextMenuCutAddedWhenAvailable() {
+        verifyMenuItemNotAdded((spy) -> doReturn(true).when(spy).canCut(), TextView.ID_CUT,
+                times(1));
+    }
+
+    @Test
+    @EnableFlags(com.android.text.flags.Flags.FLAG_CONTEXT_MENU_HIDE_UNAVAILABLE_ITEMS)
+    public void testContextMenuCopyNotAddedWhenUnavailable() {
+        verifyMenuItemNotAdded((spy) -> doReturn(false).when(spy).canCopy(), TextView.ID_COPY,
+                never());
+    }
+
+    @Test
+    @EnableFlags(com.android.text.flags.Flags.FLAG_CONTEXT_MENU_HIDE_UNAVAILABLE_ITEMS)
+    public void testContextMenuCopyAddedWhenAvailable() {
+        verifyMenuItemNotAdded((spy) -> doReturn(true).when(spy).canCopy(), TextView.ID_COPY,
+                times(1));
+    }
+
+    @Test
+    @EnableFlags(com.android.text.flags.Flags.FLAG_CONTEXT_MENU_HIDE_UNAVAILABLE_ITEMS)
+    public void testContextMenuPasteNotAddedWhenUnavailable() {
+        verifyMenuItemNotAdded((spy) -> doReturn(false).when(spy).canPaste(), TextView.ID_PASTE,
+                never());
+    }
+
+    @Test
+    @EnableFlags(com.android.text.flags.Flags.FLAG_CONTEXT_MENU_HIDE_UNAVAILABLE_ITEMS)
+    public void testContextMenuPasteAddedWhenAvailable() {
+        verifyMenuItemNotAdded((spy) -> doReturn(true).when(spy).canPaste(), TextView.ID_PASTE,
+                times(1));
+    }
+
+    @Test
+    @EnableFlags(com.android.text.flags.Flags.FLAG_CONTEXT_MENU_HIDE_UNAVAILABLE_ITEMS)
+    public void testContextMenuPasteAsPlaintextNotAddedWhenUnavailable() {
+        verifyMenuItemNotAdded((spy) -> doReturn(false).when(spy).canPasteAsPlainText(),
+                        TextView.ID_PASTE_AS_PLAIN_TEXT, never());
+    }
+
+    @Test
+    @EnableFlags(com.android.text.flags.Flags.FLAG_CONTEXT_MENU_HIDE_UNAVAILABLE_ITEMS)
+    public void testContextMenuPasteAsPlaintextAddedWhenAvailable() {
+        verifyMenuItemNotAdded((spy) -> doReturn(true).when(spy).canPasteAsPlainText(),
+                        TextView.ID_PASTE_AS_PLAIN_TEXT, times(1));
+    }
+
+    @Test
+    @EnableFlags(com.android.text.flags.Flags.FLAG_CONTEXT_MENU_HIDE_UNAVAILABLE_ITEMS)
+    public void testContextMenuSelectAllNotAddedWhenUnavailable() {
+        verifyMenuItemNotAdded((spy) -> doReturn(false).when(spy).canSelectAllText(),
+                        TextView.ID_SELECT_ALL, never());
+    }
+
+    @Test
+    @EnableFlags(com.android.text.flags.Flags.FLAG_CONTEXT_MENU_HIDE_UNAVAILABLE_ITEMS)
+    public void testContextMenuSelectAllAddedWhenAvailable() {
+        verifyMenuItemNotAdded((spy) -> doReturn(true).when(spy).canSelectAllText(),
+                        TextView.ID_SELECT_ALL, times(1));
+    }
+
+    @Test
+    @EnableFlags(com.android.text.flags.Flags.FLAG_CONTEXT_MENU_HIDE_UNAVAILABLE_ITEMS)
+    public void testContextMenuShareNotAddedWhenUnavailable() {
+        verifyMenuItemNotAdded((spy) -> doReturn(false).when(spy).canShare(), TextView.ID_SHARE,
+                never());
+    }
+
+    @Test
+    @EnableFlags(com.android.text.flags.Flags.FLAG_CONTEXT_MENU_HIDE_UNAVAILABLE_ITEMS)
+    public void testContextMenuShareAddedWhenAvailable() {
+        verifyMenuItemNotAdded((spy) -> doReturn(true).when(spy).canShare(), TextView.ID_SHARE,
+                times(1));
+    }
+
+    @Test
+    @EnableFlags(com.android.text.flags.Flags.FLAG_CONTEXT_MENU_HIDE_UNAVAILABLE_ITEMS)
+    public void testContextMenuAutofillNotAddedWhenUnavailable() {
+        verifyMenuItemNotAdded((spy) -> doReturn(false).when(spy).canRequestAutofill(),
+                TextView.ID_AUTOFILL, never());
+    }
+
+    @Test
+    @EnableFlags(com.android.text.flags.Flags.FLAG_CONTEXT_MENU_HIDE_UNAVAILABLE_ITEMS)
+    public void testContextMenuAutofillNotAddedWhenUnavailableBecauseTextSelected() {
+        verifyMenuItemNotAdded((spy) -> {
+            doReturn(true).when(spy).canRequestAutofill();
+            doReturn("test").when(spy).getSelectedText();
+        }, TextView.ID_AUTOFILL, never());
     }
 }

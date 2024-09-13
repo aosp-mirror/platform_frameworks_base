@@ -19,10 +19,8 @@ package com.android.systemui.communal.domain.interactor
 
 import android.app.admin.DevicePolicyManager
 import android.app.admin.devicePolicyManager
-import android.appwidget.AppWidgetProviderInfo
 import android.content.Intent
 import android.content.pm.UserInfo
-import android.graphics.Bitmap
 import android.os.UserHandle
 import android.os.UserManager
 import android.os.userManager
@@ -52,7 +50,6 @@ import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.domain.model.CommunalTransitionProgressModel
 import com.android.systemui.communal.shared.model.CommunalContentSize
 import com.android.systemui.communal.shared.model.CommunalScenes
-import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
 import com.android.systemui.communal.shared.model.EditModeState
 import com.android.systemui.communal.widgets.EditWidgetsActivityStarter
 import com.android.systemui.coroutines.collectLastValue
@@ -71,19 +68,21 @@ import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.settings.FakeUserTracker
 import com.android.systemui.settings.fakeUserTracker
+import com.android.systemui.statusbar.phone.fakeManagedProfileController
 import com.android.systemui.testKosmos
 import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.user.data.repository.fakeUserRepository
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.capture
-import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.mockito.whenever
+import com.android.systemui.utils.leaks.FakeManagedProfileController
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -124,6 +123,7 @@ class CommunalInteractorTest : SysuiTestCase() {
     private lateinit var userTracker: FakeUserTracker
     private lateinit var activityStarter: ActivityStarter
     private lateinit var userManager: UserManager
+    private lateinit var managedProfileController: FakeManagedProfileController
 
     private lateinit var underTest: CommunalInteractor
 
@@ -145,6 +145,7 @@ class CommunalInteractorTest : SysuiTestCase() {
         userTracker = kosmos.fakeUserTracker
         activityStarter = kosmos.activityStarter
         userManager = kosmos.userManager
+        managedProfileController = kosmos.fakeManagedProfileController
 
         whenever(mainUser.isMain).thenReturn(true)
         whenever(secondaryUser.isMain).thenReturn(false)
@@ -250,18 +251,16 @@ class CommunalInteractorTest : SysuiTestCase() {
             runCurrent()
 
             // Widgets available.
-            val widget1 = createWidgetForUser(1, USER_INFO_WORK.id)
-            val widget2 = createWidgetForUser(2, MAIN_USER_INFO.id)
-            val widget3 = createWidgetForUser(3, MAIN_USER_INFO.id)
-            val widgets = listOf(widget1, widget2, widget3)
-            widgetRepository.setCommunalWidgets(widgets)
+            widgetRepository.addWidget(appWidgetId = 1, userId = USER_INFO_WORK.id)
+            widgetRepository.addWidget(appWidgetId = 2, userId = MAIN_USER_INFO.id)
+            widgetRepository.addWidget(appWidgetId = 3, userId = MAIN_USER_INFO.id)
 
             val widgetContent by collectLastValue(underTest.widgetContent)
 
-            assertThat(widgetContent!!).isNotEmpty()
-            widgetContent!!.forEachIndexed { index, model ->
-                assertThat(model.appWidgetId).isEqualTo(widgets[index].appWidgetId)
-            }
+            assertThat(checkNotNull(widgetContent)).isNotEmpty()
+            assertThat(widgetContent!![0].appWidgetId).isEqualTo(1)
+            assertThat(widgetContent!![1].appWidgetId).isEqualTo(2)
+            assertThat(widgetContent!![2].appWidgetId).isEqualTo(3)
         }
 
     @Test
@@ -356,7 +355,7 @@ class CommunalInteractorTest : SysuiTestCase() {
 
             smartspaceRepository.setTimers(targets)
 
-            val smartspaceContent by collectLastValue(underTest.getOngoingContent(true))
+            val smartspaceContent by collectLastValue(underTest.ongoingContent)
             assertThat(smartspaceContent?.size).isEqualTo(totalTargets)
             for (index in 0 until totalTargets) {
                 assertThat(smartspaceContent?.get(index)?.size).isEqualTo(expectedSizes[index])
@@ -372,25 +371,11 @@ class CommunalInteractorTest : SysuiTestCase() {
             // Media is playing.
             mediaRepository.mediaActive()
 
-            val umoContent by collectLastValue(underTest.getOngoingContent(true))
+            val umoContent by collectLastValue(underTest.ongoingContent)
 
             assertThat(umoContent?.size).isEqualTo(1)
             assertThat(umoContent?.get(0)).isInstanceOf(CommunalContentModel.Umo::class.java)
             assertThat(umoContent?.get(0)?.key).isEqualTo(CommunalContentModel.KEY.umo())
-        }
-
-    @Test
-    fun umo_mediaPlaying_doNotShowUmo() =
-        testScope.run {
-            // Tutorial completed.
-            tutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_COMPLETED)
-
-            // Media is playing.
-            mediaRepository.mediaActive()
-
-            val umoContent by collectLastValue(underTest.getOngoingContent(false))
-
-            assertThat(umoContent?.size).isEqualTo(0)
         }
 
     @Test
@@ -416,7 +401,7 @@ class CommunalInteractorTest : SysuiTestCase() {
             val timer3 = smartspaceTimer("timer3", timestamp = 4L)
             smartspaceRepository.setTimers(listOf(timer1, timer2, timer3))
 
-            val ongoingContent by collectLastValue(underTest.getOngoingContent(true))
+            val ongoingContent by collectLastValue(underTest.ongoingContent)
             assertThat(ongoingContent?.size).isEqualTo(4)
             assertThat(ongoingContent?.get(0)?.key)
                 .isEqualTo(CommunalContentModel.KEY.smartspace("timer3"))
@@ -486,7 +471,7 @@ class CommunalInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val targetScene = CommunalScenes.Communal
 
-            underTest.changeScene(targetScene)
+            underTest.changeScene(targetScene, "test")
 
             val desiredScene = collectLastValue(communalRepository.currentScene)
             runCurrent()
@@ -639,7 +624,7 @@ class CommunalInteractorTest : SysuiTestCase() {
             runCurrent()
             assertThat(isCommunalShowing()).isEqualTo(false)
 
-            underTest.changeScene(CommunalScenes.Communal)
+            underTest.changeScene(CommunalScenes.Communal, "test")
 
             isCommunalShowing = collectLastValue(underTest.isCommunalShowing)
             runCurrent()
@@ -663,12 +648,12 @@ class CommunalInteractorTest : SysuiTestCase() {
             assertThat(isCommunalShowing).isFalse()
 
             // Verify scene changes (without the flag) to communal sets the value to true
-            underTest.changeScene(CommunalScenes.Communal)
+            underTest.changeScene(CommunalScenes.Communal, "test")
             runCurrent()
             assertThat(isCommunalShowing).isTrue()
 
             // Verify scene changes (without the flag) to blank sets the value back to false
-            underTest.changeScene(CommunalScenes.Blank)
+            underTest.changeScene(CommunalScenes.Blank, "test")
             runCurrent()
             assertThat(isCommunalShowing).isFalse()
         }
@@ -679,22 +664,31 @@ class CommunalInteractorTest : SysuiTestCase() {
         testScope.runTest {
             // Verify default is false
             val isCommunalShowing by collectLastValue(underTest.isCommunalShowing)
-            runCurrent()
-            assertThat(isCommunalShowing).isFalse()
-
-            // Verify scene changes without the flag doesn't have any impact
-            underTest.changeScene(CommunalScenes.Communal)
-            runCurrent()
             assertThat(isCommunalShowing).isFalse()
 
             // Verify scene changes (with the flag) to communal sets the value to true
             sceneInteractor.changeScene(Scenes.Communal, loggingReason = "")
-            runCurrent()
             assertThat(isCommunalShowing).isTrue()
 
             // Verify scene changes (with the flag) to lockscreen sets the value to false
             sceneInteractor.changeScene(Scenes.Lockscreen, loggingReason = "")
-            runCurrent()
+            assertThat(isCommunalShowing).isFalse()
+        }
+
+    @Test
+    @EnableSceneContainer
+    fun isCommunalShowing_whenSceneContainerEnabledAndChangeToLegacyScene() =
+        testScope.runTest {
+            // Verify default is false
+            val isCommunalShowing by collectLastValue(underTest.isCommunalShowing)
+            assertThat(isCommunalShowing).isFalse()
+
+            // Verify legacy scene change still makes communal show
+            underTest.changeScene(CommunalScenes.Communal, "test")
+            assertThat(isCommunalShowing).isTrue()
+
+            // Verify legacy scene change to blank makes communal hidden
+            underTest.changeScene(CommunalScenes.Blank, "test")
             assertThat(isCommunalShowing).isFalse()
         }
 
@@ -795,14 +789,6 @@ class CommunalInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun showWidgetEditor_withPreselectedKey_startsActivity() =
-        testScope.runTest {
-            val widgetKey = CommunalContentModel.KEY.widget(123)
-            underTest.showWidgetEditor(preselectedKey = widgetKey)
-            verify(editWidgetsActivityStarter).startActivity(widgetKey)
-        }
-
-    @Test
     fun showWidgetEditor_openWidgetPickerOnStart_startsActivity() =
         testScope.runTest {
             underTest.showWidgetEditor(shouldOpenWidgetPickerOnStart = true)
@@ -838,11 +824,9 @@ class CommunalInteractorTest : SysuiTestCase() {
 
             val widgetContent by collectLastValue(underTest.widgetContent)
             // Given three widgets, and one of them is associated with pre-existing work profile.
-            val widget1 = createWidgetForUser(1, USER_INFO_WORK.id)
-            val widget2 = createWidgetForUser(2, MAIN_USER_INFO.id)
-            val widget3 = createWidgetForUser(3, MAIN_USER_INFO.id)
-            val widgets = listOf(widget1, widget2, widget3)
-            widgetRepository.setCommunalWidgets(widgets)
+            widgetRepository.addWidget(appWidgetId = 1, userId = USER_INFO_WORK.id)
+            widgetRepository.addWidget(appWidgetId = 2, userId = MAIN_USER_INFO.id)
+            widgetRepository.addWidget(appWidgetId = 3, userId = MAIN_USER_INFO.id)
 
             // One widget is filtered out and the remaining two link to main user id.
             assertThat(checkNotNull(widgetContent).size).isEqualTo(2)
@@ -881,11 +865,9 @@ class CommunalInteractorTest : SysuiTestCase() {
             whenever(userManager.isManagedProfile(eq(USER_INFO_WORK.id))).thenReturn(true)
 
             val widgetContent by collectLastValue(underTest.widgetContent)
-            val widget1 = createWidgetForUser(1, USER_INFO_WORK.id)
-            val widget2 = createWidgetForUser(2, MAIN_USER_INFO.id)
-            val widget3 = createWidgetForUser(3, MAIN_USER_INFO.id)
-            val widgets = listOf(widget1, widget2, widget3)
-            widgetRepository.setCommunalWidgets(widgets)
+            widgetRepository.addWidget(appWidgetId = 1, userId = USER_INFO_WORK.id)
+            widgetRepository.addWidget(appWidgetId = 2, userId = MAIN_USER_INFO.id)
+            widgetRepository.addWidget(appWidgetId = 3, userId = MAIN_USER_INFO.id)
 
             // The work profile widget is in quiet mode, while other widgets are not.
             assertThat(widgetContent).hasSize(3)
@@ -926,11 +908,9 @@ class CommunalInteractorTest : SysuiTestCase() {
 
             val widgetContent by collectLastValue(underTest.widgetContent)
             // One available work widget, one pending work widget, and one regular available widget.
-            val widget1 = createWidgetForUser(1, USER_INFO_WORK.id)
-            val widget2 = createPendingWidgetForUser(2, userId = USER_INFO_WORK.id)
-            val widget3 = createWidgetForUser(3, MAIN_USER_INFO.id)
-            val widgets = listOf(widget1, widget2, widget3)
-            widgetRepository.setCommunalWidgets(widgets)
+            widgetRepository.addWidget(appWidgetId = 1, userId = USER_INFO_WORK.id)
+            widgetRepository.addPendingWidget(appWidgetId = 2, userId = USER_INFO_WORK.id)
+            widgetRepository.addWidget(appWidgetId = 3, userId = MAIN_USER_INFO.id)
 
             setKeyguardFeaturesDisabled(
                 USER_INFO_WORK,
@@ -961,11 +941,9 @@ class CommunalInteractorTest : SysuiTestCase() {
 
             val widgetContent by collectLastValue(underTest.widgetContent)
             // Given three widgets, and one of them is associated with work profile.
-            val widget1 = createWidgetForUser(1, USER_INFO_WORK.id)
-            val widget2 = createPendingWidgetForUser(2, userId = USER_INFO_WORK.id)
-            val widget3 = createWidgetForUser(3, MAIN_USER_INFO.id)
-            val widgets = listOf(widget1, widget2, widget3)
-            widgetRepository.setCommunalWidgets(widgets)
+            widgetRepository.addWidget(appWidgetId = 1, userId = USER_INFO_WORK.id)
+            widgetRepository.addPendingWidget(appWidgetId = 2, userId = USER_INFO_WORK.id)
+            widgetRepository.addWidget(appWidgetId = 3, userId = MAIN_USER_INFO.id)
 
             setKeyguardFeaturesDisabled(
                 USER_INFO_WORK,
@@ -1051,6 +1029,22 @@ class CommunalInteractorTest : SysuiTestCase() {
             assertThat(showCommunalFromOccluded).isTrue()
         }
 
+    @Test
+    fun showCommunalFromOccluded_enteredOccludedFromDreaming() =
+        testScope.runTest {
+            kosmos.setCommunalAvailable(true)
+            val showCommunalFromOccluded by collectLastValue(underTest.showCommunalFromOccluded)
+            assertThat(showCommunalFromOccluded).isFalse()
+
+            kosmos.fakeKeyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.DREAMING,
+                to = KeyguardState.OCCLUDED,
+                testScope
+            )
+
+            assertThat(showCommunalFromOccluded).isTrue()
+        }
+
     private fun smartspaceTimer(id: String, timestamp: Long = 0L): CommunalSmartspaceTimer {
         return CommunalSmartspaceTimer(
             smartspaceTargetId = id,
@@ -1058,6 +1052,43 @@ class CommunalInteractorTest : SysuiTestCase() {
             remoteViews = mock(RemoteViews::class.java)
         )
     }
+
+    @Test
+    fun dismissDisclaimerSetsDismissedFlag() =
+        testScope.runTest {
+            val disclaimerDismissed by collectLastValue(underTest.isDisclaimerDismissed)
+            assertThat(disclaimerDismissed).isFalse()
+            underTest.setDisclaimerDismissed()
+            assertThat(disclaimerDismissed).isTrue()
+        }
+
+    @Test
+    fun dismissDisclaimerTimeoutResetsDismissedFlag() =
+        testScope.runTest {
+            val disclaimerDismissed by collectLastValue(underTest.isDisclaimerDismissed)
+            underTest.setDisclaimerDismissed()
+            assertThat(disclaimerDismissed).isTrue()
+            advanceTimeBy(CommunalInteractor.DISCLAIMER_RESET_MILLIS)
+            assertThat(disclaimerDismissed).isFalse()
+        }
+
+    @Test
+    fun settingSelectedKey_flowUpdated() {
+        testScope.runTest {
+            val key = "test"
+            val selectedKey by collectLastValue(underTest.selectedKey)
+            underTest.setSelectedKey(key)
+            assertThat(selectedKey).isEqualTo(key)
+        }
+    }
+
+    @Test
+    fun unpauseWorkProfileEnablesWorkMode() =
+        testScope.runTest {
+            underTest.unpauseWorkProfile()
+
+            assertThat(managedProfileController.isWorkModeEnabled()).isTrue()
+        }
 
     private fun setKeyguardFeaturesDisabled(user: UserInfo, disabledFlags: Int) {
         whenever(kosmos.devicePolicyManager.getKeyguardDisabledFeatures(nullable(), eq(user.id)))
@@ -1067,47 +1098,6 @@ class CommunalInteractorTest : SysuiTestCase() {
             Intent(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED),
         )
     }
-
-    private fun createWidgetForUser(
-        appWidgetId: Int,
-        userId: Int
-    ): CommunalWidgetContentModel.Available =
-        mock<CommunalWidgetContentModel.Available> {
-            whenever(this.appWidgetId).thenReturn(appWidgetId)
-            val providerInfo =
-                mock<AppWidgetProviderInfo>().apply {
-                    widgetCategory = AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD
-                }
-            whenever(providerInfo.profile).thenReturn(UserHandle(userId))
-            whenever(this.providerInfo).thenReturn(providerInfo)
-        }
-
-    private fun createPendingWidgetForUser(
-        appWidgetId: Int,
-        priority: Int = 0,
-        packageName: String = "",
-        icon: Bitmap? = null,
-        userId: Int = 0,
-    ): CommunalWidgetContentModel.Pending {
-        return CommunalWidgetContentModel.Pending(
-            appWidgetId = appWidgetId,
-            priority = priority,
-            packageName = packageName,
-            icon = icon,
-            user = UserHandle(userId),
-        )
-    }
-
-    private fun createWidgetWithCategory(
-        appWidgetId: Int,
-        category: Int
-    ): CommunalWidgetContentModel =
-        mock<CommunalWidgetContentModel.Available> {
-            whenever(this.appWidgetId).thenReturn(appWidgetId)
-            val providerInfo = mock<AppWidgetProviderInfo>().apply { widgetCategory = category }
-            whenever(providerInfo.profile).thenReturn(UserHandle(MAIN_USER_INFO.id))
-            whenever(this.providerInfo).thenReturn(providerInfo)
-        }
 
     private companion object {
         val MAIN_USER_INFO = UserInfo(0, "primary", UserInfo.FLAG_MAIN)

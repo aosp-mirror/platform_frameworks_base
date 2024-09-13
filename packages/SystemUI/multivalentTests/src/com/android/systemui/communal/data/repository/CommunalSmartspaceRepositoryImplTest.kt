@@ -22,11 +22,13 @@ import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags.FLAG_COMMUNAL_TIMER_FLICKER_FIX
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.smartspace.CommunalSmartspaceController
 import com.android.systemui.concurrency.fakeExecutor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.plugins.BcSmartspaceDataPlugin.SmartspaceTargetListener
 import com.android.systemui.testKosmos
 import com.android.systemui.util.time.fakeSystemClock
@@ -66,6 +68,7 @@ class CommunalSmartspaceRepositoryImplTest : SysuiTestCase() {
                 smartspaceController,
                 fakeExecutor,
                 systemClock,
+                logcatLogBuffer("CommunalSmartspaceRepositoryImplTest"),
             )
     }
 
@@ -97,6 +100,7 @@ class CommunalSmartspaceRepositoryImplTest : SysuiTestCase() {
         }
 
     @EnableFlags(FLAG_REMOTE_VIEWS)
+    @DisableFlags(FLAG_COMMUNAL_TIMER_FLICKER_FIX)
     @Test
     fun communalTimers_onlyShowTimersWithRemoteViews() =
         testScope.runTest {
@@ -136,6 +140,48 @@ class CommunalSmartspaceRepositoryImplTest : SysuiTestCase() {
             // Verify that only the valid target is listed
             assertThat(communalTimers).hasSize(1)
             assertThat(communalTimers?.first()?.smartspaceTargetId).isEqualTo("timer-1-started")
+        }
+
+    @EnableFlags(FLAG_REMOTE_VIEWS, FLAG_COMMUNAL_TIMER_FLICKER_FIX)
+    @Test
+    fun communalTimers_onlyShowTimersWithRemoteViews_timerFlickerFix() =
+        testScope.runTest {
+            underTest.startListening()
+
+            val communalTimers by collectLastValue(underTest.timers)
+            runCurrent()
+            fakeExecutor.runAllReady()
+
+            with(captureSmartspaceTargetListener()) {
+                onSmartspaceTargetsUpdated(
+                    listOf(
+                        // Invalid. Not a timer
+                        mock<SmartspaceTarget> {
+                            on { smartspaceTargetId }.doReturn("weather")
+                            on { featureType }.doReturn(SmartspaceTarget.FEATURE_WEATHER)
+                        },
+                        // Invalid. RemoteViews absent
+                        mock<SmartspaceTarget> {
+                            on { smartspaceTargetId }.doReturn("timer-0-started")
+                            on { featureType }.doReturn(SmartspaceTarget.FEATURE_TIMER)
+                            on { remoteViews }.doReturn(null)
+                            on { creationTimeMillis }.doReturn(1000)
+                        },
+                        // Valid
+                        mock<SmartspaceTarget> {
+                            on { smartspaceTargetId }.doReturn("timer-1-started")
+                            on { featureType }.doReturn(SmartspaceTarget.FEATURE_TIMER)
+                            on { remoteViews }.doReturn(mock())
+                            on { creationTimeMillis }.doReturn(2000)
+                        },
+                    )
+                )
+            }
+            runCurrent()
+
+            // Verify that only the valid target is listed
+            assertThat(communalTimers).hasSize(1)
+            assertThat(communalTimers?.first()?.smartspaceTargetId).isEqualTo("timer-1")
         }
 
     @EnableFlags(FLAG_REMOTE_VIEWS)

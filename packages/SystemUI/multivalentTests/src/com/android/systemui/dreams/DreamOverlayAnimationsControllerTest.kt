@@ -84,25 +84,18 @@ class DreamOverlayAnimationsControllerTest : SysuiTestCase() {
         verify(mockAnimator, atLeastOnce()).addListener(captor.capture())
 
         captor.allValues.forEach { it.onAnimationEnd(mockAnimator) }
-        verify(stateController).setExitAnimationsRunning(false)
+        verify(stateController, times(2)).setExitAnimationsRunning(false)
     }
 
     @Test
-    fun testWakeUpSetsExitAnimationsRunning() {
-        controller.wakeUp()
-
-        verify(stateController).setExitAnimationsRunning(true)
-    }
-
-    @Test
-    fun testWakeUpAfterStartWillCancel() {
+    fun testOnWakeUpAfterStartWillCancel() {
         val mockStartAnimator: AnimatorSet = mock()
 
         controller.startEntryAnimations(false, animatorBuilder = { mockStartAnimator })
 
         verify(mockStartAnimator, never()).cancel()
 
-        controller.wakeUp()
+        controller.onWakeUp()
 
         // Verify that we cancelled the start animator in favor of the exit
         // animator.
@@ -153,5 +146,11 @@ class DreamOverlayAnimationsControllerTest : SysuiTestCase() {
                 it.animatedValue == -DREAM_IN_TRANSLATION_Y_DISTANCE.toFloat()
             }
         )
+    }
+
+    @Test
+    fun testCancelAnimations_clearsExitAnimationsRunning() {
+        controller.cancelAnimations()
+        verify(stateController).setExitAnimationsRunning(false)
     }
 }

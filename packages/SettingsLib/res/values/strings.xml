@@ -881,6 +881,11 @@
     <!-- UI debug setting: show physical key presses summary [CHAR LIMIT=150] -->
     <string name="show_key_presses_summary">Show visual feedback for physical key presses</string>
 
+    <!-- UI debug setting: Title text for a debug setting that enables a visualization of touchpad input in a window on the screen  [CHAR LIMIT=50] -->
+    <string name="touchpad_visualizer">Show touchpad input</string>
+    <!-- UI debug setting: Summary text for a debug setting that enables a visualization of touchpad input in a window on the screen [CHAR LIMIT=150] -->
+    <string name="touchpad_visualizer_summary">Screen overlay displaying touchpad input data and recognized gestures</string>
+
     <!-- UI debug setting: show where surface updates happen? [CHAR LIMIT=25] -->
     <string name="show_screen_updates">Show surface updates</string>
     <!-- UI debug setting: show surface updates summary [CHAR LIMIT=50] -->
@@ -1010,10 +1015,8 @@
     <!-- UI debug setting: force allow on external summary [CHAR LIMIT=150] -->
     <string name="force_resizable_activities_summary">Make all activities resizable for multi-window, regardless of manifest values.</string>
 
-    <!-- UI debug setting: enable legacy freeform window support [CHAR LIMIT=50] -->
-    <string name="enable_freeform_support">Enable freeform windows (legacy)</string>
-    <!-- UI debug setting: enable legacy freeform window support summary [CHAR LIMIT=150] -->
-    <string name="enable_freeform_support_summary">Enable support for experimental legacy freeform windows.</string>
+    <!-- Title for a toggle that enables support for windows to be in freeform. Freeform windows enables users to freely arrange and resize overlapping apps. [CHAR LIMIT=50] -->
+    <string name="enable_freeform_support">Enable freeform windows</string>
 
     <!-- Local (desktop) backup password menu title [CHAR LIMIT=25] -->
     <string name="local_backup_password_title">Desktop backup password</string>
@@ -1166,7 +1169,7 @@
     <!-- [CHAR_LIMIT=40] Label for battery level chart when charging with duration -->
     <string name="power_charging_duration"><xliff:g id="level">%1$s</xliff:g> - <xliff:g id="time">%2$s</xliff:g> left until full</string>
     <!-- [CHAR_LIMIT=80] Label for battery level chart when charge been limited -->
-    <string name="power_charging_limited"><xliff:g id="level">%1$s</xliff:g> - Charging optimized</string>
+    <string name="power_charging_limited"><xliff:g id="level">%1$s</xliff:g> - Charging on hold to protect battery</string>
     <!-- [CHAR_LIMIT=80] Label for battery charging future pause -->
     <string name="power_charging_future_paused"><xliff:g id="level">%1$s</xliff:g> - Charging</string>
 
@@ -1360,6 +1363,9 @@
     </string>
     <!-- Keywords for setting screen for controlling apps that can schedule alarms [CHAR LIMIT=100] -->
     <string name="keywords_alarms_and_reminders">schedule, alarm, reminder, clock</string>
+
+    <!-- Priority Modes: Name of the "manual" Do Not Disturb mode. [CHAR LIMIT=50] -->
+    <string name="zen_mode_do_not_disturb_name">Do Not Disturb</string>
 
     <!-- Sound: Title for the Do not Disturb option and associated settings page. [CHAR LIMIT=50]-->
     <string name="zen_mode_settings_title">Do Not Disturb</string>

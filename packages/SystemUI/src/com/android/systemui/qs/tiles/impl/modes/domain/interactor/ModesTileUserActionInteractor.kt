@@ -18,30 +18,42 @@ package com.android.systemui.qs.tiles.impl.modes.domain.interactor
 
 import android.content.Intent
 import android.provider.Settings
+import com.android.systemui.animation.Expandable
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.qs.tiles.base.actions.QSTileIntentUserInputHandler
 import com.android.systemui.qs.tiles.base.interactor.QSTileInput
 import com.android.systemui.qs.tiles.base.interactor.QSTileUserActionInteractor
 import com.android.systemui.qs.tiles.impl.modes.domain.model.ModesTileModel
 import com.android.systemui.qs.tiles.viewmodel.QSTileUserAction
+import com.android.systemui.statusbar.policy.ui.dialog.ModesDialogDelegate
 import javax.inject.Inject
 
+@SysUISingleton
 class ModesTileUserActionInteractor
 @Inject
 constructor(
-    private val qsTileIntentUserActionHandler: QSTileIntentUserInputHandler,
+    private val qsTileIntentUserInputHandler: QSTileIntentUserInputHandler,
+    // TODO(b/353896370): The domain layer should not have to depend on the UI layer.
+    private val dialogDelegate: ModesDialogDelegate,
 ) : QSTileUserActionInteractor<ModesTileModel> {
     val longClickIntent = Intent(Settings.ACTION_ZEN_MODE_SETTINGS)
 
     override suspend fun handleInput(input: QSTileInput<ModesTileModel>) {
         with(input) {
             when (action) {
-                is QSTileUserAction.Click -> {
-                    // TODO(b/346519570) open dialog
+                is QSTileUserAction.Click,
+                is QSTileUserAction.ToggleClick -> {
+                    handleClick(action.expandable)
                 }
                 is QSTileUserAction.LongClick -> {
-                    qsTileIntentUserActionHandler.handle(action.expandable, longClickIntent)
+                    qsTileIntentUserInputHandler.handle(action.expandable, longClickIntent)
                 }
             }
         }
+    }
+
+    suspend fun handleClick(expandable: Expandable?) {
+        // Show a dialog with the list of modes to configure.
+        dialogDelegate.showDialog(expandable)
     }
 }

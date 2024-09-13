@@ -16,14 +16,14 @@
 
 package com.android.systemui.volume.dagger
 
-import com.android.settingslib.volume.data.repository.AudioSharingRepository
+import com.android.settingslib.flags.Flags
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.volume.domain.interactor.AudioSharingInteractor
+import com.android.systemui.volume.domain.interactor.AudioSharingInteractorEmptyImpl
 import com.android.systemui.volume.domain.interactor.AudioSharingInteractorImpl
+import dagger.Lazy
 import dagger.Module
 import dagger.Provides
-import kotlinx.coroutines.CoroutineScope
 
 /** Dagger module for audio sharing code in the volume package */
 @Module
@@ -33,8 +33,13 @@ interface AudioSharingModule {
         @Provides
         @SysUISingleton
         fun provideAudioSharingInteractor(
-            @Application coroutineScope: CoroutineScope,
-            repository: AudioSharingRepository
-        ): AudioSharingInteractor = AudioSharingInteractorImpl(coroutineScope, repository)
+            impl: Lazy<AudioSharingInteractorImpl>,
+            emptyImpl: Lazy<AudioSharingInteractorEmptyImpl>,
+        ): AudioSharingInteractor =
+            if (Flags.volumeDialogAudioSharingFix()) {
+                impl.get()
+            } else {
+                emptyImpl.get()
+            }
     }
 }

@@ -19,10 +19,10 @@ package com.android.server.wm;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.os.SystemProperties;
+import android.window.flags.DesktopModeFlags;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.window.flags.Flags;
 
 /**
  * Constants for desktop mode feature
@@ -35,8 +35,8 @@ public final class DesktopModeHelper {
             "persist.wm.debug.desktop_mode_enforce_device_restrictions", true);
 
     /** Whether desktop mode is enabled. */
-    static boolean isDesktopModeEnabled() {
-        return Flags.enableDesktopWindowingMode();
+    static boolean isDesktopModeEnabled(@NonNull Context context) {
+        return DesktopModeFlags.DESKTOP_WINDOWING_MODE.isEnabled(context);
     }
 
     /**
@@ -60,7 +60,7 @@ public final class DesktopModeHelper {
      * Return {@code true} if desktop mode can be entered on the current device.
      */
     static boolean canEnterDesktopMode(@NonNull Context context) {
-        return isDesktopModeEnabled()
+        return isDesktopModeEnabled(context)
                 && (!shouldEnforceDeviceRestrictions() || isDesktopModeSupported(context));
     }
 }

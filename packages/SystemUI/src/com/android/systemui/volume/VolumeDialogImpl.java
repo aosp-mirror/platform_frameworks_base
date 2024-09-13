@@ -34,6 +34,7 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_VOLUME_CONTROL;
 import static com.android.internal.jank.InteractionJankMonitor.Configuration.Builder;
+import static com.android.settingslib.flags.Flags.volumeDialogAudioSharingFix;
 import static com.android.systemui.Flags.hapticVolumeSlider;
 import static com.android.systemui.volume.Events.DISMISS_REASON_POSTURE_CHANGED;
 import static com.android.systemui.volume.Events.DISMISS_REASON_SETTINGS_CLICKED;
@@ -50,7 +51,6 @@ import android.app.KeyguardManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
@@ -78,7 +78,6 @@ import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.text.InputFilter;
 import android.util.Log;
-import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
 import android.view.ContextThemeWrapper;
@@ -321,8 +320,8 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
     private final VolumePanelFlag mVolumePanelFlag;
     private final VolumeDialogInteractor mInteractor;
     // Optional actions for soundDose
-    private Optional<ImmutableList<Pair<String, Intent>>> mCsdWarningNotificationActions =
-            Optional.of(ImmutableList.of());
+    private Optional<ImmutableList<CsdWarningAction>>
+            mCsdWarningNotificationActions = Optional.of(ImmutableList.of());
 
     public VolumeDialogImpl(
             Context context,
@@ -696,18 +695,15 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
             addRow(AudioManager.STREAM_MUSIC,
                     R.drawable.ic_volume_media, R.drawable.ic_volume_media_mute, true, true);
             if (!AudioSystem.isSingleVolume(mContext)) {
-
                 addRow(AudioManager.STREAM_RING, R.drawable.ic_ring_volume,
                         R.drawable.ic_ring_volume_off, true, false);
-
-
+                addRow(AudioManager.STREAM_NOTIFICATION, R.drawable.ic_volume_ringer,
+                        R.drawable.ic_volume_off, true, false);
                 addRow(STREAM_ALARM,
                         R.drawable.ic_alarm, R.drawable.ic_volume_alarm_mute, true, false);
                 addRow(AudioManager.STREAM_VOICE_CALL,
                         com.android.internal.R.drawable.ic_phone,
                         com.android.internal.R.drawable.ic_phone, false, false);
-                addRow(AudioManager.STREAM_BLUETOOTH_SCO,
-                        R.drawable.ic_volume_bt_sco, R.drawable.ic_volume_bt_sco, false, false);
                 addRow(AudioManager.STREAM_SYSTEM, R.drawable.ic_volume_system,
                         R.drawable.ic_volume_system_mute, false, false);
             }
@@ -1678,6 +1674,14 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
                 return true;
             }
 
+            // Always show the stream for audio sharing if it exists.
+            if (volumeDialogAudioSharingFix()
+                    && row.ss != null
+                    && mContext.getString(R.string.audio_sharing_description)
+                            .equals(row.ss.remoteLabel)) {
+                return true;
+            }
+
             if (row.defaultStream) {
                 return activeRow.stream == STREAM_RING
                         || activeRow.stream == STREAM_ALARM
@@ -1880,10 +1884,25 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
             if (!ss.dynamic) continue;
             mDynamic.put(stream, true);
             if (findRow(stream) == null) {
-                addRow(stream,
-                        com.android.settingslib.R.drawable.ic_volume_remote,
-                        com.android.settingslib.R.drawable.ic_volume_remote_mute,
-                        true, false, true);
+                if (volumeDialogAudioSharingFix()
+                        && mContext.getString(R.string.audio_sharing_description)
+                                .equals(ss.remoteLabel)) {
+                    addRow(
+                            stream,
+                            R.drawable.ic_volume_media_bt,
+                            R.drawable.ic_volume_media_bt_mute,
+                            true,
+                            false,
+                            true);
+                } else {
+                    addRow(
+                            stream,
+                            com.android.settingslib.R.drawable.ic_volume_remote,
+                            com.android.settingslib.R.drawable.ic_volume_remote_mute,
+                            true,
+                            false,
+                            true);
+                }
             }
         }
 
@@ -1972,7 +1991,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
                                             : R.drawable.ic_volume_media_bt;
             }
         } else if (isStreamMuted(ss)) {
-            iconRes = ss.muted ? R.drawable.ic_volume_media_off : row.iconMuteRes;
+            iconRes = row.iconMuteRes;
         } else {
             iconRes = mShowLowMediaVolumeIcon && ss.level * 2 < (ss.levelMax + ss.levelMin)
                       ? R.drawable.ic_volume_media_low : row.iconRes;
@@ -2207,7 +2226,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
     }
 
     public void setCsdWarningNotificationActionIntents(
-            ImmutableList<Pair<String, Intent>> actionIntent) {
+            ImmutableList<CsdWarningAction> actionIntent) {
         mCsdWarningNotificationActions = Optional.of(actionIntent);
     }
 

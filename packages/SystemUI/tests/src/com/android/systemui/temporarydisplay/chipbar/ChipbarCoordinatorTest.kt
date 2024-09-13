@@ -30,6 +30,8 @@ import android.widget.TextView
 import androidx.core.animation.doOnCancel
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.app.viewcapture.ViewCapture
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager
 import com.android.internal.logging.InstanceId
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.systemui.SysuiTestCase
@@ -84,6 +86,7 @@ class ChipbarCoordinatorTest : SysuiTestCase() {
     @Mock private lateinit var viewUtil: ViewUtil
     @Mock private lateinit var vibratorHelper: VibratorHelper
     @Mock private lateinit var swipeGestureHandler: SwipeChipbarAwayGestureHandler
+    @Mock private lateinit var lazyViewCapture: Lazy<ViewCapture>
     private lateinit var chipbarAnimator: TestChipbarAnimator
     private lateinit var fakeWakeLockBuilder: WakeLockFake.Builder
     private lateinit var fakeWakeLock: WakeLockFake
@@ -112,7 +115,8 @@ class ChipbarCoordinatorTest : SysuiTestCase() {
             ChipbarCoordinator(
                 context,
                 logger,
-                windowManager,
+                ViewCaptureAwareWindowManager(windowManager, lazyViewCapture,
+                        isViewCaptureEnabled = false),
                 fakeExecutor,
                 accessibilityManager,
                 configurationController,

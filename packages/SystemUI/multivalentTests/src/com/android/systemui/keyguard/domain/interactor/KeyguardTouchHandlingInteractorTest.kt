@@ -25,8 +25,11 @@ import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.internal.logging.uiEventLogger
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.deviceentry.domain.interactor.deviceEntryFaceAuthInteractor
+import com.android.systemui.deviceentry.shared.FaceAuthUiEvent
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.fakeFeatureFlagsClassic
+import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFaceAuthRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
@@ -171,14 +174,15 @@ class KeyguardTouchHandlingInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun longPressed_openWppDirectlyEnabled_doesNotShowMenu_opensSettings() =
+    fun longPressed_isA11yAction_doesNotShowMenu_opensSettings() =
         testScope.runTest {
-            createUnderTest(isOpenWppDirectlyEnabled = true)
+            createUnderTest()
             val isMenuVisible by collectLastValue(underTest.isMenuVisible)
             val shouldOpenSettings by collectLastValue(underTest.shouldOpenSettings)
+            val isA11yAction = true
             runCurrent()
 
-            underTest.onLongPress()
+            underTest.onLongPress(isA11yAction)
 
             assertThat(isMenuVisible).isFalse()
             assertThat(shouldOpenSettings).isTrue()
@@ -259,6 +263,23 @@ class KeyguardTouchHandlingInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    fun triggersFaceAuthWhenLockscreenIsClicked() =
+        testScope.runTest {
+            collectLastValue(underTest.isMenuVisible)
+            runCurrent()
+            kosmos.fakeDeviceEntryFaceAuthRepository.canRunFaceAuth.value = true
+
+            underTest.onClick(100.0f, 100.0f)
+            runCurrent()
+
+            val runningAuthRequest =
+                kosmos.fakeDeviceEntryFaceAuthRepository.runningAuthRequest.value
+            assertThat(runningAuthRequest?.first)
+                .isEqualTo(FaceAuthUiEvent.FACE_AUTH_TRIGGERED_NOTIFICATION_PANEL_CLICKED)
+            assertThat(runningAuthRequest?.second).isEqualTo(true)
+        }
+
+    @Test
     fun showMenu_leaveLockscreen_returnToLockscreen_menuNotVisible() =
         testScope.runTest {
             val isMenuVisible by collectLastValue(underTest.isMenuVisible)
@@ -284,7 +305,6 @@ class KeyguardTouchHandlingInteractorTest : SysuiTestCase() {
     private suspend fun createUnderTest(
         isLongPressFeatureEnabled: Boolean = true,
         isRevampedWppFeatureEnabled: Boolean = true,
-        isOpenWppDirectlyEnabled: Boolean = false,
     ) {
         // This needs to be re-created for each test outside of kosmos since the flag values are
         // read during initialization to set up flows. Maybe there is a better way to handle that.
@@ -298,11 +318,11 @@ class KeyguardTouchHandlingInteractorTest : SysuiTestCase() {
                 featureFlags =
                     kosmos.fakeFeatureFlagsClassic.apply {
                         set(Flags.LOCK_SCREEN_LONG_PRESS_ENABLED, isLongPressFeatureEnabled)
-                        set(Flags.LOCK_SCREEN_LONG_PRESS_DIRECT_TO_WPP, isOpenWppDirectlyEnabled)
                     },
                 broadcastDispatcher = fakeBroadcastDispatcher,
                 accessibilityManager = kosmos.accessibilityManagerWrapper,
                 pulsingGestureListener = kosmos.pulsingGestureListener,
+                faceAuthInteractor = kosmos.deviceEntryFaceAuthInteractor,
             )
         setUpState()
     }

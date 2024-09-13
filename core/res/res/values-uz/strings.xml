@@ -1194,6 +1194,8 @@
     <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"Parol qatorlarida qoʻlyozma ishlatish imkonsiz"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Orqaga"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Matn kiritish usulini almashtirish"</string>
+    <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"Kiritish usulini tanlash oynasini ochish"</string>
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"Sozlamalar"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Xotirada joy yetarli emas"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Ayrim funksiyalar ishlamasligi mumkin"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Tizim uchun xotirada joy yetarli emas. Avval 250 megabayt joy bo‘shatib, keyin qurilmani o‘chirib yoqing."</string>
@@ -1428,6 +1430,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"BAHAM KO‘RISH"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"RAD ETISH"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Matn kiritish usulini tanlang"</string>
+    <string name="input_method_language_settings" msgid="8069089418056819437">"Til sozlamalari"</string>
     <string name="show_ime" msgid="6406112007347443383">"Tashqi klaviatura ulanganida ekranda chiqib turadi"</string>
     <string name="hardware" msgid="3611039921284836033">"Ekrandagi klaviatura"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Sozlang: <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
@@ -1743,7 +1746,8 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"Ilova ruxsat olish talabini berkitmoqda, shu sababdan javobingizni tasdiqlash imkonsiz."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Kerakli funksiyani tanlang"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Qulayliklar tugmasi bilan foydalanish uchun funksiyalarni tanlang"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Tovush tugmasi bilan ishga tushiriladigan funksiyalarni tanlang"</string>
+    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
+    <skip />
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> faolsizlantirildi"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Tezkor tugmalarni tahrirlash"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"OK"</string>
@@ -2421,6 +2425,8 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Ekran namoyishida xavfsizlik maqsadida ilova kontenti berkitildi"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Sputnikka avtomatik ulandi"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Mobil yoki Wi-Fi tarmoqsiz xabarlarni yuborishingiz va qabul qilishingiz mumkin"</string>
+    <string name="satellite_notification_manual_title" msgid="1097504441849466279">"Sputnik orqali xabarlashuv ishlatilsinmi?"</string>
+    <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Mobil yoki Wi-Fi tarmoq blan aloqa yoʻqligida xabar yuboring va qabul qiling"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Xabarlar ilovasini ochish"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Ishlash tartibi"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Kutilmoqda..."</string>
@@ -2437,22 +2443,14 @@
     <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"Foydalanuvchini almashtirish"</string>
     <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"Ovozsiz qilish"</string>
     <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"Tovushsiz qilish uchun bosing"</string>
-    <!-- no translation found for keyboard_shortcut_group_applications_browser (6535007304687100909) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_contacts (2750702518068326356) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_email (4229037666415353683) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_sms (3523799286376321137) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_music (2051507523525651067) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_calendar (3571770335653387606) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_calculator (6753209559716091507) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_maps (7950000659522589471) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications (3010389163951364798) -->
-    <skip />
+    <string name="keyboard_shortcut_group_applications_browser" msgid="6535007304687100909">"Brauzer"</string>
+    <string name="keyboard_shortcut_group_applications_contacts" msgid="2750702518068326356">"Kontaktlar"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="4229037666415353683">"Email"</string>
+    <string name="keyboard_shortcut_group_applications_sms" msgid="3523799286376321137">"SMS"</string>
+    <string name="keyboard_shortcut_group_applications_music" msgid="2051507523525651067">"Musiqa"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="3571770335653387606">"Taqvim"</string>
+    <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"Kalkulyator"</string>
+    <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"Xaritalar"</string>
+    <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"Ilovalar"</string>
+    <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"Barmoq izlaringiz endi tanilmaydi. Barmoq izi bilan ochishni qayta sozlang."</string>
 </resources>

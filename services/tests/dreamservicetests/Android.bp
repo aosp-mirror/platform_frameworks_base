@@ -42,3 +42,13 @@ android_test {
         enabled: false,
     },
 }
+
+test_module_config {
+    name: "DreamServiceTests_server_dreams",
+    base: "DreamServiceTests",
+    test_suites: [
+        "automotive-tests",
+        "device-tests",
+    ],
+    include_filters: ["com.android.server.dreams"],
+}

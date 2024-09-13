@@ -19,7 +19,7 @@ package com.android.systemui.keyguard.domain.interactor
 import android.animation.ValueAnimator
 import com.android.app.animation.Interpolators
 import com.android.app.tracing.coroutines.launch
-import com.android.systemui.communal.domain.interactor.CommunalInteractor
+import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
@@ -52,7 +52,7 @@ constructor(
     @Main mainDispatcher: CoroutineDispatcher,
     keyguardInteractor: KeyguardInteractor,
     powerInteractor: PowerInteractor,
-    private val communalInteractor: CommunalInteractor,
+    private val communalSceneInteractor: CommunalSceneInteractor,
     keyguardOcclusionInteractor: KeyguardOcclusionInteractor,
     private val biometricSettingsRepository: BiometricSettingsRepository,
     private val keyguardRepository: KeyguardRepository,
@@ -69,11 +69,12 @@ constructor(
     ) {
 
     override fun start() {
-        // TODO(b/336576536): Check if adaptation for scene framework is needed
+        // KeyguardState.GONE does not exist with SceneContainerFlag enabled
         if (SceneContainerFlag.isEnabled) return
         listenForGoneToAodOrDozing()
         listenForGoneToDreaming()
-        listenForGoneToLockscreenOrHub()
+        listenForGoneToLockscreenOrHubOrOccluded()
+        listenForGoneToOccluded()
         listenForGoneToDreamingLockscreenHosted()
     }
 
@@ -81,14 +82,32 @@ constructor(
         scope.launch("$TAG#showKeyguard") { startTransitionTo(KeyguardState.LOCKSCREEN) }
     }
 
+    /**
+     * A special case supported on foldables, where folding the device may put the device on an
+     * unlocked lockscreen, but if an occluding app is already showing (like a active phone call),
+     * then go directly to OCCLUDED.
+     */
+    private fun listenForGoneToOccluded() {
+        scope.launch("$TAG#listenForGoneToOccluded") {
+            keyguardInteractor.showDismissibleKeyguard.filterRelevantKeyguardState().collect {
+                if (keyguardInteractor.isKeyguardOccluded.value) {
+                    startTransitionTo(
+                        KeyguardState.OCCLUDED,
+                        ownerReason = "Dismissible keyguard with occlusion"
+                    )
+                }
+            }
+        }
+    }
+
     // Primarily for when the user chooses to lock down the device
-    private fun listenForGoneToLockscreenOrHub() {
+    private fun listenForGoneToLockscreenOrHubOrOccluded() {
         if (KeyguardWmStateRefactor.isEnabled) {
             scope.launch("$TAG#listenForGoneToLockscreenOrHub") {
                 biometricSettingsRepository.isCurrentUserInLockdown
                     .distinctUntilChanged()
                     .filterRelevantKeyguardStateAnd { inLockdown -> inLockdown }
-                    .sample(communalInteractor.isIdleOnCommunal, ::Pair)
+                    .sample(communalSceneInteractor.isIdleOnCommunalNotEditMode, ::Pair)
                     .collect { (_, isIdleOnCommunal) ->
                         val to =
                             if (isIdleOnCommunal) {
@@ -100,31 +119,31 @@ constructor(
                     }
             }
 
-            if (!SceneContainerFlag.isEnabled) {
-                scope.launch {
-                    keyguardRepository.isKeyguardEnabled
-                        .filterRelevantKeyguardStateAnd { enabled -> enabled }
-                        .sample(keyguardEnabledInteractor.showKeyguardWhenReenabled)
-                        .filter { reshow -> reshow }
-                        .collect {
-                            startTransitionTo(
-                                KeyguardState.LOCKSCREEN,
-                                ownerReason =
-                                    "Keyguard was re-enabled, and we weren't GONE when it " +
-                                        "was originally disabled"
-                            )
-                        }
-                }
+            scope.launch {
+                keyguardRepository.isKeyguardEnabled
+                    .filterRelevantKeyguardStateAnd { enabled -> enabled }
+                    .sample(keyguardEnabledInteractor.showKeyguardWhenReenabled)
+                    .filter { reshow -> reshow }
+                    .collect {
+                        startTransitionTo(
+                            KeyguardState.LOCKSCREEN,
+                            ownerReason =
+                                "Keyguard was re-enabled, and we weren't GONE when it " +
+                                    "was originally disabled"
+                        )
+                    }
             }
         } else {
-            scope.launch("$TAG#listenForGoneToLockscreenOrHub") {
+            scope.launch("$TAG#listenForGoneToLockscreenOrHubOrOccluded") {
                 keyguardInteractor.isKeyguardShowing
                     .filterRelevantKeyguardStateAnd { isKeyguardShowing -> isKeyguardShowing }
-                    .sample(communalInteractor.isIdleOnCommunal, ::Pair)
+                    .sample(communalSceneInteractor.isIdleOnCommunalNotEditMode, ::Pair)
                     .collect { (_, isIdleOnCommunal) ->
                         val to =
                             if (isIdleOnCommunal) {
                                 KeyguardState.GLANCEABLE_HUB
+                            } else if (keyguardInteractor.isKeyguardOccluded.value) {
+                                KeyguardState.OCCLUDED
                             } else {
                                 KeyguardState.LOCKSCREEN
                             }
@@ -168,11 +187,12 @@ constructor(
             interpolator = Interpolators.LINEAR
             duration =
                 when (toState) {
-                    KeyguardState.DREAMING -> TO_DREAMING_DURATION
                     KeyguardState.AOD -> TO_AOD_DURATION
                     KeyguardState.DOZING -> TO_DOZING_DURATION
+                    KeyguardState.DREAMING -> TO_DREAMING_DURATION
                     KeyguardState.LOCKSCREEN -> TO_LOCKSCREEN_DURATION
                     KeyguardState.GLANCEABLE_HUB -> TO_GLANCEABLE_HUB_DURATION
+                    KeyguardState.OCCLUDED -> TO_OCCLUDED_DURATION
                     else -> DEFAULT_DURATION
                 }.inWholeMilliseconds
         }
@@ -181,10 +201,11 @@ constructor(
     companion object {
         private const val TAG = "FromGoneTransitionInteractor"
         private val DEFAULT_DURATION = 500.milliseconds
-        val TO_DREAMING_DURATION = 933.milliseconds
         val TO_AOD_DURATION = 1300.milliseconds
         val TO_DOZING_DURATION = 933.milliseconds
+        val TO_DREAMING_DURATION = 933.milliseconds
         val TO_LOCKSCREEN_DURATION = DEFAULT_DURATION
         val TO_GLANCEABLE_HUB_DURATION = DEFAULT_DURATION
+        val TO_OCCLUDED_DURATION = 100.milliseconds
     }
 }

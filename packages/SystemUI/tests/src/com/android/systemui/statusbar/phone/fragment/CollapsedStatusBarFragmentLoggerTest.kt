@@ -34,12 +34,13 @@ import org.mockito.Mockito.mock
 @RunWith(AndroidJUnit4::class)
 class CollapsedStatusBarFragmentLoggerTest : SysuiTestCase() {
 
-    private val buffer = LogBufferFactory(DumpManager(), mock(LogcatEchoTracker::class.java))
-            .create("buffer", 10)
-    private val disableFlagsLogger = DisableFlagsLogger(
+    private val buffer =
+        LogBufferFactory(DumpManager(), mock(LogcatEchoTracker::class.java)).create("buffer", 10)
+    private val disableFlagsLogger =
+        DisableFlagsLogger(
             listOf(DisableFlagsLogger.DisableFlag(0b001, 'A', 'a')),
             listOf(DisableFlagsLogger.DisableFlag(0b001, 'B', 'b'))
-    )
+        )
     private val logger = CollapsedStatusBarFragmentLogger(buffer, disableFlagsLogger)
 
     @Test
@@ -66,7 +67,8 @@ class CollapsedStatusBarFragmentLoggerTest : SysuiTestCase() {
             StatusBarVisibilityModel(
                 showClock = false,
                 showNotificationIcons = true,
-                showOngoingActivityChip = false,
+                showPrimaryOngoingActivityChip = false,
+                showSecondaryOngoingActivityChip = false,
                 showSystemInfo = true,
             )
         )
@@ -77,7 +79,8 @@ class CollapsedStatusBarFragmentLoggerTest : SysuiTestCase() {
 
         assertThat(actualString).contains("showClock=false")
         assertThat(actualString).contains("showNotificationIcons=true")
-        assertThat(actualString).contains("showOngoingActivityChip=false")
+        assertThat(actualString).contains("showPrimaryOngoingActivityChip=false")
+        assertThat(actualString).contains("showSecondaryOngoingActivityChip=false")
         assertThat(actualString).contains("showSystemInfo=true")
     }
 }

@@ -149,21 +149,6 @@ public class PendingIntentController {
                         ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED);
             }
 
-            if (opts != null && opts.isPendingIntentBackgroundActivityLaunchAllowedByPermission()) {
-                Slog.wtf(TAG,
-                        "Resetting option pendingIntentBackgroundActivityLaunchAllowedByPermission"
-                                + " which is set by the pending intent creator ("
-                                + packageName
-                                + ") because this option is meant for the pending intent sender");
-                if (CompatChanges.isChangeEnabled(PendingIntent.PENDING_INTENT_OPTIONS_CHECK,
-                        callingUid)) {
-                    throw new IllegalArgumentException(
-                            "pendingIntentBackgroundActivityLaunchAllowedByPermission "
-                                    + "can not be set by creator of a PendingIntent");
-                }
-                opts.setPendingIntentBackgroundActivityLaunchAllowedByPermission(false);
-            }
-
             final boolean noCreate = (flags & PendingIntent.FLAG_NO_CREATE) != 0;
             final boolean cancelCurrent = (flags & PendingIntent.FLAG_CANCEL_CURRENT) != 0;
             final boolean updateCurrent = (flags & PendingIntent.FLAG_UPDATE_CURRENT) != 0;

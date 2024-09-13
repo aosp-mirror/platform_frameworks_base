@@ -42,7 +42,7 @@ import org.mockito.quality.Strictness
 @RunWith(AndroidJUnit4::class)
 @SmallTest
 // this class has no testable logic with either of these flags enabled
-@DisableFlags(PriorityPeopleSection.FLAG_NAME, NotificationMinimalismPrototype.V2.FLAG_NAME)
+@DisableFlags(PriorityPeopleSection.FLAG_NAME, NotificationMinimalismPrototype.FLAG_NAME)
 class NotificationSectionsFeatureManagerTest : SysuiTestCase() {
     lateinit var manager: NotificationSectionsFeatureManager
     private val proxyFake = DeviceConfigProxyFake()

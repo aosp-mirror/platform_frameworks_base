@@ -702,7 +702,7 @@ public final class MediaProjectionManagerService extends SystemService
         }
     }
 
-    private final class BinderService extends IMediaProjectionManager.Stub {
+    final class BinderService extends IMediaProjectionManager.Stub {
 
         BinderService(Context context) {
             super(PermissionEnforcer.fromContext(context));
@@ -891,6 +891,13 @@ public final class MediaProjectionManagerService extends SystemService
         @Override
         public void requestConsentForInvalidProjection(@NonNull IMediaProjection projection) {
             requestConsentForInvalidProjection_enforcePermission();
+
+            if (android.companion.virtualdevice.flags.Flags.mediaProjectionKeyguardRestrictions()
+                    && mKeyguardManager.isKeyguardLocked()) {
+                Slog.v(TAG, "Reusing token: Won't request consent while the keyguard is locked");
+                return;
+            }
+
             synchronized (mLock) {
                 if (!isCurrentProjection(projection)) {
                     Slog.v(TAG, "Reusing token: Won't request consent again for a token that "

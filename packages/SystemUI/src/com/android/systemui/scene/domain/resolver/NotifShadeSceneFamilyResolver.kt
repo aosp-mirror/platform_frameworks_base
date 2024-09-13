@@ -21,7 +21,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.shade.domain.interactor.ShadeModeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode
 import dagger.Binds
 import dagger.Module
@@ -38,17 +38,17 @@ class NotifShadeSceneFamilyResolver
 @Inject
 constructor(
     @Application applicationScope: CoroutineScope,
-    shadeInteractor: ShadeInteractor,
+    shadeModeInteractor: ShadeModeInteractor,
 ) : SceneResolver {
     override val targetFamily: SceneKey = SceneFamilies.NotifShade
 
     override val resolvedScene: StateFlow<SceneKey> =
-        shadeInteractor.shadeMode
+        shadeModeInteractor.shadeMode
             .map(::notifShadeScene)
             .stateIn(
                 applicationScope,
                 started = SharingStarted.Eagerly,
-                initialValue = notifShadeScene(shadeInteractor.shadeMode.value),
+                initialValue = notifShadeScene(shadeModeInteractor.shadeMode.value),
             )
 
     override fun includesScene(scene: SceneKey): Boolean = scene in notifShadeScenes
@@ -61,11 +61,7 @@ constructor(
         }
 
     companion object {
-        val notifShadeScenes =
-            setOf(
-                Scenes.NotificationsShade,
-                Scenes.Shade,
-            )
+        val notifShadeScenes = setOf(Scenes.NotificationsShade, Scenes.Shade)
     }
 }
 

@@ -42,7 +42,6 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.clearInvocations;
 
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
@@ -135,15 +134,13 @@ public class PhoneWindowManagerTests {
         doNothing().when(mPhoneWindowManager).initializeHdmiState();
         final boolean[] isScreenTurnedOff = { false };
         final DisplayPolicy displayPolicy = mock(DisplayPolicy.class);
-        doAnswer(invocation -> isScreenTurnedOff[0] = true).when(displayPolicy).screenTurnedOff();
+        doAnswer(invocation -> isScreenTurnedOff[0] = true).when(displayPolicy).screenTurnedOff(
+                anyBoolean());
         doAnswer(invocation -> !isScreenTurnedOff[0]).when(displayPolicy).isScreenOnEarly();
         doAnswer(invocation -> !isScreenTurnedOff[0]).when(displayPolicy).isScreenOnFully();
 
         mPhoneWindowManager.mDefaultDisplayPolicy = displayPolicy;
         mPhoneWindowManager.mDefaultDisplayRotation = mock(DisplayRotation.class);
-        final ActivityTaskManagerInternal.SleepTokenAcquirer tokenAcquirer =
-                mock(ActivityTaskManagerInternal.SleepTokenAcquirer.class);
-        doReturn(tokenAcquirer).when(mAtmInternal).createSleepTokenAcquirer(anyString());
         final PowerManager pm = mock(PowerManager.class);
         doReturn(true).when(pm).isInteractive();
         doReturn(pm).when(mContext).getSystemService(eq(Context.POWER_SERVICE));
@@ -155,9 +152,8 @@ public class PhoneWindowManagerTests {
         assertThat(mPhoneWindowManager.mIsGoingToSleepDefaultDisplay).isFalse();
 
         // Skip sleep-token for non-sleep-screen-off.
-        clearInvocations(tokenAcquirer);
         mPhoneWindowManager.screenTurnedOff(DEFAULT_DISPLAY, true /* isSwappingDisplay */);
-        verify(tokenAcquirer, never()).acquire(anyInt());
+        verify(displayPolicy).screenTurnedOff(false /* acquireSleepToken */);
         assertThat(isScreenTurnedOff[0]).isTrue();
 
         // Apply sleep-token for sleep-screen-off.
@@ -165,21 +161,10 @@ public class PhoneWindowManagerTests {
         mPhoneWindowManager.startedGoingToSleep(DEFAULT_DISPLAY, 0 /* reason */);
         assertThat(mPhoneWindowManager.mIsGoingToSleepDefaultDisplay).isTrue();
         mPhoneWindowManager.screenTurnedOff(DEFAULT_DISPLAY, true /* isSwappingDisplay */);
-        verify(tokenAcquirer).acquire(eq(DEFAULT_DISPLAY));
+        verify(displayPolicy).screenTurnedOff(true /* acquireSleepToken */);
 
         mPhoneWindowManager.finishedGoingToSleep(DEFAULT_DISPLAY, 0 /* reason */);
         assertThat(mPhoneWindowManager.mIsGoingToSleepDefaultDisplay).isFalse();
-
-        // Simulate unexpected reversed order: screenTurnedOff -> startedGoingToSleep. The sleep
-        // token can still be acquired.
-        isScreenTurnedOff[0] = false;
-        clearInvocations(tokenAcquirer);
-        mPhoneWindowManager.screenTurnedOff(DEFAULT_DISPLAY, true /* isSwappingDisplay */);
-        verify(tokenAcquirer, never()).acquire(anyInt());
-        assertThat(displayPolicy.isScreenOnEarly()).isFalse();
-        assertThat(displayPolicy.isScreenOnFully()).isFalse();
-        mPhoneWindowManager.startedGoingToSleep(DEFAULT_DISPLAY, 0 /* reason */);
-        verify(tokenAcquirer).acquire(eq(DEFAULT_DISPLAY));
     }
 
     @Test
@@ -188,7 +173,7 @@ public class PhoneWindowManagerTests {
                 .FLAG_CREATE_ACCESSIBILITY_OVERLAY_APP_OP_ENABLED);
         int[] outAppOp = new int[1];
         assertEquals(ADD_OKAY, mPhoneWindowManager.checkAddPermission(TYPE_WALLPAPER,
-                /* isRoundedCornerOverlay= */ false, "test.pkg", outAppOp));
+                /* isRoundedCornerOverlay= */ false, "test.pkg", outAppOp, DEFAULT_DISPLAY));
         assertThat(outAppOp[0]).isEqualTo(AppOpsManager.OP_NONE);
     }
 
@@ -198,7 +183,7 @@ public class PhoneWindowManagerTests {
                 .FLAG_CREATE_ACCESSIBILITY_OVERLAY_APP_OP_ENABLED);
         int[] outAppOp = new int[1];
         assertEquals(ADD_OKAY, mPhoneWindowManager.checkAddPermission(TYPE_ACCESSIBILITY_OVERLAY,
-                /* isRoundedCornerOverlay= */ false, "test.pkg", outAppOp));
+                /* isRoundedCornerOverlay= */ false, "test.pkg", outAppOp, DEFAULT_DISPLAY));
         assertThat(outAppOp[0]).isEqualTo(AppOpsManager.OP_CREATE_ACCESSIBILITY_OVERLAY);
     }
 
@@ -208,7 +193,7 @@ public class PhoneWindowManagerTests {
                 .FLAG_CREATE_ACCESSIBILITY_OVERLAY_APP_OP_ENABLED);
         int[] outAppOp = new int[1];
         assertEquals(ADD_OKAY, mPhoneWindowManager.checkAddPermission(TYPE_ACCESSIBILITY_OVERLAY,
-                /* isRoundedCornerOverlay= */ false, "test.pkg", outAppOp));
+                /* isRoundedCornerOverlay= */ false, "test.pkg", outAppOp, DEFAULT_DISPLAY));
         assertThat(outAppOp[0]).isEqualTo(AppOpsManager.OP_NONE);
     }
 

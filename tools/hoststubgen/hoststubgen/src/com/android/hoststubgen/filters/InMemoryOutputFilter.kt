@@ -19,6 +19,7 @@ import com.android.hoststubgen.addNonNullElement
 import com.android.hoststubgen.asm.ClassNodes
 import com.android.hoststubgen.asm.toHumanReadableClassName
 import com.android.hoststubgen.asm.toHumanReadableMethodName
+import com.android.hoststubgen.asm.toJvmClassName
 import com.android.hoststubgen.log
 
 // TODO: Validate all input names.
@@ -29,7 +30,7 @@ class InMemoryOutputFilter(
 ) : DelegatingFilter(fallback) {
     private val mPolicies: MutableMap<String, FilterPolicyWithReason> = mutableMapOf()
     private val mRenames: MutableMap<String, String> = mutableMapOf()
-    private val mNativeSubstitutionClasses: MutableMap<String, String> = mutableMapOf()
+    private val mRedirectionClasses: MutableMap<String, String> = mutableMapOf()
     private val mClassLoadHooks: MutableMap<String, String> = mutableMapOf()
 
     private fun getClassKey(className: String): String {
@@ -115,17 +116,17 @@ class InMemoryOutputFilter(
         mRenames[getMethodKey(className, methodName, descriptor)] = toName
     }
 
-    override fun getNativeSubstitutionClass(className: String): String? {
-        return mNativeSubstitutionClasses[getClassKey(className)]
-                ?: super.getNativeSubstitutionClass(className)
+    override fun getRedirectionClass(className: String): String? {
+        return mRedirectionClasses[getClassKey(className)]
+                ?: super.getRedirectionClass(className)
     }
 
-    fun setNativeSubstitutionClass(from: String, to: String) {
+    fun setRedirectionClass(from: String, to: String) {
         checkClass(from)
 
-        // Native substitute classes may be provided from other jars, so we can't do this check.
+        // Redirection classes may be provided from other jars, so we can't do this check.
         // ensureClassExists(to)
-        mNativeSubstitutionClasses[getClassKey(from)] = to.toHumanReadableClassName()
+        mRedirectionClasses[getClassKey(from)] = to.toJvmClassName()
     }
 
     override fun getClassLoadHooks(className: String): List<String> {

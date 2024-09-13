@@ -47,10 +47,10 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
-import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND;
-import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING;
-import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_SOLID_COLOR;
-import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_WALLPAPER;
+import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND;
+import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING;
+import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_BACKGROUND_SOLID_COLOR;
+import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_BACKGROUND_WALLPAPER;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -553,6 +553,14 @@ public class WindowManagerServiceTests extends WindowTestsBase {
 
         verify(mWm.mWindowContextListenerController, never()).registerWindowContainerListener(any(),
                 any(), any(), anyInt(), any(), anyBoolean());
+
+        // Even if the given display id is INVALID_DISPLAY, the specified params.token should be
+        // able to map the corresponding display.
+        final int result = mWm.addWindow(
+                session, new TestIWindow(), params, View.VISIBLE, INVALID_DISPLAY,
+                UserHandle.USER_SYSTEM, WindowInsets.Type.defaultVisible(), null, new InsetsState(),
+                new InsetsSourceControl.Array(), new Rect(), new float[1]);
+        assertThat(result).isAtLeast(WindowManagerGlobal.ADD_OKAY);
 
         assertTrue(parentWin.hasChild());
         assertTrue(parentWin.isAttached());
@@ -1189,7 +1197,7 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         final int displayId = mDisplayContent.mDisplayId;
         // Use real surface, so ViewportWindow's BlastBufferQueue can be created.
         final ArrayList<SurfaceControl> surfaceControls = new ArrayList<>();
-        mWm.mSurfaceControlFactory = s -> new SurfaceControl.Builder() {
+        mWm.mSurfaceControlFactory = () -> new SurfaceControl.Builder() {
             @Override
             public SurfaceControl build() {
                 final SurfaceControl sc = super.build();
@@ -1390,8 +1398,8 @@ public class WindowManagerServiceTests extends WindowTestsBase {
     }
 
     private boolean setupLetterboxConfigurationWithBackgroundType(
-            @LetterboxConfiguration.LetterboxBackgroundType int letterboxBackgroundType) {
-        mWm.mLetterboxConfiguration.setLetterboxBackgroundTypeOverride(letterboxBackgroundType);
+            @AppCompatConfiguration.LetterboxBackgroundType int letterboxBackgroundType) {
+        mWm.mAppCompatConfiguration.setLetterboxBackgroundTypeOverride(letterboxBackgroundType);
         return mWm.isLetterboxBackgroundMultiColored();
     }
 }

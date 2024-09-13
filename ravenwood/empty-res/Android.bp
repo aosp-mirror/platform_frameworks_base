@@ -1,0 +1,4 @@
+android_app {
+    name: "ravenwood-empty-res",
+    sdk_version: "current",
+}

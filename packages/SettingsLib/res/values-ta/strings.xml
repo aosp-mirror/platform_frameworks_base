@@ -380,6 +380,8 @@
     <string name="show_touches_summary" msgid="3692861665994502193">"தட்டல்களின் போது காட்சி அறிகுறிகளைக் காட்டும்"</string>
     <string name="show_key_presses" msgid="6360141722735900214">"பட்டன் அழுத்தத்தை காட்டு"</string>
     <string name="show_key_presses_summary" msgid="725387457373015024">"பட்டன் அழுத்தங்களைக் காட்சி மூலம் உறுதிப்படுத்தும்"</string>
+    <string name="touchpad_visualizer" msgid="3707916068870825115">"டச்பேட் உள்ளீட்டைக் காட்டுதல்"</string>
+    <string name="touchpad_visualizer_summary" msgid="4056080018119847449">"டச்பேட் உள்ளீட்டுத் தரவையும் அங்கீகரிக்கப்பட்ட சைகைகளையும் திரை மேலடுக்குக் காட்டும்"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"மேலோட்ட புதுப்பிப்புகளைக் காட்டு"</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"சாளரத்தின் பரப்புநிலைகள் புதுப்பிக்கப்படும்போது, அவற்றை முழுவதுமாகக் காட்டும்"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"வியூ அப்டேட்ஸைக் காட்டு"</string>
@@ -430,8 +432,7 @@
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"மேனிஃபெஸ்ட் மதிப்புகளைப் பொருட்படுத்தாமல், எல்லா ஆப்ஸையும் வெளிப்புறச் சேமிப்பிடத்தில் எழுத அனுமதிக்கும்"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"செயல்பாடுகளை அளவுமாறக்கூடியதாக அமை"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"மேனிஃபெஸ்ட் மதிப்புகளைப் பொருட்படுத்தாமல், பல சாளரத்திற்கு எல்லா செயல்பாடுகளையும் அளவுமாறக்கூடியதாக அமை."</string>
-    <string name="enable_freeform_support" msgid="8409932201445109106">"குறிப்பிட்ட வடிவமில்லாத சாளரத்தை இயக்குதல் (லெகஸி)"</string>
-    <string name="enable_freeform_support_summary" msgid="2242481082356957934">"பரிசோதனைக்குரிய, குறிப்பிட்ட வடிவமில்லாத பழைய சாளரங்களுக்கான ஆதரவை இயக்குதல்."</string>
+    <string name="enable_freeform_support" msgid="7599125687603914253">"குறிப்பிட்ட வடிவமில்லாத சாளரங்களை இயக்கு"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"டெஸ்க்டாப் காப்புப்பிரதி கடவுச்சொல்"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"டெஸ்க்டாப்பின் முழு காப்புப்பிரதிகள் தற்போது பாதுகாக்கப்படவில்லை"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"டெஸ்க்டாப்பின் முழுக் காப்புப் பிரதிகளுக்கான கடவுச்சொல்லை மாற்ற அல்லது அகற்ற, தட்டவும்"</string>
@@ -496,7 +497,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"முழுவதும் சார்ஜாக <xliff:g id="TIME">%1$s</xliff:g> ஆகும்"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - முழுவதும் சார்ஜாக <xliff:g id="TIME">%2$s</xliff:g> ஆகும்"</string>
-    <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - சார்ஜிங் மேம்படுத்தப்பட்டது"</string>
+    <string name="power_charging_limited" msgid="4144004473976005214">"<xliff:g id="LEVEL">%1$s</xliff:g> - பேட்டரியைப் பாதுகாப்பதற்காகச் சார்ஜ் ஏற்றுவது நிறுத்தப்பட்டுள்ளது"</string>
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> ‑ சார்ஜாகிறது"</string>
     <string name="power_fast_charging_duration_v2" msgid="3797735998640359490">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATUS">%2$s</xliff:g> - <xliff:g id="TIME">%3$s</xliff:g>க்கு முழுமையாகச் சார்ஜாகிவிடும்"</string>
     <string name="power_charging_duration_v2" msgid="2938998284074003248">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>க்கு முழுமையாகச் சார்ஜாகிவிடும்"</string>
@@ -563,6 +564,7 @@
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"அலாரங்கள் &amp; நினைவூட்டல்கள்"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"அலாரங்களை அமைக்கவும் குறிப்பிட்ட கால இடைவெளியில் செயல்களைத் திட்டமிடவும் இந்த ஆப்ஸை அனுமதிக்கும். இது ஆப்ஸ் பின்னணியில் இயங்குவதை அனுமதிக்கும், இதற்காக அதிக பேட்டரியைப் பயன்படுத்தக்கூடும்.\n\nஇந்த அனுமதி முடக்கப்பட்டிருந்தால் இந்த ஆப்ஸ் மூலம் திட்டமிடப்பட்ட ஏற்கெனவே அமைத்த அலாரங்களும் நேர அடிப்படையிலான நிகழ்வுகளும் வேலை செய்யாது."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"திட்டமிடல், அலாரம், நினைவூட்டல், கடிகாரம்"</string>
+    <string name="zen_mode_do_not_disturb_name" msgid="6798711401734798283">"தொந்தரவு செய்ய வேண்டாம்"</string>
     <string name="zen_mode_settings_title" msgid="7374070457626419755">"தொந்தரவு செய்யாதே"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"ஆன் செய்"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"தொந்தரவு செய்ய வேண்டாம் என்பதை ஆன் செய்யும்"</string>

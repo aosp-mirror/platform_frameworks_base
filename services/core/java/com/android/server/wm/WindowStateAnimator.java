@@ -67,9 +67,8 @@ import android.view.WindowManager.LayoutParams;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
-import com.android.internal.protolog.common.LogLevel;
 import com.android.internal.protolog.ProtoLog;
-import com.android.window.flags.Flags;
+import com.android.internal.protolog.common.LogLevel;
 import com.android.server.policy.WindowManagerPolicy;
 
 import java.io.PrintWriter;
@@ -322,8 +321,7 @@ class WindowStateAnimator {
         }
 
         if (DEBUG_VISIBILITY) {
-            Slog.v(TAG, "Creating surface in session "
-                    + mSession.mSurfaceSession + " window " + this
+            Slog.v(TAG, "Creating surface " + this
                     + " format=" + attrs.format + " flags=" + flags);
         }
 
@@ -359,9 +357,8 @@ class WindowStateAnimator {
             w.mInputWindowHandle.forceChange();
 
             ProtoLog.i(WM_SHOW_SURFACE_ALLOC,
-                        "  CREATE SURFACE %s IN SESSION %s: pid=%d format=%d flags=0x%x / %s",
-                    mSurfaceControl, mSession.mSurfaceSession, mSession.mPid, attrs.format,
-                        flags, this);
+                    "  CREATE SURFACE %s: pid=%d format=%d flags=0x%x / %s",
+                    mSurfaceControl, mSession.mPid, attrs.format, flags, this);
         } catch (OutOfResourcesException e) {
             Slog.w(TAG, "OutOfResourcesException creating surface");
             mService.mRoot.reclaimSomeSurfaceMemory(this, "create", true);
@@ -413,7 +410,7 @@ class WindowStateAnimator {
             ProtoLog.i(WM_SHOW_SURFACE_ALLOC, "SURFACE DESTROY: %s. %s",
                     mWin, new RuntimeException().fillInStackTrace());
             destroySurface(t);
-            if (Flags.ensureWallpaperInTransitions()) {
+            if (mService.mFlags.mEnsureWallpaperInTransitions) {
                 if (mWallpaperControllerLocked.isWallpaperTarget(mWin)) {
                     mWin.requestUpdateWallpaperIfNeeded();
                 }
@@ -464,7 +461,7 @@ class WindowStateAnimator {
 
         if (!w.isOnScreen()) {
             hide(t, "prepareSurfaceLocked");
-            if (!w.mIsWallpaper || !Flags.ensureWallpaperInTransitions()) {
+            if (!w.mIsWallpaper || !mService.mFlags.mEnsureWallpaperInTransitions) {
                 mWallpaperControllerLocked.hideWallpapers(w);
             }
 

@@ -45,10 +45,10 @@ import org.mockito.ArgumentCaptor
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
-import java.util.concurrent.TimeUnit
 import java.util.LinkedList
 import java.util.Queue
 import android.util.ArraySet
+import android.view.InputDevice
 
 /**
  * Tests for {@link MouseKeysInterceptor}
@@ -69,6 +69,8 @@ class MouseKeysInterceptorTest {
     }
 
     private lateinit var mouseKeysInterceptor: MouseKeysInterceptor
+    private lateinit var inputDevice: InputDevice
+
     private val clock = OffsettableClock()
     private val testLooper = TestLooper { clock.now() }
     private val nextInterceptor = TrackingInterceptor()
@@ -99,6 +101,10 @@ class MouseKeysInterceptorTest {
         testSession = InputManagerGlobal.createTestSession(iInputManager)
         mockInputManager = InputManager(context)
 
+        inputDevice = createInputDevice(DEVICE_ID)
+        Mockito.`when`(iInputManager.getInputDevice(DEVICE_ID))
+                .thenReturn(inputDevice)
+
         Mockito.`when`(mockVirtualDeviceManagerInternal.getDeviceIdsForUid(Mockito.anyInt()))
             .thenReturn(ArraySet(setOf(DEVICE_ID)))
         LocalServices.removeServiceForTest(VirtualDeviceManagerInternal::class.java)
@@ -116,10 +122,8 @@ class MouseKeysInterceptorTest {
         Mockito.`when`(iInputManager.inputDeviceIds).thenReturn(intArrayOf(DEVICE_ID))
         Mockito.`when`(mockAms.traceManager).thenReturn(mockTraceManager)
 
-        mouseKeysInterceptor = MouseKeysInterceptor(mockAms, testLooper.looper, DISPLAY_ID)
-        // VirtualMouse is created on a separate thread.
-        // Wait for VirtualMouse to be created before running tests
-        TimeUnit.MILLISECONDS.sleep(20L)
+        mouseKeysInterceptor = MouseKeysInterceptor(mockAms, mockInputManager,
+                testLooper.looper, DISPLAY_ID)
         mouseKeysInterceptor.next = nextInterceptor
     }
 
@@ -284,6 +288,17 @@ class MouseKeysInterceptorTest {
             assertEquals(yAxisMovements[i], captorEvent.yAxisMovement)
         }
     }
+
+    private fun createInputDevice(
+            deviceId: Int,
+            generation: Int = -1
+    ): InputDevice =
+            InputDevice.Builder()
+                    .setId(deviceId)
+                    .setName("Device $deviceId")
+                    .setDescriptor("descriptor $deviceId")
+                    .setGeneration(generation)
+                    .build()
 
     private class TrackingInterceptor : BaseEventStreamTransformation() {
         val events: Queue<KeyEvent> = LinkedList()

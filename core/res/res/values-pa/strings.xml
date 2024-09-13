@@ -204,7 +204,7 @@
     <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"ਪ੍ਰਾਈਵੇਟ ਸਪੇਸ ਨੂੰ ਹਟਾਇਆ ਗਿਆ"</string>
     <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"ਤੁਹਾਡੀ ਸੰਸਥਾ ਇਸ ਪ੍ਰਬੰਧਿਤ ਕੀਤੇ ਡੀਵਾਈਸ \'ਤੇ ਪ੍ਰਾਈਵੇਟ ਸਪੇਸਾਂ ਦੀ ਆਗਿਆ ਨਹੀਂ ਦਿੰਦੀ।"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"ਡੀਵਾਈਸ ਪ੍ਰਬੰਧਨ ਅਧੀਨ ਹੈ"</string>
-    <string name="network_logging_notification_text" msgid="1327373071132562512">"ਤੁਹਾਡਾ ਸੰਗਠਨ ਇਸ ਡੀਵਾਈਸ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰਦਾ ਹੈ ਅਤੇ ਨੈੱਟਵਰਕ ਟਰੈਫਿਕ ਦੀ ਨਿਗਰਾਨੀ ਕਰ ਸਕਦਾ ਹੈ। ਵੇਰਵਿਆਂ ਲਈ ਟੈਪ ਕਰੋ।"</string>
+    <string name="network_logging_notification_text" msgid="1327373071132562512">"ਤੁਹਾਡੀ ਸੰਸਥਾ ਇਸ ਡੀਵਾਈਸ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰਦੀ ਹੈ ਅਤੇ ਨੈੱਟਵਰਕ ਟਰੈਫਿਕ ਦੀ ਨਿਗਰਾਨੀ ਕਰ ਸਕਦੀ ਹੈ। ਵੇਰਵਿਆਂ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"ਐਪਾਂ ਤੁਹਾਡੇ ਟਿਕਾਣੇ ਤੱਕ ਪਹੁੰਚ ਕਰ ਸਕਦੀਆਂ ਹਨ"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"ਹੋਰ ਜਾਣਨ ਲਈ ਆਪਣੇ ਆਈ.ਟੀ. ਪ੍ਰਸ਼ਾਸਕ ਨਾਲ ਸੰਪਰਕ ਕਰੋ"</string>
     <string name="geofencing_service" msgid="3826902410740315456">"ਭੂਗੋਲਿਕ-ਘੇਰੇ ਸੰਬੰਧੀ ਸੇਵਾ"</string>
@@ -1194,6 +1194,8 @@
     <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"ਪਾਸਵਰਡ ਖੇਤਰਾਂ ਵਿੱਚ ਲਿਖਾਈ ਸਮਰਥਿਤ ਨਹੀਂ ਹੈ"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"ਪਿੱਛੇ"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"ਇਨਪੁੱਟ ਵਿਧੀ ਨੂੰ ਸਵਿੱਚ ਕਰੋ"</string>
+    <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"ਇਨਪੁੱਟ ਵਿਧੀ ਚੋਣਕਾਰ ਨੂੰ ਖੋਲ੍ਹੋ"</string>
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"ਸੈਟਿੰਗਾਂ"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"ਸਟੋਰੇਜ ਦੀ ਜਗ੍ਹਾ ਖਤਮ ਹੋ ਰਹੀ ਹੈ"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"ਕੁਝ ਸਿਸਟਮ ਫੰਕਸ਼ਨ ਕੰਮ ਨਹੀਂ ਵੀ ਕਰ ਸਕਦੇ"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"ਸਿਸਟਮ ਲਈ ਲੋੜੀਂਦੀ ਸਟੋਰੇਜ ਨਹੀਂ ਹੈ। ਯਕੀਨੀ ਬਣਾਓ ਕਿ ਤੁਹਾਡੇ ਕੋਲ 250MB ਖਾਲੀ ਜਗ੍ਹਾ ਹੈ ਅਤੇ ਮੁੜ-ਚਾਲੂ ਕਰੋ।"</string>
@@ -1428,6 +1430,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"ਸਾਂਝਾ ਕਰੋ"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"ਅਸਵੀਕਾਰ ਕਰੋ"</string>
     <string name="select_input_method" msgid="3971267998568587025">"ਇਨਪੁਟ ਵਿਧੀ ਚੁਣੋ"</string>
+    <string name="input_method_language_settings" msgid="8069089418056819437">"ਭਾਸ਼ਾ ਸੈਟਿੰਗਾਂ"</string>
     <string name="show_ime" msgid="6406112007347443383">"ਭੌਤਿਕ ਕੀ-ਬੋਰਡ ਸਰਗਰਮ ਹੋਣ ਦੌਰਾਨ ਇਸ ਨੂੰ ਸਕ੍ਰੀਨ \'ਤੇ ਬਣਾਈ ਰੱਖੋ"</string>
     <string name="hardware" msgid="3611039921284836033">"ਆਨ-ਸਕ੍ਰੀਨ ਕੀ-ਬੋਰਡ ਨੂੰ ਵਰਤੋ"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"<xliff:g id="DEVICE_NAME">%s</xliff:g> ਦਾ ਸੰਰੂਪਣ ਕਰੋ"</string>
@@ -1743,7 +1746,8 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"ਕੋਈ ਐਪ ਇਜਾਜ਼ਤ ਸੰਬੰਧੀ ਬੇਨਤੀ ਨੂੰ ਅਸਪਸ਼ਟ ਕਰ ਰਹੀ ਹੈ, ਇਸ ਲਈ ਤੁਹਾਡੇ ਜਵਾਬ ਦੀ ਪੁਸ਼ਟੀ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ।"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"ਕਿਸੇ ਵਿਸ਼ੇਸ਼ਤਾ ਨੂੰ ਵਰਤਣਾ ਸ਼ੁਰੂ ਕਰਨ ਲਈ ਉਸ \'ਤੇ ਟੈਪ ਕਰੋ:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"ਪਹੁੰਚਯੋਗਤਾ ਬਟਨ ਨਾਲ ਵਰਤਣ ਲਈ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਚੁਣੋ"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"ਅਵਾਜ਼ ਕੁੰਜੀ ਸ਼ਾਰਟਕੱਟ ਨਾਲ ਵਰਤਣ ਲਈ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਚੁਣੋ"</string>
+    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
+    <skip />
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> ਨੂੰ ਬੰਦ ਕਰ ਦਿੱਤਾ ਗਿਆ ਹੈ"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"ਸ਼ਾਰਟਕੱਟਾਂ ਦਾ ਸੰਪਾਦਨ ਕਰੋ"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"ਹੋ ਗਿਆ"</string>
@@ -2421,6 +2425,8 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"ਐਪ ਸਮੱਗਰੀ ਨੂੰ ਸੁਰੱਖਿਆ ਲਈ ਸਕ੍ਰੀਨ ਸਾਂਝਾਕਰਨ ਤੋਂ ਲੁਕਾਇਆ ਗਿਆ ਹੈ"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"ਸੈਟੇਲਾਈਟ ਨਾਲ ਸਵੈ-ਕਨੈਕਟ ਹੋਇਆ"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"ਤੁਸੀਂ ਮੋਬਾਈਲ ਜਾਂ ਵਾਈ-ਫਾਈ ਨੈੱਟਵਰਕ ਤੋਂ ਬਿਨਾਂ ਸੁਨੇਹੇ ਭੇਜ ਅਤੇ ਪ੍ਰਾਪਤ ਕਰ ਸਕਦੇ ਹੋ"</string>
+    <string name="satellite_notification_manual_title" msgid="1097504441849466279">"ਕੀ ਸੈਟੇਲਾਈਟ ਸੁਨੇਹੇ ਦੀ ਵਰਤੋਂ ਕਰਨੀ ਹੈ?"</string>
+    <string name="satellite_notification_manual_summary" msgid="901206289846283445">"ਮੋਬਾਈਲ ਜਾਂ ਵਾਈ-ਫਾਈ ਨੈੱਟਵਰਕ ਤੋਂ ਬਿਨਾਂ ਸੁਨੇਹੇ ਭੇਜੋ ਅਤੇ ਪ੍ਰਾਪਤ ਕਰੋ"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages ਐਪ ਖੋਲ੍ਹੋ"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"ਇਹ ਕਿਵੇਂ ਕੰਮ ਕਰਦਾ ਹੈ"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"ਵਿਚਾਰ-ਅਧੀਨ..."</string>
@@ -2437,22 +2443,14 @@
     <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"ਵਰਤੋਂਕਾਰ ਬਦਲੋ"</string>
     <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"ਮਿਊਟ ਕਰੋ"</string>
     <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"ਧੁਨੀ ਮਿਊਟ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ"</string>
-    <!-- no translation found for keyboard_shortcut_group_applications_browser (6535007304687100909) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_contacts (2750702518068326356) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_email (4229037666415353683) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_sms (3523799286376321137) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_music (2051507523525651067) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_calendar (3571770335653387606) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_calculator (6753209559716091507) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_maps (7950000659522589471) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications (3010389163951364798) -->
-    <skip />
+    <string name="keyboard_shortcut_group_applications_browser" msgid="6535007304687100909">"ਬ੍ਰਾਊਜ਼ਰ"</string>
+    <string name="keyboard_shortcut_group_applications_contacts" msgid="2750702518068326356">"Contacts"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="4229037666415353683">"Email"</string>
+    <string name="keyboard_shortcut_group_applications_sms" msgid="3523799286376321137">"SMS"</string>
+    <string name="keyboard_shortcut_group_applications_music" msgid="2051507523525651067">"Music"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="3571770335653387606">"Calendar"</string>
+    <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"Calculator"</string>
+    <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"Maps"</string>
+    <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"ਐਪਲੀਕੇਸ਼ਨਾਂ"</string>
+    <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"ਤੁਹਾਡੇ ਫਿੰਗਰਪ੍ਰਿੰਟਾਂ ਦੀ ਹੁਣ ਪਛਾਣ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ। ਫਿੰਗਰਪ੍ਰਿੰਟ ਅਣਲਾਕ ਦਾ ਦੁਬਾਰਾ ਸੈੱਟਅੱਪ ਕਰੋ।"</string>
 </resources>

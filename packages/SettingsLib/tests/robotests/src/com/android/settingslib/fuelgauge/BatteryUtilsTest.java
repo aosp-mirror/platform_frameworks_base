@@ -127,6 +127,25 @@ public class BatteryUtilsTest {
         assertThat(BatteryUtils.isPrivateProfile(mContext)).isTrue();
     }
 
+    @Test
+    public void isAdditionalProfile_defaultValue_returnFalse() {
+        assertThat(BatteryUtils.isAdditionalProfile(mContext)).isFalse();
+    }
+
+    @Test
+    public void isAdditionalProfile_workProfileMode_returnTrue() {
+        doReturn(true).when(mUserManager).isManagedProfile();
+
+        assertThat(BatteryUtils.isAdditionalProfile(mContext)).isTrue();
+    }
+
+    @Test
+    public void isAdditionalProfile_privateProfileMode_returnTrue() {
+        doReturn(true).when(mUserManager).isPrivateProfile();
+
+        assertThat(BatteryUtils.isAdditionalProfile(mContext)).isTrue();
+    }
+
     private void setTtsPackageName(String defaultTtsPackageName) {
         Settings.Secure.putString(mContext.getContentResolver(),
                 Settings.Secure.TTS_DEFAULT_SYNTH, defaultTtsPackageName);

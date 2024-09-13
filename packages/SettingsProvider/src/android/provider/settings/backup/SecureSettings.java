@@ -253,6 +253,7 @@ public class SecureSettings {
         Settings.Secure.CUSTOM_BUGREPORT_HANDLER_APP,
         Settings.Secure.CUSTOM_BUGREPORT_HANDLER_USER,
         Settings.Secure.CONTEXTUAL_SCREEN_TIMEOUT_ENABLED,
+        Settings.Secure.HINGE_ANGLE_LIDEVENT_ENABLED,
         Settings.Secure.LOCK_SCREEN_WEATHER_ENABLED,
         Settings.Secure.HEARING_AID_RINGTONE_ROUTING,
         Settings.Secure.HEARING_AID_CALL_ROUTING,
@@ -282,5 +283,6 @@ public class SecureSettings {
         Settings.Secure.ON_DEVICE_INFERENCE_UNBIND_TIMEOUT_MS,
         Settings.Secure.ON_DEVICE_INTELLIGENCE_IDLE_TIMEOUT_MS,
         Settings.Secure.MANDATORY_BIOMETRICS,
+        Settings.Secure.MANDATORY_BIOMETRICS_REQUIREMENTS_SATISFIED,
     };
 }

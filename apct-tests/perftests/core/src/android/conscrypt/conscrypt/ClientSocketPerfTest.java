@@ -30,6 +30,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.SocketException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -104,18 +107,25 @@ public final class ClientSocketPerfTest {
         }
     }
 
-    private Object[] getParams() {
-        return new Object[][] {
-            new Object[] {new Config(
-                              EndpointFactory.CONSCRYPT,
-                              EndpointFactory.CONSCRYPT,
-                              64,
-                              "AES128-GCM",
-                              ChannelType.CHANNEL,
-                              PerfTestProtocol.TLSv13)},
-        };
+    public Collection getParams() {
+        final List<Object[]> params = new ArrayList<>();
+        for (EndpointFactory endpointFactory : EndpointFactory.values()) {
+            for (ChannelType channelType : ChannelType.values()) {
+                for (PerfTestProtocol protocol : PerfTestProtocol.values()) {
+                    params.add(new Object[] {new Config(endpointFactory,
+                        endpointFactory, 64, "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+                        channelType, protocol)});
+                    params.add(new Object[] {new Config(endpointFactory,
+                        endpointFactory, 512, "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+                        channelType, protocol)});
+                    params.add(new Object[] {new Config(endpointFactory,
+                        endpointFactory, 4096, "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+                        channelType, protocol)});
+                }
+            }
+        }
+        return params;
     }
-
 
     private ClientEndpoint client;
     private ServerEndpoint server;
@@ -132,7 +142,7 @@ public final class ClientSocketPerfTest {
 
         // Always use the same server for consistency across the benchmarks.
         server = config.serverFactory().newServer(
-                ChannelType.CHANNEL, config.messageSize(), config.protocol().getProtocols(),
+                config.messageSize(), config.protocol().getProtocols(),
                 ciphers(config));
 
         server.setMessageProcessor(new ServerEndpoint.MessageProcessor() {
@@ -184,7 +194,7 @@ public final class ClientSocketPerfTest {
     /**
      * Simple benchmark for the amount of time to send a given number of messages
      */
-    @Test
+    // @Test Temporarily disabled
     @Parameters(method = "getParams")
     public void time(Config config) throws Exception {
         reset();

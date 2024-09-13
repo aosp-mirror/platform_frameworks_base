@@ -26,8 +26,8 @@ import static android.content.pm.ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_TO_ALIGN
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 
-import static com.android.server.wm.LetterboxConfiguration.DEFAULT_LETTERBOX_ASPECT_RATIO_FOR_MULTI_WINDOW;
-import static com.android.server.wm.LetterboxConfiguration.MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO;
+import static com.android.server.wm.AppCompatConfiguration.DEFAULT_LETTERBOX_ASPECT_RATIO_FOR_MULTI_WINDOW;
+import static com.android.server.wm.AppCompatConfiguration.MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -122,9 +122,12 @@ class AppCompatAspectRatioPolicy {
         if (aspectRatioOverrides.shouldApplyUserMinAspectRatioOverride()) {
             return aspectRatioOverrides.getUserMinAspectRatio();
         }
+        final DisplayContent displayContent = mActivityRecord.getDisplayContent();
+        final boolean shouldOverrideMinAspectRatioForCamera = displayContent != null
+                && displayContent.mAppCompatCameraPolicy.shouldOverrideMinAspectRatioForCamera(
+                        mActivityRecord);
         if (!aspectRatioOverrides.shouldOverrideMinAspectRatio()
-                && !mAppCompatOverrides.getAppCompatCameraOverrides()
-                .shouldOverrideMinAspectRatioForCamera()) {
+                && !shouldOverrideMinAspectRatioForCamera) {
             return info.getMinAspectRatio();
         }
 

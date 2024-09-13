@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.chips.sharetoapp.ui.viewmodel
 
 import android.content.applicationContext
+import com.android.systemui.animation.mockDialogTransitionAnimator
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.mediaProjectionChipInteractor
@@ -32,6 +33,7 @@ val Kosmos.shareToAppChipViewModel: ShareToAppChipViewModel by
             mediaProjectionChipInteractor = mediaProjectionChipInteractor,
             systemClock = fakeSystemClock,
             endMediaProjectionDialogHelper = endMediaProjectionDialogHelper,
+            dialogTransitionAnimator = mockDialogTransitionAnimator,
             logger = statusBarChipsLogger,
         )
     }

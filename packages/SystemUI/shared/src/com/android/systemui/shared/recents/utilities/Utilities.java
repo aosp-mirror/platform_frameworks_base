@@ -26,6 +26,7 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.inputmethodservice.InputMethodService;
+import android.inputmethodservice.InputMethodService.BackDispositionMode;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
@@ -105,8 +106,8 @@ public class Utilities {
      * @return updated set of flags from InputMethodService based off {@param oldHints}
      *          Leaves original hints unmodified
      */
-    public static int calculateBackDispositionHints(int oldHints, int backDisposition,
-            boolean imeShown, boolean showImeSwitcher) {
+    public static int calculateBackDispositionHints(int oldHints,
+            @BackDispositionMode int backDisposition, boolean imeShown, boolean showImeSwitcher) {
         int hints = oldHints;
         switch (backDisposition) {
             case InputMethodService.BACK_DISPOSITION_DEFAULT:

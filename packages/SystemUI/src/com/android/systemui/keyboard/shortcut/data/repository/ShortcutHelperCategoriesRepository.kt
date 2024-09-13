@@ -71,6 +71,35 @@ constructor(
     stateRepository: ShortcutHelperStateRepository
 ) {
 
+    private val sources =
+        listOf(
+            InternalGroupsSource(
+                source = systemShortcutsSource,
+                isTrusted = true,
+                typeProvider = { System }
+            ),
+            InternalGroupsSource(
+                source = multitaskingShortcutsSource,
+                isTrusted = true,
+                typeProvider = { MultiTasking }
+            ),
+            InternalGroupsSource(
+                source = appCategoriesShortcutsSource,
+                isTrusted = true,
+                typeProvider = { AppCategories }
+            ),
+            InternalGroupsSource(
+                source = inputShortcutsSource,
+                isTrusted = false,
+                typeProvider = { InputMethodEditor }
+            ),
+            InternalGroupsSource(
+                source = currentAppShortcutsSource,
+                isTrusted = false,
+                typeProvider = { groups -> getCurrentAppShortcutCategoryType(groups) }
+            ),
+        )
+
     private val activeInputDevice =
         stateRepository.state.map {
             if (it is Active) {
@@ -82,17 +111,20 @@ constructor(
 
     val categories: Flow<List<ShortcutCategory>> =
         activeInputDevice
-            .map {
-                if (it == null) {
+            .map { inputDevice ->
+                if (inputDevice == null) {
                     return@map emptyList()
                 }
-                return@map listOfNotNull(
-                    fetchSystemShortcuts(it),
-                    fetchMultiTaskingShortcuts(it),
-                    fetchAppCategoriesShortcuts(it),
-                    fetchImeShortcuts(it),
-                    fetchCurrentAppShortcuts(it),
-                )
+                val groupsFromAllSources = sources.map { it.source.shortcutGroups(inputDevice.id) }
+                val supportedKeyCodes = fetchSupportedKeyCodes(inputDevice.id, groupsFromAllSources)
+                return@map sources.mapIndexedNotNull { index, internalGroupsSource ->
+                    fetchShortcutCategory(
+                        internalGroupsSource,
+                        groupsFromAllSources[index],
+                        inputDevice,
+                        supportedKeyCodes,
+                    )
+                }
             }
             .stateIn(
                 scope = backgroundScope,
@@ -100,49 +132,22 @@ constructor(
                 initialValue = emptyList(),
             )
 
-    private suspend fun fetchSystemShortcuts(inputDevice: InputDevice) =
-        toShortcutCategory(
-            inputDevice.keyCharacterMap,
-            System,
-            systemShortcutsSource.shortcutGroups(inputDevice.id),
-            keepIcons = true,
-        )
-
-    private suspend fun fetchMultiTaskingShortcuts(inputDevice: InputDevice) =
-        toShortcutCategory(
-            inputDevice.keyCharacterMap,
-            MultiTasking,
-            multitaskingShortcutsSource.shortcutGroups(inputDevice.id),
-            keepIcons = true,
-        )
-
-    private suspend fun fetchAppCategoriesShortcuts(inputDevice: InputDevice) =
-        toShortcutCategory(
-            inputDevice.keyCharacterMap,
-            AppCategories,
-            appCategoriesShortcutsSource.shortcutGroups(inputDevice.id),
-            keepIcons = true,
-        )
-
-    private suspend fun fetchImeShortcuts(inputDevice: InputDevice) =
-        toShortcutCategory(
-            inputDevice.keyCharacterMap,
-            InputMethodEditor,
-            inputShortcutsSource.shortcutGroups(inputDevice.id),
-            keepIcons = false,
-        )
-
-    private suspend fun fetchCurrentAppShortcuts(inputDevice: InputDevice): ShortcutCategory? {
-        val shortcutGroups = currentAppShortcutsSource.shortcutGroups(inputDevice.id)
-        val categoryType = getCurrentAppShortcutCategoryType(shortcutGroups)
-        return if (categoryType == null) {
+    private fun fetchShortcutCategory(
+        internalGroupsSource: InternalGroupsSource,
+        groups: List<KeyboardShortcutGroup>,
+        inputDevice: InputDevice,
+        supportedKeyCodes: Set<Int>,
+    ): ShortcutCategory? {
+        val type = internalGroupsSource.typeProvider(groups)
+        return if (type == null) {
             null
         } else {
             toShortcutCategory(
                 inputDevice.keyCharacterMap,
-                categoryType,
-                shortcutGroups,
-                keepIcons = false
+                type,
+                groups,
+                internalGroupsSource.isTrusted,
+                supportedKeyCodes,
             )
         }
     }
@@ -162,13 +167,19 @@ constructor(
         type: ShortcutCategoryType,
         shortcutGroups: List<KeyboardShortcutGroup>,
         keepIcons: Boolean,
+        supportedKeyCodes: Set<Int>,
     ): ShortcutCategory? {
         val subCategories =
             shortcutGroups
                 .map { shortcutGroup ->
                     ShortcutSubCategory(
                         shortcutGroup.label.toString(),
-                        toShortcuts(keyCharacterMap, shortcutGroup.items, keepIcons)
+                        toShortcuts(
+                            keyCharacterMap,
+                            shortcutGroup.items,
+                            keepIcons,
+                            supportedKeyCodes,
+                        )
                     )
                 }
                 .filter { it.shortcuts.isNotEmpty() }
@@ -184,7 +195,15 @@ constructor(
         keyCharacterMap: KeyCharacterMap,
         infoList: List<KeyboardShortcutInfo>,
         keepIcons: Boolean,
-    ) = infoList.mapNotNull { toShortcut(keyCharacterMap, it, keepIcons) }
+        supportedKeyCodes: Set<Int>,
+    ) =
+        infoList
+            .filter {
+                // Allow KEYCODE_UNKNOWN (0) because shortcuts can have just modifiers and no
+                // keycode, or they could have a baseCharacter instead of a keycode.
+                it.keycode == KeyEvent.KEYCODE_UNKNOWN || supportedKeyCodes.contains(it.keycode)
+            }
+            .mapNotNull { toShortcut(keyCharacterMap, it, keepIcons) }
 
     private fun toShortcut(
         keyCharacterMap: KeyCharacterMap,
@@ -267,6 +286,29 @@ constructor(
         Log.wtf(TAG, "Couldn't find label or icon for key: $keyCode")
         return null
     }
+
+    private suspend fun fetchSupportedKeyCodes(
+        deviceId: Int,
+        groupsFromAllSources: List<List<KeyboardShortcutGroup>>
+    ): Set<Int> =
+        withContext(backgroundDispatcher) {
+            val allUsedKeyCodes =
+                groupsFromAllSources
+                    .flatMap { groups -> groups.flatMap { group -> group.items } }
+                    .map { info -> info.keycode }
+                    .distinct()
+            val keyCodesSupported =
+                inputManager.deviceHasKeys(deviceId, allUsedKeyCodes.toIntArray())
+            return@withContext allUsedKeyCodes
+                .filterIndexed { index, _ -> keyCodesSupported[index] }
+                .toSet()
+        }
+
+    private class InternalGroupsSource(
+        val source: KeyboardShortcutGroupsSource,
+        val isTrusted: Boolean,
+        val typeProvider: (groups: List<KeyboardShortcutGroup>) -> ShortcutCategoryType?,
+    )
 
     companion object {
         private const val TAG = "SHCategoriesRepo"

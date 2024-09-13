@@ -19,10 +19,14 @@ package com.android.systemui.communal.data.repository
 import android.app.smartspace.SmartspaceTarget
 import android.os.Parcelable
 import androidx.annotation.VisibleForTesting
+import com.android.systemui.Flags.communalTimerFlickerFix
 import com.android.systemui.communal.data.model.CommunalSmartspaceTimer
 import com.android.systemui.communal.smartspace.CommunalSmartspaceController
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.core.Logger
+import com.android.systemui.log.dagger.CommunalLog
 import com.android.systemui.plugins.BcSmartspaceDataPlugin
 import com.android.systemui.util.time.SystemClock
 import java.util.concurrent.Executor
@@ -48,7 +52,10 @@ constructor(
     private val communalSmartspaceController: CommunalSmartspaceController,
     @Main private val uiExecutor: Executor,
     private val systemClock: SystemClock,
+    @CommunalLog logBuffer: LogBuffer,
 ) : CommunalSmartspaceRepository, BcSmartspaceDataPlugin.SmartspaceTargetListener {
+
+    private val logger = Logger(logBuffer, "CommunalSmartspaceRepository")
 
     private val _timers: MutableStateFlow<List<CommunalSmartspaceTimer>> =
         MutableStateFlow(emptyList())
@@ -80,11 +87,14 @@ constructor(
                     // The view layer should have the instance based smartspaceTargetId instead of
                     // stable id, so that when a new instance of the timer is created, for example,
                     // when it is paused, the view should re-render its remote views.
-                    smartspaceTargetId = target.smartspaceTargetId,
+                    smartspaceTargetId =
+                        if (communalTimerFlickerFix()) stableId else target.smartspaceTargetId,
                     createdTimestampMillis = targetCreationTimes[stableId]!!,
                     remoteViews = target.remoteViews!!,
                 )
             }
+
+        logger.d({ "Smartspace timers updated: $str1" }) { str1 = _timers.value.toString() }
     }
 
     override fun startListening() {

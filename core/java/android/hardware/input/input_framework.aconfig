@@ -75,3 +75,52 @@ flag {
     description: "Enables a developer overlay that displays raw touchpad input data and gesture recognition status in real-time."
     bug: "286551975"
 }
+
+flag {
+    namespace: "input_native"
+    name: "keyboard_layout_manager_multi_user_ime_setup"
+    description: "Update KeyboardLayoutManager to work correctly with multi-user IME setup"
+    bug: "354333072"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+  name: "modifier_shortcut_dump"
+  namespace: "input"
+  description: "Dump keyboard shortcuts in dumpsys window"
+  bug: "351963350"
+}
+
+flag {
+  name: "modifier_shortcut_manager_refactor"
+  namespace: "input"
+  description: "Refactor ModifierShortcutManager internal representation of shortcuts."
+  bug: "358603902"
+}
+
+flag {
+    namespace: "input_native"
+    name: "manage_key_gestures"
+    description: "Manage key gestures through Input APIs"
+    is_exported: true
+    bug: "358569822"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+  name: "keyboard_repeat_keys"
+  namespace: "input_native"
+  description: "Allow configurable timeout before key repeat and repeat delay rate for key repeats"
+  bug: "336585002"
+}
+
+flag {
+  name: "mouse_reverse_vertical_scrolling"
+  namespace: "input"
+  description: "Controls whether external mouse vertical scrolling can be reversed"
+  bug: "352598211"
+}

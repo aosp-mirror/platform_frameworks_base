@@ -54,6 +54,9 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInterac
 import com.android.systemui.keyguard.shared.model.KeyguardState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.res.R;
+import com.android.systemui.scene.data.model.SceneStack;
+import com.android.systemui.scene.data.model.SceneStackKt;
+import com.android.systemui.scene.domain.interactor.SceneBackInteractor;
 import com.android.systemui.scene.domain.interactor.SceneContainerOcclusionInteractor;
 import com.android.systemui.scene.domain.interactor.SceneInteractor;
 import com.android.systemui.scene.shared.flag.SceneContainerFlag;
@@ -118,6 +121,7 @@ public class StatusBarStateControllerImpl implements
     private final Lazy<SceneInteractor> mSceneInteractorLazy;
     private final Lazy<SceneContainerOcclusionInteractor> mSceneContainerOcclusionInteractorLazy;
     private final Lazy<KeyguardClockInteractor> mKeyguardClockInteractorLazy;
+    private final Lazy<SceneBackInteractor> mSceneBackInteractorLazy;
     private int mState;
     private int mLastState;
     private int mUpcomingState;
@@ -186,7 +190,8 @@ public class StatusBarStateControllerImpl implements
             Lazy<DeviceUnlockedInteractor> deviceUnlockedInteractorLazy,
             Lazy<SceneInteractor> sceneInteractorLazy,
             Lazy<SceneContainerOcclusionInteractor> sceneContainerOcclusionInteractor,
-            Lazy<KeyguardClockInteractor> keyguardClockInteractorLazy) {
+            Lazy<KeyguardClockInteractor> keyguardClockInteractorLazy,
+            Lazy<SceneBackInteractor> sceneBackInteractorLazy) {
         mUiEventLogger = uiEventLogger;
         mInteractionJankMonitorLazy = interactionJankMonitorLazy;
         mJavaAdapter = javaAdapter;
@@ -196,6 +201,7 @@ public class StatusBarStateControllerImpl implements
         mSceneInteractorLazy = sceneInteractorLazy;
         mSceneContainerOcclusionInteractorLazy = sceneContainerOcclusionInteractor;
         mKeyguardClockInteractorLazy = keyguardClockInteractorLazy;
+        mSceneBackInteractorLazy = sceneBackInteractorLazy;
         for (int i = 0; i < HISTORY_SIZE; i++) {
             mHistoricalRecords[i] = new HistoricalState();
         }
@@ -221,6 +227,7 @@ public class StatusBarStateControllerImpl implements
                     combineFlows(
                         mDeviceUnlockedInteractorLazy.get().getDeviceUnlockStatus(),
                         mSceneInteractorLazy.get().getCurrentScene(),
+                        mSceneBackInteractorLazy.get().getBackStack(),
                         mSceneContainerOcclusionInteractorLazy.get().getInvisibleDueToOcclusion(),
                         this::calculateStateFromSceneFramework),
                     this::onStatusBarStateChanged);
@@ -677,10 +684,15 @@ public class StatusBarStateControllerImpl implements
     private int calculateStateFromSceneFramework(
             DeviceUnlockStatus deviceUnlockStatus,
             SceneKey currentScene,
+            SceneStack backStack,
             boolean isOccluded) {
         SceneContainerFlag.isUnexpectedlyInLegacyMode();
-
-        if (deviceUnlockStatus.isUnlocked() || isOccluded) {
+        if (currentScene.equals(Scenes.Lockscreen)) {
+            return StatusBarState.KEYGUARD;
+        } else if (currentScene.equals(Scenes.Shade)
+                && SceneStackKt.contains(backStack, Scenes.Lockscreen)) {
+            return StatusBarState.SHADE_LOCKED;
+        } else if (deviceUnlockStatus.isUnlocked() || isOccluded) {
             return StatusBarState.SHADE;
         } else {
             return Preconditions.checkNotNull(sStatusBarStateByLockedSceneKey.get(currentScene));
@@ -711,9 +723,7 @@ public class StatusBarStateControllerImpl implements
             Scenes.Bouncer, StatusBarState.KEYGUARD,
             Scenes.Communal, StatusBarState.KEYGUARD,
             Scenes.Shade, StatusBarState.SHADE_LOCKED,
-            Scenes.NotificationsShade, StatusBarState.SHADE_LOCKED,
             Scenes.QuickSettings, StatusBarState.SHADE_LOCKED,
-            Scenes.QuickSettingsShade, StatusBarState.SHADE_LOCKED,
             Scenes.Gone, StatusBarState.SHADE
     );
 

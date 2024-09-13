@@ -969,9 +969,7 @@ public class UserManager {
 
     /**
      * Specifies if a user is disallowed from adding new users. This can only be set by device
-     * owners or profile owners on the primary user. The default value is <code>false</code>.
-     * <p>This restriction has no effect on secondary users and managed profiles since only the
-     * primary user can add other users.
+     * owners or profile owners on the main user. The default value is <code>false</code>.
      * <p> When the device is an organization-owned device provisioned with a managed profile,
      * this restriction will be set as a base restriction which cannot be removed by any admin.
      *
@@ -1541,10 +1539,19 @@ public class UserManager {
      * Specifies that the managed profile is not allowed to have unified lock screen challenge with
      * the primary user.
      *
-     * <p><strong>Note:</strong> Setting this restriction alone doesn't automatically set a
-     * separate challenge. Profile owner can ask the user to set a new password using
-     * {@link DevicePolicyManager#ACTION_SET_NEW_PASSWORD} and verify it using
-     * {@link DevicePolicyManager#isUsingUnifiedPassword(ComponentName)}.
+     * <p>To ensure that there is a separate work profile password, IT admins
+     * have to:
+     * <ol>
+     *   <li>Enforce {@link UserManager#DISALLOW_UNIFIED_PASSWORD}</li>
+     *   <li>Verify that {@link DevicePolicyManager#isUsingUnifiedPassword(ComponentName)}
+     *       returns true. This indicates that there is now a separate work
+     *       profile password configured and the set up is completed.</li>
+     *   <li>In case {@link DevicePolicyManager#isUsingUnifiedPassword(ComponentName)}
+     *       returns false, invoke {@link DevicePolicyManager#ACTION_SET_NEW_PASSWORD}
+     *       intent and then verify again
+     *       {@link DevicePolicyManager#isUsingUnifiedPassword(ComponentName)}.</li>
+     * </ol>
+     * </p>
      *
      * <p>Can be set by profile owners. It only has effect on managed profiles when set by managed
      * profile owner. Has no effect on non-managed profiles or users.
@@ -1980,7 +1987,6 @@ public class UserManager {
      * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
      */
-    @FlaggedApi(android.app.admin.flags.Flags.FLAG_ESIM_MANAGEMENT_ENABLED)
     public static final String DISALLOW_SIM_GLOBALLY =
             "no_sim_globally";
 
@@ -2001,7 +2007,6 @@ public class UserManager {
      * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
      */
-    @FlaggedApi(android.app.admin.flags.Flags.FLAG_ASSIST_CONTENT_USER_RESTRICTION_ENABLED)
     public static final String DISALLOW_ASSIST_CONTENT = "no_assist_content";
 
     /**
@@ -2391,10 +2396,15 @@ public class UserManager {
      */
     public static final int USER_OPERATION_ERROR_DISABLED_USER = 8;
     /**
-     * Indicates user operation failed because user is disabled on the device.
+     * Indicates user operation failed because private space is disabled on the device.
      * @hide
      */
     public static final int USER_OPERATION_ERROR_PRIVATE_PROFILE = 9;
+    /**
+     * Indicates user operation failed because user is restricted on the device.
+     * @hide
+     */
+    public static final int USER_OPERATION_ERROR_USER_RESTRICTED = 10;
 
     /**
      * Result returned from various user operations.
@@ -2413,6 +2423,7 @@ public class UserManager {
             USER_OPERATION_ERROR_USER_ACCOUNT_ALREADY_EXISTS,
             USER_OPERATION_ERROR_DISABLED_USER,
             USER_OPERATION_ERROR_PRIVATE_PROFILE,
+            USER_OPERATION_ERROR_USER_RESTRICTED,
     })
     public @interface UserOperationResult {}
 
@@ -4818,6 +4829,7 @@ public class UserManager {
      * <p>Note that this does not alter the user's pre-existing user restrictions.
      *
      * @param userId the id of the user to become admin
+     * @throws SecurityException if changing ADMIN status of the user is not allowed
      * @hide
      */
     @RequiresPermission(allOf = {
@@ -4838,6 +4850,7 @@ public class UserManager {
      * <p>Note that this does not alter the user's pre-existing user restrictions.
      *
      * @param userId the id of the user to revoke admin rights from
+     * @throws SecurityException if changing ADMIN status of the user is not allowed
      * @hide
      */
     @RequiresPermission(allOf = {
@@ -6442,7 +6455,11 @@ public class UserManager {
      */
     @UnsupportedAppUsage
     public int getUserSerialNumber(@UserIdInt int userId) {
-        if (android.multiuser.Flags.cacheUserSerialNumber()) {
+        // Read only flag should is to fix early access to this API
+        // cacheUserSerialNumber to be removed after the
+        // cacheUserSerialNumberReadOnly is fully rolled out
+        if (android.multiuser.Flags.cacheUserSerialNumberReadOnly()
+                || android.multiuser.Flags.cacheUserSerialNumber()) {
             // System user serial number is always 0, and it always exists.
             // There is no need to call binder for that.
             if (userId == UserHandle.USER_SYSTEM) {

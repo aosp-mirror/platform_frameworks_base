@@ -612,8 +612,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"به برنامه اجازه داده می‌شود موقعیت نسبی بین دستگاه‌های «فراپهن‌باند» اطراف را مشخص کند"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"‏برقراری تعامل با دستگاه‌های Wi-Fi اطراف"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"‏به برنامه اجازه می‌دهد در دستگاه‌های Wi-Fi اطراف تبلیغ کند، به آن‌ها متصل شود، و موقعیت نسبی آن‌ها را تشخیص دهد"</string>
-    <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"‏اطلاعات ترجیحی سرویس پولی NFC"</string>
-    <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"‏به برنامه اجازه می‌دهد اطلاعات ترجیحی سرویس پولی NFC، مانند کمک‌های ثبت‌شده و مقصد مسیر را دریافت کند."</string>
+    <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"‏اطلاعات ترجیحی سرویس پرداخت NFC"</string>
+    <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"‏به برنامه اجازه می‌دهد اطلاعات ترجیحی سرویس پرداخت NFC، مانند کمک‌های ثبت‌شده و مقصد مسیر را دریافت کند."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"کنترل ارتباط راه نزدیک"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"‏به برنامه اجازه می‎دهد تا با تگ‌های NFC، کارت‌ها و فایل‌خوان ارتباط برقرار کند."</string>
     <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"‏رویداد تراکنش Secure Element"</string>
@@ -1057,19 +1057,19 @@
     <string name="lockscreen_access_pattern_cell_added_verbose" msgid="2931364927622563465">"سلول <xliff:g id="CELL_INDEX">%1$s</xliff:g> اضافه شد"</string>
     <string name="lockscreen_access_pattern_detected" msgid="3931150554035194012">"الگو کامل شد"</string>
     <string name="lockscreen_access_pattern_area" msgid="1288780416685002841">"ناحیه الگو"</string>
-    <string name="keyguard_accessibility_widget_changed" msgid="7298011259508200234">"‏%1$s. ابزارک %2$d از %3$d."</string>
-    <string name="keyguard_accessibility_add_widget" msgid="8245795023551343672">"ابزارک اضافه کنید."</string>
+    <string name="keyguard_accessibility_widget_changed" msgid="7298011259508200234">"‏%1$s. ابزاره %2$d از %3$d."</string>
+    <string name="keyguard_accessibility_add_widget" msgid="8245795023551343672">"ابزاره اضافه کنید."</string>
     <string name="keyguard_accessibility_widget_empty_slot" msgid="544239307077644480">"خالی"</string>
     <string name="keyguard_accessibility_unlock_area_expanded" msgid="7768634718706488951">"منطقه بازگشایی گسترده شد."</string>
     <string name="keyguard_accessibility_unlock_area_collapsed" msgid="4729922043778400434">"منطقه بازگشایی کوچک شد."</string>
-    <string name="keyguard_accessibility_widget" msgid="6776892679715699875">"ابزارک <xliff:g id="WIDGET_INDEX">%1$s</xliff:g>."</string>
+    <string name="keyguard_accessibility_widget" msgid="6776892679715699875">"ابزاره <xliff:g id="WIDGET_INDEX">%1$s</xliff:g>."</string>
     <string name="keyguard_accessibility_user_selector" msgid="1466067610235696600">"انتخابگر کاربر"</string>
     <string name="keyguard_accessibility_status" msgid="6792745049712397237">"وضعیت"</string>
     <string name="keyguard_accessibility_camera" msgid="7862557559464986528">"دوربین"</string>
     <string name="keygaurd_accessibility_media_controls" msgid="2267379779900620614">"کنترل‌های رسانه"</string>
-    <string name="keyguard_accessibility_widget_reorder_start" msgid="7066213328912939191">"مرتب سازی مجدد ابزارک آغاز شد."</string>
-    <string name="keyguard_accessibility_widget_reorder_end" msgid="1083806817600593490">"مرتب‌سازی مجدد ابزارک به پایان رسید."</string>
-    <string name="keyguard_accessibility_widget_deleted" msgid="1509738950119878705">"ابزارک <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> حذف شد.‍"</string>
+    <string name="keyguard_accessibility_widget_reorder_start" msgid="7066213328912939191">"مرتب سازی مجدد ابزاره آغاز شد."</string>
+    <string name="keyguard_accessibility_widget_reorder_end" msgid="1083806817600593490">"مرتب‌سازی مجدد ابزاره به پایان رسید."</string>
+    <string name="keyguard_accessibility_widget_deleted" msgid="1509738950119878705">"ابزاره <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> حذف شد.‍"</string>
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"گسترده کردن منطقه بازگشایی شده."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"باز کردن قفل با کشیدن انگشت روی صفحه."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"باز کردن قفل با الگو."</string>
@@ -1183,7 +1183,7 @@
     <string name="copyUrl" msgid="6229645005987260230">"‏کپی URL"</string>
     <string name="selectTextMode" msgid="3225108910999318778">"انتخاب متن"</string>
     <string name="undo" msgid="3175318090002654673">"لغو"</string>
-    <string name="redo" msgid="7231448494008532233">"بازانجام"</string>
+    <string name="redo" msgid="7231448494008532233">"ازنو انجام دادن"</string>
     <string name="autofill" msgid="511224882647795296">"تکمیل خودکار"</string>
     <string name="textSelectionCABTitle" msgid="5151441579532476940">"انتخاب متن"</string>
     <string name="addToDictionary" msgid="8041821113480950096">"افزودن به واژه‌نامه"</string>
@@ -1194,6 +1194,8 @@
     <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"در فیلدهای گذرواژه از دست‌نویسی پشتیبانی نمی‌شود"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"برگشت"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"تغییر روش ورودی"</string>
+    <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"باز کردن انتخابگر روش ورودی"</string>
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"تنظیمات"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"فضای ذخیره‌سازی درحال پر شدن است"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"برخی از عملکردهای سیستم ممکن است کار نکنند"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"فضای ذخیره‌سازی سیستم کافی نیست. اطمینان حاصل کنید که دارای ۲۵۰ مگابایت فضای خالی هستید و سیستم را راه‌اندازی مجدد کنید."</string>
@@ -1428,6 +1430,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"اشتراک‌گذاری"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"نپذیرفتن"</string>
     <string name="select_input_method" msgid="3971267998568587025">"انتخاب روش ورودی"</string>
+    <string name="input_method_language_settings" msgid="8069089418056819437">"تنظیمات زبان"</string>
     <string name="show_ime" msgid="6406112007347443383">"وقتی صفحه‌کلید فیزیکی فعال است این ویرایشگر را روی صفحه نگه‌می‌دارد"</string>
     <string name="hardware" msgid="3611039921284836033">"استفاده از صفحه‌کلید مجازی"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"پیکربندی <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
@@ -1503,7 +1506,7 @@
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"پُرسمان همه بسته‌ها"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"به برنامه اجازه می‌دهد همه بسته‌های نصب‌شده را ببیند."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"برای کنترل بزرگ‌نمایی، دو بار تک‌ضرب بزنید"</string>
-    <string name="gadget_host_error_inflating" msgid="2449961590495198720">"افزودن ابزارک انجام نشد."</string>
+    <string name="gadget_host_error_inflating" msgid="2449961590495198720">"افزودن ابزاره انجام نشد."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"برو"</string>
     <string name="ime_action_search" msgid="4501435960587287668">"جستجو"</string>
     <string name="ime_action_send" msgid="8456843745664334138">"ارسال"</string>
@@ -1743,7 +1746,7 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"پاسخ شما تأیید نشد زیرا یک برنامه درخواست اجازه را مسدود کرده است."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"برای استفاده از ویژگی، روی آن تک‌ضرب بزنید:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"انتخاب ویژگی‌های موردنظر برای استفاده با دکمه دسترس‌پذیری"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"انتخاب ویژگی‌های موردنظر برای استفاده با میان‌بر کلید میزان صدا"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2245540598834891500">"انتخاب کنید کدام ویژگی‌ها با میان‌بر کلیدهای میزان صدا استفاده شود"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> خاموش شده است"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"ویرایش میان‌برها"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"تمام"</string>
@@ -2388,13 +2391,13 @@
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"قرینه‌سازی روی نمایشگر ممکن نبود"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"از کابل دیگری استفاده کنید و دوباره امتحان کنید"</string>
     <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"دستگاه بسیار گرم است و تا زمانی‌که خنک نشود نمی‌تواند محتوا را روی نمایشگر قرینه‌سازی کند."</string>
-    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"‫Dual screen"</string>
-    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"‏‫Dual Screen روشن است"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"صفحه‌نمایش دوگانه"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"‫«صفحه‌نمایش دوگانه» روشن است"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"‫<xliff:g id="APP_NAME">%1$s</xliff:g> از هر دو نمایشگر برای نمایش محتوا استفاده می‌کند"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"دستگاه بیش‌ازحد گرم شده است"</string>
-    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"‏‫Dual Screen دردسترس نیست زیرا تلفن بیش‌ازحد گرم شده است"</string>
-    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"‏Dual Screen دردسترس نیست"</string>
-    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"‏Dual Screen دردسترس نیست چون «بهینه‌سازی باتری» روشن است. می‌توانید این ویژگی را در «تنظیمات» خاموش کنید."</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"‫«صفحه‌نمایش دوگانه» دردسترس نیست زیرا تلفن بیش‌ازحد گرم شده است"</string>
+    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"«صفحه‌نمایش دوگانه» دردسترس نیست"</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"«صفحه‌نمایش دوگانه» دردسترس نیست چون «بهینه‌سازی باتری» روشن است. می‌توانید این ویژگی را در «تنظیمات» خاموش کنید."</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"رفتن به تنظیمات"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"خاموش کردن"</string>
     <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"‫<xliff:g id="DEVICE_NAME">%s</xliff:g> پیکربندی شد"</string>
@@ -2421,6 +2424,8 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"به‌دلایل امنیتی، محتوای برنامه پس‌از هم‌رسانی صفحه‌نمایش پنهان می‌شود"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"به‌طور خودکار به ماهواره متصل شد"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"‏می‌توانید بدون شبکه تلفن همراه یا Wi-Fi پیام ارسال و دریافت کنید"</string>
+    <string name="satellite_notification_manual_title" msgid="1097504441849466279">"از «پیام‌رسانی ماهواره‌ای» استفاده شود؟"</string>
+    <string name="satellite_notification_manual_summary" msgid="901206289846283445">"‏ارسال و دریافت پیام بدون شبکه تلفن همراه یا Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"باز کردن «پیام‌نگار»"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"روش کار"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"درحال تعلیق…"</string>
@@ -2433,26 +2438,18 @@
     <string name="face_dangling_notification_msg" msgid="746235263598985384">"مدل چهره‌تان دیگر قابل‌شناسایی نیست. «قفل‌گشایی با چهره» را دوباره راه‌اندازی کنید."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"راه‌اندازی"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"حالا نه"</string>
-    <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"زنگ ساعت <xliff:g id="USER_NAME">%s</xliff:g>"</string>
+    <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"زنگ هشدار برای <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"تغییر کاربر"</string>
     <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"بی‌صدا کردن"</string>
-    <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"برای بی‌صدا کردن تک‌ضرب بزنید"</string>
-    <!-- no translation found for keyboard_shortcut_group_applications_browser (6535007304687100909) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_contacts (2750702518068326356) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_email (4229037666415353683) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_sms (3523799286376321137) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_music (2051507523525651067) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_calendar (3571770335653387606) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_calculator (6753209559716091507) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_maps (7950000659522589471) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications (3010389163951364798) -->
-    <skip />
+    <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"برای بی‌صدا کردن، تک‌ضرب بزنید"</string>
+    <string name="keyboard_shortcut_group_applications_browser" msgid="6535007304687100909">"مرورگر"</string>
+    <string name="keyboard_shortcut_group_applications_contacts" msgid="2750702518068326356">"مخاطبین"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="4229037666415353683">"ایمیل"</string>
+    <string name="keyboard_shortcut_group_applications_sms" msgid="3523799286376321137">"پیامک"</string>
+    <string name="keyboard_shortcut_group_applications_music" msgid="2051507523525651067">"موسیقی"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="3571770335653387606">"تقویم"</string>
+    <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"ماشین‌حساب"</string>
+    <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"نقشه"</string>
+    <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"برنامه‌ها"</string>
+    <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"اثر انگشتانتان دیگر قابل‌شناسایی نیست. «قفل‌گشایی با اثر انگشت» را دوباره راه‌اندازی کنید."</string>
 </resources>

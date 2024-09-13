@@ -70,7 +70,14 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
                         "ImeInsetsSourceConsumer#onAnimationFinished",
                         mController.getHost().getInputMethodManager(), null /* icProto */);
             }
-            boolean insetsChanged = super.onAnimationStateChanged(running);
+            boolean insetsChanged = false;
+            if (Flags.predictiveBackIme() && !running && isShowRequested()
+                    && mAnimationState == ANIMATION_STATE_HIDE) {
+                // A user controlled hide animation may have ended in the shown state (e.g.
+                // cancelled predictive back animation) -> Insets need to be reset to shown.
+                insetsChanged |= applyLocalVisibilityOverride();
+            }
+            insetsChanged |= super.onAnimationStateChanged(running);
             if (running && !isShowRequested()
                     && mController.isPredictiveBackImeHideAnimInProgress()) {
                 // IME predictive back animation switched from pre-commit to post-commit.
@@ -119,9 +126,11 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
 
     @Override
     public boolean applyLocalVisibilityOverride() {
-        ImeTracing.getInstance().triggerClientDump(
-                "ImeInsetsSourceConsumer#applyLocalVisibilityOverride",
-                mController.getHost().getInputMethodManager(), null /* icProto */);
+        if (!Flags.refactorInsetsController()) {
+            ImeTracing.getInstance().triggerClientDump(
+                    "ImeInsetsSourceConsumer#applyLocalVisibilityOverride",
+                    mController.getHost().getInputMethodManager(), null /* icProto */);
+        }
         return super.applyLocalVisibilityOverride();
     }
 
@@ -205,9 +214,13 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
 
     @Override
     public void removeSurface() {
-        final IBinder window = mController.getHost().getWindowToken();
-        if (window != null) {
-            getImm().removeImeSurface(window);
+        if (Flags.refactorInsetsController()) {
+            super.removeSurface();
+        } else {
+            final IBinder window = mController.getHost().getWindowToken();
+            if (window != null) {
+                getImm().removeImeSurface(window);
+            }
         }
     }
 

@@ -18,9 +18,11 @@
 #include <sys/stat.h>
 #include <string.h>
 #include <unistd.h>
+#include <string>
 #include <nativehelper/JNIHelp.h>
 #include <nativehelper/ScopedLocalRef.h>
 #include <nativehelper/ScopedUtfChars.h>
+#include <nativehelper/ScopedPrimitiveArray.h>
 
 #include "jni.h"
 #include "utils/Log.h"
@@ -48,6 +50,43 @@ static rc_t throwIfMinusOne(JNIEnv* env, const char* name, rc_t rc) {
 
 static jclass g_StructStat;
 static jclass g_StructTimespecClass;
+
+// We have to explicitly decode the string to real UTF-8, because when using GetStringUTFChars
+// we only get modified UTF-8, which is not the platform string type used in host JVM.
+struct ScopedRealUtf8Chars {
+    ScopedRealUtf8Chars(JNIEnv* env, jstring s) : valid_(false) {
+        if (s == nullptr) {
+            jniThrowNullPointerException(env);
+            return;
+        }
+        jclass clazz = env->GetObjectClass(s);
+        jmethodID getBytes = env->GetMethodID(clazz, "getBytes", "(Ljava/lang/String;)[B");
+
+        ScopedLocalRef<jstring> utf8(env, env->NewStringUTF("UTF-8"));
+        ScopedLocalRef<jbyteArray> jbytes(env,
+            (jbyteArray) env->CallObjectMethod(s, getBytes, utf8.get()));
+
+        ScopedByteArrayRO bytes(env, jbytes.get());
+        string_.append((const char *) bytes.get(), bytes.size());
+        valid_ = true;
+    }
+
+    const char* c_str() const {
+        return valid_ ? string_.c_str() : nullptr;
+    }
+
+    size_t size() const {
+        return string_.size();
+    }
+
+    const char& operator[](size_t n) const {
+        return string_[n];
+    }
+
+private:
+    std::string string_;
+    bool valid_;
+};
 
 static jclass findClass(JNIEnv* env, const char* name) {
     ScopedLocalRef<jclass> localClass(env, env->FindClass(name));
@@ -99,7 +138,7 @@ static jobject makeStructStat(JNIEnv* env, const struct stat64& sb) {
 }
 
 static jobject doStat(JNIEnv* env, jstring javaPath, bool isLstat) {
-    ScopedUtfChars path(env, javaPath);
+    ScopedRealUtf8Chars path(env, javaPath);
     if (path.c_str() == NULL) {
         return NULL;
     }
@@ -167,6 +206,27 @@ static jobject Linux_stat(JNIEnv* env, jobject, jstring javaPath) {
     return doStat(env, javaPath, false);
 }
 
+static jint Linux_open(JNIEnv* env, jobject, jstring javaPath, jint flags, jint mode) {
+    ScopedRealUtf8Chars path(env, javaPath);
+    if (path.c_str() == NULL) {
+        return -1;
+    }
+    return throwIfMinusOne(env, "open", TEMP_FAILURE_RETRY(open(path.c_str(), flags, mode)));
+}
+
+static void Linux_setenv(JNIEnv* env, jobject, jstring javaName, jstring javaValue,
+        jboolean overwrite) {
+    ScopedRealUtf8Chars name(env, javaName);
+    if (name.c_str() == NULL) {
+        jniThrowNullPointerException(env);
+    }
+    ScopedRealUtf8Chars value(env, javaValue);
+    if (value.c_str() == NULL) {
+        jniThrowNullPointerException(env);
+    }
+    throwIfMinusOne(env, "setenv", setenv(name.c_str(), value.c_str(), overwrite ? 1 : 0));
+}
+
 // ---- Registration ----
 
 static const JNINativeMethod sMethods[] =
@@ -179,6 +239,8 @@ static const JNINativeMethod sMethods[] =
     { "nFstat", "(I)Landroid/system/StructStat;", (void*)nFstat },
     { "lstat", "(Ljava/lang/String;)Landroid/system/StructStat;", (void*)Linux_lstat },
     { "stat", "(Ljava/lang/String;)Landroid/system/StructStat;", (void*)Linux_stat },
+    { "nOpen", "(Ljava/lang/String;II)I", (void*)Linux_open },
+    { "setenv", "(Ljava/lang/String;Ljava/lang/String;Z)V", (void*)Linux_setenv },
 };
 
 extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
@@ -197,7 +259,7 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
     g_StructStat = findClass(env, "android/system/StructStat");
     g_StructTimespecClass = findClass(env, "android/system/StructTimespec");
 
-    jint res = jniRegisterNativeMethods(env, "com/android/ravenwood/common/RavenwoodRuntimeNative",
+    jint res = jniRegisterNativeMethods(env, "com/android/ravenwood/RavenwoodRuntimeNative",
             sMethods, NELEM(sMethods));
     if (res < 0) {
         return res;

@@ -149,6 +149,13 @@ final class DefaultPermissionGrantPolicy {
         CONTACTS_PERMISSIONS.add(Manifest.permission.GET_ACCOUNTS);
     }
 
+    private static final Set<String> CALL_LOG_PERMISSIONS = new ArraySet<>();
+    static {
+        CALL_LOG_PERMISSIONS.add(Manifest.permission.READ_CALL_LOG);
+        CALL_LOG_PERMISSIONS.add(Manifest.permission.WRITE_CALL_LOG);
+    }
+
+
     private static final Set<String> ALWAYS_LOCATION_PERMISSIONS = new ArraySet<>();
     static {
         ALWAYS_LOCATION_PERMISSIONS.add(Manifest.permission.ACCESS_FINE_LOCATION);
@@ -753,7 +760,7 @@ final class DefaultPermissionGrantPolicy {
         String contactsProviderPackage =
                 getDefaultProviderAuthorityPackage(ContactsContract.AUTHORITY, userId);
         grantSystemFixedPermissionsToSystemPackage(pm, contactsProviderPackage, userId,
-                CONTACTS_PERMISSIONS, PHONE_PERMISSIONS);
+                CONTACTS_PERMISSIONS, PHONE_PERMISSIONS, CALL_LOG_PERMISSIONS);
         grantPermissionsToSystemPackage(pm, contactsProviderPackage, userId, STORAGE_PERMISSIONS);
 
         // Device provisioning
@@ -880,7 +887,7 @@ final class DefaultPermissionGrantPolicy {
             grantPermissionsToSystemPackage(pm,
                     getDefaultSystemHandlerActivityPackage(pm,
                             SearchManager.INTENT_ACTION_GLOBAL_SEARCH, userId),
-                    userId, PHONE_PERMISSIONS, CALENDAR_PERMISSIONS);
+                    userId, PHONE_PERMISSIONS, CALENDAR_PERMISSIONS, NEARBY_DEVICES_PERMISSIONS);
         }
 
         // Print Spooler
@@ -1359,7 +1366,7 @@ final class DefaultPermissionGrantPolicy {
 
         for (int requestedPermissionNum = 0; requestedPermissionNum < numRequestedPermissions;
                 requestedPermissionNum++) {
-            String permission = requestedPermissions[requestedPermissionNum];
+            String permission = sortedRequestedPermissions[requestedPermissionNum];
 
             // If there is a disabled system app it may request a permission the updated
             // version ot the data partition doesn't, In this case skip the permission.

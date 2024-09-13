@@ -654,6 +654,9 @@ void CanvasContext::draw(bool solelyTextureViewUpdates) {
         if (vsyncId != UiFrameInfoBuilder::INVALID_VSYNC_ID) {
             const auto inputEventId =
                     static_cast<int32_t>(mCurrentFrameInfo->get(FrameInfoIndex::InputEventId));
+            ATRACE_FORMAT(
+                "frameTimelineInfo(frameNumber=%llu, vsyncId=%lld, inputEventId=0x%" PRIx32 ")",
+                frameCompleteNr, vsyncId, inputEventId);
             const ANativeWindowFrameTimelineInfo ftl = {
                     .frameNumber = frameCompleteNr,
                     .frameTimelineVsyncId = vsyncId,
@@ -761,8 +764,8 @@ void CanvasContext::draw(bool solelyTextureViewUpdates) {
         if (mExpectSurfaceStats) {
             reportMetricsWithPresentTime();
             {  // acquire lock
-                std::lock_guard lock(mLast4FrameMetricsInfosMutex);
-                FrameMetricsInfo& next = mLast4FrameMetricsInfos.next();
+                std::lock_guard lock(mLastFrameMetricsInfosMutex);
+                FrameMetricsInfo& next = mLastFrameMetricsInfos.next();
                 next.frameInfo = mCurrentFrameInfo;
                 next.frameNumber = frameCompleteNr;
                 next.surfaceId = mSurfaceControlGenerationId;
@@ -816,12 +819,12 @@ void CanvasContext::reportMetricsWithPresentTime() {
     int32_t surfaceControlId;
 
     {  // acquire lock
-        std::scoped_lock lock(mLast4FrameMetricsInfosMutex);
-        if (mLast4FrameMetricsInfos.size() != mLast4FrameMetricsInfos.capacity()) {
+        std::scoped_lock lock(mLastFrameMetricsInfosMutex);
+        if (mLastFrameMetricsInfos.size() != mLastFrameMetricsInfos.capacity()) {
             // Not enough frames yet
             return;
         }
-        auto frameMetricsInfo = mLast4FrameMetricsInfos.front();
+        auto frameMetricsInfo = mLastFrameMetricsInfos.front();
         forthBehind = frameMetricsInfo.frameInfo;
         frameNumber = frameMetricsInfo.frameNumber;
         surfaceControlId = frameMetricsInfo.surfaceId;
@@ -869,12 +872,12 @@ void CanvasContext::removeFrameMetricsObserver(FrameMetricsObserver* observer) {
     }
 }
 
-FrameInfo* CanvasContext::getFrameInfoFromLast4(uint64_t frameNumber, uint32_t surfaceControlId) {
-    std::scoped_lock lock(mLast4FrameMetricsInfosMutex);
-    for (size_t i = 0; i < mLast4FrameMetricsInfos.size(); i++) {
-        if (mLast4FrameMetricsInfos[i].frameNumber == frameNumber &&
-            mLast4FrameMetricsInfos[i].surfaceId == surfaceControlId) {
-            return mLast4FrameMetricsInfos[i].frameInfo;
+FrameInfo* CanvasContext::getFrameInfoFromLastFew(uint64_t frameNumber, uint32_t surfaceControlId) {
+    std::scoped_lock lock(mLastFrameMetricsInfosMutex);
+    for (size_t i = 0; i < mLastFrameMetricsInfos.size(); i++) {
+        if (mLastFrameMetricsInfos[i].frameNumber == frameNumber &&
+            mLastFrameMetricsInfos[i].surfaceId == surfaceControlId) {
+            return mLastFrameMetricsInfos[i].frameInfo;
         }
     }
 
@@ -894,7 +897,7 @@ void CanvasContext::onSurfaceStatsAvailable(void* context, int32_t surfaceContro
     }
     uint64_t frameNumber = functions.getFrameNumberFunc(stats);
 
-    FrameInfo* frameInfo = instance->getFrameInfoFromLast4(frameNumber, surfaceControlId);
+    FrameInfo* frameInfo = instance->getFrameInfoFromLastFew(frameNumber, surfaceControlId);
 
     if (frameInfo != nullptr) {
         std::scoped_lock lock(instance->mFrameInfoMutex);

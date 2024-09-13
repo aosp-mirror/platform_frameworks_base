@@ -25,6 +25,8 @@ import com.android.systemui.biometrics.domain.interactor.LogContextInteractor
 import com.android.systemui.biometrics.domain.interactor.LogContextInteractorImpl
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractor
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractorImpl
+import com.android.systemui.biometrics.domain.interactor.SideFpsOverlayInteractor
+import com.android.systemui.biometrics.domain.interactor.SideFpsOverlayInteractorImpl
 import com.android.systemui.dagger.SysUISingleton
 import dagger.Binds
 import dagger.Module
@@ -43,6 +45,12 @@ interface BiometricsDomainLayerModule {
     fun providesBiometricStatusInteractor(
         impl: BiometricStatusInteractorImpl
     ): BiometricStatusInteractor
+
+    @Binds
+    @SysUISingleton
+    fun providesSideFpsOverlayInteractor(
+        impl: SideFpsOverlayInteractorImpl
+    ): SideFpsOverlayInteractor
 
     @Binds
     @SysUISingleton

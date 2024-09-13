@@ -19,6 +19,9 @@ package com.android.systemui.statusbar.notification.interruption
 import android.Manifest.permission.RECEIVE_EMERGENCY_BROADCAST
 import android.app.Notification
 import android.app.Notification.BubbleMetadata
+import android.app.Notification.CATEGORY_ALARM
+import android.app.Notification.CATEGORY_CAR_EMERGENCY
+import android.app.Notification.CATEGORY_CAR_WARNING
 import android.app.Notification.CATEGORY_EVENT
 import android.app.Notification.CATEGORY_REMINDER
 import android.app.Notification.VISIBILITY_PRIVATE
@@ -46,6 +49,7 @@ import com.android.internal.messages.nano.SystemMessageProto.SystemMessage
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.shared.notifications.domain.interactor.NotificationSettingsInteractor
 import com.android.systemui.statusbar.StatusBarState.SHADE
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl.MAX_HUN_WHEN_AGE_MS
@@ -148,12 +152,12 @@ class PeekAlreadyBubbledSuppressor(
         }
 }
 
-class PeekDndSuppressor() :
+class PeekDndSuppressor :
     VisualInterruptionFilter(types = setOf(PEEK), reason = "suppressed by DND") {
     override fun shouldSuppress(entry: NotificationEntry) = entry.shouldSuppressPeek()
 }
 
-class PeekNotImportantSuppressor() :
+class PeekNotImportantSuppressor :
     VisualInterruptionFilter(types = setOf(PEEK), reason = "importance < HIGH") {
     override fun shouldSuppress(entry: NotificationEntry) = entry.importance < IMPORTANCE_HIGH
 }
@@ -194,12 +198,12 @@ class PeekOldWhenSuppressor(private val systemClock: SystemClock) :
         }
 }
 
-class PulseEffectSuppressor() :
+class PulseEffectSuppressor :
     VisualInterruptionFilter(types = setOf(PULSE), reason = "suppressed by DND") {
     override fun shouldSuppress(entry: NotificationEntry) = entry.shouldSuppressAmbient()
 }
 
-class PulseLockscreenVisibilityPrivateSuppressor() :
+class PulseLockscreenVisibilityPrivateSuppressor :
     VisualInterruptionFilter(
         types = setOf(PULSE),
         reason = "hidden by lockscreen visibility override"
@@ -208,12 +212,12 @@ class PulseLockscreenVisibilityPrivateSuppressor() :
         entry.ranking.lockscreenVisibilityOverride == VISIBILITY_PRIVATE
 }
 
-class PulseLowImportanceSuppressor() :
+class PulseLowImportanceSuppressor :
     VisualInterruptionFilter(types = setOf(PULSE), reason = "importance < DEFAULT") {
     override fun shouldSuppress(entry: NotificationEntry) = entry.importance < IMPORTANCE_DEFAULT
 }
 
-class HunGroupAlertBehaviorSuppressor() :
+class HunGroupAlertBehaviorSuppressor :
     VisualInterruptionFilter(
         types = setOf(PEEK, PULSE),
         reason = "suppressive group alert behavior"
@@ -222,26 +226,23 @@ class HunGroupAlertBehaviorSuppressor() :
         entry.sbn.let { it.isGroup && it.notification.suppressAlertingDueToGrouping() }
 }
 
-class HunSilentNotificationSuppressor() :
-    VisualInterruptionFilter(
-        types = setOf(PEEK, PULSE),
-        reason = "notification isSilent"
-    ) {
+class HunSilentNotificationSuppressor :
+    VisualInterruptionFilter(types = setOf(PEEK, PULSE), reason = "notification isSilent") {
     override fun shouldSuppress(entry: NotificationEntry) =
         entry.sbn.let { Flags.notificationSilentFlag() && it.notification.isSilent }
 }
 
-class HunJustLaunchedFsiSuppressor() :
+class HunJustLaunchedFsiSuppressor :
     VisualInterruptionFilter(types = setOf(PEEK, PULSE), reason = "just launched FSI") {
     override fun shouldSuppress(entry: NotificationEntry) = entry.hasJustLaunchedFullScreenIntent()
 }
 
-class BubbleNotAllowedSuppressor() :
-    VisualInterruptionFilter(types = setOf(BUBBLE), reason = "cannot bubble") {
+class BubbleNotAllowedSuppressor :
+    VisualInterruptionFilter(types = setOf(BUBBLE), reason = "cannot bubble", isSpammy = true) {
     override fun shouldSuppress(entry: NotificationEntry) = !entry.canBubble()
 }
 
-class BubbleNoMetadataSuppressor() :
+class BubbleNoMetadataSuppressor :
     VisualInterruptionFilter(types = setOf(BUBBLE), reason = "has no or invalid bubble metadata") {
 
     private fun isValidMetadata(metadata: BubbleMetadata?) =
@@ -264,6 +265,7 @@ class AlertKeyguardVisibilitySuppressor(
 
 /**
  * Set with:
+ *
  * adb shell setprop persist.force_show_avalanche_edu_once 1 && adb shell stop; adb shell start
  */
 private const val FORCE_SHOW_AVALANCHE_EDU_ONCE = "persist.force_show_avalanche_edu_once"
@@ -273,11 +275,13 @@ private const val PREF_HAS_SEEN_AVALANCHE_EDU = "has_seen_avalanche_edu"
 class AvalancheSuppressor(
     private val avalancheProvider: AvalancheProvider,
     private val systemClock: SystemClock,
-    private val systemSettings: SystemSettings,
+    private val settingsInteractor: NotificationSettingsInteractor,
     private val packageManager: PackageManager,
     private val uiEventLogger: UiEventLogger,
     private val context: Context,
-    private val notificationManager: NotificationManager
+    private val notificationManager: NotificationManager,
+    private val logger: VisualInterruptionDecisionLogger,
+    private val systemSettings: SystemSettings,
 ) :
     VisualInterruptionFilter(
         types = setOf(PEEK, PULSE),
@@ -298,7 +302,12 @@ class AvalancheSuppressor(
     // education HUNs.
     private var hasShownOnceForDebug = false
 
-    private fun shouldShowEdu() : Boolean {
+    // Sometimes the kotlin flow value is false even when the cooldown setting is true (b/356768397)
+    // so let's directly check settings until we confirm that the flow is initialized and in sync
+    // with the real settings value.
+    private var isCooldownFlowInSync = false
+
+    private fun shouldShowEdu(): Boolean {
         val forceShowOnce = SystemProperties.get(FORCE_SHOW_AVALANCHE_EDU_ONCE, "").equals("1")
         return !hasSeenEdu || (forceShowOnce && !hasShownOnceForDebug)
     }
@@ -309,6 +318,9 @@ class AvalancheSuppressor(
         ALLOW_CALLSTYLE,
         ALLOW_CATEGORY_REMINDER,
         ALLOW_CATEGORY_EVENT,
+        ALLOW_CATEGORY_ALARM,
+        ALLOW_CATEGORY_CAR_EMERGENCY,
+        ALLOW_CATEGORY_CAR_WARNING,
         ALLOW_FSI_WITH_PERMISSION_ON,
         ALLOW_COLORIZED,
         ALLOW_EMERGENCY,
@@ -335,8 +347,13 @@ class AvalancheSuppressor(
         @UiEvent(doc = "HUN allowed during avalanche because it is colorized.")
         AVALANCHE_SUPPRESSOR_HUN_ALLOWED_COLORIZED(1832),
         @UiEvent(doc = "HUN allowed during avalanche because it is an emergency notification.")
-        AVALANCHE_SUPPRESSOR_HUN_ALLOWED_EMERGENCY(1833);
-
+        AVALANCHE_SUPPRESSOR_HUN_ALLOWED_EMERGENCY(1833),
+        @UiEvent(doc = "HUN allowed during avalanche because it is an alarm.")
+        AVALANCHE_SUPPRESSOR_HUN_ALLOWED_CATEGORY_ALARM(1867),
+        @UiEvent(doc = "HUN allowed during avalanche because it is a car emergency.")
+        AVALANCHE_SUPPRESSOR_HUN_ALLOWED_CATEGORY_CAR_EMERGENCY(1868),
+        @UiEvent(doc = "HUN allowed during avalanche because it is a car warning")
+        AVALANCHE_SUPPRESSOR_HUN_ALLOWED_CATEGORY_CAR_WARNING(1869);
         override fun getId(): Int {
             return id
         }
@@ -344,15 +361,18 @@ class AvalancheSuppressor(
 
     override fun shouldSuppress(entry: NotificationEntry): Boolean {
         if (!isCooldownEnabled()) {
+            logger.logAvalancheAllow("cooldown OFF")
             return false
         }
         val timeSinceAvalancheMs = systemClock.currentTimeMillis() - avalancheProvider.startTime
         val timedOut = timeSinceAvalancheMs >= avalancheProvider.timeoutMs
         if (timedOut) {
+            logger.logAvalancheAllow("timedOut! timeSinceAvalancheMs=$timeSinceAvalancheMs")
             return false
         }
         val state = calculateState(entry)
         if (state != State.SUPPRESS) {
+            logger.logAvalancheAllow("state=$state")
             return false
         }
         if (shouldShowEdu()) {
@@ -361,34 +381,33 @@ class AvalancheSuppressor(
         return true
     }
 
-    /**
-     * Show avalanche education HUN from SystemUI.
-     */
+    /** Show avalanche education HUN from SystemUI. */
     private fun showEdu() {
         val res = context.resources
-        val titleStr = res.getString(
-            com.android.systemui.res.R.string.adaptive_notification_edu_hun_title)
-        val textStr = res.getString(
-            com.android.systemui.res.R.string.adaptive_notification_edu_hun_text)
-        val actionStr = res.getString(
-            com.android.systemui.res.R.string.go_to_adaptive_notification_settings)
+        val titleStr =
+            res.getString(com.android.systemui.res.R.string.adaptive_notification_edu_hun_title)
+        val textStr =
+            res.getString(com.android.systemui.res.R.string.adaptive_notification_edu_hun_text)
+        val actionStr =
+            res.getString(com.android.systemui.res.R.string.go_to_adaptive_notification_settings)
 
         val intent = Intent(Settings.ACTION_MANAGE_ADAPTIVE_NOTIFICATIONS)
-        val pendingIntent = PendingIntent.getActivity(
-            context, 0, intent,
-            PendingIntent.FLAG_IMMUTABLE
-        )
+        val pendingIntent =
+            PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
 
         // Replace "System UI" app name with "Android System"
         val bundle = Bundle()
-        bundle.putString(Notification.EXTRA_SUBSTITUTE_APP_NAME,
-                context.getString(com.android.internal.R.string.android_system_label))
+        bundle.putString(
+            Notification.EXTRA_SUBSTITUTE_APP_NAME,
+            context.getString(com.android.internal.R.string.android_system_label)
+        )
 
         val builder =
             Notification.Builder(context, NotificationChannels.ALERTS)
                 .setTicker(titleStr)
                 .setContentTitle(titleStr)
                 .setContentText(textStr)
+                .setStyle(Notification.BigTextStyle().bigText(textStr))
                 .setSmallIcon(com.android.systemui.res.R.drawable.ic_settings)
                 .setCategory(Notification.CATEGORY_SYSTEM)
                 .setTimeoutAfter(/* one day in ms */ 24 * 60 * 60 * 1000L)
@@ -399,7 +418,7 @@ class AvalancheSuppressor(
 
         notificationManager.notify(SystemMessage.NOTE_ADAPTIVE_NOTIFICATIONS, builder.build())
         hasSeenEdu = true
-        hasShownOnceForDebug = true;
+        hasShownOnceForDebug = true
     }
 
     private fun calculateState(entry: NotificationEntry): State {
@@ -424,6 +443,22 @@ class AvalancheSuppressor(
         if (entry.sbn.notification.category == CATEGORY_REMINDER) {
             uiEventLogger.log(AvalancheEvent.AVALANCHE_SUPPRESSOR_HUN_ALLOWED_CATEGORY_REMINDER)
             return State.ALLOW_CATEGORY_REMINDER
+        }
+
+        if (entry.sbn.notification.category == CATEGORY_ALARM) {
+            uiEventLogger.log(AvalancheEvent.AVALANCHE_SUPPRESSOR_HUN_ALLOWED_CATEGORY_ALARM)
+            return State.ALLOW_CATEGORY_ALARM
+        }
+
+        if (entry.sbn.notification.category == CATEGORY_CAR_EMERGENCY) {
+            uiEventLogger.log(
+                    AvalancheEvent.AVALANCHE_SUPPRESSOR_HUN_ALLOWED_CATEGORY_CAR_EMERGENCY)
+            return State.ALLOW_CATEGORY_CAR_EMERGENCY
+        }
+
+        if (entry.sbn.notification.category == CATEGORY_CAR_WARNING) {
+            uiEventLogger.log(AvalancheEvent.AVALANCHE_SUPPRESSOR_HUN_ALLOWED_CATEGORY_CAR_WARNING)
+            return State.ALLOW_CATEGORY_CAR_WARNING
         }
 
         if (entry.sbn.notification.category == CATEGORY_EVENT) {
@@ -451,7 +486,15 @@ class AvalancheSuppressor(
     }
 
     private fun isCooldownEnabled(): Boolean {
-        return systemSettings.getInt(Settings.System.NOTIFICATION_COOLDOWN_ENABLED, /* def */ 1) ==
-            1
+        val isEnabledFromFlow = settingsInteractor.isCooldownEnabled.value
+        if (isCooldownFlowInSync) {
+            return isEnabledFromFlow
+        }
+        val isEnabled =
+            systemSettings.getInt(Settings.System.NOTIFICATION_COOLDOWN_ENABLED, /* def */ 1) == 1
+        if (isEnabled == isEnabledFromFlow) {
+            isCooldownFlowInSync = true
+        }
+        return isEnabled
     }
 }

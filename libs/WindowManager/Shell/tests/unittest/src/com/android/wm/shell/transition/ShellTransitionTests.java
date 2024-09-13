@@ -76,7 +76,6 @@ import android.os.RemoteException;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.util.ArraySet;
 import android.util.Pair;
-import android.view.IRecentsAnimationRunner;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.window.IRemoteTransition;
@@ -107,12 +106,13 @@ import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
-import com.android.wm.shell.common.TransactionPool;
+import com.android.wm.shell.recents.IRecentsAnimationRunner;
 import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.recents.RecentsTransitionHandler;
+import com.android.wm.shell.shared.ShellSharedConstants;
+import com.android.wm.shell.shared.TransactionPool;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
-import com.android.wm.shell.sysui.ShellSharedConstants;
 import com.android.wm.shell.util.StubTransaction;
 
 import org.junit.Before;
@@ -439,6 +439,27 @@ public class ShellTransitionTests extends ShellTestCase {
         final TransitionInfo openAct = new TransitionInfoBuilder(TRANSIT_OPEN)
                 .addChange(TRANSIT_OPEN, cmpt).build();
         assertTrue(filter.matches(openAct));
+    }
+
+    @Test
+    public void testTransitionFilterAnimOverride() {
+        TransitionFilter filter = new TransitionFilter();
+        filter.mRequirements =
+                new TransitionFilter.Requirement[]{new TransitionFilter.Requirement()};
+        filter.mRequirements[0].mCustomAnimation = true;
+        filter.mRequirements[0].mModes = new int[]{TRANSIT_OPEN, TRANSIT_TO_FRONT};
+
+        final RunningTaskInfo taskInf = createTaskInfo(1);
+        final TransitionInfo openTask = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(TRANSIT_OPEN, taskInf).build();
+        assertFalse(filter.matches(openTask));
+
+        final TransitionInfo.AnimationOptions overOpts =
+                TransitionInfo.AnimationOptions.makeCustomAnimOptions("pakname", 0, 0, 0, true);
+        final TransitionInfo openTaskOpts = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(TRANSIT_OPEN, taskInf).build();
+        openTaskOpts.getChanges().get(0).setAnimationOptions(overOpts);
+        assertTrue(filter.matches(openTaskOpts));
     }
 
     @Test

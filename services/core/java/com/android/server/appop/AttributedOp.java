@@ -109,7 +109,7 @@ final class AttributedOp {
                 uidState, flags);
 
         mAppOpsService.mHistoricalRegistry.incrementOpAccessedCount(parent.op, parent.uid,
-                parent.packageName, tag, uidState, flags, accessTime,
+                parent.packageName, persistentDeviceId, tag, uidState, flags, accessTime,
                 AppOpsManager.ATTRIBUTION_FLAGS_NONE, AppOpsManager.ATTRIBUTION_CHAIN_ID_NONE);
     }
 
@@ -253,8 +253,8 @@ final class AttributedOp {
 
         if (isStarted) {
             mAppOpsService.mHistoricalRegistry.incrementOpAccessedCount(parent.op, parent.uid,
-                    parent.packageName, tag, uidState, flags, startTime, attributionFlags,
-                    attributionChainId);
+                    parent.packageName, persistentDeviceId, tag, uidState, flags, startTime,
+                    attributionFlags, attributionChainId);
         }
     }
 
@@ -333,7 +333,7 @@ final class AttributedOp {
                     finishedEvent);
 
             mAppOpsService.mHistoricalRegistry.increaseOpAccessDuration(parent.op, parent.uid,
-                    parent.packageName, tag, event.getUidState(),
+                    parent.packageName, persistentDeviceId, tag, event.getUidState(),
                     event.getFlags(), finishedEvent.getNoteTime(), finishedEvent.getDuration(),
                     event.getAttributionFlags(), event.getAttributionChainId());
 
@@ -441,8 +441,9 @@ final class AttributedOp {
             event.setStartElapsedTime(SystemClock.elapsedRealtime());
             event.setStartTime(startTime);
             mAppOpsService.mHistoricalRegistry.incrementOpAccessedCount(parent.op, parent.uid,
-                    parent.packageName, tag, event.getUidState(), event.getFlags(), startTime,
-                    event.getAttributionFlags(), event.getAttributionChainId());
+                    parent.packageName, persistentDeviceId, tag, event.getUidState(),
+                    event.getFlags(), startTime, event.getAttributionFlags(),
+                    event.getAttributionChainId());
             if (shouldSendActive) {
                 mAppOpsService.scheduleOpActiveChangedIfNeededLocked(parent.op, parent.uid,
                         parent.packageName, tag, event.getVirtualDeviceId(), true,

@@ -80,6 +80,27 @@ public class BiometricManager {
             BiometricConstants.BIOMETRIC_ERROR_HW_NOT_PRESENT;
 
     /**
+     * Lockout error.
+     * @hide
+     */
+    public static final int BIOMETRIC_ERROR_LOCKOUT =
+            BiometricConstants.BIOMETRIC_ERROR_LOCKOUT;
+
+    /**
+     * Mandatory biometrics is not effective.
+     * @hide
+     */
+    public static final int BIOMETRIC_ERROR_MANDATORY_NOT_ACTIVE =
+            BiometricConstants.BIOMETRIC_ERROR_MANDATORY_NOT_ACTIVE;
+
+    /**
+     * Biometrics is not allowed to verify in apps.
+     * @hide
+     */
+    public static final int BIOMETRIC_ERROR_NOT_ENABLED_FOR_APPS =
+            BiometricConstants.BIOMETRIC_ERROR_NOT_ENABLED_FOR_APPS;
+
+    /**
      * A security vulnerability has been discovered and the sensor is unavailable until a
      * security update has addressed this issue. This error can be received if for example,
      * authentication was requested with {@link Authenticators#BIOMETRIC_STRONG}, but the
@@ -113,7 +134,9 @@ public class BiometricManager {
             BIOMETRIC_ERROR_HW_UNAVAILABLE,
             BIOMETRIC_ERROR_NONE_ENROLLED,
             BIOMETRIC_ERROR_NO_HARDWARE,
-            BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED})
+            BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED,
+            BIOMETRIC_ERROR_LOCKOUT,
+            BIOMETRIC_ERROR_MANDATORY_NOT_ACTIVE})
     @Retention(RetentionPolicy.SOURCE)
     public @interface BiometricError {}
 
@@ -415,7 +438,7 @@ public class BiometricManager {
     @RequiresPermission(TEST_BIOMETRIC)
     public BiometricTestSession createTestSession(int sensorId) {
         try {
-            return new BiometricTestSession(mContext, sensorId,
+            return new BiometricTestSession(mContext, getSensorProperties(), sensorId,
                     (context, sensorId1, callback) -> mService
                             .createTestSession(sensorId1, callback, context.getOpPackageName()));
         } catch (RemoteException e) {

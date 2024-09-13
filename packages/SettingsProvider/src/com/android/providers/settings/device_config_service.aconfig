@@ -28,6 +28,13 @@ flag {
 }
 
 flag {
+    name: "use_new_storage_value"
+    namespace: "core_experiments_team_internal"
+    description: "When enabled, read the new storage value in aconfig codegen, and actually use it."
+    bug: "312235596"
+}
+
+flag {
     name: "load_apex_aconfig_protobufs"
     namespace: "core_experiments_team_internal"
     description: "When enabled, loads aconfig default values in apex flag protobufs into DeviceConfig on boot."
@@ -48,6 +55,48 @@ flag {
     description: "When enabled, ignore any flag in the SettingsProvider XML for RO flags."
     bug: "345007098"
     is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "notify_individual_aconfig_sysprop_changed"
+    namespace: "core_experiments_team_internal"
+    description: "When enabled, propagate individual aconfig sys props on flag stage."
+    bug: "331963764"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "check_root_and_read_only"
+    namespace: "core_experiments_team_internal"
+    description: "Check root and aconfig flag permissions in adb shell device_config commands."
+    bug: "342636474"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "sync_local_overrides_removal_new_storage"
+    namespace: "core_experiments_team_internal"
+    description: "When DeviceConfig overrides are deleted, delete new storage overrides too."
+    bug: "361643653"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "support_local_overrides_sysprops"
+    namespace: "core_experiments_team_internal"
+    description: "When DeviceConfig overrides are deleted, delete new storage overrides too."
+    bug: "366022906"
     metadata {
         purpose: PURPOSE_BUGFIX
     }

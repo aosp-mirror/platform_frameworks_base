@@ -25,13 +25,12 @@ import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
 import android.platform.test.annotations.DisabledOnRavenwood;
-import android.platform.test.annotations.IgnoreUnderRavenwood;
 import android.platform.test.annotations.Presubmit;
 import android.platform.test.ravenwood.RavenwoodRule;
 import android.util.Log;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.After;
 import org.junit.Rule;
@@ -131,7 +130,6 @@ public class BundleTest {
     }
 
     @Test
-    @IgnoreUnderRavenwood(blockedBy = ParcelFileDescriptor.class)
     public void testCreateFromParcel() throws Exception {
         boolean withFd;
         Parcel p;
@@ -312,7 +310,7 @@ public class BundleTest {
     }
 
     @Test
-    @IgnoreUnderRavenwood(blockedBy = Parcel.class)
+    @DisabledOnRavenwood(reason = "Ravenwood tests run on the BCP")
     public void kindofEquals_lazyValuesAndDifferentClassLoaders_returnsFalse() {
         Parcelable p1 = new CustomParcelable(13, "Tiramisu");
         Parcelable p2 = new CustomParcelable(13, "Tiramisu");
@@ -368,7 +366,6 @@ public class BundleTest {
     }
 
     @Test
-    @IgnoreUnderRavenwood(blockedBy = Parcel.class)
     public void readWriteLengthMismatch_logsWtf() throws Exception {
         mWtfHandler = Log.setWtfHandler((tag, e, system) -> {
             throw new RuntimeException(e);
@@ -383,7 +380,7 @@ public class BundleTest {
     }
 
     @Test
-    @IgnoreUnderRavenwood(blockedBy = Parcel.class)
+    @DisabledOnRavenwood(reason = "Ravenwood tests run on the BCP")
     public void getParcelable_whenThrowingAndNotDefusing_throws() throws Exception {
         Bundle.setShouldDefuse(false);
         Bundle bundle = new Bundle();
@@ -396,7 +393,7 @@ public class BundleTest {
     }
 
     @Test
-    @IgnoreUnderRavenwood(blockedBy = Parcel.class)
+    @DisabledOnRavenwood(reason = "Ravenwood tests run on the BCP")
     public void getParcelable_whenThrowingAndDefusing_returnsNull() throws Exception {
         Bundle.setShouldDefuse(true);
         Bundle bundle = new Bundle();
@@ -412,7 +409,7 @@ public class BundleTest {
     }
 
     @Test
-    @IgnoreUnderRavenwood(blockedBy = Parcel.class)
+    @DisabledOnRavenwood(reason = "Ravenwood tests run on the BCP")
     public void getParcelable_whenThrowingAndDefusing_leavesElement() throws Exception {
         Bundle.setShouldDefuse(true);
         Bundle bundle = new Bundle();
@@ -447,7 +444,6 @@ public class BundleTest {
     }
 
     @Test
-    @DisabledOnRavenwood(blockedBy = Parcel.class)
     public void parcelledBundleWithBinder_shouldReturnHasBindersTrue() throws Exception {
         Bundle bundle = new Bundle();
         bundle.putParcelable("test", new CustomParcelable(13, "Tiramisu"));
@@ -470,7 +466,6 @@ public class BundleTest {
     }
 
     @Test
-    @DisabledOnRavenwood(blockedBy = Parcel.class)
     public void parcelledBundleWithoutBinder_shouldReturnHasBindersFalse() throws Exception {
         Bundle bundle = new Bundle();
         bundle.putParcelable("test", new CustomParcelable(13, "Tiramisu"));

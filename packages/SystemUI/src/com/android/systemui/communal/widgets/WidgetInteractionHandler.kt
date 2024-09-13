@@ -21,26 +21,93 @@ import android.app.PendingIntent
 import android.content.Intent
 import android.view.View
 import android.widget.RemoteViews
+import com.android.app.tracing.coroutines.launch
+import com.android.keyguard.KeyguardUpdateMonitor
+import com.android.systemui.Flags.communalWidgetTrampolineFix
 import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
+import com.android.systemui.communal.domain.interactor.WidgetTrampolineInteractor
 import com.android.systemui.communal.util.InteractionHandlerDelegate
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.UiBackground
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.core.Logger
+import com.android.systemui.log.dagger.CommunalLog
 import com.android.systemui.plugins.ActivityStarter
 import javax.inject.Inject
+import kotlin.coroutines.CoroutineContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 
 @SysUISingleton
 class WidgetInteractionHandler
 @Inject
 constructor(
+    @Application private val applicationScope: CoroutineScope,
+    @UiBackground private val uiBackgroundContext: CoroutineContext,
     private val activityStarter: ActivityStarter,
-    private val communalSceneInteractor: CommunalSceneInteractor
+    private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
+    communalSceneInteractor: CommunalSceneInteractor,
+    private val widgetTrampolineInteractor: WidgetTrampolineInteractor,
+    @CommunalLog val logBuffer: LogBuffer,
 ) : RemoteViews.InteractionHandler {
+
+    private companion object {
+        const val TAG = "WidgetInteractionHandler"
+    }
 
     private val delegate =
         InteractionHandlerDelegate(
             communalSceneInteractor,
             findViewToAnimate = { view -> view is CommunalAppWidgetHostView },
-            intentStarter = this::startIntent,
+            intentStarter =
+                object : InteractionHandlerDelegate.IntentStarter {
+                    private var job: Job? = null
+
+                    override fun startActivity(
+                        intent: PendingIntent,
+                        fillInIntent: Intent,
+                        activityOptions: ActivityOptions,
+                        controller: ActivityTransitionAnimator.Controller?
+                    ): Boolean {
+                        cancelTrampolineMonitoring()
+                        return startActivityIntent(
+                            intent,
+                            fillInIntent,
+                            activityOptions,
+                            controller
+                        )
+                    }
+
+                    override fun startPendingIntent(
+                        view: View,
+                        pendingIntent: PendingIntent,
+                        fillInIntent: Intent,
+                        activityOptions: ActivityOptions
+                    ): Boolean {
+                        cancelTrampolineMonitoring()
+                        if (communalWidgetTrampolineFix()) {
+                            job =
+                                applicationScope.launch("$TAG#monitorForActivityStart") {
+                                    widgetTrampolineInteractor
+                                        .waitForActivityStartAndDismissKeyguard()
+                                }
+                        }
+                        return super.startPendingIntent(
+                            view,
+                            pendingIntent,
+                            fillInIntent,
+                            activityOptions
+                        )
+                    }
+
+                    private fun cancelTrampolineMonitoring() {
+                        job?.cancel()
+                        job = null
+                    }
+                },
+            logger = Logger(logBuffer, TAG),
         )
 
     override fun onInteraction(
@@ -49,7 +116,7 @@ constructor(
         response: RemoteViews.RemoteResponse
     ): Boolean = delegate.onInteraction(view, pendingIntent, response)
 
-    private fun startIntent(
+    private fun startActivityIntent(
         pendingIntent: PendingIntent,
         fillInIntent: Intent,
         extraOptions: ActivityOptions,
@@ -58,7 +125,14 @@ constructor(
         activityStarter.startPendingIntentMaybeDismissingKeyguard(
             pendingIntent,
             /* dismissShade = */ false,
-            /* intentSentUiThreadCallback = */ null,
+            {
+                applicationScope.launch("$TAG#awakenFromDream", uiBackgroundContext) {
+                    // This activity could have started while the device is dreaming, in which case
+                    // the dream would occlude the activity. In order to show the newly started
+                    // activity, we wake from the dream.
+                    keyguardUpdateMonitor.awakenFromDream()
+                }
+            },
             controller,
             fillInIntent,
             extraOptions.toBundle(),

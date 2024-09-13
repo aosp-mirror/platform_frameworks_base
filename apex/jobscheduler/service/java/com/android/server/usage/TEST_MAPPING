@@ -10,18 +10,10 @@
       ]
     },
     {
-      "name": "CtsBRSTestCases",
-      "options": [
-        {"exclude-annotation": "androidx.test.filters.FlakyTest"},
-        {"exclude-annotation": "org.junit.Ignore"}
-      ]
+      "name": "CtsBRSTestCases"
     },
     {
-      "name": "FrameworksServicesTests",
-      "options": [
-        {"include-filter": "com.android.server.usage"},
-        {"exclude-annotation": "androidx.test.filters.FlakyTest"}
-      ]
+      "name": "FrameworksServicesTests_com_android_server_usage"
     }
   ],
   "postsubmit": [
@@ -29,10 +21,7 @@
       "name": "CtsUsageStatsTestCases"
     },
     {
-      "name": "FrameworksServicesTests",
-      "options": [
-        {"include-filter": "com.android.server.usage"}
-      ]
+      "name": "FrameworksServicesTests_com_android_server_usage"
     }
   ]
 }

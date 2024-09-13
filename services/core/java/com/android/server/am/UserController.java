@@ -131,6 +131,7 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.ObjectUtils;
 import com.android.internal.util.Preconditions;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.server.AlarmManagerInternal;
 import com.android.server.FactoryResetter;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
@@ -245,6 +246,12 @@ class UserController implements Handler.Callback {
      */
     // TODO(b/197344658): Increase to 10s or 15s once we have a switch-UX-is-done invocation too.
     private static final int USER_COMPLETED_EVENT_DELAY_MS = 5 * 1000;
+
+    /**
+     * If a user has an alarm in the next this many milliseconds, avoid stopping it due to
+     * scheduled background stopping.
+     */
+    private static final long TIME_BEFORE_USERS_ALARM_TO_AVOID_STOPPING_MS = 60 * 60_000; // 60 mins
 
     /**
      * Maximum number of users we allow to be running at a time, including system user.
@@ -439,6 +446,15 @@ class UserController implements Handler.Callback {
     @GuardedBy("mLock")
     private final List<PendingUserStart> mPendingUserStarts = new ArrayList<>();
 
+    /**
+     * Contains users which cannot abort the shutdown process.
+     *
+     * <p> For example, we don't abort shutdown for users whose processes have already been stopped
+     * due to {@link #isEarlyPackageKillEnabledForUserSwitch(int, int)}.
+     */
+    @GuardedBy("mLock")
+    private final ArraySet<Integer> mDoNotAbortShutdownUserIds = new ArraySet<>();
+
     private final UserLifecycleListener mUserLifecycleListener = new UserLifecycleListener() {
         @Override
         public void onUserCreated(UserInfo user, Object token) {
@@ -509,16 +525,36 @@ class UserController implements Handler.Callback {
         }
     }
 
-    private boolean shouldStopUserOnSwitch() {
+    private boolean isStopUserOnSwitchEnabled() {
         synchronized (mLock) {
             if (mStopUserOnSwitch != STOP_USER_ON_SWITCH_DEFAULT) {
                 final boolean value = mStopUserOnSwitch == STOP_USER_ON_SWITCH_TRUE;
-                Slogf.i(TAG, "shouldStopUserOnSwitch(): returning overridden value (%b)", value);
+                Slogf.i(TAG, "isStopUserOnSwitchEnabled(): returning overridden value (%b)", value);
                 return value;
             }
         }
         final int property = SystemProperties.getInt("fw.stop_bg_users_on_switch", -1);
         return property == -1 ? mDelayUserDataLocking : property == 1;
+    }
+
+    /**
+     * Get whether or not the previous user's packages will be killed before the user is
+     * stopped during a user switch.
+     *
+     * <p> The primary use case of this method is for {@link com.android.server.SystemService}
+     * classes to call this API in their
+     * {@link com.android.server.SystemService#onUserSwitching} method implementation to prevent
+     * restarting any of the previous user's processes that will be killed during the user switch.
+     */
+    boolean isEarlyPackageKillEnabledForUserSwitch(int fromUserId, int toUserId) {
+        // NOTE: The logic in this method could be extended to cover other cases where
+        // the previous user is also stopped like: guest users, ephemeral users,
+        // and users with DISALLOW_RUN_IN_BACKGROUND. Currently, this is not done
+        // because early killing is not enabled for these cases by default.
+        if (fromUserId == UserHandle.USER_SYSTEM) {
+            return false;
+        }
+        return isStopUserOnSwitchEnabled();
     }
 
     void finishUserSwitch(UserState uss) {
@@ -1247,6 +1283,7 @@ class UserController implements Handler.Callback {
                 return;
             }
             uss.setState(UserState.STATE_SHUTDOWN);
+            mDoNotAbortShutdownUserIds.remove(userId);
         }
         TimingsTraceAndSlog t = new TimingsTraceAndSlog();
         t.traceBegin("setUserState-STATE_SHUTDOWN-" + userId + "-[stopUser]");
@@ -1555,7 +1592,8 @@ class UserController implements Handler.Callback {
 
     private void stopPackagesOfStoppedUser(@UserIdInt int userId, String reason) {
         if (DEBUG_MU) Slogf.i(TAG, "stopPackagesOfStoppedUser(%d): %s", userId, reason);
-        mInjector.activityManagerForceStopPackage(userId, reason);
+        mInjector.activityManagerForceStopUserPackages(userId, reason,
+                /* evenImportantServices= */ true);
         if (mInjector.getUserManager().isPreCreated(userId)) {
             // Don't fire intent for precreated.
             return;
@@ -1606,6 +1644,21 @@ class UserController implements Handler.Callback {
                 stopUsersLU(oldUserId, /* allowDelayedLocking= */ false, null, null);
             }
         }
+    }
+
+    private void stopPreviousUserPackagesIfEnabled(int fromUserId, int toUserId) {
+        if (!android.multiuser.Flags.stopPreviousUserApps()
+                || !isEarlyPackageKillEnabledForUserSwitch(fromUserId, toUserId)) {
+            return;
+        }
+        // Stop the previous user's packages early to reduce resource usage
+        // during user switching. Only do this when the previous user will
+        // be stopped regardless.
+        synchronized (mLock) {
+            mDoNotAbortShutdownUserIds.add(fromUserId);
+        }
+        mInjector.activityManagerForceStopUserPackages(fromUserId,
+                "early stop user packages", /* evenImportantServices= */ false);
     }
 
     void scheduleStartProfiles() {
@@ -1889,7 +1942,8 @@ class UserController implements Handler.Callback {
                     updateStartedUserArrayLU();
                     needStart = true;
                     updateUmState = true;
-                } else if (uss.state == UserState.STATE_SHUTDOWN) {
+                } else if (uss.state == UserState.STATE_SHUTDOWN
+                        || mDoNotAbortShutdownUserIds.contains(userId)) {
                     Slogf.i(TAG, "User #" + userId
                             + " is shutting down - will start after full shutdown");
                     mPendingUserStarts.add(new PendingUserStart(userId, userStartMode,
@@ -1924,6 +1978,7 @@ class UserController implements Handler.Callback {
                 boolean userSwitchUiEnabled;
                 synchronized (mLock) {
                     mCurrentUserId = userId;
+                    ActivityManager.invalidateGetCurrentUserIdCache();
                     userSwitchUiEnabled = mUserSwitchUiEnabled;
                 }
                 mInjector.updateUserConfiguration();
@@ -2185,6 +2240,7 @@ class UserController implements Handler.Callback {
                 return true;
             }
             mTargetUserId = targetUserId;
+            ActivityManager.invalidateGetCurrentUserIdCache();
             userSwitchUiEnabled = mUserSwitchUiEnabled;
         }
         if (userSwitchUiEnabled) {
@@ -2262,6 +2318,7 @@ class UserController implements Handler.Callback {
         synchronized (mLock) {
             nextUserId = ObjectUtils.getOrElse(mPendingTargetUserIds.poll(), UserHandle.USER_NULL);
             mTargetUserId = UserHandle.USER_NULL;
+            ActivityManager.invalidateGetCurrentUserIdCache();
         }
         if (nextUserId != UserHandle.USER_NULL) {
             switchUser(nextUserId);
@@ -2293,7 +2350,7 @@ class UserController implements Handler.Callback {
                 hasUserRestriction(UserManager.DISALLOW_RUN_IN_BACKGROUND, oldUserId);
         synchronized (mLock) {
             // If running in background is disabled or mStopUserOnSwitch mode, stop the user.
-            if (hasRestriction || shouldStopUserOnSwitch()) {
+            if (hasRestriction || isStopUserOnSwitchEnabled()) {
                 Slogf.i(TAG, "Stopping user %d and its profiles on user switch", oldUserId);
                 stopUsersLU(oldUserId, /* allowDelayedLocking= */ false, null, null);
                 return;
@@ -2371,6 +2428,12 @@ class UserController implements Handler.Callback {
     void processScheduledStopOfBackgroundUser(Integer userIdInteger) {
         final int userId = userIdInteger;
         Slogf.d(TAG, "Considering stopping background user %d due to inactivity", userId);
+
+        if (avoidStoppingUserDueToUpcomingAlarm(userId)) {
+            // We want this user running soon for alarm-purposes, so don't stop it now. Reschedule.
+            scheduleStopOfBackgroundUser(userId);
+            return;
+        }
         synchronized (mLock) {
             if (getCurrentOrTargetUserIdLU() == userId) {
                 return;
@@ -2388,6 +2451,18 @@ class UserController implements Handler.Callback {
             Slogf.i(TAG, "Stopping background user %d due to inactivity", userId);
             stopUsersLU(userId, /* allowDelayedLocking= */ true, null, null);
         }
+    }
+
+    /**
+     * Returns whether we should avoid stopping the user now due to it having an alarm set to fire
+     * soon.
+     */
+    private boolean avoidStoppingUserDueToUpcomingAlarm(@UserIdInt int userId) {
+        final long alarmWallclockMs
+                = mInjector.getAlarmManagerInternal().getNextAlarmTriggerTimeForUser(userId);
+        return System.currentTimeMillis() <  alarmWallclockMs
+                && (alarmWallclockMs
+                    < System.currentTimeMillis() + TIME_BEFORE_USERS_ALARM_TO_AVOID_STOPPING_MS);
     }
 
     private void timeoutUserSwitch(UserState uss, int oldUserId, int newUserId) {
@@ -2949,6 +3024,9 @@ class UserController implements Handler.Callback {
         mInjector.getUserManagerInternal().addUserLifecycleListener(mUserLifecycleListener);
         updateProfileRelatedCaches();
         mInjector.reportCurWakefulnessUsageEvent();
+
+        // IpcDataCache must be invalidated before it starts caching.
+        ActivityManager.invalidateGetCurrentUserIdCache();
     }
 
     // TODO(b/266158156): remove this method if initial system user boot logic is refactored?
@@ -3112,6 +3190,9 @@ class UserController implements Handler.Callback {
 
     @GuardedBy("mLock")
     private int getCurrentOrTargetUserIdLU() {
+        // Note: this result is currently cached by ActivityManager.getCurrentUser() - changes to
+        // the logic here may require updating how the cache is invalidated.
+        // See ActivityManager.invalidateGetCurrentUserIdCache() for more details.
         return mTargetUserId != UserHandle.USER_NULL ? mTargetUserId : mCurrentUserId;
     }
 
@@ -3425,7 +3506,7 @@ class UserController implements Handler.Callback {
             pw.println("  mLastActiveUsersForDelayedLocking:" + mLastActiveUsersForDelayedLocking);
             pw.println("  mDelayUserDataLocking:" + mDelayUserDataLocking);
             pw.println("  mAllowUserUnlocking:" + mAllowUserUnlocking);
-            pw.println("  shouldStopUserOnSwitch():" + shouldStopUserOnSwitch());
+            pw.println("  isStopUserOnSwitchEnabled():" + isStopUserOnSwitchEnabled());
             pw.println("  mStopUserOnSwitch:" + mStopUserOnSwitch);
             pw.println("  mMaxRunningUsers:" + mMaxRunningUsers);
             pw.println("  mBackgroundUserScheduledStopTimeSecs:"
@@ -3522,6 +3603,7 @@ class UserController implements Handler.Callback {
                         Integer.toString(msg.arg1), msg.arg1);
 
                 mInjector.getSystemServiceManager().onUserSwitching(msg.arg2, msg.arg1);
+                stopPreviousUserPackagesIfEnabled(msg.arg2, msg.arg1);
                 scheduleOnUserCompletedEvent(msg.arg1,
                         UserCompletedEventType.EVENT_TYPE_USER_SWITCHING,
                         USER_COMPLETED_EVENT_DELAY_MS);
@@ -3860,6 +3942,10 @@ class UserController implements Handler.Callback {
             return mPowerManagerInternal;
         }
 
+        AlarmManagerInternal getAlarmManagerInternal() {
+            return LocalServices.getService(AlarmManagerInternal.class);
+        }
+
         KeyguardManager getKeyguardManager() {
             return mService.mContext.getSystemService(KeyguardManager.class);
         }
@@ -3896,10 +3982,10 @@ class UserController implements Handler.Callback {
             }.sendNext();
         }
 
-        void activityManagerForceStopPackage(@UserIdInt int userId, String reason) {
+        void activityManagerForceStopUserPackages(@UserIdInt int userId, String reason,
+                boolean evenImportantServices) {
             synchronized (mService) {
-                mService.forceStopPackageLocked(null, -1, false, false, true, false, false, false,
-                        userId, reason);
+                mService.forceStopUserPackagesLocked(userId, reason, evenImportantServices);
             }
         };
 

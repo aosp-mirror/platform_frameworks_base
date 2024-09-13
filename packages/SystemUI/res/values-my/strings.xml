@@ -104,13 +104,18 @@
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> နှင့် အခြားဖွင့်ထားသော အက်ပ်များက ဤဖန်သားပြင်ဓာတ်ပုံကို တွေ့ရှိသည်။"</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"မှတ်စုတွင် ထည့်ရန်"</string>
     <string name="backlinks_include_link" msgid="4562093591148248158">"လင့်ခ်ထည့်သွင်းရန်"</string>
+    <string name="backlinks_duplicate_label_format" msgid="558445128952827926">"<xliff:g id="APPNAME">%1$s</xliff:g> <xliff:g id="FREQUENCYCOUNT">(%2$d)</xliff:g>"</string>
+    <string name="backlinks_cross_profile_error" msgid="1355798585727802282">"လင့်ခ်များကို အခြားပရိုဖိုင်များမှ ထည့်၍မရပါ"</string>
     <string name="screenrecord_title" msgid="4257171601439507792">"ဖန်သားပြင်ရိုက်ကူးစက်"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"စကရင်ရိုက်ကူးမှု အပြီးသတ်နေသည်"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ဖန်သားပြင် ရိုက်ကူးသည့် စက်ရှင်အတွက် ဆက်တိုက်လာနေသော အကြောင်းကြားချက်"</string>
-    <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"ရုပ်သံဖမ်းခြင်း စတင်မလား။"</string>
-    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"ရုပ်သံဖမ်းနေစဉ် Android သည် သင့်ဖန်သားပြင်တွင် မြင်နိုင်သည့် (သို့) သင့်စက်တွင် ဖွင့်ထားသည့် အရာအားလုံးကို တွေ့နိုင်သည်။ စကားဝှက်၊ ငွေပေးချေမှု အချက်အလက်၊ မက်ဆေ့ဂျ်၊ ဓာတ်ပုံ၊ အသံနှင့် ဗီဒီယိုကဲ့သို့ အရာများကို ဂရုစိုက်ပါ။"</string>
-    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"အက်ပ်တစ်ခုကို ရုပ်သံဖမ်းနေစဉ် Android သည် ယင်းအက်ပ်တွင် ပြထားသည့် (သို့) ဖွင့်ထားသည့် အရာအားလုံးကို တွေ့နိုင်သည်။ ထို့ကြောင့် စကားဝှက်၊ ငွေပေးချေမှု အချက်အလက်၊ မက်ဆေ့ဂျ်၊ ဓာတ်ပုံ၊ အသံနှင့် ဗီဒီယိုကဲ့သို့ အရာများကို ဂရုစိုက်ပါ။"</string>
-    <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"ရုပ်သံ စဖမ်းရန်"</string>
+    <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"ဖန်သားပြင်ကို ရိုက်ကူးမလား။"</string>
+    <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"အက်ပ်တစ်ခုကို ရိုက်ကူးရန်"</string>
+    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"ဖန်သားပြင်တစ်ခုလုံးကို ရိုက်ကူးရန်"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"သင့်ဖန်သားပြင်တစ်ခုလုံး ရိုက်ကူးနေချိန်တွင် ဖန်သားပြင်တွင် ပြထားသည့် အရာအားလုံးကို ရိုက်ကူးသည်။ စကားဝှက်၊ ငွေပေးချေမှု အချက်အလက်၊ မက်ဆေ့ဂျ်၊ ဓာတ်ပုံ၊ အသံနှင့် ဗီဒီယိုကဲ့သို့ အရာများကို ဂရုစိုက်ပါ။"</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"အက်ပ်ကို ရိုက်ကူးနေချိန်တွင် ယင်းအက်ပ်တွင် ပြထားသော (သို့) ဖွင့်ထားသော အရာအားလုံးကို ရိုက်ကူးသည်။ စကားဝှက်၊ ငွေပေးချေမှု အချက်အလက်၊ မက်ဆေ့ဂျ်၊ ဓာတ်ပုံ၊ အသံနှင့် ဗီဒီယိုကဲ့သို့ အရာများကို ဂရုစိုက်ပါ။"</string>
+    <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"ဖန်သားပြင်ကို ရိုက်ကူးရန်"</string>
+    <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"ရိုက်ကူးရန် အက်ပ်ရွေးခြင်း"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"အသံဖမ်းရန်"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"စက်ပစ္စည်းအသံ"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"သီချင်း၊ ဖုန်းခေါ်ဆိုမှုနှင့် ဖုန်းမြည်သံကဲ့သို့ သင့်စက်ပစ္စည်းမှ အသံ"</string>
@@ -126,38 +131,25 @@
     <string name="screenrecord_save_text" msgid="3008973099800840163">"ကြည့်ရှုရန် တို့ပါ"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"ဖန်သားပြင်ရိုက်ကူးမှုကို သိမ်းရာတွင် အမှားရှိသည်"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"ဖန်သားပြင် ရိုက်ကူးမှု စတင်ရာတွင် အမှားအယွင်းရှိနေသည်"</string>
-    <!-- no translation found for screenrecord_stop_dialog_title (8716193661764511095) -->
-    <skip />
-    <!-- no translation found for screenrecord_stop_dialog_message (6262768207331626817) -->
-    <skip />
-    <!-- no translation found for screenrecord_stop_dialog_message_specific_app (5995770227684523244) -->
-    <skip />
+    <string name="screenrecord_stop_dialog_title" msgid="8716193661764511095">"ရိုက်ကူးခြင်း ရပ်မလား။"</string>
+    <string name="screenrecord_stop_dialog_message" msgid="6262768207331626817">"သင်သည် လက်ရှိတွင် ဖန်သားပြင်တစ်ခုလုံးကို ရိုက်ကူးနေသည်"</string>
+    <string name="screenrecord_stop_dialog_message_specific_app" msgid="5995770227684523244">"သင်သည် လက်ရှိတွင် <xliff:g id="APP_NAME">%1$s</xliff:g> ကို ရိုက်ကူးနေသည်"</string>
     <string name="screenrecord_stop_dialog_button" msgid="2883812564938194350">"ရိုက်ကူးမှု ရပ်ရန်"</string>
     <string name="share_to_app_chip_accessibility_label" msgid="4210256229976947065">"ဖန်သားပြင်ကို မျှဝေနေသည်"</string>
     <string name="share_to_app_stop_dialog_title" msgid="9212915050910250438">"ဖန်သားပြင်မျှဝေခြင်း ရပ်မလား။"</string>
-    <!-- no translation found for share_to_app_stop_dialog_message_entire_screen_with_host_app (522823522115375414) -->
-    <skip />
-    <!-- no translation found for share_to_app_stop_dialog_message_entire_screen (5090115386271179270) -->
-    <skip />
-    <!-- no translation found for share_to_app_stop_dialog_message_single_app_specific (5923772039347985172) -->
-    <skip />
-    <!-- no translation found for share_to_app_stop_dialog_message_single_app_generic (6681016774654578261) -->
-    <skip />
+    <string name="share_to_app_stop_dialog_message_entire_screen_with_host_app" msgid="522823522115375414">"သင်သည် လက်ရှိတွင် <xliff:g id="HOST_APP_NAME">%1$s</xliff:g> ဖြင့် ဖန်သားပြင်တစ်ခုလုံးကို မျှဝေနေသည်"</string>
+    <string name="share_to_app_stop_dialog_message_entire_screen" msgid="5090115386271179270">"သင်သည် လက်ရှိတွင် အက်ပ်တစ်ခုဖြင့် ဖန်သားပြင်တစ်ခုလုံးကို မျှဝေနေသည်"</string>
+    <string name="share_to_app_stop_dialog_message_single_app_specific" msgid="5923772039347985172">"သင်သည် လက်ရှိတွင် <xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g> ကို မျှဝေနေသည်"</string>
+    <string name="share_to_app_stop_dialog_message_single_app_generic" msgid="6681016774654578261">"သင်သည် လက်ရှိတွင် အက်ပ်ကို မျှဝေနေသည်"</string>
     <string name="share_to_app_stop_dialog_button" msgid="6334056916284230217">"မျှဝေခြင်း ရပ်ရန်"</string>
     <string name="cast_screen_to_other_device_chip_accessibility_label" msgid="4687917476203009885">"ဖန်သားပြင်ကို ကာစ်လုပ်နေသည်"</string>
     <string name="cast_to_other_device_stop_dialog_title" msgid="7836517190930357326">"ကာစ်လုပ်ခြင်းကို ရပ်လိုသလား။"</string>
-    <!-- no translation found for cast_to_other_device_stop_dialog_message_entire_screen_with_device (1474703115926205251) -->
-    <skip />
-    <!-- no translation found for cast_to_other_device_stop_dialog_message_entire_screen (8419219169553867625) -->
-    <skip />
-    <!-- no translation found for cast_to_other_device_stop_dialog_message_specific_app_with_device (2715934698604085519) -->
-    <skip />
-    <!-- no translation found for cast_to_other_device_stop_dialog_message_specific_app (8616103075630934513) -->
-    <skip />
-    <!-- no translation found for cast_to_other_device_stop_dialog_message_generic_with_device (9213582497852420203) -->
-    <skip />
-    <!-- no translation found for cast_to_other_device_stop_dialog_message_generic (4100272100480415076) -->
-    <skip />
+    <string name="cast_to_other_device_stop_dialog_message_entire_screen_with_device" msgid="1474703115926205251">"သင်သည် လက်ရှိတွင် ဖန်သားပြင်တစ်ခုလုံးကို <xliff:g id="DEVICE_NAME">%1$s</xliff:g> သို့ ကာစ်လုပ်နေသည်"</string>
+    <string name="cast_to_other_device_stop_dialog_message_entire_screen" msgid="8419219169553867625">"သင်သည် လက်ရှိတွင် ဖန်သားပြင်တစ်ခုလုံးကို အနီးတစ်ဝိုက်ရှိ စက်သို့ ကာစ်လုပ်နေသည်"</string>
+    <string name="cast_to_other_device_stop_dialog_message_specific_app_with_device" msgid="2715934698604085519">"သင်သည် လက်ရှိတွင် <xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g> ကို <xliff:g id="DEVICE_NAME">%2$s</xliff:g> သို့ ကာစ်လုပ်နေသည်"</string>
+    <string name="cast_to_other_device_stop_dialog_message_specific_app" msgid="8616103075630934513">"သင်သည် လက်ရှိတွင် <xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g> ကို အနီးတစ်ဝိုက်ရှိ စက်သို့ ကာစ်လုပ်နေသည်"</string>
+    <string name="cast_to_other_device_stop_dialog_message_generic_with_device" msgid="9213582497852420203">"သင်သည် လက်ရှိတွင် <xliff:g id="DEVICE_NAME">%1$s</xliff:g> သို့ ကာစ်လုပ်နေသည်"</string>
+    <string name="cast_to_other_device_stop_dialog_message_generic" msgid="4100272100480415076">"သင်သည် လက်ရှိတွင် အနီးတစ်ဝိုက်ရှိ စက်သို့ ကာစ်လုပ်နေသည်"</string>
     <string name="cast_to_other_device_stop_dialog_button" msgid="6420183747435521834">"ကာစ် ရပ်ရန်"</string>
     <string name="close_dialog_button" msgid="4749497706540104133">"ပိတ်ရန်"</string>
     <string name="issuerecord_title" msgid="286627115110121849">"ပြဿနာရိုက်ကူးစနစ်"</string>
@@ -189,8 +181,6 @@
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"ပို့ရန်"</string>
     <string name="cancel" msgid="1089011503403416730">"မလုပ်တော့"</string>
     <string name="biometric_dialog_logo" msgid="7681107853070774595">"အက်ပ်လိုဂို"</string>
-  <string-array name="biometric_dialog_package_names_for_logo_with_overrides">
-  </string-array>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"အတည်ပြုရန်"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"ထပ်စမ်းကြည့်ရန်"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"အထောက်အထားစိစစ်ခြင်းကို ပယ်ဖျက်ရန် တို့ပါ"</string>
@@ -303,8 +293,7 @@
     <string name="start_dreams" msgid="9131802557946276718">"စခရင်နားချိန်ပုံ"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"အီသာနက်"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"မနှောင့်ယှက်ရ"</string>
-    <!-- no translation found for quick_settings_modes_label (5407025818652750501) -->
-    <skip />
+    <string name="quick_settings_modes_label" msgid="879156359479504244">"မုဒ်များ"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"ဘလူးတုသ်"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"ချိတ်တွဲထားသည့် ကိရိယာများ မရှိ"</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"စက်ကို ချိတ်ဆက်ရန် (သို့) ချိတ်ဆက်မှုဖြုတ်ရန် တို့ပါ"</string>
@@ -313,6 +302,7 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"ဘလူးတုသ်သုံးရန်"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"ချိတ်ဆက်ထားသည်"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"အော်ဒီယို မျှဝေခြင်း"</string>
+    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="3227408556754456024">"အသံ ပြောင်းရန်/မျှဝေရန် တို့ပါ"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"သိမ်းထားသည်"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"ချိတ်ဆက်မှုဖြုတ်ရန်"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"စသုံးရန်"</string>
@@ -321,6 +311,7 @@
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"မနက်ဖြန်နံနက်တွင် ဘလူးတုသ် ပွင့်ပါမည်"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"အသံမျှဝေရန်"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"အသံမျှဝေနေသည်"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"အော်ဒီယို မျှဝေခြင်း ဆက်တင်များ ထည့်ရန်"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> ဘက်ထရီ"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"အသံ"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"မိုက်ခွက်ပါနားကြပ်"</string>
@@ -402,6 +393,9 @@
     <string name="performance" msgid="6552785217174378320">"စွမ်းဆောင်ရည်"</string>
     <string name="user_interface" msgid="3712869377953950887">"သုံးသူအတွက် ကြားခံစနစ်"</string>
     <string name="thermal" msgid="6758074791325414831">"အပူဓာတ်"</string>
+    <string name="custom" msgid="3337456985275158299">"စိတ်ကြိုက်"</string>
+    <string name="custom_trace_settings_dialog_title" msgid="2608570500144830554">"စိတ်ကြိုက်လုပ်ဆောင်ချက်မှတ်တမ်း ဆက်တင်များ"</string>
+    <string name="restore_default" msgid="5259420807486239755">"မူရင်းအတိုင်း ပြန်ပြောင်းရန်"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"လက်တစ်ဖက်သုံးမုဒ်"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"နားကြားကိရိယာ"</string>
     <string name="quick_settings_hearing_devices_connected" msgid="6519069502397037781">"သုံးနေသည်"</string>
@@ -411,7 +405,7 @@
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"စက်အသစ် တွဲချိတ်ရန် နှိပ်ပါ"</string>
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"အသင့်သုံးကို အပ်ဒိတ်လုပ်၍မရပါ"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"ကြိုတင်သတ်မှတ်ချက်"</string>
-    <string name="live_caption_title" msgid="8916875614623730005">"တိုက်ရိုက်စာတန်း"</string>
+    <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"တိုက်ရိုက်စာတန်း"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"စက်၏မိုက်ခရိုဖုန်းကို ပြန်ဖွင့်မလား။"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"စက်၏ကင်မရာကို ပြန်ဖွင့်မလား။"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"စက်၏ကင်မရာနှင့် မိုက်ခရိုဖုန်းကို ပြန်ဖွင့်မလား။"</string>
@@ -440,6 +434,15 @@
     <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"ဆက်တင်များဖွင့်ရန်"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"အခြားစက်ပစ္စည်း"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"ဖွင့်၊ ပိတ် အနှစ်ချုပ်"</string>
+    <string name="zen_modes_dialog_title" msgid="8854640808100096934">"မုဒ်များ"</string>
+    <string name="zen_modes_dialog_done" msgid="6654130880256438950">"ပြီးပြီ"</string>
+    <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"ဆက်တင်များ"</string>
+    <string name="zen_mode_on" msgid="9085304934016242591">"ဖွင့်"</string>
+    <string name="zen_mode_on_with_details" msgid="7416143430557895497">"ဖွင့် • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
+    <string name="zen_mode_off" msgid="1736604456618147306">"ပိတ်"</string>
+    <string name="zen_mode_set_up" msgid="7457957033034460064">"စနစ်ထည့်သွင်းရန်"</string>
+    <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"ဆက်တင်များတွင် စီမံရန်"</string>
+    <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{အသုံးပြုနေသော မုဒ်မရှိပါ}=1{{mode} ကို အသုံးပြုနေသည်}other{မုဒ် # ခုကို အသုံးပြုနေသည်}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"နှိုးစက်သံ၊ သတိပေးချက်အသံများ၊ ပွဲစဉ်သတိပေးသံများနှင့် သင်ခွင့်ပြုထားသူများထံမှ ဖုန်းခေါ်မှုများမှလွဲ၍ အခြားအသံများနှင့် တုန်ခါမှုများက သင့်ကို အနှောင့်အယှက်ပြုမည် မဟုတ်ပါ။ သို့သော်လည်း သီချင်း၊ ဗီဒီယိုနှင့် ဂိမ်းများအပါအဝင် သင်ကရွေးချယ်ဖွင့်ထားသည့် အရာတိုင်း၏ အသံကိုမူ ကြားနေရဆဲဖြစ်ပါလိမ့်မည်။"</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"နှိုးစက်သံမှလွဲ၍ အခြားအသံများနှင့် တုန်ခါမှုများက သင့်ကို အနှောင့်အယှက်ပြုမည် မဟုတ်ပါ။ သို့သော်လည်း သီချင်း၊ ဗီဒီယိုနှင့် ဂိမ်းများအပါအဝင် သင်ကရွေးချယ်ဖွင့်ထားသည့် အရာတိုင်း၏ အသံကိုမူ ကြားနေရဆဲဖြစ်ပါလိမ့်မည်။"</string>
     <string name="zen_priority_customize_button" msgid="4119213187257195047">"စိတ်ကြိုက် ပြုလုပ်ရန်"</string>
@@ -478,6 +481,7 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • နှေးကွေးစွာ အားသွင်းနေသည် • အားပြည့်ရန် <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> လိုသည်"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • အားသွင်းနေသည် • အားပြည့်ရန် <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> လိုသည်"</string>
     <string name="accessibility_action_open_communal_hub" msgid="3081702792413787849">"လော့ခ်မျက်နှာပြင်ရှိ ဝိဂျက်များ"</string>
+    <string name="accessibility_announcement_communal_widget_added" msgid="6911593106099328271">"<xliff:g id="WIDGET_NAME">%1$s</xliff:g> ဝိဂျက်ကို လော့ခ်မျက်နှာပြင်တွင် ထည့်ထားသည်"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"အများသုံးရှင်းလင်းပို့ချချက် စတင်ရန် ဘယ်သို့ပွတ်ဆွဲပါ"</string>
     <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"စိတ်ကြိုက်လုပ်ရန်"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"ပယ်ရန်"</string>
@@ -504,10 +508,9 @@
     <string name="accessibility_action_label_select_widget" msgid="8897281501387398191">"ဝိဂျက် ရွေးရန်"</string>
     <string name="accessibility_action_label_remove_widget" msgid="3373779447448758070">"ဝိဂျက် ဖယ်ရှားရန်"</string>
     <string name="accessibility_action_label_place_widget" msgid="1914197458644168978">"ရွေးချယ်ထားသော ဝိဂျက်ကို တင်ရန်"</string>
-    <!-- no translation found for communal_widget_picker_title (1953369090475731663) -->
-    <skip />
-    <!-- no translation found for communal_widget_picker_description (490515450110487871) -->
-    <skip />
+    <string name="communal_widget_picker_title" msgid="1953369090475731663">"လော့ခ်မျက်နှာပြင် ဝိဂျက်များ"</string>
+    <string name="communal_widget_picker_description" msgid="490515450110487871">"တက်ဘလက်လော့ခ်ချထားသော်လည်း မည်သူမဆို လော့ခ်မျက်နှာပြင်ဝိဂျက်ကို ကြည့်နိုင်သည်။"</string>
+    <string name="accessibility_action_label_unselect_widget" msgid="1041811747619468698">"ဝိဂျက် ပြန်ဖြုတ်ရန်"</string>
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"လော့ခ်မျက်နှာပြင် ဝိဂျက်များ"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"ဝိဂျက်သုံး၍ အက်ပ်ဖွင့်ရန်အတွက် သင်ဖြစ်ကြောင်း အတည်ပြုရန်လိုသည်။ ထို့ပြင် သင့်တက်ဘလက် လော့ခ်ချထားချိန်၌ပင် မည်သူမဆို ၎င်းတို့ကို ကြည့်နိုင်ကြောင်း သတိပြုပါ။ ဝိဂျက်အချို့ကို လော့ခ်မျက်နှာပြင်အတွက် ရည်ရွယ်ထားခြင်း မရှိသဖြင့် ဤနေရာတွင် ထည့်ပါက မလုံခြုံနိုင်ပါ။"</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"နားလည်ပြီ"</string>
@@ -530,22 +533,31 @@
     <string name="media_projection_dialog_warning" msgid="1303664408388363598">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> သည် ရုပ်သံဖမ်းနေစဉ် (သို့) ကာစ်လုပ်နေစဉ် သင့်မျက်နှာပြင်တွင် မြင်ရသော (သို့) သင့်စက်တွင် ဖွင့်ထားသော အချက်အလက်မှန်သမျှကို သုံးနိုင်ပါမည်။ ၎င်းတွင် စကားဝှက်များ၊ ငွေပေးချေမှုအသေးစိတ်များ၊ ဓာတ်ပုံများ၊ မက်ဆေ့ဂျ်များနှင့် သင်ဖွင့်သည့်အသံကဲ့သို့သော အချက်အလက်များ ပါဝင်သည်။"</string>
     <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"ရုပ်သံဖမ်းခြင်း (သို့) ကာစ်လုပ်ခြင်း စမလား။"</string>
     <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"ဤလုပ်ဆောင်ချက်ကို ပေးအပ်သည့် ဝန်ဆောင်မှုသည် ရုပ်သံဖမ်းနေစဉ် (သို့) ကာစ်လုပ်နေစဉ် သင့်မျက်နှာပြင်တွင် မြင်ရသော (သို့) သင့်စက်တွင် ဖွင့်ထားသော အချက်အလက်မှန်သမျှကို သုံးနိုင်ပါမည်။ ၎င်းတွင် စကားဝှက်များ၊ ငွေပေးချေမှုအသေးစိတ်များ၊ ဓာတ်ပုံများ၊ မက်ဆေ့ဂျ်များနှင့် သင်ဖွင့်သည့်အသံကဲ့သို့သော အချက်အလက်များ ပါဝင်သည်။"</string>
-    <string name="screen_share_permission_dialog_option_entire_screen" msgid="3131200488455089620">"ဖန်သားပြင်တစ်ခုလုံး"</string>
-    <string name="screen_share_permission_dialog_option_single_app" msgid="4350961814397220929">"အက်ပ်တစ်ခုတွင်"</string>
-    <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"အက်ပ် မျှဝေခြင်း (သို့) ရိုက်ကူးခြင်း"</string>
-    <string name="media_projection_entry_app_permission_dialog_title" msgid="9155535851866407199">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> နှင့် ရုပ်သံဖမ်းခြင်း သို့မဟုတ် ကာစ်လုပ်ခြင်း စတင်မလား။"</string>
-    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"မျှဝေ၊ ရုပ်သံဖမ်း (သို့) ကာစ်လုပ်သည့်အခါ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> သည် သင့်ဖန်သားပြင်ရှိ မြင်နိုင်သည့် (သို့) သင့်စက်တွင် ဖွင့်ထားသည့် အရာအားလုံးကို တွေ့နိုင်သည်။ စကားဝှက်၊ ငွေပေးချေမှု အချက်အလက်၊ မက်ဆေ့ဂျ်၊ ဓာတ်ပုံ၊ အသံနှင့် ဗီဒီယိုကဲ့သို့ အရာများကို ဂရုစိုက်ပါ။"</string>
-    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"အက်ပ်တစ်ခုဖြင့် မျှဝေ၊ ရုပ်သံဖမ်း (သို့) ကာစ်လုပ်သည့်အခါ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> သည် ယင်းအက်ပ်တွင် ပြထားသည့် (သို့) ဖွင့်ထားသည့် အရာအားလုံးကို တွေ့နိုင်သည်။ ထို့ကြောင့် စကားဝှက်၊ ငွေပေးချေမှု အချက်အလက်၊ မက်ဆေ့ဂျ်၊ ဓာတ်ပုံ၊ အသံနှင့် ဗီဒီယိုကဲ့သို့အရာများကို ဂရုစိုက်ပါ။"</string>
-    <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"စတင်ရန်"</string>
+    <string name="screen_share_generic_app_selector_title" msgid="8331515850599218288">"အက်ပ် မျှဝေခြင်း (သို့) ရိုက်ကူးခြင်း"</string>
+    <string name="media_projection_entry_app_permission_dialog_title" msgid="4613857256721708062">"သင့်စခရင်ကို <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> နှင့် မျှဝေမလား။"</string>
+    <string name="screen_share_permission_dialog_option_single_app" msgid="2974054871681567314">"အက်ပ်တစ်ခု မျှဝေရန်"</string>
+    <!-- no translation found for media_projection_entry_app_permission_dialog_option_text_single_app (2308901434964846084) -->
+    <skip />
+    <string name="screen_share_permission_dialog_option_entire_screen" msgid="4493174362775038997">"စခရင်တစ်ခုလုံး မျှဝေရန်"</string>
+    <!-- no translation found for media_projection_entry_app_permission_dialog_option_text_entire_screen (5100078808078139706) -->
+    <skip />
+    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="5504288438067851086">"သင့်စခရင်တစ်ခုလုံးကို မျှဝေနေချိန်တွင် စခရင်ပေါ်ရှိ အရာအားလုံးကို <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> က မြင်နိုင်သည်။ စကားဝှက်၊ ငွေပေးချေမှု အချက်အလက်၊ မက်ဆေ့ဂျ်၊ ဓာတ်ပုံ၊ အသံနှင့် ဗီဒီယိုကဲ့သို့ အရာများကို ဂရုစိုက်ပါ။"</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="7094417930857938876">"အက်ပ်ကို မျှဝေနေချိန်တွင် ယင်းအက်ပ်တွင် ပြထားသော (သို့) ဖွင့်ထားသော အရာအားလုံးကို <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> က မြင်နိုင်သည်။ စကားဝှက်၊ ငွေပေးချေမှု အချက်အလက်၊ မက်ဆေ့ဂျ်၊ ဓာတ်ပုံ၊ အသံနှင့် ဗီဒီယိုကဲ့သို့ အရာများကို ဂရုစိုက်ပါ။"</string>
+    <string name="media_projection_entry_app_permission_dialog_continue_entire_screen" msgid="1850848182344377579">"စခရင် မျှဝေရန်"</string>
     <string name="media_projection_entry_app_permission_dialog_single_app_disabled" msgid="8999903044874669995">"<xliff:g id="APP_NAME">%1$s</xliff:g> သည် ဤရွေးစရာကို ပိတ်ထားသည်"</string>
-    <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"ကာစ်လုပ်ခြင်း စမလား။"</string>
-    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"ကာစ်လုပ်သည့်အခါ Android သည် သင့်ဖန်သားပြင်ရှိ မြင်နိုင်သည့် (သို့) သင့်စက်တွင် ဖွင့်ထားသည့် အရာအားလုံးကို တွေ့နိုင်သည်။ စကားဝှက်၊ ငွေပေးချေမှု အချက်အလက်၊ မက်ဆေ့ဂျ်၊ ဓာတ်ပုံ၊ အသံနှင့် ဗီဒီယိုကဲ့သို့ အရာများကို ဂရုစိုက်ပါ။"</string>
-    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"အက်ပ်တစ်ခုကို ကာစ်လုပ်သည့်အခါ Android သည် ယင်းအက်ပ်တွင် ပြထားသည့် (သို့) ဖွင့်ထားသည့် အရာအားလုံးကို တွေ့နိုင်သည်။ ထို့ကြောင့် စကားဝှက်၊ ငွေပေးချေမှု အချက်အလက်၊ မက်ဆေ့ဂျ်၊ ဓာတ်ပုံ၊ အသံနှင့် ဗီဒီယိုကဲ့သို့ အရာများကို ဂရုစိုက်ပါ။"</string>
-    <string name="media_projection_entry_cast_permission_dialog_continue" msgid="7209890669948870042">"ကာစ်လုပ်ခြင်း စရန်"</string>
+    <string name="media_projection_entry_share_app_selector_title" msgid="1419515119767501822">"မျှဝေရန် အက်ပ်ရွေးခြင်း"</string>
+    <string name="media_projection_entry_cast_permission_dialog_title" msgid="752756942658159416">"သင့်ဖန်သားပြင်ကို ကာစ်လုပ်မလား။"</string>
+    <string name="media_projection_entry_cast_permission_dialog_option_text_single_app" msgid="6073353940838561981">"အက်ပ်တစ်ခုကို ကာစ်လုပ်ရန်"</string>
+    <string name="media_projection_entry_cast_permission_dialog_option_text_entire_screen" msgid="8389508187954155307">"ဖန်သားပြင်တစ်ခုလုံးကို ကာစ်လုပ်ရန်"</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="4040447861037324017">"သင့်ဖန်သားပြင်တစ်ခုလုံးကို ကာစ်လုပ်သည့်အခါ ဖန်သားပြင်ပေါ်ရှိ အရာအားလုံးကို မြင်နိုင်သည်။ စကားဝှက်၊ ငွေပေးချေမှု အချက်အလက်၊ မက်ဆေ့ဂျ်၊ ဓာတ်ပုံ၊ အသံနှင့် ဗီဒီယိုကဲ့သို့ အရာများကို ဂရုစိုက်ပါ။"</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="7487834861348460736">"အက်ပ်တစ်ခုကို ကာစ်လုပ်သည့်အခါ ယင်းအက်ပ်တွင် ပြထားသော (သို့) ဖွင့်ထားသော အရာအားလုံးကို မြင်နိုင်သည်။ စကားဝှက်၊ ငွေပေးချေမှု အချက်အလက်၊ မက်ဆေ့ဂျ်၊ ဓာတ်ပုံ၊ အသံနှင့် ဗီဒီယိုကဲ့သို့ အရာများကို ဂရုစိုက်ပါ။"</string>
+    <string name="media_projection_entry_cast_permission_dialog_continue_entire_screen" msgid="3261124185304676483">"စခရင် ကာစ်လုပ်ရန်"</string>
+    <string name="media_projection_entry_cast_app_selector_title" msgid="6323062146661922387">"ကာစ်လုပ်ရန် အက်ပ်ရွေးခြင်း"</string>
     <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"စတင်မျှဝေမလား။"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"မျှဝေ၊ ရုပ်သံဖမ်း (သို့) ကာစ်လုပ်သည့်အခါ Android သည် သင့်ဖန်သားပြင်တွင် မြင်နိုင်သည့် (သို့) သင့်စက်တွင် ဖွင့်ထားသည့် အရာအားလုံးကို တွေ့နိုင်သည်။ စကားဝှက်၊ ငွေပေးချေမှု အချက်အလက်၊ မက်ဆေ့ဂျ်၊ ဓာတ်ပုံ၊ အသံနှင့် ဗီဒီယိုကဲ့သို့ အရာများကို ဂရုစိုက်ပါ။"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"အက်ပ်တစ်ခုဖြင့် မျှဝေ၊ ရုပ်သံဖမ်း (သို့) ကာစ်လုပ်သည့်အခါ Android သည် ယင်းအက်ပ်တွင် ပြထားသည့် (သို့) ဖွင့်ထားသည့် အရာအားလုံးကို တွေ့နိုင်သည်။ ထို့ကြောင့် စကားဝှက်၊ ငွေပေးချေမှု အချက်အလက်၊ မက်ဆေ့ဂျ်၊ ဓာတ်ပုံ၊ အသံနှင့် ဗီဒီယိုကဲ့သို့အရာများကို ဂရုစိုက်ပါ။"</string>
     <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"စတင်ရန်"</string>
+    <string name="media_projection_entry_generic_permission_dialog_continue_single_app" msgid="5920814988611877051">"ရှေ့သို့"</string>
     <string name="media_projection_task_switcher_text" msgid="590885489897412359">"အက်ပ်ပြောင်းချိန်တွင် မျှဝေခြင်းကို ခဏရပ်သည်"</string>
     <string name="media_projection_task_switcher_action_switch" msgid="8682258717291921123">"၎င်းအစား ဤအက်ပ်ကို မျှဝေရန်"</string>
     <string name="media_projection_task_switcher_action_back" msgid="5324164224147845282">"ပြန်ပြောင်းရန်"</string>
@@ -564,8 +576,8 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"ယခု စတင်ပါ"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"အကြောင်းကြားချက် မရှိပါ"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"အကြောင်းကြားချက်သစ် မရှိပါ"</string>
-    <string name="adaptive_notification_edu_hun_title" msgid="5720882373252389461">"အလိုက်သင့်အကြောင်းကြားချက် ဖွင့်ထားသည်"</string>
-    <string name="adaptive_notification_edu_hun_text" msgid="4260536236101821273">"သင့်စက်သည် အချိန်တိုအတွင်း အကြောင်းကြားချက်များစွာ ရပါက အသံတိုးပြီး စခရင်ရှိ ပေါ့ပ်အပ်များကို နှစ်မိနစ်အထိ လျှော့ပေးသည်။"</string>
+    <string name="adaptive_notification_edu_hun_title" msgid="7790738150177329960">"အကြောင်းကြားချက် သတိပေးမှု လျှော့ချခြင်း ဖွင့်ထားသည်"</string>
+    <string name="adaptive_notification_edu_hun_text" msgid="7743367744129536610">"အကြောင်းကြားချက်များစွာ တစ်ပြိုင်နက်ရပါက သင့်စက်၏ အသံအတိုးအကျယ်နှင့် သတိပေးချက်ကို ၂ မိနစ်ကြာသည်အထိ အလိုအလျောက်လျှော့ချသည်။"</string>
     <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"ပိတ်ရန်"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"အကြောင်းကြားချက်ဟောင်းကြည့်ရန် လော့ခ်ဖွင့်ပါ"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"ဤစက်ပစ္စည်းကို သင့်မိဘက စီမံခန့်ခွဲသည်"</string>
@@ -713,6 +725,7 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"ဂြိုဟ်တု၊ ချိတ်ဆက်မှု ကောင်းသည်"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"ဂြိုဟ်တု၊ ချိတ်ဆက်မှု ရနိုင်သည်"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"Satellite SOS"</string>
+    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"အရေးပေါ်ဖုန်းခေါ်ခြင်း (သို့) SOS"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"အလုပ် ပရိုဖိုင်"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"အချို့သူများ အတွက် ပျော်စရာ ဖြစ်ပေမဲ့ အားလုံး အတွက် မဟုတ်ပါ"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"စနစ် UI Tuner က သင့်အတွက် Android အသုံးပြုသူ အင်တာဖေ့စ်ကို ပြောင်းရန်နှင့် စိတ်ကြိုက်ပြုလုပ်ရန် နည်းလမ်း အပိုများကို သင့်အတွက် စီစဉ်ပေးသည်။ အနာဂတ်ဗားရှင်းများတွင် ဤစမ်းသပ်အင်္ဂါရပ်များမှာ ပြောင်းလဲ၊ ပျက်စီး သို့မဟုတ် ပျောက်ကွယ်သွားနိုင်သည်။ သတိဖြင့် ရှေ့ဆက်ပါ။"</string>
@@ -732,8 +745,7 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"မူလ"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"အလိုအလျောက်"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"အသံ သို့မဟုတ် တုန်ခါမှုမရှိပါ"</string>
-    <!-- no translation found for notification_conversation_summary_low (3855696451919728790) -->
-    <skip />
+    <string name="notification_conversation_summary_low" msgid="3855696451919728790">"အသံမကြားရ (သို့) တုန်ခါမှုမရှိသော်လည်း စကားဝိုင်းကဏ္ဍတွင် မြင်ရပါသေးသည်"</string>
     <string name="notification_channel_summary_default" msgid="777294388712200605">"စက်ပစ္စည်း ဆက်တင်များပေါ် အခြေခံပြီး အသံမြည်နိုင်သည် (သို့) တုန်ခါနိုင်သည်"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"စက်ပစ္စည်းဆက်တင်များပေါ် အခြေခံပြီး အသံမြည်နိုင်သည် (သို့) တုန်ခါနိုင်သည်။ မူရင်းသတ်မှတ်ချက်အဖြစ် <xliff:g id="APP_NAME">%1$s</xliff:g> မှ စကားဝိုင်းများကို ပူဖောင်းကွက်ဖြင့် ပြသည်။"</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"ဤအကြောင်းကြားချက်က အသံ သို့မဟုတ် တုန်ခါမှု ပေးရန် သင့်/မသင့်ကို စနစ်က ဆုံးဖြတ်ပါစေ"</string>
@@ -790,8 +802,7 @@
     <string name="keyboard_key_page_up" msgid="173914303254199845">"အပေါ်စာမျက်နှာသို့သွားပါ"</string>
     <string name="keyboard_key_page_down" msgid="9035902490071829731">"အောက်စာမျက်နှာသို့သွားပါ"</string>
     <string name="keyboard_key_forward_del" msgid="5325501825762733459">"ဖျက်ရန်"</string>
-    <!-- no translation found for keyboard_key_esc (6230365950511411322) -->
-    <skip />
+    <string name="keyboard_key_esc" msgid="6230365950511411322">"Esc"</string>
     <string name="keyboard_key_move_home" msgid="3496502501803911971">"ပင်မ"</string>
     <string name="keyboard_key_move_end" msgid="99190401463834854">"ပြီးပါပြီ"</string>
     <string name="keyboard_key_insert" msgid="4621692715704410493">"ထည့်ပါ"</string>
@@ -1233,7 +1244,6 @@
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"အထောက်အထားစိစစ်ခြင်း လိုအပ်သည်။ အထောက်အထားစိစစ်ရန် လက်ဗွေ အာရုံခံကိရိယာကို ထိပါ။"</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"လက်ရှိ ဖုန်းခေါ်ဆိုမှု"</string>
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"မိုဘိုင်းဒေတာ"</string>
-    <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"ချိတ်ဆက်ထားသည်"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"ယာယီချိတ်ဆက်ထားသည်"</string>
     <string name="mobile_data_poor_connection" msgid="819617772268371434">"ချိတ်ဆက်မှုအားနည်းသည်"</string>
@@ -1378,22 +1388,67 @@
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"အများသုံးနိုင်မှု"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"လက်ကွက်ဖြတ်လမ်းများ"</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"ရှာဖွေစာလုံး ဖြတ်လမ်း"</string>
+    <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"ရှာဖွေမှုရလဒ် မရှိပါ"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"လျှော့ပြရန် သင်္ကေတ"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"ပိုပြရန် သင်္ကေတ"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"သို့မဟုတ်"</string>
+    <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"သင့်ကီးဘုတ်ကိုသုံး၍ လမ်းညွှန်ခြင်း"</string>
+    <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"လက်ကွက်ဖြတ်လမ်းများကို လေ့လာပါ"</string>
+    <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"သင့်တာ့ချ်ပက်ကိုသုံး၍ လမ်းညွှန်ခြင်း"</string>
+    <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"တာ့ချ်ပက်လက်ဟန်များကို လေ့လာပါ"</string>
+    <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"သင်၏ ကီးဘုတ်နှင့် တာ့ချ်ပက်တို့ကိုသုံး၍ လမ်းညွှန်ခြင်း"</string>
+    <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"တာ့ချ်ပက်လက်ဟန်များ၊ လက်ကွက်ဖြတ်လမ်းများ စသည်တို့ကို လေ့လာပါ"</string>
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"နောက်သို့ လက်ဟန်"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"ပင်မစာမျက်နှာ လက်ဟန်"</string>
     <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"လုပ်ဆောင်ချက်ကီး"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"ပြီးပြီ"</string>
-    <string name="touchpad_tutorial_gesture_done" msgid="4784438360736821255">"တော်ပါပေသည်။"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"ပြန်သွားရန်"</string>
-    <string name="touchpad_back_gesture_guidance" msgid="4222430588599527272">"ပြန်သွားရန်အတွက် တာ့ချ်ပက်တွင် မည်သည့်နေရာ၌မဆို လက်သုံးချောင်းသုံး၍ ဘယ် (သို့) ညာသို့ ပွတ်ဆွဲပါ။"</string>
-    <string name="touchpad_back_gesture_animation_content_description" msgid="2646107450922379918">"တာ့ချ်ပက်တွင် ဘယ်ညာရွှေ့နေသော လက်သုံးချောင်းကို ပြထားသည်"</string>
-    <string name="touchpad_back_gesture_screen_animation_content_description" msgid="4036267494237748710">"စက်စခရင်တွင် နောက်သို့လက်ဟန်အတွက် လှုပ်ရှားသက်ဝင်ပုံကို ပြထားသည်"</string>
+    <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"နောက်ပြန်သွားရန် တာ့ချ်ပက်ပေါ်ရှိ မည်သည့်နေရာ၌မဆို လက်သုံးချောင်းဖြင့် ဘယ် (သို့) ညာသို့ ပွတ်ဆွဲပါ။\n\n၎င်းအတွက် လက်ကွက်ဖြတ်လမ်း Action + ESC ကိုလည်း သုံးနိုင်သည်။"</string>
+    <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"တော်ပါပေသည်။"</string>
+    <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"နောက်သို့လက်ဟန် အပြီးသတ်လိုက်ပါပြီ"</string>
+    <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"ပင်မစာမျက်နှာသို့ သွားရန်"</string>
+    <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"ပင်မစာမျက်နှာသို့ အချိန်မရွေးသွားရန် စခရင်အောက်ခြေမှ အပေါ်သို့ လက်သုံးချောင်းဖြင့် ပွတ်ဆွဲပါ။"</string>
+    <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"ကောင်းသည်။"</string>
+    <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"ပင်မစာမျက်နှာသို့သွားသည့် လက်ဟန် အပြီးသတ်လိုက်ပါပြီ။"</string>
+    <string name="tutorial_action_key_title" msgid="2659466586996495447">"လုပ်ဆောင်ချက်ကီး"</string>
+    <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"သင့်အက်ပ်များသုံးရန် ကီးဘုတ်ပေါ်ရှိ လုပ်ဆောင်ချက်ကီးကို နှိပ်ပါ။"</string>
+    <string name="tutorial_action_key_success_title" msgid="466467860120112933">"ဂုဏ်ယူပါသည်။"</string>
+    <string name="tutorial_action_key_success_body" msgid="7201991081652850430">"လုပ်ဆောင်ချက်ကီး လက်ဟန် အပြီးသတ်လိုက်ပါပြီ။\n\nလုပ်ဆောင်ချက် + / သည် ရရှိနိုင်သော ဖြတ်လမ်းအားလုံးကို ပြသည်။"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"ကီးဘုတ်နောက်မီး"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"အဆင့် %2$d အနက် %1$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"အိမ်ထိန်းချုပ်မှုများ"</string>
     <string name="home_controls_dream_description" msgid="4644150952104035789">"အိမ်ထိန်းချုပ်မှုများကို စခရင်နားချိန်ပုံအဖြစ် အမြန်ဝင်ကြည့်ရန်"</string>
-    <!-- no translation found for volume_undo_action (5815519725211877114) -->
+    <string name="volume_undo_action" msgid="5815519725211877114">"နောက်ပြန်ရန်"</string>
+    <string name="back_edu_toast_content" msgid="4530314597378982956">"နောက်ပြန်သွားရန် တာ့ချ်ပက်ပေါ်တွင် လက်သုံးချောင်းဖြင့် ဘယ် (သို့) ညာသို့ ပွတ်ဆွဲပါ"</string>
+    <string name="home_edu_toast_content" msgid="3381071147871955415">"ပင်မစာမျက်နှာသို့ သွားရန် တာ့ချ်ပက်ပေါ်တွင် လက်သုံးချောင်းဖြင့် အပေါ်သို့ပွတ်ဆွဲပါ"</string>
+    <string name="overview_edu_toast_content" msgid="5797030644017804518">"လတ်တလောအက်ပ်များကို ကြည့်ရန် တာ့ချ်ပက်ပေါ်တွင် လက်သုံးချောင်းဖြင့် အပေါ်သို့ပွတ်ဆွဲပြီး ဖိထားပါ"</string>
+    <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"သင့်အက်ပ်အားလုံးကြည့်ရန် ကီးဘုတ်ပေါ်ရှိ လုပ်ဆောင်ချက်ကီးကို နှိပ်ပါ"</string>
+    <string name="redacted_notification_single_line_title" msgid="212019960919261670">"အစားထိုးထားသည်"</string>
+    <string name="redacted_notification_single_line_text" msgid="8684166405005242945">"ကြည့်ရန် ဖွင့်ပါ"</string>
+    <string name="back_edu_notification_title" msgid="5624780717751357278">"နောက်ပြန်သွားရန် သင့်တာ့ချ်ပက်ကို သုံးပါ"</string>
+    <string name="back_edu_notification_content" msgid="2497557451540954068">"လက်သုံးချောင်းဖြင့် ဘယ် (သို့) ညာသို့ ပွတ်ဆွဲပါ။ လက်ဟန်များ ပိုမိုလေ့လာရန် တို့ပါ။"</string>
+    <string name="home_edu_notification_title" msgid="6097902076909654045">"ပင်မစာမျက်နှာသို့ သွားရန် သင့်တာ့ချ်ပက်ကို သုံးပါ"</string>
+    <string name="home_edu_notification_content" msgid="6631697734535766588">"လက်သုံးချောင်းဖြင့် အပေါ်သို့ပွတ်ဆွဲပါ။ လက်ဟန်များ ပိုမိုလေ့လာရန် တို့ပါ။"</string>
+    <string name="overview_edu_notification_title" msgid="1265824157319562406">"လတ်တလောအက်ပ်များကို ကြည့်ရန် သင့်တာ့ချ်ပက်ကို သုံးပါ"</string>
+    <string name="overview_edu_notification_content" msgid="3578204677648432500">"လက်သုံးချောင်းဖြင့် အပေါ်သို့ပွတ်ဆွဲပြီး ဖိထားပါ။ လက်ဟန်များ ပိုမိုလေ့လာရန် တို့ပါ။"</string>
+    <string name="all_apps_edu_notification_title" msgid="372262997265569063">"အက်ပ်အားလုံးကြည့်ရန် သင့်ကီးဘုတ်ကို သုံးပါ"</string>
+    <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"လုပ်ဆောင်ချက်ကီးကို အချိန်မရွေးနှိပ်ပါ။ လက်ဟန်များ ပိုမိုလေ့လာရန် တို့ပါ။"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_title" msgid="4369307638184799742">"ပိုမှိန်ခြင်းသည် တောက်ပမှုဘားတွင် ပါဝင်လာပြီ"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="7513137763024327538">"သင့်စခရင်ထိပ်ဆုံး၌ပင် တောက်ပမှုအဆင့်လျှော့ချခြင်းဖြင့် စခရင်ကို ပိုမှိန်အောင် လုပ်နိုင်ပါပြီ။\n\nသင်သည် မှောင်သောပတ်ဝန်းကျင်၌ရှိချိန် ၎င်းက အကောင်းဆုံးအလုပ်လုပ်သည်။"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_button" msgid="1782147201534669800">"ပိုမှိန်ခြင်း ဖြတ်လမ်း ဖယ်ရှားရန်"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="4070696910424515757">"ပိုမှိန်ခြင်း ဖြတ်လမ်းကို ဖယ်ရှားလိုက်ပြီ။ တောက်ပမှုလျှော့ရန် ပုံမှန် တောက်ပမှုဘားကို အသုံးပြုပါ။"</string>
+    <!-- no translation found for qs_edit_mode_category_connectivity (4559726936546032672) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_accessibility (7969091385071475922) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_utilities (8123080090108420095) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_privacy (6577774443194551775) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_providedByApps (8346112074897919019) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_display (4749511439121053942) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_unknown (509314252124053550) -->
     <skip />
 </resources>

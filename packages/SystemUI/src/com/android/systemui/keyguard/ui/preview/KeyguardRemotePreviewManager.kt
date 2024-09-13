@@ -25,11 +25,21 @@ import android.os.Messenger
 import android.util.ArrayMap
 import android.util.Log
 import androidx.annotation.VisibleForTesting
+import com.android.app.tracing.coroutines.runBlocking
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.shared.quickaffordance.shared.model.KeyguardPreviewConstants
+import com.android.systemui.shared.keyguard.shared.model.KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START
+import com.android.systemui.shared.quickaffordance.shared.model.KeyguardPreviewConstants.KEY_HIDE_SMART_SPACE
+import com.android.systemui.shared.quickaffordance.shared.model.KeyguardPreviewConstants.KEY_INITIALLY_SELECTED_SLOT_ID
+import com.android.systemui.shared.quickaffordance.shared.model.KeyguardPreviewConstants.KEY_QUICK_AFFORDANCE_ID
+import com.android.systemui.shared.quickaffordance.shared.model.KeyguardPreviewConstants.KEY_SLOT_ID
+import com.android.systemui.shared.quickaffordance.shared.model.KeyguardPreviewConstants.MESSAGE_ID_DEFAULT_PREVIEW
+import com.android.systemui.shared.quickaffordance.shared.model.KeyguardPreviewConstants.MESSAGE_ID_HIDE_SMART_SPACE
+import com.android.systemui.shared.quickaffordance.shared.model.KeyguardPreviewConstants.MESSAGE_ID_PREVIEW_QUICK_AFFORDANCE_SELECTED
+import com.android.systemui.shared.quickaffordance.shared.model.KeyguardPreviewConstants.MESSAGE_ID_SLOT_SELECTED
+import com.android.systemui.shared.quickaffordance.shared.model.KeyguardPreviewConstants.MESSAGE_ID_START_CUSTOMIZING_QUICK_AFFORDANCES
 import com.android.systemui.util.kotlin.logD
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
@@ -55,7 +65,10 @@ constructor(
 
         var observer: PreviewLifecycleObserver? = null
         return try {
-            val renderer = previewRendererFactory.create(request)
+            val renderer =
+                runBlocking("$TAG#previewRendererFactory.create", mainDispatcher) {
+                    previewRendererFactory.create(request)
+                }
 
             observer =
                 PreviewLifecycleObserver(
@@ -148,16 +161,35 @@ class PreviewLifecycleObserver(
         }
 
         when (message.what) {
-            KeyguardPreviewConstants.MESSAGE_ID_SLOT_SELECTED -> {
-                message.data.getString(KeyguardPreviewConstants.KEY_SLOT_ID)?.let { slotId ->
+            MESSAGE_ID_START_CUSTOMIZING_QUICK_AFFORDANCES -> {
+                checkNotNull(renderer)
+                    .onStartCustomizingQuickAffordances(
+                        initiallySelectedSlotId =
+                            message.data.getString(KEY_INITIALLY_SELECTED_SLOT_ID)
+                                ?: SLOT_ID_BOTTOM_START
+                    )
+            }
+            MESSAGE_ID_SLOT_SELECTED -> {
+                message.data.getString(KEY_SLOT_ID)?.let { slotId ->
                     checkNotNull(renderer).onSlotSelected(slotId = slotId)
                 }
             }
-            KeyguardPreviewConstants.MESSAGE_ID_HIDE_SMART_SPACE -> {
-                checkNotNull(renderer)
-                    .hideSmartspace(
-                        message.data.getBoolean(KeyguardPreviewConstants.KEY_HIDE_SMART_SPACE)
-                    )
+            MESSAGE_ID_PREVIEW_QUICK_AFFORDANCE_SELECTED -> {
+                val slotId = message.data.getString(KEY_SLOT_ID)
+                val quickAffordanceId = message.data.getString(KEY_QUICK_AFFORDANCE_ID)
+                if (slotId != null && quickAffordanceId != null) {
+                    checkNotNull(renderer)
+                        .onPreviewQuickAffordanceSelected(
+                            slotId = slotId,
+                            quickAffordanceId = quickAffordanceId,
+                        )
+                }
+            }
+            MESSAGE_ID_DEFAULT_PREVIEW -> {
+                checkNotNull(renderer).onDefaultPreview()
+            }
+            MESSAGE_ID_HIDE_SMART_SPACE -> {
+                checkNotNull(renderer).hideSmartspace(message.data.getBoolean(KEY_HIDE_SMART_SPACE))
             }
             else -> checkNotNull(onDestroy).invoke(this)
         }

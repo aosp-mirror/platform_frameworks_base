@@ -94,6 +94,9 @@ per-file IEphemeralResolver.aidl = file:/services/core/java/com/android/server/p
 per-file IInstantAppResolver.aidl = file:/services/core/java/com/android/server/pm/OWNERS
 per-file InstantAppResolveInfo.aidl = file:/services/core/java/com/android/server/pm/OWNERS
 
+# Performance
+per-file PropertyInvalidatedCache.java = file:/PERFORMANCE_OWNERS
+
 # Pinner
 per-file pinner-client.aconfig = file:/core/java/android/app/pinner/OWNERS
 
@@ -118,6 +121,8 @@ per-file *Task* = file:/services/core/java/com/android/server/wm/OWNERS
 per-file Window* = file:/services/core/java/com/android/server/wm/OWNERS
 per-file ConfigurationController.java = file:/services/core/java/com/android/server/wm/OWNERS
 per-file *ScreenCapture* = file:/services/core/java/com/android/server/wm/OWNERS
+per-file ComponentOptions.java = file:/services/core/java/com/android/server/wm/OWNERS
+
 
 # Multitasking
 per-file multitasking.aconfig = file:/services/core/java/com/android/server/wm/OWNERS

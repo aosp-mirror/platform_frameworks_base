@@ -99,6 +99,7 @@ import static android.service.notification.Adjustment.TYPE_NEWS;
 import static android.service.notification.Condition.SOURCE_CONTEXT;
 import static android.service.notification.Condition.SOURCE_USER_ACTION;
 import static android.service.notification.Condition.STATE_TRUE;
+import static android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION;
 import static android.service.notification.Flags.FLAG_NOTIFICATION_FORCE_GROUPING;
 import static android.service.notification.Flags.FLAG_REDACT_SENSITIVE_NOTIFICATIONS_FROM_UNTRUSTED_LISTENERS;
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_ALERTING;
@@ -1255,7 +1256,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         info.resizeMode = RESIZE_MODE_RESIZEABLE;
         ResolveInfo ri = new ResolveInfo();
         ri.activityInfo = info;
-        when(mPackageManagerClient.resolveActivity(any(), anyInt())).thenReturn(ri);
+        when(mPackageManagerClient.resolveActivityAsUser(any(), anyInt(), anyInt())).thenReturn(ri);
 
         return new Notification.BubbleMetadata.Builder(
                 mActivityIntent,
@@ -3047,6 +3048,41 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     @EnableFlags(android.app.Flags.FLAG_LIFETIME_EXTENSION_REFACTOR)
+    public void testMultipleCancelOfLifetimeExtendedSendsOneUpdate() throws Exception {
+        final NotificationRecord notif = generateNotificationRecord(null);
+        notif.getSbn().getNotification().flags =
+                Notification.FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY;
+        mService.addNotification(notif);
+        final StatusBarNotification sbn = notif.getSbn();
+
+        assertThat(mBinderService.getActiveNotifications(sbn.getPackageName()).length).isEqualTo(1);
+        assertThat(mService.getNotificationRecordCount()).isEqualTo(1);
+
+        // Send two cancelations.
+        mBinderService.cancelNotificationWithTag(mPkg, mPkg, sbn.getTag(), sbn.getId(),
+                sbn.getUserId());
+        waitForIdle();
+        mBinderService.cancelNotificationWithTag(mPkg, mPkg, sbn.getTag(), sbn.getId(),
+                sbn.getUserId());
+        waitForIdle();
+
+        assertThat(mBinderService.getActiveNotifications(sbn.getPackageName()).length).isEqualTo(1);
+        assertThat(mService.getNotificationRecordCount()).isEqualTo(1);
+
+        // Checks that only one post update is sent.
+        verify(mWorkerHandler, times(1))
+                .post(any(NotificationManagerService.PostNotificationRunnable.class));
+        ArgumentCaptor<NotificationRecord> captor =
+                ArgumentCaptor.forClass(NotificationRecord.class);
+        verify(mListeners, times(1)).prepareNotifyPostedLocked(captor.capture(), any(),
+                anyBoolean());
+        assertThat(captor.getValue().getNotification().flags
+                & FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY).isEqualTo(
+                FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY);
+    }
+
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_LIFETIME_EXTENSION_REFACTOR)
     public void testCancelAllClearsLifetimeExtended() throws Exception {
         final NotificationRecord notif = generateNotificationRecord(
                 mTestNotificationChannel, 1, "group", true);
@@ -3102,6 +3138,29 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertThat(captor.getValue().getNotification().flags
                 & FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY).isEqualTo(
                 FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY);
+    }
+
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_LIFETIME_EXTENSION_REFACTOR)
+    public void testLifetimeExtendedCancelledOnClick() throws Exception {
+        // Adds a lifetime extended notification.
+        final NotificationRecord notif = generateNotificationRecord(mTestNotificationChannel, 1,
+                null, false);
+        notif.getSbn().getNotification().flags =
+                Notification.FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY;
+        mService.addNotification(notif);
+        // Verify that the notification is posted and active.
+        assertThat(mBinderService.getActiveNotifications(mPkg).length).isEqualTo(1);
+
+        // Click the notification.
+        final NotificationVisibility nv = NotificationVisibility.obtain(notif.getKey(), 1, 2, true);
+        mService.mNotificationDelegate.onNotificationClick(mUid, Binder.getCallingPid(),
+                notif.getKey(), nv);
+        waitForIdle();
+
+        // The notification has been cancelled.
+        StatusBarNotification[] notifs = mBinderService.getActiveNotifications(mPkg);
+        assertThat(notifs.length).isEqualTo(0);
     }
 
     @Test
@@ -4354,11 +4413,29 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 eq(mTestNotificationChannel.getId()), anyBoolean()))
                 .thenReturn(mTestNotificationChannel);
         when(mPreferencesHelper.deleteNotificationChannel(eq(mPkg), anyInt(),
-                eq(mTestNotificationChannel.getId()),  anyInt(), anyBoolean())).thenReturn(true);
+                eq(mTestNotificationChannel.getId()), anyInt(), anyBoolean())).thenReturn(true);
         reset(mListeners);
         mBinderService.deleteNotificationChannel(mPkg, mTestNotificationChannel.getId());
         verify(mListeners, times(1)).notifyNotificationChannelChanged(eq(mPkg),
                 eq(Process.myUserHandle()), eq(mTestNotificationChannel),
+                eq(NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_DELETED));
+    }
+
+    @Test
+    @EnableFlags(FLAG_NOTIFICATION_CLASSIFICATION)
+    public void testAppsCannotDeleteBundleChannel() throws Exception {
+        when(mCompanionMgr.getAssociations(mPkg, mUserId))
+                .thenReturn(singletonList(mock(AssociationInfo.class)));
+        mService.setPreferencesHelper(mPreferencesHelper);
+        when(mPreferencesHelper.getNotificationChannel(eq(mPkg), anyInt(),
+                eq(NEWS_ID), anyBoolean()))
+                .thenReturn(mTestNotificationChannel);
+        when(mPreferencesHelper.deleteNotificationChannel(eq(mPkg), anyInt(),
+                eq(NEWS_ID), anyInt(), anyBoolean())).thenReturn(true);
+        reset(mListeners);
+        mBinderService.deleteNotificationChannel(mPkg, NEWS_ID);
+        verify(mListeners, never()).notifyNotificationChannelChanged(eq(mPkg),
+                eq(Process.myUserHandle()), any(),
                 eq(NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_DELETED));
     }
 
@@ -6396,12 +6473,31 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @EnableFlags(android.app.Flags.FLAG_LIFETIME_EXTENSION_REFACTOR)
     public void testStats_DirectReplyLifetimeExtendedPostsUpdate() throws Exception {
         final NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
+        // Marks the notification as having already been lifetime extended and canceled.
         r.getSbn().getNotification().flags |= FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY;
+        r.setCanceledAfterLifetimeExtension(true);
+        r.setPostSilently(true);
         mService.addNotification(r);
 
         mService.mNotificationDelegate.onNotificationDirectReplied(r.getKey());
         waitForIdle();
 
+        // At the moment prepareNotifyPostedLocked is called on the listeners,
+        // verify that FLAG_ONLY_ALERT_ONCE and shouldPostSilently are set, regardless of initial
+        // values.
+        doAnswer(
+                invocation -> {
+                    int flags = ((NotificationRecord) invocation.getArgument(0))
+                            .getSbn().getNotification().flags;
+                    assertThat(flags & FLAG_ONLY_ALERT_ONCE).isEqualTo(FLAG_ONLY_ALERT_ONCE);
+                    boolean shouldPostSilently = ((NotificationRecord) invocation.getArgument(0))
+                            .shouldPostSilently();
+                    assertThat(shouldPostSilently).isTrue();
+                    return null;
+                }
+        ).when(mListeners).prepareNotifyPostedLocked(any(), any(), anyBoolean());
+
+        // Checks that the record gets marked as a direct reply having occurred.
         assertThat(mService.getNotificationRecord(r.getKey()).getStats().hasDirectReplied())
                 .isTrue();
         // Checks that a post update is sent.
@@ -6414,9 +6510,65 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertThat(captor.getValue().getNotification().flags
                 & FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY).isEqualTo(
                 FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY);
+        // FLAG_ONLY_ALERT_ONCE was not present on the original notification, so it's not here.
         assertThat(captor.getValue().getNotification().flags
-                & FLAG_ONLY_ALERT_ONCE).isEqualTo(FLAG_ONLY_ALERT_ONCE);
+                & FLAG_ONLY_ALERT_ONCE).isEqualTo(0);
         assertThat(captor.getValue().shouldPostSilently()).isTrue();
+        assertThat(captor.getValue().isCanceledAfterLifetimeExtension()).isTrue();
+    }
+
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_LIFETIME_EXTENSION_REFACTOR)
+    public void testStats_DirectReplyLifetimeExtendedPostsUpdate_RestorePostSilently()
+            throws Exception {
+        final NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
+        // Marks the notification as having already been lifetime extended and canceled.
+        r.getSbn().getNotification().flags |= FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY;
+        r.setPostSilently(false);
+        mService.addNotification(r);
+
+        mService.mNotificationDelegate.onNotificationDirectReplied(r.getKey());
+        waitForIdle();
+
+        // Checks that a post update is sent with shouldPostSilently set to true.
+        doAnswer(
+                invocation -> {
+                    boolean shouldPostSilently = ((NotificationRecord) invocation.getArgument(0))
+                            .shouldPostSilently();
+                    assertThat(shouldPostSilently).isTrue();
+                    return null;
+                }
+        ).when(mListeners).prepareNotifyPostedLocked(any(), any(), anyBoolean());
+
+        // Checks that shouldPostSilently is restored to its false state afterward.
+        assertThat(mService.getNotificationRecord(r.getKey()).shouldPostSilently()).isFalse();
+    }
+
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_LIFETIME_EXTENSION_REFACTOR)
+    public void testStats_DirectReplyLifetimeExtendedPostsUpdate_RestoreOnlyAlertOnceFlag()
+            throws Exception {
+        final NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
+        // Marks the notification as having already been lifetime extended and canceled.
+        r.getSbn().getNotification().flags |= FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY;
+        mService.addNotification(r);
+
+        mService.mNotificationDelegate.onNotificationDirectReplied(r.getKey());
+        waitForIdle();
+
+        // Checks that a post update is sent with FLAG_ONLY_ALERT_ONCE set to true.
+        doAnswer(
+                invocation -> {
+                    int flags = ((NotificationRecord) invocation.getArgument(0))
+                            .getSbn().getNotification().flags;
+                    assertThat(flags & FLAG_ONLY_ALERT_ONCE).isEqualTo(FLAG_ONLY_ALERT_ONCE);
+                    return null;
+                }
+        ).when(mListeners).prepareNotifyPostedLocked(any(), any(), anyBoolean());
+
+        // Checks that the flag is removed afterward.
+        assertThat(mService.getNotificationRecord(r.getKey()).getSbn().getNotification().flags
+                & FLAG_ONLY_ALERT_ONCE).isEqualTo(0);
     }
 
     @Test
@@ -6453,6 +6605,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 anyBoolean());
         assertThat(captor.getValue().getNotification().flags
                 & FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY).isEqualTo(0);
+        assertThat(captor.getValue().isCanceledAfterLifetimeExtension()).isFalse();
         assertThat(captor.getValue()
                 .getNotification().extras.getCharSequence(Notification.EXTRA_TITLE).toString())
                 .isEqualTo("new title");
@@ -9120,17 +9273,34 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         final int replyIndex = 2;
         final String reply = "Hello";
         final boolean modifiedBeforeSending = true;
-        final boolean generatedByAssistant = true;
 
         NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
         r.getSbn().getNotification().flags |= FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY;
-        r.setSuggestionsGeneratedByAssistant(generatedByAssistant);
+        r.getSbn().getNotification().flags |= FLAG_ONLY_ALERT_ONCE;
+        r.setSuggestionsGeneratedByAssistant(true);
+        r.setCanceledAfterLifetimeExtension(true);
+        r.setPostSilently(true);
         mService.addNotification(r);
 
         mService.mNotificationDelegate.onNotificationSmartReplySent(
                 r.getKey(), replyIndex, reply, NOTIFICATION_LOCATION_UNKNOWN,
                 modifiedBeforeSending);
         waitForIdle();
+
+        // At the moment prepareNotifyPostedLocked is called on the listeners,
+        // verify that FLAG_ONLY_ALERT_ONCE and shouldPostSilently are set, regardless of initial
+        // values.
+        doAnswer(
+                invocation -> {
+                    int flags = ((NotificationRecord) invocation.getArgument(0))
+                            .getSbn().getNotification().flags;
+                    assertThat(flags & FLAG_ONLY_ALERT_ONCE).isEqualTo(FLAG_ONLY_ALERT_ONCE);
+                    boolean shouldPostSilently = ((NotificationRecord) invocation.getArgument(0))
+                            .shouldPostSilently();
+                    assertThat(shouldPostSilently).isTrue();
+                    return null;
+                }
+        ).when(mListeners).prepareNotifyPostedLocked(any(), any(), anyBoolean());
 
         // Checks that a post update is sent.
         verify(mWorkerHandler, times(1))
@@ -9142,8 +9312,10 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertThat(captor.getValue().getNotification().flags
                 & FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY).isEqualTo(
                 FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY);
+        // Flag was present before, so it's set afterward
         assertThat(captor.getValue().getNotification().flags
                 & FLAG_ONLY_ALERT_ONCE).isEqualTo(FLAG_ONLY_ALERT_ONCE);
+        // Should post silently was set before, so it's set afterward.
         assertThat(captor.getValue().shouldPostSilently()).isTrue();
     }
 
@@ -10041,7 +10213,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // verify that zen mode helper gets passed in a package name of "android"
         verify(mockZenModeHelper).addAutomaticZenRule(eq("android"), eq(rule),
-                eq(ZenModeConfig.UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI), anyString(), anyInt());
+                eq(ZenModeConfig.ORIGIN_SYSTEM), anyString(), anyInt());
     }
 
     @Test
@@ -10063,7 +10235,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // verify that zen mode helper gets passed in a package name of "android"
         verify(mockZenModeHelper).addAutomaticZenRule(eq("android"), eq(rule),
-                eq(ZenModeConfig.UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI), anyString(), anyInt());
+                eq(ZenModeConfig.ORIGIN_SYSTEM), anyString(), anyInt());
     }
 
     @Test
@@ -10083,7 +10255,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // verify that zen mode helper gets passed in the package name from the arg, not the owner
         verify(mockZenModeHelper).addAutomaticZenRule(
-                eq("another.package"), eq(rule), eq(ZenModeConfig.UPDATE_ORIGIN_APP),
+                eq("another.package"), eq(rule), eq(ZenModeConfig.ORIGIN_APP),
                 anyString(), anyInt());  // doesn't count as a system/systemui call
     }
 
@@ -10198,7 +10370,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.addAutomaticZenRule(SOME_ZEN_RULE, "pkg", /* fromUser= */ true);
 
         verify(zenModeHelper).addAutomaticZenRule(eq("pkg"), eq(SOME_ZEN_RULE),
-                eq(ZenModeConfig.UPDATE_ORIGIN_USER), anyString(), anyInt());
+                eq(ZenModeConfig.ORIGIN_USER_IN_SYSTEMUI), anyString(), anyInt());
     }
 
     @Test
@@ -10210,7 +10382,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.addAutomaticZenRule(SOME_ZEN_RULE, "pkg", /* fromUser= */ false);
 
         verify(zenModeHelper).addAutomaticZenRule(eq("pkg"), eq(SOME_ZEN_RULE),
-                eq(ZenModeConfig.UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI), anyString(), anyInt());
+                eq(ZenModeConfig.ORIGIN_SYSTEM), anyString(), anyInt());
     }
 
     @Test
@@ -10222,7 +10394,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.addAutomaticZenRule(SOME_ZEN_RULE, "pkg", /* fromUser= */ false);
 
         verify(zenModeHelper).addAutomaticZenRule(eq("pkg"), eq(SOME_ZEN_RULE),
-                eq(ZenModeConfig.UPDATE_ORIGIN_APP), anyString(), anyInt());
+                eq(ZenModeConfig.ORIGIN_APP), anyString(), anyInt());
     }
 
     @Test
@@ -10244,7 +10416,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.updateAutomaticZenRule("id", SOME_ZEN_RULE, /* fromUser= */ true);
 
         verify(zenModeHelper).updateAutomaticZenRule(eq("id"), eq(SOME_ZEN_RULE),
-                eq(ZenModeConfig.UPDATE_ORIGIN_USER), anyString(), anyInt());
+                eq(ZenModeConfig.ORIGIN_USER_IN_SYSTEMUI), anyString(), anyInt());
     }
 
     @Test
@@ -10266,7 +10438,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.removeAutomaticZenRule("id", /* fromUser= */ true);
 
         verify(zenModeHelper).removeAutomaticZenRule(eq("id"),
-                eq(ZenModeConfig.UPDATE_ORIGIN_USER), anyString(), anyInt());
+                eq(ZenModeConfig.ORIGIN_USER_IN_SYSTEMUI), anyString(), anyInt());
     }
 
     @Test
@@ -10281,7 +10453,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     @EnableFlags(android.app.Flags.FLAG_MODES_API)
-    public void setAutomaticZenRuleState_conditionFromUser_mappedToOriginUser() throws Exception {
+    public void setAutomaticZenRuleState_fromAppWithConditionFromUser_originUserInApp()
+            throws Exception {
         ZenModeHelper zenModeHelper = setUpMockZenTest();
         mService.setCallerIsNormalPackage();
 
@@ -10290,12 +10463,12 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.setAutomaticZenRuleState("id", withSourceUser);
 
         verify(zenModeHelper).setAutomaticZenRuleState(eq("id"), eq(withSourceUser),
-                eq(ZenModeConfig.UPDATE_ORIGIN_USER), anyInt());
+                eq(ZenModeConfig.ORIGIN_USER_IN_APP), anyInt());
     }
 
     @Test
     @EnableFlags(android.app.Flags.FLAG_MODES_API)
-    public void setAutomaticZenRuleState_fromAppWithConditionNotFromUser_mappedToOriginApp()
+    public void setAutomaticZenRuleState_fromAppWithConditionNotFromUser_originApp()
             throws Exception {
         ZenModeHelper zenModeHelper = setUpMockZenTest();
         mService.setCallerIsNormalPackage();
@@ -10305,12 +10478,26 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.setAutomaticZenRuleState("id", withSourceContext);
 
         verify(zenModeHelper).setAutomaticZenRuleState(eq("id"), eq(withSourceContext),
-                eq(ZenModeConfig.UPDATE_ORIGIN_APP), anyInt());
+                eq(ZenModeConfig.ORIGIN_APP), anyInt());
     }
 
     @Test
     @EnableFlags(android.app.Flags.FLAG_MODES_API)
-    public void setAutomaticZenRuleState_fromSystemWithConditionNotFromUser_mappedToOriginSystem()
+    public void setAutomaticZenRuleState_fromSystemWithConditionFromUser_originUserInSystemUi()
+            throws Exception {
+        ZenModeHelper zenModeHelper = setUpMockZenTest();
+        mService.isSystemUid = true;
+
+        Condition withSourceContext = new Condition(Uri.parse("uri"), "summary", STATE_TRUE,
+                SOURCE_USER_ACTION);
+        mBinderService.setAutomaticZenRuleState("id", withSourceContext);
+
+        verify(zenModeHelper).setAutomaticZenRuleState(eq("id"), eq(withSourceContext),
+                eq(ZenModeConfig.ORIGIN_USER_IN_SYSTEMUI), anyInt());
+    }
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_MODES_API)
+    public void setAutomaticZenRuleState_fromSystemWithConditionNotFromUser_originSystem()
             throws Exception {
         ZenModeHelper zenModeHelper = setUpMockZenTest();
         mService.isSystemUid = true;
@@ -10320,7 +10507,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.setAutomaticZenRuleState("id", withSourceContext);
 
         verify(zenModeHelper).setAutomaticZenRuleState(eq("id"), eq(withSourceContext),
-                eq(ZenModeConfig.UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI), anyInt());
+                eq(ZenModeConfig.ORIGIN_SYSTEM), anyInt());
     }
 
     /** Prepares for a zen-related test that uses a mocked {@link ZenModeHelper}. */
@@ -13026,6 +13213,100 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     @DisableFlags(FLAG_NOTIFICATION_FORCE_GROUPING)
+    public void testCancelAutogroupSummary_cancelsAllChildren() throws Exception {
+        final String originalGroupName = "originalGroup";
+        final String aggregateGroupName = "Aggregate_Test";
+        final int summaryId = Integer.MAX_VALUE;
+        // Add 2 group notifications without a summary
+        NotificationRecord nr0 =
+                generateNotificationRecord(mTestNotificationChannel, 0, originalGroupName, false);
+        NotificationRecord nr1 =
+                generateNotificationRecord(mTestNotificationChannel, 1, originalGroupName, false);
+        mService.addNotification(nr0);
+        mService.addNotification(nr1);
+        mService.mSummaryByGroupKey.remove(nr0.getGroupKey());
+
+        // GroupHelper is a mock, so make the calls it would make
+        // Add aggregate group summary
+        NotificationAttributes attr = new NotificationAttributes(GroupHelper.BASE_FLAGS,
+                mock(Icon.class), 0, VISIBILITY_PRIVATE, GROUP_ALERT_CHILDREN,
+                nr0.getChannel().getId());
+        NotificationRecord aggregateSummary = mService.createAutoGroupSummary(nr0.getUserId(),
+                nr0.getSbn().getPackageName(), nr0.getKey(), aggregateGroupName, summaryId, attr);
+        mService.addNotification(aggregateSummary);
+        nr0.setOverrideGroupKey(aggregateGroupName);
+        nr1.setOverrideGroupKey(aggregateGroupName);
+        final String fullAggregateGroupKey = nr0.getGroupKey();
+
+        // Check that the aggregate group summary was created
+        assertThat(aggregateSummary.getNotification().getGroup()).isEqualTo(aggregateGroupName);
+        assertThat(aggregateSummary.getNotification().getChannelId()).isEqualTo(
+                nr0.getChannel().getId());
+        assertThat(mService.mSummaryByGroupKey.containsKey(fullAggregateGroupKey)).isTrue();
+
+        // Cancel aggregate group summary
+        mBinderService.cancelNotificationWithTag(mPkg, mPkg, aggregateSummary.getSbn().getTag(),
+                aggregateSummary.getSbn().getId(), aggregateSummary.getSbn().getUserId());
+        waitForIdle();
+
+        // Check that child notifications are also removed
+        verify(mGroupHelper, times(1)).onNotificationRemoved(eq(aggregateSummary));
+        verify(mGroupHelper, times(1)).onNotificationRemoved(eq(nr0));
+        verify(mGroupHelper, times(1)).onNotificationRemoved(eq(nr1));
+
+        // Make sure the summary was removed and not re-posted
+        assertThat(mService.getNotificationRecordCount()).isEqualTo(0);
+    }
+
+    @Test
+    @EnableFlags(FLAG_NOTIFICATION_FORCE_GROUPING)
+    public void testCancelAutogroupSummary_forceGrouping_cancelsAllChildren() throws Exception {
+        final String originalGroupName = "originalGroup";
+        final String aggregateGroupName = "Aggregate_Test";
+        final int summaryId = Integer.MAX_VALUE;
+        // Add 2 group notifications without a summary
+        NotificationRecord nr0 =
+                generateNotificationRecord(mTestNotificationChannel, 0, originalGroupName, false);
+        NotificationRecord nr1 =
+                generateNotificationRecord(mTestNotificationChannel, 1, originalGroupName, false);
+        mService.addNotification(nr0);
+        mService.addNotification(nr1);
+        mService.mSummaryByGroupKey.remove(nr0.getGroupKey());
+
+        // GroupHelper is a mock, so make the calls it would make
+        // Add aggregate group summary
+        NotificationAttributes attr = new NotificationAttributes(GroupHelper.BASE_FLAGS,
+                mock(Icon.class), 0, VISIBILITY_PRIVATE, GROUP_ALERT_CHILDREN,
+                nr0.getChannel().getId());
+        NotificationRecord aggregateSummary = mService.createAutoGroupSummary(nr0.getUserId(),
+                nr0.getSbn().getPackageName(), nr0.getKey(), aggregateGroupName, summaryId, attr);
+        mService.addNotification(aggregateSummary);
+        nr0.setOverrideGroupKey(aggregateGroupName);
+        nr1.setOverrideGroupKey(aggregateGroupName);
+        final String fullAggregateGroupKey = nr0.getGroupKey();
+
+        // Check that the aggregate group summary was created
+        assertThat(aggregateSummary.getNotification().getGroup()).isEqualTo(aggregateGroupName);
+        assertThat(aggregateSummary.getNotification().getChannelId()).isEqualTo(
+                nr0.getChannel().getId());
+        assertThat(mService.mSummaryByGroupKey.containsKey(fullAggregateGroupKey)).isTrue();
+
+        // Cancel aggregate group summary
+        mBinderService.cancelNotificationWithTag(mPkg, mPkg, aggregateSummary.getSbn().getTag(),
+                aggregateSummary.getSbn().getId(), aggregateSummary.getSbn().getUserId());
+        waitForIdle();
+
+        // Check that child notifications are also removed
+        verify(mGroupHelper, times(1)).onNotificationRemoved(eq(aggregateSummary), any());
+        verify(mGroupHelper, times(1)).onNotificationRemoved(eq(nr0), any());
+        verify(mGroupHelper, times(1)).onNotificationRemoved(eq(nr1), any());
+
+        // Make sure the summary was removed and not re-posted
+        assertThat(mService.getNotificationRecordCount()).isEqualTo(0);
+    }
+
+    @Test
+    @DisableFlags(FLAG_NOTIFICATION_FORCE_GROUPING)
     public void testUngroupingOngoingAutoSummary() throws Exception {
         NotificationRecord nr0 =
                 generateNotificationRecord(mTestNotificationChannel, 0);
@@ -14733,7 +15014,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    @EnableFlags(android.app.Flags.FLAG_SECURE_ALLOWLIST_TOKEN)
     public void enqueueNotification_acceptsCorrectToken() throws RemoteException {
         Notification sent = new Notification.Builder(mContext, TEST_CHANNEL_ID)
                 .setContentIntent(createPendingIntent("content"))
@@ -14752,7 +15032,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    @EnableFlags(android.app.Flags.FLAG_SECURE_ALLOWLIST_TOKEN)
     public void enqueueNotification_acceptsNullToken_andPopulatesIt() throws RemoteException {
         Notification receivedWithoutParceling = new Notification.Builder(mContext, TEST_CHANNEL_ID)
                 .setContentIntent(createPendingIntent("content"))
@@ -14769,7 +15048,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    @EnableFlags(android.app.Flags.FLAG_SECURE_ALLOWLIST_TOKEN)
     public void enqueueNotification_directlyThroughRunnable_populatesAllowlistToken() {
         Notification receivedWithoutParceling = new Notification.Builder(mContext, TEST_CHANNEL_ID)
                 .setContentIntent(createPendingIntent("content"))
@@ -14792,7 +15070,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    @EnableFlags(android.app.Flags.FLAG_SECURE_ALLOWLIST_TOKEN)
     public void enqueueNotification_rejectsOtherToken() throws RemoteException {
         Notification sent = new Notification.Builder(mContext, TEST_CHANNEL_ID)
                 .setContentIntent(createPendingIntent("content"))
@@ -14810,7 +15087,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    @EnableFlags(android.app.Flags.FLAG_SECURE_ALLOWLIST_TOKEN)
     public void enqueueNotification_customParcelingWithFakeInnerToken_hasCorrectTokenInIntents()
             throws RemoteException {
         Notification sentFromApp = new Notification.Builder(mContext, TEST_CHANNEL_ID)
@@ -15016,7 +15292,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     @SuppressWarnings("unchecked")
-    @EnableFlags(android.app.Flags.FLAG_SECURE_ALLOWLIST_TOKEN)
     public void getActiveNotifications_doesNotLeakAllowlistToken() throws RemoteException {
         Notification sentFromApp = new Notification.Builder(mContext, TEST_CHANNEL_ID)
                 .setContentIntent(createPendingIntent("content"))
@@ -15485,7 +15760,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.setInterruptionFilter("package", INTERRUPTION_FILTER_PRIORITY, false);
 
         verify(zenModeHelper).setManualZenMode(eq(ZEN_MODE_IMPORTANT_INTERRUPTIONS), eq(null),
-                eq(ZenModeConfig.UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI), anyString(), eq("package"),
+                eq(ZenModeConfig.ORIGIN_SYSTEM), anyString(), eq("package"),
                 anyInt());
     }
 
@@ -15531,7 +15806,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         if (canSetGlobalPolicy) {
             verify(zenModeHelper).setManualZenMode(eq(ZEN_MODE_IMPORTANT_INTERRUPTIONS), eq(null),
-                    eq(ZenModeConfig.UPDATE_ORIGIN_APP), anyString(), eq("package"), anyInt());
+                    eq(ZenModeConfig.ORIGIN_APP), anyString(), eq("package"), anyInt());
         } else {
             verify(zenModeHelper).applyGlobalZenModeAsImplicitZenRule(anyString(), anyInt(),
                     eq(ZEN_MODE_IMPORTANT_INTERRUPTIONS));
@@ -15571,7 +15846,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 INTERRUPTION_FILTER_PRIORITY);
 
         verify(mService.mZenModeHelper).setManualZenMode(eq(ZEN_MODE_IMPORTANT_INTERRUPTIONS),
-                eq(null), eq(ZenModeConfig.UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI), anyString(),
+                eq(null), eq(ZenModeConfig.ORIGIN_SYSTEM), anyString(),
                 eq("pkg"), eq(mUid));
     }
 

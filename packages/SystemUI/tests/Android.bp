@@ -35,9 +35,9 @@ android_test {
         "libstaticjvmtiagent",
     ],
     libs: [
-        "android.test.runner",
+        "android.test.runner.stubs.system",
         "telephony-common",
-        "android.test.base",
+        "android.test.base.stubs.system",
     ],
     aaptflags: [
         "--extra-packages com.android.systemui",
@@ -49,4 +49,15 @@ android_test {
 
     additional_manifests: ["AndroidManifest.xml"],
     manifest: "AndroidManifest-base.xml",
+}
+
+test_module_config {
+    name: "SystemUITests_systemui_accessibility",
+    base: "SystemUITests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.systemui.accessibility"],
+    exclude_annotations: [
+        "android.platform.test.annotations.Postsubmit",
+        "android.platform.test.annotations.FlakyTest",
+    ],
 }

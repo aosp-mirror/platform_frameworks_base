@@ -57,6 +57,7 @@ android_test {
         "service-permission.stubs.system_server",
         "androidx.test.runner",
         "androidx.test.rules",
+        "flickerlib",
         "junit-params",
         "mockito-target-extended-minus-junit4",
         "platform-test-annotations",
@@ -75,9 +76,9 @@ android_test {
 
     libs: [
         "android.hardware.power-V1-java",
-        "android.test.mock",
-        "android.test.base",
-        "android.test.runner",
+        "android.test.mock.stubs.system",
+        "android.test.base.stubs.system",
+        "android.test.runner.stubs.system",
     ],
 
     defaults: [
@@ -107,4 +108,36 @@ android_test {
     data: [
         ":OverlayTestApp",
     ],
+}
+
+test_module_config {
+    name: "WmTests_server_policy_Presubmit",
+    base: "WmTests",
+    test_suites: [
+        "automotive-tests",
+        "device-tests",
+    ],
+    include_filters: ["com.android.server.policy."],
+    include_annotations: ["android.platform.test.annotations.Presubmit"],
+}
+
+test_module_config {
+    name: "WmTests_server_policy",
+    base: "WmTests",
+    test_suites: [
+        "automotive-tests",
+        "device-tests",
+    ],
+    include_filters: ["com.android.server.policy."],
+}
+
+test_module_config {
+    name: "WmTests_wm_utils_Presubmit",
+    base: "WmTests",
+    test_suites: [
+        "automotive-tests",
+        "device-tests",
+    ],
+    include_filters: ["com.android.server.wm.utils"],
+    include_annotations: ["android.platform.test.annotations.Presubmit"],
 }

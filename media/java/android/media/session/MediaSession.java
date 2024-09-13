@@ -165,7 +165,7 @@ public final class MediaSession {
 
     /**
      * Creates a new session. The session will automatically be registered with
-     * the system but will not be published until {@link #setActive(boolean)
+     * the system, but will not be published until {@link #setActive(boolean)
      * setActive(true)} is called. You must call {@link #release()} when
      * finished with the session.
      * <p>

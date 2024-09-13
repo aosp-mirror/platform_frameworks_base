@@ -17,6 +17,7 @@
 package com.android.systemui.bouncer.ui.composable
 
 import android.view.HapticFeedbackConstants
+import android.view.MotionEvent
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationSpec
@@ -24,30 +25,32 @@ import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.LocalIndication
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.focusable
-import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -60,12 +63,11 @@ import com.android.systemui.bouncer.ui.viewmodel.PinBouncerViewModel
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.ui.compose.Icon
+import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.res.R
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.DurationUnit
-import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /** Renders the PIN button pad. */
@@ -94,11 +96,15 @@ fun PinPad(
         }
     }
 
+    // set the focus, so adb can send the key events for testing.
+    val focusRequester = FocusRequester()
+    LaunchedEffect(Unit) { focusRequester.requestFocus() }
+
     VerticalGrid(
         columns = columns,
         verticalSpacing = verticalSpacing,
         horizontalSpacing = calculateHorizontalSpacingBetweenColumns(gridWidth = 300.dp),
-        modifier = modifier,
+        modifier = modifier.focusRequester(focusRequester).sysuiResTag("pin_pad_grid")
     ) {
         repeat(9) { index ->
             DigitButton(
@@ -107,6 +113,7 @@ fun PinPad(
                 onClicked = viewModel::onPinButtonClicked,
                 scaling = buttonScaleAnimatables[index]::value,
                 isAnimationEnabled = isDigitButtonAnimationEnabled,
+                onPointerDown = viewModel::onDigitButtonDown,
             )
         }
 
@@ -122,6 +129,7 @@ fun PinPad(
             onLongPressed = viewModel::onBackspaceButtonLongPressed,
             appearance = backspaceButtonAppearance,
             scaling = buttonScaleAnimatables[9]::value,
+            elementId = "delete_button"
         )
 
         DigitButton(
@@ -130,6 +138,7 @@ fun PinPad(
             onClicked = viewModel::onPinButtonClicked,
             scaling = buttonScaleAnimatables[10]::value,
             isAnimationEnabled = isDigitButtonAnimationEnabled,
+            onPointerDown = viewModel::onDigitButtonDown
         )
 
         ActionButton(
@@ -143,6 +152,7 @@ fun PinPad(
             onClicked = viewModel::onAuthenticateButtonClicked,
             appearance = confirmButtonAppearance,
             scaling = buttonScaleAnimatables[11]::value,
+            elementId = "key_enter"
         )
     }
 }
@@ -152,6 +162,7 @@ private fun DigitButton(
     digit: Int,
     isInputEnabled: Boolean,
     onClicked: (Int) -> Unit,
+    onPointerDown: () -> Unit,
     scaling: () -> Float,
     isAnimationEnabled: Boolean,
 ) {
@@ -161,6 +172,7 @@ private fun DigitButton(
         backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
         foregroundColor = MaterialTheme.colorScheme.onSurfaceVariant,
         isAnimationEnabled = isAnimationEnabled,
+        onPointerDown = onPointerDown,
         modifier =
             Modifier.graphicsLayer {
                 val scale = if (isAnimationEnabled) scaling() else 1f
@@ -183,6 +195,7 @@ private fun ActionButton(
     icon: Icon,
     isInputEnabled: Boolean,
     onClicked: () -> Unit,
+    elementId: String,
     onLongPressed: (() -> Unit)? = null,
     appearance: ActionButtonAppearance,
     scaling: () -> Float,
@@ -208,6 +221,7 @@ private fun ActionButton(
         backgroundColor = backgroundColor,
         foregroundColor = foregroundColor,
         isAnimationEnabled = true,
+        elementId = elementId,
         modifier =
             Modifier.graphicsLayer {
                 alpha = hiddenAlpha
@@ -231,10 +245,14 @@ private fun PinPadButton(
     foregroundColor: Color,
     isAnimationEnabled: Boolean,
     modifier: Modifier = Modifier,
+    elementId: String? = null,
     onLongPressed: (() -> Unit)? = null,
+    onPointerDown: (() -> Unit)? = null,
     content: @Composable (contentColor: () -> Color) -> Unit,
 ) {
-    var isPressed: Boolean by remember { mutableStateOf(false) }
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val indication = LocalIndication.current.takeUnless { isPressed }
 
     val view = LocalView.current
     LaunchedEffect(isPressed) {
@@ -281,8 +299,6 @@ private fun PinPadButton(
             animationSpec = colorAnimationSpec
         )
 
-    val scope = rememberCoroutineScope()
-
     Box(
         contentAlignment = Alignment.Center,
         modifier =
@@ -297,25 +313,22 @@ private fun PinPadButton(
                         cornerRadius = CornerRadius(cornerRadius.toPx()),
                     )
                 }
+                .clip(CircleShape)
                 .thenIf(isEnabled) {
-                    Modifier.pointerInput(Unit) {
-                        detectTapGestures(
-                            onPress = {
-                                scope.launch {
-                                    isPressed = true
-                                    val minDuration = async {
-                                        delay(pinButtonPressedDuration + pinButtonHoldTime)
-                                    }
-                                    tryAwaitRelease()
-                                    minDuration.await()
-                                    isPressed = false
-                                }
-                            },
-                            onTap = { onClicked() },
-                            onLongPress = onLongPressed?.let { { onLongPressed() } },
+                    Modifier.combinedClickable(
+                            interactionSource = interactionSource,
+                            indication = indication,
+                            onClick = onClicked,
+                            onLongClick = onLongPressed
                         )
-                    }
-                },
+                        .pointerInteropFilter { motionEvent ->
+                            if (motionEvent.action == MotionEvent.ACTION_DOWN) {
+                                onPointerDown?.let { it() }
+                            }
+                            false
+                        }
+                }
+                .thenIf(elementId != null) { Modifier.sysuiResTag(elementId!!) },
     ) {
         content(contentColor::value)
     }

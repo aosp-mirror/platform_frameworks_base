@@ -71,7 +71,9 @@ import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.KeyguardIndicationController
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.temporarydisplay.chipbar.ChipbarCoordinator
+import com.google.android.msdl.domain.MSDLPlayer
 import dagger.Lazy
 import java.util.Optional
 import javax.inject.Inject
@@ -106,12 +108,14 @@ constructor(
     private val falsingManager: FalsingManager,
     private val keyguardClockViewModel: KeyguardClockViewModel,
     private val smartspaceViewModel: KeyguardSmartspaceViewModel,
-    private val lockscreenContentViewModel: LockscreenContentViewModel,
+    private val lockscreenContentViewModelFactory: LockscreenContentViewModel.Factory,
     private val lockscreenSceneBlueprintsLazy: Lazy<Set<LockscreenSceneBlueprint>>,
     private val clockInteractor: KeyguardClockInteractor,
     private val keyguardViewMediator: KeyguardViewMediator,
     private val deviceEntryUnlockTrackerViewBinder: Optional<DeviceEntryUnlockTrackerViewBinder>,
+    private val statusBarKeyguardViewManager: StatusBarKeyguardViewManager,
     @Main private val mainDispatcher: CoroutineDispatcher,
+    private val msdlPlayer: MSDLPlayer,
 ) : CoreStartable {
 
     private var rootViewHandle: DisposableHandle? = null
@@ -143,7 +147,7 @@ constructor(
                 val composeView =
                     createLockscreen(
                         context = context,
-                        viewModel = lockscreenContentViewModel,
+                        viewModelFactory = lockscreenContentViewModelFactory,
                         blueprints = lockscreenSceneBlueprintsLazy.get(),
                     )
                 composeView.id = View.generateViewId()
@@ -218,13 +222,15 @@ constructor(
                 vibratorHelper,
                 falsingManager,
                 keyguardViewMediator,
+                statusBarKeyguardViewManager,
                 mainDispatcher,
+                msdlPlayer,
             )
     }
 
     private fun createLockscreen(
         context: Context,
-        viewModel: LockscreenContentViewModel,
+        viewModelFactory: LockscreenContentViewModel.Factory,
         blueprints: Set<@JvmSuppressWildcards LockscreenSceneBlueprint>,
     ): View {
         val sceneBlueprints =
@@ -239,7 +245,7 @@ constructor(
                     scene(currentScene) {
                         with(
                             LockscreenContent(
-                                viewModel = viewModel,
+                                viewModelFactory = viewModelFactory,
                                 blueprints = sceneBlueprints,
                                 clockInteractor = clockInteractor
                             )

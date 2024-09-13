@@ -951,12 +951,14 @@ public final class ProcessList {
                             try {
                                 switch (inputData.readInt()) {
                                     case LMK_PROCKILL:
-                                        if (receivedLen != 12) {
+                                        if (receivedLen != 16) {
                                             return false;
                                         }
                                         final int pid = inputData.readInt();
                                         final int uid = inputData.readInt();
-                                        mAppExitInfoTracker.scheduleNoteLmkdProcKilled(pid, uid);
+                                        final int rssKb = inputData.readInt();
+                                        mAppExitInfoTracker.scheduleNoteLmkdProcKilled(pid, uid,
+                                                rssKb);
                                         return true;
                                     case LMK_KILL_OCCURRED:
                                         if (receivedLen
@@ -2388,8 +2390,8 @@ public final class ProcessList {
             }
             String volumeUuid = packageState.getVolumeUuid();
             long inode = packageState.getUserStateOrDefault(userId).getCeDataInode();
-            if (inode == 0) {
-                Slog.w(TAG, packageName + " inode == 0 (b/152760674)");
+            if (inode <= 0) {
+                Slog.w(TAG, packageName + " inode == 0 or app uninstalled with keep-data");
                 return null;
             }
             result.put(packageName, Pair.create(volumeUuid, inode));
@@ -3003,7 +3005,7 @@ public final class ProcessList {
         return freezePackageCgroup(packageUID, false);
     }
 
-    private static void freezeBinderAndPackageCgroup(List<Pair<ProcessRecord, Boolean>> procs,
+    private void freezeBinderAndPackageCgroup(List<Pair<ProcessRecord, Boolean>> procs,
                                                      int packageUID) {
         // Freeze all binder processes under the target UID (whose cgroup is about to be frozen).
         // Since we're going to kill these, we don't need to unfreze them later.
@@ -3017,7 +3019,7 @@ public final class ProcessList {
                 try {
                     int rc;
                     do {
-                        rc = CachedAppOptimizer.freezeBinder(pid, true, 10 /* timeout_ms */);
+                        rc = mService.getFreezer().freezeBinder(pid, true, 10 /* timeout_ms */);
                     } while (rc == -EAGAIN && nRetries++ < 1);
                     if (rc != 0) Slog.e(TAG, "Unable to freeze binder for " + pid + ": " + rc);
                 } catch (RuntimeException e) {
@@ -3392,24 +3394,39 @@ public final class ProcessList {
                 hostingRecord.getDefiningUid(), hostingRecord.getDefiningProcessName());
         final ProcessStateRecord state = r.mState;
 
-        final boolean wasStopped = (info.flags & ApplicationInfo.FLAG_STOPPED) != 0;
+        final boolean wasStopped = info.isStopped();
         // Check if we should mark the processrecord for first launch after force-stopping
         if (wasStopped) {
+            boolean wasEverLaunched = false;
+            if (android.app.Flags.useAppInfoNotLaunched()
+                    || mService.mConstants.mFlagUseAppInfoNotLaunched) {
+                wasEverLaunched = !info.isNotLaunched();
+            } else {
+                try {
+                    wasEverLaunched = mService.getPackageManagerInternal()
+                            .wasPackageEverLaunched(r.getApplicationInfo().packageName, r.userId);
+                } catch (IllegalArgumentException e) {
+                    // Package doesn't have state yet, assume not launched
+                }
+            }
             // Check if the hosting record is for an activity or not. Since the stopped
             // state tracking is handled differently to avoid WM calling back into AM,
             // store the state in the correct record
             if (hostingRecord.isTypeActivity()) {
-                final boolean wasPackageEverLaunched = mService
-                        .wasPackageEverLaunched(r.getApplicationInfo().packageName, r.userId);
                 // If the package was launched in the past but is currently stopped, only then
                 // should it be considered as force-stopped.
-                @WindowProcessController.StoppedState int stoppedState = wasPackageEverLaunched
+                @WindowProcessController.StoppedState int stoppedState = wasEverLaunched
                         ? STOPPED_STATE_FORCE_STOPPED
                         : STOPPED_STATE_FIRST_LAUNCH;
                 r.getWindowProcessController().setStoppedState(stoppedState);
             } else {
-                r.setWasForceStopped(true);
-                // first launch is computed just before logging, for non-activity types
+                if (android.app.Flags.useAppInfoNotLaunched()
+                        || mService.mConstants.mFlagUseAppInfoNotLaunched) {
+                    // If it was launched before, then it must be a force-stop
+                    r.setWasForceStopped(wasEverLaunched);
+                } else {
+                    r.setWasForceStopped(true);
+                }
             }
         }
 
@@ -3754,7 +3771,7 @@ public final class ProcessList {
                     boolean hasActivity = false;
                     int connUid = 0;
                     int connGroup = 0;
-                    while (i >= bottomI) {
+                    while (subProc.info.uid != uid) {
                         mLruProcesses.remove(i);
                         mLruProcesses.add(endIndex, subProc);
                         if (DEBUG_LRU) Slog.d(TAG_LRU,
@@ -4110,19 +4127,6 @@ public final class ProcessList {
         return false;
     }
 
-    private static int procStateToImportance(int procState, int memAdj,
-            ActivityManager.RunningAppProcessInfo currApp,
-            int clientTargetSdk) {
-        int imp = ActivityManager.RunningAppProcessInfo.procStateToImportanceForTargetSdk(
-                procState, clientTargetSdk);
-        if (imp == ActivityManager.RunningAppProcessInfo.IMPORTANCE_BACKGROUND) {
-            currApp.lru = memAdj;
-        } else {
-            currApp.lru = 0;
-        }
-        return imp;
-    }
-
     @GuardedBy(anyOf = {"mService", "mProcLock"})
     void fillInProcMemInfoLOSP(ProcessRecord app,
             ActivityManager.RunningAppProcessInfo outInfo,
@@ -4140,14 +4144,20 @@ public final class ProcessList {
         }
         outInfo.lastTrimLevel = app.mProfile.getTrimMemoryLevel();
         final ProcessStateRecord state = app.mState;
-        int adj = state.getCurAdj();
-        int procState = state.getCurProcState();
-        outInfo.importance = procStateToImportance(procState, adj, outInfo,
-                clientTargetSdk);
+        final int procState = state.getCurProcState();
+        outInfo.importance = ActivityManager.RunningAppProcessInfo
+                                .procStateToImportanceForTargetSdk(procState, clientTargetSdk);
+        if (outInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_BACKGROUND) {
+            outInfo.lru = state.getCurAdj();
+        } else {
+            outInfo.lru = 0;
+        }
         outInfo.importanceReasonCode = state.getAdjTypeCode();
         outInfo.processState = procState;
         outInfo.isFocused = (app == mService.getTopApp());
         outInfo.lastActivityTime = app.getLastActivityTime();
+        // Note: ActivityManager$RunningAppProcessInfo.copyTo() must be updated if what gets
+        // "filled into" outInfo in this method changes.
     }
 
     @GuardedBy(anyOf = {"mService", "mProcLock"})

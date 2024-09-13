@@ -1196,6 +1196,8 @@
     <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"V poliach pre heslá nie je rukopis podporovaný"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Späť"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Prepnúť metódu vstupu"</string>
+    <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"Otvoriť výber metódy vstupu"</string>
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"Nastavenia"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Nedostatok ukladacieho priestoru"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Niektoré systémové funkcie nemusia fungovať"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"V úložisku nie je dostatok voľného miesta pre systém. Zaistite, aby ste mali 250 MB voľného miesta a zariadenie reštartujte."</string>
@@ -1430,6 +1432,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"ZDIEĽAŤ"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"ODMIETNUŤ"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Zvoliť metódu vstupu"</string>
+    <string name="input_method_language_settings" msgid="8069089418056819437">"Nastavenia jazyka"</string>
     <string name="show_ime" msgid="6406112007347443383">"Ponechať na obrazovke, keď je aktívna fyzická klávesnica"</string>
     <string name="hardware" msgid="3611039921284836033">"Použiť klávesnicu na obrazovke"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Nakonfigurujte <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
@@ -1745,7 +1748,7 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"Aplikácia zakrýva žiadosť o povolenie, takže vaša odpoveď sa nedá overiť."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Klepnutím na funkciu ju začnite používať:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Výber funkcií, ktoré chcete používať tlačidlom dostupnosti"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Výber funkcií, ktoré chcete používať klávesovou skratkou"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2245540598834891500">"Vyberte funkcie, ktoré chcete používať so skratkou tlačidiel hlasitosti"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Služba <xliff:g id="SERVICE_NAME">%s</xliff:g> bola vypnutá"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Upraviť skratky"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Hotovo"</string>
@@ -2423,6 +2426,8 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Obsah aplikácie je z bezpečnostných dôvodov pri zdieľaní obrazovky skrytý"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Automaticky pripojené k satelitu"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Správy môžete odosielať a prijímať bez mobilnej siete či siete Wi-Fi"</string>
+    <string name="satellite_notification_manual_title" msgid="1097504441849466279">"Chcete používať správy cez satelit?"</string>
+    <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Odosielajte a prijímajte správy bez mobilnej siete či siete Wi‑Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Otvoriť Správy"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Ako to funguje"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Nespracovaná…"</string>
@@ -2439,22 +2444,14 @@
     <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"Prepnúť používateľa"</string>
     <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"Ignorovať"</string>
     <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"Klepnutím vypnite zvuk"</string>
-    <!-- no translation found for keyboard_shortcut_group_applications_browser (6535007304687100909) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_contacts (2750702518068326356) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_email (4229037666415353683) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_sms (3523799286376321137) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_music (2051507523525651067) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_calendar (3571770335653387606) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_calculator (6753209559716091507) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_maps (7950000659522589471) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications (3010389163951364798) -->
-    <skip />
+    <string name="keyboard_shortcut_group_applications_browser" msgid="6535007304687100909">"Prehliadač"</string>
+    <string name="keyboard_shortcut_group_applications_contacts" msgid="2750702518068326356">"Kontakty"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="4229037666415353683">"E‑mail"</string>
+    <string name="keyboard_shortcut_group_applications_sms" msgid="3523799286376321137">"SMS"</string>
+    <string name="keyboard_shortcut_group_applications_music" msgid="2051507523525651067">"Hudba"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="3571770335653387606">"Kalendár"</string>
+    <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"Kalkulačka"</string>
+    <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"Mapy"</string>
+    <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"Aplikácie"</string>
+    <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"Vaše odtlačky prstov sa už nedajú rozpoznať. Znova nastavte odomknutie odtlačkom prsta."</string>
 </resources>

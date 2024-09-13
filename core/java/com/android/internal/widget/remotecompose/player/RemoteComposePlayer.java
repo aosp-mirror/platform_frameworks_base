@@ -410,4 +410,3 @@ public class RemoteComposePlayer extends FrameLayout {
         }
     }
 }
-

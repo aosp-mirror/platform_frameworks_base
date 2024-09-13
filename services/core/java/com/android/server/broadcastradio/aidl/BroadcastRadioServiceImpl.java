@@ -51,6 +51,7 @@ public final class BroadcastRadioServiceImpl {
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private final Object mLock = new Object();
+    private final RadioServiceUserController mUserController;
 
     @GuardedBy("mLock")
     private int mNextModuleId;
@@ -77,7 +78,7 @@ public final class BroadcastRadioServiceImpl {
                 }
 
                 RadioModule radioModule =
-                        RadioModule.tryLoadingModule(moduleId, name, newBinder);
+                        RadioModule.tryLoadingModule(moduleId, name, newBinder, mUserController);
                 if (radioModule == null) {
                     Slogf.w(TAG, "No module %s with id %d (HAL AIDL)", name, moduleId);
                     return;
@@ -141,9 +142,12 @@ public final class BroadcastRadioServiceImpl {
      * BroadcastRadio HAL services
      *
      * @param serviceNameList list of names of AIDL BroadcastRadio HAL services
+     * @param userController User controller implementation
      */
-    public BroadcastRadioServiceImpl(ArrayList<String> serviceNameList) {
+    public BroadcastRadioServiceImpl(List<String> serviceNameList,
+            RadioServiceUserController userController) {
         mNextModuleId = 0;
+        mUserController = Objects.requireNonNull(userController, "User controller can not be null");
         if (DEBUG) {
             Slogf.d(TAG, "Initializing BroadcastRadioServiceImpl %s", IBroadcastRadio.DESCRIPTOR);
         }
@@ -202,7 +206,7 @@ public final class BroadcastRadioServiceImpl {
         if (DEBUG) {
             Slogf.d(TAG, "Open AIDL radio session");
         }
-        if (!RadioServiceUserController.isCurrentOrSystemUser()) {
+        if (!mUserController.isCurrentOrSystemUser()) {
             Slogf.e(TAG, "Cannot open tuner on AIDL HAL client for non-current user");
             throw new IllegalStateException("Cannot open session for non-current user");
         }
@@ -222,7 +226,7 @@ public final class BroadcastRadioServiceImpl {
         }
 
         TunerSession tunerSession = radioModule.openSession(callback);
-        if (legacyConfig != null) {
+        if (tunerSession != null && legacyConfig != null) {
             tunerSession.setConfiguration(legacyConfig);
         }
         return tunerSession;

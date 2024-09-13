@@ -30,7 +30,6 @@ import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.provider.Settings;
 import android.util.Log;
-import android.util.Pair;
 import android.view.KeyEvent;
 import android.view.WindowManager;
 
@@ -109,7 +108,7 @@ public class CsdWarningDialog extends SystemUIDialog
     private long mShowTime;
 
     @VisibleForTesting public int mCachedMediaStreamVolume;
-    private Optional<ImmutableList<Pair<String, Intent>>> mActionIntents;
+    private Optional<ImmutableList<CsdWarningAction>> mActionIntents;
     private final BroadcastDispatcher mBroadcastDispatcher;
 
     /**
@@ -121,7 +120,7 @@ public class CsdWarningDialog extends SystemUIDialog
         CsdWarningDialog create(
                 int csdWarning,
                 Runnable onCleanup,
-                Optional<ImmutableList<Pair<String, Intent>>> actionIntents);
+                Optional<ImmutableList<CsdWarningAction>> actionIntents);
     }
 
     @AssistedInject
@@ -132,7 +131,7 @@ public class CsdWarningDialog extends SystemUIDialog
             NotificationManager notificationManager,
             @Background DelayableExecutor delayableExecutor,
             @Assisted Runnable onCleanup,
-            @Assisted Optional<ImmutableList<Pair<String, Intent>>> actionIntents,
+            @Assisted Optional<ImmutableList<CsdWarningAction>> actionIntents,
             BroadcastDispatcher broadcastDispatcher) {
         super(context);
         mCsdWarning = csdWarning;
@@ -351,39 +350,45 @@ public class CsdWarningDialog extends SystemUIDialog
         if (Flags.sounddoseCustomization()
                 && mActionIntents.isPresent()
                 && !mActionIntents.get().isEmpty()) {
-            ImmutableList<Pair<String, Intent>> actionIntentsList = mActionIntents.get();
-            for (Pair<String, Intent> intentPair : actionIntentsList) {
-                if (intentPair != null && intentPair.first != null && intentPair.second != null) {
-                    PendingIntent pendingActionIntent =
-                            PendingIntent.getBroadcast(mContext, 0, intentPair.second,
-                                    FLAG_IMMUTABLE);
-                    builder.addAction(0, intentPair.first, pendingActionIntent);
-                    // Register receiver to undo volume only when
-                    // notification conaining the undo action would be sent.
-                    if (intentPair.first == mContext.getString(R.string.volume_undo_action)) {
-                        final IntentFilter filterUndo = new IntentFilter(
-                                VolumeDialog.ACTION_VOLUME_UNDO);
-                        mBroadcastDispatcher.registerReceiver(mReceiverUndo,
-                                filterUndo,
-                                /* executor = default */ null,
-                                /* user = default */ null,
-                                Context.RECEIVER_NOT_EXPORTED,
-                                /* permission = default */ null);
+            ImmutableList<CsdWarningAction> actionIntentsList = mActionIntents.get();
+            for (CsdWarningAction action : actionIntentsList) {
+                if (action.getLabel() == null || action.getIntent() == null) {
+                    Log.w(TAG, "Null action intent received. Skipping addition to notification");
+                    continue;
+                }
+                PendingIntent pendingActionIntent = action.toPendingIntent(mContext);
+                if (pendingActionIntent == null) {
+                    Log.w(TAG, "Null pending intent received. Skipping addition to notification");
+                    continue;
+                }
+                builder.addAction(0, action.getLabel(), pendingActionIntent);
 
-                        // Register receiver to learn if notification has been dismissed.
-                        // This is required to unregister receivers to prevent leak.
-                        Intent dismissIntent = new Intent(DISMISS_CSD_NOTIFICATION)
-                                .setPackage(mContext.getPackageName());
-                        PendingIntent pendingDismissIntent = PendingIntent.getBroadcast(mContext,
-                                0, dismissIntent, FLAG_IMMUTABLE);
-                        mBroadcastDispatcher.registerReceiver(mReceiverDismissNotification,
-                                new IntentFilter(DISMISS_CSD_NOTIFICATION),
-                                /* executor = default */ null,
-                                /* user = default */ null,
-                                Context.RECEIVER_NOT_EXPORTED,
-                                /* permission = default */ null);
-                        builder.setDeleteIntent(pendingDismissIntent);
-                    }
+                // Register receiver to undo volume only when
+                // notification conaining the undo action would be sent.
+                if (action.getLabel().equals(mContext.getString(R.string.volume_undo_action))) {
+                    final IntentFilter filterUndo = new IntentFilter(
+                            VolumeDialog.ACTION_VOLUME_UNDO);
+                    mBroadcastDispatcher.registerReceiver(mReceiverUndo,
+                            filterUndo,
+                            /* executor = default */ null,
+                            /* user = default */ null,
+                            Context.RECEIVER_NOT_EXPORTED,
+                            /* permission = default */ null);
+
+                    // Register receiver to learn if notification has been dismissed.
+                    // This is required to unregister receivers to prevent leak.
+                    Intent dismissIntent = new Intent(DISMISS_CSD_NOTIFICATION)
+                            .setPackage(mContext.getPackageName());
+                    PendingIntent pendingDismissIntent = PendingIntent.getBroadcast(
+                            mContext,
+                            0, dismissIntent, FLAG_IMMUTABLE);
+                    mBroadcastDispatcher.registerReceiver(mReceiverDismissNotification,
+                            new IntentFilter(DISMISS_CSD_NOTIFICATION),
+                            /* executor = default */ null,
+                            /* user = default */ null,
+                            Context.RECEIVER_NOT_EXPORTED,
+                            /* permission = default */ null);
+                    builder.setDeleteIntent(pendingDismissIntent);
                 }
             }
         }

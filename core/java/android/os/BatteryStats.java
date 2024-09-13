@@ -1997,6 +1997,8 @@ public abstract class BatteryStats {
                 STATE2_VIDEO_ON_FLAG | STATE2_FLASHLIGHT_FLAG | STATE2_CAMERA_FLAG
                 | STATE2_GPS_SIGNAL_QUALITY_MASK;
 
+        public static final int GNSS_SIGNAL_QUALITY_NONE = 2;
+
         @UnsupportedAppUsage
         public int states2;
 
@@ -2220,7 +2222,7 @@ public abstract class BatteryStats {
             modemRailChargeMah = 0;
             wifiRailChargeMah = 0;
             states = 0;
-            states2 = 0;
+            states2 = GNSS_SIGNAL_QUALITY_NONE << HistoryItem.STATE2_GPS_SIGNAL_QUALITY_SHIFT;
             wakelockTag = null;
             wakeReasonTag = null;
             eventCode = EVENT_NONE;
@@ -2491,7 +2493,7 @@ public abstract class BatteryStats {
     public static final int SCREEN_BRIGHTNESS_LIGHT = 3;
     public static final int SCREEN_BRIGHTNESS_BRIGHT = 4;
 
-    static final String[] SCREEN_BRIGHTNESS_NAMES = {
+    public static final String[] SCREEN_BRIGHTNESS_NAMES = {
         "dark", "dim", "medium", "light", "bright"
     };
 
@@ -3077,7 +3079,7 @@ public abstract class BatteryStats {
     public static final String[] HISTORY_EVENT_NAMES = new String[] {
             "null", "proc", "fg", "top", "sync", "wake_lock_in", "job", "user", "userfg", "conn",
             "active", "pkginst", "pkgunin", "alarm", "stats", "pkginactive", "pkgactive",
-            "tmpwhitelist", "screenwake", "wakeupap", "longwake", "est_capacity", "state"
+            "tmpwhitelist", "screenwake", "wakeupap", "longwake", "state"
     };
 
     public static final String[] HISTORY_EVENT_CHECKIN_NAMES = new String[] {

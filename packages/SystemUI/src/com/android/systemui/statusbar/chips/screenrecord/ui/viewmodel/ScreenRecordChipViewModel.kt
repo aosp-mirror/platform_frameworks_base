@@ -19,6 +19,9 @@ package com.android.systemui.statusbar.chips.screenrecord.ui.viewmodel
 import android.app.ActivityManager
 import android.content.Context
 import androidx.annotation.DrawableRes
+import com.android.internal.jank.Cuj
+import com.android.systemui.animation.DialogCuj
+import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.SysUISingleton
@@ -32,10 +35,13 @@ import com.android.systemui.statusbar.chips.mediaprojection.ui.view.EndMediaProj
 import com.android.systemui.statusbar.chips.screenrecord.domain.interactor.ScreenRecordChipInteractor
 import com.android.systemui.statusbar.chips.screenrecord.domain.model.ScreenRecordChipModel
 import com.android.systemui.statusbar.chips.screenrecord.ui.view.EndScreenRecordingDialogDelegate
+import com.android.systemui.statusbar.chips.sharetoapp.ui.viewmodel.ShareToAppChipViewModel
 import com.android.systemui.statusbar.chips.ui.model.ColorsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
+import com.android.systemui.statusbar.chips.ui.viewmodel.ChipTransitionHelper
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipViewModel
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipViewModel.Companion.createDialogLaunchOnClickListener
+import com.android.systemui.util.kotlin.pairwise
 import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -52,15 +58,19 @@ constructor(
     @Application private val scope: CoroutineScope,
     private val context: Context,
     private val interactor: ScreenRecordChipInteractor,
+    private val shareToAppChipViewModel: ShareToAppChipViewModel,
     private val systemClock: SystemClock,
     private val endMediaProjectionDialogHelper: EndMediaProjectionDialogHelper,
+    private val dialogTransitionAnimator: DialogTransitionAnimator,
     @StatusBarChipsLog private val logger: LogBuffer,
 ) : OngoingActivityChipViewModel {
-    override val chip: StateFlow<OngoingActivityChipModel> =
+
+    /** A direct mapping from [ScreenRecordChipModel] to [OngoingActivityChipModel]. */
+    private val simpleChip =
         interactor.screenRecordState
             .map { state ->
                 when (state) {
-                    is ScreenRecordChipModel.DoingNothing -> OngoingActivityChipModel.Hidden
+                    is ScreenRecordChipModel.DoingNothing -> OngoingActivityChipModel.Hidden()
                     is ScreenRecordChipModel.Starting -> {
                         OngoingActivityChipModel.Shown.Countdown(
                             colors = ColorsModel.Red,
@@ -70,16 +80,23 @@ constructor(
                     is ScreenRecordChipModel.Recording -> {
                         OngoingActivityChipModel.Shown.Timer(
                             icon =
-                                Icon.Resource(
-                                    ICON,
-                                    ContentDescription.Resource(
-                                        R.string.screenrecord_ongoing_screen_only,
-                                    ),
+                                OngoingActivityChipModel.ChipIcon.SingleColorIcon(
+                                    Icon.Resource(
+                                        ICON,
+                                        ContentDescription.Resource(
+                                            R.string.screenrecord_ongoing_screen_only,
+                                        ),
+                                    )
                                 ),
                             colors = ColorsModel.Red,
                             startTimeMs = systemClock.elapsedRealtime(),
                             createDialogLaunchOnClickListener(
                                 createDelegate(state.recordedTask),
+                                dialogTransitionAnimator,
+                                DialogCuj(
+                                    Cuj.CUJ_STATUS_BAR_LAUNCH_DIALOG_FROM_CHIP,
+                                    tag = "Screen record",
+                                ),
                                 logger,
                                 TAG,
                             ),
@@ -87,8 +104,34 @@ constructor(
                     }
                 }
             }
-            // See b/347726238.
-            .stateIn(scope, SharingStarted.Lazily, OngoingActivityChipModel.Hidden)
+            // See b/347726238 for [SharingStarted.Lazily] reasoning.
+            .stateIn(scope, SharingStarted.Lazily, OngoingActivityChipModel.Hidden())
+
+    /**
+     * The screen record chip to show that also ensures that the start time doesn't change once we
+     * enter the recording state. If we change the start time while we're recording, the chronometer
+     * could skip a second. See b/349620526.
+     */
+    private val chipWithConsistentTimer: StateFlow<OngoingActivityChipModel> =
+        simpleChip
+            .pairwise(initialValue = OngoingActivityChipModel.Hidden())
+            .map { (old, new) ->
+                if (
+                    old is OngoingActivityChipModel.Shown.Timer &&
+                        new is OngoingActivityChipModel.Shown.Timer
+                ) {
+                    new.copy(startTimeMs = old.startTimeMs)
+                } else {
+                    new
+                }
+            }
+            // See b/347726238 for [SharingStarted.Lazily] reasoning.
+            .stateIn(scope, SharingStarted.Lazily, OngoingActivityChipModel.Hidden())
+
+    private val chipTransitionHelper = ChipTransitionHelper(scope)
+
+    override val chip: StateFlow<OngoingActivityChipModel> =
+        chipTransitionHelper.createChipFlow(chipWithConsistentTimer)
 
     private fun createDelegate(
         recordedTask: ActivityManager.RunningTaskInfo?
@@ -96,13 +139,15 @@ constructor(
         return EndScreenRecordingDialogDelegate(
             endMediaProjectionDialogHelper,
             context,
-            stopAction = this::stopRecording,
+            stopAction = this::stopRecordingFromDialog,
             recordedTask,
         )
     }
 
-    private fun stopRecording() {
-        logger.log(TAG, LogLevel.INFO, {}, { "Stop recording requested" })
+    private fun stopRecordingFromDialog() {
+        logger.log(TAG, LogLevel.INFO, {}, { "Stop recording requested from dialog" })
+        chipTransitionHelper.onActivityStoppedFromDialog()
+        shareToAppChipViewModel.onRecordingStoppedFromDialog()
         interactor.stopRecording()
     }
 

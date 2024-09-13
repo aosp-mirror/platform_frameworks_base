@@ -22,6 +22,7 @@ import static android.app.NotificationChannel.PLACEHOLDER_CONVERSATION_ID;
 import static android.app.NotificationChannel.PROMOTIONS_ID;
 import static android.app.NotificationChannel.RECS_ID;
 import static android.app.NotificationChannel.SOCIAL_MEDIA_ID;
+import static android.app.NotificationChannel.SYSTEM_RESERVED_IDS;
 import static android.app.NotificationChannel.USER_LOCKED_IMPORTANCE;
 import static android.app.NotificationManager.BUBBLE_PREFERENCE_ALL;
 import static android.app.NotificationManager.BUBBLE_PREFERENCE_NONE;
@@ -30,7 +31,6 @@ import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_MAX;
 import static android.app.NotificationManager.IMPORTANCE_NONE;
 import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
-
 import static android.os.UserHandle.USER_SYSTEM;
 import static android.service.notification.Flags.notificationClassification;
 
@@ -440,6 +440,12 @@ public class PreferencesHelper implements RankingConfig {
                 }
                 channel.setImportanceLockedByCriticalDeviceFunction(
                         r.defaultAppLockedImportance || r.fixedImportance);
+
+                if (notificationClassification()) {
+                    if (SYSTEM_RESERVED_IDS.contains(id) && channel.isDeleted() ) {
+                        channel.setDeleted(false);
+                    }
+                }
 
                 if (isShortcutOk(channel) && isDeletionOk(channel)) {
                     r.channels.put(id, channel);
@@ -1023,6 +1029,11 @@ public class PreferencesHelper implements RankingConfig {
             }
             if (NotificationChannel.DEFAULT_CHANNEL_ID.equals(channel.getId())) {
                 throw new IllegalArgumentException("Reserved id");
+            }
+            // Only the user can update bundle channel settings
+            if (notificationClassification() && !fromSystemOrSystemUi
+                    && SYSTEM_RESERVED_IDS.contains(channel.getId())) {
+                return false;
             }
             NotificationChannel existing = r.channels.get(channel.getId());
             if (existing != null && fromTargetApp) {
@@ -1979,8 +1990,8 @@ public class PreferencesHelper implements RankingConfig {
                         (areChannelsBypassingDnd
                                 ? NotificationManager.Policy.STATE_CHANNELS_BYPASSING_DND : 0),
                         policy.priorityConversationSenders),
-                fromSystemOrSystemUi ? ZenModeConfig.UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI
-                        : ZenModeConfig.UPDATE_ORIGIN_APP,
+                fromSystemOrSystemUi ? ZenModeConfig.ORIGIN_SYSTEM
+                        : ZenModeConfig.ORIGIN_APP,
                 callingUid);
     }
 

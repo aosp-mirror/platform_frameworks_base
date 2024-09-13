@@ -23,7 +23,7 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.kotlin.getOrNull
 import com.android.wm.shell.recents.RecentTasks
-import com.android.wm.shell.util.GroupedRecentTaskInfo
+import com.android.wm.shell.shared.GroupedRecentTaskInfo
 import java.util.Optional
 import java.util.concurrent.Executor
 import javax.inject.Inject

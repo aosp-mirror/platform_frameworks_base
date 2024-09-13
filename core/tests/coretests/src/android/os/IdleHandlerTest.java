@@ -19,8 +19,8 @@ package android.os;
 import android.os.MessageQueue.IdleHandler;
 import android.platform.test.ravenwood.RavenwoodRule;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.MediumTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Rule;
 import org.junit.Test;

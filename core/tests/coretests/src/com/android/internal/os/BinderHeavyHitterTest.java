@@ -23,7 +23,7 @@ import static org.junit.Assert.assertTrue;
 
 import android.os.Binder;
 
-import androidx.test.runner.AndroidJUnit4;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.android.internal.os.BinderCallHeavyHitterWatcher.HeavyHitterContainer;
 

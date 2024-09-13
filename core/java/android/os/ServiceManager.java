@@ -277,7 +277,7 @@ public final class ServiceManager {
             if (service != null) {
                 return service;
             } else {
-                return Binder.allowBlocking(getIServiceManager().checkService(name));
+                return Binder.allowBlocking(getIServiceManager().checkService(name).getBinder());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "error in checkService", e);
@@ -425,7 +425,7 @@ public final class ServiceManager {
     private static IBinder rawGetService(String name) throws RemoteException {
         final long start = sStatLogger.getTime();
 
-        final IBinder binder = getIServiceManager().getService(name);
+        final IBinder binder = getIServiceManager().getService2(name).getBinder();
 
         final int time = (int) sStatLogger.logDurationStat(Stats.GET_SERVICE, start);
 

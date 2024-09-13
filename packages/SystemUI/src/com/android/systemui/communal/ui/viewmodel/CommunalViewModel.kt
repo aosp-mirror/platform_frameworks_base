@@ -16,6 +16,7 @@
 
 package com.android.systemui.communal.ui.viewmodel
 
+import android.content.ComponentName
 import android.content.res.Resources
 import android.os.Bundle
 import android.view.View
@@ -25,6 +26,7 @@ import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
 import com.android.systemui.communal.domain.interactor.CommunalTutorialInteractor
 import com.android.systemui.communal.domain.model.CommunalContentModel
+import com.android.systemui.communal.shared.log.CommunalMetricsLogger
 import com.android.systemui.communal.shared.model.CommunalBackgroundType
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -92,10 +94,13 @@ constructor(
     private val shadeInteractor: ShadeInteractor,
     @Named(MediaModule.COMMUNAL_HUB) mediaHost: MediaHost,
     @CommunalLog logBuffer: LogBuffer,
+    private val metricsLogger: CommunalMetricsLogger,
 ) : BaseCommunalViewModel(communalSceneInteractor, communalInteractor, mediaHost) {
 
-    private val _isMediaHostVisible =
-        conflatedCallbackFlow<Boolean> {
+    private val logger = Logger(logBuffer, "CommunalViewModel")
+
+    private val isMediaHostVisible =
+        conflatedCallbackFlow {
                 val callback = { visible: Boolean ->
                     trySend(visible)
                     Unit
@@ -103,13 +108,34 @@ constructor(
                 mediaHost.addVisibilityChangeListener(callback)
                 awaitClose { mediaHost.removeVisibilityChangeListener(callback) }
             }
-            .onStart { emit(mediaHost.visible) }
+            .onStart {
+                // Ensure the visibility state is correct when the hub is opened and this flow is
+                // started so that the UMO is shown when needed. The visibility state in MediaHost
+                // is not updated once its view has been detached, aka the hub is closed, which can
+                // result in this getting stuck as False and never being updated as the UMO is not
+                // shown.
+                mediaHost.updateViewVisibility()
+                emit(mediaHost.visible)
+            }
+            .distinctUntilChanged()
+            .onEach { logger.d({ "_isMediaHostVisible: $bool1" }) { bool1 = it } }
             .flowOn(mainDispatcher)
-
-    private val logger = Logger(logBuffer, "CommunalViewModel")
 
     /** Communal content saved from the previous emission when the flow is active (not "frozen"). */
     private var frozenCommunalContent: List<CommunalContentModel>? = null
+
+    private val ongoingContent =
+        combine(
+            isMediaHostVisible,
+            communalInteractor.ongoingContent.onEach { mediaHost.updateViewVisibility() }
+        ) { mediaVisible, ongoingContent ->
+            if (mediaVisible) {
+                ongoingContent
+            } else {
+                // Media is not visible, don't show UMO
+                ongoingContent.filterNot { it is CommunalContentModel.Umo }
+            }
+        }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private val latestCommunalContent: Flow<List<CommunalContentModel>> =
@@ -118,8 +144,6 @@ constructor(
                 if (isTutorialMode) {
                     return@flatMapLatest flowOf(communalInteractor.tutorialContent)
                 }
-                val ongoingContent =
-                    _isMediaHostVisible.flatMapLatest { communalInteractor.getOngoingContent(it) }
                 combine(
                     ongoingContent,
                     communalInteractor.widgetContent,
@@ -240,8 +264,9 @@ constructor(
         with(mediaHost) {
             expansion = MediaHostState.EXPANDED
             expandedMatchesParentHeight = true
-            showsOnlyActiveMedia = true
+            showsOnlyActiveMedia = false
             falsingProtectionNeeded = false
+            disablePagination = true
             init(MediaHierarchyManager.LOCATION_COMMUNAL_HUB)
         }
     }
@@ -250,7 +275,7 @@ constructor(
         shouldOpenWidgetPickerOnStart: Boolean,
     ) {
         persistScrollPosition()
-        communalInteractor.showWidgetEditor(selectedKey.value, shouldOpenWidgetPickerOnStart)
+        communalInteractor.showWidgetEditor(shouldOpenWidgetPickerOnStart)
     }
 
     override fun onDismissCtaTile() {
@@ -258,6 +283,10 @@ constructor(
             communalInteractor.dismissCtaTile()
             setCurrentPopupType(PopupType.CtaTile)
         }
+    }
+
+    override fun onTapWidget(componentName: ComponentName, rank: Int) {
+        metricsLogger.logTapWidget(componentName.flattenToString(), rank)
     }
 
     fun onClick() {

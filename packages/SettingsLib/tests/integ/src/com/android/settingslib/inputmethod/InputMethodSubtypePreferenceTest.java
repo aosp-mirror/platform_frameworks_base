@@ -18,9 +18,9 @@ package com.android.settingslib.inputmethod;
 
 import android.text.TextUtils;
 
-import androidx.test.InstrumentationRegistry;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -104,7 +104,7 @@ public class InputMethodSubtypePreferenceTest {
         final Locale subtypeLocale = TextUtils.isEmpty(subtypeLanguageTag)
                 ? null : Locale.forLanguageTag(subtypeLanguageTag);
         return new InputMethodSubtypePreference(
-                InstrumentationRegistry.getTargetContext(),
+                InstrumentationRegistry.getInstrumentation().getTargetContext(),
                 key,
                 subtypeName,
                 subtypeLocale,

@@ -16,6 +16,7 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import android.util.LayoutDirection
 import com.android.app.animation.Interpolators.EMPHASIZED
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.SysUISingleton
@@ -54,7 +55,10 @@ constructor(
 
     val dreamOverlayTranslationX: Flow<Float> =
         configurationInteractor
-            .dimensionPixelSize(R.dimen.dreaming_to_hub_transition_dream_overlay_translation_x)
+            .directionalDimensionPixelSize(
+                LayoutDirection.LTR,
+                R.dimen.dreaming_to_hub_transition_dream_overlay_translation_x
+            )
             .flatMapLatest { translatePx ->
                 transitionAnimation.sharedFlow(
                     duration = TO_GLANCEABLE_HUB_DURATION,
@@ -91,7 +95,7 @@ constructor(
             startTime = 167.milliseconds,
             duration = 167.milliseconds,
             onStep = { it },
-            onCancel = { 0f },
+            onCancel = { 1f },
             onFinish = { 1f },
         )
 

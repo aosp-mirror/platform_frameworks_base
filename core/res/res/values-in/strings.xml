@@ -203,7 +203,7 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Admin melepaskan perangkat untuk penggunaan pribadi"</string>
     <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"Ruang privasi dihapus"</string>
     <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"Organisasi Anda tidak mengizinkan adanya ruang privasi di perangkat terkelola ini."</string>
-    <string name="network_logging_notification_title" msgid="554983187553845004">"Perangkat ini ada yang mengelola"</string>
+    <string name="network_logging_notification_title" msgid="554983187553845004">"Ini adalah perangkat terkelola"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Organisasi mengelola perangkat ini dan mungkin memantau traffic jaringan. Ketuk untuk melihat detailnya."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"Aplikasi dapat mengakses lokasi Anda"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"Hubungi admin IT untuk mempelajari lebih lanjut"</string>
@@ -1194,6 +1194,8 @@
     <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"Tulisan tangan tidak didukung di kolom sandi"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Kembali"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Beralih metode input"</string>
+    <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"Buka pemilih metode input"</string>
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"Setelan"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Ruang penyimpanan hampir habis"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Beberapa fungsi sistem mungkin tidak dapat bekerja"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Penyimpanan tidak cukup untuk sistem. Pastikan Anda memiliki 250 MB ruang kosong, lalu mulai ulang."</string>
@@ -1428,6 +1430,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"BAGIKAN"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"TOLAK"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Pilih metode masukan"</string>
+    <string name="input_method_language_settings" msgid="8069089418056819437">"Setelan Bahasa"</string>
     <string name="show_ime" msgid="6406112007347443383">"Biarkan di layar meski keyboard fisik aktif"</string>
     <string name="hardware" msgid="3611039921284836033">"Gunakan keyboard virtual"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Konfigurasi <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
@@ -1667,7 +1670,7 @@
     <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Transmisi layar ke perangkat"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"Menelusuri perangkat…"</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"Setelan"</string>
-    <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Putuskan koneksi"</string>
+    <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Berhenti hubungkan"</string>
     <string name="media_route_status_scanning" msgid="8045156315309594482">"Memindai..."</string>
     <string name="media_route_status_connecting" msgid="5845597961412010540">"Menghubungkan..."</string>
     <string name="media_route_status_available" msgid="1477537663492007608">"Tersedia"</string>
@@ -1743,7 +1746,8 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"Aplikasi menghalangi permintaan izin sehingga respons Anda tidak dapat diverifikasi."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Ketuk fitur untuk mulai menggunakannya:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Pilih fitur yang akan digunakan dengan tombol aksesibilitas"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Pilih fitur yang akan digunakan dengan pintasan tombol volume"</string>
+    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
+    <skip />
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> telah dinonaktifkan"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Edit pintasan"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Selesai"</string>
@@ -2421,6 +2425,8 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Konten aplikasi disembunyikan dari berbagi layar karena alasan keamanan"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Menghubungkan otomatis ke satelit"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Anda dapat mengirim dan menerima pesan tanpa jaringan seluler atau Wi-Fi"</string>
+    <string name="satellite_notification_manual_title" msgid="1097504441849466279">"Gunakan fitur pesan satelit?"</string>
+    <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Mengirim dan menerima pesan tanpa jaringan seluler atau Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Buka Message"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Cara kerjanya"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Tertunda..."</string>
@@ -2437,22 +2443,14 @@
     <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"Ganti pengguna"</string>
     <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"Bisukan"</string>
     <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"Ketuk untuk membisukan suara"</string>
-    <!-- no translation found for keyboard_shortcut_group_applications_browser (6535007304687100909) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_contacts (2750702518068326356) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_email (4229037666415353683) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_sms (3523799286376321137) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_music (2051507523525651067) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_calendar (3571770335653387606) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_calculator (6753209559716091507) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_maps (7950000659522589471) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications (3010389163951364798) -->
-    <skip />
+    <string name="keyboard_shortcut_group_applications_browser" msgid="6535007304687100909">"Browser"</string>
+    <string name="keyboard_shortcut_group_applications_contacts" msgid="2750702518068326356">"Kontak"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="4229037666415353683">"Email"</string>
+    <string name="keyboard_shortcut_group_applications_sms" msgid="3523799286376321137">"SMS"</string>
+    <string name="keyboard_shortcut_group_applications_music" msgid="2051507523525651067">"Musik"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="3571770335653387606">"Kalender"</string>
+    <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"Kalkulator"</string>
+    <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"Maps"</string>
+    <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"Aplikasi"</string>
+    <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"Sidik jari Anda tidak dapat dikenali lagi. Siapkan Buka dengan Sidik Jari lagi."</string>
 </resources>

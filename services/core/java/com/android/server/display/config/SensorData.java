@@ -34,6 +34,8 @@ public class SensorData {
 
     public static final String TEMPERATURE_TYPE_DISPLAY = "DISPLAY";
     public static final String TEMPERATURE_TYPE_SKIN = "SKIN";
+    private static final SensorData UNSPECIFIED_SENSOR_DATA = new SensorData(
+            /* type= */null, /* name= */ null);
 
     @Nullable
     public final String type;
@@ -43,24 +45,14 @@ public class SensorData {
     public final float maxRefreshRate;
     public final List<SupportedModeData> supportedModes;
 
-    @VisibleForTesting
-    public SensorData() {
-        this(/* type= */ null, /* name= */ null);
+    private SensorData(@Nullable String type, @Nullable String name) {
+        this(type, name, /* minRefreshRate= */ 0f, /* maxRefreshRate= */ Float.POSITIVE_INFINITY,
+                /* supportedModes= */ List.of());
     }
 
     @VisibleForTesting
-    public SensorData(String type, String name) {
-        this(type, name, /* minRefreshRate= */ 0f, /* maxRefreshRate= */ Float.POSITIVE_INFINITY);
-    }
-
-    @VisibleForTesting
-    public SensorData(String type, String name, float minRefreshRate, float maxRefreshRate) {
-        this(type, name, minRefreshRate, maxRefreshRate, /* supportedModes= */ List.of());
-    }
-
-    @VisibleForTesting
-    public SensorData(String type, String name, float minRefreshRate, float maxRefreshRate,
-            List<SupportedModeData> supportedModes) {
+    SensorData(@Nullable String type, @Nullable String name,
+            float minRefreshRate, float maxRefreshRate, List<SupportedModeData> supportedModes) {
         this.type = type;
         this.name = name;
         this.minRefreshRate = minRefreshRate;
@@ -72,7 +64,7 @@ public class SensorData {
      * @return True if the sensor matches both the specified name and type, or one if only one
      * is specified (not-empty). Always returns false if both parameters are null or empty.
      */
-    public boolean matches(String sensorName, String sensorType) {
+    public boolean matches(@Nullable String sensorName, @Nullable String sensorType) {
         final boolean isNameSpecified = !TextUtils.isEmpty(sensorName);
         final boolean isTypeSpecified = !TextUtils.isEmpty(sensorType);
         return (isNameSpecified || isTypeSpecified)
@@ -120,7 +112,7 @@ public class SensorData {
         if (sensorDetails != null) {
             return loadSensorData(sensorDetails);
         } else {
-            return new SensorData();
+            return UNSPECIFIED_SENSOR_DATA;
         }
     }
 
@@ -130,13 +122,12 @@ public class SensorData {
     @Nullable
     public static SensorData loadProxSensorConfig(
             DisplayManagerFlags flags, DisplayConfiguration config) {
-        SensorData DEFAULT_SENSOR = new SensorData();
         List<SensorDetails> sensorDetailsList = config.getProxSensor();
         if (sensorDetailsList.isEmpty()) {
-            return DEFAULT_SENSOR;
+            return UNSPECIFIED_SENSOR_DATA;
         }
 
-        SensorData selectedSensor = DEFAULT_SENSOR;
+        SensorData selectedSensor = UNSPECIFIED_SENSOR_DATA;
         // Prioritize flagged sensors.
         for (SensorDetails sensorDetails : sensorDetailsList) {
             String flagStr = sensorDetails.getFeatureFlag();
@@ -148,7 +139,7 @@ public class SensorData {
         }
 
         // Check for normal un-flagged sensor if a flagged one wasn't found.
-        if (DEFAULT_SENSOR == selectedSensor) {
+        if (UNSPECIFIED_SENSOR_DATA == selectedSensor) {
             for (SensorDetails sensorDetails : sensorDetailsList) {
                 if (sensorDetails.getFeatureFlag() != null) {
                     continue;
@@ -159,7 +150,7 @@ public class SensorData {
         }
 
         // Check if we shouldn't use a sensor at all.
-        if (DEFAULT_SENSOR != selectedSensor) {
+        if (UNSPECIFIED_SENSOR_DATA != selectedSensor) {
             if ("".equals(selectedSensor.name) && "".equals(selectedSensor.type)) {
                 // <proxSensor> with empty values to the config means no sensor should be used.
                 // See also {@link com.android.server.display.utils.SensorUtils}
@@ -174,7 +165,7 @@ public class SensorData {
      * Loads temperature sensor data for no config case. (Type: SKIN, Name: null)
      */
     public static SensorData loadTempSensorUnspecifiedConfig() {
-        return new SensorData(TEMPERATURE_TYPE_SKIN, null);
+        return new SensorData(TEMPERATURE_TYPE_SKIN,  /* name= */ null);
     }
 
     /**
@@ -185,7 +176,7 @@ public class SensorData {
             DisplayConfiguration config) {
         SensorDetails sensorDetails = config.getTempSensor();
         if (!flags.isSensorBasedBrightnessThrottlingEnabled() || sensorDetails == null) {
-            return new SensorData(TEMPERATURE_TYPE_SKIN, null);
+            return loadTempSensorUnspecifiedConfig();
         }
         String name = sensorDetails.getName();
         String type = sensorDetails.getType();
@@ -202,7 +193,7 @@ public class SensorData {
      */
     @NonNull
     public static SensorData loadSensorUnspecifiedConfig() {
-        return new SensorData();
+        return UNSPECIFIED_SENSOR_DATA;
     }
 
     private static SensorData loadSensorData(@NonNull SensorDetails sensorDetails) {

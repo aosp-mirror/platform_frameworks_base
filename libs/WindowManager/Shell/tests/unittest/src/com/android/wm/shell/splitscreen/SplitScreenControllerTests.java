@@ -23,8 +23,8 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NO_USER_ACTION;
 
-import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
-import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeTrue;
@@ -50,7 +50,7 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
-import android.os.IBinder;
+import android.os.Handler;
 import android.window.IWindowContainerToken;
 import android.window.WindowContainerToken;
 
@@ -70,14 +70,14 @@ import com.android.wm.shell.common.LaunchAdjacentController;
 import com.android.wm.shell.common.MultiInstanceHelper;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
-import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
 import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.recents.RecentTasksController;
+import com.android.wm.shell.shared.ShellSharedConstants;
+import com.android.wm.shell.shared.TransactionPool;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
-import com.android.wm.shell.sysui.ShellSharedConstants;
 import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.windowdecor.WindowDecorViewModel;
 
@@ -104,6 +104,7 @@ public class SplitScreenControllerTests extends ShellTestCase {
     @Mock SyncTransactionQueue mSyncQueue;
     @Mock RootTaskDisplayAreaOrganizer mRootTDAOrganizer;
     @Mock ShellExecutor mMainExecutor;
+    @Mock Handler mMainHandler;
     @Mock DisplayController mDisplayController;
     @Mock DisplayImeController mDisplayImeController;
     @Mock DisplayInsetsController mDisplayInsetsController;
@@ -134,7 +135,7 @@ public class SplitScreenControllerTests extends ShellTestCase {
                 mDisplayInsetsController, mDragAndDropController, mTransitions, mTransactionPool,
                 mIconProvider, Optional.of(mRecentTasks), mLaunchAdjacentController,
                 Optional.of(mWindowDecorViewModel), Optional.of(mDesktopTasksController),
-                mStageCoordinator, mMultiInstanceHelper, mMainExecutor));
+                mStageCoordinator, mMultiInstanceHelper, mMainExecutor, mMainHandler));
     }
 
     @Test

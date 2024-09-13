@@ -20,11 +20,13 @@ import android.provider.Settings
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.TransitionKey
 import com.android.systemui.CoreStartable
+import com.android.systemui.Flags.communalSceneKtfRefactor
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.shared.model.CommunalTransitionKeys
+import com.android.systemui.communal.shared.model.EditModeState
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
@@ -96,20 +98,29 @@ constructor(
             return
         }
 
-        // Handle automatically switching based on keyguard state.
-        keyguardTransitionInteractor.startedKeyguardTransitionStep
-            .mapLatest(::determineSceneAfterTransition)
-            .filterNotNull()
-            .onEach { (nextScene, nextTransition) ->
-                if (!communalSceneInteractor.isLaunchingWidget.value) {
+        if (!communalSceneKtfRefactor()) {
+            // Handle automatically switching based on keyguard state.
+            keyguardTransitionInteractor.startedKeyguardTransitionStep
+                .mapLatest(::determineSceneAfterTransition)
+                .filterNotNull()
+                .onEach { (nextScene, nextTransition) ->
                     // When launching a widget, we don't want to animate the scene change or the
                     // Communal Hub will reveal the wallpaper even though it shouldn't. Instead we
                     // snap to the new scene as part of the launch animation, once the activity
                     // launch is done, so we don't change scene here.
-                    communalSceneInteractor.changeScene(nextScene, nextTransition)
+                    val delaySceneTransition =
+                        communalSceneInteractor.editModeState.value == EditModeState.STARTING ||
+                            communalSceneInteractor.isLaunchingWidget.value
+                    if (!delaySceneTransition) {
+                        communalSceneInteractor.changeScene(
+                            newScene = nextScene,
+                            loggingReason = "KTF syncing",
+                            transitionKey = nextTransition,
+                        )
+                    }
                 }
-            }
-            .launchIn(applicationScope)
+                .launchIn(applicationScope)
+        }
 
         // TODO(b/322787129): re-enable once custom animations are in place
         // Handle automatically switching to communal when docked.
@@ -169,7 +180,10 @@ constructor(
                     if (scene == CommunalScenes.Communal && isDreaming && timeoutJob == null) {
                         // If dreaming starts after timeout has expired, ex. if dream restarts under
                         // the hub, just close the hub immediately.
-                        communalSceneInteractor.changeScene(CommunalScenes.Blank)
+                        communalSceneInteractor.changeScene(
+                            CommunalScenes.Blank,
+                            "dream started after timeout",
+                        )
                     }
                 }
         }
@@ -194,7 +208,10 @@ constructor(
                 bgScope.launch {
                     delay(screenTimeout.milliseconds)
                     if (isDreaming) {
-                        communalSceneInteractor.changeScene(CommunalScenes.Blank)
+                        communalSceneInteractor.changeScene(
+                            newScene = CommunalScenes.Blank,
+                            loggingReason = "hub timeout",
+                        )
                     }
                     timeoutJob = null
                 }

@@ -991,7 +991,7 @@
     <string name="keyguard_password_enter_pin_password_code" msgid="7792964196473964340">"Ingiza PIN ili kufungua"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="8583732939138432793">"Nambari ya PIN uliyoweka si sahihi."</string>
     <string name="keyguard_label_text" msgid="3841953694564168384">"Ili kufungua, bofya Menyu kisha 0."</string>
-    <string name="emergency_call_dialog_number_for_display" msgid="2978165477085612673">"Nambari ya dharura"</string>
+    <string name="emergency_call_dialog_number_for_display" msgid="2978165477085612673">"Namba ya dharura"</string>
     <string name="lockscreen_carrier_default" msgid="6192313772955399160">"Hakuna huduma"</string>
     <string name="lockscreen_screen_locked" msgid="7364905540516041817">"skrini imefungwa."</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Bonyeza Menyu ili kufungua au kupiga simu ya dharura."</string>
@@ -1194,6 +1194,8 @@
     <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"Huwezi kuandika kwa mkono kwenye sehemu za kuweka nenosiri"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Rudi nyuma"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Badilisha mbinu ya kuingiza data"</string>
+    <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"Fungua kiteua mbinu ya kuingiza data"</string>
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"Mipangilio"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Nafasi ya kuhifadhi inakaribia kujaa"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Baadhi ya vipengee vya mfumo huenda visifanye kazi"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Hifadhi haitoshi kwa ajili ya mfumo. Hakikisha una MB 250 za nafasi ya hifadhi isiyotumika na uanzishe upya."</string>
@@ -1428,6 +1430,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"SHIRIKI"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"KATAA"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Chagua njia ya ingizo"</string>
+    <string name="input_method_language_settings" msgid="8069089418056819437">"Mipangilio ya Lugha"</string>
     <string name="show_ime" msgid="6406112007347443383">"Ionyeshe kwenye skrini wakati kibodi halisi inatumika"</string>
     <string name="hardware" msgid="3611039921284836033">"Tumia kibodi ya skrini"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Wekea mipangilio <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
@@ -1743,7 +1746,8 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"Programu inazuia ombi la ruhusa kwa hivyo jibu lako haliwezi kuthibitishwa."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Gusa kipengele ili uanze kukitumia:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Chagua vipengele vya kutumia na kitufe cha zana za ufikivu"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Chagua vipengele vya kutumia na njia ya mkato ya kitufe cha sauti"</string>
+    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
+    <skip />
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Huduma ya <xliff:g id="SERVICE_NAME">%s</xliff:g> imezimwa"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Kubadilisha njia za mkato"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Nimemaliza"</string>
@@ -2421,6 +2425,8 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Maudhui ya programu yamefichwa ili yasionekane kwenye skrini ya pamoja kwa sababu za kiusalama"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Imeunganishwa kiotomatiki na satelaiti"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Unaweza kutuma na kupokea ujumbe bila mtandao wa simu au Wi-Fi"</string>
+    <string name="satellite_notification_manual_title" msgid="1097504441849466279">"Ungependa kutuma ujumbe kupitia setilaiti?"</string>
+    <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Tuma na upokee ujumbe bila kutumia mtandao wa simu wala Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Fungua Programu ya Messages"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Utaratibu wake"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Inashughulikiwa..."</string>
@@ -2433,26 +2439,18 @@
     <string name="face_dangling_notification_msg" msgid="746235263598985384">"Muundo wa uso wako hautambuliki tena. Weka tena mipangilio ya Kufungua kwa Uso."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Weka mipangilio"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Si sasa"</string>
-    <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"King\'ora cha <xliff:g id="USER_NAME">%s</xliff:g>"</string>
+    <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"Kengele ya <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"Badilisha mtumiaji"</string>
     <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"Zima sauti"</string>
     <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"Gusa ili uzime sauti"</string>
-    <!-- no translation found for keyboard_shortcut_group_applications_browser (6535007304687100909) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_contacts (2750702518068326356) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_email (4229037666415353683) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_sms (3523799286376321137) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_music (2051507523525651067) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_calendar (3571770335653387606) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_calculator (6753209559716091507) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_maps (7950000659522589471) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications (3010389163951364798) -->
-    <skip />
+    <string name="keyboard_shortcut_group_applications_browser" msgid="6535007304687100909">"Kivinjari"</string>
+    <string name="keyboard_shortcut_group_applications_contacts" msgid="2750702518068326356">"Anwani"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="4229037666415353683">"Barua pepe"</string>
+    <string name="keyboard_shortcut_group_applications_sms" msgid="3523799286376321137">"SMS"</string>
+    <string name="keyboard_shortcut_group_applications_music" msgid="2051507523525651067">"Muziki"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="3571770335653387606">"Kalenda"</string>
+    <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"Kikokotoo"</string>
+    <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"Ramani"</string>
+    <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"Programu"</string>
+    <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"Alama zako za vidole hazitambuliki tena. Weka tena mipangilio ya Kufungua kwa Alama ya Kidole."</string>
 </resources>

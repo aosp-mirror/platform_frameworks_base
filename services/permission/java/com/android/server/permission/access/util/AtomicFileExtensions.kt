@@ -19,6 +19,7 @@ package com.android.server.permission.access.util
 import android.os.FileUtils
 import android.util.AtomicFile
 import android.util.Slog
+import com.android.server.security.FileIntegrity;
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileNotFoundException
@@ -49,6 +50,7 @@ inline fun AtomicFile.readWithReserveCopy(block: (FileInputStream) -> Unit) {
 inline fun AtomicFile.writeWithReserveCopy(block: (FileOutputStream) -> Unit) {
     writeInlined(block)
     val reserveFile = File(baseFile.parentFile, baseFile.name + ".reservecopy")
+    reserveFile.delete()
     try {
         FileInputStream(baseFile).use { inputStream ->
             FileOutputStream(reserveFile).use { outputStream ->
@@ -58,6 +60,12 @@ inline fun AtomicFile.writeWithReserveCopy(block: (FileOutputStream) -> Unit) {
         }
     } catch (e: Exception) {
         Slog.e("AccessPersistence", "Failed to write $reserveFile", e)
+    }
+    try {
+        FileIntegrity.setUpFsVerity(baseFile)
+        FileIntegrity.setUpFsVerity(reserveFile)
+    } catch (e: Exception) {
+        Slog.e("AccessPersistence", "Failed to verity-protect runtime-permissions", e)
     }
 }
 

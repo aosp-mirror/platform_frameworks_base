@@ -19,6 +19,7 @@ package com.android.wm.shell.windowdecor;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.content.pm.PackageManager.FEATURE_PC;
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS;
 import static android.view.WindowManager.TRANSIT_CHANGE;
@@ -26,13 +27,13 @@ import static android.view.WindowManager.TRANSIT_CHANGE;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.input.InputManager;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
 import android.util.SparseArray;
@@ -56,10 +57,12 @@ import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.freeform.FreeformTaskTransitionStarter;
+import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.windowdecor.extension.TaskInfoKt;
+import com.android.wm.shell.windowdecor.viewhost.WindowDecorViewHostSupplier;
 
 /**
  * View model for the window decoration with a caption and shadows. Works with
@@ -72,6 +75,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
     private final IWindowManager mWindowManager;
     private final Context mContext;
     private final Handler mMainHandler;
+    private final @ShellBackgroundThread ShellExecutor mBgExecutor;
     private final ShellExecutor mMainExecutor;
     private final Choreographer mMainChoreographer;
     private final DisplayController mDisplayController;
@@ -80,6 +84,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
     private final Transitions mTransitions;
     private final Region mExclusionRegion = Region.obtain();
     private final InputManager mInputManager;
+    private final WindowDecorViewHostSupplier mWindowDecorViewHostSupplier;
     private TaskOperations mTaskOperations;
 
     /**
@@ -108,6 +113,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
     public CaptionWindowDecorViewModel(
             Context context,
             Handler mainHandler,
+            @ShellBackgroundThread ShellExecutor bgExecutor,
             ShellExecutor shellExecutor,
             Choreographer mainChoreographer,
             IWindowManager windowManager,
@@ -116,10 +122,12 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
             DisplayController displayController,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
             SyncTransactionQueue syncQueue,
-            Transitions transitions) {
+            Transitions transitions,
+            WindowDecorViewHostSupplier windowDecorViewHostSupplier) {
         mContext = context;
         mMainExecutor = shellExecutor;
         mMainHandler = mainHandler;
+        mBgExecutor = bgExecutor;
         mWindowManager = windowManager;
         mMainChoreographer = mainChoreographer;
         mTaskOrganizer = taskOrganizer;
@@ -127,6 +135,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
         mRootTaskDisplayAreaOrganizer = rootTaskDisplayAreaOrganizer;
         mSyncQueue = syncQueue;
         mTransitions = transitions;
+        mWindowDecorViewHostSupplier = windowDecorViewHostSupplier;
         if (!Transitions.ENABLE_SHELL_TRANSITIONS) {
             mTaskOperations = new TaskOperations(null, mContext, mSyncQueue);
         }
@@ -169,8 +178,12 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
 
         if (decoration == null) return;
 
+        if (!shouldShowWindowDecor(taskInfo)) {
+            destroyWindowDecoration(taskInfo);
+            return;
+        }
+
         decoration.relayout(taskInfo);
-        setupCaptionColor(taskInfo, decoration);
     }
 
     @Override
@@ -232,18 +245,12 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
         decoration.close();
     }
 
-    private void setupCaptionColor(RunningTaskInfo taskInfo, CaptionWindowDecoration decoration) {
-        if (TaskInfoKt.isTransparentCaptionBarAppearance(taskInfo)) {
-            decoration.setCaptionColor(Color.TRANSPARENT);
-        } else {
-            final int statusBarColor = taskInfo.taskDescription.getStatusBarColor();
-            decoration.setCaptionColor(statusBarColor);
-        }
-    }
-
     private boolean shouldShowWindowDecor(RunningTaskInfo taskInfo) {
         if (taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM) {
             return true;
+        }
+        if (taskInfo.getWindowingMode() == WINDOWING_MODE_PINNED) {
+            return false;
         }
         if (taskInfo.getActivityType() != ACTIVITY_TYPE_STANDARD) {
             return false;
@@ -284,13 +291,16 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
         final CaptionWindowDecoration windowDecoration =
                 new CaptionWindowDecoration(
                         mContext,
+                        mContext.createContextAsUser(UserHandle.of(taskInfo.userId), 0 /* flags */),
                         mDisplayController,
                         mTaskOrganizer,
                         taskInfo,
                         taskSurface,
                         mMainHandler,
+                        mBgExecutor,
                         mMainChoreographer,
-                        mSyncQueue);
+                        mSyncQueue,
+                        mWindowDecorViewHostSupplier);
         mWindowDecorByTaskId.put(taskInfo.taskId, windowDecoration);
 
         final FluidResizeTaskPositioner taskPositioner =
@@ -304,7 +314,6 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
         windowDecoration.setTaskDragResizer(taskPositioner);
         windowDecoration.relayout(taskInfo, startT, finishT,
                 false /* applyStartTransactionOnDraw */, false /* setTaskCropAndPosition */);
-        setupCaptionColor(taskInfo, windowDecoration);
     }
 
     private class CaptionTouchEventListener implements

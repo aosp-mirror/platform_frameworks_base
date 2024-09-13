@@ -60,7 +60,7 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
 
     @Override
     public int checkAddPermission(int type, boolean isRoundedCornerOverlay, String packageName,
-            int[] outAppOp) {
+            int[] outAppOp, int displayId) {
         return 0;
     }
 
@@ -267,12 +267,6 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
 
     @Override
     public void enableScreenAfterBoot() {
-    }
-
-    @Override
-    public boolean performHapticFeedback(int uid, String packageName, int effectId, String reason,
-            int flags, int privFlags) {
-        return false;
     }
 
     @Override

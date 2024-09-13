@@ -938,8 +938,6 @@ public final class Zygote {
             throw new IllegalArgumentException(USAP_ERROR_PREFIX + "--get-pid");
         } else if (args.mPreloadDefault) {
             throw new IllegalArgumentException(USAP_ERROR_PREFIX + "--preload-default");
-        } else if (args.mPreloadPackage != null) {
-            throw new IllegalArgumentException(USAP_ERROR_PREFIX + "--preload-package");
         } else if (args.mPreloadApp != null) {
             throw new IllegalArgumentException(USAP_ERROR_PREFIX + "--preload-app");
         } else if (args.mStartChildZygote) {

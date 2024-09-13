@@ -33,7 +33,7 @@ import android.text.ParcelableSpan;
 import android.text.SpannableString;
 import android.text.style.LocaleSpan;
 
-import androidx.test.runner.AndroidJUnit4;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;

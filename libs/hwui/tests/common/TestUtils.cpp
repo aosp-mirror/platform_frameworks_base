@@ -40,6 +40,7 @@
 namespace android {
 namespace uirenderer {
 
+std::mutex TestUtils::sMutex;
 std::unordered_map<int, TestUtils::CallCounts> TestUtils::sMockFunctorCounts{};
 
 SkColor TestUtils::interpolateColor(float fraction, SkColor start, SkColor end) {

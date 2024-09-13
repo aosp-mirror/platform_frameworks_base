@@ -16,14 +16,16 @@
 
 package com.android.compose.animation.scene.transformation
 
+import androidx.compose.animation.core.Easing
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.ui.util.fastCoerceAtLeast
 import androidx.compose.ui.util.fastCoerceAtMost
 import androidx.compose.ui.util.fastCoerceIn
+import com.android.compose.animation.scene.ContentKey
 import com.android.compose.animation.scene.Element
 import com.android.compose.animation.scene.ElementMatcher
-import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneTransitionLayoutImpl
-import com.android.compose.animation.scene.TransitionState
+import com.android.compose.animation.scene.content.state.TransitionState
 
 /** A transformation applied to one or more elements during a transition. */
 sealed interface Transformation {
@@ -61,9 +63,9 @@ internal sealed interface PropertyTransformation<T> : Transformation {
     // to these internal classes.
     fun transform(
         layoutImpl: SceneTransitionLayoutImpl,
-        scene: SceneKey,
+        content: ContentKey,
         element: Element,
-        sceneState: Element.SceneState,
+        stateInContent: Element.State,
         transition: TransitionState.Transition,
         value: T,
     ): T
@@ -81,20 +83,18 @@ internal class RangedPropertyTransformation<T>(
     override fun reversed(): Transformation {
         return RangedPropertyTransformation(
             delegate.reversed() as PropertyTransformation<T>,
-            range.reversed()
+            range.reversed(),
         )
     }
 }
 
 /** The progress-based range of a [PropertyTransformation]. */
-data class TransformationRange(
-    val start: Float,
-    val end: Float,
-) {
+data class TransformationRange(val start: Float, val end: Float, val easing: Easing) {
     constructor(
         start: Float? = null,
-        end: Float? = null
-    ) : this(start ?: BoundUnspecified, end ?: BoundUnspecified)
+        end: Float? = null,
+        easing: Easing = LinearEasing,
+    ) : this(start ?: BoundUnspecified, end ?: BoundUnspecified, easing)
 
     init {
         require(!start.isSpecified() || (start in 0f..1f))
@@ -103,17 +103,20 @@ data class TransformationRange(
     }
 
     /** Reverse this range. */
-    fun reversed() = TransformationRange(start = reverseBound(end), end = reverseBound(start))
+    fun reversed() =
+        TransformationRange(start = reverseBound(end), end = reverseBound(start), easing = easing)
 
     /** Get the progress of this range given the global [transitionProgress]. */
     fun progress(transitionProgress: Float): Float {
-        return when {
-            start.isSpecified() && end.isSpecified() ->
-                ((transitionProgress - start) / (end - start)).fastCoerceIn(0f, 1f)
-            !start.isSpecified() && !end.isSpecified() -> transitionProgress
-            end.isSpecified() -> (transitionProgress / end).fastCoerceAtMost(1f)
-            else -> ((transitionProgress - start) / (1f - start)).fastCoerceAtLeast(0f)
-        }
+        val progress =
+            when {
+                start.isSpecified() && end.isSpecified() ->
+                    ((transitionProgress - start) / (end - start)).fastCoerceIn(0f, 1f)
+                !start.isSpecified() && !end.isSpecified() -> transitionProgress
+                end.isSpecified() -> (transitionProgress / end).fastCoerceAtMost(1f)
+                else -> ((transitionProgress - start) / (1f - start)).fastCoerceAtLeast(0f)
+            }
+        return easing.transform(progress)
     }
 
     private fun Float.isSpecified() = this != BoundUnspecified

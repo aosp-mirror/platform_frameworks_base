@@ -1194,6 +1194,8 @@
     <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"Hindi sinusuportahan ang sulat-kamay sa mga field ng password"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Bumalik"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Magpalit ng pamamaraan ng pag-input"</string>
+    <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"Buksan ang picker ng pamamaraan ng pag-input"</string>
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"Mga Setting"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Nauubusan na ang puwang ng storage"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Maaaring hindi gumana nang tama ang ilang paggana ng system"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Walang sapat na storage para sa system. Tiyaking mayroon kang 250MB na libreng espasyo at i-restart."</string>
@@ -1428,6 +1430,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"IBAHAGI"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"TANGGIHAN"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Pumili ng pamamaraan ng pag-input"</string>
+    <string name="input_method_language_settings" msgid="8069089418056819437">"Mga Setting ng Wika"</string>
     <string name="show_ime" msgid="6406112007347443383">"Panatilihin ito sa screen habang aktibo ang pisikal na keyboard"</string>
     <string name="hardware" msgid="3611039921284836033">"Gumamit ng on-screen keyboard"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"I-configure ang <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
@@ -1718,7 +1721,7 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Alisin"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Lakasan ang volume nang lagpas sa inirerekomendang antas?\n\nMaaaring mapinsala ng pakikinig sa malakas na volume sa loob ng mahahabang panahon ang iyong pandinig."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Magpatuloy sa pakikinig nang may malakas na volume?\n\nNaging malakas ang volume nang mas matagal na sa inirerekomenda, at posible nitong mapinsala ang pandinig mo"</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Magpatuloy sa pakikinig nang may malakas na volume?\n\nMalakas ang volume nang mas matagal na sa inirerekomenda, at posible nitong mapinsala ang pandinig mo"</string>
     <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Naka-detect ng malakas na tunog\n\nMas malakas ang volume kaysa sa inirerekomenda, at posible nitong mapinsala ang pandinig mo"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Gagamitin ang Shortcut sa Accessibility?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Kapag naka-on ang shortcut, magsisimula ang isang feature ng pagiging naa-access kapag pinindot ang parehong button ng volume."</string>
@@ -1743,7 +1746,7 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"May app na pumipigil sa kahilingan sa pahintulot kaya hindi ma-verify ang iyong sagot."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"I-tap ang isang feature para simulan itong gamitin:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Pumili ng mga feature na gagana sa pamamagitan ng button ng accessibility"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Pumili ng mga feature na gagana sa pamamagitan ng shortcut ng volume key"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2245540598834891500">"Pumili ng mga feature na gagana sa pamamagitan ng shortcut ng mga volume key"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Na-off ang <xliff:g id="SERVICE_NAME">%s</xliff:g>"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"I-edit ang mga shortcut"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Tapos na"</string>
@@ -2421,6 +2424,8 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Nakatago ang content ng app mula sa pagbabahagi ng screen para sa seguridad"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Awtomatikong nakakonekta sa satellite"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Puwede kang magpadala at tumanggap ng mga mensahe nang walang mobile o Wi-Fi network"</string>
+    <string name="satellite_notification_manual_title" msgid="1097504441849466279">"Gumamit ng satellite messaging?"</string>
+    <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Magpadala at tumanggap ng mga mensahe nang walang mobile o Wi-Fi network"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Buksan ang Messages"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Paano ito gumagana"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Nakabinbin..."</string>
@@ -2433,7 +2438,7 @@
     <string name="face_dangling_notification_msg" msgid="746235263598985384">"Hindi na makilala ang iyong face model. I-set up ulit ang Pag-unlock Gamit ang Mukha."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"I-set up"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Huwag muna"</string>
-    <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"Alarm para kay <xliff:g id="USER_NAME">%s</xliff:g>"</string>
+    <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"Alarm para kay/sa <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"Magpalit ng user"</string>
     <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"I-mute"</string>
     <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"I-tap para i-mute ang tunog"</string>
@@ -2446,4 +2451,5 @@
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"Calculator"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"Mga Mapa"</string>
     <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"Mga Application"</string>
+    <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"Hindi na makikilala ang iyong mga fingerprint. I-set up ulit ang Pag-unlock Gamit ang Fingerprint."</string>
 </resources>

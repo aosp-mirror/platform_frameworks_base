@@ -19,6 +19,7 @@ package com.android.systemui.camera
 import android.app.ActivityManager
 import android.app.ActivityOptions
 import android.app.IActivityTaskManager
+import android.app.admin.DevicePolicyManager
 import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
@@ -32,8 +33,8 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.shared.system.ActivityManagerKt.isInForeground
+import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.StatusBarState
-import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
@@ -45,9 +46,10 @@ import javax.inject.Inject
  * the camera).
  */
 @SysUISingleton
-class CameraGestureHelper @Inject constructor(
+class CameraGestureHelper
+@Inject
+constructor(
     private val context: Context,
-    private val centralSurfaces: CentralSurfaces,
     private val keyguardStateController: KeyguardStateController,
     private val statusBarKeyguardViewManager: StatusBarKeyguardViewManager,
     private val packageManager: PackageManager,
@@ -59,24 +61,25 @@ class CameraGestureHelper @Inject constructor(
     private val contentResolver: ContentResolver,
     @Main private val uiExecutor: Executor,
     private val selectedUserInteractor: SelectedUserInteractor,
+    private val devicePolicyManager: DevicePolicyManager,
+    private val lockscreenUserManager: NotificationLockscreenUserManager,
 ) {
-    /**
-     * Whether the camera application can be launched for the camera launch gesture.
-     */
+    /** Whether the camera application can be launched for the camera launch gesture. */
     fun canCameraGestureBeLaunched(statusBarState: Int): Boolean {
-        if (!centralSurfaces.isCameraAllowedByAdmin) {
+        if (!isCameraAllowedByAdmin()) {
             return false
         }
 
-        val resolveInfo: ResolveInfo? = packageManager.resolveActivityAsUser(
-            getStartCameraIntent(selectedUserInteractor.getSelectedUserId()),
-            PackageManager.MATCH_DEFAULT_ONLY,
-            selectedUserInteractor.getSelectedUserId()
-        )
+        val resolveInfo: ResolveInfo? =
+            packageManager.resolveActivityAsUser(
+                getStartCameraIntent(selectedUserInteractor.getSelectedUserId()),
+                PackageManager.MATCH_DEFAULT_ONLY,
+                selectedUserInteractor.getSelectedUserId()
+            )
         val resolvedPackage = resolveInfo?.activityInfo?.packageName
         return (resolvedPackage != null &&
-                (statusBarState != StatusBarState.SHADE ||
-                        !activityManager.isInForeground(resolvedPackage)))
+            (statusBarState != StatusBarState.SHADE ||
+                !activityManager.isInForeground(resolvedPackage)))
     }
 
     /**
@@ -87,9 +90,11 @@ class CameraGestureHelper @Inject constructor(
     fun launchCamera(source: Int) {
         val intent: Intent = getStartCameraIntent(selectedUserInteractor.getSelectedUserId())
         intent.putExtra(CameraIntents.EXTRA_LAUNCH_SOURCE, source)
-        val wouldLaunchResolverActivity = activityIntentHelper.wouldLaunchResolverActivity(
-            intent, selectedUserInteractor.getSelectedUserId()
-        )
+        val wouldLaunchResolverActivity =
+            activityIntentHelper.wouldLaunchResolverActivity(
+                intent,
+                selectedUserInteractor.getSelectedUserId()
+            )
         if (CameraIntents.isSecureCameraIntent(intent) && !wouldLaunchResolverActivity) {
             uiExecutor.execute {
                 // Normally an activity will set its requested rotation animation on its window.
@@ -101,7 +106,7 @@ class CameraGestureHelper @Inject constructor(
                 val activityOptions = ActivityOptions.makeBasic()
                 activityOptions.setDisallowEnterPictureInPictureWhileLaunching(true)
                 activityOptions.rotationAnimationHint =
-                        WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS
+                    WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS
                 try {
                     activityTaskManager.startActivityAsUser(
                         null,
@@ -115,14 +120,10 @@ class CameraGestureHelper @Inject constructor(
                         Intent.FLAG_ACTIVITY_NEW_TASK,
                         null,
                         activityOptions.toBundle(),
-                        selectedUserInteractor.getSelectedUserId(true),
+                        selectedUserInteractor.getSelectedUserId(),
                     )
                 } catch (e: RemoteException) {
-                    Log.w(
-                        "CameraGestureHelper",
-                        "Unable to start camera activity",
-                        e
-                    )
+                    Log.w("CameraGestureHelper", "Unable to start camera activity", e)
                 }
             }
         } else {
@@ -131,9 +132,6 @@ class CameraGestureHelper @Inject constructor(
             activityStarter.startActivity(intent, false /* dismissShade */)
         }
 
-        // Call this to make sure that the keyguard returns if the app that is being launched
-        // crashes after a timeout.
-        centralSurfaces.startLaunchTransitionTimeout()
         // Call this to make sure the keyguard is ready to be dismissed once the next intent is
         // handled by the OS (in our case it is the activity we started right above)
         statusBarKeyguardViewManager.readyForKeyguardDone()
@@ -151,5 +149,18 @@ class CameraGestureHelper @Inject constructor(
         } else {
             cameraIntents.getInsecureCameraIntent(userId)
         }
+    }
+
+    private fun isCameraAllowedByAdmin(): Boolean {
+        if (devicePolicyManager.getCameraDisabled(null, lockscreenUserManager.getCurrentUserId())) {
+            return false
+        } else if (keyguardStateController.isShowing() && statusBarKeyguardViewManager.isSecure()) {
+            // Check if the admin has disabled the camera specifically for the keyguard
+            return (devicePolicyManager.getKeyguardDisabledFeatures(
+                null,
+                lockscreenUserManager.getCurrentUserId()
+            ) and DevicePolicyManager.KEYGUARD_DISABLE_SECURE_CAMERA) == 0
+        }
+        return true
     }
 }

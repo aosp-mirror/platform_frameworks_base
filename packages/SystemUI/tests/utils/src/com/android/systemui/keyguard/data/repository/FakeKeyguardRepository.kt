@@ -22,6 +22,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.shared.model.BiometricUnlockMode
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
 import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
+import com.android.systemui.keyguard.shared.model.CameraLaunchSourceModel
 import com.android.systemui.keyguard.shared.model.DismissAction
 import com.android.systemui.keyguard.shared.model.DozeTransitionModel
 import com.android.systemui.keyguard.shared.model.KeyguardDone
@@ -59,19 +60,21 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
     override val bottomAreaAlpha: StateFlow<Float> = _bottomAreaAlpha
 
     private val _isKeyguardShowing = MutableStateFlow(false)
-    override val isKeyguardShowing: Flow<Boolean> = _isKeyguardShowing
+    override val isKeyguardShowing: StateFlow<Boolean> = _isKeyguardShowing
 
     private val _isKeyguardUnlocked = MutableStateFlow(false)
     override val isKeyguardDismissible: StateFlow<Boolean> = _isKeyguardUnlocked.asStateFlow()
 
     private val _isKeyguardOccluded = MutableStateFlow(false)
-    override val isKeyguardOccluded: Flow<Boolean> = _isKeyguardOccluded
+    override val isKeyguardOccluded: StateFlow<Boolean> = _isKeyguardOccluded
 
     private val _isDozing = MutableStateFlow(false)
     override val isDozing: StateFlow<Boolean> = _isDozing
 
     private val _dozeTimeTick = MutableStateFlow<Long>(0L)
     override val dozeTimeTick = _dozeTimeTick
+
+    override val showDismissibleKeyguard = MutableStateFlow<Long>(0L)
 
     private val _lastDozeTapToWakePosition = MutableStateFlow<Point?>(null)
     override val lastDozeTapToWakePosition = _lastDozeTapToWakePosition.asStateFlow()
@@ -138,6 +141,8 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
     private val _canIgnoreAuthAndReturnToGone = MutableStateFlow(false)
     override val canIgnoreAuthAndReturnToGone = _canIgnoreAuthAndReturnToGone.asStateFlow()
 
+    override val onCameraLaunchDetected = MutableStateFlow(CameraLaunchSourceModel())
+
     override fun setQuickSettingsVisible(isVisible: Boolean) {
         _isQuickSettingsVisible.value = isVisible
     }
@@ -203,6 +208,10 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
         _dozeTimeTick.value = millis
     }
 
+    override fun showDismissibleKeyguard() {
+        showDismissibleKeyguard.value = showDismissibleKeyguard.value + 1
+    }
+
     override fun setLastDozeTapToWakePosition(position: Point) {
         _lastDozeTapToWakePosition.value = position
     }
@@ -213,6 +222,9 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
 
     override fun setDreaming(isDreaming: Boolean) {
         _isDreaming.value = isDreaming
+        // Intentionally set both for testing, to avoid races with merge() in the interactor that
+        // would make testing difficult
+        _isDreamingWithOverlay.value = isDreaming
     }
 
     fun setDreamingWithOverlay(isDreaming: Boolean) {

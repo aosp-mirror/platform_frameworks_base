@@ -43,14 +43,7 @@ flag {
     name: "virtual_display_insets"
     description: "APIs for specifying virtual display insets (via cutout)"
     bug: "350007135"
-}
-
-flag {
-     namespace: "virtual_devices"
-     name: "metrics_collection"
-     description: "Enable collection of VDM-related metrics"
-     bug: "324842215"
-     is_fixed_read_only: true
+    is_exported: true
 }
 
 flag {
@@ -58,6 +51,7 @@ flag {
      name: "activity_control_api"
      description: "Enable APIs for fine grained activity policy, fallback and callbacks"
      bug: "333443509"
+     is_exported: true
 }
 
 flag {
@@ -84,24 +78,10 @@ flag {
 }
 
 flag {
-    namespace: "virtual_devices"
-    name: "virtual_display_multi_window_mode_support"
-    description: "Add support for WINDOWING_MODE_MULTI_WINDOW to virtual displays by default"
-    is_fixed_read_only: true
-    bug: "341151395"
-    metadata {
-        purpose: PURPOSE_BUGFIX
-    }
-}
-
-flag {
-    namespace: "virtual_devices"
-    name: "intent_interception_action_matching_fix"
-    description: "Do not match intents without actions if the filter has actions"
-    bug: "343805037"
-    metadata {
-        purpose: PURPOSE_BUGFIX
-    }
+     namespace: "virtual_devices"
+     name: "enforce_remote_device_opt_out_on_all_virtual_displays"
+     description: "Respect canDisplayOnRemoteDevices on all virtual displays"
+     bug: "338973239"
 }
 
 flag {
@@ -109,6 +89,7 @@ flag {
     name: "virtual_display_rotation_api"
     description: "API for on-demand rotation of virtual displays"
     bug: "291748430"
+    is_exported: true
 }
 
 flag {
@@ -116,4 +97,43 @@ flag {
     name: "high_resolution_scroll"
     description: "Enable high resolution scroll"
     bug: "335160780"
+}
+
+flag {
+    name: "camera_multiple_input_streams"
+    is_exported: true
+    namespace: "virtual_devices"
+    description: "Expose multiple surface for the virtual camera owner for different stream resolution"
+    bug: "341083465"
+}
+
+flag {
+    namespace: "virtual_devices"
+    name: "device_aware_display_power"
+    description: "Device awareness in power and display APIs"
+    bug: "285020111"
+    is_exported: true
+}
+
+flag {
+    namespace: "virtual_devices"
+    name: "display_power_manager_apis"
+    description: "Make relevant PowerManager APIs display aware by default"
+    bug: "365042486"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "status_bar_and_insets"
+    namespace: "virtual_devices"
+    description: "Allow for status bar and insets on virtual devices"
+    bug: "350007866"
+    is_exported: true
+}
+
+flag {
+  namespace: "virtual_devices"
+  name: "camera_timestamp_from_surface"
+  description: "Pass the surface timestamp to the capture result"
+  bug: "351341245"
 }

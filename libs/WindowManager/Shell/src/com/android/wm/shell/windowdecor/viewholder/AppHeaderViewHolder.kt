@@ -21,6 +21,7 @@ import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.graphics.Point
 import android.graphics.drawable.LayerDrawable
 import android.graphics.drawable.RippleDrawable
 import android.graphics.drawable.ShapeDrawable
@@ -34,6 +35,7 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.content.withStyledAttributes
+import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import com.android.internal.R.attr.materialColorOnSecondaryContainer
 import com.android.internal.R.attr.materialColorOnSurface
@@ -41,8 +43,9 @@ import com.android.internal.R.attr.materialColorSecondaryContainer
 import com.android.internal.R.attr.materialColorSurfaceContainerHigh
 import com.android.internal.R.attr.materialColorSurfaceContainerLow
 import com.android.internal.R.attr.materialColorSurfaceDim
-import com.android.window.flags.Flags
+import com.android.window.flags.Flags.enableMinimizeButton
 import com.android.wm.shell.R
+import com.android.wm.shell.shared.desktopmode.DesktopModeFlags
 import com.android.wm.shell.windowdecor.MaximizeButtonView
 import com.android.wm.shell.windowdecor.common.DecorThemeUtil
 import com.android.wm.shell.windowdecor.common.OPACITY_100
@@ -81,9 +84,9 @@ internal class AppHeaderViewHolder(
         .getDimensionPixelSize(R.dimen.desktop_mode_header_buttons_ripple_radius)
 
     /**
-     * The app chip, maximize and close button's height extends to the top & bottom edges of the
-     * header, and their width may be larger than their height. This is by design to increase the
-     * clickable and hover-able bounds of the view as much as possible. However, to prevent the
+     * The app chip, minimize, maximize and close button's height extends to the top & bottom edges
+     * of the header, and their width may be larger than their height. This is by design to increase
+     * the clickable and hover-able bounds of the view as much as possible. However, to prevent the
      * ripple drawable from being as large as the views (and asymmetrical), insets are applied to
      * the background ripple drawable itself to give the appearance of a smaller button
      * (with padding between itself and the header edges / sibling buttons) but without affecting
@@ -92,6 +95,12 @@ internal class AppHeaderViewHolder(
     private val appChipDrawableInsets = DrawableInsets(
         vertical = context.resources
             .getDimensionPixelSize(R.dimen.desktop_mode_header_app_chip_ripple_inset_vertical)
+    )
+    private val minimizeDrawableInsets = DrawableInsets(
+        vertical = context.resources
+            .getDimensionPixelSize(R.dimen.desktop_mode_header_minimize_ripple_inset_vertical),
+        horizontal = context.resources
+            .getDimensionPixelSize(R.dimen.desktop_mode_header_minimize_ripple_inset_horizontal)
     )
     private val maximizeDrawableInsets = DrawableInsets(
         vertical = context.resources
@@ -114,6 +123,7 @@ internal class AppHeaderViewHolder(
     private val maximizeButtonView: MaximizeButtonView =
             rootView.requireViewById(R.id.maximize_button_view)
     private val maximizeWindowButton: ImageButton = rootView.requireViewById(R.id.maximize_window)
+    private val minimizeWindowButton: ImageButton = rootView.requireViewById(R.id.minimize_window)
     private val appNameTextView: TextView = rootView.requireViewById(R.id.application_name)
     private val appIconImageView: ImageView = rootView.requireViewById(R.id.application_icon)
     val appNameTextWidth: Int
@@ -130,14 +140,22 @@ internal class AppHeaderViewHolder(
         maximizeWindowButton.setOnGenericMotionListener(onCaptionGenericMotionListener)
         maximizeWindowButton.onLongClickListener = onLongClickListener
         closeWindowButton.setOnTouchListener(onCaptionTouchListener)
+        minimizeWindowButton.setOnClickListener(onCaptionButtonClickListener)
+        minimizeWindowButton.setOnTouchListener(onCaptionTouchListener)
         appNameTextView.text = appName
         appIconImageView.setImageBitmap(appIconBitmap)
         maximizeButtonView.onHoverAnimationFinishedListener =
                 onMaximizeHoverAnimationFinishedListener
     }
 
-    override fun bindData(taskInfo: RunningTaskInfo) {
-        if (Flags.enableThemedAppHeaders()) {
+    override fun bindData(
+        taskInfo: RunningTaskInfo,
+        position: Point,
+        width: Int,
+        height: Int,
+        isCaptionVisible: Boolean
+    ) {
+        if (DesktopModeFlags.THEMED_APP_HEADERS.isEnabled(context)) {
             bindDataWithThemedHeaders(taskInfo)
         } else {
             bindDataLegacy(taskInfo)
@@ -150,11 +168,13 @@ internal class AppHeaderViewHolder(
         val alpha = Color.alpha(color)
         closeWindowButton.imageTintList = ColorStateList.valueOf(color)
         maximizeWindowButton.imageTintList = ColorStateList.valueOf(color)
+        minimizeWindowButton.imageTintList = ColorStateList.valueOf(color)
         expandMenuButton.imageTintList = ColorStateList.valueOf(color)
         appNameTextView.isVisible = !taskInfo.isTransparentCaptionBarAppearance
         appNameTextView.setTextColor(color)
         appIconImageView.imageAlpha = alpha
         maximizeWindowButton.imageAlpha = alpha
+        minimizeWindowButton.imageAlpha = alpha
         closeWindowButton.imageAlpha = alpha
         expandMenuButton.imageAlpha = alpha
         context.withStyledAttributes(
@@ -169,8 +189,10 @@ internal class AppHeaderViewHolder(
             openMenuButton.background = getDrawable(0)
             maximizeWindowButton.background = getDrawable(1)
             closeWindowButton.background = getDrawable(1)
+            minimizeWindowButton.background = getDrawable(1)
         }
         maximizeButtonView.setAnimationTints(isDarkMode())
+        minimizeWindowButton.isGone = !enableMinimizeButton()
     }
 
     private fun bindDataWithThemedHeaders(taskInfo: RunningTaskInfo) {
@@ -205,6 +227,16 @@ internal class AppHeaderViewHolder(
             }
             appIconImageView.imageAlpha = foregroundAlpha
         }
+        // Minimize button.
+        minimizeWindowButton.apply {
+            imageTintList = colorStateList
+            background = createRippleDrawable(
+                color = foregroundColor,
+                cornerRadius = headerButtonsRippleRadius,
+                drawableInsets = minimizeDrawableInsets
+            )
+        }
+        minimizeWindowButton.isGone = !enableMinimizeButton()
         // Maximize button.
         maximizeButtonView.setAnimationTints(
             darkMode = header.appTheme == Theme.DARK,
@@ -231,12 +263,12 @@ internal class AppHeaderViewHolder(
 
     override fun onHandleMenuClosed() {}
 
-    fun setAnimatingTaskResize(animatingTaskResize: Boolean) {
-        // If animating a task resize, cancel any running hover animations
-        if (animatingTaskResize) {
+    fun setAnimatingTaskResizeOrReposition(animatingTaskResizeOrReposition: Boolean) {
+        // If animating a task resize or reposition, cancel any running hover animations
+        if (animatingTaskResizeOrReposition) {
             maximizeButtonView.cancelHoverAnimation()
         }
-        maximizeButtonView.hoverDisabled = animatingTaskResize
+        maximizeButtonView.hoverDisabled = animatingTaskResizeOrReposition
     }
 
     fun onMaximizeWindowHoverExit() {

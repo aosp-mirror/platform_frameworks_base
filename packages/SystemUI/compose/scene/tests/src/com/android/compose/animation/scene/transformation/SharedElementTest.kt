@@ -31,7 +31,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.compose.animation.scene.Edge
 import com.android.compose.animation.scene.TestElements
 import com.android.compose.animation.scene.TestScenes
-import com.android.compose.animation.scene.inScene
+import com.android.compose.animation.scene.inContent
 import com.android.compose.animation.scene.testTransition
 import com.android.compose.test.assertSizeIsEqualTo
 import org.junit.Rule
@@ -56,7 +56,7 @@ class SharedElementTest {
             transition = {
                 spec = tween(16 * 4, easing = LinearEasing)
                 // Elements should be shared by default.
-            }
+            },
         ) {
             before {
                 onElement(TestElements.Foo).assertPositionInRootIsEqualTo(10.dp, 50.dp)
@@ -125,10 +125,10 @@ class SharedElementTest {
                 sharedElement(TestElements.Foo, enabled = false)
 
                 // In SceneA, Foo leaves to the left edge.
-                translate(TestElements.Foo.inScene(TestScenes.SceneA), Edge.Left)
+                translate(TestElements.Foo.inContent(TestScenes.SceneA), Edge.Left)
 
                 // In SceneB, Foo comes from the bottom edge.
-                translate(TestElements.Foo.inScene(TestScenes.SceneB), Edge.Bottom)
+                translate(TestElements.Foo.inContent(TestScenes.SceneB), Edge.Bottom)
             },
         ) {
             before { onElement(TestElements.Foo).assertPositionInRootIsEqualTo(10.dp, 50.dp) }

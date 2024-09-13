@@ -16,6 +16,8 @@
 
 package com.android.systemui.bouncer.ui.viewmodel
 
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import android.view.KeyEvent.KEYCODE_0
 import android.view.KeyEvent.KEYCODE_4
 import android.view.KeyEvent.KEYCODE_A
@@ -31,10 +33,10 @@ import com.android.systemui.authentication.data.repository.fakeAuthenticationRep
 import com.android.systemui.authentication.domain.interactor.authenticationInteractor
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.bouncer.data.repository.fakeSimBouncerRepository
-import com.android.systemui.bouncer.domain.interactor.bouncerInteractor
-import com.android.systemui.bouncer.domain.interactor.simBouncerInteractor
+import com.android.systemui.classifier.fakeFalsingCollector
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.lifecycle.activateIn
 import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
@@ -42,9 +44,9 @@ import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlin.random.Random
 import kotlin.random.nextInt
+import kotlin.test.assertTrue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
@@ -62,24 +64,19 @@ class PinBouncerViewModelTest : SysuiTestCase() {
     private val testScope = kosmos.testScope
     private val sceneInteractor by lazy { kosmos.sceneInteractor }
     private val authenticationInteractor by lazy { kosmos.authenticationInteractor }
-    private val bouncerInteractor by lazy { kosmos.bouncerInteractor }
-    private lateinit var underTest: PinBouncerViewModel
+    private val underTest by lazy {
+        kosmos.pinBouncerViewModelFactory.create(
+            isInputEnabled = MutableStateFlow(true),
+            onIntentionalUserInput = {},
+            authenticationMethod = AuthenticationMethodModel.Pin,
+        )
+    }
 
     @Before
     fun setUp() {
-        underTest =
-            PinBouncerViewModel(
-                applicationContext = context,
-                viewModelScope = testScope.backgroundScope,
-                interactor = bouncerInteractor,
-                isInputEnabled = MutableStateFlow(true).asStateFlow(),
-                simBouncerInteractor = kosmos.simBouncerInteractor,
-                authenticationMethod = AuthenticationMethodModel.Pin,
-                onIntentionalUserInput = {},
-            )
-
         overrideResource(R.string.keyguard_enter_your_pin, ENTER_YOUR_PIN)
         overrideResource(R.string.kg_wrong_pin, WRONG_PIN)
+        underTest.activateIn(testScope)
     }
 
     @Test
@@ -96,14 +93,10 @@ class PinBouncerViewModelTest : SysuiTestCase() {
     fun simBouncerViewModel_simAreaIsVisible() =
         testScope.runTest {
             val underTest =
-                PinBouncerViewModel(
-                    applicationContext = context,
-                    viewModelScope = testScope.backgroundScope,
-                    interactor = bouncerInteractor,
-                    isInputEnabled = MutableStateFlow(true).asStateFlow(),
-                    simBouncerInteractor = kosmos.simBouncerInteractor,
-                    authenticationMethod = AuthenticationMethodModel.Sim,
+                kosmos.pinBouncerViewModelFactory.create(
+                    isInputEnabled = MutableStateFlow(true),
                     onIntentionalUserInput = {},
+                    authenticationMethod = AuthenticationMethodModel.Sim,
                 )
 
             assertThat(underTest.isSimAreaVisible).isTrue()
@@ -125,14 +118,10 @@ class PinBouncerViewModelTest : SysuiTestCase() {
     fun simBouncerViewModel_autoConfirmEnabled_hintedPinLengthIsNull() =
         testScope.runTest {
             val underTest =
-                PinBouncerViewModel(
-                    applicationContext = context,
-                    viewModelScope = testScope.backgroundScope,
-                    interactor = bouncerInteractor,
-                    isInputEnabled = MutableStateFlow(true).asStateFlow(),
-                    simBouncerInteractor = kosmos.simBouncerInteractor,
-                    authenticationMethod = AuthenticationMethodModel.Sim,
+                kosmos.pinBouncerViewModelFactory.create(
+                    isInputEnabled = MutableStateFlow(true),
                     onIntentionalUserInput = {},
+                    authenticationMethod = AuthenticationMethodModel.Pin,
                 )
             kosmos.fakeAuthenticationRepository.setAutoConfirmFeatureEnabled(true)
             val hintedPinLength by collectLastValue(underTest.hintedPinLength)
@@ -355,6 +344,7 @@ class PinBouncerViewModelTest : SysuiTestCase() {
                 AuthenticationMethodModel.Pin
             )
             kosmos.fakeAuthenticationRepository.setAutoConfirmFeatureEnabled(true)
+            runCurrent()
 
             underTest.onPinButtonClicked(1)
 
@@ -488,6 +478,18 @@ class PinBouncerViewModelTest : SysuiTestCase() {
             underTest.onKeyEvent(KeyEventType.KeyUp, KEYCODE_NUMPAD_0 + expectedPin[3])
 
             assertThat(pin).containsExactly(*expectedPin)
+        }
+
+    @Test
+    @EnableFlags(com.android.systemui.Flags.FLAG_COMPOSE_BOUNCER)
+    @DisableFlags(com.android.systemui.Flags.FLAG_SCENE_CONTAINER)
+    fun onDigitButtonDown_avoidGesture_invoked() =
+        testScope.runTest {
+            lockDeviceAndOpenPinBouncer()
+
+            underTest.onDigitButtonDown()
+
+            assertTrue(kosmos.fakeFalsingCollector.wasLastGestureAvoided())
         }
 
     private fun TestScope.switchToScene(toScene: SceneKey) {

@@ -31,7 +31,12 @@ sealed interface ShortcutCategoryType {
 data class ShortcutCategory(
     val type: ShortcutCategoryType,
     val subCategories: List<ShortcutSubCategory>
-)
+) {
+    constructor(
+        type: ShortcutCategoryType,
+        vararg subCategories: ShortcutSubCategory
+    ) : this(type, subCategories.asList())
+}
 
 class ShortcutCategoryBuilder(val type: ShortcutCategoryType) {
     private val subCategories = mutableListOf<ShortcutSubCategory>()

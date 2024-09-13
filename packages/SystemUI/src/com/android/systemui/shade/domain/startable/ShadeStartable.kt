@@ -18,6 +18,7 @@ package com.android.systemui.shade.domain.startable
 
 import android.content.Context
 import com.android.systemui.CoreStartable
+import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
 import com.android.systemui.common.ui.data.repository.ConfigurationRepository
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -32,6 +33,7 @@ import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor
 import com.android.systemui.shade.transition.ScrimShadeTransitionController
 import com.android.systemui.statusbar.PulseExpansionHandler
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
+import com.android.systemui.statusbar.phone.ScrimController
 import com.android.systemui.statusbar.policy.SplitShadeStateController
 import javax.inject.Inject
 import javax.inject.Provider
@@ -56,11 +58,14 @@ constructor(
     private val panelExpansionInteractorProvider: Provider<PanelExpansionInteractor>,
     private val shadeExpansionStateManager: ShadeExpansionStateManager,
     private val pulseExpansionHandler: PulseExpansionHandler,
+    private val displayStateInteractor: DisplayStateInteractor,
     private val nsslc: NotificationStackScrollLayoutController,
+    private val scrimController: ScrimController,
 ) : CoreStartable {
 
     override fun start() {
         hydrateShadeLayoutWidth()
+        hydrateFullWidth()
         hydrateShadeExpansionStateManager()
         logTouchesTo(touchLog)
         scrimShadeTransitionController.init()
@@ -96,6 +101,18 @@ constructor(
                         splitShadeStateController.shouldUseSplitNotificationShade(resources)
                     )
                 }
+        }
+    }
+
+    private fun hydrateFullWidth() {
+        if (SceneContainerFlag.isEnabled) {
+            applicationScope.launch {
+                displayStateInteractor.isLargeScreen.collect {
+                    val isFullWidth = !it
+                    nsslc.setIsFullWidth(isFullWidth)
+                    scrimController.setClipsQsScrim(isFullWidth)
+                }
+            }
         }
     }
 }

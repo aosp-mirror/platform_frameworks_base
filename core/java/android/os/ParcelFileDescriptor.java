@@ -41,7 +41,6 @@ import android.content.ContentResolver;
 import android.net.Uri;
 import android.os.MessageQueue.OnFileDescriptorEventListener;
 import android.ravenwood.annotation.RavenwoodKeepWholeClass;
-import android.ravenwood.annotation.RavenwoodNativeSubstitutionClass;
 import android.ravenwood.annotation.RavenwoodReplace;
 import android.ravenwood.annotation.RavenwoodThrow;
 import android.system.ErrnoException;
@@ -77,8 +76,6 @@ import java.nio.ByteOrder;
  * you to close it when done with it.
  */
 @RavenwoodKeepWholeClass
-@RavenwoodNativeSubstitutionClass(
-        "com.android.platform.test.ravenwood.nativesubstitution.ParcelFileDescriptor_host")
 public class ParcelFileDescriptor implements Parcelable, Closeable {
     private static final String TAG = "ParcelFileDescriptor";
 
@@ -206,11 +203,11 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
         }
         mWrapped = null;
         mFd = fd;
-        setFdOwner(mFd);
+        IoUtils.setFdOwner(mFd, this);
 
         mCommFd = commChannel;
         if (mCommFd != null) {
-            setFdOwner(mCommFd);
+            IoUtils.setFdOwner(mCommFd, this);
         }
 
         mGuard.open("close");
@@ -298,7 +295,7 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
     public static @NonNull ParcelFileDescriptor wrap(@NonNull ParcelFileDescriptor pfd,
             @NonNull Handler handler, @NonNull OnCloseListener listener) throws IOException {
         final FileDescriptor original = new FileDescriptor();
-        setFdInt(original, pfd.detachFd());
+        original.setInt$(pfd.detachFd());
         return fromFd(original, handler, listener);
     }
 
@@ -340,7 +337,6 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
         return pfd;
     }
 
-    @RavenwoodReplace
     private static FileDescriptor openInternal(File file, int mode) throws FileNotFoundException {
         if ((mode & MODE_WRITE_ONLY) != 0 && (mode & MODE_APPEND) == 0
                 && (mode & MODE_TRUNCATE) == 0 && ((mode & MODE_READ_ONLY) == 0)
@@ -364,24 +360,8 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
         }
     }
 
-    private static FileDescriptor openInternal$ravenwood(File file, int mode)
-            throws FileNotFoundException {
-        try {
-            return native_open$ravenwood(file, mode);
-        } catch (FileNotFoundException e) {
-            throw e;
-        } catch (IOException e) {
-            throw new FileNotFoundException(e.getMessage());
-        }
-    }
-
-    @RavenwoodReplace
     private static void closeInternal(FileDescriptor fd) {
         IoUtils.closeQuietly(fd);
-    }
-
-    private static void closeInternal$ravenwood(FileDescriptor fd) {
-        native_close$ravenwood(fd);
     }
 
     /**
@@ -394,7 +374,7 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
         try {
             final FileDescriptor fd = new FileDescriptor();
             int intfd = Os.fcntlInt(orig, (isAtLeastQ() ? F_DUPFD_CLOEXEC : F_DUPFD), 0);
-            setFdInt(fd, intfd);
+            fd.setInt$(intfd);
             return new ParcelFileDescriptor(fd);
         } catch (ErrnoException e) {
             throw e.rethrowAsIOException();
@@ -427,12 +407,12 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
      */
     public static ParcelFileDescriptor fromFd(int fd) throws IOException {
         final FileDescriptor original = new FileDescriptor();
-        setFdInt(original, fd);
+        original.setInt$(fd);
 
         try {
             final FileDescriptor dup = new FileDescriptor();
             int intfd = Os.fcntlInt(original, (isAtLeastQ() ? F_DUPFD_CLOEXEC : F_DUPFD), 0);
-            setFdInt(dup, intfd);
+            dup.setInt$(intfd);
             return new ParcelFileDescriptor(dup);
         } catch (ErrnoException e) {
             throw e.rethrowAsIOException();
@@ -455,7 +435,7 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
      */
     public static ParcelFileDescriptor adoptFd(int fd) {
         final FileDescriptor fdesc = new FileDescriptor();
-        setFdInt(fdesc, fd);
+        fdesc.setInt$(fd);
 
         return new ParcelFileDescriptor(fdesc);
     }
@@ -712,7 +692,7 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
     @RavenwoodThrow(reason = "Os.readlink() and Os.stat()")
     public static File getFile(FileDescriptor fd) throws IOException {
         try {
-            final String path = Os.readlink("/proc/self/fd/" + getFdInt(fd));
+            final String path = Os.readlink("/proc/self/fd/" + fd.getInt$());
             if (OsConstants.S_ISREG(Os.stat(path).st_mode)
                     || OsConstants.S_ISCHR(Os.stat(path).st_mode)) {
                 return new File(path);
@@ -741,7 +721,6 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
      * Return the total size of the file representing this fd, as determined by
      * {@code stat()}. Returns -1 if the fd is not a file.
      */
-    @RavenwoodThrow(reason = "Os.readlink() and Os.stat()")
     public long getStatSize() {
         if (mWrapped != null) {
             return mWrapped.getStatSize();
@@ -793,7 +772,7 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
             if (mClosed) {
                 throw new IllegalStateException("Already closed");
             }
-            return getFdInt(mFd);
+            return mFd.getInt$();
         }
     }
 
@@ -815,7 +794,7 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
             if (mClosed) {
                 throw new IllegalStateException("Already closed");
             }
-            int fd = acquireRawFd(mFd);
+            int fd = IoUtils.acquireRawFd(mFd);
             writeCommStatusAndClose(Status.DETACHED, null);
             mClosed = true;
             mGuard.close();
@@ -1273,52 +1252,6 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
         public String toString() {
             return "{" + status + ": " + msg + "}";
         }
-    }
-
-    // These native methods are currently only implemented by Ravenwood, as it's the only
-    // mechanism we have to jump to our RavenwoodNativeSubstitutionClass
-    private static native void native_setFdInt$ravenwood(FileDescriptor fd, int fdInt);
-    private static native int native_getFdInt$ravenwood(FileDescriptor fd);
-    private static native FileDescriptor native_open$ravenwood(File file, int pfdMode)
-            throws IOException;
-    private static native void native_close$ravenwood(FileDescriptor fd);
-
-    @RavenwoodReplace
-    private static void setFdInt(FileDescriptor fd, int fdInt) {
-        fd.setInt$(fdInt);
-    }
-
-    private static void setFdInt$ravenwood(FileDescriptor fd, int fdInt) {
-        native_setFdInt$ravenwood(fd, fdInt);
-    }
-
-    @RavenwoodReplace
-    private static int getFdInt(FileDescriptor fd) {
-        return fd.getInt$();
-    }
-
-    private static int getFdInt$ravenwood(FileDescriptor fd) {
-        return native_getFdInt$ravenwood(fd);
-    }
-
-    @RavenwoodReplace
-    private void setFdOwner(FileDescriptor fd) {
-        IoUtils.setFdOwner(fd, this);
-    }
-
-    private void setFdOwner$ravenwood(FileDescriptor fd) {
-        // FD owners currently unsupported under Ravenwood; ignored
-    }
-
-    @RavenwoodReplace
-    private int acquireRawFd(FileDescriptor fd) {
-        return IoUtils.acquireRawFd(fd);
-    }
-
-    private int acquireRawFd$ravenwood(FileDescriptor fd) {
-        // FD owners currently unsupported under Ravenwood; return FD directly
-        return getFdInt(fd);
-
     }
 
     @RavenwoodReplace

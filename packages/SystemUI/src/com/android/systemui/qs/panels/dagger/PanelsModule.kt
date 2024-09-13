@@ -30,14 +30,10 @@ import com.android.systemui.qs.panels.shared.model.GridLayoutType
 import com.android.systemui.qs.panels.shared.model.InfiniteGridLayoutType
 import com.android.systemui.qs.panels.shared.model.PaginatedGridLayoutType
 import com.android.systemui.qs.panels.shared.model.PanelsLog
-import com.android.systemui.qs.panels.shared.model.PartitionedGridLayoutType
-import com.android.systemui.qs.panels.shared.model.StretchedGridLayoutType
 import com.android.systemui.qs.panels.ui.compose.GridLayout
 import com.android.systemui.qs.panels.ui.compose.InfiniteGridLayout
 import com.android.systemui.qs.panels.ui.compose.PaginatableGridLayout
 import com.android.systemui.qs.panels.ui.compose.PaginatedGridLayout
-import com.android.systemui.qs.panels.ui.compose.PartitionedGridLayout
-import com.android.systemui.qs.panels.ui.compose.StretchedGridLayout
 import com.android.systemui.qs.panels.ui.viewmodel.FixedColumnsSizeViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.FixedColumnsSizeViewModelImpl
 import com.android.systemui.qs.panels.ui.viewmodel.IconLabelVisibilityViewModel
@@ -102,22 +98,6 @@ interface PanelsModule {
 
         @Provides
         @IntoSet
-        fun provideStretchedGridLayout(
-            gridLayout: StretchedGridLayout
-        ): Pair<GridLayoutType, GridLayout> {
-            return Pair(StretchedGridLayoutType, gridLayout)
-        }
-
-        @Provides
-        @IntoSet
-        fun providePartitionedGridLayout(
-            gridLayout: PartitionedGridLayout
-        ): Pair<GridLayoutType, GridLayout> {
-            return Pair(PartitionedGridLayoutType, gridLayout)
-        }
-
-        @Provides
-        @IntoSet
         fun providePaginatedGridLayout(
             gridLayout: PaginatedGridLayout
         ): Pair<GridLayoutType, GridLayout> {
@@ -144,22 +124,6 @@ interface PanelsModule {
             consistencyInteractor: InfiniteGridConsistencyInteractor
         ): Pair<GridLayoutType, GridTypeConsistencyInteractor> {
             return Pair(InfiniteGridLayoutType, consistencyInteractor)
-        }
-
-        @Provides
-        @IntoSet
-        fun provideStretchedGridConsistencyInteractor(
-            consistencyInteractor: NoopGridConsistencyInteractor
-        ): Pair<GridLayoutType, GridTypeConsistencyInteractor> {
-            return Pair(StretchedGridLayoutType, consistencyInteractor)
-        }
-
-        @Provides
-        @IntoSet
-        fun providePartitionedGridConsistencyInteractor(
-            consistencyInteractor: NoopGridConsistencyInteractor
-        ): Pair<GridLayoutType, GridTypeConsistencyInteractor> {
-            return Pair(PartitionedGridLayoutType, consistencyInteractor)
         }
 
         @Provides

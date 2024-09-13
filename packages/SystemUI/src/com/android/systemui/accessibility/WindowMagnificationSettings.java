@@ -56,8 +56,10 @@ import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.Switch;
 
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
+import com.android.systemui.Flags;
 import com.android.systemui.common.ui.view.SeekBarWithIconButtonsView;
 import com.android.systemui.res.R;
 import com.android.systemui.util.settings.SecureSettings;
@@ -74,6 +76,7 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
     private final Context mContext;
     private final AccessibilityManager mAccessibilityManager;
     private final WindowManager mWindowManager;
+    private final ViewCaptureAwareWindowManager mViewCaptureAwareWindowManager;
     private final SecureSettings mSecureSettings;
 
     private final Runnable mWindowInsetChangeRunnable;
@@ -98,7 +101,7 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
     private Button mDoneButton;
     private Button mEditButton;
     private ImageButton mFullScreenButton;
-    private int mLastSelectedButtonIndex = MagnificationSize.NONE;
+    private int mLastSelectedButtonIndex = MagnificationSize.DEFAULT;
 
     private boolean mAllowDiagonalScrolling = false;
 
@@ -115,27 +118,31 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({
-            MagnificationSize.NONE,
+            MagnificationSize.CUSTOM,
             MagnificationSize.SMALL,
             MagnificationSize.MEDIUM,
             MagnificationSize.LARGE,
-            MagnificationSize.FULLSCREEN
+            MagnificationSize.FULLSCREEN,
+            MagnificationSize.DEFAULT
     })
     /** Denotes the Magnification size type. */
     public @interface MagnificationSize {
-        int NONE = 0;
+        int CUSTOM = 0;
         int SMALL = 1;
         int MEDIUM = 2;
         int LARGE = 3;
         int FULLSCREEN = 4;
+        int DEFAULT = MEDIUM;
     }
 
     @VisibleForTesting
     WindowMagnificationSettings(Context context, WindowMagnificationSettingsCallback callback,
-            SfVsyncFrameCallbackProvider sfVsyncFrameProvider, SecureSettings secureSettings) {
+            SfVsyncFrameCallbackProvider sfVsyncFrameProvider, SecureSettings secureSettings,
+            ViewCaptureAwareWindowManager viewCaptureAwareWindowManager) {
         mContext = context;
         mAccessibilityManager = mContext.getSystemService(AccessibilityManager.class);
         mWindowManager = mContext.getSystemService(WindowManager.class);
+        mViewCaptureAwareWindowManager = viewCaptureAwareWindowManager;
         mSfVsyncFrameProvider = sfVsyncFrameProvider;
         mCallback = callback;
         mSecureSettings = secureSettings;
@@ -317,7 +324,7 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
 
         // Unregister observer before removing view
         mSecureSettings.unregisterContentObserverSync(mMagnificationCapabilityObserver);
-        mWindowManager.removeView(mSettingView);
+        mViewCaptureAwareWindowManager.removeView(mSettingView);
         mIsVisible = false;
         if (resetPosition) {
             mParams.x = 0;
@@ -375,7 +382,7 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
                 mParams.y = mDraggableWindowBounds.bottom;
             }
 
-            mWindowManager.addView(mSettingView, mParams);
+            mViewCaptureAwareWindowManager.addView(mSettingView, mParams);
 
             mSecureSettings.registerContentObserverForUserSync(
                     Settings.Secure.ACCESSIBILITY_MAGNIFICATION_CAPABILITY,
@@ -445,13 +452,20 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
     private void updateUIControlsIfNeeded() {
         int capability = getMagnificationCapability();
         int selectedButtonIndex = mLastSelectedButtonIndex;
+        WindowMagnificationFrameSizePrefs windowMagnificationFrameSizePrefs =
+                new WindowMagnificationFrameSizePrefs(mContext);
         switch (capability) {
             case ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW:
                 mEditButton.setVisibility(View.VISIBLE);
                 mAllowDiagonalScrollingView.setVisibility(View.VISIBLE);
                 mFullScreenButton.setVisibility(View.GONE);
                 if (selectedButtonIndex == MagnificationSize.FULLSCREEN) {
-                    selectedButtonIndex = MagnificationSize.NONE;
+                    if (Flags.saveAndRestoreMagnificationSettingsButtons()) {
+                        selectedButtonIndex =
+                                windowMagnificationFrameSizePrefs.getIndexForCurrentDensity();
+                    } else {
+                        selectedButtonIndex = MagnificationSize.CUSTOM;
+                    }
                 }
                 break;
 
@@ -468,6 +482,10 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
                 } else { // mode = ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW
                     mEditButton.setVisibility(View.VISIBLE);
                     mAllowDiagonalScrollingView.setVisibility(View.VISIBLE);
+                    if (Flags.saveAndRestoreMagnificationSettingsButtons()) {
+                        selectedButtonIndex =
+                                windowMagnificationFrameSizePrefs.getIndexForCurrentDensity();
+                    }
                 }
                 break;
 
@@ -613,7 +631,7 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
 
     public void editMagnifierSizeMode(boolean enable) {
         setEditMagnifierSizeMode(enable);
-        updateSelectedButton(MagnificationSize.NONE);
+        updateSelectedButton(MagnificationSize.CUSTOM);
         hideSettingPanel();
     }
 
@@ -621,7 +639,7 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
         if (index == MagnificationSize.FULLSCREEN) {
             // transit to fullscreen magnifier if needed
             transitToMagnificationMode(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
-        } else if (index != MagnificationSize.NONE) {
+        } else if (index != MagnificationSize.CUSTOM) {
             // update the window magnifier size
             mCallback.onSetMagnifierSize(index);
             // transit to window magnifier if needed
@@ -706,7 +724,7 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
         });
     }
 
-    private void updateSelectedButton(@MagnificationSize int index) {
+    void updateSelectedButton(@MagnificationSize int index) {
         // Clear the state of last selected button
         if (mLastSelectedButtonIndex == MagnificationSize.SMALL) {
             mSmallButton.setSelected(false);

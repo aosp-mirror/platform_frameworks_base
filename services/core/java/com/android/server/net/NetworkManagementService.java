@@ -81,8 +81,6 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.HexDump;
-import com.android.modules.utils.build.SdkLevel;
-import com.android.net.module.util.NetdUtils;
 import com.android.net.module.util.PermissionUtils;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
@@ -833,144 +831,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     }
 
     @Override
-    public boolean getIpForwardingEnabled() throws IllegalStateException{
-        PermissionUtils.enforceNetworkStackPermission(mContext);
-        if (SdkLevel.isAtLeastV()) {
-            throw new UnsupportedOperationException(
-                    "NMS#getIpForwardingEnabled not supported in V+");
-        }
-        try {
-            return mNetdService.ipfwdEnabled();
-        } catch (RemoteException | ServiceSpecificException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    @Override
-    public void setIpForwardingEnabled(boolean enable) {
-        PermissionUtils.enforceNetworkStackPermission(mContext);
-        if (SdkLevel.isAtLeastV()) {
-            throw new UnsupportedOperationException(
-                    "NMS#setIpForwardingEnabled not supported in V+");
-        }        try {
-            if (enable) {
-                mNetdService.ipfwdEnableForwarding("tethering");
-            } else {
-                mNetdService.ipfwdDisableForwarding("tethering");
-            }
-        } catch (RemoteException | ServiceSpecificException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    @Override
-    public void startTethering(String[] dhcpRange) {
-        PermissionUtils.enforceNetworkStackPermission(mContext);
-        if (SdkLevel.isAtLeastV()) {
-            throw new UnsupportedOperationException("NMS#startTethering not supported in V+");
-        }
-        try {
-            NetdUtils.tetherStart(mNetdService, true /* usingLegacyDnsProxy */, dhcpRange);
-        } catch (RemoteException | ServiceSpecificException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    @Override
-    public void stopTethering() {
-        PermissionUtils.enforceNetworkStackPermission(mContext);
-        if (SdkLevel.isAtLeastV()) {
-            throw new UnsupportedOperationException("NMS#stopTethering not supported in V+");
-        }
-        try {
-            mNetdService.tetherStop();
-        } catch (RemoteException | ServiceSpecificException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    @Override
-    public boolean isTetheringStarted() {
-        PermissionUtils.enforceNetworkStackPermission(mContext);
-        if (SdkLevel.isAtLeastV()) {
-            throw new UnsupportedOperationException("NMS#isTetheringStarted not supported in V+");
-        }
-        try {
-            return mNetdService.tetherIsEnabled();
-        } catch (RemoteException | ServiceSpecificException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    @Override
-    public void tetherInterface(String iface) {
-        PermissionUtils.enforceNetworkStackPermission(mContext);
-        if (SdkLevel.isAtLeastV()) {
-            throw new UnsupportedOperationException("NMS#tetherInterface not supported in V+");
-        }
-        try {
-            final LinkAddress addr = getInterfaceConfig(iface).getLinkAddress();
-            final IpPrefix dest = new IpPrefix(addr.getAddress(), addr.getPrefixLength());
-            NetdUtils.tetherInterface(mNetdService, iface, dest);
-        } catch (RemoteException | ServiceSpecificException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    @Override
-    public void untetherInterface(String iface) {
-        PermissionUtils.enforceNetworkStackPermission(mContext);
-        if (SdkLevel.isAtLeastV()) {
-            throw new UnsupportedOperationException("NMS#untetherInterface not supported in V+");
-        }
-        try {
-            NetdUtils.untetherInterface(mNetdService, iface);
-        } catch (RemoteException | ServiceSpecificException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    @Override
-    public String[] listTetheredInterfaces() {
-        PermissionUtils.enforceNetworkStackPermission(mContext);
-        if (SdkLevel.isAtLeastV()) {
-            throw new UnsupportedOperationException(
-                    "NMS#listTetheredInterfaces not supported in V+");
-        }
-        try {
-            return mNetdService.tetherInterfaceList();
-        } catch (RemoteException | ServiceSpecificException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    @Override
-    public void enableNat(String internalInterface, String externalInterface) {
-        PermissionUtils.enforceNetworkStackPermission(mContext);
-        if (SdkLevel.isAtLeastV()) {
-            throw new UnsupportedOperationException("NMS#enableNat not supported in V+");
-        }
-        try {
-            mNetdService.tetherAddForward(internalInterface, externalInterface);
-        } catch (RemoteException | ServiceSpecificException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    @Override
-    public void disableNat(String internalInterface, String externalInterface) {
-        PermissionUtils.enforceNetworkStackPermission(mContext);
-        if (SdkLevel.isAtLeastV()) {
-            throw new UnsupportedOperationException("NMS#disableNat not supported in V+");
-        }
-        try {
-            mNetdService.tetherRemoveForward(internalInterface, externalInterface);
-        } catch (RemoteException | ServiceSpecificException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    @Override
     public void setInterfaceQuota(String iface, long quotaBytes) {
         PermissionUtils.enforceNetworkStackPermission(mContext);
 
@@ -1126,30 +986,19 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
             }
             Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "setDataSaverModeEnabled");
             try {
-                if (SdkLevel.isAtLeastV()) {
-                    // setDataSaverEnabled throws if it fails to set data saver.
-                    mContext.getSystemService(ConnectivityManager.class)
-                            .setDataSaverEnabled(enable);
-                    mDataSaverMode = enable;
-                    if (mUseMeteredFirewallChains) {
-                        // Copy mDataSaverMode state to FIREWALL_CHAIN_METERED_ALLOW
-                        // until ConnectivityService allows manipulation of the data saver mode via
-                        // FIREWALL_CHAIN_METERED_ALLOW.
-                        synchronized (mRulesLock) {
-                            mFirewallChainStates.put(FIREWALL_CHAIN_METERED_ALLOW, enable);
-                        }
+                // setDataSaverEnabled throws if it fails to set data saver.
+                mContext.getSystemService(ConnectivityManager.class).setDataSaverEnabled(enable);
+                mDataSaverMode = enable;
+                if (mUseMeteredFirewallChains) {
+                    // Copy mDataSaverMode state to FIREWALL_CHAIN_METERED_ALLOW
+                    // until ConnectivityService allows manipulation of the data saver mode via
+                    // FIREWALL_CHAIN_METERED_ALLOW.
+                    synchronized (mRulesLock) {
+                        mFirewallChainStates.put(FIREWALL_CHAIN_METERED_ALLOW, enable);
                     }
-                    return true;
-                } else {
-                    final boolean changed = mNetdService.bandwidthEnableDataSaver(enable);
-                    if (changed) {
-                        mDataSaverMode = enable;
-                    } else {
-                        Log.e(TAG, "setDataSaverMode(" + enable + "): failed to set iptables");
-                    }
-                    return changed;
                 }
-            } catch (RemoteException | IllegalStateException e) {
+                return true;
+            } catch (IllegalStateException e) {
                 Log.e(TAG, "setDataSaverMode(" + enable + "): failed with exception", e);
                 return false;
             } finally {

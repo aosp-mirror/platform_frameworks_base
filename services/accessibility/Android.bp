@@ -10,6 +10,7 @@ package {
 filegroup {
     name: "services.accessibility-sources",
     srcs: ["java/**/*.java"],
+    exclude_srcs: ["java/**/a11ychecker/*.java"],
     path: "java",
     visibility: ["//frameworks/base/services"],
 }
@@ -19,25 +20,17 @@ java_library_static {
     defaults: [
         "platform_service_defaults",
     ],
-    lint: {
-        error_checks: ["MissingPermissionAnnotation"],
-        baseline_filename: "lint-baseline.xml",
-
-    },
     srcs: [
         ":services.accessibility-sources",
         "//frameworks/base/packages/SettingsLib/RestrictedLockUtils:SettingsLibRestrictedLockUtilsSrc",
     ],
     libs: [
-        "aatf",
         "services.core",
         "androidx.annotation_annotation",
     ],
     static_libs: [
-        "a11ychecker-protos-java-proto-lite",
         "com_android_server_accessibility_flags_lib",
         "//frameworks/base/packages/SystemUI/aconfig:com_android_systemui_flags_lib",
-
     ],
 }
 
@@ -69,15 +62,4 @@ aconfig_declarations {
 java_aconfig_library {
     name: "com_android_server_accessibility_flags_lib",
     aconfig_declarations: "com_android_server_accessibility_flags",
-}
-
-java_library_static {
-    name: "a11ychecker-protos-java-proto-lite",
-    proto: {
-        type: "lite",
-        canonical_path_from_root: false,
-    },
-    srcs: [
-        "java/**/a11ychecker/proto/*.proto",
-    ],
 }

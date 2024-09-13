@@ -37,6 +37,7 @@ import android.app.ApplicationErrorReport;
 import android.app.INotificationManager;
 import android.app.SystemServiceRegistry;
 import android.app.admin.DevicePolicySafetyChecker;
+import android.app.appfunctions.AppFunctionManagerConfiguration;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -105,6 +106,9 @@ import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.BinderInternal;
 import com.android.internal.os.RuntimeInit;
 import com.android.internal.policy.AttributeCache;
+import com.android.internal.protolog.ProtoLog;
+import com.android.internal.protolog.ProtoLogConfigurationService;
+import com.android.internal.protolog.ProtoLogGroup;
 import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.EmergencyAffordanceManager;
 import com.android.internal.util.FrameworkStatsLog;
@@ -119,6 +123,7 @@ import com.android.server.am.ActivityManagerService;
 import com.android.server.ambientcontext.AmbientContextManagerService;
 import com.android.server.app.GameManagerService;
 import com.android.server.appbinding.AppBindingService;
+import com.android.server.appfunctions.AppFunctionManagerService;
 import com.android.server.apphibernation.AppHibernationService;
 import com.android.server.appop.AppOpMigrationHelper;
 import com.android.server.appop.AppOpMigrationHelperImpl;
@@ -153,6 +158,7 @@ import com.android.server.contentsuggestions.ContentSuggestionsManagerService;
 import com.android.server.contextualsearch.ContextualSearchManagerService;
 import com.android.server.coverage.CoverageService;
 import com.android.server.cpu.CpuMonitorService;
+import com.android.server.crashrecovery.CrashRecoveryModule;
 import com.android.server.credentials.CredentialManagerService;
 import com.android.server.criticalevents.CriticalEventLog;
 import com.android.server.devicepolicy.DevicePolicyManagerService;
@@ -252,6 +258,7 @@ import com.android.server.stats.bootstrap.StatsBootstrapAtomService;
 import com.android.server.stats.pull.StatsPullAtomService;
 import com.android.server.statusbar.StatusBarManagerService;
 import com.android.server.storage.DeviceStorageMonitorService;
+import com.android.server.supervision.SupervisionService;
 import com.android.server.systemcaptions.SystemCaptionsManagerService;
 import com.android.server.telecom.TelecomLoaderService;
 import com.android.server.testharness.TestHarnessModeService;
@@ -381,8 +388,6 @@ public final class SystemServer implements Dumpable {
                     + "OnDevicePersonalizationSystemService$Lifecycle";
     private static final String UPDATABLE_DEVICE_CONFIG_SERVICE_CLASS =
             "com.android.server.deviceconfig.DeviceConfigInit$Lifecycle";
-    private static final String CRASHRECOVERY_MODULE_LIFECYCLE_CLASS =
-            "com.android.server.crashrecovery.CrashRecoveryModule$Lifecycle";
 
 
     /*
@@ -1088,6 +1093,18 @@ public final class SystemServer implements Dumpable {
         SystemServerInitThreadPool.submit(SystemConfig::getInstance, TAG_SYSTEM_CONFIG);
         t.traceEnd();
 
+        // Orchestrates some ProtoLogging functionality.
+        if (android.tracing.Flags.clientSideProtoLogging()) {
+            t.traceBegin("StartProtoLogConfigurationService");
+            ServiceManager.addService(
+                    Context.PROTOLOG_CONFIGURATION_SERVICE, new ProtoLogConfigurationService());
+            t.traceEnd();
+        }
+
+        t.traceBegin("InitializeProtoLog");
+        ProtoLog.init(ProtoLogGroup.values());
+        t.traceEnd();
+
         // Platform compat service is used by ActivityManagerService, PackageManagerService, and
         // possibly others in the future. b/135010838.
         t.traceBegin("PlatformCompat");
@@ -1588,6 +1605,12 @@ public final class SystemServer implements Dumpable {
             mSystemServiceManager.startService(ROLE_SERVICE_CLASS);
             t.traceEnd();
 
+            if (android.app.supervision.flags.Flags.supervisionApi()) {
+                t.traceBegin("StartSupervisionService");
+                mSystemServiceManager.startService(SupervisionService.Lifecycle.class);
+                t.traceEnd();
+            }
+
             if (!isTv) {
                 t.traceBegin("StartVibratorManagerService");
                 mSystemServiceManager.startService(VibratorManagerService.Lifecycle.class);
@@ -1720,6 +1743,11 @@ public final class SystemServer implements Dumpable {
             mSystemServiceManager.startService(LogcatManagerService.class);
             t.traceEnd();
 
+            if (AppFunctionManagerConfiguration.isSupported(context)) {
+                t.traceBegin("StartAppFunctionManager");
+                mSystemServiceManager.startService(AppFunctionManagerService.class);
+                t.traceEnd();
+            }
         } catch (Throwable e) {
             Slog.e("System", "******************************************");
             Slog.e("System", "************ Failure starting core service");
@@ -2439,8 +2467,8 @@ public final class SystemServer implements Dumpable {
                 reportWtf("starting RuntimeService", e);
             }
             t.traceEnd();
-
-            if (!isWatch && !disableNetworkTime) {
+            if (!disableNetworkTime && (!isWatch || (isWatch
+                    && android.server.Flags.allowNetworkTimeUpdateService()))) {
                 t.traceBegin("StartNetworkTimeUpdateService");
                 try {
                     networkTimeUpdater = new NetworkTimeUpdateService(context);
@@ -2939,7 +2967,7 @@ public final class SystemServer implements Dumpable {
 
         if (Flags.refactorCrashrecovery()) {
             t.traceBegin("StartCrashRecoveryModule");
-            mSystemServiceManager.startService(CRASHRECOVERY_MODULE_LIFECYCLE_CLASS);
+            mSystemServiceManager.startService(CrashRecoveryModule.Lifecycle.class);
             t.traceEnd();
         } else {
             if (Flags.recoverabilityDetection()) {

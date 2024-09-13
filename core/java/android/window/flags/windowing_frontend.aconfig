@@ -55,11 +55,11 @@ flag {
 }
 
 flag {
-    name: "defer_display_updates"
-    namespace: "windowing_frontend"
-    description: "Feature flag for deferring DisplayManager updates to WindowManager if Shell transition is running"
-    bug: "259220649"
-    is_fixed_read_only: true
+  name: "keyguard_going_away_timeout"
+  namespace: "windowing_frontend"
+  description: "Allow a maximum of 10 seconds with keyguardGoingAway=true before force-resetting"
+  bug: "343598832"
+  is_fixed_read_only: true
 }
 
 flag {
@@ -70,10 +70,21 @@ flag {
 }
 
 flag {
-  name: "introduce_smoother_dimmer"
+  name: "reduce_keyguard_transitions"
   namespace: "windowing_frontend"
-  description: "Refactor dim to fix flickers"
-  bug: "295291019"
+  description: "Avoid setting keyguard transitions ready unless there are no other changes"
+  bug: "354647472"
+  is_fixed_read_only: true
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "transit_tracker_plumbing"
+  namespace: "windowing_frontend"
+  description: "Plumb and collect on transition tracking object instead of singleton"
+  bug: "325114242"
   is_fixed_read_only: true
 }
 
@@ -97,14 +108,6 @@ flag {
     namespace: "systemui"
     description: "Predictive back for system animations"
     bug: "320510464"
-}
-
-flag {
-    name: "activity_snapshot_by_default"
-    namespace: "systemui"
-    description: "Enable record activity snapshot by default"
-    bug: "259497289"
-    is_fixed_read_only: true
 }
 
 flag {
@@ -156,21 +159,32 @@ flag {
 }
 
 flag {
-  name: "keyguard_appear_transition"
-  namespace: "windowing_frontend"
-  description: "Add transition when keyguard appears"
-  bug: "327970608"
-  is_fixed_read_only: true
-  metadata {
-      purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
   name: "get_dimmer_on_closing"
   namespace: "windowing_frontend"
   description: "Change check for when to ignore a closing task's dim"
   bug: "329233513"
+  is_fixed_read_only: true
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "use_tasks_dim_only"
+  namespace: "windowing_frontend"
+  description: "Only use the task's dim and reparent it to the display area when needed instead of coordinating multiple dimmers"
+  bug: "352522056"
+  is_fixed_read_only: true
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "update_dims_when_window_shown"
+  namespace: "windowing_frontend"
+  description: "Check if we need to update dim layers when a new window draws the first frame"
+  bug: "327332488"
   is_fixed_read_only: true
   metadata {
     purpose: PURPOSE_BUGFIX
@@ -197,6 +211,14 @@ flag {
 }
 
 flag {
+  name: "system_ui_immersive_confirmation_dialog"
+  namespace: "windowing_frontend"
+  description: "Enable the implementation of the immersive confirmation dialog on system UI side by default"
+  bug: "359713629"
+  is_fixed_read_only: true
+}
+
+flag {
   name: "ensure_wallpaper_in_transitions"
   namespace: "windowing_frontend"
   description: "Ensure that wallpaper window tokens are always present/available for collection in transitions"
@@ -207,20 +229,41 @@ flag {
 }
 
 flag {
-  name: "enforce_shell_thread_model"
+  name: "ensure_wallpaper_in_wear_transitions"
   namespace: "windowing_frontend"
-  description: "Crash the shell process if someone calls in from the wrong thread"
-  bug: "351189446"
-  is_fixed_read_only: true
+  description: "Ensure that wallpaper window tokens are always present/available for collection in transitions on Wear"
+  bug: "355596979"
   metadata {
     purpose: PURPOSE_BUGFIX
   }
 }
+
 flag {
   name: "custom_animations_behind_translucent"
   namespace: "windowing_frontend"
   description: "A change can use its own layer parameters to animate behind a translucent activity"
   bug: "327332488"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+flag {
+  name: "migrate_predictive_back_transition"
+  namespace: "windowing_frontend"
+  description: "Create transition when visibility change from predictive back"
+  bug: "347168362"
+  is_fixed_read_only: true
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "always_capture_activity_snapshot"
+  namespace: "windowing_frontend"
+  description: "Always capture activity snapshot regardless predictive back status"
+  bug: "362183912"
+  is_fixed_read_only: true
   metadata {
     purpose: PURPOSE_BUGFIX
   }

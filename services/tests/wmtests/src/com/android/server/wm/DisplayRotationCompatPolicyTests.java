@@ -90,7 +90,7 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
     private static final String TEST_PACKAGE_1_LABEL = "testPackage1";
     private CameraManager mMockCameraManager;
     private Handler mMockHandler;
-    private LetterboxConfiguration mLetterboxConfiguration;
+    private AppCompatConfiguration mAppCompatConfiguration;
     private ActivityRefresher mActivityRefresher;
 
     private DisplayRotationCompatPolicy mDisplayRotationCompatPolicy;
@@ -101,13 +101,13 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
 
     @Before
     public void setUp() throws Exception {
-        mLetterboxConfiguration = mDisplayContent.mWmService.mLetterboxConfiguration;
-        spyOn(mLetterboxConfiguration);
-        when(mLetterboxConfiguration.isCameraCompatTreatmentEnabled())
+        mAppCompatConfiguration = mDisplayContent.mWmService.mAppCompatConfiguration;
+        spyOn(mAppCompatConfiguration);
+        when(mAppCompatConfiguration.isCameraCompatTreatmentEnabled())
                 .thenReturn(true);
-        when(mLetterboxConfiguration.isCameraCompatRefreshEnabled())
+        when(mAppCompatConfiguration.isCameraCompatRefreshEnabled())
                 .thenReturn(true);
-        when(mLetterboxConfiguration.isCameraCompatRefreshCycleThroughStopEnabled())
+        when(mAppCompatConfiguration.isCameraCompatRefreshCycleThroughStopEnabled())
                 .thenReturn(true);
 
         mMockCameraManager = mock(CameraManager.class);
@@ -185,7 +185,7 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
 
     @Test
     public void testOnScreenRotationAnimationFinished_treatmentNotEnabled_doNotShowToast() {
-        when(mLetterboxConfiguration.isCameraCompatTreatmentEnabled())
+        when(mAppCompatConfiguration.isCameraCompatTreatmentEnabled())
                 .thenReturn(false);
 
         mDisplayRotationCompatPolicy.onScreenRotationAnimationFinished();
@@ -239,7 +239,7 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
 
     @Test
     public void testTreatmentNotEnabled_noForceRotationOrRefresh() throws Exception {
-        when(mLetterboxConfiguration.isCameraCompatTreatmentEnabled())
+        when(mAppCompatConfiguration.isCameraCompatTreatmentEnabled())
                 .thenReturn(false);
 
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
@@ -253,7 +253,7 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
 
     @Test
     public void testTreatmentDisabledViaDeviceConfig_noForceRotationOrRefresh() throws Exception {
-        when(mLetterboxConfiguration.isCameraCompatTreatmentEnabled())
+        when(mAppCompatConfiguration.isCameraCompatTreatmentEnabled())
                 .thenReturn(false);
 
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
@@ -480,7 +480,7 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
     @Test
     public void testOnActivityConfigurationChanging_refreshDisabledPerApp_noRefresh()
             throws Exception {
-        when(mLetterboxConfiguration.isCameraCompatRefreshEnabled()).thenReturn(false);
+        when(mAppCompatConfiguration.isCameraCompatRefreshEnabled()).thenReturn(false);
 
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
 
@@ -519,7 +519,7 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
 
     @Test
     public void testOnActivityConfigurationChanging_cycleThroughStopDisabled() throws Exception {
-        when(mLetterboxConfiguration.isCameraCompatRefreshCycleThroughStopEnabled())
+        when(mAppCompatConfiguration.isCameraCompatRefreshCycleThroughStopEnabled())
                 .thenReturn(false);
 
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
@@ -597,7 +597,6 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
                 .build();
 
         spyOn(mActivity.mAtmService.getLifecycleManager());
-        spyOn(mActivity.mLetterboxUiController);
         spyOn(mActivity.mAppCompatController.getAppCompatCameraOverrides());
 
         doReturn(mActivity).when(mDisplayContent).topRunningActivity(anyBoolean());
@@ -613,9 +612,9 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
         verify(mActivity.mAppCompatController.getAppCompatCameraOverrides(),
                 times(refreshRequested ? 1 : 0)).setIsRefreshRequested(true);
 
-        final RefreshCallbackItem refreshCallbackItem = RefreshCallbackItem.obtain(mActivity.token,
-                cycleThroughStop ? ON_STOP : ON_PAUSE);
-        final ResumeActivityItem resumeActivityItem = ResumeActivityItem.obtain(mActivity.token,
+        final RefreshCallbackItem refreshCallbackItem =
+                new RefreshCallbackItem(mActivity.token, cycleThroughStop ? ON_STOP : ON_PAUSE);
+        final ResumeActivityItem resumeActivityItem = new ResumeActivityItem(mActivity.token,
                 /* isForward */ false, /* shouldSendCompatFakeFocus */ false);
 
         verify(mActivity.mAtmService.getLifecycleManager(), times(refreshRequested ? 1 : 0))

@@ -107,7 +107,8 @@ public final class MediaRouter2 {
      * #SCANNING_STATE_WHILE_INTERACTIVE}.
      *
      * <p>Routers requesting unrestricted scanning must hold {@link
-     * Manifest.permission#MEDIA_ROUTING_CONTROL}.
+     * Manifest.permission#MEDIA_ROUTING_CONTROL} or {@link
+     * Manifest.permission#MEDIA_CONTENT_CONTROL}.
      *
      * @hide
      */
@@ -287,8 +288,7 @@ public final class MediaRouter2 {
 
     /**
      * Returns a proxy MediaRouter2 instance that allows you to control the routing of an app
-     * specified by {@code clientPackageName}. Returns {@code null} if the specified package name
-     * does not exist.
+     * specified by {@code clientPackageName}.
      *
      * <p>Proxy MediaRouter2 instances operate differently than regular MediaRouter2 instances:
      *
@@ -522,11 +522,16 @@ public final class MediaRouter2 {
      *
      * <p>{@code scanRequest} specifies relevant scanning options, like whether the system should
      * scan with the screen off. Screen off scanning requires {@link
-     * Manifest.permission#MEDIA_ROUTING_CONTROL}
+     * Manifest.permission#MEDIA_ROUTING_CONTROL} or {@link
+     * Manifest.permission#MEDIA_CONTENT_CONTROL}.
      *
      * <p>Proxy routers use the registered {@link RouteDiscoveryPreference} of their target routers.
      *
      * @return A unique {@link ScanToken} that identifies the scan request.
+     * @throws SecurityException If a {@link ScanRequest} with {@link
+     *     ScanRequest.Builder#setScreenOffScan} true is passed, while not holding {@link
+     *     Manifest.permission#MEDIA_ROUTING_CONTROL} or {@link
+     *     Manifest.permission#MEDIA_CONTENT_CONTROL}.
      */
     @FlaggedApi(FLAG_ENABLE_SCREEN_OFF_SCANNING)
     @NonNull
@@ -1745,8 +1750,9 @@ public final class MediaRouter2 {
 
             /**
              * Sets whether the app is requesting to scan even while the screen is off, bypassing
-             * default scanning restrictions. Only companion apps holding {@link
-             * Manifest.permission#MEDIA_ROUTING_CONTROL} should set this to {@code true}.
+             * default scanning restrictions. Only apps holding {@link
+             * Manifest.permission#MEDIA_ROUTING_CONTROL} or {@link
+             * Manifest.permission#MEDIA_CONTENT_CONTROL} should set this to {@code true}.
              *
              * @see #requestScan(ScanRequest)
              */

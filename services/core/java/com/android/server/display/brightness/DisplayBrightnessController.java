@@ -339,6 +339,13 @@ public final class DisplayBrightnessController {
     }
 
     /**
+     * Flush the brightness update that has been made to the persistent data store.
+     */
+    public void saveBrightnessIfNeeded() {
+        mBrightnessSetting.saveIfNeeded();
+    }
+
+    /**
      * Sets the current screen brightness, and notifies the BrightnessSetting about the change.
      */
     public void updateScreenBrightnessSetting(float brightnessValue, float maxBrightness) {
@@ -359,11 +366,11 @@ public final class DisplayBrightnessController {
     public void setUpAutoBrightness(AutomaticBrightnessController automaticBrightnessController,
             SensorManager sensorManager,
             DisplayDeviceConfig displayDeviceConfig, Handler handler,
-            BrightnessMappingStrategy brightnessMappingStrategy, boolean isEnabled,
+            BrightnessMappingStrategy brightnessMappingStrategy, boolean isDisplayEnabled,
             int leadDisplayId) {
         setAutomaticBrightnessController(automaticBrightnessController);
         setUpAutoBrightnessFallbackStrategy(sensorManager, displayDeviceConfig, handler,
-                brightnessMappingStrategy, isEnabled, leadDisplayId);
+                brightnessMappingStrategy, isDisplayEnabled, leadDisplayId);
     }
 
     /**
@@ -534,14 +541,14 @@ public final class DisplayBrightnessController {
 
     private void setUpAutoBrightnessFallbackStrategy(SensorManager sensorManager,
             DisplayDeviceConfig displayDeviceConfig, Handler handler,
-            BrightnessMappingStrategy brightnessMappingStrategy, boolean isEnabled,
+            BrightnessMappingStrategy brightnessMappingStrategy, boolean isDisplayEnabled,
             int leadDisplayId) {
         AutoBrightnessFallbackStrategy autoBrightnessFallbackStrategy =
                 getAutoBrightnessFallbackStrategy();
         if (autoBrightnessFallbackStrategy != null) {
             autoBrightnessFallbackStrategy.setupAutoBrightnessFallbackSensor(
                     sensorManager, displayDeviceConfig, handler, brightnessMappingStrategy,
-                    isEnabled, leadDisplayId);
+                    isDisplayEnabled, leadDisplayId);
         }
     }
 

@@ -48,6 +48,7 @@ public class ShellInit {
 
     public ShellInit(ShellExecutor mainExecutor) {
         mMainExecutor = mainExecutor;
+        ProtoLog.init(ShellProtoLogGroup.values());
     }
 
     /**
@@ -76,7 +77,6 @@ public class ShellInit {
      */
     @VisibleForTesting
     public void init() {
-        ProtoLog.registerGroups(ShellProtoLogGroup.values());
         ProtoLog.v(WM_SHELL_INIT, "Initializing Shell Components: %d", mInitCallbacks.size());
         SurfaceControl.setDebugUsageAfterRelease(true);
         // Init in order of registration

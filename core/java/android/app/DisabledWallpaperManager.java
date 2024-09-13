@@ -15,11 +15,16 @@
  */
 package android.app;
 
+import android.annotation.FloatRange;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -27,9 +32,12 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
+import android.util.SparseArray;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
+import java.util.Map;
 
 /**
  * A no-op implementation of {@link WallpaperManager}.
@@ -54,29 +62,19 @@ final class DisabledWallpaperManager extends WallpaperManager {
     private DisabledWallpaperManager() {
     }
 
-    @Override
-    public boolean isWallpaperSupported() {
-        return false;
+    @UnsupportedAppUsage
+    public IWallpaperManager getIWallpaperManager() {
+        return unsupported();
     }
 
     @Override
-    public boolean isSetWallpaperAllowed() {
-        return false;
+    public boolean isLockscreenLiveWallpaperEnabled() {
+        return unsupportedBoolean();
     }
 
-    private static <T> T unsupported() {
-        if (DEBUG) Log.w(TAG, "unsupported method called; returning null", new Exception());
-        return null;
-    }
-
-    private static boolean unsupportedBoolean() {
-        if (DEBUG) Log.w(TAG, "unsupported method called; returning false", new Exception());
-        return false;
-    }
-
-    private static int unsupportedInt() {
-        if (DEBUG) Log.w(TAG, "unsupported method called; returning -1", new Exception());
-        return -1;
+    @Override
+    public boolean shouldEnableWideColorGamut() {
+        return unsupportedBoolean();
     }
 
     @Override
@@ -122,6 +120,11 @@ final class DisabledWallpaperManager extends WallpaperManager {
     }
 
     @Override
+    public boolean wallpaperSupportsWcg(int which) {
+        return unsupportedBoolean();
+    }
+
+    @Override
     public Bitmap getBitmap() {
         return unsupported();
     }
@@ -131,8 +134,57 @@ final class DisabledWallpaperManager extends WallpaperManager {
         return unsupported();
     }
 
+    @Nullable
+    public Bitmap getBitmap(boolean hardware, @SetWallpaperFlags int which) {
+        return unsupported();
+    }
+
     @Override
     public Bitmap getBitmapAsUser(int userId, boolean hardware) {
+        return unsupported();
+    }
+
+    @Override
+    public Bitmap getBitmapAsUser(int userId, boolean hardware, @SetWallpaperFlags int which) {
+        return unsupported();
+    }
+
+    @Override
+    public Bitmap getBitmapAsUser(int userId, boolean hardware,
+            @SetWallpaperFlags int which, boolean returnDefault) {
+        return unsupported();
+    }
+
+    @Override
+    public Rect peekBitmapDimensions() {
+        return unsupported();
+    }
+
+    @Override
+    public Rect peekBitmapDimensions(@SetWallpaperFlags int which) {
+        return unsupported();
+    }
+
+    @Nullable
+    public Rect peekBitmapDimensions(@SetWallpaperFlags int which, boolean returnDefault) {
+        return unsupported();
+    }
+
+    @Override
+    public List<Rect> getBitmapCrops(@NonNull List<Point> displaySizes,
+            @SetWallpaperFlags int which, boolean originalBitmap) {
+        return unsupported();
+    }
+
+    @Override
+    public List<Rect> getBitmapCrops(@NonNull Point bitmapSize, @NonNull List<Point> displaySizes,
+            @Nullable Map<Point, Rect> cropHints) {
+        return unsupported();
+    }
+
+    @Override
+    public WallpaperColors getWallpaperColors(@NonNull Bitmap bitmap,
+            @Nullable Map<Point, Rect> cropHints) {
         return unsupported();
     }
 
@@ -173,6 +225,17 @@ final class DisabledWallpaperManager extends WallpaperManager {
     }
 
     @Override
+    public void addOnColorsChangedListener(@NonNull LocalWallpaperColorConsumer callback,
+            List<RectF> regions, int which) throws IllegalArgumentException {
+        unsupported();
+    }
+
+    @Override
+    public void removeOnColorsChangedListener(@NonNull LocalWallpaperColorConsumer callback) {
+        unsupported();
+    }
+
+    @Override
     public ParcelFileDescriptor getWallpaperFile(int which, int userId) {
         return unsupported();
     }
@@ -192,12 +255,6 @@ final class DisabledWallpaperManager extends WallpaperManager {
         return unsupported();
     }
 
-    @Override
-    public ParcelFileDescriptor getWallpaperInfoFile() {
-        return unsupported();
-    }
-
-    @Override
     public WallpaperInfo getWallpaperInfoForUser(int userId) {
         return unsupported();
     }
@@ -209,6 +266,11 @@ final class DisabledWallpaperManager extends WallpaperManager {
 
     @Override
     public WallpaperInfo getWallpaperInfo(@SetWallpaperFlags int which, int userId) {
+        return unsupported();
+    }
+
+    @Override
+    public ParcelFileDescriptor getWallpaperInfoFile() {
         return unsupported();
     }
 
@@ -264,6 +326,11 @@ final class DisabledWallpaperManager extends WallpaperManager {
         return 0;
     }
 
+    public int setBitmapWithCrops(@Nullable Bitmap fullImage, @NonNull Map<Point, Rect> cropHints,
+            boolean allowBackup, @SetWallpaperFlags int which) throws IOException {
+        return unsupportedInt();
+    }
+
     @Override
     public void setStream(InputStream bitmapData) throws IOException {
         unsupported();
@@ -281,6 +348,19 @@ final class DisabledWallpaperManager extends WallpaperManager {
             int which) throws IOException {
         unsupported();
         return 0;
+    }
+
+    @Override
+    public int setStreamWithCrops(InputStream bitmapData, @NonNull Map<Point, Rect> cropHints,
+            boolean allowBackup, @SetWallpaperFlags int which) throws IOException {
+        return unsupportedInt();
+    }
+
+
+    @Override
+    public int setStreamWithCrops(InputStream bitmapData, @NonNull SparseArray<Rect> cropHints,
+            boolean allowBackup, @SetWallpaperFlags int which) throws IOException {
+        return unsupportedInt();
     }
 
     @Override
@@ -328,8 +408,36 @@ final class DisabledWallpaperManager extends WallpaperManager {
         return unsupportedBoolean();
     }
 
+
+    @Override
+    public void setWallpaperDimAmount(@FloatRange(from = 0f, to = 1f) float dimAmount) {
+        unsupported();
+    }
+
+    @Override
+    public @FloatRange(from = 0f, to = 1f) float getWallpaperDimAmount() {
+        return unsupportedInt();
+    }
+
+    @Override
+    public boolean lockScreenWallpaperExists() {
+        return unsupportedBoolean();
+    }
+
     @Override
     public boolean setWallpaperComponent(ComponentName name, int userId) {
+        return unsupportedBoolean();
+    }
+
+    @Override
+    public boolean setWallpaperComponentWithFlags(@NonNull ComponentName name,
+            @SetWallpaperFlags int which) {
+        return unsupportedBoolean();
+    }
+
+    @Override
+    public boolean setWallpaperComponentWithFlags(@NonNull ComponentName name,
+            @SetWallpaperFlags int which, int userId) {
         return unsupportedBoolean();
     }
 
@@ -347,6 +455,21 @@ final class DisabledWallpaperManager extends WallpaperManager {
     public void sendWallpaperCommand(IBinder windowToken, String action, int x, int y, int z,
             Bundle extras) {
         unsupported();
+    }
+
+    @Override
+    public void setWallpaperZoomOut(@NonNull IBinder windowToken, float zoom) {
+        unsupported();
+    }
+
+    @Override
+    public boolean isWallpaperSupported() {
+        return false;
+    }
+
+    @Override
+    public boolean isSetWallpaperAllowed() {
+        return false;
     }
 
     @Override
@@ -369,8 +492,18 @@ final class DisabledWallpaperManager extends WallpaperManager {
         return unsupportedBoolean();
     }
 
-    @Override
-    public boolean wallpaperSupportsWcg(int which) {
-        return unsupportedBoolean();
+    private static <T> T unsupported() {
+        if (DEBUG) Log.w(TAG, "unsupported method called; returning null", new Exception());
+        return null;
+    }
+
+    private static boolean unsupportedBoolean() {
+        if (DEBUG) Log.w(TAG, "unsupported method called; returning false", new Exception());
+        return false;
+    }
+
+    private static int unsupportedInt() {
+        if (DEBUG) Log.w(TAG, "unsupported method called; returning -1", new Exception());
+        return -1;
     }
 }

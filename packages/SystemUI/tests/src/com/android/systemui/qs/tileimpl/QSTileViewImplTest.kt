@@ -25,6 +25,7 @@ import android.text.TextUtils
 import android.view.ContextThemeWrapper
 import android.view.View
 import android.view.accessibility.AccessibilityNodeInfo
+import android.widget.Button
 import android.widget.TextView
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -378,6 +379,47 @@ class QSTileViewImplTest : SysuiTestCase() {
 
         tileView.changeState(state)
         assertThat(tileView.stateDescription?.contains(unavailableString)).isTrue()
+    }
+
+    @Test
+    fun testNonSwitchA11yClass_longClickActionHasCorrectLabel() {
+        val state =
+            QSTile.State().apply {
+                expandedAccessibilityClassName = Button::class.java.name
+                handlesLongClick = true
+            }
+        tileView.changeState(state)
+        val info = AccessibilityNodeInfo(tileView)
+        tileView.onInitializeAccessibilityNodeInfo(info)
+
+        assertThat(
+                info.actionList
+                    .find {
+                        it.id == AccessibilityNodeInfo.AccessibilityAction.ACTION_LONG_CLICK.id
+                    }
+                    ?.label
+            )
+            .isEqualTo(context.getString(R.string.accessibility_long_click_tile))
+    }
+
+    @Test
+    fun testNonSwitchA11yClass_disabledByPolicy_noLongClickAction() {
+        val state =
+            QSTile.State().apply {
+                expandedAccessibilityClassName = Button::class.java.name
+                handlesLongClick = true
+                disabledByPolicy = true
+            }
+        tileView.changeState(state)
+        val info = AccessibilityNodeInfo(tileView)
+        tileView.onInitializeAccessibilityNodeInfo(info)
+
+        assertThat(
+                info.actionList.find {
+                    it.id == AccessibilityNodeInfo.AccessibilityAction.ACTION_LONG_CLICK.id
+                }
+            )
+            .isNull()
     }
 
     @Test

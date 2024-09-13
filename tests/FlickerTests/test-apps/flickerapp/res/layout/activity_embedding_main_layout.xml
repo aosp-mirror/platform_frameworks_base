@@ -21,8 +21,10 @@
     android:background="@android:color/holo_orange_light">
 
     <LinearLayout
+        android:id="@+id/launch_options_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:paddingBottom="48dp"
         android:orientation="vertical">
 
         <Button

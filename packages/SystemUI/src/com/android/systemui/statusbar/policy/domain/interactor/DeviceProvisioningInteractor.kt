@@ -26,7 +26,7 @@ import kotlinx.coroutines.flow.Flow
 class DeviceProvisioningInteractor
 @Inject
 constructor(
-    repository: DeviceProvisioningRepository,
+    private val repository: DeviceProvisioningRepository,
 ) {
     /**
      * Whether this device has been provisioned.
@@ -34,4 +34,8 @@ constructor(
      * @see android.provider.Settings.Global.DEVICE_PROVISIONED
      */
     val isDeviceProvisioned: Flow<Boolean> = repository.isDeviceProvisioned
+
+    fun isDeviceProvisioned(): Boolean {
+        return repository.isDeviceProvisioned()
+    }
 }

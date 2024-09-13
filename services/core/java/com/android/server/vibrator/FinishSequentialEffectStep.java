@@ -16,6 +16,7 @@
 
 package com.android.server.vibrator;
 
+import android.annotation.NonNull;
 import android.os.Trace;
 import android.util.Slog;
 
@@ -43,6 +44,7 @@ final class FinishSequentialEffectStep extends Step {
         return true;
     }
 
+    @NonNull
     @Override
     public List<Step> play() {
         Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "FinishSequentialEffectStep");
@@ -61,6 +63,7 @@ final class FinishSequentialEffectStep extends Step {
         }
     }
 
+    @NonNull
     @Override
     public List<Step> cancel() {
         cancelImmediately();

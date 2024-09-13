@@ -35,7 +35,6 @@ import org.junit.runner.RunWith
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-@android.platform.test.annotations.EnabledOnRavenwood
 class CameraAutoRotateRepositoryImplTest : SysuiTestCase() {
     private val kosmos = Kosmos()
     private val testScope = kosmos.testScope

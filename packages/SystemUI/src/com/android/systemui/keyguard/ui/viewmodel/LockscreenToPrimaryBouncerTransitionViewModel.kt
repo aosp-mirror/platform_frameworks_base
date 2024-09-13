@@ -23,7 +23,9 @@ import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.scene.ui.composable.transitions.FROM_LOCK_SCREEN_TO_BOUNCER_FADE_FRACTION
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -51,10 +53,18 @@ constructor(
                 edge = Edge.create(from = LOCKSCREEN, to = PRIMARY_BOUNCER),
             )
 
+    private val alphaForAnimationStep: (Float) -> Float =
+        when {
+            SceneContainerFlag.isEnabled -> { step ->
+                    1f - Math.min((step / FROM_LOCK_SCREEN_TO_BOUNCER_FADE_FRACTION), 1f)
+                }
+            else -> { step -> 1f - step }
+        }
+
     val shortcutsAlpha: Flow<Float> =
         transitionAnimation.sharedFlow(
             duration = FromLockscreenTransitionInteractor.TO_PRIMARY_BOUNCER_DURATION,
-            onStep = { 1f - it }
+            onStep = alphaForAnimationStep
         )
 
     val lockscreenAlpha: Flow<Float> = shortcutsAlpha
@@ -65,6 +75,7 @@ constructor(
                 transitionAnimation.sharedFlow(
                     duration = 250.milliseconds,
                     onStep = { 1f - it },
+                    onCancel = { 0f },
                     onFinish = { 0f }
                 ),
             flowWhenShadeIsExpanded = transitionAnimation.immediatelyTransitionTo(0f)

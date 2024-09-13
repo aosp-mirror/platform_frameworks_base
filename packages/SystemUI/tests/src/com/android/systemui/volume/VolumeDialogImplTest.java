@@ -23,6 +23,7 @@ import static android.media.AudioManager.RINGER_MODE_VIBRATE;
 import static com.android.systemui.Flags.FLAG_HAPTIC_VOLUME_SLIDER;
 import static com.android.systemui.volume.Events.DISMISS_REASON_UNKNOWN;
 import static com.android.systemui.volume.Events.SHOW_REASON_UNKNOWN;
+import static com.android.systemui.volume.VolumeDialogControllerImpl.DYNAMIC_STREAM_BROADCAST;
 import static com.android.systemui.volume.VolumeDialogControllerImpl.STREAMS;
 
 import static junit.framework.Assert.assertEquals;
@@ -43,7 +44,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.KeyguardManager;
-import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -56,7 +56,6 @@ import android.platform.test.annotations.EnableFlags;
 import android.provider.Settings;
 import android.testing.TestableLooper;
 import android.util.Log;
-import android.util.Pair;
 import android.view.Gravity;
 import android.view.InputDevice;
 import android.view.MotionEvent;
@@ -72,6 +71,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.testing.UiEventLoggerFake;
+import com.android.settingslib.flags.Flags;
 import com.android.systemui.Prefs;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.AnimatorTestRule;
@@ -164,7 +164,7 @@ public class VolumeDialogImplTest extends SysuiTestCase {
             new CsdWarningDialog.Factory() {
                 @Override
                 public CsdWarningDialog create(int warningType, Runnable onCleanup,
-                        Optional<ImmutableList<Pair<String, Intent>>> actionIntents) {
+                        Optional<ImmutableList<CsdWarningAction>> actionIntents) {
                     return mCsdWarningDialog;
                 }
             };
@@ -257,13 +257,13 @@ public class VolumeDialogImplTest extends SysuiTestCase {
 
     private State createShellState() {
         State state = new VolumeDialogController.State();
-        for (int i = AudioManager.STREAM_VOICE_CALL; i <= AudioManager.STREAM_ACCESSIBILITY; i++) {
+        for (int stream : STREAMS.keySet()) {
             VolumeDialogController.StreamState ss = new VolumeDialogController.StreamState();
-            ss.name = STREAMS.get(i);
+            ss.name = STREAMS.get(stream);
             ss.level = 1;
             ss.levelMin = 0;
             ss.levelMax = 25;
-            state.states.append(i, ss);
+            state.states.append(stream, ss);
         }
         return state;
     }
@@ -792,6 +792,38 @@ public class VolumeDialogImplTest extends SysuiTestCase {
 
         verify(mVolumeDialogInteractor, atLeastOnce()).onDialogShown();
         verify(mVolumeDialogInteractor, atLeastOnce()).onDialogDismissed(); // dismiss by timeout
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_VOLUME_DIALOG_AUDIO_SHARING_FIX)
+    public void testDynamicStreamForBroadcast_createRow() {
+        State state = createShellState();
+        VolumeDialogController.StreamState ss = new VolumeDialogController.StreamState();
+        ss.dynamic = true;
+        ss.levelMin = 0;
+        ss.levelMax = 255;
+        ss.level = 20;
+        ss.name = -1;
+        ss.remoteLabel = mContext.getString(R.string.audio_sharing_description);
+        state.states.append(DYNAMIC_STREAM_BROADCAST, ss);
+
+        mDialog.onStateChangedH(state);
+        mTestableLooper.processAllMessages();
+
+        ViewGroup volumeDialogRows = mDialog.getDialogView().findViewById(R.id.volume_dialog_rows);
+        assumeNotNull(volumeDialogRows);
+        View broadcastRow = null;
+        final int rowCount = volumeDialogRows.getChildCount();
+        // we don't make assumptions about the position of the dnd row
+        for (int i = 0; i < rowCount; i++) {
+            View volumeRow = volumeDialogRows.getChildAt(i);
+            if (volumeRow.getId() == DYNAMIC_STREAM_BROADCAST) {
+                broadcastRow = volumeRow;
+                break;
+            }
+        }
+        assertNotNull(broadcastRow);
+        assertEquals(broadcastRow.getVisibility(), View.VISIBLE);
     }
 
     /**

@@ -134,3 +134,20 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "enable_full_scan_with_media_content_control"
+    namespace: "media_better_together"
+    description: "Allows holders of the MEDIA_CONTENT_CONTROL permission to scan for routes while not in the foreground."
+    bug: "352401364"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "enable_audio_input_device_routing_and_volume_control"
+    namespace: "media_better_together"
+    description: "Allows audio input devices routing and volume control via system settings."
+    bug: "355684672"
+}

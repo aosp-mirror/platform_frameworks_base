@@ -151,6 +151,7 @@ class InputManagerServiceTests {
         verify(native).setTouchpadNaturalScrollingEnabled(anyBoolean())
         verify(native).setTouchpadTapToClickEnabled(anyBoolean())
         verify(native).setTouchpadTapDraggingEnabled(anyBoolean())
+        verify(native).setShouldNotifyTouchpadHardwareState(anyBoolean())
         verify(native).setTouchpadRightClickZoneEnabled(anyBoolean())
         verify(native).setShowTouches(anyBoolean())
         verify(native).setMotionClassifierEnabled(anyBoolean())

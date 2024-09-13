@@ -17,23 +17,33 @@
 package com.android.systemui.qs.tiles.impl.modes.domain.interactor
 
 import android.app.Flags
+import android.content.Context
 import android.os.UserHandle
-import com.android.settingslib.notification.data.repository.ZenModeRepository
+import com.android.app.tracing.coroutines.flow.map
+import com.android.systemui.common.shared.model.Icon
+import com.android.systemui.common.shared.model.asIcon
+import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.qs.tiles.ModesTile
 import com.android.systemui.qs.tiles.base.interactor.DataUpdateTrigger
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataInteractor
 import com.android.systemui.qs.tiles.impl.modes.domain.model.ModesTileModel
+import com.android.systemui.statusbar.policy.domain.interactor.ZenModeInteractor
+import com.android.systemui.statusbar.policy.domain.model.ActiveZenModes
+import com.android.systemui.statusbar.policy.domain.model.ZenModeInfo
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.flowOn
 
-class ModesTileDataInteractor @Inject constructor(val zenModeRepository: ZenModeRepository) :
-    QSTileDataInteractor<ModesTileModel> {
-    private val zenModeActive =
-        zenModeRepository.modes
-            .map { modes -> modes.any { mode -> mode.isActive } }
-            .distinctUntilChanged()
+class ModesTileDataInteractor
+@Inject
+constructor(
+    val context: Context,
+    val zenModeInteractor: ZenModeInteractor,
+    @Background val bgDispatcher: CoroutineDispatcher,
+) : QSTileDataInteractor<ModesTileModel> {
 
     override fun tileData(
         user: UserHandle,
@@ -45,7 +55,49 @@ class ModesTileDataInteractor @Inject constructor(val zenModeRepository: ZenMode
      *
      * TODO(b/299909989): Remove after the transition.
      */
-    fun tileData() = zenModeActive.map { ModesTileModel(isActivated = it) }
+    fun tileData() =
+        zenModeInteractor.activeModes
+            .map { activeModes -> buildTileData(activeModes) }
+            .flowOn(bgDispatcher)
+            .distinctUntilChanged()
+
+    suspend fun getCurrentTileModel() = buildTileData(zenModeInteractor.getActiveModes())
+
+    private fun buildTileData(activeModes: ActiveZenModes): ModesTileModel {
+        if (usesModeIcons()) {
+            val tileIcon = getTileIcon(activeModes.mainMode)
+            return ModesTileModel(
+                isActivated = activeModes.isAnyActive(),
+                icon = tileIcon.icon,
+                iconResId = tileIcon.resId,
+                activeModes = activeModes.modeNames
+            )
+        } else {
+            return ModesTileModel(
+                isActivated = activeModes.isAnyActive(),
+                icon = context.getDrawable(ModesTile.ICON_RES_ID)!!.asIcon(),
+                iconResId = ModesTile.ICON_RES_ID,
+                activeModes = activeModes.modeNames
+            )
+        }
+    }
+
+    private data class TileIcon(val icon: Icon.Loaded, val resId: Int?)
+
+    private fun getTileIcon(activeMode: ZenModeInfo?): TileIcon {
+        return if (activeMode != null) {
+            // ZenIconKey.resPackage is null if its resId is a system icon.
+            if (activeMode.icon.key.resPackage == null) {
+                TileIcon(activeMode.icon.drawable.asIcon(), activeMode.icon.key.resId)
+            } else {
+                TileIcon(activeMode.icon.drawable.asIcon(), null)
+            }
+        } else {
+            TileIcon(context.getDrawable(ModesTile.ICON_RES_ID)!!.asIcon(), ModesTile.ICON_RES_ID)
+        }
+    }
 
     override fun availability(user: UserHandle): Flow<Boolean> = flowOf(Flags.modesUi())
+
+    private fun usesModeIcons() = Flags.modesApi() && Flags.modesUi() && Flags.modesUiIcons()
 }

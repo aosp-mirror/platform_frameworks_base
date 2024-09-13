@@ -1194,6 +1194,8 @@
     <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"В полета за парола не се поддържа ръкописно въвеждане"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Назад"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Превключване на метода на въвеждане"</string>
+    <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"Отваряне на инструмента за избор на метод на въвеждане"</string>
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"Настройки"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Мястото в хранилището е на изчерпване"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Възможно е някои функции на системата да не работят"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"За системата няма достатъчно място в хранилището. Уверете се, че имате свободни 250 МБ, и рестартирайте."</string>
@@ -1428,6 +1430,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"СПОДЕЛЯНЕ"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"ОТХВЪРЛЯНЕ"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Избор на метод на въвеждане"</string>
+    <string name="input_method_language_settings" msgid="8069089418056819437">"Езикови настройки"</string>
     <string name="show_ime" msgid="6406112007347443383">"Показване на екрана, докато физическата клавиатура е активна"</string>
     <string name="hardware" msgid="3611039921284836033">"Ползв. на екранната клавиатура"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Конфигуриране на <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
@@ -1743,7 +1746,8 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"Отговорът ви не може да бъде потвърден, тъй като приложение прикрива заявката за разрешение."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Докоснете дадена функция, за да започнете да я използвате:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Избиране на функции, които да използвате с бутона за достъпност"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Избиране на функции, които да използвате с прекия път чрез бутона за силата на звука"</string>
+    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
+    <skip />
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Изключихте <xliff:g id="SERVICE_NAME">%s</xliff:g>"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Редактиране на преките пътища"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Готово"</string>
@@ -2421,6 +2425,8 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Съдържанието на приложението е скрито от функцията за споделяне на екрана от съображения за сигурност"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Автоматично установена връзка със сателит"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Можете да изпращате и получавате съобщения без мобилна или Wi-Fi мрежа"</string>
+    <string name="satellite_notification_manual_title" msgid="1097504441849466279">"Да се използват ли сателитни съобщения?"</string>
+    <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Изпращайте и получавайте съобщения без мобилна или Wi-Fi мрежа"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Отваряне на Messages"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Начин на работа"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Изчаква..."</string>
@@ -2433,26 +2439,18 @@
     <string name="face_dangling_notification_msg" msgid="746235263598985384">"Моделът на лицето ви вече не може да бъде разпознат. Настройте отново „Отключване с лице“."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Настройване"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Не сега"</string>
-    <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"Будилник за <xliff:g id="USER_NAME">%s</xliff:g>"</string>
+    <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"Будилник за: <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"Смяна на потребителя"</string>
     <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"Спиране на звука"</string>
     <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"Докоснете, за да спрете звука"</string>
-    <!-- no translation found for keyboard_shortcut_group_applications_browser (6535007304687100909) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_contacts (2750702518068326356) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_email (4229037666415353683) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_sms (3523799286376321137) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_music (2051507523525651067) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_calendar (3571770335653387606) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_calculator (6753209559716091507) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_maps (7950000659522589471) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications (3010389163951364798) -->
-    <skip />
+    <string name="keyboard_shortcut_group_applications_browser" msgid="6535007304687100909">"Браузър"</string>
+    <string name="keyboard_shortcut_group_applications_contacts" msgid="2750702518068326356">"Контакти"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="4229037666415353683">"Имейл"</string>
+    <string name="keyboard_shortcut_group_applications_sms" msgid="3523799286376321137">"SMS"</string>
+    <string name="keyboard_shortcut_group_applications_music" msgid="2051507523525651067">"Музика"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="3571770335653387606">"Календар"</string>
+    <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"Калкулатор"</string>
+    <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"Карти"</string>
+    <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"Приложения"</string>
+    <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"Отпечатъците ви вече не могат да бъдат разпознати. Настройте отново „Отключване с отпечатък“."</string>
 </resources>

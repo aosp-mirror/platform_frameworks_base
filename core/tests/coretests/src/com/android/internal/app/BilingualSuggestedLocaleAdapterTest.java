@@ -18,7 +18,7 @@ package com.android.internal.app;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import androidx.test.runner.AndroidJUnit4;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.android.internal.app.LocaleHelper.LocaleInfoComparator;
 import com.android.internal.app.LocaleStore.LocaleInfo;

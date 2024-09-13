@@ -63,11 +63,11 @@ android_test {
     libs: [
         "android.hardware.power-V1-java",
         "android.hardware.tv.cec-V1.0-java",
-        "android.hardware.vibrator-V2-java",
+        "android.hardware.vibrator-V3-java",
         "android.hidl.manager-V1.0-java",
-        "android.test.mock",
-        "android.test.base",
-        "android.test.runner",
+        "android.test.mock.stubs.system",
+        "android.test.base.stubs.system",
+        "android.test.runner.stubs.system",
     ],
 
     platform_apis: true,
@@ -163,4 +163,36 @@ java_genrule {
         "  x=$${i##*FrameworksServicesTests_}; cp $$i $(genDir)/res/raw/$${x%.apk};" +
         "done && " +
         "$(location soong_zip) -o $(out) -C $(genDir)/res -D $(genDir)/res",
+}
+
+test_module_config {
+    name: "PackageManagerServiceServerTests_server_pm_Presubmit",
+    base: "PackageManagerServiceServerTests",
+    test_suites: [
+        "automotive-tests",
+        "device-tests",
+    ],
+    include_filters: ["com.android.server.pm."],
+    include_annotations: ["android.platform.test.annotations.Presubmit"],
+}
+
+test_module_config {
+    name: "PackageManagerServiceServerTests_server_pm_Postsubmit",
+    base: "PackageManagerServiceServerTests",
+    test_suites: [
+        "automotive-tests",
+        "device-tests",
+    ],
+    include_filters: ["com.android.server.pm."],
+    include_annotations: ["android.platform.test.annotations.Postsubmit"],
+}
+
+test_module_config {
+    name: "PackageManagerServiceServerTests_Presubmit",
+    base: "PackageManagerServiceServerTests",
+    test_suites: [
+        "automotive-tests",
+        "device-tests",
+    ],
+    include_annotations: ["android.platform.test.annotations.Presubmit"],
 }

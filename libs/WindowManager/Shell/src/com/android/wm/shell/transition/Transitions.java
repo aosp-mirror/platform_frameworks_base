@@ -38,12 +38,12 @@ import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_NO_ANIMATION;
 import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
 
-import static com.android.window.flags.Flags.enforceShellThreadModel;
-import static com.android.window.flags.Flags.ensureWallpaperInTransitions;
 import static com.android.systemui.shared.Flags.returnAnimationFrameworkLibrary;
+import static com.android.window.flags.Flags.ensureWallpaperInTransitions;
+import static com.android.window.flags.Flags.migratePredictiveBackTransition;
+import static com.android.wm.shell.shared.ShellSharedConstants.KEY_EXTRA_SHELL_SHELL_TRANSITIONS;
 import static com.android.wm.shell.shared.TransitionUtil.isClosingType;
 import static com.android.wm.shell.shared.TransitionUtil.isOpeningType;
-import static com.android.wm.shell.sysui.ShellSharedConstants.KEY_EXTRA_SHELL_SHELL_TRANSITIONS;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -85,12 +85,12 @@ import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.ExternalInterfaceBinder;
 import com.android.wm.shell.common.RemoteCallable;
 import com.android.wm.shell.common.ShellExecutor;
-import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.keyguard.KeyguardTransitionHandler;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.shared.IHomeTransitionListener;
 import com.android.wm.shell.shared.IShellTransitions;
 import com.android.wm.shell.shared.ShellTransitions;
+import com.android.wm.shell.shared.TransactionPool;
 import com.android.wm.shell.shared.TransitionUtil;
 import com.android.wm.shell.shared.annotations.ExternalThread;
 import com.android.wm.shell.sysui.ShellCommandHandler;
@@ -189,6 +189,15 @@ public class Transitions implements RemoteCallable<Transitions>,
     public static final int TRANSIT_TASK_FRAGMENT_DRAG_RESIZE =
             // TRANSIT_FIRST_CUSTOM + 17
             TaskFragmentOrganizer.TASK_FRAGMENT_TRANSIT_DRAG_RESIZE;
+
+    /** Remote Transition that split accepts but ultimately needs to be animated by the remote. */
+    public static final int TRANSIT_SPLIT_PASSTHROUGH = TRANSIT_FIRST_CUSTOM + 18;
+
+    /** Transition to set windowing mode after exit pip transition is finished animating. */
+    public static final int TRANSIT_CLEANUP_PIP_EXIT = WindowManager.TRANSIT_FIRST_CUSTOM + 19;
+
+    /** Transition type to minimize a task. */
+    public static final int TRANSIT_MINIMIZE = WindowManager.TRANSIT_FIRST_CUSTOM + 20;
 
     /** Transition type for desktop mode transitions. */
     public static final int TRANSIT_DESKTOP_MODE_TYPES =
@@ -714,7 +723,11 @@ public class Transitions implements RemoteCallable<Transitions>,
                 Log.e(TAG, "Got duplicate transitionReady for " + transitionToken);
                 // The transition is already somewhere else in the pipeline, so just return here.
                 t.apply();
-                existing.mFinishT.merge(finishT);
+                if (existing.mFinishT != null) {
+                    existing.mFinishT.merge(finishT);
+                } else {
+                    existing.mFinishT = finishT;
+                }
                 return;
             }
             // This usually means the system is in a bad state and may not recover; however,
@@ -819,7 +832,8 @@ public class Transitions implements RemoteCallable<Transitions>,
             }
             // The change has already animated by back gesture, don't need to play transition
             // animation on it.
-            if (change.hasFlags(FLAG_BACK_GESTURE_ANIMATED)) {
+            if (!migratePredictiveBackTransition()
+                    && change.hasFlags(FLAG_BACK_GESTURE_ANIMATED)) {
                 info.getChanges().remove(i);
             }
         }
@@ -933,9 +947,7 @@ public class Transitions implements RemoteCallable<Transitions>,
     }
 
     private void onMerged(@NonNull IBinder playingToken, @NonNull IBinder mergedToken) {
-        if (enforceShellThreadModel()) {
-            mMainExecutor.assertCurrentThread();
-        }
+        mMainExecutor.assertCurrentThread();
 
         ActiveTransition playing = mKnownTransitions.get(playingToken);
         if (playing == null) {
@@ -1084,9 +1096,7 @@ public class Transitions implements RemoteCallable<Transitions>,
     }
 
     private void onFinish(IBinder token, @Nullable WindowContainerTransaction wct) {
-        if (enforceShellThreadModel()) {
-            mMainExecutor.assertCurrentThread();
-        }
+        mMainExecutor.assertCurrentThread();
 
         final ActiveTransition active = mKnownTransitions.get(token);
         if (active == null) {
@@ -1183,12 +1193,15 @@ public class Transitions implements RemoteCallable<Transitions>,
             }
             if (request.getDisplayChange() != null) {
                 TransitionRequestInfo.DisplayChange change = request.getDisplayChange();
-                if (change.getEndRotation() != change.getStartRotation()) {
-                    // Is a rotation, so dispatch to all displayChange listeners
+                if (change.getStartRotation() != change.getEndRotation()
+                        || (change.getStartAbsBounds() != null
+                        && !change.getStartAbsBounds().equals(change.getEndAbsBounds()))) {
+                    // Is a display change, so dispatch to all displayChange listeners
                     if (wct == null) {
                         wct = new WindowContainerTransaction();
                     }
-                    mDisplayController.onDisplayRotateRequested(wct, change.getDisplayId(),
+                    mDisplayController.onDisplayChangeRequested(wct, change.getDisplayId(),
+                            change.getStartAbsBounds(), change.getEndAbsBounds(),
                             change.getStartRotation(), change.getEndRotation());
                 }
             }

@@ -86,11 +86,12 @@ public class AppInfoTest {
     @Test
     public void testAllFieldsValidV1() throws Exception {
         System.out.println("starting testAllFieldsValidV1.");
-        new AppInfoFactory()
-                .createFromOdElement(
-                        TestUtils.getElementFromResource(
-                                Paths.get(APP_INFO_OD_PATH, ALL_FIELDS_VALID_V1_FILE_NAME)),
-                        1L);
+        var unused =
+                new AppInfoFactory()
+                        .createFromOdElement(
+                                TestUtils.getElementFromResource(
+                                        Paths.get(APP_INFO_OD_PATH, ALL_FIELDS_VALID_V1_FILE_NAME)),
+                                1L);
     }
 
     /** Test for unrecognized field v1. */
@@ -133,7 +134,7 @@ public class AppInfoTest {
                     TestUtils.getElementFromResource(
                             Paths.get(APP_INFO_OD_PATH, ALL_FIELDS_VALID_V1_FILE_NAME));
             TestUtils.removeOdChildEleWithName(appInfoEle, optField);
-            new AppInfoFactory().createFromOdElement(appInfoEle, 1L);
+            var unused = new AppInfoFactory().createFromOdElement(appInfoEle, 1L);
         }
     }
 
@@ -202,7 +203,7 @@ public class AppInfoTest {
                             Paths.get(APP_INFO_HR_PATH, ALL_FIELDS_VALID_FILE_NAME));
             ele.removeAttribute(optField);
             AppInfo appInfo = new AppInfoFactory().createFromHrElement(ele, DEFAULT_VERSION);
-            appInfo.toOdDomElement(TestUtils.document());
+            var unused = appInfo.toOdDomElement(TestUtils.document());
         }
 
         for (String optField : OPTIONAL_FIELD_NAMES_OD) {
@@ -211,7 +212,7 @@ public class AppInfoTest {
                             Paths.get(APP_INFO_OD_PATH, ALL_FIELDS_VALID_FILE_NAME));
             TestUtils.removeOdChildEleWithName(ele, optField);
             AppInfo appInfo = new AppInfoFactory().createFromOdElement(ele, DEFAULT_VERSION);
-            appInfo.toHrDomElement(TestUtils.document());
+            var unused = appInfo.toHrDomElement(TestUtils.document());
         }
     }
 

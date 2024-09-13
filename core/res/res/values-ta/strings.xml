@@ -1194,6 +1194,8 @@
     <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"கடவுச்சொல் புலங்களில் கையெழுத்து ஆதரிக்கப்படவில்லை"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"பின்செல்லும்"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"உள்ளீட்டு முறையை மாற்றும்"</string>
+    <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"உள்ளீட்டு முறைத் தேர்வுக் கருவியைத் திறக்கும்"</string>
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"அமைப்புகள்"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"சேமிப்பிடம் குறைகிறது"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"சில அமைப்பு செயல்பாடுகள் வேலை செய்யாமல் போகலாம்"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"முறைமையில் போதுமான சேமிப்பகம் இல்லை. 250மெ.பை. அளவு காலி இடவசதி இருப்பதை உறுதிசெய்து மீண்டும் தொடங்கவும்."</string>
@@ -1428,6 +1430,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"பகிர்"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"வேண்டாம்"</string>
     <string name="select_input_method" msgid="3971267998568587025">"உள்ளீட்டு முறையைத் தேர்வுசெய்க"</string>
+    <string name="input_method_language_settings" msgid="8069089418056819437">"மொழி அமைப்புகள்"</string>
     <string name="show_ime" msgid="6406112007347443383">"கைமுறை கீபோர்டு இயக்கத்தில் இருக்கும் போது IMEஐ திரையில் வைத்திரு"</string>
     <string name="hardware" msgid="3611039921284836033">"ஸ்கிரீன் கீபோர்டை உபயோகி"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"<xliff:g id="DEVICE_NAME">%s</xliff:g> சாதனத்தை உள்ளமைத்தல்"</string>
@@ -1743,7 +1746,7 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"அணுகல் கோரிக்கையை ஓர் ஆப்ஸ் மறைப்பதால் உங்கள் பதிலைச் சரிபார்க்க முடியாது."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"ஒரு அம்சத்தைப் பயன்படுத்த அதைத் தட்டவும்:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"அணுகல்தன்மை பட்டன் மூலம் பயன்படுத்த விரும்பும் அம்சங்களைத் தேர்வுசெய்யுங்கள்"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"ஒலியளவு விசை ஷார்ட்கட் மூலம் பயன்படுத்த விரும்பும் அம்சங்களைத் தேர்வுசெய்யுங்கள்"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2245540598834891500">"ஒலியளவு விசைகளுக்கான ஷார்ட்கட்டுடன் பயன்படுத்துவதற்கான அம்சங்களைத் தேர்வுசெய்யுங்கள்"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> ஆஃப் செய்யப்பட்டுள்ளது"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"ஷார்ட்கட்களை மாற்று"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"முடிந்தது"</string>
@@ -2421,6 +2424,8 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"பாதுகாப்பிற்காக, திரைப் பகிர்வில் இருந்து ஆப்ஸ் உள்ளடக்கம் மறைக்கப்பட்டுள்ளது"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"சாட்டிலைட்டுடன் தானாக இணைக்கப்பட்டது"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"மொபைல்/வைஃபை நெட்வொர்க் இல்லாமல் நீங்கள் மெசேஜ்களை அனுப்பலாம் பெறலாம்"</string>
+    <string name="satellite_notification_manual_title" msgid="1097504441849466279">"சாட்டிலைட் மெசேஜிங்கைப் பயன்படுத்தவா?"</string>
+    <string name="satellite_notification_manual_summary" msgid="901206289846283445">"மொபைல்/வைஃபை நெட்வொர்க் இல்லாமல் மெசேஜ்களை அனுப்பலாம், பெறலாம்"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages ஆப்ஸைத் திறக்கவும்"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"இது செயல்படும் விதம்"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"நிலுவையிலுள்ளது..."</string>
@@ -2437,22 +2442,14 @@
     <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"பயனரை மாற்றுங்கள்"</string>
     <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"ஒலியடக்கு"</string>
     <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"ஒலியடக்க தட்டவும்"</string>
-    <!-- no translation found for keyboard_shortcut_group_applications_browser (6535007304687100909) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_contacts (2750702518068326356) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_email (4229037666415353683) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_sms (3523799286376321137) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_music (2051507523525651067) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_calendar (3571770335653387606) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_calculator (6753209559716091507) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_maps (7950000659522589471) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications (3010389163951364798) -->
-    <skip />
+    <string name="keyboard_shortcut_group_applications_browser" msgid="6535007304687100909">"உலாவி"</string>
+    <string name="keyboard_shortcut_group_applications_contacts" msgid="2750702518068326356">"தொடர்புகள்"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="4229037666415353683">"மின்னஞ்சல்"</string>
+    <string name="keyboard_shortcut_group_applications_sms" msgid="3523799286376321137">"மெசேஜ்"</string>
+    <string name="keyboard_shortcut_group_applications_music" msgid="2051507523525651067">"இசை"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="3571770335653387606">"கேலெண்டர்"</string>
+    <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"கால்குலேட்டர்"</string>
+    <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"Maps"</string>
+    <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"ஆப்ஸ்"</string>
+    <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"உங்கள் கைரேகைகளை இனி அடையாளம் காண முடியாது. கைரேகை அன்லாக் அம்சத்தை மீண்டும் அமையுங்கள்."</string>
 </resources>

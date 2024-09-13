@@ -215,6 +215,7 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
         }
         int w = measureDimension(widthMeasureSpec, mDocument.getWidth());
         int h = measureDimension(heightMeasureSpec, mDocument.getHeight());
+        mDocument.getDocument().invalidateMeasure();
 
         if (!USE_VIEW_AREA_CLICK) {
             if (mDocument.getDocument().getContentSizing() == RootContentBehavior.SIZING_SCALE) {
@@ -235,6 +236,8 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
         if (mDocument == null) {
             return;
         }
+        mARContext.setAnimationEnabled(true);
+        mARContext.currentTime = System.currentTimeMillis();
         mARContext.setDebug(mDebug);
         mARContext.useCanvas(canvas);
         mARContext.mWidth = getWidth();

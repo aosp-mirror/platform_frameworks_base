@@ -53,6 +53,7 @@ import android.os.Bundle;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.ArrayMap;
+import android.util.IntArray;
 import android.util.PrintWriterPrinter;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
@@ -938,6 +939,46 @@ final class BroadcastRecord extends Binder {
             type |= BROADCAST_TYPE_INITIAL_STICKY;
         }
         return type;
+    }
+
+    int[] calculateTypesForLogging() {
+        final IntArray types = new IntArray();
+        if (isForeground()) {
+            types.add(BROADCAST_TYPE_FOREGROUND);
+        } else {
+            types.add(BROADCAST_TYPE_BACKGROUND);
+        }
+        if (alarm) {
+            types.add(BROADCAST_TYPE_ALARM);
+        }
+        if (interactive) {
+            types.add(BROADCAST_TYPE_INTERACTIVE);
+        }
+        if (ordered) {
+            types.add(BROADCAST_TYPE_ORDERED);
+        }
+        if (prioritized) {
+            types.add(BROADCAST_TYPE_PRIORITIZED);
+        }
+        if (resultTo != null) {
+            types.add(BROADCAST_TYPE_RESULT_TO);
+        }
+        if (deferUntilActive) {
+            types.add(BROADCAST_TYPE_DEFERRABLE_UNTIL_ACTIVE);
+        }
+        if (pushMessage) {
+            types.add(BROADCAST_TYPE_PUSH_MESSAGE);
+        }
+        if (pushMessageOverQuota) {
+            types.add(BROADCAST_TYPE_PUSH_MESSAGE_OVER_QUOTA);
+        }
+        if (sticky) {
+            types.add(BROADCAST_TYPE_STICKY);
+        }
+        if (initialSticky) {
+            types.add(BROADCAST_TYPE_INITIAL_STICKY);
+        }
+        return types.toArray();
     }
 
     public BroadcastRecord maybeStripForHistory() {

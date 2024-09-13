@@ -53,7 +53,21 @@ enum class CommunalUiEvent(private val id: Int) : UiEventEnum {
     @UiEvent(doc = "User performs a swipe up gesture from bottom to enter bouncer")
     COMMUNAL_HUB_SWIPE_UP_TO_BOUNCER(1573),
     @UiEvent(doc = "User performs a swipe down gesture from top to enter shade")
-    COMMUNAL_HUB_SWIPE_DOWN_TO_SHADE(1574);
+    COMMUNAL_HUB_SWIPE_DOWN_TO_SHADE(1574),
+    @UiEvent(doc = "User starts the swipe gesture to enter the Communal Hub from Dream")
+    DREAM_TO_COMMUNAL_HUB_SWIPE_START(1860),
+    @UiEvent(doc = "User finishes the swipe gesture to enter the Communal Hub from Dream")
+    DREAM_TO_COMMUNAL_HUB_SWIPE_FINISH(1861),
+    @UiEvent(doc = "User cancels the swipe gesture to enter the Communal Hub from Dream")
+    DREAM_TO_COMMUNAL_HUB_SWIPE_CANCEL(1862),
+    @UiEvent(doc = "User starts the swipe gesture to exit the Communal Hub to go to Dream")
+    COMMUNAL_HUB_TO_DREAM_SWIPE_START(1863),
+    @UiEvent(doc = "User finishes the swipe gesture to exit the Communal Hub to go to Dream")
+    COMMUNAL_HUB_TO_DREAM_SWIPE_FINISH(1864),
+    @UiEvent(doc = "User cancels the swipe gesture to exit the Communal Hub to go to Dream")
+    COMMUNAL_HUB_TO_DREAM_SWIPE_CANCEL(1865),
+    @UiEvent(doc = "A transition from Dream to Communal Hub starts due to dream awakening")
+    DREAM_TO_COMMUNAL_HUB_DREAM_AWAKE_START(1866);
 
     override fun getId(): Int {
         return id

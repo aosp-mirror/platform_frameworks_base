@@ -1,56 +1,19 @@
 {
   "presubmit": [
     {
-      "name": "CtsAccessibilityServiceTestCases",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
+      "name": "CtsAccessibilityServiceTestCases"
     },
     {
-      "name": "CtsAccessibilityTestCases",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
+      "name": "CtsAccessibilityTestCases"
     },
     {
-      "name": "CtsUiAutomationTestCases",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
+      "name": "CtsUiAutomationTestCases"
     },
     {
-      "name": "FrameworksServicesTests",
-      "options": [
-        {
-          "include-filter": "com.android.server.accessibility"
-        },
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
+      "name": "FrameworksServicesTests_accessibility"
     },
     {
-      "name": "FrameworksCoreTests",
-      "options": [
-        {
-          "include-filter": "android.accessibilityservice"
-        },
-        {
-          "include-filter": "android.view.accessibility"
-        },
-        {
-          "include-filter": "com.android.internal.accessibility"
-        },
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
+      "name": "FrameworksCoreTests_accessibility"
     }
   ],
   "postsubmit": [
@@ -67,26 +30,10 @@
       "name": "CtsUiAutomationTestCases"
     },
     {
-      "name": "FrameworksServicesTests",
-      "options": [
-        {
-          "include-filter": "com.android.server.accessibility"
-        }
-      ]
+      "name": "FrameworksServicesTests_accessibility"
     },
     {
-      "name": "FrameworksCoreTests",
-      "options": [
-        {
-          "include-filter": "android.accessibilityservice"
-        },
-        {
-          "include-filter": "android.view.accessibility"
-        },
-        {
-          "include-filter": "com.android.internal.accessibility"
-        }
-      ]
+      "name": "FrameworksCoreTests_accessibility"
     }
   ]
 }

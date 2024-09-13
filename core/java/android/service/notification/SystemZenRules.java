@@ -129,10 +129,7 @@ public final class SystemZenRules {
         }
         sb.append(daysSummary);
         sb.append(context.getString(R.string.zen_mode_trigger_summary_divider_text));
-        sb.append(context.getString(
-                R.string.zen_mode_trigger_summary_range_symbol_combination,
-                timeString(context, schedule.startHour, schedule.startMinute),
-                timeString(context, schedule.endHour, schedule.endMinute)));
+        sb.append(getTimeSummary(context, schedule));
 
         return sb.toString();
     }
@@ -142,7 +139,7 @@ public final class SystemZenRules {
      * adjacent days grouped together ("Sun-Wed" instead of "Sun,Mon,Tue,Wed").
      */
     @Nullable
-    private static String getShortDaysSummary(Context context, @NonNull ScheduleInfo schedule) {
+    public static String getShortDaysSummary(Context context, @NonNull ScheduleInfo schedule) {
         // Compute a list of days with contiguous days grouped together, for example: "Sun-Thu" or
         // "Sun-Mon,Wed,Fri"
         final int[] days = schedule.days;
@@ -222,6 +219,14 @@ public final class SystemZenRules {
             }
         }
         return null;
+    }
+
+    /** Returns the time part of a {@link ScheduleInfo}, e.g. {@code 9:00-17:00}. */
+    public static String getTimeSummary(Context context, @NonNull ScheduleInfo schedule) {
+        return context.getString(
+                R.string.zen_mode_trigger_summary_range_symbol_combination,
+                timeString(context, schedule.startHour, schedule.startMinute),
+                timeString(context, schedule.endHour, schedule.endMinute));
     }
 
     /**

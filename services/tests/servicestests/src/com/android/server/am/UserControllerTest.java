@@ -19,6 +19,8 @@ package com.android.server.am;
 import static android.Manifest.permission.INTERACT_ACROSS_PROFILES;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
+import static android.app.ActivityManager.STOP_USER_ON_SWITCH_TRUE;
+import static android.app.ActivityManager.STOP_USER_ON_SWITCH_FALSE;
 import static android.app.ActivityManagerInternal.ALLOW_FULL_ONLY;
 import static android.app.ActivityManagerInternal.ALLOW_NON_FULL;
 import static android.app.ActivityManagerInternal.ALLOW_NON_FULL_IN_PROFILE;
@@ -53,6 +55,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeFalse;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
@@ -87,6 +90,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IRemoteCallback;
+import android.os.IpcDataCache;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManagerInternal;
@@ -103,6 +107,7 @@ import android.view.Display;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.widget.LockPatternUtils;
+import com.android.server.AlarmManagerInternal;
 import com.android.server.FgThread;
 import com.android.server.SystemService;
 import com.android.server.am.UserState.KeyEvictedCallback;
@@ -122,6 +127,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -141,7 +147,6 @@ import java.util.stream.Stream;
  */
 @SmallTest
 @Presubmit
-
 public class UserControllerTest {
     // Use big enough user id to avoid picking up already active user id.
     private static final int TEST_USER_ID = 100;
@@ -193,6 +198,9 @@ public class UserControllerTest {
     @Before
     public void setUp() throws Exception {
         runWithDexmakerShareClassLoader(() -> {
+            // Disable binder caches in this process.
+            IpcDataCache.disableForTestMode();
+
             mInjector = spy(new TestInjector(getInstrumentation().getTargetContext()));
             doNothing().when(mInjector).clearAllLockedTasks(anyString());
             doNothing().when(mInjector).startHomeActivity(anyInt(), anyString());
@@ -201,7 +209,8 @@ public class UserControllerTest {
             doNothing().when(mInjector).systemServiceManagerOnUserStopped(anyInt());
             doNothing().when(mInjector).systemServiceManagerOnUserCompletedEvent(
                     anyInt(), anyInt());
-            doNothing().when(mInjector).activityManagerForceStopPackage(anyInt(), anyString());
+            doNothing().when(mInjector).activityManagerForceStopUserPackages(anyInt(),
+                    anyString(), anyBoolean());
             doNothing().when(mInjector).activityManagerOnUserStopped(anyInt());
             doNothing().when(mInjector).clearBroadcastQueueForUser(anyInt());
             doNothing().when(mInjector).taskSupervisorRemoveUser(anyInt());
@@ -588,6 +597,7 @@ public class UserControllerTest {
     @Test
     public void testScheduleStopOfBackgroundUser_switch() {
         mSetFlagsRule.enableFlags(android.multiuser.Flags.FLAG_SCHEDULE_STOP_OF_BACKGROUND_USER);
+        assumeFalse(UserManager.isVisibleBackgroundUsersEnabled());
 
         mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
                 /* maxRunningUsers= */ 10, /* delayUserDataLocking= */ false,
@@ -637,6 +647,7 @@ public class UserControllerTest {
     @Test
     public void testScheduleStopOfBackgroundUser_startInBackground() throws Exception {
         mSetFlagsRule.enableFlags(android.multiuser.Flags.FLAG_SCHEDULE_STOP_OF_BACKGROUND_USER);
+        assumeFalse(UserManager.isVisibleBackgroundUsersEnabled());
 
         mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
                 /* maxRunningUsers= */ 10, /* delayUserDataLocking= */ false,
@@ -676,6 +687,7 @@ public class UserControllerTest {
     @Test
     public void testScheduleStopOfBackgroundUser_rescheduleWhenGuest() throws Exception {
         mSetFlagsRule.enableFlags(android.multiuser.Flags.FLAG_SCHEDULE_STOP_OF_BACKGROUND_USER);
+        assumeFalse(UserManager.isVisibleBackgroundUsersEnabled());
 
         mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
                 /* maxRunningUsers= */ 10, /* delayUserDataLocking= */ false,
@@ -725,6 +737,40 @@ public class UserControllerTest {
         assertAndProcessScheduledStopBackgroundUser(false, TEST_USER_ID2);
         assertEquals(Arrays.asList(SYSTEM_USER_ID, TEST_USER_ID2),
                 mUserController.getRunningUsersLU());
+    }
+
+    /** Test scheduling stopping of background users - reschedule if user with a scheduled alarm. */
+    @Test
+    public void testScheduleStopOfBackgroundUser_rescheduleIfAlarm() throws Exception {
+        mSetFlagsRule.enableFlags(android.multiuser.Flags.FLAG_SCHEDULE_STOP_OF_BACKGROUND_USER);
+        assumeFalse(UserManager.isVisibleBackgroundUsersEnabled());
+
+        mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
+                /* maxRunningUsers= */ 10, /* delayUserDataLocking= */ false,
+                /* backgroundUserScheduledStopTimeSecs= */ 2);
+
+        setUpAndStartUserInBackground(TEST_USER_ID);
+        assertEquals(newHashSet(SYSTEM_USER_ID, TEST_USER_ID),
+                new HashSet<>(mUserController.getRunningUsersLU()));
+
+        // Initially, the background user has an alarm that will fire soon. So don't stop the user.
+        when(mInjector.mAlarmManagerInternal.getNextAlarmTriggerTimeForUser(eq(TEST_USER_ID)))
+                .thenReturn(System.currentTimeMillis() + Duration.ofMinutes(2).toMillis());
+        assertAndProcessScheduledStopBackgroundUser(true, TEST_USER_ID);
+        assertEquals(newHashSet(SYSTEM_USER_ID, TEST_USER_ID),
+                new HashSet<>(mUserController.getRunningUsersLU()));
+
+        // Now, that alarm is gone and the next alarm isn't for a long time. Do stop the user.
+        when(mInjector.mAlarmManagerInternal.getNextAlarmTriggerTimeForUser(eq(TEST_USER_ID)))
+                .thenReturn(System.currentTimeMillis() + Duration.ofDays(1).toMillis());
+        assertAndProcessScheduledStopBackgroundUser(true, TEST_USER_ID);
+        assertEquals(newHashSet(SYSTEM_USER_ID),
+                new HashSet<>(mUserController.getRunningUsersLU()));
+
+        // No-one is scheduled to stop anymore.
+        assertAndProcessScheduledStopBackgroundUser(false, null);
+        verify(mInjector.mAlarmManagerInternal, never())
+                .getNextAlarmTriggerTimeForUser(eq(SYSTEM_USER_ID));
     }
 
     /**
@@ -935,6 +981,61 @@ public class UserControllerTest {
                 SYSTEM_USER_ID, PROFILE1_ID, PROFILE2_ID, FG_USER_ID, PARENT_ID),
                 new HashSet<>(mUserController.getRunningUsersLU()));
     }
+
+    @Test
+    public void testEarlyPackageKillEnabledForUserSwitch_enabled() {
+        mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
+                /* maxRunningUsers= */ 4, /* delayUserDataLocking= */ true,
+                /* backgroundUserScheduledStopTimeSecs= */ -1);
+
+        assertTrue(mUserController
+                .isEarlyPackageKillEnabledForUserSwitch(TEST_USER_ID, TEST_USER_ID1));
+    }
+
+    @Test
+    public void testEarlyPackageKillEnabledForUserSwitch_withoutDelayUserDataLocking() {
+        mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
+                /* maxRunningUsers= */ 4, /* delayUserDataLocking= */ false,
+                /* backgroundUserScheduledStopTimeSecs= */ -1);
+
+        assertFalse(mUserController
+                .isEarlyPackageKillEnabledForUserSwitch(TEST_USER_ID, TEST_USER_ID1));
+    }
+
+    @Test
+    public void testEarlyPackageKillEnabledForUserSwitch_withPrevSystemUser() {
+        mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
+                /* maxRunningUsers= */ 4, /* delayUserDataLocking= */ true,
+                /* backgroundUserScheduledStopTimeSecs= */ -1);
+
+        assertFalse(mUserController
+                .isEarlyPackageKillEnabledForUserSwitch(SYSTEM_USER_ID, TEST_USER_ID1));
+    }
+
+    @Test
+    public void testEarlyPackageKillEnabledForUserSwitch_stopUserOnSwitchModeOn() {
+        mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
+                /* maxRunningUsers= */ 4, /* delayUserDataLocking= */ false,
+                /* backgroundUserScheduledStopTimeSecs= */ -1);
+
+        mUserController.setStopUserOnSwitch(STOP_USER_ON_SWITCH_TRUE);
+
+        assertTrue(mUserController
+                .isEarlyPackageKillEnabledForUserSwitch(TEST_USER_ID, TEST_USER_ID1));
+    }
+
+    @Test
+    public void testEarlyPackageKillEnabledForUserSwitch_stopUserOnSwitchModeOff() {
+        mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
+                /* maxRunningUsers= */ 4, /* delayUserDataLocking= */ true,
+                /* backgroundUserScheduledStopTimeSecs= */ -1);
+
+        mUserController.setStopUserOnSwitch(STOP_USER_ON_SWITCH_FALSE);
+
+        assertFalse(mUserController
+                .isEarlyPackageKillEnabledForUserSwitch(TEST_USER_ID, TEST_USER_ID1));
+    }
+
 
     /**
      * Test that, in getRunningUsersLU, parents come after their profile, even if the profile was
@@ -1689,6 +1790,7 @@ public class UserControllerTest {
         private final WindowManagerService mWindowManagerMock;
         private final ActivityTaskManagerInternal mActivityTaskManagerInternal;
         private final PowerManagerInternal mPowerManagerInternal;
+        private final AlarmManagerInternal mAlarmManagerInternal;
         private final KeyguardManager mKeyguardManagerMock;
         private final LockPatternUtils mLockPatternUtilsMock;
 
@@ -1711,6 +1813,7 @@ public class UserControllerTest {
             mActivityTaskManagerInternal = mock(ActivityTaskManagerInternal.class);
             mStorageManagerMock = mock(IStorageManager.class);
             mPowerManagerInternal = mock(PowerManagerInternal.class);
+            mAlarmManagerInternal = mock(AlarmManagerInternal.class);
             mKeyguardManagerMock = mock(KeyguardManager.class);
             when(mKeyguardManagerMock.isDeviceSecure(anyInt())).thenReturn(true);
             mLockPatternUtilsMock = mock(LockPatternUtils.class);
@@ -1778,6 +1881,11 @@ public class UserControllerTest {
         @Override
         PowerManagerInternal getPowerManagerInternal() {
             return mPowerManagerInternal;
+        }
+
+        @Override
+        AlarmManagerInternal getAlarmManagerInternal() {
+            return mAlarmManagerInternal;
         }
 
         @Override

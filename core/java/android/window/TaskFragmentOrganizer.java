@@ -34,6 +34,7 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.view.RemoteAnimationDefinition;
 import android.view.WindowManager;
 
 import com.android.window.flags.Flags;
@@ -66,6 +67,23 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
      * {@link TaskFragmentTransaction.Change#getErrorBundle()}.
      */
     public static final String KEY_ERROR_CALLBACK_OP_TYPE = "operation_type";
+
+    /**
+     * Key to bundle {@link TaskFragmentInfo}s from the system in
+     * {@link #registerOrganizer(boolean, Bundle)}
+     *
+     * @hide
+     */
+    public static final String KEY_RESTORE_TASK_FRAGMENTS_INFO = "key_restore_task_fragments_info";
+
+    /**
+     * Key to bundle {@link TaskFragmentParentInfo} from the system in
+     * {@link #registerOrganizer(boolean, Bundle)}
+     *
+     * @hide
+     */
+    public static final String KEY_RESTORE_TASK_FRAGMENT_PARENT_INFO =
+            "key_restore_task_fragment_parent_info";
 
     /**
      * No change set.
@@ -165,17 +183,12 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
      */
     @CallSuper
     public void registerOrganizer() {
-        // TODO(b/302420256) point to registerOrganizer(boolean) when flag is removed.
-        try {
-            getController().registerOrganizer(mInterface, false /* isSystemOrganizer */);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        registerOrganizer(false /* isSystemOrganizer */, null /* outSavedState */);
     }
 
     /**
      * Registers a {@link TaskFragmentOrganizer} to manage TaskFragments.
-     *
+     * <p>
      * Registering a system organizer requires MANAGE_ACTIVITY_TASKS permission, and the organizer
      * will have additional system capabilities, including: (1) it will receive SurfaceControl for
      * the organized TaskFragment, and (2) it needs to update the
@@ -187,8 +200,31 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
     @RequiresPermission(value = "android.permission.MANAGE_ACTIVITY_TASKS", conditional = true)
     @FlaggedApi(Flags.FLAG_TASK_FRAGMENT_SYSTEM_ORGANIZER_FLAG)
     public void registerOrganizer(boolean isSystemOrganizer) {
+        registerOrganizer(isSystemOrganizer, null /* outSavedState */);
+    }
+
+    /**
+     * Registers a {@link TaskFragmentOrganizer} to manage TaskFragments.
+     * <p>
+     * Registering a system organizer requires MANAGE_ACTIVITY_TASKS permission, and the organizer
+     * will have additional system capabilities, including: (1) it will receive SurfaceControl for
+     * the organized TaskFragment, and (2) it needs to update the
+     * {@link android.view.SurfaceControl} following the window change accordingly.
+     *
+     * @param isSystemOrganizer  If it is a system organizer
+     * @param outSavedState      Returning the saved state (if any) that previously saved. This is
+     *                           useful when retrieve the state from the same TaskFragmentOrganizer
+     *                           that was killed by the system (e.g. to reclaim memory). Note that
+     *                           the save state is dropped and unable to retrieve once the system
+     *                           restarts or the organizer is unregistered.
+     * @hide
+     */
+    @CallSuper
+    @RequiresPermission(value = "android.permission.MANAGE_ACTIVITY_TASKS", conditional = true)
+    public void registerOrganizer(boolean isSystemOrganizer, @Nullable Bundle outSavedState) {
         try {
-            getController().registerOrganizer(mInterface, isSystemOrganizer);
+            getController().registerOrganizer(mInterface, isSystemOrganizer,
+                    outSavedState != null ? outSavedState : new Bundle());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -201,6 +237,58 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
     public void unregisterOrganizer() {
         try {
             getController().unregisterOrganizer(mInterface);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Registers remote animations per transition type for the organizer. It will override the
+     * animations if the transition only contains windows that belong to the organized
+     * TaskFragments, and at least one of the transition window is embedded (not filling the Task).
+     * @hide
+     */
+    @CallSuper
+    public void registerRemoteAnimations(@NonNull RemoteAnimationDefinition definition) {
+        try {
+            getController().registerRemoteAnimations(mInterface, definition);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Unregisters remote animations per transition type for the organizer.
+     * @hide
+     */
+    @CallSuper
+    public void unregisterRemoteAnimations() {
+        try {
+            getController().unregisterRemoteAnimations(mInterface);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Saves the state in the system, where the state can be restored if the process of
+     * the TaskFragmentOrganizer is restarted.
+     *
+     * @hide
+     *
+     * @param state the state to save.
+     */
+    public void setSavedState(@NonNull Bundle state) {
+        if (!Flags.aeBackStackRestore()) {
+            return;
+        }
+
+        if (state.getSize() > 200000) {
+            throw new IllegalArgumentException("Saved state too large, " + state.getSize());
+        }
+
+        try {
+            getController().setSavedState(mInterface, state);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

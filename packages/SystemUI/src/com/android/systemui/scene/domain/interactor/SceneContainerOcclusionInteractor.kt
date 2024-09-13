@@ -118,8 +118,11 @@ constructor(
         get() =
             when (this) {
                 is ObservableTransitionState.Idle -> currentScene.canBeOccluded
-                is ObservableTransitionState.Transition ->
+                is ObservableTransitionState.Transition.ChangeScene ->
                     fromScene.canBeOccluded && toScene.canBeOccluded
+                is ObservableTransitionState.Transition.ReplaceOverlay,
+                is ObservableTransitionState.Transition.ShowOrHideOverlay ->
+                    TODO("b/359173565: Handle overlay transitions")
             }
 
     /**
@@ -134,9 +137,7 @@ constructor(
                 Scenes.Communal -> true
                 Scenes.Gone -> true
                 Scenes.Lockscreen -> true
-                Scenes.NotificationsShade -> false
                 Scenes.QuickSettings -> false
-                Scenes.QuickSettingsShade -> false
                 Scenes.Shade -> false
                 else -> error("SceneKey \"$this\" doesn't have a mapping for canBeOccluded!")
             }

@@ -58,7 +58,7 @@ public class FloatsToPath {
                 break;
                 case PathData.CONIC: {
                     i += 3;
-                    if (Build.VERSION.SDK_INT >= 34) {
+                    if (Build.VERSION.SDK_INT >= 34) { // REMOVE IN PLATFORM
                         path.conicTo(
                                 floatPath[i + 0], floatPath[i + 1],
                                 floatPath[i + 2], floatPath[i + 3],

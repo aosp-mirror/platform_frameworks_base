@@ -24,6 +24,7 @@ import android.content.pm.ActivityInfo.ScreenOrientation;
 import android.content.res.Configuration;
 import android.widget.Toast;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.window.flags.Flags;
 
 /**
@@ -32,7 +33,8 @@ import com.android.window.flags.Flags;
 class AppCompatCameraPolicy {
 
     @Nullable
-    private final CameraStateMonitor mCameraStateMonitor;
+    @VisibleForTesting
+    final CameraStateMonitor mCameraStateMonitor;
     @Nullable
     private final ActivityRefresher mActivityRefresher;
     @Nullable
@@ -45,7 +47,7 @@ class AppCompatCameraPolicy {
         // Not checking DeviceConfig value here to allow enabling via DeviceConfig
         // without the need to restart the device.
         final boolean needsDisplayRotationCompatPolicy =
-                wmService.mLetterboxConfiguration.isCameraCompatTreatmentEnabledAtBuildTime();
+                wmService.mAppCompatConfiguration.isCameraCompatTreatmentEnabledAtBuildTime();
         final boolean needsCameraCompatFreeformPolicy = Flags.cameraCompatForFreeform()
                 && DesktopModeHelper.canEnterDesktopMode(wmService.mContext);
         if (needsDisplayRotationCompatPolicy || needsCameraCompatFreeformPolicy) {
@@ -122,6 +124,9 @@ class AppCompatCameraPolicy {
     }
 
     void start() {
+        if (mDisplayRotationCompatPolicy != null) {
+            mDisplayRotationCompatPolicy.start();
+        }
         if (mCameraCompatFreeformPolicy != null) {
             mCameraCompatFreeformPolicy.start();
         }
@@ -150,6 +155,10 @@ class AppCompatCameraPolicy {
         return mCameraCompatFreeformPolicy != null;
     }
 
+    boolean hasCameraStateMonitor() {
+        return mCameraStateMonitor != null;
+    }
+
     @ScreenOrientation
     int getOrientation() {
         return mDisplayRotationCompatPolicy != null
@@ -157,6 +166,9 @@ class AppCompatCameraPolicy {
                 : SCREEN_ORIENTATION_UNSPECIFIED;
     }
 
+    /**
+     * @return {@code true} if the Camera is active for the provided {@link ActivityRecord}.
+     */
     boolean isCameraActive(@NonNull ActivityRecord activity, boolean mustBeFullscreen) {
         return mDisplayRotationCompatPolicy != null
                 && mDisplayRotationCompatPolicy.isCameraActive(activity, mustBeFullscreen);
@@ -170,4 +182,13 @@ class AppCompatCameraPolicy {
         return null;
     }
 
+    /**
+     * Whether we should apply the min aspect ratio per-app override only when an app is connected
+     * to the camera.
+     */
+    boolean shouldOverrideMinAspectRatioForCamera(@NonNull ActivityRecord activityRecord) {
+        return isCameraActive(activityRecord, /* mustBeFullscreen= */ true)
+                && activityRecord.mAppCompatController.getAppCompatCameraOverrides()
+                        .isOverrideMinAspectRatioForCameraEnabled();
+    }
 }

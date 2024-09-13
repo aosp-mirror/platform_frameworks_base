@@ -51,6 +51,7 @@ import static android.hardware.SensorPrivacyManager.StateTypes.ENABLED_EXCEPT_AL
 import static android.hardware.SensorPrivacyManager.TOGGLE_TYPE_HARDWARE;
 import static android.hardware.SensorPrivacyManager.TOGGLE_TYPE_SOFTWARE;
 import static android.os.UserHandle.USER_NULL;
+import static android.os.UserHandle.getCallingUserId;
 import static android.service.SensorPrivacyIndividualEnabledSensorProto.UNKNOWN;
 
 import static com.android.internal.util.FrameworkStatsLog.PRIVACY_SENSOR_TOGGLE_INTERACTION;
@@ -130,6 +131,7 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.KeepForWeakReference;
 import com.android.internal.camera.flags.Flags;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.os.BackgroundThread;
@@ -186,6 +188,7 @@ public final class SensorPrivacyService extends SystemService {
     private final TelephonyManager mTelephonyManager;
     private final PackageManagerInternal mPackageManagerInternal;
     private final NotificationManager mNotificationManager;
+    private final UserManager mUserManager;
 
     private CameraPrivacyLightController mCameraPrivacyLightController;
 
@@ -213,6 +216,7 @@ public final class SensorPrivacyService extends SystemService {
         mTelephonyManager = context.getSystemService(TelephonyManager.class);
         mPackageManagerInternal = getLocalService(PackageManagerInternal.class);
         mNotificationManager = mContext.getSystemService(NotificationManager.class);
+        mUserManager = context.getSystemService(UserManager.class);
         mSensorPrivacyServiceImpl = new SensorPrivacyServiceImpl();
         for (String entry : SystemConfig.getInstance().getCameraPrivacyAllowlist()) {
             mCameraPrivacyAllowlist.add(entry);
@@ -378,14 +382,23 @@ public final class SensorPrivacyService extends SystemService {
         public void onUserRestrictionsChanged(int userId, Bundle newRestrictions,
                 Bundle prevRestrictions) {
             // Reset sensor privacy when restriction is added
+            // Note: isValidCallingUser needs to be called before resetting sensor privacy
+            // because DISALLOW_CAMERA_TOGGLE and DISALLOW_MICROPHONE_TOGGLE are applied on
+            // visible background users in Automotive's Multi Display configuration but we don't
+            // allow sensor privacy to be set on a visible background user.
             if (!prevRestrictions.getBoolean(UserManager.DISALLOW_CAMERA_TOGGLE)
                     && newRestrictions.getBoolean(UserManager.DISALLOW_CAMERA_TOGGLE)) {
-                setToggleSensorPrivacyUnchecked(TOGGLE_TYPE_SOFTWARE, userId, OTHER, CAMERA, false);
+                if (isValidCallingUser(userId)) {
+                    setToggleSensorPrivacyUnchecked(TOGGLE_TYPE_SOFTWARE, userId, OTHER, CAMERA,
+                            false);
+                }
             }
             if (!prevRestrictions.getBoolean(UserManager.DISALLOW_MICROPHONE_TOGGLE)
                     && newRestrictions.getBoolean(UserManager.DISALLOW_MICROPHONE_TOGGLE)) {
-                setToggleSensorPrivacyUnchecked(TOGGLE_TYPE_SOFTWARE, userId, OTHER, MICROPHONE,
-                        false);
+                if (isValidCallingUser(userId)) {
+                    setToggleSensorPrivacyUnchecked(TOGGLE_TYPE_SOFTWARE, userId, OTHER, MICROPHONE,
+                            false);
+                }
             }
         }
 
@@ -778,6 +791,10 @@ public final class SensorPrivacyService extends SystemService {
         @Override
         public void setSensorPrivacy(boolean enable) {
             enforceManageSensorPrivacyPermission();
+
+            // Enforce valid calling user on devices that enable visible background users.
+            enforceValidCallingUser(getCallingUserId());
+
             mSensorPrivacyStateController.setAllSensorState(enable);
         }
 
@@ -794,10 +811,14 @@ public final class SensorPrivacyService extends SystemService {
                         + " enable=" + enable
                         + ")");
             }
+
             enforceManageSensorPrivacyPermission();
             if (userId == UserHandle.USER_CURRENT) {
                 userId = mCurrentUser;
             }
+
+            // Enforce valid calling user on devices that enable visible background users.
+            enforceValidCallingUser(userId);
 
             if (!canChangeToggleSensorPrivacy(userId, sensor)) {
                 return;
@@ -829,6 +850,9 @@ public final class SensorPrivacyService extends SystemService {
             if (userId == UserHandle.USER_CURRENT) {
                 userId = mCurrentUser;
             }
+
+            // Enforce valid calling user on devices that enable visible background users.
+            enforceValidCallingUser(userId);
 
             if (!canChangeToggleSensorPrivacy(userId, sensor)) {
                 return;
@@ -1148,6 +1172,42 @@ public final class SensorPrivacyService extends SystemService {
                     setToggleSensorPrivacy(userId2, source, sensor, enable);
                 }
             });
+        }
+
+        // This method enforces valid calling user on devices that enable visible background users.
+        // Only system user or current user or the user that belongs to the same profile group
+        // as the current user is permitted to toggle sensor privacy.
+        // Visible background users are not permitted to toggle sensor privacy.
+        private void enforceValidCallingUser(@UserIdInt int userId) {
+            if (!isValidCallingUser(userId)) {
+                throw new SecurityException("User " + userId
+                        + " is not permitted to toggle sensor privacy");
+            }
+        }
+
+        private boolean isValidCallingUser(@UserIdInt int userId) {
+            // Check whether visible background users are enabled.
+            // Visible background users are non current but can have UI access.
+            // The main use case for visible background users is the passenger in Automotive's
+            // Multi-Display configuration.
+            if (!UserManager.isVisibleBackgroundUsersEnabled()) {
+                return true;
+            }
+
+            if (userId == UserHandle.USER_SYSTEM || userId == mCurrentUser) {
+                return true;
+            }
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                if (mUserManager.isSameProfileGroup(userId, mCurrentUser)) {
+                    return true;
+                }
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+
+            return false;
         }
 
         /**
@@ -1944,8 +2004,12 @@ public final class SensorPrivacyService extends SystemService {
     }
 
     private class CallStateHelper {
-        private OutgoingEmergencyStateCallback mEmergencyStateCallback;
-        private CallStateCallback mCallStateCallback;
+        // TelephonyCallback instances are only weakly referenced when registered, so we need
+        // to ensure these fields are kept during optimization to preserve lifecycle semantics.
+        @KeepForWeakReference
+        private final OutgoingEmergencyStateCallback mEmergencyStateCallback;
+        @KeepForWeakReference
+        private final CallStateCallback mCallStateCallback;
 
         private boolean mIsInEmergencyCall;
         private boolean mMicUnmutedForEmergencyCall;

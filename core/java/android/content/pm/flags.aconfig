@@ -237,6 +237,8 @@ flag {
     bug: "307327678"
 }
 
+# This flag is enabled since V but not a MUST requirement in CDD yet, so it needs to stay around
+# for now and any code working with it should keep checking the flag.
 flag {
     name: "restrict_nonpreloads_system_shareduids"
     namespace: "package_manager_service"
@@ -283,4 +285,12 @@ flag {
     namespace: "package_manager_service"
     description: "Feature flag to enable the feature to retrieve package info without installation with a file descriptor."
     bug: "340879905"
+}
+
+flag {
+    name: "get_packages_from_launcher_apps"
+    namespace: "package_manager_service"
+    description: "Feature flag to provide the new methods within launcher apps class to get packages."
+    bug: "363324203"
+    is_fixed_read_only: true
 }

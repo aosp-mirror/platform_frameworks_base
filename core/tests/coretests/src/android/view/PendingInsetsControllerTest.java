@@ -37,7 +37,7 @@ import android.platform.test.annotations.Presubmit;
 import android.view.WindowInsetsController.OnControllableInsetsChangedListener;
 import android.view.animation.LinearInterpolator;
 
-import androidx.test.runner.AndroidJUnit4;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;

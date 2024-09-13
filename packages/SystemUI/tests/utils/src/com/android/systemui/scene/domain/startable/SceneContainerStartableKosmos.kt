@@ -18,17 +18,20 @@ package com.android.systemui.scene.domain.startable
 
 import com.android.internal.logging.uiEventLogger
 import com.android.systemui.authentication.domain.interactor.authenticationInteractor
+import com.android.systemui.bouncer.domain.interactor.alternateBouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.bouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.simBouncerInteractor
 import com.android.systemui.classifier.falsingCollector
 import com.android.systemui.classifier.falsingManager
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryFaceAuthInteractor
+import com.android.systemui.deviceentry.domain.interactor.deviceEntryHapticsInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteractor
+import com.android.systemui.haptics.msdl.msdlPlayer
+import com.android.systemui.haptics.vibratorHelper
 import com.android.systemui.keyguard.dismissCallbackRegistry
 import com.android.systemui.keyguard.domain.interactor.keyguardEnabledInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
-import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.windowManagerLockscreenVisibilityInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
@@ -46,16 +49,17 @@ import com.android.systemui.statusbar.notification.stack.domain.interactor.heads
 import com.android.systemui.statusbar.notificationShadeWindowController
 import com.android.systemui.statusbar.phone.centralSurfacesOptional
 import com.android.systemui.statusbar.policy.domain.interactor.deviceProvisioningInteractor
+import com.android.systemui.statusbar.sysuiStatusBarStateController
 
 val Kosmos.sceneContainerStartable by Fixture {
     SceneContainerStartable(
         applicationScope = testScope.backgroundScope,
         sceneInteractor = sceneInteractor,
         deviceEntryInteractor = deviceEntryInteractor,
+        deviceEntryHapticsInteractor = deviceEntryHapticsInteractor,
         deviceUnlockedInteractor = deviceUnlockedInteractor,
         bouncerInteractor = bouncerInteractor,
         keyguardInteractor = keyguardInteractor,
-        keyguardTransitionInteractor = keyguardTransitionInteractor,
         sysUiState = sysUiState,
         displayId = displayTracker.defaultDisplayId,
         sceneLogger = sceneLogger,
@@ -77,5 +81,9 @@ val Kosmos.sceneContainerStartable by Fixture {
         windowMgrLockscreenVisInteractor = windowManagerLockscreenVisibilityInteractor,
         keyguardEnabledInteractor = keyguardEnabledInteractor,
         dismissCallbackRegistry = dismissCallbackRegistry,
+        statusBarStateController = sysuiStatusBarStateController,
+        alternateBouncerInteractor = alternateBouncerInteractor,
+        vibratorHelper = vibratorHelper,
+        msdlPlayer = msdlPlayer,
     )
 }

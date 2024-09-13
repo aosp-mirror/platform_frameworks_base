@@ -23,7 +23,6 @@ import android.net.Uri
 import android.os.UserHandle
 import android.provider.Settings.SettingNotFoundException
 import com.android.app.tracing.TraceUtils.trace
-import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.settings.SettingsProxy.Companion.parseFloat
 import com.android.systemui.util.settings.SettingsProxy.Companion.parseFloatOrThrow
 import com.android.systemui.util.settings.SettingsProxy.Companion.parseLongOrThrow
@@ -46,8 +45,8 @@ import kotlinx.coroutines.withContext
  * instances, unifying setting related actions in one place.
  */
 interface UserSettingsProxy : SettingsProxy {
-    /** Returns that [UserTracker] this instance was constructed with. */
-    val userTracker: UserTracker
+    val currentUserProvider: SettingsProxy.CurrentUserIdProvider
+
     /** Returns the user id for the associated [ContentResolver]. */
     var userId: Int
         get() = getContentResolver().userId
@@ -64,7 +63,7 @@ interface UserSettingsProxy : SettingsProxy {
     fun getRealUserHandle(userHandle: Int): Int {
         return if (userHandle != UserHandle.USER_CURRENT) {
             userHandle
-        } else userTracker.userId
+        } else currentUserProvider.getUserId()
     }
 
     @WorkerThread
@@ -354,12 +353,12 @@ interface UserSettingsProxy : SettingsProxy {
      * @param name to look up in the table
      * @return the corresponding value, or null if not present
      */
-    override fun getString(name: String): String {
+    override fun getString(name: String): String? {
         return getStringForUser(name, userId)
     }
 
     /** See [getString]. */
-    fun getStringForUser(name: String, userHandle: Int): String
+    fun getStringForUser(name: String, userHandle: Int): String?
 
     /**
      * Store a name/value pair into the database. Values written by this method will be overridden
@@ -369,36 +368,36 @@ interface UserSettingsProxy : SettingsProxy {
      * @param value to associate with the name
      * @return true if the value was set, false on database errors
      */
-    fun putString(name: String, value: String, overrideableByRestore: Boolean): Boolean
+    fun putString(name: String, value: String?, overrideableByRestore: Boolean): Boolean
 
-    override fun putString(name: String, value: String): Boolean {
+    override fun putString(name: String, value: String?): Boolean {
         return putStringForUser(name, value, userId)
     }
 
     /** Similar implementation to [putString] for the specified [userHandle]. */
-    fun putStringForUser(name: String, value: String, userHandle: Int): Boolean
+    fun putStringForUser(name: String, value: String?, userHandle: Int): Boolean
 
     /** Similar implementation to [putString] for the specified [userHandle]. */
     fun putStringForUser(
         name: String,
-        value: String,
+        value: String?,
         tag: String?,
         makeDefault: Boolean,
         @UserIdInt userHandle: Int,
         overrideableByRestore: Boolean
     ): Boolean
 
-    override fun getInt(name: String, def: Int): Int {
-        return getIntForUser(name, def, userId)
+    override fun getInt(name: String, default: Int): Int {
+        return getIntForUser(name, default, userId)
     }
 
     /** Similar implementation to [getInt] for the specified [userHandle]. */
-    fun getIntForUser(name: String, def: Int, userHandle: Int): Int {
+    fun getIntForUser(name: String, default: Int, userHandle: Int): Int {
         val v = getStringForUser(name, userHandle)
         return try {
-            v.toInt()
+            v?.toInt() ?: default
         } catch (e: NumberFormatException) {
-            def
+            default
         }
     }
 
@@ -408,7 +407,7 @@ interface UserSettingsProxy : SettingsProxy {
     /** Similar implementation to [getInt] for the specified [userHandle]. */
     @Throws(SettingNotFoundException::class)
     fun getIntForUser(name: String, userHandle: Int): Int {
-        val v = getStringForUser(name, userHandle)
+        val v = getStringForUser(name, userHandle) ?: throw SettingNotFoundException(name)
         return try {
             v.toInt()
         } catch (e: NumberFormatException) {

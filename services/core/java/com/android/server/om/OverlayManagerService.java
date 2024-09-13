@@ -80,6 +80,7 @@ import android.util.EventLog;
 import android.util.Slog;
 import android.util.SparseArray;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.KeepForWeakReference;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.content.om.OverlayConfig;
@@ -297,12 +298,13 @@ public final class OverlayManagerService extends SystemService {
 
             restoreSettings();
 
-            // Wipe all shell overlays on boot, to recover from a potentially broken device
-            String shellPkgName = TextUtils.emptyIfNull(
-                    getContext().getString(android.R.string.config_systemShell));
-            mSettings.removeIf(overlayInfo -> overlayInfo.isFabricated
-                    && shellPkgName.equals(overlayInfo.packageName));
-
+            if (Build.IS_USER) {
+                // Wipe all shell overlays on boot, to recover from a potentially broken device
+                String shellPkgName = TextUtils.emptyIfNull(
+                        getContext().getString(android.R.string.config_systemShell));
+                mSettings.removeIf(overlayInfo -> overlayInfo.isFabricated
+                        && shellPkgName.equals(overlayInfo.packageName));
+            }
             initIfNeeded();
             onStartUser(UserHandle.USER_SYSTEM);
 
@@ -1180,6 +1182,7 @@ public final class OverlayManagerService extends SystemService {
         // intent, querying the PackageManagerService for the actual current
         // state may lead to contradictions within OMS. Better then to lag
         // behind until all pending intents have been processed.
+        @GuardedBy("itself")
         private final ArrayMap<String, PackageStateUsers> mCache = new ArrayMap<>();
         private final ArraySet<Integer> mInitializedUsers = new ArraySet<>();
 
@@ -1207,10 +1210,12 @@ public final class OverlayManagerService extends SystemService {
             }
 
             final ArrayMap<String, PackageState> userPackages = new ArrayMap<>();
-            for (int i = 0, n = mCache.size(); i < n; i++) {
-                final PackageStateUsers pkg = mCache.valueAt(i);
-                if (pkg.mInstalledUsers.contains(userId)) {
-                    userPackages.put(mCache.keyAt(i), pkg.mPackageState);
+            synchronized (mCache) {
+                for (int i = 0, n = mCache.size(); i < n; i++) {
+                    final PackageStateUsers pkg = mCache.valueAt(i);
+                    if (pkg.mInstalledUsers.contains(userId)) {
+                        userPackages.put(mCache.keyAt(i), pkg.mPackageState);
+                    }
                 }
             }
             return userPackages;
@@ -1220,7 +1225,11 @@ public final class OverlayManagerService extends SystemService {
         @Nullable
         public PackageState getPackageStateForUser(@NonNull final String packageName,
                 final int userId) {
-            final PackageStateUsers pkg = mCache.get(packageName);
+            final PackageStateUsers pkg;
+
+            synchronized (mCache) {
+                pkg = mCache.get(packageName);
+            }
             if (pkg != null && pkg.mInstalledUsers.contains(userId)) {
                 return pkg.mPackageState;
             }
@@ -1251,12 +1260,15 @@ public final class OverlayManagerService extends SystemService {
         @NonNull
         private PackageState addPackageUser(@NonNull final PackageState pkg,
                 final int user) {
-            PackageStateUsers pkgUsers = mCache.get(pkg.getPackageName());
-            if (pkgUsers == null) {
-                pkgUsers = new PackageStateUsers(pkg);
-                mCache.put(pkg.getPackageName(), pkgUsers);
-            } else {
-                pkgUsers.mPackageState = pkg;
+            PackageStateUsers pkgUsers;
+            synchronized (mCache) {
+                pkgUsers = mCache.get(pkg.getPackageName());
+                if (pkgUsers == null) {
+                    pkgUsers = new PackageStateUsers(pkg);
+                    mCache.put(pkg.getPackageName(), pkgUsers);
+                } else {
+                    pkgUsers.mPackageState = pkg;
+                }
             }
             pkgUsers.mInstalledUsers.add(user);
             return pkgUsers.mPackageState;
@@ -1265,18 +1277,24 @@ public final class OverlayManagerService extends SystemService {
 
         @NonNull
         private void removePackageUser(@NonNull final String packageName, final int user) {
-            final PackageStateUsers pkgUsers = mCache.get(packageName);
-            if (pkgUsers == null) {
-                return;
+            // synchronize should include the call to the other removePackageUser() method so that
+            // the access and modification happen under the same lock.
+            synchronized (mCache) {
+                final PackageStateUsers pkgUsers = mCache.get(packageName);
+                if (pkgUsers == null) {
+                    return;
+                }
+                removePackageUser(pkgUsers, user);
             }
-            removePackageUser(pkgUsers, user);
         }
 
         @NonNull
         private void removePackageUser(@NonNull final PackageStateUsers pkg, final int user) {
             pkg.mInstalledUsers.remove(user);
             if (pkg.mInstalledUsers.isEmpty()) {
-                mCache.remove(pkg.mPackageState.getPackageName());
+                synchronized (mCache) {
+                    mCache.remove(pkg.mPackageState.getPackageName());
+                }
             }
         }
 
@@ -1386,8 +1404,10 @@ public final class OverlayManagerService extends SystemService {
         public void forgetAllPackageInfos(final int userId) {
             // Iterate in reverse order since removing the package in all users will remove the
             // package from the cache.
-            for (int i = mCache.size() - 1; i >= 0; i--) {
-                removePackageUser(mCache.valueAt(i), userId);
+            synchronized (mCache) {
+                for (int i = mCache.size() - 1; i >= 0; i--) {
+                    removePackageUser(mCache.valueAt(i), userId);
+                }
             }
         }
 
@@ -1405,22 +1425,23 @@ public final class OverlayManagerService extends SystemService {
 
         public void dump(@NonNull final PrintWriter pw, @NonNull DumpState dumpState) {
             pw.println("AndroidPackage cache");
+            synchronized (mCache) {
+                if (!dumpState.isVerbose()) {
+                    pw.println(TAB1 + mCache.size() + " package(s)");
+                    return;
+                }
 
-            if (!dumpState.isVerbose()) {
-                pw.println(TAB1 + mCache.size() + " package(s)");
-                return;
-            }
+                if (mCache.size() == 0) {
+                    pw.println(TAB1 + "<empty>");
+                    return;
+                }
 
-            if (mCache.size() == 0) {
-                pw.println(TAB1 + "<empty>");
-                return;
-            }
-
-            for (int i = 0, n = mCache.size(); i < n; i++) {
-                final String packageName = mCache.keyAt(i);
-                final PackageStateUsers pkg = mCache.valueAt(i);
-                pw.print(TAB1 + packageName + ": " + pkg.mPackageState + " users=");
-                pw.println(TextUtils.join(", ", pkg.mInstalledUsers));
+                for (int i = 0, n = mCache.size(); i < n; i++) {
+                    final String packageName = mCache.keyAt(i);
+                    final PackageStateUsers pkg = mCache.valueAt(i);
+                    pw.print(TAB1 + packageName + ": " + pkg.mPackageState + " users=");
+                    pw.println(TextUtils.join(", ", pkg.mInstalledUsers));
+                }
             }
         }
     }

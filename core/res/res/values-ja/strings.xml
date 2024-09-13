@@ -1144,7 +1144,7 @@
     <string name="weeks" msgid="3516247214269821391">"週間"</string>
     <string name="year" msgid="5182610307741238982">"年"</string>
     <string name="years" msgid="5797714729103773425">"年"</string>
-    <string name="now_string_shortest" msgid="3684914126941650330">"現在"</string>
+    <string name="now_string_shortest" msgid="3684914126941650330">"今"</string>
     <string name="duration_minutes_shortest" msgid="5744379079540806690">"<xliff:g id="COUNT">%d</xliff:g> 分"</string>
     <string name="duration_hours_shortest" msgid="1477752094141971675">"<xliff:g id="COUNT">%d</xliff:g> 時間"</string>
     <string name="duration_days_shortest" msgid="4083124701676227233">"<xliff:g id="COUNT">%d</xliff:g> 日"</string>
@@ -1194,6 +1194,8 @@
     <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"パスワードの欄は手書き入力には対応していません"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"戻る"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"入力方法の切り替え"</string>
+    <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"入力方法の選択ツールを開く"</string>
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"設定"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"空き容量わずか"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"一部のシステム機能が動作しない可能性があります"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"システムに十分な容量がありません。250MBの空き容量を確保して再起動してください。"</string>
@@ -1398,10 +1400,10 @@
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"USB テザリング ON"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"USB MIDI モード ON"</string>
     <string name="usb_uvc_notification_title" msgid="2030032862673400008">"ウェブカメラとしてデバイスを接続しました"</string>
-    <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB アクセサリが接続されました"</string>
+    <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB アクセサリーが接続されました"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"タップしてその他のオプションを表示します。"</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"接続されているデバイスを充電しています。タップすると、他の項目が表示されます。"</string>
-    <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"アナログのオーディオ アクセサリを検出"</string>
+    <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"アナログのオーディオ アクセサリーを検出"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"接続したデバイスはこのスマートフォンと互換性がありません。タップすると、詳細を確認できます。"</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"USB デバッグが接続されました"</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"無効にするにはここをタップしてください"</string>
@@ -1428,6 +1430,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"共有する"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"共有しない"</string>
     <string name="select_input_method" msgid="3971267998568587025">"入力方法の選択"</string>
+    <string name="input_method_language_settings" msgid="8069089418056819437">"言語設定"</string>
     <string name="show_ime" msgid="6406112007347443383">"物理キーボードが有効になっていても画面に表示させます"</string>
     <string name="hardware" msgid="3611039921284836033">"画面キーボードを使用"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"<xliff:g id="DEVICE_NAME">%s</xliff:g>の設定"</string>
@@ -1743,7 +1746,7 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"権限のリクエストを遮っているアプリがあるため、同意の回答を確認できません。"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"使用を開始する機能をタップ:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"ユーザー補助機能ボタンで使用する機能の選択"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"音量ボタンのショートカットで使用する機能の選択"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2245540598834891500">"音量ボタンのショートカットで使用する機能の選択"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> はオフになっています"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"ショートカットの編集"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"完了"</string>
@@ -2421,6 +2424,8 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"セキュリティ上、画面共有ではアプリの内容は非表示となります"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"衛星に自動接続しました"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"モバイル ネットワークや Wi-Fi ネットワークを使わずにメッセージを送受信できます"</string>
+    <string name="satellite_notification_manual_title" msgid="1097504441849466279">"衛星通信メッセージを使用しますか？"</string>
+    <string name="satellite_notification_manual_summary" msgid="901206289846283445">"モバイル ネットワークや Wi-Fi ネットワークがなくてもメッセージを送受信できます"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"メッセージ アプリを開く"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"仕組み"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"保留中..."</string>
@@ -2436,23 +2441,15 @@
     <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"<xliff:g id="USER_NAME">%s</xliff:g> さんのアラーム"</string>
     <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"ユーザーを切り替え"</string>
     <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"ミュート"</string>
-    <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"音声をミュートするにはタップします"</string>
-    <!-- no translation found for keyboard_shortcut_group_applications_browser (6535007304687100909) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_contacts (2750702518068326356) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_email (4229037666415353683) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_sms (3523799286376321137) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_music (2051507523525651067) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_calendar (3571770335653387606) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_calculator (6753209559716091507) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_maps (7950000659522589471) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications (3010389163951364798) -->
-    <skip />
+    <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"通知音をミュートするにはタップしてください"</string>
+    <string name="keyboard_shortcut_group_applications_browser" msgid="6535007304687100909">"ブラウザ"</string>
+    <string name="keyboard_shortcut_group_applications_contacts" msgid="2750702518068326356">"連絡先"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="4229037666415353683">"メール"</string>
+    <string name="keyboard_shortcut_group_applications_sms" msgid="3523799286376321137">"SMS"</string>
+    <string name="keyboard_shortcut_group_applications_music" msgid="2051507523525651067">"音楽"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="3571770335653387606">"カレンダー"</string>
+    <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"電卓"</string>
+    <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"マップ"</string>
+    <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"アプリ"</string>
+    <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"指紋を認識できなくなりました。指紋認証をもう一度設定してください。"</string>
 </resources>

@@ -34,8 +34,9 @@ import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO
 
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
-import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_POSITION_MULTIPLIER_CENTER;
-import static com.android.server.wm.LetterboxConfiguration.MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO;
+import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_POSITION_MULTIPLIER_CENTER;
+import static com.android.server.wm.AppCompatConfiguration.MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO;
+import static com.android.server.wm.AppCompatUtils.isChangeEnabled;
 
 import android.annotation.NonNull;
 import android.content.pm.PackageManager;
@@ -49,8 +50,6 @@ import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.wm.utils.OptPropFactory;
 
-import java.util.function.Function;
-
 /**
  * Encapsulates app compat configurations and overrides related to aspect ratio.
  */
@@ -62,7 +61,7 @@ class AppCompatAspectRatioOverrides {
     @NonNull
     private final ActivityRecord mActivityRecord;
     @NonNull
-    private final LetterboxConfiguration mLetterboxConfiguration;
+    private final AppCompatConfiguration mAppCompatConfiguration;
     @NonNull
     private final UserAspectRatioState mUserAspectRatioState;
 
@@ -75,28 +74,28 @@ class AppCompatAspectRatioOverrides {
     @NonNull
     private final OptPropFactory.OptProp mAllowOrientationOverrideOptProp;
     @NonNull
-    private final Function<Boolean, Boolean> mIsDisplayFullScreenAndInPostureProvider;
+    private final AppCompatDeviceStateQuery mAppCompatDeviceStateQuery;
     @NonNull
-    private final Function<Configuration, Float> mGetHorizontalPositionMultiplierProvider;
+    private final AppCompatReachabilityOverrides mAppCompatReachabilityOverrides;
 
     AppCompatAspectRatioOverrides(@NonNull ActivityRecord activityRecord,
-            @NonNull LetterboxConfiguration letterboxConfiguration,
+            @NonNull AppCompatConfiguration appCompatConfiguration,
             @NonNull OptPropFactory optPropBuilder,
-            @NonNull Function<Boolean, Boolean> isDisplayFullScreenAndInPostureProvider,
-            @NonNull Function<Configuration, Float> getHorizontalPositionMultiplierProvider) {
+            @NonNull AppCompatDeviceStateQuery appCompatDeviceStateQuery,
+            @NonNull AppCompatReachabilityOverrides appCompatReachabilityOverrides) {
         mActivityRecord = activityRecord;
-        mLetterboxConfiguration = letterboxConfiguration;
+        mAppCompatConfiguration = appCompatConfiguration;
+        mAppCompatDeviceStateQuery = appCompatDeviceStateQuery;
         mUserAspectRatioState = new UserAspectRatioState();
-        mIsDisplayFullScreenAndInPostureProvider = isDisplayFullScreenAndInPostureProvider;
-        mGetHorizontalPositionMultiplierProvider = getHorizontalPositionMultiplierProvider;
+        mAppCompatReachabilityOverrides = appCompatReachabilityOverrides;
         mAllowMinAspectRatioOverrideOptProp = optPropBuilder.create(
                 PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE);
         mAllowUserAspectRatioOverrideOptProp = optPropBuilder.create(
                 PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_OVERRIDE,
-                mLetterboxConfiguration::isUserAppAspectRatioSettingsEnabled);
+                mAppCompatConfiguration::isUserAppAspectRatioSettingsEnabled);
         mAllowUserAspectRatioFullscreenOverrideOptProp = optPropBuilder.create(
                 PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_FULLSCREEN_OVERRIDE,
-                mLetterboxConfiguration::isUserAppAspectRatioFullscreenEnabled);
+                mAppCompatConfiguration::isUserAppAspectRatioFullscreenEnabled);
         mAllowOrientationOverrideOptProp = optPropBuilder.create(
                 PROPERTY_COMPAT_ALLOW_ORIENTATION_OVERRIDE);
     }
@@ -115,7 +114,7 @@ class AppCompatAspectRatioOverrides {
      */
     boolean shouldOverrideMinAspectRatio() {
         return mAllowMinAspectRatioOverrideOptProp.shouldEnableWithOptInOverrideAndOptOutProperty(
-                isCompatChangeEnabled(OVERRIDE_MIN_ASPECT_RATIO));
+                isChangeEnabled(mActivityRecord, OVERRIDE_MIN_ASPECT_RATIO));
     }
 
     /**
@@ -147,14 +146,14 @@ class AppCompatAspectRatioOverrides {
     boolean isUserFullscreenOverrideEnabled() {
         if (mAllowUserAspectRatioOverrideOptProp.isFalse()
                 || mAllowUserAspectRatioFullscreenOverrideOptProp.isFalse()
-                || !mLetterboxConfiguration.isUserAppAspectRatioFullscreenEnabled()) {
+                || !mAppCompatConfiguration.isUserAppAspectRatioFullscreenEnabled()) {
             return false;
         }
         return true;
     }
 
     boolean isSystemOverrideToFullscreenEnabled() {
-        return isCompatChangeEnabled(OVERRIDE_ANY_ORIENTATION_TO_USER)
+        return isChangeEnabled(mActivityRecord, OVERRIDE_ANY_ORIENTATION_TO_USER)
                 && !mAllowOrientationOverrideOptProp.isFalse()
                 && (mUserAspectRatioState.mUserAspectRatio == USER_MIN_ASPECT_RATIO_UNSET
                 || mUserAspectRatioState.mUserAspectRatio == USER_MIN_ASPECT_RATIO_FULLSCREEN);
@@ -168,7 +167,7 @@ class AppCompatAspectRatioOverrides {
         // effect only if explicitly false. If mBooleanPropertyAllowUserAspectRatioOverride is null,
         // the current app doesn't opt-out so the first part of the predicate is true.
         return !mAllowUserAspectRatioOverrideOptProp.isFalse()
-                && mLetterboxConfiguration.isUserAppAspectRatioSettingsEnabled()
+                && mAppCompatConfiguration.isUserAppAspectRatioSettingsEnabled()
                 && mActivityRecord.mDisplayContent != null
                 && mActivityRecord.mDisplayContent.getIgnoreOrientationRequest();
     }
@@ -221,12 +220,21 @@ class AppCompatAspectRatioOverrides {
     float getFixedOrientationLetterboxAspectRatio(@NonNull Configuration parentConfiguration) {
         return shouldUseSplitScreenAspectRatio(parentConfiguration)
                 ? getSplitScreenAspectRatio()
-                : mActivityRecord.shouldCreateCompatDisplayInsets()
+                : mActivityRecord.shouldCreateAppCompatDisplayInsets()
                         ? getDefaultMinAspectRatioForUnresizableApps()
                         : getDefaultMinAspectRatio();
     }
 
-    private float getDisplaySizeMinAspectRatio() {
+    float getDefaultMinAspectRatioForUnresizableAppsFromConfig() {
+        return mAppCompatConfiguration.getDefaultMinAspectRatioForUnresizableApps();
+    }
+
+    boolean isSplitScreenAspectRatioForUnresizableAppsEnabled() {
+        return mAppCompatConfiguration.getIsSplitScreenAspectRatioForUnresizableAppsEnabled();
+    }
+
+    @VisibleForTesting
+    float getDisplaySizeMinAspectRatio() {
         final DisplayArea displayArea = mActivityRecord.getDisplayArea();
         if (displayArea == null) {
             return mActivityRecord.info.getMinAspectRatio();
@@ -236,12 +244,13 @@ class AppCompatAspectRatioOverrides {
     }
 
     private boolean shouldUseSplitScreenAspectRatio(@NonNull Configuration parentConfiguration) {
-        final boolean isBookMode = mIsDisplayFullScreenAndInPostureProvider
-                .apply(/* isTabletop */false);
-        final boolean isNotCenteredHorizontally = mGetHorizontalPositionMultiplierProvider.apply(
-                parentConfiguration) != LETTERBOX_POSITION_MULTIPLIER_CENTER;
-        final boolean isTabletopMode = mIsDisplayFullScreenAndInPostureProvider
-                .apply(/* isTabletop */ true);
+        final boolean isBookMode = mAppCompatDeviceStateQuery
+                .isDisplayFullScreenAndInPosture(/* isTabletop */false);
+        final boolean isNotCenteredHorizontally =
+                mAppCompatReachabilityOverrides.getHorizontalPositionMultiplier(parentConfiguration)
+                        != LETTERBOX_POSITION_MULTIPLIER_CENTER;
+        final boolean isTabletopMode = mAppCompatDeviceStateQuery
+                .isDisplayFullScreenAndInPosture(/* isTabletop */ true);
         final boolean isLandscape = isFixedOrientationLandscape(
                 mActivityRecord.getOverrideOrientation());
         final AppCompatCameraOverrides cameraOverrides =
@@ -255,7 +264,13 @@ class AppCompatAspectRatioOverrides {
                     && cameraPolicy.isTreatmentEnabledForActivity(mActivityRecord));
     }
 
-    @VisibleForTesting
+    /**
+     * Returns the value of the user aspect ratio override property. If unset, return {@code true}.
+     */
+    boolean getAllowUserAspectRatioOverridePropertyValue() {
+        return !mAllowUserAspectRatioOverrideOptProp.isFalse();
+    }
+
     int getUserMinAspectRatioOverrideCode() {
         try {
             return mActivityRecord.mAtmService.getPackageManager()
@@ -267,22 +282,22 @@ class AppCompatAspectRatioOverrides {
     }
 
     private float getDefaultMinAspectRatioForUnresizableApps() {
-        if (!mLetterboxConfiguration.getIsSplitScreenAspectRatioForUnresizableAppsEnabled()
+        if (!mAppCompatConfiguration.getIsSplitScreenAspectRatioForUnresizableAppsEnabled()
                 || mActivityRecord.getDisplayArea() == null) {
-            return mLetterboxConfiguration.getDefaultMinAspectRatioForUnresizableApps()
+            return mAppCompatConfiguration.getDefaultMinAspectRatioForUnresizableApps()
                     > MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO
-                    ? mLetterboxConfiguration.getDefaultMinAspectRatioForUnresizableApps()
+                    ? mAppCompatConfiguration.getDefaultMinAspectRatioForUnresizableApps()
                     : getDefaultMinAspectRatio();
         }
 
         return getSplitScreenAspectRatio();
     }
 
-    private float getDefaultMinAspectRatio() {
+    float getDefaultMinAspectRatio() {
         if (mActivityRecord.getDisplayArea() == null
-                || !mLetterboxConfiguration
+                || !mAppCompatConfiguration
                 .getIsDisplayAspectRatioEnabledForFixedOrientationLetterbox()) {
-            return mLetterboxConfiguration.getFixedOrientationLetterboxAspectRatio();
+            return mAppCompatConfiguration.getFixedOrientationLetterboxAspectRatio();
         }
         return getDisplaySizeMinAspectRatio();
     }
@@ -292,10 +307,6 @@ class AppCompatAspectRatioOverrides {
         // The min aspect ratio override set by user
         @PackageManager.UserMinAspectRatio
         private int mUserAspectRatio = USER_MIN_ASPECT_RATIO_UNSET;
-    }
-
-    private boolean isCompatChangeEnabled(long overrideChangeId) {
-        return mActivityRecord.info.isChangeEnabled(overrideChangeId);
     }
 
     private Resources getResources() {

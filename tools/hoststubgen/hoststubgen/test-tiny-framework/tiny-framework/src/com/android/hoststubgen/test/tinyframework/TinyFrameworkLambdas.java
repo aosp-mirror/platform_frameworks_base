@@ -15,8 +15,8 @@
  */
 package com.android.hoststubgen.test.tinyframework;
 
+import android.hosttest.annotation.HostSideTestKeep;
 import android.hosttest.annotation.HostSideTestStaticInitializerKeep;
-import android.hosttest.annotation.HostSideTestStub;
 
 import java.util.function.Supplier;
 
@@ -28,48 +28,48 @@ import java.util.function.Supplier;
  *
  * Implicit filter should take care of them.
  */
-@HostSideTestStub
+@HostSideTestKeep
 @HostSideTestStaticInitializerKeep
 public class TinyFrameworkLambdas {
-    @HostSideTestStub
+    @HostSideTestKeep
     public TinyFrameworkLambdas() {
     }
 
-    @HostSideTestStub
+    @HostSideTestKeep
     public final Supplier<Integer> mSupplier = () -> 1;
 
-    @HostSideTestStub
+    @HostSideTestKeep
     public static final Supplier<Integer> sSupplier = () -> 2;
 
-    @HostSideTestStub
+    @HostSideTestKeep
     public Supplier<Integer> getSupplier() {
         return () -> 3;
     }
 
-    @HostSideTestStub
+    @HostSideTestKeep
     public static Supplier<Integer> getSupplier_static() {
         return () -> 4;
     }
 
-    @HostSideTestStub
+    @HostSideTestKeep
     @HostSideTestStaticInitializerKeep
     public static class Nested {
-        @HostSideTestStub
+        @HostSideTestKeep
         public Nested() {
         }
 
-        @HostSideTestStub
+        @HostSideTestKeep
         public final Supplier<Integer> mSupplier = () -> 5;
 
-        @HostSideTestStub
+        @HostSideTestKeep
         public static final Supplier<Integer> sSupplier = () -> 6;
 
-        @HostSideTestStub
+        @HostSideTestKeep
         public Supplier<Integer> getSupplier() {
             return () -> 7;
         }
 
-        @HostSideTestStub
+        @HostSideTestKeep
         public static Supplier<Integer> getSupplier_static() {
             return () -> 8;
         }

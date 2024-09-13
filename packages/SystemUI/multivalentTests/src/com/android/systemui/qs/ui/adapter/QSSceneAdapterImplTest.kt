@@ -24,9 +24,11 @@ import androidx.asynclayoutinflater.view.AsyncLayoutInflater
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.biometrics.domain.interactor.displayStateInteractor
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.display.data.repository.displayStateRepository
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testCase
@@ -117,6 +119,7 @@ class QSSceneAdapterImplTest : SysuiTestCase() {
         }
 
     private val shadeInteractor = kosmos.shadeInteractor
+    private val displayStateInteractor = kosmos.displayStateInteractor
     private val dumpManager = mock<DumpManager>()
 
     private val underTest =
@@ -124,6 +127,7 @@ class QSSceneAdapterImplTest : SysuiTestCase() {
             qsSceneComponentFactory,
             qsImplProvider,
             shadeInteractor,
+            displayStateInteractor,
             dumpManager,
             testDispatcher,
             testScope.backgroundScope,
@@ -251,7 +255,7 @@ class QSSceneAdapterImplTest : SysuiTestCase() {
             runCurrent()
             clearInvocations(qsImpl!!)
 
-            underTest.setState(QSSceneAdapter.State.Expanding(progress))
+            underTest.setState(QSSceneAdapter.State.Expanding { progress })
             with(qsImpl!!) {
                 verify(this).setQsVisible(true)
                 verify(this, never())
@@ -580,6 +584,25 @@ class QSSceneAdapterImplTest : SysuiTestCase() {
 
             underTest.requestCloseCustomizer()
             verify(qsImpl!!).closeCustomizer()
+        }
+
+    @Test
+    fun setIsNotificationPanelFullWidth() =
+        testScope.runTest {
+            val qsImpl by collectLastValue(underTest.qsImpl)
+
+            underTest.inflate(context)
+            runCurrent()
+
+            kosmos.displayStateRepository.setIsLargeScreen(true)
+            runCurrent()
+
+            verify(qsImpl!!).setIsNotificationPanelFullWidth(false)
+
+            underTest.inflate(context)
+            runCurrent()
+
+            verify(qsImpl!!).setIsNotificationPanelFullWidth(false)
         }
 
     @Test

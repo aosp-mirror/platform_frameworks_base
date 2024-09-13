@@ -27,6 +27,7 @@ import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.scene.domain.interactor.SceneContainerOcclusionInteractor
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.statusbar.chips.ui.model.MultipleOngoingActivityChipsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipsViewModel
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
@@ -64,8 +65,17 @@ interface CollapsedStatusBarViewModel {
     /** Emits whenever a transition from lockscreen to dream has started. */
     val transitionFromLockscreenToDreamStartedEvent: Flow<Unit>
 
-    /** The ongoing activity chip that should be shown on the left-hand side of the status bar. */
-    val ongoingActivityChip: StateFlow<OngoingActivityChipModel>
+    /**
+     * The ongoing activity chip that should be primarily shown on the left-hand side of the status
+     * bar. If there are multiple ongoing activity chips, this one should take priority.
+     */
+    val primaryOngoingActivityChip: StateFlow<OngoingActivityChipModel>
+
+    /**
+     * The multiple ongoing activity chips that should be shown on the left-hand side of the status
+     * bar.
+     */
+    val ongoingActivityChips: StateFlow<MultipleOngoingActivityChipsModel>
 
     /**
      * True if the current scene can show the home status bar (aka this status bar), and false if
@@ -108,7 +118,9 @@ constructor(
             .filter { it.transitionState == TransitionState.STARTED }
             .map {}
 
-    override val ongoingActivityChip = ongoingActivityChipsViewModel.chip
+    override val primaryOngoingActivityChip = ongoingActivityChipsViewModel.primaryChip
+
+    override val ongoingActivityChips = ongoingActivityChipsViewModel.chips
 
     override val isHomeStatusBarAllowedByScene: StateFlow<Boolean> =
         combine(

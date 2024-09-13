@@ -16,20 +16,15 @@
 
 package com.android.systemui.volume.dagger
 
-import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.volume.domain.interactor.AudioSharingInteractor
 import com.android.systemui.volume.domain.interactor.AudioSharingInteractorEmptyImpl
+import dagger.Binds
 import dagger.Module
-import dagger.Provides
 
 /** Dagger module for empty audio sharing impl for unnecessary volume overlay */
 @Module
 interface AudioSharingEmptyImplModule {
 
-    companion object {
-        @Provides
-        @SysUISingleton
-        fun provideAudioSharingInteractor(): AudioSharingInteractor =
-            AudioSharingInteractorEmptyImpl()
-    }
+    @Binds
+    fun bindsAudioSharingInteractor(impl: AudioSharingInteractorEmptyImpl): AudioSharingInteractor
 }

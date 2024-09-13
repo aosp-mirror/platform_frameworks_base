@@ -28,9 +28,9 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.platform.test.flag.junit.SetFlagsRule;
 
-import androidx.test.InstrumentationRegistry;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.frameworks.inputmethodcoretests.R;
 
@@ -135,7 +135,7 @@ public class InputMethodInfoTest {
 
     private InputMethodInfo buildInputMethodForTest(final @XmlRes int metaDataRes)
             throws Exception {
-        final Context context = InstrumentationRegistry.getContext();
+        final Context context = InstrumentationRegistry.getInstrumentation().getContext();
         final ServiceInfo serviceInfo = new ServiceInfo();
         serviceInfo.applicationInfo = context.getApplicationInfo();
         serviceInfo.packageName = context.getPackageName();

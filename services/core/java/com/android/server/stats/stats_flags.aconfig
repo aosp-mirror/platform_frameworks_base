@@ -1,10 +1,32 @@
 package: "com.android.server.stats"
 container: "system"
 
+# Note: To ensure compatibility across all release configurations, initiate the ramp-up process
+# only after the 'com.android.net.flags.netstats_add_entries' flag has been fully deployed.
+# This flag provides the necessary API from the Connectivity module.
+# The flag was added because the flag 'com.android.net.flags.netstats_add_entries' for API
+# is already being rolled out, and modifying behavior during an active rollout might
+# lead to unwanted issues.
+flag {
+    name: "netstats_use_add_entries"
+    namespace: "statsd"
+    description: "Use NetworkStats#addEntries to reduce memory footprint"
+    bug: "335680025"
+    is_fixed_read_only: true
+}
+
 flag {
     name: "add_mobile_bytes_transfer_by_proc_state_puller"
     namespace: "statsd"
     description: "Adds mobile_bytes_transfer_by_proc_state atom with system server side aggregation"
     bug: "309512867"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "apply_network_stats_poll_rate_limit"
+    namespace: "statsd"
+    description: "Apply a rate limit for polling network stats when pulling relevant atoms"
+    bug: "352495181"
     is_fixed_read_only: true
 }

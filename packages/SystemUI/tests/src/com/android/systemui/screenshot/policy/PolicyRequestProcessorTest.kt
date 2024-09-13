@@ -16,13 +16,13 @@
 package com.android.systemui.screenshot.policy
 
 import android.content.ComponentName
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import android.graphics.Insets
 import android.graphics.Rect
 import android.os.UserHandle
 import android.view.Display.DEFAULT_DISPLAY
 import android.view.WindowManager.ScreenshotSource.SCREENSHOT_KEY_CHORD
 import android.view.WindowManager.TAKE_SCREENSHOT_FULLSCREEN
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.systemui.screenshot.ImageCapture
 import com.android.systemui.screenshot.ScreenshotData
 import com.android.systemui.screenshot.data.model.DisplayContentScenarios.ActivityNames.FILES
@@ -40,20 +40,23 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class PolicyRequestProcessorTest {
 
-    val imageCapture = object : ImageCapture {
-        override fun captureDisplay(displayId: Int, crop: Rect?) = null
-        override suspend fun captureTask(taskId: Int) = null
-    }
+    val imageCapture =
+        object : ImageCapture {
+            override fun captureDisplay(displayId: Int, crop: Rect?) = null
+
+            override suspend fun captureTask(taskId: Int) = null
+        }
 
     /** Tests behavior when no policies are applied */
     @Test
     fun testProcess_defaultOwner_whenNoPolicyApplied() {
         val fullScreenWork = DisplayContentRepository {
-            singleFullScreen(TaskSpec(taskId = 1001, name = FILES, userId = WORK))
+            singleFullScreen(TaskSpec(taskId = TASK_ID, name = FILES, userId = WORK))
         }
 
         val request =
-            ScreenshotData(TAKE_SCREENSHOT_FULLSCREEN,
+            ScreenshotData(
+                TAKE_SCREENSHOT_FULLSCREEN,
                 SCREENSHOT_KEY_CHORD,
                 null,
                 topComponent = null,
@@ -61,24 +64,34 @@ class PolicyRequestProcessorTest {
                 taskId = -1,
                 insets = Insets.NONE,
                 bitmap = null,
-                displayId = DEFAULT_DISPLAY)
+                displayId = DEFAULT_DISPLAY
+            )
 
         /* Create a policy request processor with no capture policies */
         val requestProcessor =
-            PolicyRequestProcessor(Dispatchers.Unconfined,
+            PolicyRequestProcessor(
+                Dispatchers.Unconfined,
                 imageCapture,
                 policies = emptyList(),
                 defaultOwner = UserHandle.of(PERSONAL),
                 defaultComponent = ComponentName("default", "Component"),
-                displayTasks = fullScreenWork)
+                displayTasks = fullScreenWork
+            )
 
         val result = runBlocking { requestProcessor.process(request) }
 
-        assertWithMessage(
-            "With no policy, the screenshot should be assigned to the default user"
-        ).that(result.userHandle).isEqualTo(UserHandle.of(PERSONAL))
+        assertWithMessage("With no policy, the screenshot should be assigned to the default user")
+            .that(result.userHandle)
+            .isEqualTo(UserHandle.of(PERSONAL))
 
-        assertWithMessage("The topComponent of the screenshot").that(result.topComponent)
-                .isEqualTo(ComponentName.unflattenFromString(FILES))
+        assertWithMessage("The topComponent of the screenshot")
+            .that(result.topComponent)
+            .isEqualTo(ComponentName.unflattenFromString(FILES))
+
+        assertWithMessage("Task ID").that(result.taskId).isEqualTo(TASK_ID)
+    }
+
+    companion object {
+        const val TASK_ID = 1001
     }
 }

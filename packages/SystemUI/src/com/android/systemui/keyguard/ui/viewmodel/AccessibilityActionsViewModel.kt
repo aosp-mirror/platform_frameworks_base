@@ -50,5 +50,9 @@ constructor(
             }
             .distinctUntilChanged()
 
-    fun openCommunalHub() = communalInteractor.changeScene(CommunalScenes.Communal)
+    fun openCommunalHub() =
+        communalInteractor.changeScene(
+            newScene = CommunalScenes.Communal,
+            loggingReason = "accessibility",
+        )
 }
