@@ -2154,7 +2154,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         mAtmService.mPackageConfigPersister.updateConfigIfNeeded(this, mUserId, packageName);
 
-        mActivityRecordInputSink = new ActivityRecordInputSink(this, sourceRecord);
+        final boolean appOptInTouchPassThrough =
+                options != null && options.isAllowPassThroughOnTouchOutside();
+        mActivityRecordInputSink = new ActivityRecordInputSink(
+                this, sourceRecord, appOptInTouchPassThrough);
 
         mAppActivityEmbeddingSplitsEnabled = isAppActivityEmbeddingSplitsEnabled();
         mAllowUntrustedEmbeddingStateSharing = getAllowUntrustedEmbeddingStateSharingProperty();
