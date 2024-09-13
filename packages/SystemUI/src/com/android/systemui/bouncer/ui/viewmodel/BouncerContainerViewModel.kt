@@ -47,21 +47,9 @@ constructor(
             launch {
                 authenticationInteractor.onAuthenticationResult.collect { authenticationSucceeded ->
                     if (authenticationSucceeded) {
-                        // Some dismiss actions require that keyguard be dismissed right away or
-                        // deferred until something else later on dismisses keyguard (eg. end of
-                        // a hide animation).
-                        val deferKeyguardDone =
-                            legacyInteractor.bouncerDismissAction?.onDismissAction?.onDismiss()
-                        legacyInteractor.setDismissAction(null, null)
-
-                        viewMediatorCallback?.let {
-                            val selectedUserId = selectedUserInteractor.getSelectedUserId()
-                            if (deferKeyguardDone == true) {
-                                it.keyguardDonePending(selectedUserId)
-                            } else {
-                                it.keyguardDone(selectedUserId)
-                            }
-                        }
+                        legacyInteractor.notifyKeyguardAuthenticatedPrimaryAuth(
+                            selectedUserInteractor.getSelectedUserId()
+                        )
                     }
                 }
             }

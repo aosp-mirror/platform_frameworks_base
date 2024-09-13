@@ -164,7 +164,7 @@ constructor(
     }
 
     fun runAfterKeyguardGone(runnable: Runnable) {
-        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return
+        if (ComposeBouncerFlags.isUnexpectedlyInLegacyMode()) return
         setDismissAction(
             DismissAction.RunAfterKeyguardGone(
                 dismissAction = { runnable.run() },
@@ -176,18 +176,18 @@ constructor(
     }
 
     fun setDismissAction(dismissAction: DismissAction) {
-        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return
+        if (ComposeBouncerFlags.isUnexpectedlyInLegacyMode()) return
         repository.dismissAction.value.onCancelAction.run()
         repository.setDismissAction(dismissAction)
     }
 
     fun handleDismissAction() {
-        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return
+        if (ComposeBouncerFlags.isUnexpectedlyInLegacyMode()) return
         repository.setDismissAction(DismissAction.None)
     }
 
     suspend fun setKeyguardDone(keyguardDoneTiming: KeyguardDone) {
-        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return
+        if (ComposeBouncerFlags.isUnexpectedlyInLegacyMode()) return
         dismissInteractor.setKeyguardDone(keyguardDoneTiming)
     }
 }
