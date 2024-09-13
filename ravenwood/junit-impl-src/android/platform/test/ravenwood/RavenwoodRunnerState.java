@@ -19,7 +19,6 @@ import static com.android.ravenwood.common.RavenwoodCommonUtils.ensureIsPublicMe
 
 import static org.junit.Assert.fail;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 
 import com.android.internal.annotations.GuardedBy;
@@ -35,12 +34,11 @@ import java.lang.reflect.Field;
 import java.util.WeakHashMap;
 
 /**
- * Used to store various states associated with the current test runner.
+ * Used to store various states associated with the current test runner that's inly needed
+ * in junit-impl.
  *
- * This class could be added to {@link RavenwoodAwareTestRunner} as a field, but we don't
- * want to put it in junit-src/ (for one, that'll cause all the downstream dependencies to be
- * rebuilt when this file is updated), so we manage it separately using a Map from each
- * {@link RavenwoodAwareTestRunner} instance to a {@link RavenwoodRunnerState}.
+ * We don't want to put it in junit-src to avoid having to recompile all the downstream
+ * dependencies after changing this class.
  *
  * All members must be called from the runner's main thread.
  */
@@ -51,23 +49,12 @@ public final class RavenwoodRunnerState {
     private static final WeakHashMap<RavenwoodAwareTestRunner, RavenwoodRunnerState> sStates =
             new WeakHashMap<>();
 
-    /**
-     * Get the instance for a given runner.
-     */
-    public static RavenwoodRunnerState forRunner(@NonNull RavenwoodAwareTestRunner runner) {
-        synchronized (sStates) {
-            var ret = sStates.get(runner);
-            if (ret == null) {
-                ret = new RavenwoodRunnerState(runner);
-                sStates.put(runner, ret);
-            }
-            return ret;
-        }
-    }
-
     private final RavenwoodAwareTestRunner mRunner;
 
-    private RavenwoodRunnerState(RavenwoodAwareTestRunner runner) {
+    /**
+     * Ctor.
+     */
+    public RavenwoodRunnerState(RavenwoodAwareTestRunner runner) {
         mRunner = runner;
     }
 
