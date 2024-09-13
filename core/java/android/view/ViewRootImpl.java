@@ -1283,7 +1283,7 @@ public final class ViewRootImpl implements ViewParent,
                                     R.string.config_inputEventCompatProcessorOverrideClassName);
         if (processorOverrideName.isEmpty()) {
             // No compatibility processor override, using default.
-            mInputCompatProcessor = new InputEventCompatProcessor(context);
+            mInputCompatProcessor = new InputEventCompatProcessor(context, mHandler);
         } else {
             InputEventCompatProcessor compatProcessor = null;
             try {
