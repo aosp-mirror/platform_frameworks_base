@@ -134,6 +134,14 @@ flag {
  bug: "364338410"
 }
 
+flag {
+ name: "lock_now_coexistence"
+ is_exported: true
+ namespace: "enterprise"
+ description: "Enables coexistence support for lockNow."
+ bug: "366559840"
+}
+
 # Fully rolled out and must not be used.
 flag {
   name: "security_log_v2_enabled"
