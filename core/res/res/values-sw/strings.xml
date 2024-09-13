@@ -1746,8 +1746,7 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"Programu inazuia ombi la ruhusa kwa hivyo jibu lako haliwezi kuthibitishwa."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Gusa kipengele ili uanze kukitumia:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Chagua vipengele vya kutumia na kitufe cha zana za ufikivu"</string>
-    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
-    <skip />
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2245540598834891500">"Chagua vipengele vya kutumia kupitia njia ya mkato ya vitufe vya sauti"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Huduma ya <xliff:g id="SERVICE_NAME">%s</xliff:g> imezimwa"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Kubadilisha njia za mkato"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Nimemaliza"</string>
@@ -2011,6 +2010,8 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Weka mbinu ya kufunga skrini"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Weka mbinu ya kufunga skrini"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Ili utumie sehemu ya faragha, weka mbinu ya kufunga skrini kwenye kifaa hiki"</string>
+    <!-- no translation found for private_space_set_up_screen_lock_for_reset (7817091386408432097) -->
+    <skip />
     <string name="app_blocked_title" msgid="7353262160455028160">"Programu haipatikani"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> haipatikani hivi sasa."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> haipatikani"</string>
