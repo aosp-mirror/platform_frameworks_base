@@ -61,7 +61,8 @@ fun createHdrBrightnessData(
     minimumHdrPercentOfScreenForNbm: Float = HDR_PERCENT_OF_SCREEN_REQUIRED_DEFAULT,
     minimumHdrPercentOfScreenForHbm: Float = HDR_PERCENT_OF_SCREEN_REQUIRED_DEFAULT,
     allowInLowPowerMode: Boolean = false,
-    sdrToHdrRatioSpline: Spline? = null
+    sdrToHdrRatioSpline: Spline? = null,
+    highestHdrSdrRatio: Float = 1f
 ): HdrBrightnessData {
     return HdrBrightnessData(
         maxBrightnessLimits,
@@ -73,7 +74,8 @@ fun createHdrBrightnessData(
         minimumHdrPercentOfScreenForNbm,
         minimumHdrPercentOfScreenForHbm,
         allowInLowPowerMode,
-        sdrToHdrRatioSpline
+        sdrToHdrRatioSpline,
+        highestHdrSdrRatio
     )
 }
 

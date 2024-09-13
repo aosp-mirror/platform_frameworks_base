@@ -21,8 +21,10 @@ import android.os.Bundle
 import android.util.SizeF
 import com.android.app.tracing.coroutines.withContext
 import com.android.systemui.communal.domain.model.CommunalContentModel
+import com.android.systemui.communal.widgets.AppWidgetHostListenerDelegate
 import com.android.systemui.communal.widgets.CommunalAppWidgetHost
 import com.android.systemui.communal.widgets.CommunalAppWidgetHostView
+import com.android.systemui.communal.widgets.WidgetInteractionHandler
 import com.android.systemui.dagger.qualifiers.UiBackground
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
@@ -33,6 +35,8 @@ class WidgetViewFactory
 constructor(
     @UiBackground private val uiBgContext: CoroutineContext,
     private val appWidgetHost: CommunalAppWidgetHost,
+    private val interactionHandler: WidgetInteractionHandler,
+    private val listenerFactory: AppWidgetHostListenerDelegate.Factory,
 ) {
     suspend fun createWidget(
         context: Context,
@@ -40,18 +44,20 @@ constructor(
         size: SizeF,
     ): CommunalAppWidgetHostView =
         withContext("$TAG#createWidget", uiBgContext) {
-            appWidgetHost
-                .createViewForCommunal(context, model.appWidgetId, model.providerInfo)
-                .apply {
-                    updateAppWidgetSize(
-                        /* newOptions = */ Bundle(),
-                        /* minWidth = */ size.width.toInt(),
-                        /* minHeight = */ size.height.toInt(),
-                        /* maxWidth = */ size.width.toInt(),
-                        /* maxHeight = */ size.height.toInt(),
-                        /* ignorePadding = */ true,
-                    )
-                }
+            val view = CommunalAppWidgetHostView(context, interactionHandler)
+            view.setAppWidget(model.appWidgetId, model.providerInfo)
+            // Instead of setting the view as the listener directly, we wrap the view in a delegate
+            // which ensures the callbacks always get called on the main thread.
+            appWidgetHost.setListener(model.appWidgetId, listenerFactory.create(view))
+            view.updateAppWidgetSize(
+                /* newOptions = */ Bundle(),
+                /* minWidth = */ size.width.toInt(),
+                /* minHeight = */ size.height.toInt(),
+                /* maxWidth = */ size.width.toInt(),
+                /* maxHeight = */ size.height.toInt(),
+                /* ignorePadding = */ true,
+            )
+            view
         }
 
     private companion object {

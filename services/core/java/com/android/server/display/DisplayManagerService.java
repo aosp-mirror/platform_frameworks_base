@@ -4779,6 +4779,18 @@ public final class DisplayManagerService extends SystemService {
                     token, displayId, modeIds);
         }
 
+        @Override // Binder call
+        public float getHighestHdrSdrRatio(int displayId) {
+            DisplayDeviceConfig ddc =
+                    mDisplayDeviceConfigProvider.getDisplayDeviceConfig(displayId);
+            if (ddc == null) {
+                throw new IllegalArgumentException(
+                        "Display ID does not have a config: " + displayId);
+            }
+            return ddc.getHdrBrightnessData() != null
+                    ? ddc.getHdrBrightnessData().highestHdrSdrRatio : 1;
+        }
+
         @EnforcePermission(android.Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS)
         @Override // Binder call
         public float[] getDozeBrightnessSensorValueToBrightness(int displayId) {

@@ -16,6 +16,8 @@
 
 package com.android.systemui.bouncer.ui.viewmodel
 
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import android.view.KeyEvent.KEYCODE_0
 import android.view.KeyEvent.KEYCODE_4
 import android.view.KeyEvent.KEYCODE_A
@@ -31,6 +33,7 @@ import com.android.systemui.authentication.data.repository.fakeAuthenticationRep
 import com.android.systemui.authentication.domain.interactor.authenticationInteractor
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.bouncer.data.repository.fakeSimBouncerRepository
+import com.android.systemui.classifier.fakeFalsingCollector
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.lifecycle.activateIn
@@ -41,6 +44,7 @@ import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlin.random.Random
 import kotlin.random.nextInt
+import kotlin.test.assertTrue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
@@ -60,12 +64,13 @@ class PinBouncerViewModelTest : SysuiTestCase() {
     private val testScope = kosmos.testScope
     private val sceneInteractor by lazy { kosmos.sceneInteractor }
     private val authenticationInteractor by lazy { kosmos.authenticationInteractor }
-    private val underTest =
+    private val underTest by lazy {
         kosmos.pinBouncerViewModelFactory.create(
             isInputEnabled = MutableStateFlow(true),
             onIntentionalUserInput = {},
             authenticationMethod = AuthenticationMethodModel.Pin,
         )
+    }
 
     @Before
     fun setUp() {
@@ -473,6 +478,18 @@ class PinBouncerViewModelTest : SysuiTestCase() {
             underTest.onKeyEvent(KeyEventType.KeyUp, KEYCODE_NUMPAD_0 + expectedPin[3])
 
             assertThat(pin).containsExactly(*expectedPin)
+        }
+
+    @Test
+    @EnableFlags(com.android.systemui.Flags.FLAG_COMPOSE_BOUNCER)
+    @DisableFlags(com.android.systemui.Flags.FLAG_SCENE_CONTAINER)
+    fun onDigitButtonDown_avoidGesture_invoked() =
+        testScope.runTest {
+            lockDeviceAndOpenPinBouncer()
+
+            underTest.onDigitButtonDown()
+
+            assertTrue(kosmos.fakeFalsingCollector.wasLastGestureAvoided())
         }
 
     private fun TestScope.switchToScene(toScene: SceneKey) {

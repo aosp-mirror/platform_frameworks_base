@@ -246,6 +246,14 @@ flag {
 }
 
 flag {
+    name: "highest_hdr_sdr_ratio_api"
+    namespace: "display_manager"
+    description: "Feature flag for an API to get the highest defined HDR/SDR ratio for a display."
+    bug: "335181559"
+    is_fixed_read_only: true
+}
+
+flag {
     name: "doze_brightness_float"
     namespace: "display_manager"
     description: "Define doze brightness in the float scale [0, 1]."

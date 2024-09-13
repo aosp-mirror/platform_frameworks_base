@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.spa.widget.card
+package com.android.settingslib.spa.widget.banner
 
 import android.content.Context
 import androidx.compose.runtime.getValue
@@ -35,16 +35,16 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-class SettingsCardTest {
+class SettingsBannerTest {
     @get:Rule val composeTestRule = createComposeRule()
 
     private val context: Context = ApplicationProvider.getApplicationContext()
 
     @Test
-    fun settingsCard_titleDisplayed() {
+    fun settingsBanner_titleDisplayed() {
         composeTestRule.setContent {
-            SettingsCard(
-                CardModel(
+            SettingsBanner(
+                BannerModel(
                     title = TITLE,
                     text = "",
                 )
@@ -55,10 +55,10 @@ class SettingsCardTest {
     }
 
     @Test
-    fun settingsCard_textDisplayed() {
+    fun settingsBanner_textDisplayed() {
         composeTestRule.setContent {
-            SettingsCard(
-                CardModel(
+            SettingsBanner(
+                BannerModel(
                     title = "",
                     text = TEXT,
                 )
@@ -69,13 +69,13 @@ class SettingsCardTest {
     }
 
     @Test
-    fun settingsCard_buttonDisplayed() {
+    fun settingsBanner_buttonDisplayed() {
         composeTestRule.setContent {
-            SettingsCard(
-                CardModel(
+            SettingsBanner(
+                BannerModel(
                     title = "",
                     text = "",
-                    buttons = listOf(CardButton(text = TEXT) {}),
+                    buttons = listOf(BannerButton(text = TEXT) {}),
                 )
             )
         }
@@ -84,14 +84,14 @@ class SettingsCardTest {
     }
 
     @Test
-    fun settingsCard_buttonCanBeClicked() {
+    fun settingsBanner_buttonCanBeClicked() {
         var buttonClicked = false
         composeTestRule.setContent {
-            SettingsCard(
-                CardModel(
+            SettingsBanner(
+                BannerModel(
                     title = "",
                     text = "",
-                    buttons = listOf(CardButton(text = TEXT) { buttonClicked = true }),
+                    buttons = listOf(BannerButton(text = TEXT) { buttonClicked = true }),
                 )
             )
         }
@@ -102,13 +102,13 @@ class SettingsCardTest {
     }
 
     @Test
-    fun settingsCard_buttonHaveContentDescription() {
+    fun settingsBanner_buttonHaveContentDescription() {
         composeTestRule.setContent {
-            SettingsCard(
-                CardModel(
+            SettingsBanner(
+                BannerModel(
                     title = "",
                     text = "",
-                    buttons = listOf(CardButton(
+                    buttons = listOf(BannerButton(
                         text = TEXT,
                         contentDescription = CONTENT_DESCRIPTION,
                         ) {}
@@ -121,11 +121,11 @@ class SettingsCardTest {
     }
 
     @Test
-    fun settingsCard_dismiss() {
+    fun settingsBanner_dismiss() {
         composeTestRule.setContent {
             var isVisible by remember { mutableStateOf(true) }
-            SettingsCard(
-                CardModel(
+            SettingsBanner(
+                BannerModel(
                     title = TITLE,
                     text = "",
                     isVisible = { isVisible },
@@ -142,11 +142,11 @@ class SettingsCardTest {
     }
 
     @Test
-    fun settingsCard_clickable() {
+    fun settingsBanner_clickable() {
         var clicked by mutableStateOf(false)
         composeTestRule.setContent {
-            SettingsCard(
-                CardModel(
+            SettingsBanner(
+                BannerModel(
                     title = TITLE,
                     text = "",
                 ) { clicked = true }

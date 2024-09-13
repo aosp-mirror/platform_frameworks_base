@@ -186,3 +186,13 @@ test_module_config {
     include_filters: ["com.android.server.pm."],
     include_annotations: ["android.platform.test.annotations.Postsubmit"],
 }
+
+test_module_config {
+    name: "PackageManagerServiceServerTests_Presubmit",
+    base: "PackageManagerServiceServerTests",
+    test_suites: [
+        "automotive-tests",
+        "device-tests",
+    ],
+    include_annotations: ["android.platform.test.annotations.Presubmit"],
+}

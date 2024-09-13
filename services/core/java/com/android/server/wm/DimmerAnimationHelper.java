@@ -109,7 +109,9 @@ public class DimmerAnimationHelper {
 
     // Sets the requested layer to reparent the dim to without applying it immediately
     void setRequestedGeometryParent(WindowContainer<?> geometryParent) {
-        mRequestedProperties.mGeometryParent = geometryParent;
+        if (geometryParent != null) {
+            mRequestedProperties.mGeometryParent = geometryParent;
+        }
     }
 
     // Sets a requested change without applying it immediately
@@ -139,9 +141,14 @@ public class DimmerAnimationHelper {
             dim.remove(t);
             return;
         }
+        if (!dim.mDimSurface.isValid()) {
+            Log.e(TAG, "Dimming surface " + dim.mDimSurface + " has already been released!"
+                    + " Can not apply changes.");
+            return;
+        }
 
         dim.ensureVisible(t);
-        reparent(dim.mDimSurface,
+        reparent(dim,
                 startProperties.mGeometryParent != mRequestedProperties.mGeometryParent
                         ? mRequestedProperties.mGeometryParent.getSurfaceControl() : null,
                 mRequestedProperties.mDimmingContainer != startProperties.mDimmingContainer
@@ -159,7 +166,7 @@ public class DimmerAnimationHelper {
                         "%s skipping animation and directly setting alpha=%f, blur=%d",
                         dim, startProperties.mAlpha,
                         mRequestedProperties.mBlurRadius);
-                setCurrentAlphaBlur(dim.mDimSurface, t);
+                setCurrentAlphaBlur(dim, t);
                 dim.mSkipAnimation = false;
             } else {
                 startAnimation(t, dim, startProperties, mRequestedProperties);
@@ -186,7 +193,7 @@ public class DimmerAnimationHelper {
                     synchronized (dim.mHostContainer.mWmService.mGlobalLock) {
                         SurfaceControl.Transaction finishTransaction =
                                 dim.mHostContainer.getSyncTransaction();
-                        setCurrentAlphaBlur(dim.mDimSurface, finishTransaction);
+                        setCurrentAlphaBlur(dim, finishTransaction);
                         if (targetAlpha == 0f && !dim.isDimming()) {
                             dim.remove(finishTransaction);
                         }
@@ -229,10 +236,11 @@ public class DimmerAnimationHelper {
     /**
      * Change the geometry and relative parent of this dim layer
      */
-    static void reparent(@NonNull SurfaceControl dimLayer,
+    void reparent(@NonNull Dimmer.DimState dim,
                   @Nullable SurfaceControl newGeometryParent,
                   @Nullable SurfaceControl newRelativeParent,
                   @NonNull SurfaceControl.Transaction t) {
+        final SurfaceControl dimLayer = dim.mDimSurface;
         try {
             if (newGeometryParent != null) {
                 t.reparent(dimLayer, newGeometryParent);
@@ -245,7 +253,8 @@ public class DimmerAnimationHelper {
         }
     }
 
-    void setCurrentAlphaBlur(@NonNull SurfaceControl sc, @NonNull SurfaceControl.Transaction t) {
+    void setCurrentAlphaBlur(@NonNull Dimmer.DimState dim, @NonNull SurfaceControl.Transaction t) {
+        final SurfaceControl sc = dim.mDimSurface;
         try {
             t.setAlpha(sc, mCurrentProperties.mAlpha);
             t.setBackgroundBlurRadius(sc, mCurrentProperties.mBlurRadius);

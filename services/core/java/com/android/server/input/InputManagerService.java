@@ -52,6 +52,7 @@ import android.hardware.input.IInputDevicesChangedListener;
 import android.hardware.input.IInputManager;
 import android.hardware.input.IInputSensorEventListener;
 import android.hardware.input.IKeyGestureEventListener;
+import android.hardware.input.IKeyGestureHandler;
 import android.hardware.input.IKeyboardBacklightListener;
 import android.hardware.input.IStickyModifierStateListener;
 import android.hardware.input.ITabletModeChangedListener;
@@ -164,7 +165,6 @@ public class InputManagerService extends IInputManager.Stub
     private static final int MSG_DELIVER_INPUT_DEVICES_CHANGED = 1;
     private static final int MSG_RELOAD_DEVICE_ALIASES = 2;
     private static final int MSG_DELIVER_TABLET_MODE_CHANGED = 3;
-    private static final int MSG_KEY_GESTURE_COMPLETED = 4;
 
     private static final int DEFAULT_VIBRATION_MAGNITUDE = 192;
     private static final AdditionalDisplayInputProperties
@@ -476,7 +476,7 @@ public class InputManagerService extends IInputManager.Stub
                         injector.getLooper(), injector.getUEventManager())
                 : new KeyboardBacklightControllerInterface() {};
         mStickyModifierStateController = new StickyModifierStateController();
-        mKeyGestureController = new KeyGestureController();
+        mKeyGestureController = new KeyGestureController(mContext, injector.getLooper());
         mKeyboardLedController = new KeyboardLedController(mContext, injector.getLooper(),
                 mNative);
         mKeyRemapper = new KeyRemapper(mContext, mNative, mDataStore, injector.getLooper());
@@ -2458,6 +2458,11 @@ public class InputManagerService extends IInputManager.Stub
     // Native callback.
     @SuppressWarnings("unused")
     private long interceptKeyBeforeDispatching(IBinder focus, KeyEvent event, int policyFlags) {
+        // TODO(b/358569822): Move shortcut trigger logic from PWM to KeyGestureController
+        long value = mKeyGestureController.interceptKeyBeforeDispatching(focus, event, policyFlags);
+        if (value != 0) { // If key is consumed (i.e. non-zero value)
+            return value;
+        }
         return mWindowManagerCallbacks.interceptKeyBeforeDispatching(focus, event, policyFlags);
     }
 
@@ -2763,33 +2768,38 @@ public class InputManagerService extends IInputManager.Stub
 
     @Override
     @PermissionManuallyEnforced
-    public void registerKeyGestureEventListener(
-            @NonNull IKeyGestureEventListener listener) {
+    public void registerKeyGestureEventListener(@NonNull IKeyGestureEventListener listener) {
         enforceManageKeyGesturePermission();
 
         Objects.requireNonNull(listener);
-        mKeyGestureController.registerKeyGestureEventListener(listener,
-                Binder.getCallingPid());
+        mKeyGestureController.registerKeyGestureEventListener(listener, Binder.getCallingPid());
     }
 
     @Override
     @PermissionManuallyEnforced
-    public void unregisterKeyGestureEventListener(
-            @NonNull IKeyGestureEventListener listener) {
+    public void unregisterKeyGestureEventListener(@NonNull IKeyGestureEventListener listener) {
         enforceManageKeyGesturePermission();
 
         Objects.requireNonNull(listener);
-        mKeyGestureController.unregisterKeyGestureEventListener(listener,
-                Binder.getCallingPid());
+        mKeyGestureController.unregisterKeyGestureEventListener(listener, Binder.getCallingPid());
     }
 
-    private void handleKeyGestureCompleted(KeyGestureEvent event) {
-        InputDevice device = getInputDevice(event.getDeviceId());
-        if (device == null || device.isVirtual()) {
-            return;
-        }
-        KeyboardMetricsCollector.logKeyboardSystemsEventReportedAtom(device, event);
-        mKeyGestureController.onKeyGestureEvent(event);
+    @Override
+    @PermissionManuallyEnforced
+    public void registerKeyGestureHandler(@NonNull IKeyGestureHandler handler) {
+        enforceManageKeyGesturePermission();
+
+        Objects.requireNonNull(handler);
+        mKeyGestureController.registerKeyGestureHandler(handler, Binder.getCallingPid());
+    }
+
+    @Override
+    @PermissionManuallyEnforced
+    public void unregisterKeyGestureHandler(@NonNull IKeyGestureHandler handler) {
+        enforceManageKeyGesturePermission();
+
+        Objects.requireNonNull(handler);
+        mKeyGestureController.unregisterKeyGestureHandler(handler, Binder.getCallingPid());
     }
 
     /**
@@ -2960,9 +2970,6 @@ public class InputManagerService extends IInputManager.Stub
                     boolean inTabletMode = (boolean) args.arg1;
                     deliverTabletModeChanged(whenNanos, inTabletMode);
                     break;
-                case MSG_KEY_GESTURE_COMPLETED:
-                    KeyGestureEvent event = (KeyGestureEvent) msg.obj;
-                    handleKeyGestureCompleted(event);
             }
         }
     }
@@ -3292,9 +3299,8 @@ public class InputManagerService extends IInputManager.Stub
         @Override
         public void notifyKeyGestureCompleted(int deviceId, int[] keycodes, int modifierState,
                 @KeyGestureEvent.KeyGestureType int gestureType) {
-            mHandler.obtainMessage(MSG_KEY_GESTURE_COMPLETED,
-                    new KeyGestureEvent(deviceId, keycodes, modifierState,
-                            gestureType)).sendToTarget();
+            mKeyGestureController.notifyKeyGestureCompleted(deviceId, keycodes, modifierState,
+                    gestureType);
         }
     }
 

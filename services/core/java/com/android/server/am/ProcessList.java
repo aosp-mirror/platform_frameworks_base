@@ -3769,7 +3769,7 @@ public final class ProcessList {
                     boolean hasActivity = false;
                     int connUid = 0;
                     int connGroup = 0;
-                    while (i >= bottomI) {
+                    while (subProc.info.uid != uid) {
                         mLruProcesses.remove(i);
                         mLruProcesses.add(endIndex, subProc);
                         if (DEBUG_LRU) Slog.d(TAG_LRU,

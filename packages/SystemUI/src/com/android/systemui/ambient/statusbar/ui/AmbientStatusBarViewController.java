@@ -27,6 +27,7 @@ import android.text.format.DateFormat;
 import android.util.PluralsMessageFormatter;
 import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
@@ -39,6 +40,9 @@ import com.android.systemui.dreams.DreamOverlayStatusBarItemsProvider;
 import com.android.systemui.dreams.DreamOverlayStatusBarItemsProvider.StatusBarItem;
 import com.android.systemui.log.LogBuffer;
 import com.android.systemui.log.dagger.DreamLog;
+import com.android.systemui.privacy.PrivacyItem;
+import com.android.systemui.privacy.PrivacyItemController;
+import com.android.systemui.privacy.PrivacyType;
 import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.CrossFadeHelper;
@@ -79,6 +83,7 @@ public class AmbientStatusBarViewController extends ViewController<AmbientStatus
     private final DreamOverlayStateController mDreamOverlayStateController;
     private final UserTracker mUserTracker;
     private final WifiInteractor mWifiInteractor;
+    private final PrivacyItemController mPrivacyItemController;
     private final StatusBarWindowStateController mStatusBarWindowStateController;
     private final DreamOverlayStatusBarItemsProvider mStatusBarItemsProvider;
     private final Executor mMainExecutor;
@@ -131,6 +136,9 @@ public class AmbientStatusBarViewController extends ViewController<AmbientStatus
     private final StatusBarWindowStateListener mStatusBarWindowStateListener =
             this::onSystemStatusBarStateChanged;
 
+    private final PrivacyItemController.Callback mPrivacyItemControllerCallback =
+            this::onPrivacyItemsChanged;
+
     @Inject
     public AmbientStatusBarViewController(
             AmbientStatusBarView view,
@@ -147,6 +155,7 @@ public class AmbientStatusBarViewController extends ViewController<AmbientStatus
             DreamOverlayStateController dreamOverlayStateController,
             UserTracker userTracker,
             WifiInteractor wifiInteractor,
+            PrivacyItemController privacyItemController,
             CommunalSceneInteractor communalSceneInteractor,
             @DreamLog LogBuffer logBuffer) {
         super(view);
@@ -163,6 +172,7 @@ public class AmbientStatusBarViewController extends ViewController<AmbientStatus
         mDreamOverlayStateController = dreamOverlayStateController;
         mUserTracker = userTracker;
         mWifiInteractor = wifiInteractor;
+        mPrivacyItemController = privacyItemController;
         mCommunalSceneInteractor = communalSceneInteractor;
         mLogger = new DreamLogger(logBuffer, TAG);
     }
@@ -174,10 +184,12 @@ public class AmbientStatusBarViewController extends ViewController<AmbientStatus
         // Register to receive show/hide updates for the system status bar. Our custom status bar
         // needs to hide when the system status bar is showing to ovoid overlapping status bars.
         mStatusBarWindowStateController.addListener(mStatusBarWindowStateListener);
+        mPrivacyItemController.addCallback(mPrivacyItemControllerCallback);
     }
 
     @Override
     public void destroy() {
+        mPrivacyItemController.removeCallback(mPrivacyItemControllerCallback);
         mStatusBarWindowStateController.removeListener(mStatusBarWindowStateListener);
 
         super.destroy();
@@ -274,6 +286,11 @@ public class AmbientStatusBarViewController extends ViewController<AmbientStatus
                 R.string.wifi_unavailable_dream_overlay_content_description);
     }
 
+    void updateLocationStatusIcon(boolean enabled) {
+        showIcon(AmbientStatusBarView.STATUS_ICON_LOCATION_ACTIVE, enabled,
+                R.string.location_active_dream_overlay_content_description);
+    }
+
     private void updateAlarmStatusIcon() {
         final AlarmManager.AlarmClockInfo alarm =
                 mAlarmManager.getNextAlarmClock(mUserTracker.getUserId());
@@ -367,6 +384,11 @@ public class AmbientStatusBarViewController extends ViewController<AmbientStatus
         }
 
         mMainExecutor.execute(this::updateVisibility);
+    }
+
+    private void onPrivacyItemsChanged(@NonNull List<PrivacyItem> privacyItems) {
+        updateLocationStatusIcon(privacyItems.stream()
+                .anyMatch(item -> item.getPrivacyType() == PrivacyType.TYPE_LOCATION));
     }
 
     private void onStatusBarItemsChanged(List<StatusBarItem> newItems) {
