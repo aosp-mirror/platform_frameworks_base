@@ -16,7 +16,6 @@
 
 package com.android.server.locksettings;
 
-import static android.security.Flags.reportPrimaryAuthAttempts;
 import static android.Manifest.permission.ACCESS_KEYGUARD_SECURE_STORAGE;
 import static android.Manifest.permission.CONFIGURE_FACTORY_RESET_PROTECTION;
 import static android.Manifest.permission.MANAGE_BIOMETRIC;
@@ -32,6 +31,7 @@ import static android.content.Intent.ACTION_MAIN_USER_LOCKSCREEN_KNOWLEDGE_FACTO
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.UserHandle.USER_ALL;
 import static android.os.UserHandle.USER_SYSTEM;
+import static android.security.Flags.reportPrimaryAuthAttempts;
 
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PASSWORD_OR_PIN;
@@ -1836,6 +1836,13 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     /**
+     * Set a new LSKF for the given user/profile. Only succeeds if the synthetic password for the
+     * user is protected by the given {@param savedCredential}.
+     * <p>
+     * When {@link android.security.Flags#clearStrongAuthOnAddPrimaryCredential()} is enabled and
+     * setting a new credential where there was none, updates the strong auth state for
+     * {@param userId} to <tt>STRONG_AUTH_NOT_REQUIRED</tt>.
+     *
      * @param savedCredential if the user is a profile with
      * {@link UserManager#isCredentialSharableWithParent()} with unified challenge and
      *   savedCredential is empty, LSS will try to re-derive the profile password internally.
@@ -1884,6 +1891,12 @@ public class LockSettingsService extends ILockSettings.Stub {
 
             onSyntheticPasswordUnlocked(userId, sp);
             setLockCredentialWithSpLocked(credential, sp, userId);
+            if (android.security.Flags.clearStrongAuthOnAddPrimaryCredential()
+                    && savedCredential.isNone() && !credential.isNone()) {
+                // Clear the strong auth value, since the LSKF has just been entered and set,
+                // but only when the previous credential was None.
+                mStrongAuth.reportUnlock(userId);
+            }
             sendCredentialsOnChangeIfRequired(credential, userId, isLockTiedToParent);
             return true;
         }

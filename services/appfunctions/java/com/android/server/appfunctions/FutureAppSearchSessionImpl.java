@@ -30,6 +30,8 @@ import android.app.appsearch.GetByDocumentIdRequest;
 import android.app.appsearch.GetSchemaResponse;
 import android.app.appsearch.PutDocumentsRequest;
 import android.app.appsearch.RemoveByDocumentIdRequest;
+import android.app.appsearch.SearchResult;
+import android.app.appsearch.SearchResults;
 import android.app.appsearch.SearchSpec;
 import android.app.appsearch.SetSchemaRequest;
 import android.app.appsearch.SetSchemaResponse;
@@ -37,6 +39,7 @@ import android.app.appsearch.SetSchemaResponse;
 import com.android.internal.infra.AndroidFuture;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 
@@ -176,11 +179,38 @@ public class FutureAppSearchSessionImpl implements FutureAppSearchSession {
             @NonNull String queryExpression, @NonNull SearchSpec searchSpec) {
         return getSessionAsync()
                 .thenApply(session -> session.search(queryExpression, searchSpec))
-                .thenApply(result -> new FutureSearchResults(result, mExecutor));
+                .thenApply(result -> new FutureSearchResultsImpl(result, mExecutor));
     }
 
     @Override
     public void close() throws IOException {}
+
+    private static final class FutureSearchResultsImpl implements FutureSearchResults {
+        private final SearchResults mSearchResults;
+        private final Executor mExecutor;
+
+        private FutureSearchResultsImpl(
+                @NonNull SearchResults searchResults, @NonNull Executor executor) {
+            this.mSearchResults = searchResults;
+            this.mExecutor = executor;
+        }
+
+        @Override
+        public AndroidFuture<List<SearchResult>> getNextPage() {
+            AndroidFuture<AppSearchResult<List<SearchResult>>> nextPageFuture =
+                    new AndroidFuture<>();
+
+            mSearchResults.getNextPage(mExecutor, nextPageFuture::complete);
+            return nextPageFuture.thenApply(
+                    result -> {
+                        if (result.isSuccess()) {
+                            return result.getResultValue();
+                        } else {
+                            throw new RuntimeException(failedResultToException(result));
+                        }
+                    });
+        }
+    }
 
     private static final class BatchResultCallbackAdapter<K, V>
             implements BatchResultCallback<K, V> {

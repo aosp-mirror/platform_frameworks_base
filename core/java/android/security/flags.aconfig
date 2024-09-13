@@ -99,3 +99,10 @@ flag {
   description: "Causes TrustManagerService to listen for credential attempts and ignore reports from upstream"
   bug: "323086607"
 }
+
+flag {
+    name: "clear_strong_auth_on_add_primary_credential"
+    namespace: "biometrics"
+    description: "Clear StrongAuth on add credential"
+    bug: "320817991"
+}

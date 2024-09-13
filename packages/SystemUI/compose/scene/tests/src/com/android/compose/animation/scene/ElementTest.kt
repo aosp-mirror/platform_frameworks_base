@@ -52,6 +52,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.assertPositionInRootIsEqualTo
 import androidx.compose.ui.test.assertTopPositionInRootIsEqualTo
+import androidx.compose.ui.test.hasParent
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -2487,5 +2488,35 @@ class ElementTest {
         scope.launch { state.startTransition(bToA) }
         rule.waitForIdle()
         return layoutImpl
+    }
+
+    @Test
+    fun elementComposableShouldPropagateMinConstraints() {
+        val contentTestTag = "content"
+        val movable = MovableElementKey("movable", contents = setOf(SceneA))
+        rule.setContent {
+            TestContentScope(currentScene = SceneA) {
+                Column {
+                    Element(TestElements.Foo, Modifier.size(40.dp)) {
+                        content {
+                            // Modifier.size() sets a preferred size and this should be ignored
+                            // because of the previously set 40dp size.
+                            Box(Modifier.testTag(contentTestTag).size(20.dp))
+                        }
+                    }
+
+                    MovableElement(movable, Modifier.size(40.dp)) {
+                        content { Box(Modifier.testTag(contentTestTag).size(20.dp)) }
+                    }
+                }
+            }
+        }
+
+        rule
+            .onNode(hasTestTag(contentTestTag) and hasParent(isElement(TestElements.Foo)))
+            .assertSizeIsEqualTo(40.dp)
+        rule
+            .onNode(hasTestTag(contentTestTag) and hasParent(isElement(movable)))
+            .assertSizeIsEqualTo(40.dp)
     }
 }

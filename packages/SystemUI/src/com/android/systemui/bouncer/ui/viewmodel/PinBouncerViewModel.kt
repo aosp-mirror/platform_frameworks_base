@@ -31,6 +31,7 @@ import com.android.keyguard.PinShapeAdapter
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.SimBouncerInteractor
+import com.android.systemui.bouncer.shared.flag.ComposeBouncerFlags
 import com.android.systemui.res.R
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -262,6 +263,15 @@ constructor(
                 }
             }
             else -> false
+        }
+    }
+
+    /** Notifies that the user has pressed down on a digit button. */
+    fun onDigitButtonDown() {
+        if (ComposeBouncerFlags.isOnlyComposeBouncerEnabled()) {
+            // Current PIN bouncer informs FalsingInteractor#avoidGesture() upon every Pin button
+            // touch.
+            super.onDown()
         }
     }
 

@@ -4409,6 +4409,17 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         for (int i = mChildren.size() - 1; i >= 0; i--) {
             committed |= mChildren.get(i).commitFinishDrawing(t);
         }
+
+        // When a new activity is showing, update dim in this transaction
+        if (Flags.updateDimsWhenWindowShown()) {
+            final Dimmer dimmer = getDimController();
+            final WindowContainer<?> dimParent = getDimParent();
+            if (dimmer != null && dimParent != null) {
+                dimParent.adjustDims();
+                dimmer.updateDims(t);
+            }
+        }
+
         // In case commitFinishDrawingLocked starts a window level animation, make sure the surface
         // operation (reparent to leash) is synced with the visibility by transition.
         if (getAnimationLeash() != null) {
@@ -5302,6 +5313,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             applyDims();
         }
         super.prepareSurfaces();
+    }
+
+    @Override
+    void adjustDims() {
+        applyDims();
+        super.adjustDims();
     }
 
     void updateSurfacePositionIfNeeded() {

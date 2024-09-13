@@ -92,3 +92,13 @@ android_test {
     // Required for TestParameterInjector
     javacflags: ["-parameters"],
 }
+
+test_module_config {
+    name: "FrameworksUiServicesTests_notification",
+    base: "FrameworksUiServicesTests",
+    test_suites: [
+        "automotive-tests",
+        "device-tests",
+    ],
+    exclude_annotations: ["androidx.test.filters.LargeTest"],
+}

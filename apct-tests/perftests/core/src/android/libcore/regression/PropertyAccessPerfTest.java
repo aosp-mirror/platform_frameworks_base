@@ -16,8 +16,8 @@
 
 package android.libcore.regression;
 
-import androidx.benchmark.BenchmarkState;
-import androidx.benchmark.junit4.BenchmarkRule;
+import android.perftests.utils.BenchmarkState;
+import android.perftests.utils.PerfStatusReporter;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -33,7 +33,7 @@ import java.lang.reflect.Method;
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public final class PropertyAccessPerfTest {
-    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
+    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
     private View mView = new View();
     private Method mSetX;
@@ -50,7 +50,7 @@ public final class PropertyAccessPerfTest {
 
     @Test
     public void timeDirectSetter() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             mView.mSetX(0.1f);
         }
@@ -58,7 +58,7 @@ public final class PropertyAccessPerfTest {
 
     @Test
     public void timeDirectFieldSet() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             mView.mX = 0.1f;
         }
@@ -66,7 +66,7 @@ public final class PropertyAccessPerfTest {
 
     @Test
     public void timeDirectSetterAndBomXing() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             Float value = 0.1f;
             mView.mSetX(value);
@@ -75,7 +75,7 @@ public final class PropertyAccessPerfTest {
 
     @Test
     public void timeDirectFieldSetAndBomXing() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             Float value = 0.1f;
             mView.mX = value;
@@ -84,7 +84,7 @@ public final class PropertyAccessPerfTest {
 
     @Test
     public void timeReflectionSetterAndTwoBomXes() throws Exception {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             mSetX.invoke(mView, 0.1f);
         }
@@ -92,7 +92,7 @@ public final class PropertyAccessPerfTest {
 
     @Test
     public void timeReflectionSetterAndOneBomX() throws Exception {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             mArgsBomX[0] = 0.1f;
             mSetX.invoke(mView, mArgsBomX);
@@ -101,7 +101,7 @@ public final class PropertyAccessPerfTest {
 
     @Test
     public void timeReflectionFieldSet() throws Exception {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             mX.setFloat(mView, 0.1f);
         }
@@ -109,7 +109,7 @@ public final class PropertyAccessPerfTest {
 
     @Test
     public void timeGeneratedSetter() throws Exception {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             mGeneratedSetter.setFloat(mView, 0.1f);
         }
@@ -117,7 +117,7 @@ public final class PropertyAccessPerfTest {
 
     @Test
     public void timeGeneratedFieldSet() throws Exception {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             mGeneratedField.setFloat(mView, 0.1f);
         }

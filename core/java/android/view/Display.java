@@ -20,6 +20,8 @@ import static android.Manifest.permission.CONFIGURE_DISPLAY_COLOR_MODE;
 import static android.Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS;
 import static android.hardware.flags.Flags.FLAG_OVERLAYPROPERTIES_CLASS_API;
 
+import static com.android.server.display.feature.flags.Flags.FLAG_HIGHEST_HDR_SDR_RATIO_API;
+
 import android.Manifest;
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
@@ -1496,6 +1498,15 @@ public final class Display {
         if (toRemove != null) {
             mGlobal.unregisterDisplayListener(toRemove);
         }
+    }
+
+    /**
+     * @return The highest possible HDR/SDR ratio. If {@link #isHdrSdrRatioAvailable()} returns
+     * false, this method returns 1.
+     */
+    @FlaggedApi(FLAG_HIGHEST_HDR_SDR_RATIO_API)
+    public float getHighestHdrSdrRatio() {
+        return mGlobal.getHighestHdrSdrRatio(mDisplayId);
     }
 
     /**

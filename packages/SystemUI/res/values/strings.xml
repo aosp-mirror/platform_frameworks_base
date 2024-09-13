@@ -3369,6 +3369,8 @@
     <!-- Toast shown when a notification does not support dragging to split [CHAR LIMIT=NONE] -->
     <string name="drag_split_not_supported">This notification does not support dragging to split screen</string>
 
+    <!-- Content description for the location icon in the dream overlay status bar [CHAR LIMIT=NONE] -->
+    <string name="dream_overlay_location_active">Location active</string>
     <!-- Content description for the Wi-Fi off icon in the dream overlay status bar [CHAR LIMIT=NONE] -->
     <string name="dream_overlay_status_bar_wifi_off">Wi\u2011Fi unavailable</string>
     <!-- Content description for the priority mode icon in the dream overlay status bar [CHAR LIMIT=NONE] -->
@@ -3561,6 +3563,9 @@
     <!-- Content description for Wi-Fi not available icon on dream [CHAR LIMIT=NONE]-->
     <string name="wifi_unavailable_dream_overlay_content_description">Wi-Fi not available</string>
 
+    <!-- Content description for location in use icon on dream [CHAR LIMIT=NONE] -->
+    <string name="location_active_dream_overlay_content_description">Location active</string>
+
     <!-- Content description for camera blocked icon on dream [CHAR LIMIT=NONE] -->
     <string name="camera_blocked_dream_overlay_content_description">Camera blocked</string>
 
@@ -3724,8 +3729,8 @@
     <string name="touchpad_tutorial_back_gesture_button">Back gesture</string>
     <!-- Label for button opening tutorial for back gesture on touchpad [CHAR LIMIT=NONE] -->
     <string name="touchpad_tutorial_home_gesture_button">Home gesture</string>
-    <!-- Label for button opening tutorial on using Action key from keyboard [CHAR LIMIT=NONE] -->
-    <string name="touchpad_tutorial_action_key_button">Action key</string>
+    <!-- Label for button opening tutorial for "view recent apps" gesture on touchpad [CHAR LIMIT=NONE] -->
+    <string name="touchpad_tutorial_recent_apps_gesture_button">View recent apps</string>
     <!-- Label for button finishing touchpad tutorial [CHAR LIMIT=NONE] -->
     <string name="touchpad_tutorial_done_button">Done</string>
     <!-- BACK GESTURE -->
@@ -3747,6 +3752,15 @@ Action + ESC for this.</string>
     <string name="touchpad_home_gesture_success_title">Nice!</string>
     <!-- Text shown to the user after they complete home gesture tutorial [CHAR LIMIT=NONE] -->
     <string name="touchpad_home_gesture_success_body">You completed the go home gesture.</string>
+    <!-- RECENT APPS GESTURE -->
+    <!-- Touchpad recent apps gesture action name in tutorial [CHAR LIMIT=NONE] -->
+    <string name="touchpad_recent_apps_gesture_action_title">View recent apps</string>
+    <!-- Touchpad recent apps gesture guidance in gestures tutorial [CHAR LIMIT=NONE] -->
+    <string name="touchpad_recent_apps_gesture_guidance">Swipe up and hold using three fingers on your touchpad.</string>
+    <!-- Screen title after recent apps gesture was done successfully [CHAR LIMIT=NONE] -->
+    <string name="touchpad_recent_apps_gesture_success_title">Great job!</string>
+    <!-- Text shown to the user after they complete recent apps gesture tutorial [CHAR LIMIT=NONE] -->
+    <string name="touchpad_recent_apps_gesture_success_body">You completed the view recent apps gesture.</string>
 
     <!-- KEYBOARD TUTORIAL-->
     <!-- Action key tutorial title [CHAR LIMIT=NONE] -->
@@ -3802,16 +3816,16 @@ Action + ESC for this.</string>
     <string name="all_apps_edu_notification_content">Press the action key at any time. Tap to learn more gestures.</string>
 
     <!-- Title for Extra Dim dialog [CHAR LIMIT=NONE] -->
-    <string name="accessibility_deprecate_extra_dim_dialog_title">Extra dim is now part of the brightness bar</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_title">Extra dim is now part of the brightness slider</string>
     <!-- Content description for Extra Dim dialog. This helps users understand that we could make screen much dimmer by lowering the brightness through the brightness bar in a dark environment. [CHAR LIMIT=NONE] -->
     <string name="accessibility_deprecate_extra_dim_dialog_description">
-        You can now make the screen extra dim by lowering the brightness level even further from the top of your screen.\n\nThis works best when you\'re in a dark environment.
+        You can now make the screen extra dim by lowering the brightness level even further.\n\nSince this feature is now part of the brightness slider, extra dim shortcuts are being removed.
     </string>
     <!-- Label for button removing Extra Dim shortcuts [CHAR LIMIT=NONE] -->
-    <string name="accessibility_deprecate_extra_dim_dialog_button">Remove extra dim shortcut</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_button">Remove extra dim shortcuts</string>
     <!-- Toast message for notifying users to use regular brightness bar to lower the brightness. [CHAR LIMIT=NONE] -->
     <string name="accessibility_deprecate_extra_dim_dialog_toast">
-        Extra dim shortcut removed. To lower your brightness, use the regular brightness bar.</string>
+        Extra dim shortcuts removed</string>
 
     <!-- Label for category in QS Edit mode list of tiles, for tiles that are related to connectivity, e.g. Internet. [CHAR LIMIT=NONE] -->
     <string name="qs_edit_mode_category_connectivity">

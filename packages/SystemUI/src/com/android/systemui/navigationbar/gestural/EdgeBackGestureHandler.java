@@ -1335,14 +1335,16 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
     public void setBackAnimation(@Nullable BackAnimation backAnimation) {
         mBackAnimation = backAnimation;
         if (backAnimation != null) {
-            backAnimation.setPilferPointerCallback(this::pilferPointers);
+            final Executor uiThreadExecutor = mUiThreadContext.getExecutor();
+            backAnimation.setPilferPointerCallback(
+                    () -> uiThreadExecutor.execute(this::pilferPointers));
             backAnimation.setTopUiRequestCallback(
-                    (requestTopUi, tag) -> mUiThreadContext.getExecutor().execute(() ->
+                    (requestTopUi, tag) -> uiThreadExecutor.execute(() ->
                             mNotificationShadeWindowController.setRequestTopUi(requestTopUi, tag)));
             updateBackAnimationThresholds();
             if (mLightBarControllerProvider.get() != null) {
                 mBackAnimation.setStatusBarCustomizer((appearance) ->
-                        mUiThreadContext.getExecutor().execute(() ->
+                        uiThreadExecutor.execute(() ->
                             mLightBarControllerProvider.get()
                                     .customizeStatusBarAppearance(appearance)));
             }

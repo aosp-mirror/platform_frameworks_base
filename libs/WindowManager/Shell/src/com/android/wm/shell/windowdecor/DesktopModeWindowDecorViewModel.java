@@ -41,6 +41,7 @@ import static com.android.wm.shell.desktopmode.DesktopModeVisualIndicator.Indica
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_UNDEFINED;
 
 import android.annotation.NonNull;
@@ -122,6 +123,7 @@ import com.android.wm.shell.windowdecor.DesktopModeWindowDecoration.ExclusionReg
 import com.android.wm.shell.windowdecor.extension.InsetsStateKt;
 import com.android.wm.shell.windowdecor.extension.TaskInfoKt;
 import com.android.wm.shell.windowdecor.viewholder.AppHeaderViewHolder;
+import com.android.wm.shell.windowdecor.viewhost.WindowDecorViewHostSupplier;
 
 import kotlin.Unit;
 
@@ -155,6 +157,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     private final InteractionJankMonitor mInteractionJankMonitor;
     private final MultiInstanceHelper mMultiInstanceHelper;
     private final Optional<DesktopTasksLimiter> mDesktopTasksLimiter;
+    private final WindowDecorViewHostSupplier mWindowDecorViewHostSupplier;
     private boolean mTransitionDragActive;
 
     private SparseArray<EventReceiver> mEventReceiversByDisplay = new SparseArray<>();
@@ -223,8 +226,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             AssistContentRequester assistContentRequester,
             MultiInstanceHelper multiInstanceHelper,
             Optional<DesktopTasksLimiter> desktopTasksLimiter,
-            Optional<DesktopActivityOrientationChangeHandler> activityOrientationChangeHandler
-    ) {
+            Optional<DesktopActivityOrientationChangeHandler> activityOrientationChangeHandler,
+            WindowDecorViewHostSupplier windowDecorViewHostSupplier) {
         this(
                 context,
                 shellExecutor,
@@ -244,6 +247,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 genericLinksParser,
                 assistContentRequester,
                 multiInstanceHelper,
+                windowDecorViewHostSupplier,
                 new DesktopModeWindowDecoration.Factory(),
                 new InputMonitorFactory(),
                 SurfaceControl.Transaction::new,
@@ -275,6 +279,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             AppToWebGenericLinksParser genericLinksParser,
             AssistContentRequester assistContentRequester,
             MultiInstanceHelper multiInstanceHelper,
+            WindowDecorViewHostSupplier windowDecorViewHostSupplier,
             DesktopModeWindowDecoration.Factory desktopModeWindowDecorFactory,
             InputMonitorFactory inputMonitorFactory,
             Supplier<SurfaceControl.Transaction> transactionFactory,
@@ -300,6 +305,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         mMultiInstanceHelper = multiInstanceHelper;
         mShellCommandHandler = shellCommandHandler;
         mWindowManager = windowManager;
+        mWindowDecorViewHostSupplier = windowDecorViewHostSupplier;
         mDesktopModeWindowDecorFactory = desktopModeWindowDecorFactory;
         mInputMonitorFactory = inputMonitorFactory;
         mTransactionFactory = transactionFactory;
@@ -1098,8 +1104,22 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                         // If we are entering split select, handle will no longer be visible and
                         // should not be receiving any input.
                         if (resultType == TO_SPLIT_LEFT_INDICATOR
-                                || resultType != TO_SPLIT_RIGHT_INDICATOR) {
+                                || resultType == TO_SPLIT_RIGHT_INDICATOR) {
                             relevantDecor.disposeStatusBarInputLayer();
+                            // We should also dispose the other split task's input layer if
+                            // applicable.
+                            final int splitPosition = mSplitScreenController
+                                    .getSplitPosition(relevantDecor.mTaskInfo.taskId);
+                            if (splitPosition != SPLIT_POSITION_UNDEFINED) {
+                                final int oppositePosition =
+                                        splitPosition == SPLIT_POSITION_TOP_OR_LEFT
+                                                ? SPLIT_POSITION_BOTTOM_OR_RIGHT
+                                                : SPLIT_POSITION_TOP_OR_LEFT;
+                                final RunningTaskInfo oppositeTaskInfo =
+                                        mSplitScreenController.getTaskInfo(oppositePosition);
+                                mWindowDecorByTaskId.get(oppositeTaskInfo.taskId)
+                                        .disposeStatusBarInputLayer();
+                            }
                         }
                         mMoveToDesktopAnimator = null;
                         return;
@@ -1284,7 +1304,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                         mRootTaskDisplayAreaOrganizer,
                         mGenericLinksParser,
                         mAssistContentRequester,
-                        mMultiInstanceHelper);
+                        mMultiInstanceHelper,
+                        mWindowDecorViewHostSupplier);
         mWindowDecorByTaskId.put(taskInfo.taskId, windowDecoration);
 
         final TaskPositioner taskPositioner = mTaskPositionerFactory.create(

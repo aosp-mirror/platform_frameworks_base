@@ -215,6 +215,13 @@ flag {
 }
 
 flag {
+    name: "enable_desktop_windowing_exit_transitions"
+    namespace: "lse_desktop_experience"
+    description: "Enables exit desktop windowing transition & motion polish changes"
+    bug: "353650462"
+}
+
+flag {
     name: "enable_compat_ui_visibility_status"
     namespace: "lse_desktop_experience"
     description: "Enables the tracking of the status for compat ui elements."
