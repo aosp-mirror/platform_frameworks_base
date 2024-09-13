@@ -321,8 +321,8 @@ java_library {
 android_ravenwood_libgroup {
     name: "ravenwood-runtime",
     data: [
-        "framework-res",
-        "ravenwood-empty-res",
+        ":framework-res",
+        ":ravenwood-empty-res",
     ],
     libs: [
         "100-framework-minus-apex.ravenwood",
