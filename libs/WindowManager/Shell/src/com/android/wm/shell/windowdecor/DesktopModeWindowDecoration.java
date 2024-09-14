@@ -64,6 +64,7 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.WindowManager;
 import android.widget.ImageButton;
+import android.window.TaskSnapshot;
 import android.window.WindowContainerTransaction;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -86,6 +87,7 @@ import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
 import com.android.wm.shell.shared.desktopmode.DesktopModeFlags;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource;
+import com.android.wm.shell.shared.desktopmode.ManageWindowsViewContainer;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.windowdecor.extension.TaskInfoKt;
 import com.android.wm.shell.windowdecor.viewholder.AppHandleViewHolder;
@@ -93,9 +95,12 @@ import com.android.wm.shell.windowdecor.viewholder.AppHeaderViewHolder;
 import com.android.wm.shell.windowdecor.viewholder.WindowDecorationViewHolder;
 import com.android.wm.shell.windowdecor.viewhost.WindowDecorViewHostSupplier;
 
+import kotlin.Pair;
 import kotlin.Unit;
 import kotlin.jvm.functions.Function0;
+import kotlin.jvm.functions.Function1;
 
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -131,6 +136,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     private Function0<Unit> mOnToFullscreenClickListener;
     private Function0<Unit> mOnToSplitscreenClickListener;
     private Function0<Unit> mOnNewWindowClickListener;
+    private Function0<Unit> mOnManageWindowsClickListener;
     private DragPositioningCallback mDragPositioningCallback;
     private DragResizeInputListener mDragResizeListener;
     private DragDetector mDragDetector;
@@ -140,6 +146,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
 
     private final Point mPositionInParent = new Point();
     private HandleMenu mHandleMenu;
+    private boolean mMinimumInstancesFound;
+    private ManageWindowsViewContainer mManageWindowsMenu;
 
     private MaximizeMenu mMaximizeMenu;
 
@@ -283,6 +291,14 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     /** Registers a listener to be called when the decoration's new window action is triggered. */
     void setOnNewWindowClickListener(Function0<Unit> listener) {
         mOnNewWindowClickListener = listener;
+    }
+
+    /**
+     * Registers a listener to be called when the decoration's manage windows action is
+     * triggered.
+     */
+    void setManageWindowsClickListener(Function0<Unit> listener) {
+        mOnManageWindowsClickListener = listener;
     }
 
     void setCaptionListeners(
@@ -941,9 +957,10 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     /**
      * Updates app info and creates and displays handle menu window.
      */
-    void createHandleMenu() {
+    void createHandleMenu(boolean minimumInstancesFound) {
         // Requests assist content. When content is received, calls {@link #onAssistContentReceived}
         // which sets app info and creates the handle menu.
+        mMinimumInstancesFound = minimumInstancesFound;
         mAssistContentRequester.requestAssistContent(
                 mTaskInfo.taskId, this::onAssistContentReceived);
     }
@@ -956,8 +973,10 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         mWebUri = assistContent == null ? null : assistContent.getWebUri();
         loadAppInfoIfNeeded();
         updateGenericLink();
-
-        // Create and display handle menu
+        final boolean supportsMultiInstance = mMultiInstanceHelper
+                .supportsMultiInstanceSplit(mTaskInfo.baseActivity);
+        final boolean shouldShowManageWindowsButton = supportsMultiInstance
+                && mMinimumInstancesFound;
         mHandleMenu = mHandleMenuFactory.create(
                 this,
                 mWindowManagerWrapper,
@@ -966,9 +985,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 mAppName,
                 mSplitScreenController,
                 DesktopModeStatus.canEnterDesktopMode(mContext),
-                Flags.enableDesktopWindowingMultiInstanceFeatures()
-                        && mMultiInstanceHelper
-                        .supportsMultiInstanceSplit(mTaskInfo.baseActivity),
+                supportsMultiInstance,
+                shouldShowManageWindowsButton,
                 getBrowserLink(),
                 mResult.mCaptionWidth,
                 mResult.mCaptionHeight,
@@ -984,6 +1002,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 /* onToFullscreenClickListener= */ mOnToFullscreenClickListener,
                 /* onToSplitScreenClickListener= */ mOnToSplitscreenClickListener,
                 /* onNewWindowClickListener= */ mOnNewWindowClickListener,
+                /* onManageWindowsClickListener= */ mOnManageWindowsClickListener,
                 /* openInBrowserClickListener= */ (uri) -> {
                     mOpenInBrowserClickListener.accept(uri);
                     onCapturedLinkExpired();
@@ -998,6 +1017,47 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                     return Unit.INSTANCE;
                 }
         );
+        mMinimumInstancesFound = false;
+    }
+
+    void createManageWindowsMenu(@NonNull List<Pair<Integer, TaskSnapshot>> snapshotList,
+            @NonNull Function1<Integer, Unit> onIconClickListener
+    ) {
+        if (mTaskInfo.isFreeform()) {
+            mManageWindowsMenu = new DesktopHeaderManageWindowsMenu(
+                    mTaskInfo,
+                    mDisplayController,
+                    mRootTaskDisplayAreaOrganizer,
+                    mContext,
+                    mSurfaceControlBuilderSupplier,
+                    mSurfaceControlTransactionSupplier,
+                    snapshotList,
+                    onIconClickListener,
+                    /* onOutsideClickListener= */ () -> {
+                        closeManageWindowsMenu();
+                        return Unit.INSTANCE;
+                    }
+                    );
+        } else {
+            mManageWindowsMenu = new DesktopHandleManageWindowsMenu(
+                    mTaskInfo,
+                    mSplitScreenController,
+                    getCaptionX(),
+                    mResult.mCaptionWidth,
+                    mWindowManagerWrapper,
+                    mContext,
+                    snapshotList,
+                    onIconClickListener,
+                    /* onOutsideClickListener= */ () -> {
+                        closeManageWindowsMenu();
+                        return Unit.INSTANCE;
+                    }
+                    );
+        }
+    }
+
+    void closeManageWindowsMenu() {
+        mManageWindowsMenu.close();
     }
 
     private void updateGenericLink() {

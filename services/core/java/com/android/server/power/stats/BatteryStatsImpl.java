@@ -5031,9 +5031,7 @@ public class BatteryStatsImpl extends BatteryStats {
         if (mPretendScreenOff != pretendScreenOff) {
             mPretendScreenOff = pretendScreenOff;
             final int primaryScreenState = mPerDisplayBatteryStats[0].screenState;
-            noteScreenStateLocked(0, primaryScreenState,
-                    mClock.elapsedRealtime(), mClock.uptimeMillis(),
-                    mClock.currentTimeMillis());
+            noteScreenStateLocked(0, primaryScreenState);
         }
     }
 
@@ -5554,15 +5552,29 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
+    private static String getScreenStateTag(
+            int display, int state, @Display.StateReason int reason) {
+        return String.format(
+                "display=%d state=%s reason=%s",
+                display, Display.stateToString(state), Display.stateReasonToString(reason));
+    }
+
     @GuardedBy("this")
     public void noteScreenStateLocked(int display, int state) {
-        noteScreenStateLocked(display, state, mClock.elapsedRealtime(), mClock.uptimeMillis(),
-                mClock.currentTimeMillis());
+        noteScreenStateLocked(display, state, Display.STATE_REASON_UNKNOWN,
+                mClock.elapsedRealtime(), mClock.uptimeMillis(), mClock.currentTimeMillis());
     }
 
     @GuardedBy("this")
     public void noteScreenStateLocked(int display, int displayState,
-            long elapsedRealtimeMs, long uptimeMs, long currentTimeMs) {
+            @Display.StateReason int displayStateReason, long elapsedRealtimeMs, long uptimeMs,
+            long currentTimeMs) {
+        if (Flags.batteryStatsScreenStateEvent()) {
+            mHistory.recordEvent(
+                    elapsedRealtimeMs, uptimeMs, HistoryItem.EVENT_DISPLAY_STATE_CHANGED,
+                    getScreenStateTag(display, displayState, displayStateReason),
+                    Process.INVALID_UID);
+        }
         // Battery stats relies on there being 4 states. To accommodate this, new states beyond the
         // original 4 are mapped to one of the originals.
         if (displayState > MAX_TRACKED_SCREEN_STATE) {

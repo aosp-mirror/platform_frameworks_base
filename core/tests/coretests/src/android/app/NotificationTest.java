@@ -215,6 +215,25 @@ public class NotificationTest {
     }
 
     @Test
+    @EnableFlags(Flags.FLAG_API_RICH_ONGOING)
+    public void testGetShortCriticalText_noneSet() {
+        Notification n = new Notification.Builder(mContext, "test")
+                .build();
+
+        assertSame(n.getShortCriticalText(), null);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_API_RICH_ONGOING)
+    public void testGetShortCriticalText_isSet() {
+        Notification n = new Notification.Builder(mContext, "test")
+                .setShortCriticalText("short critical text here")
+                .build();
+
+        assertSame(n.getShortCriticalText(), "short critical text here");
+    }
+
+    @Test
     public void largeIconMultipleReferences_keptAfterParcelling() {
         Icon originalIcon = Icon.createWithBitmap(BitmapFactory.decodeResource(
                 mContext.getResources(), com.android.frameworks.coretests.R.drawable.test128x96));

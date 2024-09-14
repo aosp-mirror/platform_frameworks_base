@@ -147,6 +147,14 @@
             android:drawableStart="@drawable/desktop_mode_ic_handle_menu_new_window"
             android:drawableTint="?androidprv:attr/materialColorOnSurface"
             style="@style/DesktopModeHandleMenuActionButton" />
+
+        <Button
+            android:id="@+id/manage_windows_button"
+            android:contentDescription="@string/manage_windows_text"
+            android:text="@string/manage_windows_text"
+            android:drawableStart="@drawable/desktop_mode_ic_handle_menu_manage_windows"
+            android:drawableTint="?androidprv:attr/materialColorOnSurface"
+            style="@style/DesktopModeHandleMenuActionButton" />
     </LinearLayout>
 
     <LinearLayout

@@ -144,7 +144,7 @@ fun ShortcutHelper(
                 useSinglePane,
                 onSearchQueryChanged,
                 modifier,
-                onKeyboardSettingsClicked
+                onKeyboardSettingsClicked,
             )
         }
         else -> {
@@ -159,7 +159,7 @@ private fun ActiveShortcutHelper(
     useSinglePane: @Composable () -> Boolean,
     onSearchQueryChanged: (String) -> Unit,
     modifier: Modifier,
-    onKeyboardSettingsClicked: () -> Unit
+    onKeyboardSettingsClicked: () -> Unit,
 ) {
     var selectedCategoryType by
         remember(shortcutsUiState.defaultSelectedCategory) {
@@ -183,7 +183,7 @@ private fun ActiveShortcutHelper(
             shortcutsUiState.shortcutCategories,
             selectedCategoryType,
             onCategorySelected = { selectedCategoryType = it },
-            onKeyboardSettingsClicked
+            onKeyboardSettingsClicked,
         )
     }
 }
@@ -223,14 +223,14 @@ private fun ShortcutHelperSinglePane(
                 searchQuery,
                 categories,
                 selectedCategoryType,
-                onCategorySelected
+                onCategorySelected,
             )
             Spacer(modifier = Modifier.weight(1f))
         }
         KeyboardSettings(
             horizontalPadding = 16.dp,
             verticalPadding = 32.dp,
-            onClick = onKeyboardSettingsClicked
+            onClick = onKeyboardSettingsClicked,
         )
     }
 }
@@ -282,11 +282,7 @@ private fun CategoryItemSinglePane(
     onClick: () -> Unit,
     shape: Shape,
 ) {
-    Surface(
-        color = MaterialTheme.colorScheme.surfaceBright,
-        shape = shape,
-        onClick = onClick,
-    ) {
+    Surface(color = MaterialTheme.colorScheme.surfaceBright, shape = shape, onClick = onClick) {
         Column {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -327,7 +323,7 @@ fun ShortcutCategoryIcon(
     source: IconSource,
     modifier: Modifier = Modifier,
     contentDescription: String? = null,
-    tint: Color = LocalContentColor.current
+    tint: Color = LocalContentColor.current,
 ) {
     if (source.imageVector != null) {
         Icon(source.imageVector, contentDescription, modifier, tint)
@@ -350,7 +346,7 @@ private fun ShortcutCategory.label(context: Context): String =
 
 private fun getApplicationLabelForCurrentApp(
     type: ShortcutCategoryType.CurrentApp,
-    context: Context
+    context: Context,
 ): String {
     val packageManagerForUser = CentralSurfaces.getPackageManagerForUser(context, context.userId)
     return try {
@@ -358,7 +354,7 @@ private fun getApplicationLabelForCurrentApp(
             packageManagerForUser.getApplicationInfoAsUser(
                 type.packageName,
                 /* flags = */ 0,
-                context.userId
+                context.userId,
             )
         packageManagerForUser.getApplicationLabel(currentAppInfo).toString()
     } catch (e: NameNotFoundException) {
@@ -377,13 +373,13 @@ private fun RotatingExpandCollapseIcon(isExpanded: Boolean) {
                 } else {
                     0f
                 },
-            label = "Expand icon rotation animation"
+            label = "Expand icon rotation animation",
         )
     Icon(
         modifier =
             Modifier.background(
                     color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                    shape = CircleShape
+                    shape = CircleShape,
                 )
                 .graphicsLayer { rotationZ = expandIconRotationDegrees },
         imageVector = Icons.Default.ExpandMore,
@@ -393,7 +389,7 @@ private fun RotatingExpandCollapseIcon(isExpanded: Boolean) {
             } else {
                 stringResource(R.string.shortcut_helper_content_description_expand_icon)
             },
-        tint = MaterialTheme.colorScheme.onSurface
+        tint = MaterialTheme.colorScheme.onSurface,
     )
 }
 
@@ -435,11 +431,11 @@ private fun ShortcutHelperTwoPane(
         Row(Modifier.fillMaxWidth()) {
             StartSidePanel(
                 onSearchQueryChanged = onSearchQueryChanged,
-                modifier = Modifier.width(200.dp),
+                modifier = Modifier.width(240.dp),
                 categories = categories,
                 onKeyboardSettingsClicked = onKeyboardSettingsClicked,
                 selectedCategory = selectedCategoryType,
-                onCategoryClicked = { onCategorySelected(it.type) }
+                onCategoryClicked = { onCategorySelected(it.type) },
             )
             Spacer(modifier = Modifier.width(24.dp))
             EndSidePanel(searchQuery, Modifier.fillMaxSize().padding(top = 8.dp), selectedCategory)
@@ -475,7 +471,7 @@ private fun NoSearchResultsText(horizontalPadding: Dp, fillHeight: Boolean) {
             modifier
                 .padding(vertical = 8.dp)
                 .background(MaterialTheme.colorScheme.surfaceBright, RoundedCornerShape(28.dp))
-                .padding(horizontal = horizontalPadding, vertical = 24.dp)
+                .padding(horizontal = horizontalPadding, vertical = 24.dp),
     )
 }
 
@@ -484,7 +480,7 @@ private fun SubCategoryContainerDualPane(searchQuery: String, subCategory: Short
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(28.dp),
-        color = MaterialTheme.colorScheme.surfaceBright
+        color = MaterialTheme.colorScheme.surfaceBright,
     ) {
         Column(Modifier.padding(24.dp)) {
             SubCategoryTitle(subCategory.label)
@@ -519,7 +515,7 @@ private fun ShortcutView(modifier: Modifier, searchQuery: String, shortcut: Shor
                 isFocused = isFocused,
                 focusColor = MaterialTheme.colorScheme.secondary,
                 padding = 8.dp,
-                cornerRadius = 16.dp
+                cornerRadius = 16.dp,
             )
     ) {
         Row(
@@ -528,21 +524,12 @@ private fun ShortcutView(modifier: Modifier, searchQuery: String, shortcut: Shor
             verticalAlignment = Alignment.CenterVertically,
         ) {
             if (shortcut.icon != null) {
-                ShortcutIcon(
-                    shortcut.icon,
-                    modifier = Modifier.size(24.dp),
-                )
+                ShortcutIcon(shortcut.icon, modifier = Modifier.size(24.dp))
             }
-            ShortcutDescriptionText(
-                searchQuery = searchQuery,
-                shortcut = shortcut,
-            )
+            ShortcutDescriptionText(searchQuery = searchQuery, shortcut = shortcut)
         }
         Spacer(modifier = Modifier.width(16.dp))
-        ShortcutKeyCombinations(
-            modifier = Modifier.weight(1f),
-            shortcut = shortcut,
-        )
+        ShortcutKeyCombinations(modifier = Modifier.weight(1f), shortcut = shortcut)
     }
 }
 
@@ -566,14 +553,11 @@ fun ShortcutIcon(
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun ShortcutKeyCombinations(
-    modifier: Modifier = Modifier,
-    shortcut: Shortcut,
-) {
+private fun ShortcutKeyCombinations(modifier: Modifier = Modifier, shortcut: Shortcut) {
     FlowRow(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(8.dp),
-        horizontalArrangement = Arrangement.End
+        horizontalArrangement = Arrangement.End,
     ) {
         shortcut.commands.forEachIndexed { index, command ->
             if (index > 0) {
@@ -609,8 +593,8 @@ private fun ShortcutKeyContainer(shortcutKeyContent: @Composable BoxScope.() -> 
             Modifier.height(36.dp)
                 .background(
                     color = MaterialTheme.colorScheme.surfaceContainer,
-                    shape = RoundedCornerShape(12.dp)
-                ),
+                    shape = RoundedCornerShape(12.dp),
+                )
     ) {
         shortcutKeyContent()
     }
@@ -630,7 +614,7 @@ private fun BoxScope.ShortcutIconKey(key: ShortcutKey.Icon) {
     Icon(
         painter = painterResource(key.drawableResId),
         contentDescription = null,
-        modifier = Modifier.align(Alignment.Center).padding(6.dp)
+        modifier = Modifier.align(Alignment.Center).padding(6.dp),
     )
 }
 
@@ -701,7 +685,7 @@ private fun StartSidePanel(
         KeyboardSettings(
             horizontalPadding = 24.dp,
             verticalPadding = 24.dp,
-            onKeyboardSettingsClicked
+            onKeyboardSettingsClicked,
         )
     }
 }
@@ -710,7 +694,7 @@ private fun StartSidePanel(
 private fun CategoriesPanelTwoPane(
     categories: List<ShortcutCategory>,
     selectedCategory: ShortcutCategoryType?,
-    onCategoryClicked: (ShortcutCategory) -> Unit
+    onCategoryClicked: (ShortcutCategory) -> Unit,
 ) {
     Column {
         categories.fastForEach {
@@ -718,7 +702,7 @@ private fun CategoriesPanelTwoPane(
                 label = it.label(LocalContext.current),
                 iconSource = it.icon,
                 selected = selectedCategory == it.type,
-                onClick = { onCategoryClicked(it) }
+                onClick = { onCategoryClicked(it) },
             )
         }
     }
@@ -747,7 +731,7 @@ private fun CategoryItemTwoPane(
                     isFocused = isFocused,
                     focusColor = MaterialTheme.colorScheme.secondary,
                     padding = 2.dp,
-                    cornerRadius = 33.dp
+                    cornerRadius = 33.dp,
                 ),
         shape = RoundedCornerShape(28.dp),
         color = colors.containerColor(selected).value,
@@ -758,7 +742,7 @@ private fun CategoryItemTwoPane(
                 modifier = Modifier.size(24.dp),
                 source = iconSource,
                 contentDescription = null,
-                tint = colors.iconColor(selected).value
+                tint = colors.iconColor(selected).value,
             )
             Spacer(Modifier.width(12.dp))
             Box(Modifier.weight(1f)) {
@@ -766,7 +750,7 @@ private fun CategoryItemTwoPane(
                     fontSize = 18.sp,
                     color = colors.textColor(selected).value,
                     style = MaterialTheme.typography.headlineSmall,
-                    text = label
+                    text = label,
                 )
             }
         }
@@ -777,7 +761,7 @@ private fun Modifier.outlineFocusModifier(
     isFocused: Boolean,
     focusColor: Color,
     padding: Dp,
-    cornerRadius: Dp
+    cornerRadius: Dp,
 ): Modifier {
     if (isFocused) {
         return this.drawWithContent {
@@ -795,7 +779,7 @@ private fun Modifier.outlineFocusModifier(
                     style = Stroke(width = 3.dp.toPx()),
                     topLeft = focusOutline.topLeft,
                     size = focusOutline.size,
-                    cornerRadius = CornerRadius(cornerRadius.toPx())
+                    cornerRadius = CornerRadius(cornerRadius.toPx()),
                 )
             }
             // Increasing Z-Index so focus outline is drawn on top of "selected" category
@@ -815,9 +799,9 @@ private fun TitleBar() {
             Text(
                 text = stringResource(R.string.shortcut_helper_title),
                 color = MaterialTheme.colorScheme.onSurface,
-                style = MaterialTheme.typography.headlineSmall
+                style = MaterialTheme.typography.headlineSmall,
             )
-        }
+        },
     )
 }
 
@@ -852,7 +836,7 @@ private fun ShortcutsSearchBar(onQueryChange: (String) -> Unit) {
         onSearch = {},
         leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
         placeholder = { Text(text = stringResource(R.string.shortcut_helper_search_placeholder)) },
-        content = {}
+        content = {},
     )
 }
 
@@ -874,21 +858,21 @@ private fun KeyboardSettings(horizontalPadding: Dp, verticalPadding: Dp, onClick
                         isFocused = isFocused,
                         focusColor = MaterialTheme.colorScheme.secondary,
                         padding = 8.dp,
-                        cornerRadius = 28.dp
+                        cornerRadius = 28.dp,
                     ),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
                 "Keyboard Settings",
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                fontSize = 16.sp
+                fontSize = 16.sp,
             )
             Spacer(modifier = Modifier.weight(1f))
             Icon(
                 imageVector = Icons.AutoMirrored.Default.OpenInNew,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(24.dp),
             )
         }
     }
@@ -900,17 +884,15 @@ object ShortcutHelper {
         val singlePaneFirstCategory =
             RoundedCornerShape(
                 topStart = Dimensions.SinglePaneCategoryCornerRadius,
-                topEnd = Dimensions.SinglePaneCategoryCornerRadius
+                topEnd = Dimensions.SinglePaneCategoryCornerRadius,
             )
         val singlePaneLastCategory =
             RoundedCornerShape(
                 bottomStart = Dimensions.SinglePaneCategoryCornerRadius,
-                bottomEnd = Dimensions.SinglePaneCategoryCornerRadius
+                bottomEnd = Dimensions.SinglePaneCategoryCornerRadius,
             )
         val singlePaneSingleCategory =
-            RoundedCornerShape(
-                size = Dimensions.SinglePaneCategoryCornerRadius,
-            )
+            RoundedCornerShape(size = Dimensions.SinglePaneCategoryCornerRadius)
         val singlePaneCategory = RectangleShape
     }
 

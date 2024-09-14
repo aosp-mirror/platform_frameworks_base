@@ -36,6 +36,7 @@ data class DeviceSettingItem(
     val className: String,
     val intentAction: String,
     val preferenceKey: String? = null,
+    val highlighted: Boolean = false,
     val extras: Bundle = Bundle.EMPTY,
 ) : Parcelable {
 
@@ -47,6 +48,7 @@ data class DeviceSettingItem(
             writeString(packageName)
             writeString(className)
             writeString(intentAction)
+            writeBoolean(highlighted)
             writeString(preferenceKey)
             writeBundle(extras)
         }
@@ -63,6 +65,7 @@ data class DeviceSettingItem(
                             packageName = readString() ?: "",
                             className = readString() ?: "",
                             intentAction = readString() ?: "",
+                            highlighted = readBoolean(),
                             preferenceKey = readString() ?: "",
                             extras = readBundle((Bundle::class.java.classLoader)) ?: Bundle.EMPTY,
                         )

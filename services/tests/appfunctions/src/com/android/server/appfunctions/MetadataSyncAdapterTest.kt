@@ -16,26 +16,28 @@
 package com.android.server.appfunctions
 
 import android.app.appfunctions.AppFunctionRuntimeMetadata
-import android.app.appfunctions.AppFunctionRuntimeMetadata.createParentAppFunctionRuntimeSchema
-import android.app.appfunctions.AppFunctionStaticMetadataHelper
+import android.app.appsearch.AppSearchBatchResult
 import android.app.appsearch.AppSearchManager
-import android.app.appsearch.AppSearchManager.SearchContext
+import android.app.appsearch.AppSearchResult
+import android.app.appsearch.AppSearchSchema
 import android.app.appsearch.GenericDocument
+import android.app.appsearch.GetByDocumentIdRequest
+import android.app.appsearch.GetSchemaResponse
 import android.app.appsearch.PutDocumentsRequest
+import android.app.appsearch.RemoveByDocumentIdRequest
 import android.app.appsearch.SearchResult
 import android.app.appsearch.SearchSpec
 import android.app.appsearch.SetSchemaRequest
+import android.app.appsearch.SetSchemaResponse
 import android.util.ArrayMap
 import android.util.ArraySet
+import android.util.Log
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.internal.infra.AndroidFuture
 import com.android.server.appfunctions.FutureAppSearchSession.FutureSearchResults
 import com.google.common.truth.Truth.assertThat
 import com.google.common.util.concurrent.MoreExecutors
-import java.util.concurrent.Executor
 import java.util.concurrent.atomic.AtomicBoolean
-import org.junit.After
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
@@ -47,46 +49,19 @@ class MetadataSyncAdapterTest {
     private val testExecutor = MoreExecutors.directExecutor()
     private val packageManager = context.packageManager
 
-    @Before
-    @After
-    fun clearData() {
-        val searchContext = SearchContext.Builder(TEST_DB).build()
-        FutureAppSearchSessionImpl(appSearchManager, testExecutor, searchContext).use {
-            val setSchemaRequest = SetSchemaRequest.Builder().setForceOverride(true).build()
-            it.setSchema(setSchemaRequest).get()
-        }
-    }
-
     @Test
     fun getPackageToFunctionIdMap() {
-        val searchContext: SearchContext = SearchContext.Builder(TEST_DB).build()
+        val searchSession = FakeSearchSession()
         val functionRuntimeMetadata =
             AppFunctionRuntimeMetadata.Builder(TEST_TARGET_PKG_NAME, "testFunctionId", "").build()
-        val setSchemaRequest =
-            SetSchemaRequest.Builder()
-                .addSchemas(AppFunctionRuntimeMetadata.createParentAppFunctionRuntimeSchema())
-                .addSchemas(
-                    AppFunctionRuntimeMetadata.createAppFunctionRuntimeSchema(TEST_TARGET_PKG_NAME)
-                )
-                .build()
         val putDocumentsRequest: PutDocumentsRequest =
             PutDocumentsRequest.Builder().addGenericDocuments(functionRuntimeMetadata).build()
-        FutureAppSearchSessionImpl(appSearchManager, testExecutor, searchContext).use {
-            val setSchemaResponse = it.setSchema(setSchemaRequest).get()
-            assertThat(setSchemaResponse).isNotNull()
-            val appSearchBatchResult = it.put(putDocumentsRequest).get()
-            assertThat(appSearchBatchResult.isSuccess).isTrue()
-        }
+        searchSession.put(putDocumentsRequest).get()
 
-        val metadataSyncAdapter =
-            MetadataSyncAdapter(
-                testExecutor,
-                FutureAppSearchSessionImpl(appSearchManager, testExecutor, searchContext),
-                packageManager,
-            )
         val packageToFunctionIdMap =
-            metadataSyncAdapter.getPackageToFunctionIdMap(
-                AppFunctionRuntimeMetadata.RUNTIME_SCHEMA_TYPE,
+            MetadataSyncAdapter.getPackageToFunctionIdMap(
+                searchSession,
+                "fakeSchema",
                 AppFunctionRuntimeMetadata.PROPERTY_FUNCTION_ID,
                 AppFunctionRuntimeMetadata.PROPERTY_PACKAGE_NAME,
             )
@@ -97,7 +72,7 @@ class MetadataSyncAdapterTest {
 
     @Test
     fun getPackageToFunctionIdMap_multipleDocuments() {
-        val searchContext: SearchContext = SearchContext.Builder(TEST_DB).build()
+        val searchSession = FakeSearchSession()
         val functionRuntimeMetadata =
             AppFunctionRuntimeMetadata.Builder(TEST_TARGET_PKG_NAME, "testFunctionId", "").build()
         val functionRuntimeMetadata1 =
@@ -106,13 +81,6 @@ class MetadataSyncAdapterTest {
             AppFunctionRuntimeMetadata.Builder(TEST_TARGET_PKG_NAME, "testFunctionId2", "").build()
         val functionRuntimeMetadata3 =
             AppFunctionRuntimeMetadata.Builder(TEST_TARGET_PKG_NAME, "testFunctionId3", "").build()
-        val setSchemaRequest =
-            SetSchemaRequest.Builder()
-                .addSchemas(AppFunctionRuntimeMetadata.createParentAppFunctionRuntimeSchema())
-                .addSchemas(
-                    AppFunctionRuntimeMetadata.createAppFunctionRuntimeSchema(TEST_TARGET_PKG_NAME)
-                )
-                .build()
         val putDocumentsRequest: PutDocumentsRequest =
             PutDocumentsRequest.Builder()
                 .addGenericDocuments(
@@ -122,21 +90,11 @@ class MetadataSyncAdapterTest {
                     functionRuntimeMetadata3,
                 )
                 .build()
-        FutureAppSearchSessionImpl(appSearchManager, testExecutor, searchContext).use {
-            val setSchemaResponse = it.setSchema(setSchemaRequest).get()
-            assertThat(setSchemaResponse).isNotNull()
-            val appSearchBatchResult = it.put(putDocumentsRequest).get()
-            assertThat(appSearchBatchResult.isSuccess).isTrue()
-        }
+        searchSession.put(putDocumentsRequest).get()
 
-        val metadataSyncAdapter =
-            MetadataSyncAdapter(
-                testExecutor,
-                FutureAppSearchSessionImpl(appSearchManager, testExecutor, searchContext),
-                packageManager,
-            )
         val packageToFunctionIdMap =
-            metadataSyncAdapter.getPackageToFunctionIdMap(
+            MetadataSyncAdapter.getPackageToFunctionIdMap(
+                searchSession,
                 AppFunctionRuntimeMetadata.RUNTIME_SCHEMA_TYPE,
                 AppFunctionRuntimeMetadata.PROPERTY_FUNCTION_ID,
                 AppFunctionRuntimeMetadata.PROPERTY_PACKAGE_NAME,
@@ -172,62 +130,21 @@ class MetadataSyncAdapterTest {
 
     @Test
     fun syncMetadata_noDiff() {
-        val searchContext: SearchContext = SearchContext.Builder(TEST_DB).build()
-        val appSearchSession =
-            PartialFakeFutureAppSearchSession(appSearchManager, testExecutor, searchContext)
-        val fakeFunctionId = "syncMetadata_noDiff"
-        val fakeStaticMetadata: GenericDocument =
-            GenericDocument.Builder<GenericDocument.Builder<*>>(
-                    AppFunctionStaticMetadataHelper.APP_FUNCTION_STATIC_NAMESPACE,
-                    AppFunctionStaticMetadataHelper.getDocumentIdForAppFunction(
-                        TEST_TARGET_PKG_NAME,
-                        fakeFunctionId,
-                    ),
-                    AppFunctionStaticMetadataHelper.STATIC_SCHEMA_TYPE,
-                )
-                .setPropertyString(
-                    AppFunctionStaticMetadataHelper.PROPERTY_PACKAGE_NAME,
-                    TEST_TARGET_PKG_NAME,
-                )
-                .setPropertyString(
-                    AppFunctionStaticMetadataHelper.PROPERTY_FUNCTION_ID,
-                    fakeFunctionId,
-                )
-                .build()
-        appSearchSession.overrideStaticMetadataSearchResult = mutableListOf(fakeStaticMetadata)
-        val putCorrespondingSchema =
-            appSearchSession
-                .setSchema(
-                    SetSchemaRequest.Builder()
-                        .addSchemas(
-                            createParentAppFunctionRuntimeSchema(),
-                            AppFunctionRuntimeMetadata.createAppFunctionRuntimeSchema(
-                                TEST_TARGET_PKG_NAME
-                            ),
-                        )
-                        .setForceOverride(true)
-                        .build()
-                )
-                .get()
-        assertThat(putCorrespondingSchema).isNotNull()
-        val putCorrespondingRuntimeMetadata =
-            appSearchSession
-                .put(
-                    PutDocumentsRequest.Builder()
-                        .addGenericDocuments(
-                            AppFunctionRuntimeMetadata.Builder(
-                                    TEST_TARGET_PKG_NAME,
-                                    fakeFunctionId,
-                                    "",
-                                )
-                                .build()
-                        )
-                        .build()
-                )
-                .get()
-        assertThat(putCorrespondingRuntimeMetadata.isSuccess).isTrue()
+        val runtimeSearchSession = FakeSearchSession()
+        val staticSearchSession = FakeSearchSession()
+        val functionRuntimeMetadata =
+            AppFunctionRuntimeMetadata.Builder(TEST_TARGET_PKG_NAME, "testFunctionId", "").build()
+        val putDocumentsRequest: PutDocumentsRequest =
+            PutDocumentsRequest.Builder().addGenericDocuments(functionRuntimeMetadata).build()
+        runtimeSearchSession.put(putDocumentsRequest).get()
+        staticSearchSession.put(putDocumentsRequest).get()
         val metadataSyncAdapter =
-            MetadataSyncAdapter(testExecutor, appSearchSession, context.packageManager)
+            MetadataSyncAdapter(
+                testExecutor,
+                runtimeSearchSession,
+                staticSearchSession,
+                packageManager,
+            )
 
         val submitSyncRequest = metadataSyncAdapter.submitSyncRequest()
 
@@ -257,31 +174,20 @@ class MetadataSyncAdapterTest {
 
     @Test
     fun syncMetadata_addedFunction() {
-        val searchContext: SearchContext = SearchContext.Builder(TEST_DB).build()
-        val appSearchSession =
-            PartialFakeFutureAppSearchSession(appSearchManager, testExecutor, searchContext)
-        val fakeFunctionId = "addedFunction1"
-        val fakeStaticMetadata: GenericDocument =
-            GenericDocument.Builder<GenericDocument.Builder<*>>(
-                    AppFunctionStaticMetadataHelper.APP_FUNCTION_STATIC_NAMESPACE,
-                    AppFunctionStaticMetadataHelper.getDocumentIdForAppFunction(
-                        TEST_TARGET_PKG_NAME,
-                        fakeFunctionId,
-                    ),
-                    AppFunctionStaticMetadataHelper.STATIC_SCHEMA_TYPE,
-                )
-                .setPropertyString(
-                    AppFunctionStaticMetadataHelper.PROPERTY_PACKAGE_NAME,
-                    TEST_TARGET_PKG_NAME,
-                )
-                .setPropertyString(
-                    AppFunctionStaticMetadataHelper.PROPERTY_FUNCTION_ID,
-                    fakeFunctionId,
-                )
-                .build()
-        appSearchSession.overrideStaticMetadataSearchResult = mutableListOf(fakeStaticMetadata)
+        val runtimeSearchSession = FakeSearchSession()
+        val staticSearchSession = FakeSearchSession()
+        val functionRuntimeMetadata =
+            AppFunctionRuntimeMetadata.Builder(TEST_TARGET_PKG_NAME, "testFunctionId", "").build()
+        val putDocumentsRequest: PutDocumentsRequest =
+            PutDocumentsRequest.Builder().addGenericDocuments(functionRuntimeMetadata).build()
+        staticSearchSession.put(putDocumentsRequest).get()
         val metadataSyncAdapter =
-            MetadataSyncAdapter(testExecutor, appSearchSession, context.packageManager)
+            MetadataSyncAdapter(
+                testExecutor,
+                runtimeSearchSession,
+                staticSearchSession,
+                packageManager,
+            )
 
         val submitSyncRequest = metadataSyncAdapter.submitSyncRequest()
 
@@ -325,43 +231,20 @@ class MetadataSyncAdapterTest {
 
     @Test
     fun syncMetadata_removedFunction() {
-        val searchContext: SearchContext = SearchContext.Builder(TEST_DB).build()
-        val appSearchSession =
-            PartialFakeFutureAppSearchSession(appSearchManager, testExecutor, searchContext)
-        val fakeFunctionId = "syncMetadata_removedFunction"
-        val putCorrespondingSchema =
-            appSearchSession
-                .setSchema(
-                    SetSchemaRequest.Builder()
-                        .addSchemas(
-                            createParentAppFunctionRuntimeSchema(),
-                            AppFunctionRuntimeMetadata.createAppFunctionRuntimeSchema(
-                                TEST_TARGET_PKG_NAME
-                            ),
-                        )
-                        .setForceOverride(true)
-                        .build()
-                )
-                .get()
-        assertThat(putCorrespondingSchema).isNotNull()
-        val putStaleRuntimeMetadata =
-            appSearchSession
-                .put(
-                    PutDocumentsRequest.Builder()
-                        .addGenericDocuments(
-                            AppFunctionRuntimeMetadata.Builder(
-                                    TEST_TARGET_PKG_NAME,
-                                    fakeFunctionId,
-                                    "",
-                                )
-                                .build()
-                        )
-                        .build()
-                )
-                .get()
-        assertThat(putStaleRuntimeMetadata.isSuccess).isTrue()
+        val runtimeSearchSession = FakeSearchSession()
+        val staticSearchSession = FakeSearchSession()
+        val functionRuntimeMetadata =
+            AppFunctionRuntimeMetadata.Builder(TEST_TARGET_PKG_NAME, "testFunctionId", "").build()
+        val putDocumentsRequest: PutDocumentsRequest =
+            PutDocumentsRequest.Builder().addGenericDocuments(functionRuntimeMetadata).build()
+        runtimeSearchSession.put(putDocumentsRequest).get()
         val metadataSyncAdapter =
-            MetadataSyncAdapter(testExecutor, appSearchSession, context.packageManager)
+            MetadataSyncAdapter(
+                testExecutor,
+                runtimeSearchSession,
+                staticSearchSession,
+                packageManager,
+            )
 
         val submitSyncRequest = metadataSyncAdapter.submitSyncRequest()
 
@@ -426,48 +309,99 @@ class MetadataSyncAdapterTest {
         const val TEST_TARGET_PKG_NAME = "com.android.frameworks.appfunctionstests"
     }
 
-    class PartialFakeFutureAppSearchSession(
-        appSearchManager: AppSearchManager,
-        executor: Executor,
-        appSearchContext: SearchContext,
-    ) : FutureAppSearchSessionImpl(appSearchManager, executor, appSearchContext) {
-        var overrideStaticMetadataSearchResult: MutableList<GenericDocument> = mutableListOf()
-        private val overrideUsed = AtomicBoolean(false)
+    class FakeSearchSession : FutureAppSearchSession {
+        private val schemas: MutableSet<AppSearchSchema> = mutableSetOf()
+        private val genericDocumentMutableMap: MutableMap<String, GenericDocument> = mutableMapOf()
 
-        // Overriding this method to fake searching for static metadata.
-        // Static metadata is the source of truth for the metadata sync behaviour since the sync is
-        // updating the runtime metadata to match the existing static metadata.
+        override fun close() {
+            Log.d("FakeRuntimeMetadataSearchSession", "Closing session")
+        }
+
+        override fun setSchema(
+            setSchemaRequest: SetSchemaRequest
+        ): AndroidFuture<SetSchemaResponse> {
+            schemas.addAll(setSchemaRequest.schemas)
+            return AndroidFuture.completedFuture(SetSchemaResponse.Builder().build())
+        }
+
+        override fun getSchema(): AndroidFuture<GetSchemaResponse> {
+            val resultBuilder = GetSchemaResponse.Builder()
+            for (schema in schemas) {
+                resultBuilder.addSchema(schema)
+            }
+            return AndroidFuture.completedFuture(resultBuilder.build())
+        }
+
+        override fun put(
+            putDocumentsRequest: PutDocumentsRequest
+        ): AndroidFuture<AppSearchBatchResult<String, Void>> {
+            for (document in putDocumentsRequest.genericDocuments) {
+                genericDocumentMutableMap[document.id] = document
+            }
+            val batchResultBuilder = AppSearchBatchResult.Builder<String, Void>()
+            for (document in putDocumentsRequest.genericDocuments) {
+                batchResultBuilder.setResult(document.id, AppSearchResult.newSuccessfulResult(null))
+            }
+            return AndroidFuture.completedFuture(batchResultBuilder.build())
+        }
+
+        override fun remove(
+            removeRequest: RemoveByDocumentIdRequest
+        ): AndroidFuture<AppSearchBatchResult<String, Void>> {
+            for (documentId in removeRequest.ids) {
+                if (!genericDocumentMutableMap.keys.contains(documentId)) {
+                    throw IllegalStateException("Document $documentId does not exist")
+                }
+            }
+            val batchResultBuilder = AppSearchBatchResult.Builder<String, Void>()
+            for (id in removeRequest.ids) {
+                batchResultBuilder.setResult(id, AppSearchResult.newSuccessfulResult(null))
+            }
+            return AndroidFuture.completedFuture(batchResultBuilder.build())
+        }
+
+        override fun getByDocumentId(
+            getRequest: GetByDocumentIdRequest
+        ): AndroidFuture<AppSearchBatchResult<String, GenericDocument>> {
+            val batchResultBuilder = AppSearchBatchResult.Builder<String, GenericDocument>()
+            for (documentId in getRequest.ids) {
+                if (!genericDocumentMutableMap.keys.contains(documentId)) {
+                    throw IllegalStateException("Document $documentId does not exist")
+                }
+                batchResultBuilder.setResult(
+                    documentId,
+                    AppSearchResult.newSuccessfulResult(genericDocumentMutableMap[documentId]),
+                )
+            }
+            return AndroidFuture.completedFuture(batchResultBuilder.build())
+        }
+
         override fun search(
             queryExpression: String,
             searchSpec: SearchSpec,
         ): AndroidFuture<FutureSearchResults> {
-            if (
-                searchSpec.filterSchemas.contains(
-                    AppFunctionStaticMetadataHelper.STATIC_SCHEMA_TYPE
-                )
-            ) {
-                val futureSearchResults =
-                    object : FutureSearchResults {
-                        override fun getNextPage(): AndroidFuture<MutableList<SearchResult>> {
-                            if (overrideUsed.get()) {
-                                overrideStaticMetadataSearchResult.clear()
-                                return AndroidFuture.completedFuture(mutableListOf())
-                            }
-                            overrideUsed.set(true)
-                            return AndroidFuture.completedFuture(
-                                overrideStaticMetadataSearchResult
-                                    .map {
-                                        SearchResult.Builder(TEST_TARGET_PKG_NAME, TEST_DB)
-                                            .setGenericDocument(it)
-                                            .build()
-                                    }
-                                    .toMutableList()
-                            )
+            val futureSearchResults =
+                object : FutureSearchResults {
+                    val hasNextPage = AtomicBoolean(false)
+
+                    override fun getNextPage(): AndroidFuture<MutableList<SearchResult>> {
+                        val searchResultMutableList: MutableList<SearchResult> =
+                            genericDocumentMutableMap.values
+                                .map {
+                                    SearchResult.Builder(TEST_TARGET_PKG_NAME, TEST_DB)
+                                        .setGenericDocument(it)
+                                        .build()
+                                }
+                                .toMutableList()
+                        if (!hasNextPage.get()) {
+                            hasNextPage.set(true)
+                            return AndroidFuture.completedFuture(searchResultMutableList)
+                        } else {
+                            return AndroidFuture.completedFuture(mutableListOf())
                         }
                     }
-                return AndroidFuture.completedFuture(futureSearchResults)
-            }
-            return super.search(queryExpression, searchSpec)
+                }
+            return AndroidFuture.completedFuture(futureSearchResults)
         }
     }
 }

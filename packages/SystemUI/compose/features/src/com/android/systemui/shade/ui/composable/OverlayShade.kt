@@ -61,23 +61,17 @@ fun SceneScope.OverlayShade(
     Box(modifier) {
         Scrim(onClicked = onScrimClicked)
 
-        Box(
-            modifier = Modifier.fillMaxSize().panelPadding(),
-            contentAlignment = Alignment.TopEnd,
-        ) {
+        Box(modifier = Modifier.fillMaxSize().panelPadding(), contentAlignment = Alignment.TopEnd) {
             Panel(
                 modifier = Modifier.element(OverlayShade.Elements.Panel).panelSize(),
-                content = content
+                content = content,
             )
         }
     }
 }
 
 @Composable
-private fun SceneScope.Scrim(
-    onClicked: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
+private fun SceneScope.Scrim(onClicked: () -> Unit, modifier: Modifier = Modifier) {
     Spacer(
         modifier =
             modifier
@@ -89,10 +83,7 @@ private fun SceneScope.Scrim(
 }
 
 @Composable
-private fun SceneScope.Panel(
-    modifier: Modifier = Modifier,
-    content: @Composable () -> Unit,
-) {
+private fun SceneScope.Panel(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     Box(modifier = modifier.clip(OverlayShade.Shapes.RoundedCornerPanel)) {
         Spacer(
             modifier =
@@ -101,7 +92,7 @@ private fun SceneScope.Panel(
                     .background(
                         color = OverlayShade.Colors.PanelBackground,
                         shape = OverlayShade.Shapes.RoundedCornerPanel,
-                    ),
+                    )
         )
 
         // This content is intentionally rendered as a separate element from the background in order
@@ -137,7 +128,7 @@ private fun Modifier.panelPadding(): Modifier {
             systemBars.asPaddingValues(),
             displayCutout.asPaddingValues(),
             waterfall.asPaddingValues(),
-            contentPadding
+            contentPadding,
         )
 
     return if (widthSizeClass == WindowWidthSizeClass.Compact) {
@@ -156,14 +147,19 @@ private fun combinePaddings(vararg paddingValues: PaddingValues): PaddingValues 
         start = paddingValues.maxOfOrNull { it.calculateStartPadding(layoutDirection) } ?: 0.dp,
         top = paddingValues.maxOfOrNull { it.calculateTopPadding() } ?: 0.dp,
         end = paddingValues.maxOfOrNull { it.calculateEndPadding(layoutDirection) } ?: 0.dp,
-        bottom = paddingValues.maxOfOrNull { it.calculateBottomPadding() } ?: 0.dp
+        bottom = paddingValues.maxOfOrNull { it.calculateBottomPadding() } ?: 0.dp,
     )
 }
 
 object OverlayShade {
     object Elements {
         val Scrim = ElementKey("OverlayShadeScrim", contentPicker = LowestZIndexContentPicker)
-        val Panel = ElementKey("OverlayShadePanel", contentPicker = LowestZIndexContentPicker)
+        val Panel =
+            ElementKey(
+                "OverlayShadePanel",
+                contentPicker = LowestZIndexContentPicker,
+                placeAllCopies = true,
+            )
         val PanelBackground =
             ElementKey("OverlayShadePanelBackground", contentPicker = LowestZIndexContentPicker)
     }
