@@ -30,6 +30,7 @@ import android.view.ViewTreeObserver.OnComputeInternalInsetsListener;
 import android.view.WindowInsets;
 
 import androidx.annotation.VisibleForTesting;
+
 import com.android.compose.animation.scene.ObservableTransitionState;
 import com.android.internal.policy.SystemBarUtils;
 import com.android.systemui.Dumpable;
@@ -69,7 +70,9 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
     private final UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
 
     private boolean mIsStatusBarExpanded = false;
-    private boolean mIsIdleOnGone = true;
+    // Whether the scene container has no UI to render, i.e. is in idle state on the Gone scene and
+    // without any overlays to display.
+    private boolean mIsSceneContainerUiEmpty = true;
     private boolean mIsRemoteUserInteractionOngoing = false;
     private boolean mShouldAdjustInsets = false;
     private View mNotificationShadeWindowView;
@@ -134,7 +137,7 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
         if (SceneContainerFlag.isEnabled()) {
             javaAdapter.alwaysCollectFlow(
                     sceneInteractor.get().getTransitionState(),
-                    this::onSceneChanged);
+                    this::onSceneContainerTransition);
             javaAdapter.alwaysCollectFlow(
                     sceneInteractor.get().isRemoteUserInteractionOngoing(),
                     this::onRemoteUserInteractionOngoingChanged);
@@ -172,11 +175,13 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
         }
     }
 
-    private void onSceneChanged(ObservableTransitionState transitionState) {
-        boolean isIdleOnGone = transitionState.isIdle(Scenes.Gone);
-        if (isIdleOnGone != mIsIdleOnGone) {
-            mIsIdleOnGone = isIdleOnGone;
-            if (!isIdleOnGone) {
+    private void onSceneContainerTransition(ObservableTransitionState transitionState) {
+        boolean isSceneContainerUiEmpty = transitionState.isIdle(Scenes.Gone)
+                && ((ObservableTransitionState.Idle) transitionState).getCurrentOverlays()
+                .isEmpty();
+        if (isSceneContainerUiEmpty != mIsSceneContainerUiEmpty) {
+            mIsSceneContainerUiEmpty = isSceneContainerUiEmpty;
+            if (!isSceneContainerUiEmpty) {
                 // make sure our state is sensible
                 mForceCollapsedUntilLayout = false;
             }
@@ -296,7 +301,7 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
         // underneath.
         return mIsStatusBarExpanded
                 || (SceneContainerFlag.isEnabled()
-                && (!mIsIdleOnGone || mIsRemoteUserInteractionOngoing))
+                && (!mIsSceneContainerUiEmpty || mIsRemoteUserInteractionOngoing))
                 || mPrimaryBouncerInteractor.isShowing().getValue()
                 || mAlternateBouncerInteractor.isVisibleState()
                 || mUnlockedScreenOffAnimationController.isAnimationPlaying();

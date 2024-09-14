@@ -17,6 +17,7 @@
 package android.os;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -30,6 +31,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.hardware.vibrator.IVibrator;
 import android.media.AudioAttributes;
+import android.os.vibrator.Flags;
 import android.os.vibrator.VibrationConfig;
 import android.os.vibrator.VibratorFrequencyProfile;
 import android.util.Log;
@@ -310,6 +312,86 @@ public abstract class Vibrator {
      */
     public float getHapticChannelMaximumAmplitude() {
         return getConfig().getHapticChannelMaximumAmplitude();
+    }
+
+    /**
+     * Checks whether the vibrator supports the creation of envelope effects.
+     *
+     * Envelope effects are defined by a series of frequency-amplitude pairs with specified
+     * transition times, allowing the creation of more complex vibration patterns.
+     *
+     * @return True if the hardware supports creating envelope effects, false otherwise.
+     */
+    @FlaggedApi(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
+    public boolean areEnvelopeEffectsSupported() {
+        return getInfo().areEnvelopeEffectsSupported();
+    }
+
+    /**
+     * Retrieves the maximum duration supported for an envelope effect, in milliseconds.
+     *
+     * <p>If the device supports envelope effects (check {@link #areEnvelopeEffectsSupported}),
+     * this value will be positive. Devices with envelope effects capabilities guarantees a
+     * maximum duration equivalent to the product of {@link #getMaxEnvelopeEffectSize()} and
+     * {@link #getMaxEnvelopeEffectControlPointDurationMillis()}. If the device does not support
+     * envelope effects, this method will return 0.
+     *
+     * @return The maximum duration (in milliseconds) allowed for an envelope effect, or 0 if
+     * envelope effects are not supported.
+     */
+    @FlaggedApi(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
+    public int getMaxEnvelopeEffectDurationMillis() {
+        return getInfo().getMaxEnvelopeEffectDurationMillis();
+    }
+
+    /**
+     * Retrieves the maximum number of control points supported for an envelope effect.
+     *
+     * <p>If the device supports envelope effects (check {@link #areEnvelopeEffectsSupported}),
+     * this value will be positive. Devices with envelope effects capabilities guarantee support
+     * for a minimum of 16 control points. If the device does not support envelope effects,
+     * this method will return 0.
+     *
+     * @return the maximum number of control points allowed for an envelope effect, or 0 if
+     * envelope effects are not supported.
+     */
+    @FlaggedApi(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
+    public int getMaxEnvelopeEffectSize() {
+        return getInfo().getMaxEnvelopeEffectSize();
+    }
+
+    /**
+     * Retrieves the minimum duration supported between two control points within an envelope
+     * effect, in milliseconds.
+     *
+     * <p>If the device supports envelope effects (check {@link #areEnvelopeEffectsSupported}),
+     * this value will be positive. Devices with envelope effects capabilities guarantee
+     * support for durations down to at least 20 milliseconds. If the device does
+     * not support envelope effects, this method will return 0.
+     *
+     * @return the minimum allowed duration between two control points in an envelope effect,
+     * or 0 if envelope effects are not supported.
+     */
+    @FlaggedApi(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
+    public int getMinEnvelopeEffectControlPointDurationMillis() {
+        return getInfo().getMinEnvelopeEffectControlPointDurationMillis();
+    }
+
+    /**
+     * Retrieves the maximum duration supported between two control points within an envelope
+     * effect, in milliseconds.
+     *
+     * <p>If the device supports envelope effects (check {@link #areEnvelopeEffectsSupported}),
+     * this value will be positive. Devices with envelope effects capabilities guarantee support
+     * for durations up to at least 1 second. If the device does not support envelope effects,
+     * this method will return 0.
+     *
+     * @return the maximum allowed duration between two control points in an envelope effect,
+     * or 0 if envelope effects are not supported.
+     */
+    @FlaggedApi(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
+    public int getMaxEnvelopeEffectControlPointDurationMillis() {
+        return getInfo().getMaxEnvelopeEffectControlPointDurationMillis();
     }
 
     /**

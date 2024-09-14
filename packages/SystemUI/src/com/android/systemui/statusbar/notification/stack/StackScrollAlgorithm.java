@@ -682,7 +682,10 @@ public class StackScrollAlgorithm {
                 //  doesn't get updated quickly enough and can cause the footer to flash when
                 //  closing the shade. As such, we temporarily also check the ambientState directly.
                 if (((FooterView) view).shouldBeHidden() || !ambientState.isShadeExpanded()) {
-                    viewState.hidden = true;
+                    // Note: This is no longer necessary in flexiglass.
+                    if (!SceneContainerFlag.isEnabled()) {
+                        viewState.hidden = true;
+                    }
                 } else {
                     final float footerEnd = algorithmState.mCurrentExpandedYPosition
                             + view.getIntrinsicHeight();
@@ -691,7 +694,6 @@ public class StackScrollAlgorithm {
                             noSpaceForFooter || (ambientState.isClearAllInProgress()
                                     && !hasNonClearableNotifs(algorithmState));
                 }
-
             } else {
                 final boolean shadeClosed = !ambientState.isShadeExpanded();
                 final boolean isShelfShowing = algorithmState.firstViewInShelf != null;

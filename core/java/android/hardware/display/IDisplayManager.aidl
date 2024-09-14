@@ -247,6 +247,9 @@ interface IDisplayManager {
     @EnforcePermission("RESTRICT_DISPLAY_MODES")
     void requestDisplayModes(in IBinder token, int displayId, in @nullable int[] modeIds);
 
+    // Get the highest defined HDR/SDR ratio for a display.
+    float getHighestHdrSdrRatio(int displayId);
+
     // Get the mapping between the doze brightness sensor values and brightness values
     @EnforcePermission("CONTROL_DISPLAY_BRIGHTNESS")
     float[] getDozeBrightnessSensorValueToBrightness(int displayId);

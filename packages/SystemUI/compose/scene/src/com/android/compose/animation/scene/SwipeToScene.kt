@@ -39,14 +39,14 @@ import com.android.compose.animation.scene.content.Content
 @Stable
 internal fun Modifier.swipeToScene(
     draggableHandler: DraggableHandlerImpl,
-    swipeDetector: SwipeDetector
+    swipeDetector: SwipeDetector,
 ): Modifier {
     return this.then(SwipeToSceneElement(draggableHandler, swipeDetector))
 }
 
 private data class SwipeToSceneElement(
     val draggableHandler: DraggableHandlerImpl,
-    val swipeDetector: SwipeDetector
+    val swipeDetector: SwipeDetector,
 ) : ModifierNodeElement<SwipeToSceneNode>() {
     override fun create(): SwipeToSceneNode = SwipeToSceneNode(draggableHandler, swipeDetector)
 
@@ -183,12 +183,12 @@ internal fun interface ScrollBehaviorOwner {
  */
 private class ScrollBehaviorOwnerNode(
     override val traverseKey: Any,
-    val nestedScrollHandlerImpl: NestedScrollHandlerImpl
+    val nestedScrollHandlerImpl: NestedScrollHandlerImpl,
 ) : Modifier.Node(), TraversableNode, ScrollBehaviorOwner {
     override fun updateScrollBehaviors(
         topOrLeftBehavior: NestedScrollBehavior,
         bottomOrRightBehavior: NestedScrollBehavior,
-        isExternalOverscrollGesture: () -> Boolean
+        isExternalOverscrollGesture: () -> Boolean,
     ) {
         nestedScrollHandlerImpl.topOrLeftBehavior = topOrLeftBehavior
         nestedScrollHandlerImpl.bottomOrRightBehavior = bottomOrRightBehavior

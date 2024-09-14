@@ -19,10 +19,10 @@ package com.android.server.wm;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.os.SystemProperties;
+import android.window.flags.DesktopModeFlags;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.wm.utils.DesktopModeFlagsUtil;
 
 /**
  * Constants for desktop mode feature
@@ -36,7 +36,7 @@ public final class DesktopModeHelper {
 
     /** Whether desktop mode is enabled. */
     static boolean isDesktopModeEnabled(@NonNull Context context) {
-        return DesktopModeFlagsUtil.DESKTOP_WINDOWING_MODE.isEnabled(context);
+        return DesktopModeFlags.DESKTOP_WINDOWING_MODE.isEnabled(context);
     }
 
     /**

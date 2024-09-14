@@ -104,6 +104,7 @@ import android.debug.IAdbManager;
 import android.devicelock.DeviceLockFrameworkInitializer;
 import android.graphics.fonts.FontManager;
 import android.hardware.ConsumerIrManager;
+import android.hardware.ISensorPrivacyManager;
 import android.hardware.ISerialManager;
 import android.hardware.SensorManager;
 import android.hardware.SensorPrivacyManager;
@@ -707,8 +708,12 @@ public final class SystemServiceRegistry {
         registerService(Context.SENSOR_PRIVACY_SERVICE, SensorPrivacyManager.class,
                 new CachedServiceFetcher<SensorPrivacyManager>() {
                     @Override
-                    public SensorPrivacyManager createService(ContextImpl ctx) {
-                        return SensorPrivacyManager.getInstance(ctx);
+                    public SensorPrivacyManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        IBinder b = ServiceManager.getServiceOrThrow(
+                                Context.SENSOR_PRIVACY_SERVICE);
+                        return SensorPrivacyManager.getInstance(
+                                ctx, ISensorPrivacyManager.Stub.asInterface(b));
                     }});
 
         registerService(Context.STATUS_BAR_SERVICE, StatusBarManager.class,

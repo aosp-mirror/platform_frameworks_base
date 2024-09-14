@@ -45,6 +45,7 @@ import android.view.animation.DecelerateInterpolator;
 
 import androidx.annotation.VisibleForTesting;
 
+import com.android.internal.policy.SystemBarUtils;
 import com.android.wm.shell.R;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.common.DisplayController;
@@ -173,8 +174,7 @@ public class DesktopModeVisualIndicator {
         final Region region = new Region();
         int transitionHeight = mDragStartState == DragStartState.FROM_FREEFORM
                 || mDragStartState == DragStartState.DRAGGED_INTENT
-                ? mContext.getResources().getDimensionPixelSize(
-                com.android.wm.shell.R.dimen.desktop_mode_transition_region_thickness)
+                ? SystemBarUtils.getStatusBarHeight(mContext)
                 : 2 * layout.stableInsets().top;
         // A Rect at the top of the screen that takes up the center 40%.
         if (mDragStartState == DragStartState.FROM_FREEFORM) {

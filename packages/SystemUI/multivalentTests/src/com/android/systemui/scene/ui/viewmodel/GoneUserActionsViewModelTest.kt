@@ -16,6 +16,8 @@
 
 package com.android.systemui.scene.ui.viewmodel
 
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import android.testing.TestableLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -29,6 +31,7 @@ import com.android.systemui.lifecycle.activateIn
 import com.android.systemui.scene.shared.model.TransitionKeys.ToSplitShade
 import com.android.systemui.shade.data.repository.shadeRepository
 import com.android.systemui.shade.domain.interactor.shadeInteractor
+import com.android.systemui.shade.shared.flag.DualShade
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -52,14 +55,12 @@ class GoneUserActionsViewModelTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        underTest =
-            GoneUserActionsViewModel(
-                shadeInteractor = kosmos.shadeInteractor,
-            )
+        underTest = GoneUserActionsViewModel(shadeInteractor = kosmos.shadeInteractor)
         underTest.activateIn(testScope)
     }
 
     @Test
+    @DisableFlags(DualShade.FLAG_NAME)
     fun downTransitionKey_splitShadeEnabled_isGoneToSplitShade() =
         testScope.runTest {
             val userActions by collectLastValue(underTest.actions)
@@ -71,10 +72,22 @@ class GoneUserActionsViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(DualShade.FLAG_NAME)
     fun downTransitionKey_splitShadeDisabled_isNull() =
         testScope.runTest {
             val userActions by collectLastValue(underTest.actions)
             shadeRepository.setShadeLayoutWide(false)
+            runCurrent()
+
+            assertThat(userActions?.get(Swipe(SwipeDirection.Down))?.transitionKey).isNull()
+        }
+
+    @Test
+    @EnableFlags(DualShade.FLAG_NAME)
+    fun downTransitionKey_dualShadeEnabled_isNull() =
+        testScope.runTest {
+            val userActions by collectLastValue(underTest.actions)
+            shadeRepository.setShadeLayoutWide(true)
             runCurrent()
 
             assertThat(userActions?.get(Swipe(SwipeDirection.Down))?.transitionKey).isNull()

@@ -27,10 +27,11 @@ import static com.android.internal.util.FrameworkStatsLog.BUBBLE_DEVELOPER_ERROR
 import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.util.Slog;
 
@@ -47,6 +48,7 @@ public class BubbleExtractor implements NotificationSignalExtractor {
     private ShortcutHelper mShortcutHelper;
     private RankingConfig mConfig;
     private ActivityManager mActivityManager;
+    private PackageManager mPackageManager;
     private Context mContext;
 
     boolean mSupportsBubble;
@@ -73,6 +75,11 @@ public class BubbleExtractor implements NotificationSignalExtractor {
 
         if (mShortcutHelper == null) {
             if (DBG) Slog.d(TAG, "missing shortcut helper");
+            return null;
+        }
+
+        if (mPackageManager == null) {
+            if (DBG) Slog.d(TAG, "missing package manager");
             return null;
         }
 
@@ -133,6 +140,10 @@ public class BubbleExtractor implements NotificationSignalExtractor {
         mShortcutHelper = helper;
     }
 
+    public void setPackageManager(PackageManager packageManager) {
+        mPackageManager = packageManager;
+    }
+
     @VisibleForTesting
     public void setActivityManager(ActivityManager manager) {
         mActivityManager = manager;
@@ -176,30 +187,25 @@ public class BubbleExtractor implements NotificationSignalExtractor {
             // TODO: check the shortcut intent / ensure it can show in activity view
             return true;
         }
-        return canLaunchInTaskView(mContext, metadata.getIntent(), pkg);
+        return canLaunchInTaskView(metadata.getIntent().getIntent(), pkg,
+                r.getUser().getIdentifier());
     }
 
     /**
-     * Whether an intent is properly configured to display in an {@link
-     * TaskView} for bubbling.
+     * Whether an intent is properly configured to display in a TaskView for bubbling.
      *
-     * @param context       the context to use.
-     * @param pendingIntent the pending intent of the bubble.
-     * @param packageName   the notification package name for this bubble.
+     * @param intent the intent of the bubble.
+     * @param packageName the notification package name for this bubble.
      */
-    // Keep checks in sync with BubbleController#canLaunchInTaskView.
-    @VisibleForTesting
-    protected boolean canLaunchInTaskView(Context context, PendingIntent pendingIntent,
-            String packageName) {
-        if (pendingIntent == null) {
+    // Keep checks in sync with BubbleController#isResizableActivity.
+    private boolean canLaunchInTaskView(Intent intent, String packageName, int userId) {
+        if (intent == null) {
             Slog.w(TAG, "Unable to create bubble -- no intent");
             return false;
         }
 
-        Intent intent = pendingIntent.getIntent();
-        ActivityInfo info = intent != null
-                ? intent.resolveActivityInfo(context.getPackageManager(), 0)
-                : null;
+        ResolveInfo resolveInfo = mPackageManager.resolveActivityAsUser(intent, 0, userId);
+        ActivityInfo info = resolveInfo != null ? resolveInfo.activityInfo : null;
         if (info == null) {
             FrameworkStatsLog.write(FrameworkStatsLog.BUBBLE_DEVELOPER_ERROR_REPORTED,
                     packageName,

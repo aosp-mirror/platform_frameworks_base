@@ -16,8 +16,8 @@
 
 package android.libcore.regression;
 
-import androidx.benchmark.BenchmarkState;
-import androidx.benchmark.junit4.BenchmarkRule;
+import android.perftests.utils.BenchmarkState;
+import android.perftests.utils.PerfStatusReporter;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -32,11 +32,11 @@ import java.util.Random;
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class RandomPerfTest {
-    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
+    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
     @Test
     public void timeNewRandom() throws Exception {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             Random rng = new Random();
             rng.nextInt();
@@ -46,7 +46,7 @@ public class RandomPerfTest {
     @Test
     public void timeReusedRandom() throws Exception {
         Random rng = new Random();
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             rng.nextInt();
         }
@@ -55,7 +55,7 @@ public class RandomPerfTest {
     @Test
     public void timeReusedSecureRandom() throws Exception {
         SecureRandom rng = new SecureRandom();
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             rng.nextInt();
         }
@@ -63,7 +63,7 @@ public class RandomPerfTest {
 
     @Test
     public void timeNewSecureRandom() throws Exception {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             SecureRandom rng = new SecureRandom();
             rng.nextInt();

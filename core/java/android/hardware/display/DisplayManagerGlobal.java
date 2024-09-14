@@ -21,6 +21,7 @@ import static android.hardware.display.DisplayManager.EventsMask;
 import static android.view.Display.HdrCapabilities.HdrType;
 
 import android.Manifest;
+import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -1226,6 +1227,20 @@ public final class DisplayManagerGlobal {
     public void requestDisplayModes(int displayId, @Nullable int[] modeIds) {
         try {
             mDm.requestDisplayModes(mToken, displayId, modeIds);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @param displayId The ID of the display
+     * @return The highest HDR/SDR ratio of the ratios defined in Display Device Config. If no
+     * HDR/SDR map is defined, this always returns 1.
+     */
+    @FlaggedApi(com.android.server.display.feature.flags.Flags.FLAG_HIGHEST_HDR_SDR_RATIO_API)
+    public float getHighestHdrSdrRatio(int displayId) {
+        try {
+            return mDm.getHighestHdrSdrRatio(displayId);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }

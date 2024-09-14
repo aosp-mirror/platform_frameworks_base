@@ -17,9 +17,12 @@
 
 package com.android.systemui.common.ui.compose
 
+import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import com.android.systemui.common.shared.model.Text
+import com.android.systemui.common.shared.model.Text.Companion.loadText
 
 /** Returns the loaded [String] or `null` if there isn't one. */
 @Composable
@@ -28,4 +31,8 @@ fun Text.load(): String? {
         is Text.Loaded -> text
         is Text.Resource -> stringResource(res)
     }
+}
+
+fun Text.toAnnotatedString(context: Context): AnnotatedString? {
+    return loadText(context)?.let { AnnotatedString(it) }
 }

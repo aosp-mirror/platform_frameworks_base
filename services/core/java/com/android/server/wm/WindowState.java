@@ -2754,10 +2754,16 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * @param outRegion The region to update.
      */
     private void updateRegionForModalActivityWindow(Region outRegion) {
-        // If the inner bounds of letterbox is available, then it will be used as the
-        // touchable region so it won't cover the touchable letterbox and the touch
-        // events can slip to activity from letterbox.
-        mActivityRecord.getLetterboxInnerBounds(mTmpRect);
+        if (Flags.scrollingFromLetterbox()) {
+            // Touchable region expands to the letterbox area to react to scrolls from letterbox.
+            mTmpRect.setEmpty();
+        } else {
+            // If the activity is letterboxed and scrolling from letterbox is disabled, limit the
+            // touchable region to the activity. This way, the letterbox area is exposed to react
+            // to touch events, and the touch events can slip from the activity from letterbox.
+            mActivityRecord.getLetterboxInnerBounds(mTmpRect);
+        }
+
         if (mTmpRect.isEmpty()) {
             final Rect transformedBounds = mActivityRecord.getFixedRotationTransformDisplayBounds();
             if (transformedBounds != null) {
@@ -4409,6 +4415,17 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         for (int i = mChildren.size() - 1; i >= 0; i--) {
             committed |= mChildren.get(i).commitFinishDrawing(t);
         }
+
+        // When a new activity is showing, update dim in this transaction
+        if (Flags.updateDimsWhenWindowShown()) {
+            final Dimmer dimmer = getDimController();
+            final WindowContainer<?> dimParent = getDimParent();
+            if (dimmer != null && dimParent != null) {
+                dimParent.adjustDims();
+                dimmer.updateDims(t);
+            }
+        }
+
         // In case commitFinishDrawingLocked starts a window level animation, make sure the surface
         // operation (reparent to leash) is synced with the visibility by transition.
         if (getAnimationLeash() != null) {
@@ -5196,14 +5213,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             Dimmer dimmer;
             WindowContainer<?> geometryParent = task;
             if (Flags.useTasksDimOnly()) {
-                if (task != null) {
-                    geometryParent = task.getDimmerParent();
-                    dimmer = task.mDimmer;
-                } else {
-                    RootDisplayArea displayArea = getRootDisplayArea();
-                    geometryParent = displayArea;
-                    dimmer = displayArea != null ? displayArea.getDimmer() : null;
-                }
+                geometryParent = getDimParent();
+                dimmer = getDimController();
                 if (dimmer == null) {
                     ProtoLog.e(WM_DEBUG_DIMMER, "WindowState %s does not have task or"
                             + " display area for dimming", this);
@@ -5216,9 +5227,28 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             if (isVisibleNow()) {
                 dimmer.adjustAppearance(this, dimAmount, blurRadius);
             }
-            dimmer.adjustPosition(geometryParent,
-                    this /* relativeParent */, -1 /* relativeLayer */);
+            dimmer.adjustPosition(geometryParent, this /* relativeParent */);
         }
+    }
+
+    private Dimmer getDimController() {
+        Task task = getTask();
+        if (task != null) {
+            return task.mDimmer;
+        }
+        RootDisplayArea displayArea = getRootDisplayArea();
+        if (displayArea != null) {
+            return displayArea.getDimmer();
+        }
+        return null;
+    }
+
+    private WindowContainer<?> getDimParent() {
+        Task task = getTask();
+        if (task != null && task.isSuitableForDimming()) {
+            return task;
+        }
+        return getRootDisplayArea();
     }
 
     private boolean shouldDrawBlurBehind() {
@@ -5289,6 +5319,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             applyDims();
         }
         super.prepareSurfaces();
+    }
+
+    @Override
+    void adjustDims() {
+        applyDims();
+        super.adjustDims();
     }
 
     void updateSurfacePositionIfNeeded() {

@@ -49,8 +49,7 @@ import java.util.function.Supplier;
  * that we send the final shell transition since we still utilize the {@link #onTransitionConsumed}
  * callback.
  */
-class FluidResizeTaskPositioner implements DragPositioningCallback,
-        TaskDragResizer, Transitions.TransitionHandler {
+class FluidResizeTaskPositioner implements TaskPositioner, Transitions.TransitionHandler {
     private final ShellTaskOrganizer mTaskOrganizer;
     private final Transitions mTransitions;
     private final WindowDecoration mWindowDecoration;

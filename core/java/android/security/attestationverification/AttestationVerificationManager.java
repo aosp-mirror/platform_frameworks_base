@@ -322,6 +322,10 @@ public class AttestationVerificationManager {
     /** Requirements bundle parameter for a challenge. */
     public static final String PARAM_CHALLENGE = "localbinding.challenge";
 
+    /** Requirements bundle parameter for max patch level diff (int) for a peer device. **/
+    public static final String PARAM_MAX_PATCH_LEVEL_DIFF_MONTHS =
+            "param_max_patch_level_diff_months";
+
     /** @hide */
     public static String localBindingTypeToString(@LocalBindingType int localBindingType) {
         final String text;

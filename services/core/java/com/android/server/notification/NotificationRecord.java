@@ -330,10 +330,19 @@ public final class NotificationRecord {
         }
 
         final long[] vibrationPattern = channel.getVibrationPattern();
-        if (vibrationPattern == null) {
-            return helper.createDefaultVibration(insistent);
+        if (vibrationPattern != null) {
+            return helper.createWaveformVibration(vibrationPattern, insistent);
         }
-        return helper.createWaveformVibration(vibrationPattern, insistent);
+
+        if (com.android.server.notification.Flags.notificationVibrationInSoundUri()) {
+            final VibrationEffect vibrationEffectFromSoundUri =
+                    helper.createVibrationEffectFromSoundUri(channel.getSound());
+            if (vibrationEffectFromSoundUri != null) {
+                return vibrationEffectFromSoundUri;
+            }
+        }
+
+        return helper.createDefaultVibration(insistent);
     }
 
     private VibrationEffect calculateVibration() {

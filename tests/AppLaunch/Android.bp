@@ -14,11 +14,12 @@ android_test {
     platform_apis: true,
     certificate: "platform",
     libs: [
-        "android.test.base",
-        "android.test.runner",
+        "android.test.base.stubs.system",
+        "android.test.runner.stubs.system",
     ],
     static_libs: [
         "androidx.test.rules",
-        "ub-uiautomator"],
+        "ub-uiautomator",
+    ],
     test_suites: ["device-tests"],
 }

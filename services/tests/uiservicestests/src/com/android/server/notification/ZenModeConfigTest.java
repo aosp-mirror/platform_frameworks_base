@@ -756,7 +756,7 @@ public class ZenModeConfigTest extends UiServiceTestCase {
         assertEquals("a", fromXml.getPkg());
 
         fromXml.condition = new Condition(Uri.EMPTY, "", Condition.STATE_TRUE);
-        assertTrue(fromXml.isAutomaticActive());
+        assertTrue(fromXml.isActive());
     }
 
     @Test

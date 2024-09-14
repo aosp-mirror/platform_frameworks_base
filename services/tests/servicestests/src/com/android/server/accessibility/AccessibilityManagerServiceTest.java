@@ -35,6 +35,7 @@ import static com.android.internal.accessibility.common.ShortcutConstants.UserSh
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.HARDWARE;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.QUICK_SETTINGS;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.SOFTWARE;
+import static com.android.internal.accessibility.dialog.AccessibilityButtonChooserActivity.EXTRA_TYPE_TO_CHOOSE;
 import static com.android.server.accessibility.AccessibilityManagerService.ACTION_LAUNCH_HEARING_DEVICES_DIALOG;
 import static com.android.window.flags.Flags.FLAG_ALWAYS_DRAW_MAGNIFICATION_FULLSCREEN_BORDER;
 
@@ -2046,6 +2047,53 @@ public class AccessibilityManagerServiceTest {
     }
 
     @Test
+    public void showAccessibilityTargetSelection_navBarNavigationMode_softwareExtra() {
+        mFakePermissionEnforcer.grant(Manifest.permission.STATUS_BAR_SERVICE);
+        final AccessibilityUserState userState = new AccessibilityUserState(
+                UserHandle.USER_SYSTEM, mTestableContext, mA11yms);
+        mA11yms.mUserStates.put(UserHandle.USER_SYSTEM, userState);
+        Settings.Secure.putIntForUser(mTestableContext.getContentResolver(),
+                NAVIGATION_MODE, NAV_BAR_MODE_3BUTTON, userState.mUserId);
+
+        mA11yms.notifyAccessibilityButtonLongClicked(Display.DEFAULT_DISPLAY);
+        mTestableLooper.processAllMessages();
+
+        assertStartActivityWithExpectedShortcutType(mTestableContext.getMockContext(), SOFTWARE);
+    }
+
+    @Test
+    @DisableFlags(android.provider.Flags.FLAG_A11Y_STANDALONE_GESTURE_ENABLED)
+    public void showAccessibilityTargetSelection_gestureNavigationMode_softwareExtra() {
+        mFakePermissionEnforcer.grant(Manifest.permission.STATUS_BAR_SERVICE);
+        final AccessibilityUserState userState = new AccessibilityUserState(
+                UserHandle.USER_SYSTEM, mTestableContext, mA11yms);
+        mA11yms.mUserStates.put(UserHandle.USER_SYSTEM, userState);
+        Settings.Secure.putIntForUser(mTestableContext.getContentResolver(),
+                NAVIGATION_MODE, NAV_BAR_MODE_GESTURAL, userState.mUserId);
+
+        mA11yms.notifyAccessibilityButtonLongClicked(Display.DEFAULT_DISPLAY);
+        mTestableLooper.processAllMessages();
+
+        assertStartActivityWithExpectedShortcutType(mTestableContext.getMockContext(), SOFTWARE);
+    }
+
+    @Test
+    @EnableFlags(android.provider.Flags.FLAG_A11Y_STANDALONE_GESTURE_ENABLED)
+    public void showAccessibilityTargetSelection_gestureNavigationMode_gestureExtra() {
+        mFakePermissionEnforcer.grant(Manifest.permission.STATUS_BAR_SERVICE);
+        final AccessibilityUserState userState = new AccessibilityUserState(
+                UserHandle.USER_SYSTEM, mTestableContext, mA11yms);
+        mA11yms.mUserStates.put(UserHandle.USER_SYSTEM, userState);
+        Settings.Secure.putIntForUser(mTestableContext.getContentResolver(),
+                NAVIGATION_MODE, NAV_BAR_MODE_GESTURAL, userState.mUserId);
+
+        mA11yms.notifyAccessibilityButtonLongClicked(Display.DEFAULT_DISPLAY);
+        mTestableLooper.processAllMessages();
+
+        assertStartActivityWithExpectedShortcutType(mTestableContext.getMockContext(), GESTURE);
+    }
+
+    @Test
     public void registerUserInitializationCompleteCallback_isRegistered() {
         mA11yms.mUserInitializationCompleteCallbacks.clear();
 
@@ -2073,6 +2121,43 @@ public class AccessibilityManagerServiceTest {
 
         verify(mUserInitializationCompleteCallback).onUserInitializationComplete(
                 UserHandle.MIN_SECONDARY_USER_ID);
+    }
+
+    @Test
+    @DisableFlags(android.provider.Flags.FLAG_A11Y_STANDALONE_GESTURE_ENABLED)
+    public void getShortcutTypeForGenericShortcutCalls_softwareType() {
+        final AccessibilityUserState userState = new AccessibilityUserState(
+                UserHandle.USER_SYSTEM, mTestableContext, mA11yms);
+        mA11yms.mUserStates.put(UserHandle.USER_SYSTEM, userState);
+
+        assertThat(mA11yms.getShortcutTypeForGenericShortcutCalls(userState.mUserId))
+                .isEqualTo(SOFTWARE);
+    }
+
+    @Test
+    @EnableFlags(android.provider.Flags.FLAG_A11Y_STANDALONE_GESTURE_ENABLED)
+    public void getShortcutTypeForGenericShortcutCalls_gestureNavigationMode_gestureType() {
+        final AccessibilityUserState userState = new AccessibilityUserState(
+                UserHandle.USER_SYSTEM, mTestableContext, mA11yms);
+        mA11yms.mUserStates.put(UserHandle.USER_SYSTEM, userState);
+        Settings.Secure.putIntForUser(mTestableContext.getContentResolver(),
+                NAVIGATION_MODE, NAV_BAR_MODE_GESTURAL, userState.mUserId);
+
+        assertThat(mA11yms.getShortcutTypeForGenericShortcutCalls(userState.mUserId))
+                .isEqualTo(GESTURE);
+    }
+
+    @Test
+    @EnableFlags(android.provider.Flags.FLAG_A11Y_STANDALONE_GESTURE_ENABLED)
+    public void getShortcutTypeForGenericShortcutCalls_buttonNavigationMode_softwareType() {
+        final AccessibilityUserState userState = new AccessibilityUserState(
+                UserHandle.USER_SYSTEM, mTestableContext, mA11yms);
+        mA11yms.mUserStates.put(UserHandle.USER_SYSTEM, userState);
+        Settings.Secure.putIntForUser(mTestableContext.getContentResolver(),
+                NAVIGATION_MODE, NAV_BAR_MODE_3BUTTON, userState.mUserId);
+
+        assertThat(mA11yms.getShortcutTypeForGenericShortcutCalls(userState.mUserId))
+                .isEqualTo(SOFTWARE);
     }
 
     private Set<String> readStringsFromSetting(String setting) {
@@ -2146,6 +2231,14 @@ public class AccessibilityManagerServiceTest {
                 any(Bundle.class), any(UserHandle.class));
         assertThat(mIntentArgumentCaptor.getValue().getStringExtra(
                 Intent.EXTRA_COMPONENT_NAME)).isEqualTo(componentName);
+    }
+
+    private void assertStartActivityWithExpectedShortcutType(Context mockContext,
+            @UserShortcutType int shortcutType) {
+        verify(mockContext).startActivityAsUser(mIntentArgumentCaptor.capture(),
+                any(Bundle.class), any(UserHandle.class));
+        assertThat(mIntentArgumentCaptor.getValue().getIntExtra(
+                EXTRA_TYPE_TO_CHOOSE, -1)).isEqualTo(shortcutType);
     }
 
     private void setupShortcutTargetServices() {

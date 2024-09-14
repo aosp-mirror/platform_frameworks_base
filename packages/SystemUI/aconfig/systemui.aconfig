@@ -247,13 +247,6 @@ flag {
 }
 
 flag {
-    name: "haptic_brightness_slider"
-    namespace: "systemui"
-    description: "Adds haptic feedback to the brightness slider."
-    bug: "296467915"
-}
-
-flag {
     name: "unfold_animation_background_progress"
     namespace: "systemui"
     description: "Moves unfold animation progress calculation to a background thread"
@@ -285,6 +278,16 @@ flag {
    namespace: "systemui"
    description: "Use the new tiles in the Quick Settings that are still under development. This flag will not be used to gate release but to prevent tiles under development from reaching teamfood."
    bug: "311147395"
+}
+
+flag {
+  name: "qs_quick_rebind_active_tiles"
+  namespace: "systemui"
+  description: "Rebind active custom tiles quickly."
+  bug: "362526228"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }
 
 flag {
@@ -600,16 +603,6 @@ flag {
     namespace: "systemui"
     description: "Mitigate crash on invalid computed range in CropView"
     bug: "232633995"
-    metadata {
-        purpose: PURPOSE_BUGFIX
-    }
-}
-
-flag {
-    name: "screenshot_save_image_exporter"
-    namespace: "systemui"
-    description: "Save all screenshots using ImageExporter"
-    bug: "352308052"
     metadata {
         purpose: PURPOSE_BUGFIX
     }

@@ -16,8 +16,8 @@
 
 package android.libcore;
 
-import androidx.benchmark.BenchmarkState;
-import androidx.benchmark.junit4.BenchmarkRule;
+import android.perftests.utils.BenchmarkState;
+import android.perftests.utils.PerfStatusReporter;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -33,11 +33,11 @@ import java.util.Arrays;
 public class ArrayCopyPerfTest {
 
     @Rule
-    public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
+    public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
     @Test
     public void timeManualArrayCopy() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         char[] src = new char[8192];
         while (state.keepRunning()) {
             char[] dst = new char[8192];
@@ -49,7 +49,7 @@ public class ArrayCopyPerfTest {
 
     @Test
     public void time_System_arrayCopy() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         char[] src = new char[8192];
         while (state.keepRunning()) {
             char[] dst = new char[8192];
@@ -59,7 +59,7 @@ public class ArrayCopyPerfTest {
 
     @Test
     public void time_Arrays_copyOf() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         char[] src = new char[8192];
         while (state.keepRunning()) {
             char[] dst = Arrays.copyOf(src, 8192);
@@ -68,7 +68,7 @@ public class ArrayCopyPerfTest {
 
     @Test
     public void time_Arrays_copyOfRange() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         char[] src = new char[8192];
         while (state.keepRunning()) {
             char[] dst = Arrays.copyOfRange(src, 0, 8192);

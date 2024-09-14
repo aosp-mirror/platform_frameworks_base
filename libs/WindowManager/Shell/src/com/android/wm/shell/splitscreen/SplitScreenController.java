@@ -61,7 +61,6 @@ import android.view.IRemoteAnimationRunner;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
-import android.view.SurfaceSession;
 import android.view.WindowManager;
 import android.widget.Toast;
 import android.window.RemoteTransition;
@@ -93,7 +92,7 @@ import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.split.SplitScreenUtils;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
 import com.android.wm.shell.draganddrop.DragAndDropController;
-import com.android.wm.shell.draganddrop.DragAndDropPolicy;
+import com.android.wm.shell.draganddrop.SplitDragPolicy;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.shared.TransactionPool;
@@ -122,7 +121,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @see StageCoordinator
  */
 // TODO(b/198577848): Implement split screen flicker test to consolidate CUJ of split screen.
-public class SplitScreenController implements DragAndDropPolicy.Starter,
+public class SplitScreenController implements SplitDragPolicy.Starter,
         RemoteCallable<SplitScreenController>, KeyguardChangeListener {
     private static final String TAG = SplitScreenController.class.getSimpleName();
 
@@ -897,7 +896,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
 
     private SurfaceControl reparentSplitTasksForAnimation(RemoteAnimationTarget[] apps,
             SurfaceControl.Transaction t, String callsite) {
-        final SurfaceControl.Builder builder = new SurfaceControl.Builder(new SurfaceSession())
+        final SurfaceControl.Builder builder = new SurfaceControl.Builder()
                 .setContainerLayer()
                 .setName("RecentsAnimationSplitTasks")
                 .setHidden(false)

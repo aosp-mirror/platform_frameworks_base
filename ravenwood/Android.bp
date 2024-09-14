@@ -5,6 +5,10 @@ package {
     // to get the below license kinds:
     //   SPDX-license-identifier-Apache-2.0
     default_applicable_licenses: ["frameworks_base_license"],
+
+    // OWNER: g/ravenwood
+    // Bug component: 25698
+    default_team: "trendy_team_framework_backstage_power",
 }
 
 filegroup {
@@ -94,6 +98,9 @@ java_library {
     libs: [
         "ravenwood-runtime-common-ravenwood",
     ],
+    static_libs: [
+        "framework-annotations-lib", // should it be "libs" instead?
+    ],
     visibility: ["//visibility:private"],
 }
 
@@ -126,9 +133,9 @@ java_library {
     ],
     libs: [
         "framework-minus-apex.ravenwood",
-        "ravenwood-junit",
         "ravenwood-helper-libcore-runtime",
     ],
+    sdk_version: "core_current",
     visibility: ["//visibility:private"],
 }
 
@@ -156,14 +163,15 @@ java_library {
         "ravenwood-runtime-common",
     ],
     libs: [
-        "android.test.mock",
+        "android.test.mock.impl",
         "framework-minus-apex.ravenwood",
         "ravenwood-framework",
         "services.core.ravenwood",
         "junit",
         "framework-annotations-lib",
+        "ravenwood-helper-framework-runtime",
+        "ravenwood-helper-libcore-runtime",
     ],
-    sdk_version: "core_current",
     visibility: ["//frameworks/base"],
     jarjar_rules: ":ravenwood-services-jarjar-rules",
 }
@@ -333,8 +341,8 @@ java_library {
 android_ravenwood_libgroup {
     name: "ravenwood-runtime",
     data: [
-        "framework-res",
-        "ravenwood-empty-res",
+        ":framework-res",
+        ":ravenwood-empty-res",
     ],
     libs: [
         "100-framework-minus-apex.ravenwood",

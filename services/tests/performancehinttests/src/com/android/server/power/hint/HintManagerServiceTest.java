@@ -48,7 +48,9 @@ import android.app.ActivityManagerInternal;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.hardware.common.fmq.MQDescriptor;
 import android.hardware.power.ChannelConfig;
+import android.hardware.power.ChannelMessage;
 import android.hardware.power.IPower;
 import android.hardware.power.SessionConfig;
 import android.hardware.power.SessionTag;
@@ -167,6 +169,8 @@ public class HintManagerServiceTest {
         mConfig = new ChannelConfig();
         mConfig.readFlagBitmask = 1;
         mConfig.writeFlagBitmask = 2;
+        mConfig.channelDescriptor = new MQDescriptor<ChannelMessage, Byte>();
+        mConfig.eventFlagDescriptor = new MQDescriptor<Byte, Byte>();
         ApplicationInfo applicationInfo = new ApplicationInfo();
         applicationInfo.category = ApplicationInfo.CATEGORY_GAME;
         when(mContext.getPackageManager()).thenReturn(mMockPackageManager);

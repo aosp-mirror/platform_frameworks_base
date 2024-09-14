@@ -2,6 +2,7 @@ package com.android.systemui.battery
 
 import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.pipeline.shared.TileSpec
+import com.android.systemui.qs.shared.model.TileCategory
 import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.qs.tiles.BatterySaverTile
 import com.android.systemui.qs.tiles.base.interactor.QSTileAvailabilityInteractor
@@ -33,7 +34,7 @@ interface BatterySaverModule {
     @IntoMap
     @StringKey(BATTERY_SAVER_TILE_SPEC)
     fun provideBatterySaverAvailabilityInteractor(
-            impl: BatterySaverTileDataInteractor
+        impl: BatterySaverTileDataInteractor
     ): QSTileAvailabilityInteractor
 
     companion object {
@@ -51,6 +52,7 @@ interface BatterySaverModule {
                         labelRes = R.string.battery_detail_switch_title,
                     ),
                 instanceId = uiEventLogger.getNewInstanceId(),
+                category = TileCategory.UTILITIES,
             )
 
         /** Inject BatterySaverTile into tileViewModelMap in QSModule */

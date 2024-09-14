@@ -105,6 +105,7 @@
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Bæta við glósu"</string>
     <string name="backlinks_include_link" msgid="4562093591148248158">"Hafa tengil með"</string>
     <string name="backlinks_duplicate_label_format" msgid="558445128952827926">"<xliff:g id="APPNAME">%1$s</xliff:g> <xliff:g id="FREQUENCYCOUNT">(%2$d)</xliff:g>"</string>
+    <string name="backlinks_cross_profile_error" msgid="1355798585727802282">"Ekki er hægt að bæta við tenglum frá öðrum prófílum"</string>
     <string name="screenrecord_title" msgid="4257171601439507792">"Skjáupptaka"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Vinnur úr skjáupptöku"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Áframhaldandi tilkynning fyrir skjáupptökulotu"</string>
@@ -292,8 +293,7 @@
     <string name="start_dreams" msgid="9131802557946276718">"Skjávari"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Ónáðið ekki"</string>
-    <!-- no translation found for quick_settings_modes_label (879156359479504244) -->
-    <skip />
+    <string name="quick_settings_modes_label" msgid="879156359479504244">"Stillingar"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Engin pöruð tæki til staðar"</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"Ýttu til að tengja eða aftengja tæki"</string>
@@ -434,8 +434,7 @@
     <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"Opna stillingar"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Annað tæki"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Kveikja/slökkva á yfirliti"</string>
-    <!-- no translation found for zen_modes_dialog_title (8854640808100096934) -->
-    <skip />
+    <string name="zen_modes_dialog_title" msgid="8854640808100096934">"Stillingar"</string>
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"Lokið"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"Stillingar"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"Kveikt"</string>
@@ -1393,18 +1392,12 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Minnka tákn"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Stækka tákn"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"eða"</string>
-    <!-- no translation found for launch_keyboard_tutorial_notification_title (8849933155160522519) -->
-    <skip />
-    <!-- no translation found for launch_keyboard_tutorial_notification_content (2880339951512757918) -->
-    <skip />
-    <!-- no translation found for launch_touchpad_tutorial_notification_title (2243780062772196901) -->
-    <skip />
-    <!-- no translation found for launch_touchpad_tutorial_notification_content (7931085031240753226) -->
-    <skip />
-    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_title (1940023776496198762) -->
-    <skip />
-    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_content (1780725168171929365) -->
-    <skip />
+    <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Flettu með því að nota lyklaborðið"</string>
+    <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Kynntu þér flýtilykla"</string>
+    <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Flettu með því að nota snertiflötinn"</string>
+    <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"Nánar um bendingar á snertifleti"</string>
+    <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"Flettu með því að nota lyklaborðið og snertiflötinn"</string>
+    <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"Kynntu þér bendingar á snertifleti, flýtilykla og fleira"</string>
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Bending til að fara til baka"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Bending til að fara á upphafsskjá"</string>
     <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"Aðgerðalykill"</string>
@@ -1444,4 +1437,18 @@
     <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="7513137763024327538">"Nú geturðu gert skjáinn mjög dökkan með því að lækka birtustigið enn frekar efst á skjánum.\n\nÞetta virkar best þegar umhverfi þitt er mjög dimmt."</string>
     <string name="accessibility_deprecate_extra_dim_dialog_button" msgid="1782147201534669800">"Fjarlægja flýtilykil á mjög dökka stillingu"</string>
     <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="4070696910424515757">"Flýtilykill á mjög dökka stillingu fjarlægður. Notaðu hefðbundnu birtustigsstikuna til að lækka birtustigið."</string>
+    <!-- no translation found for qs_edit_mode_category_connectivity (4559726936546032672) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_accessibility (7969091385071475922) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_utilities (8123080090108420095) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_privacy (6577774443194551775) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_providedByApps (8346112074897919019) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_display (4749511439121053942) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_unknown (509314252124053550) -->
+    <skip />
 </resources>

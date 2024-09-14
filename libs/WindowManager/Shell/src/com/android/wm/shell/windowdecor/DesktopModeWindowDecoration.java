@@ -35,7 +35,6 @@ import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getResiz
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.WindowConfiguration.WindowingMode;
 import android.app.assist.AssistContent;
@@ -65,6 +64,7 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.WindowManager;
 import android.widget.ImageButton;
+import android.window.TaskSnapshot;
 import android.window.WindowContainerTransaction;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -87,15 +87,20 @@ import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
 import com.android.wm.shell.shared.desktopmode.DesktopModeFlags;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource;
+import com.android.wm.shell.shared.desktopmode.ManageWindowsViewContainer;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.windowdecor.extension.TaskInfoKt;
 import com.android.wm.shell.windowdecor.viewholder.AppHandleViewHolder;
 import com.android.wm.shell.windowdecor.viewholder.AppHeaderViewHolder;
 import com.android.wm.shell.windowdecor.viewholder.WindowDecorationViewHolder;
+import com.android.wm.shell.windowdecor.viewhost.WindowDecorViewHostSupplier;
 
+import kotlin.Pair;
 import kotlin.Unit;
 import kotlin.jvm.functions.Function0;
+import kotlin.jvm.functions.Function1;
 
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -131,18 +136,18 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     private Function0<Unit> mOnToFullscreenClickListener;
     private Function0<Unit> mOnToSplitscreenClickListener;
     private Function0<Unit> mOnNewWindowClickListener;
+    private Function0<Unit> mOnManageWindowsClickListener;
     private DragPositioningCallback mDragPositioningCallback;
     private DragResizeInputListener mDragResizeListener;
     private DragDetector mDragDetector;
-    private Runnable mCurrentViewHostRunnable = null;
     private RelayoutParams mRelayoutParams = new RelayoutParams();
     private final WindowDecoration.RelayoutResult<WindowDecorLinearLayout> mResult =
             new WindowDecoration.RelayoutResult<>();
-    private final Runnable mViewHostRunnable =
-            () -> updateViewHost(mRelayoutParams, null /* onDrawTransaction */, mResult);
 
     private final Point mPositionInParent = new Point();
     private HandleMenu mHandleMenu;
+    private boolean mMinimumInstancesFound;
+    private ManageWindowsViewContainer mManageWindowsMenu;
 
     private MaximizeMenu mMaximizeMenu;
 
@@ -190,14 +195,16 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
             AppToWebGenericLinksParser genericLinksParser,
             AssistContentRequester assistContentRequester,
-            MultiInstanceHelper multiInstanceHelper) {
+            MultiInstanceHelper multiInstanceHelper,
+            WindowDecorViewHostSupplier windowDecorViewHostSupplier) {
         this (context, userContext, displayController, splitScreenController, taskOrganizer,
                 taskInfo, taskSurface, handler, bgExecutor, choreographer, syncQueue,
                 rootTaskDisplayAreaOrganizer, genericLinksParser, assistContentRequester,
                 SurfaceControl.Builder::new, SurfaceControl.Transaction::new,
                 WindowContainerTransaction::new, SurfaceControl::new, new WindowManagerWrapper(
                         context.getSystemService(WindowManager.class)),
-                new SurfaceControlViewHostFactory() {}, DefaultMaximizeMenuFactory.INSTANCE,
+                new SurfaceControlViewHostFactory() {}, windowDecorViewHostSupplier,
+                DefaultMaximizeMenuFactory.INSTANCE,
                 DefaultHandleMenuFactory.INSTANCE, multiInstanceHelper);
     }
 
@@ -222,13 +229,14 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             Supplier<SurfaceControl> surfaceControlSupplier,
             WindowManagerWrapper windowManagerWrapper,
             SurfaceControlViewHostFactory surfaceControlViewHostFactory,
+            WindowDecorViewHostSupplier windowDecorViewHostSupplier,
             MaximizeMenuFactory maximizeMenuFactory,
             HandleMenuFactory handleMenuFactory,
             MultiInstanceHelper multiInstanceHelper) {
         super(context, userContext, displayController, taskOrganizer, taskInfo, taskSurface,
                 surfaceControlBuilderSupplier, surfaceControlTransactionSupplier,
                 windowContainerTransactionSupplier, surfaceControlSupplier,
-                surfaceControlViewHostFactory);
+                surfaceControlViewHostFactory, windowDecorViewHostSupplier);
         mSplitScreenController = splitScreenController;
         mHandler = handler;
         mBgExecutor = bgExecutor;
@@ -285,6 +293,14 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         mOnNewWindowClickListener = listener;
     }
 
+    /**
+     * Registers a listener to be called when the decoration's manage windows action is
+     * triggered.
+     */
+    void setManageWindowsClickListener(Function0<Unit> listener) {
+        mOnManageWindowsClickListener = listener;
+    }
+
     void setCaptionListeners(
             View.OnClickListener onCaptionButtonClickListener,
             View.OnTouchListener onCaptionTouchListener,
@@ -337,73 +353,6 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             SurfaceControl.Transaction startT, SurfaceControl.Transaction finishT,
             boolean applyStartTransactionOnDraw, boolean shouldSetTaskPositionAndCrop) {
         Trace.beginSection("DesktopModeWindowDecoration#relayout");
-        if (taskInfo.isFreeform()) {
-            // The Task is in Freeform mode -> show its header in sync since it's an integral part
-            // of the window itself - a delayed header might cause bad UX.
-            relayoutInSync(taskInfo, startT, finishT, applyStartTransactionOnDraw,
-                    shouldSetTaskPositionAndCrop);
-        } else {
-            // The Task is outside Freeform mode -> allow the handle view to be delayed since the
-            // handle is just a small addition to the window.
-            relayoutWithDelayedViewHost(taskInfo, startT, finishT, applyStartTransactionOnDraw,
-                    shouldSetTaskPositionAndCrop);
-        }
-        Trace.endSection();
-    }
-
-    /** Run the whole relayout phase immediately without delay. */
-    private void relayoutInSync(ActivityManager.RunningTaskInfo taskInfo,
-            SurfaceControl.Transaction startT, SurfaceControl.Transaction finishT,
-            boolean applyStartTransactionOnDraw, boolean shouldSetTaskPositionAndCrop) {
-        // Clear the current ViewHost runnable as we will update the ViewHost here
-        clearCurrentViewHostRunnable();
-        updateRelayoutParamsAndSurfaces(taskInfo, startT, finishT, applyStartTransactionOnDraw,
-                shouldSetTaskPositionAndCrop);
-        if (mResult.mRootView != null) {
-            updateViewHost(mRelayoutParams, startT, mResult);
-        }
-    }
-
-    /**
-     * Clear the current ViewHost runnable - to ensure it doesn't run once relayout params have been
-     * updated.
-     */
-    private void clearCurrentViewHostRunnable() {
-        if (mCurrentViewHostRunnable != null) {
-            mHandler.removeCallbacks(mCurrentViewHostRunnable);
-            mCurrentViewHostRunnable = null;
-        }
-    }
-
-    /**
-     * Relayout the window decoration but repost some of the work, to unblock the current callstack.
-     */
-    private void relayoutWithDelayedViewHost(ActivityManager.RunningTaskInfo taskInfo,
-            SurfaceControl.Transaction startT, SurfaceControl.Transaction finishT,
-            boolean applyStartTransactionOnDraw, boolean shouldSetTaskPositionAndCrop) {
-        if (applyStartTransactionOnDraw) {
-            throw new IllegalArgumentException(
-                    "We cannot both sync viewhost ondraw and delay viewhost creation.");
-        }
-        // Clear the current ViewHost runnable as we will update the ViewHost here
-        clearCurrentViewHostRunnable();
-        updateRelayoutParamsAndSurfaces(taskInfo, startT, finishT,
-                false /* applyStartTransactionOnDraw */, shouldSetTaskPositionAndCrop);
-        if (mResult.mRootView == null) {
-            // This means something blocks the window decor from showing, e.g. the task is hidden.
-            // Nothing is set up in this case including the decoration surface.
-            return;
-        }
-        // Store the current runnable so it can be removed if we start a new relayout.
-        mCurrentViewHostRunnable = mViewHostRunnable;
-        mHandler.post(mCurrentViewHostRunnable);
-    }
-
-    @SuppressLint("MissingPermission")
-    private void updateRelayoutParamsAndSurfaces(ActivityManager.RunningTaskInfo taskInfo,
-            SurfaceControl.Transaction startT, SurfaceControl.Transaction finishT,
-            boolean applyStartTransactionOnDraw, boolean shouldSetTaskPositionAndCrop) {
-        Trace.beginSection("DesktopModeWindowDecoration#updateRelayoutParamsAndSurfaces");
 
         if (Flags.enableDesktopWindowingAppToWeb()) {
             setCapturedLink(taskInfo.capturedLink, taskInfo.capturedLinkTimestamp);
@@ -420,8 +369,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         final SurfaceControl oldDecorationSurface = mDecorationContainerSurface;
         final WindowContainerTransaction wct = new WindowContainerTransaction();
 
-        Trace.beginSection("DesktopModeWindowDecoration#relayout-updateViewsAndSurfaces");
-        updateViewsAndSurfaces(mRelayoutParams, startT, finishT, wct, oldRootView, mResult);
+        Trace.beginSection("DesktopModeWindowDecoration#relayout-inner");
+        relayout(mRelayoutParams, startT, finishT, wct, oldRootView, mResult);
         Trace.endSection();
         // After this line, mTaskInfo is up-to-date and should be used instead of taskInfo
 
@@ -433,7 +382,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             // This means something blocks the window decor from showing, e.g. the task is hidden.
             // Nothing is set up in this case including the decoration surface.
             disposeStatusBarInputLayer();
-            Trace.endSection(); // DesktopModeWindowDecoration#updateRelayoutParamsAndSurfaces
+            Trace.endSection(); // DesktopModeWindowDecoration#relayout
             return;
         }
 
@@ -441,12 +390,12 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             disposeStatusBarInputLayer();
             mWindowDecorViewHolder = createViewHolder();
         }
-        Trace.beginSection("DesktopModeWindowDecoration#relayout-binding");
 
         final Point position = new Point();
         if (isAppHandle(mWindowDecorViewHolder)) {
             position.set(determineHandlePosition());
         }
+        Trace.beginSection("DesktopModeWindowDecoration#relayout-bindData");
         mWindowDecorViewHolder.bindData(mTaskInfo,
                 position,
                 mResult.mCaptionWidth,
@@ -460,7 +409,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         }
         updateDragResizeListener(oldDecorationSurface);
         updateMaximizeMenu(startT);
-        Trace.endSection(); // DesktopModeWindowDecoration#updateRelayoutParamsAndSurfaces
+        Trace.endSection(); // DesktopModeWindowDecoration#relayout
     }
 
     private boolean isCaptionVisible() {
@@ -638,6 +587,10 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         relayoutParams.mLayoutResId = captionLayoutId;
         relayoutParams.mCaptionHeightId = getCaptionHeightIdStatic(taskInfo.getWindowingMode());
         relayoutParams.mCaptionWidthId = getCaptionWidthId(relayoutParams.mLayoutResId);
+        // Allow the handle view to be delayed since the handle is just a small addition to the
+        // window, whereas the header cannot be delayed because it is expected to be visible from
+        // the first frame.
+        relayoutParams.mAsyncViewHost = isAppHandle;
 
         if (isAppHeader) {
             if (TaskInfoKt.isTransparentCaptionBarAppearance(taskInfo)) {
@@ -1004,9 +957,10 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     /**
      * Updates app info and creates and displays handle menu window.
      */
-    void createHandleMenu() {
+    void createHandleMenu(boolean minimumInstancesFound) {
         // Requests assist content. When content is received, calls {@link #onAssistContentReceived}
         // which sets app info and creates the handle menu.
+        mMinimumInstancesFound = minimumInstancesFound;
         mAssistContentRequester.requestAssistContent(
                 mTaskInfo.taskId, this::onAssistContentReceived);
     }
@@ -1019,8 +973,10 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         mWebUri = assistContent == null ? null : assistContent.getWebUri();
         loadAppInfoIfNeeded();
         updateGenericLink();
-
-        // Create and display handle menu
+        final boolean supportsMultiInstance = mMultiInstanceHelper
+                .supportsMultiInstanceSplit(mTaskInfo.baseActivity);
+        final boolean shouldShowManageWindowsButton = supportsMultiInstance
+                && mMinimumInstancesFound;
         mHandleMenu = mHandleMenuFactory.create(
                 this,
                 mWindowManagerWrapper,
@@ -1029,9 +985,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 mAppName,
                 mSplitScreenController,
                 DesktopModeStatus.canEnterDesktopMode(mContext),
-                Flags.enableDesktopWindowingMultiInstanceFeatures()
-                        && mMultiInstanceHelper
-                        .supportsMultiInstanceSplit(mTaskInfo.baseActivity),
+                supportsMultiInstance,
+                shouldShowManageWindowsButton,
                 getBrowserLink(),
                 mResult.mCaptionWidth,
                 mResult.mCaptionHeight,
@@ -1047,6 +1002,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 /* onToFullscreenClickListener= */ mOnToFullscreenClickListener,
                 /* onToSplitScreenClickListener= */ mOnToSplitscreenClickListener,
                 /* onNewWindowClickListener= */ mOnNewWindowClickListener,
+                /* onManageWindowsClickListener= */ mOnManageWindowsClickListener,
                 /* openInBrowserClickListener= */ (uri) -> {
                     mOpenInBrowserClickListener.accept(uri);
                     onCapturedLinkExpired();
@@ -1061,6 +1017,47 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                     return Unit.INSTANCE;
                 }
         );
+        mMinimumInstancesFound = false;
+    }
+
+    void createManageWindowsMenu(@NonNull List<Pair<Integer, TaskSnapshot>> snapshotList,
+            @NonNull Function1<Integer, Unit> onIconClickListener
+    ) {
+        if (mTaskInfo.isFreeform()) {
+            mManageWindowsMenu = new DesktopHeaderManageWindowsMenu(
+                    mTaskInfo,
+                    mDisplayController,
+                    mRootTaskDisplayAreaOrganizer,
+                    mContext,
+                    mSurfaceControlBuilderSupplier,
+                    mSurfaceControlTransactionSupplier,
+                    snapshotList,
+                    onIconClickListener,
+                    /* onOutsideClickListener= */ () -> {
+                        closeManageWindowsMenu();
+                        return Unit.INSTANCE;
+                    }
+                    );
+        } else {
+            mManageWindowsMenu = new DesktopHandleManageWindowsMenu(
+                    mTaskInfo,
+                    mSplitScreenController,
+                    getCaptionX(),
+                    mResult.mCaptionWidth,
+                    mWindowManagerWrapper,
+                    mContext,
+                    snapshotList,
+                    onIconClickListener,
+                    /* onOutsideClickListener= */ () -> {
+                        closeManageWindowsMenu();
+                        return Unit.INSTANCE;
+                    }
+                    );
+        }
+    }
+
+    void closeManageWindowsMenu() {
+        mManageWindowsMenu.close();
     }
 
     private void updateGenericLink() {
@@ -1253,7 +1250,6 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         mExclusionRegionListener.onExclusionRegionDismissed(mTaskInfo.taskId);
         disposeResizeVeil();
         disposeStatusBarInputLayer();
-        clearCurrentViewHostRunnable();
         super.close();
     }
 
@@ -1364,7 +1360,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
                 AppToWebGenericLinksParser genericLinksParser,
                 AssistContentRequester assistContentRequester,
-                MultiInstanceHelper multiInstanceHelper) {
+                MultiInstanceHelper multiInstanceHelper,
+                WindowDecorViewHostSupplier windowDecorViewHostSupplier) {
             return new DesktopModeWindowDecoration(
                     context,
                     userContext,
@@ -1380,7 +1377,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                     rootTaskDisplayAreaOrganizer,
                     genericLinksParser,
                     assistContentRequester,
-                    multiInstanceHelper);
+                    multiInstanceHelper,
+                    windowDecorViewHostSupplier);
         }
     }
 

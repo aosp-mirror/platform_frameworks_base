@@ -29,7 +29,6 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.util.TypedValue;
 import android.view.SurfaceControl;
-import android.view.SurfaceSession;
 import android.window.TaskSnapshot;
 
 /**
@@ -75,7 +74,7 @@ public abstract class PipContentOverlay {
 
         public PipColorOverlay(Context context) {
             mContext = context;
-            mLeash = new SurfaceControl.Builder(new SurfaceSession())
+            mLeash = new SurfaceControl.Builder()
                     .setCallsite(TAG)
                     .setName(LAYER_NAME)
                     .setColorLayer()
@@ -123,7 +122,7 @@ public abstract class PipContentOverlay {
         public PipSnapshotOverlay(TaskSnapshot snapshot, Rect sourceRectHint) {
             mSnapshot = snapshot;
             mSourceRectHint = new Rect(sourceRectHint);
-            mLeash = new SurfaceControl.Builder(new SurfaceSession())
+            mLeash = new SurfaceControl.Builder()
                     .setCallsite(TAG)
                     .setName(LAYER_NAME)
                     .build();
@@ -183,7 +182,7 @@ public abstract class PipContentOverlay {
 
             mBitmap = Bitmap.createBitmap(overlaySize, overlaySize, Bitmap.Config.ARGB_8888);
             prepareAppIconOverlay(appIcon);
-            mLeash = new SurfaceControl.Builder(new SurfaceSession())
+            mLeash = new SurfaceControl.Builder()
                     .setCallsite(TAG)
                     .setName(LAYER_NAME)
                     .build();

@@ -279,6 +279,26 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             Log.i(TAG, "Setting embedding rules. Size: " + rules.size());
             mSplitRules.clear();
             mSplitRules.addAll(rules);
+
+            if (!Flags.aeBackStackRestore() || !mPresenter.isRebuildTaskContainersNeeded()) {
+                return;
+            }
+
+            try {
+                final TransactionRecord transactionRecord =
+                        mTransactionManager.startNewTransaction();
+                final WindowContainerTransaction wct = transactionRecord.getTransaction();
+                if (mPresenter.rebuildTaskContainers(wct, rules)) {
+                    transactionRecord.apply(false /* shouldApplyIndependently */);
+                    updateCallbackIfNecessary();
+                } else {
+                    transactionRecord.abort();
+                }
+            } catch (IllegalStateException ex) {
+                Log.e(TAG, "Having an existing transaction while running restoration with"
+                        + "new rules!! It is likely too late to perform the restoration "
+                        + "already!?", ex);
+            }
         }
     }
 
@@ -900,6 +920,12 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             return;
         }
         updateContainersInTask(wct, taskContainer);
+    }
+
+    @GuardedBy("mLock")
+    void onTaskFragmentParentRestored(@NonNull WindowContainerTransaction wct, int taskId,
+            @NonNull TaskFragmentParentInfo parentInfo) {
+        onTaskFragmentParentInfoChanged(wct, taskId, parentInfo);
     }
 
     @GuardedBy("mLock")

@@ -53,12 +53,12 @@ class KeyGestureEventListenerTest {
 
     companion object {
         const val DEVICE_ID = 1
-        val HOME_GESTURE_EVENT = KeyGestureEvent(
-            DEVICE_ID,
-            intArrayOf(KeyEvent.KEYCODE_H),
-            KeyEvent.META_META_ON or KeyEvent.META_META_LEFT_ON,
-            KeyGestureEvent.KEY_GESTURE_TYPE_HOME
-        )
+        val HOME_GESTURE_EVENT = KeyGestureEvent.Builder()
+            .setDeviceId(DEVICE_ID)
+            .setKeycodes(intArrayOf(KeyEvent.KEYCODE_H))
+            .setModifierState(KeyEvent.META_META_ON or KeyEvent.META_META_LEFT_ON)
+            .setKeyGestureType(KeyGestureEvent.KEY_GESTURE_TYPE_HOME)
+            .build()
     }
 
     @get:Rule
@@ -114,12 +114,15 @@ class KeyGestureEventListenerTest {
     }
 
     private fun notifyKeyGestureEvent(event: KeyGestureEvent) {
-        registeredListener!!.onKeyGestureEvent(
-            event.deviceId,
-            event.keycodes,
-            event.modifierState,
-            event.keyGestureType
-        )
+        val eventToSend = AidlKeyGestureEvent()
+        eventToSend.deviceId = event.deviceId
+        eventToSend.keycodes = event.keycodes
+        eventToSend.modifierState = event.modifierState
+        eventToSend.gestureType = event.keyGestureType
+        eventToSend.action = event.action
+        eventToSend.displayId = event.displayId
+        eventToSend.flags = event.flags
+        registeredListener!!.onKeyGestureEvent(eventToSend)
     }
 
     @Test

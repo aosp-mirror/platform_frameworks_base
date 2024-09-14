@@ -16,98 +16,90 @@
 
 package com.android.systemui.accessibility.data.repository
 
+import android.annotation.SuppressLint
 import android.view.accessibility.CaptioningManager
+import com.android.systemui.accessibility.data.model.CaptioningModel
+import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.user.data.repository.UserRepository
+import com.android.systemui.user.utils.UserScopedService
+import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
+import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.channels.ProducerScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 interface CaptioningRepository {
 
-    /** The system audio caption enabled state. */
-    val isSystemAudioCaptioningEnabled: StateFlow<Boolean>
+    /** Current state of Live Captions. */
+    val captioningModel: StateFlow<CaptioningModel?>
 
-    /** The system audio caption UI enabled state. */
-    val isSystemAudioCaptioningUiEnabled: StateFlow<Boolean>
-
-    /** Sets [isSystemAudioCaptioningEnabled]. */
+    /** Sets [CaptioningModel.isSystemAudioCaptioningEnabled]. */
     suspend fun setIsSystemAudioCaptioningEnabled(isEnabled: Boolean)
 }
 
-class CaptioningRepositoryImpl(
-    private val captioningManager: CaptioningManager,
-    private val backgroundCoroutineContext: CoroutineContext,
-    coroutineScope: CoroutineScope,
+@OptIn(ExperimentalCoroutinesApi::class)
+class CaptioningRepositoryImpl
+@Inject
+constructor(
+    private val userScopedCaptioningManagerProvider: UserScopedService<CaptioningManager>,
+    userRepository: UserRepository,
+    @Background private val backgroundCoroutineContext: CoroutineContext,
+    @Application coroutineScope: CoroutineScope,
 ) : CaptioningRepository {
 
-    private val captioningChanges: SharedFlow<CaptioningChange> =
-        callbackFlow {
-                val listener = CaptioningChangeProducingListener(this)
-                captioningManager.addCaptioningChangeListener(listener)
-                awaitClose { captioningManager.removeCaptioningChangeListener(listener) }
-            }
-            .shareIn(coroutineScope, SharingStarted.WhileSubscribed(), replay = 0)
+    @SuppressLint("NonInjectedService") // this uses user-aware context
+    private val captioningManager: StateFlow<CaptioningManager?> =
+        userRepository.selectedUser
+            .map { userScopedCaptioningManagerProvider.forUser(it.userInfo.userHandle) }
+            .stateIn(coroutineScope, SharingStarted.WhileSubscribed(), null)
 
-    override val isSystemAudioCaptioningEnabled: StateFlow<Boolean> =
-        captioningChanges
-            .filterIsInstance(CaptioningChange.IsSystemAudioCaptioningEnabled::class)
-            .map { it.isEnabled }
-            .onStart { emit(captioningManager.isSystemAudioCaptioningEnabled) }
-            .stateIn(
-                coroutineScope,
-                SharingStarted.WhileSubscribed(),
-                captioningManager.isSystemAudioCaptioningEnabled,
-            )
-
-    override val isSystemAudioCaptioningUiEnabled: StateFlow<Boolean> =
-        captioningChanges
-            .filterIsInstance(CaptioningChange.IsSystemUICaptioningEnabled::class)
-            .map { it.isEnabled }
-            .onStart { emit(captioningManager.isSystemAudioCaptioningUiEnabled) }
-            .stateIn(
-                coroutineScope,
-                SharingStarted.WhileSubscribed(),
-                captioningManager.isSystemAudioCaptioningUiEnabled,
-            )
+    override val captioningModel: StateFlow<CaptioningModel?> =
+        captioningManager
+            .filterNotNull()
+            .flatMapLatest { it.captioningModel() }
+            .stateIn(coroutineScope, SharingStarted.WhileSubscribed(), null)
 
     override suspend fun setIsSystemAudioCaptioningEnabled(isEnabled: Boolean) {
         withContext(backgroundCoroutineContext) {
-            captioningManager.isSystemAudioCaptioningEnabled = isEnabled
+            captioningManager.value?.isSystemAudioCaptioningEnabled = isEnabled
         }
     }
 
-    private sealed interface CaptioningChange {
+    private fun CaptioningManager.captioningModel(): Flow<CaptioningModel> {
+        return conflatedCallbackFlow {
+                val listener =
+                    object : CaptioningManager.CaptioningChangeListener() {
 
-        data class IsSystemAudioCaptioningEnabled(val isEnabled: Boolean) : CaptioningChange
+                        override fun onSystemAudioCaptioningChanged(enabled: Boolean) {
+                            trySend(Unit)
+                        }
 
-        data class IsSystemUICaptioningEnabled(val isEnabled: Boolean) : CaptioningChange
-    }
-
-    private class CaptioningChangeProducingListener(
-        private val scope: ProducerScope<CaptioningChange>
-    ) : CaptioningManager.CaptioningChangeListener() {
-
-        override fun onSystemAudioCaptioningChanged(enabled: Boolean) {
-            emitChange(CaptioningChange.IsSystemAudioCaptioningEnabled(enabled))
-        }
-
-        override fun onSystemAudioCaptioningUiChanged(enabled: Boolean) {
-            emitChange(CaptioningChange.IsSystemUICaptioningEnabled(enabled))
-        }
-
-        private fun emitChange(change: CaptioningChange) {
-            scope.launch { scope.send(change) }
-        }
+                        override fun onSystemAudioCaptioningUiChanged(enabled: Boolean) {
+                            trySend(Unit)
+                        }
+                    }
+                addCaptioningChangeListener(listener)
+                awaitClose { removeCaptioningChangeListener(listener) }
+            }
+            .onStart { emit(Unit) }
+            .map {
+                CaptioningModel(
+                    isSystemAudioCaptioningEnabled = isSystemAudioCaptioningEnabled,
+                    isSystemAudioCaptioningUiEnabled = isSystemAudioCaptioningUiEnabled,
+                )
+            }
+            .flowOn(backgroundCoroutineContext)
     }
 }

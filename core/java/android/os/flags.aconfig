@@ -52,14 +52,6 @@ flag {
 }
 
 flag {
-    name: "bugreport_mode_max_value"
-    is_exported: true
-    namespace: "telephony"
-    description: "Introduce a constant as maximum value of bugreport mode."
-    bug: "305067125"
-}
-
-flag {
     name: "adpf_prefer_power_efficiency"
     is_exported: true
     namespace: "game"
@@ -110,14 +102,6 @@ flag {
     name: "adpf_use_fmq_channel_fixed"
     namespace: "game"
     description: "Guards use of the FMQ channel for ADPF with a readonly flag"
-    is_fixed_read_only: true
-    bug: "315894228"
-}
-
-flag {
-    name: "adpf_fmq_eager_send"
-    namespace: "game"
-    description: "Guards the use of an eager-sending optimization in FMQ for low-latency messages"
     is_fixed_read_only: true
     bug: "315894228"
 }

@@ -24,18 +24,16 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.testng.Assert.assertThrows;
 
-import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.annotations.DisabledOnRavenwood;
 import android.platform.test.ravenwood.RavenwoodRule;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.os.BinderInternal;
 
-
 import org.junit.Rule;
 import org.junit.Test;
 
-@IgnoreUnderRavenwood(blockedBy = WorkSource.class)
 public class BinderTest {
     private static final int UID = 100;
 
@@ -89,6 +87,7 @@ public class BinderTest {
 
     @SmallTest
     @Test(expected = java.lang.SecurityException.class)
+    @DisabledOnRavenwood(blockedBy = ServiceManagerNative.class)
     public void testServiceManagerNativeSecurityException() throws RemoteException {
         // Find the service manager
         IServiceManager sServiceManager = ServiceManagerNative
@@ -101,6 +100,7 @@ public class BinderTest {
 
     @SmallTest
     @Test(expected = java.lang.NullPointerException.class)
+    @DisabledOnRavenwood(blockedBy = ServiceManagerNative.class)
     public void testServiceManagerNativeNullptrException() throws RemoteException {
         // Find the service manager
         IServiceManager sServiceManager = ServiceManagerNative

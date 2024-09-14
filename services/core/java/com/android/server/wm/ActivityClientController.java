@@ -864,8 +864,9 @@ class ActivityClientController extends IActivityClientController.Stub {
                 if (transition != null) {
                     if (changed) {
                         // Always set as scene transition because it expects to be a jump-cut.
-                        transition.setOverrideAnimation(TransitionInfo.AnimationOptions
-                                .makeSceneTransitionAnimOptions(), null, null);
+                        transition.setOverrideAnimation(
+                                TransitionInfo.AnimationOptions.makeSceneTransitionAnimOptions(), r,
+                                null, null);
                         r.mTransitionController.requestStartTransition(transition,
                                 null /*startTask */, null /* remoteTransition */,
                                 null /* displayChange */);
@@ -910,8 +911,9 @@ class ActivityClientController extends IActivityClientController.Stub {
                                 && under.returningOptions.getAnimationType()
                                         == ANIM_SCENE_TRANSITION) {
                             // Pass along the scene-transition animation-type
-                            transition.setOverrideAnimation(TransitionInfo.AnimationOptions
-                                    .makeSceneTransitionAnimOptions(), null, null);
+                            transition.setOverrideAnimation(TransitionInfo
+                                            .AnimationOptions.makeSceneTransitionAnimOptions(), r,
+                                    null, null);
                         }
                     } else {
                         transition.abort();
@@ -1508,7 +1510,7 @@ class ActivityClientController extends IActivityClientController.Stub {
                         r.mOverrideTaskTransition);
                 r.mTransitionController.setOverrideAnimation(
                         TransitionInfo.AnimationOptions.makeCustomAnimOptions(packageName,
-                                enterAnim, exitAnim, backgroundColor, r.mOverrideTaskTransition),
+                                enterAnim, exitAnim, backgroundColor, r.mOverrideTaskTransition), r,
                         null /* startCallback */, null /* finishCallback */);
             }
         }

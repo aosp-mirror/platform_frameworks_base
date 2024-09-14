@@ -65,7 +65,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.PlatformOutlinedButton
 import com.android.compose.animation.Easings
@@ -355,7 +354,10 @@ private class PinInputRow(
     fun Content(modifier: Modifier) {
 
         // Wrap PIN entry in a Box so it is visible to accessibility (even if empty).
-        Box(modifier = modifier.fillMaxWidth().wrapContentHeight()) {
+        Box(
+            modifier = modifier.fillMaxWidth().wrapContentHeight(),
+            contentAlignment = Alignment.Center,
+        ) {
             Row(
                 modifier
                     .heightIn(min = shapeAnimations.shapeSize)

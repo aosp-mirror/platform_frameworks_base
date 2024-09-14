@@ -40,12 +40,7 @@ internal class Translate(
         transition: TransitionState.Transition,
         value: Offset,
     ): Offset {
-        return with(layoutImpl.density) {
-            Offset(
-                value.x + x.toPx(),
-                value.y + y.toPx(),
-            )
-        }
+        return with(layoutImpl.density) { Offset(value.x + x.toPx(), value.y + y.toPx()) }
     }
 }
 
@@ -71,10 +66,7 @@ internal class OverscrollTranslate(
         val overscrollScope =
             cachedOverscrollScope.getFromCacheOrCompute(layoutImpl.density, overscrollProperties)
 
-        return Offset(
-            x = value.x + overscrollScope.x(),
-            y = value.y + overscrollScope.y(),
-        )
+        return Offset(x = value.x + overscrollScope.x(), y = value.y + overscrollScope.y())
     }
 }
 

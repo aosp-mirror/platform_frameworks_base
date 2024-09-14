@@ -31,6 +31,6 @@ android_test {
         "mockito-target-minus-junit4",
     ],
     platform_apis: true,
-    libs: ["android.test.runner"],
+    libs: ["android.test.runner.stubs.system"],
     certificate: "platform",
 }
