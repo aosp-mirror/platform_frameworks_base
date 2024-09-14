@@ -250,6 +250,16 @@ flag {
 }
 
 flag {
+    name: "enable_hold_to_drag_app_handle"
+    namespace: "lse_desktop_experience"
+    description: "Requires hold-to-drag the App Handle when using touchscreen input"
+    bug: "356409496"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "skip_compat_ui_education_in_desktop_mode"
     namespace: "lse_desktop_experience"
     description: "Ignore Compat UI educations when in Desktop Mode."
