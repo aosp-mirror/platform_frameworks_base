@@ -71,6 +71,7 @@ class HandleMenu(
     private val splitScreenController: SplitScreenController,
     private val shouldShowWindowingPill: Boolean,
     private val shouldShowNewWindowButton: Boolean,
+    private val shouldShowManageWindowsButton: Boolean,
     private val openInBrowserLink: Uri?,
     private val captionWidth: Int,
     private val captionHeight: Int,
@@ -119,6 +120,7 @@ class HandleMenu(
         onToFullscreenClickListener: () -> Unit,
         onToSplitScreenClickListener: () -> Unit,
         onNewWindowClickListener: () -> Unit,
+        onManageWindowsClickListener: () -> Unit,
         openInBrowserClickListener: (Uri) -> Unit,
         onCloseMenuClickListener: () -> Unit,
         onOutsideTouchListener: () -> Unit,
@@ -133,6 +135,7 @@ class HandleMenu(
             onToFullscreenClickListener = onToFullscreenClickListener,
             onToSplitScreenClickListener = onToSplitScreenClickListener,
             onNewWindowClickListener = onNewWindowClickListener,
+            onManageWindowsClickListener = onManageWindowsClickListener,
             openInBrowserClickListener = openInBrowserClickListener,
             onCloseMenuClickListener = onCloseMenuClickListener,
             onOutsideTouchListener = onOutsideTouchListener,
@@ -150,6 +153,7 @@ class HandleMenu(
         onToFullscreenClickListener: () -> Unit,
         onToSplitScreenClickListener: () -> Unit,
         onNewWindowClickListener: () -> Unit,
+        onManageWindowsClickListener: () -> Unit,
         openInBrowserClickListener: (Uri) -> Unit,
         onCloseMenuClickListener: () -> Unit,
         onOutsideTouchListener: () -> Unit
@@ -160,13 +164,15 @@ class HandleMenu(
             captionHeight = captionHeight,
             shouldShowWindowingPill = shouldShowWindowingPill,
             shouldShowBrowserPill = shouldShowBrowserPill,
-            shouldShowNewWindowButton = shouldShowNewWindowButton
+            shouldShowNewWindowButton = shouldShowNewWindowButton,
+            shouldShowManageWindowsButton = shouldShowManageWindowsButton
         ).apply {
             bind(taskInfo, appIconBitmap, appName)
             this.onToDesktopClickListener = onToDesktopClickListener
             this.onToFullscreenClickListener = onToFullscreenClickListener
             this.onToSplitScreenClickListener = onToSplitScreenClickListener
             this.onNewWindowClickListener = onNewWindowClickListener
+            this.onManageWindowsClickListener = onManageWindowsClickListener
             this.onOpenInBrowserClickListener = {
                 openInBrowserClickListener.invoke(openInBrowserLink!!)
             }
@@ -372,7 +378,13 @@ class HandleMenu(
                 R.dimen.desktop_mode_handle_menu_new_window_height
             )
         }
-        if (!SHOULD_SHOW_SCREENSHOT_BUTTON && !shouldShowNewWindowButton) {
+        if (!shouldShowManageWindowsButton) {
+            menuHeight -= loadDimensionPixelSize(
+                R.dimen.desktop_mode_handle_menu_manage_windows_height
+            )
+        }
+        if (!SHOULD_SHOW_SCREENSHOT_BUTTON && !shouldShowNewWindowButton
+            && !shouldShowManageWindowsButton) {
             menuHeight -= pillTopMargin
         }
         if (!shouldShowBrowserPill) {
@@ -405,7 +417,8 @@ class HandleMenu(
         captionHeight: Int,
         private val shouldShowWindowingPill: Boolean,
         private val shouldShowBrowserPill: Boolean,
-        private val shouldShowNewWindowButton: Boolean
+        private val shouldShowNewWindowButton: Boolean,
+        private val shouldShowManageWindowsButton: Boolean
     ) {
         val rootView = LayoutInflater.from(context)
             .inflate(R.layout.desktop_mode_window_decor_handle_menu, null /* root */) as View
@@ -430,6 +443,8 @@ class HandleMenu(
         private val moreActionsPill = rootView.requireViewById<View>(R.id.more_actions_pill)
         private val screenshotBtn = moreActionsPill.requireViewById<Button>(R.id.screenshot_button)
         private val newWindowBtn = moreActionsPill.requireViewById<Button>(R.id.new_window_button)
+        private val manageWindowBtn = moreActionsPill
+            .requireViewById<Button>(R.id.manage_windows_button)
 
         // Open in Browser Pill.
         private val openInBrowserPill = rootView.requireViewById<View>(R.id.open_in_browser_pill)
@@ -446,6 +461,7 @@ class HandleMenu(
         var onToFullscreenClickListener: (() -> Unit)? = null
         var onToSplitScreenClickListener: (() -> Unit)? = null
         var onNewWindowClickListener: (() -> Unit)? = null
+        var onManageWindowsClickListener: (() -> Unit)? = null
         var onOpenInBrowserClickListener: (() -> Unit)? = null
         var onCloseMenuClickListener: (() -> Unit)? = null
         var onOutsideTouchListener: (() -> Unit)? = null
@@ -457,6 +473,7 @@ class HandleMenu(
             browserBtn.setOnClickListener { onOpenInBrowserClickListener?.invoke() }
             collapseMenuButton.setOnClickListener { onCloseMenuClickListener?.invoke() }
             newWindowBtn.setOnClickListener { onNewWindowClickListener?.invoke() }
+            manageWindowBtn.setOnClickListener { onManageWindowsClickListener?.invoke() }
 
             rootView.setOnTouchListener { _, event ->
                 if (event.actionMasked == ACTION_OUTSIDE) {
@@ -587,6 +604,7 @@ class HandleMenu(
         private fun bindMoreActionsPill(style: MenuStyle) {
             moreActionsPill.apply {
                 isGone = !shouldShowNewWindowButton && !SHOULD_SHOW_SCREENSHOT_BUTTON
+                        && !shouldShowManageWindowsButton
             }
             screenshotBtn.apply {
                 isGone = !SHOULD_SHOW_SCREENSHOT_BUTTON
@@ -598,6 +616,13 @@ class HandleMenu(
             }
             newWindowBtn.apply {
                 isGone = !shouldShowNewWindowButton
+                background.colorFilter =
+                    BlendModeColorFilter(style.backgroundColor, BlendMode.MULTIPLY)
+                setTextColor(style.textColor)
+                compoundDrawableTintList = ColorStateList.valueOf(style.textColor)
+            }
+            manageWindowBtn.apply {
+                isGone = !shouldShowManageWindowsButton
                 background.colorFilter =
                     BlendModeColorFilter(style.backgroundColor, BlendMode.MULTIPLY)
                 setTextColor(style.textColor)
@@ -643,6 +668,7 @@ interface HandleMenuFactory {
         splitScreenController: SplitScreenController,
         shouldShowWindowingPill: Boolean,
         shouldShowNewWindowButton: Boolean,
+        shouldShowManageWindowsButton: Boolean,
         openInBrowserLink: Uri?,
         captionWidth: Int,
         captionHeight: Int,
@@ -661,6 +687,7 @@ object DefaultHandleMenuFactory : HandleMenuFactory {
         splitScreenController: SplitScreenController,
         shouldShowWindowingPill: Boolean,
         shouldShowNewWindowButton: Boolean,
+        shouldShowManageWindowsButton: Boolean,
         openInBrowserLink: Uri?,
         captionWidth: Int,
         captionHeight: Int,
@@ -675,6 +702,7 @@ object DefaultHandleMenuFactory : HandleMenuFactory {
             splitScreenController,
             shouldShowWindowingPill,
             shouldShowNewWindowButton,
+            shouldShowManageWindowsButton,
             openInBrowserLink,
             captionWidth,
             captionHeight,

@@ -128,15 +128,20 @@ final class VibrationThread extends Thread {
      *  before the release callback.
      */
     boolean runVibrationOnVibrationThread(VibrationStepConductor conductor) {
-        synchronized (mLock) {
-            if (mRequestedActiveConductor != null) {
-                Slog.wtf(TAG, "Attempt to start vibration when one already running");
-                return false;
+        Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "runVibrationOnVibrationThread");
+        try {
+            synchronized (mLock) {
+                if (mRequestedActiveConductor != null) {
+                    Slog.wtf(TAG, "Attempt to start vibration when one already running");
+                    return false;
+                }
+                mRequestedActiveConductor = conductor;
+                mLock.notifyAll();
             }
-            mRequestedActiveConductor = conductor;
-            mLock.notifyAll();
+            return true;
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
         }
-        return true;
     }
 
     @Override

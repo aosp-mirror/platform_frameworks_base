@@ -324,7 +324,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                         return;
                     }
                     onDisplayChanged(mDisplayController.getDisplayLayout(displayId),
-                            false /* saveRestoreSnapFraction */);
+                            true /* saveRestoreSnapFraction */);
                 }
 
                 @Override
@@ -652,9 +652,11 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                             // there's a keyguard present
                             return;
                         }
-                        onDisplayChangedUncheck(mDisplayController
-                                        .getDisplayLayout(mPipDisplayLayoutState.getDisplayId()),
-                                false /* saveRestoreSnapFraction */);
+                        mMainExecutor.executeDelayed(() -> {
+                            onDisplayChangedUncheck(mDisplayController.getDisplayLayout(
+                                    mPipDisplayLayoutState.getDisplayId()),
+                                    false /* saveRestoreSnapFraction */);
+                        }, PIP_KEEP_CLEAR_AREAS_DELAY);
                     }
                 });
 
@@ -800,7 +802,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             }
         };
 
-        if (mPipTaskOrganizer.isInPip() && saveRestoreSnapFraction) {
+        if (mPipTransitionState.hasEnteredPip() && saveRestoreSnapFraction) {
             mMenuController.attachPipMenuView();
             // Calculate the snap fraction of the current stack along the old movement bounds
             final PipSnapAlgorithm pipSnapAlgorithm = mPipBoundsAlgorithm.getSnapAlgorithm();

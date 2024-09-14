@@ -603,7 +603,8 @@ class ActivityStarter {
                             .checkGrantUriPermissionFromIntent(intent, resolvedCallingUid,
                                     activityInfo.applicationInfo.packageName,
                                     UserHandle.getUserId(activityInfo.applicationInfo.uid),
-                                    activityInfo.requireContentUriPermissionFromCaller);
+                                    activityInfo.requireContentUriPermissionFromCaller,
+                                    /* requestHashCode */ this.hashCode());
                 } else {
                     intentGrants = supervisor.mService.mUgmInternal
                             .checkGrantUriPermissionFromIntent(intent, resolvedCallingUid,
@@ -717,6 +718,9 @@ class ActivityStarter {
      * @return The starter result.
      */
     int execute() {
+        // Required for logging ContentOrFileUriEventReported in the finally block.
+        String callerActivityName = null;
+        ActivityRecord launchingRecord = null;
         try {
             onExecutionStarted();
 
@@ -737,6 +741,7 @@ class ActivityStarter {
                         ?  Binder.getCallingUid() : mRequest.realCallingUid;
                 launchingState = mSupervisor.getActivityMetricsLogger().notifyActivityLaunching(
                         mRequest.intent, caller, callingUid);
+                callerActivityName = caller != null ? caller.info.name : null;
             }
 
             if (mRequest.intent != null) {
@@ -812,7 +817,7 @@ class ActivityStarter {
                 final ActivityOptions originalOptions = mRequest.activityOptions != null
                         ? mRequest.activityOptions.getOriginalOptions() : null;
                 // Only track the launch time of activity that will be resumed.
-                final ActivityRecord launchingRecord = mDoResume ? mLastStartActivityRecord : null;
+                launchingRecord = mDoResume ? mLastStartActivityRecord : null;
                 // If the new record is the one that started, a new activity has created.
                 final boolean newActivityCreated = mStartActivity == launchingRecord;
                 // Notify ActivityMetricsLogger that the activity has launched.
@@ -828,6 +833,23 @@ class ActivityStarter {
                 return getExternalResult(res);
             }
         } finally {
+            // Notify UriGrantsManagerService that activity launch completed. Required for logging
+            // the ContentOrFileUriEventReported message.
+            mSupervisor.mService.mUgmInternal.notifyActivityLaunchRequestCompleted(
+                    mRequest.hashCode(),
+                    // isSuccessfulLaunch
+                    launchingRecord != null,
+                    // Intent action
+                    mRequest.intent != null ? mRequest.intent.getAction() : null,
+                    mRequest.realCallingUid,
+                    callerActivityName,
+                    // Callee UID
+                    mRequest.activityInfo != null
+                            ? mRequest.activityInfo.applicationInfo.uid : INVALID_UID,
+                    // Callee Activity name
+                    mRequest.activityInfo != null ? mRequest.activityInfo.name : null,
+                    // isStartActivityForResult
+                    launchingRecord != null && launchingRecord.resultTo != null);
             onExecutionComplete();
         }
     }

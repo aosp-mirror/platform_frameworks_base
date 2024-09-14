@@ -100,6 +100,10 @@ interface SceneTransitionLayoutScope {
      * By default overlays are centered in their layout but they can be aligned differently using
      * [alignment].
      *
+     * If [isModal] is true (the default), then a protective layer will be added behind the overlay
+     * to prevent swipes from reaching other scenes or overlays behind this one. Clicking this
+     * protective layer will close the overlay.
+     *
      * Important: overlays must be defined after all scenes. Overlay order along the z-axis follows
      * call order. Calling overlay(A) followed by overlay(B) will mean that overlay B renders
      * after/above overlay A.
@@ -109,6 +113,7 @@ interface SceneTransitionLayoutScope {
         userActions: Map<UserAction, UserActionResult> =
             mapOf(Back to UserActionResult.HideOverlay(key)),
         alignment: Alignment = Alignment.Center,
+        isModal: Boolean = true,
         content: @Composable ContentScope.() -> Unit,
     )
 }

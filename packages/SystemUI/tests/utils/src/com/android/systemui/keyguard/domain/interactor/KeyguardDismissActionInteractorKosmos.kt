@@ -17,7 +17,7 @@
 package com.android.systemui.keyguard.domain.interactor
 
 import com.android.systemui.bouncer.domain.interactor.alternateBouncerInteractor
-import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
+import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteractor
 import com.android.systemui.keyguard.data.repository.keyguardRepository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
@@ -37,12 +37,11 @@ val Kosmos.keyguardDismissActionInteractor by
             dismissInteractor = keyguardDismissInteractor,
             applicationScope = testScope.backgroundScope,
             sceneInteractor = { sceneInteractor },
-            deviceEntryInteractor = { deviceEntryInteractor },
+            deviceUnlockedInteractor = { deviceUnlockedInteractor },
             quickSettingsSceneFamilyResolver = { quickSettingsSceneFamilyResolver },
             notifShadeSceneFamilyResolver = { notifShadeSceneFamilyResolver },
             powerInteractor = powerInteractor,
             alternateBouncerInteractor = alternateBouncerInteractor,
-            keyguardInteractor = { keyguardInteractor },
             shadeInteractor = { shadeInteractor },
         )
     }

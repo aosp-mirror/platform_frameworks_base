@@ -813,6 +813,10 @@ private fun shouldPlaceElement(
     element: Element,
     elementState: TransitionState,
 ): Boolean {
+    if (element.key.placeAllCopies) {
+        return true
+    }
+
     val transition =
         when (elementState) {
             is TransitionState.Idle -> {

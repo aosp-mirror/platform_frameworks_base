@@ -256,7 +256,7 @@ public class PipControllerTest extends ShellTestCase {
         when(mMockPipDisplayLayoutState.getDisplayLayout()).thenReturn(mMockDisplayLayout1);
         when(mMockDisplayController.getDisplayLayout(displayId)).thenReturn(mMockDisplayLayout2);
 
-        when(mMockPipTaskOrganizer.isInPip()).thenReturn(true);
+        when(mMockPipTransitionState.hasEnteredPip()).thenReturn(true);
         mPipController.mDisplaysChangedListener.onDisplayConfigurationChanged(
                 displayId, new Configuration());
 
