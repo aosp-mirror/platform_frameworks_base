@@ -21,7 +21,9 @@ import android.cts.input.EventVerifier
 import android.graphics.PointF
 import android.hardware.input.InputManager
 import android.os.ParcelFileDescriptor
+import android.util.Log
 import android.util.Size
+import android.view.InputEvent
 import android.view.MotionEvent
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.cts.input.BatchedEventSplitter
@@ -35,6 +37,7 @@ import com.android.cts.input.inputeventmatchers.withPressure
 import com.android.cts.input.inputeventmatchers.withRawCoords
 import com.android.cts.input.inputeventmatchers.withSource
 import java.io.InputStream
+import junit.framework.Assert.fail
 import org.hamcrest.Matchers.allOf
 import org.junit.Before
 import org.junit.Rule
@@ -70,7 +73,13 @@ class UinputRecordingIntegrationTests {
                 ),
             )
 
+        /**
+         * Use the debug mode to see the JSON-encoded received events in logcat.
+         */
+        const val DEBUG_RECEIVED_EVENTS = false
+
         const val INPUT_DEVICE_SOURCE_ALL = -1
+        val TAG = UinputRecordingIntegrationTests::class.java.simpleName
     }
 
     class TestData(
@@ -121,9 +130,15 @@ class UinputRecordingIntegrationTests {
                         scenario.virtualDisplay.display.uniqueId!!,
                     )
 
+                    injectUinputEvents()
+
+                    if (DEBUG_RECEIVED_EVENTS) {
+                        printReceivedEventsToLogcat(scenario.activity)
+                        fail("Test cannot pass in debug mode!")
+                    }
+
                     val verifier =
                         EventVerifier(BatchedEventSplitter { scenario.activity.getInputEvent() })
-                    injectUinputEvents()
                     verifyEvents(verifier)
                     scenario.activity.assertNoEvents()
                 } finally {
@@ -132,6 +147,18 @@ class UinputRecordingIntegrationTests {
             } finally {
                 instrumentation.uiAutomation.dropShellPermissionIdentity()
             }
+        }
+    }
+
+    private fun printReceivedEventsToLogcat(activity: CaptureEventActivity) {
+        val getNextEvent = BatchedEventSplitter { activity.getInputEvent() }
+        var receivedEvent: InputEvent? = getNextEvent()
+        while (receivedEvent != null) {
+            Log.d(TAG,
+                parser.encodeEvent(receivedEvent)?.toString()
+                    ?: "(Failed to encode received event)"
+            )
+            receivedEvent = getNextEvent()
         }
     }
 
