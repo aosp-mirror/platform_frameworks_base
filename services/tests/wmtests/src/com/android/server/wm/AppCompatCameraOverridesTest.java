@@ -267,7 +267,6 @@ public class AppCompatCameraOverridesTest extends WindowTestsBase {
             robot.conf().enableCameraCompatSplitScreenAspectRatio(true);
             robot.applyOnActivity((a) -> {
                 a.createActivityWithComponentInNewTask();
-                a.activateCameraInPolicy(true);
                 a.setShouldCreateCompatDisplayInsets(false);
             });
 
@@ -276,27 +275,12 @@ public class AppCompatCameraOverridesTest extends WindowTestsBase {
     }
 
     @Test
-    public void testIsCameraActive() {
-        runTestScenario((robot) -> {
-            robot.applyOnActivity((a) -> {
-                a.createActivityWithComponent();
-                a.activateCameraInPolicy(/* isCameraActive */ false);
-                robot.checkIsCameraActive(/* active */ false);
-                a.activateCameraInPolicy(/* isCameraActive */ true);
-                robot.checkIsCameraActive(/* active */ true);
-            });
-        });
-    }
-
-
-    @Test
     @EnableCompatChanges({OVERRIDE_MIN_ASPECT_RATIO_ONLY_FOR_CAMERA})
     public void shouldOverrideMinAspectRatioForCamera_overrideEnabled_returnsTrue() {
         runTestScenario((robot) -> {
             robot.activity().createActivityWithComponent();
-            robot.activity().activateCameraInPolicy(/* isCameraActive */ true);
 
-            robot.checkShouldOverrideMinAspectRatioForCamera(/* expected */ true);
+            robot.checkIsOverrideMinAspectRatioForCameraEnabled(/* expected */ true);
         });
     }
 
@@ -306,21 +290,8 @@ public class AppCompatCameraOverridesTest extends WindowTestsBase {
         runTestScenario((robot) -> {
             robot.prop().enable(PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE);
             robot.activity().createActivityWithComponent();
-            robot.activity().activateCameraInPolicy(/* isCameraActive */ true);
 
-            robot.checkShouldOverrideMinAspectRatioForCamera(/* expected */ true);
-        });
-    }
-
-    @Test
-    @EnableCompatChanges({OVERRIDE_MIN_ASPECT_RATIO_ONLY_FOR_CAMERA})
-    public void shouldOverrideMinAspectRatioForCamera_propertyTrue_overrideEnabled_returnsFalse() {
-        runTestScenario((robot) -> {
-            robot.prop().enable(PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE);
-            robot.activity().createActivityWithComponent();
-            robot.activity().activateCameraInPolicy(/* isCameraActive */ false);
-
-            robot.checkShouldOverrideMinAspectRatioForCamera(/* expected */ false);
+            robot.checkIsOverrideMinAspectRatioForCameraEnabled(/* expected */ true);
         });
     }
 
@@ -330,9 +301,8 @@ public class AppCompatCameraOverridesTest extends WindowTestsBase {
         runTestScenario((robot) -> {
             robot.prop().enable(PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE);
             robot.activity().createActivityWithComponent();
-            robot.activity().activateCameraInPolicy(/* isCameraActive */ true);
 
-            robot.checkShouldOverrideMinAspectRatioForCamera(/* expected */ false);
+            robot.checkIsOverrideMinAspectRatioForCameraEnabled(/* expected */ false);
         });
     }
 
@@ -341,9 +311,8 @@ public class AppCompatCameraOverridesTest extends WindowTestsBase {
     public void shouldOverrideMinAspectRatioForCamera_overrideDisabled_returnsFalse() {
         runTestScenario((robot) -> {
             robot.activity().createActivityWithComponent();
-            robot.activity().activateCameraInPolicy(/* isCameraActive */ true);
 
-            robot.checkShouldOverrideMinAspectRatioForCamera(/* expected */ false);
+            robot.checkIsOverrideMinAspectRatioForCameraEnabled(/* expected */ false);
         });
     }
 
@@ -354,7 +323,7 @@ public class AppCompatCameraOverridesTest extends WindowTestsBase {
             robot.prop().disable(PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE);
             robot.activity().createActivityWithComponent();
 
-            robot.checkShouldOverrideMinAspectRatioForCamera(/* expected */ false);
+            robot.checkIsOverrideMinAspectRatioForCameraEnabled(/* expected */ false);
         });
     }
 
@@ -364,9 +333,8 @@ public class AppCompatCameraOverridesTest extends WindowTestsBase {
         runTestScenario((robot) -> {
             robot.prop().disable(PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE);
             robot.activity().createActivityWithComponent();
-            robot.activity().activateCameraInPolicy(/* isCameraActive */ true);
 
-            robot.checkShouldOverrideMinAspectRatioForCamera(/* expected */ false);
+            robot.checkIsOverrideMinAspectRatioForCameraEnabled(/* expected */ false);
         });
     }
 
@@ -412,13 +380,9 @@ public class AppCompatCameraOverridesTest extends WindowTestsBase {
                     .shouldApplyFreeformTreatmentForCameraCompat(), expected);
         }
 
-        void checkShouldOverrideMinAspectRatioForCamera(boolean expected) {
+        void checkIsOverrideMinAspectRatioForCameraEnabled(boolean expected) {
             Assert.assertEquals(getAppCompatCameraOverrides()
-                    .shouldOverrideMinAspectRatioForCamera(), expected);
-        }
-
-        void checkIsCameraActive(boolean active) {
-            Assert.assertEquals(getAppCompatCameraOverrides().isCameraActive(), active);
+                    .isOverrideMinAspectRatioForCameraEnabled(), expected);
         }
 
         private AppCompatCameraOverrides getAppCompatCameraOverrides() {

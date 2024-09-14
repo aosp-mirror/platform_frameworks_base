@@ -68,3 +68,11 @@ flag {
     description: "Disable deprecated BatteryUsageStatsAtom pulled atom"
     bug: "324602949"
 }
+
+flag {
+    name: "battery_stats_screen_state_event"
+    namespace: "backstage_power"
+    description: "Guards the battery stats event for screen state changes."
+    bug: "364350206"
+    is_fixed_read_only: true
+}

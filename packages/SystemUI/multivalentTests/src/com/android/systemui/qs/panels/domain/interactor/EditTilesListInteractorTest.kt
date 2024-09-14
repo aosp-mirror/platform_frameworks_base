@@ -31,6 +31,7 @@ import com.android.systemui.qs.panels.shared.model.EditTileData
 import com.android.systemui.qs.pipeline.data.repository.FakeInstalledTilesComponentRepository
 import com.android.systemui.qs.pipeline.data.repository.fakeInstalledTilesRepository
 import com.android.systemui.qs.pipeline.shared.TileSpec
+import com.android.systemui.qs.shared.model.TileCategory
 import com.android.systemui.qs.tiles.impl.battery.qsBatterySaverTileConfig
 import com.android.systemui.qs.tiles.impl.flashlight.qsFlashlightTileConfig
 import com.android.systemui.qs.tiles.impl.internet.qsInternetTileConfig
@@ -132,6 +133,7 @@ class EditTilesListInteractorTest : SysuiTestCase() {
                         icon = Icon.Loaded(icon, ContentDescription.Loaded(tileName)),
                         label = Text.Loaded(tileName),
                         appName = Text.Loaded(appName),
+                        category = TileCategory.PROVIDED_BY_APP,
                     )
 
                 assertThat(editTiles.customTiles).hasSize(1)
@@ -181,7 +183,8 @@ class EditTilesListInteractorTest : SysuiTestCase() {
                 tileSpec = this,
                 icon = Icon.Resource(android.R.drawable.star_on, ContentDescription.Loaded(spec)),
                 label = Text.Loaded(spec),
-                appName = null
+                appName = null,
+                category = TileCategory.UNKNOWN,
             )
         }
 
@@ -192,6 +195,7 @@ class EditTilesListInteractorTest : SysuiTestCase() {
                     Icon.Resource(uiConfig.iconRes, ContentDescription.Resource(uiConfig.labelRes)),
                 label = Text.Resource(uiConfig.labelRes),
                 appName = null,
+                category = category,
             )
         }
     }

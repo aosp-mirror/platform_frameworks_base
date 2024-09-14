@@ -80,7 +80,7 @@ class CollapsedStatusBarViewBinderImpl @Inject constructor() : CollapsedStatusBa
                     }
                 }
 
-                if (Flags.statusBarScreenSharingChips()) {
+                if (Flags.statusBarScreenSharingChips() && !Flags.statusBarRonChips()) {
                     val primaryChipView: View =
                         view.requireViewById(R.id.ongoing_activity_chip_primary)
                     launch {
@@ -89,15 +89,40 @@ class CollapsedStatusBarViewBinderImpl @Inject constructor() : CollapsedStatusBa
                             when (primaryChipModel) {
                                 is OngoingActivityChipModel.Shown ->
                                     listener.onOngoingActivityStatusChanged(
-                                        hasOngoingActivity = true,
+                                        hasPrimaryOngoingActivity = true,
+                                        hasSecondaryOngoingActivity = false,
                                         shouldAnimate = true,
                                     )
                                 is OngoingActivityChipModel.Hidden ->
                                     listener.onOngoingActivityStatusChanged(
-                                        hasOngoingActivity = false,
+                                        hasPrimaryOngoingActivity = false,
+                                        hasSecondaryOngoingActivity = false,
                                         shouldAnimate = primaryChipModel.shouldAnimate,
                                     )
                             }
+                        }
+                    }
+                }
+
+                if (Flags.statusBarScreenSharingChips() && Flags.statusBarRonChips()) {
+                    val primaryChipView: View =
+                        view.requireViewById(R.id.ongoing_activity_chip_primary)
+                    val secondaryChipView: View =
+                        view.requireViewById(R.id.ongoing_activity_chip_secondary)
+                    launch {
+                        viewModel.ongoingActivityChips.collect { chips ->
+                            OngoingActivityChipBinder.bind(chips.primary, primaryChipView)
+                            // TODO(b/364653005): Don't show the secondary chip if there isn't
+                            // enough space for it.
+                            OngoingActivityChipBinder.bind(chips.secondary, secondaryChipView)
+                            listener.onOngoingActivityStatusChanged(
+                                hasPrimaryOngoingActivity =
+                                    chips.primary is OngoingActivityChipModel.Shown,
+                                hasSecondaryOngoingActivity =
+                                    chips.secondary is OngoingActivityChipModel.Shown,
+                                // TODO(b/364653005): Figure out the animation story here.
+                                shouldAnimate = true,
+                            )
                         }
                     }
                 }
@@ -161,7 +186,11 @@ interface StatusBarVisibilityChangeListener {
      * @param shouldAnimate true if the chip should animate in/out, and false if the chip should
      *   immediately appear/disappear.
      */
-    fun onOngoingActivityStatusChanged(hasOngoingActivity: Boolean, shouldAnimate: Boolean)
+    fun onOngoingActivityStatusChanged(
+        hasPrimaryOngoingActivity: Boolean,
+        hasSecondaryOngoingActivity: Boolean,
+        shouldAnimate: Boolean,
+    )
 
     /**
      * Called when the scene state has changed such that the home status bar is newly allowed or no

@@ -36,6 +36,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
 import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
+import com.android.systemui.keyguard.shared.model.KeyguardState.OCCLUDED
 import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.keyguard.shared.model.TransitionState.RUNNING
 import com.android.systemui.keyguard.shared.model.TransitionState.STARTED
@@ -173,6 +174,9 @@ constructor(
                     ),
                     keyguardTransitionInteractor.isInTransition(
                         Edge.create(from = LOCKSCREEN, to = DREAMING)
+                    ),
+                    keyguardTransitionInteractor.isInTransition(
+                        Edge.create(from = LOCKSCREEN, to = OCCLUDED)
                     ),
                 ),
                 isOnLockscreen,

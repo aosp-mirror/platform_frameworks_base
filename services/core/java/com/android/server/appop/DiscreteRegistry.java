@@ -32,13 +32,23 @@ import static android.app.AppOpsManager.OP_FLAGS_ALL;
 import static android.app.AppOpsManager.OP_FLAG_SELF;
 import static android.app.AppOpsManager.OP_FLAG_TRUSTED_PROXIED;
 import static android.app.AppOpsManager.OP_FLAG_TRUSTED_PROXY;
+import static android.app.AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION;
+import static android.app.AppOpsManager.OP_MONITOR_LOCATION;
 import static android.app.AppOpsManager.OP_NONE;
 import static android.app.AppOpsManager.OP_PHONE_CALL_CAMERA;
 import static android.app.AppOpsManager.OP_PHONE_CALL_MICROPHONE;
+import static android.app.AppOpsManager.OP_PROCESS_OUTGOING_CALLS;
+import static android.app.AppOpsManager.OP_READ_ICC_SMS;
+import static android.app.AppOpsManager.OP_READ_SMS;
 import static android.app.AppOpsManager.OP_RECEIVE_AMBIENT_TRIGGER_AUDIO;
 import static android.app.AppOpsManager.OP_RECEIVE_SANDBOX_TRIGGER_AUDIO;
 import static android.app.AppOpsManager.OP_RECORD_AUDIO;
 import static android.app.AppOpsManager.OP_RESERVED_FOR_TESTING;
+import static android.app.AppOpsManager.OP_SEND_SMS;
+import static android.app.AppOpsManager.OP_SMS_FINANCIAL_TRANSACTIONS;
+import static android.app.AppOpsManager.OP_SYSTEM_ALERT_WINDOW;
+import static android.app.AppOpsManager.OP_WRITE_ICC_SMS;
+import static android.app.AppOpsManager.OP_WRITE_SMS;
 import static android.app.AppOpsManager.flagsToString;
 import static android.app.AppOpsManager.getUidStateName;
 import static android.companion.virtual.VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT;
@@ -46,6 +56,7 @@ import static android.companion.virtual.VirtualDeviceManager.PERSISTENT_DEVICE_I
 import static java.lang.Long.min;
 import static java.lang.Math.max;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AppOpsManager;
@@ -62,6 +73,7 @@ import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.XmlUtils;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
@@ -72,6 +84,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
@@ -125,7 +139,6 @@ import java.util.Set;
  * relies on {@link HistoricalRegistry} for controlling that no calls are allowed until then. All
  * outside calls are going through {@link HistoricalRegistry}, where
  * {@link HistoricalRegistry#isPersistenceInitializedMLocked()} check is done.
- *
  */
 
 final class DiscreteRegistry {
@@ -142,10 +155,39 @@ final class DiscreteRegistry {
             + OP_PHONE_CALL_MICROPHONE + "," + OP_PHONE_CALL_CAMERA + ","
             + OP_RECEIVE_AMBIENT_TRIGGER_AUDIO + "," + OP_RECEIVE_SANDBOX_TRIGGER_AUDIO
             + "," + OP_RESERVED_FOR_TESTING;
+    private static final int[] sDiscreteOpsToLog =
+            new int[]{OP_FINE_LOCATION, OP_COARSE_LOCATION, OP_EMERGENCY_LOCATION, OP_CAMERA,
+                    OP_RECORD_AUDIO, OP_PHONE_CALL_MICROPHONE, OP_PHONE_CALL_CAMERA,
+                    OP_RECEIVE_AMBIENT_TRIGGER_AUDIO, OP_RECEIVE_SANDBOX_TRIGGER_AUDIO, OP_READ_SMS,
+                    OP_WRITE_SMS, OP_SEND_SMS, OP_READ_ICC_SMS, OP_WRITE_ICC_SMS,
+                    OP_SMS_FINANCIAL_TRANSACTIONS, OP_SYSTEM_ALERT_WINDOW, OP_MONITOR_LOCATION,
+                    OP_MONITOR_HIGH_POWER_LOCATION, OP_PROCESS_OUTGOING_CALLS,
+            };
     private static final long DEFAULT_DISCRETE_HISTORY_CUTOFF = Duration.ofDays(7).toMillis();
     private static final long MAXIMUM_DISCRETE_HISTORY_CUTOFF = Duration.ofDays(30).toMillis();
     private static final long DEFAULT_DISCRETE_HISTORY_QUANTIZATION =
             Duration.ofMinutes(1).toMillis();
+
+    static final int ACCESS_TYPE_NOTE_OP =
+            FrameworkStatsLog.APP_OP_ACCESS_TRACKED__ACCESS_TYPE__NOTE_OP;
+    static final int ACCESS_TYPE_START_OP =
+            FrameworkStatsLog.APP_OP_ACCESS_TRACKED__ACCESS_TYPE__START_OP;
+    static final int ACCESS_TYPE_FINISH_OP =
+            FrameworkStatsLog.APP_OP_ACCESS_TRACKED__ACCESS_TYPE__FINISH_OP;
+    static final int ACCESS_TYPE_PAUSE_OP =
+            FrameworkStatsLog.APP_OP_ACCESS_TRACKED__ACCESS_TYPE__PAUSE_OP;
+    static final int ACCESS_TYPE_RESUME_OP =
+            FrameworkStatsLog.APP_OP_ACCESS_TRACKED__ACCESS_TYPE__RESUME_OP;
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"ACCESS_TYPE_"}, value = {
+            ACCESS_TYPE_NOTE_OP,
+            ACCESS_TYPE_START_OP,
+            ACCESS_TYPE_FINISH_OP,
+            ACCESS_TYPE_PAUSE_OP,
+            ACCESS_TYPE_RESUME_OP
+    })
+    public @interface AccessType {}
 
     private static long sDiscreteHistoryCutoff;
     private static long sDiscreteHistoryQuantization;
@@ -255,7 +297,23 @@ final class DiscreteRegistry {
     void recordDiscreteAccess(int uid, String packageName, @NonNull String deviceId, int op,
             @Nullable String attributionTag, @AppOpsManager.OpFlags int flags,
             @AppOpsManager.UidState int uidState, long accessTime, long accessDuration,
-            @AppOpsManager.AttributionFlags int attributionFlags, int attributionChainId) {
+            @AppOpsManager.AttributionFlags int attributionFlags, int attributionChainId,
+            @AccessType int accessType) {
+        if (shouldLogAccess(op)) {
+            int firstChar = 0;
+            if (attributionTag != null && attributionTag.startsWith(packageName)) {
+                firstChar = packageName.length();
+                if (firstChar < attributionTag.length() && attributionTag.charAt(firstChar)
+                        == '.') {
+                    firstChar++;
+                }
+            }
+            FrameworkStatsLog.write(FrameworkStatsLog.APP_OP_ACCESS_TRACKED, uid, op, accessType,
+                    uidState, flags, attributionFlags,
+                    attributionTag == null ? null : attributionTag.substring(firstChar),
+                    attributionChainId);
+        }
+
         if (!isDiscreteOp(op, flags)) {
             return;
         }
@@ -388,7 +446,7 @@ final class DiscreteRegistry {
                                 if (event == null
                                         || event.mAttributionChainId == ATTRIBUTION_CHAIN_ID_NONE
                                         || (event.mAttributionFlags & ATTRIBUTION_FLAG_TRUSTED)
-                                                == 0) {
+                                        == 0) {
                                     continue;
                                 }
 
@@ -1523,6 +1581,11 @@ final class DiscreteRegistry {
         return true;
     }
 
+    private static boolean shouldLogAccess(int op) {
+        return Flags.appopAccessTrackingLoggingEnabled()
+                && ArrayUtils.contains(sDiscreteOpsToLog, op);
+    }
+
     private static long discretizeTimeStamp(long timeStamp) {
         return timeStamp / sDiscreteHistoryQuantization * sDiscreteHistoryQuantization;
 
@@ -1530,7 +1593,7 @@ final class DiscreteRegistry {
 
     private static long discretizeDuration(long duration) {
         return duration == -1 ? -1 : (duration + sDiscreteHistoryQuantization - 1)
-                        / sDiscreteHistoryQuantization * sDiscreteHistoryQuantization;
+                / sDiscreteHistoryQuantization * sDiscreteHistoryQuantization;
     }
 
     void setDebugMode(boolean debugMode) {

@@ -18,6 +18,8 @@ import android.window.TransitionInfo.FLAG_IS_WALLPAPER
 import android.window.WindowContainerTransaction
 import androidx.test.filters.SmallTest
 import com.android.dx.mockito.inline.extended.ExtendedMockito
+import com.android.internal.jank.Cuj.CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_HOLD
+import com.android.internal.jank.Cuj.CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_RELEASE
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.ShellTestCase
@@ -446,6 +448,42 @@ class DragToDesktopTransitionHandlerTest : ShellTestCase() {
                 scale = scale
             )
         )
+    }
+
+    @Test
+    fun startDragToDesktop_aborted_logsDragHoldCancelled() {
+        val transition = startDragToDesktopTransition(defaultHandler, createTask(), dragAnimator)
+
+        defaultHandler.onTransitionConsumed(transition, aborted = true, mock())
+
+        verify(mockInteractionJankMonitor).cancel(eq(CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_HOLD))
+        verify(mockInteractionJankMonitor, times(0)).cancel(
+            eq(CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_RELEASE))
+    }
+
+    @Test
+    fun mergeEndDragToDesktop_aborted_logsDragReleaseCancelled() {
+        val task = createTask()
+        val startTransition = startDrag(defaultHandler, task)
+        val endTransition = mock<IBinder>()
+        defaultHandler.onTaskResizeAnimationListener = mock()
+        defaultHandler.mergeAnimation(
+            transition = endTransition,
+            info = createTransitionInfo(
+                type = TRANSIT_DESKTOP_MODE_END_DRAG_TO_DESKTOP,
+                draggedTask = task
+            ),
+            t = mock<SurfaceControl.Transaction>(),
+            mergeTarget = startTransition,
+            finishCallback = mock<Transitions.TransitionFinishCallback>()
+        )
+
+        defaultHandler.onTransitionConsumed(endTransition, aborted = true, mock())
+
+        verify(mockInteractionJankMonitor)
+            .cancel(eq(CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_RELEASE))
+        verify(mockInteractionJankMonitor, times(0))
+            .cancel(eq(CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_HOLD))
     }
 
     private fun startDrag(

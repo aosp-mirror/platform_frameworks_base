@@ -261,12 +261,12 @@ class KeyboardTouchpadEduInteractorTest : SysuiTestCase() {
                 .registerKeyGestureEventListener(any(), listenerCaptor.capture())
 
             val allAppsKeyGestureEvent =
-                KeyGestureEvent(
-                    /* deviceId= */ 1,
-                    IntArray(0),
-                    KeyEvent.META_META_ON,
-                    KeyGestureEvent.KEY_GESTURE_TYPE_ALL_APPS
-                )
+                KeyGestureEvent.Builder()
+                    .setDeviceId(1)
+                    .setModifierState(KeyEvent.META_META_ON)
+                    .setKeyGestureType(KeyGestureEvent.KEY_GESTURE_TYPE_ALL_APPS)
+                    .setAction(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+                    .build()
             listenerCaptor.value.onKeyGestureEvent(allAppsKeyGestureEvent)
 
             val model by

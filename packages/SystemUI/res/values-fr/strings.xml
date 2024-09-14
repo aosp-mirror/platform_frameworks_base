@@ -105,6 +105,8 @@
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Ajouter à la note"</string>
     <string name="backlinks_include_link" msgid="4562093591148248158">"Inclure le lien"</string>
     <string name="backlinks_duplicate_label_format" msgid="558445128952827926">"<xliff:g id="APPNAME">%1$s</xliff:g> <xliff:g id="FREQUENCYCOUNT">(%2$d)</xliff:g>"</string>
+    <!-- no translation found for backlinks_cross_profile_error (1355798585727802282) -->
+    <skip />
     <string name="screenrecord_title" msgid="4257171601439507792">"Enregistreur d\'écran"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Enregistrement de l\'écran…"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notification en cours pour une session d\'enregistrement de l\'écran"</string>
@@ -292,8 +294,7 @@
     <string name="start_dreams" msgid="9131802557946276718">"Économiseur d\'écran"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Ne pas déranger"</string>
-    <!-- no translation found for quick_settings_modes_label (879156359479504244) -->
-    <skip />
+    <string name="quick_settings_modes_label" msgid="879156359479504244">"Modes"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Aucun appareil associé disponible."</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"Appuyez pour connecter ou déconnecter un appareil"</string>
@@ -434,8 +435,7 @@
     <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"Ouvrir les paramètres"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Autre appareil"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Activer/Désactiver l\'écran Récents"</string>
-    <!-- no translation found for zen_modes_dialog_title (8854640808100096934) -->
-    <skip />
+    <string name="zen_modes_dialog_title" msgid="8854640808100096934">"Modes"</string>
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"OK"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"Paramètres"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"Activé"</string>
@@ -498,7 +498,7 @@
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Ajouter un widget"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"OK"</string>
     <string name="label_for_button_in_empty_state_cta" msgid="7314975555382055823">"Ajouter des widgets"</string>
-    <string name="title_for_empty_state_cta" msgid="6161654421223450530">"Accéder rapidement aux widgets de vos applis préférées sans déverrouiller votre tablette."</string>
+    <string name="title_for_empty_state_cta" msgid="6161654421223450530">"Accédez rapidement aux widgets de vos applis préférées sans déverrouiller votre tablette."</string>
     <string name="dialog_title_to_allow_any_widget" msgid="1004820948962675644">"Autoriser n\'importe quel widget sur l\'écran de verrouillage ?"</string>
     <string name="button_text_to_open_settings" msgid="1987729256950941628">"Ouvrir les paramètres"</string>
     <string name="work_mode_off_title" msgid="5794818421357835873">"Réactiver les applis pro ?"</string>
@@ -1444,4 +1444,18 @@
     <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="7513137763024327538">"Désormais, vous pouvez rendre l\'écran encore plus sombre en abaissant davantage le niveau de luminosité en haut de l\'écran.\n\nCela fonctionne mieux lorsque vous êtes dans un environnement sombre."</string>
     <string name="accessibility_deprecate_extra_dim_dialog_button" msgid="1782147201534669800">"Supprimer le raccourci Luminosité ultra-réduite"</string>
     <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="4070696910424515757">"Raccourci Luminosité ultra-réduite supprimé. Pour diminuer la luminosité, utilisez la barre de luminosité habituelle."</string>
+    <!-- no translation found for qs_edit_mode_category_connectivity (4559726936546032672) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_accessibility (7969091385071475922) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_utilities (8123080090108420095) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_privacy (6577774443194551775) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_providedByApps (8346112074897919019) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_display (4749511439121053942) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_unknown (509314252124053550) -->
+    <skip />
 </resources>

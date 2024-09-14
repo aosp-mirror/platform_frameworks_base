@@ -16,6 +16,7 @@
 
 package com.android.systemui.shade.ui.composable
 
+import android.view.HapticFeedbackConstants
 import android.view.ViewGroup
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
@@ -60,6 +61,7 @@ import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
@@ -178,9 +180,7 @@ constructor(
     override val userActions: Flow<Map<UserAction, UserActionResult>> = actionsViewModel.actions
 
     @Composable
-    override fun SceneScope.Content(
-        modifier: Modifier,
-    ) =
+    override fun SceneScope.Content(modifier: Modifier) =
         ShadeScene(
             notificationStackScrollView.get(),
             viewModel =
@@ -224,6 +224,13 @@ private fun SceneScope.ShadeScene(
     modifier: Modifier = Modifier,
     shadeSession: SaveableSession,
 ) {
+    val view = LocalView.current
+    LaunchedEffect(Unit) {
+        if (layoutState.currentTransition?.fromContent == Scenes.Gone) {
+            view.performHapticFeedback(HapticFeedbackConstants.GESTURE_START)
+        }
+    }
+
     val shadeMode by viewModel.shadeMode.collectAsStateWithLifecycle()
     when (shadeMode) {
         is ShadeMode.Single ->
@@ -282,7 +289,7 @@ private fun SceneScope.SingleShade(
         animateSceneFloatAsState(
             value = 1f,
             key = QuickSettings.SharedValues.TilesSquishiness,
-            canOverflow = false
+            canOverflow = false,
         )
     val isEmptySpaceClickable by viewModel.isEmptySpaceClickable.collectAsStateWithLifecycle()
     val isMediaVisible by viewModel.isMediaVisible.collectAsStateWithLifecycle()
@@ -320,7 +327,7 @@ private fun SceneScope.SingleShade(
                     } else {
                         cutoutInsets
                     }
-                }
+                },
             )
         }
 
@@ -337,7 +344,7 @@ private fun SceneScope.SingleShade(
             modifier =
                 Modifier.fillMaxSize()
                     .element(Shade.Elements.BackgroundScrim)
-                    .background(colorResource(R.color.shade_scrim_background_dark)),
+                    .background(colorResource(R.color.shade_scrim_background_dark))
         )
         Layout(
             modifier =
@@ -398,13 +405,13 @@ private fun SceneScope.SingleShade(
                     .pointerInteropFilter { true }
                     .verticalNestedScrollToScene(
                         topBehavior = NestedScrollBehavior.EdgeAlways,
-                        isExternalOverscrollGesture = { false }
+                        isExternalOverscrollGesture = { false },
                     )
         ) {
             NotificationStackCutoffGuideline(
                 stackScrollView = notificationStackScrollView,
                 viewModel = notificationsPlaceholderViewModel,
-                modifier = Modifier.align(Alignment.TopCenter)
+                modifier = Modifier.align(Alignment.TopCenter),
             )
         }
     }
@@ -440,24 +447,16 @@ private fun SceneScope.SplitShade(
             canOverflow = false,
         )
     val unfoldTranslationXForStartSide by
-        viewModel
-            .unfoldTranslationX(
-                isOnStartSide = true,
-            )
-            .collectAsStateWithLifecycle(0f)
+        viewModel.unfoldTranslationX(isOnStartSide = true).collectAsStateWithLifecycle(0f)
     val unfoldTranslationXForEndSide by
-        viewModel
-            .unfoldTranslationX(
-                isOnStartSide = false,
-            )
-            .collectAsStateWithLifecycle(0f)
+        viewModel.unfoldTranslationX(isOnStartSide = false).collectAsStateWithLifecycle(0f)
 
     val navBarBottomHeight = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
     val bottomPadding by
         animateDpAsState(
             targetValue = if (isCustomizing) 0.dp else navBarBottomHeight,
             animationSpec = tween(customizingAnimationDuration),
-            label = "animateQSSceneBottomPaddingAsState"
+            label = "animateQSSceneBottomPaddingAsState",
         )
     val density = LocalDensity.current
     LaunchedEffect(navBarBottomHeight, density) {
@@ -516,9 +515,7 @@ private fun SceneScope.SplitShade(
                     )
         )
 
-        Column(
-            modifier = Modifier.fillMaxSize(),
-        ) {
+        Column(modifier = Modifier.fillMaxSize()) {
             CollapsedShadeHeader(
                 viewModelFactory = viewModel.shadeHeaderViewModelFactory,
                 createTintedIconManager = createTintedIconManager,
@@ -526,9 +523,7 @@ private fun SceneScope.SplitShade(
                 statusBarIconController = statusBarIconController,
                 modifier =
                     Modifier.then(brightnessMirrorShowingModifier)
-                        .padding(
-                            horizontal = { unfoldTranslationXForStartSide.roundToInt() },
-                        )
+                        .padding(horizontal = { unfoldTranslationXForStartSide.roundToInt() }),
             )
 
             Row(modifier = Modifier.fillMaxWidth().weight(1f)) {
@@ -536,14 +531,14 @@ private fun SceneScope.SplitShade(
                     modifier =
                         Modifier.element(Shade.Elements.SplitShadeStartColumn)
                             .weight(1f)
-                            .graphicsLayer { translationX = unfoldTranslationXForStartSide },
+                            .graphicsLayer { translationX = unfoldTranslationXForStartSide }
                 ) {
                     BrightnessMirror(
                         viewModel = brightnessMirrorViewModel,
                         qsSceneAdapter = viewModel.qsSceneAdapter,
                         // Need to use the offset measured from the container as the header
                         // has to be accounted for
-                        measureFromContainer = true
+                        measureFromContainer = true,
                     )
                     Column(
                         verticalArrangement = Arrangement.Top,
@@ -557,7 +552,7 @@ private fun SceneScope.SplitShade(
                                     .thenIf(!isCustomizerShowing) {
                                         Modifier.verticalScroll(
                                                 quickSettingsScrollState,
-                                                enabled = isScrollable
+                                                enabled = isScrollable,
                                             )
                                             .clipScrollableContainer(Orientation.Horizontal)
                                     }
@@ -619,16 +614,16 @@ private fun SceneScope.SplitShade(
                             .padding(
                                 end =
                                     dimensionResource(R.dimen.notification_panel_margin_horizontal),
-                                bottom = navBarBottomHeight
+                                bottom = navBarBottomHeight,
                             )
-                            .then(brightnessMirrorShowingModifier)
+                            .then(brightnessMirrorShowingModifier),
                 )
             }
         }
         NotificationStackCutoffGuideline(
             stackScrollView = notificationStackScrollView,
             viewModel = notificationsPlaceholderViewModel,
-            modifier = Modifier.align(Alignment.BottomCenter).navigationBarsPadding()
+            modifier = Modifier.align(Alignment.BottomCenter).navigationBarsPadding(),
         )
     }
 }
@@ -652,6 +647,6 @@ private fun SceneScope.ShadeMediaCarousel(
                 null
             } else {
                 { mediaOffsetProvider.offset }
-            }
+            },
     )
 }

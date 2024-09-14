@@ -136,3 +136,14 @@ flag {
          purpose: PURPOSE_BUGFIX
      }
 }
+
+flag {
+     namespace: "backstage_power"
+     name: "rate_limit_get_my_memory_state"
+     description: "Rate limit calls to getMyMemoryState using a cache"
+     is_fixed_read_only: true
+     bug: "365182205"
+     metadata {
+         purpose: PURPOSE_BUGFIX
+     }
+}

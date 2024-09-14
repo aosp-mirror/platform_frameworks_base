@@ -49,7 +49,6 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.SparseArray;
 import android.view.SurfaceControl;
-import android.view.SurfaceSession;
 import android.window.ITaskOrganizer;
 import android.window.ITaskOrganizerController;
 import android.window.TaskAppearedInfo;
@@ -169,7 +168,7 @@ public class ShellTaskOrganizerTests extends ShellTestCase {
     public void testTaskLeashReleasedAfterVanished() throws RemoteException {
         assumeFalse(ENABLE_SHELL_TRANSITIONS);
         RunningTaskInfo taskInfo = createTaskInfo(/* taskId= */ 1, WINDOWING_MODE_MULTI_WINDOW);
-        SurfaceControl taskLeash = new SurfaceControl.Builder(new SurfaceSession())
+        SurfaceControl taskLeash = new SurfaceControl.Builder()
                 .setName("task").build();
         mOrganizer.registerOrganizer();
         mOrganizer.onTaskAppeared(taskInfo, taskLeash);

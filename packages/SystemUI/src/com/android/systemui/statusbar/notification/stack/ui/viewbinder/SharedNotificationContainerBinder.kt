@@ -62,7 +62,6 @@ constructor(
         viewModel: SharedNotificationContainerViewModel,
     ): DisposableHandle {
         val disposables = DisposableHandles()
-
         disposables +=
             view.repeatWhenAttached {
                 repeatOnLifecycle(Lifecycle.State.CREATED) {
@@ -87,10 +86,7 @@ constructor(
             }
 
         val burnInParams = MutableStateFlow(BurnInParameters())
-        val viewState =
-            ViewStateAccessor(
-                alpha = { controller.getAlpha() },
-            )
+        val viewState = ViewStateAccessor(alpha = { controller.getAlpha() })
 
         /*
          * For animation sensitive coroutines, immediately run just like applicationScope does
@@ -108,7 +104,7 @@ constructor(
                                         addUpdateListener { animation ->
                                             controller.setMaxAlphaForKeyguard(
                                                 animation.animatedFraction,
-                                                "SharedNotificationContainerVB (collapseFadeIn)"
+                                                "SharedNotificationContainerVB (collapseFadeIn)",
                                             )
                                         }
                                         start()
@@ -153,7 +149,7 @@ constructor(
                     launch { viewModel.translationX.collect { x -> controller.translationX = x } }
 
                     launch {
-                        viewModel.keyguardAlpha(viewState).collect {
+                        viewModel.keyguardAlpha(viewState, this).collect {
                             controller.setMaxAlphaForKeyguard(it, "SharedNotificationContainerVB")
                         }
                     }

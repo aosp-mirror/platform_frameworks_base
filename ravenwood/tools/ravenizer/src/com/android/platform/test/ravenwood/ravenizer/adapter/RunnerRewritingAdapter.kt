@@ -184,7 +184,7 @@ class RunnerRewritingAdapter private constructor(
             av.visit("value", ravenwoodTestRunnerType.type)
             av.visitEnd()
         }
-        log.i("Update the @RunWith: ${classInternalName.toHumanReadableClassName()}")
+        log.v("Update the @RunWith: ${classInternalName.toHumanReadableClassName()}")
     }
 
     /*
@@ -302,7 +302,7 @@ class RunnerRewritingAdapter private constructor(
         override fun visitCode() {
             visitFieldInsn(Opcodes.GETSTATIC,
                 ravenwoodTestRunnerType.internlName,
-                RavenwoodAwareTestRunner.IMPLICIT_CLASS_MIN_RULE_NAME,
+                RavenwoodAwareTestRunner.IMPLICIT_CLASS_OUTER_RULE_NAME,
                 testRuleType.desc
             )
             visitFieldInsn(Opcodes.PUTSTATIC,
@@ -313,7 +313,7 @@ class RunnerRewritingAdapter private constructor(
 
             visitFieldInsn(Opcodes.GETSTATIC,
                 ravenwoodTestRunnerType.internlName,
-                RavenwoodAwareTestRunner.IMPLICIT_CLASS_MAX_RULE_NAME,
+                RavenwoodAwareTestRunner.IMPLICIT_CLASS_INNER_RULE_NAME,
                 testRuleType.desc
             )
             visitFieldInsn(Opcodes.PUTSTATIC,
@@ -361,7 +361,7 @@ class RunnerRewritingAdapter private constructor(
             visitVarInsn(ALOAD, 0)
             visitFieldInsn(Opcodes.GETSTATIC,
                 ravenwoodTestRunnerType.internlName,
-                RavenwoodAwareTestRunner.IMPLICIT_INST_MIN_RULE_NAME,
+                RavenwoodAwareTestRunner.IMPLICIT_INST_OUTER_RULE_NAME,
                 testRuleType.desc
             )
             visitFieldInsn(Opcodes.PUTFIELD,
@@ -373,7 +373,7 @@ class RunnerRewritingAdapter private constructor(
             visitVarInsn(ALOAD, 0)
             visitFieldInsn(Opcodes.GETSTATIC,
                 ravenwoodTestRunnerType.internlName,
-                RavenwoodAwareTestRunner.IMPLICIT_INST_MAX_RULE_NAME,
+                RavenwoodAwareTestRunner.IMPLICIT_INST_INNER_RULE_NAME,
                 testRuleType.desc
             )
             visitFieldInsn(Opcodes.PUTFIELD,
@@ -442,7 +442,7 @@ class RunnerRewritingAdapter private constructor(
             // Don't process a class if it has a @NoRavenizer annotation.
             classes.findClass(className)?.let { cn ->
                 if (cn.findAnyAnnotation(noRavenizerAnotType.descAsSet) != null) {
-                    log.w("Class ${className.toHumanReadableClassName()} has" +
+                    log.i("Class ${className.toHumanReadableClassName()} has" +
                         " @${noRavenizerAnotType.humanReadableName}. Skipping."
                     )
                     return false

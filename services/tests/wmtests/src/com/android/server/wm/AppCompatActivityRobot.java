@@ -139,11 +139,6 @@ class AppCompatActivityRobot {
                 /* isUnresizable */ true);
     }
 
-    void activateCameraInPolicy(boolean isCameraActive) {
-        doReturn(isCameraActive).when(mDisplayContent.mAppCompatCameraPolicy)
-                .isCameraActive(any(ActivityRecord.class), anyBoolean());
-    }
-
     void setDisplayNaturalOrientation(@Configuration.Orientation int naturalOrientation) {
         doReturn(naturalOrientation).when(mDisplayContent).getNaturalOrientation();
     }

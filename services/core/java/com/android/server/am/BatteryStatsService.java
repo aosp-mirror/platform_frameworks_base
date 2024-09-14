@@ -1018,7 +1018,9 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         if (Flags.addBatteryUsageStatsSliceAtom()) {
             statsManager.setPullAtomCallback(
                     FrameworkStatsLog.BATTERY_USAGE_STATS_PER_UID,
-                    null, // use default PullAtomMetadata values
+                    new StatsManager.PullAtomMetadata.Builder()
+                            .setTimeoutMillis(3_000L)
+                            .build(),
                     DIRECT_EXECUTOR,
                     pullAtomCallback);
         }
@@ -1098,14 +1100,11 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                                     DEVICE_CONFIG_NAMESPACE,
                                     MIN_CONSUMED_POWER_THRESHOLD_KEY,
                                     0);
-                    final long sessionStart = 0;
-                    final long sessionEnd = System.currentTimeMillis();
                     final BatteryUsageStatsQuery query =
                             new BatteryUsageStatsQuery.Builder()
                                     .setMaxStatsAgeMs(0)
                                     .includeProcessStateData()
                                     .includeVirtualUids()
-                                    .aggregateSnapshots(sessionStart, sessionEnd)
                                     .setMinConsumedPowerThreshold(minConsumedPowerThreshold)
                                     .build();
                     bus = getBatteryUsageStats(List.of(query)).get(0);
@@ -1122,7 +1121,11 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                     throw new UnsupportedOperationException("Unknown tagId=" + atomTag);
             }
             final byte[] statsProto = bus.getStatsProto();
-
+            try {
+                bus.close();
+            } catch (IOException e) {
+                Slog.w(TAG, "Failure close BatteryUsageStats", e);
+            }
             data.add(FrameworkStatsLog.buildStatsEvent(atomTag, statsProto));
 
             return StatsManager.PULL_SUCCESS;
@@ -1830,7 +1833,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
     @Override
     @EnforcePermission(UPDATE_DEVICE_STATS)
-    public void noteScreenState(final int state) {
+    public void noteScreenState(final int displayId, final int state, final int reason) {
         super.noteScreenState_enforcePermission();
 
         synchronized (mLock) {
@@ -1840,7 +1843,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             mHandler.post(() -> {
                 if (DBG) Slog.d(TAG, "begin noteScreenState");
                 synchronized (mStats) {
-                    mStats.noteScreenStateLocked(0, state, elapsedRealtime, uptime, currentTime);
+                    mStats.noteScreenStateLocked(
+                            displayId, state, reason, elapsedRealtime, uptime, currentTime);
                 }
                 if (DBG) Slog.d(TAG, "end noteScreenState");
             });
@@ -1850,7 +1854,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
     @Override
     @EnforcePermission(UPDATE_DEVICE_STATS)
-    public void noteScreenBrightness(final int brightness) {
+    public void noteScreenBrightness(final int displayId, final int brightness) {
         super.noteScreenBrightness_enforcePermission();
 
         synchronized (mLock) {
@@ -1858,7 +1862,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             final long uptime = SystemClock.uptimeMillis();
             mHandler.post(() -> {
                 synchronized (mStats) {
-                    mStats.noteScreenBrightnessLocked(0, brightness, elapsedRealtime, uptime);
+                    mStats.noteScreenBrightnessLocked(
+                            displayId, brightness, elapsedRealtime, uptime);
                 }
             });
         }

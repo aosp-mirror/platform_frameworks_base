@@ -259,7 +259,7 @@ class MultiPointerDraggableTest {
                                         it
                                     }
                                 ),
-                                Orientation.Vertical
+                                Orientation.Vertical,
                             )
                             .fillMaxSize()
                     )
@@ -438,6 +438,9 @@ class MultiPointerDraggableTest {
 
         continueDraggingDown()
         assertThat(stopped).isTrue()
+
+        // Complete the gesture
+        rule.onRoot().performTouchInput { up() }
     }
 
     @Test
@@ -640,7 +643,7 @@ class MultiPointerDraggableTest {
                 override fun onPostScroll(
                     consumed: Offset,
                     available: Offset,
-                    source: NestedScrollSource
+                    source: NestedScrollSource,
                 ): Offset {
                     availableOnPostScroll = available.y
                     return Offset.Zero
@@ -653,7 +656,7 @@ class MultiPointerDraggableTest {
 
                 override suspend fun onPostFling(
                     consumed: Velocity,
-                    available: Velocity
+                    available: Velocity,
                 ): Velocity {
                     availableOnPostFling = available.y
                     return Velocity.Zero

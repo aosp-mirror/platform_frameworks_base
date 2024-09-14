@@ -16,183 +16,84 @@
 
 package com.android.server.appfunctions;
 
-import static android.app.appfunctions.flags.Flags.FLAG_ENABLE_APP_FUNCTION_MANAGER;
-
-import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.app.appsearch.AppSearchBatchResult;
-import android.app.appsearch.AppSearchManager;
-import android.app.appsearch.AppSearchManager.SearchContext;
 import android.app.appsearch.AppSearchResult;
 import android.app.appsearch.AppSearchSession;
+import android.app.appsearch.GenericDocument;
+import android.app.appsearch.GetByDocumentIdRequest;
 import android.app.appsearch.GetSchemaResponse;
 import android.app.appsearch.PutDocumentsRequest;
+import android.app.appsearch.RemoveByDocumentIdRequest;
 import android.app.appsearch.SearchResult;
-import android.app.appsearch.SearchResults;
 import android.app.appsearch.SearchSpec;
 import android.app.appsearch.SetSchemaRequest;
 import android.app.appsearch.SetSchemaResponse;
-import android.util.Slog;
 
 import com.android.internal.infra.AndroidFuture;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.Executor;
 
-/**
- * A future API wrapper of {@link AppSearchSession} APIs.
- */
-@FlaggedApi(FLAG_ENABLE_APP_FUNCTION_MANAGER)
-public class FutureAppSearchSession implements Closeable {
-    private static final String TAG = FutureAppSearchSession.class.getSimpleName();
-    private final Executor mExecutor;
-    private final AndroidFuture<AppSearchResult<AppSearchSession>> mSettableSessionFuture;
-
-    public FutureAppSearchSession(
-            @NonNull AppSearchManager appSearchManager,
-            @NonNull Executor executor,
-            @NonNull SearchContext appSearchContext) {
-        Objects.requireNonNull(appSearchManager);
-        Objects.requireNonNull(executor);
-        Objects.requireNonNull(appSearchContext);
-
-        mExecutor = executor;
-        mSettableSessionFuture = new AndroidFuture<>();
-        appSearchManager.createSearchSession(
-                appSearchContext, mExecutor, mSettableSessionFuture::complete);
-    }
+/** A future API wrapper of {@link AppSearchSession} APIs. */
+public interface FutureAppSearchSession extends Closeable {
 
     /** Converts a failed app search result codes into an exception. */
     @NonNull
-    private static Exception failedResultToException(@NonNull AppSearchResult<?> appSearchResult) {
+    static Exception failedResultToException(@NonNull AppSearchResult<?> appSearchResult) {
         return switch (appSearchResult.getResultCode()) {
-            case AppSearchResult.RESULT_INVALID_ARGUMENT -> new IllegalArgumentException(
-                    appSearchResult.getErrorMessage());
-            case AppSearchResult.RESULT_IO_ERROR -> new IOException(
-                    appSearchResult.getErrorMessage());
-            case AppSearchResult.RESULT_SECURITY_ERROR -> new SecurityException(
-                    appSearchResult.getErrorMessage());
+            case AppSearchResult.RESULT_INVALID_ARGUMENT ->
+                    new IllegalArgumentException(appSearchResult.getErrorMessage());
+            case AppSearchResult.RESULT_IO_ERROR ->
+                    new IOException(appSearchResult.getErrorMessage());
+            case AppSearchResult.RESULT_SECURITY_ERROR ->
+                    new SecurityException(appSearchResult.getErrorMessage());
             default -> new IllegalStateException(appSearchResult.getErrorMessage());
         };
     }
 
-    private AndroidFuture<AppSearchSession> getSessionAsync() {
-        return mSettableSessionFuture.thenApply(
-                result -> {
-                    if (result.isSuccess()) {
-                        return result.getResultValue();
-                    } else {
-                        throw new RuntimeException(failedResultToException(result));
-                    }
-                });
-    }
+    /**
+     * Sets the schema that represents the organizational structure of data within the AppSearch
+     * database.
+     */
+    AndroidFuture<SetSchemaResponse> setSchema(@NonNull SetSchemaRequest setSchemaRequest);
 
-    /** Gets the schema for a given app search session. */
-    public AndroidFuture<GetSchemaResponse> getSchema() {
-        return getSessionAsync()
-                .thenCompose(
-                        session -> {
-                            AndroidFuture<AppSearchResult<GetSchemaResponse>>
-                                    settableSchemaResponse = new AndroidFuture<>();
-                            session.getSchema(mExecutor, settableSchemaResponse::complete);
-                            return settableSchemaResponse.thenApply(
-                                    result -> {
-                                        if (result.isSuccess()) {
-                                            return result.getResultValue();
-                                        } else {
-                                            throw new RuntimeException(
-                                                    failedResultToException(result));
-                                        }
-                                    });
-                        });
-    }
+    /** Retrieves the schema most recently successfully provided to {@code setSchema}. */
+    AndroidFuture<GetSchemaResponse> getSchema();
 
-    /** Sets the schema for a given app search session. */
-    public AndroidFuture<SetSchemaResponse> setSchema(@NonNull SetSchemaRequest setSchemaRequest) {
-        return getSessionAsync()
-                .thenCompose(
-                        session -> {
-                            AndroidFuture<AppSearchResult<SetSchemaResponse>>
-                                    settableSchemaResponse = new AndroidFuture<>();
-                            session.setSchema(
-                                    setSchemaRequest,
-                                    mExecutor,
-                                    mExecutor,
-                                    settableSchemaResponse::complete);
-                            return settableSchemaResponse.thenApply(
-                                    result -> {
-                                        if (result.isSuccess()) {
-                                            return result.getResultValue();
-                                        } else {
-                                            throw new RuntimeException(
-                                                    failedResultToException(result));
-                                        }
-                                    });
-                        });
-    }
+    /** Indexes documents into the {@link AppSearchSession} database. */
+    AndroidFuture<AppSearchBatchResult<String, Void>> put(
+            @NonNull PutDocumentsRequest putDocumentsRequest);
 
-    /** Indexes documents into the AppSearchSession database. */
-    public AndroidFuture<AppSearchBatchResult<String, Void>> put(
-            @NonNull PutDocumentsRequest putDocumentsRequest) {
-        return getSessionAsync().thenCompose(
-                session -> {
-                    AndroidFuture<AppSearchBatchResult<String, Void>> batchResultFuture =
-                            new AndroidFuture<>();
-
-                    session.put(putDocumentsRequest, mExecutor, batchResultFuture::complete);
-                    return batchResultFuture;
-                });
-    }
+    /** Removes {@link GenericDocument} from the index by Query. */
+    AndroidFuture<AppSearchBatchResult<String, Void>> remove(
+            @NonNull RemoveByDocumentIdRequest removeRequest);
 
     /**
-     * Retrieves documents from the open AppSearchSession that match a given query string and type
-     * of search provided.
+     * Gets {@link GenericDocument} objects by document IDs in a namespace from the {@link
+     * AppSearchSession} database.
      */
-    public AndroidFuture<FutureSearchResults> search(
-            @NonNull String queryExpression,
-            @NonNull SearchSpec searchSpec) {
-        return getSessionAsync().thenApply(
-                        session -> session.search(queryExpression, searchSpec))
-                .thenApply(result -> new FutureSearchResults(result, mExecutor));
-    }
+    AndroidFuture<AppSearchBatchResult<String, GenericDocument>> getByDocumentId(
+            @NonNull GetByDocumentIdRequest getRequest);
 
-    @Override
-    public void close() throws IOException {
-        try {
-            getSessionAsync().get().close();
-        } catch (Exception ex) {
-            Slog.e(TAG, "Failed to close app search session", ex);
-        }
-    }
+    /**
+     * Retrieves documents from the open {@link AppSearchSession} that match a given query string
+     * and type of search provided.
+     */
+    AndroidFuture<FutureSearchResults> search(
+            @NonNull String queryExpression, @NonNull SearchSpec searchSpec);
 
     /** A future API wrapper of {@link android.app.appsearch.SearchResults}. */
-    public static class FutureSearchResults {
-        private final SearchResults mSearchResults;
-        private final Executor mExecutor;
+    interface FutureSearchResults {
 
-        public FutureSearchResults(@NonNull SearchResults searchResults,
-                @NonNull Executor executor) {
-            mSearchResults = Objects.requireNonNull(searchResults);
-            mExecutor = Objects.requireNonNull(executor);
-        }
-
-        public AndroidFuture<List<SearchResult>> getNextPage() {
-            AndroidFuture<AppSearchResult<List<SearchResult>>> nextPageFuture =
-                    new AndroidFuture<>();
-
-            mSearchResults.getNextPage(mExecutor, nextPageFuture::complete);
-            return nextPageFuture.thenApply(result -> {
-                if (result.isSuccess()) {
-                    return result.getResultValue();
-                } else {
-                    throw new RuntimeException(
-                            failedResultToException(result));
-                }
-            });
-        }
-
+        /**
+         * Retrieves the next page of {@link SearchResult} objects from the {@link AppSearchSession}
+         * database.
+         *
+         * <p>Continue calling this method to access results until it returns an empty list,
+         * signifying there are no more results.
+         */
+        AndroidFuture<List<SearchResult>> getNextPage();
     }
 }

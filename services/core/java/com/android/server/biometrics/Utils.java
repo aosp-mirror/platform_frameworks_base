@@ -321,6 +321,9 @@ public class Utils {
             case BiometricConstants.BIOMETRIC_ERROR_MANDATORY_NOT_ACTIVE:
                 biometricManagerCode = BiometricManager.BIOMETRIC_ERROR_MANDATORY_NOT_ACTIVE;
                 break;
+            case BiometricConstants.BIOMETRIC_ERROR_NOT_ENABLED_FOR_APPS:
+                biometricManagerCode = BiometricManager.BIOMETRIC_ERROR_NOT_ENABLED_FOR_APPS;
+                break;
             default:
                 Slog.e(BiometricService.TAG, "Unhandled result code: " + biometricConstantsCode);
                 biometricManagerCode = BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE;
@@ -384,9 +387,12 @@ public class Utils {
                 return BiometricConstants.BIOMETRIC_ERROR_SENSOR_PRIVACY_ENABLED;
             case MANDATORY_BIOMETRIC_UNAVAILABLE_ERROR:
                 return BiometricConstants.BIOMETRIC_ERROR_MANDATORY_NOT_ACTIVE;
+            case BIOMETRIC_NOT_ENABLED_FOR_APPS:
+                if (Flags.mandatoryBiometrics()) {
+                    return BiometricConstants.BIOMETRIC_ERROR_NOT_ENABLED_FOR_APPS;
+                }
             case BIOMETRIC_DISABLED_BY_DEVICE_POLICY:
             case BIOMETRIC_HARDWARE_NOT_DETECTED:
-            case BIOMETRIC_NOT_ENABLED_FOR_APPS:
             default:
                 return BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE;
         }

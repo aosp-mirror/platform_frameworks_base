@@ -567,7 +567,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see #INFO_SESSION_CONFIGURATION_QUERY_VERSION
      */
     @NonNull
-    @FlaggedApi(Flags.FLAG_FEATURE_COMBINATION_QUERY)
     public List<CameraCharacteristics.Key<?>> getAvailableSessionCharacteristicsKeys() {
         if (mAvailableSessionCharacteristicsKeys != null) {
             return mAvailableSessionCharacteristicsKeys;
@@ -5210,7 +5209,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      */
     @PublicKey
     @NonNull
-    @FlaggedApi(Flags.FLAG_FEATURE_COMBINATION_QUERY)
     public static final Key<Integer> INFO_SESSION_CONFIGURATION_QUERY_VERSION =
             new Key<Integer>("android.info.sessionConfigurationQueryVersion", int.class);
 

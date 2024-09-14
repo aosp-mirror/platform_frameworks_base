@@ -37,8 +37,7 @@ import android.graphics.Rect;
 import android.os.SystemProperties;
 import android.util.Size;
 import android.view.Gravity;
-
-import com.android.server.wm.utils.DesktopModeFlagsUtil;
+import android.window.flags.DesktopModeFlags;
 
 import java.util.function.Consumer;
 
@@ -104,7 +103,7 @@ public final class DesktopModeBoundsCalculator {
         final TaskDisplayArea displayArea = task.getDisplayArea();
         final Rect screenBounds = displayArea.getBounds();
         final Size idealSize = calculateIdealSize(screenBounds, DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
-        if (!DesktopModeFlagsUtil.DYNAMIC_INITIAL_BOUNDS.isEnabled(activity.mWmService.mContext)) {
+        if (!DesktopModeFlags.DYNAMIC_INITIAL_BOUNDS.isEnabled(activity.mWmService.mContext)) {
             return centerInScreen(idealSize, screenBounds);
         }
         if (activity.mAppCompatController.getAppCompatAspectRatioOverrides()

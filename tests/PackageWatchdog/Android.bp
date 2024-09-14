@@ -36,7 +36,7 @@ android_test {
         "services.net",
         "truth",
     ],
-    libs: ["android.test.runner"],
+    libs: ["android.test.runner.stubs.system"],
     jni_libs: [
         // mockito-target-extended dependencies
         "libdexmakerjvmtiagent",

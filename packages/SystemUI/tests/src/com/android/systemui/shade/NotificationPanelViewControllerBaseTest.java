@@ -167,7 +167,7 @@ import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.ConfigurationControllerImpl;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
-import com.android.systemui.statusbar.phone.HeadsUpTouchHelper;
+import com.android.systemui.statusbar.notification.HeadsUpTouchHelper;
 import com.android.systemui.statusbar.phone.KeyguardBottomAreaView;
 import com.android.systemui.statusbar.phone.KeyguardBottomAreaViewController;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
@@ -431,7 +431,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mFakeKeyguardRepository,
                 mKeyguardTransitionInteractor,
                 mPowerInteractor,
-                mShadeRepository,
                 new FakeUserSetupRepository(),
                 mock(UserSwitcherInteractor.class),
                 new ShadeInteractorLegacyImpl(
@@ -447,8 +446,8 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                                 () -> mLargeScreenHeaderHelper
                         ),
                         mShadeRepository
-                )
-        );
+                ),
+                mKosmos.getShadeModeInteractor());
         SystemClock systemClock = new FakeSystemClock();
         mStatusBarStateController = new StatusBarStateControllerImpl(
                 mUiEventLogger,

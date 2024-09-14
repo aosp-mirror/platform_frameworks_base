@@ -105,6 +105,8 @@
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Тэмдэглэлд нэмэх"</string>
     <string name="backlinks_include_link" msgid="4562093591148248158">"Холбоосыг оруулах"</string>
     <string name="backlinks_duplicate_label_format" msgid="558445128952827926">"<xliff:g id="APPNAME">%1$s</xliff:g> <xliff:g id="FREQUENCYCOUNT">(%2$d)</xliff:g>⁠"</string>
+    <!-- no translation found for backlinks_cross_profile_error (1355798585727802282) -->
+    <skip />
     <string name="screenrecord_title" msgid="4257171601439507792">"Дэлгэцийн үйлдэл бичигч"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Дэлгэц бичлэг боловсруулж байна"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Дэлгэц бичих горимын үргэлжилж буй мэдэгдэл"</string>
@@ -292,8 +294,7 @@
     <string name="start_dreams" msgid="9131802557946276718">"Дэлгэц амраагч"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"Этернет"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Бүү саад бол"</string>
-    <!-- no translation found for quick_settings_modes_label (879156359479504244) -->
-    <skip />
+    <string name="quick_settings_modes_label" msgid="879156359479504244">"Горим"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Хослуулсан төхөөрөмж байхгүй"</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"Төхөөрөмжийг холбох эсвэл салгахын тулд товшино уу"</string>
@@ -434,8 +435,7 @@
     <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"Тохиргоог нээх"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Бусад төхөөрөмж"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Тоймыг асаах/унтраах"</string>
-    <!-- no translation found for zen_modes_dialog_title (8854640808100096934) -->
-    <skip />
+    <string name="zen_modes_dialog_title" msgid="8854640808100096934">"Горим"</string>
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"Болсон"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"Тохиргоо"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"Асаалттай"</string>
@@ -1393,18 +1393,12 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Хураах дүрс тэмдэг"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Дэлгэх дүрс тэмдэг"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"эсвэл"</string>
-    <!-- no translation found for launch_keyboard_tutorial_notification_title (8849933155160522519) -->
-    <skip />
-    <!-- no translation found for launch_keyboard_tutorial_notification_content (2880339951512757918) -->
-    <skip />
-    <!-- no translation found for launch_touchpad_tutorial_notification_title (2243780062772196901) -->
-    <skip />
-    <!-- no translation found for launch_touchpad_tutorial_notification_content (7931085031240753226) -->
-    <skip />
-    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_title (1940023776496198762) -->
-    <skip />
-    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_content (1780725168171929365) -->
-    <skip />
+    <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Гараа ашиглан шилжих"</string>
+    <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Товчлуурын шууд холбоосыг мэдэж аваарай"</string>
+    <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Мэдрэгч самбараа ашиглан шилжээрэй"</string>
+    <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"Мэдрэгч самбарын зангааг мэдэж аваарай"</string>
+    <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"Гар эсвэл мэдрэгч самбараа ашиглан шилжээрэй"</string>
+    <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"Мэдрэгч самбарын зангаа, товчлуурын шууд холбоос болон бусад зүйлийг мэдэж аваарай"</string>
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Буцах зангаа"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Үндсэн нүүрний зангаа"</string>
     <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"Тусгай товчлуур"</string>
@@ -1444,4 +1438,18 @@
     <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="7513137763024327538">"Та одоо дэлгэцийнхээ дээд талаас гэрэлтүүлгийн түвшнийг бүр илүү багасгаснаар дэлгэцийг хэт бүүдгэр болгох боломжтой.\n\nЭнэ нь таныг харанхуй орчинд байхад хамгийн сайн ажилладаг."</string>
     <string name="accessibility_deprecate_extra_dim_dialog_button" msgid="1782147201534669800">"Хэт бүүдгэр онцлогийн товчлолыг хасах"</string>
     <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="4070696910424515757">"Хэт бүүдгэр онцлогийн товчлолыг хассан. Гэрэлтүүлгээ багасгахын тулд энгийн гэрэлтүүлгийн самбарыг ашиглана уу."</string>
+    <!-- no translation found for qs_edit_mode_category_connectivity (4559726936546032672) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_accessibility (7969091385071475922) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_utilities (8123080090108420095) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_privacy (6577774443194551775) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_providedByApps (8346112074897919019) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_display (4749511439121053942) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_unknown (509314252124053550) -->
+    <skip />
 </resources>

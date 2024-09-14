@@ -19,9 +19,11 @@ package com.android.systemui.scene.ui.viewmodel
 import android.view.MotionEvent
 import androidx.compose.runtime.getValue
 import com.android.compose.animation.scene.ContentKey
+import com.android.compose.animation.scene.DefaultEdgeDetector
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.OverlayKey
 import com.android.compose.animation.scene.SceneKey
+import com.android.compose.animation.scene.SwipeSourceDetector
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.classifier.Classifier
@@ -33,12 +35,15 @@ import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.logger.SceneLogger
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.composable.Overlay
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 
 /** Models UI state for the scene container. */
 class SceneContainerViewModel
@@ -47,6 +52,8 @@ constructor(
     private val sceneInteractor: SceneInteractor,
     private val falsingInteractor: FalsingInteractor,
     private val powerInteractor: PowerInteractor,
+    shadeInteractor: ShadeInteractor,
+    private val splitEdgeDetector: SplitEdgeDetector,
     private val logger: SceneLogger,
     @Assisted private val motionEventHandlerReceiver: (MotionEventHandler?) -> Unit,
 ) : ExclusiveActivatable() {
@@ -58,6 +65,20 @@ constructor(
 
     /** Whether the container is visible. */
     val isVisible: Boolean by hydrator.hydratedStateOf("isVisible", sceneInteractor.isVisible)
+
+    /**
+     * The [SwipeSourceDetector] to use for defining which edges of the screen can be defined in the
+     * [UserAction]s for this container.
+     */
+    val edgeDetector: SwipeSourceDetector by
+        hydrator.hydratedStateOf(
+            traceName = "edgeDetector",
+            initialValue = DefaultEdgeDetector,
+            source =
+                shadeInteractor.shadeMode.map {
+                    if (it is ShadeMode.Dual) splitEdgeDetector else DefaultEdgeDetector
+                },
+        )
 
     override suspend fun onActivated(): Nothing {
         try {
@@ -142,10 +163,8 @@ constructor(
             when (toScene) {
                 Scenes.Bouncer -> Classifier.BOUNCER_UNLOCK
                 Scenes.Gone -> Classifier.UNLOCK
-                Scenes.NotificationsShade -> Classifier.NOTIFICATION_DRAG_DOWN
                 Scenes.Shade -> Classifier.NOTIFICATION_DRAG_DOWN
                 Scenes.QuickSettings -> Classifier.QUICK_SETTINGS
-                Scenes.QuickSettingsShade -> Classifier.QUICK_SETTINGS
                 else -> null
             }
 
@@ -179,7 +198,7 @@ constructor(
      * resolution target.
      */
     fun resolveSceneFamilies(
-        actionResultMap: Map<UserAction, UserActionResult>,
+        actionResultMap: Map<UserAction, UserActionResult>
     ): Map<UserAction, UserActionResult> {
         return actionResultMap.mapValues { (_, actionResult) ->
             when (actionResult) {
@@ -193,9 +212,10 @@ constructor(
                         )
                     }
                 }
+                // Overlay transitions don't use scene families, nothing to resolve.
                 is UserActionResult.ShowOverlay,
                 is UserActionResult.HideOverlay,
-                is UserActionResult.ReplaceByOverlay -> TODO("b/353679003: Support overlays")
+                is UserActionResult.ReplaceByOverlay -> null
             } ?: actionResult
         }
     }
@@ -238,7 +258,7 @@ constructor(
     @AssistedFactory
     interface Factory {
         fun create(
-            motionEventHandlerReceiver: (MotionEventHandler?) -> Unit,
+            motionEventHandlerReceiver: (MotionEventHandler?) -> Unit
         ): SceneContainerViewModel
     }
 }

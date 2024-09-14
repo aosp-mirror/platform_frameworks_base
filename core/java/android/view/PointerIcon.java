@@ -540,8 +540,6 @@ public final class PointerIcon implements Parcelable {
                 // Assumes they have the exact duration.
                 mDurationPerFrame = animationDrawable.getDuration(0);
                 mBitmapFrames = new Bitmap[frames - 1];
-                final int width = drawable.getIntrinsicWidth();
-                final int height = drawable.getIntrinsicHeight();
                 final boolean isVectorAnimation = drawable instanceof VectorDrawable;
                 mDrawNativeDropShadow = isVectorAnimation;
                 for (int i = 1; i < frames; ++i) {
@@ -556,9 +554,6 @@ public final class PointerIcon implements Parcelable {
                                 + "is a different type from the others. All frames should be the "
                                 + "same type.");
                     }
-                    // TODO(b/361232935): Check when bitmap size of the ith frame is different
-                    // drawableFrame.getIntrinsicWidth() != width ||
-                    // drawableFrame.getIntrinsicHeight() != height
                     if (isVectorAnimation) {
                         drawableFrame = getBitmapDrawableFromVectorDrawable(resources,
                                 (VectorDrawable) drawableFrame, pointerScale);
