@@ -88,6 +88,7 @@ import android.util.Size;
 import android.view.WindowInsetsController.Appearance;
 import android.window.TaskSnapshot;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.LocalePicker;
 import com.android.internal.app.procstats.ProcessStats;
 import com.android.internal.os.RoSystemProperties;
@@ -237,6 +238,22 @@ public class ActivityManager {
     /** Rate-Limiting Cache that allows no more than 200 calls to the service per second. */
     private static final RateLimitingCache<List<ProcessErrorStateInfo>> mErrorProcessesCache =
             new RateLimitingCache<>(10, 2);
+
+    /** Rate-Limiting cache that allows no more than 100 calls to the service per second. */
+    @GuardedBy("mMemoryInfoCache")
+    private static final RateLimitingCache<MemoryInfo> mMemoryInfoCache =
+            new RateLimitingCache<>(10);
+    /** Used to store cached results for rate-limited calls to getMemoryInfo(). */
+    @GuardedBy("mMemoryInfoCache")
+    private static final MemoryInfo mRateLimitedMemInfo = new MemoryInfo();
+
+    /** Rate-Limiting cache that allows no more than 200 calls to the service per second. */
+    @GuardedBy("mMyMemoryStateCache")
+    private static final RateLimitingCache<RunningAppProcessInfo> mMyMemoryStateCache =
+            new RateLimitingCache<>(10, 2);
+    /** Used to store cached results for rate-limited calls to getMyMemoryState(). */
+    @GuardedBy("mMyMemoryStateCache")
+    private static final RunningAppProcessInfo mRateLimitedMemState = new RunningAppProcessInfo();
 
     /**
      * Query handler for mGetCurrentUserIdCache - returns a cached value of the current foreground
@@ -3510,6 +3527,19 @@ public class ActivityManager {
             foregroundAppThreshold = source.readLong();
         }
 
+        /** @hide */
+        public void copyTo(MemoryInfo other) {
+            other.advertisedMem = advertisedMem;
+            other.availMem = availMem;
+            other.totalMem = totalMem;
+            other.threshold = threshold;
+            other.lowMemory = lowMemory;
+            other.hiddenAppThreshold = hiddenAppThreshold;
+            other.secondaryServerThreshold = secondaryServerThreshold;
+            other.visibleAppThreshold = visibleAppThreshold;
+            other.foregroundAppThreshold = foregroundAppThreshold;
+        }
+
         public static final @android.annotation.NonNull Creator<MemoryInfo> CREATOR
                 = new Creator<MemoryInfo>() {
             public MemoryInfo createFromParcel(Parcel source) {
@@ -3536,6 +3566,20 @@ public class ActivityManager {
      * manage its memory.
      */
     public void getMemoryInfo(MemoryInfo outInfo) {
+        if (Flags.rateLimitGetMemoryInfo()) {
+            synchronized (mMemoryInfoCache) {
+                mMemoryInfoCache.get(() -> {
+                    getMemoryInfoInternal(mRateLimitedMemInfo);
+                    return mRateLimitedMemInfo;
+                });
+                mRateLimitedMemInfo.copyTo(outInfo);
+            }
+        } else {
+            getMemoryInfoInternal(outInfo);
+        }
+    }
+
+    private void getMemoryInfoInternal(MemoryInfo outInfo) {
         try {
             getService().getMemoryInfo(outInfo);
         } catch (RemoteException e) {
@@ -4187,6 +4231,23 @@ public class ActivityManager {
             lastActivityTime = source.readLong();
         }
 
+        /**
+         * Note: only fields that are updated in ProcessList.fillInProcMemInfoLOSP() are copied.
+         * @hide
+         */
+        public void copyTo(RunningAppProcessInfo other) {
+            other.pid = pid;
+            other.uid = uid;
+            other.flags = flags;
+            other.lastTrimLevel = lastTrimLevel;
+            other.importance = importance;
+            other.lru = lru;
+            other.importanceReasonCode = importanceReasonCode;
+            other.processState = processState;
+            other.isFocused = isFocused;
+            other.lastActivityTime = lastActivityTime;
+        }
+
         public static final @android.annotation.NonNull Creator<RunningAppProcessInfo> CREATOR =
             new Creator<RunningAppProcessInfo>() {
             public RunningAppProcessInfo createFromParcel(Parcel source) {
@@ -4818,7 +4879,21 @@ public class ActivityManager {
      * {@link RunningAppProcessInfo#lru}, and
      * {@link RunningAppProcessInfo#importanceReasonCode}.
      */
-    static public void getMyMemoryState(RunningAppProcessInfo outState) {
+    public static void getMyMemoryState(RunningAppProcessInfo outState) {
+        if (Flags.rateLimitGetMyMemoryState()) {
+            synchronized (mMyMemoryStateCache) {
+                mMyMemoryStateCache.get(() -> {
+                    getMyMemoryStateInternal(mRateLimitedMemState);
+                    return mRateLimitedMemState;
+                });
+                mRateLimitedMemState.copyTo(outState);
+            }
+        } else {
+            getMyMemoryStateInternal(outState);
+        }
+    }
+
+    private static void getMyMemoryStateInternal(RunningAppProcessInfo outState) {
         try {
             getService().getMyMemoryState(outState);
         } catch (RemoteException e) {

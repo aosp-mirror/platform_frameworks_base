@@ -195,7 +195,7 @@ class ModernStatusBarWifiViewTest : SysuiTestCase() {
     @Test
     fun isIconVisible_notEnabled_outputsFalse() {
         wifiRepository.setIsWifiEnabled(false)
-        wifiRepository.setWifiNetwork(WifiNetworkModel.Active(isValidated = true, level = 2))
+        wifiRepository.setWifiNetwork(WifiNetworkModel.Active.of(isValidated = true, level = 2))
 
         val view = ModernStatusBarWifiView.constructAndBind(context, SLOT_NAME, viewModel)
 
@@ -210,7 +210,7 @@ class ModernStatusBarWifiViewTest : SysuiTestCase() {
     @Test
     fun isIconVisible_enabled_outputsTrue() {
         wifiRepository.setIsWifiEnabled(true)
-        wifiRepository.setWifiNetwork(WifiNetworkModel.Active(isValidated = true, level = 2))
+        wifiRepository.setWifiNetwork(WifiNetworkModel.Active.of(isValidated = true, level = 2))
 
         val view = ModernStatusBarWifiView.constructAndBind(context, SLOT_NAME, viewModel)
 

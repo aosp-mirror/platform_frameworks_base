@@ -50,6 +50,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.Logger
 import com.android.systemui.log.dagger.CommunalLog
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import javax.inject.Inject
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -244,15 +245,18 @@ constructor(
     private fun listenForTransitionAndChangeScene() {
         lifecycleScope.launch {
             communalViewModel.canShowEditMode.collect {
-                communalViewModel.changeScene(
-                    scene = CommunalScenes.Blank,
-                    loggingReason = "edit mode opening",
-                    transitionKey = CommunalTransitionKeys.ToEditMode,
-                    keyguardState = KeyguardState.GONE,
-                )
-                // wait till transitioned to Blank scene, then animate in communal content in
-                // edit mode
-                communalViewModel.currentScene.first { it == CommunalScenes.Blank }
+                if (!SceneContainerFlag.isEnabled) {
+                    communalViewModel.changeScene(
+                        scene = CommunalScenes.Blank,
+                        loggingReason = "edit mode opening",
+                        transitionKey = CommunalTransitionKeys.ToEditMode,
+                        keyguardState = KeyguardState.GONE,
+                    )
+                    // wait till transitioned to Blank scene, then animate in communal content in
+                    // edit mode
+                    communalViewModel.currentScene.first { it == CommunalScenes.Blank }
+                }
+
                 communalViewModel.setEditModeState(EditModeState.SHOWING)
 
                 // Inform the ActivityController that we are now fully visible.

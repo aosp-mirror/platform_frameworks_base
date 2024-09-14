@@ -39,6 +39,7 @@ import com.android.systemui.keyboard.shortcut.ui.composable.ShortcutHelper
 import com.android.systemui.keyboard.shortcut.ui.viewmodel.ShortcutHelperViewModel
 import com.android.systemui.res.R
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.util.dpToPx
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior.BottomSheetCallback
 import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_HIDDEN
@@ -51,10 +52,8 @@ import kotlinx.coroutines.launch
  */
 class ShortcutHelperActivity
 @Inject
-constructor(
-    private val userTracker: UserTracker,
-    private val viewModel: ShortcutHelperViewModel,
-) : ComponentActivity() {
+constructor(private val userTracker: UserTracker, private val viewModel: ShortcutHelperViewModel) :
+    ComponentActivity() {
 
     private val bottomSheetContainer
         get() = requireViewById<View>(R.id.shortcut_helper_sheet_container)
@@ -69,7 +68,7 @@ constructor(
         setupEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_keyboard_shortcut_helper)
-        setUpBottomSheetWidth()
+        setUpWidth()
         expandBottomSheet()
         setUpInsets()
         setUpPredictiveBack()
@@ -78,6 +77,13 @@ constructor(
         setUpComposeView()
         observeFinishRequired()
         viewModel.onViewOpened()
+    }
+
+    private fun setUpWidth() {
+        // we override this because when maxWidth isn't specified, material imposes a max width
+        // constraint on bottom sheets on larger screens which is smaller than our desired width.
+        bottomSheetBehavior.maxWidth =
+            resources.getDimension(R.dimen.shortcut_helper_width).dpToPx(resources).toInt()
     }
 
     private fun setUpComposeView() {
@@ -102,7 +108,7 @@ constructor(
         try {
             startActivityAsUser(
                 Intent(Settings.ACTION_HARD_KEYBOARD_SETTINGS),
-                userTracker.userHandle
+                userTracker.userHandle,
             )
         } catch (e: ActivityNotFoundException) {
             // From the Settings docs: In some cases, a matching Activity may not exist, so ensure
@@ -133,15 +139,6 @@ constructor(
         window.setDecorFitsSystemWindows(false)
     }
 
-    private fun setUpBottomSheetWidth() {
-        val sheetScreenWidthFraction =
-            resources.getFloat(R.dimen.shortcut_helper_screen_width_fraction)
-        // maxWidth needs to be set before the sheet is drawn, otherwise the call will have no
-        // effect.
-        val screenWidth = windowManager.maximumWindowMetrics.bounds.width()
-        bottomSheetBehavior.maxWidth = (sheetScreenWidthFraction * screenWidth).toInt()
-    }
-
     private fun setUpInsets() {
         bottomSheetContainer.setOnApplyWindowInsetsListener { _, insets ->
             val safeDrawingInsets = insets.safeDrawing
@@ -153,7 +150,7 @@ constructor(
             bottomSheet.updatePadding(
                 left = safeDrawingInsets.left,
                 right = safeDrawingInsets.right,
-                bottom = safeDrawingInsets.bottom
+                bottom = safeDrawingInsets.bottom,
             )
             // The bottom sheet has to be expanded only after setting up insets, otherwise there is
             // a bug and it will not use full height.
@@ -191,7 +188,7 @@ constructor(
             }
         onBackPressedDispatcher.addCallback(
             owner = this,
-            onBackPressedCallback = onBackPressedCallback
+            onBackPressedCallback = onBackPressedCallback,
         )
     }
 

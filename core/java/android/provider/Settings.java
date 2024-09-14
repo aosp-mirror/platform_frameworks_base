@@ -17818,6 +17818,12 @@ public final class Settings {
         public static final String FORCE_NON_DEBUGGABLE_FINAL_BUILD_FOR_COMPAT =
                 "force_non_debuggable_final_build_for_compat";
 
+        /**
+         * Flag to enable the use of ApplicationInfo for getting not-launched status.
+         *
+         * @hide
+         */
+        public static final String ENABLE_USE_APP_INFO_NOT_LAUNCHED = "use_app_info_not_launched";
 
         /**
          * Current version of signed configuration applied.

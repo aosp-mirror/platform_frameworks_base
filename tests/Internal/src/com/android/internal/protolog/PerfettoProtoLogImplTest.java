@@ -399,16 +399,12 @@ public class PerfettoProtoLogImplTest {
         TestProtoLogGroup.TEST_GROUP.setLogToLogcat(true);
         TestProtoLogGroup.TEST_GROUP.setLogToProto(false);
 
-        var assertion = assertThrows(RuntimeException.class, () -> implSpy.log(
-                LogLevel.INFO, TestProtoLogGroup.TEST_GROUP, 1234, 4321,
-                new Object[]{5}));
+        implSpy.log(LogLevel.INFO, TestProtoLogGroup.TEST_GROUP, 1234, 4321,
+                new Object[]{5});
 
-        verify(implSpy, never()).passToLogcat(eq(TestProtoLogGroup.TEST_GROUP.getTag()), eq(
-                LogLevel.INFO), any());
+        verify(implSpy).passToLogcat(eq(TestProtoLogGroup.TEST_GROUP.getTag()), eq(
+                LogLevel.INFO), eq("UNKNOWN MESSAGE args = (5)"));
         verify(sReader).getViewerString(eq(1234L));
-
-        Truth.assertThat(assertion).hasMessageThat()
-                .contains("Failed to get log message with hash 1234 and args (5)");
     }
 
     @Test
@@ -864,19 +860,6 @@ public class PerfettoProtoLogImplTest {
                 .isEqualTo(LogLevel.ERROR);
         Truth.assertThat(protolog.messages.get(1).getMessage())
                 .isEqualTo("This message should also be logged 567");
-    }
-
-    @Test
-    public void throwsOnLogToLogcatForProcessedMessageMissingLoadedDefinition() {
-        TestProtoLogGroup.TEST_GROUP.setLogToLogcat(true);
-        var protolog = new PerfettoProtoLogImpl(TestProtoLogGroup.values());
-
-        var exception = assertThrows(RuntimeException.class, () -> {
-            protolog.log(LogLevel.DEBUG, TestProtoLogGroup.TEST_GROUP, 123, 0, new Object[0]);
-        });
-
-        Truth.assertThat(exception).hasMessageThat()
-                .contains("Failed to get log message with hash 123");
     }
 
     private enum TestProtoLogGroup implements IProtoLogGroup {

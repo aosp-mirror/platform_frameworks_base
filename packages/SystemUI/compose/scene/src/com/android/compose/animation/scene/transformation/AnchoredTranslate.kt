@@ -61,15 +61,9 @@ internal class AnchoredTranslate(
         val offset = anchorToOffset - anchorFromOffset
 
         return if (content == transition.toContent) {
-            Offset(
-                value.x - offset.x,
-                value.y - offset.y,
-            )
+            Offset(value.x - offset.x, value.y - offset.y)
         } else {
-            Offset(
-                value.x + offset.x,
-                value.y + offset.y,
-            )
+            Offset(value.x + offset.x, value.y + offset.y)
         }
     }
 }

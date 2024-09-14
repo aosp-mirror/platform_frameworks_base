@@ -55,7 +55,9 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -99,6 +101,11 @@ public final class NotificationChannel implements Parcelable {
     @TestApi
     @FlaggedApi(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
     public static final String RECS_ID = "android.app.recs";
+
+    /** @hide */
+    @FlaggedApi(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+    public static final ArrayList<String> SYSTEM_RESERVED_IDS = new ArrayList<>(
+            List.of(NEWS_ID, SOCIAL_MEDIA_ID, PROMOTIONS_ID, RECS_ID));
 
     /**
      * The formatter used by the system to create an id for notification
@@ -761,14 +768,22 @@ public final class NotificationChannel implements Parcelable {
         this.mVibrationEnabled = effect != null;
         this.mVibrationEffect = effect;
         if (Flags.notifChannelCropVibrationEffects() && effect != null) {
-            // Try converting to a vibration pattern and trimming that array. If not convertible
-            // to a pattern directly, try trimming the vibration effect if possible and storing
-            // that version instead.
             long[] pattern = effect.computeCreateWaveformOffOnTimingsOrNull();
             if (pattern != null) {
-                setVibrationPattern(pattern);
+                // If this effect has an equivalent pattern, AND the pattern needs to be truncated
+                // due to being too long, we delegate to setVibrationPattern to re-generate the
+                // effect as well. Otherwise, we use the effect (already set above) and converted
+                // pattern directly.
+                if (pattern.length > MAX_VIBRATION_LENGTH) {
+                    setVibrationPattern(pattern);
+                } else {
+                    this.mVibrationPattern = pattern;
+                }
             } else {
+                // If not convertible to a pattern directly, try trimming the vibration effect if
+                // possible and storing that version instead.
                 this.mVibrationEffect = getTrimmedVibrationEffect(mVibrationEffect);
+                this.mVibrationPattern = null;
             }
         } else {
             this.mVibrationPattern =

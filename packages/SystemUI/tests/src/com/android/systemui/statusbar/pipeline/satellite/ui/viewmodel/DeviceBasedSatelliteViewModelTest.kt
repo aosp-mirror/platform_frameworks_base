@@ -375,7 +375,7 @@ class DeviceBasedSatelliteViewModelTest : SysuiTestCase() {
             repo.isSatelliteProvisioned.value = true
 
             // GIVEN wifi network is active
-            wifiRepository.setWifiNetwork(WifiNetworkModel.Active(level = 1))
+            wifiRepository.setWifiNetwork(WifiNetworkModel.Active.of(level = 1))
 
             // THEN icon is null because the device is connected to wifi
             assertThat(latest).isNull()
@@ -573,7 +573,7 @@ class DeviceBasedSatelliteViewModelTest : SysuiTestCase() {
             repo.isSatelliteProvisioned.value = true
 
             // GIVEN wifi network is active
-            wifiRepository.setWifiNetwork(WifiNetworkModel.Active(level = 1))
+            wifiRepository.setWifiNetwork(WifiNetworkModel.Active.of(level = 1))
 
             // THEN carrier text is null because the device is connected to wifi
             assertThat(latest).isNull()

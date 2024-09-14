@@ -117,11 +117,11 @@ class ShadeControllerImplTest : SysuiTestCase() {
                 deviceProvisionedController,
                 notificationShadeWindowController,
                 0,
+                Lazy { nswvc },
                 Lazy { npvc },
                 Lazy { assistManager },
                 Lazy { gutsManager },
             )
-        shadeController.setNotificationShadeWindowViewController(nswvc)
         shadeController.setVisibilityListener(mock())
     }
 

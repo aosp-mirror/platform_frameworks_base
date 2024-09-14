@@ -145,6 +145,13 @@ flag {
 }
 
 flag {
+    name: "enable_resizing_metrics"
+    namespace: "lse_desktop_experience"
+    description: "Whether to enable log collection for task resizing in desktop windowing mode"
+    bug: "341319100"
+}
+
+flag {
     name: "enable_caption_compat_inset_force_consumption"
     namespace: "lse_desktop_experience"
     description: "Enables force-consumption of caption bar insets for immersive apps in freeform"
@@ -215,6 +222,13 @@ flag {
 }
 
 flag {
+    name: "enable_desktop_windowing_exit_transitions"
+    namespace: "lse_desktop_experience"
+    description: "Enables exit desktop windowing transition & motion polish changes"
+    bug: "353650462"
+}
+
+flag {
     name: "enable_compat_ui_visibility_status"
     namespace: "lse_desktop_experience"
     description: "Enables the tracking of the status for compat ui elements."
@@ -250,4 +264,11 @@ flag {
     namespace: "lse_desktop_experience"
     description: "Persists the desktop windowing session across reboots."
     bug: "350456942"
+}
+
+flag {
+    name: "enable_display_focus_in_shell_transitions"
+    namespace: "lse_desktop_experience"
+    description: "Creates a shell transition when display focus switches."
+    bug: "356109871"
 }

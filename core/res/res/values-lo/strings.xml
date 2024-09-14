@@ -1746,8 +1746,7 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"ແອັບໜຶ່ງກຳລັງປິດບັງຄຳຮ້ອງຂໍການອະນຸຍາດ ດັ່ງນັ້ນຈຶ່ງບໍ່ສາມາດຢັ້ງຢືນຄຳຕອບຂອງທ່ານໄດ້."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"ແຕະໃສ່ຄຸນສົມບັດໃດໜຶ່ງເພື່ອເລີ່ມການນຳໃຊ້ມັນ:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"ເລືອກຄຸນສົມບັດເພື່ອໃຊ້ກັບປຸ່ມການຊ່ວຍເຂົ້າເຖິງ"</string>
-    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
-    <skip />
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2245540598834891500">"ເລືອກຄຸນສົມບັດທີ່ຈະໃຊ້ກັບທາງລັດຂອງປຸ່ມລະດັບສຽງ"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"ປິດ <xliff:g id="SERVICE_NAME">%s</xliff:g> ໄວ້ແລ້ວ"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"ແກ້ໄຂທາງລັດ"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"ແລ້ວໆ"</string>

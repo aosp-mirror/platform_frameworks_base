@@ -117,7 +117,7 @@ constructor(
     sceneInteractor: SceneInteractor,
     @CommunalLog logBuffer: LogBuffer,
     @CommunalTableLog tableLogBuffer: TableLogBuffer,
-    private val managedProfileController: ManagedProfileController
+    private val managedProfileController: ManagedProfileController,
 ) {
     private val logger = Logger(logBuffer, "CommunalInteractor")
 
@@ -154,7 +154,7 @@ constructor(
         allOf(
                 communalSettingsInteractor.isCommunalEnabled,
                 not(keyguardInteractor.isEncryptedOrLockdown),
-                keyguardInteractor.isKeyguardShowing
+                keyguardInteractor.isKeyguardShowing,
             )
             .distinctUntilChanged()
             .onEach { available ->
@@ -342,7 +342,7 @@ constructor(
     fun changeScene(
         newScene: SceneKey,
         loggingReason: String,
-        transitionKey: TransitionKey? = null
+        transitionKey: TransitionKey? = null,
     ) = communalSceneInteractor.changeScene(newScene, loggingReason, transitionKey)
 
     fun setEditModeOpen(isOpen: Boolean) {
@@ -354,9 +354,7 @@ constructor(
     }
 
     /** Show the widget editor Activity. */
-    fun showWidgetEditor(
-        shouldOpenWidgetPickerOnStart: Boolean = false,
-    ) {
+    fun showWidgetEditor(shouldOpenWidgetPickerOnStart: Boolean = false) {
         communalSceneInteractor.setEditModeState(EditModeState.STARTING)
         editWidgetsActivityStarter.startActivity(shouldOpenWidgetPickerOnStart)
     }
@@ -419,7 +417,7 @@ constructor(
                     IntentFilter().apply {
                         addAction(Intent.ACTION_MANAGED_PROFILE_AVAILABLE)
                         addAction(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE)
-                    },
+                    }
             )
             .emitOnStart()
 
@@ -450,7 +448,7 @@ constructor(
                             rank = widget.rank,
                             providerInfo = widget.providerInfo,
                             appWidgetHost = appWidgetHost,
-                            inQuietMode = isQuietModeEnabled(widget.providerInfo.profile)
+                            inQuietMode = isQuietModeEnabled(widget.providerInfo.profile),
                         )
                     }
                     is CommunalWidgetContentModel.Pending -> {
@@ -468,7 +466,7 @@ constructor(
     /** Filter widgets based on whether their associated profile is allowed by device policy. */
     private fun filterWidgetsAllowedByDevicePolicy(
         list: List<CommunalWidgetContentModel>,
-        disallowedByDevicePolicyUser: UserInfo?
+        disallowedByDevicePolicyUser: UserInfo?,
     ): List<CommunalWidgetContentModel> =
         if (disallowedByDevicePolicyUser == null) {
             list
@@ -507,7 +505,7 @@ constructor(
      * A flow of ongoing content, including smartspace timers and umo, ordered by creation time and
      * sized dynamically.
      */
-    val ongoingContent: Flow<List<CommunalContentModel.Ongoing>> =
+    fun ongoingContent(isMediaHostVisible: Boolean): Flow<List<CommunalContentModel.Ongoing>> =
         combine(smartspaceRepository.timers, mediaRepository.mediaModel) { timers, media ->
                 val ongoingContent = mutableListOf<CommunalContentModel.Ongoing>()
 
@@ -523,22 +521,20 @@ constructor(
                 )
 
                 // Add UMO
-                if (media.hasAnyMediaOrRecommendation) {
+                if (isMediaHostVisible && media.hasAnyMediaOrRecommendation) {
                     ongoingContent.add(
                         CommunalContentModel.Umo(
-                            createdTimestampMillis = media.createdTimestampMillis,
+                            createdTimestampMillis = media.createdTimestampMillis
                         )
                     )
                 }
 
-                // Order by creation time descending
+                // Order by creation time descending.
                 ongoingContent.sortByDescending { it.createdTimestampMillis }
+                // Resize the items.
+                ongoingContent.resizeItems()
 
-                // Dynamic sizing
-                ongoingContent.forEachIndexed { index, model ->
-                    model.size = dynamicContentSize(ongoingContent.size, index)
-                }
-
+                // Return the sorted and resized items.
                 ongoingContent
             }
             .flowOn(bgDispatcher)
@@ -548,7 +544,7 @@ constructor(
      * stale data following user deletion.
      */
     private fun filterWidgetsByExistingUsers(
-        list: List<CommunalWidgetContentModel>,
+        list: List<CommunalWidgetContentModel>
     ): List<CommunalWidgetContentModel> {
         val currentUserIds = userTracker.userProfiles.map { it.id }.toSet()
         return list.filter { widget ->
@@ -558,6 +554,40 @@ constructor(
                 is CommunalWidgetContentModel.Pending -> true
             }
         }
+    }
+
+    // Dynamically resizes the height of items in the list of ongoing items such that they fit in
+    // columns in as compact a space as possible.
+    //
+    // Currently there are three possible sizes. When the total number is 1, size for that  content
+    // is [FULL], when the total number is 2, size for each is [HALF], and 3, size for  each is
+    // [THIRD].
+    //
+    // This algorithm also respects each item's minimum size. All items in a column will have the
+    // same size, and all items in a column will be no smaller than any item's minimum size.
+    private fun List<CommunalContentModel.Ongoing>.resizeItems() {
+        fun resizeColumn(c: List<CommunalContentModel.Ongoing>) {
+            if (c.isEmpty()) return
+            val newSize = CommunalContentSize.toSize(span = FULL.span / c.size)
+            c.forEach { item -> item.size = newSize }
+        }
+
+        val column = mutableListOf<CommunalContentModel.Ongoing>()
+        var available = FULL.span
+
+        forEach { item ->
+            if (available < item.minSize.span) {
+                resizeColumn(column)
+                column.clear()
+                available = FULL.span
+            }
+
+            column.add(item)
+            available -= item.minSize.span
+        }
+
+        // Make sure to resize the final column.
+        resizeColumn(column)
     }
 
     companion object {
@@ -574,31 +604,6 @@ constructor(
          * of -1 means that the user's chosen screen timeout will be used instead.
          */
         const val AWAKE_INTERVAL_MS = -1
-
-        /**
-         * Calculates the content size dynamically based on the total number of contents of that
-         * type.
-         *
-         * Contents with the same type are expected to fill each column evenly. Currently there are
-         * three possible sizes. When the total number is 1, size for that content is [FULL], when
-         * the total number is 2, size for each is [HALF], and 3, size for each is [THIRD].
-         *
-         * When dynamic contents fill in multiple columns, the first column follows the algorithm
-         * above, and the remaining contents are packed in [THIRD]s. For example, when the total
-         * number if 4, the first one is [FULL], filling the column, and the remaining 3 are
-         * [THIRD].
-         *
-         * @param size The total number of contents of this type.
-         * @param index The index of the current content of this type.
-         */
-        private fun dynamicContentSize(size: Int, index: Int): CommunalContentSize {
-            val remainder = size % CommunalContentSize.entries.size
-            return CommunalContentSize.toSize(
-                span =
-                    FULL.span /
-                        if (index > remainder - 1) CommunalContentSize.entries.size else remainder
-            )
-        }
     }
 
     /**

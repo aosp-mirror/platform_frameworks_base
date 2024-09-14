@@ -11,3 +11,4 @@ per-file BLASTBufferQueue.java = file:/services/core/java/com/android/server/wm/
 per-file FontFamily.java = file:fonts/OWNERS
 per-file FontListParser.java = file:fonts/OWNERS
 per-file Typeface.java = file:fonts/OWNERS
+per-file Paint.java = file:fonts/OWNERS

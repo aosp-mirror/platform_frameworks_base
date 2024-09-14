@@ -21,6 +21,7 @@ import androidx.compose.runtime.Immutable
 import com.android.systemui.qs.panels.shared.model.SizedTile
 import com.android.systemui.qs.panels.shared.model.splitInRowsSequence
 import com.android.systemui.qs.panels.ui.viewmodel.EditTileViewModel
+import com.android.systemui.qs.shared.model.CategoryAndName
 
 /** Represents an item from a grid associated with a row and a span */
 interface GridCell {
@@ -38,7 +39,7 @@ data class TileGridCell(
     override val row: Int,
     override val width: Int,
     override val span: GridItemSpan = GridItemSpan(width)
-) : GridCell, SizedTile<EditTileViewModel> {
+) : GridCell, SizedTile<EditTileViewModel>, CategoryAndName by tile {
     val key: String = "${tile.tileSpec.spec}-$row"
 
     constructor(

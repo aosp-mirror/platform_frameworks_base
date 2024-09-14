@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringDef;
@@ -551,11 +552,19 @@ public class IpcDataCache<Query, Result> extends PropertyInvalidatedCache<Query,
     }
 
     /**
-     * An interface suitable for a lambda expression instead of a QueryHandler.
+     * An interface suitable for a lambda expression instead of a QueryHandler applying remote call.
      * @hide
      */
     public interface RemoteCall<Query, Result> {
         Result apply(Query query) throws RemoteException;
+    }
+
+    /**
+     * An interface suitable for a lambda expression instead of a QueryHandler bypassing the cache.
+     * @hide
+     */
+    public interface BypassCall<Query> {
+        Boolean apply(Query query);
     }
 
     /**
@@ -580,11 +589,54 @@ public class IpcDataCache<Query, Result> extends PropertyInvalidatedCache<Query,
         }
     }
 
+
     /**
      * Create a cache using a config and a lambda expression.
+     * @param config The configuration for the cache.
+     * @param remoteCall The lambda expression that will be invoked to fetch the data.
      * @hide
      */
-    public IpcDataCache(@NonNull Config config, @NonNull RemoteCall<Query, Result> computer) {
-        this(config, new SystemServerCallHandler<>(computer));
+    public IpcDataCache(@NonNull Config config, @NonNull RemoteCall<Query, Result> remoteCall) {
+      this(config, android.multiuser.Flags.cachingDevelopmentImprovements() ?
+        new QueryHandler<Query, Result>() {
+            @Override
+            public Result apply(Query query) {
+                try {
+                    return remoteCall.apply(query);
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
+            }
+        } : new SystemServerCallHandler<>(remoteCall));
+    }
+
+
+    /**
+     * Create a cache using a config and a lambda expression.
+     * @param config The configuration for the cache.
+     * @param remoteCall The lambda expression that will be invoked to fetch the data.
+     * @param bypass The lambda expression that will be invoked to determine if the cache should be
+     *     bypassed.
+     * @hide
+     */
+    @FlaggedApi(android.multiuser.Flags.FLAG_CACHING_DEVELOPMENT_IMPROVEMENTS)
+    public IpcDataCache(@NonNull Config config,
+            @NonNull RemoteCall<Query, Result> remoteCall,
+            @NonNull BypassCall<Query> bypass) {
+        this(config, new QueryHandler<Query, Result>() {
+            @Override
+            public Result apply(Query query) {
+                try {
+                    return remoteCall.apply(query);
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
+            }
+
+            @Override
+            public boolean shouldBypassCache(Query query) {
+                return bypass.apply(query);
+            }
+        });
     }
 }

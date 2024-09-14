@@ -18,6 +18,7 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
@@ -27,6 +28,7 @@ import com.android.compose.animation.scene.Swipe
 import com.android.compose.animation.scene.SwipeDirection
 import com.android.compose.animation.scene.TransitionKey
 import com.android.compose.animation.scene.UserActionResult
+import com.android.compose.animation.scene.UserActionResult.ShowOverlay
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.repository.fakeAuthenticationRepository
@@ -42,8 +44,10 @@ import com.android.systemui.lifecycle.activateIn
 import com.android.systemui.power.data.repository.fakePowerRepository
 import com.android.systemui.power.shared.model.WakefulnessState
 import com.android.systemui.scene.domain.interactor.sceneInteractor
+import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.TransitionKeys
+import com.android.systemui.scene.ui.viewmodel.SceneContainerEdge
 import com.android.systemui.shade.data.repository.shadeRepository
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.testKosmos
@@ -111,12 +115,12 @@ class LockscreenUserActionsViewModelTest : SysuiTestCase() {
 
         private fun expectedDownDestination(
             downFromEdge: Boolean,
-            isSingleShade: Boolean,
+            isNarrowScreen: Boolean,
             isShadeTouchable: Boolean,
         ): SceneKey? {
             return when {
                 !isShadeTouchable -> null
-                downFromEdge && isSingleShade -> Scenes.QuickSettings
+                downFromEdge && isNarrowScreen -> Scenes.QuickSettings
                 else -> Scenes.Shade
             }
         }
@@ -162,7 +166,7 @@ class LockscreenUserActionsViewModelTest : SysuiTestCase() {
     @JvmField @Parameter(0) var canSwipeToEnter: Boolean = false
     @JvmField @Parameter(1) var downWithTwoPointers: Boolean = false
     @JvmField @Parameter(2) var downFromEdge: Boolean = false
-    @JvmField @Parameter(3) var isSingleShade: Boolean = true
+    @JvmField @Parameter(3) var isNarrowScreen: Boolean = true
     @JvmField @Parameter(4) var isCommunalAvailable: Boolean = false
     @JvmField @Parameter(5) var isShadeTouchable: Boolean = false
 
@@ -170,7 +174,8 @@ class LockscreenUserActionsViewModelTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(Flags.FLAG_COMMUNAL_HUB)
-    fun userActions() =
+    @DisableFlags(Flags.FLAG_DUAL_SHADE)
+    fun userActions_fullscreenShade() =
         testScope.runTest {
             underTest.activateIn(this)
             kosmos.fakeDeviceEntryRepository.setLockscreenEnabled(true)
@@ -182,7 +187,7 @@ class LockscreenUserActionsViewModelTest : SysuiTestCase() {
                 }
             )
             sceneInteractor.changeScene(Scenes.Lockscreen, "reason")
-            kosmos.shadeRepository.setShadeLayoutWide(!isSingleShade)
+            kosmos.shadeRepository.setShadeLayoutWide(!isNarrowScreen)
             kosmos.setCommunalAvailable(isCommunalAvailable)
             kosmos.fakePowerRepository.updateWakefulness(
                 rawState =
@@ -190,7 +195,7 @@ class LockscreenUserActionsViewModelTest : SysuiTestCase() {
                         WakefulnessState.AWAKE
                     } else {
                         WakefulnessState.ASLEEP
-                    },
+                    }
             )
 
             val userActions by collectLastValue(underTest.actions)
@@ -212,7 +217,7 @@ class LockscreenUserActionsViewModelTest : SysuiTestCase() {
                 .isEqualTo(
                     expectedDownDestination(
                         downFromEdge = downFromEdge,
-                        isSingleShade = isSingleShade,
+                        isNarrowScreen = isNarrowScreen,
                         isShadeTouchable = isShadeTouchable,
                     )
                 )
@@ -220,10 +225,105 @@ class LockscreenUserActionsViewModelTest : SysuiTestCase() {
             assertThat(downDestination?.transitionKey)
                 .isEqualTo(
                     expectedDownTransitionKey(
-                        isSingleShade = isSingleShade,
+                        isSingleShade = isNarrowScreen,
                         isShadeTouchable = isShadeTouchable,
                     )
                 )
+
+            val upScene by
+                collectLastValue(
+                    (userActions?.get(Swipe.Up) as? UserActionResult.ChangeScene)?.toScene?.let {
+                        scene ->
+                        kosmos.sceneInteractor.resolveSceneFamily(scene)
+                    } ?: flowOf(null)
+                )
+
+            assertThat(upScene)
+                .isEqualTo(
+                    expectedUpDestination(
+                        canSwipeToEnter = canSwipeToEnter,
+                        isShadeTouchable = isShadeTouchable,
+                    )
+                )
+
+            val leftScene by
+                collectLastValue(
+                    (userActions?.get(Swipe.Left) as? UserActionResult.ChangeScene)?.toScene?.let {
+                        scene ->
+                        kosmos.sceneInteractor.resolveSceneFamily(scene)
+                    } ?: flowOf(null)
+                )
+
+            assertThat(leftScene)
+                .isEqualTo(
+                    expectedLeftDestination(
+                        isCommunalAvailable = isCommunalAvailable,
+                        isShadeTouchable = isShadeTouchable,
+                    )
+                )
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_COMMUNAL_HUB, Flags.FLAG_DUAL_SHADE)
+    fun userActions_dualShade() =
+        testScope.runTest {
+            underTest.activateIn(this)
+            kosmos.fakeDeviceEntryRepository.setLockscreenEnabled(true)
+            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
+                if (canSwipeToEnter) {
+                    AuthenticationMethodModel.None
+                } else {
+                    AuthenticationMethodModel.Pin
+                }
+            )
+            sceneInteractor.changeScene(Scenes.Lockscreen, "reason")
+            kosmos.shadeRepository.setShadeLayoutWide(!isNarrowScreen)
+            kosmos.setCommunalAvailable(isCommunalAvailable)
+            kosmos.fakePowerRepository.updateWakefulness(
+                rawState =
+                    if (isShadeTouchable) {
+                        WakefulnessState.AWAKE
+                    } else {
+                        WakefulnessState.ASLEEP
+                    }
+            )
+
+            val userActions by collectLastValue(underTest.actions)
+
+            val downDestination =
+                userActions?.get(
+                    Swipe(
+                        SwipeDirection.Down,
+                        fromSource = Edge.Top.takeIf { downFromEdge },
+                        pointerCount = if (downWithTwoPointers) 2 else 1,
+                    )
+                )
+
+            if (downFromEdge || downWithTwoPointers || !isShadeTouchable) {
+                // Top edge is not applicable in dual shade, as well as two-finger swipe.
+                assertThat(downDestination).isNull()
+            } else {
+                assertThat(downDestination).isEqualTo(ShowOverlay(Overlays.NotificationsShade))
+                assertThat(downDestination?.transitionKey).isNull()
+            }
+
+            val downFromTopRightDestination =
+                userActions?.get(
+                    Swipe(
+                        SwipeDirection.Down,
+                        fromSource = SceneContainerEdge.TopRight,
+                        pointerCount = if (downWithTwoPointers) 2 else 1,
+                    )
+                )
+            when {
+                !isShadeTouchable -> assertThat(downFromTopRightDestination).isNull()
+                downWithTwoPointers -> assertThat(downFromTopRightDestination).isNull()
+                else -> {
+                    assertThat(downFromTopRightDestination)
+                        .isEqualTo(ShowOverlay(Overlays.QuickSettingsShade))
+                    assertThat(downFromTopRightDestination?.transitionKey).isNull()
+                }
+            }
 
             val upScene by
                 collectLastValue(

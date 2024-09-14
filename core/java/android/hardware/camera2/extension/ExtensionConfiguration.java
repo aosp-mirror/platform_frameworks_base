@@ -83,7 +83,6 @@ public class ExtensionConfiguration {
      * The default will be -1, indicating an unspecified ColorSpace,
      * unless explicitly set using this method.
      */
-    @FlaggedApi(Flags.FLAG_EXTENSION_10_BIT)
     public void setColorSpace(int colorSpace) {
         mColorSpace = colorSpace;
     }
@@ -98,11 +97,7 @@ public class ExtensionConfiguration {
         ret.sessionTemplateId = mSessionTemplateId;
         ret.sessionType = mSessionType;
         ret.outputConfigs = new ArrayList<>(mOutputs.size());
-        if (Flags.extension10Bit()) {
-            ret.colorSpace = mColorSpace;
-        } else {
-            ret.colorSpace = ColorSpaceProfiles.UNSPECIFIED;
-        }
+        ret.colorSpace = mColorSpace;
         for (ExtensionOutputConfiguration outputConfig : mOutputs) {
             ret.outputConfigs.add(outputConfig.getOutputConfig());
         }

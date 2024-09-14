@@ -33,7 +33,7 @@ interface IHintManager {
      * if creation is supported but fails.
      */
     IHintSession createHintSessionWithConfig(in IBinder token, in int[] threadIds,
-            in long durationNanos, in SessionTag tag, out @nullable SessionConfig config);
+            in long durationNanos, in SessionTag tag, out SessionConfig config);
 
     /**
      * Get preferred rate limit in nanoseconds.
@@ -48,6 +48,6 @@ interface IHintManager {
      *
      * Throws IllegalStateException if FMQ channel creation fails.
      */
-    ChannelConfig getSessionChannel(in IBinder token);
+    @nullable ChannelConfig getSessionChannel(in IBinder token);
     oneway void closeSessionChannel();
 }

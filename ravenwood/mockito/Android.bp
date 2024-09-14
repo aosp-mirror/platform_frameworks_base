@@ -21,9 +21,9 @@ android_ravenwood_test {
         "truth",
     ],
     libs: [
-        "android.test.mock",
-        "android.test.base",
-        "android.test.runner",
+        "android.test.mock.stubs.system",
+        "android.test.base.stubs.system",
+        "android.test.runner.stubs.system",
     ],
     auto_gen_config: true,
 }
@@ -48,9 +48,9 @@ android_test {
         "mockito-target-extended-minus-junit4",
     ],
     libs: [
-        "android.test.mock",
-        "android.test.base",
-        "android.test.runner",
+        "android.test.mock.stubs.system",
+        "android.test.base.stubs.system",
+        "android.test.runner.stubs.system",
     ],
     jni_libs: [
         // Required by mockito

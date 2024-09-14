@@ -127,7 +127,7 @@ class Ravenizer(val options: RavenizerOptions) {
             }
         }
 
-        stats.totalProcessTime = log.iTime("$executableName processing $inJar") {
+        stats.totalProcessTime = log.vTime("$executableName processing $inJar") {
             ZipFile(inJar).use { inZip ->
                 val inEntries = inZip.entries()
 

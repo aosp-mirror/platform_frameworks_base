@@ -105,6 +105,8 @@
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Thêm vào ghi chú"</string>
     <string name="backlinks_include_link" msgid="4562093591148248158">"Thêm đường liên kết"</string>
     <string name="backlinks_duplicate_label_format" msgid="558445128952827926">"<xliff:g id="APPNAME">%1$s</xliff:g> <xliff:g id="FREQUENCYCOUNT">(%2$d)</xliff:g>"</string>
+    <!-- no translation found for backlinks_cross_profile_error (1355798585727802282) -->
+    <skip />
     <string name="screenrecord_title" msgid="4257171601439507792">"Trình ghi màn hình"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Đang xử lý video ghi màn hình"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Thông báo đang diễn ra về phiên ghi màn hình"</string>
@@ -292,8 +294,7 @@
     <string name="start_dreams" msgid="9131802557946276718">"Trình bảo vệ m.hình"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Không làm phiền"</string>
-    <!-- no translation found for quick_settings_modes_label (879156359479504244) -->
-    <skip />
+    <string name="quick_settings_modes_label" msgid="879156359479504244">"Chế độ"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Không có thiết bị nào được ghép nối"</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"Nhấn để kết nối/ngắt kết nối với một thiết bị"</string>
@@ -434,8 +435,7 @@
     <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"Mở phần Cài đặt"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Thiết bị khác"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Bật/tắt chế độ xem Tổng quan"</string>
-    <!-- no translation found for zen_modes_dialog_title (8854640808100096934) -->
-    <skip />
+    <string name="zen_modes_dialog_title" msgid="8854640808100096934">"Chế độ"</string>
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"Xong"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"Cài đặt"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"Đang bật"</string>
@@ -1393,18 +1393,12 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Biểu tượng Thu gọn"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Biểu tượng Mở rộng"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"hoặc"</string>
-    <!-- no translation found for launch_keyboard_tutorial_notification_title (8849933155160522519) -->
-    <skip />
-    <!-- no translation found for launch_keyboard_tutorial_notification_content (2880339951512757918) -->
-    <skip />
-    <!-- no translation found for launch_touchpad_tutorial_notification_title (2243780062772196901) -->
-    <skip />
-    <!-- no translation found for launch_touchpad_tutorial_notification_content (7931085031240753226) -->
-    <skip />
-    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_title (1940023776496198762) -->
-    <skip />
-    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_content (1780725168171929365) -->
-    <skip />
+    <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Di chuyển bằng bàn phím"</string>
+    <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Tìm hiểu về phím tắt"</string>
+    <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Di chuyển bằng bàn di chuột"</string>
+    <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"Tìm hiểu về cử chỉ trên bàn di chuột"</string>
+    <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"Di chuyển bằng bàn phím và bàn di chuột"</string>
+    <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"Tìm hiểu về cử chỉ trên bàn di chuột, phím tắt và nhiều mục khác"</string>
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Cử chỉ quay lại"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Cử chỉ chuyển đến màn hình chính"</string>
     <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"Phím hành động"</string>
@@ -1444,4 +1438,18 @@
     <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="7513137763024327538">"Giờ đây, bạn có thể đặt màn hình ở chế độ siêu tối bằng cách giảm thêm độ sáng từ đầu màn hình.\n\nChế độ này hoạt động hiệu quả nhất khi bạn ở trong một môi trường tối."</string>
     <string name="accessibility_deprecate_extra_dim_dialog_button" msgid="1782147201534669800">"Xoá lối tắt của chế độ siêu tối"</string>
     <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="4070696910424515757">"Đã xoá lối tắt của chế độ siêu tối. Để giảm độ sáng, hãy dùng thanh độ sáng như thông thường."</string>
+    <!-- no translation found for qs_edit_mode_category_connectivity (4559726936546032672) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_accessibility (7969091385071475922) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_utilities (8123080090108420095) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_privacy (6577774443194551775) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_providedByApps (8346112074897919019) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_display (4749511439121053942) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_unknown (509314252124053550) -->
+    <skip />
 </resources>

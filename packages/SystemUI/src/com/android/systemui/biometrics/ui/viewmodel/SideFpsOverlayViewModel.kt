@@ -147,8 +147,7 @@ constructor(
             _lottieBounds,
             sensorLocation,
             displayRotation,
-        ) { bounds: Rect?, sensorLocation: SideFpsSensorLocation, displayRotation: DisplayRotation
-            ->
+        ) { _: Rect?, sensorLocation: SideFpsSensorLocation, _: DisplayRotation ->
             val topLeft = Point(sensorLocation.left, sensorLocation.top)
 
             defaultOverlayViewParams.apply {

@@ -1094,7 +1094,7 @@ abstract public class ManagedServices {
             return info;
         }
         throw new SecurityException("Disallowed call from unknown " + getCaption() + ": "
-                + service + " " + service.getClass());
+                + service.asBinder() + " " + service.getClass());
     }
 
     public boolean isSameUser(IInterface service, int userId) {
@@ -1585,6 +1585,9 @@ abstract public class ManagedServices {
         // after the rebind delay
         if (isPackageOrComponentAllowedWithPermission(cn, userId)) {
             registerService(cn, userId);
+        } else {
+            if (DEBUG) Slog.v(TAG, "skipped reregisterService cn=" + cn + " u=" + userId
+                    + " because of isPackageOrComponentAllowedWithPermission check");
         }
     }
 
@@ -1918,6 +1921,7 @@ abstract public class ManagedServices {
                     .append(",targetSdkVersion=").append(targetSdkVersion)
                     .append(",connection=").append(connection == null ? null : "<connection>")
                     .append(",service=").append(service)
+                    .append(",serviceAsBinder=").append(service != null ? service.asBinder() : null)
                     .append(']').toString();
         }
 
@@ -1956,7 +1960,7 @@ abstract public class ManagedServices {
 
         @Override
         public void binderDied() {
-            if (DEBUG) Slog.d(TAG, "binderDied");
+            if (DEBUG) Slog.d(TAG, "binderDied " + this);
             // Remove the service, but don't unbind from the service. The system will bring the
             // service back up, and the onServiceConnected handler will read the service with the
             // new binding. If this isn't a bound service, and is just a registered

@@ -25,7 +25,6 @@ import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_UP;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 
-import static com.android.internal.accessibility.common.ShortcutConstants.CHOOSER_PACKAGE_NAME;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SYSUI_PROXY;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_UNFOLD_ANIMATION_FORWARDER;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_UNLOCK_ANIMATION_CONTROLLER;
@@ -76,7 +75,6 @@ import android.view.inputmethod.InputMethodManager;
 
 import androidx.annotation.NonNull;
 
-import com.android.internal.accessibility.dialog.AccessibilityButtonChooserActivity;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.AssistUtils;
 import com.android.internal.app.IVoiceInteractionSessionListener;
@@ -103,10 +101,10 @@ import com.android.systemui.navigationbar.views.buttons.KeyButtonView;
 import com.android.systemui.recents.OverviewProxyService.OverviewProxyListener;
 import com.android.systemui.scene.domain.interactor.SceneInteractor;
 import com.android.systemui.scene.shared.flag.SceneContainerFlag;
-import com.android.systemui.scene.shared.model.SceneFamilies;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.ShadeViewController;
+import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.shared.recents.IOverviewProxy;
 import com.android.systemui.shared.recents.ISystemUiProxy;
 import com.android.systemui.shared.system.QuickStepContract;
@@ -160,6 +158,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private final ScreenPinningRequest mScreenPinningRequest;
     private final NotificationShadeWindowController mStatusBarWinController;
     private final Provider<SceneInteractor> mSceneInteractor;
+    private final Provider<ShadeInteractor> mShadeInteractor;
 
     private final KeyboardTouchpadEduStatsInteractor mKeyboardTouchpadEduStatsInteractor;
 
@@ -248,11 +247,8 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                             }
                         } else if (action == ACTION_UP) {
                             // Gesture was too short to be picked up by scene container touch
-                            // handling; programmatically start the transition to shade scene.
-                            mSceneInteractor.get().changeScene(
-                                    SceneFamilies.NotifShade,
-                                    "short launcher swipe"
-                            );
+                            // handling; programmatically start the transition to the shade.
+                            mShadeInteractor.get().expandNotificationShade("short launcher swipe");
                         }
                     }
                     event.recycle();
@@ -269,10 +265,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                         mSceneInteractor.get().onRemoteUserInputStarted(
                                 "trackpad swipe");
                     } else if (action == ACTION_UP) {
-                        mSceneInteractor.get().changeScene(
-                                SceneFamilies.NotifShade,
-                                "short trackpad swipe"
-                        );
+                        mShadeInteractor.get().expandNotificationShade("short trackpad swipe");
                     }
                     mStatusBarWinController.getWindowRootView().dispatchTouchEvent(event);
                 } else {
@@ -404,23 +397,16 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         @Override
         public void notifyAccessibilityButtonClicked(int displayId) {
             verifyCallerAndClearCallingIdentity("notifyAccessibilityButtonClicked", () ->
-                    AccessibilityManager.getInstance(mContext)
-                            .notifyAccessibilityButtonClicked(displayId));
+                    AccessibilityManager.getInstance(mContext).notifyAccessibilityButtonClicked(
+                            displayId));
         }
 
         @Override
         public void notifyAccessibilityButtonLongClicked() {
-            verifyCallerAndClearCallingIdentity("notifyAccessibilityButtonLongClicked",
-                    () -> {
-                        final Intent intent =
-                                new Intent(AccessibilityManager.ACTION_CHOOSE_ACCESSIBILITY_BUTTON);
-                        final String chooserClassName = AccessibilityButtonChooserActivity
-                                .class.getName();
-                        intent.setClassName(CHOOSER_PACKAGE_NAME, chooserClassName);
-                        intent.addFlags(
-                                Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        mContext.startActivityAsUser(intent, mUserTracker.getUserHandle());
-                    });
+            verifyCallerAndClearCallingIdentity("notifyAccessibilityButtonLongClicked", () ->
+                    AccessibilityManager.getInstance(mContext)
+                            .notifyAccessibilityButtonLongClicked(
+                                    mDisplayTracker.getDefaultDisplayId()));
         }
 
         @Override
@@ -661,6 +647,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             NotificationShadeWindowController statusBarWinController,
             SysUiState sysUiState,
             Provider<SceneInteractor> sceneInteractor,
+            Provider<ShadeInteractor> shadeInteractor,
             UserTracker userTracker,
             UserManager userManager,
             WakefulnessLifecycle wakefulnessLifecycle,
@@ -697,6 +684,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         mScreenPinningRequest = screenPinningRequest;
         mStatusBarWinController = statusBarWinController;
         mSceneInteractor = sceneInteractor;
+        mShadeInteractor = shadeInteractor;
         mUserTracker = userTracker;
         mConnectionBackoffAttempts = 0;
         mRecentsComponentName = ComponentName.unflattenFromString(context.getString(

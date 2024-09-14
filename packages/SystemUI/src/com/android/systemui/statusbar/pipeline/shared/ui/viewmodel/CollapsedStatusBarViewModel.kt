@@ -27,6 +27,7 @@ import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.scene.domain.interactor.SceneContainerOcclusionInteractor
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.statusbar.chips.ui.model.MultipleOngoingActivityChipsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipsViewModel
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
@@ -71,6 +72,12 @@ interface CollapsedStatusBarViewModel {
     val primaryOngoingActivityChip: StateFlow<OngoingActivityChipModel>
 
     /**
+     * The multiple ongoing activity chips that should be shown on the left-hand side of the status
+     * bar.
+     */
+    val ongoingActivityChips: StateFlow<MultipleOngoingActivityChipsModel>
+
+    /**
      * True if the current scene can show the home status bar (aka this status bar), and false if
      * the current scene should never show the home status bar.
      */
@@ -112,6 +119,8 @@ constructor(
             .map {}
 
     override val primaryOngoingActivityChip = ongoingActivityChipsViewModel.primaryChip
+
+    override val ongoingActivityChips = ongoingActivityChipsViewModel.chips
 
     override val isHomeStatusBarAllowedByScene: StateFlow<Boolean> =
         combine(

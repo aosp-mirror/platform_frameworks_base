@@ -144,6 +144,13 @@ flag {
 }
 
 flag {
+  name: "universal_resizable_by_default"
+  namespace: "windowing_frontend"
+  description: "The orientation, aspect ratio, resizability of activity will follow system behavior by default"
+  bug: "357141415"
+}
+
+flag {
   name: "respect_non_top_visible_fixed_orientation"
   namespace: "windowing_frontend"
   description: "If top activity is not opaque, respect the fixed orientation of activity behind it"
@@ -174,6 +181,17 @@ flag {
   namespace: "windowing_frontend"
   description: "Only use the task's dim and reparent it to the display area when needed instead of coordinating multiple dimmers"
   bug: "352522056"
+  is_fixed_read_only: true
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "update_dims_when_window_shown"
+  namespace: "windowing_frontend"
+  description: "Check if we need to update dim layers when a new window draws the first frame"
+  bug: "327332488"
   is_fixed_read_only: true
   metadata {
     purpose: PURPOSE_BUGFIX

@@ -16,13 +16,17 @@
 
 package com.android.server.input.debug;
 
+import static android.util.TypedValue.COMPLEX_UNIT_DIP;
+
 import android.annotation.NonNull;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.hardware.input.InputManager;
 import android.util.Slog;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
@@ -30,9 +34,20 @@ import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.android.server.input.TouchpadFingerState;
+import com.android.server.input.TouchpadHardwareProperties;
+import com.android.server.input.TouchpadHardwareState;
+
 import java.util.Objects;
 
 public class TouchpadDebugView extends LinearLayout {
+    private static final float MAX_SCREEN_WIDTH_PROPORTION = 0.4f;
+    private static final float MAX_SCREEN_HEIGHT_PROPORTION = 0.4f;
+    private static final float MIN_SCALE_FACTOR = 10f;
+    private static final float TEXT_SIZE_SP = 16.0f;
+    private static final float DEFAULT_RES_X = 47f;
+    private static final float DEFAULT_RES_Y = 45f;
+
     /**
      * Input device ID for the touchpad that this debug view is displaying.
      */
@@ -52,16 +67,23 @@ public class TouchpadDebugView extends LinearLayout {
     private int mScreenHeight;
     private int mWindowLocationBeforeDragX;
     private int mWindowLocationBeforeDragY;
+    @NonNull
+    private TouchpadHardwareState mLastTouchpadState =
+            new TouchpadHardwareState(0, 0 /* buttonsDown */, 0, 0,
+                    new TouchpadFingerState[0]);
+    private TouchpadVisualizationView mTouchpadVisualizationView;
+    private final TouchpadHardwareProperties mTouchpadHardwareProperties;
 
-    public TouchpadDebugView(Context context, int touchpadId) {
+    public TouchpadDebugView(Context context, int touchpadId,
+            TouchpadHardwareProperties touchpadHardwareProperties) {
         super(context);
         mTouchpadId = touchpadId;
         mWindowManager =
                 Objects.requireNonNull(getContext().getSystemService(WindowManager.class));
-        init(context);
+        mTouchpadHardwareProperties = touchpadHardwareProperties;
+        init(context, touchpadId);
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
 
-        // TODO(b/360137366): Use the hardware properties to initialise layout parameters.
         mWindowLayoutParams = new WindowManager.LayoutParams();
         mWindowLayoutParams.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
         mWindowLayoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
@@ -81,34 +103,44 @@ public class TouchpadDebugView extends LinearLayout {
         mWindowLayoutParams.gravity = Gravity.TOP | Gravity.LEFT;
     }
 
-    private void init(Context context) {
+    private void init(Context context, int touchpadId) {
+        updateScreenDimensions();
         setOrientation(VERTICAL);
-        setLayoutParams(new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT));
+        setLayoutParams(new LayoutParams(
+                LayoutParams.WRAP_CONTENT,
+                LayoutParams.WRAP_CONTENT));
         setBackgroundColor(Color.TRANSPARENT);
 
-        // TODO(b/286551975): Replace this content with the touchpad debug view.
-        TextView textView1 = new TextView(context);
-        textView1.setBackgroundColor(Color.parseColor("#FFFF0000"));
-        textView1.setTextSize(20);
-        textView1.setText("Touchpad Debug View 1");
-        textView1.setGravity(Gravity.CENTER);
-        textView1.setTextColor(Color.WHITE);
-        textView1.setLayoutParams(new LayoutParams(1000, 200));
+        TextView nameView = new TextView(context);
+        nameView.setBackgroundColor(Color.RED);
+        nameView.setTextSize(TEXT_SIZE_SP);
+        nameView.setText(Objects.requireNonNull(Objects.requireNonNull(
+                        mContext.getSystemService(InputManager.class))
+                .getInputDevice(touchpadId)).getName());
+        nameView.setGravity(Gravity.CENTER);
+        nameView.setTextColor(Color.WHITE);
+        nameView.setLayoutParams(
+                new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 
-        TextView textView2 = new TextView(context);
-        textView2.setBackgroundColor(Color.BLUE);
-        textView2.setTextSize(20);
-        textView2.setText("Touchpad Debug View 2");
-        textView2.setGravity(Gravity.CENTER);
-        textView2.setTextColor(Color.WHITE);
-        textView2.setLayoutParams(new LayoutParams(1000, 200));
+        mTouchpadVisualizationView = new TouchpadVisualizationView(context,
+                mTouchpadHardwareProperties);
+        mTouchpadVisualizationView.setBackgroundColor(Color.WHITE);
 
-        addView(textView1);
-        addView(textView2);
+        //TODO(b/365562952): Add a display for recognized gesture info here
+        TextView gestureInfoView = new TextView(context);
+        gestureInfoView.setBackgroundColor(Color.GRAY);
+        gestureInfoView.setTextSize(TEXT_SIZE_SP);
+        gestureInfoView.setText("Touchpad Debug View 3");
+        gestureInfoView.setGravity(Gravity.CENTER);
+        gestureInfoView.setTextColor(Color.BLACK);
+        gestureInfoView.setLayoutParams(
+                new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 
-        updateScreenDimensions();
+        addView(nameView);
+        addView(mTouchpadVisualizationView);
+        addView(gestureInfoView);
+
+        updateViewsDimensions();
     }
 
     @Override
@@ -126,18 +158,13 @@ public class TouchpadDebugView extends LinearLayout {
             case MotionEvent.ACTION_MOVE:
                 deltaX = event.getRawX() - mWindowLayoutParams.x - mTouchDownX;
                 deltaY = event.getRawY() - mWindowLayoutParams.y - mTouchDownY;
-                Slog.d("TouchpadDebugView", "Slop = " + mTouchSlop);
                 if (isSlopExceeded(deltaX, deltaY)) {
-                    Slog.d("TouchpadDebugView", "Slop exceeded");
                     mWindowLayoutParams.x =
                             Math.max(0, Math.min((int) (event.getRawX() - mTouchDownX),
                                     mScreenWidth - this.getWidth()));
                     mWindowLayoutParams.y =
                             Math.max(0, Math.min((int) (event.getRawY() - mTouchDownY),
                                     mScreenHeight - this.getHeight()));
-
-                    Slog.d("TouchpadDebugView", "New position X: "
-                            + mWindowLayoutParams.x + ", Y: " + mWindowLayoutParams.y);
 
                     mWindowManager.updateViewLayout(this, mWindowLayoutParams);
                 }
@@ -166,7 +193,7 @@ public class TouchpadDebugView extends LinearLayout {
     @Override
     public boolean performClick() {
         super.performClick();
-        Slog.d("TouchpadDebugView", "You clicked me!");
+        Slog.d("TouchpadDebugView", "You tapped the window!");
         return true;
     }
 
@@ -174,6 +201,7 @@ public class TouchpadDebugView extends LinearLayout {
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         updateScreenDimensions();
+        updateViewsDimensions();
 
         // Adjust view position to stay within screen bounds after rotation
         mWindowLayoutParams.x =
@@ -185,6 +213,41 @@ public class TouchpadDebugView extends LinearLayout {
 
     private boolean isSlopExceeded(float deltaX, float deltaY) {
         return deltaX * deltaX + deltaY * deltaY >= mTouchSlop * mTouchSlop;
+    }
+
+    private void updateViewsDimensions() {
+        float resX = mTouchpadHardwareProperties.getResX() == 0f ? DEFAULT_RES_X
+                : mTouchpadHardwareProperties.getResX();
+        float resY = mTouchpadHardwareProperties.getResY() == 0f ? DEFAULT_RES_Y
+                : mTouchpadHardwareProperties.getResY();
+
+        float touchpadHeightMm = Math.abs(
+                mTouchpadHardwareProperties.getBottom() - mTouchpadHardwareProperties.getTop())
+                / resY;
+        float touchpadWidthMm = Math.abs(
+                mTouchpadHardwareProperties.getLeft() - mTouchpadHardwareProperties.getRight())
+                / resX;
+
+        float maxViewWidthPx = mScreenWidth * MAX_SCREEN_WIDTH_PROPORTION;
+        float maxViewHeightPx = mScreenHeight * MAX_SCREEN_HEIGHT_PROPORTION;
+
+        float minScaleFactorPx = TypedValue.applyDimension(COMPLEX_UNIT_DIP, MIN_SCALE_FACTOR,
+                getResources().getDisplayMetrics());
+
+        float scaleFactorBasedOnWidth =
+                touchpadWidthMm * minScaleFactorPx > maxViewWidthPx ? maxViewWidthPx
+                        / touchpadWidthMm : minScaleFactorPx;
+        float scaleFactorBasedOnHeight =
+                touchpadHeightMm * minScaleFactorPx > maxViewHeightPx ? maxViewHeightPx
+                        / touchpadHeightMm : minScaleFactorPx;
+        float scaleFactorUsed = Math.min(scaleFactorBasedOnHeight, scaleFactorBasedOnWidth);
+
+        mTouchpadVisualizationView.setLayoutParams(
+                new LayoutParams((int) (touchpadWidthMm * scaleFactorUsed),
+                        (int) (touchpadHeightMm * scaleFactorUsed)));
+
+        mTouchpadVisualizationView.updateScaleFactor(scaleFactorUsed);
+        mTouchpadVisualizationView.invalidate();
     }
 
     private void updateScreenDimensions() {
@@ -200,5 +263,40 @@ public class TouchpadDebugView extends LinearLayout {
 
     public WindowManager.LayoutParams getWindowLayoutParams() {
         return mWindowLayoutParams;
+    }
+
+    /**
+     * Notify the view of a change in the hardware state of a touchpad. The view should
+     * update its content to reflect the new state.
+     *
+     * @param touchpadHardwareState the hardware state of a touchpad
+     * @param deviceId              the deviceId of the touchpad that is sending the hardware state
+     */
+    public void updateHardwareState(TouchpadHardwareState touchpadHardwareState, int deviceId) {
+        if (deviceId != mTouchpadId) {
+            return;
+        }
+
+        mTouchpadVisualizationView.onTouchpadHardwareStateNotified(touchpadHardwareState);
+        if (mLastTouchpadState.getButtonsDown() == 0) {
+            if (touchpadHardwareState.getButtonsDown() > 0) {
+                onTouchpadButtonPress();
+            }
+        } else {
+            if (touchpadHardwareState.getButtonsDown() == 0) {
+                onTouchpadButtonRelease();
+            }
+        }
+        mLastTouchpadState = touchpadHardwareState;
+    }
+
+    private void onTouchpadButtonPress() {
+        Slog.d("TouchpadDebugView", "You clicked me!");
+        getChildAt(0).setBackgroundColor(Color.BLUE);
+    }
+
+    private void onTouchpadButtonRelease() {
+        Slog.d("TouchpadDebugView", "You released the click");
+        getChildAt(0).setBackgroundColor(Color.RED);
     }
 }

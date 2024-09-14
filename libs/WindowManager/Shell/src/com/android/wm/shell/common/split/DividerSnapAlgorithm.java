@@ -235,7 +235,7 @@ public class DividerSnapAlgorithm {
 
     private SnapTarget snap(int position, boolean hardDismiss) {
         if (shouldApplyFreeSnapMode(position)) {
-            return new SnapTarget(position, position, SNAP_TO_NONE);
+            return new SnapTarget(position, SNAP_TO_NONE);
         }
         int minIndex = -1;
         float minDistance = Float.MAX_VALUE;
@@ -263,7 +263,7 @@ public class DividerSnapAlgorithm {
         if (dockedSide == DOCKED_RIGHT) {
             startPos += mInsets.left;
         }
-        mTargets.add(new SnapTarget(startPos, startPos, SNAP_TO_START_AND_DISMISS, 0.35f));
+        mTargets.add(new SnapTarget(startPos, SNAP_TO_START_AND_DISMISS, 0.35f));
         switch (mSnapMode) {
             case SNAP_MODE_16_9:
                 addRatio16_9Targets(isHorizontalDivision, dividerMax);
@@ -278,7 +278,7 @@ public class DividerSnapAlgorithm {
                 addMinimizedTarget(isHorizontalDivision, dockedSide);
                 break;
         }
-        mTargets.add(new SnapTarget(dividerMax, dividerMax, SNAP_TO_END_AND_DISMISS, 0.35f));
+        mTargets.add(new SnapTarget(dividerMax, SNAP_TO_END_AND_DISMISS, 0.35f));
     }
 
     private void addNonDismissingTargets(boolean isHorizontalDivision, int topPosition,
@@ -325,14 +325,14 @@ public class DividerSnapAlgorithm {
      */
     private void maybeAddTarget(int position, int smallerSize, @SnapPosition int snapPosition) {
         if (smallerSize >= mMinimalSizeResizableTask) {
-            mTargets.add(new SnapTarget(position, position, snapPosition));
+            mTargets.add(new SnapTarget(position, snapPosition));
         }
     }
 
     private void addMiddleTarget(boolean isHorizontalDivision) {
         int position = DockedDividerUtils.calculateMiddlePosition(isHorizontalDivision,
                 mInsets, mDisplayWidth, mDisplayHeight, mDividerSize);
-        mTargets.add(new SnapTarget(position, position, SNAP_TO_50_50));
+        mTargets.add(new SnapTarget(position, SNAP_TO_50_50));
     }
 
     private void addMinimizedTarget(boolean isHorizontalDivision, int dockedSide) {
@@ -346,7 +346,7 @@ public class DividerSnapAlgorithm {
                 position = mDisplayWidth - position - mInsets.right - mDividerSize;
             }
         }
-        mTargets.add(new SnapTarget(position, position, SNAP_TO_MINIMIZE));
+        mTargets.add(new SnapTarget(position, SNAP_TO_MINIMIZE));
     }
 
     public SnapTarget getMiddleTarget() {
@@ -377,20 +377,15 @@ public class DividerSnapAlgorithm {
     }
 
     /**
-     * Represents a snap target for the divider.
+     * An object, calculated at boot time, representing a legal position for the split screen
+     * divider (i.e. the divider can be dragged to this spot).
      */
     public static class SnapTarget {
         /** Position of this snap target. The right/bottom edge of the top/left task snaps here. */
         public final int position;
 
         /**
-         * Like {@link #position}, but used to calculate the task bounds which might be different
-         * from the stack bounds.
-         */
-        public final int taskPosition;
-
-        /**
-         * An int describing the placement of the divider in this snap target.
+         * An int (enum) describing the placement of the divider in this snap target.
          */
         public final @SnapPosition int snapPosition;
 
@@ -402,14 +397,13 @@ public class DividerSnapAlgorithm {
          */
         private final float distanceMultiplier;
 
-        public SnapTarget(int position, int taskPosition, @SnapPosition int snapPosition) {
-            this(position, taskPosition, snapPosition, 1f);
+        public SnapTarget(int position, @SnapPosition int snapPosition) {
+            this(position, snapPosition, 1f);
         }
 
-        public SnapTarget(int position, int taskPosition, @SnapPosition int snapPosition,
+        public SnapTarget(int position, @SnapPosition int snapPosition,
                 float distanceMultiplier) {
             this.position = position;
-            this.taskPosition = taskPosition;
             this.snapPosition = snapPosition;
             this.distanceMultiplier = distanceMultiplier;
         }

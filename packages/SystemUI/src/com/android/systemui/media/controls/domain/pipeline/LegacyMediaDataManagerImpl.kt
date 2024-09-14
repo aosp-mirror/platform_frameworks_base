@@ -70,6 +70,7 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.media.controls.domain.pipeline.MediaDataManager.Companion.isMediaNotification
 import com.android.systemui.media.controls.domain.resume.MediaResumeListener
 import com.android.systemui.media.controls.domain.resume.ResumeMediaBrowser
+import com.android.systemui.media.controls.shared.MediaLogger
 import com.android.systemui.media.controls.shared.model.EXTRA_KEY_TRIGGER_SOURCE
 import com.android.systemui.media.controls.shared.model.EXTRA_VALUE_TRIGGER_PERIODIC
 import com.android.systemui.media.controls.shared.model.MediaAction
@@ -84,7 +85,7 @@ import com.android.systemui.media.controls.util.MediaControllerFactory
 import com.android.systemui.media.controls.util.MediaDataUtils
 import com.android.systemui.media.controls.util.MediaFlags
 import com.android.systemui.media.controls.util.MediaUiEventLogger
-import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.media.controls.util.SmallHash
 import com.android.systemui.plugins.BcSmartspaceDataPlugin
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.NotificationMediaManager.isPlayingState
@@ -186,7 +187,6 @@ class LegacyMediaDataManagerImpl(
     private val mediaDeviceManager: MediaDeviceManager,
     mediaDataCombineLatest: MediaDataCombineLatest,
     private val mediaDataFilter: LegacyMediaDataFilterImpl,
-    private val activityStarter: ActivityStarter,
     private val smartspaceMediaDataProvider: SmartspaceMediaDataProvider,
     private var useMediaResumption: Boolean,
     private val useQsMediaPlayer: Boolean,
@@ -197,6 +197,7 @@ class LegacyMediaDataManagerImpl(
     private val smartspaceManager: SmartspaceManager?,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
     private val mediaDataLoader: dagger.Lazy<MediaDataLoader>,
+    private val mediaLogger: MediaLogger,
 ) : Dumpable, BcSmartspaceDataPlugin.SmartspaceTargetListener, MediaDataManager {
 
     companion object {
@@ -273,7 +274,6 @@ class LegacyMediaDataManagerImpl(
         mediaDeviceManager: MediaDeviceManager,
         mediaDataCombineLatest: MediaDataCombineLatest,
         mediaDataFilter: LegacyMediaDataFilterImpl,
-        activityStarter: ActivityStarter,
         smartspaceMediaDataProvider: SmartspaceMediaDataProvider,
         clock: SystemClock,
         tunerService: TunerService,
@@ -282,6 +282,7 @@ class LegacyMediaDataManagerImpl(
         smartspaceManager: SmartspaceManager?,
         keyguardUpdateMonitor: KeyguardUpdateMonitor,
         mediaDataLoader: dagger.Lazy<MediaDataLoader>,
+        mediaLogger: MediaLogger,
     ) : this(
         context,
         // Loading bitmap for UMO background can take longer time, so it cannot run on the default
@@ -301,7 +302,6 @@ class LegacyMediaDataManagerImpl(
         mediaDeviceManager,
         mediaDataCombineLatest,
         mediaDataFilter,
-        activityStarter,
         smartspaceMediaDataProvider,
         Utils.useMediaResumption(context),
         Utils.useQsMediaPlayer(context),
@@ -312,6 +312,7 @@ class LegacyMediaDataManagerImpl(
         smartspaceManager,
         keyguardUpdateMonitor,
         mediaDataLoader,
+        mediaLogger,
     )
 
     private val appChangeReceiver =
@@ -564,6 +565,42 @@ class LegacyMediaDataManagerImpl(
             val resumeAction: Runnable? = currentEntry?.resumeAction
             val hasCheckedForResume = currentEntry?.hasCheckedForResume == true
             val active = currentEntry?.active ?: true
+            val mediaController = mediaControllerFactory.create(result.token!!)
+
+            val mediaData =
+                MediaData(
+                    userId = sbn.normalizedUserId,
+                    initialized = true,
+                    app = result.appName,
+                    appIcon = result.appIcon,
+                    artist = result.artist,
+                    song = result.song,
+                    artwork = result.artworkIcon,
+                    actions = result.actionIcons,
+                    actionsToShowInCompact = result.actionsToShowInCompact,
+                    semanticActions = result.semanticActions,
+                    packageName = sbn.packageName,
+                    token = result.token,
+                    clickIntent = result.clickIntent,
+                    device = result.device,
+                    active = active,
+                    resumeAction = resumeAction,
+                    playbackLocation = result.playbackLocation,
+                    notificationKey = key,
+                    hasCheckedForResume = hasCheckedForResume,
+                    isPlaying = result.isPlaying,
+                    isClearable = !sbn.isOngoing,
+                    lastActive = lastActive,
+                    createdTimestampMillis = createdTimestampMillis,
+                    instanceId = instanceId,
+                    appUid = result.appUid,
+                    isExplicit = result.isExplicit,
+                )
+
+            if (isSameMediaData(context, mediaController, mediaData, currentEntry)) {
+                mediaLogger.logDuplicateMediaNotification(key)
+                return@withContext
+            }
 
             // We need to log the correct media added.
             if (isNewlyActiveEntry) {
@@ -583,40 +620,7 @@ class LegacyMediaDataManagerImpl(
                 )
             }
 
-            withContext(mainDispatcher) {
-                onMediaDataLoaded(
-                    key,
-                    oldKey,
-                    MediaData(
-                        userId = sbn.normalizedUserId,
-                        initialized = true,
-                        app = result.appName,
-                        appIcon = result.appIcon,
-                        artist = result.artist,
-                        song = result.song,
-                        artwork = result.artworkIcon,
-                        actions = result.actionIcons,
-                        actionsToShowInCompact = result.actionsToShowInCompact,
-                        semanticActions = result.semanticActions,
-                        packageName = sbn.packageName,
-                        token = result.token,
-                        clickIntent = result.clickIntent,
-                        device = result.device,
-                        active = active,
-                        resumeAction = resumeAction,
-                        playbackLocation = result.playbackLocation,
-                        notificationKey = key,
-                        hasCheckedForResume = hasCheckedForResume,
-                        isPlaying = result.isPlaying,
-                        isClearable = !sbn.isOngoing,
-                        lastActive = lastActive,
-                        createdTimestampMillis = createdTimestampMillis,
-                        instanceId = instanceId,
-                        appUid = result.appUid,
-                        isExplicit = result.isExplicit,
-                    )
-                )
-            }
+            withContext(mainDispatcher) { onMediaDataLoaded(key, oldKey, mediaData) }
         }
 
     /** Add a listener for changes in this class */
@@ -1100,6 +1104,47 @@ class LegacyMediaDataManagerImpl(
         val instanceId = currentEntry?.instanceId ?: logger.getNewInstanceId()
         val appUid = appInfo?.uid ?: Process.INVALID_UID
 
+        val lastActive = systemClock.elapsedRealtime()
+        val createdTimestampMillis = currentEntry?.createdTimestampMillis ?: 0L
+        val resumeAction: Runnable? = mediaEntries[key]?.resumeAction
+        val hasCheckedForResume = mediaEntries[key]?.hasCheckedForResume == true
+        val active = mediaEntries[key]?.active ?: true
+        var mediaData =
+            MediaData(
+                sbn.normalizedUserId,
+                true,
+                appName,
+                smallIcon,
+                artist,
+                song,
+                artWorkIcon,
+                actionIcons,
+                actionsToShowCollapsed,
+                semanticActions,
+                sbn.packageName,
+                token,
+                notif.contentIntent,
+                device,
+                active,
+                resumeAction = resumeAction,
+                playbackLocation = playbackLocation,
+                notificationKey = key,
+                hasCheckedForResume = hasCheckedForResume,
+                isPlaying = isPlaying,
+                isClearable = !sbn.isOngoing,
+                lastActive = lastActive,
+                createdTimestampMillis = createdTimestampMillis,
+                instanceId = instanceId,
+                appUid = appUid,
+                isExplicit = isExplicit,
+                smartspaceId = SmallHash.hash(appUid + systemClock.currentTimeMillis().toInt()),
+            )
+
+        if (isSameMediaData(context, mediaController, mediaData, currentEntry)) {
+            mediaLogger.logDuplicateMediaNotification(key)
+            return
+        }
+
         if (isNewlyActiveEntry) {
             logSingleVsMultipleMediaAdded(appUid, sbn.packageName, instanceId)
             logger.logActiveMediaAdded(appUid, sbn.packageName, instanceId, playbackLocation)
@@ -1107,44 +1152,17 @@ class LegacyMediaDataManagerImpl(
             logger.logPlaybackLocationChange(appUid, sbn.packageName, instanceId, playbackLocation)
         }
 
-        val lastActive = systemClock.elapsedRealtime()
-        val createdTimestampMillis = currentEntry?.createdTimestampMillis ?: 0L
         foregroundExecutor.execute {
-            val resumeAction: Runnable? = mediaEntries[key]?.resumeAction
-            val hasCheckedForResume = mediaEntries[key]?.hasCheckedForResume == true
-            val active = mediaEntries[key]?.active ?: true
-            onMediaDataLoaded(
-                key,
-                oldKey,
-                MediaData(
-                    sbn.normalizedUserId,
-                    true,
-                    appName,
-                    smallIcon,
-                    artist,
-                    song,
-                    artWorkIcon,
-                    actionIcons,
-                    actionsToShowCollapsed,
-                    semanticActions,
-                    sbn.packageName,
-                    token,
-                    notif.contentIntent,
-                    device,
-                    active,
-                    resumeAction = resumeAction,
-                    playbackLocation = playbackLocation,
-                    notificationKey = key,
-                    hasCheckedForResume = hasCheckedForResume,
-                    isPlaying = isPlaying,
-                    isClearable = !sbn.isOngoing,
-                    lastActive = lastActive,
-                    createdTimestampMillis = createdTimestampMillis,
-                    instanceId = instanceId,
-                    appUid = appUid,
-                    isExplicit = isExplicit,
+            val oldResumeAction: Runnable? = mediaEntries[key]?.resumeAction
+            val oldHasCheckedForResume = mediaEntries[key]?.hasCheckedForResume == true
+            val oldActive = mediaEntries[key]?.active ?: true
+            mediaData =
+                mediaData.copy(
+                    resumeAction = oldResumeAction,
+                    hasCheckedForResume = oldHasCheckedForResume,
+                    active = oldActive
                 )
-            )
+            onMediaDataLoaded(key, oldKey, mediaData)
         }
     }
 

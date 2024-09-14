@@ -105,6 +105,7 @@
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Idagdag sa tala"</string>
     <string name="backlinks_include_link" msgid="4562093591148248158">"Isama ang link"</string>
     <string name="backlinks_duplicate_label_format" msgid="558445128952827926">"<xliff:g id="APPNAME">%1$s</xliff:g> <xliff:g id="FREQUENCYCOUNT">(%2$d)</xliff:g>⁠"</string>
+    <string name="backlinks_cross_profile_error" msgid="1355798585727802282">"Hindi maidaragdag ang mga link mula sa ibang profile"</string>
     <string name="screenrecord_title" msgid="4257171601439507792">"Recorder ng Screen"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Pinoproseso screen recording"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Kasalukuyang notification para sa session ng pag-record ng screen"</string>
@@ -1391,18 +1392,12 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"I-collapse ang icon"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"I-expand ang icon"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"o"</string>
-    <!-- no translation found for launch_keyboard_tutorial_notification_title (8849933155160522519) -->
-    <skip />
-    <!-- no translation found for launch_keyboard_tutorial_notification_content (2880339951512757918) -->
-    <skip />
-    <!-- no translation found for launch_touchpad_tutorial_notification_title (2243780062772196901) -->
-    <skip />
-    <!-- no translation found for launch_touchpad_tutorial_notification_content (7931085031240753226) -->
-    <skip />
-    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_title (1940023776496198762) -->
-    <skip />
-    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_content (1780725168171929365) -->
-    <skip />
+    <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Mag-navigate gamit ang iyong keyboard"</string>
+    <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Matuto ng mga keyboard shortcut"</string>
+    <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Mag-navigate gamit ang iyong touchpad"</string>
+    <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"Matuto ng mga galaw sa touchpad"</string>
+    <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"Mag-navigate gamit ang iyong keyboard at touchpad"</string>
+    <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"Matuto ng mga galaw sa touchpad, keyboard shortcut, at higit pa"</string>
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Galaw para bumalik"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Galaw para sa Home"</string>
     <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"Action key"</string>
@@ -1442,4 +1437,18 @@
     <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="7513137763024327538">"Puwede mo nang gawing extra dim ang screen sa pamamagitan ng pagpapababa ng level ng liwanag nang higit pa mula sa itaas ng iyong screen.\n\nPinakamahusay itong gumagana kapag nasa madilim na kapaligiran ka."</string>
     <string name="accessibility_deprecate_extra_dim_dialog_button" msgid="1782147201534669800">"Alisin ang shortcut ng extra dim"</string>
     <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="4070696910424515757">"Inalis ang shortcut ng extra dim. Para bawasan ang liwanag, gamitin ang karaniwang bar ng liwanag."</string>
+    <!-- no translation found for qs_edit_mode_category_connectivity (4559726936546032672) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_accessibility (7969091385071475922) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_utilities (8123080090108420095) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_privacy (6577774443194551775) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_providedByApps (8346112074897919019) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_display (4749511439121053942) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_unknown (509314252124053550) -->
+    <skip />
 </resources>

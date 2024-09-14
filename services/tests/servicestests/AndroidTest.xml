@@ -35,6 +35,7 @@
     <target_preparer class="com.android.tradefed.targetprep.suite.SuiteApkInstaller">
         <option name="cleanup-apks" value="true" />
         <option name="install-arg" value="-t" />
+        <option name="test-file-name" value="DisplayManagerTestApp.apk" />
         <option name="test-file-name" value="FrameworksServicesTests.apk" />
         <option name="test-file-name" value="SuspendTestApp.apk" />
         <option name="test-file-name" value="SimpleServiceTestApp1.apk" />

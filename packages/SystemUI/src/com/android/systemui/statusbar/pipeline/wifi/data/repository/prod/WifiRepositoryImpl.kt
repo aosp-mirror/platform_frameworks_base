@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.pipeline.wifi.data.repository.prod
 import android.annotation.SuppressLint
 import android.net.wifi.ScanResult
 import android.net.wifi.WifiManager
-import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
@@ -39,18 +38,14 @@ import com.android.systemui.statusbar.pipeline.dagger.WifiTableLog
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
 import com.android.systemui.statusbar.pipeline.shared.data.model.toWifiDataActivityModel
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.RealWifiRepository
-import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository.Companion.CARRIER_MERGED_INVALID_SUB_ID_REASON
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository.Companion.COL_NAME_IS_DEFAULT
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository.Companion.COL_NAME_IS_ENABLED
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
-import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel.Inactive.toHotspotDeviceType
+import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel.Unavailable.toHotspotDeviceType
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiScanEntry
 import com.android.wifitrackerlib.HotspotNetworkEntry
 import com.android.wifitrackerlib.MergedCarrierEntry
 import com.android.wifitrackerlib.WifiEntry
-import com.android.wifitrackerlib.WifiEntry.WIFI_LEVEL_MAX
-import com.android.wifitrackerlib.WifiEntry.WIFI_LEVEL_MIN
-import com.android.wifitrackerlib.WifiEntry.WIFI_LEVEL_UNREACHABLE
 import com.android.wifitrackerlib.WifiPickerTracker
 import java.util.concurrent.Executor
 import javax.inject.Inject
@@ -246,36 +241,28 @@ constructor(
     }
 
     private fun MergedCarrierEntry.convertCarrierMergedToModel(): WifiNetworkModel {
-        return if (this.subscriptionId == INVALID_SUBSCRIPTION_ID) {
-            WifiNetworkModel.Invalid(CARRIER_MERGED_INVALID_SUB_ID_REASON)
-        } else {
-            WifiNetworkModel.CarrierMerged(
-                subscriptionId = this.subscriptionId,
-                level = this.level,
-                // WifiManager APIs to calculate the signal level start from 0, so
-                // maxSignalLevel + 1 represents the total level buckets count.
-                numberOfLevels = wifiManager.maxSignalLevel + 1,
-            )
-        }
+        // WifiEntry instance values aren't guaranteed to be stable between method calls
+        // because
+        // WifiPickerTracker is continuously updating the same object. Save the level in a
+        // local
+        // variable so that checking the level validity here guarantees that the level will
+        // still be
+        // valid when we create the `WifiNetworkModel.Active` instance later. Otherwise, the
+        // level
+        // could be valid here but become invalid later, and `WifiNetworkModel.Active` will
+        // throw
+        // an exception. See b/362384551.
+
+        return WifiNetworkModel.CarrierMerged.of(
+            subscriptionId = this.subscriptionId,
+            level = this.level,
+            // WifiManager APIs to calculate the signal level start from 0, so
+            // maxSignalLevel + 1 represents the total level buckets count.
+            numberOfLevels = wifiManager.maxSignalLevel + 1,
+        )
     }
 
     private fun WifiEntry.convertNormalToModel(): WifiNetworkModel {
-        // WifiEntry instance values aren't guaranteed to be stable between method calls because
-        // WifiPickerTracker is continuously updating the same object. Save the level in a local
-        // variable so that checking the level validity here guarantees that the level will still be
-        // valid when we create the `WifiNetworkModel.Active` instance later. Otherwise, the level
-        // could be valid here but become invalid later, and `WifiNetworkModel.Active` will throw
-        // an exception. See b/362384551.
-        val currentLevel = this.level
-        if (
-            currentLevel == WIFI_LEVEL_UNREACHABLE ||
-                currentLevel !in WIFI_LEVEL_MIN..WIFI_LEVEL_MAX
-        ) {
-            // If our level means the network is unreachable or the level is otherwise invalid, we
-            // don't have an active network.
-            return WifiNetworkModel.Inactive
-        }
-
         val hotspotDeviceType =
             if (this is HotspotNetworkEntry) {
                 this.deviceType.toHotspotDeviceType()
@@ -283,9 +270,9 @@ constructor(
                 WifiNetworkModel.HotspotDeviceType.NONE
             }
 
-        return WifiNetworkModel.Active(
+        return WifiNetworkModel.Active.of(
             isValidated = this.hasInternetAccess(),
-            level = currentLevel,
+            level = this.level,
             ssid = this.title,
             hotspotDeviceType = hotspotDeviceType,
         )
@@ -421,7 +408,7 @@ constructor(
 
     companion object {
         // Start out with no known wifi network.
-        @VisibleForTesting val WIFI_NETWORK_DEFAULT = WifiNetworkModel.Inactive
+        @VisibleForTesting val WIFI_NETWORK_DEFAULT = WifiNetworkModel.Inactive()
 
         private const val WIFI_STATE_DEFAULT = WifiManager.WIFI_STATE_DISABLED
 

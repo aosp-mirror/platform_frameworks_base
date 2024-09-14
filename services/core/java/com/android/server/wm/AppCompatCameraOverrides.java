@@ -85,9 +85,10 @@ class AppCompatCameraOverrides {
     }
 
     /**
-     * Whether we should apply the min aspect ratio per-app override only when an app is connected
-     * to the camera.
-     * When this override is applied the min aspect ratio given in the app's manifest will be
+     * Whether applying the min aspect ratio per-app override only when an app is connected
+     * to the camera is allowed.
+     *
+     * <p>When this override is applied the min aspect ratio given in the app's manifest will be
      * overridden to the largest enabled aspect ratio treatment unless the app's manifest value
      * is higher. The treatment will also apply if no value is provided in the manifest.
      *
@@ -97,9 +98,8 @@ class AppCompatCameraOverrides {
      *     <li>Per-app override is enabled
      * </ul>
      */
-    boolean shouldOverrideMinAspectRatioForCamera() {
-        return isCameraActive() && mAllowMinAspectRatioOverrideOptProp
-                .shouldEnableWithOptInOverrideAndOptOutProperty(
+    boolean isOverrideMinAspectRatioForCameraEnabled() {
+        return mAllowMinAspectRatioOverrideOptProp.shouldEnableWithOptInOverrideAndOptOutProperty(
                         isChangeEnabled(mActivityRecord,
                                 OVERRIDE_MIN_ASPECT_RATIO_ONLY_FOR_CAMERA));
     }
@@ -172,24 +172,6 @@ class AppCompatCameraOverrides {
     boolean shouldApplyFreeformTreatmentForCameraCompat() {
         return Flags.cameraCompatForFreeform() && !isChangeEnabled(mActivityRecord,
                 OVERRIDE_CAMERA_COMPAT_DISABLE_FREEFORM_WINDOWING_TREATMENT);
-    }
-
-    /**
-     * @return {@code true} if the Camera is active for the current activity
-     */
-    boolean isCameraActive() {
-        return mActivityRecord.mDisplayContent != null
-                && mActivityRecord.mDisplayContent.mAppCompatCameraPolicy
-                    .isCameraActive(mActivityRecord, /* mustBeFullscreen */ true);
-    }
-
-    /**
-     * @return {@code true} if the configuration needs to be recomputed after a camera state update.
-     */
-    boolean shouldRecomputeConfigurationForCameraCompat() {
-        return isOverrideOrientationOnlyForCameraEnabled()
-                || isCameraCompatSplitScreenAspectRatioAllowed()
-                || shouldOverrideMinAspectRatioForCamera();
     }
 
     boolean isOverrideOrientationOnlyForCameraEnabled() {

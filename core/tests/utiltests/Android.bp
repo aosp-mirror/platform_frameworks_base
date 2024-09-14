@@ -39,9 +39,9 @@ android_test {
     ],
 
     libs: [
-        "android.test.runner",
-        "android.test.base",
-        "android.test.mock",
+        "android.test.runner.stubs.system",
+        "android.test.base.stubs.system",
+        "android.test.mock.stubs.system",
     ],
 
     platform_apis: true,
@@ -55,7 +55,7 @@ android_test {
 android_ravenwood_test {
     name: "FrameworksUtilTestsRavenwood",
     libs: [
-        "android.test.mock",
+        "android.test.mock.stubs.system",
     ],
     static_libs: [
         "androidx.annotation_annotation",

@@ -76,8 +76,8 @@ android_test {
         "Harrier",
     ],
     libs: [
-        "android.test.base",
-        "android.test.mock",
+        "android.test.base.stubs.system",
+        "android.test.mock.stubs.system",
         "unsupportedappusage",
     ],
     resource_dirs: [],

@@ -31,6 +31,7 @@ import android.app.WindowConfiguration.WindowingMode;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.IBinder;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -147,14 +148,23 @@ class TaskContainer {
 
     /** This is only used when restoring it from a {@link ParcelableTaskContainerData}. */
     TaskContainer(@NonNull ParcelableTaskContainerData data,
-            @NonNull SplitController splitController) {
+            @NonNull SplitController splitController,
+            @NonNull ArrayMap<IBinder, TaskFragmentInfo> taskFragmentInfoMap) {
         mParcelableTaskContainerData = new ParcelableTaskContainerData(data, this);
+        mInfo = new TaskFragmentParentInfo(new Configuration(), 0 /* displayId */, -1 /* taskId */,
+                false /* visible */, false /* hasDirectActivity */, null /* decorSurface */);
         mSplitController = splitController;
         for (ParcelableTaskFragmentContainerData tfData :
                 data.getParcelableTaskFragmentContainerDataList()) {
-            final TaskFragmentContainer container =
-                    new TaskFragmentContainer(tfData, splitController, this);
-            mContainers.add(container);
+            final TaskFragmentInfo info = taskFragmentInfoMap.get(tfData.mToken);
+            if (info != null && !info.isEmpty()) {
+                final TaskFragmentContainer container =
+                        new TaskFragmentContainer(tfData, splitController, this);
+                container.setInfo(new WindowContainerTransaction(), info);
+                mContainers.add(container);
+            } else {
+                Log.d(TAG, "Drop " + tfData + " while restoring Task " + data.mTaskId);
+            }
         }
     }
 
