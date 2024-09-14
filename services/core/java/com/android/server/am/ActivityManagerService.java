@@ -4898,7 +4898,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (!mConstants.mEnableWaitForFinishAttachApplication) {
                 finishAttachApplicationInner(startSeq, callingUid, pid);
             }
-            maybeSendBootCompletedLocked(app);
+            maybeSendBootCompletedLocked(app, isRestrictedBackupMode);
         } catch (Exception e) {
             // We need kill the process group here. (b/148588589)
             Slog.wtf(TAG, "Exception thrown during bind of " + app, e);
@@ -5143,7 +5143,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      * Send LOCKED_BOOT_COMPLETED and BOOT_COMPLETED to the package explicitly when unstopped,
      * or when the package first starts in private space
      */
-    private void maybeSendBootCompletedLocked(ProcessRecord app) {
+    private void maybeSendBootCompletedLocked(ProcessRecord app, boolean isRestrictedBackupMode) {
         boolean sendBroadcast = false;
         if (android.os.Flags.allowPrivateProfile()
                 && android.multiuser.Flags.enablePrivateSpaceFeatures()) {
@@ -5168,6 +5168,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                     RESTRICTION_LEVEL_FORCE_STOPPED, false,
                     RESTRICTION_REASON_USAGE, "unknown", RESTRICTION_SOURCE_USER, 0L);
         }
+
+        // Don't send BOOT_COMPLETED if currently in restricted backup mode
+        if (isRestrictedBackupMode) return;
 
         if (!sendBroadcast) {
             if (!android.content.pm.Flags.stayStopped()) return;
