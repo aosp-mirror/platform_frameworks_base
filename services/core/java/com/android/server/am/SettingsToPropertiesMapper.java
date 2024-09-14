@@ -370,6 +370,13 @@ public class SettingsToPropertiesMapper {
                   String propertyName = "next_boot." + makeAconfigFlagPropertyName(
                       actualNamespace, actualFlagName);
 
+                  if (Flags.supportLocalOverridesSysprops()) {
+                    // Don't propagate if there is a local override.
+                    String overrideName = actualNamespace + ":" + actualFlagName;
+                    if (DeviceConfig.getProperty(NAMESPACE_LOCAL_OVERRIDES, overrideName) != null) {
+                      continue;
+                    }
+                  }
                   setProperty(propertyName, flagValue);
               }
 
@@ -387,6 +394,42 @@ public class SettingsToPropertiesMapper {
             (DeviceConfig.Properties properties) -> {
                 if (enableAconfigStorageDaemon()) {
                     setLocalOverridesInNewStorage(properties);
+                }
+
+                if (Flags.supportLocalOverridesSysprops()) {
+                  String overridesNamespace = properties.getNamespace();
+                  for (String key : properties.getKeyset()) {
+                    String realNamespace = key.split(":")[0];
+                    String realFlagName = key.split(":")[1];
+                    String aconfigPropertyName =
+                        makeAconfigFlagPropertyName(realNamespace, realFlagName);
+                    if (aconfigPropertyName == null) {
+                      logErr("unable to construct system property for " + realNamespace + "/"
+                        + key);
+                      return;
+                    }
+
+                    if (properties.getString(key, null) == null) {
+                      String deviceConfigValue =
+                              DeviceConfig.getProperty(realNamespace, realFlagName);
+                      String stagedDeviceConfigValue =
+                              DeviceConfig.getProperty(NAMESPACE_REBOOT_STAGING,
+                                              realNamespace + "*" + realFlagName);
+
+                      setProperty(aconfigPropertyName, deviceConfigValue);
+                      if (stagedDeviceConfigValue == null) {
+                        setProperty("next_boot." + aconfigPropertyName, deviceConfigValue);
+                      } else {
+                        setProperty("next_boot." + aconfigPropertyName, stagedDeviceConfigValue);
+                      }
+                    } else {
+                      // Otherwise, propagate the override to sysprops.
+                      setProperty(aconfigPropertyName, properties.getString(key, null));
+                      // If there's a staged value, make sure it's the override value.
+                      setProperty("next_boot." + aconfigPropertyName,
+                                properties.getString(key, null));
+                    }
+                  }
                 }
         });
     }

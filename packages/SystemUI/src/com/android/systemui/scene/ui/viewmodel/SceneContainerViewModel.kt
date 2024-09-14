@@ -52,7 +52,7 @@ constructor(
     private val sceneInteractor: SceneInteractor,
     private val falsingInteractor: FalsingInteractor,
     private val powerInteractor: PowerInteractor,
-    private val shadeInteractor: ShadeInteractor,
+    shadeInteractor: ShadeInteractor,
     private val splitEdgeDetector: SplitEdgeDetector,
     private val logger: SceneLogger,
     @Assisted private val motionEventHandlerReceiver: (MotionEventHandler?) -> Unit,
@@ -212,9 +212,10 @@ constructor(
                         )
                     }
                 }
+                // Overlay transitions don't use scene families, nothing to resolve.
                 is UserActionResult.ShowOverlay,
                 is UserActionResult.HideOverlay,
-                is UserActionResult.ReplaceByOverlay -> TODO("b/353679003: Support overlays")
+                is UserActionResult.ReplaceByOverlay -> null
             } ?: actionResult
         }
     }

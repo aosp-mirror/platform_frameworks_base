@@ -112,6 +112,10 @@ class CallerValidatorImpl implements CallerValidator {
                 mContext.checkPermission(Manifest.permission.EXECUTE_APP_FUNCTIONS, pid, uid)
                         == PackageManager.PERMISSION_GRANTED;
 
+        if (!hasExecutionPermission) {
+            return AndroidFuture.completedFuture(false);
+        }
+
         final long token = Binder.clearCallingIdentity();
         try {
             FutureAppSearchSession futureAppSearchSession =

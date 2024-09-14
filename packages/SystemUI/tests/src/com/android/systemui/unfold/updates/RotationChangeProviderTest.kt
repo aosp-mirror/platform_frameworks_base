@@ -38,6 +38,7 @@ import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.inOrder
 import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.MockitoAnnotations
 
@@ -76,6 +77,26 @@ class RotationChangeProviderTest : SysuiTestCase() {
         sendRotationUpdate(42)
 
         verify(listener).onRotationChanged(42)
+    }
+
+    @Test
+    fun onRotationChanged_rotationSentMultipleWithTheSameValue_listenerReceivesUpdateOnce() {
+        sendRotationUpdate(42)
+        sendRotationUpdate(42)
+        sendRotationUpdate(42)
+
+        verify(listener).onRotationChanged(42)
+    }
+
+    @Test
+    fun onRotationChanged_rotationSentMultipleTimesWithDifferentValues_listenerReceivesUpdates() {
+        sendRotationUpdate(0)
+        sendRotationUpdate(1)
+
+        with(inOrder(listener)) {
+            verify(listener).onRotationChanged(0)
+            verify(listener).onRotationChanged(1)
+        }
     }
 
     @Test

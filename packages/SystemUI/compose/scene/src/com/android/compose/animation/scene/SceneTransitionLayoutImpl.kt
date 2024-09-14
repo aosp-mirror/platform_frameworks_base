@@ -17,12 +17,16 @@
 package com.android.compose.animation.scene
 
 import androidx.annotation.VisibleForTesting
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.key
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -253,6 +257,7 @@ internal class SceneTransitionLayoutImpl(
                     key: OverlayKey,
                     userActions: Map<UserAction, UserActionResult>,
                     alignment: Alignment,
+                    isModal: Boolean,
                     content: @Composable (ContentScope.() -> Unit),
                 ) {
                     overlaysDefined = true
@@ -266,6 +271,7 @@ internal class SceneTransitionLayoutImpl(
                         overlay.zIndex = zIndex
                         overlay.userActions = resolvedUserActions
                         overlay.alignment = alignment
+                        overlay.isModal = isModal
                     } else {
                         // New overlay.
                         overlays[key] =
@@ -276,6 +282,7 @@ internal class SceneTransitionLayoutImpl(
                                 resolvedUserActions,
                                 zIndex,
                                 alignment,
+                                isModal,
                             )
                     }
 
@@ -399,12 +406,30 @@ internal class SceneTransitionLayoutImpl(
             return
         }
 
-        // We put the overlays inside a Box that is matching the layout size so that overlays are
-        // measured after all scenes and that their max size is the size of the layout without the
-        // overlays.
-        Box(Modifier.matchParentSize().zIndex(overlaysOrderedByZIndex.first().zIndex)) {
-            overlaysOrderedByZIndex.fastForEach { overlay ->
-                key(overlay.key) { overlay.Content(Modifier.align(overlay.alignment)) }
+        overlaysOrderedByZIndex.fastForEach { overlay ->
+            val key = overlay.key
+            key(key) {
+                // We put the overlays inside a Box that is matching the layout size so that they
+                // are measured after all scenes and that their max size is the size of the layout
+                // without the overlays.
+                Box(Modifier.matchParentSize().zIndex(overlay.zIndex)) {
+                    if (overlay.isModal) {
+                        // Add a fullscreen clickable to prevent swipes from reaching the scenes and
+                        // other overlays behind this overlay. Clicking will close the overlay.
+                        Box(
+                            Modifier.fillMaxSize().clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null,
+                            ) {
+                                if (state.canHideOverlay(key)) {
+                                    state.hideOverlay(key, animationScope = animationScope)
+                                }
+                            }
+                        )
+                    }
+
+                    overlay.Content(Modifier.align(overlay.alignment))
+                }
             }
         }
     }

@@ -17,12 +17,14 @@
 package com.android.systemui.bouncer.ui.viewmodel
 
 import androidx.compose.runtime.getValue
-import com.android.keyguard.ViewMediatorCallback
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
+import com.android.systemui.deviceentry.domain.interactor.DeviceUnlockedInteractor
 import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.lifecycle.Hydrator
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
+import com.android.systemui.util.kotlin.Utils.Companion.sample
+import com.android.systemui.util.kotlin.sample
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.coroutineScope
@@ -34,7 +36,7 @@ constructor(
     private val legacyInteractor: PrimaryBouncerInteractor,
     private val authenticationInteractor: AuthenticationInteractor,
     private val selectedUserInteractor: SelectedUserInteractor,
-    private val viewMediatorCallback: ViewMediatorCallback?,
+    private val deviceUnlockedInteractor: DeviceUnlockedInteractor,
 ) : ExclusiveActivatable() {
 
     private val hydrator = Hydrator("BouncerContainerViewModel")
@@ -45,23 +47,23 @@ constructor(
     override suspend fun onActivated(): Nothing {
         coroutineScope {
             launch {
+                legacyInteractor.isShowing
+                    .sample(deviceUnlockedInteractor.deviceUnlockStatus, ::Pair)
+                    .collect { (isShowing, unlockStatus) ->
+                        if (isShowing && unlockStatus.isUnlocked) {
+                            legacyInteractor.notifyUserRequestedBouncerWhenAlreadyAuthenticated(
+                                selectedUserInteractor.getSelectedUserId()
+                            )
+                        }
+                    }
+            }
+
+            launch {
                 authenticationInteractor.onAuthenticationResult.collect { authenticationSucceeded ->
                     if (authenticationSucceeded) {
-                        // Some dismiss actions require that keyguard be dismissed right away or
-                        // deferred until something else later on dismisses keyguard (eg. end of
-                        // a hide animation).
-                        val deferKeyguardDone =
-                            legacyInteractor.bouncerDismissAction?.onDismissAction?.onDismiss()
-                        legacyInteractor.setDismissAction(null, null)
-
-                        viewMediatorCallback?.let {
-                            val selectedUserId = selectedUserInteractor.getSelectedUserId()
-                            if (deferKeyguardDone == true) {
-                                it.keyguardDonePending(selectedUserId)
-                            } else {
-                                it.keyguardDone(selectedUserId)
-                            }
-                        }
+                        legacyInteractor.notifyKeyguardAuthenticatedPrimaryAuth(
+                            selectedUserInteractor.getSelectedUserId()
+                        )
                     }
                 }
             }

@@ -2553,7 +2553,7 @@ public class ZenModeConfig implements Parcelable {
         if (!Flags.modesUi()) {
             return manualRule != null;
         }
-        return manualRule != null && manualRule.isAutomaticActive();
+        return manualRule != null && manualRule.isActive();
     }
 
     public static class ZenRule implements Parcelable {
@@ -2932,8 +2932,7 @@ public class ZenModeConfig implements Parcelable {
             }
         }
 
-        // TODO: b/363193376 - Rename to isActive()
-        public boolean isAutomaticActive() {
+        public boolean isActive() {
             if (Flags.modesApi() && Flags.modesUi()) {
                 if (!enabled || getPkg() == null) {
                     return false;
@@ -3173,7 +3172,7 @@ public class ZenModeConfig implements Parcelable {
 
         // DND turned on by an automatic rule
         for (ZenRule automaticRule : config.automaticRules.values()) {
-            if (automaticRule.isAutomaticActive()) {
+            if (automaticRule.isActive()) {
                 if (isValidEventConditionId(automaticRule.conditionId)
                         || isValidScheduleConditionId(automaticRule.conditionId)) {
                     // set text if automatic rule end time is the latest active rule end time

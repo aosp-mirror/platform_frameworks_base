@@ -139,3 +139,13 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "audio_sharing_qs_dialog_improvement"
+    namespace: "cross_device_experiences"
+    description: "Gates whether to enable audio sharing qs dialog improvement"
+    bug: "360759048"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

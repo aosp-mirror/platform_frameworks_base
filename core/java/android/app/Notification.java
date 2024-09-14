@@ -1281,6 +1281,15 @@ public class Notification implements Parcelable
     public static final String EXTRA_BIG_TEXT = "android.bigText";
 
     /**
+     * {@link #extras} key: very short text summarizing the most critical information contained in
+     * the notification.
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
+    public static final String EXTRA_SHORT_CRITICAL_TEXT = "android.shortCriticalText";
+
+    /**
      * {@link #extras} key: this is the resource ID of the notification's main small icon, as
      * supplied to {@link Builder#setSmallIcon(int)}.
      *
@@ -4050,6 +4059,17 @@ public class Notification implements Parcelable
         return String.join("|", defaultStrings);
     }
 
+
+    /**
+     * Returns the very short text summarizing the most critical information contained in the
+     * notification, or null if this field was not set.
+     */
+    @Nullable
+    @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
+    public String getShortCriticalText() {
+        return extras.getString(EXTRA_SHORT_CRITICAL_TEXT);
+    }
+
     /**
      * @hide
      */
@@ -4987,6 +5007,18 @@ public class Notification implements Parcelable
         @Deprecated
         public Builder setContentInfo(CharSequence info) {
             mN.extras.putCharSequence(EXTRA_INFO_TEXT, safeCharSequence(info));
+            return this;
+        }
+
+        /**
+         * Sets a very short string summarizing the most critical information contained in the
+         * notification. Suggested max length is 5 characters, and there is no guarantee how much or
+         * how little of this text will be shown.
+         */
+        @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
+        @NonNull
+        public Builder setShortCriticalText(@Nullable String shortCriticalText) {
+            mN.extras.putString(EXTRA_SHORT_CRITICAL_TEXT, shortCriticalText);
             return this;
         }
 

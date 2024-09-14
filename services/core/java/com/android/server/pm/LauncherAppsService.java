@@ -92,6 +92,7 @@ import android.graphics.Rect;
 import android.multiuser.Flags;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IInterface;
@@ -214,7 +215,7 @@ public class LauncherAppsService extends SystemService {
 
     @VisibleForTesting
     static class LauncherAppsImpl extends ILauncherApps.Stub {
-        private static final boolean DEBUG = false;
+        private static final boolean DEBUG = Build.IS_DEBUGGABLE;
         private static final String TAG = "LauncherAppsService";
         private static final String NAMESPACE_MULTIUSER = "multiuser";
         private static final String FLAG_NON_SYSTEM_ACCESS_TO_HIDDEN_PROFILES =
@@ -495,8 +496,28 @@ public class LauncherAppsService extends SystemService {
 
         private boolean canAccessProfile(int callingUid, int callingUserId, int callingPid,
                 int targetUserId, String message) {
-            if (targetUserId == callingUserId) return true;
+            if (DEBUG) {
+                final AndroidPackage callingPackage =
+                        mPackageManagerInternal.getPackage(callingUid);
+                final String callingPackageName = callingPackage == null
+                        ? null : callingPackage.getPackageName();
+                Slog.v(TAG, "canAccessProfile called by " + callingPackageName
+                        + " for user " + callingUserId
+                        + " requesting to access user "
+                        + targetUserId + " when invoking " + message);
+            }
+            if (targetUserId == callingUserId) {
+                if (DEBUG) {
+                    Slog.v(TAG, message + " passed canAccessProfile for targetuser"
+                        + targetUserId + " because it is the same as the calling user");
+                }
+                return true;
+            }
             if (injectHasInteractAcrossUsersFullPermission(callingPid, callingUid)) {
+              if (DEBUG) {
+                    Slog.v(TAG, message + " passed because calling process"
+                        + "has permission to interact across users");
+                }
                 return true;
             }
 
@@ -514,11 +535,25 @@ public class LauncherAppsService extends SystemService {
 
             if (isHiddenProfile(UserHandle.of(targetUserId))
                     && !canAccessHiddenProfile(callingUid, callingPid)) {
+                Slog.w(TAG, message + " for hidden profile user " + targetUserId
+                        + " from " + callingUserId + " not allowed");
+
                 return false;
             }
 
-            return mUserManagerInternal.isProfileAccessible(callingUserId, targetUserId,
-                    message, true);
+            final boolean ret = mUserManagerInternal.isProfileAccessible(
+                    callingUserId, targetUserId, message, true);
+            if (DEBUG) {
+                final AndroidPackage callingPackage =
+                        mPackageManagerInternal.getPackage(callingUid);
+                final String callingPackageName = callingPackage == null
+                        ? null : callingPackage.getPackageName();
+                Slog.v(TAG, "canAccessProfile returned " + ret + " for " + callingPackageName
+                        + " for user " + callingUserId
+                        + " requesting to access user "
+                        + targetUserId + " when invoking " + message);
+            }
+            return ret;
         }
 
         private boolean isHiddenProfile(UserHandle targetUser) {
@@ -1341,6 +1376,10 @@ public class LauncherAppsService extends SystemService {
         @Override
         public void pinShortcuts(String callingPackage, String packageName, List<String> ids,
                 UserHandle targetUser) {
+            if (DEBUG) {
+                Slog.v(TAG, "pinShortcuts: " + callingPackage + " is pinning shortcuts from "
+                        + packageName + " for user " + targetUser);
+            }
             if (!mShortcutServiceInternal
                     .areShortcutsSupportedOnHomeScreen(targetUser.getIdentifier())) {
                 // Requires strict ACCESS_SHORTCUTS permission for user-profiles with items
@@ -1351,6 +1390,11 @@ public class LauncherAppsService extends SystemService {
             }
             ensureShortcutPermission(callingPackage);
             if (!canAccessProfile(targetUser.getIdentifier(), "Cannot pin shortcuts")) {
+                if (DEBUG) {
+                    Slog.v(TAG, "pinShortcuts: " + callingPackage
+                            + " is pinning shortcuts from " + packageName
+                            + " for user " + targetUser + " but cannot access profile");
+                }
                 return;
             }
 
