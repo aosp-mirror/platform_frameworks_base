@@ -1,0 +1,16 @@
+package: "android.app.jank"
+container: "system"
+
+flag {
+  name: "detailed_app_jank_metrics_api"
+  namespace: "system_performance"
+  description: "Control the API portion of Detailed Application Jank Metrics"
+  bug: "366264614"
+}
+
+flag {
+  name: "detailed_app_jank_metrics_logging_enabled"
+  namespace: "system_performance"
+  description: "Controls whether the system will log frame metrics related to app jank"
+  bug: "366265225"
+}

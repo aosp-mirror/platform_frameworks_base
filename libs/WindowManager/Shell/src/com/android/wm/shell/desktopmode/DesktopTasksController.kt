@@ -1077,45 +1077,47 @@ class DesktopTasksController(
             request.triggerTask != null
     }
 
+    /** Open an existing instance of an app. */
+    fun openInstance(
+        callingTask: RunningTaskInfo,
+        requestedTaskId: Int
+    ) {
+        val wct = WindowContainerTransaction()
+        val options = createNewWindowOptions(callingTask)
+        if (options.launchWindowingMode == WINDOWING_MODE_FREEFORM) {
+            wct.startTask(requestedTaskId, options.toBundle())
+            transitions.startTransition(TRANSIT_OPEN, wct, null)
+        } else {
+            val splitPosition = splitScreenController.determineNewInstancePosition(callingTask)
+            splitScreenController.startTask(requestedTaskId, splitPosition,
+                options.toBundle(), null /* hideTaskToken */)
+        }
+    }
+
+    /** Create an Intent to open a new window of a task. */
     fun openNewWindow(
-        taskInfo: RunningTaskInfo
+        callingTaskInfo: RunningTaskInfo
     ) {
         // TODO(b/337915660): Add a transition handler for these; animations
         //  need updates in some cases.
-        val newTaskWindowingMode = when {
-            taskInfo.isFreeform -> {
-                WINDOWING_MODE_FREEFORM
-            }
-            taskInfo.isFullscreen || taskInfo.isMultiWindow -> {
-                WINDOWING_MODE_MULTI_WINDOW
-            }
-            else -> {
-                error("Invalid windowing mode: ${taskInfo.windowingMode}")
-            }
-        }
-
-        val baseActivity = taskInfo.baseActivity ?: return
+        val baseActivity = callingTaskInfo.baseActivity ?: return
         val fillIn: Intent = context.packageManager
             .getLaunchIntentForPackage(
                 baseActivity.packageName
             ) ?: return
         fillIn
             .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
-        val options =
-            ActivityOptions.makeBasic().apply {
-                launchWindowingMode = newTaskWindowingMode
-                pendingIntentBackgroundActivityStartMode =
-                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS
-            }
         val launchIntent = PendingIntent.getActivity(
             context,
             /* requestCode= */ 0,
             fillIn,
             PendingIntent.FLAG_IMMUTABLE
         )
-        when (newTaskWindowingMode) {
+        val options = createNewWindowOptions(callingTaskInfo)
+        when (options.launchWindowingMode) {
             WINDOWING_MODE_MULTI_WINDOW -> {
-                val splitPosition = splitScreenController.determineNewInstancePosition(taskInfo)
+                val splitPosition = splitScreenController
+                    .determineNewInstancePosition(callingTaskInfo)
                 splitScreenController.startIntent(
                     launchIntent, context.userId, fillIn, splitPosition,
                     options.toBundle(), null /* hideTaskToken */
@@ -1127,6 +1129,25 @@ class DesktopTasksController(
                 wct.sendPendingIntent(launchIntent, fillIn, options.toBundle())
                 transitions.startTransition(TRANSIT_OPEN, wct, null)
             }
+        }
+    }
+
+    private fun createNewWindowOptions(callingTask: RunningTaskInfo): ActivityOptions {
+        val newTaskWindowingMode = when {
+            callingTask.isFreeform -> {
+                WINDOWING_MODE_FREEFORM
+            }
+            callingTask.isFullscreen || callingTask.isMultiWindow -> {
+                WINDOWING_MODE_MULTI_WINDOW
+            }
+            else -> {
+                error("Invalid windowing mode: ${callingTask.windowingMode}")
+            }
+        }
+        return ActivityOptions.makeBasic().apply {
+            launchWindowingMode = newTaskWindowingMode
+            pendingIntentBackgroundActivityStartMode =
+                ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS
         }
     }
 

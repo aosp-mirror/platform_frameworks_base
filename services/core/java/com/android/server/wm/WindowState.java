@@ -2754,10 +2754,16 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * @param outRegion The region to update.
      */
     private void updateRegionForModalActivityWindow(Region outRegion) {
-        // If the inner bounds of letterbox is available, then it will be used as the
-        // touchable region so it won't cover the touchable letterbox and the touch
-        // events can slip to activity from letterbox.
-        mActivityRecord.getLetterboxInnerBounds(mTmpRect);
+        if (Flags.scrollingFromLetterbox()) {
+            // Touchable region expands to the letterbox area to react to scrolls from letterbox.
+            mTmpRect.setEmpty();
+        } else {
+            // If the activity is letterboxed and scrolling from letterbox is disabled, limit the
+            // touchable region to the activity. This way, the letterbox area is exposed to react
+            // to touch events, and the touch events can slip from the activity from letterbox.
+            mActivityRecord.getLetterboxInnerBounds(mTmpRect);
+        }
+
         if (mTmpRect.isEmpty()) {
             final Rect transformedBounds = mActivityRecord.getFixedRotationTransformDisplayBounds();
             if (transformedBounds != null) {

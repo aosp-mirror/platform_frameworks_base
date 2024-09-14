@@ -236,11 +236,11 @@ class HandleMenuTest : ShellTestCase() {
         val handleMenu = HandleMenu(mockDesktopWindowDecoration,
             WindowManagerWrapper(mockWindowManager),
             layoutId, appIcon, appName, splitScreenController, shouldShowWindowingPill = true,
-            shouldShowNewWindowButton = true,
+            shouldShowNewWindowButton = true, shouldShowManageWindowsButton = false,
             null /* openInBrowserLink */, captionWidth = HANDLE_WIDTH, captionHeight = 50,
             captionX = captionX
         )
-        handleMenu.show(mock(), mock(), mock(), mock(), mock(), mock(), mock())
+        handleMenu.show(mock(), mock(), mock(), mock(), mock(), mock(), mock(), mock())
         return handleMenu
     }
 

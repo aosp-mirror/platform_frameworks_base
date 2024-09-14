@@ -757,8 +757,12 @@ public class GroupHelper {
 
             // scenario 3: sparse/singleton groups
             if (Flags.notificationForceGroupSingletons()) {
-                groupSparseGroups(record, notificationList, summaryByGroupKey, sectioner,
-                    fullAggregateGroupKey);
+                try {
+                    groupSparseGroups(record, notificationList, summaryByGroupKey, sectioner,
+                        fullAggregateGroupKey);
+                } catch (Throwable e) {
+                    Slog.wtf(TAG, "Failed to group sparse groups", e);
+                }
             }
         }
     }

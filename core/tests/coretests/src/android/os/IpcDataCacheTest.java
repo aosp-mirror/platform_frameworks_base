@@ -18,7 +18,9 @@ package android.os;
 
 import static org.junit.Assert.assertEquals;
 
+import android.multiuser.Flags;
 import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.ravenwood.RavenwoodRule;
 
 import androidx.test.filters.SmallTest;
@@ -151,8 +153,6 @@ public class IpcDataCacheTest {
         tester.verify(9);
     }
 
-    // This test is disabled pending an sepolicy change that allows any app to set the
-    // test property.
     @Test
     public void testRemoteCall() {
 
@@ -190,6 +190,44 @@ public class IpcDataCacheTest {
             assertEquals(e.getCause() instanceof RemoteException, true);
         }
         tester.verify(4);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_CACHING_DEVELOPMENT_IMPROVEMENTS)
+    public void testRemoteCallBypass() {
+
+        // A stand-in for the binder.  The test verifies that calls are passed through to
+        // this class properly.
+        ServerProxy tester = new ServerProxy();
+
+        // Create a cache that uses simple arithmetic to computer its values.
+        IpcDataCache.Config config = new IpcDataCache.Config(4, MODULE, API, "testCache3");
+        IpcDataCache<Integer, Boolean> testCache =
+                new IpcDataCache<>(config, (x) -> tester.query(x), (x) -> x % 9 == 0);
+
+        IpcDataCache.setTestMode(true);
+        testCache.testPropertyName();
+
+        tester.verify(0);
+        assertEquals(tester.value(3), testCache.query(3));
+        tester.verify(1);
+        assertEquals(tester.value(3), testCache.query(3));
+        tester.verify(2);
+        testCache.invalidateCache();
+        assertEquals(tester.value(3), testCache.query(3));
+        tester.verify(3);
+        assertEquals(tester.value(5), testCache.query(5));
+        tester.verify(4);
+        assertEquals(tester.value(5), testCache.query(5));
+        tester.verify(4);
+        assertEquals(tester.value(3), testCache.query(3));
+        tester.verify(4);
+        assertEquals(tester.value(9), testCache.query(9));
+        tester.verify(5);
+        assertEquals(tester.value(3), testCache.query(3));
+        tester.verify(5);
+        assertEquals(tester.value(5), testCache.query(5));
+        tester.verify(5);
     }
 
     @Test

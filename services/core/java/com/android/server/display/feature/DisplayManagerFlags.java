@@ -200,6 +200,11 @@ public class DisplayManagerFlags {
             Flags::normalBrightnessForDozeParameter
     );
 
+    private final FlagState mEnableBatteryStatsForAllDisplays = new FlagState(
+            Flags.FLAG_ENABLE_BATTERY_STATS_FOR_ALL_DISPLAYS,
+            Flags::enableBatteryStatsForAllDisplays
+    );
+
     /**
      * @return {@code true} if 'port' is allowed in display layout configuration file.
      */
@@ -415,6 +420,14 @@ public class DisplayManagerFlags {
     }
 
     /**
+      * @return {@code true} if battery stats is enabled for all displays, not just the primary
+      * display.
+      */
+    public boolean isBatteryStatsEnabledForAllDisplays() {
+        return mEnableBatteryStatsForAllDisplays.isEnabled();
+    }
+
+    /**
      * dumps all flagstates
      * @param pw printWriter
      */
@@ -456,6 +469,7 @@ public class DisplayManagerFlags {
         pw.println(" " + mNewHdrBrightnessModifier);
         pw.println(" " + mNormalBrightnessForDozeParameter);
         pw.println(" " + mIdleScreenConfigInSubscribingLightSensor);
+        pw.println(" " + mEnableBatteryStatsForAllDisplays);
     }
 
     private static class FlagState {
