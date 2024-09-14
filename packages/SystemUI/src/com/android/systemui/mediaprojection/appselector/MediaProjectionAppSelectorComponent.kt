@@ -16,6 +16,7 @@
 
 package com.android.systemui.mediaprojection.appselector
 
+import com.android.app.tracing.coroutines.createCoroutineTracingContext
 import android.app.Activity
 import android.content.ComponentName
 import android.content.Context
@@ -133,7 +134,7 @@ interface MediaProjectionAppSelectorModule {
         @MediaProjectionAppSelector
         @MediaProjectionAppSelectorScope
         fun provideCoroutineScope(@Application applicationScope: CoroutineScope): CoroutineScope =
-            CoroutineScope(applicationScope.coroutineContext + SupervisorJob())
+            CoroutineScope(applicationScope.coroutineContext + SupervisorJob() + createCoroutineTracingContext("MediaProjectionAppSelectorScope"))
     }
 }
 

@@ -17,6 +17,7 @@
 
 package com.android.systemui.keyguard.ui.preview
 
+import com.android.app.tracing.coroutines.createCoroutineTracingContext
 import android.app.WallpaperColors
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -187,7 +188,7 @@ constructor(
     private var themeStyle: Style? = null
 
     init {
-        coroutineScope = CoroutineScope(applicationScope.coroutineContext + Job())
+        coroutineScope = CoroutineScope(applicationScope.coroutineContext + Job() + createCoroutineTracingContext("KeyguardPreviewRenderer"))
         disposables += DisposableHandle { coroutineScope.cancel() }
         clockController.setFallbackWeatherData(WeatherData.getPlaceholderWeatherData())
 
