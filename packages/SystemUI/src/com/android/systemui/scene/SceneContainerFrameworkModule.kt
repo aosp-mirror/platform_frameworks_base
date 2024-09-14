@@ -23,7 +23,6 @@ import com.android.systemui.scene.domain.SceneDomainModule
 import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor
 import com.android.systemui.scene.domain.resolver.HomeSceneFamilyResolverModule
 import com.android.systemui.scene.domain.resolver.NotifShadeSceneFamilyResolverModule
-import com.android.systemui.scene.domain.resolver.QuickSettingsSceneFamilyResolverModule
 import com.android.systemui.scene.domain.startable.KeyguardStateCallbackStartable
 import com.android.systemui.scene.domain.startable.SceneContainerStartable
 import com.android.systemui.scene.domain.startable.ScrimStartable
@@ -61,7 +60,6 @@ import dagger.multibindings.IntoMap
             // List SceneResolver modules for supported SceneFamilies
             HomeSceneFamilyResolverModule::class,
             NotifShadeSceneFamilyResolverModule::class,
-            QuickSettingsSceneFamilyResolverModule::class,
         ]
 )
 interface SceneContainerFrameworkModule {

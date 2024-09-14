@@ -40,7 +40,6 @@ import com.android.systemui.scene.data.repository.Transition
 import com.android.systemui.scene.data.repository.setSceneTransition
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.domain.resolver.notifShadeSceneFamilyResolver
-import com.android.systemui.scene.domain.resolver.quickSettingsSceneFamilyResolver
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.testKosmos
@@ -80,7 +79,6 @@ class KeyguardDismissActionInteractorTest : SysuiTestCase() {
                 applicationScope = testScope.backgroundScope,
                 sceneInteractor = { kosmos.sceneInteractor },
                 deviceUnlockedInteractor = { kosmos.deviceUnlockedInteractor },
-                quickSettingsSceneFamilyResolver = { kosmos.quickSettingsSceneFamilyResolver },
                 notifShadeSceneFamilyResolver = { kosmos.notifShadeSceneFamilyResolver },
                 powerInteractor = kosmos.powerInteractor,
                 alternateBouncerInteractor = kosmos.alternateBouncerInteractor,
