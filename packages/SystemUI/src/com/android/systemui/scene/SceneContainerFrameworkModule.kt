@@ -50,7 +50,6 @@ import dagger.multibindings.IntoMap
             QuickSettingsSceneModule::class,
             ShadeSceneModule::class,
             QuickSettingsShadeOverlayModule::class,
-            QuickSettingsShadeSceneModule::class,
             NotificationsShadeOverlayModule::class,
             NotificationsShadeSceneModule::class,
             NotificationsShadeSessionModule::class,
