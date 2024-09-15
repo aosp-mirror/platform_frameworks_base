@@ -419,7 +419,7 @@ class ZenModeEventLogger {
 
             if (config.automaticRules != null) {
                 for (ZenModeConfig.ZenRule rule : config.automaticRules.values()) {
-                    if (rule != null && rule.isAutomaticActive()) {
+                    if (rule != null && rule.isActive()) {
                         rules.add(rule);
                     }
                 }

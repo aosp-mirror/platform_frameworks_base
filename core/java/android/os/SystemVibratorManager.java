@@ -138,11 +138,14 @@ public class SystemVibratorManager extends VibratorManager {
             Log.w(TAG, "Failed to vibrate; no vibrator manager service.");
             return;
         }
+        Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "vibrate, reason=" + reason);
         try {
             mService.vibrate(uid, mContext.getDeviceId(), opPkg, effect, attributes, reason,
                     mToken);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to vibrate.", e);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
         }
     }
 
@@ -152,11 +155,14 @@ public class SystemVibratorManager extends VibratorManager {
             Log.w(TAG, "Failed to perform haptic feedback; no vibrator manager service.");
             return;
         }
+        Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "performHapticFeedback, reason=" + reason);
         try {
             mService.performHapticFeedback(mUid, mContext.getDeviceId(), mPackageName, constant,
                     reason, flags, privFlags);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to perform haptic feedback.", e);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
         }
     }
 
@@ -168,11 +174,15 @@ public class SystemVibratorManager extends VibratorManager {
                             + " no vibrator manager service.");
             return;
         }
+        Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR,
+                "performHapticFeedbackForInputDevice, reason=" + reason);
         try {
             mService.performHapticFeedbackForInputDevice(mUid, mContext.getDeviceId(), mPackageName,
                     constant, inputDeviceId, inputSource, reason, flags, privFlags);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to perform haptic feedback for input device.", e);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
         }
     }
 

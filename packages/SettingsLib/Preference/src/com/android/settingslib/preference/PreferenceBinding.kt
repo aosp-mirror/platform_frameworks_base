@@ -108,6 +108,9 @@ interface PreferenceBinding {
 /** Abstract preference screen to provide preference hierarchy and binding factory. */
 interface PreferenceScreenCreator : PreferenceScreenMetadata, PreferenceScreenProvider {
 
+    /** Returns if the flag (e.g. for rollout) is enabled on current screen. */
+    fun isFlagEnabled(context: Context): Boolean = true
+
     val preferenceBindingFactory: PreferenceBindingFactory
         get() = DefaultPreferenceBindingFactory
 

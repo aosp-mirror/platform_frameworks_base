@@ -5509,6 +5509,9 @@
     <!-- Message shown in the dialog prompting the user to set up a screen lock to access private space [CHAR LIMIT=120] -->
     <string name="private_space_set_up_screen_lock_message">To use your private space, set a screen lock on this device</string>
 
+    <!-- Message shown in the dialog prompting the user to set up a screen lock to delete private space from Reset Options [CHAR LIMIT=120] -->
+    <string name="private_space_set_up_screen_lock_for_reset">To delete private space, set a screen lock on this device</string>
+
     <!-- Title of the dialog that is shown when the user tries to launch a blocked application [CHAR LIMIT=50] -->
     <string name="app_blocked_title">App is not available</string>
     <!-- Default message shown in the dialog that is shown when the user tries to launch a blocked application [CHAR LIMIT=NONE] -->

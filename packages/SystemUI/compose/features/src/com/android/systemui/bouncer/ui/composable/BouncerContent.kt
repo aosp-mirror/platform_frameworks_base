@@ -830,7 +830,7 @@ private fun UserSwitcher(
             Image(
                 bitmap = it.asImageBitmap(),
                 contentDescription = null,
-                modifier = Modifier.size(SelectedUserImageSize),
+                modifier = Modifier.size(SelectedUserImageSize).sysuiResTag("user_icon"),
             )
         }
 

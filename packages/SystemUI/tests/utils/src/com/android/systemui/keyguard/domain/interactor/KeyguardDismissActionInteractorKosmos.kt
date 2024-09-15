@@ -17,14 +17,12 @@
 package com.android.systemui.keyguard.domain.interactor
 
 import com.android.systemui.bouncer.domain.interactor.alternateBouncerInteractor
-import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
+import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteractor
 import com.android.systemui.keyguard.data.repository.keyguardRepository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
-import com.android.systemui.scene.domain.resolver.notifShadeSceneFamilyResolver
-import com.android.systemui.scene.domain.resolver.quickSettingsSceneFamilyResolver
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
@@ -37,12 +35,9 @@ val Kosmos.keyguardDismissActionInteractor by
             dismissInteractor = keyguardDismissInteractor,
             applicationScope = testScope.backgroundScope,
             sceneInteractor = { sceneInteractor },
-            deviceEntryInteractor = { deviceEntryInteractor },
-            quickSettingsSceneFamilyResolver = { quickSettingsSceneFamilyResolver },
-            notifShadeSceneFamilyResolver = { notifShadeSceneFamilyResolver },
+            deviceUnlockedInteractor = { deviceUnlockedInteractor },
             powerInteractor = powerInteractor,
             alternateBouncerInteractor = alternateBouncerInteractor,
-            keyguardInteractor = { keyguardInteractor },
             shadeInteractor = { shadeInteractor },
         )
     }

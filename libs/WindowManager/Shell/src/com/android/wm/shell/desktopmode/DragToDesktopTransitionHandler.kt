@@ -629,15 +629,20 @@ sealed class DragToDesktopTransitionHandler(
         finishTransaction: SurfaceControl.Transaction?
     ) {
         val state = transitionState ?: return
-        if (aborted && state.startTransitionToken == transition) {
+        if (!aborted) {
+            return
+        }
+        if (state.startTransitionToken == transition) {
             ProtoLog.v(
                 ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
                 "DragToDesktop: onTransitionConsumed() start transition aborted"
             )
             state.startAborted = true
-            // Cancel CUJ interaction if the transition is aborted.
+            // The start-transition (DRAG_HOLD) is aborted, cancel its jank interaction.
             interactionJankMonitor.cancel(CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_HOLD)
         } else if (state.cancelTransitionToken != transition) {
+            // This transition being aborted is neither the start, nor the cancel transition, so
+            // it must be the finish transition (DRAG_RELEASE); cancel its jank interaction.
             interactionJankMonitor.cancel(CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_RELEASE)
         }
     }

@@ -28,6 +28,7 @@ import android.util.Log;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.internal.os.RuntimeInit;
+import com.android.platform.test.ravenwood.runtimehelper.ClassLoadHook;
 import com.android.ravenwood.common.RavenwoodCommonUtils;
 
 import org.junit.runner.Description;
@@ -75,6 +76,9 @@ public class RavenwoodAwareTestRunnerHook {
         // We haven't initialized liblog yet, so directly write to System.out here.
         RavenwoodCommonUtils.log(TAG, "initOnce()");
 
+        // Make sure libandroid_runtime is loaded.
+        ClassLoadHook.onClassLoaded(Log.class);
+
         // Redirect stdout/stdin to liblog.
         RuntimeInit.redirectLogStreams();
 
@@ -82,6 +86,10 @@ public class RavenwoodAwareTestRunnerHook {
         System.setProperty("android.junit.runner",
                 "androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner");
         System.setProperty(RAVENWOOD_VERSION_JAVA_SYSPROP, "1");
+
+        // Do the basic set up for the android sysprops.
+        RavenwoodRuntimeEnvironmentController.setSystemProperties(
+                RavenwoodSystemProperties.DEFAULT_VALUES);
     }
 
     /**
@@ -100,7 +108,7 @@ public class RavenwoodAwareTestRunnerHook {
         Log.v(TAG, "onBeforeInnerRunnerStart: description=" + description);
 
         // Prepare the environment before the inner runner starts.
-        RavenwoodRunnerState.forRunner(runner).enterTestClass(description);
+        runner.mState.enterTestClass(description);
     }
 
     /**
@@ -111,7 +119,7 @@ public class RavenwoodAwareTestRunnerHook {
         Log.v(TAG, "onAfterInnerRunnerFinished: description=" + description);
 
         RavenwoodTestStats.getInstance().onClassFinished(description);
-        RavenwoodRunnerState.forRunner(runner).exitTestClass();
+        runner.mState.exitTestClass();
     }
 
     /**
@@ -125,10 +133,10 @@ public class RavenwoodAwareTestRunnerHook {
 
         if (scope == Scope.Instance && order == Order.Outer) {
             // Start of a test method.
-            RavenwoodRunnerState.forRunner(runner).enterTestMethod(description);
+            runner.mState.enterTestMethod(description);
         }
 
-        final var classDescription = RavenwoodRunnerState.forRunner(runner).getClassDescription();
+        final var classDescription = runner.mState.getClassDescription();
 
         // Class-level annotations are checked by the runner already, so we only check
         // method-level annotations here.
@@ -152,11 +160,11 @@ public class RavenwoodAwareTestRunnerHook {
             Scope scope, Order order, Throwable th) {
         Log.v(TAG, "onAfter: description=" + description + ", " + scope + ", " + order + ", " + th);
 
-        final var classDescription = RavenwoodRunnerState.forRunner(runner).getClassDescription();
+        final var classDescription = runner.mState.getClassDescription();
 
         if (scope == Scope.Instance && order == Order.Outer) {
             // End of a test method.
-            RavenwoodRunnerState.forRunner(runner).exitTestMethod();
+            runner.mState.exitTestMethod();
             RavenwoodTestStats.getInstance().onTestFinished(classDescription, description,
                     th == null ? Result.Passed : Result.Failed);
         }
@@ -206,7 +214,7 @@ public class RavenwoodAwareTestRunnerHook {
             Description description, RavenwoodRule rule) throws Throwable {
         Log.v(TAG, "onRavenwoodRuleEnter: description=" + description);
 
-        RavenwoodRunnerState.forRunner(runner).enterRavenwoodRule(rule);
+        runner.mState.enterRavenwoodRule(rule);
     }
 
 
@@ -217,6 +225,6 @@ public class RavenwoodAwareTestRunnerHook {
             Description description, RavenwoodRule rule) throws Throwable {
         Log.v(TAG, "onRavenwoodRuleExit: description=" + description);
 
-        RavenwoodRunnerState.forRunner(runner).exitRavenwoodRule(rule);
+        runner.mState.exitRavenwoodRule(rule);
     }
 }

@@ -225,6 +225,39 @@ class KeyguardInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    fun dismissAlpha_onGlanceableHub_doesNotEmitWhenShadeResets() =
+        testScope.runTest {
+            val dismissAlpha by collectValues(underTest.dismissAlpha)
+            assertThat(dismissAlpha[0]).isEqualTo(1f)
+            assertThat(dismissAlpha.size).isEqualTo(1)
+
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.AOD,
+                to = KeyguardState.LOCKSCREEN,
+                testScope,
+            )
+
+            // User begins to swipe up
+            repository.setStatusBarState(StatusBarState.KEYGUARD)
+            repository.setKeyguardDismissible(true)
+            shadeRepository.setLegacyShadeExpansion(0.98f)
+
+            assertThat(dismissAlpha[1]).isGreaterThan(0.5f)
+            assertThat(dismissAlpha[1]).isLessThan(1f)
+            assertThat(dismissAlpha.size).isEqualTo(2)
+
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.GLANCEABLE_HUB,
+                testScope,
+            )
+
+            // Now reset the shade and verify we don't emit any new values
+            shadeRepository.setLegacyShadeExpansion(1f)
+            assertThat(dismissAlpha.size).isEqualTo(2)
+        }
+
+    @Test
     fun dismissAlpha_doesNotEmitWhileTransitioning() =
         testScope.runTest {
             val dismissAlpha by collectLastValue(underTest.dismissAlpha)
@@ -262,7 +295,7 @@ class KeyguardInteractorTest : SysuiTestCase() {
 
             configRepository.setDimensionPixelSize(
                 R.dimen.keyguard_translate_distance_on_swipe_up,
-                100
+                100,
             )
             configRepository.onAnyConfigurationChange()
 
@@ -284,7 +317,7 @@ class KeyguardInteractorTest : SysuiTestCase() {
 
             configRepository.setDimensionPixelSize(
                 R.dimen.keyguard_translate_distance_on_swipe_up,
-                100
+                100,
             )
             configRepository.onAnyConfigurationChange()
 
@@ -306,7 +339,7 @@ class KeyguardInteractorTest : SysuiTestCase() {
 
             configRepository.setDimensionPixelSize(
                 R.dimen.keyguard_translate_distance_on_swipe_up,
-                100
+                100,
             )
             configRepository.onAnyConfigurationChange()
 
@@ -328,7 +361,7 @@ class KeyguardInteractorTest : SysuiTestCase() {
 
             configRepository.setDimensionPixelSize(
                 R.dimen.keyguard_translate_distance_on_swipe_up,
-                100
+                100,
             )
             configRepository.onAnyConfigurationChange()
 

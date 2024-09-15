@@ -68,6 +68,13 @@ public class TouchpadDebugViewController implements InputManager.InputDeviceList
     @Override
     public void onInputDeviceRemoved(int deviceId) {
         hideDebugView(deviceId);
+        if (mTouchpadDebugView == null) {
+            final InputManager inputManager = Objects.requireNonNull(
+                    mContext.getSystemService(InputManager.class));
+            for (int id : inputManager.getInputDeviceIds()) {
+                onInputDeviceAdded(id);
+            }
+        }
     }
 
     @Override
@@ -105,18 +112,20 @@ public class TouchpadDebugViewController implements InputManager.InputDeviceList
         final WindowManager wm = Objects.requireNonNull(
                 mContext.getSystemService(WindowManager.class));
 
-        mTouchpadDebugView = new TouchpadDebugView(mContext, touchpadId);
+        TouchpadHardwareProperties touchpadHardwareProperties =
+                mInputManagerService.getTouchpadHardwareProperties(
+                        touchpadId);
+
+        mTouchpadDebugView = new TouchpadDebugView(mContext, touchpadId,
+                touchpadHardwareProperties);
         final WindowManager.LayoutParams mWindowLayoutParams =
                 mTouchpadDebugView.getWindowLayoutParams();
 
         wm.addView(mTouchpadDebugView, mWindowLayoutParams);
         Slog.d(TAG, "Touchpad debug view created.");
 
-        TouchpadHardwareProperties mTouchpadHardwareProperties =
-                mInputManagerService.getTouchpadHardwareProperties(
-                        touchpadId);
-        if (mTouchpadHardwareProperties != null) {
-            Slog.d(TAG, mTouchpadHardwareProperties.toString());
+        if (touchpadHardwareProperties != null) {
+            Slog.d(TAG, touchpadHardwareProperties.toString());
         } else {
             Slog.w(TAG, "Failed to retrieve touchpad hardware properties for "
                     + "device ID: " + touchpadId);
@@ -134,9 +143,16 @@ public class TouchpadDebugViewController implements InputManager.InputDeviceList
         Slog.d(TAG, "Touchpad debug view removed.");
     }
 
-    public void updateTouchpadHardwareState(TouchpadHardwareState touchpadHardwareState) {
+    /**
+     * Notifies about an update in the touchpad's hardware state.
+     *
+     * @param touchpadHardwareState the hardware state of a touchpad
+     * @param deviceId              the deviceId of the touchpad that is sending the hardware state
+     */
+    public void updateTouchpadHardwareState(TouchpadHardwareState touchpadHardwareState,
+            int deviceId) {
         if (mTouchpadDebugView != null) {
-            mTouchpadDebugView.updateHardwareState(touchpadHardwareState);
+            mTouchpadDebugView.updateHardwareState(touchpadHardwareState, deviceId);
         }
     }
 }

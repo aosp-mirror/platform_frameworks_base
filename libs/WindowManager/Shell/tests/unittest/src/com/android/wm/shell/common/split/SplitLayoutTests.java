@@ -20,8 +20,6 @@ import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_50_50;
-import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_END_AND_DISMISS;
-import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_START_AND_DISMISS;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -150,8 +148,8 @@ public class SplitLayoutTests extends ShellTestCase {
     @UiThreadTest
     public void testSnapToDismissStart() {
         // verify it callbacks properly when the snap target indicates dismissing split.
-        DividerSnapAlgorithm.SnapTarget snapTarget = getSnapTarget(0 /* position */,
-                SNAP_TO_START_AND_DISMISS);
+        DividerSnapAlgorithm.SnapTarget snapTarget =
+                mSplitLayout.mDividerSnapAlgorithm.getDismissStartTarget();
 
         mSplitLayout.snapToTarget(mSplitLayout.getDividerPosition(), snapTarget);
         waitDividerFlingFinished();
@@ -162,8 +160,8 @@ public class SplitLayoutTests extends ShellTestCase {
     @UiThreadTest
     public void testSnapToDismissEnd() {
         // verify it callbacks properly when the snap target indicates dismissing split.
-        DividerSnapAlgorithm.SnapTarget snapTarget = getSnapTarget(0 /* position */,
-                SNAP_TO_END_AND_DISMISS);
+        DividerSnapAlgorithm.SnapTarget snapTarget =
+                mSplitLayout.mDividerSnapAlgorithm.getDismissEndTarget();
 
         mSplitLayout.snapToTarget(mSplitLayout.getDividerPosition(), snapTarget);
         waitDividerFlingFinished();
@@ -202,10 +200,5 @@ public class SplitLayoutTests extends ShellTestCase {
         configuration.windowConfiguration.setBounds(
                 new Rect(0, 0, 1080, 2160));
         return configuration;
-    }
-
-    private static DividerSnapAlgorithm.SnapTarget getSnapTarget(int position, int flag) {
-        return new DividerSnapAlgorithm.SnapTarget(
-                position /* position */, position /* taskPosition */, flag);
     }
 }

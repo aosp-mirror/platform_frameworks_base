@@ -6207,6 +6207,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @Override
         public void onProcessAdded(WindowProcessController proc) {
             synchronized (mGlobalLockWithoutBoost) {
+                mPackageConfigPersister.updateConfigIfNeeded(
+                        proc, proc.mUserId, proc.mInfo.packageName);
                 mProcessNames.put(proc.mName, proc.mUid, proc);
             }
         }

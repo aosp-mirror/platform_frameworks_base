@@ -110,15 +110,16 @@ class DeviceSettingRepositoryImpl(
             if (settingId == DeviceSettingId.DEVICE_SETTING_ID_BLUETOOTH_PROFILES) {
                 BluetoothProfilesItem(
                     settingId,
+                    highlighted,
                     preferenceKey!!,
                     extras.getStringArrayList(DeviceSettingContract.INVISIBLE_PROFILES)
                         ?: emptyList()
                 )
             } else {
-                CommonBuiltinItem(settingId, preferenceKey!!)
+                CommonBuiltinItem(settingId, highlighted, preferenceKey!!)
             }
         } else {
-            AppProvidedItem(settingId)
+            AppProvidedItem(settingId, highlighted)
         }
     }
 

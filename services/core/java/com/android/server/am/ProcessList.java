@@ -2390,8 +2390,8 @@ public final class ProcessList {
             }
             String volumeUuid = packageState.getVolumeUuid();
             long inode = packageState.getUserStateOrDefault(userId).getCeDataInode();
-            if (inode == 0) {
-                Slog.w(TAG, packageName + " inode == 0 (b/152760674)");
+            if (inode <= 0) {
+                Slog.w(TAG, packageName + " inode == 0 or app uninstalled with keep-data");
                 return null;
             }
             result.put(packageName, Pair.create(volumeUuid, inode));
@@ -3398,7 +3398,8 @@ public final class ProcessList {
         // Check if we should mark the processrecord for first launch after force-stopping
         if (wasStopped) {
             boolean wasEverLaunched = false;
-            if (android.app.Flags.useAppInfoNotLaunched()) {
+            if (android.app.Flags.useAppInfoNotLaunched()
+                    || mService.mConstants.mFlagUseAppInfoNotLaunched) {
                 wasEverLaunched = !info.isNotLaunched();
             } else {
                 try {
@@ -3419,7 +3420,8 @@ public final class ProcessList {
                         : STOPPED_STATE_FIRST_LAUNCH;
                 r.getWindowProcessController().setStoppedState(stoppedState);
             } else {
-                if (android.app.Flags.useAppInfoNotLaunched()) {
+                if (android.app.Flags.useAppInfoNotLaunched()
+                        || mService.mConstants.mFlagUseAppInfoNotLaunched) {
                     // If it was launched before, then it must be a force-stop
                     r.setWasForceStopped(wasEverLaunched);
                 } else {
@@ -3769,7 +3771,7 @@ public final class ProcessList {
                     boolean hasActivity = false;
                     int connUid = 0;
                     int connGroup = 0;
-                    while (i >= bottomI) {
+                    while (subProc.info.uid != uid) {
                         mLruProcesses.remove(i);
                         mLruProcesses.add(endIndex, subProc);
                         if (DEBUG_LRU) Slog.d(TAG_LRU,
@@ -4125,19 +4127,6 @@ public final class ProcessList {
         return false;
     }
 
-    private static int procStateToImportance(int procState, int memAdj,
-            ActivityManager.RunningAppProcessInfo currApp,
-            int clientTargetSdk) {
-        int imp = ActivityManager.RunningAppProcessInfo.procStateToImportanceForTargetSdk(
-                procState, clientTargetSdk);
-        if (imp == ActivityManager.RunningAppProcessInfo.IMPORTANCE_BACKGROUND) {
-            currApp.lru = memAdj;
-        } else {
-            currApp.lru = 0;
-        }
-        return imp;
-    }
-
     @GuardedBy(anyOf = {"mService", "mProcLock"})
     void fillInProcMemInfoLOSP(ProcessRecord app,
             ActivityManager.RunningAppProcessInfo outInfo,
@@ -4155,14 +4144,20 @@ public final class ProcessList {
         }
         outInfo.lastTrimLevel = app.mProfile.getTrimMemoryLevel();
         final ProcessStateRecord state = app.mState;
-        int adj = state.getCurAdj();
-        int procState = state.getCurProcState();
-        outInfo.importance = procStateToImportance(procState, adj, outInfo,
-                clientTargetSdk);
+        final int procState = state.getCurProcState();
+        outInfo.importance = ActivityManager.RunningAppProcessInfo
+                                .procStateToImportanceForTargetSdk(procState, clientTargetSdk);
+        if (outInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_BACKGROUND) {
+            outInfo.lru = state.getCurAdj();
+        } else {
+            outInfo.lru = 0;
+        }
         outInfo.importanceReasonCode = state.getAdjTypeCode();
         outInfo.processState = procState;
         outInfo.isFocused = (app == mService.getTopApp());
         outInfo.lastActivityTime = app.getLastActivityTime();
+        // Note: ActivityManager$RunningAppProcessInfo.copyTo() must be updated if what gets
+        // "filled into" outInfo in this method changes.
     }
 
     @GuardedBy(anyOf = {"mService", "mProcLock"})

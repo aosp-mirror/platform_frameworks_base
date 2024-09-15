@@ -44,13 +44,8 @@ open class PreferenceFragment :
         fun createPreferenceScreenFromResource() =
             factory.inflate(getPreferenceScreenResId(context))
 
-        if (!usePreferenceScreenMetadata()) return createPreferenceScreenFromResource()
-
-        val screenKey = getPreferenceScreenBindingKey(context)
         val screenCreator =
-            (PreferenceScreenRegistry[screenKey] as? PreferenceScreenCreator)
-                ?: return createPreferenceScreenFromResource()
-
+            getPreferenceScreenCreator(context) ?: return createPreferenceScreenFromResource()
         val preferenceBindingFactory = screenCreator.preferenceBindingFactory
         val preferenceHierarchy = screenCreator.getPreferenceHierarchy(context)
         val preferenceScreen =
@@ -73,16 +68,13 @@ open class PreferenceFragment :
         return preferenceScreen
     }
 
-    /**
-     * Returns if preference screen metadata can be used to set up preference screen.
-     *
-     * This is for flagging purpose. If false (e.g. flag is disabled), xml resource is used to build
-     * preference screen.
-     */
-    protected open fun usePreferenceScreenMetadata(): Boolean = true
-
     /** Returns the xml resource to create preference screen. */
     @XmlRes protected open fun getPreferenceScreenResId(context: Context): Int = 0
+
+    protected fun getPreferenceScreenCreator(context: Context): PreferenceScreenCreator? =
+        (PreferenceScreenRegistry[getPreferenceScreenBindingKey(context)]
+                as? PreferenceScreenCreator)
+            ?.run { if (isFlagEnabled(context)) this else null }
 
     override fun getPreferenceScreenBindingKey(context: Context): String? =
         arguments?.getString(EXTRA_BINDING_SCREEN_KEY)
@@ -90,20 +82,5 @@ open class PreferenceFragment :
     override fun onDestroy() {
         preferenceScreenBindingHelper?.close()
         super.onDestroy()
-    }
-
-    companion object {
-        /** Returns [PreferenceFragment] instance to display the preference screen of given key. */
-        fun of(screenKey: String): PreferenceFragment? {
-            val screenMetadata = PreferenceScreenRegistry[screenKey] ?: return null
-            if (
-                screenMetadata is PreferenceScreenCreator && screenMetadata.hasCompleteHierarchy()
-            ) {
-                return PreferenceFragment().apply {
-                    arguments = Bundle().apply { putString(EXTRA_BINDING_SCREEN_KEY, screenKey) }
-                }
-            }
-            return null
-        }
     }
 }

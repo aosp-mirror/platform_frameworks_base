@@ -15,21 +15,10 @@
  */
 package com.android.internal.ravenwood;
 
-import android.os.SystemProperties_host;
-import android.platform.test.ravenwood.RavenwoodSystemProperties;
-import android.util.Log;
-
 import com.android.ravenwood.common.JvmWorkaround;
 import com.android.ravenwood.common.RavenwoodCommonUtils;
 
 public class RavenwoodEnvironment_host {
-    private static final String TAG = RavenwoodEnvironment.TAG;
-
-    private static final Object sInitializeLock = new Object();
-
-    // @GuardedBy("sInitializeLock")
-    private static boolean sInitialized;
-
     private RavenwoodEnvironment_host() {
     }
 
@@ -37,27 +26,8 @@ public class RavenwoodEnvironment_host {
      * Called from {@link RavenwoodEnvironment#ensureRavenwoodInitialized()}.
      */
     public static void ensureRavenwoodInitialized() {
-
-        // TODO Unify it with the initialization code in RavenwoodAwareTestRunnerHook.
-
-        synchronized (sInitializeLock) {
-            if (sInitialized) {
-                return;
-            }
-            Log.i(TAG, "Initializing Ravenwood environment");
-
-            // Set the default values.
-            var sysProps = RavenwoodSystemProperties.DEFAULT_VALUES;
-
-            // We have a method that does it in RavenwoodRuleImpl, but we can't use that class
-            // here, So just inline it.
-            SystemProperties_host.initializeIfNeeded(
-                    sysProps.getValues(),
-                    sysProps.getKeyReadablePredicate(),
-                    sysProps.getKeyWritablePredicate());
-
-            sInitialized = true;
-        }
+        // Initialization is now done by RavenwoodAwareTestRunner.
+        // Should we remove it?
     }
 
     /**

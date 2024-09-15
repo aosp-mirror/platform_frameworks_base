@@ -391,11 +391,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     }
 
     public void notifyVisible(boolean visible) {
-        if (Flags.useVolumeController()) {
-            mVolumeControllerAdapter.notifyVolumeControllerVisible(visible);
-        } else {
-            mWorker.obtainMessage(W.NOTIFY_VISIBLE, visible ? 1 : 0, 0).sendToTarget();
-        }
+        mWorker.obtainMessage(W.NOTIFY_VISIBLE, visible ? 1 : 0, 0).sendToTarget();
     }
 
     public void userActivity() {
@@ -457,7 +453,11 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     }
 
     private void onNotifyVisibleW(boolean visible) {
-        mAudio.notifyVolumeControllerVisible(mVolumeController, visible);
+        if (Flags.useVolumeController()) {
+            mVolumeControllerAdapter.notifyVolumeControllerVisible(visible);
+        } else {
+            mAudio.notifyVolumeControllerVisible(mVolumeController, visible);
+        }
         if (!visible) {
             if (updateActiveStreamW(-1)) {
                 mCallbacks.onStateChanged(mState);
@@ -539,10 +539,12 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
                                     != 0;
             changed |= updateStreamRoutedToBluetoothW(stream, routedToBluetooth);
         } else if (stream == AudioManager.STREAM_VOICE_CALL) {
-            final boolean routedToBluetooth =
-                    (mAudio.getDevicesForStream(AudioManager.STREAM_VOICE_CALL)
-                            & AudioManager.DEVICE_OUT_BLE_HEADSET) != 0;
-            changed |= updateStreamRoutedToBluetoothW(stream, routedToBluetooth);
+            final int devices = mAudio.getDevicesForStream(AudioManager.STREAM_VOICE_CALL);
+            final int bluetoothDevicesMask = (AudioManager.DEVICE_OUT_BLE_HEADSET
+                    | AudioManager.DEVICE_OUT_BLUETOOTH_SCO_HEADSET
+                    | AudioManager.DEVICE_OUT_BLUETOOTH_SCO_CARKIT);
+            changed |= updateStreamRoutedToBluetoothW(stream,
+                    (devices & bluetoothDevicesMask) != 0);
         }
         return changed;
     }

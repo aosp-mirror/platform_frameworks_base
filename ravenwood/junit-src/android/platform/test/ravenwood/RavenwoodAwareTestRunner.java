@@ -171,6 +171,12 @@ public final class RavenwoodAwareTestRunner extends Runner implements Filterable
     private Description mDescription = null;
     private Throwable mExceptionInConstructor = null;
 
+    /**
+     * Stores internal states / methods associated with this runner that's only needed in
+     * junit-impl.
+     */
+    final RavenwoodRunnerState mState = new RavenwoodRunnerState(this);
+
     private Error logAndFail(String message, Throwable exception) {
         Log.e(TAG, message, exception);
         throw new AssertionError(message, exception);

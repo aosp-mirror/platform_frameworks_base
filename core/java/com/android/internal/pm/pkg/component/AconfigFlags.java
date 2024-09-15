@@ -18,6 +18,7 @@ package com.android.internal.pm.pkg.component;
 
 import static com.android.internal.pm.pkg.parsing.ParsingUtils.ANDROID_RES_NAMESPACE;
 
+import android.aconfig.DeviceProtos;
 import android.aconfig.nano.Aconfig;
 import android.aconfig.nano.Aconfig.parsed_flag;
 import android.aconfig.nano.Aconfig.parsed_flags;
@@ -40,7 +41,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.List;
+import java.util.Arrays;
 import java.util.Map;
 
 /**
@@ -53,12 +54,6 @@ import java.util.Map;
  */
 public class AconfigFlags {
     private static final String LOG_TAG = "AconfigFlags";
-
-    private static final List<String> sTextProtoFilesOnDevice = List.of(
-            "/system/etc/aconfig_flags.pb",
-            "/system_ext/etc/aconfig_flags.pb",
-            "/product/etc/aconfig_flags.pb",
-            "/vendor/etc/aconfig_flags.pb");
 
     public enum Permission {
         READ_WRITE,
@@ -73,7 +68,10 @@ public class AconfigFlags {
             Slog.v(LOG_TAG, "Feature disabled, skipped all loading");
             return;
         }
-        for (String fileName : sTextProtoFilesOnDevice) {
+        final var defaultFlagProtoFiles =
+                (Process.myUid() == Process.SYSTEM_UID) ? DeviceProtos.parsedFlagsProtoPaths()
+                        : Arrays.asList(DeviceProtos.PATHS);
+        for (String fileName : defaultFlagProtoFiles) {
             try (var inputStream = new FileInputStream(fileName)) {
                 loadAconfigDefaultValues(inputStream.readAllBytes());
             } catch (IOException e) {

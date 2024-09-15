@@ -25,6 +25,7 @@ import android.hardware.BatteryState;
 import android.hardware.SensorManager;
 import android.hardware.input.InputManager.InputDeviceBatteryListener;
 import android.hardware.input.InputManager.InputDeviceListener;
+import android.hardware.input.InputManager.KeyGestureEventHandler;
 import android.hardware.input.InputManager.KeyGestureEventListener;
 import android.hardware.input.InputManager.KeyboardBacklightListener;
 import android.hardware.input.InputManager.OnTabletModeChangedListener;
@@ -118,6 +119,14 @@ public final class InputManagerGlobal {
     @GuardedBy("mKeyGestureEventListenerLock")
     @Nullable
     private IKeyGestureEventListener mKeyGestureEventListener;
+
+    private final Object mKeyGestureEventHandlerLock = new Object();
+    @GuardedBy("mKeyGestureEventHandlerLock")
+    @Nullable
+    private ArrayList<KeyGestureEventHandler> mKeyGestureEventHandlers;
+    @GuardedBy("mKeyGestureEventHandlerLock")
+    @Nullable
+    private IKeyGestureHandler mKeyGestureHandler;
 
     // InputDeviceSensorManager gets notified synchronously from the binder thread when input
     // devices change, so it must be synchronized with the input device listeners.
@@ -1080,18 +1089,14 @@ public final class InputManagerGlobal {
     }
 
     private class LocalKeyGestureEventListener extends IKeyGestureEventListener.Stub {
-
         @Override
-        public void onKeyGestureEvent(int deviceId, int[] keycodes, int modifierState,
-                int gestureType) {
+        public void onKeyGestureEvent(@NonNull AidlKeyGestureEvent ev) {
             synchronized (mKeyGestureEventListenerLock) {
                 if (mKeyGestureEventListeners == null) return;
                 final int numListeners = mKeyGestureEventListeners.size();
+                final KeyGestureEvent event = new KeyGestureEvent(ev);
                 for (int i = 0; i < numListeners; i++) {
-                    mKeyGestureEventListeners.get(i)
-                            .onKeyGestureEvent(
-                                    new KeyGestureEvent(deviceId, keycodes, modifierState,
-                                            gestureType));
+                    mKeyGestureEventListeners.get(i).onKeyGestureEvent(event);
                 }
             }
         }
@@ -1150,6 +1155,96 @@ public final class InputManagerGlobal {
                 }
                 mKeyGestureEventListeners = null;
                 mKeyGestureEventListener = null;
+            }
+        }
+    }
+
+    private class LocalKeyGestureHandler extends IKeyGestureHandler.Stub {
+        @Override
+        public boolean handleKeyGesture(@NonNull AidlKeyGestureEvent ev, IBinder focusedToken) {
+            synchronized (mKeyGestureEventHandlerLock) {
+                if (mKeyGestureEventHandlers == null) {
+                    return false;
+                }
+                final int numHandlers = mKeyGestureEventHandlers.size();
+                final KeyGestureEvent event = new KeyGestureEvent(ev);
+                for (int i = 0; i < numHandlers; i++) {
+                    KeyGestureEventHandler handler = mKeyGestureEventHandlers.get(i);
+                    if (handler.handleKeyGestureEvent(event, focusedToken)) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public boolean isKeyGestureSupported(@KeyGestureEvent.KeyGestureType int gestureType) {
+            synchronized (mKeyGestureEventHandlerLock) {
+                if (mKeyGestureEventHandlers == null) {
+                    return false;
+                }
+                final int numHandlers = mKeyGestureEventHandlers.size();
+                for (int i = 0; i < numHandlers; i++) {
+                    KeyGestureEventHandler handler = mKeyGestureEventHandlers.get(i);
+                    if (handler.isKeyGestureSupported(gestureType)) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+    }
+
+    /**
+     * @see InputManager#registerKeyGestureEventHandler(KeyGestureEventHandler)
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_KEY_GESTURES)
+    void registerKeyGestureEventHandler(@NonNull KeyGestureEventHandler handler)
+            throws IllegalArgumentException {
+        Objects.requireNonNull(handler, "handler should not be null");
+
+        synchronized (mKeyGestureEventHandlerLock) {
+            if (mKeyGestureHandler == null) {
+                mKeyGestureEventHandlers = new ArrayList<>();
+                mKeyGestureHandler = new LocalKeyGestureHandler();
+
+                try {
+                    mIm.registerKeyGestureHandler(mKeyGestureHandler);
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
+            }
+            final int numHandlers = mKeyGestureEventHandlers.size();
+            for (int i = 0; i < numHandlers; i++) {
+                if (mKeyGestureEventHandlers.get(i) == handler) {
+                    throw new IllegalArgumentException("Handler has already been registered!");
+                }
+            }
+            mKeyGestureEventHandlers.add(handler);
+        }
+    }
+
+    /**
+     * @see InputManager#unregisterKeyGestureEventHandler(KeyGestureEventHandler)
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_KEY_GESTURES)
+    void unregisterKeyGestureEventHandler(@NonNull KeyGestureEventHandler handler) {
+        Objects.requireNonNull(handler, "handler should not be null");
+
+        synchronized (mKeyGestureEventHandlerLock) {
+            if (mKeyGestureEventHandlers == null) {
+                return;
+            }
+            mKeyGestureEventHandlers.removeIf(existingHandler -> existingHandler == handler);
+            if (mKeyGestureEventHandlers.isEmpty()) {
+                try {
+                    mIm.unregisterKeyGestureHandler(mKeyGestureHandler);
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
+                mKeyGestureEventHandlers = null;
+                mKeyGestureHandler = null;
             }
         }
     }

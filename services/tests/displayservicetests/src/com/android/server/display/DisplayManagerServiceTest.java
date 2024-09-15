@@ -117,6 +117,7 @@ import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.test.mock.MockContentResolver;
 import android.util.SparseArray;
+import android.util.Spline;
 import android.view.ContentRecordingSession;
 import android.view.Display;
 import android.view.DisplayAdjustments;
@@ -141,8 +142,10 @@ import com.android.server.SystemService;
 import com.android.server.companion.virtual.VirtualDeviceManagerInternal;
 import com.android.server.display.DisplayManagerService.DeviceStateListener;
 import com.android.server.display.DisplayManagerService.SyncRoot;
+import com.android.server.display.config.HdrBrightnessData;
 import com.android.server.display.config.SensorData;
 import com.android.server.display.feature.DisplayManagerFlags;
+import com.android.server.display.layout.Layout;
 import com.android.server.display.notifications.DisplayNotificationManager;
 import com.android.server.input.InputManagerInternal;
 import com.android.server.lights.LightsManager;
@@ -3199,6 +3202,84 @@ public class DisplayManagerServiceTest {
                 (filter) -> Intent.ACTION_SETTING_RESTORED.equals(filter.getAction(0));
         verify(mContext, times(0)).registerReceiver(any(BroadcastReceiver.class),
                 argThat(matchesFilter));
+    }
+
+    @Test
+    public void testHighestHdrSdrRatio() {
+        DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerService.BinderService displayManagerBinderService =
+                displayManager.new BinderService();
+
+        FakeDisplayDevice displayDevice = createFakeDisplayDevice(displayManager, new float[]{60f});
+        displayDevice.mDisplayDeviceConfig = mMockDisplayDeviceConfig;
+        int displayId = getDisplayIdForDisplayDevice(displayManager, displayManagerBinderService,
+                displayDevice);
+        float highestRatio = 9.5f;
+        HdrBrightnessData hdrData = new HdrBrightnessData(Collections.emptyMap(),
+                /* brightnessIncreaseDebounceMillis= */ 0, /* screenBrightnessRampIncrease= */ 0,
+                /* brightnessDecreaseDebounceMillis= */ 0, /* screenBrightnessRampDecrease= */ 0,
+                /* hbmTransitionPoint= */ 0, /* minimumHdrPercentOfScreenForNbm= */ 0,
+                /* minimumHdrPercentOfScreenForHbm= */ 0, /* allowInLowPowerMode= */ false,
+                mock(Spline.class), highestRatio);
+        when(mMockDisplayDeviceConfig.getHdrBrightnessData()).thenReturn(hdrData);
+
+        assertEquals(highestRatio, displayManagerBinderService.getHighestHdrSdrRatio(displayId),
+                /* delta= */ 0);
+    }
+
+    @Test
+    public void testHighestHdrSdrRatio_HdrDataNull() {
+        DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerService.BinderService displayManagerBinderService =
+                displayManager.new BinderService();
+
+        FakeDisplayDevice displayDevice = createFakeDisplayDevice(displayManager, new float[]{60f});
+        displayDevice.mDisplayDeviceConfig = mMockDisplayDeviceConfig;
+        int displayId = getDisplayIdForDisplayDevice(displayManager, displayManagerBinderService,
+                displayDevice);
+        when(mMockDisplayDeviceConfig.getHdrBrightnessData()).thenReturn(null);
+
+        assertEquals(1, displayManagerBinderService.getHighestHdrSdrRatio(displayId),
+                /* delta= */ 0);
+    }
+
+    @Test
+    public void testOnDisplayChanged_HbmMetadataNull() {
+        DisplayPowerController dpc = mock(DisplayPowerController.class);
+        DisplayManagerService.Injector injector = new BasicInjector() {
+            @Override
+            DisplayPowerController getDisplayPowerController(Context context,
+                    DisplayPowerController.Injector injector,
+                    DisplayManagerInternal.DisplayPowerCallbacks callbacks, Handler handler,
+                    SensorManager sensorManager, DisplayBlanker blanker,
+                    LogicalDisplay logicalDisplay, BrightnessTracker brightnessTracker,
+                    BrightnessSetting brightnessSetting, Runnable onBrightnessChangeRunnable,
+                    HighBrightnessModeMetadata hbmMetadata, boolean bootCompleted,
+                    DisplayManagerFlags flags) {
+                return dpc;
+            }
+        };
+        DisplayManagerService displayManager = new DisplayManagerService(mContext, injector);
+        DisplayManagerInternal localService = displayManager.new LocalService();
+        registerDefaultDisplays(displayManager);
+        displayManager.onBootPhase(SystemService.PHASE_WAIT_FOR_DEFAULT_DISPLAY);
+
+        // Add the FakeDisplayDevice
+        FakeDisplayDevice displayDevice = new FakeDisplayDevice();
+        DisplayDeviceInfo displayDeviceInfo = new DisplayDeviceInfo();
+        displayDeviceInfo.state = Display.STATE_ON;
+        displayDevice.setDisplayDeviceInfo(displayDeviceInfo);
+        displayManager.getDisplayDeviceRepository()
+                .onDisplayDeviceEvent(displayDevice, DisplayAdapter.DISPLAY_DEVICE_EVENT_ADDED);
+        initDisplayPowerController(localService);
+
+        // Simulate DisplayDevice change
+        DisplayDeviceInfo displayDeviceInfo2 = new DisplayDeviceInfo();
+        displayDeviceInfo2.copyFrom(displayDeviceInfo);
+        displayDeviceInfo2.state = Display.STATE_DOZE;
+        updateDisplayDeviceInfo(displayManager, displayDevice, displayDeviceInfo2);
+
+        verify(dpc).onDisplayChanged(/* hbmMetadata= */ null, Layout.NO_LEAD_DISPLAY);
     }
 
     private void initDisplayPowerController(DisplayManagerInternal localService) {
