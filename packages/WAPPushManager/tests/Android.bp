@@ -26,9 +26,9 @@ package {
 android_test {
     name: "WAPPushManagerTests",
     libs: [
-        "android.test.runner",
+        "android.test.runner.stubs.system",
         "telephony-common",
-        "android.test.base",
+        "android.test.base.stubs.system",
     ],
     static_libs: ["junit"],
     // Include all test java files.

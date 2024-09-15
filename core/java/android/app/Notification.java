@@ -1281,6 +1281,15 @@ public class Notification implements Parcelable
     public static final String EXTRA_BIG_TEXT = "android.bigText";
 
     /**
+     * {@link #extras} key: very short text summarizing the most critical information contained in
+     * the notification.
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
+    public static final String EXTRA_SHORT_CRITICAL_TEXT = "android.shortCriticalText";
+
+    /**
      * {@link #extras} key: this is the resource ID of the notification's main small icon, as
      * supplied to {@link Builder#setSmallIcon(int)}.
      *
@@ -1593,17 +1602,6 @@ public class Notification implements Parcelable
      */
     @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
     public static final String EXTRA_ENROUTE_LARGE_ICON_SUBTEXT = "android.enrouteLargeIconSubText";
-
-    /**
-     * {@link #extras} key: {@link Icon} of an image used as a thumb icon on
-     * {@link Notification} progress bar for {@link EnRouteStyle} notifications.
-     * This extra is an {@code Icon}.
-     * @hide
-     */
-    @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
-    public static final String EXTRA_ENROUTE_PROGRESS_THUMB_ICON =
-            "android.enrouteProgressThumbIcon";
-
     /**
      * {@link #extras} key: whether the notification should be colorized as
      * supplied to {@link Builder#setColorized(boolean)}.
@@ -3063,8 +3061,6 @@ public class Notification implements Parcelable
 
         if (Flags.apiRichOngoing()) {
             visitIconUri(visitor, extras.getParcelable(EXTRA_ENROUTE_OVERLAY_ICON, Icon.class));
-            visitIconUri(visitor, extras.getParcelable(EXTRA_ENROUTE_PROGRESS_THUMB_ICON,
-                Icon.class));
         }
 
         if (mBubbleMetadata != null) {
@@ -4063,6 +4059,17 @@ public class Notification implements Parcelable
         return String.join("|", defaultStrings);
     }
 
+
+    /**
+     * Returns the very short text summarizing the most critical information contained in the
+     * notification, or null if this field was not set.
+     */
+    @Nullable
+    @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
+    public String getShortCriticalText() {
+        return extras.getString(EXTRA_SHORT_CRITICAL_TEXT);
+    }
+
     /**
      * @hide
      */
@@ -5000,6 +5007,18 @@ public class Notification implements Parcelable
         @Deprecated
         public Builder setContentInfo(CharSequence info) {
             mN.extras.putCharSequence(EXTRA_INFO_TEXT, safeCharSequence(info));
+            return this;
+        }
+
+        /**
+         * Sets a very short string summarizing the most critical information contained in the
+         * notification. Suggested max length is 5 characters, and there is no guarantee how much or
+         * how little of this text will be shown.
+         */
+        @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
+        @NonNull
+        public Builder setShortCriticalText(@Nullable String shortCriticalText) {
+            mN.extras.putString(EXTRA_SHORT_CRITICAL_TEXT, shortCriticalText);
             return this;
         }
 
@@ -11028,9 +11047,6 @@ public class Notification implements Parcelable
         @Nullable
         private CharSequence mLargeIconSubText = null;
 
-        @Nullable
-        private Icon mProgressThumbIcon = null;
-
         public EnRouteStyle() {
         }
 
@@ -11074,25 +11090,6 @@ public class Notification implements Parcelable
             return this;
         }
 
-        /**
-         * Returns the progress thumb icon.
-         * @see EnRouteStyle#setProgressThumbIcon
-         */
-        @Nullable
-        public Icon getProgressThumbIcon() {
-            return mProgressThumbIcon;
-        }
-
-        /**
-         * Optional icon to be used as a progress thumb.
-         */
-        @NonNull
-        public EnRouteStyle setProgressThumbIcon(@Nullable Icon progressThumbIcon) {
-            mProgressThumbIcon = progressThumbIcon;
-            return this;
-        }
-
-
          /**
          * @hide
          */
@@ -11104,8 +11101,7 @@ public class Notification implements Parcelable
 
             final EnRouteStyle enRouteStyle = (EnRouteStyle) other;
             return !Objects.equals(mOverlayIcon, enRouteStyle.mOverlayIcon)
-                    || !Objects.equals(mLargeIconSubText, enRouteStyle.mLargeIconSubText)
-                    || !Objects.equals(mProgressThumbIcon, enRouteStyle.mProgressThumbIcon);
+                    || !Objects.equals(mLargeIconSubText, enRouteStyle.mLargeIconSubText);
         }
 
         /**
@@ -11116,7 +11112,6 @@ public class Notification implements Parcelable
             super.addExtras(extras);
             extras.putParcelable(EXTRA_ENROUTE_OVERLAY_ICON, mOverlayIcon);
             extras.putCharSequence(EXTRA_ENROUTE_LARGE_ICON_SUBTEXT, mLargeIconSubText);
-            extras.putParcelable(EXTRA_ENROUTE_PROGRESS_THUMB_ICON, mProgressThumbIcon);
         }
 
         /**
@@ -11127,8 +11122,6 @@ public class Notification implements Parcelable
             super.restoreFromExtras(extras);
             mOverlayIcon = extras.getParcelable(EXTRA_ENROUTE_OVERLAY_ICON, Icon.class);
             mLargeIconSubText = extras.getCharSequence(EXTRA_ENROUTE_LARGE_ICON_SUBTEXT);
-            mProgressThumbIcon =
-                    extras.getParcelable(EXTRA_ENROUTE_PROGRESS_THUMB_ICON, Icon.class);
         }
 
         /**
@@ -11139,10 +11132,6 @@ public class Notification implements Parcelable
             super.purgeResources();
             if (mOverlayIcon != null) {
                 mOverlayIcon.convertToAshmem();
-            }
-
-            if (mProgressThumbIcon != null) {
-                mProgressThumbIcon.convertToAshmem();
             }
         }
 

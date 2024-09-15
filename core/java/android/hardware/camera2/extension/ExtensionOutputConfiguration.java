@@ -80,11 +80,7 @@ public class ExtensionOutputConfiguration {
         config.outputId = new OutputConfigId();
         config.outputId.id = mOutputConfigId;
         config.surfaceGroupId = mSurfaceGroupId;
-        if (Flags.extension10Bit()) {
-            config.dynamicRangeProfile = surface.getDynamicRangeProfile();
-        } else {
-            config.dynamicRangeProfile = DynamicRangeProfiles.STANDARD;
-        }
+        config.dynamicRangeProfile = surface.getDynamicRangeProfile();
     }
 
     @Nullable CameraOutputConfig getOutputConfig() {

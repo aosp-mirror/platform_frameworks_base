@@ -48,17 +48,13 @@ import com.android.systemui.qs.ui.adapter.QSSceneAdapter.State.UnsquishingQS
 import com.android.systemui.scene.shared.model.Scenes
 
 object QuickSettings {
-    private val SCENES =
-        setOf(
-            Scenes.QuickSettings,
-            Scenes.Shade,
-        )
+    private val SCENES = setOf(Scenes.QuickSettings, Scenes.Shade)
 
     object Elements {
         val Content =
             MovableElementKey(
                 "QuickSettingsContent",
-                contentPicker = MovableElementContentPicker(SCENES)
+                contentPicker = MovableElementContentPicker(SCENES),
             )
         val QuickQuickSettings = ElementKey("QuickQuickSettings")
         val SplitShadeQuickSettings = ElementKey("SplitShadeQuickSettings")
@@ -87,7 +83,7 @@ object QuickSettings {
 
 private fun SceneScope.stateForQuickSettingsContent(
     isSplitShade: Boolean,
-    squishiness: () -> Float = { QuickSettings.SharedValues.SquishinessValues.Default }
+    squishiness: () -> Float = { QuickSettings.SharedValues.SquishinessValues.Default },
 ): QSSceneAdapter.State {
     return when (val transitionState = layoutState.transitionState) {
         is TransitionState.Idle -> {
@@ -122,7 +118,7 @@ private fun SceneScope.stateForQuickSettingsContent(
                 }
             }
         is TransitionState.Transition.OverlayTransition ->
-            TODO("b/359173565: Handle overlay transitions")
+            error("Bad transition for QuickSettings scene: overlays not supported")
     }
 }
 
@@ -172,7 +168,7 @@ fun SceneScope.QuickSettings(
                 val height = heightProvider().coerceAtLeast(0)
 
                 layout(placeable.width, height) { placeable.placeRelative(0, 0) }
-            }
+            },
     ) {
         content { QuickSettingsContent(qsSceneAdapter = qsSceneAdapter, contentState) }
     }
@@ -225,7 +221,7 @@ private fun QuickSettingsContent(
                             it.addView(view)
                         }
                     },
-                    onRelease = { it.removeAllViews() }
+                    onRelease = { it.removeAllViews() },
                 )
             }
         }

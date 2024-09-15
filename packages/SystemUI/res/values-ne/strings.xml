@@ -105,6 +105,7 @@
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"नोटमा सेभ गर्नुहोस्"</string>
     <string name="backlinks_include_link" msgid="4562093591148248158">"लिंक समावेश गर्नुहोस्"</string>
     <string name="backlinks_duplicate_label_format" msgid="558445128952827926">"<xliff:g id="APPNAME">%1$s</xliff:g> <xliff:g id="FREQUENCYCOUNT">(%2$d)</xliff:g>⁠"</string>
+    <string name="backlinks_cross_profile_error" msgid="1355798585727802282">"अन्य प्रोफाइलबाट लिंकहरू हाल्न मिल्दैन"</string>
     <string name="screenrecord_title" msgid="4257171601439507792">"स्क्रिन रेकर्डर"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"स्क्रिन रेकर्डिङको प्रक्रिया अघि बढाइँदै"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"कुनै स्क्रिन रेकर्ड गर्ने सत्रका लागि चलिरहेको सूचना"</string>
@@ -292,8 +293,7 @@
     <string name="start_dreams" msgid="9131802557946276718">"स्क्रिन सेभर"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"बाधा नपुऱ्याउनुहोस्"</string>
-    <!-- no translation found for quick_settings_modes_label (879156359479504244) -->
-    <skip />
+    <string name="quick_settings_modes_label" msgid="879156359479504244">"मोडहरू"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"ब्लुटुथ"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"जोडी उपकरणहरू उपलब्ध छैन"</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"कुनै डिभाइस कनेक्ट गर्न वा डिस्कनेक्ट गर्न ट्याप गर्नुहोस्"</string>
@@ -434,8 +434,7 @@
     <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"सेटिङ खोल्नुहोस्"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"अर्को डिभाइड"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"परिदृश्य टगल गर्नुहोस्"</string>
-    <!-- no translation found for zen_modes_dialog_title (8854640808100096934) -->
-    <skip />
+    <string name="zen_modes_dialog_title" msgid="8854640808100096934">"मोडहरू"</string>
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"सम्पन्न भयो"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"सेटिङ"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"अन छ"</string>
@@ -1393,18 +1392,12 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"\"कोल्याप्स गर्नुहोस्\" आइकन"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"\"एक्स्पान्ड गर्नुहोस्\" आइकन"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"वा"</string>
-    <!-- no translation found for launch_keyboard_tutorial_notification_title (8849933155160522519) -->
-    <skip />
-    <!-- no translation found for launch_keyboard_tutorial_notification_content (2880339951512757918) -->
-    <skip />
-    <!-- no translation found for launch_touchpad_tutorial_notification_title (2243780062772196901) -->
-    <skip />
-    <!-- no translation found for launch_touchpad_tutorial_notification_content (7931085031240753226) -->
-    <skip />
-    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_title (1940023776496198762) -->
-    <skip />
-    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_content (1780725168171929365) -->
-    <skip />
+    <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"किबोर्ड प्रयोग गरी नेभिगेट गर्नुहोस्"</string>
+    <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"किबोर्डका सर्टकटहरू प्रयोग गर्न सिक्नुहोस्"</string>
+    <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"टचप्याड प्रयोग गरी नेभिगेट गर्नुहोस्"</string>
+    <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"टचप्याड जेस्चर प्रयोग गर्न सिक्नुहोस्"</string>
+    <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"किबोर्ड र टचप्याड प्रयोग गरी नेभिगेट गर्नुहोस्"</string>
+    <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"टचप्याड जेस्चर, किबोर्डका सर्टकट र अन्य कुरा प्रयोग गर्न सिक्नुहोस्"</string>
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"ब्याक जेस्चर"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"होम जेस्चर"</string>
     <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"एक्सन की"</string>
@@ -1444,4 +1437,18 @@
     <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="7513137763024327538">"तपाईं अब आफ्नो स्क्रिनको सिरानबाट चमकको स्तर घटाएर आफ्नो स्क्रिन अझै मधुरो बनाउन सक्नुहुन्छ।\n\nतपाईं अँध्यारो ठाउँमा भएका बेला यो सुविधाले अझ राम्रोसँग काम गर्छ।"</string>
     <string name="accessibility_deprecate_extra_dim_dialog_button" msgid="1782147201534669800">"\"अझै मधुरो\" सर्टकट हटाउनुहोस्"</string>
     <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="4070696910424515757">"\"अझै मधुरो\" सर्टकट हटाइएको छ। स्क्रिनको चमक घटाउन \"रेगुलर ब्राइटनेस बार\" प्रयोग गर्नुहोस्।"</string>
+    <!-- no translation found for qs_edit_mode_category_connectivity (4559726936546032672) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_accessibility (7969091385071475922) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_utilities (8123080090108420095) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_privacy (6577774443194551775) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_providedByApps (8346112074897919019) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_display (4749511439121053942) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_unknown (509314252124053550) -->
+    <skip />
 </resources>

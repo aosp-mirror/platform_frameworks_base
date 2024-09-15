@@ -22,8 +22,6 @@ import com.android.systemui.notifications.ui.composable.NotificationsShadeSessio
 import com.android.systemui.scene.domain.SceneDomainModule
 import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor
 import com.android.systemui.scene.domain.resolver.HomeSceneFamilyResolverModule
-import com.android.systemui.scene.domain.resolver.NotifShadeSceneFamilyResolverModule
-import com.android.systemui.scene.domain.resolver.QuickSettingsSceneFamilyResolverModule
 import com.android.systemui.scene.domain.startable.KeyguardStateCallbackStartable
 import com.android.systemui.scene.domain.startable.SceneContainerStartable
 import com.android.systemui.scene.domain.startable.ScrimStartable
@@ -47,7 +45,6 @@ import dagger.multibindings.IntoMap
             EmptySceneModule::class,
             GoneSceneModule::class,
             NotificationsShadeOverlayModule::class,
-            NotificationsShadeSceneModule::class,
             NotificationsShadeSessionModule::class,
             QuickSettingsShadeOverlayModule::class,
             QuickSettingsSceneModule::class,
@@ -56,9 +53,7 @@ import dagger.multibindings.IntoMap
 
             // List SceneResolver modules for supported SceneFamilies
             HomeSceneFamilyResolverModule::class,
-            NotifShadeSceneFamilyResolverModule::class,
-            QuickSettingsSceneFamilyResolverModule::class,
-        ],
+        ]
 )
 interface KeyguardlessSceneContainerFrameworkModule {
 
@@ -100,8 +95,6 @@ interface KeyguardlessSceneContainerFrameworkModule {
                     listOfNotNull(
                         Scenes.Gone,
                         Scenes.QuickSettings.takeUnless { DualShade.isEnabled },
-                        Scenes.QuickSettingsShade.takeIf { DualShade.isEnabled },
-                        Scenes.NotificationsShade.takeIf { DualShade.isEnabled },
                         Scenes.Shade.takeUnless { DualShade.isEnabled },
                     ),
                 initialSceneKey = Scenes.Gone,
@@ -113,13 +106,11 @@ interface KeyguardlessSceneContainerFrameworkModule {
                 navigationDistances =
                     mapOf(
                             Scenes.Gone to 0,
-                            Scenes.NotificationsShade to 1.takeIf { DualShade.isEnabled },
                             Scenes.Shade to 1.takeUnless { DualShade.isEnabled },
-                            Scenes.QuickSettingsShade to 2.takeIf { DualShade.isEnabled },
                             Scenes.QuickSettings to 2.takeUnless { DualShade.isEnabled },
                         )
                         .filterValues { it != null }
-                        .mapValues { checkNotNull(it.value) }
+                        .mapValues { checkNotNull(it.value) },
             )
         }
 
@@ -129,7 +120,7 @@ interface KeyguardlessSceneContainerFrameworkModule {
                 topEdgeSplitFraction = shadeInteractor::getTopEdgeSplitFraction,
                 // TODO(b/338577208): This should be 60dp at the top in the dual-shade UI. Better to
                 //  replace this constant with dynamic window insets.
-                edgeSize = 40.dp
+                edgeSize = 40.dp,
             )
         }
     }

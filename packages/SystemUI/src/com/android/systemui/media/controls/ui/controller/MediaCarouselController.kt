@@ -1202,13 +1202,17 @@ constructor(
             commonViewModels.forEach { viewModel ->
                 when (viewModel) {
                     is MediaCommonViewModel.MediaControl -> {
-                        controllerById[viewModel.instanceId.toString()]?.mediaViewHolder?.let {
-                            mediaContent.addView(it.player)
+                        controllerById[viewModel.instanceId.toString()]?.let {
+                            it.widthInSceneContainerPx = widthInSceneContainerPx
+                            it.heightInSceneContainerPx = heightInSceneContainerPx
+                            mediaContent.addView(it.mediaViewHolder?.player)
                         }
                     }
                     is MediaCommonViewModel.MediaRecommendations -> {
-                        controllerById[viewModel.key]?.recommendationViewHolder?.let {
-                            mediaContent.addView(it.recommendations)
+                        controllerById[viewModel.key]?.let {
+                            it.widthInSceneContainerPx = widthInSceneContainerPx
+                            it.heightInSceneContainerPx = heightInSceneContainerPx
+                            mediaContent.addView(it.recommendationViewHolder?.recommendations)
                         }
                     }
                 }

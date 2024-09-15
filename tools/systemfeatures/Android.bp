@@ -5,6 +5,7 @@ package {
     // to get the below license kinds:
     //   SPDX-license-identifier-Apache-2.0
     default_applicable_licenses: ["frameworks_base_license"],
+    default_team: "trendy_team_system_performance",
 }
 
 java_library_host {
@@ -25,8 +26,6 @@ java_binary_host {
     static_libs: ["systemfeatures-gen-lib"],
 }
 
-// TODO(b/203143243): Add golden diff test for generated sources.
-// Functional runtime behavior is covered in systemfeatures-gen-tests.
 genrule {
     name: "systemfeatures-gen-tests-srcs",
     cmd: "$(location systemfeatures-gen-tool) com.android.systemfeatures.RwNoFeatures --readonly=false > $(location RwNoFeatures.java) && " +
@@ -42,11 +41,12 @@ genrule {
     tools: ["systemfeatures-gen-tool"],
 }
 
+// Functional runtime behavior testing.
 java_test_host {
     name: "systemfeatures-gen-tests",
     test_suites: ["general-tests"],
     srcs: [
-        "tests/**/*.java",
+        "tests/src/**/*.java",
         ":systemfeatures-gen-tests-srcs",
     ],
     test_options: {
@@ -60,4 +60,34 @@ java_test_host {
         "mockito",
         "truth",
     ],
+}
+
+// Rename the goldens as they may be copied into the source tree, and we don't
+// need or want the usual `.java` linting (e.g., copyright checks).
+genrule {
+    name: "systemfeatures-gen-tests-golden-srcs",
+    cmd: "for f in $(in); do cp $$f $(genDir)/tests/gen/$$(basename $$f).gen; done",
+    srcs: [":systemfeatures-gen-tests-srcs"],
+    out: [
+        "tests/gen/RwNoFeatures.java.gen",
+        "tests/gen/RoNoFeatures.java.gen",
+        "tests/gen/RwFeatures.java.gen",
+        "tests/gen/RoFeatures.java.gen",
+    ],
+}
+
+// Golden output testing. Golden sources can be updated via:
+//   $ANDROID_BUILD_TOP/frameworks/base/tools/systemfeatures/tests/golden_test.sh --update
+sh_test_host {
+    name: "systemfeatures-gen-golden-tests",
+    src: "tests/golden_test.sh",
+    filename: "systemfeatures-gen-golden-tests.sh",
+    test_config: "tests/systemfeatures-gen-golden-tests.xml",
+    data: [
+        "tests/golden/**/*.java*",
+        ":systemfeatures-gen-tests-golden-srcs",
+    ],
+    test_options: {
+        unit_test: true,
+    },
 }

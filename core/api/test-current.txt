@@ -2321,7 +2321,7 @@ package android.os {
   }
 
   public final class BugreportParams {
-    field @FlaggedApi("android.os.bugreport_mode_max_value") public static final int BUGREPORT_MODE_MAX_VALUE = 7; // 0x7
+    field public static final int BUGREPORT_MODE_MAX_VALUE = 7; // 0x7
   }
 
   public class Build {

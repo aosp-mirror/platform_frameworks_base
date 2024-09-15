@@ -91,17 +91,14 @@ constructor(
     }
 
     override fun instantCollapseShade() {
-        sceneInteractor.snapToScene(
-            SceneFamilies.Home,
-            "hide shade",
-        )
+        sceneInteractor.snapToScene(SceneFamilies.Home, "hide shade")
     }
 
     override fun animateCollapseShade(
         flags: Int,
         force: Boolean,
         delayed: Boolean,
-        speedUpFactor: Float
+        speedUpFactor: Float,
     ) {
         if (!force && !shadeInteractor.isAnyExpanded.value) {
             runPostCollapseActions()
@@ -147,7 +144,7 @@ constructor(
         if (shadeInteractor.isAnyExpanded.value) {
             commandQueue.animateCollapsePanels(
                 CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL,
-                true /* force */
+                true, /* force */
             )
             assistManagerLazy.get().hideAssist()
         }
@@ -172,17 +169,11 @@ constructor(
     }
 
     override fun expandToNotifications() {
-        sceneInteractor.changeScene(
-            SceneFamilies.NotifShade,
-            "ShadeController.animateExpandShade",
-        )
+        shadeInteractor.expandNotificationShade("ShadeController.animateExpandShade")
     }
 
     override fun expandToQs() {
-        sceneInteractor.changeScene(
-            SceneFamilies.QuickSettings,
-            "ShadeController.animateExpandQs",
-        )
+        shadeInteractor.expandQuickSettingsShade("ShadeController.animateExpandQs")
     }
 
     override fun setVisibilityListener(listener: ShadeVisibilityListener) {

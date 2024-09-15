@@ -77,8 +77,8 @@ android_test {
         "platform-test-rules",
     ],
     libs: [
-        "android.test.base",
-        "android.test.runner",
+        "android.test.base.stubs.system",
+        "android.test.runner.stubs.system",
     ],
     jni_libs: [
         "libdexmakerjvmtiagent",

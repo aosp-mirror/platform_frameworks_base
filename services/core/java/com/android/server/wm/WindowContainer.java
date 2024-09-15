@@ -2875,6 +2875,15 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     /**
+     * Go through the hierarchy to allow windows to request a dim if needed
+     */
+    void adjustDims() {
+        for (int i = 0; i < mChildren.size(); i++) {
+            mChildren.get(i).adjustDims();
+        }
+    }
+
+    /**
      * Trigger a call to prepareSurfaces from the animation thread, such that pending transactions
      * will be applied.
      */

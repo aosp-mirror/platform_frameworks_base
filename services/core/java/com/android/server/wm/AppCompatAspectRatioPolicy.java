@@ -122,9 +122,12 @@ class AppCompatAspectRatioPolicy {
         if (aspectRatioOverrides.shouldApplyUserMinAspectRatioOverride()) {
             return aspectRatioOverrides.getUserMinAspectRatio();
         }
+        final DisplayContent displayContent = mActivityRecord.getDisplayContent();
+        final boolean shouldOverrideMinAspectRatioForCamera = displayContent != null
+                && displayContent.mAppCompatCameraPolicy.shouldOverrideMinAspectRatioForCamera(
+                        mActivityRecord);
         if (!aspectRatioOverrides.shouldOverrideMinAspectRatio()
-                && !mAppCompatOverrides.getAppCompatCameraOverrides()
-                .shouldOverrideMinAspectRatioForCamera()) {
+                && !shouldOverrideMinAspectRatioForCamera) {
             return info.getMinAspectRatio();
         }
 

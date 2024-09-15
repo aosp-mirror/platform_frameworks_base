@@ -25,3 +25,10 @@ android_test {
     resource_dirs: ["res"],
     test_suites: ["device-tests"],
 }
+
+test_module_config {
+    name: "LoudnessCodecApiTest_Presubmit",
+    base: "LoudnessCodecApiTest",
+    test_suites: ["device-tests"],
+    include_annotations: ["android.platform.test.annotations.Presubmit"],
+}

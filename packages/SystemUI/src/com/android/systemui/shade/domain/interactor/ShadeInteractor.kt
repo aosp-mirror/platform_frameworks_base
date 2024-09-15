@@ -140,6 +140,18 @@ interface BaseShadeInteractor {
      * animating.
      */
     val isUserInteractingWithQs: Flow<Boolean>
+
+    /**
+     * Triggers the expansion (opening) of the notification shade. If the notification shade is
+     * already open, this has no effect.
+     */
+    fun expandNotificationShade(loggingReason: String)
+
+    /**
+     * Triggers the expansion (opening) of the quick settings shade. If the quick settings shade is
+     * already open, this has no effect.
+     */
+    fun expandQuickSettingsShade(loggingReason: String)
 }
 
 fun createAnyExpansionFlow(

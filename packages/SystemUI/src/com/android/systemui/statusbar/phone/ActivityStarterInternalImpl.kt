@@ -470,9 +470,6 @@ constructor(
                     if (dismissShade) {
                         shadeControllerLazy.get().collapseShadeForActivityStart()
                     }
-                    if (Flags.communalHub()) {
-                        communalSceneInteractor.changeSceneForActivityStartOnDismissKeyguard()
-                    }
                     return deferred
                 }
 

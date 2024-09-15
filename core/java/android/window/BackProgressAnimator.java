@@ -212,6 +212,17 @@ public class BackProgressAnimator implements DynamicAnimation.OnAnimationUpdateL
         mBackCancelledFinishRunnable = null;
     }
 
+    /**
+     * Removes the finishCallback passed into {@link #onBackCancelled}
+     */
+    public void removeOnBackInvokedFinishCallback() {
+        if (mBackInvokedFlingAnim != null) {
+            mBackInvokedFlingAnim.removeUpdateListener(mOnBackInvokedFlingUpdateListener);
+            mBackInvokedFlingAnim.removeEndListener(mOnAnimationEndListener);
+        }
+        mBackInvokedFinishRunnable = null;
+    }
+
     /** Returns true if the back animation is in progress. */
     @VisibleForTesting(visibility = PACKAGE)
     public boolean isBackAnimationInProgress() {

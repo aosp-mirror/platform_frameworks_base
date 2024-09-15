@@ -14,7 +14,7 @@ android_test {
     },
     // Include some source files directly to be able to access package members
     srcs: ["src/**/*.java"],
-    libs: ["android.test.runner"],
+    libs: ["android.test.runner.stubs.system"],
     static_libs: [
         "junit",
         "androidx.test.rules",

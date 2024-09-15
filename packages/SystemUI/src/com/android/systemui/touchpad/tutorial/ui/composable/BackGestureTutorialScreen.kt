@@ -24,8 +24,6 @@ import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialScreenCon
 import com.android.systemui.inputdevice.tutorial.ui.composable.rememberColorFilterProperty
 import com.android.systemui.res.R
 import com.android.systemui.touchpad.tutorial.ui.gesture.BackGestureMonitor
-import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState
-import com.android.systemui.touchpad.tutorial.ui.gesture.TouchpadGestureMonitor
 
 @Composable
 fun BackGestureTutorialScreen(
@@ -49,14 +47,11 @@ fun BackGestureTutorialScreen(
                 )
         )
     val gestureMonitorProvider =
-        object : GestureMonitorProvider {
-            override fun createGestureMonitor(
-                gestureDistanceThresholdPx: Int,
-                gestureStateChangedCallback: (GestureState) -> Unit
-            ): TouchpadGestureMonitor {
-                return BackGestureMonitor(gestureDistanceThresholdPx, gestureStateChangedCallback)
+        DistanceBasedGestureMonitorProvider(
+            monitorFactory = { distanceThresholdPx, gestureStateCallback ->
+                BackGestureMonitor(distanceThresholdPx, gestureStateCallback)
             }
-        }
+        )
     GestureTutorialScreen(screenConfig, gestureMonitorProvider, onDoneButtonClicked, onBack)
 }
 

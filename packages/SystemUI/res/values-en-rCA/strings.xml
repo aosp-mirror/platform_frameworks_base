@@ -105,6 +105,7 @@
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Add to note"</string>
     <string name="backlinks_include_link" msgid="4562093591148248158">"Include link"</string>
     <string name="backlinks_duplicate_label_format" msgid="558445128952827926">"<xliff:g id="APPNAME">%1$s</xliff:g> <xliff:g id="FREQUENCYCOUNT">(%2$d)</xliff:g>"</string>
+    <string name="backlinks_cross_profile_error" msgid="1355798585727802282">"Links can\'t be added from other profiles"</string>
     <string name="screenrecord_title" msgid="4257171601439507792">"Screen Recorder"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Processing screen recording"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Ongoing notification for a screen record session"</string>
@@ -1436,4 +1437,11 @@
     <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="7513137763024327538">"You can now make the screen extra dim by lowering the brightness level even further from the top of your screen.\n\nThis works best when you\'re in a dark environment."</string>
     <string name="accessibility_deprecate_extra_dim_dialog_button" msgid="1782147201534669800">"Remove extra dim shortcut"</string>
     <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="4070696910424515757">"Extra dim shortcut removed. To lower your brightness, use the regular brightness bar."</string>
+    <string name="qs_edit_mode_category_connectivity" msgid="4559726936546032672">"Connectivity"</string>
+    <string name="qs_edit_mode_category_accessibility" msgid="7969091385071475922">"Accessibility"</string>
+    <string name="qs_edit_mode_category_utilities" msgid="8123080090108420095">"Utilities"</string>
+    <string name="qs_edit_mode_category_privacy" msgid="6577774443194551775">"Privacy"</string>
+    <string name="qs_edit_mode_category_providedByApps" msgid="8346112074897919019">"Provided by apps"</string>
+    <string name="qs_edit_mode_category_display" msgid="4749511439121053942">"Display"</string>
+    <string name="qs_edit_mode_category_unknown" msgid="509314252124053550">"Unknown"</string>
 </resources>

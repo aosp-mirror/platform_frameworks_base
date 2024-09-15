@@ -3299,6 +3299,8 @@
   <java-symbol type="string" name="set_up_screen_lock_action_label" />
   <!-- Message for the alert dialog prompting the user to set up a screen lock to access private space -->
   <java-symbol type="string" name="private_space_set_up_screen_lock_message" />
+  <!-- Message shown in the dialog prompting the user to set up a screen lock to delete private space from Reset Options [CHAR LIMIT=120] -->
+  <java-symbol type="string" name="private_space_set_up_screen_lock_for_reset" />
 
   <java-symbol type="string" name="deprecated_target_sdk_message" />
   <java-symbol type="string" name="deprecated_target_sdk_app_store" />

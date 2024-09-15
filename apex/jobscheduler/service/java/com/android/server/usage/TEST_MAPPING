@@ -21,10 +21,7 @@
       "name": "CtsUsageStatsTestCases"
     },
     {
-      "name": "FrameworksServicesTests",
-      "options": [
-        {"include-filter": "com.android.server.usage"}
-      ]
+      "name": "FrameworksServicesTests_com_android_server_usage"
     }
   ]
 }

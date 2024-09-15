@@ -3398,7 +3398,8 @@ public final class ProcessList {
         // Check if we should mark the processrecord for first launch after force-stopping
         if (wasStopped) {
             boolean wasEverLaunched = false;
-            if (android.app.Flags.useAppInfoNotLaunched()) {
+            if (android.app.Flags.useAppInfoNotLaunched()
+                    || mService.mConstants.mFlagUseAppInfoNotLaunched) {
                 wasEverLaunched = !info.isNotLaunched();
             } else {
                 try {
@@ -3419,7 +3420,8 @@ public final class ProcessList {
                         : STOPPED_STATE_FIRST_LAUNCH;
                 r.getWindowProcessController().setStoppedState(stoppedState);
             } else {
-                if (android.app.Flags.useAppInfoNotLaunched()) {
+                if (android.app.Flags.useAppInfoNotLaunched()
+                        || mService.mConstants.mFlagUseAppInfoNotLaunched) {
                     // If it was launched before, then it must be a force-stop
                     r.setWasForceStopped(wasEverLaunched);
                 } else {
@@ -3769,7 +3771,7 @@ public final class ProcessList {
                     boolean hasActivity = false;
                     int connUid = 0;
                     int connGroup = 0;
-                    while (i >= bottomI) {
+                    while (subProc.info.uid != uid) {
                         mLruProcesses.remove(i);
                         mLruProcesses.add(endIndex, subProc);
                         if (DEBUG_LRU) Slog.d(TAG_LRU,

@@ -2002,6 +2002,7 @@ class BackNavigationController {
         final Transition prepareOpen = migrateBackTransition && !tc.isCollecting()
                 ? tc.createTransition(TRANSIT_PREPARE_BACK_NAVIGATION) : null;
 
+        DisplayContent commonDisplay = null;
         for (int i = affects.size() - 1; i >= 0; --i) {
             final ActivityRecord activity = affects.get(i);
             if (!migrateBackTransition && !activity.isVisibleRequested()) {
@@ -2024,12 +2025,14 @@ class BackNavigationController {
             activity.mTaskSupervisor.mStoppingActivities.remove(activity);
 
             if (!migrateBackTransition) {
-                activity.getDisplayContent().ensureActivitiesVisible(null /* starting */,
-                        true /* notifyClients */);
+                commonDisplay = activity.getDisplayContent();
             } else if (activity.shouldBeVisible()) {
                 activity.ensureActivityConfiguration(true /* ignoreVisibility */);
                 activity.makeVisibleIfNeeded(null /* starting */, true /* notifyToClient */);
             }
+        }
+        if (commonDisplay != null) {
+            commonDisplay.ensureActivitiesVisible(null /* starting */, true /* notifyClients */);
         }
         if (prepareOpen != null) {
             if (prepareOpen.hasChanges()) {

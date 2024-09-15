@@ -34,10 +34,12 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.keyguard.domain.interactor.KeyguardKeyboardInteractor;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.bouncer.ui.helper.BouncerHapticPlayer;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.keyboard.data.repository.FakeKeyboardRepository;
+import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.res.R;
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 
@@ -93,6 +95,9 @@ public class KeyguardPinBasedInputViewControllerTest extends SysuiTestCase {
 
     private KeyguardPinBasedInputViewController mKeyguardPinViewController;
 
+    private KosmosJavaAdapter mKosmosJavaAdapter = new KosmosJavaAdapter(this);
+    private BouncerHapticPlayer mBouncerHapticPlayer = mKosmosJavaAdapter.getBouncerHapticHelper();
+
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
@@ -119,7 +124,8 @@ public class KeyguardPinBasedInputViewControllerTest extends SysuiTestCase {
                 mKeyguardUpdateMonitor, mSecurityMode, mLockPatternUtils, mKeyguardSecurityCallback,
                 mKeyguardMessageAreaControllerFactory, mLatencyTracker, mLiftToactivateListener,
                 mEmergencyButtonController, mFalsingCollector, featureFlags,
-                mSelectedUserInteractor, keyguardKeyboardInteractor, null, mUserActivityNotifier) {
+                mSelectedUserInteractor, keyguardKeyboardInteractor, mBouncerHapticPlayer,
+                mUserActivityNotifier) {
             @Override
             public void onResume(int reason) {
                 super.onResume(reason);

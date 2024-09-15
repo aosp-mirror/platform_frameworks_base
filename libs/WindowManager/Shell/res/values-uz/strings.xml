@@ -73,8 +73,7 @@
     <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>ni yopish"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> sozlamalari"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"Bulutchani yopish"</string>
-    <!-- no translation found for bubble_fullscreen_text (1006758103218086231) -->
-    <skip />
+    <string name="bubble_fullscreen_text" msgid="1006758103218086231">"Butun ekranga koʻchirish"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"Suhbatlar bulutchalar shaklida chiqmasin"</string>
     <string name="bubbles_user_education_title" msgid="2112319053732691899">"Bulutchalar yordamida subhatlashish"</string>
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"Yangi xabarlar qalqib chiquvchi belgilar yoki bulutchalar kabi chiqadi. Xabarni ochish uchun bildirishnoma ustiga bosing. Xabarni qayta joylash uchun bildirishnomani suring."</string>

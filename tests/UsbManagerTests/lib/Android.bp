@@ -38,6 +38,6 @@ android_library {
         "androidx.core_core",
     ],
     libs: [
-        "android.test.mock",
+        "android.test.mock.stubs.system",
     ],
 }

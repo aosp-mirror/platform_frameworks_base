@@ -106,7 +106,7 @@ internal class ContentScopeImpl(
     override fun Element(
         key: ElementKey,
         modifier: Modifier,
-        content: @Composable (ElementScope<ElementContentScope>.() -> Unit)
+        content: @Composable (ElementScope<ElementContentScope>.() -> Unit),
     ) {
         Element(layoutImpl, this@ContentScopeImpl.content, key, modifier, content)
     }
@@ -115,7 +115,7 @@ internal class ContentScopeImpl(
     override fun MovableElement(
         key: MovableElementKey,
         modifier: Modifier,
-        content: @Composable (ElementScope<MovableElementContentScope>.() -> Unit)
+        content: @Composable (ElementScope<MovableElementContentScope>.() -> Unit),
     ) {
         MovableElement(layoutImpl, this@ContentScopeImpl.content, key, modifier, content)
     }
