@@ -71,6 +71,12 @@ constructor(
         logger.logSceneBackStack(backStack.value.asIterable())
     }
 
+    /** Applies the given [transform] to the back stack. */
+    fun updateBackStack(transform: (SceneStack) -> SceneStack) {
+        _backStack.update { stack -> transform(stack) }
+        logger.logSceneBackStack(backStack.value.asIterable())
+    }
+
     private fun stackOperation(from: SceneKey, to: SceneKey, stack: SceneStack): StackOperation? {
         val fromDistance =
             checkNotNull(sceneContainerConfig.navigationDistances[from]) {

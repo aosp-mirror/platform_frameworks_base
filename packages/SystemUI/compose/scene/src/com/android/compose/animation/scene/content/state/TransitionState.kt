@@ -184,7 +184,7 @@ sealed interface TransitionState {
 
             private fun computeCurrentOverlays(
                 include: OverlayKey,
-                exclude: OverlayKey
+                exclude: OverlayKey,
             ): Set<OverlayKey> {
                 return buildSet {
                     addAll(currentOverlaysWhenTransitionStarted)
@@ -300,7 +300,7 @@ sealed interface TransitionState {
         }
 
         /** Run this transition and return once it is finished. */
-        internal abstract suspend fun run()
+        abstract suspend fun run()
 
         /**
          * Freeze this transition state so that neither [currentScene] nor [currentOverlays] will
@@ -311,7 +311,7 @@ sealed interface TransitionState {
          *
          * This is called when this transition is interrupted (replaced) by another transition.
          */
-        internal abstract fun freezeAndAnimateToCurrentState()
+        abstract fun freezeAndAnimateToCurrentState()
 
         internal fun updateOverscrollSpecs(
             fromSpec: OverscrollSpecImpl?,
@@ -336,9 +336,7 @@ sealed interface TransitionState {
             return specForCurrentScene.transformationSpec.transformations.isNotEmpty()
         }
 
-        internal open fun interruptionProgress(
-            layoutImpl: SceneTransitionLayoutImpl,
-        ): Float {
+        internal open fun interruptionProgress(layoutImpl: SceneTransitionLayoutImpl): Float {
             if (!layoutImpl.state.enableInterruptions) {
                 return 0f
             }

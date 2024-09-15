@@ -31,17 +31,18 @@ import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.text.AnnotatedString
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
-import com.android.systemui.common.shared.model.Text
 import com.android.systemui.qs.panels.shared.model.SizedTile
 import com.android.systemui.qs.panels.shared.model.SizedTileImpl
 import com.android.systemui.qs.panels.ui.viewmodel.EditTileViewModel
 import com.android.systemui.qs.pipeline.shared.TileSpec
+import com.android.systemui.qs.shared.model.TileCategory
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -199,10 +200,11 @@ class DragAndDropTest : SysuiTestCase() {
                             android.R.drawable.star_on,
                             ContentDescription.Loaded(tileSpec)
                         ),
-                    label = Text.Loaded(tileSpec),
+                    label = AnnotatedString(tileSpec),
                     appName = null,
                     isCurrent = true,
                     availableEditActions = emptySet(),
+                    category = TileCategory.UNKNOWN,
                 ),
                 getWidth(tileSpec),
             )

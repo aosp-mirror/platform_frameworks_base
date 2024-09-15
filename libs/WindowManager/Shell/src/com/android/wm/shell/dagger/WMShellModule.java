@@ -18,6 +18,7 @@ package com.android.wm.shell.dagger;
 
 import static com.android.wm.shell.shared.desktopmode.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_TASK_LIMIT;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.KeyguardManager;
 import android.content.Context;
@@ -114,6 +115,8 @@ import com.android.wm.shell.unfold.qualifier.UnfoldTransition;
 import com.android.wm.shell.windowdecor.CaptionWindowDecorViewModel;
 import com.android.wm.shell.windowdecor.DesktopModeWindowDecorViewModel;
 import com.android.wm.shell.windowdecor.WindowDecorViewModel;
+import com.android.wm.shell.windowdecor.viewhost.DefaultWindowDecorViewHostSupplier;
+import com.android.wm.shell.windowdecor.viewhost.WindowDecorViewHostSupplier;
 
 import dagger.Binds;
 import dagger.Lazy;
@@ -244,7 +247,8 @@ public abstract class WMShellModule {
             AssistContentRequester assistContentRequester,
             MultiInstanceHelper multiInstanceHelper,
             Optional<DesktopTasksLimiter> desktopTasksLimiter,
-            Optional<DesktopActivityOrientationChangeHandler> desktopActivityOrientationHandler) {
+            Optional<DesktopActivityOrientationChangeHandler> desktopActivityOrientationHandler,
+            WindowDecorViewHostSupplier windowDecorViewHostSupplier) {
         if (DesktopModeStatus.canEnterDesktopMode(context)) {
             return new DesktopModeWindowDecorViewModel(
                     context,
@@ -268,7 +272,8 @@ public abstract class WMShellModule {
                     assistContentRequester,
                     multiInstanceHelper,
                     desktopTasksLimiter,
-                    desktopActivityOrientationHandler);
+                    desktopActivityOrientationHandler,
+                    windowDecorViewHostSupplier);
         }
         return new CaptionWindowDecorViewModel(
                 context,
@@ -282,7 +287,8 @@ public abstract class WMShellModule {
                 displayController,
                 rootTaskDisplayAreaOrganizer,
                 syncQueue,
-                transitions);
+                transitions,
+                windowDecorViewHostSupplier);
     }
 
     @WMSingleton
@@ -369,6 +375,13 @@ public abstract class WMShellModule {
             WindowDecorViewModel windowDecorViewModel) {
         return new FreeformTaskTransitionObserver(
                 context, shellInit, transitions, windowDecorViewModel);
+    }
+
+    @WMSingleton
+    @Provides
+    static WindowDecorViewHostSupplier provideWindowDecorViewHostSupplier(
+            @ShellMainThread @NonNull CoroutineScope mainScope) {
+        return new DefaultWindowDecorViewHostSupplier(mainScope);
     }
 
     //

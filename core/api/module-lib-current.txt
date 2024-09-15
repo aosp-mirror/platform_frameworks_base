@@ -673,8 +673,8 @@ package android.webkit {
     method @Nullable public android.content.pm.PackageInfo getCurrentWebViewPackage();
     method @Nullable public String getCurrentWebViewPackageName();
     method @FlaggedApi("android.webkit.update_service_v2") @NonNull public android.webkit.WebViewProviderInfo getDefaultWebViewPackage();
-    method @Nullable public static android.webkit.WebViewUpdateManager getInstance();
-    method @NonNull @RequiresPermission(allOf={android.Manifest.permission.INTERACT_ACROSS_USERS, android.Manifest.permission.QUERY_ALL_PACKAGES}) public android.webkit.WebViewProviderInfo[] getValidWebViewPackages();
+    method @NonNull public static android.webkit.WebViewUpdateManager getInstance();
+    method @NonNull @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public android.webkit.WebViewProviderInfo[] getValidWebViewPackages();
     method @NonNull public android.webkit.WebViewProviderResponse waitForAndGetProvider();
   }
 

@@ -7,6 +7,9 @@
     { "name": "RavenwoodMockitoTest_device" },
     { "name": "RavenwoodBivalentTest_device" },
 
+    { "name": "RavenwoodBivalentInstTest_nonself_inst" },
+    { "name": "RavenwoodBivalentInstTest_self_inst_device" },
+
     // The sysui tests should match vendor/unbundled_google/packages/SystemUIGoogle/TEST_MAPPING
     {
       "name": "SystemUIGoogleTests",
@@ -138,7 +141,19 @@
       "host": true
     },
     {
+      "name": "RavenwoodBivalentInstTest_nonself_inst",
+      "host": true
+    },
+    {
+      "name": "RavenwoodBivalentInstTest_self_inst",
+      "host": true
+    },
+    {
       "name": "RavenwoodBivalentTest",
+      "host": true
+    },
+    {
+      "name": "RavenwoodCoreTest",
       "host": true
     },
     {

@@ -22,6 +22,7 @@ import android.content.pm.PackageManager;
 import android.graphics.GraphicBuffer;
 import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
+import android.hardware.SyncFence;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraExtensionCharacteristics;
@@ -1619,7 +1620,7 @@ public class CameraExtensionsProxyService extends Service {
                 }
                 ret.outputConfigs.add(entry);
             }
-            if (Flags.extension10Bit() && EFV_SUPPORTED) {
+            if (EFV_SUPPORTED) {
                 ret.colorSpace = sessionConfig.getColorSpace();
             } else {
                 ret.colorSpace = ColorSpaceProfiles.UNSPECIFIED;
@@ -2525,6 +2526,19 @@ public class CameraExtensionsProxyService extends Service {
         }
 
         @Override
+        public SyncFence getFence() {
+            if (mParcelImage.fence != null) {
+                try {
+                    return SyncFence.create(mParcelImage.fence.dup());
+                } catch (IOException e) {
+                    Log.e(TAG, "Failed to parcel buffer fence!");
+                }
+            }
+
+            return SyncFence.createEmpty();
+        }
+
+        @Override
         protected final void finalize() throws Throwable {
             try {
                 close();
@@ -2582,7 +2596,7 @@ public class CameraExtensionsProxyService extends Service {
 
     private static CameraOutputConfig getCameraOutputConfig(Camera2OutputConfigImpl output) {
         CameraOutputConfig ret = new CameraOutputConfig();
-        if (Flags.extension10Bit() && EFV_SUPPORTED) {
+        if (EFV_SUPPORTED) {
             ret.dynamicRangeProfile = output.getDynamicRangeProfile();
         } else {
             ret.dynamicRangeProfile = DynamicRangeProfiles.STANDARD;

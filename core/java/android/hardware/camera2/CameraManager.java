@@ -29,6 +29,7 @@ import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.app.ActivityManager;
+import android.app.CameraCompatTaskInfo;
 import android.app.TaskInfo;
 import android.app.compat.CompatChanges;
 import android.companion.virtual.VirtualDeviceManager;
@@ -1586,12 +1587,13 @@ public final class CameraManager {
                     context.getSystemService(ActivityManager.class);
             for (ActivityManager.AppTask appTask : activityManager.getAppTasks()) {
                 final TaskInfo taskInfo = appTask.getTaskInfo();
-                if (taskInfo.appCompatTaskInfo.cameraCompatTaskInfo.freeformCameraCompatMode
-                        != 0
+                final int freeformCameraCompatMode =
+                        taskInfo.appCompatTaskInfo.cameraCompatTaskInfo.freeformCameraCompatMode;
+                if (freeformCameraCompatMode != 0
                         && taskInfo.topActivity != null
                         && taskInfo.topActivity.getPackageName().equals(packageName)) {
                     // WindowManager has requested rotation override.
-                    return ICameraService.ROTATION_OVERRIDE_ROTATION_ONLY;
+                    return getRotationOverrideForCompatFreeform(freeformCameraCompatMode);
                 }
             }
         }
@@ -1611,6 +1613,19 @@ public final class CameraManager {
         return CompatChanges.isChangeEnabled(OVERRIDE_CAMERA_LANDSCAPE_TO_PORTRAIT)
                 ? ICameraService.ROTATION_OVERRIDE_OVERRIDE_TO_PORTRAIT
                 : ICameraService.ROTATION_OVERRIDE_NONE;
+    }
+
+    private static int getRotationOverrideForCompatFreeform(
+            @CameraCompatTaskInfo.FreeformCameraCompatMode int freeformCameraCompatMode) {
+        // Only rotate-and-crop if the app and device orientations do not match.
+        if (freeformCameraCompatMode
+                == CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_LANDSCAPE_DEVICE_IN_PORTRAIT
+                || freeformCameraCompatMode
+                    == CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_PORTRAIT_DEVICE_IN_LANDSCAPE) {
+            return ICameraService.ROTATION_OVERRIDE_ROTATION_ONLY;
+        } else {
+            return ICameraService.ROTATION_OVERRIDE_NONE;
+        }
     }
 
     /**

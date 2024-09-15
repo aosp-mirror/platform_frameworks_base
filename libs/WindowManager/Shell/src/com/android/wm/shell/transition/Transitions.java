@@ -196,6 +196,9 @@ public class Transitions implements RemoteCallable<Transitions>,
     /** Transition to set windowing mode after exit pip transition is finished animating. */
     public static final int TRANSIT_CLEANUP_PIP_EXIT = WindowManager.TRANSIT_FIRST_CUSTOM + 19;
 
+    /** Transition type to minimize a task. */
+    public static final int TRANSIT_MINIMIZE = WindowManager.TRANSIT_FIRST_CUSTOM + 20;
+
     /** Transition type for desktop mode transitions. */
     public static final int TRANSIT_DESKTOP_MODE_TYPES =
             WindowManager.TRANSIT_FIRST_CUSTOM + 100;

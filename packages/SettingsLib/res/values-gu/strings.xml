@@ -564,8 +564,7 @@
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"અલાર્મ અને રિમાઇન્ડર"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"આ ઍપને અલાર્મ સેટ કરવા અને સમય પ્રતિ સંવેદનશીલ ક્રિયાઓ શેડ્યૂલ કરવા માટે મંજૂરી આપો. આ ઍપને બૅકગ્રાઉન્ડમાં ચાલવા દે છે, જેને કારણે બૅટરીનો વધુ વપરાશ થઈ શકે છે.\n\nજો આ પરવાનગી બંધ હોય, તો આ ઍપ દ્વારા શેડ્યૂલ કરવામાં આવેલા વર્તમાન અલાર્મ અને સમય આધારિત ઇવેન્ટ કામ કરશે નહીં."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"શેડ્યૂલ, અલાર્મ, રિમાઇન્ડર, ઘડિયાળ"</string>
-    <!-- no translation found for zen_mode_do_not_disturb_name (6798711401734798283) -->
-    <skip />
+    <string name="zen_mode_do_not_disturb_name" msgid="6798711401734798283">"ખલેલ પાડશો નહીં"</string>
     <string name="zen_mode_settings_title" msgid="7374070457626419755">"ખલેલ પાડશો નહીં"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"ચાલુ કરો"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"ખલેલ પાડશો નહીં ચાલુ કરો"</string>

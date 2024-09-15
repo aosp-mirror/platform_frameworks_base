@@ -187,6 +187,9 @@ java_library {
         "shared/**/desktopmode/*.java",
         "shared/**/desktopmode/*.kt",
     ],
+    static_libs: [
+        "com.android.window.flags.window-aconfig-java",
+    ],
 }
 
 android_library {

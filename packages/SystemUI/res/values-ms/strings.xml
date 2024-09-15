@@ -105,6 +105,7 @@
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Tambahkan pada nota"</string>
     <string name="backlinks_include_link" msgid="4562093591148248158">"Sertakan pautan"</string>
     <string name="backlinks_duplicate_label_format" msgid="558445128952827926">"<xliff:g id="APPNAME">%1$s</xliff:g> <xliff:g id="FREQUENCYCOUNT">(%2$d)</xliff:g>"</string>
+    <string name="backlinks_cross_profile_error" msgid="1355798585727802282">"Pautan tidak dapat ditambahkan daripada profil lain"</string>
     <string name="screenrecord_title" msgid="4257171601439507792">"Perakam Skrin"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Memproses rakaman skrin"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Pemberitahuan breterusan untuk sesi rakaman skrin"</string>
@@ -1391,18 +1392,12 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Kuncupkan ikon"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Kembangkan ikon"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"atau"</string>
-    <!-- no translation found for launch_keyboard_tutorial_notification_title (8849933155160522519) -->
-    <skip />
-    <!-- no translation found for launch_keyboard_tutorial_notification_content (2880339951512757918) -->
-    <skip />
-    <!-- no translation found for launch_touchpad_tutorial_notification_title (2243780062772196901) -->
-    <skip />
-    <!-- no translation found for launch_touchpad_tutorial_notification_content (7931085031240753226) -->
-    <skip />
-    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_title (1940023776496198762) -->
-    <skip />
-    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_content (1780725168171929365) -->
-    <skip />
+    <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Navigasi menggunakan papan kekunci anda"</string>
+    <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Ketahui pintasan papan kekunci"</string>
+    <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Navigasi menggunakan pad sentuh anda"</string>
+    <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"Ketahui gerak isyarat pad sentuh"</string>
+    <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"Navigasi menggunakan papan kekunci dan pad sentuh anda"</string>
+    <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"Ketahui gerak isyarat pad sentuh, pintasan papan kekunci dan pelbagai lagi"</string>
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Gerak isyarat kembali"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Gerak isyarat pergi ke laman utama"</string>
     <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"Kekunci tindakan"</string>
@@ -1442,4 +1437,18 @@
     <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="7513137763024327538">"Kini anda boleh menjadikan skrin amat malap dengan merendahkan tahap kecerahan lebih jauh daripada bahagian atas skrin anda.\n\nCiri ini berfungsi paling baik apabila anda berada dalam persekitaran yang gelap."</string>
     <string name="accessibility_deprecate_extra_dim_dialog_button" msgid="1782147201534669800">"Alih keluar pintasan amat malap"</string>
     <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="4070696910424515757">"Pintasan amat malap dialih keluar. Untuk mengurangkan kecerahan anda, gunakan bar kecerahan biasa."</string>
+    <!-- no translation found for qs_edit_mode_category_connectivity (4559726936546032672) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_accessibility (7969091385071475922) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_utilities (8123080090108420095) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_privacy (6577774443194551775) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_providedByApps (8346112074897919019) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_display (4749511439121053942) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_unknown (509314252124053550) -->
+    <skip />
 </resources>

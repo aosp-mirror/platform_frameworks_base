@@ -158,16 +158,13 @@ object BiometricViewSizeBinder {
             fun setVisibilities(hideSensorIcon: Boolean, size: PromptSize) {
                 viewsToHideWhenSmall.forEach { it.showContentOrHide(forceHide = size.isSmall) }
                 largeConstraintSet.setVisibility(iconHolderView.id, View.GONE)
-                largeConstraintSet.setVisibility(R.id.biometric_icon_overlay, View.GONE)
                 largeConstraintSet.setVisibility(R.id.indicator, View.GONE)
                 largeConstraintSet.setVisibility(R.id.scrollView, View.GONE)
 
                 if (hideSensorIcon) {
                     smallConstraintSet.setVisibility(iconHolderView.id, View.GONE)
-                    smallConstraintSet.setVisibility(R.id.biometric_icon_overlay, View.GONE)
                     smallConstraintSet.setVisibility(R.id.indicator, View.GONE)
                     mediumConstraintSet.setVisibility(iconHolderView.id, View.GONE)
-                    mediumConstraintSet.setVisibility(R.id.biometric_icon_overlay, View.GONE)
                     mediumConstraintSet.setVisibility(R.id.indicator, View.GONE)
                 }
             }

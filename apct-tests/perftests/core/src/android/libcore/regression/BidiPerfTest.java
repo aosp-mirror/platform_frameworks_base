@@ -16,8 +16,8 @@
 
 package android.libcore.regression;
 
-import androidx.benchmark.BenchmarkState;
-import androidx.benchmark.junit4.BenchmarkRule;
+import android.perftests.utils.BenchmarkState;
+import android.perftests.utils.PerfStatusReporter;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -34,14 +34,14 @@ import java.text.DecimalFormat;
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class BidiPerfTest {
-    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
+    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
     private static final AttributedCharacterIterator CHAR_ITER =
             DecimalFormat.getInstance().formatToCharacterIterator(new BigDecimal(Math.PI));
 
     @Test
     public void time_createBidiFromIter() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             Bidi bidi = new Bidi(CHAR_ITER);
         }
@@ -49,7 +49,7 @@ public class BidiPerfTest {
 
     @Test
     public void time_createBidiFromCharArray() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             Bidi bd =
                     new Bidi(
@@ -64,7 +64,7 @@ public class BidiPerfTest {
 
     @Test
     public void time_createBidiFromString() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             Bidi bidi = new Bidi("Hello", Bidi.DIRECTION_LEFT_TO_RIGHT);
         }
@@ -72,7 +72,7 @@ public class BidiPerfTest {
 
     @Test
     public void time_reorderVisually() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             Bidi.reorderVisually(
                     new byte[] {2, 1, 3, 0, 4}, 0, new String[] {"H", "e", "l", "l", "o"}, 0, 5);
@@ -81,7 +81,7 @@ public class BidiPerfTest {
 
     @Test
     public void time_hebrewBidi() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             Bidi bd =
                     new Bidi(
@@ -104,7 +104,7 @@ public class BidiPerfTest {
 
     @Test
     public void time_complicatedOverrideBidi() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             Bidi bd =
                     new Bidi(
@@ -119,7 +119,7 @@ public class BidiPerfTest {
 
     @Test
     public void time_requiresBidi() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             Bidi.requiresBidi("\u05D0".toCharArray(), 1, 1); // false.
             Bidi.requiresBidi("\u05D0".toCharArray(), 0, 1); // true.

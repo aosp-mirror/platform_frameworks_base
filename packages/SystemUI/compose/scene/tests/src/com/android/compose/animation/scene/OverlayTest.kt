@@ -18,10 +18,12 @@ package com.android.compose.animation.scene
 
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -31,19 +33,26 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.assertPositionInRootIsEqualTo
+import androidx.compose.ui.test.click
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipe
+import androidx.compose.ui.test.swipeUp
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.compose.animation.scene.TestOverlays.OverlayA
 import com.android.compose.animation.scene.TestOverlays.OverlayB
 import com.android.compose.animation.scene.TestScenes.SceneA
+import com.android.compose.animation.scene.subjects.assertThat
 import com.android.compose.test.assertSizeIsEqualTo
 import com.android.compose.test.setContentAndCreateMainScope
 import com.android.compose.test.subjects.assertThat
@@ -654,6 +663,85 @@ class OverlayTest {
     }
 
     @Test
+    fun replaceAnimation_elementInCurrentSceneAndOneOverlay_sharedElementDisabled() {
+        rule.testReplaceOverlayTransition(
+            currentSceneContent = {
+                Box(Modifier.size(width = 180.dp, height = 120.dp)) {
+                    Foo(width = 60.dp, height = 40.dp)
+                }
+            },
+            fromContent = {},
+            fromAlignment = Alignment.TopStart,
+            toContent = { Foo(width = 100.dp, height = 80.dp) },
+            transition = {
+                // 4 frames of animation
+                spec = tween(4 * 16, easing = LinearEasing)
+
+                // Scale Foo to/from size 0 in each content instead of sharing it.
+                sharedElement(TestElements.Foo, enabled = false)
+                scaleSize(TestElements.Foo, width = 0f, height = 0f)
+            },
+        ) {
+            before {
+                rule
+                    .onNode(isElement(TestElements.Foo, content = SceneA))
+                    .assertSizeIsEqualTo(60.dp, 40.dp)
+                    .assertPositionInRootIsEqualTo(0.dp, 0.dp)
+                rule.onNode(isElement(TestElements.Foo, content = OverlayA)).assertDoesNotExist()
+                rule.onNode(isElement(TestElements.Foo, content = OverlayB)).assertDoesNotExist()
+            }
+
+            at(16) {
+                rule
+                    .onNode(isElement(TestElements.Foo, content = SceneA))
+                    .assertSizeIsEqualTo(45.dp, 30.dp)
+                    .assertPositionInRootIsEqualTo(0.dp, 0.dp)
+                rule.onNode(isElement(TestElements.Foo, content = OverlayA)).assertDoesNotExist()
+                rule
+                    .onNode(isElement(TestElements.Foo, content = OverlayB))
+                    .assertSizeIsEqualTo(25.dp, 20.dp)
+                    .assertPositionInRootIsEqualTo(((180 - 25) / 2f).dp, ((120 - 20) / 2f).dp)
+            }
+
+            at(32) {
+                rule
+                    .onNode(isElement(TestElements.Foo, content = SceneA))
+                    .assertSizeIsEqualTo(30.dp, 20.dp)
+                    .assertPositionInRootIsEqualTo(0.dp, 0.dp)
+                rule.onNode(isElement(TestElements.Foo, content = OverlayA)).assertDoesNotExist()
+                rule
+                    .onNode(isElement(TestElements.Foo, content = OverlayB))
+                    .assertSizeIsEqualTo(50.dp, 40.dp)
+                    .assertPositionInRootIsEqualTo(((180 - 50) / 2f).dp, ((120 - 40) / 2f).dp)
+            }
+
+            at(48) {
+                rule
+                    .onNode(isElement(TestElements.Foo, content = SceneA))
+                    .assertSizeIsEqualTo(15.dp, 10.dp)
+                    .assertPositionInRootIsEqualTo(0.dp, 0.dp)
+                rule.onNode(isElement(TestElements.Foo, content = OverlayA)).assertDoesNotExist()
+                rule
+                    .onNode(isElement(TestElements.Foo, content = OverlayB))
+                    .assertSizeIsEqualTo(75.dp, 60.dp)
+                    .assertPositionInRootIsEqualTo(((180 - 75) / 2f).dp, ((120 - 60) / 2f).dp)
+            }
+
+            after {
+                rule
+                    .onNode(isElement(TestElements.Foo, content = SceneA))
+                    .assertExists()
+                    .assertIsNotDisplayed()
+                rule.onNode(isElement(TestElements.Foo, content = OverlayA)).assertDoesNotExist()
+                rule
+                    .onNode(isElement(TestElements.Foo, content = OverlayB))
+                    .assertSizeIsEqualTo(100.dp, 80.dp)
+                    .assertPositionInRootIsEqualTo(40.dp, 20.dp)
+            }
+        }
+    }
+
+    @Test
     fun overscrollingOverlay_movableElementNotInOverlay() {
         val state =
             rule.runOnUiThread {
@@ -664,7 +752,7 @@ class OverlayTest {
                         overscroll(OverlayA, orientation = Orientation.Horizontal) {
                             translate(ElementKey("elementThatDoesNotExist"), x = 10.dp)
                         }
-                    }
+                    },
                 )
             }
 
@@ -689,5 +777,60 @@ class OverlayTest {
             .assertPositionInRootIsEqualTo(0.dp, 0.dp)
             .assertSizeIsEqualTo(100.dp)
             .assertIsDisplayed()
+    }
+
+    @Test
+    fun overlaysAreModalByDefault() {
+        val state = rule.runOnUiThread { MutableSceneTransitionLayoutStateImpl(SceneA) }
+
+        val scrollState = ScrollState(initial = 0)
+        val scope =
+            rule.setContentAndCreateMainScope {
+                SceneTransitionLayout(state) {
+                    // Make the scene vertically scrollable.
+                    scene(SceneA) {
+                        Box(Modifier.size(200.dp).verticalScroll(scrollState)) {
+                            Box(Modifier.size(200.dp, 400.dp))
+                        }
+                    }
+
+                    // The overlay is at the center end of the scene.
+                    overlay(OverlayA, alignment = Alignment.CenterEnd) {
+                        Box(Modifier.size(100.dp))
+                    }
+                }
+            }
+
+        fun swipeUp() {
+            rule.onRoot().performTouchInput {
+                swipe(start = Offset(x = 0f, y = bottom), end = Offset(x = 0f, y = top))
+            }
+        }
+
+        // Swiping up on the scene scrolls the list.
+        assertThat(scrollState.value).isEqualTo(0)
+        swipeUp()
+        assertThat(scrollState.value).isNotEqualTo(0)
+
+        // Reset the scroll.
+        scope.launch { scrollState.scrollTo(0) }
+        rule.waitForIdle()
+        assertThat(scrollState.value).isEqualTo(0)
+
+        // Show the overlay.
+        rule.runOnUiThread { state.showOverlay(OverlayA, animationScope = scope) }
+        rule.waitForIdle()
+        assertThat(state.transitionState).isIdle()
+        assertThat(state.transitionState).hasCurrentOverlays(OverlayA)
+
+        // Swiping up does not scroll the scene behind the overlay.
+        swipeUp()
+        assertThat(scrollState.value).isEqualTo(0)
+
+        // Clicking outside the overlay will close it.
+        rule.onRoot().performTouchInput { click(Offset.Zero) }
+        rule.waitForIdle()
+        assertThat(state.transitionState).isIdle()
+        assertThat(state.transitionState).hasCurrentOverlays(/* empty */ )
     }
 }

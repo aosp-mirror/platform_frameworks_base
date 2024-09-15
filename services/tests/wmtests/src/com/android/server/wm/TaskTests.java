@@ -16,7 +16,9 @@
 
 package com.android.server.wm;
 
+
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
+import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_PORTRAIT_DEVICE_IN_LANDSCAPE;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
@@ -71,7 +73,6 @@ import static org.mockito.Mockito.never;
 
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
-import android.app.CameraCompatTaskInfo;
 import android.app.TaskInfo;
 import android.app.WindowConfiguration;
 import android.content.ComponentName;
@@ -2025,10 +2026,10 @@ public class TaskTests extends WindowTestsBase {
     public void getTaskInfoPropagatesCameraCompatMode() {
         final Task task = new TaskBuilder(mSupervisor).setCreateActivity(true).build();
         final ActivityRecord activity = task.getTopMostActivity();
-        activity.mAppCompatController.getAppCompatCameraOverrides()
-                .setFreeformCameraCompatMode(CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_PORTRAIT);
+        activity.mAppCompatController.getAppCompatCameraOverrides().setFreeformCameraCompatMode(
+                CAMERA_COMPAT_FREEFORM_PORTRAIT_DEVICE_IN_LANDSCAPE);
 
-        assertEquals(CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_PORTRAIT,
+        assertEquals(CAMERA_COMPAT_FREEFORM_PORTRAIT_DEVICE_IN_LANDSCAPE,
                 task.getTaskInfo().appCompatTaskInfo.cameraCompatTaskInfo.freeformCameraCompatMode);
     }
 

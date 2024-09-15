@@ -118,7 +118,7 @@ public class FreeformTaskTransitionHandler
 
     @Override
     public IBinder startMinimizedModeTransition(WindowContainerTransaction wct) {
-        final int type = WindowManager.TRANSIT_TO_BACK;
+        final int type = Transitions.TRANSIT_MINIMIZE;
         final IBinder token = mTransitions.startTransition(type, wct, this);
         mPendingTransitionTokens.add(token);
         return token;
@@ -161,7 +161,8 @@ public class FreeformTaskTransitionHandler
                             transition, info.getType(), change);
                     break;
                 case WindowManager.TRANSIT_TO_BACK:
-                    transitionHandled |= startMinimizeTransition(transition);
+                    transitionHandled |= startMinimizeTransition(
+                            transition, info.getType(), change);
                     break;
                 case WindowManager.TRANSIT_CLOSE:
                     if (change.getTaskInfo().getWindowingMode() == WINDOWING_MODE_FREEFORM) {
@@ -227,8 +228,20 @@ public class FreeformTaskTransitionHandler
         return handled;
     }
 
-    private boolean startMinimizeTransition(IBinder transition) {
-        return mPendingTransitionTokens.contains(transition);
+    private boolean startMinimizeTransition(
+            IBinder transition,
+            int type,
+            TransitionInfo.Change change) {
+        if (!mPendingTransitionTokens.contains(transition)) {
+            return false;
+        }
+
+        final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
+        if (type != Transitions.TRANSIT_MINIMIZE) {
+            return false;
+        }
+        // TODO(b/361524575): Add minimize animations
+        return true;
     }
 
     private boolean startCloseTransition(IBinder transition, TransitionInfo.Change change,

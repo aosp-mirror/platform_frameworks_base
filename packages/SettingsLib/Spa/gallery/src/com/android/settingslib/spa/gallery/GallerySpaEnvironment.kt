@@ -22,7 +22,7 @@ import com.android.settingslib.spa.framework.common.SettingsPageProviderReposito
 import com.android.settingslib.spa.framework.common.SpaEnvironment
 import com.android.settingslib.spa.framework.common.createSettingsPage
 import com.android.settingslib.spa.gallery.button.ActionButtonPageProvider
-import com.android.settingslib.spa.gallery.card.CardPageProvider
+import com.android.settingslib.spa.gallery.banner.BannerPageProvider
 import com.android.settingslib.spa.gallery.chart.ChartPageProvider
 import com.android.settingslib.spa.gallery.dialog.DialogMainPageProvider
 import com.android.settingslib.spa.gallery.dialog.NavDialogProvider
@@ -107,7 +107,7 @@ class GallerySpaEnvironment(context: Context) : SpaEnvironment(context) {
                 SettingsTextFieldPasswordPageProvider,
                 SearchScaffoldPageProvider,
                 SuwScaffoldPageProvider,
-                CardPageProvider,
+                BannerPageProvider,
                 CopyablePageProvider,
             ),
             rootPages = listOf(

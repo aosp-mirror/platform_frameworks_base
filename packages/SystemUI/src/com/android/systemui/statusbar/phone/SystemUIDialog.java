@@ -480,10 +480,16 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
     }
 
     public static AlertDialog applyFlags(AlertDialog dialog) {
+        return applyFlags(dialog, true);
+    }
+
+    public static AlertDialog applyFlags(AlertDialog dialog, boolean showWhenLocked) {
         final Window window = dialog.getWindow();
         window.setType(WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL);
-        window.addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
-                | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
+        window.addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
+        if (showWhenLocked) {
+            window.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
+        }
         window.getAttributes().setFitInsetsTypes(
                 window.getAttributes().getFitInsetsTypes() & ~Type.statusBars());
         return dialog;

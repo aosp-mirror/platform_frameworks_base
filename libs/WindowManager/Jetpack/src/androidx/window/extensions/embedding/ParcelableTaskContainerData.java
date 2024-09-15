@@ -108,6 +108,15 @@ class ParcelableTaskContainerData implements Parcelable {
                 : mParcelableSplitContainerDataList;
     }
 
+    @NonNull
+    List<String> getSplitRuleTags() {
+        final List<String> tags = new ArrayList<>();
+        for (ParcelableSplitContainerData data : getParcelableSplitContainerDataList()) {
+            tags.add(data.mSplitRuleTag);
+        }
+        return tags;
+    }
+
     @Override
     public int describeContents() {
         return 0;

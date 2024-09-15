@@ -294,6 +294,8 @@
     <string name="open_in_browser_text">Open in browser</string>
     <!-- Accessibility text for the handle menu new window button [CHAR LIMIT=NONE] -->
     <string name="new_window_text">New Window</string>
+    <!-- Accessibility text for the handle menu new window button [CHAR LIMIT=NONE] -->
+    <string name="manage_windows_text">Manage Windows</string>
     <!-- Accessibility text for the handle menu close button [CHAR LIMIT=NONE] -->
     <string name="close_text">Close</string>
     <!-- Accessibility text for the handle menu close menu button [CHAR LIMIT=NONE] -->

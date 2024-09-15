@@ -294,7 +294,9 @@ constructor(
 
     /** Tell the bouncer that bouncer is requested when device is already authenticated */
     fun notifyUserRequestedBouncerWhenAlreadyAuthenticated(userId: Int) {
-        applicationScope.launch { repository.setKeyguardAuthenticatedPrimaryAuth(userId) }
+        applicationScope.launch {
+            repository.setUserRequestedBouncerWhenAlreadyAuthenticated(userId)
+        }
     }
 
     /** Tell the bouncer that keyguard is authenticated with biometrics. */

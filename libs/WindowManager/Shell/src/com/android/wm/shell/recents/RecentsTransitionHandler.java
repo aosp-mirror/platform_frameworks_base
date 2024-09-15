@@ -49,8 +49,6 @@ import android.util.IntArray;
 import android.util.Pair;
 import android.util.Slog;
 import android.view.Display;
-import android.view.IRecentsAnimationController;
-import android.view.IRecentsAnimationRunner;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 import android.window.PictureInPictureSurfaceTransaction;
@@ -1024,10 +1022,6 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
         }
 
         @Override
-        public void setAnimationTargetsBehindSystemBars(boolean behindSystemBars) {
-        }
-
-        @Override
         public void setFinishTaskTransaction(int taskId,
                 PictureInPictureSurfaceTransaction finishTransaction, SurfaceControl overlay) {
             mExecutor.execute(() -> {
@@ -1254,26 +1248,10 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
         }
 
         @Override
-        public void setDeferCancelUntilNextTransition(boolean defer, boolean screenshot) {
-        }
-
-        @Override
-        public void cleanupScreenshot() {
-        }
-
-        @Override
         public void setWillFinishToHome(boolean willFinishToHome) {
             mExecutor.execute(() -> {
                 mWillFinishToHome = willFinishToHome;
             });
-        }
-
-        /**
-         * @see IRecentsAnimationController#removeTask
-         */
-        @Override
-        public boolean removeTask(int taskId) {
-            return false;
         }
 
         /**
@@ -1291,13 +1269,6 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                     Slog.e(TAG, "Failed to detach the navigation bar from app", e);
                 }
             });
-        }
-
-        /**
-         * @see IRecentsAnimationController#animateNavigationBarToApp(long)
-         */
-        @Override
-        public void animateNavigationBarToApp(long duration) {
         }
     };
 

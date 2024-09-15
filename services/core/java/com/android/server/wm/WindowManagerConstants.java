@@ -34,7 +34,7 @@ import java.util.concurrent.Executor;
  */
 final class WindowManagerConstants {
 
-    /** The orientation of activity will be always "unspecified". */
+    /** The orientation of activity will be always "unspecified" except for game apps. */
     private static final String KEY_IGNORE_ACTIVITY_ORIENTATION_REQUEST =
             "ignore_activity_orientation_request";
 

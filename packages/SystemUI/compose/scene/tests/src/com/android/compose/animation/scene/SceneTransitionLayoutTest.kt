@@ -95,14 +95,8 @@ class SceneTransitionLayoutTest {
             )
         }
 
-        SceneTransitionLayout(
-            state = layoutState,
-            modifier = Modifier.size(LayoutSize),
-        ) {
-            scene(
-                SceneA,
-                userActions = mapOf(Back to SceneB),
-            ) {
+        SceneTransitionLayout(state = layoutState, modifier = Modifier.size(LayoutSize)) {
+            scene(SceneA, userActions = mapOf(Back to SceneB)) {
                 Box(Modifier.fillMaxSize()) {
                     SharedFoo(size = 50.dp, childOffset = 0.dp, Modifier.align(Alignment.TopEnd))
                     Text("SceneA")
@@ -250,7 +244,7 @@ class SceneTransitionLayoutTest {
         sharedFoo.assertHeightIsEqualTo(75.dp)
         sharedFoo.assertPositionInRootIsEqualTo(
             expectedTop = 0.dp,
-            expectedLeft = (LayoutSize - 50.dp) / 2
+            expectedLeft = (LayoutSize - 50.dp) / 2,
         )
 
         // The shared offset of the single child of SharedFoo() is 50dp in scene B and 0dp in Scene
@@ -325,7 +319,7 @@ class SceneTransitionLayoutTest {
             rule.runOnUiThread {
                 MutableSceneTransitionLayoutStateImpl(
                     SceneA,
-                    transitions { overscrollDisabled(SceneB, Orientation.Horizontal) }
+                    transitions { overscrollDisabled(SceneB, Orientation.Horizontal) },
                 )
             }
 
@@ -371,7 +365,7 @@ class SceneTransitionLayoutTest {
                         from(SceneB, to = SceneC) {
                             spec = tween(duration.toInt(), easing = LinearEasing)
                         }
-                    }
+                    },
                 )
             }
 
@@ -447,7 +441,7 @@ class SceneTransitionLayoutTest {
     }
 
     private fun SemanticsNodeInteraction.offsetRelativeTo(
-        other: SemanticsNodeInteraction,
+        other: SemanticsNodeInteraction
     ): DpOffset {
         val node = fetchSemanticsNode()
         val bounds = node.boundsInRoot

@@ -19,10 +19,8 @@ package com.android.keyguard;
 import static com.android.internal.util.LatencyTracker.ACTION_CHECK_CREDENTIAL;
 import static com.android.internal.util.LatencyTracker.ACTION_CHECK_CREDENTIAL_UNLOCKED;
 import static com.android.keyguard.KeyguardAbsKeyInputView.MINIMUM_PASSWORD_LENGTH_BEFORE_REPORT;
-import static com.android.systemui.Flags.msdlFeedback;
 import static com.android.systemui.Flags.notifyPasswordTextViewUserActivityInBackground;
 
-import android.annotation.Nullable;
 import android.content.res.ColorStateList;
 import android.os.AsyncTask;
 import android.os.CountDownTimer;
@@ -37,14 +35,12 @@ import com.android.internal.widget.LockscreenCredential;
 import com.android.keyguard.EmergencyButtonController.EmergencyButtonCallback;
 import com.android.keyguard.KeyguardAbsKeyInputView.KeyDownListener;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
+import com.android.systemui.bouncer.ui.helper.BouncerHapticPlayer;
 import com.android.systemui.classifier.FalsingClassifier;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.res.R;
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
-
-import com.google.android.msdl.data.model.MSDLToken;
-import com.google.android.msdl.domain.MSDLPlayer;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -62,8 +58,6 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
     protected AsyncTask<?, ?, ?> mPendingLockCheck;
     protected boolean mResumed;
     protected boolean mLockedOut;
-    @Nullable
-    protected MSDLPlayer mMSDLPlayer;
 
     private final KeyDownListener mKeyDownListener = (keyCode, keyEvent) -> {
         // Fingerprint sensor sends a KeyEvent.KEYCODE_UNKNOWN.
@@ -91,16 +85,16 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
             LatencyTracker latencyTracker, FalsingCollector falsingCollector,
             EmergencyButtonController emergencyButtonController,
             FeatureFlags featureFlags, SelectedUserInteractor selectedUserInteractor,
-            @Nullable MSDLPlayer msdlPlayer,
+            BouncerHapticPlayer bouncerHapticPlayer,
             UserActivityNotifier userActivityNotifier) {
         super(view, securityMode, keyguardSecurityCallback, emergencyButtonController,
-                messageAreaControllerFactory, featureFlags, selectedUserInteractor);
+                messageAreaControllerFactory, featureFlags, selectedUserInteractor,
+                bouncerHapticPlayer);
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mLockPatternUtils = lockPatternUtils;
         mLatencyTracker = latencyTracker;
         mFalsingCollector = falsingCollector;
         mEmergencyButtonController = emergencyButtonController;
-        mMSDLPlayer = msdlPlayer;
         mUserActivityNotifier = userActivityNotifier;
     }
 
@@ -191,7 +185,9 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
     void onPasswordChecked(int userId, boolean matched, int timeoutMs, boolean isValidPassword) {
         boolean dismissKeyguard = mSelectedUserInteractor.getSelectedUserId() == userId;
         if (matched) {
-            playAuthenticationHaptics(/* unlock= */true);
+            mBouncerHapticPlayer.playAuthenticationFeedback(
+                    /* authenticationSucceeded = */true
+            );
             getKeyguardSecurityCallback().reportUnlockAttempt(userId, true, 0);
             if (dismissKeyguard) {
                 mDismissing = true;
@@ -199,7 +195,9 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
                 getKeyguardSecurityCallback().dismiss(true, userId, getSecurityMode());
             }
         } else {
-            playAuthenticationHaptics(/* unlock= */false);
+            mBouncerHapticPlayer.playAuthenticationFeedback(
+                    /* authenticationSucceeded = */false
+            );
             mView.resetPasswordText(true /* animate */, false /* announce deletion if no match */);
             if (isValidPassword) {
                 getKeyguardSecurityCallback().reportUnlockAttempt(userId, false, timeoutMs);
@@ -214,18 +212,6 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
             }
             startErrorAnimation();
         }
-    }
-
-    private void playAuthenticationHaptics(boolean unlock) {
-        if (!msdlFeedback() || mMSDLPlayer == null) return;
-
-        MSDLToken token;
-        if (unlock) {
-            token = MSDLToken.UNLOCK;
-        } else {
-            token = MSDLToken.FAILURE;
-        }
-        mMSDLPlayer.playToken(token, mAuthInteractionProperties);
     }
 
     protected void startErrorAnimation() { /* no-op */ }

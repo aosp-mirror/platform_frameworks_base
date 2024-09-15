@@ -85,7 +85,7 @@ public class TestModeBuilder {
 
     public TestModeBuilder(ZenMode previous) {
         mId = previous.getId();
-        mRule = previous.getRule();
+        mRule = new AutomaticZenRule.Builder(previous.getRule()).build();
 
         mConfigZenRule = new ZenModeConfig.ZenRule();
         mConfigZenRule.enabled = previous.getRule().isEnabled();

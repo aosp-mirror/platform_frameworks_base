@@ -16,6 +16,7 @@
 
 package com.android.systemui.touchpad.tutorial.ui.composable
 
+import android.content.res.Resources
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -39,10 +40,33 @@ import com.android.systemui.touchpad.tutorial.ui.gesture.TouchpadGestureHandler
 import com.android.systemui.touchpad.tutorial.ui.gesture.TouchpadGestureMonitor
 
 interface GestureMonitorProvider {
-    fun createGestureMonitor(
-        gestureDistanceThresholdPx: Int,
+
+    @Composable
+    fun rememberGestureMonitor(
+        resources: Resources,
         gestureStateChangedCallback: (GestureState) -> Unit
     ): TouchpadGestureMonitor
+}
+
+typealias gestureStateCallback = (GestureState) -> Unit
+
+class DistanceBasedGestureMonitorProvider(
+    val monitorFactory: (Int, gestureStateCallback) -> TouchpadGestureMonitor
+) : GestureMonitorProvider {
+
+    @Composable
+    override fun rememberGestureMonitor(
+        resources: Resources,
+        gestureStateChangedCallback: (GestureState) -> Unit
+    ): TouchpadGestureMonitor {
+        val distanceThresholdPx =
+            resources.getDimensionPixelSize(
+                com.android.internal.R.dimen.system_gestures_distance_threshold
+            )
+        return remember(distanceThresholdPx) {
+            monitorFactory(distanceThresholdPx, gestureStateChangedCallback)
+        }
+    }
 }
 
 fun GestureState.toTutorialActionState(): TutorialActionState {
@@ -62,19 +86,12 @@ fun GestureTutorialScreen(
 ) {
     BackHandler(onBack = onBack)
     var gestureState by remember { mutableStateOf(NOT_STARTED) }
-    val swipeDistanceThresholdPx =
-        LocalContext.current.resources.getDimensionPixelSize(
-            com.android.internal.R.dimen.system_gestures_distance_threshold
+    val gestureMonitor =
+        gestureMonitorProvider.rememberGestureMonitor(
+            resources = LocalContext.current.resources,
+            gestureStateChangedCallback = { gestureState = it }
         )
-    val gestureHandler =
-        remember(swipeDistanceThresholdPx) {
-            TouchpadGestureHandler(
-                gestureMonitorProvider.createGestureMonitor(
-                    swipeDistanceThresholdPx,
-                    gestureStateChangedCallback = { gestureState = it }
-                )
-            )
-        }
+    val gestureHandler = remember(gestureMonitor) { TouchpadGestureHandler(gestureMonitor) }
     TouchpadGesturesHandlingBox(gestureHandler, gestureState) {
         ActionTutorialContent(
             gestureState.toTutorialActionState(),

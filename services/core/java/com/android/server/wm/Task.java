@@ -3192,13 +3192,6 @@ class Task extends TaskFragment {
         return "Task=" + mTaskId;
     }
 
-    WindowContainer<?> getDimmerParent() {
-        if (!inMultiWindowMode() && isTranslucentForTransition()) {
-            return getRootDisplayArea();
-        }
-        return this;
-    }
-
     @Deprecated
     @Override
     Dimmer getDimmer() {
@@ -3220,6 +3213,13 @@ class Task extends TaskFragment {
         }
 
         return mDimmer;
+    }
+
+    boolean isSuitableForDimming() {
+        // If the window is in multi-window mode, we want to dim at the Task level to ensure the dim
+        // bounds match the area the app lives in.
+        // If translucent, we will move the dim to the display area
+        return inMultiWindowMode() || !isTranslucentAndVisible();
     }
 
     @Override
@@ -3806,6 +3806,9 @@ class Task extends TaskFragment {
             sb.append(" aI=");
             sb.append(affinityIntent.getComponent().flattenToShortString());
         }
+        sb.append(" isResizeable=").append(isResizeable());
+        sb.append(" minWidth=").append(mMinWidth);
+        sb.append(" minHeight=").append(mMinHeight);
         sb.append('}');
         return stringName = sb.toString();
     }

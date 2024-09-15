@@ -80,6 +80,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atMost;
 import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
@@ -88,9 +89,12 @@ import android.content.res.Configuration;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.Region;
 import android.os.IBinder;
 import android.os.InputConfig;
 import android.os.RemoteException;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
 import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.util.ArraySet;
@@ -116,6 +120,7 @@ import androidx.test.filters.SmallTest;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.testutils.StubTransaction;
 import com.android.server.wm.SensitiveContentPackages.PackageInfo;
+import com.android.window.flags.Flags;
 
 import org.junit.After;
 import org.junit.Test;
@@ -963,6 +968,88 @@ public class WindowStateTests extends WindowTestsBase {
         assertNull(handle.token);
         assertEquals(0L, handle.dispatchingTimeoutMillis);
         assertTrue(testFlag(handle.inputConfig, InputConfig.NO_INPUT_CHANNEL));
+    }
+
+    @DisableFlags(Flags.FLAG_SCROLLING_FROM_LETTERBOX)
+    @Test
+    public void testTouchRegionUsesLetterboxBoundsIfTransformedBoundsAndLetterboxScrolling() {
+        final WindowState win = createWindow(null, TYPE_APPLICATION, "win");
+
+        // Transformed bounds used for size of touchable region if letterbox inner bounds are empty.
+        final Rect transformedBounds = new Rect(0, 0, 300, 500);
+        doReturn(transformedBounds).when(win.mToken).getFixedRotationTransformDisplayBounds();
+
+        // Otherwise, touchable region should match letterbox inner bounds.
+        final Rect letterboxInnerBounds = new Rect(30, 0, 270, 500);
+        doAnswer(invocation -> {
+            Rect rect = invocation.getArgument(0);
+            rect.set(letterboxInnerBounds);
+            return null;
+        }).when(win.mActivityRecord).getLetterboxInnerBounds(any());
+
+        Region outRegion = new Region();
+        win.getSurfaceTouchableRegion(outRegion, win.mAttrs);
+
+        // Because scrollingFromLetterbox flag is disabled and letterboxInnerBounds is not empty,
+        // touchable region should match letterboxInnerBounds always.
+        assertEquals(letterboxInnerBounds, outRegion.getBounds());
+    }
+
+    @DisableFlags(Flags.FLAG_SCROLLING_FROM_LETTERBOX)
+    @Test
+    public void testTouchRegionUsesLetterboxBoundsIfNullTransformedBoundsAndLetterboxScrolling() {
+        final WindowState win = createWindow(null, TYPE_APPLICATION, "win");
+
+        // Fragment bounds used for size of touchable region if letterbox inner bounds are empty
+        // and Transform bounds are null.
+        doReturn(null).when(win.mToken).getFixedRotationTransformDisplayBounds();
+        final Rect fragmentBounds = new Rect(0, 0, 300, 500);
+        final TaskFragment taskFragment = win.mActivityRecord.getTaskFragment();
+        doAnswer(invocation -> {
+            Rect rect = invocation.getArgument(0);
+            rect.set(fragmentBounds);
+            return null;
+        }).when(taskFragment).getDimBounds(any());
+
+        // Otherwise, touchable region should match letterbox inner bounds.
+        final Rect letterboxInnerBounds = new Rect(30, 0, 270, 500);
+        doAnswer(invocation -> {
+            Rect rect = invocation.getArgument(0);
+            rect.set(letterboxInnerBounds);
+            return null;
+        }).when(win.mActivityRecord).getLetterboxInnerBounds(any());
+
+        Region outRegion = new Region();
+        win.getSurfaceTouchableRegion(outRegion, win.mAttrs);
+
+        // Because scrollingFromLetterbox flag is disabled and letterboxInnerBounds is not empty,
+        // touchable region should match letterboxInnerBounds always.
+        assertEquals(letterboxInnerBounds, outRegion.getBounds());
+    }
+
+    @EnableFlags(Flags.FLAG_SCROLLING_FROM_LETTERBOX)
+    @Test
+    public void testTouchRegionUsesTransformedBoundsIfLetterboxScrolling() {
+        final WindowState win = createWindow(null, TYPE_APPLICATION, "win");
+
+        // Transformed bounds used for size of touchable region if letterbox inner bounds are empty.
+        final Rect transformedBounds = new Rect(0, 0, 300, 500);
+        doReturn(transformedBounds).when(win.mToken).getFixedRotationTransformDisplayBounds();
+
+        // Otherwise, touchable region should match letterbox inner bounds.
+        final Rect letterboxInnerBounds = new Rect(30, 0, 270, 500);
+        doAnswer(invocation -> {
+            Rect rect = invocation.getArgument(0);
+            rect.set(letterboxInnerBounds);
+            return null;
+        }).when(win.mActivityRecord).getLetterboxInnerBounds(any());
+
+        Region outRegion = new Region();
+        win.getSurfaceTouchableRegion(outRegion, win.mAttrs);
+
+        // Because scrollingFromLetterbox flag is enabled and transformedBounds are non-null,
+        // touchable region should match transformedBounds.
+        assertEquals(transformedBounds, outRegion.getBounds());
     }
 
     @Test

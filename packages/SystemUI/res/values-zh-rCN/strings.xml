@@ -105,6 +105,8 @@
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"添加到备注中"</string>
     <string name="backlinks_include_link" msgid="4562093591148248158">"包括链接"</string>
     <string name="backlinks_duplicate_label_format" msgid="558445128952827926">"<xliff:g id="APPNAME">%1$s</xliff:g> <xliff:g id="FREQUENCYCOUNT">(%2$d)</xliff:g>⁠"</string>
+    <!-- no translation found for backlinks_cross_profile_error (1355798585727802282) -->
+    <skip />
     <string name="screenrecord_title" msgid="4257171601439507792">"屏幕录制器"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"正在处理屏幕录制视频"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"持续显示屏幕录制会话通知"</string>
@@ -292,8 +294,7 @@
     <string name="start_dreams" msgid="9131802557946276718">"屏保"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"有线网络"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"勿扰"</string>
-    <!-- no translation found for quick_settings_modes_label (879156359479504244) -->
-    <skip />
+    <string name="quick_settings_modes_label" msgid="879156359479504244">"模式"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"蓝牙"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"没有可用的配对设备"</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"点按即可连接设备或断开设备连接"</string>
@@ -434,8 +435,7 @@
     <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"打开“设置”"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"其他设备"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"切换概览"</string>
-    <!-- no translation found for zen_modes_dialog_title (8854640808100096934) -->
-    <skip />
+    <string name="zen_modes_dialog_title" msgid="8854640808100096934">"模式"</string>
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"完成"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"设置"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"已开启"</string>
@@ -1393,18 +1393,12 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"收起图标"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"展开图标"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"或"</string>
-    <!-- no translation found for launch_keyboard_tutorial_notification_title (8849933155160522519) -->
-    <skip />
-    <!-- no translation found for launch_keyboard_tutorial_notification_content (2880339951512757918) -->
-    <skip />
-    <!-- no translation found for launch_touchpad_tutorial_notification_title (2243780062772196901) -->
-    <skip />
-    <!-- no translation found for launch_touchpad_tutorial_notification_content (7931085031240753226) -->
-    <skip />
-    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_title (1940023776496198762) -->
-    <skip />
-    <!-- no translation found for launch_keyboard_touchpad_tutorial_notification_content (1780725168171929365) -->
-    <skip />
+    <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"使用键盘导航"</string>
+    <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"了解键盘快捷键"</string>
+    <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"使用触控板导航"</string>
+    <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"了解触控板手势"</string>
+    <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"使用键盘和触控板进行导航"</string>
+    <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"了解触控板手势、键盘快捷键等"</string>
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"返回手势"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"主屏幕手势"</string>
     <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"快捷操作按键"</string>
@@ -1444,4 +1438,18 @@
     <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="7513137763024327538">"现在，您可从屏幕顶部进一步调低亮度，将屏幕调成极暗。\n\n此功能在昏暗环境中效果最佳。"</string>
     <string name="accessibility_deprecate_extra_dim_dialog_button" msgid="1782147201534669800">"移除“极暗”快捷方式"</string>
     <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="4070696910424515757">"已移除“极暗”快捷方式。如要调低亮度，请使用常规亮度条。"</string>
+    <!-- no translation found for qs_edit_mode_category_connectivity (4559726936546032672) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_accessibility (7969091385071475922) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_utilities (8123080090108420095) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_privacy (6577774443194551775) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_providedByApps (8346112074897919019) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_display (4749511439121053942) -->
+    <skip />
+    <!-- no translation found for qs_edit_mode_category_unknown (509314252124053550) -->
+    <skip />
 </resources>
