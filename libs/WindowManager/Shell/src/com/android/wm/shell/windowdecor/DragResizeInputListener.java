@@ -318,7 +318,8 @@ class DragResizeInputListener implements AutoCloseable {
                 }
             };
 
-            mDragDetector = new DragDetector(this);
+            mDragDetector = new DragDetector(this, 0 /* holdToDragMinDurationMs */,
+                    ViewConfiguration.get(mContext).getScaledTouchSlop());
             mDisplayLayoutSizeSupplier = displayLayoutSizeSupplier;
             mTouchRegionConsumer = touchRegionConsumer;
         }
