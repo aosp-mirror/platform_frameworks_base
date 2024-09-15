@@ -19,7 +19,6 @@ package com.android.systemui.scene.ui.viewmodel
 import com.android.compose.animation.scene.Edge
 import com.android.compose.animation.scene.Swipe
 import com.android.compose.animation.scene.SwipeDirection
-import com.android.compose.animation.scene.TransitionKey
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.scene.shared.model.Overlays
@@ -38,21 +37,25 @@ constructor(private val shadeInteractor: ShadeInteractor) : UserActionsViewModel
         shadeInteractor.shadeMode.collect { shadeMode ->
             setActions(
                 when (shadeMode) {
-                    ShadeMode.Single -> fullscreenShadeActions()
-                    ShadeMode.Split -> fullscreenShadeActions(transitionKey = ToSplitShade)
+                    ShadeMode.Single -> singleShadeActions()
+                    ShadeMode.Split -> splitShadeActions()
                     ShadeMode.Dual -> dualShadeActions()
                 }
             )
         }
     }
 
-    private fun fullscreenShadeActions(
-        transitionKey: TransitionKey? = null
-    ): Map<UserAction, UserActionResult> {
+    private fun singleShadeActions(): Map<UserAction, UserActionResult> {
         return mapOf(
-            Swipe.Down to UserActionResult(Scenes.Shade, transitionKey),
-            Swipe(direction = SwipeDirection.Down, pointerCount = 2, fromSource = Edge.Top) to
-                UserActionResult(Scenes.Shade, transitionKey),
+            Swipe.Down to Scenes.Shade,
+            swipeDownFromTopWithTwoFingers() to Scenes.QuickSettings,
+        )
+    }
+
+    private fun splitShadeActions(): Map<UserAction, UserActionResult> {
+        return mapOf(
+            Swipe.Down to UserActionResult(Scenes.Shade, ToSplitShade),
+            swipeDownFromTopWithTwoFingers() to UserActionResult(Scenes.Shade, ToSplitShade),
         )
     }
 
@@ -62,6 +65,10 @@ constructor(private val shadeInteractor: ShadeInteractor) : UserActionsViewModel
             Swipe(direction = SwipeDirection.Down, fromSource = SceneContainerEdge.TopRight) to
                 Overlays.QuickSettingsShade,
         )
+    }
+
+    private fun swipeDownFromTopWithTwoFingers(): UserAction {
+        return Swipe(direction = SwipeDirection.Down, pointerCount = 2, fromSource = Edge.Top)
     }
 
     @AssistedFactory
