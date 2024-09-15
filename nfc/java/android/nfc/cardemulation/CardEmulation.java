@@ -992,9 +992,7 @@ public final class CardEmulation {
      * Is EUICC supported as a Secure Element EE which supports off host card emulation.
      *
      * @return true if the device supports EUICC for off host card emulation, false otherwise.
-     * @hide
      */
-    @SystemApi
     @FlaggedApi(android.nfc.Flags.FLAG_ENABLE_CARD_EMULATION_EUICC)
     public boolean isEuiccSupported() {
         return callServiceReturn(() -> sService.isEuiccSupported(), false);
