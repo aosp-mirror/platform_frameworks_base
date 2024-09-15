@@ -25,16 +25,22 @@ import android.content.res.Resources;
 
 import com.android.dream.lowlight.dagger.LowLightDreamModule;
 import com.android.settingslib.dream.DreamBackend;
+import com.android.systemui.ambient.touch.scrim.dagger.ScrimModule;
 import com.android.systemui.complication.dagger.RegisteredComplicationsModule;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.DreamOverlayNotificationCountProvider;
 import com.android.systemui.dreams.DreamOverlayService;
+import com.android.systemui.dreams.SystemDialogsCloser;
 import com.android.systemui.dreams.complication.dagger.ComplicationComponent;
-import com.android.systemui.dreams.homecontrols.DreamActivityProvider;
-import com.android.systemui.dreams.homecontrols.DreamActivityProviderImpl;
+import com.android.systemui.dreams.homecontrols.DreamServiceDelegate;
+import com.android.systemui.dreams.homecontrols.DreamServiceDelegateImpl;
 import com.android.systemui.dreams.homecontrols.HomeControlsDreamService;
-import com.android.systemui.dreams.touch.scrim.dagger.ScrimModule;
+import com.android.systemui.qs.QsEventLogger;
+import com.android.systemui.qs.pipeline.shared.TileSpec;
+import com.android.systemui.qs.tiles.viewmodel.QSTileConfig;
+import com.android.systemui.qs.tiles.viewmodel.QSTilePolicy;
+import com.android.systemui.qs.tiles.viewmodel.QSTileUIConfig;
 import com.android.systemui.res.R;
 import com.android.systemui.touch.TouchInsetManager;
 
@@ -43,6 +49,7 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.ClassKey;
 import dagger.multibindings.IntoMap;
+import dagger.multibindings.StringKey;
 
 import java.util.Optional;
 import java.util.concurrent.Executor;
@@ -69,6 +76,7 @@ public interface DreamModule {
     String DREAM_SUPPORTED = "dream_supported";
     String DREAM_OVERLAY_WINDOW_TITLE = "dream_overlay_window_title";
     String HOME_CONTROL_PANEL_DREAM_COMPONENT = "home_control_panel_dream_component";
+    String DREAM_TILE_SPEC = "dream";
 
     /**
      * Provides the dream component
@@ -146,6 +154,15 @@ public interface DreamModule {
         return Optional.empty();
     }
 
+    /**
+     * Provides an implementation for {@link SystemDialogsCloser} that calls
+     * {@link Context.closeSystemDialogs}.
+     */
+    @Provides
+    static SystemDialogsCloser providesSystemDialogsCloser(Context context) {
+        return () -> context.closeSystemDialogs();
+    }
+
     /** */
     @Provides
     @Named(DREAM_ONLY_ENABLED_FOR_DOCK_USER)
@@ -168,8 +185,25 @@ public interface DreamModule {
         return resources.getString(R.string.app_label);
     }
 
-    /** Provides activity for dream service */
+    /** Provides config for the dream tile */
+    @Provides
+    @IntoMap
+    @StringKey(DREAM_TILE_SPEC)
+    static QSTileConfig provideDreamTileConfig(QsEventLogger uiEventLogger) {
+        TileSpec tileSpec = TileSpec.create(DREAM_TILE_SPEC);
+        return new QSTileConfig(tileSpec,
+                new QSTileUIConfig.Resource(
+                        R.drawable.ic_qs_screen_saver,
+                        R.string.quick_settings_screensaver_label),
+                uiEventLogger.getNewInstanceId(),
+                tileSpec.getSpec(),
+                QSTilePolicy.NoRestrictions.INSTANCE
+                );
+    }
+
+
+    /** Provides delegate to allow for testing of dream service */
     @Binds
-    DreamActivityProvider bindActivityProvider(DreamActivityProviderImpl impl);
+    DreamServiceDelegate bindDreamDelegate(DreamServiceDelegateImpl impl);
 
 }

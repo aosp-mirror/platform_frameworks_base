@@ -82,8 +82,8 @@ public class BadgedImageView extends ConstraintLayout {
 
     private BubbleViewProvider mBubble;
     private BubblePositioner mPositioner;
-    private boolean mOnLeft;
-
+    private boolean mBadgeOnLeft;
+    private boolean mDotOnLeft;
     private DotRenderer mDotRenderer;
     private DotRenderer.DrawParams mDrawParams;
     private int mDotColor;
@@ -153,7 +153,8 @@ public class BadgedImageView extends ConstraintLayout {
 
     public void hideDotAndBadge(boolean onLeft) {
         addDotSuppressionFlag(BadgedImageView.SuppressionFlag.BEHIND_STACK);
-        mOnLeft = onLeft;
+        mBadgeOnLeft = onLeft;
+        mDotOnLeft = onLeft;
         hideBadge();
     }
 
@@ -185,7 +186,7 @@ public class BadgedImageView extends ConstraintLayout {
 
         mDrawParams.dotColor = mDotColor;
         mDrawParams.iconBounds = mTempBounds;
-        mDrawParams.leftAlign = mOnLeft;
+        mDrawParams.leftAlign = mDotOnLeft;
         mDrawParams.scale = mDotScale;
 
         mDotRenderer.draw(canvas, mDrawParams);
@@ -255,7 +256,7 @@ public class BadgedImageView extends ConstraintLayout {
      * Whether decorations (badges or dots) are on the left.
      */
     boolean getDotOnLeft() {
-        return mOnLeft;
+        return mDotOnLeft;
     }
 
     /**
@@ -263,7 +264,7 @@ public class BadgedImageView extends ConstraintLayout {
      */
     float[] getDotCenter() {
         float[] dotPosition;
-        if (mOnLeft) {
+        if (mDotOnLeft) {
             dotPosition = mDotRenderer.getLeftDotPosition();
         } else {
             dotPosition = mDotRenderer.getRightDotPosition();
@@ -288,22 +289,26 @@ public class BadgedImageView extends ConstraintLayout {
 
     /** Sets the position of the dot and badge, animating them out and back in if requested. */
     void animateDotBadgePositions(boolean onLeft) {
-        mOnLeft = onLeft;
-
-        if (onLeft != getDotOnLeft() && shouldDrawDot()) {
-            animateDotScale(0f /* showDot */, () -> {
-                invalidate();
-                animateDotScale(1.0f, null /* after */);
-            });
+        if (onLeft != getDotOnLeft()) {
+            if (shouldDrawDot()) {
+                animateDotScale(0f /* showDot */, () -> {
+                    mDotOnLeft = onLeft;
+                    invalidate();
+                    animateDotScale(1.0f, null /* after */);
+                });
+            } else {
+                mDotOnLeft = onLeft;
+            }
         }
+        mBadgeOnLeft = onLeft;
         // TODO animate badge
         showBadge();
-
     }
 
     /** Sets the position of the dot and badge. */
     void setDotBadgeOnLeft(boolean onLeft) {
-        mOnLeft = onLeft;
+        mBadgeOnLeft = onLeft;
+        mDotOnLeft = onLeft;
         invalidate();
         showBadge();
     }
@@ -358,7 +363,7 @@ public class BadgedImageView extends ConstraintLayout {
         }
 
         int translationX;
-        if (mOnLeft) {
+        if (mBadgeOnLeft) {
             translationX = -(mBubble.getBubbleIcon().getWidth() - appBadgeBitmap.getWidth());
         } else {
             translationX = 0;

@@ -1,0 +1,21 @@
+<data-labels>
+    <data-shared dataType="personal_data_type_name"
+        isSharingOptional="true"
+        purposes="analytics|developer_communications" />
+    <data-shared dataType="personal_data_type_email_address"
+    purposes="analytics" />
+    <data-shared dataType="personal_data_type_physical_address"
+    purposes="analytics" />
+    <data-shared dataType="personal_data_type_phone_number"
+    purposes="analytics" />
+    <data-shared dataType="personal_data_type_race_ethnicity"
+    purposes="analytics" />
+    <data-shared dataType="personal_data_type_political_or_religious_beliefs"
+    purposes="analytics" />
+    <data-shared dataType="personal_data_type_sexual_orientation_or_gender_identity"
+    purposes="analytics" />
+    <data-shared dataType="personal_data_type_personal_identifiers"
+    purposes="analytics" />
+    <data-shared dataType="personal_data_type_other"
+    purposes="analytics" />
+</data-labels>

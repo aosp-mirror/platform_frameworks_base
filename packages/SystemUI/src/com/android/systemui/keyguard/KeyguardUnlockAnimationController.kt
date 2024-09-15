@@ -20,7 +20,7 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.app.WallpaperManager
-import android.content.Context
+import android.content.res.Resources
 import android.graphics.Matrix
 import android.graphics.Rect
 import android.os.DeadObjectException
@@ -32,16 +32,18 @@ import android.view.RemoteAnimationTarget
 import android.view.SurfaceControl
 import android.view.SyncRtSurfaceTransactionApplier
 import android.view.View
+import android.view.WindowManager
 import androidx.annotation.VisibleForTesting
 import androidx.core.math.MathUtils
 import com.android.app.animation.Interpolators
 import com.android.internal.R
 import com.android.keyguard.KeyguardClockSwitchController
 import com.android.keyguard.KeyguardViewController
+import com.android.systemui.Flags.fastUnlockTransition
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
-import com.android.systemui.Flags.fastUnlockTransition
 import com.android.systemui.plugins.BcSmartspaceDataPlugin
 import com.android.systemui.shared.recents.utilities.Utilities
 import com.android.systemui.shared.system.ActivityManagerWrapper
@@ -145,17 +147,18 @@ const val SURFACE_BEHIND_FADE_OUT_START_DELAY_MS = 0L
  */
 @SysUISingleton
 class KeyguardUnlockAnimationController @Inject constructor(
-    private val context: Context,
-    private val keyguardStateController: KeyguardStateController,
-    private val
+        private val windowManager: WindowManager,
+        @Main private val resources: Resources,
+        private val keyguardStateController: KeyguardStateController,
+        private val
     keyguardViewMediator: Lazy<KeyguardViewMediator>,
-    private val keyguardViewController: KeyguardViewController,
-    private val featureFlags: FeatureFlags,
-    private val biometricUnlockControllerLazy: Lazy<BiometricUnlockController>,
-    private val statusBarStateController: SysuiStatusBarStateController,
-    private val notificationShadeWindowController: NotificationShadeWindowController,
-    private val powerManager: PowerManager,
-    private val wallpaperManager: WallpaperManager
+        private val keyguardViewController: KeyguardViewController,
+        private val featureFlags: FeatureFlags,
+        private val biometricUnlockControllerLazy: Lazy<BiometricUnlockController>,
+        private val statusBarStateController: SysuiStatusBarStateController,
+        private val notificationShadeWindowController: NotificationShadeWindowController,
+        private val powerManager: PowerManager,
+        private val wallpaperManager: WallpaperManager
 ) : KeyguardStateController.Callback, ISysuiUnlockAnimationController.Stub() {
 
     interface KeyguardUnlockAnimationListener {
@@ -399,7 +402,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
         keyguardStateController.addCallback(this)
 
         roundedCornerRadius =
-            context.resources.getDimensionPixelSize(R.dimen.rounded_corner_radius).toFloat()
+            resources.getDimensionPixelSize(R.dimen.rounded_corner_radius).toFloat()
     }
 
     /**
@@ -438,7 +441,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
         Log.wtf(TAG, "  !notificationShadeWindowController.isLaunchingActivity: " +
                 "${!notificationShadeWindowController.isLaunchingActivity}")
         Log.wtf(TAG, "  launcherUnlockController != null: ${launcherUnlockController != null}")
-        Log.wtf(TAG, "  !isFoldable(context): ${!isFoldable(context)}")
+        Log.wtf(TAG, "  !isFoldable(context): ${!isFoldable(resources)}")
     }
 
     /**
@@ -709,7 +712,6 @@ class KeyguardUnlockAnimationController @Inject constructor(
         // As soon as the shade starts animating out of the way, start the canned unlock animation,
         // which will finish keyguard exit when it completes. The in-window animations in the
         // Launcher window will end on their own.
-        if (fastUnlockTransition()) hideKeyguardViewAfterRemoteAnimation()
         handler.postDelayed({
             if (keyguardViewMediator.get().isShowingAndNotOccluded &&
                 !keyguardStateController.isKeyguardGoingAway) {
@@ -720,7 +722,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
 
             if ((wallpaperTargets?.isNotEmpty() == true)) {
                 fadeInWallpaper()
-                if (!fastUnlockTransition()) hideKeyguardViewAfterRemoteAnimation()
+                hideKeyguardViewAfterRemoteAnimation()
             } else {
                 keyguardViewMediator.get().exitKeyguardAndFinishSurfaceBehindRemoteAnimation(
                     false /* cancelled */)
@@ -1100,7 +1102,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
 
         // We don't do the shared element on large screens because the smartspace has to fly across
         // large distances, which is distracting.
-        if (Utilities.isLargeScreen(context)) {
+        if (Utilities.isLargeScreen(windowManager, resources)) {
             return false
         }
 
@@ -1180,8 +1182,8 @@ class KeyguardUnlockAnimationController @Inject constructor(
 
     companion object {
 
-        fun isFoldable(context: Context): Boolean {
-            return context.resources.getIntArray(R.array.config_foldedDeviceStates).isNotEmpty()
+        fun isFoldable(resources: Resources): Boolean {
+            return resources.getIntArray(R.array.config_foldedDeviceStates).isNotEmpty()
         }
     }
 }

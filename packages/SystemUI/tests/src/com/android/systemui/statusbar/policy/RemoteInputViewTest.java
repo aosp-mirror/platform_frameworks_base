@@ -70,7 +70,6 @@ import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.AnimatorTestRule;
 import com.android.systemui.flags.FakeFeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.RemoteInputController;
@@ -451,7 +450,6 @@ public class RemoteInputViewTest extends SysuiTestCase {
 
     @Test
     public void testUnanimatedFocusAfterDefocusAnimation() throws Exception {
-        mFeatureFlags.set(Flags.NOTIFICATION_INLINE_REPLY_ANIMATION, true);
         NotificationTestHelper helper = new NotificationTestHelper(
                 mContext,
                 mDependency,
@@ -484,7 +482,6 @@ public class RemoteInputViewTest extends SysuiTestCase {
     private RemoteInputViewController bindController(
             RemoteInputView view,
             NotificationEntry entry) {
-        mFeatureFlags.set(Flags.NOTIFICATION_INLINE_REPLY_ANIMATION, true);
         RemoteInputViewControllerImpl viewController = new RemoteInputViewControllerImpl(
                 view,
                 entry,

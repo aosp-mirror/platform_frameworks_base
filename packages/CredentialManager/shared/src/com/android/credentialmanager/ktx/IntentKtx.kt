@@ -54,9 +54,3 @@ val Intent.resultReceiver: ResultReceiver?
         Constants.EXTRA_RESULT_RECEIVER,
         ResultReceiver::class.java
     )
-
-val Intent.finalResponseReceiver: ResultReceiver?
-    get() = this.getParcelableExtra(
-        Constants.EXTRA_FINAL_RESPONSE_RECEIVER,
-        ResultReceiver::class.java
-    )

@@ -17,7 +17,7 @@ android_test {
         "frameworks-base-testutils",
         "mockito-target-minus-junit4",
     ],
-    libs: ["android.test.runner"],
+    libs: ["android.test.runner.stubs.system"],
     platform_apis: true,
     certificate: "platform",
 }

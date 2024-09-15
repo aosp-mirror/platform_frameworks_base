@@ -26,8 +26,11 @@
     <string name="profile_name_glasses" msgid="3506504967216601277">"appareil"</string>
     <string name="summary_glasses" msgid="2872254734959842579">"Cette appli sera autorisée à accéder à ces autorisations sur votre <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"Autoriser &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; à accéder à ces informations depuis votre téléphone"</string>
+    <string name="title_app_streaming_with_mirroring" msgid="3364582597581570658">"Autoriser &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; à caster les applications de votre téléphone ?"</string>
+    <string name="summary_app_streaming" msgid="295548145144086753">"%1$s aura accès à tout ce qui est visible ou lu sur le téléphone, y compris les contenus audio, les photos, les mots de passe et les messages.&lt;br/&gt;&lt;br/&gt;%1$s pourra caster des applications jusqu\'à ce que vous supprimiez l\'accès à cette autorisation."</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"Services inter-appareils"</string>
     <string name="helper_summary_app_streaming" msgid="2396773196949578425">"<xliff:g id="APP_NAME">%1$s</xliff:g> demande l\'autorisation au nom de votre <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> pour caster des applis d\'un appareil à l\'autre"</string>
+    <string name="helper_summary_app_streaming_with_mirroring" msgid="6138581029144467467">"<xliff:g id="APP_NAME">%1$s</xliff:g> demande l\'autorisation au nom de votre <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> pour afficher et caster des applications d\'un appareil à l\'autre"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
     <string name="title_computer" msgid="4693714143506569253">"Autoriser &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; à accéder à ces informations depuis votre téléphone"</string>
@@ -35,6 +38,8 @@
     <string name="helper_title_computer" msgid="4671071173916176037">"Services Google Play"</string>
     <string name="helper_summary_computer" msgid="8774832742608187072">"<xliff:g id="APP_NAME">%1$s</xliff:g> demande l\'autorisation au nom de votre <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> pour accéder aux photos, contenus multimédias et notifications de votre téléphone"</string>
     <string name="title_nearby_device_streaming" msgid="7269956847378799794">"Autoriser &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; à effectuer cette action ?"</string>
+    <string name="title_nearby_device_streaming_with_mirroring" msgid="242855799919611657">"Autoriser &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; à streamer les applications et les fonctionnalités système de votre téléphone ?"</string>
+    <string name="summary_nearby_device_streaming" msgid="4039565463149145573">"%1$s aura accès à tout ce qui est visible ou lu sur le téléphone, y compris les contenus audio, les photos, les informations de paiement, les mots de passe et les messages.&lt;br/&gt;&lt;br/&gt;%1$s pourra caster des applications et des fonctionnalités système jusqu\'à ce que vous supprimiez l\'accès à cette autorisation."</string>
     <string name="helper_summary_nearby_device_streaming" msgid="2063965070936844876">"<xliff:g id="APP_NAME">%1$s</xliff:g> demande l\'autorisation au nom de votre <xliff:g id="DEVICE_NAME">%2$s</xliff:g> de diffuser des applis et d\'autres fonctionnalités système en streaming sur des appareils à proximité"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"appareil"</string>
     <string name="summary_generic" msgid="1761976003668044801">"Cette appli pourra synchroniser des infos, comme le nom de l\'appelant, entre votre téléphone et l\'appareil choisi"</string>

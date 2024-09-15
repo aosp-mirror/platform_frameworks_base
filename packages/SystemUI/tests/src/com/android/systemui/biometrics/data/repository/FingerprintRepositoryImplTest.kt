@@ -23,6 +23,7 @@ import android.hardware.fingerprint.FingerprintManager
 import android.hardware.fingerprint.FingerprintSensorProperties
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal
 import android.hardware.fingerprint.IFingerprintAuthenticatorsRegisteredCallback
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.shared.model.FingerprintSensorType
@@ -38,7 +39,6 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.Mock
@@ -47,7 +47,7 @@ import org.mockito.junit.MockitoJUnit
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
 class FingerprintRepositoryImplTest : SysuiTestCase() {
 
     @JvmField @Rule var mockitoRule = MockitoJUnit.rule()
@@ -84,8 +84,8 @@ class FingerprintRepositoryImplTest : SysuiTestCase() {
             val sensorType by collectLastValue(repository.sensorType)
             val sensorLocations by collectLastValue(repository.sensorLocations)
 
-            // Assert default properties.
-            assertThat(sensorId).isEqualTo(-1)
+            // Assert non-initialized properties.
+            assertThat(sensorId).isEqualTo(-2)
             assertThat(strength).isEqualTo(SensorStrength.CONVENIENCE)
             assertThat(sensorType).isEqualTo(FingerprintSensorType.UNKNOWN)
 

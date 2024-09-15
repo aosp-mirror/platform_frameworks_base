@@ -17,12 +17,12 @@
 package android.app.admin;
 
 import android.content.ComponentName;
+import android.os.Bundle;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
 
 import com.android.internal.util.Preconditions;
 
-import java.lang.reflect.Field;
 import java.util.ArrayDeque;
 import java.util.Queue;
 
@@ -71,44 +71,51 @@ public class PolicySizeVerifier {
             for (String key : current.keySet()) {
                 enforceMaxStringLength(key, "key in " + argName);
                 Object value = current.get(key);
-                if (value instanceof String) {
-                    enforceMaxStringLength((String) value, "string value in " + argName);
-                } else if (value instanceof String[]) {
-                    for (String str : (String[]) value) {
+                if (value instanceof String str) {
+                    enforceMaxStringLength(str, "string value in " + argName);
+                } else if (value instanceof String[] strArray) {
+                    for (String str : strArray) {
                         enforceMaxStringLength(str, "string value in " + argName);
                     }
-                } else if (value instanceof PersistableBundle) {
-                    queue.add((PersistableBundle) value);
+                } else if (value instanceof PersistableBundle persistableBundle) {
+                    queue.add(persistableBundle);
                 }
             }
         }
     }
 
     /**
-     * Throw if Parcelable contains any string that's too long to be serialized.
+     * Throw if bundle contains any string that's too long to be serialized. This follows the
+     * serialization logic in BundlePolicySerializer#writeBundle.
      */
-    public static void enforceMaxParcelableFieldsLength(Parcelable parcelable) {
-        // TODO(b/326662716) rework to protect against infinite recursion.
-        if (true) {
-            return;
-        }
-        Class<?> clazz = parcelable.getClass();
-
-        Field[] fields = clazz.getDeclaredFields();
-        for (Field field : fields) {
-            field.setAccessible(true);
-            try {
-                Object value = field.get(parcelable);
-                if (value instanceof String) {
-                    String stringValue = (String) value;
-                    enforceMaxStringLength(stringValue, field.getName());
+    public static void enforceMaxBundleFieldsLength(Bundle bundle) {
+        Queue<Bundle> queue = new ArrayDeque<>();
+        queue.add(bundle);
+        while (!queue.isEmpty()) {
+            Bundle current = queue.remove();
+            for (String key : current.keySet()) {
+                enforceMaxStringLength(key, "key in Bundle");
+                Object value = current.get(key);
+                if (value instanceof String str) {
+                    enforceMaxStringLength(str, "string value in Bundle with "
+                            + "key" + key);
+                } else if (value instanceof String[] strArray) {
+                    for (String str : strArray) {
+                        enforceMaxStringLength(str, "string value in Bundle with"
+                                + " key" + key);
+                    }
+                } else if (value instanceof Bundle b) {
+                    queue.add(b);
                 }
-
-                if (value instanceof Parcelable) {
-                    enforceMaxParcelableFieldsLength((Parcelable) value);
+                else if (value instanceof Parcelable[] parcelableArray) {
+                    for (Parcelable parcelable : parcelableArray) {
+                        if (!(parcelable instanceof Bundle)) {
+                            throw new IllegalArgumentException("bundle-array can only hold "
+                                    + "Bundles");
+                        }
+                        queue.add((Bundle) parcelable);
+                    }
                 }
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
             }
         }
     }

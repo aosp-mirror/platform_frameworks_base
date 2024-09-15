@@ -186,4 +186,9 @@
     <item msgid="2478289035899842865">"사용 안함"</item>
     <item msgid="5137565285664080143">"사용"</item>
   </string-array>
+  <string-array name="tile_states_hearing_devices">
+    <item msgid="1235334096484287173">"사용 불가"</item>
+    <item msgid="3079622119444911877">"사용 안함"</item>
+    <item msgid="3028994095749238254">"사용"</item>
+  </string-array>
 </resources>

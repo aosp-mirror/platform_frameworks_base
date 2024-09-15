@@ -19,6 +19,9 @@ class com/android/hoststubgen/test/tinyframework/TinyFrameworkForTextPolicy	~com
 # Heuristics rule: Stub all the AIDL classes.
 class :aidl stubclass
 
+# Heuristics rule: Stub all the R classes.
+class :r stubclass
+
 # Default is "remove", so let's put all the base classes / interfaces in the stub first.
 class com.android.hoststubgen.test.tinyframework.subclasstest.C1 stub
 class com.android.hoststubgen.test.tinyframework.subclasstest.C2 stub
@@ -37,3 +40,17 @@ class *com.android.hoststubgen.test.tinyframework.subclasstest.CA remove
 
 class *com.android.hoststubgen.test.tinyframework.subclasstest.I1 keep
 class *com.android.hoststubgen.test.tinyframework.subclasstest.IA remove
+
+# Test package directive
+package com.android.hoststubgen.test.tinyframework.packagetest stub
+class com.android.hoststubgen.test.tinyframework.packagetest.B remove
+class com.android.hoststubgen.test.tinyframework.packagetest.sub.B remove
+# The following rules are the same as above
+# class com.android.hoststubgen.test.tinyframework.packagetest.A stub
+# class com.android.hoststubgen.test.tinyframework.packagetest.sub.A stub
+
+
+# "rename" takes a type internal name, so '/'s is used as a separator.
+# The leading / in the prefix is not needed (it'll be stripped), but it's added to make
+# sure the stripping works.
+rename ^.*/TinyFrameworkToBeRenamed$ /rename_prefix/

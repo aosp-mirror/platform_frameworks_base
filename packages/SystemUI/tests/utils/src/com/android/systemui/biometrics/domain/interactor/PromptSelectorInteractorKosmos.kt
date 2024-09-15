@@ -25,6 +25,7 @@ import com.android.systemui.kosmos.Kosmos.Fixture
 val Kosmos.promptSelectorInteractor by Fixture {
     PromptSelectorInteractorImpl(
         fingerprintPropertyRepository = fingerprintPropertyRepository,
+        displayStateInteractor = displayStateInteractor,
         promptRepository = promptRepository,
         lockPatternUtils = lockPatternUtils
     )

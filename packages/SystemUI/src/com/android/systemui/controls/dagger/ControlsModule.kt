@@ -20,8 +20,6 @@ import android.app.Activity
 import android.content.pm.PackageManager
 import com.android.systemui.controls.ControlsMetricsLogger
 import com.android.systemui.controls.ControlsMetricsLoggerImpl
-import com.android.systemui.controls.settings.ControlsSettingsRepository
-import com.android.systemui.controls.settings.ControlsSettingsRepositoryImpl
 import com.android.systemui.controls.controller.ControlsBindingController
 import com.android.systemui.controls.controller.ControlsBindingControllerImpl
 import com.android.systemui.controls.controller.ControlsController
@@ -40,14 +38,20 @@ import com.android.systemui.controls.panels.SelectedComponentRepository
 import com.android.systemui.controls.panels.SelectedComponentRepositoryImpl
 import com.android.systemui.controls.settings.ControlsSettingsDialogManager
 import com.android.systemui.controls.settings.ControlsSettingsDialogManagerImpl
+import com.android.systemui.controls.settings.ControlsSettingsRepository
+import com.android.systemui.controls.settings.ControlsSettingsRepositoryImpl
 import com.android.systemui.controls.ui.ControlActionCoordinator
 import com.android.systemui.controls.ui.ControlActionCoordinatorImpl
 import com.android.systemui.controls.ui.ControlsActivity
 import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.controls.ui.ControlsUiControllerImpl
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.qs.QsEventLogger
+import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.qs.tiles.DeviceControlsTile
+import com.android.systemui.qs.tiles.viewmodel.QSTileConfig
+import com.android.systemui.qs.tiles.viewmodel.QSTileUIConfig
 import dagger.Binds
 import dagger.BindsOptionalOf
 import dagger.Module
@@ -75,6 +79,22 @@ abstract class ControlsModule {
         fun providesControlsFeatureEnabled(pm: PackageManager): Boolean {
             return pm.hasSystemFeature(PackageManager.FEATURE_CONTROLS)
         }
+
+        const val DEVICE_CONTROLS_SPEC = "controls"
+
+        @Provides
+        @IntoMap
+        @StringKey(DEVICE_CONTROLS_SPEC)
+        fun provideDeviceControlsTileConfig(uiEventLogger: QsEventLogger): QSTileConfig =
+                QSTileConfig(
+                        tileSpec = TileSpec.create(DEVICE_CONTROLS_SPEC),
+                        uiConfig =
+                        QSTileUIConfig.Resource(
+                                iconRes = com.android.systemui.res.R.drawable.controls_icon,
+                                labelRes = com.android.systemui.res.R.string.quick_controls_title
+                        ),
+                        instanceId = uiEventLogger.getNewInstanceId(),
+                )
     }
 
     @Binds

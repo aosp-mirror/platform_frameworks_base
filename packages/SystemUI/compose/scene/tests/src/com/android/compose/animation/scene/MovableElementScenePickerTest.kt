@@ -38,8 +38,8 @@ class MovableElementScenePickerTest {
     }
 
     @Test
-    fun toSceneNotInScenes() {
-        val picker = MovableElementScenePicker(scenes = emptySet())
+    fun fromSceneInScenes() {
+        val picker = MovableElementScenePicker(scenes = setOf(TestScenes.SceneA))
         assertThat(
                 picker.sceneDuringTransition(
                     TestElements.Foo,
@@ -49,5 +49,19 @@ class MovableElementScenePickerTest {
                 )
             )
             .isEqualTo(TestScenes.SceneA)
+    }
+
+    @Test
+    fun noneInScenes() {
+        val picker = MovableElementScenePicker(scenes = emptySet())
+        assertThat(
+                picker.sceneDuringTransition(
+                    TestElements.Foo,
+                    transition(from = TestScenes.SceneA, to = TestScenes.SceneB),
+                    fromSceneZIndex = 0f,
+                    toSceneZIndex = 1f,
+                )
+            )
+            .isEqualTo(null)
     }
 }

@@ -43,6 +43,8 @@ import android.app.PropertyInvalidatedCache;
 import android.content.Intent;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.service.gatekeeper.GateKeeperResponse;
@@ -483,15 +485,28 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
         setSecureFrpMode(true);
         try {
             mService.setLockCredential(newPassword("1234"), nonePassword(), PRIMARY_USER_ID);
-            fail("Password shouldn't be changeable before FRP unlock");
+            fail("Password shouldn't be changeable while FRP is active");
         } catch (SecurityException e) { }
     }
 
     @Test
-    public void testSetCredentialPossibleInSecureFrpModeAfterSuw() throws RemoteException {
+    @DisableFlags(android.security.Flags.FLAG_FRP_ENFORCEMENT)
+    public void testSetCredentialPossibleInSecureFrpModeAfterSuw_FlagOff() throws RemoteException {
         setUserSetupComplete(true);
         setSecureFrpMode(true);
         setCredential(PRIMARY_USER_ID, newPassword("1234"));
+    }
+
+    @Test
+    @EnableFlags(android.security.Flags.FLAG_FRP_ENFORCEMENT)
+    public void testSetCredentialNotPossibleInSecureFrpModeAfterSuw_FlagOn()
+            throws RemoteException {
+        setUserSetupComplete(true);
+        setSecureFrpMode(true);
+        try {
+            mService.setLockCredential(newPassword("1234"), nonePassword(), PRIMARY_USER_ID);
+            fail("Password shouldn't be changeable after SUW while FRP is active");
+        } catch (SecurityException e) { }
     }
 
     @Test

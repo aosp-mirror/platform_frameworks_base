@@ -22,10 +22,13 @@ import static android.content.Context.BIND_INCLUDE_CAPABILITIES;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.provider.Settings;
 import android.service.ondeviceintelligence.IOnDeviceIntelligenceService;
 import android.service.ondeviceintelligence.OnDeviceIntelligenceService;
 
 import com.android.internal.infra.ServiceConnector;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * Manages the connection to the remote on-device intelligence service. Also, handles unbinding
@@ -33,6 +36,7 @@ import com.android.internal.infra.ServiceConnector;
  */
 public class RemoteOnDeviceIntelligenceService extends
         ServiceConnector.Impl<IOnDeviceIntelligenceService> {
+    private static final long LONG_TIMEOUT = TimeUnit.HOURS.toMillis(4);
     private static final String TAG =
             RemoteOnDeviceIntelligenceService.class.getSimpleName();
 
@@ -48,9 +52,15 @@ public class RemoteOnDeviceIntelligenceService extends
     }
 
     @Override
+    protected long getRequestTimeoutMs() {
+        return LONG_TIMEOUT;
+    }
+
+    @Override
     protected long getAutoDisconnectTimeoutMs() {
-        // Disable automatic unbinding.
-        // TODO: add logic to fetch this flag via SecureSettings.
-        return -1;
+        return Settings.Secure.getLongForUser(mContext.getContentResolver(),
+                Settings.Secure.ON_DEVICE_INTELLIGENCE_UNBIND_TIMEOUT_MS,
+                TimeUnit.SECONDS.toMillis(30),
+                mContext.getUserId());
     }
 }

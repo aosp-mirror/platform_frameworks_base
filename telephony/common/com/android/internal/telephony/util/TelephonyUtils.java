@@ -16,6 +16,8 @@
 package com.android.internal.telephony.util;
 
 import static android.telephony.Annotation.DataState;
+import static android.telephony.NetworkRegistrationInfo.FIRST_SERVICE_TYPE;
+import static android.telephony.NetworkRegistrationInfo.LAST_SERVICE_TYPE;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -37,6 +39,7 @@ import android.provider.Telephony.Carriers.EditStatus;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyFrameworkInitializer;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.telephony.ITelephony;
@@ -48,6 +51,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * This class provides various util functions
@@ -341,5 +346,49 @@ public final class TelephonyUtils {
         }
         return false;
 
+    }
+
+    /**
+     * @param input string that want to be compared.
+     * @param regex string that express regular expression
+     * @return {@code true} if matched  {@code false} otherwise.
+     */
+    private static boolean isValidPattern(@Nullable String input, @Nullable String regex) {
+        if (TextUtils.isEmpty(input) || TextUtils.isEmpty(regex)) {
+            return false;
+        }
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(input);
+        if (!matcher.matches()) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * @param countryCode two letters country code based on the ISO 3166-1.
+     * @return {@code true} if the countryCode is valid {@code false} otherwise.
+     */
+    public static boolean isValidCountryCode(@Nullable String countryCode) {
+        return isValidPattern(countryCode, "^[A-Za-z]{2}$");
+    }
+
+    /**
+     * @param plmn target plmn for validation.
+     * @return {@code true} if the target plmn is valid {@code false} otherwise.
+     */
+    public static boolean isValidPlmn(@Nullable String plmn) {
+        return isValidPattern(plmn, "^(?:[0-9]{3})(?:[0-9]{2}|[0-9]{3})$");
+    }
+
+    /**
+     * @param serviceType target serviceType for validation.
+     * @return {@code true} if the target serviceType is valid {@code false} otherwise.
+     */
+    public static boolean isValidService(int serviceType) {
+        if (serviceType < FIRST_SERVICE_TYPE || serviceType > LAST_SERVICE_TYPE) {
+            return false;
+        }
+        return true;
     }
 }

@@ -218,10 +218,6 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub implements
                 mService.mMetricsHelper.registerPuller();
             }
         }
-
-        public UriGrantsManagerService getService() {
-            return mService;
-        }
     }
 
     @VisibleForTesting

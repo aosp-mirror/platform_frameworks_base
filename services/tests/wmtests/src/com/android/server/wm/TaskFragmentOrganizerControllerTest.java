@@ -19,13 +19,15 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.window.TaskFragmentOperation.OP_TYPE_CREATE_TASK_FRAGMENT;
-import static android.window.TaskFragmentOperation.OP_TYPE_CREATE_TASK_FRAGMENT_DECOR_SURFACE;
+import static android.window.TaskFragmentOperation.OP_TYPE_CREATE_OR_MOVE_TASK_FRAGMENT_DECOR_SURFACE;
 import static android.window.TaskFragmentOperation.OP_TYPE_DELETE_TASK_FRAGMENT;
 import static android.window.TaskFragmentOperation.OP_TYPE_REMOVE_TASK_FRAGMENT_DECOR_SURFACE;
 import static android.window.TaskFragmentOperation.OP_TYPE_REORDER_TO_BOTTOM_OF_TASK;
@@ -485,6 +487,16 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         // Flush EVENT_APPEARED.
         mController.dispatchPendingEvents();
 
+        // Even if the activity is not launched in an organized TaskFragment, it is still considered
+        // as the remote activity to the organizer process. Because when the task becomes visible,
+        // the organizer process needs to be interactive (unfrozen) to receive TaskFragment events.
+        activity.setVisibleRequested(true);
+        activity.setState(ActivityRecord.State.RESUMED, "test");
+        assertTrue(organizerProc.hasVisibleActivities());
+        activity.setVisibleRequested(false);
+        activity.setState(ActivityRecord.State.STOPPED, "test");
+        assertFalse(organizerProc.hasVisibleActivities());
+
         // Make sure the activity belongs to the same app, but it is in a different pid.
         activity.info.applicationInfo.uid = uid;
         doReturn(pid + 1).when(activity).getPid();
@@ -879,7 +891,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         mTransaction.addTaskFragmentOperation(mFragmentToken, operation);
         final TaskFragmentOperation dimOperation = new TaskFragmentOperation.Builder(
                 OP_TYPE_SET_DIM_ON_TASK)
-                .setDimOnTask(true)
+                .setBooleanValue(true)
                 .build();
         mTransaction.addTaskFragmentOperation(mFragmentToken, dimOperation);
         mOrganizer.applyTransaction(mTransaction, TASK_FRAGMENT_TRANSIT_CHANGE,
@@ -1021,6 +1033,60 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         // The top TaskFragment should remain on top.
         assertEquals(task.mChildren.indexOf(taskFragment) + 1,
                 task.mChildren.indexOf(mTaskFragment));
+    }
+
+    @Test
+    public void testApplyTransaction_createTaskFragment_overrideOrientation_systemOrganizer() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_TASK_FRAGMENT_SYSTEM_ORGANIZER_FLAG);
+        mController.unregisterOrganizer(mIOrganizer);
+        registerTaskFragmentOrganizer(mIOrganizer, true /* isSystemOrganizer */);
+
+        final Task task = createTask(mDisplayContent);
+        final ActivityRecord activity = createActivityRecord(task);
+        final int uid = Binder.getCallingUid();
+        activity.info.applicationInfo.uid = uid;
+        activity.getTask().effectiveUid = uid;
+        final IBinder fragmentToken = new Binder();
+
+        // Create a TaskFragment with OverrideOrientation set.
+        final TaskFragmentCreationParams params = new TaskFragmentCreationParams.Builder(
+                mOrganizerToken, fragmentToken, activity.token)
+                .setOverrideOrientation(SCREEN_ORIENTATION_BEHIND)
+                .build();
+        mTransaction.setTaskFragmentOrganizer(mIOrganizer);
+        mTransaction.createTaskFragment(params);
+        assertApplyTransactionAllowed(mTransaction);
+
+        // TaskFragment override orientation should be set for a system organizer.
+        final TaskFragment taskFragment = mWindowOrganizerController.getTaskFragment(fragmentToken);
+        assertNotNull(taskFragment);
+
+        taskFragment.setVisibleRequested(true);
+        assertEquals(SCREEN_ORIENTATION_BEHIND, taskFragment.getOverrideOrientation());
+    }
+
+    @Test
+    public void testApplyTransaction_createTaskFragment_overrideOrientation_nonSystemOrganizer() {
+        final Task task = createTask(mDisplayContent);
+        final ActivityRecord activity = createActivityRecord(task);
+        final int uid = Binder.getCallingUid();
+        activity.info.applicationInfo.uid = uid;
+        activity.getTask().effectiveUid = uid;
+        final IBinder fragmentToken = new Binder();
+
+        // Create a TaskFragment with OverrideOrientation set.
+        final TaskFragmentCreationParams params = new TaskFragmentCreationParams.Builder(
+                mOrganizerToken, fragmentToken, activity.token)
+                .setOverrideOrientation(SCREEN_ORIENTATION_BEHIND)
+                .build();
+        mTransaction.setTaskFragmentOrganizer(mIOrganizer);
+        mTransaction.createTaskFragment(params);
+        assertApplyTransactionAllowed(mTransaction);
+
+        // TaskFragment override orientation is ignored for a non-system organizer.
+        final TaskFragment taskFragment = mWindowOrganizerController.getTaskFragment(fragmentToken);
+        assertNotNull(taskFragment);
+        assertEquals(SCREEN_ORIENTATION_UNSPECIFIED, taskFragment.getOverrideOrientation());
     }
 
     @Test
@@ -1828,28 +1894,21 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
     public void testApplyTransaction_createTaskFragmentDecorSurface() {
         mSetFlagsRule.enableFlags(Flags.FLAG_TASK_FRAGMENT_SYSTEM_ORGANIZER_FLAG);
 
-        // TODO(b/293654166) remove system organizer requirement once security review is cleared.
-        mController.unregisterOrganizer(mIOrganizer);
-        registerTaskFragmentOrganizer(mIOrganizer, true /* isSystemOrganizer */);
         final Task task = createTask(mDisplayContent);
-
         final TaskFragment tf = createTaskFragment(task);
         final TaskFragmentOperation operation = new TaskFragmentOperation.Builder(
-                OP_TYPE_CREATE_TASK_FRAGMENT_DECOR_SURFACE).build();
+                OP_TYPE_CREATE_OR_MOVE_TASK_FRAGMENT_DECOR_SURFACE).build();
         mTransaction.addTaskFragmentOperation(tf.getFragmentToken(), operation);
 
         assertApplyTransactionAllowed(mTransaction);
 
-        verify(task).moveOrCreateDecorSurfaceFor(tf);
+        verify(task).moveOrCreateDecorSurfaceFor(tf, true /* visible */);
     }
 
     @Test
     public void testApplyTransaction_removeTaskFragmentDecorSurface() {
         mSetFlagsRule.enableFlags(Flags.FLAG_TASK_FRAGMENT_SYSTEM_ORGANIZER_FLAG);
 
-        // TODO(b/293654166) remove system organizer requirement once security review is cleared.
-        mController.unregisterOrganizer(mIOrganizer);
-        registerTaskFragmentOrganizer(mIOrganizer, true /* isSystemOrganizer */);
         final Task task = createTask(mDisplayContent);
         final TaskFragment tf = createTaskFragment(task);
 

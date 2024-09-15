@@ -20,17 +20,65 @@ package {
     // all of the 'license_kinds' from "frameworks_base_license"
     // to get the below license kinds:
     //   SPDX-license-identifier-Apache-2.0
+    default_team: "trendy_team_windowing_sdk",
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
-android_test {
-    name: "FlickerTestsOther",
+filegroup {
+    name: "FlickerTestsOtherCommon-src",
+    srcs: ["src/**/ActivityEmbeddingTestBase.kt"],
+}
+
+filegroup {
+    name: "FlickerTestsOtherOpen-src",
+    srcs: ["src/**/open/*"],
+}
+
+filegroup {
+    name: "FlickerTestsOtherRotation-src",
+    srcs: ["src/**/rotation/*"],
+}
+
+java_library {
+    name: "FlickerTestsOtherCommon",
+    defaults: ["FlickerTestsDefault"],
+    srcs: [":FlickerTestsOtherCommon-src"],
+    static_libs: ["FlickerTestsBase"],
+}
+
+java_defaults {
+    name: "FlickerTestsOtherDefaults",
     defaults: ["FlickerTestsDefault"],
     manifest: "AndroidManifest.xml",
     package_name: "com.android.server.wm.flicker",
     instrumentation_target_package: "com.android.server.wm.flicker",
     test_config_template: "AndroidTestTemplate.xml",
-    srcs: ["src/**/*"],
-    static_libs: ["FlickerTestsBase"],
+    static_libs: [
+        "FlickerTestsBase",
+        "FlickerTestsOtherCommon",
+    ],
     data: ["trace_config/*"],
+}
+
+android_test {
+    name: "FlickerTestsOtherOpen",
+    defaults: ["FlickerTestsOtherDefaults"],
+    srcs: [":FlickerTestsOtherOpen-src"],
+}
+
+android_test {
+    name: "FlickerTestsOtherRotation",
+    defaults: ["FlickerTestsOtherDefaults"],
+    srcs: [":FlickerTestsOtherRotation-src"],
+}
+
+android_test {
+    name: "FlickerTestsOther",
+    defaults: ["FlickerTestsOtherDefaults"],
+    srcs: ["src/**/*"],
+    exclude_srcs: [
+        ":FlickerTestsOtherOpen-src",
+        ":FlickerTestsOtherRotation-src",
+        ":FlickerTestsOtherCommon-src",
+    ],
 }

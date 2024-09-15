@@ -37,8 +37,8 @@ import android.window.OnBackInvokedCallback;
 import android.window.OnBackInvokedDispatcher;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.res.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.res.R;
 
 import javax.inject.Inject;
 

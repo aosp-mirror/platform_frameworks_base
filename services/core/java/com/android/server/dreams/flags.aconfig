@@ -1,0 +1,12 @@
+package: "com.android.server.dreams"
+container: "system"
+
+flag {
+    name: "use_battery_changed_broadcast"
+    namespace: "communal"
+    description: "Use ACTION_BATTERY_CHANGED broadcast to track charging state"
+    bug: "329125239"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

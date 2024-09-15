@@ -22,11 +22,11 @@ import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.view.View;
-import android.view.accessibility.AccessibilityManager.ShortcutType;
 
 import com.android.internal.R;
 import com.android.internal.accessibility.common.ShortcutConstants.AccessibilityFragmentType;
 import com.android.internal.accessibility.common.ShortcutConstants.ShortcutMenuMode;
+import com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType;
 import com.android.internal.accessibility.dialog.TargetAdapter.ViewHolder;
 
 import java.lang.annotation.Retention;
@@ -45,7 +45,7 @@ class ToggleAccessibilityServiceTarget extends AccessibilityServiceTarget {
         float DISABLED = 0.5f;
     }
 
-    ToggleAccessibilityServiceTarget(Context context, @ShortcutType int shortcutType,
+    ToggleAccessibilityServiceTarget(Context context, @UserShortcutType int shortcutType,
             @NonNull AccessibilityServiceInfo serviceInfo) {
         super(context,
                 shortcutType,

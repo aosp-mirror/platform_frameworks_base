@@ -97,6 +97,7 @@ filter_output() {
     # - Remove the constant pool
     # - Remove the line number table
     # - Some other transient lines
+    # - Sometimes the javap shows mysterious warnings, so remove them too.
     #
     # `/PATTERN-1/,/PATTERN-1/{//!d}` is a trick to delete lines between two patterns, without
     # the start and the end lines.
@@ -106,7 +107,8 @@ filter_output() {
         -e '/^ *line *[0-9][0-9]*: *[0-9][0-9]*$/d' \
         -e '/SHA-256 checksum/d' \
         -e '/Last modified/d' \
-        -e '/^Classfile jar/d'
+        -e '/^Classfile jar/d' \
+        -e '/\[warning\]/d'
   else
     cat # Print as-is.
   fi

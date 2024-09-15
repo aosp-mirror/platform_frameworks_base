@@ -74,10 +74,10 @@ public abstract class SettingObserver extends ContentObserver implements Listena
         mListening = listening;
         if (listening) {
             mObservedValue = getValueFromProvider();
-            mSettingsProxy.registerContentObserver(
+            mSettingsProxy.registerContentObserverSync(
                     mSettingsProxy.getUriFor(mSettingName), false, this);
         } else {
-            mSettingsProxy.unregisterContentObserver(this);
+            mSettingsProxy.unregisterContentObserverSync(this);
             mObservedValue = mDefaultValue;
         }
     }

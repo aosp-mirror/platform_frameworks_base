@@ -18,7 +18,9 @@ package com.android.systemui.keyguard.ui.viewmodel
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.FromDozingTransitionInteractor
-import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.Edge
+import com.android.systemui.keyguard.shared.model.KeyguardState.DOZING
+import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import javax.inject.Inject
@@ -39,8 +41,7 @@ constructor(
     private val transitionAnimation =
         animationFlow.setup(
             duration = FromDozingTransitionInteractor.TO_LOCKSCREEN_DURATION,
-            from = KeyguardState.DOZING,
-            to = KeyguardState.LOCKSCREEN,
+            edge = Edge.create(from = DOZING, to = LOCKSCREEN),
         )
 
     val shortcutsAlpha: Flow<Float> =

@@ -24,11 +24,9 @@ import static android.accessibilityservice.AccessibilityService.SHOW_MODE_IGNORE
 import static android.accessibilityservice.AccessibilityService.SHOW_MODE_MASK;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_NONE;
-import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_BUTTON;
-import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_SHORTCUT_KEY;
-import static android.view.accessibility.AccessibilityManager.ShortcutType;
 
 import static com.android.internal.accessibility.AccessibilityShortcutController.MAGNIFICATION_CONTROLLER_NAME;
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType;
 
 import android.accessibilityservice.AccessibilityService.SoftKeyboardShowMode;
 import android.accessibilityservice.AccessibilityServiceInfo;
@@ -38,10 +36,12 @@ import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.os.Binder;
 import android.os.RemoteCallbackList;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -63,6 +63,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Class that hold states and settings per user and share between
@@ -99,6 +101,20 @@ class AccessibilityUserState {
     final ArraySet<String> mAccessibilityShortcutKeyTargets = new ArraySet<>();
 
     final ArraySet<String> mAccessibilityButtonTargets = new ArraySet<>();
+    private final ArraySet<String> mAccessibilityQsTargets = new ArraySet<>();
+
+    /**
+     * The QuickSettings tiles in the QS Panel. This can be different from
+     * {@link #mAccessibilityQsTargets} in that {@link #mA11yTilesInQsPanel} stores the
+     * TileService's or the a11y framework tile component names (e.g.
+     * {@link AccessibilityShortcutController#COLOR_INVERSION_TILE_COMPONENT_NAME}) instead of the
+     * A11y Feature's component names.
+     * <p/>
+     * In addition, {@link #mA11yTilesInQsPanel} stores what's on the QS Panel, whereas
+     * {@link #mAccessibilityQsTargets} stores the targets that configured qs as their shortcut and
+     * also grant full device control permission.
+     */
+    private final ArraySet<ComponentName> mA11yTilesInQsPanel = new ArraySet<>();
 
     private final ServiceInfoChangeListener mServiceInfoChangeListener;
 
@@ -146,6 +162,8 @@ class AccessibilityUserState {
     private final int mFocusStrokeWidthDefaultValue;
     // The default value of the focus color.
     private final int mFocusColorDefaultValue;
+    private final Map<ComponentName, ComponentName> mA11yServiceToTileService = new ArrayMap<>();
+    private final Map<ComponentName, ComponentName> mA11yActivityToTileService = new ArrayMap<>();
 
     private Context mContext;
 
@@ -226,9 +244,6 @@ class AccessibilityUserState {
 
     void addServiceLocked(AccessibilityServiceConnection serviceConnection) {
         if (!mBoundServices.contains(serviceConnection)) {
-            if (!Flags.addWindowTokenWithoutLock()) {
-                serviceConnection.addWindowTokensForAllDisplays();
-            }
             mBoundServices.add(serviceConnection);
             mComponentNameToServiceMap.put(serviceConnection.getComponentName(), serviceConnection);
             mServiceInfoChangeListener.onServiceInfoChangedLocked(this);
@@ -560,6 +575,10 @@ class AccessibilityUserState {
         pw.println("}");
         pw.append("     button target:{").append(mTargetAssignedToAccessibilityButton);
         pw.println("}");
+        pw.append("     qs shortcut targets:").append(mAccessibilityQsTargets.toString());
+        pw.println();
+        pw.append("     a11y tiles in QS panel:").append(mA11yTilesInQsPanel.toString());
+        pw.println();
         pw.append("     Bound services:{");
         final int serviceCount = mBoundServices.size();
         for (int j = 0; j < serviceCount; j++) {
@@ -757,13 +776,22 @@ class AccessibilityUserState {
      * @param shortcutType The shortcut type.
      * @return The array set of the strings
      */
-    public ArraySet<String> getShortcutTargetsLocked(@ShortcutType int shortcutType) {
-        if (shortcutType == ACCESSIBILITY_SHORTCUT_KEY) {
+    public ArraySet<String> getShortcutTargetsLocked(@UserShortcutType int shortcutType) {
+        if (shortcutType == UserShortcutType.HARDWARE) {
             return mAccessibilityShortcutKeyTargets;
-        } else if (shortcutType == ACCESSIBILITY_BUTTON) {
+        } else if (shortcutType == UserShortcutType.SOFTWARE) {
             return mAccessibilityButtonTargets;
+        } else if (shortcutType == UserShortcutType.QUICK_SETTINGS) {
+            return getA11yQsTargets();
+        } else if ((shortcutType == UserShortcutType.TRIPLETAP
+                && isMagnificationSingleFingerTripleTapEnabledLocked()) || (
+                shortcutType == UserShortcutType.TWOFINGER_DOUBLETAP
+                        && isMagnificationTwoFingerTripleTapEnabledLocked())) {
+            ArraySet<String> targets = new ArraySet<>();
+            targets.add(MAGNIFICATION_CONTROLLER_NAME);
+            return targets;
         }
-        return null;
+        return new ArraySet<>();
     }
 
     /**
@@ -806,9 +834,18 @@ class AccessibilityUserState {
      * @param target The component name of the shortcut target.
      * @return true if the shortcut target is removed.
      */
-    public boolean removeShortcutTargetLocked(@ShortcutType int shortcutType,
-            ComponentName target) {
-        return getShortcutTargetsLocked(shortcutType).removeIf(name -> {
+    public boolean removeShortcutTargetLocked(
+            @UserShortcutType int shortcutType, ComponentName target) {
+        if (shortcutType == UserShortcutType.TRIPLETAP
+                || shortcutType == UserShortcutType.TWOFINGER_DOUBLETAP) {
+            throw new UnsupportedOperationException(
+                    "removeShortcutTargetLocked only support shortcut type: "
+                            + "software and hardware and quick settings for now"
+            );
+        }
+
+        Set<String> targets = getShortcutTargetsLocked(shortcutType);
+        boolean result = targets.removeIf(name -> {
             ComponentName componentName;
             if (name == null
                     || (componentName = ComponentName.unflattenFromString(name)) == null) {
@@ -816,6 +853,11 @@ class AccessibilityUserState {
             }
             return componentName.equals(target);
         });
+        if (shortcutType == UserShortcutType.QUICK_SETTINGS) {
+            updateA11yQsTargetLocked(targets);
+        }
+
+        return result;
     }
 
     /**
@@ -1033,5 +1075,97 @@ class AccessibilityUserState {
             return mServiceDetectsGestures.get(displayId);
         }
         return false;
+    }
+
+    public void updateTileServiceMapForAccessibilityServiceLocked() {
+        mA11yServiceToTileService.clear();
+        mInstalledServices.forEach(
+                a11yServiceInfo -> {
+                    String tileServiceName = a11yServiceInfo.getTileServiceName();
+                    if (!TextUtils.isEmpty(tileServiceName)) {
+                        ResolveInfo resolveInfo = a11yServiceInfo.getResolveInfo();
+                        ComponentName a11yFeature = new ComponentName(
+                                resolveInfo.serviceInfo.packageName,
+                                resolveInfo.serviceInfo.name
+                        );
+                        ComponentName tileService = new ComponentName(
+                                a11yFeature.getPackageName(),
+                                tileServiceName
+                        );
+                        mA11yServiceToTileService.put(a11yFeature, tileService);
+                    }
+                }
+        );
+    }
+
+    public void updateTileServiceMapForAccessibilityActivityLocked() {
+        mA11yActivityToTileService.clear();
+        mInstalledShortcuts.forEach(
+                a11yShortcutInfo -> {
+                    String tileServiceName = a11yShortcutInfo.getTileServiceName();
+                    if (!TextUtils.isEmpty(tileServiceName)) {
+                        ComponentName a11yFeature = a11yShortcutInfo.getComponentName();
+                        ComponentName tileService = new ComponentName(
+                                a11yFeature.getPackageName(),
+                                tileServiceName);
+                        mA11yActivityToTileService.put(a11yFeature, tileService);
+                    }
+                }
+        );
+    }
+
+    public void updateA11yQsTargetLocked(Set<String> targets) {
+        mAccessibilityQsTargets.clear();
+        mAccessibilityQsTargets.addAll(targets);
+    }
+
+    /**
+     * Returns a copy of the targets which has qs shortcut turned on
+     */
+    public ArraySet<String> getA11yQsTargets() {
+        return new ArraySet<>(mAccessibilityQsTargets);
+    }
+
+    public void updateA11yTilesInQsPanelLocked(Set<ComponentName> componentNames) {
+        mA11yTilesInQsPanel.clear();
+        mA11yTilesInQsPanel.addAll(componentNames);
+    }
+
+    /**
+     * Returns a copy of the a11y tiles that are in the QuickSettings panel
+     */
+    public ArraySet<ComponentName> getA11yQsTilesInQsPanel() {
+        return new ArraySet<>(mA11yTilesInQsPanel);
+    }
+
+    /**
+     * Returns a map of AccessibilityService or AccessibilityShortcut to its provided TileService
+     */
+    public Map<ComponentName, ComponentName> getA11yFeatureToTileService() {
+        Map<ComponentName, ComponentName> featureToTileServiceMap = new ArrayMap<>();
+        featureToTileServiceMap.putAll(mA11yServiceToTileService);
+        featureToTileServiceMap.putAll(mA11yActivityToTileService);
+        return featureToTileServiceMap;
+    }
+
+    /**
+     * Returns a map of TileService's componentName to the AccessibilityServiceInfo it ties to.
+     */
+    public Map<ComponentName, AccessibilityServiceInfo> getTileServiceToA11yServiceInfoMapLocked() {
+        Map<ComponentName, AccessibilityServiceInfo> tileServiceToA11yServiceInfoMap =
+                new ArrayMap<>();
+        Map<ComponentName, AccessibilityServiceInfo> a11yServiceToServiceInfoMap =
+                mInstalledServices.stream().collect(
+                        Collectors.toMap(
+                                AccessibilityServiceInfo::getComponentName,
+                                Function.identity()));
+        for (Map.Entry<ComponentName, ComponentName> serviceToTile :
+                mA11yServiceToTileService.entrySet()) {
+            if (a11yServiceToServiceInfoMap.containsKey(serviceToTile.getKey())) {
+                tileServiceToA11yServiceInfoMap.put(serviceToTile.getValue(),
+                        a11yServiceToServiceInfoMap.get(serviceToTile.getKey()));
+            }
+        }
+        return tileServiceToA11yServiceInfoMap;
     }
 }

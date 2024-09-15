@@ -253,6 +253,7 @@ class SnapshotPersistQueue {
                 PersistInfoProvider provider) {
             super(provider, userId);
             mId = id;
+            snapshot.addReference(TaskSnapshot.REFERENCE_PERSIST);
             mSnapshot = snapshot;
         }
 
@@ -289,6 +290,7 @@ class SnapshotPersistQueue {
             if (failed) {
                 deleteSnapshot(mId, mUserId, mPersistInfoProvider);
             }
+            mSnapshot.removeReference(TaskSnapshot.REFERENCE_PERSIST);
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
 
@@ -346,6 +348,9 @@ class SnapshotPersistQueue {
                         + bitmap.isMutable() + ") to (config=ARGB_8888, isMutable=false) failed.");
                 return false;
             }
+            final int width = bitmap.getWidth();
+            final int height = bitmap.getHeight();
+            bitmap.recycle();
 
             final File file = mPersistInfoProvider.getHighResolutionBitmapFile(mId, mUserId);
             try {
@@ -363,8 +368,8 @@ class SnapshotPersistQueue {
             }
 
             final Bitmap lowResBitmap = Bitmap.createScaledBitmap(swBitmap,
-                    (int) (bitmap.getWidth() * mPersistInfoProvider.lowResScaleFactor()),
-                    (int) (bitmap.getHeight() * mPersistInfoProvider.lowResScaleFactor()),
+                    (int) (width * mPersistInfoProvider.lowResScaleFactor()),
+                    (int) (height * mPersistInfoProvider.lowResScaleFactor()),
                     true /* filter */);
             swBitmap.recycle();
 

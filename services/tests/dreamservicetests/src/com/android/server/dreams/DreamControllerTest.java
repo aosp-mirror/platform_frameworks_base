@@ -19,6 +19,8 @@ package com.android.server.dreams;
 import static android.os.PowerManager.USER_ACTIVITY_EVENT_OTHER;
 import static android.os.PowerManager.USER_ACTIVITY_FLAG_NO_CHANGE_LIGHTS;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -268,6 +270,39 @@ public class DreamControllerTest {
         verify(mPowerManager).userActivity(/*displayId=*/ anyInt(), /*time=*/ anyLong(),
                 eq(USER_ACTIVITY_EVENT_OTHER),
                 eq(USER_ACTIVITY_FLAG_NO_CHANGE_LIGHTS));
+    }
+
+    @Test
+    public void setDreamIsObscured_true_dreamIsNotFrontmost() {
+        mDreamController.startDream(mToken, mDreamName, false /*isPreview*/, false /*doze*/,
+                0 /*userId*/, null /*wakeLock*/, mOverlayName, "test" /*reason*/);
+
+        mDreamController.setDreamIsObscured(true);
+        assertFalse(mDreamController.dreamIsFrontmost());
+    }
+
+    @Test
+    public void setDreamIsObscured_false_dreamIsFrontmost() {
+        mDreamController.startDream(mToken, mDreamName, false /*isPreview*/, false /*doze*/,
+                0 /*userId*/, null /*wakeLock*/, mOverlayName, "test" /*reason*/);
+
+        mDreamController.setDreamIsObscured(false);
+        assertTrue(mDreamController.dreamIsFrontmost());
+    }
+
+    @Test
+    public void setDreamIsObscured_notDreaming_dreamIsNotFrontmost() {
+        mDreamController.setDreamIsObscured(true);
+        // Dream still isn't frontmost because it was never started.
+        assertFalse(mDreamController.dreamIsFrontmost());
+    }
+
+    @Test
+    public void startDream_dreamIsFrontmost() {
+        mDreamController.startDream(mToken, mDreamName, false /*isPreview*/, false /*doze*/,
+                0 /*userId*/, null /*wakeLock*/, mOverlayName, "test" /*reason*/);
+
+        assertTrue(mDreamController.dreamIsFrontmost());
     }
 
     private ServiceConnection captureServiceConnection() {

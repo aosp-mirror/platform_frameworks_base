@@ -66,6 +66,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.database.ContentObserver;
 import android.hardware.SensorPrivacyManager;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerInternal;
@@ -84,10 +85,10 @@ import android.os.VibratorInfo;
 import android.os.test.TestLooper;
 import android.service.dreams.DreamManagerInternal;
 import android.telecom.TelecomManager;
-import android.util.FeatureFlagUtils;
 import android.view.Display;
 import android.view.InputDevice;
 import android.view.KeyEvent;
+import android.view.accessibility.AccessibilityManager;
 import android.view.autofill.AutofillManagerInternal;
 
 import com.android.dx.mockito.inline.extended.StaticMockitoSession;
@@ -155,6 +156,7 @@ class TestPhoneWindowManager {
     @Mock private AudioManagerInternal mAudioManagerInternal;
     @Mock private SearchManager mSearchManager;
     @Mock private RoleManager mRoleManager;
+    @Mock private AccessibilityManager mAccessibilityManager;
 
     @Mock private Display mDisplay;
     @Mock private DisplayRotation mDisplayRotation;
@@ -246,6 +248,13 @@ class TestPhoneWindowManager {
         }
     }
 
+    /**
+     * {@link TestPhoneWindowManager}'s constructor.
+     *
+     * @param context The {@Context} to be used in any Context-related actions.
+     * @param supportSettingsUpdate {@code true} if this object should read and listen to provider
+     *      settings values.
+     */
     TestPhoneWindowManager(Context context, boolean supportSettingsUpdate) {
         MockitoAnnotations.initMocks(this);
         mHandler = new Handler(mTestLooper.getLooper());
@@ -298,6 +307,9 @@ class TestPhoneWindowManager {
                 eq(SensorPrivacyManager.class));
         doReturn(mSearchManager).when(mContext).getSystemService(eq(SearchManager.class));
         doReturn(mRoleManager).when(mContext).getSystemService(eq(RoleManager.class));
+        doReturn(mAccessibilityManager).when(mContext).getSystemService(
+                eq(AccessibilityManager.class));
+        doReturn(false).when(mAccessibilityManager).isEnabled();
         doReturn(false).when(mPackageManager).hasSystemFeature(any());
         try {
             doThrow(new PackageManager.NameNotFoundException("test")).when(mPackageManager)
@@ -416,6 +428,13 @@ class TestPhoneWindowManager {
         mPhoneWindowManager.dispatchUnhandledKey(mInputToken, event, FLAG_INTERACTIVE);
     }
 
+    /**
+     * Provide access to the SettingsObserver so that tests can manually trigger Settings changes.
+     */
+    ContentObserver getSettingsObserver() {
+        return mPhoneWindowManager.mSettingsObserver;
+    }
+
     long getCurrentTime() {
         return mClock.now();
     }
@@ -477,8 +496,8 @@ class TestPhoneWindowManager {
         mPhoneWindowManager.mDoubleTapOnHomeBehavior = behavior;
     }
 
-    void overrideShortPressOnSettingsBehavior(int behavior) {
-        mPhoneWindowManager.mShortPressOnSettingsBehavior = behavior;
+    void overrideSettingsKeyBehavior(int behavior) {
+        mPhoneWindowManager.mSettingsKeyBehavior = behavior;
     }
 
     void overrideCanStartDreaming(boolean canDream) {
@@ -588,7 +607,7 @@ class TestPhoneWindowManager {
     }
 
     void overrideEnableBugReportTrigger(boolean enable) {
-        mPhoneWindowManager.mEnableShiftMenuBugReports = enable;
+        mPhoneWindowManager.mEnableBugReportKeyboardShortcut = enable;
     }
 
     void overrideStartActivity() {
@@ -728,23 +747,18 @@ class TestPhoneWindowManager {
 
     void assertSwitchKeyboardLayout(int direction, int displayId) {
         mTestLooper.dispatchAll();
-        if (FeatureFlagUtils.isEnabled(mContext, FeatureFlagUtils.SETTINGS_NEW_KEYBOARD_UI)) {
-            verify(mInputMethodManagerInternal).onSwitchKeyboardLayoutShortcut(eq(direction),
-                    eq(displayId), eq(mImeTargetWindowToken));
-            verify(mWindowManagerFuncsImpl, never()).switchKeyboardLayout(anyInt(), anyInt());
-        } else {
-            verify(mWindowManagerFuncsImpl).switchKeyboardLayout(anyInt(), eq(direction));
-            verify(mInputMethodManagerInternal, never())
-                    .onSwitchKeyboardLayoutShortcut(anyInt(), anyInt(), any());
-        }
+        verify(mInputMethodManagerInternal).onSwitchKeyboardLayoutShortcut(eq(direction),
+                eq(displayId), eq(mImeTargetWindowToken));
     }
 
-    void assertTakeBugreport() {
+    void assertTakeBugreport(boolean wasCalled) throws RemoteException {
         mTestLooper.dispatchAll();
-        ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
-        verify(mContext).sendOrderedBroadcastAsUser(intentCaptor.capture(), any(), any(), any(),
-                any(), anyInt(), any(), any());
-        Assert.assertTrue(intentCaptor.getValue().getAction() == Intent.ACTION_BUG_REPORT);
+        if (wasCalled) {
+            verify(mActivityManagerService).requestInteractiveBugReport();
+        } else {
+            verify(mActivityManagerService, never()).requestInteractiveBugReport();
+        }
+
     }
 
     void assertTogglePanel() throws RemoteException {

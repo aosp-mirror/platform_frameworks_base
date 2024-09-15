@@ -54,12 +54,25 @@ internal fun RestrictedPreference(
         return
     }
     val restrictedMode = restrictionsProviderFactory.rememberRestrictedMode(restrictions).value
-    val restrictedSwitchModel = remember(restrictedMode) {
+    val restrictedModel = remember(restrictedMode) {
         RestrictedPreferenceModel(model, restrictedMode)
     }
-    restrictedSwitchModel.RestrictionWrapper {
-        Preference(restrictedSwitchModel)
+    restrictedModel.RestrictionWrapper {
+        Preference(restrictedModel)
     }
+}
+
+internal fun RestrictedMode?.restrictEnabled(enabled: () -> Boolean) = when (this) {
+    NoRestricted -> enabled
+    else -> ({ false })
+}
+
+internal fun <T> RestrictedMode?.restrictOnClick(onClick: T): T? = when (this) {
+    NoRestricted -> onClick
+    // Need to passthrough onClick for clickable semantics, although since enabled is false so
+    // this will not be called.
+    BaseUserRestricted -> onClick
+    else -> null
 }
 
 private class RestrictedPreferenceModel(
@@ -69,19 +82,8 @@ private class RestrictedPreferenceModel(
     override val title = model.title
     override val summary = model.summary
     override val icon = model.icon
-
-    override val enabled = when (restrictedMode) {
-        NoRestricted -> model.enabled
-        else -> ({ false })
-    }
-
-    override val onClick = when (restrictedMode) {
-        NoRestricted -> model.onClick
-        // Need to passthrough onClick for clickable semantics, although since enabled is false so
-        // this will not be called.
-        BaseUserRestricted -> model.onClick
-        else -> null
-    }
+    override val enabled = restrictedMode.restrictEnabled(model.enabled)
+    override val onClick = restrictedMode.restrictOnClick(model.onClick)
 
     @Composable
     fun RestrictionWrapper(content: @Composable () -> Unit) {

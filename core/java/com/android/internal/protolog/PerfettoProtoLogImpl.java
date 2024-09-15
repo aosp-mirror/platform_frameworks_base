@@ -52,6 +52,8 @@ import android.tracing.perfetto.DataSourceParams;
 import android.tracing.perfetto.InitArguments;
 import android.tracing.perfetto.Producer;
 import android.tracing.perfetto.TracingContext;
+import android.util.ArrayMap;
+import android.util.Log;
 import android.util.LongArray;
 import android.util.Slog;
 import android.util.proto.ProtoInputStream;
@@ -66,11 +68,15 @@ import com.android.internal.protolog.common.LogLevel;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -81,16 +87,22 @@ public class PerfettoProtoLogImpl implements IProtoLog {
     private final AtomicInteger mTracingInstances = new AtomicInteger();
 
     private final ProtoLogDataSource mDataSource = new ProtoLogDataSource(
-            this.mTracingInstances::incrementAndGet,
+            this::onTracingInstanceStart,
             this::dumpTransitionTraceConfig,
-            this.mTracingInstances::decrementAndGet
+            this::onTracingInstanceStop
     );
     private final ProtoLogViewerConfigReader mViewerConfigReader;
     private final ViewerConfigInputStreamProvider mViewerConfigInputStreamProvider;
     private final TreeMap<String, IProtoLogGroup> mLogGroups;
+    private final Runnable mCacheUpdater;
+
+    private final Map<LogLevel, Integer> mDefaultLogLevelCounts = new ArrayMap<>();
+    private final Map<IProtoLogGroup, Map<LogLevel, Integer>> mLogLevelCounts = new ArrayMap<>();
+
+    private final ExecutorService mBackgroundLoggingService = Executors.newSingleThreadExecutor();
 
     public PerfettoProtoLogImpl(String viewerConfigFilePath,
-            TreeMap<String, IProtoLogGroup> logGroups) {
+            TreeMap<String, IProtoLogGroup> logGroups, Runnable cacheUpdater) {
         this(() -> {
             try {
                 return new ProtoInputStream(new FileInputStream(viewerConfigFilePath));
@@ -98,28 +110,38 @@ public class PerfettoProtoLogImpl implements IProtoLog {
                 Slog.w(LOG_TAG, "Failed to load viewer config file " + viewerConfigFilePath, e);
                 return null;
             }
-        }, logGroups);
+        }, logGroups, cacheUpdater);
     }
 
     public PerfettoProtoLogImpl(
             ViewerConfigInputStreamProvider viewerConfigInputStreamProvider,
-            TreeMap<String, IProtoLogGroup> logGroups
+            TreeMap<String, IProtoLogGroup> logGroups,
+            Runnable cacheUpdater
     ) {
         this(viewerConfigInputStreamProvider,
-                new ProtoLogViewerConfigReader(viewerConfigInputStreamProvider), logGroups);
+                new ProtoLogViewerConfigReader(viewerConfigInputStreamProvider), logGroups,
+                cacheUpdater);
     }
 
     @VisibleForTesting
     public PerfettoProtoLogImpl(
             ViewerConfigInputStreamProvider viewerConfigInputStreamProvider,
             ProtoLogViewerConfigReader viewerConfigReader,
-            TreeMap<String, IProtoLogGroup> logGroups
+            TreeMap<String, IProtoLogGroup> logGroups,
+            Runnable cacheUpdater
     ) {
         Producer.init(InitArguments.DEFAULTS);
-        mDataSource.register(DataSourceParams.DEFAULTS);
+        DataSourceParams params =
+                new DataSourceParams.Builder()
+                        .setBufferExhaustedPolicy(
+                                DataSourceParams
+                                        .PERFETTO_DS_BUFFER_EXHAUSTED_POLICY_DROP)
+                        .build();
+        mDataSource.register(params);
         this.mViewerConfigInputStreamProvider = viewerConfigInputStreamProvider;
         this.mViewerConfigReader = viewerConfigReader;
         this.mLogGroups = logGroups;
+        this.mCacheUpdater = cacheUpdater;
     }
 
     /**
@@ -133,7 +155,8 @@ public class PerfettoProtoLogImpl implements IProtoLog {
 
         long tsNanos = SystemClock.elapsedRealtimeNanos();
         try {
-            logToProto(level, group.name(), messageHash, paramsMask, args, tsNanos);
+            mBackgroundLoggingService.submit(() ->
+                    logToProto(level, group.name(), messageHash, paramsMask, args, tsNanos));
             if (group.isLogToLogcat()) {
                 logToLogcat(group.getTag(), level, messageHash, messageString, args);
             }
@@ -151,76 +174,86 @@ public class PerfettoProtoLogImpl implements IProtoLog {
         }
 
         mDataSource.trace(ctx -> {
-            final ProtoOutputStream os = ctx.newTracePacket();
+            try {
+                final ProtoOutputStream os = ctx.newTracePacket();
 
-            os.write(TIMESTAMP, SystemClock.elapsedRealtimeNanos());
+                os.write(TIMESTAMP, SystemClock.elapsedRealtimeNanos());
 
-            final long outProtologViewerConfigToken = os.start(PROTOLOG_VIEWER_CONFIG);
-            while (pis.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
-                if (pis.getFieldNumber() == (int) MESSAGES) {
-                    final long inMessageToken = pis.start(MESSAGES);
-                    final long outMessagesToken = os.start(MESSAGES);
-
-                    while (pis.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
-                        switch (pis.getFieldNumber()) {
-                            case (int) MessageData.MESSAGE_ID:
-                                os.write(MessageData.MESSAGE_ID,
-                                        pis.readLong(MessageData.MESSAGE_ID));
-                                break;
-                            case (int) MESSAGE:
-                                os.write(MESSAGE, pis.readString(MESSAGE));
-                                break;
-                            case (int) LEVEL:
-                                os.write(LEVEL, pis.readInt(LEVEL));
-                                break;
-                            case (int) GROUP_ID:
-                                os.write(GROUP_ID, pis.readInt(GROUP_ID));
-                                break;
-                            default:
-                                throw new RuntimeException(
-                                        "Unexpected field id " + pis.getFieldNumber());
-                        }
+                final long outProtologViewerConfigToken = os.start(PROTOLOG_VIEWER_CONFIG);
+                while (pis.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
+                    if (pis.getFieldNumber() == (int) MESSAGES) {
+                        writeViewerConfigMessage(pis, os);
                     }
 
-                    pis.end(inMessageToken);
-                    os.end(outMessagesToken);
-                }
-
-                if (pis.getFieldNumber() == (int) GROUPS) {
-                    final long inGroupToken = pis.start(GROUPS);
-                    final long outGroupToken = os.start(GROUPS);
-
-                    while (pis.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
-                        switch (pis.getFieldNumber()) {
-                            case (int) ID:
-                                int id = pis.readInt(ID);
-                                os.write(ID, id);
-                                break;
-                            case (int) NAME:
-                                String name = pis.readString(NAME);
-                                os.write(NAME, name);
-                                break;
-                            case (int) TAG:
-                                String tag = pis.readString(TAG);
-                                os.write(TAG, tag);
-                                break;
-                            default:
-                                throw new RuntimeException(
-                                        "Unexpected field id " + pis.getFieldNumber());
-                        }
+                    if (pis.getFieldNumber() == (int) GROUPS) {
+                        writeViewerConfigGroup(pis, os);
                     }
-
-                    pis.end(inGroupToken);
-                    os.end(outGroupToken);
                 }
+
+                os.end(outProtologViewerConfigToken);
+            } catch (IOException e) {
+                Log.e(LOG_TAG, "Failed to read ProtoLog viewer config to dump on tracing end", e);
             }
-
-            os.end(outProtologViewerConfigToken);
-
-            ctx.flush();
         });
+    }
 
-        mDataSource.flush();
+    private static void writeViewerConfigGroup(
+            ProtoInputStream pis, ProtoOutputStream os) throws IOException {
+        final long inGroupToken = pis.start(GROUPS);
+        final long outGroupToken = os.start(GROUPS);
+
+        while (pis.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
+            switch (pis.getFieldNumber()) {
+                case (int) ID:
+                    int id = pis.readInt(ID);
+                    os.write(ID, id);
+                    break;
+                case (int) NAME:
+                    String name = pis.readString(NAME);
+                    os.write(NAME, name);
+                    break;
+                case (int) TAG:
+                    String tag = pis.readString(TAG);
+                    os.write(TAG, tag);
+                    break;
+                default:
+                    throw new RuntimeException(
+                            "Unexpected field id " + pis.getFieldNumber());
+            }
+        }
+
+        pis.end(inGroupToken);
+        os.end(outGroupToken);
+    }
+
+    private static void writeViewerConfigMessage(
+            ProtoInputStream pis, ProtoOutputStream os) throws IOException {
+        final long inMessageToken = pis.start(MESSAGES);
+        final long outMessagesToken = os.start(MESSAGES);
+
+        while (pis.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
+            switch (pis.getFieldNumber()) {
+                case (int) MessageData.MESSAGE_ID:
+                    os.write(MessageData.MESSAGE_ID,
+                            pis.readLong(MessageData.MESSAGE_ID));
+                    break;
+                case (int) MESSAGE:
+                    os.write(MESSAGE, pis.readString(MESSAGE));
+                    break;
+                case (int) LEVEL:
+                    os.write(LEVEL, pis.readInt(LEVEL));
+                    break;
+                case (int) GROUP_ID:
+                    os.write(GROUP_ID, pis.readInt(GROUP_ID));
+                    break;
+                default:
+                    throw new RuntimeException(
+                            "Unexpected field id " + pis.getFieldNumber());
+            }
+        }
+
+        pis.end(inMessageToken);
+        os.end(outMessagesToken);
     }
 
     private void logToLogcat(String tag, LogLevel level, long messageHash,
@@ -408,7 +441,8 @@ public class PerfettoProtoLogImpl implements IProtoLog {
         return sw.toString();
     }
 
-    private int internStacktraceString(TracingContext<ProtoLogDataSource.Instance,
+    private int internStacktraceString(TracingContext<
+            ProtoLogDataSource.Instance,
             ProtoLogDataSource.TlsState,
             ProtoLogDataSource.IncrementalState> ctx,
             String stacktrace) {
@@ -418,9 +452,8 @@ public class PerfettoProtoLogImpl implements IProtoLog {
     }
 
     private int internStringArg(
-            TracingContext<ProtoLogDataSource.Instance,
-            ProtoLogDataSource.TlsState,
-            ProtoLogDataSource.IncrementalState> ctx,
+            TracingContext<ProtoLogDataSource.Instance, ProtoLogDataSource.TlsState,
+                    ProtoLogDataSource.IncrementalState> ctx,
             String string
     ) {
         final ProtoLogDataSource.IncrementalState incrementalState = ctx.getIncrementalState();
@@ -429,9 +462,8 @@ public class PerfettoProtoLogImpl implements IProtoLog {
     }
 
     private int internString(
-            TracingContext<ProtoLogDataSource.Instance,
-                ProtoLogDataSource.TlsState,
-                ProtoLogDataSource.IncrementalState> ctx,
+            TracingContext<ProtoLogDataSource.Instance, ProtoLogDataSource.TlsState,
+                    ProtoLogDataSource.IncrementalState> ctx,
             Map<String, Integer> internMap,
             long fieldId,
             String string
@@ -458,40 +490,6 @@ public class PerfettoProtoLogImpl implements IProtoLog {
         }
 
         return internMap.get(string);
-    }
-
-    /**
-     * Responds to a shell command.
-     */
-    public int onShellCommand(ShellCommand shell) {
-        PrintWriter pw = shell.getOutPrintWriter();
-        String cmd = shell.getNextArg();
-        if (cmd == null) {
-            return unknownCommand(pw);
-        }
-        ArrayList<String> args = new ArrayList<>();
-        String arg;
-        while ((arg = shell.getNextArg()) != null) {
-            args.add(arg);
-        }
-        final ILogger logger = (msg) -> logAndPrintln(pw, msg);
-        String[] groups = args.toArray(new String[args.size()]);
-        switch (cmd) {
-            case "enable-text":
-                return this.startLoggingToLogcat(groups, logger);
-            case "disable-text":
-                return this.stopLoggingToLogcat(groups, logger);
-            default:
-                return unknownCommand(pw);
-        }
-    }
-
-    private int unknownCommand(PrintWriter pw) {
-        pw.println("Unknown command");
-        pw.println("Window manager logging options:");
-        pw.println("  enable-text [group...]: Enable logcat logging for given groups");
-        pw.println("  disable-text [group...]: Disable logcat logging for given groups");
-        return -1;
     }
 
     /**
@@ -523,6 +521,29 @@ public class PerfettoProtoLogImpl implements IProtoLog {
         return setTextLogging(false, logger, groups);
     }
 
+    @Override
+    public boolean isEnabled(IProtoLogGroup group, LogLevel level) {
+        return group.isLogToLogcat() || getLogFromLevel(group).ordinal() <= level.ordinal();
+    }
+
+    private LogLevel getLogFromLevel(IProtoLogGroup group) {
+        if (mLogLevelCounts.containsKey(group)) {
+            for (LogLevel logLevel : LogLevel.values()) {
+                if (mLogLevelCounts.get(group).getOrDefault(logLevel, 0) > 0) {
+                    return logLevel;
+                }
+            }
+        } else {
+            for (LogLevel logLevel : LogLevel.values()) {
+                if (mDefaultLogLevelCounts.getOrDefault(logLevel, 0) > 0) {
+                    return logLevel;
+                }
+            }
+        }
+
+        return LogLevel.WTF;
+    }
+
     /**
      * Start logging the stack trace of the when the log message happened for target groups
      * @return status code
@@ -550,7 +571,107 @@ public class PerfettoProtoLogImpl implements IProtoLog {
                 return -1;
             }
         }
+
+        mCacheUpdater.run();
         return 0;
+    }
+
+    /**
+     * Responds to a shell command.
+     */
+    public int onShellCommand(ShellCommand shell) {
+        PrintWriter pw = shell.getOutPrintWriter();
+        String cmd = shell.getNextArg();
+        if (cmd == null) {
+            return unknownCommand(pw);
+        }
+        ArrayList<String> args = new ArrayList<>();
+        String arg;
+        while ((arg = shell.getNextArg()) != null) {
+            args.add(arg);
+        }
+        final ILogger logger = (msg) -> logAndPrintln(pw, msg);
+        String[] groups = args.toArray(new String[0]);
+        switch (cmd) {
+            case "start", "stop" -> {
+                pw.println("Command not supported. "
+                        + "Please start and stop ProtoLog tracing with Perfetto.");
+                return -1;
+            }
+            case "enable-text" -> {
+                mViewerConfigReader.loadViewerConfig(logger);
+                return setTextLogging(true, logger, groups);
+            }
+            case "disable-text" -> {
+                return setTextLogging(false, logger, groups);
+            }
+            default -> {
+                return unknownCommand(pw);
+            }
+        }
+    }
+
+    private int unknownCommand(PrintWriter pw) {
+        pw.println("Unknown command");
+        pw.println("Window manager logging options:");
+        pw.println("  enable-text [group...]: Enable logcat logging for given groups");
+        pw.println("  disable-text [group...]: Disable logcat logging for given groups");
+        return -1;
+    }
+
+    private synchronized void onTracingInstanceStart(ProtoLogDataSource.ProtoLogConfig config) {
+        this.mTracingInstances.incrementAndGet();
+
+        final LogLevel defaultLogFrom = config.getDefaultGroupConfig().logFrom;
+        mDefaultLogLevelCounts.put(defaultLogFrom,
+                mDefaultLogLevelCounts.getOrDefault(defaultLogFrom, 0) + 1);
+
+        final Set<String> overriddenGroupTags = config.getGroupTagsWithOverriddenConfigs();
+
+        for (String overriddenGroupTag : overriddenGroupTags) {
+            IProtoLogGroup group = mLogGroups.get(overriddenGroupTag);
+
+            mLogLevelCounts.putIfAbsent(group, new ArrayMap<>());
+            final Map<LogLevel, Integer> logLevelsCountsForGroup = mLogLevelCounts.get(group);
+
+            final LogLevel logFromLevel = config.getConfigFor(overriddenGroupTag).logFrom;
+            logLevelsCountsForGroup.put(logFromLevel,
+                    logLevelsCountsForGroup.getOrDefault(logFromLevel, 0) + 1);
+        }
+
+        mCacheUpdater.run();
+    }
+
+    private synchronized void onTracingInstanceStop(ProtoLogDataSource.ProtoLogConfig config) {
+        this.mTracingInstances.decrementAndGet();
+
+        final LogLevel defaultLogFrom = config.getDefaultGroupConfig().logFrom;
+        mDefaultLogLevelCounts.put(defaultLogFrom,
+                mDefaultLogLevelCounts.get(defaultLogFrom) - 1);
+        if (mDefaultLogLevelCounts.get(defaultLogFrom) <= 0) {
+            mDefaultLogLevelCounts.remove(defaultLogFrom);
+        }
+
+        final Set<String> overriddenGroupTags = config.getGroupTagsWithOverriddenConfigs();
+
+        for (String overriddenGroupTag : overriddenGroupTags) {
+            IProtoLogGroup group = mLogGroups.get(overriddenGroupTag);
+
+            mLogLevelCounts.putIfAbsent(group, new ArrayMap<>());
+            final Map<LogLevel, Integer> logLevelsCountsForGroup = mLogLevelCounts.get(group);
+
+            final LogLevel logFromLevel = config.getConfigFor(overriddenGroupTag).logFrom;
+            logLevelsCountsForGroup.put(logFromLevel,
+                    logLevelsCountsForGroup.get(logFromLevel) - 1);
+            if (logLevelsCountsForGroup.get(logFromLevel) <= 0) {
+                logLevelsCountsForGroup.remove(logFromLevel);
+            }
+            if (logLevelsCountsForGroup.isEmpty()) {
+                mLogLevelCounts.remove(group);
+            }
+        }
+
+        mCacheUpdater.run();
     }
 
     static void logAndPrintln(@Nullable PrintWriter pw, String msg) {

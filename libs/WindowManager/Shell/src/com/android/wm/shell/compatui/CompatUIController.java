@@ -20,7 +20,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.AppCompatTaskInfo.CameraCompatControlState;
+import android.app.CameraCompatTaskInfo.CameraCompatControlState;
 import android.app.TaskInfo;
 import android.content.ComponentName;
 import android.content.Context;
@@ -188,6 +188,11 @@ public class CompatUIController implements OnDisplaysChangedListener,
      */
     private boolean mHasShownUserAspectRatioSettingsButton = false;
 
+    /**
+     * This is true when the rechability education is displayed for the first time.
+     */
+    private boolean mIsFirstReachabilityEducationRunning;
+
     public CompatUIController(@NonNull Context context,
             @NonNull ShellInit shellInit,
             @NonNull ShellController shellController,
@@ -252,12 +257,51 @@ public class CompatUIController implements OnDisplaysChangedListener,
             removeLayouts(taskInfo.taskId);
             return;
         }
-
+        // We're showing the first reachability education so we ignore incoming TaskInfo
+        // until the education flow has completed or we double tap. The double-tap
+        // basically cancel all the onboarding flow. We don't have to ignore events in case
+        // the app is in size compat mode.
+        if (mIsFirstReachabilityEducationRunning) {
+            if (!taskInfo.appCompatTaskInfo.isFromLetterboxDoubleTap
+                    && !taskInfo.appCompatTaskInfo.topActivityInSizeCompat) {
+                return;
+            }
+            mIsFirstReachabilityEducationRunning = false;
+        }
+        if (taskInfo.appCompatTaskInfo.topActivityBoundsLetterboxed) {
+            if (taskInfo.appCompatTaskInfo.isLetterboxEducationEnabled) {
+                createOrUpdateLetterboxEduLayout(taskInfo, taskListener);
+            } else if (!taskInfo.appCompatTaskInfo.isFromLetterboxDoubleTap) {
+                // In this case the app is letterboxed and the letterbox education
+                // is disabled. In this case we need to understand if it's the first
+                // time we show the reachability education. When this is happening
+                // we need to ignore all the incoming TaskInfo until the education
+                // completes. If we come from a double tap we follow the normal flow.
+                final boolean topActivityPillarboxed =
+                        taskInfo.appCompatTaskInfo.isTopActivityPillarboxed();
+                final boolean isFirstTimeHorizontalReachabilityEdu = topActivityPillarboxed
+                        && !mCompatUIConfiguration.hasSeenHorizontalReachabilityEducation(taskInfo);
+                final boolean isFirstTimeVerticalReachabilityEdu = !topActivityPillarboxed
+                        && !mCompatUIConfiguration.hasSeenVerticalReachabilityEducation(taskInfo);
+                if (isFirstTimeHorizontalReachabilityEdu || isFirstTimeVerticalReachabilityEdu) {
+                    mCompatUIConfiguration.setSeenLetterboxEducation(taskInfo.userId);
+                    // We activate the first reachability education if the double-tap is enabled.
+                    // If the double tap is not enabled (e.g. thin letterbox) we just set the value
+                    // of the education being seen.
+                    if (taskInfo.appCompatTaskInfo.isLetterboxDoubleTapEnabled) {
+                        mIsFirstReachabilityEducationRunning = true;
+                        createOrUpdateReachabilityEduLayout(taskInfo, taskListener);
+                        return;
+                    }
+                }
+            }
+        }
         createOrUpdateCompatLayout(taskInfo, taskListener);
-        createOrUpdateLetterboxEduLayout(taskInfo, taskListener);
         createOrUpdateRestartDialogLayout(taskInfo, taskListener);
         if (mCompatUIConfiguration.getHasSeenLetterboxEducation(taskInfo.userId)) {
-            createOrUpdateReachabilityEduLayout(taskInfo, taskListener);
+            if (taskInfo.appCompatTaskInfo.isLetterboxDoubleTapEnabled) {
+                createOrUpdateReachabilityEduLayout(taskInfo, taskListener);
+            }
             // The user aspect ratio button should not be handled when a new TaskInfo is
             // sent because of a double tap or when in multi-window mode.
             if (taskInfo.getWindowingMode() != WINDOWING_MODE_FULLSCREEN) {
@@ -589,6 +633,7 @@ public class CompatUIController implements OnDisplaysChangedListener,
     private void onInitialReachabilityEduDismissed(@NonNull TaskInfo taskInfo,
             @NonNull ShellTaskOrganizer.TaskListener taskListener) {
         // We need to update the UI otherwise it will not be shown until the user relaunches the app
+        mIsFirstReachabilityEducationRunning = false;
         createOrUpdateUserAspectRatioSettingsLayout(taskInfo, taskListener);
     }
 

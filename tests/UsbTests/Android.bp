@@ -37,6 +37,8 @@ android_test {
         "services.usb",
         "truth",
         "UsbManagerTestLib",
+        "android.hardware.usb.flags-aconfig-java",
+        "flag-junit",
     ],
     jni_libs: [
         // Required for ExtendedMockito

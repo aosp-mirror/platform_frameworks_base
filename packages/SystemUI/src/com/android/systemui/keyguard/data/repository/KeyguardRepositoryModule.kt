@@ -76,4 +76,9 @@ interface KeyguardRepositoryModule {
     @Binds fun trustRepository(impl: TrustRepositoryImpl): TrustRepository
 
     @Binds fun keyguardClockRepository(impl: KeyguardClockRepositoryImpl): KeyguardClockRepository
+
+    @Binds
+    fun keyguardSmartspaceRepository(
+        impl: KeyguardSmartspaceRepositoryImpl
+    ): KeyguardSmartspaceRepository
 }

@@ -40,12 +40,13 @@ android_test {
         "platform-test-annotations",
         "truth",
         "testables",
+        "flag-junit",
     ],
 
     libs: [
-        "android.test.base",
-        "android.test.mock",
-        "android.test.runner",
+        "android.test.base.stubs.system",
+        "android.test.mock.stubs.system",
+        "android.test.runner.stubs.system",
     ],
 
     // These are not normally accessible from apps so they must be explicitly included.

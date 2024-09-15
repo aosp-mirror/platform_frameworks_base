@@ -17,8 +17,8 @@
 package com.android.systemui.statusbar.connectivity
 
 import android.os.UserManager
-import android.test.suitebuilder.annotation.SmallTest
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.filters.SmallTest
 import android.testing.TestableLooper.RunWithLooper
 import androidx.lifecycle.Lifecycle
 import com.android.systemui.SysuiTestCase
@@ -42,7 +42,7 @@ import org.mockito.MockitoAnnotations
 import java.util.concurrent.Executor
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @RunWithLooper(setAsMainLooper = true)
 class AccessPointControllerImplTest : SysuiTestCase() {
 

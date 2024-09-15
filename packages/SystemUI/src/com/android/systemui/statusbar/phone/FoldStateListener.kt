@@ -16,6 +16,7 @@
 package com.android.systemui.statusbar.phone
 
 import android.content.Context
+import android.hardware.devicestate.DeviceState
 import android.hardware.devicestate.DeviceStateManager.DeviceStateCallback
 import com.android.internal.R
 
@@ -45,13 +46,13 @@ internal class FoldStateListener(
 
     private var wasFolded: Boolean? = null
 
-    override fun onStateChanged(state: Int) {
-        val isFolded = foldedDeviceStates.contains(state)
+    override fun onDeviceStateChanged(state: DeviceState) {
+        val isFolded = foldedDeviceStates.contains(state.identifier)
         if (wasFolded == isFolded) {
             return
         }
         wasFolded = isFolded
-        val willGoToSleep = goToSleepDeviceStates.contains(state)
+        val willGoToSleep = goToSleepDeviceStates.contains(state.identifier)
         listener.onFoldStateChanged(isFolded, willGoToSleep)
     }
 }

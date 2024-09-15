@@ -16,6 +16,9 @@
 
 package android.view;
 
+import static com.android.text.flags.Flags.handwritingCursorPosition;
+import static com.android.text.flags.Flags.handwritingUnsupportedMessage;
+
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -32,7 +35,9 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.Editor;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.lang.ref.WeakReference;
@@ -221,24 +226,46 @@ public class HandwritingInitiator {
                     View candidateView = findBestCandidateView(mState.mStylusDownX,
                             mState.mStylusDownY, /* isHover */ false);
                     if (candidateView != null && candidateView.isEnabled()) {
-                        if (candidateView == getConnectedOrFocusedView()) {
-                            if (!mInitiateWithoutConnection && !candidateView.hasFocus()) {
+                        boolean candidateHasFocus = candidateView.hasFocus();
+                        if (!candidateView.isStylusHandwritingAvailable()) {
+                            mState.mShouldInitHandwriting = false;
+                            return false;
+                        } else if (shouldShowHandwritingUnavailableMessageForView(candidateView)) {
+                            int messagesResId = (candidateView instanceof TextView tv
+                                    && tv.isAnyPasswordInputType())
+                                    ? R.string.error_handwriting_unsupported_password
+                                    : R.string.error_handwriting_unsupported;
+                            Toast.makeText(candidateView.getContext(), messagesResId,
+                                    Toast.LENGTH_SHORT).show();
+                            if (!candidateView.hasFocus()) {
+                                requestFocusWithoutReveal(candidateView);
+                            }
+                            mImm.showSoftInput(candidateView, 0);
+                            mState.mHandled = true;
+                            mState.mShouldInitHandwriting = false;
+                            motionEvent.setAction((motionEvent.getAction()
+                                    & MotionEvent.ACTION_POINTER_INDEX_MASK)
+                                    | MotionEvent.ACTION_CANCEL);
+                            candidateView.getRootView().dispatchTouchEvent(motionEvent);
+                        } else if (candidateView == getConnectedOrFocusedView()) {
+                            if (!candidateHasFocus) {
                                 requestFocusWithoutReveal(candidateView);
                             }
                             startHandwriting(candidateView);
                         } else if (candidateView.getHandwritingDelegatorCallback() != null) {
                             prepareDelegation(candidateView);
                         } else {
-                            if (!mInitiateWithoutConnection) {
+                            if (mInitiateWithoutConnection) {
+                                if (!candidateHasFocus) {
+                                    // schedule for view focus.
+                                    mState.mPendingFocusedView = new WeakReference<>(candidateView);
+                                    requestFocusWithoutReveal(candidateView);
+                                }
+                            } else {
                                 mState.mPendingConnectedView = new WeakReference<>(candidateView);
-                            }
-                            if (!candidateView.hasFocus()) {
-                                requestFocusWithoutReveal(candidateView);
-                            }
-                            if (mInitiateWithoutConnection
-                                    && updateFocusedView(candidateView,
-                                            /* fromTouchEvent */ true)) {
-                                startHandwriting(candidateView);
+                                if (!candidateHasFocus) {
+                                    requestFocusWithoutReveal(candidateView);
+                                }
                             }
                         }
                     }
@@ -264,6 +291,9 @@ public class HandwritingInitiator {
      * gained focus.
      */
     public void onDelegateViewFocused(@NonNull View view) {
+        if (mInitiateWithoutConnection) {
+            onEditorFocused(view);
+        }
         if (view == getConnectedView()) {
             tryAcceptStylusHandwritingDelegation(view);
         }
@@ -307,6 +337,33 @@ public class HandwritingInitiator {
                     && mState.mPendingConnectedView.get() == view) {
                 startHandwriting(view);
             }
+        }
+    }
+
+    /**
+     * Notify HandwritingInitiator that a new editor is focused.
+     * @param view the view that received focus.
+     */
+    @VisibleForTesting
+    public void onEditorFocused(@NonNull View view) {
+        if (!mInitiateWithoutConnection) {
+            return;
+        }
+
+        if (!view.isAutoHandwritingEnabled()) {
+            clearFocusedView(view);
+            return;
+        }
+
+        final View focusedView = getFocusedView();
+        if (focusedView == view) {
+            return;
+        }
+        updateFocusedView(view);
+
+        if (mState != null && mState.mPendingFocusedView != null
+                && mState.mPendingFocusedView.get() == view) {
+            startHandwriting(view);
         }
     }
 
@@ -357,7 +414,7 @@ public class HandwritingInitiator {
      * @return {@code true} if handwriting can initiate for given view.
      */
     @VisibleForTesting
-    public boolean updateFocusedView(@NonNull View view, boolean fromTouchEvent) {
+    public boolean updateFocusedView(@NonNull View view) {
         if (!view.shouldInitiateHandwriting()) {
             mFocusedView = null;
             return false;
@@ -369,9 +426,7 @@ public class HandwritingInitiator {
             // A new view just gain focus. By default, we should show hover icon for it.
             mShowHoverIconForConnectedView = true;
         }
-        if (!fromTouchEvent && view.isHandwritingDelegate()) {
-            tryAcceptStylusHandwritingDelegation(view);
-        }
+
         return true;
     }
 
@@ -441,9 +496,10 @@ public class HandwritingInitiator {
         if (delegatorPackageName == null) {
             delegatorPackageName = view.getContext().getOpPackageName();
         }
+        WeakReference<View> viewRef = new WeakReference<>(view);
         Consumer<Boolean> consumer = delegationAccepted -> {
             if (delegationAccepted) {
-                onDelegationAccepted(view);
+                onDelegationAccepted(viewRef.get());
             }
         };
         mImm.acceptStylusHandwritingDelegation(view, delegatorPackageName, view::post, consumer);
@@ -453,6 +509,10 @@ public class HandwritingInitiator {
         if (mState != null) {
             mState.mHandled = true;
             mState.mShouldInitHandwriting = false;
+        }
+        if (view == null) {
+            // can be null if view was detached and was GCed.
+            return;
         }
         if (view instanceof TextView) {
             ((TextView) view).hideHint();
@@ -482,6 +542,15 @@ public class HandwritingInitiator {
         return view.isStylusHandwritingAvailable();
     }
 
+    private static boolean shouldShowHandwritingUnavailableMessageForView(@NonNull View view) {
+        return (view instanceof TextView) && !shouldTriggerStylusHandwritingForView(view);
+    }
+
+    private static boolean shouldTriggerHandwritingOrShowUnavailableMessageForView(
+            @NonNull View view) {
+        return (view instanceof TextView) || shouldTriggerStylusHandwritingForView(view);
+    }
+
     /**
      * Returns the pointer icon for the motion event, or null if it doesn't specify the icon.
      * This gives HandwritingInitiator a chance to show the stylus handwriting icon over a
@@ -489,7 +558,7 @@ public class HandwritingInitiator {
      */
     public PointerIcon onResolvePointerIcon(Context context, MotionEvent event) {
         final View hoverView = findHoverView(event);
-        if (hoverView == null) {
+        if (hoverView == null || !shouldTriggerStylusHandwritingForView(hoverView)) {
             return null;
         }
 
@@ -547,7 +616,9 @@ public class HandwritingInitiator {
             final View candidateView = findBestCandidateView(hoverX, hoverY, /* isHover */ true);
 
             if (candidateView != null) {
-                mCachedHoverTarget = new WeakReference<>(candidateView);
+                if (!handwritingUnsupportedMessage()) {
+                    mCachedHoverTarget = new WeakReference<>(candidateView);
+                }
                 return candidateView;
             }
         }
@@ -557,7 +628,8 @@ public class HandwritingInitiator {
     }
 
     private void requestFocusWithoutReveal(View view) {
-        if (view instanceof EditText editText && !mState.mStylusDownWithinEditorBounds) {
+        if (!handwritingCursorPosition() && view instanceof EditText editText
+                && !mState.mStylusDownWithinEditorBounds) {
             // If the stylus down point was inside the EditText's bounds, then the EditText will
             // automatically set its cursor position nearest to the stylus down point when it
             // gains focus. If the stylus down point was outside the EditText's bounds (within
@@ -576,11 +648,22 @@ public class HandwritingInitiator {
         } else {
             view.requestFocus();
         }
+        if (handwritingCursorPosition() && view instanceof EditText editText) {
+            // Move the cursor to the end of the paragraph closest to the stylus down point.
+            view.getLocationInWindow(mTempLocation);
+            int line = editText.getLineAtCoordinate(mState.mStylusDownY - mTempLocation[1]);
+            int paragraphEnd = TextUtils.indexOf(editText.getText(), '\n',
+                    editText.getLayout().getLineStart(line));
+            if (paragraphEnd < 0) {
+                paragraphEnd = editText.getText().length();
+            }
+            editText.setSelection(paragraphEnd);
+        }
     }
 
     /**
      * Given the location of the stylus event, return the best candidate view to initialize
-     * handwriting mode.
+     * handwriting mode or show the handwriting unavailable error message.
      *
      * @param x the x coordinates of the stylus event, in the coordinates of the window.
      * @param y the y coordinates of the stylus event, in the coordinates of the window.
@@ -596,7 +679,8 @@ public class HandwritingInitiator {
             Rect handwritingArea = mTempRect;
             if (getViewHandwritingArea(connectedOrFocusedView, handwritingArea)
                     && isInHandwritingArea(handwritingArea, x, y, connectedOrFocusedView, isHover)
-                    && shouldTriggerStylusHandwritingForView(connectedOrFocusedView)) {
+                    && shouldTriggerHandwritingOrShowUnavailableMessageForView(
+                            connectedOrFocusedView)) {
                 if (!isHover && mState != null) {
                     mState.mStylusDownWithinEditorBounds =
                             contains(handwritingArea, x, y, 0f, 0f, 0f, 0f);
@@ -614,7 +698,7 @@ public class HandwritingInitiator {
             final View view = viewInfo.getView();
             final Rect handwritingArea = viewInfo.getHandwritingArea();
             if (!isInHandwritingArea(handwritingArea, x, y, view, isHover)
-                    || !shouldTriggerStylusHandwritingForView(view)) {
+                    || !shouldTriggerHandwritingOrShowUnavailableMessageForView(view)) {
                 continue;
             }
 
@@ -818,6 +902,12 @@ public class HandwritingInitiator {
          */
         private WeakReference<View> mPendingConnectedView = null;
 
+        /**
+         * A view which has requested focus and is yet to receive it.
+         * When view receives focus, a handwriting session should be started for the view.
+         */
+        private WeakReference<View> mPendingFocusedView = null;
+
         /** The pointer id of the stylus pointer that is being tracked. */
         private final int mStylusPointerId;
         /** The time stamp when the stylus pointer goes down. */
@@ -842,7 +932,7 @@ public class HandwritingInitiator {
     /** The helper method to check if the given view is still active for handwriting. */
     private static boolean isViewActive(@Nullable View view) {
         return view != null && view.isAttachedToWindow() && view.isAggregatedVisible()
-                && view.shouldInitiateHandwriting();
+                && view.shouldTrackHandwritingArea();
     }
 
     private CursorAnchorInfo getCursorAnchorInfoForConnectionless(View view) {

@@ -67,8 +67,8 @@
                     android:layout_width="@dimen/volume_ringer_drawer_icon_size"
                     android:layout_height="@dimen/volume_ringer_drawer_icon_size"
                     android:layout_gravity="center"
-                    android:tint="?android:attr/textColorPrimary"
-                    android:src="@drawable/ic_volume_ringer_vibrate" />
+                    android:src="@drawable/ic_volume_ringer_vibrate"
+                    android:tint="?android:attr/textColorPrimary" />
 
             </FrameLayout>
 
@@ -76,6 +76,7 @@
                 android:id="@+id/volume_drawer_mute"
                 android:layout_width="@dimen/volume_ringer_drawer_item_size"
                 android:layout_height="@dimen/volume_ringer_drawer_item_size"
+                android:accessibilityTraversalAfter="@id/volume_drawer_vibrate"
                 android:contentDescription="@string/volume_ringer_hint_mute"
                 android:gravity="center">
 
@@ -84,8 +85,8 @@
                     android:layout_width="@dimen/volume_ringer_drawer_icon_size"
                     android:layout_height="@dimen/volume_ringer_drawer_icon_size"
                     android:layout_gravity="center"
-                    android:tint="?android:attr/textColorPrimary"
-                    android:src="@drawable/ic_speaker_mute" />
+                    android:src="@drawable/ic_speaker_mute"
+                    android:tint="?android:attr/textColorPrimary" />
 
             </FrameLayout>
 
@@ -93,6 +94,7 @@
                 android:id="@+id/volume_drawer_normal"
                 android:layout_width="@dimen/volume_ringer_drawer_item_size"
                 android:layout_height="@dimen/volume_ringer_drawer_item_size"
+                android:accessibilityTraversalAfter="@id/volume_drawer_mute"
                 android:contentDescription="@string/volume_ringer_hint_unmute"
                 android:gravity="center">
 
@@ -101,8 +103,8 @@
                     android:layout_width="@dimen/volume_ringer_drawer_icon_size"
                     android:layout_height="@dimen/volume_ringer_drawer_icon_size"
                     android:layout_gravity="center"
-                    android:tint="?android:attr/textColorPrimary"
-                    android:src="@drawable/ic_speaker_on" />
+                    android:src="@drawable/ic_speaker_on"
+                    android:tint="?android:attr/textColorPrimary" />
 
             </FrameLayout>
 

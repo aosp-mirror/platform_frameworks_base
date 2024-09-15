@@ -15,92 +15,110 @@
 -->
 
 
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
-    <LinearLayout
-        android:id="@+id/content"
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+    />
+
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp">
 
-        <Spinner
-            android:id="@+id/spinnerBehavior"
+        <LinearLayout
+            android:id="@+id/content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="20dp" />
+            android:orientation="vertical">
 
-        <ToggleButton
-            android:id="@+id/toggleButtonStatus"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:checked="true"
-            android:text="Status Bars Toggle Button"
-            android:textOff="Status Bars Invisible"
-            android:textOn="Status Bars Visible" />
+            <Spinner
+                android:id="@+id/spinnerBehavior"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="20dp" />
 
-        <SeekBar
-            android:id="@+id/seekBarStatus"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="20dp"
-            android:max="10000"
-            android:progress="10000" />
+            <ToggleButton
+                android:id="@+id/toggleButtonStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="@string/status_bars_toggle_button"
+                android:textOff="@string/status_bars_invisible"
+                android:textOn="@string/status_bars_visible" />
 
-        <ToggleButton
-            android:id="@+id/toggleButtonNavigation"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:checked="true"
-            android:text="Navigation Bars Toggle Button"
-            android:textOff="Navigation Bars Invisible"
-            android:textOn="Navigation Bars Visible" />
+            <SeekBar
+                android:id="@+id/seekBarStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="20dp"
+                android:max="10000"
+                android:progress="10000" />
 
-        <SeekBar
-            android:id="@+id/seekBarNavigation"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="20dp"
-            android:max="10000"
-            android:progress="10000" />
+            <ToggleButton
+                android:id="@+id/toggleButtonNavigation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="@string/navigation_bars_toggle_button"
+                android:textOff="@string/navigation_bars_invisible"
+                android:textOn="@string/navigation_bars_visible" />
 
-        <ToggleButton
-            android:id="@+id/toggleButtonIme"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:checked="true"
-            android:text="IME Toggle Button"
-            android:textOff="IME Invisible"
-            android:textOn="IME Visible" />
+            <SeekBar
+                android:id="@+id/seekBarNavigation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="20dp"
+                android:max="10000"
+                android:progress="10000" />
 
-        <SeekBar
-            android:id="@+id/seekBarIme"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="20dp"
-            android:max="10000"
-            android:progress="0" />
+            <ToggleButton
+                android:id="@+id/toggleButtonIme"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="@string/ime_toggle_button"
+                android:textOff="@string/ime_invisible"
+                android:textOn="@string/ime_visible" />
 
-        <TextView
-            android:id="@+id/textViewControllableInsets"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="5dp" />
+            <SeekBar
+                android:id="@+id/seekBarIme"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="20dp"
+                android:max="10000"
+                android:progress="0" />
 
-        <EditText
-            android:id="@+id/editText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ems="10"
-            android:hint="For testing IME..."
-            android:inputType="text"
-            android:text="" />
+            <TextView
+                android:id="@+id/textViewControllableInsets"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp" />
 
-    </LinearLayout>
+            <EditText
+                android:id="@+id/editText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:autofillHints="@string/for_testing_ime"
+                android:hint="@string/for_testing_ime"
+                android:inputType="text"
+                android:text="" />
 
-</ScrollView>
+        </LinearLayout>
+
+    </ScrollView>
+
+</LinearLayout>

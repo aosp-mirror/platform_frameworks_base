@@ -39,10 +39,10 @@ import static java.util.Objects.requireNonNull;
 import android.database.ContentObserver;
 import android.os.Handler;
 import android.os.RemoteException;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import androidx.annotation.NonNull;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.statusbar.IStatusBarService;
@@ -64,10 +64,12 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.OnBefo
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
+import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider;
 import com.android.systemui.statusbar.notification.collection.provider.SectionStyleProvider;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.notification.collection.render.NotifViewBarn;
 import com.android.systemui.statusbar.notification.row.NotifInflationErrorManager;
+import com.android.systemui.statusbar.policy.SensitiveNotificationProtectionController;
 import com.android.systemui.util.settings.SecureSettings;
 
 import org.junit.Before;
@@ -86,7 +88,7 @@ import java.util.List;
 import java.util.Map;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper
 public class PreparationCoordinatorTest extends SysuiTestCase {
     private NotifCollectionListener mCollectionListener;
@@ -107,10 +109,13 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
     @Mock private IStatusBarService mService;
     @Mock private BindEventManagerImpl mBindEventManagerImpl;
     @Mock private NotificationLockscreenUserManager mLockscreenUserManager;
+    @Mock private SensitiveNotificationProtectionController mSensitiveNotifProtectionController;
     @Mock private Handler mHandler;
     @Mock private SecureSettings mSecureSettings;
     @Spy private FakeNotifInflater mNotifInflater = new FakeNotifInflater();
-    private final SectionStyleProvider mSectionStyleProvider = new SectionStyleProvider();
+    @Mock
+    HighPriorityProvider mHighPriorityProvider;
+    private SectionStyleProvider mSectionStyleProvider;
     @Mock private UserTracker mUserTracker;
     @Mock private GroupMembershipManager mGroupMembershipManager;
 
@@ -124,10 +129,12 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        mSectionStyleProvider = new SectionStyleProvider(mHighPriorityProvider);
         mAdjustmentProvider = new NotifUiAdjustmentProvider(
                 mHandler,
                 mSecureSettings,
                 mLockscreenUserManager,
+                mSensitiveNotifProtectionController,
                 mSectionStyleProvider,
                 mUserTracker,
                 mGroupMembershipManager
@@ -248,7 +255,7 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
         mCollectionListener.onEntryInit(mEntry);
         mBeforeFilterListener.onBeforeFinalizeFilter(List.of(mEntry));
         verify(mNotifInflater).inflateViews(eq(mEntry), mParamsCaptor.capture(), any());
-        assertFalse(mParamsCaptor.getValue().isLowPriority());
+        assertFalse(mParamsCaptor.getValue().isMinimized());
         mNotifInflater.invokeInflateCallbackForEntry(mEntry);
 
         // WHEN notification moves to a min priority section
@@ -257,7 +264,7 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
 
         // THEN we rebind it
         verify(mNotifInflater).rebindViews(eq(mEntry), mParamsCaptor.capture(), any());
-        assertTrue(mParamsCaptor.getValue().isLowPriority());
+        assertTrue(mParamsCaptor.getValue().isMinimized());
 
         // THEN we do not filter it because it's not the first inflation.
         assertFalse(mUninflatedFilter.shouldFilterOut(mEntry, 0));
@@ -270,7 +277,7 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
         mCollectionListener.onEntryInit(mEntry);
         mBeforeFilterListener.onBeforeFinalizeFilter(List.of(mEntry));
         verify(mNotifInflater).inflateViews(eq(mEntry), mParamsCaptor.capture(), any());
-        assertTrue(mParamsCaptor.getValue().isLowPriority());
+        assertTrue(mParamsCaptor.getValue().isMinimized());
         mNotifInflater.invokeInflateCallbackForEntry(mEntry);
 
         // WHEN notification is moved under a parent
@@ -279,7 +286,7 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
 
         // THEN we rebind it as not-minimized
         verify(mNotifInflater).rebindViews(eq(mEntry), mParamsCaptor.capture(), any());
-        assertFalse(mParamsCaptor.getValue().isLowPriority());
+        assertFalse(mParamsCaptor.getValue().isMinimized());
 
         // THEN we do not filter it because it's not the first inflation.
         assertFalse(mUninflatedFilter.shouldFilterOut(mEntry, 0));
@@ -313,7 +320,7 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
                 .thenReturn(1);
         ArgumentCaptor<ContentObserver> contentObserverCaptor = ArgumentCaptor.forClass(
                 ContentObserver.class);
-        verify(mSecureSettings).registerContentObserverForUser(eq(SHOW_NOTIFICATION_SNOOZE),
+        verify(mSecureSettings).registerContentObserverForUserSync(eq(SHOW_NOTIFICATION_SNOOZE),
                 contentObserverCaptor.capture(), anyInt());
         ContentObserver contentObserver = contentObserverCaptor.getValue();
         contentObserver.onChange(false);

@@ -20,6 +20,8 @@ import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.content.Context
 import android.content.res.ColorStateList
+import android.graphics.Color
+import android.graphics.drawable.RippleDrawable
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
@@ -29,6 +31,7 @@ import android.widget.ProgressBar
 import androidx.core.animation.doOnEnd
 import androidx.core.animation.doOnStart
 import androidx.core.content.ContextCompat
+import com.android.window.flags.Flags
 import com.android.wm.shell.R
 
 private const val OPEN_MAXIMIZE_MENU_DELAY_ON_HOVER_MS = 350
@@ -85,22 +88,51 @@ class MaximizeButtonView(
     }
 
     fun cancelHoverAnimation() {
-        hoverProgressAnimatorSet.removeAllListeners()
+        hoverProgressAnimatorSet.childAnimations.forEach { it.removeAllListeners() }
         hoverProgressAnimatorSet.cancel()
         progressBar.visibility = View.INVISIBLE
     }
 
-    fun setAnimationTints(darkMode: Boolean) {
-        if (darkMode) {
-            progressBar.progressTintList = ColorStateList.valueOf(
-                    resources.getColor(R.color.desktop_mode_maximize_menu_progress_dark))
-            maximizeWindow.background?.setTintList(ContextCompat.getColorStateList(context,
-                    R.color.desktop_mode_caption_button_color_selector_dark))
+    /**
+     * Set the color tints of the maximize button views.
+     *
+     * @param darkMode whether the app's theme is in dark mode.
+     * @param iconForegroundColor the color tint to use for the maximize icon to match the rest of
+     *   the App Header icons
+     * @param baseForegroundColor the base foreground color tint used by the App Header, used to style
+     *   views within this button using the same base color but with different opacities.
+     */
+    fun setAnimationTints(
+        darkMode: Boolean,
+        iconForegroundColor: ColorStateList? = null,
+        baseForegroundColor: Int? = null,
+        rippleDrawable: RippleDrawable? = null
+    ) {
+        if (Flags.enableThemedAppHeaders()) {
+            requireNotNull(iconForegroundColor) { "Icon foreground color must be non-null" }
+            requireNotNull(baseForegroundColor) { "Base foreground color must be non-null" }
+            requireNotNull(rippleDrawable) { "Ripple drawable must be non-null" }
+            maximizeWindow.imageTintList = iconForegroundColor
+            maximizeWindow.background = rippleDrawable
+            progressBar.progressTintList = ColorStateList.valueOf(baseForegroundColor)
+                .withAlpha(OPACITY_15)
+            progressBar.progressBackgroundTintList = ColorStateList.valueOf(Color.TRANSPARENT)
         } else {
-            progressBar.progressTintList = ColorStateList.valueOf(
+            if (darkMode) {
+                progressBar.progressTintList = ColorStateList.valueOf(
+                    resources.getColor(R.color.desktop_mode_maximize_menu_progress_dark))
+                maximizeWindow.background?.setTintList(ContextCompat.getColorStateList(context,
+                    R.color.desktop_mode_caption_button_color_selector_dark))
+            } else {
+                progressBar.progressTintList = ColorStateList.valueOf(
                     resources.getColor(R.color.desktop_mode_maximize_menu_progress_light))
-            maximizeWindow.background?.setTintList(ContextCompat.getColorStateList(context,
+                maximizeWindow.background?.setTintList(ContextCompat.getColorStateList(context,
                     R.color.desktop_mode_caption_button_color_selector_light))
+            }
         }
+    }
+
+    companion object {
+        private const val OPACITY_15 = 38
     }
 }

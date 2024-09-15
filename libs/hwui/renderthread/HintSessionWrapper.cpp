@@ -20,6 +20,7 @@
 #include <private/performance_hint_private.h>
 #include <utils/Log.h>
 
+#include <algorithm>
 #include <chrono>
 #include <vector>
 
@@ -44,11 +45,12 @@ void HintSessionWrapper::HintSessionBinding::init() {
     LOG_ALWAYS_FATAL_IF(handle_ == nullptr, "Failed to dlopen libandroid.so!");
 
     BIND_APH_METHOD(getManager);
-    BIND_APH_METHOD(createSession);
+    BIND_APH_METHOD(createSessionInternal);
     BIND_APH_METHOD(closeSession);
     BIND_APH_METHOD(updateTargetWorkDuration);
     BIND_APH_METHOD(reportActualWorkDuration);
     BIND_APH_METHOD(sendHint);
+    BIND_APH_METHOD(setThreads);
 
     mInitialized = true;
 }
@@ -66,6 +68,10 @@ void HintSessionWrapper::destroy() {
     if (mHintSessionFuture.has_value()) {
         mHintSession = mHintSessionFuture->get();
         mHintSessionFuture = std::nullopt;
+    }
+    if (mSetThreadsFuture.has_value()) {
+        mSetThreadsFuture->wait();
+        mSetThreadsFuture = std::nullopt;
     }
     if (mHintSession) {
         mBinding->closeSession(mHintSession);
@@ -106,17 +112,18 @@ bool HintSessionWrapper::init() {
     APerformanceHintManager* manager = mBinding->getManager();
     if (!manager) return false;
 
-    std::vector<pid_t> tids = CommonPool::getThreadIds();
-    tids.push_back(mUiThreadId);
-    tids.push_back(mRenderThreadId);
+    mPermanentSessionTids = CommonPool::getThreadIds();
+    mPermanentSessionTids.push_back(mUiThreadId);
+    mPermanentSessionTids.push_back(mRenderThreadId);
 
     // Use the cached target value if there is one, otherwise use a default. This is to ensure
     // the cached target and target in PowerHAL are consistent, and that it updates correctly
     // whenever there is a change.
     int64_t targetDurationNanos =
             mLastTargetWorkDuration == 0 ? kDefaultTargetDuration : mLastTargetWorkDuration;
-    mHintSessionFuture = CommonPool::async([=, this, tids = std::move(tids)] {
-        return mBinding->createSession(manager, tids.data(), tids.size(), targetDurationNanos);
+    mHintSessionFuture = CommonPool::async([=, this, tids = mPermanentSessionTids] {
+        return mBinding->createSessionInternal(manager, tids.data(), tids.size(),
+                                               targetDurationNanos, SessionTag::HWUI);
     });
     return false;
 }
@@ -141,6 +148,23 @@ void HintSessionWrapper::reportActualWorkDuration(long actualDurationNanos) {
         mBinding->reportActualWorkDuration(mHintSession, actualDurationNanos);
     }
     mLastFrameNotification = systemTime();
+}
+
+void HintSessionWrapper::setActiveFunctorThreads(std::vector<pid_t> threadIds) {
+    if (!init()) return;
+    if (!mBinding || !mHintSession) return;
+    // Sort the vector to make sure they're compared as sets.
+    std::sort(threadIds.begin(), threadIds.end());
+    if (threadIds == mActiveFunctorTids) return;
+    mActiveFunctorTids = std::move(threadIds);
+    std::vector<pid_t> combinedTids = mPermanentSessionTids;
+    std::copy(mActiveFunctorTids.begin(), mActiveFunctorTids.end(),
+              std::back_inserter(combinedTids));
+    mSetThreadsFuture = CommonPool::async([this, tids = std::move(combinedTids)] {
+        int ret = mBinding->setThreads(mHintSession, tids.data(), tids.size());
+        ALOGE_IF(ret != 0, "APerformaceHint_setThreads failed: %d", ret);
+        return ret;
+    });
 }
 
 void HintSessionWrapper::sendLoadResetHint() {

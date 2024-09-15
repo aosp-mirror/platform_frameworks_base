@@ -29,9 +29,11 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
+import android.util.ExceptionUtils;
 import android.view.WindowManager;
 import android.window.ImeOnBackInvokedDispatcher;
 
+import com.android.internal.infra.AndroidFuture;
 import com.android.internal.inputmethod.DirectBootAwareness;
 import com.android.internal.inputmethod.IBooleanListener;
 import com.android.internal.inputmethod.IConnectionlessHandwritingCallback;
@@ -40,6 +42,7 @@ import com.android.internal.inputmethod.IInputMethodClient;
 import com.android.internal.inputmethod.IRemoteAccessibilityInputConnection;
 import com.android.internal.inputmethod.IRemoteInputConnection;
 import com.android.internal.inputmethod.InputBindResult;
+import com.android.internal.inputmethod.InputMethodInfoSafeList;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.internal.inputmethod.StartInputFlags;
 import com.android.internal.inputmethod.StartInputReason;
@@ -47,6 +50,7 @@ import com.android.internal.view.IInputMethodManager;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 /**
@@ -61,6 +65,10 @@ import java.util.function.Consumer;
  * a wrapper method in {@link InputMethodManagerGlobal} instead of making this class public.</p>
  */
 final class IInputMethodManagerGlobalInvoker {
+
+    /** The threshold in milliseconds for an {@link AndroidFuture} completion signal. */
+    private static final long TIMEOUT_MS = 10_000;
+
     @Nullable
     private static volatile IInputMethodManager sServiceCache = null;
 
@@ -242,7 +250,12 @@ final class IInputMethodManagerGlobalInvoker {
             return new ArrayList<>();
         }
         try {
-            return service.getInputMethodList(userId, directBootAwareness);
+            if (Flags.useInputMethodInfoSafeList()) {
+                return InputMethodInfoSafeList.extractFrom(
+                        service.getInputMethodList(userId, directBootAwareness));
+            } else {
+                return service.getInputMethodListLegacy(userId, directBootAwareness);
+            }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -257,7 +270,12 @@ final class IInputMethodManagerGlobalInvoker {
             return new ArrayList<>();
         }
         try {
-            return service.getEnabledInputMethodList(userId);
+            if (Flags.useInputMethodInfoSafeList()) {
+                return InputMethodInfoSafeList.extractFrom(
+                        service.getEnabledInputMethodList(userId));
+            } else {
+                return service.getEnabledInputMethodListLegacy(userId);
+            }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -754,6 +772,19 @@ final class IInputMethodManagerGlobalInvoker {
         }
     }
 
+    /** @see com.android.server.inputmethod.ImeTrackerService#onDispatched */
+    static void onDispatched(@NonNull ImeTracker.Token statsToken) {
+        final IImeTracker service = getImeTrackerService();
+        if (service == null) {
+            return;
+        }
+        try {
+            service.onDispatched(statsToken);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     /** @see com.android.server.inputmethod.ImeTrackerService#hasPendingImeVisibilityRequests */
     @AnyThread
     @RequiresPermission(Manifest.permission.TEST_INPUT_METHOD)
@@ -766,6 +797,24 @@ final class IInputMethodManagerGlobalInvoker {
             return service.hasPendingImeVisibilityRequests();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @AnyThread
+    @RequiresPermission(Manifest.permission.TEST_INPUT_METHOD)
+    static void finishTrackingPendingImeVisibilityRequests() {
+        final var service = getImeTrackerService();
+        if (service == null) {
+            return;
+        }
+        try {
+            final var completionSignal = new AndroidFuture<Void>();
+            service.finishTrackingPendingImeVisibilityRequests(completionSignal);
+            completionSignal.get(TIMEOUT_MS, TimeUnit.MILLISECONDS);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        } catch (Exception e) {
+            throw ExceptionUtils.propagate(e);
         }
     }
 

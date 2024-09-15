@@ -228,6 +228,7 @@ class TogglePermissionAppInfoPageTest {
         const val PACKAGE_NAME = "package.name"
         val APP = ApplicationInfo().apply {
             packageName = PACKAGE_NAME
+            uid = 11000
         }
         val PACKAGE_INFO = PackageInfo().apply {
             packageName = PACKAGE_NAME

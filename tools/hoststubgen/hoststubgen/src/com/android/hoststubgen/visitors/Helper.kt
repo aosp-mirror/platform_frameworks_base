@@ -17,12 +17,19 @@ package com.android.hoststubgen.visitors
 
 import com.android.hoststubgen.HostStubGenErrors
 import com.android.hoststubgen.asm.ClassNodes
+import com.android.hoststubgen.asm.clearVisibility
 import com.android.hoststubgen.asm.getVisibility
 import com.android.hoststubgen.asm.isStatic
 
+const val NOT_COMPATIBLE: Int = -1
+
 /**
  * Make sure substitution from and to methods have matching definition.
- * (static-ness, visibility.)
+ * (static-ness, etc)
+ *
+ * If the methods are compatible, return the "merged" [access] of the new method.
+ *
+ * If they are not compatible, returns [NOT_COMPATIBLE]
  */
 fun checkSubstitutionMethodCompatibility(
     classes: ClassNodes,
@@ -31,33 +38,31 @@ fun checkSubstitutionMethodCompatibility(
     toMethodName: String, // the one with either a "_host" or "$ravenwood" prefix. (typically)
     descriptor: String,
     errors: HostStubGenErrors,
-): Boolean {
+): Int {
     val from = classes.findMethod(className, fromMethodName, descriptor)
     if (from == null) {
         errors.onErrorFound(
-            "Substitution-from method not found: $className.$fromMethodName$descriptor")
-        return false
+            "Substitution-from method not found: $className.$fromMethodName$descriptor"
+        )
+        return NOT_COMPATIBLE
     }
     val to = classes.findMethod(className, toMethodName, descriptor)
     if (to == null) {
         // This shouldn't happen, because the visitor visited this method...
         errors.onErrorFound(
-            "Substitution-to method not found: $className.$toMethodName$descriptor")
-        return false
+            "Substitution-to method not found: $className.$toMethodName$descriptor"
+        )
+        return NOT_COMPATIBLE
     }
 
     if (from.isStatic() != to.isStatic()) {
         errors.onErrorFound(
             "Substitution method must have matching static-ness: " +
-                    "$className.$fromMethodName$descriptor")
-        return false
-    }
-    if (from.getVisibility().ordinal > to.getVisibility().ordinal) {
-        errors.onErrorFound(
-            "Substitution method cannot have smaller visibility than original: " +
-                    "$className.$fromMethodName$descriptor")
-        return false
+                    "$className.$fromMethodName$descriptor"
+        )
+        return NOT_COMPATIBLE
     }
 
-    return true
+    // Return the substitution's access flag but with the original method's visibility.
+    return clearVisibility (to.access) or getVisibility(from.access)
 }

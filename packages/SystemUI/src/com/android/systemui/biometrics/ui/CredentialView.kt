@@ -1,6 +1,7 @@
 package com.android.systemui.biometrics.ui
 
 import com.android.systemui.biometrics.AuthPanelController
+import com.android.systemui.biometrics.ui.binder.Spaghetti
 import com.android.systemui.biometrics.ui.viewmodel.CredentialViewModel
 
 /** A credential variant of BiometricPrompt. */
@@ -27,5 +28,6 @@ sealed interface CredentialView {
         host: Host,
         panelViewController: AuthPanelController,
         animatePanel: Boolean,
+        legacyCallback: Spaghetti.Callback,
     )
 }

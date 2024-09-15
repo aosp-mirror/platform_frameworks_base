@@ -235,6 +235,10 @@ bool JHwParcel::wasSent() const {
     return mWasSent;
 }
 
+void JHwParcel::addBlob(const sp<JHwBlob> &blob) {
+    mBlobs.emplace_back(blob);
+}
+
 }  // namespace android
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1059,6 +1063,7 @@ static void JHwParcel_native_writeBuffer(
         JHwParcel::GetNativeContext(env, thiz)->getParcel();
 
     sp<JHwBlob> blob = JHwBlob::GetNativeContext(env, blobObj);
+    JHwParcel::GetNativeContext(env, thiz)->addBlob(blob);
     status_t err = blob->writeToParcel(parcel);
 
     if (err != OK) {

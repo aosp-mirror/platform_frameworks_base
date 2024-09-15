@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.row.ui.viewbinder
 
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.View.OnTouchListener
@@ -72,7 +73,6 @@ private class TouchHandler(
     var isTouchEnabled = false
 
     override fun onTouch(v: View, ev: MotionEvent): Boolean {
-        val result = false
         if (ev.action == MotionEvent.ACTION_UP) {
             view.setLastActionUpTime(ev.eventTime)
         }
@@ -82,13 +82,22 @@ private class TouchHandler(
         }
         if (ev.action == MotionEvent.ACTION_UP) {
             // If this is a false tap, capture the even so it doesn't result in a click.
-            return falsingManager.isFalseTap(FalsingManager.LOW_PENALTY)
+            return falsingManager.isFalseTap(FalsingManager.LOW_PENALTY).also {
+                if (it) {
+                    Log.d(v::class.simpleName ?: TAG, "capturing false tap")
+                }
+            }
         }
-        return result
+        return false
     }
 
     override fun onInterceptTouchEvent(ev: MotionEvent): Boolean = false
 
     /** Use [onTouch] instead. */
     override fun onTouchEvent(ev: MotionEvent): Boolean = false
+
+    companion object {
+        private const val TAG = "ActivatableNotificationViewBinder"
+    }
 }
+

@@ -111,6 +111,9 @@
     <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"વધારાની સુરક્ષા માટે, તેના બદલે પૅટર્નનો ઉપયોગ કરો"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"વધારાની સુરક્ષા માટે, તેના બદલે પિનનો ઉપયોગ કરો"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"વધારાની સુરક્ષા માટે, તેના બદલે પાસવર્ડનો ઉપયોગ કરો"</string>
+    <string name="kg_prompt_added_security_pin" msgid="5487992065995475528">"વધારાની સુરક્ષા માટે પિન જરૂરી છે"</string>
+    <string name="kg_prompt_added_security_pattern" msgid="1017068086102168544">"વધારાની સુરક્ષા માટે પૅટર્ન જરૂરી છે"</string>
+    <string name="kg_prompt_added_security_password" msgid="6053156069765029006">"વધારાની સુરક્ષા માટે પાસવર્ડ જરૂરી છે"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"વ્યવસ્થાપકે ઉપકરણ લૉક કરેલું છે"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"ઉપકરણ મેન્યુઅલી લૉક કર્યું હતું"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"ઓળખાયેલ નથી"</string>

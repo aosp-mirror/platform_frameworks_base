@@ -98,6 +98,17 @@ LIBANDROID {
     AInputQueue_getEvent;
     AInputQueue_hasEvents;
     AInputQueue_preDispatchEvent;
+    AInputReceiver_createBatchedInputReceiver; # introduced=35
+    AInputReceiver_createUnbatchedInputReceiver; # introduced=35
+    AInputReceiver_release; # introduced=35
+    AInputReceiver_getInputTransferToken; # introduced=35
+    AInputReceiverCallbacks_create; # introduced=35
+    AInputReceiverCallbacks_release; # introduced=35
+    AInputReceiverCallbacks_setKeyEventCallback; # introduced=35
+    AInputReceiverCallbacks_setMotionEventCallback; # introduced=35
+    AInputTransferToken_fromJava; # introduced=35
+    AInputTransferToken_release; # introduced=35
+    AInputTransferToken_toJava; # introduced=35
     AKeyEvent_getAction;
     AKeyEvent_getDownTime;
     AKeyEvent_getEventTime;
@@ -355,6 +366,7 @@ LIBANDROID_PLATFORM {
     APerformanceHint_setIHintManagerForTesting;
     APerformanceHint_sendHint;
     APerformanceHint_getThreadIds;
+    APerformanceHint_createSessionInternal;
     extern "C++" {
         ASurfaceControl_registerSurfaceStatsListener*;
         ASurfaceControl_unregisterSurfaceStatsListener*;

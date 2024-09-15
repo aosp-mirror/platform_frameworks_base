@@ -16,13 +16,24 @@
 
 package android.view.accessibility;
 
+import static com.android.internal.accessibility.AccessibilityShortcutController.COLOR_INVERSION_COMPONENT_NAME;
+import static com.android.internal.accessibility.AccessibilityShortcutController.COLOR_INVERSION_TILE_COMPONENT_NAME;
+import static com.android.internal.accessibility.AccessibilityShortcutController.DALTONIZER_COMPONENT_NAME;
+import static com.android.internal.accessibility.AccessibilityShortcutController.DALTONIZER_TILE_COMPONENT_NAME;
+
+import static com.google.common.truth.Truth.assertThat;
+
 import static junit.framework.TestCase.assertFalse;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -34,6 +45,8 @@ import android.app.RemoteAction;
 import android.content.Intent;
 import android.content.pm.ParceledListSlice;
 import android.graphics.drawable.Icon;
+import android.os.Bundle;
+import android.os.RemoteException;
 import android.os.UserHandle;
 
 import androidx.annotation.NonNull;
@@ -41,6 +54,7 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.R;
+import com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType;
 import com.android.internal.util.IntPair;
 import com.android.server.accessibility.test.MessageCapturingHandler;
 
@@ -54,6 +68,8 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Executors;
 
 /**
@@ -261,6 +277,75 @@ public class AccessibilityManagerTest {
         manager.registerDisplayProxy(proxy);
         manager.unregisterDisplayProxy(proxy);
         verify(mMockService).unregisterProxyForDisplay(proxy.getDisplayId());
+    }
+
+    @Test
+    public void getA11yFeatureToTileMap_catchRemoteExceptionAndRethrow() throws Exception {
+        AccessibilityManager manager = createManager(WITH_A11Y_ENABLED);
+        doThrow(new RemoteException(new SecurityException()))
+                .when(mMockService)
+                .getA11yFeatureToTileMap(anyInt());
+
+        Throwable rethrownException = assertThrows(RuntimeException.class,
+                () -> manager.getA11yFeatureToTileMap(UserHandle.USER_CURRENT));
+        assertThat(rethrownException.getCause().getCause()).isInstanceOf(SecurityException.class);
+    }
+
+    @Test
+    public void getA11yFeatureToTileMap_verifyServiceMethodCalled() throws Exception {
+        AccessibilityManager manager = createManager(WITH_A11Y_ENABLED);
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(
+                COLOR_INVERSION_COMPONENT_NAME.flattenToString(),
+                COLOR_INVERSION_TILE_COMPONENT_NAME);
+        bundle.putParcelable(
+                DALTONIZER_COMPONENT_NAME.flattenToString(),
+                DALTONIZER_TILE_COMPONENT_NAME);
+        when(mMockService.getA11yFeatureToTileMap(UserHandle.USER_CURRENT)).thenReturn(bundle);
+
+        assertThat(manager.getA11yFeatureToTileMap(UserHandle.USER_CURRENT))
+                .containsExactlyEntriesIn(Map.of(
+                        COLOR_INVERSION_COMPONENT_NAME, COLOR_INVERSION_TILE_COMPONENT_NAME,
+                        DALTONIZER_COMPONENT_NAME, DALTONIZER_TILE_COMPONENT_NAME
+                ));
+        verify(mMockService).getA11yFeatureToTileMap(UserHandle.USER_CURRENT);
+    }
+
+    @Test
+    public void enableShortcutsForTargets_catchRemoteExceptionAndRethrow() throws Exception {
+        AccessibilityManager manager = createManager(WITH_A11Y_ENABLED);
+        doThrow(new RemoteException(new SecurityException()))
+                .when(mMockService)
+                .enableShortcutsForTargets(anyBoolean(), anyInt(), anyList(), anyInt());
+
+        Throwable rethrownException = assertThrows(RuntimeException.class,
+                () -> manager.enableShortcutsForTargets(
+                        /* enable= */ false,
+                        UserShortcutType.HARDWARE,
+                        Set.of(DALTONIZER_COMPONENT_NAME.flattenToString()),
+                        UserHandle.USER_CURRENT
+                ));
+        assertThat(rethrownException.getCause().getCause()).isInstanceOf(SecurityException.class);
+    }
+
+    @Test
+    public void enableShortcutsForTargets_verifyServiceMethodCalled() throws Exception {
+        AccessibilityManager manager = createManager(WITH_A11Y_ENABLED);
+        int shortcutTypes = UserShortcutType.HARDWARE | UserShortcutType.TRIPLETAP;
+
+        manager.enableShortcutsForTargets(
+                /* enable= */ false,
+                shortcutTypes,
+                Set.of(DALTONIZER_COMPONENT_NAME.flattenToString()),
+                UserHandle.USER_CURRENT
+        );
+
+        verify(mMockService).enableShortcutsForTargets(
+                /* enable= */ false,
+                shortcutTypes,
+                List.of(DALTONIZER_COMPONENT_NAME.flattenToString()),
+                UserHandle.USER_CURRENT
+        );
     }
 
     private class MyAccessibilityProxy extends AccessibilityDisplayProxy {

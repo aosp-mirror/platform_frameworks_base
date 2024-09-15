@@ -17,26 +17,27 @@
 package com.android.systemui.keyguard.data.repository
 
 import android.graphics.Point
+import android.os.PowerManager.WAKE_REASON_UNKNOWN
 import android.testing.TestableLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.AnimatorTestRule
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
+import com.android.systemui.keyguard.shared.model.BiometricUnlockMode
 import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
-import com.android.systemui.power.data.repository.FakePowerRepository
-import com.android.systemui.power.domain.interactor.PowerInteractor
-import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
-import com.android.systemui.power.domain.interactor.PowerInteractorFactory
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.power.data.repository.powerRepository
+import com.android.systemui.power.shared.model.WakeSleepReason
+import com.android.systemui.power.shared.model.WakefulnessState
 import com.android.systemui.statusbar.CircleReveal
 import com.android.systemui.statusbar.LightRevealEffect
+import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.mock
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertFalse
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -49,9 +50,10 @@ import org.mockito.MockitoAnnotations
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 class LightRevealScrimRepositoryTest : SysuiTestCase() {
-    private lateinit var fakeKeyguardRepository: FakeKeyguardRepository
-    private lateinit var powerRepository: FakePowerRepository
-    private lateinit var powerInteractor: PowerInteractor
+    private val kosmos = testKosmos()
+    private val testScope = kosmos.testScope
+    private val fakeKeyguardRepository = kosmos.fakeKeyguardRepository
+    private val powerRepository = kosmos.powerRepository
     private lateinit var underTest: LightRevealScrimRepositoryImpl
 
     @get:Rule val animatorTestRule = AnimatorTestRule(this)
@@ -59,13 +61,13 @@ class LightRevealScrimRepositoryTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        fakeKeyguardRepository = FakeKeyguardRepository()
-        powerRepository = FakePowerRepository()
-        powerInteractor =
-            PowerInteractorFactory.create(repository = powerRepository).powerInteractor
-
         underTest =
-            LightRevealScrimRepositoryImpl(fakeKeyguardRepository, context, powerInteractor, mock())
+            LightRevealScrimRepositoryImpl(
+                kosmos.fakeKeyguardRepository,
+                context,
+                powerRepository,
+                mock()
+            )
     }
 
     @Test
@@ -73,14 +75,24 @@ class LightRevealScrimRepositoryTest : SysuiTestCase() {
         val values = mutableListOf<LightRevealEffect>()
         val job = launch { underTest.revealEffect.collect { values.add(it) } }
 
-        powerInteractor.setAwakeForTest()
+        powerRepository.updateWakefulness(
+            rawState = WakefulnessState.STARTING_TO_WAKE,
+            lastWakeReason = WakeSleepReason.fromPowerManagerWakeReason(WAKE_REASON_UNKNOWN),
+            powerButtonLaunchGestureTriggered =
+                powerRepository.wakefulness.value.powerButtonLaunchGestureTriggered,
+        )
+        powerRepository.updateWakefulness(rawState = WakefulnessState.AWAKE)
+
         // We should initially emit the default reveal effect.
         runCurrent()
         values.assertEffectsMatchPredicates({ it == DEFAULT_REVEAL_EFFECT })
 
         // The source and sensor locations are still null, so we should still be using the
         // default reveal despite a biometric unlock.
-        fakeKeyguardRepository.setBiometricUnlockState(BiometricUnlockModel.WAKE_AND_UNLOCK)
+        fakeKeyguardRepository.setBiometricUnlockState(
+            BiometricUnlockMode.WAKE_AND_UNLOCK,
+            BiometricUnlockSource.FINGERPRINT_SENSOR
+        )
 
         runCurrent()
         values.assertEffectsMatchPredicates(
@@ -89,7 +101,10 @@ class LightRevealScrimRepositoryTest : SysuiTestCase() {
 
         // We got a source but still have no sensor locations, so should be sticking with
         // the default effect.
-        fakeKeyguardRepository.setBiometricUnlockSource(BiometricUnlockSource.FINGERPRINT_SENSOR)
+        fakeKeyguardRepository.setBiometricUnlockState(
+            BiometricUnlockMode.WAKE_AND_UNLOCK,
+            BiometricUnlockSource.FINGERPRINT_SENSOR
+        )
 
         runCurrent()
         values.assertEffectsMatchPredicates(
@@ -108,8 +123,10 @@ class LightRevealScrimRepositoryTest : SysuiTestCase() {
         // Now we have fingerprint sensor locations, and wake and unlock via fingerprint.
         val fingerprintLocation = Point(500, 500)
         fakeKeyguardRepository.setFingerprintSensorLocation(fingerprintLocation)
-        fakeKeyguardRepository.setBiometricUnlockSource(BiometricUnlockSource.FINGERPRINT_SENSOR)
-        fakeKeyguardRepository.setBiometricUnlockState(BiometricUnlockModel.WAKE_AND_UNLOCK_PULSING)
+        fakeKeyguardRepository.setBiometricUnlockState(
+            BiometricUnlockMode.WAKE_AND_UNLOCK_PULSING,
+            BiometricUnlockSource.FINGERPRINT_SENSOR
+        )
 
         // We should now have switched to the circle reveal, at the fingerprint location.
         runCurrent()
@@ -124,14 +141,21 @@ class LightRevealScrimRepositoryTest : SysuiTestCase() {
 
         // Subsequent wake and unlocks should not emit duplicate, identical CircleReveals.
         val valuesPrevSize = values.size
-        fakeKeyguardRepository.setBiometricUnlockState(BiometricUnlockModel.WAKE_AND_UNLOCK_PULSING)
         fakeKeyguardRepository.setBiometricUnlockState(
-            BiometricUnlockModel.WAKE_AND_UNLOCK_FROM_DREAM
+            BiometricUnlockMode.WAKE_AND_UNLOCK_PULSING,
+            BiometricUnlockSource.FINGERPRINT_SENSOR
+        )
+        fakeKeyguardRepository.setBiometricUnlockState(
+            BiometricUnlockMode.WAKE_AND_UNLOCK_FROM_DREAM,
+            BiometricUnlockSource.FINGERPRINT_SENSOR
         )
         assertEquals(valuesPrevSize, values.size)
 
         // Non-biometric unlock, we should return to the default reveal.
-        fakeKeyguardRepository.setBiometricUnlockState(BiometricUnlockModel.NONE)
+        fakeKeyguardRepository.setBiometricUnlockState(
+            BiometricUnlockMode.NONE,
+            BiometricUnlockSource.FINGERPRINT_SENSOR
+        )
 
         runCurrent()
         values.assertEffectsMatchPredicates(
@@ -146,9 +170,10 @@ class LightRevealScrimRepositoryTest : SysuiTestCase() {
 
         // We already have a face location, so switching to face source should update the
         // CircleReveal.
-        fakeKeyguardRepository.setBiometricUnlockSource(BiometricUnlockSource.FACE_SENSOR)
-        runCurrent()
-        fakeKeyguardRepository.setBiometricUnlockState(BiometricUnlockModel.WAKE_AND_UNLOCK)
+        fakeKeyguardRepository.setBiometricUnlockState(
+            BiometricUnlockMode.WAKE_AND_UNLOCK,
+            BiometricUnlockSource.FACE_SENSOR
+        )
         runCurrent()
 
         values.assertEffectsMatchPredicates(
@@ -168,9 +193,10 @@ class LightRevealScrimRepositoryTest : SysuiTestCase() {
     @Test
     @TestableLooper.RunWithLooper(setAsMainLooper = true)
     fun revealAmount_emitsTo1AfterAnimationStarted() =
-        runTest(UnconfinedTestDispatcher()) {
+        testScope.runTest {
             val value by collectLastValue(underTest.revealAmount)
-            underTest.startRevealAmountAnimator(true)
+            runCurrent()
+            underTest.startRevealAmountAnimator(true, 500L)
             assertEquals(0.0f, value)
             animatorTestRule.advanceTimeBy(500L)
             assertEquals(1.0f, value)
@@ -179,13 +205,14 @@ class LightRevealScrimRepositoryTest : SysuiTestCase() {
     @Test
     @TestableLooper.RunWithLooper(setAsMainLooper = true)
     fun revealAmount_startingRevealTwiceWontRerunAnimator() =
-        runTest(UnconfinedTestDispatcher()) {
+        testScope.runTest {
             val value by collectLastValue(underTest.revealAmount)
-            underTest.startRevealAmountAnimator(true)
+            runCurrent()
+            underTest.startRevealAmountAnimator(true, 500L)
             assertEquals(0.0f, value)
             animatorTestRule.advanceTimeBy(250L)
             assertEquals(0.5f, value)
-            underTest.startRevealAmountAnimator(true)
+            underTest.startRevealAmountAnimator(true, 500L)
             animatorTestRule.advanceTimeBy(250L)
             assertEquals(1.0f, value)
         }
@@ -193,12 +220,14 @@ class LightRevealScrimRepositoryTest : SysuiTestCase() {
     @Test
     @TestableLooper.RunWithLooper(setAsMainLooper = true)
     fun revealAmount_emitsTo0AfterAnimationStartedReversed() =
-        runTest(UnconfinedTestDispatcher()) {
-            val value by collectLastValue(underTest.revealAmount)
-            underTest.startRevealAmountAnimator(false)
-            assertEquals(1.0f, value)
+        testScope.runTest {
+            val lastValue by collectLastValue(underTest.revealAmount)
+            runCurrent()
+            underTest.startRevealAmountAnimator(true, 500L)
             animatorTestRule.advanceTimeBy(500L)
-            assertEquals(0.0f, value)
+            underTest.startRevealAmountAnimator(false, 500L)
+            animatorTestRule.advanceTimeBy(500L)
+            assertEquals(0.0f, lastValue)
         }
 
     /**

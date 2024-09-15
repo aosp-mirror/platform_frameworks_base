@@ -18,6 +18,7 @@ package android.os;
 
 import static java.util.Objects.requireNonNull;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
@@ -31,6 +32,8 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.Serializable;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,6 +55,53 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
 
     @VisibleForTesting
     static final int FLAG_ALLOW_FDS = 1 << 10;
+
+    @VisibleForTesting
+    static final int FLAG_HAS_BINDERS_KNOWN = 1 << 11;
+
+    @VisibleForTesting
+    static final int FLAG_HAS_BINDERS = 1 << 12;
+
+
+    /**
+     * Status when the Bundle can <b>assert</b> that the underlying Parcel DOES NOT contain
+     * Binder object(s).
+     *
+     * @hide
+     */
+    public static final int STATUS_BINDERS_NOT_PRESENT = 0;
+
+    /**
+     * Status when the Bundle can <b>assert</b> that there are Binder object(s) in the Parcel.
+     *
+     * @hide
+     */
+    public static final int STATUS_BINDERS_PRESENT = 1;
+
+    /**
+     * Status when the Bundle cannot be checked for Binders and there is no parcelled data
+     * available to check either.
+     * <p> This could happen when a Bundle is unparcelled or was never parcelled, and modified such
+     * that it is not possible to assert if the Bundle has any Binder objects in the current state.
+     *
+     * For e.g. calling {@link #putParcelable} or {@link #putBinder} could have added a Binder
+     * object to the Bundle but it is not possible to assert this fact unless the Bundle is written
+     * to a Parcel.
+     * </p>
+     *
+     * @hide
+     */
+    public static final int STATUS_BINDERS_UNKNOWN = 2;
+
+    /** @hide */
+    @IntDef(flag = true, prefix = {"STATUS_BINDERS_"}, value = {
+            STATUS_BINDERS_PRESENT,
+            STATUS_BINDERS_UNKNOWN,
+            STATUS_BINDERS_NOT_PRESENT
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface HasBinderStatus {
+    }
 
     /** An unmodifiable {@code Bundle} that is always {@link #isEmpty() empty}. */
     public static final Bundle EMPTY;
@@ -75,7 +125,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      */
     public Bundle() {
         super();
-        mFlags = FLAG_HAS_FDS_KNOWN | FLAG_ALLOW_FDS;
+        mFlags = FLAG_HAS_FDS_KNOWN | FLAG_HAS_BINDERS_KNOWN | FLAG_ALLOW_FDS;
     }
 
     /**
@@ -111,7 +161,6 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      *
      * @param from The bundle to be copied.
      * @param deep Whether is a deep or shallow copy.
-     *
      * @hide
      */
     Bundle(Bundle from, boolean deep) {
@@ -143,7 +192,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      */
     public Bundle(ClassLoader loader) {
         super(loader);
-        mFlags = FLAG_HAS_FDS_KNOWN | FLAG_ALLOW_FDS;
+        mFlags = FLAG_HAS_FDS_KNOWN | FLAG_HAS_BINDERS_KNOWN | FLAG_ALLOW_FDS;
     }
 
     /**
@@ -154,7 +203,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      */
     public Bundle(int capacity) {
         super(capacity);
-        mFlags = FLAG_HAS_FDS_KNOWN | FLAG_ALLOW_FDS;
+        mFlags = FLAG_HAS_FDS_KNOWN | FLAG_HAS_BINDERS_KNOWN | FLAG_ALLOW_FDS;
     }
 
     /**
@@ -180,7 +229,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      */
     public Bundle(PersistableBundle b) {
         super(b);
-        mFlags = FLAG_HAS_FDS_KNOWN | FLAG_ALLOW_FDS;
+        mFlags = FLAG_HAS_FDS_KNOWN | FLAG_HAS_BINDERS_KNOWN | FLAG_ALLOW_FDS;
     }
 
     /**
@@ -292,6 +341,9 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
         if ((mFlags & FLAG_HAS_FDS) != 0) {
             mFlags &= ~FLAG_HAS_FDS_KNOWN;
         }
+        if ((mFlags & FLAG_HAS_BINDERS) != 0) {
+            mFlags &= ~FLAG_HAS_BINDERS_KNOWN;
+        }
     }
 
     /**
@@ -306,12 +358,19 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
         bundle.mOwnsLazyValues = false;
         mMap.putAll(bundle.mMap);
 
-        // FD state is now known if and only if both bundles already knew
+        // FD and Binders state is now known if and only if both bundles already knew
         if ((bundle.mFlags & FLAG_HAS_FDS) != 0) {
             mFlags |= FLAG_HAS_FDS;
         }
         if ((bundle.mFlags & FLAG_HAS_FDS_KNOWN) == 0) {
             mFlags &= ~FLAG_HAS_FDS_KNOWN;
+        }
+
+        if ((bundle.mFlags & FLAG_HAS_BINDERS) != 0) {
+            mFlags |= FLAG_HAS_BINDERS;
+        }
+        if ((bundle.mFlags & FLAG_HAS_BINDERS_KNOWN) == 0) {
+            mFlags &= ~FLAG_HAS_BINDERS_KNOWN;
         }
     }
 
@@ -341,6 +400,33 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
             mFlags |= FLAG_HAS_FDS_KNOWN;
         }
         return (mFlags & FLAG_HAS_FDS) != 0;
+    }
+
+    /**
+     * Returns a status indicating whether the bundle contains any parcelled Binder objects.
+     * @hide
+     */
+    public @HasBinderStatus int hasBinders() {
+        if ((mFlags & FLAG_HAS_BINDERS_KNOWN) != 0) {
+            if ((mFlags & FLAG_HAS_BINDERS) != 0) {
+                return STATUS_BINDERS_PRESENT;
+            } else {
+                return STATUS_BINDERS_NOT_PRESENT;
+            }
+        }
+
+        final Parcel p = mParcelledData;
+        if (p == null) {
+            return STATUS_BINDERS_UNKNOWN;
+        }
+        if (p.hasBinders()) {
+            mFlags = mFlags | FLAG_HAS_BINDERS | FLAG_HAS_BINDERS_KNOWN;
+            return STATUS_BINDERS_PRESENT;
+        } else {
+            mFlags = mFlags & ~FLAG_HAS_BINDERS;
+            mFlags |= FLAG_HAS_BINDERS_KNOWN;
+            return STATUS_BINDERS_NOT_PRESENT;
+        }
     }
 
     /** {@hide} */
@@ -464,6 +550,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
         unparcel();
         mMap.put(key, value);
         mFlags &= ~FLAG_HAS_FDS_KNOWN;
+        mFlags &= ~FLAG_HAS_BINDERS_KNOWN;
     }
 
     /**
@@ -502,6 +589,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
         unparcel();
         mMap.put(key, value);
         mFlags &= ~FLAG_HAS_FDS_KNOWN;
+        mFlags &= ~FLAG_HAS_BINDERS_KNOWN;
     }
 
     /**
@@ -517,6 +605,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
         unparcel();
         mMap.put(key, value);
         mFlags &= ~FLAG_HAS_FDS_KNOWN;
+        mFlags &= ~FLAG_HAS_BINDERS_KNOWN;
     }
 
     /** {@hide} */
@@ -525,6 +614,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
         unparcel();
         mMap.put(key, value);
         mFlags &= ~FLAG_HAS_FDS_KNOWN;
+        mFlags &= ~FLAG_HAS_BINDERS_KNOWN;
     }
 
     /**
@@ -540,6 +630,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
         unparcel();
         mMap.put(key, value);
         mFlags &= ~FLAG_HAS_FDS_KNOWN;
+        mFlags &= ~FLAG_HAS_BINDERS_KNOWN;
     }
 
     /**
@@ -680,6 +771,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
     public void putBinder(@Nullable String key, @Nullable IBinder value) {
         unparcel();
         mMap.put(key, value);
+        mFlags &= ~FLAG_HAS_BINDERS_KNOWN;
     }
 
     /**
@@ -697,6 +789,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
     public void putIBinder(@Nullable String key, @Nullable IBinder value) {
         unparcel();
         mMap.put(key, value);
+        mFlags &= ~FLAG_HAS_BINDERS_KNOWN;
     }
 
     /**

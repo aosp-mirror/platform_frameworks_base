@@ -21,9 +21,9 @@ import com.android.systemui.assist.AssistManager.VisualQueryAttentionListener;
 import com.android.systemui.dagger.qualifiers.Application;
 import com.android.systemui.shared.condition.Condition;
 
-import javax.inject.Inject;
-
 import kotlinx.coroutines.CoroutineScope;
+
+import javax.inject.Inject;
 
 /**
  * {@link AssistantAttentionCondition} provides a signal when assistant has the user's attention.

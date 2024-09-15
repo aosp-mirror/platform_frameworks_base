@@ -33,6 +33,7 @@ import android.os.PowerManager;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.server.display.AutomaticBrightnessController;
 import com.android.server.display.config.HdrBrightnessData;
 import com.android.server.testutils.OffsettableClock;
 import com.android.server.testutils.TestHandler;
@@ -220,6 +221,18 @@ public class HdrClamperTest {
         assertEquals(0.04f, mHdrClamper.getTransitionRate(), FLOAT_TOLERANCE);
     }
 
+    @Test
+    public void testCalmper_transitionRateOverriddenByOtherRequest() {
+        mHdrClamper.onAmbientLuxChange(499);
+
+        mClock.fastForward(3000);
+        mTestHandler.timeAdvance();
+        assertEquals(0.6f, mHdrClamper.getMaxBrightness(), FLOAT_TOLERANCE);
+        assertEquals(0.04, mHdrClamper.getTransitionRate(), FLOAT_TOLERANCE);
+        // getTransitionRate should reset transitionRate
+        assertEquals(-1f, mHdrClamper.getTransitionRate(), FLOAT_TOLERANCE);
+    }
+
     // MsgInfo.sendTime is calculated first by adding SystemClock.uptimeMillis()
     // (in Handler.sendMessageDelayed) and then by subtracting SystemClock.uptimeMillis()
     // (in TestHandler.sendMessageAtTime, there might be several milliseconds difference between
@@ -230,6 +243,11 @@ public class HdrClamperTest {
     }
 
     private void configureClamper() {
+        // AutoBrightnessController sends ambientLux values *only* when auto brightness enabled.
+        // HdrClamper is temporary disabled  if auto brightness is off.
+        // Temporary setting AutoBrightnessState to enabled for this test
+        // The issue is tracked here: b/322445088
+        mHdrClamper.setAutoBrightnessState(AutomaticBrightnessController.AUTO_BRIGHTNESS_ENABLED);
         mHdrClamper.resetHdrConfig(TEST_HDR_DATA, WIDTH, HEIGHT, MIN_HDR_PERCENT, mMockBinder);
         mHdrChangeListener.onHdrVisible(true);
     }

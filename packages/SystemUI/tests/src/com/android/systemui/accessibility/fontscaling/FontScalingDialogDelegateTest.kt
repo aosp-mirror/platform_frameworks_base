@@ -18,12 +18,12 @@ package com.android.systemui.accessibility.fontscaling
 import android.content.res.Configuration
 import android.os.Handler
 import android.provider.Settings
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.SeekBar
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.DialogTransitionAnimator
@@ -46,19 +46,19 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyBoolean
-import org.mockito.ArgumentMatchers.anyInt
+import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.Mock
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
+import org.mockito.Mockito.`when` as whenever
 
 private const val ON: Int = 1
 private const val OFF: Int = 0
 
 /** Tests for [FontScalingDialogDelegate]. */
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 class FontScalingDialogDelegateTest : SysuiTestCase() {
     private lateinit var fontScalingDialogDelegate: FontScalingDialogDelegate
@@ -90,7 +90,7 @@ class FontScalingDialogDelegateTest : SysuiTestCase() {
         secureSettings = FakeSettings()
         systemClock = FakeSystemClock()
         backgroundDelayableExecutor = FakeExecutor(systemClock)
-        whenever(sysuiState.setFlag(anyInt(), anyBoolean())).thenReturn(sysuiState)
+        whenever(sysuiState.setFlag(anyLong(), anyBoolean())).thenReturn(sysuiState)
 
         fontScalingDialogDelegate =
             spy(

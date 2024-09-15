@@ -35,7 +35,7 @@ android_app {
     name: "FusedLocation",
     defaults: ["platform_app_defaults"],
     srcs: ["src/**/*.java"],
-    libs: ["com.android.location.provider"],
+    libs: ["com.android.location.provider.impl"],
     platform_apis: true,
     certificate: "platform",
     privileged: true,
@@ -50,9 +50,9 @@ android_test {
         "src/**/*.java", // include real sources because we're forced to test this directly
     ],
     libs: [
-        "android.test.base",
-        "android.test.runner",
-        "com.android.location.provider",
+        "android.test.base.stubs.system",
+        "android.test.runner.stubs.system",
+        "com.android.location.provider.impl",
     ],
     static_libs: [
         "androidx.test.core",

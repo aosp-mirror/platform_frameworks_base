@@ -24,6 +24,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -160,6 +161,48 @@ public class InsetsSourceProviderTest extends WindowTestsBase {
         assertNull(mProvider.getControl(target).getLeash());
         mProvider.updateFakeControlTarget(null);
         assertNull(mProvider.getControl(target));
+    }
+
+    @Test
+    public void testGetLeash() {
+        final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");
+        final WindowState target = createWindow(null, TYPE_APPLICATION, "target");
+        final WindowState fakeTarget = createWindow(null, TYPE_APPLICATION, "fakeTarget");
+        final WindowState otherTarget = createWindow(null, TYPE_APPLICATION, "otherTarget");
+        statusBar.getFrame().set(0, 0, 500, 100);
+
+        // We must not have control or control target before we have the insets source window,
+        // so also no leash.
+        mProvider.updateControlForTarget(target, true /* force */);
+        assertNull(mProvider.getControl(target));
+        assertNull(mProvider.getControlTarget());
+        assertNull(mProvider.getLeash(target));
+
+        // We can have the control or the control target after we have the insets source window,
+        // but no leash as this is not yet ready for dispatching.
+        mProvider.setWindowContainer(statusBar, null, null);
+        mProvider.updateControlForTarget(target, false /* force */);
+        assertNotNull(mProvider.getControl(target));
+        assertNotNull(mProvider.getControlTarget());
+        assertEquals(mProvider.getControlTarget(), target);
+        assertNull(mProvider.getLeash(target));
+
+        // After surface transactions are applied, the leash is ready for dispatching.
+        mProvider.onSurfaceTransactionApplied();
+        assertNotNull(mProvider.getLeash(target));
+
+        // We do have fake control for the fake control target, but that has no leash.
+        mProvider.updateFakeControlTarget(fakeTarget);
+        assertNotNull(mProvider.getControl(fakeTarget));
+        assertNotNull(mProvider.getFakeControlTarget());
+        assertNotEquals(mProvider.getControlTarget(), fakeTarget);
+        assertNull(mProvider.getLeash(fakeTarget));
+
+        // We don't have any control for a different (non-fake control target), so also no leash.
+        assertNull(mProvider.getControl(otherTarget));
+        assertNotNull(mProvider.getControlTarget());
+        assertNotEquals(mProvider.getControlTarget(), otherTarget);
+        assertNull(mProvider.getLeash(otherTarget));
     }
 
     @Test

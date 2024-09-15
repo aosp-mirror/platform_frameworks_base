@@ -127,6 +127,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.Executor;
 
 /**
@@ -180,7 +181,8 @@ public class VoiceInteractionManagerService extends SystemService {
                 LocalServices.getService(ActivityManagerInternal.class));
         mAtmInternal = Objects.requireNonNull(
                 LocalServices.getService(ActivityTaskManagerInternal.class));
-        mWmInternal = LocalServices.getService(WindowManagerInternal.class);
+        mWmInternal = Objects.requireNonNull(
+                LocalServices.getService(WindowManagerInternal.class));
         mDpmInternal = LocalServices.getService(DevicePolicyManagerInternal.class);
         LegacyPermissionManagerInternal permissionManagerInternal = LocalServices.getService(
                 LegacyPermissionManagerInternal.class);
@@ -2536,7 +2538,8 @@ public class VoiceInteractionManagerService extends SystemService {
             }
         }
 
-        PackageMonitor mPackageMonitor = new PackageMonitor() {
+        PackageMonitor mPackageMonitor = new PackageMonitor(
+                /* supportsPackageRestartQuery= */ true) {
 
             @Override
             public boolean onHandleForceStop(Intent intent, String[] packages, int uid,
@@ -2737,12 +2740,8 @@ public class VoiceInteractionManagerService extends SystemService {
                     isManagedProfileVisible = true;
                 }
             }
-            final ScreenCapture.ScreenshotHardwareBuffer shb;
-            if (mWmInternal != null) {
-                shb = mWmInternal.takeAssistScreenshot();
-            } else {
-                shb = null;
-            }
+            final ScreenCapture.ScreenshotHardwareBuffer shb =
+                    mWmInternal.takeAssistScreenshot(/* windowTypesToExclude= */ Set.of());
             final Bitmap bm = shb != null ? shb.asBitmap() : null;
             // Now that everything is fetched, putting it in the launchIntent.
             if (bm != null) {

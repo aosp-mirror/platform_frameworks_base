@@ -119,6 +119,7 @@ public class ScreenMediaRecorder extends MediaProjection.Callback {
         IMediaProjection projection = IMediaProjection.Stub.asInterface(proj.asBinder());
         if (mCaptureRegion != null) {
             projection.setLaunchCookie(mCaptureRegion.getLaunchCookie());
+            projection.setTaskId(mCaptureRegion.getTaskId());
         }
         mMediaProjection = new MediaProjection(mContext, projection);
         mMediaProjection.registerCallback(this, mHandler);

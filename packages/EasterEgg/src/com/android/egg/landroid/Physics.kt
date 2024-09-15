@@ -20,7 +20,7 @@ import android.util.ArraySet
 import kotlin.random.Random
 
 // artificially speed up or slow down the simulation
-const val TIME_SCALE = 1f
+const val TIME_SCALE = 1f // simulation seconds per wall clock second
 
 // if it's been over 1 real second since our last timestep, don't simulate that elapsed time.
 // this allows the simulation to "pause" when, for example, the activity pauses
@@ -34,6 +34,19 @@ interface Entity {
 
     // Post-integration step, after constraints are satisfied.
     fun postUpdate(sim: Simulator, dt: Float)
+}
+
+interface Removable {
+    fun canBeRemoved(): Boolean
+}
+
+class Fuse(var lifetime: Float) : Removable {
+    fun update(dt: Float) {
+        lifetime -= dt
+    }
+    override fun canBeRemoved(): Boolean {
+        return lifetime < 0
+    }
 }
 
 open class Body(var name: String = "Unknown") : Entity {

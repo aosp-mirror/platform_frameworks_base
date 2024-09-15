@@ -17,7 +17,7 @@
 package com.android.systemui.qs.tileimpl
 
 import android.content.ComponentName
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.qs.QSHost
@@ -93,7 +93,7 @@ private val specMap = mapOf(
         "font_scaling" to FontScalingTile::class.java
 )
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class QSFactoryImplTest : SysuiTestCase() {
 

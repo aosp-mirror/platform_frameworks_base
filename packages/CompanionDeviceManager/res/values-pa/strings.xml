@@ -26,8 +26,11 @@
     <string name="profile_name_glasses" msgid="3506504967216601277">"ਡੀਵਾਈਸ"</string>
     <string name="summary_glasses" msgid="2872254734959842579">"ਇਸ ਐਪ ਨੂੰ ਤੁਹਾਡੇ <xliff:g id="DEVICE_NAME">%1$s</xliff:g> \'ਤੇ ਇਨ੍ਹਾਂ ਇਜਾਜ਼ਤਾਂ ਤੱਕ ਪਹੁੰਚ ਕਰਨ ਦੀ ਆਗਿਆ ਹੋਵੇਗੀ"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ਨੂੰ ਤੁਹਾਡੇ ਫ਼ੋਨ ਤੋਂ ਇਸ ਜਾਣਕਾਰੀ ਤੱਕ ਪਹੁੰਚ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿਓ"</string>
+    <string name="title_app_streaming_with_mirroring" msgid="3364582597581570658">"ਕੀ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ਨੂੰ ਤੁਹਾਡੇ ਫ਼ੋਨ ਦੀਆਂ ਐਪਾਂ ਨੂੰ ਸਟ੍ਰੀਮ ਕਰਨ ਦੀ ਆਗਿਆ ਦੇਣੀ ਹੈ?"</string>
+    <string name="summary_app_streaming" msgid="295548145144086753">"%1$s ਕੋਲ ਆਡੀਓ, ਫ਼ੋਟੋਆਂ, ਪਾਸਵਰਡਾਂ ਅਤੇ ਸੁਨੇਹਿਆਂ ਸਮੇਤ, ਫ਼ੋਨ \'ਤੇ ਦਿਖਾਈ ਦੇਣ ਵਾਲੀ ਜਾਂ ਚਲਾਈ ਜਾਣ ਵਾਲੀ ਕਿਸੇ ਵੀ ਚੀਜ਼ ਤੱਕ ਪਹੁੰਚ ਹੋਵੇਗੀ।&lt;br/&gt;&lt;br/&gt;%1$s ਐਪਾਂ ਨੂੰ ਉਦੋਂ ਤੱਕ ਸਟ੍ਰੀਮ ਕਰ ਸਕੇਗਾ, ਜਦੋਂ ਤੱਕ ਤੁਸੀਂ ਇਸ ਇਜਾਜ਼ਤ ਤੱਕ ਪਹੁੰਚ ਨਹੀਂ ਹਟਾ ਦਿੰਦੇ।"</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"ਕ੍ਰਾਸ-ਡੀਵਾਈਸ ਸੇਵਾਵਾਂ"</string>
     <string name="helper_summary_app_streaming" msgid="2396773196949578425">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਤੁਹਾਡੇ <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> ਦੀ ਤਰਫ਼ੋਂ ਤੁਹਾਡੇ ਡੀਵਾਈਸਾਂ ਵਿਚਕਾਰ ਐਪਾਂ ਨੂੰ ਸਟ੍ਰੀਮ ਕਰਨ ਦੀ ਇਜਾਜ਼ਤ ਮੰਗ ਰਹੀ ਹੈ"</string>
+    <string name="helper_summary_app_streaming_with_mirroring" msgid="6138581029144467467">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਤੁਹਾਡੇ <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> ਦੀ ਤਰਫ਼ੋਂ ਤੁਹਾਡੇ ਡੀਵਾਈਸਾਂ ਵਿਚਕਾਰ ਐਪਾਂ ਨੂੰ ਦਿਖਾਉਣ ਅਤੇ ਸਟ੍ਰੀਮ ਕਰਨ ਦੀ ਇਜਾਜ਼ਤ ਮੰਗ ਰਹੀ ਹੈ"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
     <string name="title_computer" msgid="4693714143506569253">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ਨੂੰ ਤੁਹਾਡੇ ਫ਼ੋਨ ਤੋਂ ਇਸ ਜਾਣਕਾਰੀ ਤੱਕ ਪਹੁੰਚ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿਓ"</string>
@@ -35,6 +38,8 @@
     <string name="helper_title_computer" msgid="4671071173916176037">"Google Play ਸੇਵਾਵਾਂ"</string>
     <string name="helper_summary_computer" msgid="8774832742608187072">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਤੁਹਾਡੇ <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> ਦੀ ਤਰਫ਼ੋਂ ਤੁਹਾਡੇ ਫ਼ੋਨ ਦੀਆਂ ਫ਼ੋਟੋਆਂ, ਮੀਡੀਆ ਅਤੇ ਸੂਚਨਾਵਾਂ ਤੱਕ ਪਹੁੰਚ ਕਰਨ ਦੀ ਇਜਾਜ਼ਤ ਮੰਗ ਰਹੀ ਹੈ"</string>
     <string name="title_nearby_device_streaming" msgid="7269956847378799794">"ਕੀ &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; ਨੂੰ ਇਹ ਕਾਰਵਾਈ ਕਰਨ ਦੀ ਆਗਿਆ ਦੇਣੀ ਹੈ?"</string>
+    <string name="title_nearby_device_streaming_with_mirroring" msgid="242855799919611657">"ਕੀ &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; ਨੂੰ ਤੁਹਾਡੇ ਫ਼ੋਨ ਦੀਆਂ ਐਪਾਂ ਨੂੰ ਸਟ੍ਰੀਮ ਕਰਨ ਅਤੇ ਸਿਸਟਮ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਦੀ ਵਰਤੋਂ ਕਰਨ ਦੀ ਆਗਿਆ ਦੇਣੀ ਹੈ?"</string>
+    <string name="summary_nearby_device_streaming" msgid="4039565463149145573">"%1$s ਕੋਲ ਆਡੀਓ, ਫ਼ੋਟੋਆਂ, ਭੁਗਤਾਨ ਜਾਣਕਾਰੀ, ਪਾਸਵਰਡਾਂ ਅਤੇ ਸੁਨੇਹਿਆਂ ਸਮੇਤ, ਫ਼ੋਨ \'ਤੇ ਦਿਖਾਈ ਦੇਣ ਵਾਲੀ ਜਾਂ ਚਲਾਈ ਜਾਣ ਵਾਲੀ ਕਿਸੇ ਵੀ ਚੀਜ਼ ਤੱਕ ਪਹੁੰਚ ਹੋਵੇਗੀ।&lt;br/&gt;&lt;br/&gt;%1$s ਐਪਾਂ ਨੂੰ ਉਦੋਂ ਤੱਕ ਸਟ੍ਰੀਮ ਅਤੇ ਸਿਸਟਮ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਦੀ ਵਰਤੋਂ ਕਰ ਸਕੇਗਾ, ਜਦੋਂ ਤੱਕ ਤੁਸੀਂ ਇਸ ਇਜਾਜ਼ਤ ਤੱਕ ਪਹੁੰਚ ਨਹੀਂ ਹਟਾ ਦਿੰਦੇ।"</string>
     <string name="helper_summary_nearby_device_streaming" msgid="2063965070936844876">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਤੁਹਾਡੇ <xliff:g id="DEVICE_NAME">%2$s</xliff:g> ਦੀ ਤਰਫ਼ੋਂ ਨਜ਼ਦੀਕੀ ਡੀਵਾਈਸਾਂ \'ਤੇ ਐਪਾਂ ਅਤੇ ਹੋਰ ਸਿਸਟਮ ਸੰਬੰਧੀ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਨੂੰ ਸਟ੍ਰੀਮ ਕਰਨ ਦੀ ਇਜਾਜ਼ਤ ਮੰਗ ਰਹੀ ਹੈ"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"ਡੀਵਾਈਸ"</string>
     <string name="summary_generic" msgid="1761976003668044801">"ਇਹ ਐਪ ਤੁਹਾਡੇ ਫ਼ੋਨ ਅਤੇ ਚੁਣੇ ਗਏ ਡੀਵਾਈਸ ਵਿਚਕਾਰ ਕਾਲਰ ਦੇ ਨਾਮ ਵਰਗੀ ਜਾਣਕਾਰੀ ਨੂੰ ਸਿੰਕ ਕਰ ਸਕੇਗੀ"</string>

@@ -16,14 +16,11 @@
 
 package com.android.server.power.stats;
 
-import android.hardware.power.stats.EnergyConsumer;
-import android.hardware.power.stats.EnergyConsumerResult;
 import android.hardware.power.stats.EnergyConsumerType;
 import android.os.BatteryConsumer;
 import android.os.Handler;
 import android.os.PersistableBundle;
 import android.os.Process;
-import android.power.PowerStatsInternal;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -34,20 +31,11 @@ import com.android.internal.os.Clock;
 import com.android.internal.os.CpuScalingPolicies;
 import com.android.internal.os.PowerProfile;
 import com.android.internal.os.PowerStats;
-import com.android.server.LocalServices;
 
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.function.IntSupplier;
-import java.util.function.Supplier;
 
 /**
  * Collects snapshots of power-related system statistics.
@@ -61,215 +49,58 @@ public class CpuPowerStatsCollector extends PowerStatsCollector {
     private static final long ENERGY_UNSPECIFIED = -1;
     private static final int DEFAULT_CPU_POWER_BRACKETS = 3;
     private static final int DEFAULT_CPU_POWER_BRACKETS_PER_ENERGY_CONSUMER = 2;
-    private static final long POWER_STATS_ENERGY_CONSUMERS_TIMEOUT = 20000;
+
+    interface Injector {
+        Handler getHandler();
+        Clock getClock();
+        PowerStatsUidResolver getUidResolver();
+        CpuScalingPolicies getCpuScalingPolicies();
+        PowerProfile getPowerProfile();
+        KernelCpuStatsReader getKernelCpuStatsReader();
+        ConsumedEnergyRetriever getConsumedEnergyRetriever();
+        IntSupplier getVoltageSupplier();
+        long getPowerStatsCollectionThrottlePeriod(String powerComponentName);
+
+        default int getDefaultCpuPowerBrackets() {
+            return DEFAULT_CPU_POWER_BRACKETS;
+        }
+
+        default int getDefaultCpuPowerBracketsPerEnergyConsumer() {
+            return DEFAULT_CPU_POWER_BRACKETS_PER_ENERGY_CONSUMER;
+        }
+    }
+
+    private final Injector mInjector;
 
     private boolean mIsInitialized;
-    private final CpuScalingPolicies mCpuScalingPolicies;
-    private final PowerProfile mPowerProfile;
-    private final KernelCpuStatsReader mKernelCpuStatsReader;
-    private final PowerStatsUidResolver mUidResolver;
-    private final Supplier<PowerStatsInternal> mPowerStatsSupplier;
-    private final IntSupplier mVoltageSupplier;
-    private final int mDefaultCpuPowerBrackets;
-    private final int mDefaultCpuPowerBracketsPerEnergyConsumer;
+    private CpuScalingPolicies mCpuScalingPolicies;
+    private PowerProfile mPowerProfile;
+    private KernelCpuStatsReader mKernelCpuStatsReader;
+    private ConsumedEnergyRetriever mConsumedEnergyRetriever;
+    private IntSupplier mVoltageSupplier;
+    private int mDefaultCpuPowerBrackets;
+    private int mDefaultCpuPowerBracketsPerEnergyConsumer;
     private long[] mCpuTimeByScalingStep;
     private long[] mTempCpuTimeByScalingStep;
     private long[] mTempUidStats;
     private final SparseArray<UidStats> mUidStats = new SparseArray<>();
     private boolean mIsPerUidTimeInStateSupported;
-    private PowerStatsInternal mPowerStatsInternal;
     private int[] mCpuEnergyConsumerIds = new int[0];
     private PowerStats.Descriptor mPowerStatsDescriptor;
     // Reusable instance
     private PowerStats mCpuPowerStats;
-    private CpuStatsArrayLayout mLayout;
+    private CpuPowerStatsLayout mLayout;
     private long mLastUpdateTimestampNanos;
     private long mLastUpdateUptimeMillis;
     private int mLastVoltageMv;
     private long[] mLastConsumedEnergyUws;
 
-    /**
-     * Captures the positions and lengths of sections of the stats array, such as time-in-state,
-     * power usage estimates etc.
-     */
-    public static class CpuStatsArrayLayout extends StatsArrayLayout {
-        private static final String EXTRA_DEVICE_TIME_BY_SCALING_STEP_POSITION = "dt";
-        private static final String EXTRA_DEVICE_TIME_BY_SCALING_STEP_COUNT = "dtc";
-        private static final String EXTRA_DEVICE_TIME_BY_CLUSTER_POSITION = "dc";
-        private static final String EXTRA_DEVICE_TIME_BY_CLUSTER_COUNT = "dcc";
-        private static final String EXTRA_UID_BRACKETS_POSITION = "ub";
-        private static final String EXTRA_UID_STATS_SCALING_STEP_TO_POWER_BRACKET = "us";
-
-        private int mDeviceCpuTimeByScalingStepPosition;
-        private int mDeviceCpuTimeByScalingStepCount;
-        private int mDeviceCpuTimeByClusterPosition;
-        private int mDeviceCpuTimeByClusterCount;
-
-        private int mUidPowerBracketsPosition;
-        private int mUidPowerBracketCount;
-
-        private int[] mScalingStepToPowerBracketMap;
-
-        /**
-         * Declare that the stats array has a section capturing CPU time per scaling step
-         */
-        public void addDeviceSectionCpuTimeByScalingStep(int scalingStepCount) {
-            mDeviceCpuTimeByScalingStepPosition = addDeviceSection(scalingStepCount);
-            mDeviceCpuTimeByScalingStepCount = scalingStepCount;
-        }
-
-        public int getCpuScalingStepCount() {
-            return mDeviceCpuTimeByScalingStepCount;
-        }
-
-        /**
-         * Saves the time duration in the <code>stats</code> element
-         * corresponding to the CPU scaling <code>state</code>.
-         */
-        public void setTimeByScalingStep(long[] stats, int step, long value) {
-            stats[mDeviceCpuTimeByScalingStepPosition + step] = value;
-        }
-
-        /**
-         * Extracts the time duration from the <code>stats</code> element
-         * corresponding to the CPU scaling <code>step</code>.
-         */
-        public long getTimeByScalingStep(long[] stats, int step) {
-            return stats[mDeviceCpuTimeByScalingStepPosition + step];
-        }
-
-        /**
-         * Declare that the stats array has a section capturing CPU time in each cluster
-         */
-        public void addDeviceSectionCpuTimeByCluster(int clusterCount) {
-            mDeviceCpuTimeByClusterPosition = addDeviceSection(clusterCount);
-            mDeviceCpuTimeByClusterCount = clusterCount;
-        }
-
-        public int getCpuClusterCount() {
-            return mDeviceCpuTimeByClusterCount;
-        }
-
-        /**
-         * Saves the time duration in the <code>stats</code> element
-         * corresponding to the CPU <code>cluster</code>.
-         */
-        public void setTimeByCluster(long[] stats, int cluster, long value) {
-            stats[mDeviceCpuTimeByClusterPosition + cluster] = value;
-        }
-
-        /**
-         * Extracts the time duration from the <code>stats</code> element
-         * corresponding to the CPU <code>cluster</code>.
-         */
-        public long getTimeByCluster(long[] stats, int cluster) {
-            return stats[mDeviceCpuTimeByClusterPosition + cluster];
-        }
-
-        /**
-         * Declare that the UID stats array has a section capturing CPU time per power bracket.
-         */
-        public void addUidSectionCpuTimeByPowerBracket(int[] scalingStepToPowerBracketMap) {
-            mScalingStepToPowerBracketMap = scalingStepToPowerBracketMap;
-            updatePowerBracketCount();
-            mUidPowerBracketsPosition = addUidSection(mUidPowerBracketCount);
-        }
-
-        private void updatePowerBracketCount() {
-            mUidPowerBracketCount = 1;
-            for (int bracket : mScalingStepToPowerBracketMap) {
-                if (bracket >= mUidPowerBracketCount) {
-                    mUidPowerBracketCount = bracket + 1;
-                }
-            }
-        }
-
-        public int[] getScalingStepToPowerBracketMap() {
-            return mScalingStepToPowerBracketMap;
-        }
-
-        public int getCpuPowerBracketCount() {
-            return mUidPowerBracketCount;
-        }
-
-        /**
-         * Saves time in <code>bracket</code> in the corresponding section of <code>stats</code>.
-         */
-        public void setUidTimeByPowerBracket(long[] stats, int bracket, long value) {
-            stats[mUidPowerBracketsPosition + bracket] = value;
-        }
-
-        /**
-         * Extracts the time in <code>bracket</code> from a UID stats array.
-         */
-        public long getUidTimeByPowerBracket(long[] stats, int bracket) {
-            return stats[mUidPowerBracketsPosition + bracket];
-        }
-
-        /**
-         * Copies the elements of the stats array layout into <code>extras</code>
-         */
-        public void toExtras(PersistableBundle extras) {
-            super.toExtras(extras);
-            extras.putInt(EXTRA_DEVICE_TIME_BY_SCALING_STEP_POSITION,
-                    mDeviceCpuTimeByScalingStepPosition);
-            extras.putInt(EXTRA_DEVICE_TIME_BY_SCALING_STEP_COUNT,
-                    mDeviceCpuTimeByScalingStepCount);
-            extras.putInt(EXTRA_DEVICE_TIME_BY_CLUSTER_POSITION,
-                    mDeviceCpuTimeByClusterPosition);
-            extras.putInt(EXTRA_DEVICE_TIME_BY_CLUSTER_COUNT,
-                    mDeviceCpuTimeByClusterCount);
-            extras.putInt(EXTRA_UID_BRACKETS_POSITION, mUidPowerBracketsPosition);
-            putIntArray(extras, EXTRA_UID_STATS_SCALING_STEP_TO_POWER_BRACKET,
-                    mScalingStepToPowerBracketMap);
-        }
-
-        /**
-         * Retrieves elements of the stats array layout from <code>extras</code>
-         */
-        public void fromExtras(PersistableBundle extras) {
-            super.fromExtras(extras);
-            mDeviceCpuTimeByScalingStepPosition =
-                    extras.getInt(EXTRA_DEVICE_TIME_BY_SCALING_STEP_POSITION);
-            mDeviceCpuTimeByScalingStepCount =
-                    extras.getInt(EXTRA_DEVICE_TIME_BY_SCALING_STEP_COUNT);
-            mDeviceCpuTimeByClusterPosition =
-                    extras.getInt(EXTRA_DEVICE_TIME_BY_CLUSTER_POSITION);
-            mDeviceCpuTimeByClusterCount =
-                    extras.getInt(EXTRA_DEVICE_TIME_BY_CLUSTER_COUNT);
-            mUidPowerBracketsPosition = extras.getInt(EXTRA_UID_BRACKETS_POSITION);
-            mScalingStepToPowerBracketMap =
-                    getIntArray(extras, EXTRA_UID_STATS_SCALING_STEP_TO_POWER_BRACKET);
-            if (mScalingStepToPowerBracketMap == null) {
-                mScalingStepToPowerBracketMap = new int[mDeviceCpuTimeByScalingStepCount];
-            }
-            updatePowerBracketCount();
-        }
-    }
-
-    public CpuPowerStatsCollector(CpuScalingPolicies cpuScalingPolicies, PowerProfile powerProfile,
-            PowerStatsUidResolver uidResolver, IntSupplier voltageSupplier, Handler handler,
-            long throttlePeriodMs) {
-        this(cpuScalingPolicies, powerProfile, handler, new KernelCpuStatsReader(), uidResolver,
-                () -> LocalServices.getService(PowerStatsInternal.class), voltageSupplier,
-                throttlePeriodMs, Clock.SYSTEM_CLOCK, DEFAULT_CPU_POWER_BRACKETS,
-                DEFAULT_CPU_POWER_BRACKETS_PER_ENERGY_CONSUMER);
-    }
-
-    public CpuPowerStatsCollector(CpuScalingPolicies cpuScalingPolicies, PowerProfile powerProfile,
-            Handler handler, KernelCpuStatsReader kernelCpuStatsReader,
-            PowerStatsUidResolver uidResolver, Supplier<PowerStatsInternal> powerStatsSupplier,
-            IntSupplier voltageSupplier, long throttlePeriodMs, Clock clock,
-            int defaultCpuPowerBrackets, int defaultCpuPowerBracketsPerEnergyConsumer) {
-        super(handler, throttlePeriodMs, clock);
-        mCpuScalingPolicies = cpuScalingPolicies;
-        mPowerProfile = powerProfile;
-        mKernelCpuStatsReader = kernelCpuStatsReader;
-        mUidResolver = uidResolver;
-        mPowerStatsSupplier = powerStatsSupplier;
-        mVoltageSupplier = voltageSupplier;
-        mDefaultCpuPowerBrackets = defaultCpuPowerBrackets;
-        mDefaultCpuPowerBracketsPerEnergyConsumer = defaultCpuPowerBracketsPerEnergyConsumer;
+    CpuPowerStatsCollector(Injector injector) {
+        super(injector.getHandler(), injector.getPowerStatsCollectionThrottlePeriod(
+                        BatteryConsumer.powerComponentIdToString(
+                                BatteryConsumer.POWER_COMPONENT_CPU)),
+                injector.getUidResolver(), injector.getClock());
+        mInjector = injector;
     }
 
     private boolean ensureInitialized() {
@@ -281,19 +112,27 @@ public class CpuPowerStatsCollector extends PowerStatsCollector {
             return false;
         }
 
-        mIsPerUidTimeInStateSupported = mKernelCpuStatsReader.nativeIsSupportedFeature();
-        mPowerStatsInternal = mPowerStatsSupplier.get();
+        mCpuScalingPolicies = mInjector.getCpuScalingPolicies();
+        mPowerProfile = mInjector.getPowerProfile();
+        mKernelCpuStatsReader = mInjector.getKernelCpuStatsReader();
+        mConsumedEnergyRetriever = mInjector.getConsumedEnergyRetriever();
+        mVoltageSupplier = mInjector.getVoltageSupplier();
+        mDefaultCpuPowerBrackets = mInjector.getDefaultCpuPowerBrackets();
+        mDefaultCpuPowerBracketsPerEnergyConsumer =
+                mInjector.getDefaultCpuPowerBracketsPerEnergyConsumer();
 
-        if (mPowerStatsInternal != null) {
-            readCpuEnergyConsumerIds();
-        }
+        mIsPerUidTimeInStateSupported = mKernelCpuStatsReader.isSupportedFeature();
+        mCpuEnergyConsumerIds =
+                mConsumedEnergyRetriever.getEnergyConsumerIds(EnergyConsumerType.CPU_CLUSTER);
+        mLastConsumedEnergyUws = new long[mCpuEnergyConsumerIds.length];
+        Arrays.fill(mLastConsumedEnergyUws, ENERGY_UNSPECIFIED);
 
         int cpuScalingStepCount = mCpuScalingPolicies.getScalingStepCount();
         mCpuTimeByScalingStep = new long[cpuScalingStepCount];
         mTempCpuTimeByScalingStep = new long[cpuScalingStepCount];
         int[] scalingStepToPowerBracketMap = initPowerBrackets();
 
-        mLayout = new CpuStatsArrayLayout();
+        mLayout = new CpuPowerStatsLayout();
         mLayout.addDeviceSectionCpuTimeByScalingStep(cpuScalingStepCount);
         mLayout.addDeviceSectionCpuTimeByCluster(mCpuScalingPolicies.getPolicies().length);
         mLayout.addDeviceSectionUsageDuration();
@@ -306,39 +145,14 @@ public class CpuPowerStatsCollector extends PowerStatsCollector {
         mLayout.toExtras(extras);
 
         mPowerStatsDescriptor = new PowerStats.Descriptor(BatteryConsumer.POWER_COMPONENT_CPU,
-                mLayout.getDeviceStatsArrayLength(), mLayout.getUidStatsArrayLength(), extras);
+                mLayout.getDeviceStatsArrayLength(), /* stateLabels */null,
+                /* stateStatsArrayLength */ 0, mLayout.getUidStatsArrayLength(), extras);
         mCpuPowerStats = new PowerStats(mPowerStatsDescriptor);
 
         mTempUidStats = new long[mLayout.getCpuPowerBracketCount()];
 
         mIsInitialized = true;
         return true;
-    }
-
-    private void readCpuEnergyConsumerIds() {
-        EnergyConsumer[] energyConsumerInfo = mPowerStatsInternal.getEnergyConsumerInfo();
-        if (energyConsumerInfo == null) {
-            return;
-        }
-
-        List<EnergyConsumer> cpuEnergyConsumers = new ArrayList<>();
-        for (EnergyConsumer energyConsumer : energyConsumerInfo) {
-            if (energyConsumer.type == EnergyConsumerType.CPU_CLUSTER) {
-                cpuEnergyConsumers.add(energyConsumer);
-            }
-        }
-        if (cpuEnergyConsumers.isEmpty()) {
-            return;
-        }
-
-        cpuEnergyConsumers.sort(Comparator.comparing(c -> c.ordinal));
-
-        mCpuEnergyConsumerIds = new int[cpuEnergyConsumers.size()];
-        for (int i = 0; i < mCpuEnergyConsumerIds.length; i++) {
-            mCpuEnergyConsumerIds[i] = cpuEnergyConsumers.get(i).id;
-        }
-        mLastConsumedEnergyUws = new long[cpuEnergyConsumers.size()];
-        Arrays.fill(mLastConsumedEnergyUws, ENERGY_UNSPECIFIED);
     }
 
     private int[] initPowerBrackets() {
@@ -371,6 +185,7 @@ public class CpuPowerStatsCollector extends PowerStatsCollector {
         }
         return stepToBracketMap;
     }
+
 
     private int[] initPowerBracketsByCluster(int defaultBracketCountPerCluster) {
         int[] stepToBracketMap = new int[mCpuScalingPolicies.getScalingStepCount()];
@@ -531,7 +346,7 @@ public class CpuPowerStatsCollector extends PowerStatsCollector {
 
         mCpuPowerStats.uidStats.clear();
         // TODO(b/305120724): additionally retrieve time-in-cluster for each CPU cluster
-        long newTimestampNanos = mKernelCpuStatsReader.nativeReadCpuStats(this::processUidStats,
+        long newTimestampNanos = mKernelCpuStatsReader.readCpuStats(this::processUidStats,
                 mLayout.getScalingStepToPowerBracketMap(), mLastUpdateTimestampNanos,
                 mTempCpuTimeByScalingStep, mTempUidStats);
         for (int step = mLayout.getCpuScalingStepCount() - 1; step >= 0; step--) {
@@ -571,35 +386,20 @@ public class CpuPowerStatsCollector extends PowerStatsCollector {
         int averageVoltage = mLastVoltageMv != 0 ? (mLastVoltageMv + voltageMv) / 2 : voltageMv;
         mLastVoltageMv = voltageMv;
 
-        CompletableFuture<EnergyConsumerResult[]> future =
-                mPowerStatsInternal.getEnergyConsumedAsync(mCpuEnergyConsumerIds);
-        EnergyConsumerResult[] results = null;
-        try {
-            results = future.get(
-                    POWER_STATS_ENERGY_CONSUMERS_TIMEOUT, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            Slog.e(TAG, "Could not obtain energy consumers from PowerStatsService", e);
-        }
-        if (results == null) {
+        long[] energyUws = mConsumedEnergyRetriever.getConsumedEnergyUws(mCpuEnergyConsumerIds);
+        if (energyUws == null) {
             return;
         }
 
-        for (int i = 0; i < mCpuEnergyConsumerIds.length; i++) {
-            int id = mCpuEnergyConsumerIds[i];
-            for (EnergyConsumerResult result : results) {
-                if (result.id == id) {
-                    long energyDelta = mLastConsumedEnergyUws[i] != ENERGY_UNSPECIFIED
-                            ? result.energyUWs - mLastConsumedEnergyUws[i] : 0;
-                    if (energyDelta < 0) {
-                        // Likely, restart of powerstats HAL
-                        energyDelta = 0;
-                    }
-                    mLayout.setConsumedEnergy(mCpuPowerStats.stats, i,
-                            uJtoUc(energyDelta, averageVoltage));
-                    mLastConsumedEnergyUws[i] = result.energyUWs;
-                    break;
-                }
+        for (int i = energyUws.length - 1; i >= 0; i--) {
+            long energyDelta = mLastConsumedEnergyUws[i] != ENERGY_UNSPECIFIED
+                    ? energyUws[i] - mLastConsumedEnergyUws[i] : 0;
+            if (energyDelta < 0) {
+                // Likely, restart of powerstats HAL
+                energyDelta = 0;
             }
+            mLayout.setConsumedEnergy(mCpuPowerStats.stats, i, uJtoUc(energyDelta, averageVoltage));
+            mLastConsumedEnergyUws[i] = energyUws[i];
         }
     }
 
@@ -622,7 +422,8 @@ public class CpuPowerStatsCollector extends PowerStatsCollector {
 
         boolean nonzero = false;
         for (int bracket = powerBracketCount - 1; bracket >= 0; bracket--) {
-            long delta = timeByPowerBracket[bracket] - uidStats.timeByPowerBracket[bracket];
+            long delta = Math.max(0,
+                    timeByPowerBracket[bracket] - uidStats.timeByPowerBracket[bracket]);
             if (delta != 0) {
                 nonzero = true;
             }
@@ -648,10 +449,27 @@ public class CpuPowerStatsCollector extends PowerStatsCollector {
         }
     }
 
+    @Override
+    protected void onUidRemoved(int uid) {
+        super.onUidRemoved(uid);
+        mUidStats.remove(uid);
+    }
+
     /**
      * Native class that retrieves CPU stats from the kernel.
      */
     public static class KernelCpuStatsReader {
+        protected boolean isSupportedFeature() {
+            return nativeIsSupportedFeature();
+        }
+
+        protected long readCpuStats(KernelCpuStatsCallback callback,
+                int[] scalingStepToPowerBracketMap, long lastUpdateTimestampNanos,
+                long[] outCpuTimeByScalingStep, long[] tempForUidStats) {
+            return nativeReadCpuStats(callback, scalingStepToPowerBracketMap,
+                    lastUpdateTimestampNanos, outCpuTimeByScalingStep, tempForUidStats);
+        }
+
         protected native boolean nativeIsSupportedFeature();
 
         protected native long nativeReadCpuStats(KernelCpuStatsCallback callback,

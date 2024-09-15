@@ -168,6 +168,9 @@ public class KeySyncTask implements Runnable {
     }
 
     private void syncKeys() throws RemoteException {
+        if (mCredentialUpdated && mRecoverableKeyStoreDb.getBadRemoteGuessCounter(mUserId) != 0) {
+            mRecoverableKeyStoreDb.setBadRemoteGuessCounter(mUserId, 0);
+        }
         int generation = mPlatformKeyManager.getGenerationId(mUserId);
         if (mCredentialType == LockPatternUtils.CREDENTIAL_TYPE_NONE) {
             // Application keys for the user will not be available for sync.

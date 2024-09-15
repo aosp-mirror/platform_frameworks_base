@@ -16,6 +16,8 @@
 
 package android.widget;
 
+import static android.view.flags.Flags.viewVelocityApi;
+
 import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
 import android.annotation.NonNull;
@@ -5098,6 +5100,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 boolean more = scroller.computeScrollOffset();
                 final int y = scroller.getCurrY();
 
+                // For variable refresh rate project to track the current velocity of this View
+                if (viewVelocityApi()) {
+                    setFrameContentVelocity(Math.abs(mScroller.getCurrVelocity()));
+                }
+
                 // Flip sign to convert finger direction to list items direction
                 // (e.g. finger moving down means list is moving towards the top)
                 int delta = consumeFlingInStretch(mLastFlingY - y);
@@ -5191,6 +5198,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     } else {
                         invalidate();
                         postOnAnimation(this);
+                    }
+                    // For variable refresh rate project to track the current velocity of this View
+                    if (viewVelocityApi()) {
+                        setFrameContentVelocity(Math.abs(mScroller.getCurrVelocity()));
                     }
                 } else {
                     endFling();

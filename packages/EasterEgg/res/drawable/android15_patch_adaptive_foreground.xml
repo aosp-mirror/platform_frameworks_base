@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Copyright (C) 2024 The Android Open Source Project
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+         http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- zoomies -->
+    <group>
+        <path
+            android:pathData="M53,42C52.21,50.58 46.46,68.95 32.11,74.63C19.22,79.75 5.77,82.32 1.19,83.19C0.68,83.29 0.28,83.36 0,83.42V108H54H108V83.42C107.72,83.36 107.32,83.29 106.81,83.19C102.23,82.32 88.78,79.75 75.89,74.63C61.54,68.95 55.79,50.58 55,42H54H53Z"
+            android:fillColor="#C6FF00"
+            android:fillType="evenOdd"/>
+        <path
+            android:pathData="M53.25,42C52.88,50.53 50.44,69.01 43.68,74.67C36.91,80.33 32.65,82.86 31.37,83.41L54,102.87L76.63,83.41C75.35,82.86 71.09,80.33 64.32,74.67C57.56,69.01 55.12,50.53 54.75,42H54H53.25Z"
+            android:fillColor="#ffffff"
+            android:fillType="evenOdd"/>
+        <path
+            android:pathData="M54,42m-1,0a1,1 0,1 1,2 0a1,1 0,1 1,-2 0"
+            android:fillColor="#ffffff"/>
+    </group>
+    <group>
+        <!-- head! it's like sputnik -->
+        <path
+            android:pathData="M54,94.25m-26.25,0a26.25,26.25 0,1 1,52.5 0a26.25,26.25 0,1 1,-52.5 0"
+            android:fillColor="#34A853"/>
+        <!-- ant -->
+        <path
+            android:pathData="M38,63.5L44.5,74.5"
+            android:strokeWidth="5"
+            android:fillColor="#00000000"
+            android:strokeColor="#34A853"
+            android:strokeLineCap="round"/>
+        <path
+            android:pathData="M70,63.5L63.5,74.5"
+            android:strokeWidth="5"
+            android:fillColor="#00000000"
+            android:strokeColor="#34A853"
+            android:strokeLineCap="round"/>
+    </group>
+    <!-- spaceship -->
+    <path
+        android:pathData="M54,34C52.34,34 51,35.29 51,36.88V40.44C51,40.75 51.25,41 51.56,41C51.87,41 52.13,40.75 52.13,40.44V39.48C52.13,38.87 52.63,38.37 53.25,38.37H54.75C55.37,38.37 55.87,38.87 55.87,39.48V40.44C55.87,40.75 56.13,41 56.44,41C56.75,41 57,40.75 57,40.44V36.88C57,35.29 55.66,34 54,34H54Z"
+        android:fillColor="#E9F3EB"/>
+</vector>

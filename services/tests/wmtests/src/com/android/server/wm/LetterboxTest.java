@@ -172,14 +172,14 @@ public class LetterboxTest {
     @Test
     public void testSurfaceOrigin_applied() {
         mLetterbox.layout(new Rect(0, 0, 10, 10), new Rect(0, 1, 10, 10), new Point(1000, 2000));
-        mLetterbox.applySurfaceChanges(mTransaction);
+        applySurfaceChanges();
         verify(mTransaction).setPosition(mSurfaces.top, -1000, -2000);
     }
 
     @Test
     public void testApplySurfaceChanges_setColor() {
         mLetterbox.layout(new Rect(0, 0, 10, 10), new Rect(0, 1, 10, 10), new Point(1000, 2000));
-        mLetterbox.applySurfaceChanges(mTransaction);
+        applySurfaceChanges();
 
         verify(mTransaction).setColor(mSurfaces.top, new float[]{0, 0, 0});
 
@@ -187,7 +187,7 @@ public class LetterboxTest {
 
         assertTrue(mLetterbox.needsApplySurfaceChanges());
 
-        mLetterbox.applySurfaceChanges(mTransaction);
+        applySurfaceChanges();
 
         verify(mTransaction).setColor(mSurfaces.top, new float[]{0, 1, 0});
     }
@@ -195,7 +195,7 @@ public class LetterboxTest {
     @Test
     public void testNeedsApplySurfaceChanges_wallpaperBackgroundRequested() {
         mLetterbox.layout(new Rect(0, 0, 10, 10), new Rect(0, 1, 10, 10), new Point(1000, 2000));
-        mLetterbox.applySurfaceChanges(mTransaction);
+        applySurfaceChanges();
 
         verify(mTransaction).setAlpha(mSurfaces.top, 1.0f);
         assertFalse(mLetterbox.needsApplySurfaceChanges());
@@ -204,14 +204,14 @@ public class LetterboxTest {
 
         assertTrue(mLetterbox.needsApplySurfaceChanges());
 
-        mLetterbox.applySurfaceChanges(mTransaction);
+        applySurfaceChanges();
         verify(mTransaction).setAlpha(mSurfaces.fullWindowSurface, mDarkScrimAlpha);
     }
 
     @Test
     public void testNeedsApplySurfaceChanges_setParentSurface() {
         mLetterbox.layout(new Rect(0, 0, 10, 10), new Rect(0, 1, 10, 10), new Point(1000, 2000));
-        mLetterbox.applySurfaceChanges(mTransaction);
+        applySurfaceChanges();
 
         verify(mTransaction).reparent(mSurfaces.top, mParentSurface);
         assertFalse(mLetterbox.needsApplySurfaceChanges());
@@ -220,14 +220,14 @@ public class LetterboxTest {
 
         assertTrue(mLetterbox.needsApplySurfaceChanges());
 
-        mLetterbox.applySurfaceChanges(mTransaction);
+        applySurfaceChanges();
         verify(mTransaction).reparent(mSurfaces.top, mParentSurface);
     }
 
     @Test
     public void testApplySurfaceChanges_cornersNotRounded_surfaceFullWindowSurfaceNotCreated() {
         mLetterbox.layout(new Rect(0, 0, 10, 10), new Rect(0, 1, 10, 10), new Point(1000, 2000));
-        mLetterbox.applySurfaceChanges(mTransaction);
+        applySurfaceChanges();
 
         assertNull(mSurfaces.fullWindowSurface);
     }
@@ -236,7 +236,7 @@ public class LetterboxTest {
     public void testApplySurfaceChanges_cornersRounded_surfaceFullWindowSurfaceCreated() {
         mAreCornersRounded = true;
         mLetterbox.layout(new Rect(0, 0, 10, 10), new Rect(0, 1, 10, 10), new Point(1000, 2000));
-        mLetterbox.applySurfaceChanges(mTransaction);
+        applySurfaceChanges();
 
         assertNotNull(mSurfaces.fullWindowSurface);
     }
@@ -245,7 +245,7 @@ public class LetterboxTest {
     public void testApplySurfaceChanges_wallpaperBackground_surfaceFullWindowSurfaceCreated() {
         mHasWallpaperBackground = true;
         mLetterbox.layout(new Rect(0, 0, 10, 10), new Rect(0, 1, 10, 10), new Point(1000, 2000));
-        mLetterbox.applySurfaceChanges(mTransaction);
+        applySurfaceChanges();
 
         assertNotNull(mSurfaces.fullWindowSurface);
     }
@@ -254,7 +254,7 @@ public class LetterboxTest {
     public void testNotIntersectsOrFullyContains_cornersRounded() {
         mAreCornersRounded = true;
         mLetterbox.layout(new Rect(0, 0, 10, 10), new Rect(0, 1, 10, 10), new Point(0, 0));
-        mLetterbox.applySurfaceChanges(mTransaction);
+        applySurfaceChanges();
 
         assertTrue(mLetterbox.notIntersectsOrFullyContains(new Rect(1, 2, 9, 9)));
     }
@@ -262,12 +262,17 @@ public class LetterboxTest {
     @Test
     public void testSurfaceOrigin_changeCausesReapply() {
         mLetterbox.layout(new Rect(0, 0, 10, 10), new Rect(0, 1, 10, 10), new Point(1000, 2000));
-        mLetterbox.applySurfaceChanges(mTransaction);
+        applySurfaceChanges();
         clearInvocations(mTransaction);
         mLetterbox.layout(new Rect(0, 0, 10, 10), new Rect(0, 1, 10, 10), new Point(0, 0));
         assertTrue(mLetterbox.needsApplySurfaceChanges());
-        mLetterbox.applySurfaceChanges(mTransaction);
+        applySurfaceChanges();
         verify(mTransaction).setPosition(mSurfaces.top, 0, 0);
+    }
+
+    private void applySurfaceChanges() {
+        mLetterbox.applySurfaceChanges(/* syncTransaction */ mTransaction,
+                /* pendingTransaction */ mTransaction);
     }
 
     class SurfaceControlMocker implements Supplier<SurfaceControl.Builder> {

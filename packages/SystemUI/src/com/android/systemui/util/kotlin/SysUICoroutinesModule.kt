@@ -32,7 +32,7 @@ import kotlinx.coroutines.plus
 
 private const val LIMIT_BACKGROUND_DISPATCHER_THREADS = true
 
-/** Providers for various SystemIU specific coroutines-related constructs. */
+/** Providers for various SystemUI-specific coroutines-related constructs. */
 @Module
 class SysUICoroutinesModule {
     @Provides

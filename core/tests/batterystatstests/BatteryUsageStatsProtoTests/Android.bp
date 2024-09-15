@@ -21,7 +21,7 @@ android_test {
         "truth",
     ],
 
-    libs: ["android.test.runner"],
+    libs: ["android.test.runner.stubs.system"],
 
     platform_apis: true,
     certificate: "platform",

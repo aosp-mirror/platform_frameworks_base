@@ -27,7 +27,6 @@ import android.hardware.face.Face;
 import android.hardware.keymaster.HardwareAuthToken;
 import android.util.Slog;
 
-import com.android.server.biometrics.Flags;
 import com.android.server.biometrics.HardwareAuthTokenUtils;
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.sensors.AcquisitionClient;
@@ -50,16 +49,6 @@ import java.util.function.Consumer;
  * Response handler for the {@link ISessionCallback} HAL AIDL interface.
  */
 public class AidlResponseHandler extends ISessionCallback.Stub {
-    /**
-     * Interface to send results to the AidlResponseHandler's owner.
-     */
-    public interface HardwareUnavailableCallback {
-        /**
-         * Invoked when the HAL sends ERROR_HW_UNAVAILABLE.
-         */
-        void onHardwareUnavailable();
-    }
-
     /**
      * Interface to send results to the AidlResponseHandler's owner.
      */
@@ -90,8 +79,6 @@ public class AidlResponseHandler extends ISessionCallback.Stub {
     @NonNull
     private final AuthSessionCoordinator mAuthSessionCoordinator;
     @NonNull
-    private final HardwareUnavailableCallback mHardwareUnavailableCallback;
-    @NonNull
     private final AidlResponseHandlerCallback mAidlResponseHandlerCallback;
 
     public AidlResponseHandler(@NonNull Context context,
@@ -99,24 +86,6 @@ public class AidlResponseHandler extends ISessionCallback.Stub {
             @NonNull LockoutTracker lockoutTracker,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher,
             @NonNull AuthSessionCoordinator authSessionCoordinator,
-            @NonNull HardwareUnavailableCallback hardwareUnavailableCallback) {
-        this(context, scheduler, sensorId, userId, lockoutTracker, lockoutResetDispatcher,
-                authSessionCoordinator, hardwareUnavailableCallback,
-                new AidlResponseHandlerCallback() {
-                    @Override
-                    public void onEnrollSuccess() {}
-
-                    @Override
-                    public void onHardwareUnavailable() {}
-                });
-    }
-
-    public AidlResponseHandler(@NonNull Context context,
-            @NonNull BiometricScheduler scheduler, int sensorId, int userId,
-            @NonNull LockoutTracker lockoutTracker,
-            @NonNull LockoutResetDispatcher lockoutResetDispatcher,
-            @NonNull AuthSessionCoordinator authSessionCoordinator,
-            @NonNull HardwareUnavailableCallback hardwareUnavailableCallback,
             @NonNull AidlResponseHandlerCallback aidlResponseHandlerCallback) {
         mContext = context;
         mScheduler = scheduler;
@@ -125,7 +94,6 @@ public class AidlResponseHandler extends ISessionCallback.Stub {
         mLockoutTracker = lockoutTracker;
         mLockoutResetDispatcher = lockoutResetDispatcher;
         mAuthSessionCoordinator = authSessionCoordinator;
-        mHardwareUnavailableCallback = hardwareUnavailableCallback;
         mAidlResponseHandlerCallback = aidlResponseHandlerCallback;
     }
 
@@ -185,11 +153,7 @@ public class AidlResponseHandler extends ISessionCallback.Stub {
         handleResponse(ErrorConsumer.class, (c) -> {
             c.onError(error, vendorCode);
             if (error == Error.HW_UNAVAILABLE) {
-                if (Flags.deHidl()) {
-                    mAidlResponseHandlerCallback.onHardwareUnavailable();
-                } else {
-                    mHardwareUnavailableCallback.onHardwareUnavailable();
-                }
+                mAidlResponseHandlerCallback.onHardwareUnavailable();
             }
         });
     }

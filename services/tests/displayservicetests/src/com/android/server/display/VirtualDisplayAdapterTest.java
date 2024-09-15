@@ -18,12 +18,14 @@ package com.android.server.display;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.hardware.display.IVirtualDisplayCallback;
 import android.hardware.display.VirtualDisplayConfig;
 import android.os.IBinder;
+import android.os.Process;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
@@ -85,6 +87,25 @@ public class VirtualDisplayAdapterTest {
                 /* uniqueId= */ "uniqueId", /* surface= */ null, /* flags= */ 0, config);
 
         assertNotNull(result);
+    }
+
+    @Test
+    public void testCreatesVirtualDisplay_checkGeneratedDisplayUniqueIdPrefix() {
+        VirtualDisplayConfig config = new VirtualDisplayConfig.Builder("test", /* width= */ 1,
+                /* height= */ 1, /* densityDpi= */ 1).build();
+
+        final String packageName = "testpackage";
+        final String displayUniqueId = VirtualDisplayAdapter.generateDisplayUniqueId(
+                packageName, Process.myUid(), config);
+
+        DisplayDevice result = mVirtualDisplayAdapter.createVirtualDisplayLocked(
+                mMockCallback, /* projection= */ null, /* ownerUid= */ 10,
+                packageName, displayUniqueId, /* surface= */ null, /* flags= */ 0, config);
+
+        assertNotNull(result);
+
+        final String uniqueId = result.getUniqueId();
+        assertTrue(uniqueId.startsWith(VirtualDisplayAdapter.UNIQUE_ID_PREFIX + packageName));
     }
 
     @Test

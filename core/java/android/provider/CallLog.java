@@ -2017,7 +2017,7 @@ public class CallLog {
                 return false;
             }
             final UserInfo userInfo = userManager.getUserInfo(userId);
-            return userInfo != null && !userInfo.isManagedProfile();
+            return userInfo != null && !userInfo.isProfile();
         }
 
         /**

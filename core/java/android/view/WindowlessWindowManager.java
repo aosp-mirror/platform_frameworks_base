@@ -349,12 +349,49 @@ public class WindowlessWindowManager implements IWindowSession {
     }
 
     @Override
-    public int relayout(IWindow window, WindowManager.LayoutParams inAttrs,
+    public int relayoutLegacy(IWindow window, WindowManager.LayoutParams inAttrs,
             int requestedWidth, int requestedHeight, int viewFlags, int flags, int seq,
             int lastSyncSeqId, ClientWindowFrames outFrames,
             MergedConfiguration outMergedConfiguration, SurfaceControl outSurfaceControl,
             InsetsState outInsetsState, InsetsSourceControl.Array outActiveControls,
             Bundle outSyncSeqIdBundle) {
+        return relayoutInner(window, inAttrs, requestedWidth, requestedHeight, viewFlags, flags,
+                seq, lastSyncSeqId, outFrames, outMergedConfiguration, outSurfaceControl,
+                outInsetsState, outActiveControls);
+    }
+
+    @Override
+    public int relayout(IWindow window, WindowManager.LayoutParams inAttrs,
+            int requestedWidth, int requestedHeight, int viewFlags, int flags, int seq,
+            int lastSyncSeqId, WindowRelayoutResult outRelayoutResult) {
+        final ClientWindowFrames outFrames;
+        final MergedConfiguration outMergedConfiguration;
+        final SurfaceControl outSurfaceControl;
+        final InsetsState outInsetsState;
+        final InsetsSourceControl.Array outActiveControls;
+        if (outRelayoutResult != null) {
+            outFrames = outRelayoutResult.frames;
+            outMergedConfiguration = outRelayoutResult.mergedConfiguration;
+            outSurfaceControl = outRelayoutResult.surfaceControl;
+            outInsetsState = outRelayoutResult.insetsState;
+            outActiveControls = outRelayoutResult.activeControls;
+        } else {
+            outFrames = null;
+            outMergedConfiguration = null;
+            outSurfaceControl = null;
+            outInsetsState = null;
+            outActiveControls = null;
+        }
+        return relayoutInner(window, inAttrs, requestedWidth, requestedHeight, viewFlags, flags,
+                seq, lastSyncSeqId, outFrames, outMergedConfiguration, outSurfaceControl,
+                outInsetsState, outActiveControls);
+    }
+
+    private int relayoutInner(IWindow window, WindowManager.LayoutParams inAttrs,
+            int requestedWidth, int requestedHeight, int viewFlags, int flags, int seq,
+            int lastSyncSeqId, ClientWindowFrames outFrames,
+            MergedConfiguration outMergedConfiguration, SurfaceControl outSurfaceControl,
+            InsetsState outInsetsState, InsetsSourceControl.Array outActiveControls) {
         final State state;
         synchronized (this) {
             state = mStateForWindow.get(window.asBinder());
@@ -439,10 +476,10 @@ public class WindowlessWindowManager implements IWindowSession {
     public void relayoutAsync(IWindow window, WindowManager.LayoutParams inAttrs,
             int requestedWidth, int requestedHeight, int viewFlags, int flags, int seq,
             int lastSyncSeqId) {
-        relayout(window, inAttrs, requestedWidth, requestedHeight, viewFlags, flags, seq,
+        relayoutInner(window, inAttrs, requestedWidth, requestedHeight, viewFlags, flags, seq,
                 lastSyncSeqId, null /* outFrames */, null /* outMergedConfiguration */,
                 null /* outSurfaceControl */, null /* outInsetsState */,
-                null /* outActiveControls */, null /* outSyncSeqIdBundle */);
+                null /* outActiveControls */);
     }
 
     @Override
@@ -566,10 +603,6 @@ public class WindowlessWindowManager implements IWindowSession {
     }
 
     @Override
-    public void updatePointerIcon(android.view.IWindow window) {
-    }
-
-    @Override
     public void updateTapExcludeRegion(android.view.IWindow window,
             android.graphics.Region region) {
     }
@@ -638,7 +671,7 @@ public class WindowlessWindowManager implements IWindowSession {
                 mTmpConfig.setConfiguration(mConfiguration, mConfiguration);
                 s.mClient.resized(mTmpFrames, false /* reportDraw */, mTmpConfig, state,
                         false /* forceLayout */, false /* alwaysConsumeSystemBars */, s.mDisplayId,
-                        Integer.MAX_VALUE, false /* dragResizing */);
+                        Integer.MAX_VALUE, false /* dragResizing */, null /* activityWindowInfo */);
             } catch (RemoteException e) {
                 // Too bad
             }

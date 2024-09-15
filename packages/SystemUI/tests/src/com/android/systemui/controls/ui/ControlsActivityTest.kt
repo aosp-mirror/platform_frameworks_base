@@ -19,8 +19,8 @@ package com.android.systemui.controls.ui
 import android.content.Intent
 import android.content.res.Configuration
 import android.service.dreams.IDreamManager
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import androidx.test.rule.ActivityTestRule
 import com.android.systemui.SysuiTestCase
@@ -39,7 +39,7 @@ import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 class ControlsActivityTest : SysuiTestCase() {
     @Mock private lateinit var uiController: ControlsUiController

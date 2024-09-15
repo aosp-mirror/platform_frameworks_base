@@ -244,8 +244,9 @@ import java.util.function.Consumer;
             // Broadcast messages shouldn't be sent with any permissions tagged per CHRE API
             // requirements.
             if (!messagePermissions.isEmpty()) {
-                Log.wtf(TAG, "Received broadcast message with permissions from "
+                Log.e(TAG, "Received broadcast message with permissions from "
                         + message.getNanoAppId());
+                return ErrorCode.PERMANENT_ERROR;
             }
 
             ContextHubEventLogger.getInstance().logMessageFromNanoapp(contextHubId, message,

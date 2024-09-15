@@ -26,7 +26,7 @@ import dalvik.annotation.optimization.NeverCompile;
 
 import java.io.PrintWriter;
 
-final class BroadcastFilter extends IntentFilter {
+public final class BroadcastFilter extends IntentFilter {
     // Back-pointer to the list this filter is in.
     final ReceiverList receiverList;
     final String packageName;
@@ -37,7 +37,7 @@ final class BroadcastFilter extends IntentFilter {
     final int owningUserId;
     final boolean instantApp;
     final boolean visibleToInstantApp;
-    final boolean exported;
+    public final boolean exported;
 
     BroadcastFilter(IntentFilter _filter, ReceiverList _receiverList,
             String _packageName, String _featureId, String _receiverId, String _requiredPermission,

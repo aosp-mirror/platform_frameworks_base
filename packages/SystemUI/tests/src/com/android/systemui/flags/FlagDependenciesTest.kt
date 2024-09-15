@@ -16,8 +16,8 @@
 
 package com.android.systemui.flags
 
-import android.testing.AndroidTestingRunner
 import android.util.Log
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import java.io.PrintWriter
@@ -25,7 +25,7 @@ import kotlin.test.fail
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class FlagDependenciesTest : SysuiTestCase() {
     @Test

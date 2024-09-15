@@ -16,12 +16,13 @@
 
 package com.android.server.display.brightness.strategy;
 
-import android.hardware.display.DisplayManagerInternal;
 import android.os.PowerManager;
 
 import com.android.server.display.DisplayBrightnessState;
 import com.android.server.display.brightness.BrightnessReason;
 import com.android.server.display.brightness.BrightnessUtils;
+import com.android.server.display.brightness.StrategyExecutionRequest;
+import com.android.server.display.brightness.StrategySelectionNotifyRequest;
 
 import java.io.PrintWriter;
 
@@ -42,7 +43,7 @@ public class TemporaryBrightnessStrategy implements DisplayBrightnessStrategy {
     // WindowManager or based on the display state.
     @Override
     public DisplayBrightnessState updateBrightness(
-            DisplayManagerInternal.DisplayPowerRequest displayPowerRequest) {
+            StrategyExecutionRequest strategyExecutionRequest) {
         // Todo(b/241308599): Introduce a validator class and add validations before setting
         // the brightness
         DisplayBrightnessState displayBrightnessState =
@@ -72,5 +73,16 @@ public class TemporaryBrightnessStrategy implements DisplayBrightnessStrategy {
     public void dump(PrintWriter writer) {
         writer.println("TemporaryBrightnessStrategy:");
         writer.println("  mTemporaryScreenBrightness:" + mTemporaryScreenBrightness);
+    }
+
+    @Override
+    public void strategySelectionPostProcessor(
+            StrategySelectionNotifyRequest strategySelectionNotifyRequest) {
+        // DO NOTHING
+    }
+
+    @Override
+    public int getReason() {
+        return BrightnessReason.REASON_TEMPORARY;
     }
 }

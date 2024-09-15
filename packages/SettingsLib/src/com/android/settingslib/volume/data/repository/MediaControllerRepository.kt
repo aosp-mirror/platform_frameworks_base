@@ -21,24 +21,33 @@ import android.media.session.MediaSessionManager
 import com.android.settingslib.bluetooth.LocalBluetoothManager
 import com.android.settingslib.bluetooth.headsetAudioModeChanges
 import com.android.settingslib.media.session.activeMediaChanges
+import com.android.settingslib.media.session.defaultRemoteSessionChanged
 import com.android.settingslib.volume.shared.AudioManagerEventsReceiver
 import com.android.settingslib.volume.shared.model.AudioManagerEvent
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filterIsInstance
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 
 /** Provides controllers for currently active device media sessions. */
 interface MediaControllerRepository {
 
-    /** Current [MediaController]. Null is emitted when there is no active [MediaController]. */
-    val activeLocalMediaController: StateFlow<MediaController?>
+    /**
+     * Get a list of controllers for all ongoing sessions. The controllers will be provided in
+     * priority order with the most important controller at index 0.
+     *
+     * This requires the [android.Manifest.permission.MEDIA_CONTENT_CONTROL] permission be held by
+     * the calling app.
+     */
+    val activeSessions: StateFlow<List<MediaController>>
 }
 
 class MediaControllerRepositoryImpl(
@@ -49,51 +58,20 @@ class MediaControllerRepositoryImpl(
     backgroundContext: CoroutineContext,
 ) : MediaControllerRepository {
 
-    private val devicesChanges =
-        audioManagerEventsReceiver.events.filterIsInstance(
-            AudioManagerEvent.StreamDevicesChanged::class
-        )
-
-    override val activeLocalMediaController: StateFlow<MediaController?> =
-        combine(
-                mediaSessionManager.activeMediaChanges.onStart {
-                    emit(mediaSessionManager.getActiveSessions(null))
+    override val activeSessions: StateFlow<List<MediaController>> =
+        merge(
+                mediaSessionManager.defaultRemoteSessionChanged.map {
+                    mediaSessionManager.getActiveSessions(null)
                 },
-                localBluetoothManager?.headsetAudioModeChanges?.onStart { emit(Unit) }
-                    ?: flowOf(null),
-                devicesChanges.onStart { emit(AudioManagerEvent.StreamDevicesChanged) },
-            ) { controllers, _, _ ->
-                controllers?.let(::findLocalMediaController)
-            }
+                mediaSessionManager.activeMediaChanges.filterNotNull(),
+                localBluetoothManager?.headsetAudioModeChanges?.map {
+                    mediaSessionManager.getActiveSessions(null)
+                } ?: emptyFlow(),
+                audioManagerEventsReceiver.events
+                    .filterIsInstance(AudioManagerEvent.StreamDevicesChanged::class)
+                    .map { mediaSessionManager.getActiveSessions(null) },
+            )
+            .onStart { emit(mediaSessionManager.getActiveSessions(null)) }
             .flowOn(backgroundContext)
-            .stateIn(coroutineScope, SharingStarted.WhileSubscribed(), null)
-
-    private fun findLocalMediaController(
-        controllers: Collection<MediaController>,
-    ): MediaController? {
-        var localController: MediaController? = null
-        val remoteMediaSessionLists: MutableList<String> = ArrayList()
-        for (controller in controllers) {
-            val playbackInfo: MediaController.PlaybackInfo = controller.playbackInfo ?: continue
-            when (playbackInfo.playbackType) {
-                MediaController.PlaybackInfo.PLAYBACK_TYPE_REMOTE -> {
-                    if (localController?.packageName.equals(controller.packageName)) {
-                        localController = null
-                    }
-                    if (!remoteMediaSessionLists.contains(controller.packageName)) {
-                        remoteMediaSessionLists.add(controller.packageName)
-                    }
-                }
-                MediaController.PlaybackInfo.PLAYBACK_TYPE_LOCAL -> {
-                    if (
-                        localController == null &&
-                            !remoteMediaSessionLists.contains(controller.packageName)
-                    ) {
-                        localController = controller
-                    }
-                }
-            }
-        }
-        return localController
-    }
+            .stateIn(coroutineScope, SharingStarted.WhileSubscribed(), emptyList())
 }

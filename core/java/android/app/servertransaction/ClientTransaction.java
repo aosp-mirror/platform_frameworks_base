@@ -249,6 +249,9 @@ public class ClientTransaction implements Parcelable, ObjectPoolItem {
 
     @Override
     public void recycle() {
+        if (Flags.disableObjectPool()) {
+            return;
+        }
         if (mTransactionItems != null) {
             int size = mTransactionItems.size();
             for (int i = 0; i < size; i++) {

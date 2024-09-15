@@ -18,9 +18,10 @@ package android.text;
 
 import static com.android.graphics.hwui.flags.Flags.highContrastTextLuminance;
 import static com.android.text.flags.Flags.FLAG_FIX_LINE_HEIGHT_FOR_LOCALE;
-import static com.android.text.flags.Flags.FLAG_USE_BOUNDS_FOR_WIDTH;
 import static com.android.text.flags.Flags.FLAG_LETTER_SPACING_JUSTIFICATION;
+import static com.android.text.flags.Flags.FLAG_USE_BOUNDS_FOR_WIDTH;
 
+import android.annotation.ColorInt;
 import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
@@ -70,6 +71,11 @@ import java.util.Locale;
  * For text that will not change, use a {@link StaticLayout}.
  */
 public abstract class Layout {
+
+    // These should match the constants in framework/base/libs/hwui/hwui/DrawTextFunctor.h
+    private static final float HIGH_CONTRAST_TEXT_BORDER_WIDTH_MIN_PX = 4f;
+    private static final float HIGH_CONTRAST_TEXT_BORDER_WIDTH_FACTOR = 0.2f;
+
     /** @hide */
     @IntDef(prefix = { "BREAK_STRATEGY_" }, value = {
             LineBreaker.BREAK_STRATEGY_SIMPLE,
@@ -393,6 +399,20 @@ public abstract class Layout {
         mUseBoundsForWidth = useBoundsForWidth;
         mShiftDrawingOffsetForStartOverhang = shiftDrawingOffsetForStartOverhang;
         mMinimumFontMetrics = minimumFontMetrics;
+
+        initSpanColors();
+    }
+
+    private void initSpanColors() {
+        if (mSpannedText && Flags.highContrastTextSmallTextRect()) {
+            if (mSpanColors == null) {
+                mSpanColors = new SpanColors();
+            } else {
+                mSpanColors.recycle();
+            }
+        } else {
+            mSpanColors = null;
+        }
     }
 
     /**
@@ -412,6 +432,7 @@ public abstract class Layout {
         mSpacingMult = spacingmult;
         mSpacingAdd = spacingadd;
         mSpannedText = text instanceof Spanned;
+        initSpanColors();
     }
 
     /**
@@ -494,9 +515,9 @@ public abstract class Layout {
 
         drawText(canvas, firstLine, lastLine);
 
-        // Since high contrast text draws a solid rectangle background behind the text, it covers up
-        // the highlights and selections. In this case we draw over the top of the text with a
-        // blend mode that ensures the text stays high-contrast.
+        // Since high contrast text draws a thick border on the text, the highlight actually makes
+        // it harder to read. In this case we draw over the top of the text with a blend mode that
+        // ensures the text stays high-contrast.
         if (shouldDrawHighlightsOnTop(canvas)) {
             drawHighlights(canvas, highlightPaths, highlightPaints, selectionPath, selectionPaint,
                     cursorOffsetVertical, firstLine, lastLine);
@@ -638,20 +659,20 @@ public abstract class Layout {
             return null;
         }
 
-        return isHighContrastTextDark() ? BlendMode.MULTIPLY : BlendMode.DIFFERENCE;
+        return isHighContrastTextDark(mPaint.getColor()) ? BlendMode.MULTIPLY
+                : BlendMode.DIFFERENCE;
     }
 
-    private boolean isHighContrastTextDark() {
+    private boolean isHighContrastTextDark(@ColorInt int color) {
         // High-contrast text mode
         // Determine if the text is black-on-white or white-on-black, so we know what blendmode will
         // give the highest contrast and most realistic text color.
         // This equation should match the one in libs/hwui/hwui/DrawTextFunctor.h
         if (highContrastTextLuminance()) {
             var lab = new double[3];
-            ColorUtils.colorToLAB(mPaint.getColor(), lab);
-            return lab[0] < 0.5;
+            ColorUtils.colorToLAB(color, lab);
+            return lab[0] < 50.0;
         } else {
-            var color = mPaint.getColor();
             int channelSum = Color.red(color) + Color.green(color) + Color.blue(color);
             return channelSum < (128 * 3);
         }
@@ -922,6 +943,9 @@ public abstract class Layout {
     public void drawBackground(
             @NonNull Canvas canvas,
             int firstLine, int lastLine) {
+
+        drawHighContrastBackground(canvas, firstLine, lastLine);
+
         // First, draw LineBackgroundSpans.
         // LineBackgroundSpans know nothing about the alignment, margins, or
         // direction of the layout or line.  XXX: Should they?
@@ -984,6 +1008,112 @@ public abstract class Layout {
                 }
             }
             mLineBackgroundSpans.recycle();
+        }
+    }
+
+    /**
+     * Draws a solid rectangle behind the text, the same color as the high contrast stroke border,
+     * to make it even easier to read.
+     *
+     * <p>We draw it here instead of in DrawTextFunctor so that multiple spans don't draw
+     * backgrounds over each other's text.
+     */
+    private void drawHighContrastBackground(@NonNull Canvas canvas, int firstLine, int lastLine) {
+        if (!shouldDrawHighlightsOnTop(canvas)) {
+            return;
+        }
+
+        var padding = Math.max(HIGH_CONTRAST_TEXT_BORDER_WIDTH_MIN_PX,
+                mPaint.getTextSize() * HIGH_CONTRAST_TEXT_BORDER_WIDTH_FACTOR);
+
+        var originalTextColor = mPaint.getColor();
+        var bgPaint = mWorkPlainPaint;
+        bgPaint.reset();
+        bgPaint.setColor(isHighContrastTextDark(originalTextColor) ? Color.WHITE : Color.BLACK);
+        bgPaint.setStyle(Paint.Style.FILL);
+
+        int start = getLineStart(firstLine);
+        int end = getLineEnd(lastLine);
+        // Draw a separate background rectangle for each line of text, that only surrounds the
+        // characters on that line. But we also have to check the text color for each character, and
+        // make sure we are drawing the correct contrasting background. This is because Spans can
+        // change colors throughout the text and we'll need to match our backgrounds.
+        if (mSpannedText && mSpanColors != null) {
+            mSpanColors.init(mWorkPaint, ((Spanned) mText), start, end);
+        }
+
+        forEachCharacterBounds(
+                start,
+                end,
+                firstLine,
+                lastLine,
+                new CharacterBoundsListener() {
+                    int mLastLineNum = -1;
+                    final RectF mLineBackground = new RectF();
+
+                    @ColorInt int mLastColor = originalTextColor;
+
+                    @Override
+                    public void onCharacterBounds(int index, int lineNum, float left, float top,
+                            float right, float bottom) {
+
+                        var newBackground = determineContrastingBackgroundColor(index);
+                        var hasBgColorChanged = newBackground != bgPaint.getColor();
+
+                        if (lineNum != mLastLineNum || hasBgColorChanged) {
+                            // Draw what we have so far, then reset the rect and update its color
+                            drawRect();
+                            mLineBackground.set(left, top, right, bottom);
+                            mLastLineNum = lineNum;
+
+                            if (hasBgColorChanged) {
+                                bgPaint.setColor(newBackground);
+                            }
+                        } else {
+                            mLineBackground.union(left, top, right, bottom);
+                        }
+                    }
+
+                    @Override
+                    public void onEnd() {
+                        drawRect();
+                    }
+
+                    private void drawRect() {
+                        if (!mLineBackground.isEmpty()) {
+                            mLineBackground.inset(-padding, -padding);
+                            canvas.drawRect(mLineBackground, bgPaint);
+                        }
+                    }
+
+                    private int determineContrastingBackgroundColor(int index) {
+                        if (!mSpannedText || mSpanColors == null) {
+                            // The text is not Spanned. it's all one color.
+                            return bgPaint.getColor();
+                        }
+
+                        // Sometimes the color will change, but not enough to warrant a background
+                        // color change. e.g. from black to dark grey still gets clamped to black,
+                        // so the background stays white and we don't need to draw a fresh
+                        // background.
+                        var textColor = mSpanColors.getColorAt(index);
+                        if (textColor == SpanColors.NO_COLOR_FOUND) {
+                            textColor = originalTextColor;
+                        }
+                        var hasColorChanged = textColor != mLastColor;
+                        if (hasColorChanged) {
+                            mLastColor = textColor;
+
+                            return isHighContrastTextDark(textColor) ? Color.WHITE : Color.BLACK;
+                        }
+
+                        return bgPaint.getColor();
+                    }
+                }
+        );
+
+        if (mSpanColors != null) {
+            mSpanColors.recycle();
         }
     }
 
@@ -1682,7 +1812,7 @@ public abstract class Layout {
         }
 
         if (bounds == null) {
-            throw  new IllegalArgumentException("bounds can't be null.");
+            throw new IllegalArgumentException("bounds can't be null.");
         }
 
         final int neededLength = 4 * (end - start);
@@ -1698,6 +1828,34 @@ public abstract class Layout {
 
         final int startLine = getLineForOffset(start);
         final int endLine = getLineForOffset(end - 1);
+
+        forEachCharacterBounds(start, end, startLine, endLine,
+                (index, lineNum, left, lineTop, right, lineBottom) -> {
+                    final int boundsIndex = boundsStart + 4 * (index - start);
+                    bounds[boundsIndex] = left;
+                    bounds[boundsIndex + 1] = lineTop;
+                    bounds[boundsIndex + 2] = right;
+                    bounds[boundsIndex + 3] = lineBottom;
+                });
+    }
+
+    /**
+     * Return the characters' bounds in the given range. The coordinates are in local text layout.
+     *
+     * @param start the start index to compute the character bounds, inclusive.
+     * @param end the end index to compute the character bounds, exclusive.
+     * @param startLine index of the line that contains {@code start}
+     * @param endLine index of the line that contains {@code end}
+     * @param listener called for each character with its bounds
+     *
+     */
+    private void forEachCharacterBounds(
+            @IntRange(from = 0) int start,
+            @IntRange(from = 0) int end,
+            @IntRange(from = 0) int startLine,
+            @IntRange(from = 0) int endLine,
+            CharacterBoundsListener listener
+    ) {
         float[] horizontalBounds = null;
         for (int line = startLine; line <= endLine; ++line) {
             final int lineStart = getLineStart(line);
@@ -1722,13 +1880,10 @@ public abstract class Layout {
                 final float left = horizontalBounds[offset * 2] + lineStartPos;
                 final float right = horizontalBounds[offset * 2 + 1] + lineStartPos;
 
-                final int boundsIndex = boundsStart + 4 * (index - start);
-                bounds[boundsIndex] = left;
-                bounds[boundsIndex + 1] = lineTop;
-                bounds[boundsIndex + 2] = right;
-                bounds[boundsIndex + 3] = lineBottom;
+                listener.onCharacterBounds(index, line, left, lineTop, right, lineBottom);
             }
         }
+        listener.onEnd();
     }
 
     /**
@@ -3487,6 +3642,7 @@ public abstract class Layout {
     private float mSpacingAdd;
     private static final Rect sTempRect = new Rect();
     private boolean mSpannedText;
+    @Nullable private SpanColors mSpanColors;
     private TextDirectionHeuristic mTextDir;
     private SpanSet<LineBackgroundSpan> mLineBackgroundSpans;
     private boolean mIncludePad;
@@ -4442,5 +4598,16 @@ public abstract class Layout {
     @FlaggedApi(FLAG_FIX_LINE_HEIGHT_FOR_LOCALE)
     public Paint.FontMetrics getMinimumFontMetrics() {
         return mMinimumFontMetrics;
+    }
+
+    /**
+     * Callback for {@link #forEachCharacterBounds(int, int, int, int, CharacterBoundsListener)}
+     */
+    private interface CharacterBoundsListener {
+        void onCharacterBounds(int index, int lineNum, float left, float top, float right,
+                float bottom);
+
+        /** Called after the last character has been sent to {@link #onCharacterBounds}. */
+        default void onEnd() {}
     }
 }

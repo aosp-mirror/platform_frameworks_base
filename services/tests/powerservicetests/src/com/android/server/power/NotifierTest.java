@@ -22,10 +22,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
@@ -52,6 +54,7 @@ import com.android.internal.app.IBatteryStats;
 import com.android.server.LocalServices;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.power.batterysaver.BatterySaverStateMachine;
+import com.android.server.power.feature.PowerManagerFlags;
 import com.android.server.statusbar.StatusBarManagerInternal;
 
 import org.junit.Before;
@@ -77,6 +80,9 @@ public class NotifierTest {
     @Mock private InattentiveSleepWarningController mInattentiveSleepWarningControllerMock;
     @Mock private Vibrator mVibrator;
     @Mock private StatusBarManagerInternal mStatusBarManagerInternal;
+    @Mock private WakeLockLog mWakeLockLog;
+
+    @Mock private PowerManagerFlags mPowerManagerFlags;
 
     private PowerManagerService mService;
     private Context mContextSpy;
@@ -222,6 +228,7 @@ public class NotifierTest {
 
     @Test
     public void testOnWakeLockListener_RemoteException_NoRethrow() {
+        when(mPowerManagerFlags.improveWakelockLatency()).thenReturn(true);
         createNotifier();
 
         IWakeLockCallback exceptingCallback = new IWakeLockCallback.Stub() {
@@ -235,6 +242,9 @@ public class NotifierTest {
         mNotifier.onWakeLockReleased(PowerManager.PARTIAL_WAKE_LOCK, "wakelockTag",
                 "my.package.name", uid, pid, /* workSource= */ null, /* historyTag= */ null,
                 exceptingCallback);
+        verifyZeroInteractions(mWakeLockLog);
+        mTestLooper.dispatchAll();
+        verify(mWakeLockLog).onWakeLockReleased("wakelockTag", uid, 1);
         mNotifier.onWakeLockAcquired(PowerManager.PARTIAL_WAKE_LOCK, "wakelockTag",
                 "my.package.name", uid, pid, /* workSource= */ null, /* historyTag= */ null,
                 exceptingCallback);
@@ -244,8 +254,27 @@ public class NotifierTest {
                 PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "wakelockTag",
                 "my.package.name", uid, pid, /* newWorkSource= */ null, /* newHistoryTag= */ null,
                 exceptingCallback);
+        verifyNoMoreInteractions(mWakeLockLog);
         mTestLooper.dispatchAll();
+        verify(mWakeLockLog).onWakeLockAcquired("wakelockTag", uid,
+                PowerManager.PARTIAL_WAKE_LOCK, 1);
         // If we didn't throw, we're good!
+
+        // Test with improveWakelockLatency flag false, hence the wakelock log will run on the same
+        // thread
+        clearInvocations(mWakeLockLog);
+        when(mPowerManagerFlags.improveWakelockLatency()).thenReturn(false);
+
+        mNotifier.onWakeLockAcquired(PowerManager.PARTIAL_WAKE_LOCK, "wakelockTag",
+                "my.package.name", uid, pid, /* workSource= */ null, /* historyTag= */ null,
+                exceptingCallback);
+        verify(mWakeLockLog).onWakeLockAcquired("wakelockTag", uid,
+                PowerManager.PARTIAL_WAKE_LOCK, -1);
+
+        mNotifier.onWakeLockReleased(PowerManager.PARTIAL_WAKE_LOCK, "wakelockTag",
+                "my.package.name", uid, pid, /* workSource= */ null, /* historyTag= */ null,
+                exceptingCallback);
+        verify(mWakeLockLog).onWakeLockReleased("wakelockTag", uid, -1);
     }
 
     private final PowerManagerService.Injector mInjector = new PowerManagerService.Injector() {
@@ -253,7 +282,7 @@ public class NotifierTest {
         Notifier createNotifier(Looper looper, Context context, IBatteryStats batteryStats,
                 SuspendBlocker suspendBlocker, WindowManagerPolicy policy,
                 FaceDownDetector faceDownDetector, ScreenUndimDetector screenUndimDetector,
-                Executor backgroundExecutor) {
+                Executor backgroundExecutor, PowerManagerFlags powerManagerFlags) {
             return mNotifierMock;
         }
 
@@ -326,6 +355,18 @@ public class NotifierTest {
     }
 
     private void createNotifier() {
+        Notifier.Injector injector = new Notifier.Injector() {
+            @Override
+            public long currentTimeMillis() {
+                return 1;
+            }
+
+            @Override
+            public WakeLockLog getWakeLockLog(Context context) {
+                return mWakeLockLog;
+            }
+        };
+
         mNotifier = new Notifier(
                 mTestLooper.getLooper(),
                 mContextSpy,
@@ -335,7 +376,7 @@ public class NotifierTest {
                 null,
                 null,
                 null,
-                mTestExecutor);
+                mTestExecutor, mPowerManagerFlags, injector);
     }
 
     private static class FakeExecutor implements Executor {

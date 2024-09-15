@@ -18,11 +18,17 @@ package com.android.systemui.scene
 
 import com.android.systemui.CoreStartable
 import com.android.systemui.bouncer.shared.flag.ComposeBouncerFlagsModule
+import com.android.systemui.notifications.ui.composable.NotificationsShadeSessionModule
+import com.android.systemui.scene.domain.SceneDomainModule
 import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor
+import com.android.systemui.scene.domain.resolver.HomeSceneFamilyResolverModule
+import com.android.systemui.scene.domain.resolver.NotifShadeSceneFamilyResolverModule
+import com.android.systemui.scene.domain.resolver.QuickSettingsSceneFamilyResolverModule
 import com.android.systemui.scene.domain.startable.SceneContainerStartable
-import com.android.systemui.scene.shared.flag.SceneContainerFlagsModule
+import com.android.systemui.scene.domain.startable.ScrimStartable
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.shade.shared.flag.DualShade
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -40,8 +46,16 @@ import dagger.multibindings.IntoMap
             GoneSceneModule::class,
             LockscreenSceneModule::class,
             QuickSettingsSceneModule::class,
-            SceneContainerFlagsModule::class,
             ShadeSceneModule::class,
+            QuickSettingsShadeSceneModule::class,
+            NotificationsShadeSceneModule::class,
+            NotificationsShadeSessionModule::class,
+            SceneDomainModule::class,
+
+            // List SceneResolver modules for supported SceneFamilies
+            HomeSceneFamilyResolverModule::class,
+            NotifShadeSceneFamilyResolverModule::class,
+            QuickSettingsSceneFamilyResolverModule::class,
         ],
 )
 interface SceneContainerFrameworkModule {
@@ -50,6 +64,11 @@ interface SceneContainerFrameworkModule {
     @IntoMap
     @ClassKey(SceneContainerStartable::class)
     fun containerStartable(impl: SceneContainerStartable): CoreStartable
+
+    @Binds
+    @IntoMap
+    @ClassKey(ScrimStartable::class)
+    fun scrimStartable(impl: ScrimStartable): CoreStartable
 
     @Binds
     @IntoMap
@@ -63,18 +82,33 @@ interface SceneContainerFrameworkModule {
         @Provides
         fun containerConfig(): SceneContainerConfig {
             return SceneContainerConfig(
-                // Note that this list is in z-order. The first one is the bottom-most and the
-                // last one is top-most.
+                // Note that this list is in z-order. The first one is the bottom-most and the last
+                // one is top-most.
                 sceneKeys =
-                    listOf(
+                    listOfNotNull(
                         Scenes.Gone,
                         Scenes.Communal,
                         Scenes.Lockscreen,
                         Scenes.Bouncer,
-                        Scenes.QuickSettings,
-                        Scenes.Shade,
+                        Scenes.QuickSettings.takeUnless { DualShade.isEnabled },
+                        Scenes.QuickSettingsShade.takeIf { DualShade.isEnabled },
+                        Scenes.NotificationsShade.takeIf { DualShade.isEnabled },
+                        Scenes.Shade.takeUnless { DualShade.isEnabled },
                     ),
                 initialSceneKey = Scenes.Lockscreen,
+                navigationDistances =
+                    mapOf(
+                            Scenes.Gone to 0,
+                            Scenes.Lockscreen to 0,
+                            Scenes.Communal to 1,
+                            Scenes.NotificationsShade to 2.takeIf { DualShade.isEnabled },
+                            Scenes.Shade to 2.takeUnless { DualShade.isEnabled },
+                            Scenes.QuickSettingsShade to 3.takeIf { DualShade.isEnabled },
+                            Scenes.QuickSettings to 3.takeUnless { DualShade.isEnabled },
+                            Scenes.Bouncer to 4,
+                        )
+                        .filterValues { it != null }
+                        .mapValues { checkNotNull(it.value) }
             )
         }
     }

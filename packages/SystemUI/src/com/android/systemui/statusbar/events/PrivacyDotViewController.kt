@@ -26,6 +26,7 @@ import android.widget.FrameLayout
 import androidx.core.animation.Animator
 import com.android.app.animation.Interpolators
 import com.android.internal.annotations.GuardedBy
+import com.android.systemui.Flags.privacyDotUnfoldWrongCornerFix
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
@@ -505,7 +506,9 @@ open class PrivacyDotViewController @Inject constructor(
             return
         }
 
-        if (state.rotation != currentViewState.rotation) {
+        val designatedCornerChanged = state.designatedCorner != currentViewState.designatedCorner
+        val rotationChanged = state.rotation != currentViewState.rotation
+        if (rotationChanged || (designatedCornerChanged && privacyDotUnfoldWrongCornerFix())) {
             // A rotation has started, hide the views to avoid flicker
             updateRotations(state.rotation, state.paddingTop)
         }
@@ -515,7 +518,7 @@ open class PrivacyDotViewController @Inject constructor(
             views.forEach { it.requestLayout() }
         }
 
-        if (state.designatedCorner != currentViewState.designatedCorner) {
+        if (designatedCornerChanged) {
             currentViewState.designatedCorner?.contentDescription = null
             state.designatedCorner?.contentDescription = state.contentDescription
 

@@ -105,7 +105,6 @@ public final class PackageManagerServiceTestParams {
     public boolean isEngBuild;
     public boolean isUserDebugBuild;
     public int sdkInt = Build.VERSION.SDK_INT;
-    public @Nullable BackgroundDexOptService backgroundDexOptService;
     public final String incrementalVersion = Build.VERSION.INCREMENTAL;
     public BroadcastHelper broadcastHelper;
     public AppDataHelper appDataHelper;

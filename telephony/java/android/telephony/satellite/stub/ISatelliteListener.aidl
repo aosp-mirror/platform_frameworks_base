@@ -74,4 +74,19 @@ oneway interface ISatelliteListener {
      * @param SatelliteCapabilities The current satellite capabilities.
      */
     void onSatelliteCapabilitiesChanged(in SatelliteCapabilities capabilities);
+
+    /**
+     * Called when supported state of satellite has changed
+     *
+     * @param supported True means satellite service is supported and false means it is not.
+     */
+    void onSatelliteSupportedStateChanged(in boolean supported);
+
+    /**
+     * Indicates that the satellite registration failed with following failure code
+     *
+     * @param causeCode the primary failure cause code of the procedure.
+     *        For LTE (EMM), cause codes are TS 24.301 Sec 9.9.3.9
+     */
+    void onRegistrationFailure(in int causeCode);
 }

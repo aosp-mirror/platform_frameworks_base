@@ -74,11 +74,11 @@ import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
 import androidx.core.math.MathUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.res.R;
 import com.android.systemui.people.data.model.PeopleTileModel;
 import com.android.systemui.people.widget.LaunchConversationActivity;
 import com.android.systemui.people.widget.PeopleSpaceWidgetProvider;
 import com.android.systemui.people.widget.PeopleTileKey;
+import com.android.systemui.res.R;
 
 import java.io.IOException;
 import java.text.NumberFormat;

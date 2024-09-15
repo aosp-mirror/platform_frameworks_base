@@ -165,6 +165,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -368,18 +369,32 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                 return false;
             }
 
+            int userId = UserHandle.getUserId(uid);
+
+            boolean isInSetup =
+                    getSecureInt(Settings.Secure.USER_SETUP_COMPLETE, userId)
+                             .map(setupState -> setupState == 0)
+                             .orElse(false);
+            if (isInSetup) {
+                return true;
+            }
+
+            boolean isInDeferredSetup =
+                    getSecureInt(Settings.Secure.USER_SETUP_PERSONALIZATION_STATE, userId)
+                            .map(state ->
+                                    state == Settings.Secure.USER_SETUP_PERSONALIZATION_STARTED)
+                            .orElse(false);
+            return isInDeferredSetup;
+        }
+
+        private Optional<Integer> getSecureInt(String settingName, int userId) {
             try {
-                int userId = UserHandle.getUserId(uid);
-                boolean isInSetup = Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                        Settings.Secure.USER_SETUP_COMPLETE, userId) == 0;
-                boolean isInDeferredSetup = Settings.Secure.getIntForUser(
-                        mContext.getContentResolver(),
-                        Settings.Secure.USER_SETUP_PERSONALIZATION_STATE, userId)
-                        == Settings.Secure.USER_SETUP_PERSONALIZATION_STARTED;
-                return isInSetup || isInDeferredSetup;
+                return Optional.of(
+                        Settings.Secure.getIntForUser(
+                                mContext.getContentResolver(), settingName, userId));
             } catch (Settings.SettingNotFoundException e) {
-                Slog.w(LOG_TAG, "Failed to check if the user is in restore: " + e);
-                return false;
+                Slog.i(LOG_TAG, "Setting " + settingName + " not found", e);
+                return Optional.empty();
             }
         }
 

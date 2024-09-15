@@ -18,11 +18,26 @@
 <resources>
   <color name="system_error_light">#B3261E</color>
   <color name="system_on_error_light">#FFFFFF</color>
-  <color name="system_error_container_light">#F9DEDC</color>
+  <color name="system_error_container_light">#F7DCDA</color>
   <color name="system_on_error_container_light">#410E0B</color>
 
-  <color name="system_error_dark">#EC928E</color>
-  <color name="system_on_error_dark">#410E0B</color>
-  <color name="system_error_container_dark">#F2B8B5</color>
-  <color name="system_on_error_container_dark">#601410</color>
+  <color name="system_error_dark">#F2B8B5</color>
+  <color name="system_on_error_dark">#601410</color>
+  <color name="system_error_container_dark">#FF8986</color>
+  <color name="system_on_error_container_dark">#410E0B</color>
+
+  <!-- With material deprecation of 'background' in favor of 'surface' we flatten these
+       on watches to match the black background requirements -->
+  <color name="system_surface_dark">#000000</color>
+  <color name="system_surface_dim_dark">#000000</color>
+  <color name="system_surface_bright_dark">#000000</color>
+
+  <!-- Wear flattens the typical 5 container layers to 3; container + high & low -->
+  <color name="system_surface_container_dark">#303030</color>
+  <color name="system_surface_variant_dark">#303030</color>
+  <color name="system_surface_container_high_dark">#474747</color>
+  <color name="system_surface_container_highest_dark">#474747</color>
+  <color name="system_surface_container_low_dark">#252626</color>
+  <color name="system_surface_container_lowest_dark">#252626</color>
+
 </resources>

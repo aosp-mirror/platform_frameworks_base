@@ -25,11 +25,13 @@ import com.android.systemui.bouncer.ui.helper.BouncerSceneLayout.STANDARD_BOUNCE
 import com.google.common.truth.Truth.assertThat
 import java.util.Locale
 import org.junit.Test
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameter
+import platform.test.runner.parameterized.Parameters
 import org.junit.runner.RunWith
-import org.junit.runners.Parameterized
 
 @SmallTest
-@RunWith(Parameterized::class)
+@RunWith(ParameterizedAndroidJunit4::class)
 class BouncerSceneLayoutTest : SysuiTestCase() {
 
     data object Phone :
@@ -79,7 +81,7 @@ class BouncerSceneLayoutTest : SysuiTestCase() {
 
     companion object {
         @JvmStatic
-        @Parameterized.Parameters(name = "{0}")
+        @Parameters(name = "{0}")
         fun testCases() =
             listOf(
                     Phone to
@@ -158,7 +160,7 @@ class BouncerSceneLayoutTest : SysuiTestCase() {
                 }
     }
 
-    @Parameterized.Parameter @JvmField var testCase: TestCase? = null
+    @Parameter @JvmField var testCase: TestCase? = null
 
     @Test
     fun calculateLayout() {

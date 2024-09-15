@@ -37,6 +37,8 @@ constructor(
         QSTileState.build(resources, theme, config.uiConfig) {
             val subtitleArray = resources.getStringArray(R.array.tile_states_color_correction)
 
+            iconRes = R.drawable.ic_qs_color_correction
+
             if (data.isEnabled) {
                 activationState = QSTileState.ActivationState.ACTIVE
                 secondaryLabel = subtitleArray[2]

@@ -24,14 +24,14 @@ import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.util.ArrayList;
 import java.util.List;
 
 
 /**
- * Contains the information of the template of vertical list content view for Biometric Prompt. Note
- * that there are limits on the item count and the number of characters allowed for each item's
- * text.
+ * Contains the information of the template of vertical list content view for Biometric Prompt.
  * <p>
  * Here's how you'd set a <code>PromptVerticalListContentView</code> on a Biometric Prompt:
  * <pre class="prettyprint">
@@ -49,8 +49,13 @@ import java.util.List;
  */
 @FlaggedApi(FLAG_CUSTOM_BIOMETRIC_PROMPT)
 public final class PromptVerticalListContentView implements PromptContentViewParcelable {
-    private static final int MAX_ITEM_NUMBER = 20;
-    private static final int MAX_EACH_ITEM_CHARACTER_NUMBER = 640;
+    @VisibleForTesting
+    static final int MAX_ITEM_NUMBER = 20;
+    @VisibleForTesting
+    static final int MAX_EACH_ITEM_CHARACTER_NUMBER = 640;
+    @VisibleForTesting
+    static final int MAX_DESCRIPTION_CHARACTER_NUMBER = 225;
+
     private final List<PromptContentItemParcelable> mContentList;
     private final String mDescription;
 
@@ -150,51 +155,59 @@ public final class PromptVerticalListContentView implements PromptContentViewPar
          *
          * @param description The description to display.
          * @return This builder.
+         * @throws IllegalArgumentException If description exceeds certain character limit.
          */
         @NonNull
         public Builder setDescription(@NonNull String description) {
+            if (description.length() > MAX_DESCRIPTION_CHARACTER_NUMBER) {
+                throw new IllegalArgumentException("The character number of description exceeds "
+                        + MAX_DESCRIPTION_CHARACTER_NUMBER);
+            }
             mDescription = description;
             return this;
         }
 
         /**
-         * Optional: Adds a list item in the current row. Maximum {@value MAX_ITEM_NUMBER} items in
-         * total. The maximum length for each item is {@value MAX_EACH_ITEM_CHARACTER_NUMBER}
-         * characters.
+         * Optional: Adds a list item in the current row.
          *
          * @param listItem The list item view to display
          * @return This builder.
+         * @throws IllegalArgumentException If this list item exceeds certain character limits or
+         *                                  the number of list items exceeds certain limit.
          */
         @NonNull
         public Builder addListItem(@NonNull PromptContentItem listItem) {
-            if (doesListItemExceedsCharLimit(listItem)) {
-                throw new IllegalStateException(
-                        "The character number of list item exceeds "
-                                + MAX_EACH_ITEM_CHARACTER_NUMBER);
-            }
             mContentList.add((PromptContentItemParcelable) listItem);
+            checkItemLimits(listItem);
             return this;
         }
 
-
         /**
-         * Optional: Adds a list item in the current row. Maximum {@value MAX_ITEM_NUMBER} items in
-         * total. The maximum length for each item is {@value MAX_EACH_ITEM_CHARACTER_NUMBER}
-         * characters.
+         * Optional: Adds a list item in the current row.
          *
          * @param listItem The list item view to display
-         * @param index The position at which to add the item
+         * @param index    The position at which to add the item
          * @return This builder.
+         * @throws IllegalArgumentException If this list item exceeds certain character limits or
+         *                                  the number of list items exceeds certain limit.
          */
         @NonNull
         public Builder addListItem(@NonNull PromptContentItem listItem, int index) {
+            mContentList.add(index, (PromptContentItemParcelable) listItem);
+            checkItemLimits(listItem);
+            return this;
+        }
+
+        private void checkItemLimits(@NonNull PromptContentItem listItem) {
             if (doesListItemExceedsCharLimit(listItem)) {
-                throw new IllegalStateException(
+                throw new IllegalArgumentException(
                         "The character number of list item exceeds "
                                 + MAX_EACH_ITEM_CHARACTER_NUMBER);
             }
-            mContentList.add(index, (PromptContentItemParcelable) listItem);
-            return this;
+            if (mContentList.size() > MAX_ITEM_NUMBER) {
+                throw new IllegalArgumentException(
+                        "The number of list items exceeds " + MAX_ITEM_NUMBER);
+            }
         }
 
         private boolean doesListItemExceedsCharLimit(PromptContentItem listItem) {
@@ -217,10 +230,6 @@ public final class PromptVerticalListContentView implements PromptContentViewPar
          */
         @NonNull
         public PromptVerticalListContentView build() {
-            if (mContentList.size() > MAX_ITEM_NUMBER) {
-                throw new IllegalStateException(
-                        "The number of list items exceeds " + MAX_ITEM_NUMBER);
-            }
             return new PromptVerticalListContentView(mContentList, mDescription);
         }
     }

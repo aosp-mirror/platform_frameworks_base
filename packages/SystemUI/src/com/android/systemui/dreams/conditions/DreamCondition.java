@@ -22,9 +22,9 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.dagger.qualifiers.Application;
 import com.android.systemui.shared.condition.Condition;
 
-import javax.inject.Inject;
-
 import kotlinx.coroutines.CoroutineScope;
+
+import javax.inject.Inject;
 
 /**
  * {@link DreamCondition} provides a signal when a dream begins and ends.

@@ -17,8 +17,8 @@
 #ifndef ANDROID_FENCE_H
 #define ANDROID_FENCE_H
 
-#include <utils/String8.h>
 #include <utils/RefBase.h>
+#include <utils/String8.h>
 
 typedef int64_t nsecs_t;
 
@@ -26,11 +26,14 @@ namespace android {
 
 class Fence : public LightRefBase<Fence> {
 public:
-    Fence() { }
-    Fence(int) { }
+    Fence() {}
+
+    Fence(int) {}
+
     static const sp<Fence> NO_FENCE;
     static constexpr nsecs_t SIGNAL_TIME_PENDING = INT64_MAX;
     static constexpr nsecs_t SIGNAL_TIME_INVALID = -1;
+
     static sp<Fence> merge(const char* name, const sp<Fence>& f1, const sp<Fence>& f2) {
         return NO_FENCE;
     }
@@ -40,16 +43,22 @@ public:
     }
 
     enum class Status {
-        Invalid,     // Fence is invalid
-        Unsignaled,  // Fence is valid but has not yet signaled
-        Signaled,    // Fence is valid and has signaled
+        Invalid,    // Fence is invalid
+        Unsignaled, // Fence is valid but has not yet signaled
+        Signaled,   // Fence is valid and has signaled
     };
 
-    status_t wait(int timeout) { return OK; }
+    status_t wait(int timeout) {
+        return OK;
+    }
 
-    status_t waitForever(const char* logname) { return OK; }
+    status_t waitForever(const char* logname) {
+        return OK;
+    }
 
-    int dup() const { return 0; }
+    int dup() const {
+        return 0;
+    }
 
     inline Status getStatus() {
         // The sync_wait call underlying wait() has been measured to be

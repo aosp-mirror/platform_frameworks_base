@@ -18,6 +18,7 @@ package com.android.systemui.keyguard.ui.binder
 
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.app.tracing.coroutines.launch
 import com.android.systemui.keyguard.ui.viewmodel.LightRevealScrimViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.statusbar.LightRevealScrim
@@ -28,11 +29,11 @@ object LightRevealScrimViewBinder {
     fun bind(revealScrim: LightRevealScrim, viewModel: LightRevealScrimViewModel) {
         revealScrim.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
-                launch {
+                launch("$TAG#viewModel.revealAmount") {
                     viewModel.revealAmount.collect { amount -> revealScrim.revealAmount = amount }
                 }
 
-                launch {
+                launch("$TAG#viewModel.lightRevealEffect") {
                     viewModel.lightRevealEffect.collect { effect ->
                         revealScrim.revealEffect = effect
                     }
@@ -40,4 +41,6 @@ object LightRevealScrimViewBinder {
             }
         }
     }
+
+    private const val TAG = "LightRevealScrimViewBinder"
 }

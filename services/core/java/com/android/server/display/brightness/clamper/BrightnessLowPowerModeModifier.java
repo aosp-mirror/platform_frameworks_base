@@ -51,4 +51,14 @@ class BrightnessLowPowerModeModifier extends BrightnessModifier {
         IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "    ");
         super.dump(ipw);
     }
+
+    @Override
+    public boolean shouldListenToLightSensor() {
+        return false;
+    }
+
+    @Override
+    public void setAmbientLux(float lux) {
+        // unused
+    }
 }

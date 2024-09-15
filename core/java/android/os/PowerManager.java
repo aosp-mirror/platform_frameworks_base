@@ -184,6 +184,22 @@ public final class PowerManager {
     public static final int DRAW_WAKE_LOCK = OsProtoEnums.DRAW_WAKE_LOCK; // 0x00000080
 
     /**
+     * Wake lock level: Override the current screen timeout.
+     * <p>
+     *  This is used by the system to allow {@code PowerManagerService} to override the current
+     *  screen timeout by config value.
+     *
+     *  config_screenTimeoutOverride in config.xml determines the screen timeout override value.
+     * </p><p>
+     * Requires the {@link android.Manifest.permission#SCREEN_TIMEOUT_OVERRIDE} permission.
+     * </p>
+     *
+     * @hide
+     */
+    public static final int SCREEN_TIMEOUT_OVERRIDE_WAKE_LOCK =
+            OsProtoEnums.SCREEN_TIMEOUT_OVERRIDE_WAKE_LOCK; // 0x00000100
+
+    /**
      * Mask for the wake lock level component of a combined wake lock level and flags integer.
      *
      * @hide
@@ -1369,6 +1385,7 @@ public final class PowerManager {
             case PROXIMITY_SCREEN_OFF_WAKE_LOCK:
             case DOZE_WAKE_LOCK:
             case DRAW_WAKE_LOCK:
+            case SCREEN_TIMEOUT_OVERRIDE_WAKE_LOCK:
                 break;
             default:
                 throw new IllegalArgumentException("Must specify a valid wake lock level.");

@@ -55,6 +55,9 @@ public final class PermissionAllowlist {
     @NonNull
     private final ArrayMap<String, ArrayMap<String, Boolean>> mSystemExtSignatureAppAllowlist =
             new ArrayMap<>();
+    @NonNull
+    private final ArrayMap<String, ArrayMap<String, Boolean>> mApexSignatureAppAllowlist =
+            new ArrayMap<>();
 
     @NonNull
     public ArrayMap<String, ArrayMap<String, Boolean>> getOemAppAllowlist() {
@@ -105,6 +108,11 @@ public final class PermissionAllowlist {
     @NonNull
     public ArrayMap<String, ArrayMap<String, Boolean>> getSystemExtSignatureAppAllowlist() {
         return mSystemExtSignatureAppAllowlist;
+    }
+
+    @NonNull
+    public ArrayMap<String, ArrayMap<String, Boolean>> getApexSignatureAppAllowlist() {
+        return mApexSignatureAppAllowlist;
     }
 
     @Nullable
@@ -206,6 +214,16 @@ public final class PermissionAllowlist {
     public Boolean getSystemExtSignatureAppAllowlistState(@NonNull String packageName,
             @NonNull String permissionName) {
         ArrayMap<String, Boolean> permissions = mSystemExtSignatureAppAllowlist.get(packageName);
+        if (permissions == null) {
+            return null;
+        }
+        return permissions.get(permissionName);
+    }
+
+    @Nullable
+    public Boolean getApexSignatureAppAllowlistState(@NonNull String packageName,
+            @NonNull String permissionName) {
+        ArrayMap<String, Boolean> permissions = mApexSignatureAppAllowlist.get(packageName);
         if (permissions == null) {
             return null;
         }

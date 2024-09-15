@@ -79,6 +79,11 @@ interface IVirtualDevice {
     int getDevicePolicy(int policyType);
 
     /**
+    * Returns whether the device has a valid microphone.
+    */
+    boolean hasCustomAudioInputSupport();
+
+    /**
      * Closes the virtual device and frees all associated resources.
      */
     @EnforcePermission("CREATE_VIRTUAL_DEVICE")
@@ -276,5 +281,5 @@ interface IVirtualDevice {
      * Returns the id of the virtual camera with given config.
      */
     @EnforcePermission("CREATE_VIRTUAL_DEVICE")
-    int getVirtualCameraId(in VirtualCameraConfig camera);
+    String getVirtualCameraId(in VirtualCameraConfig camera);
 }

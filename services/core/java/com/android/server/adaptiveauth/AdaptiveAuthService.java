@@ -23,7 +23,13 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.biometrics.AuthenticationStateListener;
 import android.hardware.biometrics.BiometricManager;
-import android.hardware.biometrics.BiometricSourceType;
+import android.hardware.biometrics.events.AuthenticationAcquiredInfo;
+import android.hardware.biometrics.events.AuthenticationErrorInfo;
+import android.hardware.biometrics.events.AuthenticationFailedInfo;
+import android.hardware.biometrics.events.AuthenticationHelpInfo;
+import android.hardware.biometrics.events.AuthenticationStartedInfo;
+import android.hardware.biometrics.events.AuthenticationStoppedInfo;
+import android.hardware.biometrics.events.AuthenticationSucceededInfo;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -131,30 +137,35 @@ public class AdaptiveAuthService extends SystemService {
     private final AuthenticationStateListener mAuthenticationStateListener =
             new AuthenticationStateListener.Stub() {
                 @Override
-                public void onAuthenticationStarted(int requestReason) {}
+                public void onAuthenticationAcquired(AuthenticationAcquiredInfo authInfo) {}
 
                 @Override
-                public void onAuthenticationStopped() {}
+                public void onAuthenticationError(AuthenticationErrorInfo authInfo) {}
 
                 @Override
-                public void onAuthenticationSucceeded(int requestReason, int userId) {
+                public void onAuthenticationFailed(AuthenticationFailedInfo authInfo) {
+                    Slog.i(TAG, "AuthenticationStateListener#onAuthenticationFailed");
+                    mHandler.obtainMessage(MSG_REPORT_BIOMETRIC_AUTH_ATTEMPT, AUTH_FAILURE,
+                                    authInfo.getUserId()).sendToTarget();
+                }
+
+                @Override
+                public void onAuthenticationHelp(AuthenticationHelpInfo authInfo) {}
+
+                @Override
+                public void onAuthenticationStarted(AuthenticationStartedInfo authInfo) {}
+
+                @Override
+                public void onAuthenticationStopped(AuthenticationStoppedInfo authInfo) {}
+
+                @Override
+                public void onAuthenticationSucceeded(AuthenticationSucceededInfo authInfo) {
                     if (DEBUG) {
                         Slog.d(TAG, "AuthenticationStateListener#onAuthenticationSucceeded");
                     }
-                    mHandler.obtainMessage(MSG_REPORT_BIOMETRIC_AUTH_ATTEMPT, AUTH_SUCCESS, userId)
-                            .sendToTarget();
+                    mHandler.obtainMessage(MSG_REPORT_BIOMETRIC_AUTH_ATTEMPT, AUTH_SUCCESS,
+                                    authInfo.getUserId()).sendToTarget();
                 }
-
-                @Override
-                public void onAuthenticationFailed(int requestReason, int userId) {
-                    Slog.i(TAG, "AuthenticationStateListener#onAuthenticationFailed");
-                    mHandler.obtainMessage(MSG_REPORT_BIOMETRIC_AUTH_ATTEMPT, AUTH_FAILURE, userId)
-                            .sendToTarget();
-                }
-
-                @Override
-                public void onAuthenticationAcquired(BiometricSourceType biometricSourceType,
-                        int requestReason, int acquiredInfo) {}
             };
 
     private final Handler mHandler = new Handler(Looper.getMainLooper()) {

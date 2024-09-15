@@ -1345,13 +1345,11 @@ public class JobStatusTest {
     private void markExpeditedQuotaApproved(JobStatus job, boolean isApproved) {
         if (job.isRequestedExpeditedJob()) {
             job.setExpeditedJobQuotaApproved(sElapsedRealtimeClock.millis(), isApproved);
-            job.setExpeditedJobTareApproved(sElapsedRealtimeClock.millis(), isApproved);
         }
     }
 
     private void markImplicitConstraintsSatisfied(JobStatus job, boolean isSatisfied) {
         job.setQuotaConstraintSatisfied(sElapsedRealtimeClock.millis(), isSatisfied);
-        job.setTareWealthConstraintSatisfied(sElapsedRealtimeClock.millis(), isSatisfied);
         job.setDeviceNotDozingConstraintSatisfied(
                 sElapsedRealtimeClock.millis(), isSatisfied, false);
         job.setBackgroundNotRestrictedConstraintSatisfied(

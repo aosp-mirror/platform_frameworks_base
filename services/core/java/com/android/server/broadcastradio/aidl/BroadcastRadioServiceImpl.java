@@ -82,13 +82,6 @@ public final class BroadcastRadioServiceImpl {
                     Slogf.w(TAG, "No module %s with id %d (HAL AIDL)", name, moduleId);
                     return;
                 }
-                try {
-                    radioModule.setInternalHalCallback();
-                } catch (RemoteException ex) {
-                    Slogf.wtf(TAG, ex, "Broadcast radio module %s with id %d (HAL AIDL) "
-                            + "cannot register HAL callback", name, moduleId);
-                    return;
-                }
                 if (DEBUG) {
                     Slogf.d(TAG, "Loaded broadcast radio module %s with id %d (HAL AIDL)",
                             name, moduleId);
@@ -136,7 +129,7 @@ public final class BroadcastRadioServiceImpl {
                     if (entry.getValue() == mModuleId) {
                         Slogf.w(TAG, "Service %s died, removed RadioModule with ID %d",
                                 entry.getKey(), mModuleId);
-                        return;
+                        break;
                     }
                 }
             }
@@ -145,7 +138,9 @@ public final class BroadcastRadioServiceImpl {
 
     /**
      * Constructs BroadcastRadioServiceImpl using AIDL HAL using the list of names of AIDL
-     * BroadcastRadio HAL services {@code serviceNameList}
+     * BroadcastRadio HAL services
+     *
+     * @param serviceNameList list of names of AIDL BroadcastRadio HAL services
      */
     public BroadcastRadioServiceImpl(ArrayList<String> serviceNameList) {
         mNextModuleId = 0;
@@ -176,7 +171,11 @@ public final class BroadcastRadioServiceImpl {
     }
 
     /**
-     * Gets the AIDL RadioModule for the given {@code moduleId}. Null will be returned if not found.
+     * Gets the AIDL RadioModule for the given module Id.
+     *
+     * @param id Id of {@link RadioModule}  of AIDL BroadcastRadio HAL service
+     * @return {@code true} if {@link RadioModule} of AIDL BroadcastRadio HAL service is found,
+     *         {@code false} otherwise
      */
     public boolean hasModule(int id) {
         synchronized (mLock) {

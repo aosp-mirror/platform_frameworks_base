@@ -640,68 +640,16 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         // stable insets, which usually are system widgets such as sysbar & navbar.
         final Rect stableBounds = mTmpStableBounds;
         displayArea.getStableRect(stableBounds);
-        final int defaultWidth = stableBounds.width();
-        final int defaultHeight = stableBounds.height();
 
-        int width;
-        int height;
-        if (!windowLayout.hasSpecifiedSize()) {
-            if (!inOutBounds.isEmpty()) {
-                // If the bounds is resolved already and WindowLayout doesn't have any opinion on
-                // its size, use the already resolved size and apply the gravity to it.
-                width = inOutBounds.width();
-                height = inOutBounds.height();
-            } else {
-                getTaskBounds(root, displayArea, windowLayout, WINDOWING_MODE_FREEFORM,
-                        /* hasInitialBounds */ false, inOutBounds);
-                width = inOutBounds.width();
-                height = inOutBounds.height();
-            }
-        } else {
-            width = defaultWidth;
-            if (windowLayout.width > 0 && windowLayout.width < defaultWidth) {
-                width = windowLayout.width;
-            } else if (windowLayout.widthFraction > 0 && windowLayout.widthFraction < 1.0f) {
-                width = (int) (width * windowLayout.widthFraction);
-            }
-
-            height = defaultHeight;
-            if (windowLayout.height > 0 && windowLayout.height < defaultHeight) {
-                height = windowLayout.height;
-            } else if (windowLayout.heightFraction > 0 && windowLayout.heightFraction < 1.0f) {
-                height = (int) (height * windowLayout.heightFraction);
-            }
+        if (windowLayout.hasSpecifiedSize()) {
+            LaunchParamsUtil.calculateLayoutBounds(stableBounds, windowLayout, inOutBounds,
+                    /* desiredBounds */ null);
+        } else if (inOutBounds.isEmpty()) {
+            getTaskBounds(root, displayArea, windowLayout, WINDOWING_MODE_FREEFORM,
+                    /* hasInitialBounds */ false, inOutBounds);
         }
-
-        final float fractionOfHorizontalOffset;
-        switch (horizontalGravity) {
-            case Gravity.LEFT:
-                fractionOfHorizontalOffset = 0f;
-                break;
-            case Gravity.RIGHT:
-                fractionOfHorizontalOffset = 1f;
-                break;
-            default:
-                fractionOfHorizontalOffset = 0.5f;
-        }
-
-        final float fractionOfVerticalOffset;
-        switch (verticalGravity) {
-            case Gravity.TOP:
-                fractionOfVerticalOffset = 0f;
-                break;
-            case Gravity.BOTTOM:
-                fractionOfVerticalOffset = 1f;
-                break;
-            default:
-                fractionOfVerticalOffset = 0.5f;
-        }
-
-        inOutBounds.set(0, 0, width, height);
-        inOutBounds.offset(stableBounds.left, stableBounds.top);
-        final int xOffset = (int) (fractionOfHorizontalOffset * (defaultWidth - width));
-        final int yOffset = (int) (fractionOfVerticalOffset * (defaultHeight - height));
-        inOutBounds.offset(xOffset, yOffset);
+        LaunchParamsUtil.applyLayoutGravity(verticalGravity, horizontalGravity, inOutBounds,
+                stableBounds);
     }
 
     private boolean shouldLaunchUnresizableAppInFreeform(ActivityRecord activity,

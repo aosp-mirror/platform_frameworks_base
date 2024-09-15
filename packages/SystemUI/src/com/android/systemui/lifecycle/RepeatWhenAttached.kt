@@ -17,6 +17,7 @@
 
 package com.android.systemui.lifecycle
 
+import android.os.Trace
 import android.view.View
 import android.view.ViewTreeObserver
 import androidx.annotation.MainThread
@@ -24,12 +25,15 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.lifecycleScope
+import com.android.app.tracing.coroutines.createCoroutineTracingContext
+import com.android.app.tracing.coroutines.launch
+import com.android.systemui.Flags.coroutineTracing
 import com.android.systemui.util.Assert
+import com.android.systemui.util.Compile
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.DisposableHandle
-import kotlinx.coroutines.launch
 
 /**
  * Runs the given [block] every time the [View] becomes attached (or immediately after calling this
@@ -66,7 +70,13 @@ fun View.repeatWhenAttached(
     // dispatcher to use. We don't want it to run on the Dispatchers.Default thread pool as
     // default behavior. Instead, we want it to run on the view's UI thread since the user will
     // presumably want to call view methods that require being called from said UI thread.
-    val lifecycleCoroutineContext = Dispatchers.Main + coroutineContext
+    val lifecycleCoroutineContext = MAIN_DISPATCHER_SINGLETON + coroutineContext
+    val traceName =
+        if (Compile.IS_DEBUG && coroutineTracing()) {
+            inferTraceSectionName()
+        } else {
+            DEFAULT_TRACE_NAME
+        }
     var lifecycleOwner: ViewLifecycleOwner? = null
     val onAttachListener =
         object : View.OnAttachStateChangeListener {
@@ -75,6 +85,7 @@ fun View.repeatWhenAttached(
                 lifecycleOwner?.onDestroy()
                 lifecycleOwner =
                     createLifecycleOwnerAndRun(
+                        traceName,
                         view,
                         lifecycleCoroutineContext,
                         block,
@@ -91,31 +102,31 @@ fun View.repeatWhenAttached(
     if (view.isAttachedToWindow) {
         lifecycleOwner =
             createLifecycleOwnerAndRun(
+                traceName,
                 view,
                 lifecycleCoroutineContext,
                 block,
             )
     }
 
-    return object : DisposableHandle {
-        override fun dispose() {
-            Assert.isMainThread()
+    return DisposableHandle {
+        Assert.isMainThread()
 
-            lifecycleOwner?.onDestroy()
-            lifecycleOwner = null
-            view.removeOnAttachStateChangeListener(onAttachListener)
-        }
+        lifecycleOwner?.onDestroy()
+        lifecycleOwner = null
+        view.removeOnAttachStateChangeListener(onAttachListener)
     }
 }
 
 private fun createLifecycleOwnerAndRun(
+    nameForTrace: String,
     view: View,
     coroutineContext: CoroutineContext,
     block: suspend LifecycleOwner.(View) -> Unit,
 ): ViewLifecycleOwner {
     return ViewLifecycleOwner(view).apply {
         onCreate()
-        lifecycleScope.launch(coroutineContext) { block(view) }
+        lifecycleScope.launch(nameForTrace, coroutineContext) { block(view) }
     }
 }
 
@@ -181,3 +192,40 @@ class ViewLifecycleOwner(
             }
     }
 }
+
+private fun isFrameInteresting(frame: StackWalker.StackFrame): Boolean =
+    frame.className != CURRENT_CLASS_NAME && frame.className != JAVA_ADAPTER_CLASS_NAME
+
+/** Get a name for the trace section include the name of the call site. */
+private fun inferTraceSectionName(): String {
+    try {
+        Trace.traceBegin(Trace.TRACE_TAG_APP, "RepeatWhenAttachedKt#inferTraceSectionName")
+        val interestingFrame =
+            StackWalker.getInstance().walk { stream ->
+                stream.filter(::isFrameInteresting).limit(5).findFirst()
+            }
+        return if (interestingFrame.isPresent) {
+            val f = interestingFrame.get()
+            "${f.className}#${f.methodName}:${f.lineNumber} [$DEFAULT_TRACE_NAME]"
+        } else {
+            DEFAULT_TRACE_NAME
+        }
+    } finally {
+        Trace.traceEnd(Trace.TRACE_TAG_APP)
+    }
+}
+
+/**
+ * Even though there is only has one usage of `Dispatchers.Main` in this file, we cache it in a
+ * top-level property so that we do not unnecessarily create new `CoroutineContext` objects for
+ * tracing on each call to [repeatWhenAttached]. It is okay to reuse a single instance of the
+ * tracing context because it is copied for its children.
+ *
+ * Also, ideally, we would use the injected `@Main CoroutineDispatcher`, but [repeatWhenAttached] is
+ * an extension function, and plumbing dagger-injected instances for static usage has little
+ * benefit.
+ */
+private val MAIN_DISPATCHER_SINGLETON = Dispatchers.Main + createCoroutineTracingContext()
+private const val DEFAULT_TRACE_NAME = "repeatWhenAttached"
+private const val CURRENT_CLASS_NAME = "com.android.systemui.lifecycle.RepeatWhenAttachedKt"
+private const val JAVA_ADAPTER_CLASS_NAME = "com.android.systemui.util.kotlin.JavaAdapterKt"

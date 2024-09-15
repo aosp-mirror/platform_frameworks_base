@@ -17,7 +17,7 @@
 package com.android.systemui.statusbar.notification.collection.coordinator
 
 import android.app.Notification
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
@@ -38,7 +38,7 @@ import org.mockito.Mockito
 import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class DismissibilityCoordinatorTest : SysuiTestCase() {
 
     private lateinit var coordinator: DismissibilityCoordinator

@@ -16,6 +16,10 @@
 
 package com.android.server.pm.verify.domain;
 
+import static android.content.IntentFilter.WILDCARD;
+
+import static com.android.server.pm.verify.domain.DomainVerificationUtils.isValidDomain;
+
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 
@@ -253,9 +257,18 @@ public class DomainVerificationService extends SystemService
             Map<String, List<UriRelativeFilterGroup>> domainToGroupsMap =
                     pkgState.getUriRelativeFilterGroupMap();
             for (String domain : bundle.keySet()) {
+                if (!isValidDomain(domain)) {
+                    continue;
+                }
                 ArrayList<UriRelativeFilterGroupParcel> parcels =
                         bundle.getParcelableArrayList(domain, UriRelativeFilterGroupParcel.class);
-                domainToGroupsMap.put(domain, UriRelativeFilterGroup.parcelsToGroups(parcels));
+                List<UriRelativeFilterGroup> groups =
+                        UriRelativeFilterGroup.parcelsToGroups(parcels);
+                if (groups == null || groups.isEmpty()) {
+                    domainToGroupsMap.remove(domain);
+                } else {
+                    domainToGroupsMap.put(domain, groups);
+                }
             }
         }
     }
@@ -273,9 +286,11 @@ public class DomainVerificationService extends SystemService
                 Map<String, List<UriRelativeFilterGroup>> map =
                         pkgState.getUriRelativeFilterGroupMap();
                 for (int i = 0; i < domains.size(); i++) {
-                    List<UriRelativeFilterGroup> groups = map.get(domains.get(i));
-                    bundle.putParcelableList(domains.get(i),
-                            UriRelativeFilterGroup.groupsToParcels(groups));
+                    if (map.containsKey(domains.get(i))) {
+                        List<UriRelativeFilterGroup> groups = map.get(domains.get(i));
+                        bundle.putParcelableList(domains.get(i),
+                                UriRelativeFilterGroup.groupsToParcels(groups));
+                    }
                 }
             }
         }
@@ -285,15 +300,29 @@ public class DomainVerificationService extends SystemService
     @NonNull
     private List<UriRelativeFilterGroup> getUriRelativeFilterGroups(@NonNull String packageName,
             @NonNull String domain) {
-        List<UriRelativeFilterGroup> groups = Collections.emptyList();
+        List<UriRelativeFilterGroup> groups;
         synchronized (mLock) {
             DomainVerificationPkgState pkgState = mAttachedPkgStates.get(packageName);
             if (pkgState != null) {
-                groups = pkgState.getUriRelativeFilterGroupMap().getOrDefault(domain,
-                        Collections.emptyList());
+                Map<String, List<UriRelativeFilterGroup>> groupMap =
+                        pkgState.getUriRelativeFilterGroupMap();
+                groups = groupMap.get(domain);
+                if (groups != null) {
+                    return groups;
+                }
+                int first = domain.indexOf(".");
+                int second = domain.indexOf('.', first + 1);
+                while (first > 0 && second > 0) {
+                    groups = groupMap.get(WILDCARD + domain.substring(first));
+                    if (groups != null) {
+                        return groups;
+                    }
+                    first = second;
+                    second = domain.indexOf('.', second + 1);
+                }
             }
         }
-        return groups;
+        return Collections.emptyList();
     }
 
     @NonNull

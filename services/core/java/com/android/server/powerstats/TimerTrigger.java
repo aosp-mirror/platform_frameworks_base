@@ -16,8 +16,10 @@
 
 package com.android.server.powerstats;
 
+import android.app.AlarmManager;
 import android.content.Context;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.util.Slog;
 
 /**
@@ -33,37 +35,53 @@ public final class TimerTrigger extends PowerStatsLogTrigger {
     private static final long LOG_PERIOD_MS_HIGH_FREQUENCY = 2 * 60 * 1000; // 2 minutes
 
     private final Handler mHandler;
+    private final AlarmManager mAlarmManager;
 
-    private Runnable mLogDataLowFrequency = new Runnable() {
+    class PeriodicTimer implements Runnable, AlarmManager.OnAlarmListener {
+        private final String mName;
+        private final long mPeriodMs;
+        private final int mMsgType;
+
+        PeriodicTimer(String name, long periodMs, int msgType) {
+            mName = name;
+            mPeriodMs = periodMs;
+            mMsgType = msgType;
+        }
+
+        @Override
+        public void onAlarm() {
+            run();
+        }
+
         @Override
         public void run() {
-            // Do not wake the device for these messages.  Opportunistically log rail data every
-            // LOG_PERIOD_MS_LOW_FREQUENCY.
-            mHandler.postDelayed(mLogDataLowFrequency, LOG_PERIOD_MS_LOW_FREQUENCY);
-            if (DEBUG) Slog.d(TAG, "Received delayed message.  Log rail data low frequency");
-            logPowerStatsData(PowerStatsLogger.MSG_LOG_TO_DATA_STORAGE_LOW_FREQUENCY);
+            if (Flags.alarmBasedPowerstatsLogging()) {
+                final long nextAlarmMs = SystemClock.elapsedRealtime() + mPeriodMs;
+                mAlarmManager.set(AlarmManager.ELAPSED_REALTIME, nextAlarmMs,
+                        AlarmManager.WINDOW_EXACT, 0, mName, this, mHandler, null);
+            } else {
+                mHandler.postDelayed(this, mPeriodMs);
+            }
+            if (DEBUG) Slog.d(TAG, "Received delayed message (" + mName + ").  Logging rail data");
+            logPowerStatsData(mMsgType);
         }
-    };
-
-    private Runnable mLogDataHighFrequency = new Runnable() {
-        @Override
-        public void run() {
-            // Do not wake the device for these messages.  Opportunistically log rail data every
-            // LOG_PERIOD_MS_HIGH_FREQUENCY.
-            mHandler.postDelayed(mLogDataHighFrequency, LOG_PERIOD_MS_HIGH_FREQUENCY);
-            if (DEBUG) Slog.d(TAG, "Received delayed message.  Log rail data high frequency");
-            logPowerStatsData(PowerStatsLogger.MSG_LOG_TO_DATA_STORAGE_HIGH_FREQUENCY);
-        }
-    };
+    }
 
     public TimerTrigger(Context context, PowerStatsLogger powerStatsLogger,
             boolean triggerEnabled) {
         super(context, powerStatsLogger);
         mHandler = mContext.getMainThreadHandler();
+        mAlarmManager = mContext.getSystemService(AlarmManager.class);
 
         if (triggerEnabled) {
-            mLogDataLowFrequency.run();
-            mLogDataHighFrequency.run();
+            final PeriodicTimer logDataLowFrequency = new PeriodicTimer("PowerStatsLowFreqLog",
+                    LOG_PERIOD_MS_LOW_FREQUENCY,
+                    PowerStatsLogger.MSG_LOG_TO_DATA_STORAGE_LOW_FREQUENCY);
+            final PeriodicTimer logDataHighFrequency = new PeriodicTimer("PowerStatsHighFreqLog",
+                    LOG_PERIOD_MS_HIGH_FREQUENCY,
+                    PowerStatsLogger.MSG_LOG_TO_DATA_STORAGE_HIGH_FREQUENCY);
+            logDataLowFrequency.run();
+            logDataHighFrequency.run();
         }
     }
 }

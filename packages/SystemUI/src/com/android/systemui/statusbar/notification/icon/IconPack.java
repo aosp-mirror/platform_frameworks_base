@@ -33,6 +33,7 @@ public final class IconPack {
     @Nullable private final StatusBarIconView mAodIcon;
 
     @Nullable private StatusBarIcon mSmallIconDescriptor;
+    @Nullable private StatusBarIcon mAppIconDescriptor;
     @Nullable private StatusBarIcon mPeopleAvatarDescriptor;
 
     private boolean mIsImportantConversation;
@@ -109,6 +110,15 @@ public final class IconPack {
 
     void setPeopleAvatarDescriptor(@Nullable StatusBarIcon peopleAvatarDescriptor) {
         mPeopleAvatarDescriptor = peopleAvatarDescriptor;
+    }
+
+    @Nullable
+    StatusBarIcon getAppIconDescriptor() {
+        return mAppIconDescriptor;
+    }
+
+    void setAppIconDescriptor(@Nullable StatusBarIcon appIconDescriptor) {
+        mAppIconDescriptor = appIconDescriptor;
     }
 
     boolean isImportantConversation() {

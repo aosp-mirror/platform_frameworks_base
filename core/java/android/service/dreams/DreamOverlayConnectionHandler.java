@@ -39,7 +39,7 @@ import java.util.function.Consumer;
  *
  * @hide
  */
-@VisibleForTesting
+@VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
 public final class DreamOverlayConnectionHandler {
     private static final String TAG = "DreamOverlayConnection";
 

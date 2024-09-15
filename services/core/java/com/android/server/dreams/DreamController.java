@@ -205,7 +205,7 @@ final class DreamController {
             Intent intent = new Intent(DreamService.SERVICE_INTERFACE);
             intent.setComponent(name);
             intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-            intent.putExtra(DreamService.EXTRA_DREAM_OVERLAY_COMPONENT, overlayComponentName);
+            DreamService.setDreamOverlayComponent(intent, overlayComponentName);
             try {
                 if (!mContext.bindServiceAsUser(intent, mCurrentDream,
                         Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE,
@@ -249,6 +249,16 @@ final class DreamController {
         mCurrentDream.mAppTask = appTask;
     }
 
+    void setDreamIsObscured(boolean isObscured) {
+        if (mCurrentDream != null) {
+            mCurrentDream.mDreamIsObscured = isObscured;
+        }
+    }
+
+    boolean dreamIsFrontmost() {
+        return mCurrentDream != null && mCurrentDream.dreamIsFrontmost();
+    }
+
     /**
      * Sends a user activity signal to PowerManager to stop the screen from turning off immediately
      * if there hasn't been any user interaction in a while.
@@ -269,6 +279,21 @@ final class DreamController {
     public void stopDream(boolean immediate, String reason) {
         stopPreviousDreams();
         stopDreamInstance(immediate, reason, mCurrentDream);
+    }
+
+    public boolean bringDreamToFront() {
+        if (mCurrentDream == null || mCurrentDream.mService == null) {
+            return false;
+        }
+
+        try {
+            mCurrentDream.mService.comeToFront();
+            return true;
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Error asking dream to come to the front", e);
+        }
+
+        return false;
     }
 
     /**
@@ -426,6 +451,7 @@ final class DreamController {
         private String mStopReason;
         private long mDreamStartTime;
         public boolean mWakingGently;
+        private boolean mDreamIsObscured;
 
         private final Runnable mStopPreviousDreamsIfNeeded = this::stopPreviousDreamsIfNeeded;
         private final Runnable mReleaseWakeLockIfNeeded = this::releaseWakeLockIfNeeded;
@@ -522,6 +548,10 @@ final class DreamController {
                 mWakeLock = null;
                 mHandler.removeCallbacks(mReleaseWakeLockIfNeeded);
             }
+        }
+
+        boolean dreamIsFrontmost() {
+            return !mDreamIsObscured;
         }
     }
 }

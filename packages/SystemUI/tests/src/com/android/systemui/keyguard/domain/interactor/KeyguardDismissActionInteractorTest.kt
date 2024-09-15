@@ -21,12 +21,18 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.flags.DisableSceneContainer
+import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.DismissAction
 import com.android.systemui.keyguard.shared.model.KeyguardDone
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.scene.data.repository.Idle
+import com.android.systemui.scene.data.repository.setSceneTransition
+import com.android.systemui.scene.domain.interactor.sceneInteractor
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -65,10 +71,11 @@ class KeyguardDismissActionInteractorTest : SysuiTestCase() {
 
         underTest =
             KeyguardDismissActionInteractor(
-                keyguardRepository,
-                kosmos.keyguardTransitionInteractor,
-                dismissInteractorWithDependencies.interactor,
-                testScope.backgroundScope,
+                repository = keyguardRepository,
+                transitionInteractor = kosmos.keyguardTransitionInteractor,
+                dismissInteractor = dismissInteractorWithDependencies.interactor,
+                applicationScope = testScope.backgroundScope,
+                sceneInteractor = kosmos.sceneInteractor,
             )
     }
 
@@ -153,6 +160,7 @@ class KeyguardDismissActionInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableSceneContainer
     fun executeDismissAction_dismissKeyguardRequestWithoutImmediateDismissAction() =
         testScope.runTest {
             val executeDismissAction by collectLastValue(underTest.executeDismissAction)
@@ -175,6 +183,29 @@ class KeyguardDismissActionInteractorTest : SysuiTestCase() {
                 to = KeyguardState.GONE,
                 testScope,
             )
+            assertThat(executeDismissAction).isNotNull()
+        }
+
+    @Test
+    @EnableSceneContainer
+    fun executeDismissAction_dismissKeyguardRequestWithoutImmediateDismissAction_scene_container() =
+        testScope.runTest {
+            val executeDismissAction by collectLastValue(underTest.executeDismissAction)
+
+            // WHEN a keyguard action will run after the keyguard is gone
+            val onDismissAction = {}
+            keyguardRepository.setDismissAction(
+                DismissAction.RunAfterKeyguardGone(
+                    dismissAction = onDismissAction,
+                    onCancelAction = {},
+                    message = "message",
+                    willAnimateOnLockscreen = true,
+                )
+            )
+            assertThat(executeDismissAction).isNull()
+
+            kosmos.setSceneTransition(Idle(Scenes.Gone))
+
             assertThat(executeDismissAction).isNotNull()
         }
 

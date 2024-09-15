@@ -19,9 +19,9 @@
 
 #include "SpriteController.h"
 
-#include <log/log.h>
-#include <utils/String8.h>
+#include <android-base/logging.h>
 #include <gui/Surface.h>
+#include <utils/String8.h>
 
 namespace android {
 
@@ -129,7 +129,7 @@ void SpriteController::doUpdateSprites() {
             update.state.surfaceVisible = false;
             update.state.surfaceControl =
                     obtainSurface(update.state.surfaceWidth, update.state.surfaceHeight,
-                                  update.state.displayId);
+                                  update.state.displayId, update.state.skipScreenshot);
             if (update.state.surfaceControl != NULL) {
                 update.surfaceChanged = surfaceChanged = true;
             }
@@ -148,8 +148,9 @@ void SpriteController::doUpdateSprites() {
         if (update.state.wantSurfaceVisible()) {
             int32_t desiredWidth = update.state.icon.width();
             int32_t desiredHeight = update.state.icon.height();
-            if (update.state.surfaceWidth < desiredWidth
-                    || update.state.surfaceHeight < desiredHeight) {
+            // TODO(b/331260947): investigate using a larger surface width with smaller sprites.
+            if (update.state.surfaceWidth != desiredWidth ||
+                update.state.surfaceHeight != desiredHeight) {
                 needApplyTransaction = true;
 
                 update.state.surfaceControl->updateDefaultBufferSize(desiredWidth, desiredHeight);
@@ -202,11 +203,13 @@ void SpriteController::doUpdateSprites() {
                 && update.state.surfaceDrawn;
         bool becomingVisible = wantSurfaceVisibleAndDrawn && !update.state.surfaceVisible;
         bool becomingHidden = !wantSurfaceVisibleAndDrawn && update.state.surfaceVisible;
-        if (update.state.surfaceControl != NULL && (becomingVisible || becomingHidden
-                || (wantSurfaceVisibleAndDrawn && (update.state.dirty & (DIRTY_ALPHA
-                        | DIRTY_POSITION | DIRTY_TRANSFORMATION_MATRIX | DIRTY_LAYER
-                        | DIRTY_VISIBILITY | DIRTY_HOTSPOT | DIRTY_DISPLAY_ID
-                        | DIRTY_ICON_STYLE))))) {
+        if (update.state.surfaceControl != NULL &&
+            (becomingVisible || becomingHidden ||
+             (wantSurfaceVisibleAndDrawn &&
+              (update.state.dirty &
+               (DIRTY_ALPHA | DIRTY_POSITION | DIRTY_TRANSFORMATION_MATRIX | DIRTY_LAYER |
+                DIRTY_VISIBILITY | DIRTY_HOTSPOT | DIRTY_DISPLAY_ID | DIRTY_ICON_STYLE |
+                DIRTY_DRAW_DROP_SHADOW | DIRTY_SKIP_SCREENSHOT))))) {
             needApplyTransaction = true;
 
             if (wantSurfaceVisibleAndDrawn
@@ -235,13 +238,15 @@ void SpriteController::doUpdateSprites() {
                         update.state.transformationMatrix.dtdy);
             }
 
-            if (wantSurfaceVisibleAndDrawn
-                    && (becomingVisible
-                            || (update.state.dirty & (DIRTY_HOTSPOT | DIRTY_ICON_STYLE)))) {
+            if (wantSurfaceVisibleAndDrawn &&
+                (becomingVisible ||
+                 (update.state.dirty &
+                  (DIRTY_HOTSPOT | DIRTY_ICON_STYLE | DIRTY_DRAW_DROP_SHADOW)))) {
                 Parcel p;
                 p.writeInt32(static_cast<int32_t>(update.state.icon.style));
                 p.writeFloat(update.state.icon.hotSpotX);
                 p.writeFloat(update.state.icon.hotSpotY);
+                p.writeBool(update.state.icon.drawNativeDropShadow);
 
                 // Pass cursor metadata in the sprite surface so that when Android is running as a
                 // client OS (e.g. ARC++) the host OS can get the requested cursor metadata and
@@ -253,6 +258,14 @@ void SpriteController::doUpdateSprites() {
             if (wantSurfaceVisibleAndDrawn
                     && (becomingVisible || (update.state.dirty & DIRTY_LAYER))) {
                 t.setLayer(update.state.surfaceControl, surfaceLayer);
+            }
+
+            if (wantSurfaceVisibleAndDrawn &&
+                (becomingVisible || (update.state.dirty & DIRTY_SKIP_SCREENSHOT))) {
+                int32_t flags =
+                        update.state.skipScreenshot ? ISurfaceComposerClient::eSkipScreenshot : 0;
+                t.setFlags(update.state.surfaceControl, flags,
+                           ISurfaceComposerClient::eSkipScreenshot);
             }
 
             if (becomingVisible) {
@@ -328,19 +341,22 @@ void SpriteController::ensureSurfaceComposerClient() {
 }
 
 sp<SurfaceControl> SpriteController::obtainSurface(int32_t width, int32_t height,
-                                                   int32_t displayId) {
+                                                   ui::LogicalDisplayId displayId,
+                                                   bool hideOnMirrored) {
     ensureSurfaceComposerClient();
 
     const sp<SurfaceControl> parent = mParentSurfaceProvider(displayId);
     if (parent == nullptr) {
-        ALOGE("Failed to get the parent surface for pointers on display %d", displayId);
+        LOG(ERROR) << "Failed to get the parent surface for pointers on display " << displayId;
     }
 
+    int32_t createFlags = ISurfaceComposerClient::eHidden | ISurfaceComposerClient::eCursorWindow;
+    if (hideOnMirrored) {
+        createFlags |= ISurfaceComposerClient::eSkipScreenshot;
+    }
     const sp<SurfaceControl> surfaceControl =
             mSurfaceComposerClient->createSurface(String8("Sprite"), width, height,
-                                                  PIXEL_FORMAT_RGBA_8888,
-                                                  ISurfaceComposerClient::eHidden |
-                                                          ISurfaceComposerClient::eCursorWindow,
+                                                  PIXEL_FORMAT_RGBA_8888, createFlags,
                                                   parent ? parent->getHandle() : nullptr);
     if (surfaceControl == nullptr || !surfaceControl->isValid()) {
         ALOGE("Error creating sprite surface.");
@@ -388,12 +404,13 @@ void SpriteController::SpriteImpl::setIcon(const SpriteIcon& icon) {
     uint32_t dirty;
     if (icon.isValid()) {
         mLocked.state.icon.bitmap = icon.bitmap.copy(ANDROID_BITMAP_FORMAT_RGBA_8888);
-        if (!mLocked.state.icon.isValid()
-                || mLocked.state.icon.hotSpotX != icon.hotSpotX
-                || mLocked.state.icon.hotSpotY != icon.hotSpotY) {
+        if (!mLocked.state.icon.isValid() || mLocked.state.icon.hotSpotX != icon.hotSpotX ||
+            mLocked.state.icon.hotSpotY != icon.hotSpotY ||
+            mLocked.state.icon.drawNativeDropShadow != icon.drawNativeDropShadow) {
             mLocked.state.icon.hotSpotX = icon.hotSpotX;
             mLocked.state.icon.hotSpotY = icon.hotSpotY;
-            dirty = DIRTY_BITMAP | DIRTY_HOTSPOT;
+            mLocked.state.icon.drawNativeDropShadow = icon.drawNativeDropShadow;
+            dirty = DIRTY_BITMAP | DIRTY_HOTSPOT | DIRTY_DRAW_DROP_SHADOW;
         } else {
             dirty = DIRTY_BITMAP;
         }
@@ -404,7 +421,7 @@ void SpriteController::SpriteImpl::setIcon(const SpriteIcon& icon) {
         }
     } else if (mLocked.state.icon.isValid()) {
         mLocked.state.icon.bitmap.reset();
-        dirty = DIRTY_BITMAP | DIRTY_HOTSPOT | DIRTY_ICON_STYLE;
+        dirty = DIRTY_BITMAP | DIRTY_HOTSPOT | DIRTY_ICON_STYLE | DIRTY_DRAW_DROP_SHADOW;
     } else {
         return; // setting to invalid icon and already invalid so nothing to do
     }
@@ -459,12 +476,21 @@ void SpriteController::SpriteImpl::setTransformationMatrix(
     }
 }
 
-void SpriteController::SpriteImpl::setDisplayId(int32_t displayId) {
+void SpriteController::SpriteImpl::setDisplayId(ui::LogicalDisplayId displayId) {
     AutoMutex _l(mController.mLock);
 
     if (mLocked.state.displayId != displayId) {
         mLocked.state.displayId = displayId;
         invalidateLocked(DIRTY_DISPLAY_ID);
+    }
+}
+
+void SpriteController::SpriteImpl::setSkipScreenshot(bool skip) {
+    AutoMutex _l(mController.mLock);
+
+    if (mLocked.state.skipScreenshot != skip) {
+        mLocked.state.skipScreenshot = skip;
+        invalidateLocked(DIRTY_SKIP_SCREENSHOT);
     }
 }
 

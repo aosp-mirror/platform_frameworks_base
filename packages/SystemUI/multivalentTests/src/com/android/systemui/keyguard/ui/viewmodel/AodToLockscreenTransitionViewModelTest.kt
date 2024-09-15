@@ -16,36 +16,57 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import android.platform.test.flag.junit.FlagsParameterization
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.data.repository.fingerprintPropertyRepository
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
+import com.android.systemui.flags.andSceneContainer
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.shade.data.repository.fakeShadeRepository
+import com.android.systemui.shade.shadeTestUtil
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
 @ExperimentalCoroutinesApi
 @SmallTest
-@RunWith(AndroidJUnit4::class)
-class AodToLockscreenTransitionViewModelTest : SysuiTestCase() {
+@RunWith(ParameterizedAndroidJunit4::class)
+class AodToLockscreenTransitionViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
     val kosmos = testKosmos()
     val testScope = kosmos.testScope
     val repository = kosmos.fakeKeyguardTransitionRepository
-    val shadeRepository = kosmos.fakeShadeRepository
+    val shadeTestUtil by lazy { kosmos.shadeTestUtil }
     val fingerprintPropertyRepository = kosmos.fingerprintPropertyRepository
-    val underTest = kosmos.aodToLockscreenTransitionViewModel
+    lateinit var underTest: AodToLockscreenTransitionViewModel
+
+    companion object {
+        @JvmStatic
+        @Parameters(name = "{0}")
+        fun getParams(): List<FlagsParameterization> {
+            return FlagsParameterization.allCombinationsOf().andSceneContainer()
+        }
+    }
+
+    init {
+        mSetFlagsRule.setFlagsParameterization(flags)
+    }
+
+    @Before
+    fun setup() {
+        underTest = kosmos.aodToLockscreenTransitionViewModel
+    }
 
     @Test
     fun deviceEntryParentViewShows() =
@@ -65,7 +86,7 @@ class AodToLockscreenTransitionViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val alpha by collectLastValue(underTest.notificationAlpha)
 
-            shadeRepository.setQsExpansion(0.5f)
+            shadeTestUtil.setQsExpansion(0.5f)
             runCurrent()
 
             repository.sendTransitionStep(step(0f, TransitionState.STARTED))
@@ -81,7 +102,7 @@ class AodToLockscreenTransitionViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val alpha by collectLastValue(underTest.notificationAlpha)
 
-            shadeRepository.setQsExpansion(0f)
+            shadeTestUtil.setQsExpansion(0f)
             runCurrent()
 
             repository.sendTransitionStep(step(0f, TransitionState.STARTED))

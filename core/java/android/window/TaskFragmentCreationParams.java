@@ -18,10 +18,13 @@ package android.window;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.app.WindowConfiguration.WindowingMode;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.TestApi;
+import android.content.pm.ActivityInfo.ScreenOrientation;
 import android.graphics.Rect;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -101,11 +104,20 @@ public final class TaskFragmentCreationParams implements Parcelable {
      */
     private final boolean mAllowTransitionWhenEmpty;
 
+    /**
+     * The override orientation for the TaskFragment. This is effective only for a system organizer.
+     * The value is ignored otherwise. Default to {@code SCREEN_ORIENTATION_UNSPECIFIED}.
+     *
+     * @see TaskFragmentOrganizer#registerOrganizer(boolean)
+     */
+    private final @ScreenOrientation int mOverrideOrientation;
+
     private TaskFragmentCreationParams(
             @NonNull TaskFragmentOrganizerToken organizer, @NonNull IBinder fragmentToken,
             @NonNull IBinder ownerToken, @NonNull Rect initialRelativeBounds,
             @WindowingMode int windowingMode, @Nullable IBinder pairedPrimaryFragmentToken,
-            @Nullable IBinder pairedActivityToken, boolean allowTransitionWhenEmpty) {
+            @Nullable IBinder pairedActivityToken, boolean allowTransitionWhenEmpty,
+            @ScreenOrientation int overrideOrientation) {
         if (pairedPrimaryFragmentToken != null && pairedActivityToken != null) {
             throw new IllegalArgumentException("pairedPrimaryFragmentToken and"
                     + " pairedActivityToken should not be set at the same time.");
@@ -118,6 +130,7 @@ public final class TaskFragmentCreationParams implements Parcelable {
         mPairedPrimaryFragmentToken = pairedPrimaryFragmentToken;
         mPairedActivityToken = pairedActivityToken;
         mAllowTransitionWhenEmpty = allowTransitionWhenEmpty;
+        mOverrideOrientation = overrideOrientation;
     }
 
     @NonNull
@@ -168,6 +181,11 @@ public final class TaskFragmentCreationParams implements Parcelable {
         return mAllowTransitionWhenEmpty;
     }
 
+    /** @hide */
+    public @ScreenOrientation int getOverrideOrientation() {
+        return mOverrideOrientation;
+    }
+
     private TaskFragmentCreationParams(Parcel in) {
         mOrganizer = TaskFragmentOrganizerToken.CREATOR.createFromParcel(in);
         mFragmentToken = in.readStrongBinder();
@@ -177,6 +195,7 @@ public final class TaskFragmentCreationParams implements Parcelable {
         mPairedPrimaryFragmentToken = in.readStrongBinder();
         mPairedActivityToken = in.readStrongBinder();
         mAllowTransitionWhenEmpty = in.readBoolean();
+        mOverrideOrientation = in.readInt();
     }
 
     /** @hide */
@@ -190,6 +209,7 @@ public final class TaskFragmentCreationParams implements Parcelable {
         dest.writeStrongBinder(mPairedPrimaryFragmentToken);
         dest.writeStrongBinder(mPairedActivityToken);
         dest.writeBoolean(mAllowTransitionWhenEmpty);
+        dest.writeInt(mOverrideOrientation);
     }
 
     @NonNull
@@ -217,6 +237,7 @@ public final class TaskFragmentCreationParams implements Parcelable {
                 + " pairedFragmentToken=" + mPairedPrimaryFragmentToken
                 + " pairedActivityToken=" + mPairedActivityToken
                 + " allowTransitionWhenEmpty=" + mAllowTransitionWhenEmpty
+                + " overrideOrientation=" + mOverrideOrientation
                 + "}";
     }
 
@@ -251,6 +272,8 @@ public final class TaskFragmentCreationParams implements Parcelable {
         private IBinder mPairedActivityToken;
 
         private boolean mAllowTransitionWhenEmpty;
+
+        private @ScreenOrientation int mOverrideOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
 
         public Builder(@NonNull TaskFragmentOrganizerToken organizer,
                 @NonNull IBinder fragmentToken, @NonNull IBinder ownerToken) {
@@ -330,12 +353,28 @@ public final class TaskFragmentCreationParams implements Parcelable {
             return this;
         }
 
+        /**
+         * Sets the override orientation for the TaskFragment. This is effective only for a system
+         * organizer. The value is ignored otherwise. Default to
+         * {@code SCREEN_ORIENTATION_UNSPECIFIED}.
+         *
+         * @see TaskFragmentOrganizer#registerOrganizer(boolean)
+         *
+         * @hide
+         */
+        @RequiresPermission(value = android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
+        @NonNull
+        public Builder setOverrideOrientation(@ScreenOrientation int overrideOrientation) {
+            mOverrideOrientation = overrideOrientation;
+            return this;
+        }
+
         /** Constructs the options to create TaskFragment with. */
         @NonNull
         public TaskFragmentCreationParams build() {
             return new TaskFragmentCreationParams(mOrganizer, mFragmentToken, mOwnerToken,
                     mInitialRelativeBounds, mWindowingMode, mPairedPrimaryFragmentToken,
-                    mPairedActivityToken, mAllowTransitionWhenEmpty);
+                    mPairedActivityToken, mAllowTransitionWhenEmpty, mOverrideOrientation);
         }
     }
 }

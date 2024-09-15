@@ -49,7 +49,8 @@ public final class DeviceStateManager {
      *
      * @hide
      */
-    public static final int INVALID_DEVICE_STATE = -1;
+    @TestApi
+    public static final int INVALID_DEVICE_STATE_IDENTIFIER = -1;
 
     /**
      * The minimum allowed device state identifier.
@@ -91,20 +92,6 @@ public final class DeviceStateManager {
                     "Failed to get instance of global device state manager.");
         }
         mGlobal = global;
-    }
-
-    /**
-     * Returns the list of device states that are supported and can be requested with
-     * {@link #requestState(DeviceStateRequest, Executor, DeviceStateRequest.Callback)}.
-     * @deprecated use {@link #getSupportedDeviceStates()}
-     * @hide
-     */
-    // TODO(b/325124054): Make non-default and remove deprecated callback methods.
-    @TestApi
-    @Deprecated
-    @NonNull
-    public int[] getSupportedStates() {
-        return mGlobal.getSupportedStates();
     }
 
     /**
@@ -239,23 +226,6 @@ public final class DeviceStateManager {
          * Guaranteed to be called once on registration of the callback with the initial value and
          * then on every subsequent change in the supported states.
          *
-         * @param supportedStates the new supported states.
-         *
-         * @see DeviceStateManager#getSupportedStates()
-         * @deprecated use {@link #onSupportedStatesChanged(List)}
-         * @hide
-         */
-        // TODO(b/325124054): Make non-default and remove deprecated callback methods.
-        @TestApi
-        @Deprecated
-        default void onSupportedStatesChanged(@NonNull int[] supportedStates) {}
-
-        /**
-         * Called in response to a change in the states supported by the device.
-         * <p>
-         * Guaranteed to be called once on registration of the callback with the initial value and
-         * then on every subsequent change in the supported states.
-         *
          * The supported device states may change due to certain states becoming unavailable
          * due to device configuration or device conditions such as if the device is too hot or
          * external monitors have been connected.
@@ -267,42 +237,6 @@ public final class DeviceStateManager {
         default void onSupportedStatesChanged(@NonNull List<DeviceState> supportedStates) {}
 
         /**
-         * Called in response to a change in the base device state.
-         * <p>
-         * The base state is the state of the device without considering any requests made through
-         * calls to {@link #requestState(DeviceStateRequest, Executor, DeviceStateRequest.Callback)}
-         * from any client process. The base state is guaranteed to match the state provided with a
-         * call to {@link #onStateChanged(int)} when there are no active requests from any process.
-         * <p>
-         * Guaranteed to be called once on registration of the callback with the initial value and
-         * then on every subsequent change in the non-override state.
-         *
-         * @param state the new base device state.
-         * @deprecated use {@link #onDeviceStateChanged(DeviceState)} and query for physical
-         * properties that are relevant to your needs.
-         * @hide
-         */
-        // TODO(b/325124054): Make non-default and remove deprecated callback methods.
-        @TestApi
-        @Deprecated
-        default void onBaseStateChanged(int state) {}
-
-        /**
-         * Called in response to device state changes.
-         * <p>
-         * Guaranteed to be called once on registration of the callback with the initial value and
-         * then on every subsequent change in device state.
-         *
-         * @param state the new device state.
-         * @deprecated use {@link #onDeviceStateChanged(DeviceState)}
-         * @hide
-         */
-        // TODO(b/325124054): Make non-default and remove deprecated callback methods.
-        @TestApi
-        @Deprecated
-        void onStateChanged(int state);
-
-        /**
          * Called in response to device state changes.
          * <p>
          * Guaranteed to be called once on registration of the callback with the initial value and
@@ -310,8 +244,7 @@ public final class DeviceStateManager {
          *
          * @param state the new device state.
          */
-        // TODO(b/325124054): Make non-default and remove deprecated callback methods.
-        default void onDeviceStateChanged(@NonNull DeviceState state) {}
+        void onDeviceStateChanged(@NonNull DeviceState state);
     }
 
     /**
@@ -338,9 +271,6 @@ public final class DeviceStateManager {
             mDelegate = listener;
             mFeatureFlags = new android.hardware.devicestate.feature.flags.FeatureFlagsImpl();
         }
-
-        @Override
-        public final void onStateChanged(int state) {}
 
         @Override
         public final void onDeviceStateChanged(@NonNull DeviceState deviceState) {

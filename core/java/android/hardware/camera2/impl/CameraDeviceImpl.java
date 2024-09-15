@@ -31,6 +31,7 @@ import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraExtensionCharacteristics;
+import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CameraOfflineSession;
 import android.hardware.camera2.CaptureFailure;
@@ -146,7 +147,8 @@ public class CameraDeviceImpl extends CameraDevice
 
     private final String mCameraId;
     private final CameraCharacteristics mCharacteristics;
-    private final Map<String, CameraCharacteristics> mPhysicalIdsToChars;
+    private Map<String, CameraCharacteristics> mPhysicalIdsToChars;
+    private final CameraManager mCameraManager;
     private final int mTotalPartialCount;
     private final Context mContext;
 
@@ -290,20 +292,75 @@ public class CameraDeviceImpl extends CameraDevice
         }
     };
 
+    private class ClientStateCallback extends StateCallback {
+        private final Executor mClientExecutor;
+        private final StateCallback mClientStateCallback;
+
+        private ClientStateCallback(@NonNull Executor clientExecutor,
+                @NonNull StateCallback clientStateCallback) {
+            mClientExecutor = clientExecutor;
+            mClientStateCallback = clientStateCallback;
+        }
+
+        public void onClosed(@NonNull CameraDevice camera) {
+            mClientExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    mClientStateCallback.onClosed(camera);
+                }
+            });
+        }
+        @Override
+        public void onOpened(@NonNull CameraDevice camera) {
+            mClientExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    mClientStateCallback.onOpened(camera);
+                }
+            });
+        }
+
+        @Override
+        public void onDisconnected(@NonNull CameraDevice camera) {
+            mClientExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    mClientStateCallback.onDisconnected(camera);
+                }
+            });
+        }
+
+        @Override
+        public void onError(@NonNull CameraDevice camera, int error) {
+            mClientExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    mClientStateCallback.onError(camera, error);
+                }
+            });
+        }
+    }
+
     public CameraDeviceImpl(String cameraId, StateCallback callback, Executor executor,
                         CameraCharacteristics characteristics,
-                        Map<String, CameraCharacteristics> physicalIdsToChars,
+                        @NonNull CameraManager manager,
                         int appTargetSdkVersion,
                         Context ctx,
                         @Nullable CameraDevice.CameraDeviceSetup cameraDeviceSetup) {
-        if (cameraId == null || callback == null || executor == null || characteristics == null) {
+        if (cameraId == null || callback == null || executor == null || characteristics == null
+                || manager == null) {
             throw new IllegalArgumentException("Null argument given");
         }
         mCameraId = cameraId;
-        mDeviceCallback = callback;
-        mDeviceExecutor = executor;
+        if (Flags.singleThreadExecutor()) {
+            mDeviceCallback = new ClientStateCallback(executor, callback);
+            mDeviceExecutor = Executors.newSingleThreadExecutor();
+        } else {
+            mDeviceCallback = callback;
+            mDeviceExecutor = executor;
+        }
         mCharacteristics = characteristics;
-        mPhysicalIdsToChars = physicalIdsToChars;
+        mCameraManager = manager;
         mAppTargetSdkVersion = appTargetSdkVersion;
         mContext = ctx;
         mCameraDeviceSetup = cameraDeviceSetup;
@@ -323,6 +380,18 @@ public class CameraDeviceImpl extends CameraDevice
         } else {
             mTotalPartialCount = partialCount;
         }
+    }
+
+    private Map<String, CameraCharacteristics> getPhysicalIdToChars() {
+        if (mPhysicalIdsToChars == null) {
+            try {
+                mPhysicalIdsToChars = mCameraManager.getPhysicalIdToCharsMap(mCharacteristics);
+            } catch (CameraAccessException e) {
+                Log.e(TAG, "Unable to query the physical characteristics map!");
+            }
+        }
+
+        return mPhysicalIdsToChars;
     }
 
     public CameraDeviceCallbacks getCallbacks() {
@@ -1502,8 +1571,7 @@ public class CameraDeviceImpl extends CameraDevice
         }
 
         // Allow RAW formats, even when not advertised.
-        if (inputFormat == ImageFormat.RAW_PRIVATE || inputFormat == ImageFormat.RAW10
-                || inputFormat == ImageFormat.RAW12 || inputFormat == ImageFormat.RAW_SENSOR) {
+        if (isRawFormat(inputFormat)) {
             return true;
         }
 
@@ -1544,7 +1612,7 @@ public class CameraDeviceImpl extends CameraDevice
             return true;
         }
 
-        for (Map.Entry<String, CameraCharacteristics> entry : mPhysicalIdsToChars.entrySet()) {
+        for (Map.Entry<String, CameraCharacteristics> entry : getPhysicalIdToChars().entrySet()) {
             configMap = entry.getValue().get(ck);
 
             if (configMap != null &&
@@ -1571,6 +1639,11 @@ public class CameraDeviceImpl extends CameraDevice
                 if (format == inputFormat) {
                     validFormat = true;
                 }
+            }
+
+            // Allow RAW formats, even when not advertised.
+            if (Flags.multiResRawReprocessing() && isRawFormat(inputFormat)) {
+                return;
             }
 
             if (validFormat == false) {
@@ -2515,6 +2588,11 @@ public class CameraDeviceImpl extends CameraDevice
         return mCharacteristics;
     }
 
+    private boolean isRawFormat(int format) {
+        return (format == ImageFormat.RAW_PRIVATE || format == ImageFormat.RAW10
+                || format == ImageFormat.RAW12 || format == ImageFormat.RAW_SENSOR);
+    }
+
     /**
      * Listener for binder death.
      *
@@ -2567,7 +2645,7 @@ public class CameraDeviceImpl extends CameraDevice
     public void createExtensionSession(ExtensionSessionConfiguration extensionConfiguration)
             throws CameraAccessException {
         HashMap<String, CameraCharacteristics> characteristicsMap = new HashMap<>(
-                mPhysicalIdsToChars);
+                getPhysicalIdToChars());
         characteristicsMap.put(mCameraId, mCharacteristics);
         boolean initializationFailed = true;
         IBinder token = new Binder(TAG + " : " + mNextSessionId++);

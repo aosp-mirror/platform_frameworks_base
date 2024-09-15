@@ -36,24 +36,22 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.settings.GlobalSettings
 import com.android.systemui.util.settings.SecureSettings
-import com.android.systemui.util.wrapper.BuildInfo
 import java.io.PrintWriter
 import java.util.concurrent.Executor
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 
 @SysUISingleton
-open class DeviceProvisionedControllerImpl @Inject constructor(
+open class DeviceProvisionedControllerImpl
+@Inject
+constructor(
     private val secureSettings: SecureSettings,
     private val globalSettings: GlobalSettings,
     private val userTracker: UserTracker,
     private val dumpManager: DumpManager,
-    private val buildInfo: BuildInfo,
     @Background private val backgroundHandler: Handler,
     @Main private val mainExecutor: Executor
-) : DeviceProvisionedController,
-    DeviceProvisionedController.DeviceProvisionedListener,
-    Dumpable {
+) : DeviceProvisionedController, DeviceProvisionedController.DeviceProvisionedListener, Dumpable {
 
     companion object {
         private const val ALL_USERS = -1
@@ -62,13 +60,10 @@ open class DeviceProvisionedControllerImpl @Inject constructor(
     }
 
     private val deviceProvisionedUri = globalSettings.getUriFor(Settings.Global.DEVICE_PROVISIONED)
-    private val frpActiveUri = globalSettings.getUriFor(Settings.Global.SECURE_FRP_MODE)
     private val userSetupUri = secureSettings.getUriFor(Settings.Secure.USER_SETUP_COMPLETE)
 
     private val deviceProvisioned = AtomicBoolean(false)
-    private val frpActive = AtomicBoolean(false)
-    @GuardedBy("lock")
-    private val userSetupComplete = SparseBooleanArray()
+    @GuardedBy("lock") private val userSetupComplete = SparseBooleanArray()
     @GuardedBy("lock")
     private val listeners = ArraySet<DeviceProvisionedController.DeviceProvisionedListener>()
 
@@ -85,46 +80,42 @@ open class DeviceProvisionedControllerImpl @Inject constructor(
         return _currentUser
     }
 
-    private val observer = object : ContentObserver(backgroundHandler) {
-        override fun onChange(
-            selfChange: Boolean,
-            uris: MutableCollection<Uri>,
-            flags: Int,
-            userId: Int
-        ) {
-            val updateDeviceProvisioned = deviceProvisionedUri in uris
-            val updateFrp = frpActiveUri in uris
-            val updateUser = if (userSetupUri in uris) userId else NO_USERS
-            updateValues(updateDeviceProvisioned, updateFrp, updateUser)
-            if (updateDeviceProvisioned) {
-                onDeviceProvisionedChanged()
-            }
-            if (updateFrp) {
-                onFrpActiveChanged()
-            }
-            if (updateUser != NO_USERS) {
-                onUserSetupChanged()
+    private val observer =
+        object : ContentObserver(backgroundHandler) {
+            override fun onChange(
+                selfChange: Boolean,
+                uris: MutableCollection<Uri>,
+                flags: Int,
+                userId: Int
+            ) {
+                val updateDeviceProvisioned = deviceProvisionedUri in uris
+                val updateUser = if (userSetupUri in uris) userId else NO_USERS
+                updateValues(updateDeviceProvisioned, updateUser)
+                if (updateDeviceProvisioned) {
+                    onDeviceProvisionedChanged()
+                }
+                if (updateUser != NO_USERS) {
+                    onUserSetupChanged()
+                }
             }
         }
-    }
 
-    private val userChangedCallback = object : UserTracker.Callback {
-        @WorkerThread
-        override fun onUserChanged(newUser: Int, userContext: Context) {
-            updateValues(updateDeviceProvisioned = false, updateFrp = false, updateUser = newUser)
-            onUserSwitched()
+    private val userChangedCallback =
+        object : UserTracker.Callback {
+            @WorkerThread
+            override fun onUserChanged(newUser: Int, userContext: Context) {
+                updateValues(updateDeviceProvisioned = false, updateUser = newUser)
+                onUserSwitched()
+            }
+
+            override fun onProfilesChanged(profiles: List<UserInfo>) {}
         }
-
-        override fun onProfilesChanged(profiles: List<UserInfo>) {}
-    }
 
     init {
         userSetupComplete.put(currentUser, false)
     }
 
-    /**
-     * Call to initialize values and register observers
-     */
+    /** Call to initialize values and register observers */
     open fun init() {
         if (!initted.compareAndSet(false, true)) {
             return
@@ -132,36 +123,39 @@ open class DeviceProvisionedControllerImpl @Inject constructor(
         dumpManager.registerDumpable(this)
         updateValues()
         userTracker.addCallback(userChangedCallback, backgroundExecutor)
-        globalSettings.registerContentObserver(deviceProvisionedUri, observer)
-        globalSettings.registerContentObserver(frpActiveUri, observer)
-        secureSettings.registerContentObserverForUser(userSetupUri, observer, UserHandle.USER_ALL)
+        globalSettings.registerContentObserverSync(deviceProvisionedUri, observer)
+        secureSettings.registerContentObserverForUserSync(
+            userSetupUri,
+            observer,
+            UserHandle.USER_ALL
+        )
     }
 
     @WorkerThread
-    private fun updateValues(
-        updateDeviceProvisioned: Boolean = true,
-        updateFrp: Boolean = true,
-        updateUser: Int = ALL_USERS
-    ) {
+    private fun updateValues(updateDeviceProvisioned: Boolean = true, updateUser: Int = ALL_USERS) {
         if (updateDeviceProvisioned) {
-            deviceProvisioned
-                    .set(globalSettings.getInt(Settings.Global.DEVICE_PROVISIONED, 0) != 0)
-        }
-        if (updateFrp) {
-            frpActive.set(globalSettings.getInt(Settings.Global.SECURE_FRP_MODE, 0) != 0)
+            deviceProvisioned.set(globalSettings.getInt(Settings.Global.DEVICE_PROVISIONED, 0) != 0)
         }
         synchronized(lock) {
             if (updateUser == ALL_USERS) {
                 val n = userSetupComplete.size()
                 for (i in 0 until n) {
                     val user = userSetupComplete.keyAt(i)
-                    val value = secureSettings
-                            .getIntForUser(Settings.Secure.USER_SETUP_COMPLETE, 0, user) != 0
+                    val value =
+                        secureSettings.getIntForUser(
+                            Settings.Secure.USER_SETUP_COMPLETE,
+                            0,
+                            user
+                        ) != 0
                     userSetupComplete.put(user, value)
                 }
             } else if (updateUser != NO_USERS) {
-                val value = secureSettings
-                        .getIntForUser(Settings.Secure.USER_SETUP_COMPLETE, 0, updateUser) != 0
+                val value =
+                    secureSettings.getIntForUser(
+                        Settings.Secure.USER_SETUP_COMPLETE,
+                        0,
+                        updateUser
+                    ) != 0
                 userSetupComplete.put(updateUser, value)
             }
         }
@@ -173,40 +167,26 @@ open class DeviceProvisionedControllerImpl @Inject constructor(
      * The listener will not be called when this happens.
      */
     override fun addCallback(listener: DeviceProvisionedController.DeviceProvisionedListener) {
-        synchronized(lock) {
-            listeners.add(listener)
-        }
+        synchronized(lock) { listeners.add(listener) }
     }
 
     override fun removeCallback(listener: DeviceProvisionedController.DeviceProvisionedListener) {
-        synchronized(lock) {
-            listeners.remove(listener)
-        }
+        synchronized(lock) { listeners.remove(listener) }
     }
 
     override fun isDeviceProvisioned(): Boolean {
         return deviceProvisioned.get()
     }
 
-    override fun isFrpActive(): Boolean {
-        return frpActive.get() && !buildInfo.isDebuggable
-    }
-
     override fun isUserSetup(user: Int): Boolean {
-        val index = synchronized(lock) {
-            userSetupComplete.indexOfKey(user)
-        }
+        val index = synchronized(lock) { userSetupComplete.indexOfKey(user) }
         return if (index < 0) {
-            val value = secureSettings
-                    .getIntForUser(Settings.Secure.USER_SETUP_COMPLETE, 0, user) != 0
-            synchronized(lock) {
-                userSetupComplete.put(user, value)
-            }
+            val value =
+                secureSettings.getIntForUser(Settings.Secure.USER_SETUP_COMPLETE, 0, user) != 0
+            synchronized(lock) { userSetupComplete.put(user, value) }
             value
         } else {
-            synchronized(lock) {
-                userSetupComplete.get(user, false)
-            }
+            synchronized(lock) { userSetupComplete.get(user, false) }
         }
     }
 
@@ -217,12 +197,6 @@ open class DeviceProvisionedControllerImpl @Inject constructor(
     override fun onDeviceProvisionedChanged() {
         dispatchChange(
             DeviceProvisionedController.DeviceProvisionedListener::onDeviceProvisionedChanged
-        )
-    }
-
-    override fun onFrpActiveChanged() {
-        dispatchChange(
-            DeviceProvisionedController.DeviceProvisionedListener::onFrpActiveChanged
         )
     }
 
@@ -237,17 +211,12 @@ open class DeviceProvisionedControllerImpl @Inject constructor(
     protected fun dispatchChange(
         callback: DeviceProvisionedController.DeviceProvisionedListener.() -> Unit
     ) {
-        val listenersCopy = synchronized(lock) {
-            ArrayList(listeners)
-        }
-        mainExecutor.execute {
-            listenersCopy.forEach(callback)
-        }
+        val listenersCopy = synchronized(lock) { ArrayList(listeners) }
+        mainExecutor.execute { listenersCopy.forEach(callback) }
     }
 
     override fun dump(pw: PrintWriter, args: Array<out String>) {
         pw.println("Device provisioned: ${deviceProvisioned.get()}")
-        pw.println("Factory Reset Protection active: ${frpActive.get()}")
         synchronized(lock) {
             pw.println("User setup complete: $userSetupComplete")
             pw.println("Listeners: $listeners")

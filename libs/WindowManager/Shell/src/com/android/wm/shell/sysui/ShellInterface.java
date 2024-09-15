@@ -25,6 +25,7 @@ import androidx.annotation.NonNull;
 
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 /**
  * General interface for notifying the Shell of common SysUI events like configuration or keyguard
@@ -63,6 +64,18 @@ public interface ShellInterface {
      * Notifies the Shell when a profile belonging to the user changes.
      */
     default void onUserProfilesChanged(@NonNull List<UserInfo> profiles) {}
+
+    /**
+     * Registers a DisplayImeChangeListener to monitor for changes on Ime
+     * position and visibility.
+     */
+    default void addDisplayImeChangeListener(DisplayImeChangeListener listener,
+            Executor executor) {}
+
+    /**
+     * Removes a registered DisplayImeChangeListener.
+     */
+    default void removeDisplayImeChangeListener(DisplayImeChangeListener listener) {}
 
     /**
      * Handles a shell command.

@@ -16,17 +16,26 @@
 
 package android.window;
 
+import static android.view.WindowInsets.Type.displayCutout;
+import static android.view.WindowInsets.Type.navigationBars;
+
 import static org.junit.Assert.assertEquals;
 
 import android.app.Activity;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.RequiresFlagsDisabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
+import android.view.WindowInsets;
 import android.view.WindowMetrics;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.rule.ActivityTestRule;
 import androidx.test.runner.AndroidJUnit4;
+
+import com.android.window.flags.Flags;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -49,20 +58,44 @@ public class WindowMetricsHelperTest {
     @Rule
     public ActivityTestRule<TestActivity> mActivityRule =
             new ActivityTestRule<>(TestActivity.class);
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule =
+            DeviceFlagsValueProvider.createCheckFlagsRule();
 
     @Test
-    public void testGetLegacySizeMatchesDisplayGetSize() throws Throwable {
+    @RequiresFlagsDisabled(Flags.FLAG_INSETS_DECOUPLED_CONFIGURATION)
+    public void testGetBoundsExcludingNavigationBarAndCutoutMatchesDisplayGetSize()
+            throws Throwable {
         mActivityRule.runOnUiThread(() -> {
             Activity activity = mActivityRule.getActivity();
             final WindowMetrics metrics = activity.getWindowManager().getCurrentWindowMetrics();
-            final Rect legacyBounds = WindowMetricsHelper
+            final Rect boundsExcludingNavBarAndCutout = WindowMetricsHelper
                     .getBoundsExcludingNavigationBarAndCutout(metrics);
 
             final Point expectedSize = new Point();
             activity.getDisplay().getSize(expectedSize);
 
-            assertEquals(expectedSize.x, legacyBounds.width());
-            assertEquals(expectedSize.y, legacyBounds.height());
+            assertEquals(expectedSize.x, boundsExcludingNavBarAndCutout.width());
+            assertEquals(expectedSize.y, boundsExcludingNavBarAndCutout.height());
+        });
+    }
+
+    @Test
+    public void testGetBoundsExcludingNavigationBarAndCutout()
+            throws Throwable {
+        mActivityRule.runOnUiThread(() -> {
+            Activity activity = mActivityRule.getActivity();
+            final WindowMetrics metrics = activity.getWindowManager().getCurrentWindowMetrics();
+            final Rect boundsExcludingNavBarAndCutout = WindowMetricsHelper
+                    .getBoundsExcludingNavigationBarAndCutout(metrics);
+
+            final WindowInsets windowInsets = metrics.getWindowInsets();
+            final Rect expectedBounds = new Rect(metrics.getBounds());
+            expectedBounds.inset(windowInsets.getInsetsIgnoringVisibility(
+                    navigationBars() | displayCutout()));
+
+            assertEquals(expectedBounds.width(), boundsExcludingNavBarAndCutout.width());
+            assertEquals(expectedBounds.height(), boundsExcludingNavBarAndCutout.height());
         });
     }
 

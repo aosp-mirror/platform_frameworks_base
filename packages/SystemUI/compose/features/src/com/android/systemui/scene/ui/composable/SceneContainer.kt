@@ -23,7 +23,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -31,14 +30,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.PointerEventPass
-import androidx.compose.ui.input.pointer.motionEventSpy
-import androidx.compose.ui.input.pointer.pointerInput
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.MutableSceneTransitionLayoutState
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneTransitionLayout
-import com.android.compose.animation.scene.UserAction
-import com.android.compose.animation.scene.UserActionResult
 import com.android.compose.animation.scene.observableTransitionState
 import com.android.systemui.ribbon.ui.composable.BottomRightCornerRibbon
 import com.android.systemui.scene.shared.model.SceneDataSourceDelegator
@@ -70,15 +65,15 @@ fun SceneContainer(
     modifier: Modifier = Modifier,
 ) {
     val coroutineScope = rememberCoroutineScope()
-    val currentSceneKey: SceneKey by viewModel.currentScene.collectAsState()
-    val currentScene = checkNotNull(sceneByKey[currentSceneKey])
-    val currentDestinations: Map<UserAction, UserActionResult> by
-        currentScene.destinationScenes.collectAsState()
+    val currentSceneKey: SceneKey by viewModel.currentScene.collectAsStateWithLifecycle()
+    val currentDestinations by
+        viewModel.currentDestinationScenes(coroutineScope).collectAsStateWithLifecycle()
     val state: MutableSceneTransitionLayoutState = remember {
         MutableSceneTransitionLayoutState(
             initialScene = currentSceneKey,
             canChangeScene = { toScene -> viewModel.canChangeScene(toScene) },
             transitions = SceneContainerTransitions,
+            enableInterruptions = false,
         )
     }
 
@@ -96,21 +91,7 @@ fun SceneContainer(
     Box(
         modifier = Modifier.fillMaxSize(),
     ) {
-        SceneTransitionLayout(
-            state = state,
-            modifier =
-                modifier
-                    .fillMaxSize()
-                    .motionEventSpy { event -> viewModel.onMotionEvent(event) }
-                    .pointerInput(Unit) {
-                        awaitPointerEventScope {
-                            while (true) {
-                                awaitPointerEvent(PointerEventPass.Final)
-                                viewModel.onMotionEventComplete()
-                            }
-                        }
-                    }
-        ) {
+        SceneTransitionLayout(state = state, modifier = modifier.fillMaxSize()) {
             sceneByKey.forEach { (sceneKey, composableScene) ->
                 scene(
                     key = sceneKey,
@@ -118,7 +99,7 @@ fun SceneContainer(
                         if (sceneKey == currentSceneKey) {
                             currentDestinations
                         } else {
-                            composableScene.destinationScenes.value
+                            viewModel.resolveSceneFamilies(composableScene.destinationScenes.value)
                         },
                 ) {
                     with(composableScene) {

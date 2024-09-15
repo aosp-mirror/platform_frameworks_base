@@ -28,7 +28,7 @@ import java.util.List;
 
 /**
  * Describe some basic information for a RemoteCompose document
- *
+ * <p>
  * It encodes the version of the document (following semantic versioning) as well
  * as the dimensions of the document in pixels.
  */
@@ -94,27 +94,26 @@ public class RootContentBehavior implements RemoteComposeOperation {
     public static final int SCALE_CROP = 5;
     public static final int SCALE_FILL_BOUNDS = 6;
 
-
     public static final Companion COMPANION = new Companion();
 
     /**
      * Sets the way the player handles the content
      *
-     * @param scroll set the horizontal behavior (NONE|SCROLL_HORIZONTAL|SCROLL_VERTICAL)
+     * @param scroll    set the horizontal behavior (NONE|SCROLL_HORIZONTAL|SCROLL_VERTICAL)
      * @param alignment set the alignment of the content (TOP|CENTER|BOTTOM|START|END)
-     * @param sizing set the type of sizing for the content (NONE|SIZING_LAYOUT|SIZING_SCALE)
-     * @param mode set the mode of sizing, either LAYOUT modes or SCALE modes
-     *             the LAYOUT modes are:
-     *             - LAYOUT_MATCH_PARENT
-     *             - LAYOUT_WRAP_CONTENT
-     *             or adding an horizontal mode and a vertical mode:
-     *             - LAYOUT_HORIZONTAL_MATCH_PARENT
-     *             - LAYOUT_HORIZONTAL_WRAP_CONTENT
-     *             - LAYOUT_HORIZONTAL_FIXED
-     *             - LAYOUT_VERTICAL_MATCH_PARENT
-     *             - LAYOUT_VERTICAL_WRAP_CONTENT
-     *             - LAYOUT_VERTICAL_FIXED
-     *             The LAYOUT_*_FIXED modes will use the intrinsic document size
+     * @param sizing    set the type of sizing for the content (NONE|SIZING_LAYOUT|SIZING_SCALE)
+     * @param mode      set the mode of sizing, either LAYOUT modes or SCALE modes
+     *                  the LAYOUT modes are:
+     *                  - LAYOUT_MATCH_PARENT
+     *                  - LAYOUT_WRAP_CONTENT
+     *                  or adding an horizontal mode and a vertical mode:
+     *                  - LAYOUT_HORIZONTAL_MATCH_PARENT
+     *                  - LAYOUT_HORIZONTAL_WRAP_CONTENT
+     *                  - LAYOUT_HORIZONTAL_FIXED
+     *                  - LAYOUT_VERTICAL_MATCH_PARENT
+     *                  - LAYOUT_VERTICAL_WRAP_CONTENT
+     *                  - LAYOUT_VERTICAL_FIXED
+     *                  The LAYOUT_*_FIXED modes will use the intrinsic document size
      */
     public RootContentBehavior(int scroll, int alignment, int sizing, int mode) {
         switch (scroll) {
@@ -149,10 +148,12 @@ public class RootContentBehavior implements RemoteComposeOperation {
         switch (sizing) {
             case SIZING_LAYOUT: {
                 Log.e(TAG, "sizing_layout is not yet supported");
-            } break;
+            }
+            break;
             case SIZING_SCALE: {
                 mSizing = sizing;
-            } break;
+            }
+            break;
             default: {
                 Log.e(TAG, "incorrect sizing value " + sizing);
             }
@@ -200,7 +201,8 @@ public class RootContentBehavior implements RemoteComposeOperation {
     }
 
     public static class Companion implements CompanionOperation {
-        private Companion() {}
+        private Companion() {
+        }
 
         @Override
         public String name() {

@@ -44,7 +44,6 @@ import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_W
 import static com.android.server.wm.AppTransition.MAX_APP_TRANSITION_DURATION;
 import static com.android.server.wm.AppTransition.isActivityTransitOld;
 import static com.android.server.wm.AppTransition.isTaskFragmentTransitOld;
-import static com.android.server.wm.AppTransition.isTaskTransitOld;
 import static com.android.server.wm.DisplayContent.IME_TARGET_LAYERING;
 import static com.android.server.wm.IdentifierProto.HASH_CODE;
 import static com.android.server.wm.IdentifierProto.TITLE;
@@ -72,7 +71,6 @@ import android.annotation.ColorInt;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityInfo.ScreenOrientation;
 import android.content.res.Configuration;
@@ -103,7 +101,6 @@ import android.view.SurfaceControl;
 import android.view.SurfaceControl.Builder;
 import android.view.SurfaceControlViewHost;
 import android.view.SurfaceSession;
-import android.view.TaskTransitionSpec;
 import android.view.WindowManager;
 import android.view.WindowManager.TransitionOldType;
 import android.view.animation.Animation;
@@ -113,11 +110,13 @@ import android.window.WindowContainerToken;
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.ColorUtils;
+import com.android.internal.protolog.common.LogLevel;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.server.wm.SurfaceAnimator.Animatable;
 import com.android.server.wm.SurfaceAnimator.AnimationType;
 import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
+import com.android.server.wm.utils.AlwaysTruePredicate;
 
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
@@ -185,7 +184,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     // The specified orientation for this window container.
     // Shouldn't be accessed directly since subclasses can override getOverrideOrientation.
     @ScreenOrientation
-    private int mOverrideOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
+    private int mOverrideOrientation = SCREEN_ORIENTATION_UNSET;
 
     /**
      * The window container which decides its orientation since the last time
@@ -716,7 +715,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
         // If parent is null, the layer should be placed offscreen so reparent to null. Otherwise,
         // set to the available parent.
-        t.reparent(mSurfaceControl, mParent == null ? null : mParent.getSurfaceControl());
+        t.reparent(mSurfaceControl, mParent == null ? null : mParent.mSurfaceControl);
 
         if (mLastRelativeToLayer != null) {
             t.setRelativeLayer(mSurfaceControl, mLastRelativeToLayer, mLastLayer);
@@ -1077,9 +1076,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         mDisplayContent = dc;
         if (dc != null && dc != this) {
             dc.getPendingTransaction().merge(mPendingTransaction);
-        }
-        if (dc != this && mLocalInsetsSources != null) {
-            mLocalInsetsSources.clear();
         }
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final WindowContainer child = mChildren.get(i);
@@ -1682,8 +1678,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final WindowContainer wc = mChildren.get(i);
 
-            // TODO: Maybe mOverrideOrientation should default to SCREEN_ORIENTATION_UNSET vs.
-            // SCREEN_ORIENTATION_UNSPECIFIED?
             final int orientation = wc.getOrientation(candidate == SCREEN_ORIENTATION_BEHIND
                     ? SCREEN_ORIENTATION_BEHIND : SCREEN_ORIENTATION_UNSET);
             if (orientation == SCREEN_ORIENTATION_BEHIND) {
@@ -1699,7 +1693,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 continue;
             }
 
-            if (wc.providesOrientation() || orientation != SCREEN_ORIENTATION_UNSPECIFIED) {
+            if (orientation != SCREEN_ORIENTATION_UNSPECIFIED || wc.providesOrientation()) {
                 // Use the orientation if the container can provide or requested an explicit
                 // orientation that isn't SCREEN_ORIENTATION_UNSPECIFIED.
                 ProtoLog.v(WM_DEBUG_ORIENTATION, "%s is requesting orientation %d (%s)",
@@ -2023,29 +2017,34 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 callback, boundary, includeBoundary, traverseTopToBottom, boundaryFound);
     }
 
+    @SuppressWarnings("unchecked")
+    static <T> Predicate<T> alwaysTruePredicate() {
+        return (Predicate<T>) AlwaysTruePredicate.INSTANCE;
+    }
+
     ActivityRecord getActivityAbove(ActivityRecord r) {
-        return getActivity((above) -> true, r,
+        return getActivity(alwaysTruePredicate(), r /* boundary */,
                 false /*includeBoundary*/, false /*traverseTopToBottom*/);
     }
 
     ActivityRecord getActivityBelow(ActivityRecord r) {
-        return getActivity((below) -> true, r,
+        return getActivity(alwaysTruePredicate(), r /* boundary */,
                 false /*includeBoundary*/, true /*traverseTopToBottom*/);
     }
 
     ActivityRecord getBottomMostActivity() {
-        return getActivity((r) -> true, false /*traverseTopToBottom*/);
+        return getActivity(alwaysTruePredicate(), false /* traverseTopToBottom */);
     }
 
     ActivityRecord getTopMostActivity() {
-        return getActivity((r) -> true, true /*traverseTopToBottom*/);
+        return getActivity(alwaysTruePredicate(), true /* traverseTopToBottom */);
     }
 
     ActivityRecord getTopActivity(boolean includeFinishing, boolean includeOverlays) {
         // Break down into 4 calls to avoid object creation due to capturing input params.
         if (includeFinishing) {
             if (includeOverlays) {
-                return getActivity((r) -> true);
+                return getActivity(alwaysTruePredicate());
             }
             return getActivity((r) -> !r.isTaskOverlay());
         } else if (includeOverlays) {
@@ -2224,21 +2223,17 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         }
     }
 
-    Task getTaskAbove(Task t) {
-        return getTask(
-                (above) -> true, t, false /*includeBoundary*/, false /*traverseTopToBottom*/);
-    }
-
     Task getTaskBelow(Task t) {
-        return getTask((below) -> true, t, false /*includeBoundary*/, true /*traverseTopToBottom*/);
+        return getTask(alwaysTruePredicate(), t /* boundary */,
+                false /* includeBoundary */, true /* traverseTopToBottom */);
     }
 
     Task getBottomMostTask() {
-        return getTask((t) -> true, false /*traverseTopToBottom*/);
+        return getTask(alwaysTruePredicate(), false /* traverseTopToBottom */);
     }
 
     Task getTopMostTask() {
-        return getTask((t) -> true, true /*traverseTopToBottom*/);
+        return getTask(alwaysTruePredicate(), true /* traverseTopToBottom */);
     }
 
     Task getTask(Predicate<Task> callback) {
@@ -3147,9 +3142,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         // Separate position and size for use in animators.
         final Rect screenBounds = getAnimationBounds(appRootTaskClipMode);
         mTmpRect.set(screenBounds);
-        if (this.asTask() != null && isTaskTransitOld(transit)) {
-            this.asTask().adjustAnimationBoundsForTransition(mTmpRect);
-        }
         getAnimationPosition(mTmpPoint);
         mTmpRect.offsetTo(0, 0);
 
@@ -3284,14 +3276,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
             AnimationRunnerBuilder animationRunnerBuilder = new AnimationRunnerBuilder();
 
-            if (isTaskTransitOld(transit) && getWindowingMode() == WINDOWING_MODE_FULLSCREEN) {
-                animationRunnerBuilder.setTaskBackgroundColor(getTaskAnimationBackgroundColor());
-                // TODO: Remove when we migrate to shell (b/202383002)
-                if (mWmService.mTaskTransitionSpec != null) {
-                    animationRunnerBuilder.hideInsetSourceViewOverflows();
-                }
-            }
-
             // Check if the animation requests to show background color for Activity and embedded
             // TaskFragment.
             final ActivityRecord activityRecord = asActivityRecord();
@@ -3343,18 +3327,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 getDisplayContent().pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
             }
         }
-    }
-
-    private @ColorInt int getTaskAnimationBackgroundColor() {
-        Context uiContext = mDisplayContent.getDisplayPolicy().getSystemUiContext();
-        TaskTransitionSpec customSpec = mWmService.mTaskTransitionSpec;
-        @ColorInt int defaultFallbackColor = uiContext.getColor(R.color.overview_background);
-
-        if (customSpec != null && customSpec.backgroundColor != 0) {
-            return customSpec.backgroundColor;
-        }
-
-        return defaultFallbackColor;
     }
 
     final SurfaceAnimationRunner getSurfaceAnimationRunner() {
@@ -3409,7 +3381,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 // ActivityOption#makeCustomAnimation or WindowManager#overridePendingTransition.
                 a.restrictDuration(MAX_APP_TRANSITION_DURATION);
             }
-            if (ProtoLog.isEnabled(WM_DEBUG_ANIM)) {
+            if (ProtoLog.isEnabled(WM_DEBUG_ANIM, LogLevel.DEBUG)) {
                 ProtoLog.i(WM_DEBUG_ANIM, "Loaded animation %s for %s, duration: %d, stack=%s",
                         a, this, ((a != null) ? a.getDuration() : 0), Debug.getCallers(20));
             }
@@ -3892,6 +3864,18 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return false;
     }
 
+
+    /** @return {@code true} if this container wants to show wallpaper. */
+    boolean hasWallpaper() {
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            final WindowContainer child = mChildren.get(i);
+            if (child.hasWallpaper()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Nullable
     static WindowContainer fromBinder(IBinder binder) {
         return RemoteToken.fromBinder(binder).getContainer();
@@ -4252,27 +4236,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 // animation but and so the surface is still animating)
                 mOnAnimationFinished.add(clearBackgroundColorHandler);
                 mOnAnimationCancelled.add(clearBackgroundColorHandler);
-            }
-        }
-
-        private void hideInsetSourceViewOverflows() {
-            final SparseArray<InsetsSourceProvider> providers =
-                    getDisplayContent().getInsetsStateController().getSourceProviders();
-            for (int i = providers.size(); i >= 0; i--) {
-                final InsetsSourceProvider insetProvider = providers.valueAt(i);
-                if (!insetProvider.getSource().hasFlags(InsetsSource.FLAG_INSETS_ROUNDED_CORNER)) {
-                    return;
-                }
-
-                // Will apply it immediately to current leash and to all future inset animations
-                // until we disable it.
-                insetProvider.setCropToProvidingInsetsBounds(getPendingTransaction());
-
-                // Only clear the size restriction of the inset once the surface animation is over
-                // and not if it's canceled to be replace by another animation.
-                mOnAnimationFinished.add(() -> {
-                    insetProvider.removeCropToProvidingInsetsBounds(getPendingTransaction());
-                });
             }
         }
 

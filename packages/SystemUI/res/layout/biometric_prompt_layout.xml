@@ -44,7 +44,7 @@
         android:singleLine="true"
         android:marqueeRepeatLimit="1"
         android:ellipsize="marquee"
-        style="@style/TextAppearance.AuthCredential.Title"/>
+        style="@style/TextAppearance.AuthCredential.OldTitle"/>
 
     <TextView
         android:id="@+id/subtitle"
@@ -54,20 +54,21 @@
         android:singleLine="true"
         android:marqueeRepeatLimit="1"
         android:ellipsize="marquee"
-        style="@style/TextAppearance.AuthCredential.Subtitle"/>
+        style="@style/TextAppearance.AuthCredential.OldSubtitle"/>
 
     <TextView
         android:id="@+id/description"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="@integer/biometric_dialog_text_gravity"
         android:scrollbars ="vertical"
         android:importantForAccessibility="no"
-        style="@style/TextAppearance.AuthCredential.Description"/>
+        style="@style/TextAppearance.AuthCredential.OldDescription"/>
 
     <Space
         android:id="@+id/space_above_content"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/biometric_prompt_space_above_content"
+        android:layout_height="24dp"
         android:visibility="gone" />
 
     <LinearLayout
@@ -77,7 +78,6 @@
         android:fadeScrollbars="false"
         android:gravity="center_vertical"
         android:orientation="vertical"
-        android:paddingHorizontal="@dimen/biometric_prompt_content_container_padding_horizontal"
         android:scrollbars="vertical"
         android:visibility="gone" />
 

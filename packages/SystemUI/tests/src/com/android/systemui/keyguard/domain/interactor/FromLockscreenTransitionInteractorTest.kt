@@ -16,6 +16,8 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
+import android.app.ActivityManager
+import android.app.WindowConfiguration
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -26,6 +28,7 @@ import com.android.systemui.coroutines.collectValues
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.data.repository.keyguardOcclusionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
@@ -34,16 +37,14 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.shade.data.repository.FlingInfo
 import com.android.systemui.shade.data.repository.fakeShadeRepository
 import com.android.systemui.testKosmos
-import com.android.systemui.util.mockito.any
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito.never
+import org.mockito.Mockito.reset
 import org.mockito.Mockito.spy
-import org.mockito.Mockito.verify
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -121,7 +122,7 @@ class FromLockscreenTransitionInteractorTest : SysuiTestCase() {
     fun testTransitionsToGone_whenDismissFlingWhileDismissable_flagEnabled() =
         testScope.runTest {
             underTest.start()
-            verify(transitionRepository, never()).startTransition(any())
+            assertThatRepository(transitionRepository).noTransitionsStarted()
 
             keyguardRepository.setKeyguardDismissible(true)
             runCurrent()
@@ -142,7 +143,7 @@ class FromLockscreenTransitionInteractorTest : SysuiTestCase() {
     fun testDoesNotTransitionToGone_whenDismissFlingWhileDismissable_flagDisabled() =
         testScope.runTest {
             underTest.start()
-            verify(transitionRepository, never()).startTransition(any())
+            assertThatRepository(transitionRepository).noTransitionsStarted()
 
             keyguardRepository.setKeyguardDismissible(true)
             runCurrent()
@@ -159,7 +160,7 @@ class FromLockscreenTransitionInteractorTest : SysuiTestCase() {
     fun testDoesNotTransitionToGone_whenDismissFling_emitsNull() =
         testScope.runTest {
             underTest.start()
-            verify(transitionRepository, never()).startTransition(any())
+            assertThatRepository(transitionRepository).noTransitionsStarted()
 
             keyguardRepository.setKeyguardDismissible(true)
             runCurrent()
@@ -170,5 +171,50 @@ class FromLockscreenTransitionInteractorTest : SysuiTestCase() {
             runCurrent()
 
             assertThatRepository(transitionRepository).noTransitionsStarted()
+        }
+
+    @EnableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
+    fun testTransitionsToOccluded_whenShowWhenLockedActivityOnTop() =
+        testScope.runTest {
+            underTest.start()
+            runCurrent()
+
+            reset(transitionRepository)
+            kosmos.keyguardOcclusionRepository.setShowWhenLockedActivityInfo(
+                true,
+                ActivityManager.RunningTaskInfo().apply {
+                    topActivityType = WindowConfiguration.ACTIVITY_TYPE_STANDARD
+                }
+            )
+            runCurrent()
+
+            assertThatRepository(transitionRepository)
+                .startedTransition(
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.OCCLUDED,
+                )
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
+    fun testTransitionsToDream_whenDreamActivityOnTop() =
+        testScope.runTest {
+            underTest.start()
+            runCurrent()
+
+            reset(transitionRepository)
+            kosmos.keyguardOcclusionRepository.setShowWhenLockedActivityInfo(
+                true,
+                ActivityManager.RunningTaskInfo().apply {
+                    topActivityType = WindowConfiguration.ACTIVITY_TYPE_DREAM
+                }
+            )
+            runCurrent()
+
+            assertThatRepository(transitionRepository)
+                .startedTransition(
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.DREAMING,
+                )
         }
 }

@@ -38,6 +38,7 @@ import android.hardware.display.DisplayManager.DisplayListener;
 import android.hardware.graphics.common.DisplayDecorationSupport;
 import android.media.projection.IMediaProjection;
 import android.media.projection.MediaProjection;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.IBinder;
@@ -137,6 +138,8 @@ public final class DisplayManagerGlobal {
     private int[] mDisplayIdCache;
 
     private int mWifiDisplayScanNestCount;
+
+    private final Binder mToken = new Binder();
 
     @VisibleForTesting
     public DisplayManagerGlobal(IDisplayManager dm) {
@@ -542,6 +545,20 @@ public final class DisplayManagerGlobal {
             mDm.disableConnectedDisplay(displayId);
         } catch (RemoteException ex) {
             Log.e(TAG, "Error trying to enable external display", ex);
+        }
+    }
+
+    /**
+     * Request to power a display ON or OFF.
+     * @hide
+     */
+    @RequiresPermission("android.permission.MANAGE_DISPLAYS")
+    public boolean requestDisplayPower(int displayId, boolean on) {
+        try {
+            return mDm.requestDisplayPower(displayId, on);
+        } catch (RemoteException ex) {
+            Log.e(TAG, "Error trying to request display power " + on, ex);
+            return false;
         }
     }
 
@@ -1177,6 +1194,20 @@ public final class DisplayManagerGlobal {
     public int getRefreshRateSwitchingType() {
         try {
             return mDm.getRefreshRateSwitchingType();
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Sets allowed display mode ids
+     *
+     * @hide
+     */
+    @RequiresPermission("android.permission.RESTRICT_DISPLAY_MODES")
+    public void requestDisplayModes(int displayId, @Nullable int[] modeIds) {
+        try {
+            mDm.requestDisplayModes(mToken, displayId, modeIds);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }

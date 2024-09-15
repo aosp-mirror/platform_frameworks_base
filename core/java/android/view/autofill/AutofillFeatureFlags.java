@@ -220,6 +220,52 @@ public class AutofillFeatureFlags {
             DEVICE_CONFIG_ALWAYS_INCLUDE_WEBVIEW_IN_ASSIST_STRUCTURE =
             "always_include_webview_in_assist_structure";
 
+    /**
+     * Whether to include invisible views in the assist structure. Including invisible views can fix
+     * some cases in which Session is destroyed earlier than it is suppose to.
+     *
+     * <p>See
+     * frameworks/base/services/autofill/bugfixes.aconfig#include_invisible_view_group_in_assist_structure
+     * for more information.
+     *
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_INCLUDE_INVISIBLE_VIEW_GROUP_IN_ASSIST_STRUCTURE =
+            "include_invisible_view_group_in_assist_structure";
+
+    /**
+     * Bugfix flag, Autofill should ignore views resetting to empty states.
+     *
+     * See frameworks/base/services/autofill/bugfixes.aconfig#ignore_view_state_reset_to_empty
+     * for more information.
+     *
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_IGNORE_VIEW_STATE_RESET_TO_EMPTY =
+            "ignore_view_state_reset_to_empty";
+
+    /**
+     * Bugfix flag, Autofill should ignore view updates if an Auth intent is showing.
+     *
+     * See frameworks/base/services/autofill/bugfixes.aconfig#relayout
+     * for more information.
+     *
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_IGNORE_RELAYOUT_WHEN_AUTH_PENDING =
+            "ignore_relayout_auth_pending";
+
+    /**
+     * Bugfix flag, Autofill should only fill in value from current session.
+     *
+     * See frameworks/base/services/autofill/bugfixes.aconfig#fill_fields_from_current_session_only
+     * for more information
+     *
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_FILL_FIELDS_FROM_CURRENT_SESSION_ONLY =
+            "fill_fields_from_current_session_only";
+
     // END AUTOFILL FOR ALL APPS FLAGS //
 
 
@@ -473,6 +519,37 @@ public class AutofillFeatureFlags {
                 DEVICE_CONFIG_ALWAYS_INCLUDE_WEBVIEW_IN_ASSIST_STRUCTURE, true);
     }
 
+    /** @hide */
+    public static boolean shouldIncludeInvisibleViewInAssistStructure() {
+        return DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_AUTOFILL,
+                DEVICE_CONFIG_INCLUDE_INVISIBLE_VIEW_GROUP_IN_ASSIST_STRUCTURE,
+                true);
+    }
+
+    /** @hide */
+    public static boolean shouldIgnoreViewStateResetToEmpty() {
+        return DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_AUTOFILL,
+                DEVICE_CONFIG_IGNORE_VIEW_STATE_RESET_TO_EMPTY,
+                true);
+    }
+
+    /** @hide */
+    public static boolean shouldIgnoreRelayoutWhenAuthPending() {
+        return DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_AUTOFILL,
+                DEVICE_CONFIG_IGNORE_RELAYOUT_WHEN_AUTH_PENDING,
+                false);
+    }
+
+    /** @hide **/
+    public static boolean shouldFillFieldsFromCurrentSessionOnly() {
+        return DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_AUTOFILL,
+                DEVICE_CONFIG_FILL_FIELDS_FROM_CURRENT_SESSION_ONLY,
+                true);
+    }
 
     /**
      * Whether should enable multi-line filter

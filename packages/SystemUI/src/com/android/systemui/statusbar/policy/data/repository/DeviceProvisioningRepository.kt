@@ -31,9 +31,6 @@ interface DeviceProvisioningRepository {
      * @see android.provider.Settings.Global.DEVICE_PROVISIONED
      */
     val isDeviceProvisioned: Flow<Boolean>
-
-    /** Whether Factory Reset Protection (FRP) is currently active, locking the device. */
-    val isFactoryResetProtectionActive: Flow<Boolean>
 }
 
 @Module
@@ -56,18 +53,6 @@ constructor(
             }
         deviceProvisionedController.addCallback(listener)
         trySend(deviceProvisionedController.isDeviceProvisioned)
-        awaitClose { deviceProvisionedController.removeCallback(listener) }
-    }
-
-    override val isFactoryResetProtectionActive: Flow<Boolean> = conflatedCallbackFlow {
-        val listener =
-            object : DeviceProvisionedController.DeviceProvisionedListener {
-                override fun onFrpActiveChanged() {
-                    trySend(deviceProvisionedController.isFrpActive)
-                }
-            }
-        deviceProvisionedController.addCallback(listener)
-        trySend(deviceProvisionedController.isFrpActive)
         awaitClose { deviceProvisionedController.removeCallback(listener) }
     }
 }

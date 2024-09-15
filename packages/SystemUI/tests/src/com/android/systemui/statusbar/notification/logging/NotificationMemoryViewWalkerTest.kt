@@ -3,9 +3,9 @@ package com.android.systemui.statusbar.notification.logging
 import android.app.Notification
 import android.graphics.Bitmap
 import android.graphics.drawable.Icon
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.widget.RemoteViews
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder
@@ -17,7 +17,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 class NotificationMemoryViewWalkerTest : SysuiTestCase() {
 

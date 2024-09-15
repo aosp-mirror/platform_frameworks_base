@@ -25,11 +25,11 @@ import static org.mockito.Mockito.when;
 
 import android.graphics.Rect;
 import android.graphics.Region;
-import android.testing.AndroidTestingRunner;
 import android.view.AttachedSurfaceControl;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -45,7 +45,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class TouchInsetManagerTest extends SysuiTestCase {
     @Mock
     private AttachedSurfaceControl mAttachedSurfaceControl;

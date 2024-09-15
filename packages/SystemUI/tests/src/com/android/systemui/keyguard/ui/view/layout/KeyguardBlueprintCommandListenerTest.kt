@@ -16,6 +16,7 @@
 
 package com.android.systemui.keyguard.ui.view.layout
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.keyguard.data.repository.KeyguardBlueprintRepository
@@ -28,7 +29,6 @@ import java.io.PrintWriter
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
 import org.mockito.Mockito.atLeastOnce
@@ -36,7 +36,7 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class KeyguardBlueprintCommandListenerTest : SysuiTestCase() {
     private lateinit var keyguardBlueprintCommandListener: KeyguardBlueprintCommandListener
@@ -66,25 +66,19 @@ class KeyguardBlueprintCommandListenerTest : SysuiTestCase() {
     fun testHelp() {
         command().execute(pw, listOf("help"))
         verify(pw, atLeastOnce()).println(anyString())
-        verify(keyguardBlueprintInteractor, never()).transitionToBlueprint(anyString())
+        verify(keyguardBlueprintInteractor, never()).transitionOrRefreshBlueprint(anyString())
     }
 
     @Test
     fun testBlank() {
         command().execute(pw, listOf())
         verify(pw, atLeastOnce()).println(anyString())
-        verify(keyguardBlueprintInteractor, never()).transitionToBlueprint(anyString())
+        verify(keyguardBlueprintInteractor, never()).transitionOrRefreshBlueprint(anyString())
     }
 
     @Test
     fun testValidArg() {
         command().execute(pw, listOf("fake"))
-        verify(keyguardBlueprintInteractor).transitionToBlueprint("fake")
-    }
-
-    @Test
-    fun testValidArg_Int() {
-        command().execute(pw, listOf("1"))
-        verify(keyguardBlueprintInteractor).transitionToBlueprint(1)
+        verify(keyguardBlueprintInteractor).transitionOrRefreshBlueprint("fake")
     }
 }

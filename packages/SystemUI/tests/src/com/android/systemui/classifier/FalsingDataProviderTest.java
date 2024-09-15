@@ -25,10 +25,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.hardware.devicestate.DeviceStateManager.FoldStateListener;
-import android.testing.AndroidTestingRunner;
 import android.util.DisplayMetrics;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.classifier.FalsingDataProvider.GestureFinalizedListener;
@@ -45,7 +46,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.List;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class FalsingDataProviderTest extends ClassifierTest {
 
     private FalsingDataProvider mDataProvider;
@@ -278,6 +279,22 @@ public class FalsingDataProviderTest extends ClassifierTest {
         mDataProvider.onMotionEvent(motionEventOrigin);
         mDataProvider.onMotionEvent(appendMoveEvent(-3, 10));
         assertThat(mDataProvider.isUp()).isFalse();
+        mDataProvider.onSessionEnd();
+    }
+
+    @Test
+    public void test_isFromKeyboard_disallowedKey_false() {
+        KeyEvent eventDown = KeyEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, KeyEvent.KEYCODE_A, 0,
+                0, 0, 0, 0, 0, 0, "");
+        KeyEvent eventUp = KeyEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, KeyEvent.KEYCODE_A, 0, 0,
+                0, 0, 0, 0, 0, "");
+
+        //events have not come in yet
+        assertThat(mDataProvider.isFromKeyboard()).isFalse();
+
+        mDataProvider.onKeyEvent(eventDown);
+        mDataProvider.onKeyEvent(eventUp);
+        assertThat(mDataProvider.isFromKeyboard()).isTrue();
         mDataProvider.onSessionEnd();
     }
 
