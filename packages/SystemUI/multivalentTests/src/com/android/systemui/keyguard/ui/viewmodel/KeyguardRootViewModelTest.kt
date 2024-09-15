@@ -507,6 +507,46 @@ class KeyguardRootViewModelTest(flags: FlagsParameterization) : SysuiTestCase() 
 
     @Test
     @DisableSceneContainer
+    fun alphaFromShadeExpansion_doesNotEmitWhenOccludedTransitionRunning() =
+        testScope.runTest {
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.AOD,
+                to = KeyguardState.LOCKSCREEN,
+                testScope,
+            )
+
+            val alpha by collectLastValue(underTest.alpha(viewState))
+            shadeTestUtil.setQsExpansion(0f)
+            runCurrent()
+            assertThat(alpha).isEqualTo(1f)
+
+            keyguardTransitionRepository.sendTransitionSteps(
+                listOf(
+                    TransitionStep(
+                        from = KeyguardState.LOCKSCREEN,
+                        to = KeyguardState.OCCLUDED,
+                        transitionState = TransitionState.STARTED,
+                        value = 0f,
+                    ),
+                    TransitionStep(
+                        from = KeyguardState.LOCKSCREEN,
+                        to = KeyguardState.OCCLUDED,
+                        transitionState = TransitionState.RUNNING,
+                        value = 0.8f,
+                    ),
+                ),
+                testScope,
+            )
+            // Alpha should be 0f from the above transition
+            assertThat(alpha).isEqualTo(0f)
+
+            shadeTestUtil.setQsExpansion(0.5f)
+            // Alpha should remain unchanged
+            assertThat(alpha).isEqualTo(0f)
+        }
+
+    @Test
+    @DisableSceneContainer
     fun alphaFromShadeExpansion_doesNotEmitWhenLockscreenToDreamTransitionRunning() =
         testScope.runTest {
             keyguardTransitionRepository.sendTransitionSteps(

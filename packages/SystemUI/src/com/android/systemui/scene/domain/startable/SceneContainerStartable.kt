@@ -107,6 +107,7 @@ import kotlinx.coroutines.launch
  * Hooks up business logic that manipulates the state of the [SceneInteractor] for the system UI
  * scene container based on state from other systems.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class SceneContainerStartable
 @Inject
@@ -280,6 +281,8 @@ constructor(
         applicationScope.launch {
             sceneInteractor.currentScene.collectLatest { currentScene ->
                 if (currentScene == Scenes.Lockscreen) {
+                    // Wait for the screen to be on
+                    powerInteractor.isAwake.first { it }
                     // Wait for surface to become visible
                     windowMgrLockscreenVisInteractor.surfaceBehindVisibility.first { it }
                     // Make sure the device is actually unlocked before force-changing the scene
@@ -406,8 +409,7 @@ constructor(
                         }
                         isOnPrimaryBouncer -> {
                             // When the device becomes unlocked in primary Bouncer,
-                            // notify dismiss succeeded and
-                            // go to previous scene or Gone.
+                            // notify dismiss succeeded and go to previous scene or Gone.
                             dismissCallbackRegistry.notifyDismissSucceeded()
                             if (
                                 previousScene.value == Scenes.Lockscreen ||
@@ -594,12 +596,12 @@ constructor(
             combine(
                     sceneInteractor.transitionState
                         .mapNotNull { it as? ObservableTransitionState.Idle }
-                        .map { it.currentScene }
                         .distinctUntilChanged(),
                     occlusionInteractor.invisibleDueToOcclusion,
-                ) { sceneKey, invisibleDueToOcclusion ->
+                ) { idleState, invisibleDueToOcclusion ->
                     SceneContainerPlugin.SceneContainerPluginState(
-                        scene = sceneKey,
+                        scene = idleState.currentScene,
+                        overlays = idleState.currentOverlays,
                         invisibleDueToOcclusion = invisibleDueToOcclusion,
                     )
                 }

@@ -30,40 +30,52 @@ import com.android.server.input.TouchpadHardwareState;
 public class TouchpadVisualizationView extends View {
     private static final String TAG = "TouchpadVizMain";
     private static final boolean DEBUG = true;
+    private static final float DEFAULT_RES_X = 47f;
+    private static final float DEFAULT_RES_Y = 45f;
 
     private final TouchpadHardwareProperties mTouchpadHardwareProperties;
+    private float mScaleFactor;
 
     TouchpadHardwareState mLatestHardwareState = new TouchpadHardwareState(0, 0, 0, 0,
             new TouchpadFingerState[]{});
 
-    private final Paint mOvalPaint;
+    private final Paint mOvalStrokePaint;
+    private final Paint mOvalFillPaint;
+    private final RectF mTempOvalRect = new RectF();
 
     public TouchpadVisualizationView(Context context,
             TouchpadHardwareProperties touchpadHardwareProperties) {
         super(context);
         mTouchpadHardwareProperties = touchpadHardwareProperties;
-        mOvalPaint = new Paint();
-        mOvalPaint.setAntiAlias(true);
-        mOvalPaint.setARGB(255, 0, 0, 0);
-        mOvalPaint.setStyle(Paint.Style.STROKE);
+        mScaleFactor = 1;
+        mOvalStrokePaint = new Paint();
+        mOvalStrokePaint.setAntiAlias(true);
+        mOvalStrokePaint.setARGB(255, 0, 0, 0);
+        mOvalStrokePaint.setStyle(Paint.Style.STROKE);
+        mOvalFillPaint = new Paint();
+        mOvalFillPaint.setAntiAlias(true);
+        mOvalFillPaint.setARGB(255, 0, 0, 0);
     }
 
-    private final RectF mOvalRect = new RectF();
-
-    private void drawOval(Canvas canvas, float x, float y, float major, float minor, float angle,
-            Paint paint) {
+    private void drawOval(Canvas canvas, float x, float y, float major, float minor, float angle) {
         canvas.save(Canvas.MATRIX_SAVE_FLAG);
         canvas.rotate(angle, x, y);
-        mOvalRect.left = x - minor / 2;
-        mOvalRect.right = x + minor / 2;
-        mOvalRect.top = y - major / 2;
-        mOvalRect.bottom = y + major / 2;
-        canvas.drawOval(mOvalRect, paint);
+        mTempOvalRect.left = x - minor / 2;
+        mTempOvalRect.right = x + minor / 2;
+        mTempOvalRect.top = y - major / 2;
+        mTempOvalRect.bottom = y + major / 2;
+        canvas.drawOval(mTempOvalRect, mOvalStrokePaint);
+        canvas.drawOval(mTempOvalRect, mOvalFillPaint);
         canvas.restore();
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
+        float maximumPressure = 0;
+        for (TouchpadFingerState touchpadFingerState : mLatestHardwareState.getFingerStates()) {
+            maximumPressure = Math.max(maximumPressure, touchpadFingerState.getPressure());
+        }
+
         for (TouchpadFingerState touchpadFingerState : mLatestHardwareState.getFingerStates()) {
             float newX = translateRange(mTouchpadHardwareProperties.getLeft(),
                     mTouchpadHardwareProperties.getRight(), 0, getWidth(),
@@ -73,16 +85,22 @@ public class TouchpadVisualizationView extends View {
                     mTouchpadHardwareProperties.getBottom(), 0, getHeight(),
                     touchpadFingerState.getPositionY());
 
-            float newAngle = -translateRange(mTouchpadHardwareProperties.getOrientationMinimum(),
-                    mTouchpadHardwareProperties.getOrientationMaximum(), 0, 360,
-                    touchpadFingerState.getOrientation());
+            float newAngle = translateRange(0, mTouchpadHardwareProperties.getOrientationMaximum(),
+                    0, 90, touchpadFingerState.getOrientation());
 
-            float newTouchMajor =
-                    touchpadFingerState.getTouchMajor() / mTouchpadHardwareProperties.getResX();
-            float newTouchMinor =
-                    touchpadFingerState.getTouchMinor() / mTouchpadHardwareProperties.getResY();
+            float resX = mTouchpadHardwareProperties.getResX() == 0f ? DEFAULT_RES_X
+                    : mTouchpadHardwareProperties.getResX();
+            float resY = mTouchpadHardwareProperties.getResY() == 0f ? DEFAULT_RES_Y
+                    : mTouchpadHardwareProperties.getResY();
 
-            drawOval(canvas, newX, newY, newTouchMajor, newTouchMinor, newAngle, mOvalPaint);
+            float newTouchMajor = touchpadFingerState.getTouchMajor() * mScaleFactor / resY;
+            float newTouchMinor = touchpadFingerState.getTouchMinor() * mScaleFactor / resX;
+
+            float pressureToOpacity = translateRange(0, maximumPressure, 0, 255,
+                    touchpadFingerState.getPressure());
+            mOvalFillPaint.setAlpha((int) pressureToOpacity);
+
+            drawOval(canvas, newX, newY, newTouchMajor, newTouchMinor, newAngle);
         }
     }
 
@@ -99,6 +117,15 @@ public class TouchpadVisualizationView extends View {
         mLatestHardwareState = schs;
 
         invalidate();
+    }
+
+    /**
+     * Update the scale factor of the drawings in the view.
+     *
+     * @param scaleFactor the new scale factor
+     */
+    public void updateScaleFactor(float scaleFactor) {
+        mScaleFactor = scaleFactor;
     }
 
     private float translateRange(float rangeBeforeMin, float rangeBeforeMax,

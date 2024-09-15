@@ -146,9 +146,7 @@ class OverviewProxyServiceTest : SysuiTestCase() {
         whenever(packageManager.resolveServiceAsUser(any(), anyInt(), anyInt()))
             .thenReturn(mock(ResolveInfo::class.java))
 
-        mSetFlagsRule.disableFlags(
-            com.android.systemui.Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR,
-        )
+        mSetFlagsRule.disableFlags(com.android.systemui.Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
 
         subject = createOverviewProxyService(context)
     }
@@ -283,6 +281,7 @@ class OverviewProxyServiceTest : SysuiTestCase() {
             statusBarWinController,
             sysUiState,
             mock(),
+            mock(),
             userTracker,
             userManager,
             wakefulnessLifecycle,
@@ -294,7 +293,7 @@ class OverviewProxyServiceTest : SysuiTestCase() {
             dumpManager,
             unfoldTransitionProgressForwarder,
             broadcastDispatcher,
-            keyboardTouchpadEduStatsInteractor
+            keyboardTouchpadEduStatsInteractor,
         )
     }
 }

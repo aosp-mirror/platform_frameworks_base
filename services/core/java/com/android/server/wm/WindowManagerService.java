@@ -1186,9 +1186,13 @@ public class WindowManagerService extends IWindowManager.Stub
     public static WindowManagerService main(final Context context, final InputManagerService im,
             final boolean showBootMsgs, WindowManagerPolicy policy,
             ActivityTaskManagerService atm) {
+        // Using SysUI context to have access to Material colors extracted from Wallpaper.
+        final AppCompatConfiguration appCompat = new AppCompatConfiguration(
+                ActivityThread.currentActivityThread().getSystemUiContext());
+
         final WindowManagerService wms = main(context, im, showBootMsgs, policy, atm,
                 new DisplayWindowSettingsProvider(), SurfaceControl.Transaction::new,
-                SurfaceControl.Builder::new);
+                SurfaceControl.Builder::new, appCompat);
         WindowManagerGlobal.setWindowManagerServiceForSystemProcess(wms);
         return wms;
     }
@@ -1202,12 +1206,14 @@ public class WindowManagerService extends IWindowManager.Stub
             final boolean showBootMsgs, WindowManagerPolicy policy, ActivityTaskManagerService atm,
             DisplayWindowSettingsProvider displayWindowSettingsProvider,
             Supplier<SurfaceControl.Transaction> transactionFactory,
-            Supplier<SurfaceControl.Builder> surfaceControlFactory) {
+            Supplier<SurfaceControl.Builder> surfaceControlFactory,
+            AppCompatConfiguration appCompat) {
+
         final WindowManagerService[] wms = new WindowManagerService[1];
         DisplayThread.getHandler().runWithScissors(() ->
                 wms[0] = new WindowManagerService(context, im, showBootMsgs, policy, atm,
                         displayWindowSettingsProvider, transactionFactory,
-                        surfaceControlFactory), 0);
+                        surfaceControlFactory, appCompat), 0);
         return wms[0];
     }
 
@@ -1231,7 +1237,8 @@ public class WindowManagerService extends IWindowManager.Stub
             boolean showBootMsgs, WindowManagerPolicy policy, ActivityTaskManagerService atm,
             DisplayWindowSettingsProvider displayWindowSettingsProvider,
             Supplier<SurfaceControl.Transaction> transactionFactory,
-            Supplier<SurfaceControl.Builder> surfaceControlFactory) {
+            Supplier<SurfaceControl.Builder> surfaceControlFactory,
+            AppCompatConfiguration appCompat) {
         installLock(this, INDEX_WINDOW);
         mGlobalLock = atm.getGlobalLock();
         mAtmService = atm;
@@ -1283,9 +1290,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     | WindowInsets.Type.navigationBars();
         }
 
-        mAppCompatConfiguration = new AppCompatConfiguration(
-                // Using SysUI context to have access to Material colors extracted from Wallpaper.
-                ActivityThread.currentActivityThread().getSystemUiContext());
+        mAppCompatConfiguration = appCompat;
 
         mInputManager = inputManager; // Must be before createDisplayContentLocked.
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);

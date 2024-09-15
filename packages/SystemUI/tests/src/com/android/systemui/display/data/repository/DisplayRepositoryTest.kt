@@ -63,21 +63,27 @@ class DisplayRepositoryTest : SysuiTestCase() {
     private val defaultDisplay =
         display(type = TYPE_INTERNAL, id = DEFAULT_DISPLAY, state = Display.STATE_ON)
 
-    private lateinit var displayRepository: DisplayRepositoryImpl
+    // This is Lazy as displays could be set before the instance is created, and we want to verify
+    // that the initial state (soon after construction) contains the expected ones set in every
+    // test.
+    private val displayRepository: DisplayRepositoryImpl by lazy {
+        DisplayRepositoryImpl(
+                displayManager,
+                testHandler,
+                TestScope(UnconfinedTestDispatcher()),
+                UnconfinedTestDispatcher(),
+            )
+            .also {
+                verify(displayManager, never()).registerDisplayListener(any(), any())
+                // It needs to be called, just once, for the initial value.
+                verify(displayManager).getDisplays()
+            }
+    }
 
     @Before
     fun setup() {
         setDisplays(listOf(defaultDisplay))
         setAllDisplaysIncludingDisabled(DEFAULT_DISPLAY)
-        displayRepository =
-            DisplayRepositoryImpl(
-                displayManager,
-                testHandler,
-                TestScope(UnconfinedTestDispatcher()),
-                UnconfinedTestDispatcher()
-            )
-        verify(displayManager, never()).registerDisplayListener(any(), any())
-        verify(displayManager, never()).getDisplays(any())
     }
 
     @Test
@@ -502,7 +508,7 @@ class DisplayRepositoryTest : SysuiTestCase() {
             .registerDisplayListener(
                 connectedDisplayListener.capture(),
                 eq(testHandler),
-                eq(DisplayManager.EVENT_FLAG_DISPLAY_CONNECTION_CHANGED)
+                eq(DisplayManager.EVENT_FLAG_DISPLAY_CONNECTION_CHANGED),
             )
         return flowValue
     }
@@ -522,7 +528,7 @@ class DisplayRepositoryTest : SysuiTestCase() {
                     DisplayManager.EVENT_FLAG_DISPLAY_ADDED or
                         DisplayManager.EVENT_FLAG_DISPLAY_CHANGED or
                         DisplayManager.EVENT_FLAG_DISPLAY_REMOVED
-                )
+                ),
             )
     }
 

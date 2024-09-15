@@ -685,6 +685,11 @@ final class ActivityManagerConstants extends ContentObserver {
     // default. Controlled by Settings.Global.FORCE_ENABLE_PSS_PROFILING
     volatile boolean mForceEnablePssProfiling = false;
 
+    // Indicates whether to use ApplicationInfo to determine launched state instead of PM user state
+    // This is a temporary workaround until the trunk-stable flag is pushed to nextfood.
+    // TODO: b/365979852 - remove this workaround when redundant
+    volatile boolean mFlagUseAppInfoNotLaunched = false;
+
     /**
      * Indicates whether the foreground service background start restriction is enabled for
      * caller app that is targeting S+.
@@ -1016,6 +1021,9 @@ final class ActivityManagerConstants extends ContentObserver {
 
     private static final Uri FORCE_ENABLE_PSS_PROFILING_URI =
             Settings.Global.getUriFor(Settings.Global.FORCE_ENABLE_PSS_PROFILING);
+
+    private static final Uri ENABLE_USE_APP_INFO_NOT_LAUNCHED_URI =
+            Settings.Global.getUriFor(Settings.Global.ENABLE_USE_APP_INFO_NOT_LAUNCHED);
 
     /**
      * The threshold to decide if a given association should be dumped into metrics.
@@ -1479,6 +1487,7 @@ final class ActivityManagerConstants extends ContentObserver {
                     false, this);
         }
         mResolver.registerContentObserver(FORCE_ENABLE_PSS_PROFILING_URI, false, this);
+        mResolver.registerContentObserver(ENABLE_USE_APP_INFO_NOT_LAUNCHED_URI, false, this);
         updateConstants();
         if (mSystemServerAutomaticHeapDumpEnabled) {
             updateEnableAutomaticSystemServerHeapDumps();
@@ -1495,6 +1504,7 @@ final class ActivityManagerConstants extends ContentObserver {
         updateActivityStartsLoggingEnabled();
         updateForegroundServiceStartsLoggingEnabled();
         updateForceEnablePssProfiling();
+        updateEnableUseAppInfoNotLaunched();
         // Read DropboxRateLimiter params from flags.
         mService.initDropboxRateLimiter();
     }
@@ -1540,6 +1550,8 @@ final class ActivityManagerConstants extends ContentObserver {
             updateEnableAutomaticSystemServerHeapDumps();
         } else if (FORCE_ENABLE_PSS_PROFILING_URI.equals(uri)) {
             updateForceEnablePssProfiling();
+        } else if (ENABLE_USE_APP_INFO_NOT_LAUNCHED_URI.equals(uri)) {
+            updateEnableUseAppInfoNotLaunched();
         }
     }
 
@@ -1657,6 +1669,11 @@ final class ActivityManagerConstants extends ContentObserver {
     private void updateForceEnablePssProfiling() {
         mForceEnablePssProfiling = Settings.Global.getInt(mResolver,
                 Settings.Global.FORCE_ENABLE_PSS_PROFILING, 0) == 1;
+    }
+
+    private void updateEnableUseAppInfoNotLaunched() {
+        mFlagUseAppInfoNotLaunched = Settings.Global.getInt(mResolver,
+                Settings.Global.ENABLE_USE_APP_INFO_NOT_LAUNCHED, 0) == 1;
     }
 
     private void updateBackgroundActivityStarts() {
@@ -2538,6 +2555,8 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.print("  OOMADJ_UPDATE_QUICK="); pw.println(OOMADJ_UPDATE_QUICK);
         pw.print("  ENABLE_WAIT_FOR_FINISH_ATTACH_APPLICATION=");
         pw.println(mEnableWaitForFinishAttachApplication);
+        pw.print("  FLAG_USE_APP_INFO_NOT_LAUNCHED=");
+        pw.println(mFlagUseAppInfoNotLaunched);
 
         pw.print("  "); pw.print(KEY_FOLLOW_UP_OOMADJ_UPDATE_WAIT_DURATION);
         pw.print("="); pw.println(FOLLOW_UP_OOMADJ_UPDATE_WAIT_DURATION);

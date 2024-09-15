@@ -92,7 +92,7 @@ import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.split.SplitScreenUtils;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
 import com.android.wm.shell.draganddrop.DragAndDropController;
-import com.android.wm.shell.draganddrop.DragAndDropPolicy;
+import com.android.wm.shell.draganddrop.SplitDragPolicy;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.shared.TransactionPool;
@@ -121,7 +121,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @see StageCoordinator
  */
 // TODO(b/198577848): Implement split screen flicker test to consolidate CUJ of split screen.
-public class SplitScreenController implements DragAndDropPolicy.Starter,
+public class SplitScreenController implements SplitDragPolicy.Starter,
         RemoteCallable<SplitScreenController>, KeyguardChangeListener {
     private static final String TAG = SplitScreenController.class.getSimpleName();
 

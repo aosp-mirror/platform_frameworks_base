@@ -63,6 +63,7 @@ import com.android.systemui.bouncer.ui.viewmodel.PinBouncerViewModel
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.ui.compose.Icon
+import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.res.R
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.DurationUnit
@@ -103,7 +104,7 @@ fun PinPad(
         columns = columns,
         verticalSpacing = verticalSpacing,
         horizontalSpacing = calculateHorizontalSpacingBetweenColumns(gridWidth = 300.dp),
-        modifier = modifier.focusRequester(focusRequester)
+        modifier = modifier.focusRequester(focusRequester).sysuiResTag("pin_pad_grid")
     ) {
         repeat(9) { index ->
             DigitButton(
@@ -128,6 +129,7 @@ fun PinPad(
             onLongPressed = viewModel::onBackspaceButtonLongPressed,
             appearance = backspaceButtonAppearance,
             scaling = buttonScaleAnimatables[9]::value,
+            elementId = "delete_button"
         )
 
         DigitButton(
@@ -150,6 +152,7 @@ fun PinPad(
             onClicked = viewModel::onAuthenticateButtonClicked,
             appearance = confirmButtonAppearance,
             scaling = buttonScaleAnimatables[11]::value,
+            elementId = "key_enter"
         )
     }
 }
@@ -192,6 +195,7 @@ private fun ActionButton(
     icon: Icon,
     isInputEnabled: Boolean,
     onClicked: () -> Unit,
+    elementId: String,
     onLongPressed: (() -> Unit)? = null,
     appearance: ActionButtonAppearance,
     scaling: () -> Float,
@@ -217,6 +221,7 @@ private fun ActionButton(
         backgroundColor = backgroundColor,
         foregroundColor = foregroundColor,
         isAnimationEnabled = true,
+        elementId = elementId,
         modifier =
             Modifier.graphicsLayer {
                 alpha = hiddenAlpha
@@ -240,6 +245,7 @@ private fun PinPadButton(
     foregroundColor: Color,
     isAnimationEnabled: Boolean,
     modifier: Modifier = Modifier,
+    elementId: String? = null,
     onLongPressed: (() -> Unit)? = null,
     onPointerDown: (() -> Unit)? = null,
     content: @Composable (contentColor: () -> Color) -> Unit,
@@ -321,7 +327,8 @@ private fun PinPadButton(
                             }
                             false
                         }
-                },
+                }
+                .thenIf(elementId != null) { Modifier.sysuiResTag(elementId!!) },
     ) {
         content(contentColor::value)
     }

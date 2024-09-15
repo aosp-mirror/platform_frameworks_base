@@ -34,6 +34,8 @@ class DeviceSettingItemTest {
                 packageName = "package_name",
                 className = "class_name",
                 intentAction = "intent_action",
+                preferenceKey = "key1",
+                highlighted = true,
                 extras = Bundle().apply { putString("key1", "value1") },
             )
 
@@ -43,6 +45,7 @@ class DeviceSettingItemTest {
         assertThat(fromParcel.packageName).isEqualTo(item.packageName)
         assertThat(fromParcel.className).isEqualTo(item.className)
         assertThat(fromParcel.intentAction).isEqualTo(item.intentAction)
+        assertThat(fromParcel.preferenceKey).isEqualTo(item.preferenceKey)
         assertThat(fromParcel.extras.getString("key1")).isEqualTo(item.extras.getString("key1"))
     }
 

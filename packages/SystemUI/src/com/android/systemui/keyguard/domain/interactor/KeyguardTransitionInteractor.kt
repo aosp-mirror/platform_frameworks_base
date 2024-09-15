@@ -77,7 +77,7 @@ constructor(
             MutableSharedFlow<Float>(
                     replay = 1,
                     extraBufferCapacity = 2,
-                    onBufferOverflow = BufferOverflow.DROP_OLDEST
+                    onBufferOverflow = BufferOverflow.DROP_OLDEST,
                 )
                 .also { it.tryEmit(0f) }
         }
@@ -97,8 +97,8 @@ constructor(
                 SharingStarted.Eagerly,
                 WithPrev(
                     sceneInteractor.transitionState.value,
-                    sceneInteractor.transitionState.value
-                )
+                    sceneInteractor.transitionState.value,
+                ),
             )
 
     /**
@@ -156,7 +156,7 @@ constructor(
                     Log.e(
                         TAG,
                         "STARTED step ($startedStep) was preceded by a RUNNING step " +
-                            "($prevStep), which should never happen. Things could go badly here."
+                            "($prevStep), which should never happen. Things could go badly here.",
                     )
                 }
             }
@@ -202,7 +202,7 @@ constructor(
             transitionMap.getOrPut(mappedEdge) {
                 MutableSharedFlow(
                     extraBufferCapacity = 10,
-                    onBufferOverflow = BufferOverflow.DROP_OLDEST
+                    onBufferOverflow = BufferOverflow.DROP_OLDEST,
                 )
             }
 
@@ -262,7 +262,7 @@ constructor(
             is Edge.StateToState ->
                 Edge.create(
                     from = edge.from?.mapToSceneContainerState(),
-                    to = edge.to?.mapToSceneContainerState()
+                    to = edge.to?.mapToSceneContainerState(),
                 )
             is Edge.SceneToState -> Edge.create(UNDEFINED, edge.to)
             is Edge.StateToScene -> Edge.create(edge.from, UNDEFINED)
@@ -286,9 +286,7 @@ constructor(
      * The value will be `0` (or close to `0`, due to float point arithmetic) if not in this step or
      * `1` when fully in the given state.
      */
-    fun transitionValue(
-        state: KeyguardState,
-    ): Flow<Float> {
+    fun transitionValue(state: KeyguardState): Flow<Float> {
         if (SceneContainerFlag.isEnabled && state != state.mapToSceneContainerState()) {
             Log.e(TAG, "SceneContainer is enabled but a deprecated state $state is used.")
             return transitionValue(state.mapToSceneContainerScene()!!, state)
@@ -369,10 +367,9 @@ constructor(
             .stateIn(scope, SharingStarted.Eagerly, OFF)
 
     val isInTransition =
-        combine(
-            isInTransitionWhere({ true }, { true }),
-            sceneInteractor.transitionState,
-        ) { isKeyguardTransitioning, sceneTransitionState ->
+        combine(isInTransitionWhere({ true }, { true }), sceneInteractor.transitionState) {
+            isKeyguardTransitioning,
+            sceneTransitionState ->
             isKeyguardTransitioning ||
                 (SceneContainerFlag.isEnabled && sceneTransitionState.isTransitioning())
         }
@@ -463,6 +460,10 @@ constructor(
 
     fun getCurrentState(): KeyguardState {
         return currentKeyguardState.replayCache.last()
+    }
+
+    fun getStartedState(): KeyguardState {
+        return startedKeyguardTransitionStep.value.to
     }
 
     private val finishedKeyguardState: StateFlow<KeyguardState> =

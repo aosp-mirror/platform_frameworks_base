@@ -17,6 +17,7 @@
 package com.android.systemui.bouncer.shared.flag
 
 import com.android.systemui.Flags
+import com.android.systemui.flags.RefactorFlagUtils
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 
 object ComposeBouncerFlags {
@@ -32,6 +33,18 @@ object ComposeBouncerFlags {
     fun isComposeBouncerOrSceneContainerEnabled(): Boolean {
         return SceneContainerFlag.isEnabled || Flags.composeBouncer()
     }
+
+    /**
+     * Called to ensure code is only run when the flag is enabled. This protects users from the
+     * unintended behaviors caused by accidentally running new logic, while also crashing on an eng
+     * build to ensure that the refactor author catches issues in testing.
+     */
+    @JvmStatic
+    fun isUnexpectedlyInLegacyMode() =
+        RefactorFlagUtils.isUnexpectedlyInLegacyMode(
+            isEnabled,
+            "SceneContainerFlag || ComposeBouncerFlag"
+        )
 
     /**
      * Returns `true` if only compose bouncer is enabled and scene container framework is not

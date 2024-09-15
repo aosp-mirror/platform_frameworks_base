@@ -729,6 +729,11 @@ class ShortcutPackage extends ShortcutPackageItem {
             }
             pinnedShortcuts.addAll(pinned);
         });
+        if (ShortcutService.DEBUG) {
+            Slog.v(TAG, "ShortcutPackage#refreshPinnedFlags: "
+                    + " pinnedShortcuts: " + pinnedShortcuts.stream().collect(
+                            Collectors.joining(", ", "[", "]")));
+        }
         // Secondly, update the pinned state if necessary.
         final List<ShortcutInfo> pinned = findAll(pinnedShortcuts);
         if (pinned != null) {
